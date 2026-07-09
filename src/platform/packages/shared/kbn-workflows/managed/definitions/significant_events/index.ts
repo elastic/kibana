@@ -35,8 +35,8 @@ const SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
 
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-  pluginId: 'streams', // todo: update to significant_events once https://github.com/elastic/kibana/pull/275522 and follow ups merge
-  version: 3,
+  pluginId: 'significant_events',
+  version: 4,
   billable: false,
   yaml: DETECTION_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
@@ -44,8 +44,8 @@ export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
-  pluginId: 'streams', // todo: update to significant_events once https://github.com/elastic/kibana/pull/275522 and follow ups merge
-  version: 4,
+  pluginId: 'significant_events',
+  version: 6,
   billable: false,
   yaml: DISCOVERY_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
@@ -53,8 +53,8 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
-  pluginId: 'streams', // todo: update to significant_events once https://github.com/elastic/kibana/pull/275522 and follow ups merge
-  version: 2,
+  pluginId: 'significant_events',
+  version: 3,
   billable: false,
   yaml: ORCHESTRATOR_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
@@ -62,8 +62,8 @@ export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
-  pluginId: 'streams', // todo: update to significant_events once https://github.com/elastic/kibana/pull/275522 and follow ups merge
-  version: 5,
+  pluginId: 'significant_events',
+  version: 7,
   billable: false,
   yaml: TRIAGE_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,

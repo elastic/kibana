@@ -74,6 +74,11 @@ export const selectAiAssisted = createSelector(
 
 export const selectFocusedStepId = createSelector(selectDetail, (detail) => detail.focusedStepId);
 
+export const selectFocusedTriggerId = createSelector(
+  selectDetail,
+  (detail) => detail.focusedTriggerId
+);
+
 export const selectHighlightedStepId = createSelector(
   selectDetail,
   (detail) => detail.highlightedStepId

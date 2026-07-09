@@ -10,40 +10,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { monaco } from '@kbn/code-editor';
-import { collectAllConnectorIds } from './collect_all_connector_ids';
-import { collectAllStepPropertyItems } from './collect_all_step_property_items';
+import { collectFullWorkflowYamlValidationResults } from './collect_full_workflow_yaml_validation_results';
 import { createMarkersAndDecorations } from './create_yaml_validation_markers_and_decorations';
-import { useGetPropertyHandler } from './property_handlers/use_get_property_handler';
-import { runWorkflowYamlValidations } from './run_workflow_yaml_validations';
-import { validateConnectorIds } from './validate_connector_ids';
-import { validateGraphBuild } from './validate_graph_build';
-import { validateStepProperties } from './validate_step_properties';
-import { validateWorkflowInputs } from './validate_workflow_inputs';
+import { useWorkflowYamlValidationContext } from './use_workflow_yaml_validation_context';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
-  selectConnectors,
   selectEditorWorkflowLookup,
   selectGraphBuildError,
   selectIsWorkflowTab,
   selectWorkflowDefinition,
-  selectWorkflows,
   selectYamlLineCounter,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { useKibana } from '../../../hooks/use_kibana';
-import { useWorkflowEsqlCallbacks } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks';
-import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
 import {
   BATCHED_CUSTOM_MARKER_OWNER,
-  validationResultFingerprint,
+  validationResultsFingerprint,
   type YamlValidationResult,
 } from '../model/types';
-
-function buildResultsFingerprint(results: YamlValidationResult[]): string {
-  if (results.length === 0) {
-    return '';
-  }
-  return results.map(validationResultFingerprint).join('\n');
-}
 
 export interface UseYamlValidationResult {
   error: Error | null;
@@ -60,7 +42,7 @@ export function useYamlValidation(
   const [validationResults, setValidationResults] = useState<YamlValidationResult[]>([]);
   const lastFingerprintRef = useRef<string>('');
   const setStableValidationResults = useCallback((results: YamlValidationResult[]) => {
-    const fingerprint = buildResultsFingerprint(results);
+    const fingerprint = validationResultsFingerprint(results);
     if (fingerprint !== lastFingerprintRef.current) {
       lastFingerprintRef.current = fingerprint;
       setValidationResults(results);
@@ -74,21 +56,7 @@ export function useYamlValidation(
   const graphBuildError = useSelector(selectGraphBuildError);
   const lineCounter = useSelector(selectYamlLineCounter);
   const isWorkflowTab = useSelector(selectIsWorkflowTab);
-  const connectors = useSelector(selectConnectors);
-  const workflows = useSelector(selectWorkflows);
-  const { application, http, data, licensing } = useKibana().services;
-  const esqlCallbacks = useWorkflowEsqlCallbacks({
-    http,
-    application,
-    data,
-    licensing,
-  });
-  // Held in a ref so the effect below doesn't re-fire just because the
-  // memo identity rebuilt (it does on every render in tests where the kibana
-  // mock returns fresh service objects).
-  const esqlCallbacksRef = useRef(esqlCallbacks);
-  esqlCallbacksRef.current = esqlCallbacks;
-  const getPropertyHandler = useGetPropertyHandler();
+  const validationContext = useWorkflowYamlValidationContext();
 
   useEffect(() => {
     const esqlAbortController = new AbortController();
@@ -114,69 +82,28 @@ export function useYamlValidation(
         return;
       }
 
-      if (!yamlDocument) {
+      if (!yamlDocument || !lineCounter) {
         setStableValidationResults([]);
         setIsLoading(false);
-        setError(new Error('Error validating: Yaml document is not loaded'));
+        setError(yamlDocument ? null : new Error('Error validating: Yaml document is not loaded'));
         return;
       }
 
-      const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
-      const stepPropertyItems =
-        workflowLookup && lineCounter
-          ? collectAllStepPropertyItems(workflowLookup, lineCounter, getPropertyHandler)
-          : [];
-      const dynamicConnectorTypes = connectors?.connectorTypes ?? null;
-
-      // Generate the connectors management URL
-      const connectorsManagementUrl = application.getUrlForApp('management', {
-        deepLinkId: 'triggersActionsConnectors',
-        absolute: true,
-      });
-
-      // These validations only need the parsed YAML document, not the full workflow graph.
-      // They must run even when workflowGraph/workflowDefinition are unavailable
-      // (e.g. during editing when the YAML doesn't fully match the workflow schema yet)
-      // so that connector-id, step-name, liquid-template, step-property, and
-      // workflow-inputs validation still provide feedback.
       const yamlString = model.getValue();
-      const results: YamlValidationResult[] = lineCounter
-        ? runWorkflowYamlValidations({
-            yamlString,
-            model,
-            yamlDocument,
-            lineCounter,
-            workflowLookup: workflowLookup ?? undefined,
-            workflowGraph: workflowGraph ?? undefined,
-            workflowDefinition: workflowDefinition ?? undefined,
-          })
-        : [];
-
-      results.push(
-        ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
-        // Surface graph-build failures (valid YAML that compiles to an
-        // unsupported graph, e.g. waitForInput inside a parallel branch) as a
-        // precise, step-anchored marker instead of the generic fallback error.
-        // Editor-only: needs the live graphBuildError from the store.
-        ...validateGraphBuild(graphBuildError, workflowLookup, lineCounter)
-      );
-
-      if (stepPropertyItems.length > 0) {
-        results.push(...(await validateStepProperties(stepPropertyItems)));
-      }
-
-      if (workflowLookup && lineCounter) {
-        results.push(
-          ...validateWorkflowInputs(workflowLookup, workflows, lineCounter),
-          ...(await validateEsqlSteps(
-            workflowLookup,
-            lineCounter,
-            model,
-            esqlCallbacksRef.current,
-            esqlAbortController.signal
-          ).catch(() => []))
-        );
-      }
+      const results = await collectFullWorkflowYamlValidationResults({
+        yamlString,
+        model,
+        yamlDocument,
+        lineCounter,
+        workflowLookup: workflowLookup ?? undefined,
+        workflowGraph: workflowGraph ?? undefined,
+        workflowDefinition: workflowDefinition ?? undefined,
+        graphBuildError,
+        context: {
+          ...validationContext,
+          signal: esqlAbortController.signal,
+        },
+      });
 
       const { markers, decorations } = createMarkersAndDecorations(results);
 
@@ -203,13 +130,10 @@ export function useYamlValidation(
     workflowGraph,
     graphBuildError,
     yamlDocument,
-    application,
     isWorkflowTab,
-    connectors?.connectorTypes,
     workflowLookup,
-    workflows,
+    validationContext,
     setStableValidationResults,
-    getPropertyHandler,
   ]);
 
   return {

@@ -9,7 +9,12 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { appContextService } from '../app_context';
 
-import { isAgentlessEnabled, prependAgentlessApiBasePathToEndpoint } from './agentless';
+import {
+  isAgentlessEnabled,
+  prependAgentlessApiBasePathToEndpoint,
+  logLegacyAgentlessWriteDeprecation,
+  LEGACY_AGENTLESS_WRITE_DEPRECATION_MARKER,
+} from './agentless';
 
 jest.mock('../app_context');
 
@@ -54,6 +59,28 @@ describe('isAgentlessEnabled', () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 
     expect(isAgentlessEnabled()).toBe(true);
+  });
+});
+
+describe('logLegacyAgentlessWriteDeprecation', () => {
+  const warn = jest.fn();
+
+  beforeEach(() => {
+    warn.mockReset();
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue({ warn } as any);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('warns with the stable marker and the operation', () => {
+    logLegacyAgentlessWriteDeprecation('create package policy');
+
+    expect(warn).toHaveBeenCalledTimes(1);
+    const message = warn.mock.calls[0][0] as string;
+    expect(message).toContain(LEGACY_AGENTLESS_WRITE_DEPRECATION_MARKER);
+    expect(message).toContain('create package policy');
   });
 });
 

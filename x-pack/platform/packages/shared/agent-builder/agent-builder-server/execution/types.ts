@@ -15,6 +15,7 @@ import type {
   BrowserApiToolMetadata,
   ConversationAction,
   ConversationAccessControl,
+  ConversationSource,
   ExecutionStatus,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
@@ -61,6 +62,8 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   autoCreateConversationWithId?: boolean;
   /** Access mode to apply when creating a new conversation. Ignored for existing conversations. */
   accessControl?: ConversationAccessControl;
+  /** External source used to resolve the conversation. */
+  source?: ConversationSource;
   /** Browser API tools to make available to the agent. */
   browserApiTools?: BrowserApiToolMetadata[];
   /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
