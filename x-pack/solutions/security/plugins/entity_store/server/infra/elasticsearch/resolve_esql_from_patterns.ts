@@ -7,10 +7,13 @@
 
 import type {
   IndicesResolveIndexRequest,
+  IndicesResolveIndexResolveIndexItem,
   IndicesResolveIndexResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { castArray } from 'lodash';
+import { getErrorMessage } from '../../../common';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -67,7 +70,9 @@ const reconcile = async (
     const edits = await Promise.all(PREFLIGHT_CASES.map((runCase) => runCase(ctx)));
     return edits.reduce(applyEdit, requested);
   } catch (error) {
-    logger.warn(`Failed to reconcile index patterns (querying them unfiltered): ${message(error)}`);
+    logger.warn(
+      `Failed to reconcile index patterns (querying them unfiltered): ${getErrorMessage(error)}`
+    );
     return requested;
   }
 };
@@ -111,7 +116,7 @@ const dropMissingConcreteIndices: PreflightCase = async ({ requested, resolved, 
 const rerouteClosedDataStreams: PreflightCase = async ({ resolved, esClient, logger }) => {
   const streams = resolved.data_streams.map((ds) => ({
     name: ds.name,
-    backing: asArray(ds.backing_indices),
+    backing: castArray(ds.backing_indices),
   }));
 
   // resolveIndex reports backing indices by name only, so a second call learns their open/closed state.
@@ -173,7 +178,5 @@ const resolveIndexRequest = (name: string[]): IndicesResolveIndexRequest => ({
 
 const negate = (name: string): string => `-${name}`;
 const isConcrete = (pattern: string): boolean => !pattern.includes('*');
-const isClosed = (index: { attributes: string[] }): boolean => index.attributes.includes('closed');
-const asArray = (value: string | string[]): string[] => (Array.isArray(value) ? value : [value]);
-const message = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
+const isClosed = (index: IndicesResolveIndexResolveIndexItem): boolean =>
+  index.attributes.includes('closed');
