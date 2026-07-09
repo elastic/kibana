@@ -314,4 +314,25 @@ describe('WHEN rendering Console output', () => {
     const actionsContainer = button.closest('[style]') as HTMLElement;
     await waitFor(() => expect(actionsContainer.style.visibility).toBe('hidden'));
   });
+
+  it('SHOULD hide the actions and highlight after the copy fails', async () => {
+    mockCopyTextToClipboard.mockResolvedValue(false);
+
+    render(
+      <I18nProvider>
+        <MonacoEditorOutput />
+      </I18nProvider>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('consoleMonacoOutput')).toHaveTextContent('"acknowledged": true')
+    );
+
+    const button = screen.getByTestId('copyOutputButton');
+    await userEvent.click(button);
+
+    await waitFor(() => expect(addDanger).toHaveBeenCalled());
+    const actionsContainer = button.closest('[style]') as HTMLElement;
+    await waitFor(() => expect(actionsContainer.style.visibility).toBe('hidden'));
+  });
 });
