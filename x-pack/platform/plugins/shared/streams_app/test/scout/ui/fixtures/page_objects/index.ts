@@ -7,7 +7,7 @@
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
-import { DocViewer } from '@kbn/discover-plugin/test/scout/ui/fixtures/page_objects';
+import { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
 import { StreamsApp } from './streams_app';
 
 export interface StreamsPageObjects extends PageObjects {

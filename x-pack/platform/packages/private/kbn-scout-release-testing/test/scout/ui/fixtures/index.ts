@@ -7,7 +7,7 @@
 
 import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
-import { DocViewer } from '@kbn/discover-plugin/test/scout/ui/fixtures/page_objects';
+import { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
 import { DashboardLinks } from './page_objects';
 
 export interface ReleaseTestingTestFixtures extends ScoutTestFixtures {

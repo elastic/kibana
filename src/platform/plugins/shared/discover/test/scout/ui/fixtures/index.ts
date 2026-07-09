@@ -38,5 +38,3 @@ export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWork
     });
   },
 });
-
-export { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
