@@ -59,7 +59,11 @@ export type OnRequestHandler = (
 const noop = () => undefined;
 
 const isStreamBody = (body: unknown): body is NodeJS.ReadableStream => {
-  return typeof body === 'object' && body !== null && typeof (body as { pipe?: unknown }).pipe === 'function';
+  return (
+    typeof body === 'object' &&
+    body !== null &&
+    typeof (body as { pipe?: unknown }).pipe === 'function'
+  );
 };
 
 const isUnauthorizedStreamResponse = (
@@ -170,7 +174,10 @@ export const createTransport = ({
               ...options?.headers,
             };
 
-            const retryResponse = (await super.request(params, retryOpts)) as TransportResult<any, any>;
+            const retryResponse = (await super.request(params, retryOpts)) as TransportResult<
+              any,
+              any
+            >;
             if (isUnauthorizedStreamResponse(retryResponse)) {
               throw await createUnauthorizedStreamError(retryResponse);
             }
