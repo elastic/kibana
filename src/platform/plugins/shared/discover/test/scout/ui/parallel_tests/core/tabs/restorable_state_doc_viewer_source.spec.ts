@@ -25,7 +25,10 @@ const openSourceDocViewer = async (
   await docViewer.readJsonFromCodeEditor();
 };
 
-const openTableDocViewer = async ({ discover, docViewer }: DiscoverPageObjects, rowIndex: number) => {
+const openTableDocViewer = async (
+  { discover, docViewer }: DiscoverPageObjects,
+  rowIndex: number
+) => {
   await docViewer.openAndWaitForFlyout({ rowIndex });
   expect(await discover.isShowingDocViewer()).toBe(true);
   await docViewer.openTab(DOC_VIEWER_TABLE_TAB_ID);
