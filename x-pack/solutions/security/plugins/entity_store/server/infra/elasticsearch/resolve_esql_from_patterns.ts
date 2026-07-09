@@ -41,19 +41,19 @@ type PreflightCase = (ctx: PreflightContext) => Promise<EsqlFromClauseEdit>;
 // ── Public API ─────────────────────────────────────────────────────────────
 
 /**
- * Compiles a selection into an ESQL-safe FROM clause, reconciled against the given cluster.
+ * Compiles targets into an ESQL-safe FROM clause, reconciled against the given cluster.
  * Locality-agnostic: callers pass their own patterns and their own client (the local extractor
  * against the local cluster, the remote extractor against the remote one).
  */
 export const resolveEsqlFromClause = async (
   esClient: ElasticsearchClient,
-  selection: EsqlFromClauseTargets,
+  targets: EsqlFromClauseTargets,
   logger: Logger
-): Promise<string[]> => toEsqlFromClause(await reconcile(esClient, selection, logger));
+): Promise<string[]> => toEsqlFromClause(await reconcile(esClient, targets, logger));
 
 // ── Reconciliation: resolve against the cluster, run each case, fold the edits ──
 
-/** Rewrites a selection so ESQL's FROM can safely execute it; falls back to the raw selection on failure. */
+/** Rewrites the targets so ESQL's FROM can safely execute; falls back to the raw targets on failure. */
 const reconcile = async (
   esClient: ElasticsearchClient,
   requested: EsqlFromClauseTargets,
@@ -146,7 +146,7 @@ const excludeClosedStandaloneIndices: PreflightCase = async ({ resolved, logger 
   return { exclude: closed };
 };
 
-// Order-independent: cases derive edits from the shared ctx, not the accumulating selection.
+// Order-independent: cases derive edits from the shared ctx, not the accumulating targets.
 const PREFLIGHT_CASES: PreflightCase[] = [
   dropMissingConcreteIndices,
   rerouteClosedDataStreams,

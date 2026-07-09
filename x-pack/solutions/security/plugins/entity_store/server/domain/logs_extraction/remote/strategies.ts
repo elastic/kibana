@@ -24,12 +24,6 @@ export interface RemoteExtractionStrategy {
   }): EsqlFromClauseTargets;
 }
 
-/**
- * Excludes all indices on the origin project from the CPS scope (the resolver negates it).
- * see https://www.elastic.co/docs/reference/query-languages/esql/esql-cross-serverless-projects#exclude-specific-projects
- */
-const EXCLUDED_ORIGIN = '_origin:*';
-
 const isNotSystemIndex = (indexPattern: string) => !indexPattern.startsWith('.');
 
 export const createCcsStrategy = (
@@ -51,6 +45,8 @@ export const createCpsStrategy = (
   stateClient,
   buildPatterns: ({ local }) => ({
     include: local.include.filter(isNotSystemIndex), // avoids verification errors on remote clusters
-    exclude: [...local.exclude, EXCLUDED_ORIGIN],
+    // exclude the origin project from the CPS scope (the resolver negates it):
+    // https://www.elastic.co/docs/reference/query-languages/esql/esql-cross-serverless-projects#exclude-specific-projects
+    exclude: [...local.exclude, '_origin:*'],
   }),
 });

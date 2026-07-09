@@ -976,8 +976,8 @@ export class LogsExtractionClient {
   }
 
   /**
-   * Splits configured patterns into local and remote (cluster-prefixed) selections.
-   * Pure routing — no reconciliation or negation; each pipeline reconciles its own selection
+   * Splits configured patterns into local and remote (cluster-prefixed) targets.
+   * Pure routing — no reconciliation or negation; each pipeline reconciles its own targets
    * against its own cluster (CCS via the remote patterns, CPS by reusing the local ones).
    * Main extraction uses local only (LOOKUP JOIN does not support remote).
    */
