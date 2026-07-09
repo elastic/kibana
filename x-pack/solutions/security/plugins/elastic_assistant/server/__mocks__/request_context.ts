@@ -9,6 +9,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type {
@@ -186,6 +187,7 @@ const createElasticAssistantRequestContextMock = (
     llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
     core: clients.core,
     savedObjectsClient: clients.elasticAssistant.savedObjectsClient,
+    security: securityMock.createStart(),
     telemetry: clients.elasticAssistant.telemetry,
     checkPrivileges: jest.fn(),
     updateAnonymizationFields: jest.fn(),

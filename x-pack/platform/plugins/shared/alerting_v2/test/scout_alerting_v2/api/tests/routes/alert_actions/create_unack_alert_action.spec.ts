@@ -27,12 +27,12 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
 
   apiTest.beforeEach(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest('unack: writes an unack action and returns 204', async ({ apiClient, apiServices }) => {
@@ -51,7 +51,7 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
       body: { episode_id: episodeId },
     });
     expect(response).toHaveStatusCode(204);
-    const actions = await apiServices.alertingV2.alertActions.find({
+    const actions = await apiServices.alertingV2.alertActionsEvents.find({
       ruleId,
       actionTypes: ['unack'],
     });
