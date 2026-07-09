@@ -1003,6 +1003,11 @@ export const labels = {
           }
         ),
     },
+    referencedFilesSectionTitle: (count: number) =>
+      i18n.translate('xpack.agentBuilder.skills.referencedFilesSectionTitle', {
+        defaultMessage: 'Reference files ({count})',
+        values: { count },
+      }),
     typeLabel: i18n.translate('xpack.agentBuilder.skills.typeLabel', { defaultMessage: 'Type' }),
     saveButtonLabel: i18n.translate('xpack.agentBuilder.skills.saveButtonLabel', {
       defaultMessage: 'Save',
