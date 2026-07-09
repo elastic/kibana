@@ -36,6 +36,12 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/inference-common'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/security-plugin'
+  - '@kbn/security-solution-features'
+  - '@kbn/workflows'
+  - '@kbn/attack-discovery-schedules-common'
+  - '@kbn/event-log-plugin'
+  - '@kbn/workflows-management-plugin'
 tags:
   - shared-server
   - package

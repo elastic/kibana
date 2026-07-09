@@ -13514,6 +13514,100 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/cases/templates:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/templates</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of case templates. Requires the Cases feature to be enabled in the space.
+      operationId: getCaseTemplatesDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_page_index'
+        - $ref: '#/components/parameters/Cases_page_size'
+        - $ref: '#/components/parameters/Cases_template_sort_field'
+        - $ref: '#/components/parameters/Cases_sort_order'
+        - $ref: '#/components/parameters/Cases_search'
+        - $ref: '#/components/parameters/Cases_owner_filter'
+        - $ref: '#/components/parameters/Cases_template_tags'
+        - $ref: '#/components/parameters/Cases_template_author'
+        - $ref: '#/components/parameters/Cases_template_is_enabled'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCaseTemplatesResponse:
+                  $ref: '#/components/examples/Cases_get_case_templates_response'
+              schema:
+                $ref: '#/components/schemas/Cases_get_case_templates_response'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+      summary: Get all case templates
+      tags:
+        - cases
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/cases/templates/{template_id}:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/templates/{template_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the details of a case template. Requires the Cases feature to be enabled in the space.
+      operationId: getCaseTemplateDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_template_id'
+        - $ref: '#/components/parameters/Cases_template_version'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCaseTemplateResponse:
+                  $ref: '#/components/examples/Cases_get_case_template_response'
+              schema:
+                $ref: '#/components/schemas/Cases_template_v2_response'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The template was not found.
+      summary: Get a case template by ID
+      tags:
+        - cases
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/dashboards:
     get:
       tags:
@@ -46910,6 +47004,7 @@ paths:
               properties:
                 description:
                   description: A description of the pipeline.
+                  maxLength: 1024
                   type: string
                 pipeline:
                   description: A definition for the pipeline.
@@ -74369,6 +74464,35 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzM2LDFd
+    Cases_get_case_template_response:
+      summary: A case template.
+      value:
+        definition: {}
+        definitionString: 'fields: []'
+        deletedAt: null
+        isLatest: true
+        latestVersion: 1
+        name: My Template
+        owner: cases
+        templateId: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+        templateVersion: 1
+    Cases_get_case_templates_response:
+      summary: A paginated list of case templates.
+      value:
+        page: 1
+        perPage: 20
+        templates:
+          - definition: {}
+            definitionString: 'fields: []'
+            deletedAt: null
+            fieldSearchMatches: false
+            isLatest: true
+            latestVersion: 1
+            name: My Template
+            owner: cases
+            templateId: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+            templateVersion: 1
+        total: 1
     Cases_get_comment_response:
       summary: A single user comment retrieved from a case
       value:
@@ -74469,6 +74593,12 @@ components:
         error: Unauthorized
         message: Unable to authenticate with the provided credentials.
         statusCode: 401
+    Cases_response_404:
+      summary: The requested resource was not found.
+      value:
+        error: Not Found
+        message: Saved object [cases-template/9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42] not found
+        statusCode: 404
     Cases_set_case_configuration_request:
       summary: Set the closure type, custom fields, and default connector for Stack Management cases.
       value:
@@ -78818,6 +78948,70 @@ components:
         oneOf:
           - $ref: '#/components/schemas/Cases_string'
           - $ref: '#/components/schemas/Cases_string_array'
+    Cases_template_author:
+      description: Filters the returned templates by author username.
+      example: elastic
+      in: query
+      name: author
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/Cases_string'
+          - $ref: '#/components/schemas/Cases_string_array'
+    Cases_template_id:
+      description: The identifier for the template.
+      example: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+      in: path
+      name: template_id
+      required: true
+      schema:
+        maxLength: 36
+        type: string
+    Cases_template_is_enabled:
+      description: Filters the returned templates by their enabled state.
+      example: true
+      in: query
+      name: isEnabled
+      schema:
+        type: boolean
+    Cases_template_sort_field:
+      description: Determines which field is used to sort the results.
+      example: name
+      in: query
+      name: sortField
+      required: false
+      schema:
+        default: name
+        enum:
+          - templateId
+          - name
+          - templateVersion
+          - owner
+          - deletedAt
+          - author
+          - usageCount
+          - fieldCount
+          - lastUsedAt
+          - isDefault
+          - isLatest
+        type: string
+    Cases_template_tags:
+      description: Filters the returned templates by tags.
+      example: tag-1
+      in: query
+      name: tags
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/Cases_string'
+          - $ref: '#/components/schemas/Cases_string_array'
+    Cases_template_version:
+      description: The version number of the template to retrieve. If omitted, the latest version is returned.
+      example: 1
+      in: query
+      name: version
+      required: false
+      schema:
+        minimum: 1
+        type: integer
     Cases_to:
       description: |
         Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression.
@@ -80722,6 +80916,36 @@ components:
         - page
         - per_page
         - total
+    Cases_get_case_templates_response:
+      description: Response returned by the get all case templates API.
+      type: object
+      properties:
+        page:
+          description: The page number of the returned results.
+          type: integer
+        perPage:
+          description: The number of results per page.
+          type: integer
+        templates:
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Cases_template_v2_response'
+              - type: object
+                properties:
+                  fieldSearchMatches:
+                    description: Whether the search query matched a field name in this template.
+                    type: boolean
+                required:
+                  - fieldSearchMatches
+          type: array
+        total:
+          description: The total number of templates matching the query.
+          type: integer
+      required:
+        - templates
+        - page
+        - perPage
+        - total
     Cases_owner:
       description: |
         The application that owns the cases: Stack Management, Observability, or Elastic Security.
@@ -81177,6 +81401,101 @@ components:
         type: string
       maxItems: 200
       type: array
+    Cases_template_v2_response:
+      description: A case template (v2).
+      type: object
+      properties:
+        author:
+          description: The username of the template author.
+          maxLength: 1000
+          type: string
+        definition:
+          description: The parsed template definition.
+        definitionString:
+          description: The raw YAML definition string.
+          maxLength: 30000
+          type: string
+        deletedAt:
+          description: The date the template was soft-deleted, or null if active.
+          format: date-time
+          nullable: true
+          type: string
+        description:
+          description: A human-readable description of the template.
+          maxLength: 30000
+          type: string
+        fieldCount:
+          description: The number of fields defined in the template.
+          type: integer
+        fieldNames:
+          description: Metadata about each field defined in the template.
+          items:
+            type: object
+            properties:
+              control:
+                maxLength: 50
+                type: string
+              label:
+                maxLength: 256
+                type: string
+              name:
+                maxLength: 256
+                type: string
+              type:
+                maxLength: 50
+                type: string
+            required:
+              - name
+              - label
+              - type
+              - control
+          type: array
+        isDefault:
+          description: Whether this is the default template for its owner.
+          type: boolean
+        isEnabled:
+          description: Whether the template is enabled.
+          type: boolean
+        isLatest:
+          description: Whether this is the latest version of the template.
+          type: boolean
+        lastUsedAt:
+          description: The date the template was last used to create a case.
+          format: date-time
+          type: string
+        latestVersion:
+          description: The latest version number of this template.
+          type: integer
+        name:
+          description: The display name of the template.
+          maxLength: 100
+          type: string
+        owner:
+          description: The owning solution (e.g. cases, observability, securitySolution).
+          maxLength: 50
+          type: string
+        tags:
+          $ref: '#/components/schemas/Cases_template_tags'
+        templateId:
+          description: The unique identifier of the template, shared across all versions.
+          maxLength: 36
+          type: string
+        templateVersion:
+          description: The version number of this template revision.
+          type: integer
+        usageCount:
+          description: The number of times this template has been used to create a case.
+          type: integer
+      required:
+        - templateId
+        - name
+        - owner
+        - definition
+        - definitionString
+        - templateVersion
+        - deletedAt
+        - isLatest
+        - latestVersion
     Cases_templates:
       items:
         type: object
