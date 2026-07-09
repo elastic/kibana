@@ -168,7 +168,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             version: API_VERSIONS.public.v1,
             options: {
               oasOperationObject: () =>
-                path.join(__dirname, 'examples/create_agentless_policies.yaml'),
+                path.join(__dirname, 'examples/create_managed_integrations.yaml'),
             },
             validate: {
               request: CreateAgentlessPolicyRequestSchema,
@@ -224,7 +224,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             version: API_VERSIONS.public.v1,
             options: {
               oasOperationObject: () =>
-                path.join(__dirname, 'examples/list_agentless_policies.yaml'),
+                path.join(__dirname, 'examples/list_managed_integrations.yaml'),
             },
             validate: {
               request: ListAgentlessPoliciesRequestSchema,
@@ -275,7 +275,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           {
             version: API_VERSIONS.public.v1,
             options: {
-              oasOperationObject: () => path.join(__dirname, 'examples/get_agentless_policy.yaml'),
+              oasOperationObject: () => path.join(__dirname, 'examples/get_managed_integration.yaml'),
             },
             validate: {
               request: GetAgentlessPolicyRequestSchema,
@@ -332,7 +332,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             version: API_VERSIONS.public.v1,
             options: {
               oasOperationObject: () =>
-                path.join(__dirname, 'examples/update_agentless_policy.yaml'),
+                path.join(__dirname, 'examples/update_managed_integration.yaml'),
             },
             validate: {
               request: UpdateAgentlessPolicyRequestSchema,
@@ -393,7 +393,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             version: API_VERSIONS.public.v1,
             options: {
               oasOperationObject: () =>
-                path.join(__dirname, 'examples/delete_agentless_policies.yaml'),
+                path.join(__dirname, 'examples/delete_managed_integrations.yaml'),
             },
             validate: {
               request: DeleteAgentlessPolicyRequestSchema,
@@ -450,7 +450,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             version: API_VERSIONS.public.v1,
             options: {
               oasOperationObject: () =>
-                path.join(__dirname, 'examples/upgrade_agentless_policies.yaml'),
+                path.join(__dirname, 'examples/upgrade_managed_integrations.yaml'),
             },
             validate: {
               request: BulkUpgradeAgentlessPoliciesRequestSchema,
@@ -503,7 +503,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             version: API_VERSIONS.public.v1,
             options: {
               oasOperationObject: () =>
-                path.join(__dirname, 'examples/upgrade_agentless_policies_dryrun.yaml'),
+                path.join(__dirname, 'examples/upgrade_managed_integrations_dryrun.yaml'),
             },
             validate: {
               request: AgentlessPolicyUpgradeDryRunRequestSchema,
