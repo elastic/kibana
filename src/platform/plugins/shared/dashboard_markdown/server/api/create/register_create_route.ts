@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { writeErrorHandler } from '@kbn/as-code-utils';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
@@ -55,16 +56,17 @@ export function registerCreateRoute(
         },
       },
     },
-    async (ctx, req, res) => {
-      try {
-        const result = await create(ctx, req.body);
-        return res.created({ body: result });
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden({ body: { message: e.message } });
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          const result = await create(ctx, req.body);
+          return res.created({ body: result });
+        } catch (e) {
+          if (e.isBoom && e.output.statusCode === 403) {
+            return res.forbidden({ body: { message: e.message } });
+          }
+          return writeErrorHandler(e, res, logger, req);
         }
-        return writeErrorHandler(e, res, logger, req);
-      }
-    }
+      })
   );
 }
