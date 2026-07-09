@@ -106,11 +106,12 @@ export const RetentionSelector = ({
   });
 
   const visibleOptions = useMemo(() => {
-    const normalizedSearchValue = searchValue.trim().toLowerCase();
+    const isSearchActive = showSearch || controlledSearchValue !== undefined;
+    const normalizedSearchValue = isSearchActive ? searchValue.trim().toLowerCase() : '';
     if (!normalizedSearchValue) return options;
 
     return options.filter((option) => option.name.toLowerCase().includes(normalizedSearchValue));
-  }, [options, searchValue]);
+  }, [controlledSearchValue, options, searchValue, showSearch]);
 
   const list =
     visibleOptions.length > 0 ? (
