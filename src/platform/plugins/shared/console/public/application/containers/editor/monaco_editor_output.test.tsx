@@ -274,4 +274,24 @@ describe('WHEN rendering Console output', () => {
     expect(mockCopyTextToClipboard).toHaveBeenCalledWith('');
     expect(addSuccess).not.toHaveBeenCalled();
   });
+
+  it('SHOULD keep the editor focused when the copy button is pressed', async () => {
+    // Pressing the copy button must not blur the output editor: the editor's blur
+    // handler hides the actions after 100ms, which is faster than a typical human
+    // click is released, so the click would land on a hidden element and never fire.
+    render(
+      <I18nProvider>
+        <MonacoEditorOutput />
+      </I18nProvider>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('consoleMonacoOutput')).toHaveTextContent('"acknowledged": true')
+    );
+
+    const mouseDownEvent = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    screen.getByTestId('copyOutputButton').dispatchEvent(mouseDownEvent);
+
+    expect(mouseDownEvent.defaultPrevented).toBe(true);
+  });
 });

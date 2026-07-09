@@ -243,6 +243,12 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         style={editorActionsCss}
         justifyContent="center"
         alignItems="center"
+        // Keep the output editor focused while the actions are clicked. Without this,
+        // pressing the copy button blurs the editor, whose blur handler hides the
+        // actions 100ms later -- faster than a typical human click is released -- so
+        // the mouseup lands on a hidden element and the click never fires.
+        // See https://github.com/elastic/kibana/issues/266698.
+        onMouseDown={(e) => e.preventDefault()}
       >
         <EuiFlexItem grow={false}>
           <EuiToolTip
