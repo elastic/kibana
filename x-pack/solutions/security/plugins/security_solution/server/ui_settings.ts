@@ -25,6 +25,11 @@ import {
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
 } from '@kbn/management-settings-ids';
 import { snakeCase } from 'lodash';
+import {
+  TAG_PREFIX_MAX_LENGTH,
+  TAG_PREFIX_PATTERN,
+  TAG_PREFIX_VALIDATION_MESSAGE,
+} from '../common/workflows/alert_analysis_workflow';
 import { DefaultClosingReasonSchema } from '../common/types';
 import {
   APP_ID,
@@ -891,7 +896,15 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
     type: 'string',
     category: [APP_ID],
     requiresPageReload: false,
-    schema: schema.string({ minLength: 1 }),
+    // The prefix is interpolated verbatim into the workflow's Liquid tag expressions, so it is
+    // constrained to a safe tag-namespace charset here too (this path is writable through the
+    // settings API, not just the workflow settings page).
+    schema: schema.string({
+      minLength: 1,
+      maxLength: TAG_PREFIX_MAX_LENGTH,
+      validate: (value) =>
+        TAG_PREFIX_PATTERN.test(value) ? undefined : TAG_PREFIX_VALIDATION_MESSAGE,
+    }),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
     readonly: true,

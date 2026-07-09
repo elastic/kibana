@@ -6,9 +6,9 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { isEqual } from 'lodash';
+import { AppHeader } from '@kbn/app-header';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { isEqual } from 'lodash';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -21,8 +21,8 @@ import { useDebouncedYamlEdit } from '../hooks/use_debounced_yaml_edit';
 import * as i18n from '../translations';
 import { componentStyles } from './template_form_layout.styles';
 import { TEMPLATE_PREVIEW_WIDTH_KEY } from '../constants';
-import { TemplateFormHeader } from './template_form_header';
 import { TemplateResetModal } from './template_reset_modal';
+import { getTemplateFormBadges, getTemplateFormMenu } from './header_menu';
 import { TemplateEditorLayout } from './template_editor_layout';
 import {
   type FieldDefaultValue,
@@ -77,7 +77,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   initialIsEnabled = true,
 }) => {
   const styles = useMemoCss(componentStyles);
-  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
+  const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
   const defaultPreviewWidth = Math.floor(window.innerWidth * 0.3);
   const [previewWidth = defaultPreviewWidth, setPreviewWidth] = useLocalStorage(
@@ -276,35 +276,77 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     setIsEnabled(enabled);
   }, []);
 
+  const templateFormMenu = useMemo(
+    () =>
+      getTemplateFormMenu({
+        hasChanges,
+        hasValidationErrors,
+        isEdit,
+        isLoading,
+        isSaving,
+        isEnabled,
+        submitError,
+        onReset: handleResetClick,
+        onSave: handleSave,
+        onIsEnabledChange: handleIsEnabledChange,
+      }),
+    [
+      handleIsEnabledChange,
+      handleResetClick,
+      handleSave,
+      hasChanges,
+      hasValidationErrors,
+      isEdit,
+      isEnabled,
+      isLoading,
+      isSaving,
+      submitError,
+    ]
+  );
+
+  const templateFormBadges = useMemo(() => getTemplateFormBadges(hasChanges), [hasChanges]);
+
+  const templateFormBack = useMemo(
+    () => ({
+      href: getCasesTemplatesUrl(),
+      // `AppHeader` renders this as "Back to {label}", so pass just the destination name.
+      label: i18n.TEMPLATE_TITLE,
+      // AppHeader's back button keeps its `href` on the rendered anchor, so the default
+      // navigation must be prevented here to avoid a full page reload alongside the SPA one.
+      onClick: (event: React.MouseEvent) => {
+        event.preventDefault();
+        navigateToCasesTemplates();
+      },
+    }),
+    [getCasesTemplatesUrl, navigateToCasesTemplates]
+  );
+
   return (
     <FormProvider {...form}>
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        // The wrapper cancels the page-section padding via negative margins, so the only
-        // extra vertical space to reserve is the Security Solution timeline bottom bar
+        // The header cancels the page-section padding itself (see its `padding` prop below),
+        // so the wrapper only needs to reserve the Security Solution timeline bottom bar
         // (57px, the same value used by the validation accordion). This makes the page
         // fill the viewport exactly and never scroll the header under the sticky top bar.
         css={[kbnFullBodyHeightCss('57px'), styles.wrapper]}
       >
-        <EuiFlexItem grow={false} css={styles.header}>
-          <TemplateFormHeader
+        <EuiFlexItem grow={false}>
+          <AppHeader
             title={title}
-            isLoading={isLoading}
-            isSaving={isSaving}
-            hasChanges={hasChanges}
-            isEdit={isEdit}
-            submitError={submitError}
-            hasValidationErrors={hasValidationErrors}
-            isEnabled={isEnabled}
-            onBack={navigateToCasesTemplates}
-            onReset={handleResetClick}
-            onSave={handleSave}
-            onIsEnabledChange={handleIsEnabledChange}
+            back={templateFormBack}
+            badges={templateFormBadges}
+            menu={templateFormMenu}
+            sticky={false}
+            // Breaks the header out to the surrounding EuiPageSection's edges (top/left/right)
+            // and re-insets its content by the same amount, so it runs edge-to-edge while the
+            // title/menu stay aligned with the page gutter.
+            padding={{ bleed: 'l' }}
           />
         </EuiFlexItem>
 
-        <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
+        <EuiFlexItem css={styles.editorWrapper}>
           <TemplateEditorLayout
             isLoading={isLoading}
             yamlValue={yamlValue}
