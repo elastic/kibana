@@ -577,12 +577,13 @@ describe('createTransport', () => {
       const requestParams = { method: 'GET', path: '/' };
 
       await expect(transport.request(requestParams, { asStream: true })).rejects.toThrowError(
-        /Response Error/
+        /token expired/
       );
 
       expect(transportRequestMock).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler.mock.calls[0][0]).toBeInstanceOf(errors.ResponseError);
+      expect(handler.mock.calls[0][0].body).toEqual({ error: { reason: 'token expired' } });
     });
 
     it('retries streamed unauthorized responses when the handler returns `retry`', async () => {
@@ -632,7 +633,7 @@ describe('createTransport', () => {
       const requestParams = { method: 'GET', path: '/' };
 
       await expect(transport.request(requestParams, { asStream: true })).rejects.toThrowError(
-        /Response Error/
+        /token expired/
       );
 
       expect(transportRequestMock).toHaveBeenCalledTimes(2);

@@ -17,6 +17,7 @@ import {
   type TransportResult,
 } from '@elastic/elasticsearch';
 import { isUnauthorizedError } from '@kbn/es-errors';
+import type { UnauthorizedError } from '@kbn/es-errors';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalUnauthorizedErrorHandler } from './retry_unauthorized';
@@ -67,16 +68,24 @@ const isStreamBody = (body: unknown): body is NodeJS.ReadableStream => {
 };
 
 const isUnauthorizedStreamResponse = (
-  response: TransportResult<any, any>
+  response: TransportResult<any, any> | undefined
 ): response is TransportResult<NodeJS.ReadableStream, any> & { statusCode: 401 } => {
-  return response.statusCode === 401 && isStreamBody(response.body);
+  return response != null && response.statusCode === 401 && isStreamBody(response.body);
 };
+
+const MAX_ERROR_BODY_BYTES = 64 * 1024;
 
 const readStreamBody = async (body: NodeJS.ReadableStream): Promise<string> => {
   const chunks: Buffer[] = [];
+  let totalBytes = 0;
 
   for await (const chunk of body as AsyncIterable<Buffer | string>) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    totalBytes += buf.byteLength;
+    if (totalBytes > MAX_ERROR_BODY_BYTES) {
+      break;
+    }
+    chunks.push(buf);
   }
 
   return Buffer.concat(chunks).toString('utf8');
@@ -84,16 +93,19 @@ const readStreamBody = async (body: NodeJS.ReadableStream): Promise<string> => {
 
 const createUnauthorizedStreamError = async (
   response: TransportResult<NodeJS.ReadableStream, any> & { statusCode: 401 }
-) => {
-  const responseBodyText = await readStreamBody(response.body);
-
+): Promise<UnauthorizedError> => {
   let responseBody: unknown;
-  if (responseBodyText) {
-    try {
-      responseBody = JSON.parse(responseBodyText);
-    } catch {
-      responseBody = responseBodyText;
+  try {
+    const responseBodyText = await readStreamBody(response.body);
+    if (responseBodyText) {
+      try {
+        responseBody = JSON.parse(responseBodyText);
+      } catch {
+        responseBody = responseBodyText;
+      }
     }
+  } catch {
+    // Stream read failed; proceed with empty body so retry logic still runs
   }
 
   return new errors.ResponseError({
@@ -102,7 +114,7 @@ const createUnauthorizedStreamError = async (
     headers: response.headers,
     warnings: response.warnings ?? [],
     meta: response.meta ?? ({} as any),
-  });
+  }) as UnauthorizedError;
 };
 
 export const createTransport = ({
@@ -157,7 +169,7 @@ export const createTransport = ({
 
       onRequest({ scoped }, params, opts, logger);
 
-      const retryUnauthorizedRequest = async (error: errors.ResponseError) => {
+      const retryUnauthorizedRequest = async (error: UnauthorizedError) => {
         const unauthorizedErrorHandler = getUnauthorizedErrorHandler
           ? getUnauthorizedErrorHandler()
           : undefined;
@@ -201,6 +213,11 @@ export const createTransport = ({
       }
 
       if (isUnauthorizedStreamResponse(response)) {
+        logger.debug(
+          `Received streamed 401 response for [${params.method} ${params.path}]${
+            opts.opaqueId ? ` (opaqueId: ${opts.opaqueId})` : ''
+          }, attempting token refresh and retry`
+        );
         return await retryUnauthorizedRequest(await createUnauthorizedStreamError(response));
       }
 
