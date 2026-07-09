@@ -96,8 +96,10 @@ describe('focusFirstFocusable', () => {
       jest.runAllTimers();
 
       expect(document.activeElement).toBe(button);
-      // visibility is overridden inline so the element is focusable
-      expect(hiddenContainer.style.visibility).toBe('visible');
+      // the focusable element's own visibility is overridden so it can receive focus,
+      // while the hidden ancestor is left untouched
+      expect(button.style.visibility).toBe('visible');
+      expect(hiddenContainer.style.visibility).toBe('hidden');
     });
 
     it('restores the original visibility once focus leaves', () => {
@@ -109,11 +111,11 @@ describe('focusFirstFocusable', () => {
 
       focusFirstFocusable(hiddenContainer);
       jest.runAllTimers();
-      expect(hiddenContainer.style.visibility).toBe('visible');
+      expect(button.style.visibility).toBe('visible');
 
       button.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
 
-      expect(hiddenContainer.style.visibility).toBe('hidden');
+      expect(button.style.visibility).toBe('');
     });
 
     it('does not touch visibility when the target is already visible', () => {
@@ -127,6 +129,24 @@ describe('focusFirstFocusable', () => {
 
       expect(document.activeElement).toBe(button);
       expect(container.style.visibility).toBe('');
+    });
+
+    it('restores the overridden visibility immediately when the focus does not land', () => {
+      const hiddenContainer = document.createElement('div');
+      hiddenContainer.style.visibility = 'hidden';
+      const button = document.createElement('button');
+      // A disabled button cannot receive focus, so no `focusout` will ever fire.
+      button.disabled = true;
+      hiddenContainer.appendChild(button);
+      document.body.appendChild(hiddenContainer);
+
+      focusFirstFocusable(hiddenContainer);
+      jest.runAllTimers();
+
+      expect(document.activeElement).not.toBe(button);
+      // the element's overridden visibility is restored right away instead of being
+      // left overridden forever
+      expect(button.style.visibility).toBe('');
     });
   });
 });

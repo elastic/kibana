@@ -7,6 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Stable DOM id for a panel's context menu ("...") toggle button. Shared between the
+ * embeddable panel hover actions (which render the button) and `openLazyFlyout` (which
+ * restores focus to it) so focus can return to the persistent toggle when a flyout
+ * opened from the panel closes — even if the action ran asynchronously and the context
+ * menu (and the transient menu item that had focus) was already torn down (WCAG 2.4.3
+ * Focus Order).
+ */
+export const getPanelContextMenuTriggerId = (panelId: string) =>
+  `presentationPanelContextMenu-${panelId}`;
+
 const FOCUSABLE_SELECTOR = 'button, [href], input, select, textarea, [tabindex]';
 
 const getFirstFocusable = (el: HTMLElement | null): HTMLElement | null => {
@@ -14,27 +25,31 @@ const getFirstFocusable = (el: HTMLElement | null): HTMLElement | null => {
   if (el.matches(FOCUSABLE_SELECTOR)) return el;
   return el.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
 };
+
 const focusPreservingVisibility = (el: HTMLElement) => {
-  const overridden: Array<{ node: HTMLElement; previousInlineVisibility: string }> = [];
-  for (let node: HTMLElement | null = el; node; node = node.parentElement) {
-    if (window.getComputedStyle(node).visibility === 'hidden') {
-      overridden.push({ node, previousInlineVisibility: node.style.visibility });
-      node.style.visibility = 'visible';
-    }
-  }
+  const previousInlineVisibility = el.style.visibility;
+  // `visibility: visible` on the element overrides an inherited `visibility: hidden`
+  // from an ancestor (e.g. the hover-actions toolbar), so the programmatic focus lands
+  // without revealing the whole toolbar. Keyboard users still get the CSS
+  // `:focus-visible` reveal while the element stays focused.
+  el.style.visibility = 'visible';
 
   el.focus();
 
-  if (overridden.length === 0) return;
-
   const restore = () => {
     el.removeEventListener('focusout', restore);
-    for (const { node, previousInlineVisibility } of overridden) {
-      node.style.visibility = previousInlineVisibility;
-    }
+    el.style.visibility = previousInlineVisibility;
   };
-  // Restore the original visibility once focus leaves the element. While it stays
-  // focused, keyboard users keep it revealed via the CSS `:focus-visible` rules.
+
+  if (document.activeElement !== el) {
+    // The focus did not land (e.g. the element is disabled or was detached), so no
+    // `focusout` will ever fire. Restore the overridden visibility immediately to
+    // avoid leaving the element permanently overridden.
+    restore();
+    return;
+  }
+
+  // Restore the original visibility once focus leaves the element.
   el.addEventListener('focusout', restore);
 };
 

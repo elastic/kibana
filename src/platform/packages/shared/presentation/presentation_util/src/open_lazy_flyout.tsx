@@ -12,7 +12,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
-import { focusFirstFocusable } from './focus_helpers';
+import { focusFirstFocusable, getPanelContextMenuTriggerId } from './focus_helpers';
 import { LoadingFlyout } from './loading_flyout';
 import { tracksOverlays } from './tracks_overlays';
 
@@ -29,6 +29,19 @@ interface OpenLazyFlyoutParams {
   loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
   flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string; focusedPanelId?: string };
 }
+
+/**
+ * Re-queries `el` by its id (so focus survives a re-render that replaced the node),
+ * falling back to the node itself while it is still attached to the DOM.
+ */
+const resolveAttachedElement = (el: HTMLElement | null): HTMLElement | null => {
+  if (!el) return null;
+  if (el.id) {
+    const refreshed = document.getElementById(el.id);
+    if (refreshed) return refreshed;
+  }
+  return document.body.contains(el) ? el : null;
+};
 
 /**
  * Opens a flyout panel with lazily loaded content.
@@ -49,22 +62,6 @@ interface OpenLazyFlyoutParams {
  *
  * @returns A handle to the opened flyout (`OverlayRef`).
  */
-export const getPanelContextMenuTriggerId = (panelId: string) =>
-  `presentationPanelContextMenu-${panelId}`;
-
-/**
- * Re-queries `el` by its id (so focus survives a re-render that replaced the node),
- * falling back to the node itself while it is still attached to the DOM.
- */
-const resolveAttachedElement = (el: HTMLElement | null): HTMLElement | null => {
-  if (!el) return null;
-  if (el.id) {
-    const refreshed = document.getElementById(el.id);
-    if (refreshed) return refreshed;
-  }
-  return document.body.contains(el) ? el : null;
-};
-
 export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const { core, parentApi, loadContent, flyoutProps: allFlyoutProps } = params;
   const { focusedPanelId, triggerId, ...flyoutProps } = allFlyoutProps ?? {};

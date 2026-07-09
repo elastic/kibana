@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { openLazyFlyout, getPanelContextMenuTriggerId } from './open_lazy_flyout';
+import { openLazyFlyout } from './open_lazy_flyout';
+import { getPanelContextMenuTriggerId } from './focus_helpers';
 import type { CoreStart } from '@kbn/core/public';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
