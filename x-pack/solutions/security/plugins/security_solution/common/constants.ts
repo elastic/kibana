@@ -11,6 +11,7 @@ import {
   SECURITY_FEATURE_ID_V5,
 } from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
+import { MITRE_ATTACK_VERSION } from './detection_engine/mitre/mitre_version';
 
 export {
   SecurityPageName,
@@ -124,6 +125,7 @@ export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
 export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const RULES_CHANGES_HISTORY_PATH = `${RULES_PATH}/id/:ruleId/changes-history` as const;
+export const ALERT_ANALYSIS_WORKFLOW_PATH = `${RULES_PATH}/alert_analysis_workflow` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
@@ -277,6 +279,13 @@ export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInven
 
 /** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
 export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable the new EUI-based flyout system */
+export const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable the rule changes history feature */
+export const ENABLE_RULE_CHANGES_HISTORY_SETTING =
+  'securitySolution:enableRuleChangesHistory' as const;
 
 /**
  * Id for the notifications alerting type
@@ -504,6 +513,9 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
   ATTACKS_PAGE: 'securitySolution.attacksPage.newFeaturesTour.v9.5',
   ATTACKS_PAGE_CALLOUT: 'securitySolution.attacksPage.tourCalloutDismissed.v9.5',
+  // Notifies users that the bundled MITRE ATT&CK® dataset was bumped. Keyed to
+  // MITRE_ATTACK_VERSION so each upgrade automatically re-surfaces the callout.
+  MITRE_VERSION_UPGRADED_CALLOUT: `securitySolution.rulesManagementPage.mitreVersionUpgradedCallout.${MITRE_ATTACK_VERSION}`,
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -692,6 +704,8 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
   'kibana.alert.severity',
   'kibana.alert.start',
   'kibana.alert.workflow_status',
+  'kibana.alert.workflow_reason',
+  'kibana.alert.workflow_user',
   'kibana.alert.reason',
   'kibana.alert.risk_score',
   'kibana.alert.rule.name',
@@ -733,7 +747,3 @@ export enum SecurityAgentBuilderAttachments {
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';
-
-export const REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG =
-  'securitySolution.registerAlertValidationStepsEnabled' as const;
-export const REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT = false as const;

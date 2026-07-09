@@ -15,14 +15,6 @@ export const CASE_DETAILS_TITLE = i18n.translate('xpack.cases.casesRedesign.deta
   defaultMessage: 'Case Details (Redesign)',
 });
 
-export const CASE_SETTINGS_TITLE = i18n.translate('xpack.cases.casesRedesign.settings.title', {
-  defaultMessage: 'Case Settings (Redesign)',
-});
-
-export const UNDER_CONSTRUCTION = i18n.translate('xpack.cases.casesRedesign.underConstruction', {
-  defaultMessage: 'This page is under construction.',
-});
-
 export const VIEWING_CASE = (caseId: string) =>
   i18n.translate('xpack.cases.casesRedesign.details.viewingCase', {
     defaultMessage: 'Viewing case: {caseId}. This page is under construction.',
@@ -58,3 +50,11 @@ export const EDIT_CASE_NAME_ARIA = i18n.translate(
     defaultMessage: 'Edit case name',
   }
 );
+
+export const SHOW_FIELDS = i18n.translate('xpack.cases.casesRedesign.details.showFields', {
+  defaultMessage: 'Show fields',
+});
+
+export const HIDE_FIELDS = i18n.translate('xpack.cases.casesRedesign.details.hideFields', {
+  defaultMessage: 'Hide fields',
+});

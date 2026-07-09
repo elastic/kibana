@@ -38,14 +38,14 @@ export interface AttackFlyoutWrapperProps {
 
 /**
  * Wrapper for AttackFlyout that owns the single fetch of the attack document
- * for the flyout. It builds the `hit` from the fetched search hit, and exposes
- * a refreshing `onAttackUpdated` callback to children so that any in-flyout
- * mutation (status, assignees, tags, ...) is reflected without re-opening
- * the flyout.
+ * for the v2 flyout. It builds the `hit` and resolves the `attack` from the
+ * same fetched search hit, and exposes a refreshing `onAttackUpdated` callback
+ * to children so that any in-flyout mutation (status, assignees, tags, ...)
+ * is reflected without re-opening the flyout.
  */
 export const AttackFlyoutWrapper = memo(
   ({ attackId, indexName, onAttackUpdated }: AttackFlyoutWrapperProps) => {
-    const { loading, searchHit, refetch } = useAttackDetails({ attackId, indexName });
+    const { loading, searchHit, attack, refetch } = useAttackDetails({ attackId, indexName });
 
     const hit = useMemo(
       () => (searchHit ? buildDataTableRecord(searchHit as EsHitRecord) : null),
@@ -65,7 +65,7 @@ export const AttackFlyoutWrapper = memo(
       return <FlyoutLoading data-test-subj="attack-flyout-wrapper-loading" />;
     }
 
-    if (!hit) {
+    if (!hit || !attack) {
       return (
         <EuiCallOut
           announceOnMount
@@ -77,7 +77,7 @@ export const AttackFlyoutWrapper = memo(
       );
     }
 
-    return <AttackFlyout hit={hit} onAttackUpdated={handleAttackUpdated} />;
+    return <AttackFlyout hit={hit} attack={attack} onAttackUpdated={handleAttackUpdated} />;
   }
 );
 

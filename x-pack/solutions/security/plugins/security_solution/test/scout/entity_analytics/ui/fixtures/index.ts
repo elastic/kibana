@@ -5,4 +5,30 @@
  * 2.0.
  */
 
-export { spaceTest, tags } from '@kbn/scout-security';
+import { spaceTest as baseSpaceTest, createLazyPageObject } from '@kbn/scout-security';
+import type { SecurityTestFixtures, SecurityPageObjects, ScoutPage } from '@kbn/scout-security';
+import { EntityCasesPage } from './page_objects/entity_cases_page';
+
+interface SecuritySolutionTestFixtures extends SecurityTestFixtures {
+  pageObjects: SecurityPageObjects & { entityCases: EntityCasesPage };
+}
+
+export const spaceTest = baseSpaceTest.extend<SecuritySolutionTestFixtures>({
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: SecuritySolutionTestFixtures['pageObjects'];
+      page: ScoutPage;
+    },
+    use: (pageObjects: SecuritySolutionTestFixtures['pageObjects']) => Promise<void>
+  ) => {
+    await use({
+      ...pageObjects,
+      entityCases: createLazyPageObject(EntityCasesPage, page),
+    });
+  },
+});
+
+export { tags } from '@kbn/scout-security';

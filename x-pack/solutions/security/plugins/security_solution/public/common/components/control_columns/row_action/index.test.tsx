@@ -22,8 +22,11 @@ import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandabl
 import { createExpandableFlyoutApiMock } from '../../../mock/expandable_flyout';
 import { useUserPrivileges } from '../../user_privileges';
 import { initialUserPrivilegesState } from '../../user_privileges/user_privileges_context';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { useIsNewFlyoutEnabled } from '../../../hooks/use_is_new_flyout_enabled';
 
+jest.mock('../../../hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
+}));
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -78,7 +81,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 jest.mock('../../user_privileges');
-jest.mock('../../../hooks/use_experimental_features');
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -129,14 +131,14 @@ describe('RowAction', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
     });
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
     (useRouteSpy as jest.Mock).mockReturnValue([mockRouteSpy]);
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
-    jest.clearAllMocks();
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   test('displays expand events button', () => {
@@ -171,7 +173,7 @@ describe('RowAction', () => {
     });
   });
 
-  test('should open expandable flyout when newFlyoutSystemEnabled is disabled', () => {
+  test('should open expandable flyout when enableNewFlyout setting is disabled', () => {
     const wrapper = render(
       <TestProviders>
         <RowAction {...defaultProps} />
@@ -184,8 +186,8 @@ describe('RowAction', () => {
     expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
   });
 
-  test('should open system flyout when newFlyoutSystemEnabled is enabled', () => {
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+  test('should open system flyout when enableNewFlyout setting is enabled', () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
     const refetch = jest.fn();
 
     const wrapper = render(

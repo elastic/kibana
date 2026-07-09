@@ -135,6 +135,7 @@ export const resolvePanelCreationRequests = async ({
                 index: request.panelInput.index,
                 chartType: request.panelInput.chartType,
                 esql: request.panelInput.esql,
+                renderer: request.panelInput.renderer,
               }),
             }))
           ),

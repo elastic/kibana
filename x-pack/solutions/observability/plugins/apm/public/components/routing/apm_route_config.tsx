@@ -47,6 +47,7 @@ const apmRoutes = {
         t.partial({
           rangeFrom: t.string,
           rangeTo: t.string,
+          environment: t.string,
         }),
       ]),
     }),

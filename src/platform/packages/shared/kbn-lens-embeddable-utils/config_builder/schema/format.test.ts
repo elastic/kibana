@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { durationFormatSchema } from './duration_units';
 import { formatTypeSchema, formatSchema } from './format';
 
 describe('Format Schemas', () => {
@@ -83,8 +84,8 @@ describe('Format Schemas', () => {
     });
   });
 
-  describe('durationFormat', () => {
-    it('validates a valid duration format configuration', () => {
+  describe('durationFormat — GA enum values', () => {
+    it('validates a valid duration format configuration with short units', () => {
       const input = {
         type: 'duration' as const,
         from: 'ms',
@@ -96,7 +97,7 @@ describe('Format Schemas', () => {
       expect(validated).toEqual(input);
     });
 
-    it('validates duration format without suffix', () => {
+    it('validates duration format with `min` for minutes', () => {
       const input = {
         type: 'duration' as const,
         from: 'ms',
@@ -107,13 +108,90 @@ describe('Format Schemas', () => {
       expect(validated).toEqual(input);
     });
 
-    it('throws on missing required fields', () => {
+    it('validates `auto-approximate` output (precise auto-select)', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 's',
+        to: 'auto-approximate',
+      };
+
+      const validated = formatTypeSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates `auto` output (approximate auto-select)', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 'ms',
+        to: 'auto',
+      };
+
+      const validated = formatTypeSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates fine-grained input units', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 'us',
+        to: 'ms',
+      };
+
+      const validated = formatTypeSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+  });
+
+  describe('durationFormat — legacy unit names (accepted at HTTP layer)', () => {
+    it('accepts legacy `m` for minutes', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 'm',
+        to: 'humanize',
+      };
+
+      const validated = formatTypeSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('accepts legacy `humanizePrecise` output name', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 'ms',
+        to: 'humanizePrecise',
+      };
+
+      const validated = formatTypeSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('rejects verbose long-form unit names in the GA duration schema', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 'seconds',
+        to: 'humanize',
+      };
+
+      expect(() => durationFormatSchema.validate(input)).toThrow();
+    });
+
+    it('rejects Lens state output names like `asMinutes` in the GA duration schema', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 'ms',
+        to: 'asMinutes',
+      };
+
+      expect(() => durationFormatSchema.validate(input)).toThrow();
+    });
+
+    it('throws on missing required `to` field', () => {
       const input = {
         type: 'duration' as const,
         from: 'ms',
       };
 
-      expect(() => formatTypeSchema.validate(input)).toThrow(/\[2.to\]: expected value of type/);
+      expect(() => formatTypeSchema.validate(input)).toThrow();
     });
   });
 
@@ -134,7 +212,7 @@ describe('Format Schemas', () => {
       };
 
       expect(() => formatTypeSchema.validate(input)).toThrow(
-        /\[3.pattern\]: expected value of type/
+        /\[4.pattern\]: expected value of type/
       );
     });
   });

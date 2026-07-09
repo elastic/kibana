@@ -170,12 +170,41 @@ describe('useServiceFlyoutTransactions', () => {
     expect(result.current.items[0].impact).toBeUndefined();
   });
 
-  it('reflects maxCountExceeded from the response', async () => {
+  it('returns maxCountExceeded as true once any response exceeds the limit', async () => {
     const http = makeHttp({ transactionGroups: [], maxCountExceeded: true });
 
     const { result } = renderHook(() => useServiceFlyoutTransactions({ http, ...BASE_PARAMS }));
 
     await waitFor(() => expect(result.current.maxCountExceeded).toBe(true));
+  });
+
+  it('resets maxCountExceeded to false when the service name changes', async () => {
+    const http = {
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({
+          transactionGroups: [],
+          maxCountExceeded: true,
+          hasActiveAlerts: false,
+        })
+        .mockResolvedValue({
+          transactionGroups: [],
+          maxCountExceeded: false,
+          hasActiveAlerts: false,
+        }),
+    } as unknown as HttpStart;
+
+    const { result, rerender } = renderHook(
+      ({ serviceName }: { serviceName: string }) =>
+        useServiceFlyoutTransactions({ http, ...BASE_PARAMS, serviceName }),
+      { initialProps: { serviceName: 'my-service' } }
+    );
+
+    await waitFor(() => expect(result.current.maxCountExceeded).toBe(true));
+
+    rerender({ serviceName: 'other-service' });
+
+    await waitFor(() => expect(result.current.maxCountExceeded).toBe(false));
   });
 
   it('reflects hasActiveAlerts from the response', async () => {
@@ -242,6 +271,40 @@ describe('useServiceFlyoutTransactions', () => {
     );
   });
 
+  it('does not trigger additional fetches when server-side search returns maxCountExceeded: false', async () => {
+    const http = {
+      get: jest
+        .fn()
+        .mockResolvedValueOnce({
+          transactionGroups: [],
+          maxCountExceeded: true,
+          hasActiveAlerts: false,
+        })
+        .mockResolvedValueOnce({
+          transactionGroups: [],
+          maxCountExceeded: false,
+          hasActiveAlerts: false,
+        }),
+    } as unknown as HttpStart;
+
+    const { rerender } = renderHook(
+      ({ searchQuery }: { searchQuery: string }) =>
+        useServiceFlyoutTransactions({ http, ...BASE_PARAMS, searchQuery }),
+      { initialProps: { searchQuery: '' } }
+    );
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(1));
+
+    rerender({ searchQuery: 'checkout' });
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+
+    // maxCountExceeded must stay true (sticky) so serverSearchQuery remains 'checkout'
+    // and no third fetch is triggered. waitFor() uses act() internally, so all React
+    // state from the 2nd response (including setMaxCountExceeded) is flushed above.
+    expect(http.get).toHaveBeenCalledTimes(2);
+  });
+
   it('returns isLoading true while the request is in flight', async () => {
     let resolveRequest!: (value: object) => void;
     const http = {
@@ -299,5 +362,25 @@ describe('useServiceFlyoutTransactions', () => {
       renderHook(() => useServiceFlyoutTransactions({ http, ...BASE_PARAMS }));
       expect(http.get).not.toHaveBeenCalled();
     });
+  });
+
+  it('re-fetches when refreshToken changes', async () => {
+    const http = makeHttp({
+      transactionGroups: [],
+      maxCountExceeded: false,
+      hasActiveAlerts: false,
+    });
+
+    const { rerender } = renderHook(
+      ({ refreshToken }: { refreshToken: number }) =>
+        useServiceFlyoutTransactions({ http, ...BASE_PARAMS, refreshToken }),
+      { initialProps: { refreshToken: 0 } }
+    );
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(1));
+
+    rerender({ refreshToken: 1 });
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
   });
 });
