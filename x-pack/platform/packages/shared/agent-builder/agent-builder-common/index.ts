@@ -149,6 +149,8 @@ export {
   type ConversationRound,
   type Conversation,
   type ConversationSource,
+  type ConversationTemplateReference,
+  type ConversationExtendedFields,
   type ConversationWithoutRounds,
   type ToolCallStep,
   type ConversationRoundStep,
@@ -243,7 +245,9 @@ export {
   isUserQuestionAnsweredEvent,
   createUserQuestionAskedEvent,
   createUserQuestionAnsweredEvent,
+  type ConversationExtendedFieldFilter,
   type ConversationListOptions,
+  type ConversationSearchFilters,
 } from './chat';
 export {
   type PublicSkillDefinition,

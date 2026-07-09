@@ -361,6 +361,13 @@ export interface ConversationSource {
   external_conversation_id: string;
 }
 
+export interface ConversationTemplateReference {
+  id: string;
+  version: number;
+}
+
+export type ConversationExtendedFields = Record<string, string>;
+
 export interface RoundModelUsageStats {
   /**
    * Id of the connector used for this round
@@ -432,6 +439,10 @@ export interface Conversation {
   access_control?: ConversationAccessControl;
   /** External source used to resolve conversations submitted by stateless relays. */
   source?: ConversationSource;
+  /** Pinned template version used to validate and search conversation extended fields. */
+  template?: ConversationTemplateReference;
+  /** Template/global field values stored by generated storage key. */
+  extended_fields?: ConversationExtendedFields;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

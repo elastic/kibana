@@ -21,6 +21,8 @@ export {
   type ConversationRound,
   type Conversation,
   type ConversationSource,
+  type ConversationTemplateReference,
+  type ConversationExtendedFields,
   type ConversationInternalState,
   type TodoItem,
   type TodoStatus,
@@ -126,4 +128,8 @@ export {
   createUserQuestionAnsweredEvent,
 } from './events';
 export type { RoundState } from './round_state';
-export type { ConversationListOptions } from './conversation_list';
+export type {
+  ConversationExtendedFieldFilter,
+  ConversationListOptions,
+  ConversationSearchFilters,
+} from './conversation_list';

@@ -12,9 +12,11 @@ import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type {
   ConversationAccessControl,
+  ConversationExtendedFields,
   ConversationInternalState,
   ConversationRoundStatus,
   ConversationSource,
+  ConversationTemplateReference,
 } from '@kbn/agent-builder-common/chat';
 import type { PersistentConversationRound } from './types';
 
@@ -31,6 +33,14 @@ const storageSettings = {
       title: types.text({}),
       created_at: types.date({}),
       updated_at: types.date({}),
+      template: types.object({
+        properties: {
+          id: types.keyword({}),
+          version: types.long({}),
+        },
+        dynamic: false,
+      }),
+      extended_fields: types.flattened({}),
       conversation_rounds: types.object({ dynamic: false, properties: {} }),
       attachments: types.object({ dynamic: false, properties: {} }),
       state: types.object({ dynamic: false, properties: {} }),
@@ -62,6 +72,8 @@ export interface ConversationProperties {
   title: string;
   created_at: string;
   updated_at: string;
+  template?: ConversationTemplateReference;
+  extended_fields?: ConversationExtendedFields;
   conversation_rounds: PersistentConversationRound[];
   attachments?: VersionedAttachment[];
   state?: ConversationInternalState;

@@ -46,12 +46,16 @@ describe('ConversationClient', () => {
     userId = 'user-1',
     username = 'test-user',
     accessMode = ConversationAccessControlMode.Private,
+    template,
+    extendedFields,
   }: {
     id?: string;
     agentId?: string;
     userId?: string;
     username?: string;
     accessMode?: ConversationAccessControlMode;
+    template?: { id: string; version: number };
+    extendedFields?: Record<string, string>;
   } = {}): Document =>
     ({
       _id: id,
@@ -70,6 +74,8 @@ describe('ConversationClient', () => {
         access_control: {
           access_mode: accessMode,
         },
+        ...(template ? { template } : {}),
+        ...(extendedFields ? { extended_fields: extendedFields } : {}),
       },
     } as Document);
 
@@ -100,6 +106,8 @@ describe('ConversationClient', () => {
           hits: [
             createConversationDocument({
               accessMode: ConversationAccessControlMode.Public,
+              template: { id: 'triage-template', version: 3 },
+              extendedFields: { priority_as_keyword: 'high' },
             }),
           ],
         },
@@ -112,10 +120,22 @@ describe('ConversationClient', () => {
           _source: expect.arrayContaining(['access_control']),
         })
       );
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: expect.arrayContaining(['template', 'extended_fields']),
+        })
+      );
       expect(result[0]).toEqual(
         expect.objectContaining({
           access_control: {
             access_mode: ConversationAccessControlMode.Public,
+          },
+          template: {
+            id: 'triage-template',
+            version: 3,
+          },
+          extended_fields: {
+            priority_as_keyword: 'high',
           },
         })
       );
@@ -223,6 +243,54 @@ describe('ConversationClient', () => {
       await expect(client.list()).resolves.toEqual([]);
 
       expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('composes exact template and extended field filters with conversation access filters', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [createConversationDocument()],
+        },
+      });
+
+      await client.list({
+        filters: {
+          template: {
+            id: 'triage-template',
+            version: 3,
+          },
+          extendedFields: [
+            {
+              key: 'priority_as_keyword',
+              value: 'high',
+            },
+            {
+              key: 'risk_score_as_long',
+              exists: true,
+            },
+          ],
+        },
+      });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                expect.any(Object),
+                expect.objectContaining({
+                  bool: expect.objectContaining({
+                    filter: expect.any(Array),
+                  }),
+                }),
+                { term: { 'template.id': 'triage-template' } },
+                { term: { 'template.version': 3 } },
+                { term: { 'extended_fields.priority_as_keyword': 'high' } },
+                { exists: { field: 'extended_fields.risk_score_as_long' } },
+              ],
+            },
+          },
+        })
+      );
     });
   });
 
@@ -428,6 +496,54 @@ describe('ConversationClient', () => {
         })
       );
       expect(result.read).toBe(true);
+    });
+
+    it('preserves template metadata and extended fields when unrelated updates rewrite the document', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              template: { id: 'triage-template', version: 3 },
+              extendedFields: {
+                priority_as_keyword: 'high',
+                risk_score_as_long: '42',
+              },
+            }),
+          ],
+        },
+      });
+
+      const result = await client.update({ id: 'conversation-1', title: 'Updated title' });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conversation-1',
+          document: expect.objectContaining({
+            title: 'Updated title',
+            template: {
+              id: 'triage-template',
+              version: 3,
+            },
+            extended_fields: {
+              priority_as_keyword: 'high',
+              risk_score_as_long: '42',
+            },
+          }),
+        })
+      );
+      expect(result).toEqual(
+        expect.objectContaining({
+          title: 'Updated title',
+          template: {
+            id: 'triage-template',
+            version: 3,
+          },
+          extended_fields: {
+            priority_as_keyword: 'high',
+            risk_score_as_long: '42',
+          },
+        })
+      );
     });
 
     it('returns not found for converse updates when agent use access fails', async () => {
