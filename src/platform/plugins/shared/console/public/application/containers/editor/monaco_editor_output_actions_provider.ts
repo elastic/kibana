@@ -36,7 +36,7 @@ export class MonacoEditorOutputActionsProvider {
         if (editor.hasTextFocus()) {
           await this.highlightRequests(this.highlightedLinesClassName);
         } else {
-          this.clearEditorDecorations();
+          this.resetOutputActions();
         }
       },
       DEBOUNCE_HIGHLIGHT_WAIT_MS,
@@ -64,12 +64,12 @@ export class MonacoEditorOutputActionsProvider {
       // the clearing of the editor decorations to ensure that the actions buttons
       // are not hidden.
       setTimeout(() => {
-        this.clearEditorDecorations();
+        this.resetOutputActions();
       }, 100);
     });
   }
 
-  public clearEditorDecorations() {
+  public resetOutputActions() {
     this.debouncedHighlightRequests.cancel();
     // remove the highlighted lines
     this.highlightedLines.clear();

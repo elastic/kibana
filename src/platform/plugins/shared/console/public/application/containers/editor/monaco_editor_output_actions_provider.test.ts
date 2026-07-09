@@ -113,7 +113,7 @@ describe('MonacoEditorOutputActionsProvider', () => {
 
     await triggerCursorSelectionChange();
     await triggerCursorSelectionChange();
-    provider.clearEditorDecorations();
+    provider.resetOutputActions();
 
     await jest.advanceTimersByTimeAsync(200);
 
