@@ -532,7 +532,7 @@ export const createTestTracks: Command<void> = {
         try {
           return testChannel.fromString(channel);
         } catch (e) {
-          throw createFailError(e);
+          throw createFailError(String(e));
         }
       })
     );
