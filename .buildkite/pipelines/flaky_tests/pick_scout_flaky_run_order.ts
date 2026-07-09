@@ -21,10 +21,8 @@ import {
 // configs. It writes the manifest we read below to plan per-(arch, domain) Buildkite steps.
 const MANIFEST_RELATIVE_PATH = path.join('.scout', 'test_configs', 'scout_playwright_configs.json');
 
-// Normalize an optional leading "./" so paths match the discovery manifest and the CLI allow-list.
 const normalizeConfigPath = (configPath: string): string => configPath.replace(/^\.\//, '');
 
-// Resolve just the requested configs into the manifest consumed by the planner below.
 const resolveRequestedScoutConfigs = (
   kibanaDir: string,
   requests: ScoutFlakyRequest[],
