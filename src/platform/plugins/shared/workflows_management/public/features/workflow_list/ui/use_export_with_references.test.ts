@@ -130,7 +130,9 @@ describe('useExportWithReferences', () => {
         expect.objectContaining({ title: expect.any(String) })
       );
       expect(mockNotifications.toasts.addSuccess).not.toHaveBeenCalled();
-      expect(mockReportWorkflowExported).not.toHaveBeenCalled();
+      expect(mockReportWorkflowExported).toHaveBeenCalledWith(
+        expect.objectContaining({ error: exportError })
+      );
       expect(onComplete).not.toHaveBeenCalled();
     });
 
