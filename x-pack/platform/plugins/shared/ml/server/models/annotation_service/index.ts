@@ -7,9 +7,10 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { annotationProvider } from './annotation';
+import type { MlClient } from '../../lib/ml_client/types';
 
-export function annotationServiceProvider(client: IScopedClusterClient) {
+export function annotationServiceProvider(client: IScopedClusterClient, mlClient: MlClient) {
   return {
-    ...annotationProvider(client),
+    ...annotationProvider(client, mlClient),
   };
 }

@@ -25,6 +25,7 @@ import {
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '../../../common/constants/index_patterns';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
+import type { MlClient } from '../../lib/ml_client/types';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions
@@ -69,9 +70,8 @@ export interface AggByJob {
   latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
 }
 
-export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
-  // Find the index the annotation is stored in.
-  async function fetchAnnotationIndex(id: string) {
+export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlClient: MlClient) {
+  async function getAnnotationById(id: string): Promise<{ annotation: Annotation; index: string }> {
     const searchParams: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       size: 1,
@@ -82,7 +82,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       },
     };
 
-    const body = await asInternalUser.search(searchParams, { maxRetries: 0 });
+    const body = await asInternalUser.search<any>(searchParams, { maxRetries: 0 });
     const totalCount =
       typeof body.hits.total === 'number' ? body.hits.total : body.hits.total!.value;
 
@@ -90,7 +90,21 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       throw Boom.notFound(`Cannot find annotation with ID ${id}`);
     }
 
-    return body.hits.hits[0]._index;
+    const hit = body.hits.hits[0];
+    const annotation: Annotation = {
+      ...hit._source,
+      event: hit._source?.event ?? ANNOTATION_EVENT_USER,
+      _id: hit._id,
+    };
+
+    if (isAnnotation(annotation) === false) {
+      // No need to translate, this will not be exposed in the UI.
+      throw new Error('invalid annotation format');
+    }
+
+    await mlClient.getJobs({ job_id: annotation.job_id });
+
+    return { annotation, index: hit._index };
   }
 
   async function indexAnnotation(annotation: Annotation, username: string) {
@@ -98,6 +112,8 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       // No need to translate, this will not be exposed in the UI.
       return Promise.reject(new Error('invalid annotation format'));
     }
+
+    await mlClient.getJobs({ job_id: annotation.job_id });
 
     if (annotation.create_time === undefined) {
       annotation.create_time = new Date().getTime();
@@ -116,7 +132,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
 
     if (typeof annotation._id !== 'undefined') {
       params.id = annotation._id;
-      params.index = await fetchAnnotationIndex(annotation._id);
+      params.index = (await getAnnotationById(annotation._id)).index;
       params.require_alias = false;
       delete params.body._id;
       delete params.body.key;
@@ -134,6 +150,8 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     entities,
     event,
   }: IndexAnnotationArgs): Promise<GetResponse> {
+    await mlClient.getJobs({ job_id: jobIds.join(',') });
+
     const obj: GetResponse = {
       success: true,
       annotations: {},
@@ -352,6 +370,8 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     jobIds: string[];
     earliestMs?: number;
   }): Promise<Annotation[]> {
+    await mlClient.getJobs({ job_id: jobIds.join(',') });
+
     const params: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       size: 0,
@@ -400,7 +420,9 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
   }
 
   async function deleteAnnotation(id: string) {
-    const index = await fetchAnnotationIndex(id);
+    const { index, annotation } = await getAnnotationById(id);
+
+    await mlClient.getJobs({ job_id: annotation.job_id });
 
     const deleteParams: DeleteParams = {
       index,
@@ -413,6 +435,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
 
   return {
     getAnnotations,
+    getAnnotationById,
     indexAnnotation,
     deleteAnnotation,
     getDelayedDataAnnotations,
