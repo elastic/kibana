@@ -52,11 +52,19 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../../shared/hooks/use_default_flyout_properties';
+import { buildFlyoutNavTitle } from '../../../shared/utils/build_flyout_nav_title';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
+import {
+  ENTITY_GRAPH_VIEW_TITLE,
+  formatFlyoutTitle,
+  RESOLUTION_TITLE,
+  RISK_INPUTS_TITLE,
+  SERVICE_TITLE,
+} from '../../../shared/constants/flyout_titles';
 import { RiskInputs } from '../../shared/tools/risk_inputs';
 import { GraphView } from '../../shared/tools/graph_view';
 import { Resolution } from '../../shared/tools/resolution';
-import { renderEntityDetails } from '../../shared/render_entity_details';
+import { getEntityFlyoutTitle, renderEntityDetails } from '../../shared/render_entity_details';
 
 export interface ServiceProps {
   /** Display name from the source row / document (typically `service.name`). */
@@ -95,6 +103,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const safeContextID = contextID ?? scopeId ?? 'service-panel';
 
@@ -184,7 +193,12 @@ export const Service: FC<ServiceProps> = memo(function Service({
         history,
         children: <Service serviceName={serviceName} entityId={entityId} scopeId={scopeId} />,
       }),
-      { ...defaultDocumentFlyoutProperties, title: serviceName, historyKey, session: 'inherit' }
+      {
+        ...defaultDocumentFlyoutProperties,
+        title: buildChildFlyoutTitle(formatFlyoutTitle(SERVICE_TITLE, serviceName)),
+        historyKey,
+        session: 'inherit',
+      }
     );
   }, [
     overlays,
@@ -196,6 +210,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
     scopeId,
     historyKey,
     defaultDocumentFlyoutProperties,
+    buildChildFlyoutTitle,
   ]);
 
   const onShowRelatedEntity = useCallback(
@@ -213,24 +228,32 @@ export const Service: FC<ServiceProps> = memo(function Service({
         }),
         {
           ...defaultDocumentFlyoutProperties,
-          title: params.entityName ?? params.entityId,
+          title: buildChildFlyoutTitle(getEntityFlyoutTitle(params)),
           historyKey,
           session: 'inherit',
         }
       ),
-    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
+    [
+      overlays,
+      services,
+      store,
+      history,
+      scopeId,
+      historyKey,
+      defaultDocumentFlyoutProperties,
+      buildChildFlyoutTitle,
+    ]
   );
 
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
-      const common = {
-        ...defaultToolsFlyoutProperties,
-        title: serviceName,
-        historyKey,
-        session: 'start' as const,
-      };
-      const wrap = (children: React.ReactNode) =>
-        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), common);
+      const wrap = (children: React.ReactNode, title: string) =>
+        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), {
+          ...defaultToolsFlyoutProperties,
+          title,
+          historyKey,
+          session: 'start' as const,
+        });
 
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
@@ -240,7 +263,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
               entityName={serviceName}
               entityId={entityStoreEntityId}
               onShowEntity={onShowService}
-            />
+            />,
+            formatFlyoutTitle(RISK_INPUTS_TITLE, serviceName)
           );
         case EntityDetailsLeftPanelTab.GRAPH_VIEW:
           if (!entityStoreEntityId) return;
@@ -251,7 +275,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
               entityName={serviceName}
               onShowEntity={onShowRelatedEntity}
               onShowOriginatingEntity={onShowService}
-            />
+            />,
+            formatFlyoutTitle(ENTITY_GRAPH_VIEW_TITLE, serviceName)
           );
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -263,7 +288,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
               scopeId={scopeId}
               onShowEntity={onShowService}
               onShowRelatedEntity={onShowRelatedEntity}
-            />
+            />,
+            formatFlyoutTitle(RESOLUTION_TITLE, serviceName)
           );
       }
     },

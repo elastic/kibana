@@ -34,6 +34,7 @@ import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
 import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { getDocumentHistoryTitle } from '../../../../flyout_v2/document/main/utils/get_header_title';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -139,6 +140,7 @@ const RowActionComponent = ({
           ...defaultFlyoutProperties,
           historyKey: documentFlyoutHistoryKey,
           session: 'start',
+          title: getDocumentHistoryTitle(hit),
         }
       );
     } else {

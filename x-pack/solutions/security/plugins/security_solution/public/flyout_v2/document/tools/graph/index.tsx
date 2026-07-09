@@ -8,7 +8,6 @@
 import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import {
   GRAPH_SCOPE_ID,
@@ -33,13 +32,21 @@ import { DocumentFlyoutWrapper } from '../../main/document_flyout_wrapper';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { Network } from '../../../network/main';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { renderEntityDetails } from '../../../entity/shared/render_entity_details';
+import {
+  getEntityFlyoutTitle,
+  renderEntityDetails,
+} from '../../../entity/shared/render_entity_details';
+import { buildFlyoutNavTitle } from '../../../shared/utils/build_flyout_nav_title';
+import {
+  ENTITIES_TITLE,
+  EVENT_TITLE,
+  formatFlyoutTitle,
+  GRAPH_TITLE,
+  NETWORK_TITLE,
+} from '../../../shared/constants/flyout_titles';
+import { getAlertHistoryTitle } from '../../main/utils/get_header_title';
 
 export const GRAPH_TOOLS_TEST_ID = `${PREFIX}GraphTools` as const;
-
-const TITLE = i18n.translate('xpack.securitySolution.flyout.graph.title', {
-  defaultMessage: 'Graph',
-});
 
 export interface GraphDetailsProps {
   hit: DataTableRecord;
@@ -61,9 +68,10 @@ export const GraphDetails = memo(
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
     const onShowDocument = useCallback(
-      (documentId: string, indexName?: string) =>
+      (documentId: string, indexName?: string, isEvent?: boolean) =>
         overlays.openSystemFlyout(
           flyoutProviders({
             services,
@@ -82,9 +90,11 @@ export const GraphDetails = memo(
             ...defaultFlyoutProperties,
             historyKey,
             session: 'inherit',
+            title: buildChildFlyoutTitle(isEvent ? EVENT_TITLE : getAlertHistoryTitle()),
           }
         ),
       [
+        buildChildFlyoutTitle,
         defaultFlyoutProperties,
         history,
         historyKey,
@@ -105,9 +115,22 @@ export const GraphDetails = memo(
             history,
             children: <Network ip={ip} flowTarget={FlowTargetSourceDest.source} />,
           }),
-          { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            historyKey,
+            session: 'inherit',
+            title: buildChildFlyoutTitle(formatFlyoutTitle(NETWORK_TITLE, ip)),
+          }
         ),
-      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
+      [
+        buildChildFlyoutTitle,
+        defaultFlyoutProperties,
+        history,
+        historyKey,
+        overlays,
+        services,
+        store,
+      ]
     );
 
     const onShowEntity = useCallback(
@@ -136,10 +159,21 @@ export const GraphDetails = memo(
             ...defaultFlyoutProperties,
             historyKey,
             session: 'inherit',
+            title: buildChildFlyoutTitle(
+              getEntityFlyoutTitle({ engineType, entityId, entityName })
+            ),
           }
         );
       },
-      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
+      [
+        buildChildFlyoutTitle,
+        defaultFlyoutProperties,
+        history,
+        historyKey,
+        overlays,
+        services,
+        store,
+      ]
     );
 
     const onShowGrouped = useCallback(
@@ -163,9 +197,17 @@ export const GraphDetails = memo(
               />
             ),
           }),
-          { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            historyKey,
+            session: 'inherit',
+            title: buildChildFlyoutTitle(
+              params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE
+            ),
+          }
         ),
       [
+        buildChildFlyoutTitle,
         defaultFlyoutProperties,
         history,
         historyKey,
@@ -191,7 +233,7 @@ export const GraphDetails = memo(
         >
           <DocumentToolsFlyoutHeader
             hit={hit}
-            title={TITLE}
+            title={GRAPH_TITLE}
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}
           />

@@ -24,6 +24,10 @@ import { Network } from '../../../flyout_v2/network/main';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import {
+  formatFlyoutTitle,
+  NETWORK_TITLE,
+} from '../../../flyout_v2/shared/constants/flyout_titles';
 
 const tryStringify = (value: string | object | null | undefined): string => {
   try {
@@ -92,6 +96,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           {
             ...defaultDocumentFlyoutProperties,
             session: 'start',
+            title: formatFlyoutTitle(NETWORK_TITLE, ip),
           }
         );
       } else if (eventContext) {

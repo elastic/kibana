@@ -36,14 +36,26 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../../shared/hooks/use_default_flyout_properties';
+import { buildFlyoutNavTitle } from '../../../shared/utils/build_flyout_nav_title';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
+import {
+  ALERTS_INSIGHTS_TITLE,
+  ANOMALY_INSIGHTS_TITLE,
+  ENTITY_GRAPH_VIEW_TITLE,
+  formatFlyoutTitle,
+  HOST_TITLE,
+  MISCONFIGURATION_INSIGHTS_TITLE,
+  RESOLUTION_TITLE,
+  RISK_INPUTS_TITLE,
+  VULNERABILITY_INSIGHTS_TITLE,
+} from '../../../shared/constants/flyout_titles';
 import { RiskInputs } from '../../shared/tools/risk_inputs';
 import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
 import { VulnerabilityInsights } from '../tools/vulnerability_insights';
 import { AlertsInsights } from '../../shared/tools/alerts_insights';
 import { GraphView } from '../../shared/tools/graph_view';
 import { Resolution } from '../../shared/tools/resolution';
-import { renderEntityDetails } from '../../shared/render_entity_details';
+import { getEntityFlyoutTitle, renderEntityDetails } from '../../shared/render_entity_details';
 import { AnomalyInsights } from '../../shared/tools/anomaly_insights';
 import { Header } from './header';
 import { Content } from './content';
@@ -134,6 +146,7 @@ export const Host: FC<HostProps> = memo(function Host({
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
   const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
@@ -280,7 +293,12 @@ export const Host: FC<HostProps> = memo(function Host({
         history,
         children: <Host hostName={hostName} entityId={entityId} scopeId={scopeId} />,
       }),
-      { ...defaultDocumentFlyoutProperties, title: hostName, historyKey, session: 'inherit' }
+      {
+        ...defaultDocumentFlyoutProperties,
+        title: buildChildFlyoutTitle(formatFlyoutTitle(HOST_TITLE, hostName)),
+        historyKey,
+        session: 'inherit',
+      }
     );
   }, [
     overlays,
@@ -292,6 +310,7 @@ export const Host: FC<HostProps> = memo(function Host({
     entityId,
     scopeId,
     defaultDocumentFlyoutProperties,
+    buildChildFlyoutTitle,
   ]);
 
   const onShowRelatedEntity = useCallback(
@@ -309,24 +328,32 @@ export const Host: FC<HostProps> = memo(function Host({
         }),
         {
           ...defaultDocumentFlyoutProperties,
-          title: params.entityName ?? params.entityId,
+          title: buildChildFlyoutTitle(getEntityFlyoutTitle(params)),
           historyKey,
           session: 'inherit',
         }
       ),
-    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
+    [
+      overlays,
+      services,
+      store,
+      history,
+      scopeId,
+      historyKey,
+      defaultDocumentFlyoutProperties,
+      buildChildFlyoutTitle,
+    ]
   );
 
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
-      const common = {
-        ...defaultToolsFlyoutProperties,
-        title: hostName,
-        historyKey,
-        session: 'start' as const,
-      };
-      const wrap = (children: React.ReactNode) =>
-        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), common);
+      const wrap = (children: React.ReactNode, title: string) =>
+        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), {
+          ...defaultToolsFlyoutProperties,
+          title,
+          historyKey,
+          session: 'start' as const,
+        });
 
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
@@ -336,7 +363,8 @@ export const Host: FC<HostProps> = memo(function Host({
               entityName={hostName}
               entityId={entityStoreEntityId}
               onShowEntity={onShowHost}
-            />
+            />,
+            formatFlyoutTitle(RISK_INPUTS_TITLE, hostName)
           );
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return wrap(
@@ -345,7 +373,8 @@ export const Host: FC<HostProps> = memo(function Host({
               value={hostName}
               entityId={entityStoreEntityId}
               onOpenEntity={onShowHost}
-            />
+            />,
+            formatFlyoutTitle(ANOMALY_INSIGHTS_TITLE, hostName)
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -355,7 +384,8 @@ export const Host: FC<HostProps> = memo(function Host({
                   value={hostName}
                   entityId={panelDisplayEntityId}
                   onShowHost={onShowHost}
-                />
+                />,
+                formatFlyoutTitle(VULNERABILITY_INSIGHTS_TITLE, hostName)
               );
             case CspInsightLeftPanelSubTab.ALERTS:
               return wrap(
@@ -364,7 +394,8 @@ export const Host: FC<HostProps> = memo(function Host({
                   value={hostName}
                   entityId={panelDisplayEntityId}
                   onShowEntity={onShowHost}
-                />
+                />,
+                formatFlyoutTitle(ALERTS_INSIGHTS_TITLE, hostName)
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return wrap(
@@ -373,7 +404,8 @@ export const Host: FC<HostProps> = memo(function Host({
                   value={hostName}
                   entityId={panelDisplayEntityId}
                   onShowEntity={onShowHost}
-                />
+                />,
+                formatFlyoutTitle(MISCONFIGURATION_INSIGHTS_TITLE, hostName)
               );
           }
           return;
@@ -386,7 +418,8 @@ export const Host: FC<HostProps> = memo(function Host({
               entityName={hostName}
               onShowEntity={onShowRelatedEntity}
               onShowOriginatingEntity={onShowHost}
-            />
+            />,
+            formatFlyoutTitle(ENTITY_GRAPH_VIEW_TITLE, hostName)
           );
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -398,7 +431,8 @@ export const Host: FC<HostProps> = memo(function Host({
               scopeId={scopeId}
               onShowEntity={onShowHost}
               onShowRelatedEntity={onShowRelatedEntity}
-            />
+            />,
+            formatFlyoutTitle(RESOLUTION_TITLE, hostName)
           );
       }
     },

@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
@@ -35,15 +34,14 @@ import {
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
+import {
+  formatFlyoutTitle,
+  INVESTIGATION_GUIDE_TITLE,
+  INVESTIGATION_SECTION_TITLE,
+} from '../../../shared/constants/flyout_titles';
+import { getDocumentTitle } from '../utils/get_header_title';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
-
-export const INVESTIGATION_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.investigation.sectionTitle',
-  {
-    defaultMessage: 'Investigation',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'investigation';
 
@@ -115,6 +113,7 @@ export const InvestigationSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
+          title: formatFlyoutTitle(INVESTIGATION_GUIDE_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [history, historyKey, hit, overlays, services, store]);

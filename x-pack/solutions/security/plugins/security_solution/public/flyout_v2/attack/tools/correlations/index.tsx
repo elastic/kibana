@@ -8,17 +8,13 @@
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import { CorrelationsDetailsAlertsTable } from '../../../document/tools/correlations/components/correlations_details_alerts_table';
 import { getColumns } from '../../../document/tools/correlations/utils/get_columns';
 import { ATTACK_CORRELATIONS_TABLE_TEST_ID, ATTACK_CORRELATIONS_TOOL_TEST_ID } from './test_ids';
-
-const TITLE = i18n.translate('xpack.securitySolution.flyoutV2.attack.tools.correlations.title', {
-  defaultMessage: 'Correlations',
-});
+import { ATTACK_CORRELATIONS_TITLE } from '../../../shared/constants/flyout_titles';
 
 const noopShowAlert = (_id: string, _indexName: string) => {};
 
@@ -68,7 +64,7 @@ export const CorrelationsDetails = memo(
             padding-block: ${euiTheme.size.s} !important;
           `}
         >
-          <DocumentToolsFlyoutHeader title={TITLE} hit={hit} />
+          <DocumentToolsFlyoutHeader title={ATTACK_CORRELATIONS_TITLE} hit={hit} />
         </EuiFlyoutHeader>
         <EuiFlyoutBody data-test-subj={ATTACK_CORRELATIONS_TOOL_TEST_ID}>
           <CorrelationsDetailsAlertsTable

@@ -47,6 +47,8 @@ import {
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
+import { formatFlyoutTitle, NOTES_TITLE } from '../../shared/constants/flyout_titles';
+import { getDocumentTitle } from './utils/get_header_title';
 import { RemoteDocumentCallout } from './components/remote_document_callout';
 
 const footerStyles = css`
@@ -165,6 +167,7 @@ export const DocumentFlyout = memo(
         {
           ...defaultToolsFlyoutProperties,
           historyKey,
+          title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [history, historyKey, hit, overlays, services, store]);

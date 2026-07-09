@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
@@ -29,15 +28,16 @@ import { SessionView } from '../../tools/session_view';
 import { GraphDetails } from '../../tools/graph';
 import { defaultToolsFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import {
+  ANALYZER_TITLE,
+  formatFlyoutTitle,
+  GRAPH_TITLE,
+  SESSION_VIEW_TITLE,
+  VISUALIZATION_SECTION_TITLE,
+} from '../../../shared/constants/flyout_titles';
+import { getDocumentTitle } from '../utils/get_header_title';
 
 export const VISUALIZATION_SECTION_TEST_ID = `${PREFIX}Visualizations` as const;
-
-export const VISUALIZATION_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.visualizations.sectionTitle',
-  {
-    defaultMessage: 'Visualizations',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'visualizations';
 
@@ -96,6 +96,7 @@ export const VisualizationsSection = memo(
             ...defaultToolsFlyoutProperties,
             historyKey,
             session: 'start',
+            title: formatFlyoutTitle(ANALYZER_TITLE, getDocumentTitle(hit)),
           }
         ),
       [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
@@ -122,6 +123,7 @@ export const VisualizationsSection = memo(
             ...defaultToolsFlyoutProperties,
             historyKey,
             session: 'start',
+            title: formatFlyoutTitle(SESSION_VIEW_TITLE, getDocumentTitle(hit)),
           }
         ),
       [
@@ -157,6 +159,7 @@ export const VisualizationsSection = memo(
             ...defaultToolsFlyoutProperties,
             historyKey,
             session: 'start',
+            title: formatFlyoutTitle(GRAPH_TITLE, getDocumentTitle(hit)),
           }
         ),
       [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]

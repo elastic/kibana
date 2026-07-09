@@ -157,7 +157,7 @@ describe('<MisconfigurationInsights /> host', () => {
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ session: 'inherit', title: 'my-host' })
+      expect.objectContaining({ session: 'inherit', title: 'Host: my-host' })
     );
   });
 });

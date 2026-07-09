@@ -14,6 +14,7 @@ import { getOrEmptyTagFromValue } from '../../common/components/empty_value';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { buildFlyoutContent } from '../../flyout_v2/shared/utils/build_flyout_content';
+import { formatFlyoutTitle, RULE_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 
@@ -63,9 +64,18 @@ export const RuleNameCellRenderer = React.memo<RuleNameCellRendererProps>(
         {
           ...defaultDocumentFlyoutProperties,
           session: 'start',
+          title: formatFlyoutTitle(RULE_TITLE, ruleName),
         }
       );
-    }, [defaultDocumentFlyoutProperties, overlays, services, store, history, flyoutContent]);
+    }, [
+      defaultDocumentFlyoutProperties,
+      overlays,
+      services,
+      store,
+      history,
+      flyoutContent,
+      ruleName,
+    ]);
 
     if (!ruleName) {
       return getOrEmptyTagFromValue(null);

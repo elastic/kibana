@@ -37,7 +37,20 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../../shared/hooks/use_default_flyout_properties';
+import { buildFlyoutNavTitle } from '../../../shared/utils/build_flyout_nav_title';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
+import {
+  ALERTS_INSIGHTS_TITLE,
+  ANOMALY_INSIGHTS_TITLE,
+  ENTITY_GRAPH_VIEW_TITLE,
+  ENTRA_INSIGHTS_TITLE,
+  formatFlyoutTitle,
+  MISCONFIGURATION_INSIGHTS_TITLE,
+  OKTA_INSIGHTS_TITLE,
+  RESOLUTION_TITLE,
+  RISK_INPUTS_TITLE,
+  USER_TITLE,
+} from '../../../shared/constants/flyout_titles';
 import { RiskInputs } from '../../shared/tools/risk_inputs';
 import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
 import { AlertsInsights } from '../../shared/tools/alerts_insights';
@@ -46,7 +59,7 @@ import { OktaInsights } from '../tools/okta_insights';
 import { EntraInsights } from '../tools/entra_insights';
 import { GraphView } from '../../shared/tools/graph_view';
 import { Resolution } from '../../shared/tools/resolution';
-import { renderEntityDetails } from '../../shared/render_entity_details';
+import { getEntityFlyoutTitle, renderEntityDetails } from '../../shared/render_entity_details';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -134,6 +147,7 @@ export const User: FC<UserProps> = memo(function User({
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
   const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
@@ -282,7 +296,12 @@ export const User: FC<UserProps> = memo(function User({
         history,
         children: <User userName={userName} entityId={entityId} scopeId={scopeId} />,
       }),
-      { ...defaultDocumentFlyoutProperties, title: userName, historyKey, session: 'inherit' }
+      {
+        ...defaultDocumentFlyoutProperties,
+        title: buildChildFlyoutTitle(formatFlyoutTitle(USER_TITLE, userName)),
+        historyKey,
+        session: 'inherit',
+      }
     );
   }, [
     overlays,
@@ -294,6 +313,7 @@ export const User: FC<UserProps> = memo(function User({
     entityId,
     scopeId,
     defaultDocumentFlyoutProperties,
+    buildChildFlyoutTitle,
   ]);
 
   const onShowRelatedEntity = useCallback(
@@ -311,24 +331,32 @@ export const User: FC<UserProps> = memo(function User({
         }),
         {
           ...defaultDocumentFlyoutProperties,
-          title: params.entityName ?? params.entityId,
+          title: buildChildFlyoutTitle(getEntityFlyoutTitle(params)),
           historyKey,
           session: 'inherit',
         }
       ),
-    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
+    [
+      overlays,
+      services,
+      store,
+      history,
+      scopeId,
+      historyKey,
+      defaultDocumentFlyoutProperties,
+      buildChildFlyoutTitle,
+    ]
   );
 
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
-      const common = {
-        ...defaultToolsFlyoutProperties,
-        title: userName,
-        historyKey,
-        session: 'start' as const,
-      };
-      const wrap = (children: React.ReactNode) =>
-        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), common);
+      const wrap = (children: React.ReactNode, title: string) =>
+        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), {
+          ...defaultToolsFlyoutProperties,
+          title,
+          historyKey,
+          session: 'start' as const,
+        });
 
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
@@ -338,7 +366,8 @@ export const User: FC<UserProps> = memo(function User({
               entityName={userName}
               entityId={entityStoreEntityId}
               onShowEntity={onOpenUser}
-            />
+            />,
+            formatFlyoutTitle(RISK_INPUTS_TITLE, userName)
           );
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return wrap(
@@ -347,7 +376,8 @@ export const User: FC<UserProps> = memo(function User({
               value={userName}
               entityId={entityStoreEntityId}
               onOpenEntity={onOpenUser}
-            />
+            />,
+            formatFlyoutTitle(ANOMALY_INSIGHTS_TITLE, userName)
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -358,7 +388,8 @@ export const User: FC<UserProps> = memo(function User({
                   value={userName}
                   entityId={panelDisplayEntityId}
                   onShowEntity={onOpenUser}
-                />
+                />,
+                formatFlyoutTitle(ALERTS_INSIGHTS_TITLE, userName)
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return wrap(
@@ -367,7 +398,8 @@ export const User: FC<UserProps> = memo(function User({
                   value={userName}
                   entityId={panelDisplayEntityId}
                   onShowEntity={onOpenUser}
-                />
+                />,
+                formatFlyoutTitle(MISCONFIGURATION_INSIGHTS_TITLE, userName)
               );
           }
           break;
@@ -380,7 +412,8 @@ export const User: FC<UserProps> = memo(function User({
               entityName={userName}
               onShowEntity={onShowRelatedEntity}
               onShowOriginatingEntity={onOpenUser}
-            />
+            />,
+            formatFlyoutTitle(ENTITY_GRAPH_VIEW_TITLE, userName)
           );
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -392,7 +425,8 @@ export const User: FC<UserProps> = memo(function User({
               scopeId={scopeId}
               onShowEntity={onOpenUser}
               onShowRelatedEntity={onShowRelatedEntity}
-            />
+            />,
+            formatFlyoutTitle(RESOLUTION_TITLE, userName)
           );
         // TODO: currently dead (v1 accessed through left pane tabs, need to perhaps add preview?)
         case EntityDetailsLeftPanelTab.OKTA: {
@@ -403,7 +437,8 @@ export const User: FC<UserProps> = memo(function User({
                 managedUser={oktaManagedUser}
                 value={userName}
                 onOpenUser={onOpenUser}
-              />
+              />,
+              formatFlyoutTitle(OKTA_INSIGHTS_TITLE, userName)
             );
           }
           break;
@@ -416,7 +451,8 @@ export const User: FC<UserProps> = memo(function User({
                 managedUser={entraManagedUser}
                 value={userName}
                 onOpenUser={onOpenUser}
-              />
+              />,
+              formatFlyoutTitle(ENTRA_INSIGHTS_TITLE, userName)
             );
           }
           break;

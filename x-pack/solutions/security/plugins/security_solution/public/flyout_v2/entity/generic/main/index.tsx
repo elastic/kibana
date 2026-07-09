@@ -47,7 +47,16 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../../shared/hooks/use_default_flyout_properties';
+import { buildFlyoutNavTitle } from '../../../shared/utils/build_flyout_nav_title';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
+import {
+  ALERTS_INSIGHTS_TITLE,
+  FIELDS_TABLE_TITLE,
+  formatFlyoutTitle,
+  GENERIC_ENTITY_TITLE,
+  MISCONFIGURATION_INSIGHTS_TITLE,
+  VULNERABILITY_INSIGHTS_TITLE,
+} from '../../../shared/constants/flyout_titles';
 import { FieldsTableTool } from '../../shared/tools/fields_table';
 import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
 import { AlertsInsights } from '../../shared/tools/alerts_insights';
@@ -75,6 +84,7 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const { getGenericEntity } = useGetGenericEntity(params);
   const genericInsightsValue = getGenericEntity.data?._source?.entity.id;
@@ -132,19 +142,34 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
         history,
         children: <GenericEntity {...params} />,
       }),
-      { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' }
+      {
+        ...defaultDocumentFlyoutProperties,
+        historyKey,
+        session: 'inherit',
+        title: buildChildFlyoutTitle(formatFlyoutTitle(GENERIC_ENTITY_TITLE, genericInsightsValue)),
+      }
     );
-  }, [overlays, services, store, history, params, historyKey, defaultDocumentFlyoutProperties]);
+  }, [
+    overlays,
+    services,
+    store,
+    history,
+    params,
+    historyKey,
+    defaultDocumentFlyoutProperties,
+    buildChildFlyoutTitle,
+    genericInsightsValue,
+  ]);
 
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
-      const common = {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start' as const,
-      };
-      const wrap = (children: React.ReactNode) =>
-        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), common);
+      const wrap = (children: React.ReactNode, title: string) =>
+        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), {
+          ...defaultToolsFlyoutProperties,
+          title,
+          historyKey,
+          session: 'start' as const,
+        });
 
       const value = genericInsightsValue || '';
 
@@ -156,7 +181,8 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
               tableStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS}
               entityName={value}
               onShowEntity={onShowGeneric}
-            />
+            />,
+            formatFlyoutTitle(FIELDS_TABLE_TITLE, value)
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -167,7 +193,8 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
                   value={value}
                   entityId={genericInsightsValue}
                   onShowEntity={onShowGeneric}
-                />
+                />,
+                formatFlyoutTitle(MISCONFIGURATION_INSIGHTS_TITLE, value)
               );
             case CspInsightLeftPanelSubTab.VULNERABILITIES:
               return wrap(
@@ -176,7 +203,8 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
                   entityId={genericInsightsValue}
                   entityType={EntityType.generic}
                   onShowHost={onShowGeneric}
-                />
+                />,
+                formatFlyoutTitle(VULNERABILITY_INSIGHTS_TITLE, value)
               );
             case CspInsightLeftPanelSubTab.ALERTS:
               return wrap(
@@ -185,7 +213,8 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
                   value={value}
                   entityId={genericInsightsValue}
                   onShowEntity={onShowGeneric}
-                />
+                />,
+                formatFlyoutTitle(ALERTS_INSIGHTS_TITLE, value)
               );
           }
       }

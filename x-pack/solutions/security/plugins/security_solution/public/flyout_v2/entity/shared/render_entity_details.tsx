@@ -11,6 +11,13 @@ import { Host } from '../host/main';
 import { User } from '../user/main';
 import { Service } from '../service/main';
 import { GenericEntity } from '../generic/main';
+import {
+  formatFlyoutTitle,
+  GENERIC_ENTITY_TITLE,
+  HOST_TITLE,
+  SERVICE_TITLE,
+  USER_TITLE,
+} from '../../shared/constants/flyout_titles';
 
 export interface RenderEntityDetailsParams {
   /** Entity Store engine type of the entity to render (`host` | `user` | `service` | other → generic). */
@@ -43,5 +50,30 @@ export const renderEntityDetails = ({
       return <Service serviceName={entityName ?? ''} entityId={entityId} scopeId={scopeId} />;
     default:
       return <GenericEntity entityId={entityId} scopeId={scopeId} />;
+  }
+};
+
+/**
+ * Returns the flyout-history title for the entity {@link renderEntityDetails} would render,
+ * in the format `"{Type}: {value}"` (e.g. `"Host: my-host"`), falling back to the entity id when
+ * no display name is available. Kept alongside `renderEntityDetails` so both stay in sync for the
+ * same `engineType` switch.
+ */
+export const getEntityFlyoutTitle = ({
+  engineType,
+  entityId,
+  entityName,
+}: Pick<RenderEntityDetailsParams, 'engineType' | 'entityId' | 'entityName'>): string => {
+  const value = entityName ?? entityId;
+
+  switch (engineType) {
+    case 'host':
+      return formatFlyoutTitle(HOST_TITLE, value);
+    case 'user':
+      return formatFlyoutTitle(USER_TITLE, value);
+    case 'service':
+      return formatFlyoutTitle(SERVICE_TITLE, value);
+    default:
+      return formatFlyoutTitle(GENERIC_ENTITY_TITLE, value);
   }
 };

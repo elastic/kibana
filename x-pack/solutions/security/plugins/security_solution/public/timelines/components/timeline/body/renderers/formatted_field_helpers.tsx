@@ -32,6 +32,11 @@ import { RuleDetails } from '../../../../../flyout_v2/rule/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { buildFlyoutNavTitle } from '../../../../../flyout_v2/shared/utils/build_flyout_nav_title';
+import {
+  formatFlyoutTitle,
+  RULE_TITLE,
+} from '../../../../../flyout_v2/shared/constants/flyout_titles';
 
 interface RenderRuleNameProps {
   children?: React.ReactNode;
@@ -66,6 +71,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   const eventContext = useContext(StatefulEventContext);
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const ruleName = `${value}`;
   const ruleId = linkValue;
@@ -100,6 +106,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
           {
             ...defaultDocumentFlyoutProperties,
             session: 'inherit',
+            title: buildChildFlyoutTitle(formatFlyoutTitle(RULE_TITLE, ruleName)),
           }
         );
         return;
@@ -128,6 +135,8 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       store,
       history,
       defaultDocumentFlyoutProperties,
+      buildChildFlyoutTitle,
+      ruleName,
     ]
   );
 

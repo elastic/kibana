@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { noop } from 'lodash/fp';
@@ -19,15 +18,16 @@ import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_he
 import { useKibana } from '../../../../../common/lib/kibana';
 import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
+import { buildFlyoutNavTitle } from '../../../../shared/utils/build_flyout_nav_title';
 import { DocumentFlyoutWrapper } from '../../../../document/main/document_flyout_wrapper';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
+import { RISK_INPUTS_TITLE } from '../../../../shared/constants/flyout_titles';
+import { getAlertHistoryTitle } from '../../../../document/main/utils/get_header_title';
 import { RISK_INPUTS_TOOL_TEST_ID } from './test_ids';
 
-const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.riskInputs.title', {
-  defaultMessage: 'Risk score',
-});
+const TITLE = RISK_INPUTS_TITLE;
 
 const ICON_TYPE = EntityIconByType;
 
@@ -48,6 +48,7 @@ export const RiskInputs = memo(
     const store = useStore();
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const buildChildFlyoutTitle = buildFlyoutNavTitle;
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
@@ -71,10 +72,11 @@ export const RiskInputs = memo(
             ...defaultFlyoutProperties,
             historyKey,
             session: 'inherit',
+            title: buildChildFlyoutTitle(getAlertHistoryTitle()),
           }
         );
       },
-      [services, store, history, defaultFlyoutProperties, historyKey]
+      [services, store, history, defaultFlyoutProperties, historyKey, buildChildFlyoutTitle]
     );
 
     return (

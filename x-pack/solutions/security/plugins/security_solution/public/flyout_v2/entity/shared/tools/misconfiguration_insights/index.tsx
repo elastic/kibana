@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
@@ -19,7 +18,15 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
+import { buildFlyoutNavTitle } from '../../../../shared/utils/build_flyout_nav_title';
 import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
+import {
+  formatFlyoutTitle,
+  GENERIC_ENTITY_TITLE,
+  HOST_TITLE,
+  MISCONFIGURATION_INSIGHTS_TITLE,
+  USER_TITLE,
+} from '../../../../shared/constants/flyout_titles';
 import { Misconfiguration } from '../../../../csp/misconfiguration';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
@@ -27,10 +34,7 @@ import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_secur
 import type { CloudPostureEntityIdentifier } from '../../../../../cloud_security_posture/components/entity_insight';
 import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
-const TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.misconfigurationInsights.title',
-  { defaultMessage: 'Misconfigurations' }
-);
+const TITLE = MISCONFIGURATION_INSIGHTS_TITLE;
 
 const ICON_TYPE = EntityIconByType;
 const FIELD: Record<
@@ -41,6 +45,12 @@ const FIELD: Record<
   [EntityType.user]: EntityIdentifierFields.userName,
   // `related.entity` carries the entity id used to filter findings for generic entities.
   [EntityType.generic]: 'related.entity',
+};
+
+const ENTITY_TITLE: Record<EntityType.host | EntityType.user | EntityType.generic, string> = {
+  [EntityType.host]: HOST_TITLE,
+  [EntityType.user]: USER_TITLE,
+  [EntityType.generic]: GENERIC_ENTITY_TITLE,
 };
 
 export interface MisconfigurationInsightsProps {
@@ -64,6 +74,7 @@ export const MisconfigurationInsights = memo(
     const store = useStore();
     const history = useHistory();
     const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const buildChildFlyoutTitle = buildFlyoutNavTitle;
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
@@ -76,10 +87,25 @@ export const MisconfigurationInsights = memo(
             history,
             children: <Misconfiguration resourceId={resourceId} ruleId={ruleId} />,
           }),
-          { ...defaultDocumentFlyoutProperties, title: value, historyKey, session: 'inherit' }
+          {
+            ...defaultDocumentFlyoutProperties,
+            title: buildChildFlyoutTitle(formatFlyoutTitle(ENTITY_TITLE[entityType], value)),
+            historyKey,
+            session: 'inherit',
+          }
         );
       },
-      [overlays, services, store, history, defaultDocumentFlyoutProperties, value, historyKey]
+      [
+        overlays,
+        services,
+        store,
+        history,
+        defaultDocumentFlyoutProperties,
+        buildChildFlyoutTitle,
+        entityType,
+        value,
+        historyKey,
+      ]
     );
 
     return (

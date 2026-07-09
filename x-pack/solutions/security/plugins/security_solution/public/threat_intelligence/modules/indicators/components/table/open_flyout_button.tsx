@@ -11,7 +11,10 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import {
+  type Indicator,
+  RawIndicatorFieldId,
+} from '../../../../../../common/threat_intelligence/types/indicator';
 import { IOCRightPanelKey } from '../../../../../flyout/ioc_details/constants/panel_keys';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
@@ -20,6 +23,11 @@ import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/sha
 import { IOCDetails } from '../../../../../flyout_v2/ioc/main';
 import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
+import {
+  formatFlyoutTitle,
+  IOC_TITLE,
+} from '../../../../../flyout_v2/shared/constants/flyout_titles';
+import { getIndicatorFieldAndValue } from '../../utils/field_value';
 import { BUTTON_TEST_ID } from './test_ids';
 import { VIEW_DETAILS_BUTTON_LABEL } from './translations';
 
@@ -51,6 +59,11 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
     [indicator]
   );
 
+  const name = useMemo(
+    () => getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Name).value,
+    [indicator]
+  );
+
   const open = useCallback(() => {
     if (enableNewFlyout) {
       overlays.openSystemFlyout(
@@ -64,6 +77,7 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
           ...defaultFlyoutProperties,
           historyKey: documentFlyoutHistoryKey,
           session: 'start',
+          title: formatFlyoutTitle(IOC_TITLE, name),
         }
       );
     } else {
@@ -86,6 +100,7 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
     indicator._id,
     defaultFlyoutProperties,
     openFlyout,
+    name,
   ]);
 
   return (

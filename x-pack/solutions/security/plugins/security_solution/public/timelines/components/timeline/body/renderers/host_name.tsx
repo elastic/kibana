@@ -24,6 +24,10 @@ import { Host } from '../../../../../flyout_v2/entity/host/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
+import {
+  formatFlyoutTitle,
+  HOST_TITLE,
+} from '../../../../../flyout_v2/shared/constants/flyout_titles';
 
 interface Props {
   contextId: string;
@@ -82,6 +86,7 @@ const HostNameComponent: React.FC<Props> = ({
           }),
           {
             ...defaultDocumentFlyoutProperties,
+            title: formatFlyoutTitle(HOST_TITLE, hostName),
             historyKey,
             session: 'start',
           }

@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
@@ -21,16 +20,23 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
+import { buildFlyoutNavTitle } from '../../../../shared/utils/build_flyout_nav_title';
 import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
+import {
+  ENTITIES_TITLE,
+  ENTITY_GRAPH_VIEW_TITLE,
+  EVENT_TITLE,
+  formatFlyoutTitle,
+  NETWORK_TITLE,
+} from '../../../../shared/constants/flyout_titles';
+import { getAlertHistoryTitle } from '../../../../document/main/utils/get_header_title';
 import { DocumentFlyoutWrapper } from '../../../../document/main/document_flyout_wrapper';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { GraphVisualization } from '../../../../document/tools/graph/components/graph_visualization';
 import { Network } from '../../../../network/main';
 
-const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.graphView.title', {
-  defaultMessage: 'Graph',
-});
+const TITLE = ENTITY_GRAPH_VIEW_TITLE;
 
 export interface GraphViewProps {
   /** Entity Store v2 id (`entity.id`) to center the graph on. */
@@ -63,9 +69,10 @@ export const GraphView = memo(
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
     const onShowDocument = useCallback(
-      (documentId: string, indexName?: string) =>
+      (documentId: string, indexName?: string, isEvent?: boolean) =>
         overlays.openSystemFlyout(
           flyoutProviders({
             services,
@@ -80,9 +87,22 @@ export const GraphView = memo(
               />
             ),
           }),
-          { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            historyKey,
+            session: 'inherit',
+            title: buildChildFlyoutTitle(isEvent ? EVENT_TITLE : getAlertHistoryTitle()),
+          }
         ),
-      [overlays, services, store, history, defaultFlyoutProperties, historyKey]
+      [
+        overlays,
+        services,
+        store,
+        history,
+        defaultFlyoutProperties,
+        historyKey,
+        buildChildFlyoutTitle,
+      ]
     );
 
     const onShowNetwork = useCallback(
@@ -94,9 +114,22 @@ export const GraphView = memo(
             history,
             children: <Network ip={ip} flowTarget={FlowTargetSourceDest.source} />,
           }),
-          { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            historyKey,
+            session: 'inherit',
+            title: buildChildFlyoutTitle(formatFlyoutTitle(NETWORK_TITLE, ip)),
+          }
         ),
-      [overlays, services, store, history, defaultFlyoutProperties, historyKey]
+      [
+        overlays,
+        services,
+        store,
+        history,
+        defaultFlyoutProperties,
+        historyKey,
+        buildChildFlyoutTitle,
+      ]
     );
 
     const onShowGrouped = useCallback(
@@ -120,7 +153,14 @@ export const GraphView = memo(
               />
             ),
           }),
-          { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            historyKey,
+            session: 'inherit',
+            title: buildChildFlyoutTitle(
+              params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE
+            ),
+          }
         ),
       [
         overlays,
@@ -132,6 +172,7 @@ export const GraphView = memo(
         onShowEntity,
         defaultFlyoutProperties,
         historyKey,
+        buildChildFlyoutTitle,
       ]
     );
 

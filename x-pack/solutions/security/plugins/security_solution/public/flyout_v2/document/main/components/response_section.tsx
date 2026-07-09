@@ -16,6 +16,8 @@ import { ResponseDetails } from '../../tools/response';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
+import { formatFlyoutTitle, RESPONSE_TITLE } from '../../../shared/constants/flyout_titles';
+import { getDocumentTitle } from '../utils/get_header_title';
 import { ResponseSectionContent } from './response_section_content';
 
 export interface ResponseSectionProps {
@@ -53,6 +55,7 @@ export const ResponseSection = memo<ResponseSectionProps>(({ hit, isRulePreview 
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
+        title: formatFlyoutTitle(RESPONSE_TITLE, getDocumentTitle(hit)),
       }
     );
   }, [history, historyKey, hit, overlays, services, store]);

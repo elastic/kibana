@@ -13,11 +13,8 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
-import {
-  INSIGHTS_SECTION_TEST_ID,
-  INSIGHTS_SECTION_TITLE,
-  InsightsSection,
-} from './insights_section';
+import { INSIGHTS_SECTION_TEST_ID, InsightsSection } from './insights_section';
+import { INSIGHTS_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useKibana } from '../../../../common/lib/kibana';

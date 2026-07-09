@@ -23,6 +23,8 @@ import { AISummarySection } from '../components/ai_summary_section';
 import { VisualizationsSection } from '../components/visualizations_section';
 import { InsightsSection } from '../components/insights_section';
 import { useAttackAlertIds } from '../hooks/use_attack_alert_ids';
+import { buildFlyoutNavTitle } from '../../../shared/utils/build_flyout_nav_title';
+import { getAlertHistoryTitle } from '../../../document/main/utils/get_header_title';
 
 export interface OverviewTabProps {
   /**
@@ -50,6 +52,7 @@ export const OverviewTab = memo(({ hit, onAttackUpdated }: OverviewTabProps) => 
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const { openAttackCorrelations, openAttackEntities } = useFlyoutApi();
+  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const alertIds = useAttackAlertIds(hit);
 
@@ -69,9 +72,15 @@ export const OverviewTab = memo(({ hit, onAttackUpdated }: OverviewTabProps) => 
             />
           ),
         }),
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' }
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: 'inherit',
+          title: buildChildFlyoutTitle(getAlertHistoryTitle()),
+        }
       ),
     [
+      buildChildFlyoutTitle,
       defaultDocumentFlyoutProperties,
       history,
       historyKey,

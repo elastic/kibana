@@ -26,6 +26,10 @@ import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyo
 import { FlyoutLoading } from '../../../../../flyout_v2/shared/components/flyout_loading';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
+import {
+  formatFlyoutTitle,
+  USER_TITLE,
+} from '../../../../../flyout_v2/shared/constants/flyout_titles';
 
 // Lazy-loaded to keep the heavy v2 entity flyout out of the timeline row renderer's static import
 // graph, which would otherwise create a require cycle back through the row renderers barrel.
@@ -99,7 +103,12 @@ const UserNameComponent: React.FC<Props> = ({
               </Suspense>
             ),
           }),
-          { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' }
+          {
+            ...defaultDocumentFlyoutProperties,
+            title: formatFlyoutTitle(USER_TITLE, userName),
+            historyKey,
+            session: 'start',
+          }
         );
       } else {
         const { timelineID } = eventContext;

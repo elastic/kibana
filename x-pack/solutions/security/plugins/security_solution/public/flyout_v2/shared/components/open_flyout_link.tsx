@@ -21,7 +21,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
-import { buildFlyoutContent } from '../utils/build_flyout_content';
+import { buildFlyoutContent, buildFlyoutTitleFromField } from '../utils/build_flyout_content';
+import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
 
 export interface OpenFlyoutLinkProps {
   /**
@@ -79,8 +80,13 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
+  const flyoutTitle = useMemo(
+    () => buildFlyoutTitleFromField(field, value) ?? value,
+    [field, value]
+  );
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
@@ -99,6 +105,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
           historyKey,
           session: asParent ? 'start' : 'inherit',
           outsideClickCloses: asParent,
+          title: asParent ? flyoutTitle : buildChildFlyoutTitle(flyoutTitle),
         }
       );
     }
@@ -111,6 +118,8 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
     flyoutContent,
     asParent,
     historyKey,
+    flyoutTitle,
+    buildChildFlyoutTitle,
   ]);
 
   if (!flyoutContent) {

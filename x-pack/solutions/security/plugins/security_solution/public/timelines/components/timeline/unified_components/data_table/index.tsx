@@ -12,6 +12,7 @@ import type {
   UnifiedDataTableProps,
   UnifiedDataTableSettingsColumn,
 } from '@kbn/unified-data-table';
+import { getFieldValue } from '@kbn/discover-utils';
 import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
@@ -61,6 +62,9 @@ import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { DocumentFlyoutWrapper } from '../../../../../flyout_v2/document/main/document_flyout_wrapper';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { getDocumentHistoryTitle } from '../../../../../flyout_v2/document/main/utils/get_header_title';
+
+const ATTACK_DISCOVERY_TITLE_FIELD = 'kibana.alert.attack_discovery.title' as const;
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -197,6 +201,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               attackId: eventData._id,
               indexName: eventData.ecs._index ?? '',
               onAttackUpdated: refetch,
+              attackTitle: getFieldValue(eventData, ATTACK_DISCOVERY_TITLE_FIELD) as
+                | string
+                | undefined,
             });
           } else {
             overlays.openSystemFlyout(
@@ -217,6 +224,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
                 ...defaultFlyoutProperties,
                 historyKey: documentFlyoutHistoryKey,
                 session: 'start',
+                title: getDocumentHistoryTitle(eventData),
               }
             );
           }

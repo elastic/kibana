@@ -6,7 +6,6 @@
  */
 
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useMemo } from 'react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
@@ -40,15 +39,18 @@ import {
 import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
 import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { buildFlyoutNavTitle } from '../../../shared/utils/build_flyout_nav_title';
+import {
+  CORRELATIONS_TITLE,
+  ENTITIES_TITLE,
+  formatFlyoutTitle,
+  INSIGHTS_SECTION_TITLE,
+  PREVALENCE_TITLE,
+  THREAT_INTELLIGENCE_TITLE,
+} from '../../../shared/constants/flyout_titles';
+import { getAlertHistoryTitle, getDocumentTitle } from '../utils/get_header_title';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
-
-export const INSIGHTS_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.insights.sectionTitle',
-  {
-    defaultMessage: 'Insights',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'insights';
 
@@ -80,6 +82,7 @@ export const InsightsSection = memo(
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -116,6 +119,7 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
+          title: formatFlyoutTitle(THREAT_INTELLIGENCE_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [history, historyKey, hit, overlays, services, store]);
@@ -139,9 +143,11 @@ export const InsightsSection = memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
+            title: buildChildFlyoutTitle(getAlertHistoryTitle()),
           }
         ),
       [
+        buildChildFlyoutTitle,
         defaultFlyoutProperties,
         renderCellActions,
         history,
@@ -164,6 +170,7 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
+          title: formatFlyoutTitle(ENTITIES_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [history, historyKey, hit, overlays, services, store]);
@@ -187,6 +194,7 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
+          title: formatFlyoutTitle(CORRELATIONS_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
@@ -217,6 +225,7 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
+          title: formatFlyoutTitle(PREVALENCE_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [

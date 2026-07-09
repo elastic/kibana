@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -15,6 +15,7 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getFieldValue } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useStore } from 'react-redux';
@@ -34,6 +35,9 @@ import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
 import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
 import { Footer } from './footer';
+import { formatFlyoutTitle, NOTES_TITLE } from '../../shared/constants/flyout_titles';
+
+const FIELD_ATTACK_TITLE = 'kibana.alert.attack_discovery.title' as const;
 
 type AttackFlyoutTabId = 'overview' | 'table' | 'json';
 
@@ -85,6 +89,10 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
   const history = useHistory();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const attackTitle = useMemo(
+    () => getFieldValue(hit, FIELD_ATTACK_TITLE) as string | undefined,
+    [hit]
+  );
 
   // The selected tab is persisted to localStorage, sharing the key with the legacy
   // attack flyout so the user's preference carries across both implementations.
@@ -101,9 +109,14 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
         history,
         children: <NotesDetails hit={hit} />,
       }),
-      { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+      {
+        ...defaultToolsFlyoutProperties,
+        historyKey,
+        session: 'start',
+        title: formatFlyoutTitle(NOTES_TITLE, attackTitle),
+      }
     );
-  }, [history, historyKey, hit, overlays, services, store]);
+  }, [attackTitle, history, historyKey, hit, overlays, services, store]);
 
   return (
     <>
