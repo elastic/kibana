@@ -86,13 +86,15 @@ export interface UiamOAuthType {
   ): Promise<UiamOAuthClientResponse | null>;
 
   /**
-   * Lists OAuth clients, optionally filtered by client ID.
+   * Lists OAuth clients, optionally filtered by client ID or project ID.
    * @param request The Kibana request containing the authorization header.
    * @param clientId Optional client ID filter.
+   * @param projectId Optional project ID filter.
    */
   listClients(
     request: KibanaRequest,
-    clientId?: string
+    clientId?: string,
+    projectId?: string
   ): Promise<{ clients: UiamOAuthClientResponse[] } | null>;
 
   /**
