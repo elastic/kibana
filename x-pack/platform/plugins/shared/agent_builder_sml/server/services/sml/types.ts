@@ -145,13 +145,9 @@ export interface SmlTypeDefinition {
 
   /**
    * Compute the {@link SmlPermissions} that gate access to chunks for the
-   * given `originId`. Called by the indexer for every chunk it stamps,
-   * regardless of which mode (crawler/origin vs. workflow/content) wrote
-   * the chunk — so a workflow step's content-mode write inherits the same
-   * gating as a crawler-driven write.
+   * given `originId`. Called by the indexer for every chunk it stamps.
    *
-   * Authoritative when defined. Callers (workflow step, `getSmlEntry`) cannot
-   * override or bypass it — `SmlEntry` does not carry a `permissions`
+   * Authoritative when defined. `SmlEntry` does not carry a `permissions`
    * field. Types that need permission shapes the built-in helpers do not
    * cover should still implement this directly (returning a fully-shaped
    * {@link SmlPermissions}).
@@ -184,9 +180,9 @@ export interface SmlTypeDefinition {
  *
  * - `'crawled'`: written by the SML crawler or by an event-driven `indexAttachment`
  *   origin-mode call (content fetched via `getSmlEntry`).
- * - `'manual'`: written explicitly by a user/admin — via the HTTP upsert route or via
- *   `indexAttachment` content-mode. Manual entries are protected from being overwritten
- *   by the crawler / origin-mode `indexAttachment` unless `force: true` is passed.
+ * - `'manual'`: written explicitly by a user/admin via the HTTP upsert route.
+ *   Manual entries are protected from being overwritten by the crawler /
+ *   origin-mode `indexAttachment` unless `force: true` is passed.
  */
 export type SmlIngestionMethod = 'manual' | 'crawled';
 
@@ -359,47 +355,16 @@ export type { SmlSearchFilters, SmlSearchConstraints } from '../../../common/htt
 export type SmlDeleteScope = SmlIngestionMethod | 'all';
 
 /**
- * Mode discriminator for `indexAttachment`.
+ * Origin-mode mixin for `indexAttachment`.
  *
- * The two mixins below define the discriminated half of the parameter object.
- * They are combined with a layer-specific "base" (public vs internal) to form
- * the full unions: `SmlIndexAttachmentParams` (public, in `server/types.ts`)
- * and `SmlIndexerParams` (internal, below).
- *
- * Origin mode — content is produced by the registered type's `getSmlEntry`
- * hook. Resulting chunks are tagged `ingestion_method: 'crawled'`. If the
- * target `origin_id` already has any `ingestion_method: 'manual'` chunks, the
- * call is a no-op unless `force: true` is provided.
+ * Content is produced by the registered type's `getSmlEntry` hook. Resulting
+ * chunks are tagged `ingestion_method: 'crawled'`. If the target `origin_id`
+ * already has any `ingestion_method: 'manual'` chunks, the call is a no-op
+ * unless `force: true` is provided.
  */
 export interface SmlIndexAttachmentOriginMode {
   /** Override existing manual entries. Default: false. */
   force?: boolean;
-  content?: undefined;
-}
-
-/**
- * Content mode — caller supplies a pre-built entry directly; `getSmlEntry` is
- * not called. The resulting document is tagged `ingestion_method: 'manual'`.
- * Always overwrites existing documents for the `origin_id`.
- */
-export interface SmlIndexAttachmentContentMode {
-  /** Pre-built entry; skips getSmlEntry; marks `ingestion_method='manual'`. */
-  content: SmlEntry;
-  force?: undefined;
-  /**
-   * `created_at` to stamp on the written chunks. When provided (e.g. the
-   * HTTP PUT route passes the value from the existing chunk so updates
-   * preserve the original creation timestamp), the chunks are written with
-   * this value instead of the current time. Omit on first-write — the
-   * indexer will stamp `now`.
-   */
-  createdAt?: string;
-  /**
-   * Caller-supplied permissions to stamp on the written chunks, used only
-   * when `attachmentType` has no `getPermissions` hook. Conflicts with a
-   * hook-backed type — see {@link SmlPermissionsConflictError}.
-   */
-  permissions?: SmlPermissions;
 }
 
 /**
@@ -422,13 +387,12 @@ interface SmlIndexerBaseParams {
 }
 
 export type SmlIndexerOriginParams = SmlIndexerBaseParams & SmlIndexAttachmentOriginMode;
-export type SmlIndexerContentParams = SmlIndexerBaseParams & SmlIndexAttachmentContentMode;
 
 /**
- * Discriminated union for the internal `indexAttachment` flow. Shared between
- * `SmlService.indexAttachment` and `SmlIndexer.indexAttachment`.
+ * Internal params for `indexAttachment`. Origin-mode only — content is always
+ * resolved via the registered type's `getSmlEntry` hook.
  */
-export type SmlIndexerParams = SmlIndexerOriginParams | SmlIndexerContentParams;
+export type SmlIndexerParams = SmlIndexerOriginParams;
 
 /**
  * Internal params for `SmlIndexer.deleteAttachment` and

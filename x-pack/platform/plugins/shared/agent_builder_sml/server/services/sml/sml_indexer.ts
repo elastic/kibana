@@ -7,10 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type {
-  SavedObjectsClientContract,
-  ISavedObjectsRepository,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { SmlTypeRegistry } from './sml_type_registry';
 import type {
@@ -26,7 +23,7 @@ import type {
 } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
-import { SmlUnregisteredTypeError, SmlPermissionsConflictError } from './sml_errors';
+import { SmlUnregisteredTypeError } from './sml_errors';
 
 export interface SmlIndexerDeps {
   registry: SmlTypeRegistry;
@@ -37,32 +34,13 @@ export interface SmlIndexer {
   /**
    * Index, update, or delete SML data for a specific item.
    *
-   * In origin mode (no `content`), the indexer resolves the type's `getSmlEntry`
-   * hook and writes the produced chunks tagged `ingestion_method: 'crawled'`.
-   * If any existing chunks for this `origin_id` carry
-   * `ingestion_method: 'manual'`, the call is a no-op unless `force: true` is
-   * passed.
+   * The indexer resolves the type's `getSmlEntry` hook and writes the
+   * produced chunks tagged `ingestion_method: 'crawled'`. If any existing
+   * chunks for this `origin_id` carry `ingestion_method: 'manual'`, the
+   * call is a no-op unless `force: true` is passed.
    *
-   * In content mode (`content` provided), `getSmlEntry` is skipped and the
-   * provided chunks are written directly, tagged `ingestion_method: 'manual'`.
-   * The write always overwrites any existing chunks for the `origin_id`.
-   *
-   * **Unregistered types are handled by mode:**
-   *
-   * - Origin mode (`action: 'create' | 'update'` without `content`) throws
-   *   {@link SmlUnregisteredTypeError} — there is no `getSmlEntry` to call
-   *   and no sensible fallback. The crawler and event-driven origin-mode
-   *   callers only ever target registered types, so this is never hit in
-   *   normal operation; the throw exists to surface programmer error.
-   * - Content mode (`action: 'create' | 'update'` with `content`) accepts
-   *   any `attachmentType`. When the type is registered, the chunk is
-   *   stamped with the result of `getPermissions`; when it is not, the
-   *   indexer stamps empty `SmlPermissions` (no privileges required,
-   *   space-scoped read) and emits a once-per-process warn for that
-   *   `attachmentType` so operators see the implicit "public" stamping.
-   *   Use this when a workflow needs to write ad-hoc content that has no
-   *   dedicated SML type; register a real `SmlTypeDefinition` if the
-   *   content should be gated.
+   * Unregistered types throw {@link SmlUnregisteredTypeError} — there is
+   * no `getSmlEntry` to call and no sensible fallback.
    *
    * **`getPermissions` failures fail-closed.** When the registered type's
    * `getPermissions` hook throws, the call is aborted *before* any
@@ -125,14 +103,6 @@ export const createSmlIndexer = ({ registry, logger }: SmlIndexerDeps): SmlIndex
 class SmlIndexerImpl implements SmlIndexer {
   private readonly registry: SmlTypeRegistry;
   private readonly logger: Logger;
-  /**
-   * `attachmentType` values we've already emitted the "writing chunks under
-   * an unregistered type" warn for in this process. Bounded by the number
-   * of distinct caller-supplied types, which is small in practice; we
-   * deliberately do not cap or evict because doing so would just re-emit
-   * the warn on the next write of an already-known type and add noise.
-   */
-  private readonly warnedUnregisteredTypes = new Set<string>();
 
   constructor({ registry, logger }: SmlIndexerDeps) {
     this.registry = registry;
@@ -149,13 +119,10 @@ class SmlIndexerImpl implements SmlIndexer {
       savedObjectsClient,
       logger: contextLogger,
     } = params;
-    const isContentMode = params.content !== undefined;
     const originUri = `${attachmentType}://${originId}`;
 
     this.logger.info(
-      `SML indexer: indexAttachment called — originId='${originId}', type='${attachmentType}', action='${action}', mode='${
-        isContentMode ? 'content' : 'origin'
-      }', spaces=[${spaces.join(', ')}]`
+      `SML indexer: indexAttachment called — originId='${originId}', type='${attachmentType}', action='${action}', spaces=[${spaces.join(', ')}]`
     );
 
     if (action === 'delete') {
@@ -166,25 +133,9 @@ class SmlIndexerImpl implements SmlIndexer {
       return;
     }
 
-    if (isContentMode) {
-      await this.indexManualEntry({
-        originId,
-        attachmentType,
-        spaces,
-        esClient,
-        savedObjectsClient,
-        contextLogger,
-        entry: params.content!,
-        createdAt: params.createdAt,
-        requestedPermissions: params.permissions,
-      });
-      return;
-    }
-
     const definition = this.registry.get(attachmentType);
     if (!definition) {
-      // Origin-mode writes against unregistered types throw (fail-closed),
-      // mirroring content mode below. Delete still proceeds —
+      // Unregistered types throw (fail-closed). Delete still proceeds —
       // see the early `action === 'delete'` branch above.
       throw new SmlUnregisteredTypeError(
         `SML indexer: type definition '${attachmentType}' is not registered — cannot index origin '${originId}'. Registered types: [${this.registry
@@ -290,155 +241,27 @@ class SmlIndexerImpl implements SmlIndexer {
   }
 
   /**
-   * Write a content-mode (manual) attachment: skip getSmlEntry, write the
-   * entry directly with a bare-UUID ID and `ingestion_method: 'manual'`.
-   * Always overwrites.
-   *
-   * Permissions resolution:
-   *
-   * - **Registered type with `getPermissions`** — the hook's result is
-   *   stamped onto the entry, identical to origin-mode behaviour so a
-   *   content-mode write inherits the same gating as a crawler-driven
-   *   write for the same type.
-   * - **Registered type without `getPermissions`** — empty
-   *   `SmlPermissions` is stamped (no privileges required); the entry is
-   *   readable to anyone with access to the space.
-   * - **Unregistered type** — empty `SmlPermissions` is stamped and a
-   *   warn is logged once per process per `attachmentType` so operators
-   *   can spot ad-hoc namespaces being created without permissions
-   *   metadata. Content mode is intentionally permissive about
-   *   registration so workflow authors can write ad-hoc content without a
-   *   code change; the trade-off is that those entries become publicly
-   *   readable in their space.
-   */
-  private async indexManualEntry({
-    originId,
-    attachmentType,
-    spaces,
-    esClient,
-    savedObjectsClient,
-    contextLogger,
-    entry,
-    createdAt,
-    requestedPermissions,
-  }: {
-    originId: string;
-    attachmentType: string;
-    spaces: string[];
-    esClient: ElasticsearchClient;
-    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
-    contextLogger: Logger;
-    entry: SmlEntry;
-    createdAt?: string;
-    requestedPermissions?: SmlPermissions;
-  }): Promise<void> {
-    const originUri = `${attachmentType}://${originId}`;
-
-    this.logger.info(
-      `SML indexer: content mode for origin '${originId}' of type '${attachmentType}' — writing entry as 'manual'`
-    );
-
-    // Content mode accepts any `attachmentType` — workflow authors and
-    // HTTP callers can write entries under an unregistered namespace
-    // (e.g. ad-hoc knowledge entries) without first registering a real
-    // SmlTypeDefinition. The trade-off is that without `getPermissions`,
-    // the entry has no permission gate and is readable to anyone in the
-    // space. We surface that trade-off with a one-time warn per
-    // (process, type) so operators notice when a new namespace starts
-    // being written with empty permissions.
-    const definition = this.registry.get(attachmentType);
-    if (!definition && !this.warnedUnregisteredTypes.has(attachmentType)) {
-      this.warnedUnregisteredTypes.add(attachmentType);
-      this.logger.warn(
-        `SML indexer: unregistered type '${attachmentType}' (origin '${originId}'): stamping empty permissions — entries will be publicly readable within their space. Register an SmlTypeDefinition to add a permission gate.`
-      );
-    }
-
-    const context: SmlContext = {
-      esClient,
-      savedObjectsClient: savedObjectsClient as SavedObjectsClientContract,
-      logger: contextLogger,
-    };
-
-    // Resolve permissions BEFORE `deleteEntry` so a hook throw doesn't
-    // leave the origin in a wiped state.
-    let resolvedPermissions: SmlPermissions;
-    try {
-      resolvedPermissions = await this.resolvePermissionsForOrigin({
-        definition,
-        originId,
-        context,
-        requestedPermissions,
-      });
-    } catch (error) {
-      const reason =
-        error instanceof SmlPermissionsConflictError
-          ? `caller-supplied permissions conflict with type '${definition?.id ?? attachmentType}'`
-          : `type '${definition?.id ?? attachmentType}' getPermissions threw`;
-      this.logger.warn(
-        `SML indexer: ${reason} for origin '${originId}' — aborting content-mode write to avoid producing un-gated entry: ${
-          (error as Error).message
-        }`
-      );
-      throw error;
-    }
-
-    await this.deleteEntry({ originUri, esClient, spaces });
-
-    const bulkOps = [
-      this.buildIndexOp({
-        chunkId: uuidv4(),
-        entry,
-        originId,
-        spaces,
-        ingestionMethod: 'manual',
-        resolvedPermissions,
-        createdAt,
-      }),
-    ];
-
-    await this.executeBulk({ bulkOps, esClient, originId, chunkCount: 1 });
-  }
-
-  /**
    * Resolve the {@link SmlPermissions} to stamp on every chunk for an
-   * origin. Called **once per origin** before any ES mutation
+   * origin. Called **once per origin** before any ES mutation.
    *
-   * - If only a hook is present, it wins.
-   * - If only `requestedPermissions` is supplied, they are used.
-   * - If both a hook is present AND `requestedPermissions` are supplied, an error is thrown.
-   * - If neither, permissions are left empty.
+   * - If the type's `getPermissions` hook is present, its result is used.
+   * - Otherwise, permissions are left empty.
    */
   private async resolvePermissionsForOrigin({
     definition,
     originId,
     context,
-    requestedPermissions,
   }: {
-    definition: SmlTypeDefinition | undefined;
+    definition: SmlTypeDefinition;
     originId: string;
     context: SmlContext;
-    requestedPermissions?: SmlPermissions;
   }): Promise<SmlPermissions> {
-    if (definition && definition.getPermissions) {
-      if (requestedPermissions) {
-        throw new SmlPermissionsConflictError(
-          `attachmentType '${definition.id}' derives permissions via getPermissions() and does not accept a caller-supplied 'permissions' value for origin '${originId}'.`
-        );
-      }
-
+    if (definition.getPermissions) {
       // Intentionally NOT wrapped in try/catch — see fail-closed note in
-      // the JSDoc. Logging here is the caller's job (so origin-mode and
-      // content-mode can frame the failure with their own context).
+      // the JSDoc. Logging here is the caller's job.
       const result = await definition.getPermissions(originId, context);
       return {
         kibana: { privileges: result.kibana?.privileges ?? [] },
-      };
-    }
-
-    if (requestedPermissions) {
-      return {
-        kibana: { privileges: requestedPermissions.kibana?.privileges ?? [] },
       };
     }
 
@@ -624,9 +447,7 @@ class SmlIndexerImpl implements SmlIndexer {
       // Scope the delete to chunks visible in at least one of the provided
       // spaces. Mirrors `isVisibleInSpace`: a chunk is visible when its
       // `spaces` array contains the space id OR the wildcard `'*'` (global
-      // chunks). Without the `'*'` entry, crawler-written globally-scoped
-      // chunks would survive the delete and violate the "claim the origin"
-      // replace semantic of content-mode writes.
+      // chunks).
       filter.push({ terms: { spaces: [...spaces, '*'] } });
     }
     const label = ingestionMethod ? `${ingestionMethod} entry` : 'entry';
