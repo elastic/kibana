@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiLoadingSpinner,
+  EuiNotificationBadge,
+  EuiTab,
+  EuiTabs,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   ResizableLayout,
@@ -17,16 +25,21 @@ import {
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
+import type { TemplateMetadata, TemplateMetadataErrors } from '../utils/template_metadata';
+import type { OnCaseDefaultChange } from '../case_default_fields';
 import { TemplateYamlEditor } from './template_form';
-import { TemplateRenderPanel } from './template_render_panel';
+import { TemplatePreview } from './template_preview';
+import { TemplateConfigurationTab } from './template_configuration_tab';
 import { componentStyles } from './template_form_layout.styles';
 import { MIN_EDITOR_WIDTH, MIN_PREVIEW_WIDTH } from '../constants';
+import * as i18n from '../translations';
 
 interface TemplateEditorLayoutProps {
   isLoading?: boolean;
   yamlValue: string;
   onYamlChange: (value: string) => void;
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+  onCaseDefaultChange?: OnCaseDefaultChange;
   isYamlSaving: boolean;
   isYamlSaved: boolean;
   previewWidth: number;
@@ -36,14 +49,28 @@ interface TemplateEditorLayoutProps {
   connector?: CaseConnectorWithoutName;
   onSettingsChange: (settings: TemplateSettings) => void;
   onConnectorChange: (connector: CaseConnectorWithoutName) => void;
+  metadata: TemplateMetadata;
+  metadataErrors: TemplateMetadataErrors;
+  onMetadataChange: (metadata: TemplateMetadata) => void;
   formResetKey?: number;
+  isYamlDefinitionValid: boolean;
 }
 
+type ActiveTab = 'fields' | 'configuration';
+
+/**
+ * The template editor: full-area `Fields` and `Configuration` tabs. The YAML editor is only rendered
+ * on the Fields tab (alongside its live two-way preview), so it is never shown beside content it is
+ * not bound to. Configuration (identity + settings + connector) is panel-owned. A required-name
+ * indicator on the Configuration tab surfaces when the template name is missing/invalid, so
+ * defaulting to the Fields tab never hides that required step.
+ */
 export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   isLoading,
   yamlValue,
   onYamlChange,
   onFieldDefaultChange,
+  onCaseDefaultChange,
   isYamlSaving,
   isYamlSaved,
   previewWidth,
@@ -53,9 +80,14 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   connector,
   onSettingsChange,
   onConnectorChange,
+  metadata,
+  metadataErrors,
+  onMetadataChange,
   formResetKey,
+  isYamlDefinitionValid,
 }) => {
   const styles = useMemoCss(componentStyles);
+  const [activeTab, setActiveTab] = useState<ActiveTab>('fields');
 
   if (isLoading) {
     return (
@@ -65,7 +97,68 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
     );
   }
 
-  return (
+  const nameNeedsAttention = metadataErrors.name != null;
+
+  const tabs = (
+    <EuiTabs
+      css={css`
+        padding-inline: 16px;
+      `}
+    >
+      <EuiTab
+        isSelected={activeTab === 'fields'}
+        onClick={() => setActiveTab('fields')}
+        data-test-subj="templateTabFields"
+      >
+        {i18n.FIELDS_TAB_LABEL}
+      </EuiTab>
+      <EuiTab
+        isSelected={activeTab === 'configuration'}
+        onClick={() => setActiveTab('configuration')}
+        append={
+          nameNeedsAttention ? (
+            <EuiToolTip content={i18n.CONFIGURATION_TAB_NAME_REQUIRED}>
+              <EuiNotificationBadge
+                color="accent"
+                aria-label={i18n.CONFIGURATION_TAB_NAME_REQUIRED}
+                data-test-subj="templateConfigTabRequiredIndicator"
+              >
+                {'!'}
+              </EuiNotificationBadge>
+            </EuiToolTip>
+          ) : undefined
+        }
+        data-test-subj="templateTabConfiguration"
+      >
+        {i18n.CONFIGURATION_TAB_LABEL}
+      </EuiTab>
+    </EuiTabs>
+  );
+
+  const fieldsPreview = (
+    <div css={styles.previewPanel} data-test-subj="templatePreviewPanel">
+      {isYamlDefinitionValid ? (
+        <TemplatePreview
+          settings={settings}
+          connector={connector}
+          onFieldDefaultChange={onFieldDefaultChange}
+          onCaseDefaultChange={onCaseDefaultChange}
+        />
+      ) : (
+        <EuiEmptyPrompt
+          data-test-subj="templateRenderPanelInvalidYaml"
+          iconType="warning"
+          color="warning"
+          paddingSize="m"
+          titleSize="xs"
+          title={<h3>{i18n.PREVIEW_UNAVAILABLE_TITLE}</h3>}
+          body={<p>{i18n.PREVIEW_UNAVAILABLE_BODY}</p>}
+        />
+      )}
+    </div>
+  );
+
+  const fieldsTab = (
     <ResizableLayout
       className="eui-fullHeight"
       flexPanel={
@@ -80,18 +173,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
         </div>
       }
       minFlexPanelSize={MIN_EDITOR_WIDTH}
-      fixedPanel={
-        <div css={styles.previewPanel} data-test-subj="templatePreviewPanel">
-          <TemplateRenderPanel
-            settings={settings}
-            connector={connector}
-            onSettingsChange={onSettingsChange}
-            onConnectorChange={onConnectorChange}
-            onFieldDefaultChange={onFieldDefaultChange}
-            formResetKey={formResetKey}
-          />
-        </div>
-      }
+      fixedPanel={fieldsPreview}
       fixedPanelSize={previewWidth}
       onFixedPanelSizeChange={onPreviewWidthChange}
       minFixedPanelSize={MIN_PREVIEW_WIDTH}
@@ -101,6 +183,28 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
       resizeButtonClassName="templatePreviewResizeButton"
       data-test-subj="templateEditorWithPreviewLayout"
     />
+  );
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="none" css={css({ height: '100%', minHeight: 0 })}>
+      <div>{tabs}</div>
+      <div css={css({ flexGrow: 1, minHeight: 0 })}>
+        {activeTab === 'fields' ? (
+          fieldsTab
+        ) : (
+          <TemplateConfigurationTab
+            metadata={metadata}
+            metadataErrors={metadataErrors}
+            onMetadataChange={onMetadataChange}
+            settings={settings}
+            connector={connector}
+            onSettingsChange={onSettingsChange}
+            onConnectorChange={onConnectorChange}
+            formResetKey={formResetKey}
+          />
+        )}
+      </div>
+    </EuiFlexGroup>
   );
 };
 

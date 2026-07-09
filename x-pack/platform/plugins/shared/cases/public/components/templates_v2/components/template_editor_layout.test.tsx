@@ -13,7 +13,6 @@ import { renderWithTestingProviders } from '../../../common/mock';
 
 const SAVING_TEXT = 'Saving...';
 const SAVED_TEXT = 'Saved';
-const PREVIEW_TEXT = 'Preview';
 
 jest.mock('./template_form', () => ({
   TemplateYamlEditor: ({
@@ -36,14 +35,20 @@ jest.mock('./template_form', () => ({
 }));
 
 jest.mock('./template_preview', () => ({
-  TemplatePreview: () => <div data-test-subj="mockTemplatePreview">{PREVIEW_TEXT}</div>,
+  TemplatePreview: () => <div data-test-subj="mockTemplatePreview">{'Preview'}</div>,
+}));
+
+jest.mock('./template_configuration_tab', () => ({
+  TemplateConfigurationTab: () => (
+    <div data-test-subj="mockConfigurationTab">{'Configuration'}</div>
+  ),
 }));
 
 describe('TemplateEditorLayout', () => {
   const user = userEvent.setup({ pointerEventsCheck: 0 });
   const defaultProps = {
     isLoading: false,
-    yamlValue: 'name: Test\nfields: []',
+    yamlValue: 'fields: []',
     onYamlChange: jest.fn(),
     isYamlSaving: false,
     isYamlSaved: false,
@@ -51,6 +56,10 @@ describe('TemplateEditorLayout', () => {
     onPreviewWidthChange: jest.fn(),
     onSettingsChange: jest.fn(),
     onConnectorChange: jest.fn(),
+    metadata: { name: 'Template', description: '', tags: [] },
+    metadataErrors: {},
+    onMetadataChange: jest.fn(),
+    isYamlDefinitionValid: true,
   };
 
   beforeEach(() => {
@@ -64,14 +73,26 @@ describe('TemplateEditorLayout', () => {
     expect(screen.queryByTestId('mockYamlEditor')).not.toBeInTheDocument();
   });
 
-  it('renders editor and preview when not loading', () => {
+  it('defaults to the Fields tab, showing the editor + preview and hiding configuration', () => {
     renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} />);
 
     expect(screen.getByTestId('mockYamlEditor')).toBeInTheDocument();
     expect(screen.getByTestId('mockTemplatePreview')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockConfigurationTab')).not.toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Fields/ })).toHaveAttribute('aria-selected', 'true');
   });
 
-  it('renders resizable layout with correct test subject', () => {
+  it('switches to the Configuration tab, showing config and hiding the YAML editor', async () => {
+    renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} />);
+
+    await user.click(screen.getByRole('tab', { name: /Configuration/ }));
+
+    expect(screen.getByTestId('mockConfigurationTab')).toBeInTheDocument();
+    // The YAML editor must not be rendered beside the (unbound) configuration content.
+    expect(screen.queryByTestId('mockYamlEditor')).not.toBeInTheDocument();
+  });
+
+  it('renders resizable layout on the Fields tab', () => {
     renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} />);
 
     expect(
@@ -79,39 +100,49 @@ describe('TemplateEditorLayout', () => {
     ).toBeInTheDocument();
   });
 
-  it('passes yamlValue to editor', () => {
+  it('passes yamlValue to editor and calls onYamlChange on edit', async () => {
     renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} />);
 
     const textarea = screen.getByRole('textbox');
-    expect(textarea).toHaveValue('name: Test\nfields: []');
-  });
-
-  it('calls onYamlChange when editor value changes', async () => {
-    renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} />);
-
-    const textarea = screen.getByRole('textbox');
-    await user.clear(textarea);
-    await user.type(textarea, 'new value');
-
+    expect(textarea).toHaveValue('fields: []');
+    await user.type(textarea, 'x');
     expect(defaultProps.onYamlChange).toHaveBeenCalled();
   });
 
-  it('shows saving indicator when isYamlSaving is true', () => {
-    renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} isYamlSaving={true} />);
-
+  it('shows saving / saved indicators', () => {
+    const { rerender } = renderWithTestingProviders(
+      <TemplateEditorLayout {...defaultProps} isYamlSaving={true} />
+    );
     expect(screen.getByText(SAVING_TEXT)).toBeInTheDocument();
-  });
 
-  it('shows saved indicator when isYamlSaved is true', () => {
-    renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} isYamlSaved={true} />);
-
+    rerender(<TemplateEditorLayout {...defaultProps} isYamlSaved={true} />);
     expect(screen.getByText(SAVED_TEXT)).toBeInTheDocument();
   });
 
-  it('does not render editor when loading', () => {
-    renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} isLoading={true} />);
+  it('shows the invalid-YAML prompt on the Fields tab when the definition is invalid', () => {
+    renderWithTestingProviders(
+      <TemplateEditorLayout {...defaultProps} isYamlDefinitionValid={false} />
+    );
 
-    expect(screen.queryByTestId('mockYamlEditor')).not.toBeInTheDocument();
+    expect(screen.getByTestId('templateRenderPanelInvalidYaml')).toBeInTheDocument();
     expect(screen.queryByTestId('mockTemplatePreview')).not.toBeInTheDocument();
+  });
+
+  it('shows a required-name indicator on the Configuration tab when the name is invalid', () => {
+    renderWithTestingProviders(
+      <TemplateEditorLayout
+        {...defaultProps}
+        metadata={{ name: '', description: '', tags: [] }}
+        metadataErrors={{ name: 'Template name is required.' }}
+      />
+    );
+
+    expect(screen.getByTestId('templateConfigTabRequiredIndicator')).toBeInTheDocument();
+  });
+
+  it('does not show the required-name indicator when the name is valid', () => {
+    renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} />);
+
+    expect(screen.queryByTestId('templateConfigTabRequiredIndicator')).not.toBeInTheDocument();
   });
 });

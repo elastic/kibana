@@ -106,6 +106,7 @@ const clearTemplateFromForm = (
   setFieldValue('tags', []);
   setFieldValue('severity', 'low');
   setFieldValue('category', null);
+  setFieldValue('assignees', []);
   innerForm.reset({ [CASE_EXTENDED_FIELDS]: preserveGlobalFields(innerForm, globalFieldKeys) });
 };
 
@@ -218,11 +219,13 @@ export const useTemplateFormSync = (
     }
 
     const fieldMappings: Array<[string, unknown]> = [
+      // The create-case form field is `title`; the template's case-default title is `name`.
       ['title', definition.name],
       ['description', definition.description],
       ['tags', definition.tags?.length ? definition.tags : undefined],
       ['severity', definition.severity],
       ['category', definition.category],
+      ['assignees', definition.assignees],
     ];
 
     for (const [fieldName, value] of fieldMappings) {

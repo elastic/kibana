@@ -57,10 +57,11 @@ describe('templatesToYaml', () => {
     const yaml = templatesToYaml(templates);
 
     expect(yaml).toContain('templateId: "template-1"');
+    expect(yaml).toContain('template_name: "My template"');
     expect(yaml).toContain('name: "My template"');
     expect(yaml).toContain('owner: "securitySolution"');
     expect(yaml).toContain('author: "alice"');
-    expect(yaml).toContain('tags:');
+    expect(yaml).toContain('template_tags:');
     expect(yaml).toContain('  - "tag-a"');
     expect(yaml).toContain('  - "tag-b"');
 
@@ -78,6 +79,41 @@ describe('templatesToYaml', () => {
     // Non-select field should not include select metadata block
     expect(yaml).toContain('    - name: "summary"');
     expect(yaml).toContain('      control: "INPUT_TEXT"');
+  });
+
+  it('keeps case defaults distinct from template metadata in export output', () => {
+    const templates: ParsedTemplate[] = [
+      {
+        templateId: 'template-separate',
+        name: 'Template metadata name',
+        owner: 'securitySolution',
+        description: 'Template metadata description',
+        tags: ['template-tag'],
+        templateVersion: 1,
+        latestVersion: 1,
+        isLatest: true,
+        deletedAt: null,
+        definitionString: '',
+        definition: {
+          name: 'Case default title',
+          description: 'Case default description',
+          tags: ['case-tag'],
+          severity: 'medium',
+          fields: [],
+        },
+      },
+    ];
+
+    const yaml = templatesToYaml(templates);
+    const parsed = parseYaml(yaml) as Record<string, unknown>;
+
+    expect(parsed.template_name).toEqual('Template metadata name');
+    expect(parsed.template_description).toEqual('Template metadata description');
+    expect(parsed.template_tags).toEqual(['template-tag']);
+    expect(parsed.name).toEqual('Case default title');
+    expect(parsed.description).toEqual('Case default description');
+    expect(parsed.tags).toEqual(['case-tag']);
+    expect(parsed.severity).toEqual('medium');
   });
 
   it('handles empty templates array', () => {
@@ -870,6 +906,7 @@ describe('templateToYaml', () => {
 
     expect(yaml).toContain('# Template: My template');
     expect(yaml).toContain('templateId: "template-1"');
+    expect(yaml).toContain('template_name: "My template"');
     expect(yaml).toContain('author: "alice"');
   });
 });

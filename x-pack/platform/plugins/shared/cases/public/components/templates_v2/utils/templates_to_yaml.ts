@@ -30,14 +30,16 @@ const yamlString = (value: string | number | undefined | null) => {
 
 const serializeTemplateHeader = (out: string[], template: ParsedTemplate) => {
   out.push(`templateId: ${yamlString(template.templateId)}`);
-  out.push(`name: ${yamlString(template.name)}`);
+  out.push(`template_name: ${yamlString(template.name)}`);
   out.push(`owner: ${yamlString(template.owner)}`);
 
   if (template.author) {
     out.push(`author: ${yamlString(template.author)}`);
   }
 
-  out.push(`description: ${yamlString(template.description ?? '')}`);
+  if (template.description !== undefined) {
+    out.push(`template_description: ${yamlString(template.description)}`);
+  }
   out.push(`templateVersion: ${template.templateVersion}`);
   out.push(`latestVersion: ${template.latestVersion}`);
   out.push(`isLatest: ${template.isLatest}`);
@@ -51,12 +53,27 @@ const serializeTemplateHeader = (out: string[], template: ParsedTemplate) => {
     out.push(`isEnabled: ${template.isEnabled}`);
   }
 
-  // severity and category live inside the parsed definition
+  // Case defaults live inside the parsed definition and should remain distinct from template metadata.
+  if (template.definition.name) {
+    out.push(`name: ${yamlString(template.definition.name)}`);
+  }
+  if (template.definition.description !== undefined) {
+    out.push(`description: ${yamlString(template.definition.description)}`);
+  }
+  if (template.definition.tags !== undefined) {
+    out.push('tags:');
+    for (const tag of template.definition.tags) {
+      out.push(`  - ${yamlString(tag)}`);
+    }
+  }
   if (template.definition.severity) {
     out.push(`severity: ${template.definition.severity}`);
   }
   if (template.definition.category != null) {
     out.push(`category: ${yamlString(template.definition.category)}`);
+  }
+  if (template.definition.assignees && template.definition.assignees.length > 0) {
+    serializeNestedBlock(out, 'assignees', template.definition.assignees);
   }
 
   // connector and settings also live inside the parsed definition. Emit them via the YAML library
@@ -68,9 +85,11 @@ const serializeTemplateHeader = (out: string[], template: ParsedTemplate) => {
     serializeNestedBlock(out, 'settings', template.definition.settings);
   }
 
-  out.push('tags:');
-  for (const tag of template.tags ?? []) {
-    out.push(`  - ${yamlString(tag)}`);
+  if (template.tags && template.tags.length > 0) {
+    out.push('template_tags:');
+    for (const tag of template.tags) {
+      out.push(`  - ${yamlString(tag)}`);
+    }
   }
 };
 
