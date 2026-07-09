@@ -237,30 +237,21 @@ export const assertNotResolved = async (
   entityId: string,
   timeoutMs = 10_000
 ): Promise<void> => {
-  const deadline = Date.now() + timeoutMs;
+  const start = Date.now();
 
-  await expect
-    .poll(
-      async () => {
-        const source = await fetchEntitySource(esClient, entityId);
-        if (source) {
-          const resolvedTo = readResolvedTo(source);
-          if (resolvedTo != null) {
-            throw new Error(
-              `Entity '${entityId}' unexpectedly resolved to '${resolvedTo}' — expected it to stay unresolved`
-            );
-          }
-        }
-
-        return Date.now() >= deadline;
-      },
-      {
-        timeout: timeoutMs + 5_000,
-        intervals: [200],
-        message: `Entity '${entityId}' should stay unresolved for ${timeoutMs}ms`,
+  while (Date.now() - start < timeoutMs) {
+    const source = await fetchEntitySource(esClient, entityId);
+    if (source) {
+      const resolvedTo = readResolvedTo(source);
+      if (resolvedTo != null) {
+        throw new Error(
+          `Entity '${entityId}' unexpectedly resolved to '${resolvedTo}' — expected it to stay unresolved`
+        );
       }
-    )
-    .toBe(true);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
 };
 
 /**
