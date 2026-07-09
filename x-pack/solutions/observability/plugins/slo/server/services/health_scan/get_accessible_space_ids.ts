@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SLORoutesDependencies } from '../../routes/utils/types';
+import type { SLORoutesDependencies } from '../../routes/types';
 
 interface Params {
   plugins: SLORoutesDependencies['plugins'];
