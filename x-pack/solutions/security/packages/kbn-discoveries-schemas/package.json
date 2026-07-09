@@ -1,0 +1,15 @@
+{
+  "name": "@kbn/discoveries-schemas",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "sideEffects": false,
+  "scripts": {
+    "openapi:generate": "node scripts/openapi/generate",
+    "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate"
+  },
+  "dependencies": {
+    "@kbn/zod": "link:../../../../../src/platform/packages/shared/kbn-zod",
+    "@kbn/zod-helpers": "link:../../../../../src/platform/packages/shared/kbn-zod-helpers"
+  }
+}

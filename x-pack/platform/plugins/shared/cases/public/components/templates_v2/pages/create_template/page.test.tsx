@@ -38,6 +38,7 @@ jest.mock('../../hooks/use_create_template', () => ({
 jest.mock('../../../../common/navigation', () => ({
   useCasesTemplatesNavigation: () => ({
     navigateToCasesTemplates: mockNavigateToCasesTemplates,
+    getCasesTemplatesUrl: jest.fn().mockReturnValue('/app/security/cases/configure/templates'),
   }),
 }));
 
@@ -52,16 +53,21 @@ describe('CreateTemplatePage', () => {
     mockMutateAsync.mockResolvedValue(undefined);
   });
 
-  it('renders the layout with header and sections', () => {
+  it('renders the layout with header and sections', async () => {
     render(
       <TestProviders>
         <CreateTemplatePage />
       </TestProviders>
     );
 
-    expect(screen.getByText(i18n.ADD_TEMPLATE_TITLE)).toBeInTheDocument();
-    expect(screen.getByText(i18n.BACK_TO_TEMPLATES)).toBeInTheDocument();
-    expect(screen.getByTestId('saveTemplateHeaderButton')).toBeInTheDocument();
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent(i18n.ADD_TEMPLATE_TITLE);
+    expect(screen.getByTestId('appHeaderBack')).toHaveAttribute(
+      'aria-label',
+      `Back to ${i18n.TEMPLATE_TITLE}`
+    );
+    // AppMenu resolves its contents via a dynamic import, so the save button isn't available
+    // in the very first render tick.
+    expect(await screen.findByTestId('saveTemplateHeaderButton')).toBeInTheDocument();
     expect(screen.getByTestId('template-yaml-editor')).toBeInTheDocument();
     expect(screen.getByTestId('create-template-preview')).toBeInTheDocument();
   });
