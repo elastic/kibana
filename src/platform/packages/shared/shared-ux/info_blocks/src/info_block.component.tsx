@@ -9,7 +9,7 @@
 
 import React, { type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
-import { EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiText, EuiTextTruncate, useEuiTheme } from '@elastic/eui';
 import type { InfoBlockItem } from './types';
 
 export interface InfoBlockProps extends InfoBlockItem {
@@ -30,6 +30,10 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   const { euiTheme } = useEuiTheme();
   // "Big number" values map their font size to the matching euiTheme.size token.
   const bigNumberFontSize = valueSize ? euiTheme.size[valueSize] : undefined;
+  // Plain text values (and titles) truncate to a single line via
+  // EuiTextTruncate so a long string never overflows its column. Node values
+  // (badges, links, images) manage their own layout and render as-is.
+  const isTextValue = typeof value === 'string' || typeof value === 'number';
   return (
     <div
       data-test-subj={rest['data-test-subj'] ?? 'infoBlock'}
@@ -38,7 +42,7 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
       `}
     >
       <EuiText size="xs" color="subdued">
-        {title}
+        <EuiTextTruncate text={title} />
       </EuiText>
       <EuiText
         size={compressed ? 'xs' : 's'}
@@ -55,7 +59,7 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
           }
         `}
       >
-        {value}
+        {isTextValue ? <EuiTextTruncate text={String(value)} /> : value}
       </EuiText>
     </div>
   );
