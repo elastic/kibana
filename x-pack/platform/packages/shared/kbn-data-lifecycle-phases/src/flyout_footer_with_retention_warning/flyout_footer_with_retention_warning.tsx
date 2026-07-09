@@ -88,11 +88,6 @@ export const FlyoutFooterWithRetentionWarning = ({
       ? footerStrings.downsamplingNotAppliedBodyIlmPolicy
       : footerStrings.downsamplingNotAppliedBody;
 
-  const warningBody =
-    warningType === 'ilm_policy'
-      ? footerStrings.downsamplingNotAppliedBodyIlmPolicy
-      : footerStrings.downsamplingNotAppliedBody;
-
   return (
     <EuiFlyoutFooter>
       {showWarning && (
