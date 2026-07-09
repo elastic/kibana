@@ -180,8 +180,7 @@ const THRESHOLD_RULE_TITLE = i18n.translate(
 const THRESHOLD_RULE_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleDescription',
   {
-    defaultMessage:
-      'Monitor metrics against one or more threshold conditions.',
+    defaultMessage: 'Monitor metrics against one or more threshold conditions.',
   }
 );
 
