@@ -23,7 +23,7 @@ export const PostGenerateRequestBody = z.object({
   /**
    * Alerts index pattern for retrieval
    */
-  alerts_index_pattern: z.string(),
+  alerts_index_pattern: z.string().max(1024),
   /**
    * Anonymization replacements map
    */
@@ -35,7 +35,7 @@ export const PostGenerateRequestBody = z.object({
   /**
    * End time for alert retrieval
    */
-  end: z.string().optional(),
+  end: z.string().max(1024).optional(),
   /**
    * Query filter for alert retrieval
    */
@@ -47,7 +47,7 @@ export const PostGenerateRequestBody = z.object({
   /**
    * Start time for alert retrieval
    */
-  start: z.string().optional(),
+  start: z.string().max(1024).optional(),
   /**
    * How this generation was triggered
    */
@@ -60,15 +60,15 @@ export const PostGenerateRequestBody = z.object({
       /**
        * UUID of the alerting action execution
        */
-      action_execution_uuid: z.string().optional(),
+      action_execution_uuid: z.string().max(1024).optional(),
       /**
        * ID of the alerting rule that triggered this generation
        */
-      rule_id: z.string().optional(),
+      rule_id: z.string().max(1024).optional(),
       /**
        * Name of the alerting rule that triggered this generation
        */
-      rule_name: z.string().optional(),
+      rule_name: z.string().max(1024).optional(),
     })
     .optional(),
   /**
@@ -83,7 +83,7 @@ export const PostGenerateRequestBody = z.object({
       /**
        * Array of user-created alert retrieval workflow IDs to execute. Only meaningful when alert_retrieval_workflows_enabled is true.
        */
-      alert_retrieval_workflow_ids: z.array(z.string()).optional().default([]),
+      alert_retrieval_workflow_ids: z.array(z.string().max(1024)).optional().default([]),
       /**
        * Toggle 3 - whether the user-created alert retrieval workflows run.
        */
@@ -95,7 +95,7 @@ export const PostGenerateRequestBody = z.object({
       /**
        * ES|QL query for alert retrieval (required when default_retrieval_enabled is true and alert_retrieval_mode is 'esql').
        */
-      esql_query: z.string().optional(),
+      esql_query: z.string().max(10000).optional(),
       /**
        * Toggle 1 - whether the attack discovery skill performs its own additional alert retrieval.
        */
@@ -103,7 +103,7 @@ export const PostGenerateRequestBody = z.object({
       /**
        * ID of the validation workflow to use (or 'default' for built-in)
        */
-      validation_workflow_id: z.string().optional().default('default'),
+      validation_workflow_id: z.string().max(1024).optional().default('default'),
     })
     .optional(),
 });
