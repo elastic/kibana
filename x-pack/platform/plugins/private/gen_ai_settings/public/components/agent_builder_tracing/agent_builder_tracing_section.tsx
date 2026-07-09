@@ -151,7 +151,7 @@ export const AgentBuilderTracingSection: React.FC = () => {
                                 >
                                   {i18n.translate(
                                     'xpack.genAiSettings.agentBuilderTracing.deleteDashboardMenuItem',
-                                    { defaultMessage: 'Delete this dashboard' }
+                                    { defaultMessage: 'Uninstall dashboard' }
                                   )}
                                 </EuiContextMenuItem>,
                               ]}
