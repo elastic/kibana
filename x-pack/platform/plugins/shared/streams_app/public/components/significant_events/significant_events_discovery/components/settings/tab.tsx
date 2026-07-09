@@ -298,7 +298,7 @@ export function SettingsTab() {
                     <h4>
                       {i18n.translate(
                         'xpack.streams.significantEventsDiscovery.settings.scheduledDiscoveryLabel',
-                        { defaultMessage: 'Automatic discovery' }
+                        { defaultMessage: 'Scheduled discovery' }
                       )}
                     </h4>
                   </EuiText>
@@ -340,6 +340,10 @@ export function SettingsTab() {
                     'xpack.streams.significantEventsDiscovery.settings.detectionIntervalLabel',
                     { defaultMessage: 'Detection interval (minutes)' }
                   )}
+                  helpText={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.detectionIntervalHelp',
+                    { defaultMessage: 'How often scheduled detection runs.' }
+                  )}
                 >
                   <EuiFieldNumber
                     data-test-subj="streams-settings-scheduled-detection-interval"
@@ -362,6 +366,10 @@ export function SettingsTab() {
                   label={i18n.translate(
                     'xpack.streams.significantEventsDiscovery.settings.reviewIntervalLabel',
                     { defaultMessage: 'Review interval (minutes)' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.reviewIntervalHelp',
+                    { defaultMessage: 'How often scheduled discovery and triage review runs.' }
                   )}
                 >
                   <EuiFieldNumber
@@ -386,6 +394,10 @@ export function SettingsTab() {
                     'xpack.streams.significantEventsDiscovery.settings.discoveryBatchSizeLabel',
                     { defaultMessage: 'Discovery batch size' }
                   )}
+                  helpText={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.discoveryBatchSizeHelp',
+                    { defaultMessage: 'Maximum detections sent to each scheduled discovery pass.' }
+                  )}
                 >
                   <EuiFieldNumber
                     data-test-subj="streams-settings-scheduled-discovery-batch-size"
@@ -409,6 +421,10 @@ export function SettingsTab() {
                   label={i18n.translate(
                     'xpack.streams.significantEventsDiscovery.settings.triageBatchSizeLabel',
                     { defaultMessage: 'Triage batch size' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.streams.significantEventsDiscovery.settings.triageBatchSizeHelp',
+                    { defaultMessage: 'Maximum discoveries sent to each scheduled triage pass.' }
                   )}
                 >
                   <EuiFieldNumber

@@ -82,6 +82,22 @@ describe('useScheduledDiscoverySettings', () => {
       OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
       45
     );
+    expect(client.set).toHaveBeenCalledWith(
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
+      15
+    );
+    expect(client.set).toHaveBeenCalledWith(
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
+      6
+    );
+    expect(client.set).toHaveBeenCalledWith(
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
+      8
+    );
+    expect(client.set).toHaveBeenCalledWith(
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
+      4
+    );
     expect(result.current.saved).toEqual(result.current.draft);
     expect(result.current.hasChanged).toBe(false);
   });
