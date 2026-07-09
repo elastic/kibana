@@ -192,6 +192,13 @@ import {
  *   on text_indicator_list reports (unsplit = 1/1). Folded into `migrateExistingExternalReferencesMapping`
  *   so pre-v19 indices gain these fields at startup without a separate migration call.
  *
+ * v20: adds `extracted.vulnerability.*` (8 fields) — structured advisory fields for CISA KEV
+ *   and similar vulnerability-feed adapters. All fields are keyword/date (aggregatable) so INFOSEC
+ *   can filter and aggregate by vendor, product, cveID, etc.
+ *   Fields: cve_id (keyword), vendor (keyword), product (keyword), name (keyword),
+ *           cwes (keyword), date_added (date), due_date (date), ransomware_use (keyword).
+ *   A `migrateExistingVulnerabilityMappings` call patches pre-v20 backing indices at startup.
+ *
  * v16: adds `extracted.gate.*` (7 fields) — the relevance/provenance gate verdict block.
  *   Note: `primary_links` is deferred — no consumer until Slice-5 link-chasing.
  *   A `migrateExistingGateMappings` call patches pre-v16 backing indices at startup.
@@ -221,7 +228,7 @@ import {
  * template PUT or rollover). `bootstrap_threat_intelligence` logs an error at
  * startup if the endpoint is absent so operators catch the gap before data flows.
  */
-const TEMPLATE_VERSION = 19;
+const TEMPLATE_VERSION = 20;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -475,6 +482,22 @@ const threatReportsTemplate = {
                 has_original_commentary: { type: 'boolean' as const },
                 reason: { type: 'text' as const, index: false },
                 assessed_at: { type: 'date' as const },
+              },
+            },
+            // Structured vulnerability fields — populated at ingest by the kev adapter
+            // for CISA KEV entries. All fields are keyword/date (aggregatable) so INFOSEC
+            // can filter and aggregate by vendor/product/cveID without text analysis.
+            // Added in v20.
+            vulnerability: {
+              properties: {
+                cve_id: { type: 'keyword' as const },
+                vendor: { type: 'keyword' as const },
+                product: { type: 'keyword' as const },
+                name: { type: 'keyword' as const },
+                cwes: { type: 'keyword' as const },
+                date_added: { type: 'date' as const },
+                due_date: { type: 'date' as const },
+                ransomware_use: { type: 'keyword' as const },
               },
             },
           },
@@ -1413,6 +1436,86 @@ const migrateExistingIndicatorSourcesMapping = async (
   }
 };
 
+/**
+ * Patches `extracted.vulnerability.*` field mappings onto any existing
+ * `.ds-.kibana-threat-reports-*` backing indices created before the v20 template.
+ * The v20 template adds these fields automatically to new rollovers; pre-existing
+ * backing indices keep their original mapping until explicitly updated.
+ *
+ * Safe to re-run on every plugin start: PUT mapping is idempotent for additive
+ * fields. Without this, writes from the kev adapter fail with
+ * `strict_dynamic_mapping_exception` because `dynamic: 'strict'` rejects
+ * unknown fields under `extracted`.
+ */
+const migrateExistingVulnerabilityMappings = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('vulnerability-mapping-migration');
+
+  let backingIndices: string[];
+  try {
+    const streamInfo = await esClient.indices.getDataStream(
+      { name: THREAT_REPORTS_DATA_STREAM },
+      { ignore: [404] }
+    );
+    backingIndices = (streamInfo.data_streams ?? []).flatMap((ds) =>
+      (ds.indices ?? []).map((i) => i.index_name)
+    );
+  } catch (err) {
+    log.debug(
+      `vulnerability-mapping-migration: data stream not found — skipping (${
+        (err as Error).message
+      })`
+    );
+    return;
+  }
+
+  for (const indexName of backingIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const extractedProps = (
+        indexMappings?.mappings?.properties as
+          | Record<string, { properties?: Record<string, unknown> }>
+          | undefined
+      )?.extracted?.properties;
+
+      if (!extractedProps?.vulnerability) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            extracted: {
+              properties: {
+                vulnerability: {
+                  properties: {
+                    cve_id: { type: 'keyword' },
+                    vendor: { type: 'keyword' },
+                    product: { type: 'keyword' },
+                    name: { type: 'keyword' },
+                    cwes: { type: 'keyword' },
+                    date_added: { type: 'date' },
+                    due_date: { type: 'date' },
+                    ransomware_use: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(`Migrated extracted.vulnerability mappings on ${indexName} (v20 backfill)`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate vulnerability mappings on ${indexName}: ${(err as Error).message}. ` +
+          `The extracted.vulnerability fields will be rejected by dynamic: strict until the ` +
+          `mapping is updated manually.`
+      );
+    }
+  }
+};
+
 const ensureCompanionIndex = async (
   esClient: ElasticsearchClient,
   indexName: string,
@@ -1499,6 +1602,8 @@ export const installIndexTemplates = async ({
   await migrateExistingIocReferenceMappings(esClient, log);
   // Patch sources[] nested field onto the pre-v19 indicators companion index. Safe to re-run.
   await migrateExistingIndicatorSourcesMapping(esClient, log);
+  // Patch extracted.vulnerability.* fields onto any pre-v20 backing indices. Safe to re-run.
+  await migrateExistingVulnerabilityMappings(esClient, log);
 
   log.info('Threat intelligence index templates installed');
 };

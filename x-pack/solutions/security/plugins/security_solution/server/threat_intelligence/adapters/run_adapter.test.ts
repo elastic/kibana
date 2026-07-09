@@ -23,7 +23,7 @@ describe('runAdapter', () => {
     // they are handled by other code paths and registering them here
     // would suggest the source-ingestion workflow could pull them.
     expect(__getRegisteredAdapterTypesForTest().sort()).toEqual(
-      ['rss', 'stix', 'taxii', 'vendor_api'].sort()
+      ['kev', 'rss', 'stix', 'taxii', 'text_indicator_list', 'vendor_api'].sort()
     );
   });
 

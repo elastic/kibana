@@ -79,7 +79,7 @@ describe('stixAdapter', () => {
       },
     });
     expect(reports[0].extracted?.iocs).toHaveLength(1);
-    expect(reports[0].extracted?.iocs[0]).toMatchObject({ type: 'domain', value: 'bad.example' });
+    expect(reports[0].extracted?.iocs![0]).toMatchObject({ type: 'domain', value: 'bad.example' });
     expect(reports[0].content.body_text).toContain(
       "Pattern (stix): [domain-name:value = 'bad.example']"
     );
@@ -143,7 +143,11 @@ describe('stixAdapter', () => {
     expect(report.provenance.extraction_method).toBe('stix');
     expect(report.provenance.extracted_at).toBe(NOW.toISOString());
     expect(report.extracted?.iocs).toHaveLength(1);
-    expect(report.extracted?.iocs[0]).toMatchObject({ type: 'ip', value: '1.2.3.4', tier: 'contextual' });
+    expect(report.extracted?.iocs![0]).toMatchObject({
+      type: 'ip',
+      value: '1.2.3.4',
+      tier: 'contextual',
+    });
     expect(report.content.body_text).toContain('Known C2 server');
   });
 
@@ -225,7 +229,11 @@ describe('stixAdapter', () => {
     expect(reports).toHaveLength(1);
     const refs = reports[0].content.external_references;
     expect(refs).toHaveLength(2);
-    expect(refs![0]).toEqual({ source_name: 'mitre', external_id: 'T1234', url: 'https://attack.mitre.org/T1234' });
+    expect(refs![0]).toEqual({
+      source_name: 'mitre',
+      external_id: 'T1234',
+      url: 'https://attack.mitre.org/T1234',
+    });
     expect(refs![1]).toEqual({ source_name: 'nvd', description: 'CVE notes' });
   });
 
@@ -279,7 +287,12 @@ describe('stixAdapter', () => {
       '@timestamp': '2026-05-16T12:00:00.000Z',
       content_fingerprint: 'abc123',
       space_id: '*',
-      source: { type: 'stix' as const, name: 'Test', url: 'https://example.com', adapter_id: 'stix:test' },
+      source: {
+        type: 'stix' as const,
+        name: 'Test',
+        url: 'https://example.com',
+        adapter_id: 'stix:test',
+      },
       content: { title: 'Test', body_text: 'body', language: 'en' },
       severity: { level: 'low' as const, score: 1 },
       provenance: {
@@ -299,7 +312,15 @@ describe('stixAdapter', () => {
         source_doc_ref: { index: 'stix:bundle', id: 'indicator--1' },
       },
       extracted: {
-        iocs: [{ type: 'ip', value: '1.2.3.4', tier: 'contextual', tier_heuristic: 'contextual', tier_basis: 'stix_pattern' }],
+        iocs: [
+          {
+            type: 'ip',
+            value: '1.2.3.4',
+            tier: 'contextual',
+            tier_heuristic: 'contextual',
+            tier_basis: 'stix_pattern',
+          },
+        ],
       },
     };
     expect(() => normalizedReportSchema.parse(stixReport)).not.toThrow();

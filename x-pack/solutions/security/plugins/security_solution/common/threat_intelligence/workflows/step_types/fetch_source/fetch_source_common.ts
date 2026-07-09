@@ -143,9 +143,10 @@ export const normalizedReportSchema = z.object({
      *                          nl-extraction skips this doc (Slice D).
      * `'text_indicator_list'` — already structured at ingest via parseIndicatorList;
      *                          nl-extraction skips this doc (same as 'stix').
+     * `'kev'`                 — CISA KEV structured ingest; nl-extraction skips this doc.
      * Any other value silently excludes the report from extraction.
      */
-    extraction_method: z.enum(['pending', 'stix', 'text_indicator_list']),
+    extraction_method: z.enum(['pending', 'stix', 'text_indicator_list', 'kev']),
     /**
      * ISO-8601 wall-clock of the extraction run. Set by structured adapters
      * at ingest (STIX indicator path) OR stamped later by nl-extraction.
@@ -180,19 +181,45 @@ export const normalizedReportSchema = z.object({
    */
   extracted: z
     .object({
-      iocs: z.array(
-        z.object({
-          type: z.string(),
-          value: z.string(),
-          defanged: z.string().optional(),
-          tier: z.string(),
-          tier_heuristic: z.string(),
-          tier_basis: z.string(),
-          port: z.number().optional(),
-          reference: z.string().optional(),
-          block_index: z.number().optional(),
+      iocs: z
+        .array(
+          z.object({
+            type: z.string(),
+            value: z.string(),
+            defanged: z.string().optional(),
+            tier: z.string(),
+            tier_heuristic: z.string(),
+            tier_basis: z.string(),
+            port: z.number().optional(),
+            reference: z.string().optional(),
+            block_index: z.number().optional(),
+          })
+        )
+        .optional(),
+      /**
+       * Closed-set category taxonomy. Populated at ingest by structured adapters
+       * (e.g. kev → ['vulnerability']) or later by nl_extraction_behavioral for
+       * pending reports. Mirrors the `extracted.categories` keyword mapping in
+       * `setup/index_templates.ts` (added in v5).
+       */
+      categories: z.array(z.string()).optional(),
+      /**
+       * Structured vulnerability fields from CISA KEV and similar advisory feeds.
+       * Populated at ingest by the kev adapter; nl-extraction never touches this block.
+       * Mirrors `extracted.vulnerability.*` keyword/date mapping (added in v20).
+       */
+      vulnerability: z
+        .object({
+          cve_id: z.string(),
+          vendor: z.string(),
+          product: z.string(),
+          name: z.string(),
+          cwes: z.array(z.string()).optional(),
+          date_added: z.string(),
+          due_date: z.string(),
+          ransomware_use: z.string().optional(),
         })
-      ),
+        .optional(),
     })
     .optional(),
 });

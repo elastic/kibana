@@ -46,7 +46,7 @@ import {
  */
 interface DefaultSource {
   id: string;
-  adapter_type: 'rss' | 'vendor_api' | 'text_indicator_list';
+  adapter_type: 'rss' | 'vendor_api' | 'text_indicator_list' | 'kev';
   name: string;
   config: { url: string };
   tags: string[];
@@ -65,6 +65,21 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
       url: 'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt',
     },
     tags: ['malware', 'research-tools', 'feed'],
+  },
+
+  // --- CISA Known Exploited Vulnerabilities (KEV) -------------------------
+  // CISA maintains this catalog of vulnerabilities with confirmed exploitation
+  // in the wild. Each entry maps to a single report doc with structured
+  // extracted.vulnerability.* fields (vendor/product/cveID) for INFOSEC
+  // filtering and aggregation. NL extraction is skipped (extraction_method='kev').
+  {
+    id: 'kev:cisa-known-exploited-vulnerabilities',
+    adapter_type: 'kev',
+    name: 'CISA Known Exploited Vulnerabilities',
+    config: {
+      url: 'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
+    },
+    tags: ['vulnerability', 'cisa', 'kev', 'government'],
   },
 
   // --- Vendor research blogs ---------------------------------------------

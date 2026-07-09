@@ -21,8 +21,8 @@ import * as path from 'path';
 const src = fs.readFileSync(path.join(__dirname, 'index_templates.ts'), 'utf8');
 
 describe('index_templates — mapping coverage guard', () => {
-  it('TEMPLATE_VERSION is 19', () => {
-    expect(src).toContain('const TEMPLATE_VERSION = 19;');
+  it('TEMPLATE_VERSION is 20', () => {
+    expect(src).toContain('const TEMPLATE_VERSION = 20;');
   });
 
   it('content.external_references is declared as nested with the expected property shape', () => {
@@ -50,5 +50,25 @@ describe('index_templates — mapping coverage guard', () => {
   it('extracted.iocs includes reference and block_index fields (v19 maltrail adapter fields)', () => {
     expect(src).toContain("reference: { type: 'keyword' as const }");
     expect(src).toContain("block_index: { type: 'integer' as const }");
+  });
+
+  it('extracted.vulnerability block is declared with all expected keyword/date properties (v20)', () => {
+    expect(src).toContain('vulnerability: {');
+    expect(src).toContain("cve_id: { type: 'keyword' as const }");
+    expect(src).toContain("vendor: { type: 'keyword' as const }");
+    expect(src).toContain("product: { type: 'keyword' as const }");
+    expect(src).toContain("date_added: { type: 'date' as const }");
+    expect(src).toContain("due_date: { type: 'date' as const }");
+    expect(src).toContain("ransomware_use: { type: 'keyword' as const }");
+  });
+
+  it('migrateExistingVulnerabilityMappings is wired into installIndexTemplates', () => {
+    expect(src).toContain('const migrateExistingVulnerabilityMappings');
+
+    const installIdx = src.indexOf('export const installIndexTemplates');
+    expect(installIdx).toBeGreaterThan(-1);
+
+    const callIdx = src.indexOf('await migrateExistingVulnerabilityMappings', installIdx);
+    expect(callIdx).toBeGreaterThan(installIdx);
   });
 });

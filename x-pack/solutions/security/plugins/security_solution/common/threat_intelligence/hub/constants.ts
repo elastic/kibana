@@ -527,6 +527,7 @@ export const SOURCE_TYPES = [
   'taxii',
   'vendor_api',
   'text_indicator_list',
+  'kev',
   'email',
   'manual',
   'telemetry',

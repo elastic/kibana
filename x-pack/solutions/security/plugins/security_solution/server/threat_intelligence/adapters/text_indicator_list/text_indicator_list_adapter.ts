@@ -37,7 +37,7 @@ const trailLabelFromUrl = (url: string): string => {
   }
 };
 
-type IocEntry = NonNullable<NormalizedReport['extracted']>['iocs'][number];
+type IocEntry = NonNullable<NonNullable<NormalizedReport['extracted']>['iocs']>[number];
 type ExtRefEntry = NonNullable<NormalizedReport['content']['external_references']>[number];
 
 /**
