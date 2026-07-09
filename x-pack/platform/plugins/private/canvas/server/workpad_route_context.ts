@@ -11,6 +11,10 @@ import type {
   SavedObject,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import {
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
+} from '@kbn/as-code-shared-schemas';
 import type { WorkpadAttributes } from './routes/workpad/workpad_attributes';
 import { CANVAS_TYPE } from '../common/lib/constants';
 import { getId } from '../common/lib/get_id';
@@ -38,7 +42,13 @@ export const createWorkpadRouteContext: () => IContextProvider<
   'canvas'
 > = () => {
   return async (context) => {
-    const soClient = (await context.core).savedObjects.client;
+    const core = await context.core;
+    const soClient = core.savedObjects.client;
+    const useGASchemas = await core.featureFlags.getBooleanValue(
+      AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+      AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+    );
+
     return {
       workpad: {
         create: async (workpad: CanvasWorkpad) => {
@@ -48,7 +58,10 @@ export const createWorkpadRouteContext: () => IContextProvider<
           const id = maybeId ? maybeId : getId('workpad');
 
           // embeddables transform in
-          const { attributes: transformedAttributes, references } = transformWorkpadIn(attributes);
+          const { attributes: transformedAttributes, references } = transformWorkpadIn(
+            attributes,
+            useGASchemas
+          );
 
           return await soClient.create<WorkpadAttributes>(
             CANVAS_TYPE,
@@ -74,7 +87,8 @@ export const createWorkpadRouteContext: () => IContextProvider<
 
           // embeddables transform in
           const { attributes, references } = transformWorkpadIn(
-            workpadWithoutId as WorkpadAttributes
+            workpadWithoutId as WorkpadAttributes,
+            useGASchemas
           );
           return await soClient.create<WorkpadAttributes>(
             CANVAS_TYPE,

@@ -32,15 +32,20 @@ dependsOn:
   - '@kbn/slo-schema'
   - '@kbn/elastic-agent-utils'
   - '@kbn/apm-types-shared'
+  - '@kbn/zod'
+  - '@kbn/zod-helpers'
 tags:
   - shared-common
   - package
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

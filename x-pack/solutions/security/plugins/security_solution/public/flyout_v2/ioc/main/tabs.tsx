@@ -21,6 +21,8 @@ import {
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 
+export const validTabIds: RightPanelPaths[] = ['overview', 'table', 'json'];
+
 export interface RightPanelTabType {
   id: RightPanelPaths;
   name: ReactElement;
