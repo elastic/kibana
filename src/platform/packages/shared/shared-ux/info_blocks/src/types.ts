@@ -8,21 +8,50 @@
  */
 
 import type { ReactNode } from 'react';
+import type { _EuiThemeSize } from '@elastic/eui';
 
 export interface InfoBlockItem {
   /** Fixed-style text label rendered above the value. */
   title: string;
   /** Arbitrary content rendered as the block value. */
   value: ReactNode;
+  /**
+   * Renders the value as a large "big number" using the matching
+   * `euiTheme.size` token as its font size (e.g. `'xl'`). The title is
+   * unaffected. When omitted, the value uses the default text size.
+   */
+  valueSize?: _EuiThemeSize;
   'data-test-subj'?: string;
 }
+
+/**
+ * A spacer that fills the remainder of its current row, adapting to the live
+ * column count, so the next real block starts on a fresh row. It renders no
+ * content and no dividers. Use the {@link EMPTY_INFO_BLOCK} sentinel to add one.
+ */
+export interface EmptyInfoBlockItem {
+  empty: true;
+}
+
+/** An entry in {@link InfoBlocksProps.items}: a real block or an empty spacer. */
+export type InfoBlocksItem = InfoBlockItem | EmptyInfoBlockItem;
+
+/**
+ * Sentinel spacer that fills the rest of its row (see {@link EmptyInfoBlockItem}).
+ */
+export const EMPTY_INFO_BLOCK: EmptyInfoBlockItem = { empty: true };
+
+/** Narrows an {@link InfoBlocksItem} to the empty spacer variant. */
+export const isEmptyInfoBlock = (item: InfoBlocksItem): item is EmptyInfoBlockItem =>
+  'empty' in item && item.empty === true;
 
 export interface InfoBlocksProps {
   /**
    * The blocks to render. Up to 6 are supported; passing more is a consumer
-   * bug and is not validated or guarded at runtime.
+   * bug and is not validated or guarded at runtime. Use {@link EMPTY_INFO_BLOCK}
+   * for an entry that fills the rest of its row.
    */
-  items: readonly InfoBlockItem[];
+  items: readonly InfoBlocksItem[];
   /**
    * Compact spacing/sizing. Intended to be driven by the flyout header's
    * collapsed state.

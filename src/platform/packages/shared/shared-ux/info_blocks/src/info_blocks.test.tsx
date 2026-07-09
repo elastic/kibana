@@ -8,8 +8,12 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { InfoBlocks, getInfoBlocksColumnCount } from './info_blocks.component';
+import { render, renderHook, screen } from '@testing-library/react';
+import { useEuiTheme } from '@elastic/eui';
+import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
+import { InfoBlocks, getInfoBlocksColumnCount, getInfoBlocksLayout } from './info_blocks.component';
+import { EMPTY_INFO_BLOCK } from './types';
+import type { InfoBlocksItem } from './types';
 
 describe('InfoBlocks', () => {
   it('renders each block title and node value', () => {
@@ -26,6 +30,25 @@ describe('InfoBlocks', () => {
     expect(screen.getByText('Platform')).toBeInTheDocument();
     expect(screen.getByText('Throughput')).toBeInTheDocument();
     expect(screen.getByText('1.2k tpm')).toBeInTheDocument();
+  });
+
+  it('renders a "big number" value at the matching euiTheme.size font size', () => {
+    const { result } = renderHook(() => useEuiTheme());
+    renderWithEuiTheme(
+      <InfoBlocks
+        items={[
+          { title: 'Risk score', value: '90', valueSize: 'xl' },
+          { title: 'Vendor', value: 'Elastic' },
+        ]}
+      />
+    );
+
+    expect(screen.getByText('90')).toHaveStyleRule('font-size', result.current.euiTheme.size.xl);
+    // A default (non-big) value must not pick up the big-number font size.
+    expect(screen.getByText('Elastic')).not.toHaveStyleRule(
+      'font-size',
+      result.current.euiTheme.size.xl
+    );
   });
 
   it('renders one block element per item', () => {
@@ -45,6 +68,106 @@ describe('InfoBlocks', () => {
   it('honors a custom data-test-subj on the container', () => {
     render(<InfoBlocks data-test-subj="myBlocks" items={[{ title: 'A', value: '1' }]} />);
     expect(screen.getByTestId('myBlocks')).toBeInTheDocument();
+  });
+
+  it('renders no InfoBlock for an empty spacer', () => {
+    render(
+      <InfoBlocks
+        items={[
+          { title: 'Risk score', value: '90', valueSize: 'xl' },
+          EMPTY_INFO_BLOCK,
+          { title: 'Vendor', value: 'Elastic' },
+          { title: 'Result', value: 'Success' },
+        ]}
+      />
+    );
+    // Only the three real blocks render a block element; the spacer renders none.
+    expect(screen.getAllByTestId('infoBlock')).toHaveLength(3);
+    expect(screen.getByText('Risk score')).toBeInTheDocument();
+    expect(screen.getByText('Vendor')).toBeInTheDocument();
+  });
+});
+
+describe('getInfoBlocksLayout (empty-block placement + divider hints)', () => {
+  const RISK: InfoBlocksItem = { title: 'Risk score', value: '90', valueSize: 'xl' };
+  const withEmpty: InfoBlocksItem[] = [
+    RISK,
+    EMPTY_INFO_BLOCK,
+    { title: 'Vendor', value: 'Elastic' },
+    { title: 'Result', value: 'Success' },
+  ];
+
+  it('spans the empty block over the single remaining cell at 2 columns', () => {
+    const layout = getInfoBlocksLayout(withEmpty, 2);
+    // Risk score occupies cell 1; the spacer fills the rest of row 1 (1 cell).
+    expect(layout[0]).toMatchObject({ columnStart: 0, span: 1, isEmpty: false });
+    expect(layout[1]).toMatchObject({ columnStart: 1, span: 1, isEmpty: true });
+    // The next real block therefore starts on row 2, in column 1.
+    expect(layout[2]).toMatchObject({ columnStart: 0, span: 1, isEmpty: false });
+    expect(layout[3]).toMatchObject({ columnStart: 1, span: 1, isEmpty: false });
+  });
+
+  it('spans the empty block over both remaining cells at 3 columns', () => {
+    const layout = getInfoBlocksLayout(withEmpty, 3);
+    // Risk score occupies cell 1; the spacer fills the rest of row 1 (2 cells).
+    expect(layout[0]).toMatchObject({ columnStart: 0, span: 1, isEmpty: false });
+    expect(layout[1]).toMatchObject({ columnStart: 1, span: 2, isEmpty: true });
+    // Real content still resumes on row 2.
+    expect(layout[2]).toMatchObject({ columnStart: 0, span: 1, isEmpty: false });
+    expect(layout[3]).toMatchObject({ columnStart: 1, span: 1, isEmpty: false });
+  });
+
+  it('keeps the divider on the block before an empty spacer, and marks the spacer last-column', () => {
+    const layout = getInfoBlocksLayout(withEmpty, 3);
+    // The block before the spacer is NOT the last column, so it keeps its
+    // inline-end (right-hand) vertical divider.
+    expect(layout[0].isLastColumn).toBe(false);
+    // The spacer fills the rest of the row, reaching the last column.
+    expect(layout[1]).toMatchObject({ isEmpty: true, isLastColumn: true });
+  });
+
+  it('marks a row that has real content below it', () => {
+    const layout = getInfoBlocksLayout(withEmpty, 3);
+    expect(layout[0].hasRowBelow).toBe(true); // Risk score, row 1 -> row 2 below
+    expect(layout[1].hasRowBelow).toBe(true); // spacer shares row 1
+    expect(layout[2].hasRowBelow).toBe(false); // last content row
+    expect(layout[3].hasRowBelow).toBe(false);
+  });
+
+  it('leaves single-column, no-empty layout unchanged (one span-1 cell per row)', () => {
+    const items: InfoBlocksItem[] = [
+      { title: 'A', value: '1' },
+      { title: 'B', value: '2' },
+    ];
+    const layout = getInfoBlocksLayout(items, 1);
+    expect(layout.every((cell) => cell.span === 1 && cell.columnStart === 0)).toBe(true);
+    expect(layout[0]).toMatchObject({ isLastColumn: true, hasRowBelow: true });
+    expect(layout[1]).toMatchObject({ isLastColumn: true, hasRowBelow: false });
+  });
+
+  it('preserves the vertical divider beside a partial trailing row (no empty item)', () => {
+    // 3 columns, 5 items: row 2 is [D | E | (absent)]. E is not the last column,
+    // so it keeps its inline-end divider even though the trailing cell is empty.
+    const items: InfoBlocksItem[] = ['A', 'B', 'C', 'D', 'E'].map((t) => ({
+      title: t,
+      value: t,
+    }));
+    const layout = getInfoBlocksLayout(items, 3);
+    expect(layout[4]).toMatchObject({ columnStart: 1, span: 1, isLastColumn: false });
+  });
+
+  it('fills a whole row when the empty block starts a row, and reports no content below a trailing empty row', () => {
+    const items: InfoBlocksItem[] = [
+      { title: 'A', value: '1' },
+      { title: 'B', value: '2' },
+      EMPTY_INFO_BLOCK,
+    ];
+    const layout = getInfoBlocksLayout(items, 2);
+    // A | B fill row 1; the spacer starts row 2 and fills both cells.
+    expect(layout[2]).toMatchObject({ columnStart: 0, span: 2, isEmpty: true });
+    // No horizontal divider under row 1 since the only row below holds no content.
+    expect(layout[0].hasRowBelow).toBe(false);
+    expect(layout[1].hasRowBelow).toBe(false);
   });
 });
 

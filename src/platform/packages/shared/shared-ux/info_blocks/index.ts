@@ -9,4 +9,10 @@
 
 export { InfoBlocks } from './src/info_blocks.component';
 export { InfoBlock } from './src/info_block.component';
-export type { InfoBlockItem, InfoBlocksProps } from './src/types';
+export { EMPTY_INFO_BLOCK, isEmptyInfoBlock } from './src/types';
+export type {
+  InfoBlockItem,
+  EmptyInfoBlockItem,
+  InfoBlocksItem,
+  InfoBlocksProps,
+} from './src/types';

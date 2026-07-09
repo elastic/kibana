@@ -23,10 +23,13 @@ export interface InfoBlockProps extends InfoBlockItem {
 export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   title,
   value,
+  valueSize,
   compressed,
   ...rest
 }) => {
   const { euiTheme } = useEuiTheme();
+  // "Big number" values map their font size to the matching euiTheme.size token.
+  const bigNumberFontSize = valueSize ? euiTheme.size[valueSize] : undefined;
   return (
     <div
       data-test-subj={rest['data-test-subj'] ?? 'infoBlock'}
@@ -41,6 +44,12 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
         size={compressed ? 'xs' : 's'}
         css={css`
           font-weight: ${euiTheme.font.weight.bold};
+          ${bigNumberFontSize
+            ? `
+                font-size: ${bigNumberFontSize};
+                line-height: ${euiTheme.font.lineHeightMultiplier};
+              `
+            : ''}
           a {
             font-weight: inherit;
           }
