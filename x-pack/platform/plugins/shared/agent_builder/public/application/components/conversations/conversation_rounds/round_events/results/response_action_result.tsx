@@ -98,7 +98,10 @@ const StatusBadge: React.FC<{ wasSuccessful?: boolean; status?: string }> = ({
   wasSuccessful,
   status,
 }) => {
-  if (wasSuccessful === true) {
+  // Check `status` first — `wasSuccessful` is `false` for both pending and
+  // genuinely-failed actions, so relying on it alone shows a red "Failed"
+  // badge for actions that are simply not-yet-completed.
+  if (status === 'successful' || (wasSuccessful === true && status !== 'failed')) {
     return (
       <EuiBadge color="success">
         {i18n.translate('xpack.agentBuilder.roundEvents.results.responseAction.successful', {
@@ -107,11 +110,20 @@ const StatusBadge: React.FC<{ wasSuccessful?: boolean; status?: string }> = ({
       </EuiBadge>
     );
   }
-  if (wasSuccessful === false) {
+  if (status === 'failed' || (wasSuccessful === false && status && status !== 'pending')) {
     return (
       <EuiBadge color="danger">
         {i18n.translate('xpack.agentBuilder.roundEvents.results.responseAction.failed', {
           defaultMessage: 'Failed',
+        })}
+      </EuiBadge>
+    );
+  }
+  if (status === 'canceled') {
+    return (
+      <EuiBadge color="default">
+        {i18n.translate('xpack.agentBuilder.roundEvents.results.responseAction.canceled', {
+          defaultMessage: 'Canceled',
         })}
       </EuiBadge>
     );
