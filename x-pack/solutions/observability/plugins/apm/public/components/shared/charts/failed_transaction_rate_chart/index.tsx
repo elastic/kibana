@@ -177,8 +177,7 @@ export function FailedTransactionRateChart({
       : []),
   ];
 
-  const chartHeight =
-    sectionHeight !== undefined ? sectionHeight - SECTION_CHROME_HEIGHT : height;
+  const chartHeight = sectionHeight !== undefined ? sectionHeight - SECTION_CHROME_HEIGHT : height;
 
   return (
     <EuiPanel
