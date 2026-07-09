@@ -69,7 +69,7 @@ export const registerESQLExtensionsRoute = (
             }
           ),
           // query is passed as a URL path segment, so keep it well under typical URL length limits.
-          query: schema.string({ maxLength: 2000 }),
+          query: schema.string({ maxLength: 10000 }),
         }),
       },
     },

@@ -187,7 +187,7 @@ export const registerGetTimeFieldRoute = (
       },
       validate: {
         body: schema.object({
-          query: schema.string({ maxLength: 50000 }),
+          query: schema.string({ maxLength: 1000000 }),
         }),
       },
     },
