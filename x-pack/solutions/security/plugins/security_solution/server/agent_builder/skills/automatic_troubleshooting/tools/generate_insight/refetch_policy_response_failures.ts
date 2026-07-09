@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { policyIndexPattern } from '../../../../../../common/endpoint/constants';
 import { INITIAL_POLICY_ID } from '../../../../../endpoint/routes/policy';
+import { prefixIndexPatternsWithCcs } from '../../../../../endpoint/utils/ccs_utils';
 
 const POLICY_RESPONSE_INDEX_PATTERN = policyIndexPattern;
 const DEFAULT_AGENT_BUCKET_SIZE = 1500;
@@ -59,6 +60,7 @@ export interface PolicyResponseFailureEvent {
 export interface RefetchPolicyResponseOptions {
   endpointIds: string[];
   size?: number;
+  ccsEnabled?: boolean;
 }
 
 const isFailureOrWarning = (action: PolicyResponseAction): boolean =>
@@ -66,11 +68,15 @@ const isFailureOrWarning = (action: PolicyResponseAction): boolean =>
 
 const UNKNOWN_OS_NAME = 'unknown';
 
-function buildQuery({ endpointIds, size }: RefetchPolicyResponseOptions): SearchRequest {
+function buildQuery({
+  endpointIds,
+  size,
+  ccsEnabled,
+}: RefetchPolicyResponseOptions): SearchRequest {
   return {
     allow_no_indices: true,
     ignore_unavailable: true,
-    index: [POLICY_RESPONSE_INDEX_PATTERN],
+    index: [prefixIndexPatternsWithCcs(POLICY_RESPONSE_INDEX_PATTERN, ccsEnabled ?? false)],
     query: {
       bool: {
         must: [

@@ -61,6 +61,14 @@ describe('getPolicyResponseFailureEvents', () => {
     ]);
   });
 
+  it('queries the CCS-prefixed pattern when ccsEnabled is true', async () => {
+    const esClient = mockEsClient([]);
+    await getPolicyResponseFailureEvents(esClient, { endpointIds: ['a'], ccsEnabled: true });
+
+    const query = (esClient.search as jest.Mock).mock.calls[0][0];
+    expect(query.index).toEqual(['metrics-endpoint.policy-*,*:metrics-endpoint.policy-*']);
+  });
+
   it('returns no rows when the latest policy response for every agent is all-success', async () => {
     const esClient = mockEsClient([
       bucket('a', 'Linux', 'doc-a', [

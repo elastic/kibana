@@ -55,6 +55,7 @@ export const createGenerateInsightGraph = ({
   data,
   spaceId,
   esClient,
+  ccsEnabled,
 }: {
   model: ScopedModel;
   problemDescription: string;
@@ -63,6 +64,7 @@ export const createGenerateInsightGraph = ({
   data: unknown[];
   spaceId: string;
   esClient: ElasticsearchClient;
+  ccsEnabled: boolean;
 }) => {
   async function categorizeInsightType(): Promise<{ insightType: WorkflowInsightType }> {
     const output = await model.chatModel.withStructuredOutput(
@@ -85,7 +87,10 @@ ${problemDescription}
       return {};
     }
 
-    const refetchedData = await getPolicyResponseFailureEvents(esClient, { endpointIds });
+    const refetchedData = await getPolicyResponseFailureEvents(esClient, {
+      endpointIds,
+      ccsEnabled,
+    });
     return { refetchedData };
   }
 

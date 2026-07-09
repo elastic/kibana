@@ -66,6 +66,7 @@ This tool creates structured insights for persisting the results of the troubles
           .ensureInCurrentSpace({ agentIds: endpointIds });
 
         const model = await modelProvider.getDefaultModel();
+        const ccsEnabled = await endpointAppContextService.isCcsEnabled();
         const graph = createGenerateInsightGraph({
           model,
           problemDescription,
@@ -74,6 +75,7 @@ This tool creates structured insights for persisting the results of the troubles
           data,
           spaceId,
           esClient: esClient.asInternalUser,
+          ccsEnabled,
         });
         const outState = await graph.invoke({});
 

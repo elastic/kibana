@@ -64,7 +64,10 @@ const createModel = ({
 
 const esClient = {} as unknown as ElasticsearchClient;
 
-const buildGraph = (model: ScopedModel, overrides: Partial<{ data: unknown[] }> = {}) =>
+const buildGraph = (
+  model: ScopedModel,
+  overrides: Partial<{ data: unknown[]; ccsEnabled: boolean }> = {}
+) =>
   createGenerateInsightGraph({
     model,
     problemDescription: 'ransomware protection disabled on host',
@@ -73,6 +76,7 @@ const buildGraph = (model: ScopedModel, overrides: Partial<{ data: unknown[] }> 
     data: overrides.data ?? [{ some: 'model-supplied doc' }],
     spaceId: 'space-1',
     esClient,
+    ccsEnabled: overrides.ccsEnabled ?? false,
   });
 
 describe('createGenerateInsightGraph', () => {
@@ -126,11 +130,28 @@ describe('createGenerateInsightGraph', () => {
 
       expect(mockGetPolicyResponseFailureEvents).toHaveBeenCalledWith(esClient, {
         endpointIds: ['endpoint-1'],
+        ccsEnabled: false,
       });
       expect(generateInvoke).not.toHaveBeenCalled();
       expect(withStructuredOutput).toHaveBeenCalledTimes(1);
       expect(mockCreateFromDefendInsights).not.toHaveBeenCalled();
       expect(result.results).toEqual([]);
+    });
+
+    it('passes ccsEnabled through to the refetch', async () => {
+      mockGetPolicyResponseFailureEvents.mockResolvedValueOnce([]);
+      const { model } = createModel({
+        insightType: WorkflowInsightType.enum.policy_response_failure,
+        insights: [],
+      });
+
+      const graph = buildGraph(model, { ccsEnabled: true });
+      await graph.invoke({});
+
+      expect(mockGetPolicyResponseFailureEvents).toHaveBeenCalledWith(esClient, {
+        endpointIds: ['endpoint-1'],
+        ccsEnabled: true,
+      });
     });
 
     it('generates from the refetched failure/warning evidence, not the model-supplied data', async () => {
