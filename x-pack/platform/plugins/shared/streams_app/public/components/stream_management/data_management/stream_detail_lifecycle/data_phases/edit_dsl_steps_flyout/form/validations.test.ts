@@ -8,8 +8,9 @@
 import type { ValidationFuncArg } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import {
+  afterBeforeExitBoundary,
   afterGreaterThanPreviousStep,
-  afterSmallerThanDataRetention,
+  fixedIntervalBeforeExitBoundary,
   fixedIntervalMultipleOfPreviousStep,
   fixedIntervalMustBeAtLeastFiveMinutes,
 } from './validations';
@@ -172,13 +173,14 @@ describe('streams DSL steps flyout validations', () => {
     });
   });
 
-  describe('afterSmallerThanDataRetention', () => {
+  describe('afterBeforeExitBoundary', () => {
     const dayMs = 86_400_000;
 
-    it('fails when after is larger than data retention', () => {
-      const validate = afterSmallerThanDataRetention({
-        retentionMs: 30 * dayMs,
-        retentionEsFormat: '30d',
+    it('fails against the delete phase', () => {
+      const validate = afterBeforeExitBoundary({
+        boundaryMs: 30 * dayMs,
+        boundaryEsFormat: '30d',
+        phase: 'delete',
       });
 
       const formData: FlatFormData = {
@@ -196,39 +198,41 @@ describe('streams DSL steps flyout validations', () => {
       );
 
       expect(result).toEqual({
-        message: 'Must not exceed the data retention period (30d).',
+        message: 'Must not exceed the delete phase (30d).',
       });
     });
 
-    it('fails when after is equal to data retention', () => {
-      const validate = afterSmallerThanDataRetention({
-        retentionMs: 30 * dayMs,
-        retentionEsFormat: '30d',
+    it('fails against the frozen phase when one is configured', () => {
+      const validate = afterBeforeExitBoundary({
+        boundaryMs: 20 * dayMs,
+        boundaryEsFormat: '20d',
+        phase: 'frozen',
       });
 
       const formData: FlatFormData = {
-        '_meta.downsampleSteps[0].afterValue': '30',
+        '_meta.downsampleSteps[0].afterValue': '20',
         '_meta.downsampleSteps[0].afterUnit': 'd',
-        '_meta.downsampleSteps[0].afterToMilliSeconds': 30 * dayMs,
+        '_meta.downsampleSteps[0].afterToMilliSeconds': 20 * dayMs,
       };
 
       const result = validate(
         createArg({
           path: '_meta.downsampleSteps[0].afterValue',
-          value: '30',
+          value: '20',
           formData,
         })
       );
 
       expect(result).toEqual({
-        message: 'Must not exceed the data retention period (30d).',
+        message: 'Must not exceed the frozen phase (20d).',
       });
     });
 
-    it('returns undefined when after is smaller than data retention', () => {
-      const validate = afterSmallerThanDataRetention({
-        retentionMs: 30 * dayMs,
-        retentionEsFormat: '30d',
+    it('returns undefined when after is smaller than the boundary', () => {
+      const validate = afterBeforeExitBoundary({
+        boundaryMs: 30 * dayMs,
+        boundaryEsFormat: '30d',
+        phase: 'delete',
       });
 
       const formData: FlatFormData = {
@@ -246,6 +250,167 @@ describe('streams DSL steps flyout validations', () => {
       );
 
       expect(result).toBeUndefined();
+    });
+
+    it('returns undefined for an empty value or an unusable boundary', () => {
+      const validate = afterBeforeExitBoundary({
+        boundaryMs: 30 * dayMs,
+        boundaryEsFormat: '30d',
+        phase: 'delete',
+      });
+      expect(
+        validate(
+          createArg({
+            path: '_meta.downsampleSteps[0].afterValue',
+            value: '',
+            formData: { '_meta.downsampleSteps[0].afterValue': '' },
+          })
+        )
+      ).toBeUndefined();
+
+      const noBoundary = afterBeforeExitBoundary({
+        boundaryMs: -1,
+        boundaryEsFormat: '',
+        phase: 'delete',
+      });
+      expect(
+        noBoundary(
+          createArg({
+            path: '_meta.downsampleSteps[0].afterValue',
+            value: '999',
+            formData: {
+              '_meta.downsampleSteps[0].afterValue': '999',
+              '_meta.downsampleSteps[0].afterToMilliSeconds': 999 * dayMs,
+            },
+          })
+        )
+      ).toBeUndefined();
+    });
+  });
+
+  describe('fixedIntervalBeforeExitBoundary', () => {
+    const dayMs = 86_400_000;
+
+    it('fails when the interval reaches the frozen phase', () => {
+      const validate = fixedIntervalBeforeExitBoundary({
+        boundaryMs: 40 * dayMs,
+        boundaryEsFormat: '40d',
+        phase: 'frozen',
+      });
+
+      const formData: FlatFormData = {
+        '_meta.downsampleSteps[0].fixedIntervalValue': '40',
+        '_meta.downsampleSteps[0].fixedIntervalUnit': 'd',
+      };
+
+      const result = validate(
+        createArg({
+          path: '_meta.downsampleSteps[0].fixedIntervalValue',
+          value: '40',
+          formData,
+        })
+      );
+
+      expect(result).toEqual({
+        message: 'Must not exceed the frozen phase (40d).',
+      });
+    });
+
+    it('fails against the delete phase when no frozen phase is configured', () => {
+      const validate = fixedIntervalBeforeExitBoundary({
+        boundaryMs: 30 * dayMs,
+        boundaryEsFormat: '30d',
+        phase: 'delete',
+      });
+
+      const formData: FlatFormData = {
+        '_meta.downsampleSteps[0].fixedIntervalValue': '45',
+        '_meta.downsampleSteps[0].fixedIntervalUnit': 'd',
+      };
+
+      const result = validate(
+        createArg({
+          path: '_meta.downsampleSteps[0].fixedIntervalValue',
+          value: '45',
+          formData,
+        })
+      );
+
+      expect(result).toEqual({
+        message: 'Must not exceed the delete phase (30d).',
+      });
+    });
+
+    it('returns undefined when the interval is smaller than the boundary', () => {
+      const validate = fixedIntervalBeforeExitBoundary({
+        boundaryMs: 40 * dayMs,
+        boundaryEsFormat: '40d',
+        phase: 'frozen',
+      });
+
+      const formData: FlatFormData = {
+        '_meta.downsampleSteps[0].fixedIntervalValue': '4',
+        '_meta.downsampleSteps[0].fixedIntervalUnit': 'd',
+      };
+
+      const result = validate(
+        createArg({
+          path: '_meta.downsampleSteps[0].fixedIntervalValue',
+          value: '4',
+          formData,
+        })
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined for an empty value, non-positive interval, or unusable boundary', () => {
+      const validate = fixedIntervalBeforeExitBoundary({
+        boundaryMs: 40 * dayMs,
+        boundaryEsFormat: '40d',
+        phase: 'frozen',
+      });
+      // Empty value.
+      expect(
+        validate(
+          createArg({
+            path: '_meta.downsampleSteps[0].fixedIntervalValue',
+            value: '',
+            formData: { '_meta.downsampleSteps[0].fixedIntervalValue': '' },
+          })
+        )
+      ).toBeUndefined();
+      // Non-positive interval is left to the other interval validators.
+      expect(
+        validate(
+          createArg({
+            path: '_meta.downsampleSteps[0].fixedIntervalValue',
+            value: '0',
+            formData: {
+              '_meta.downsampleSteps[0].fixedIntervalValue': '0',
+              '_meta.downsampleSteps[0].fixedIntervalUnit': 'd',
+            },
+          })
+        )
+      ).toBeUndefined();
+      // Unusable boundary.
+      const noBoundary = fixedIntervalBeforeExitBoundary({
+        boundaryMs: -1,
+        boundaryEsFormat: '',
+        phase: 'frozen',
+      });
+      expect(
+        noBoundary(
+          createArg({
+            path: '_meta.downsampleSteps[0].fixedIntervalValue',
+            value: '999',
+            formData: {
+              '_meta.downsampleSteps[0].fixedIntervalValue': '999',
+              '_meta.downsampleSteps[0].fixedIntervalUnit': 'd',
+            },
+          })
+        )
+      ).toBeUndefined();
     });
   });
 });

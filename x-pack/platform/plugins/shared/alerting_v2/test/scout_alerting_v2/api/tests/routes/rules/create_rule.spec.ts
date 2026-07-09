@@ -220,7 +220,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       const body = buildCreateRuleData({
         kind: 'signal',
         state_transition: undefined,
-        no_data_strategy: 'emit',
+        no_data_strategy: 'last_known_status',
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
@@ -391,7 +391,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         metadata: { name: 'standalone-no-data-rule' },
-        no_data_strategy: 'emit',
+        no_data_strategy: 'last_known_status',
         query: {
           format: 'standalone',
           breach: { query: 'FROM logs-* | LIMIT 1' },
@@ -404,7 +404,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.query).toStrictEqual(body.query);
-      expect(response.body.no_data_strategy).toBe('emit');
+      expect(response.body.no_data_strategy).toBe('last_known_status');
     }
   );
 

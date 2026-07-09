@@ -17,7 +17,9 @@ import {
   EntityType,
 } from '../../../../../../common/entity_analytics/types';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
+import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { AlertsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/alerts_findings_details_table';
+import type { CloudPostureEntityIdentifier } from '../../../../../cloud_security_posture/components/entity_insight';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
@@ -31,16 +33,21 @@ const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.alerts
   defaultMessage: 'Alerts',
 });
 
-const ICON_TYPE = { [EntityType.host]: 'storage', [EntityType.user]: 'user' } as const;
-const FIELD = {
+const ICON_TYPE = EntityIconByType;
+const FIELD: Record<
+  EntityType.host | EntityType.user | EntityType.generic,
+  CloudPostureEntityIdentifier
+> = {
   [EntityType.host]: EntityIdentifierFields.hostName,
   [EntityType.user]: EntityIdentifierFields.userName,
-} as const;
+  // `related.entity` carries the entity id used to filter alerts for generic entities.
+  [EntityType.generic]: 'related.entity',
+};
 
 export interface AlertsInsightsProps {
-  /** Whether this tool is scoped to a host or user entity. Controls the icon, query field, and entity type passed to the table. */
-  entityType: EntityType.host | EntityType.user;
-  /** Field value used to query alerts — `host.name` for hosts, `user.name` for users. */
+  /** Which entity type this tool is scoped to. Controls the icon, query field, and entity type passed to the table. */
+  entityType: EntityType.host | EntityType.user | EntityType.generic;
+  /** Field value used to query alerts — e.g. `host.name` for hosts, the entity id for generic. */
   value: string;
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
@@ -98,7 +105,13 @@ export const AlertsInsights = memo(
             field={FIELD[entityType]}
             value={value}
             entityId={entityId}
-            entityType={entityType}
+            // The alerts table only resolves host/user entity types; for generic it relies on
+            // the `field`/`value` filter (`related.entity`) instead.
+            entityType={
+              entityType === EntityType.host || entityType === EntityType.user
+                ? entityType
+                : undefined
+            }
             onShowAlert={onExpandAlert}
           />
         </div>

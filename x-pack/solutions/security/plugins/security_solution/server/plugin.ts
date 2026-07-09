@@ -25,7 +25,6 @@ import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
-import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
 import { ensureIndicesExistsForPolicies } from './endpoint/migrations/ensure_indices_exists_for_policies';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
 import { registerAgentRoutes } from './endpoint/routes/agent';
@@ -132,11 +131,6 @@ import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generati
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
-import {
-  registerEntityStoreFieldRetentionEnrichTask,
-  registerEntityStoreSnapshotTask,
-  registerEntityStoreHealthTask,
-} from './lib/entity_analytics/entity_store/tasks';
 import { accessesFrequentlyMaintainer } from './lib/entity_analytics/maintainers/accesses';
 import { communicatesWithMaintainer } from './lib/entity_analytics/maintainers/communicates_with';
 import { administersMaintainer } from './lib/entity_analytics/maintainers/administers';
@@ -172,6 +166,8 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
+import { installSecurityAlertAnalysisWorkflowAndMarkReady } from './workflows/alert_analysis_workflow/install';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
@@ -292,10 +288,9 @@ export class Plugin implements ISecuritySolutionPlugin {
         isServerless: this.isServerless,
       },
       this.isServerless,
+      this.pluginContext.env.packageInfo.version,
       plugins.encryptedSavedObjects?.canEncrypt === true
-    ).catch((error) => {
-      this.logger.error(`Error registering security tools: ${error}`);
-    });
+    );
     registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
@@ -387,53 +382,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
 
-    if (!experimentalFeatures.entityStoreDisabled) {
-      plugins.entityStore?.registerEntityMaintainer(accessesFrequentlyMaintainer);
-      plugins.entityStore?.registerEntityMaintainer(communicatesWithMaintainer);
-      plugins.entityStore?.registerEntityMaintainer(administersMaintainer);
-      plugins.entityStore?.registerEntityMaintainer(supervisesMaintainer);
-      plugins.entityStore?.registerEntityMaintainer(ownsMaintainer);
-
-      registerEntityStoreFieldRetentionEnrichTask({
-        getStartServices: core.getStartServices,
-        logger: this.logger,
-        telemetry: core.analytics,
-        taskManager: plugins.taskManager,
-      });
-
-      registerEntityStoreDataViewRefreshTask({
-        getStartServices: core.getStartServices,
-        appClientFactory,
-        logger: this.logger,
-        telemetry: core.analytics,
-        taskManager: plugins.taskManager,
-        auditLogger: plugins.security?.audit.withoutRequest,
-        entityStoreConfig: config.entityAnalytics.entityStore,
-        experimentalFeatures,
-        kibanaVersion: pluginContext.env.packageInfo.version,
-        isServerless: this.isServerless,
-      });
-
-      registerEntityStoreSnapshotTask({
-        getStartServices: core.getStartServices,
-        logger: this.logger,
-        telemetry: core.analytics,
-        taskManager: plugins.taskManager,
-      });
-
-      registerEntityStoreHealthTask({
-        getStartServices: core.getStartServices,
-        appClientFactory,
-        logger: this.logger,
-        telemetry: core.analytics,
-        taskManager: plugins.taskManager,
-        auditLogger: plugins.security?.audit.withoutRequest,
-        entityStoreConfig: config.entityAnalytics.entityStore,
-        experimentalFeatures,
-        kibanaVersion: pluginContext.env.packageInfo.version,
-        isServerless: this.isServerless,
-      });
-    }
+    plugins.entityStore?.registerEntityMaintainer(accessesFrequentlyMaintainer);
+    plugins.entityStore?.registerEntityMaintainer(communicatesWithMaintainer);
+    plugins.entityStore?.registerEntityMaintainer(administersMaintainer);
+    plugins.entityStore?.registerEntityMaintainer(supervisesMaintainer);
+    plugins.entityStore?.registerEntityMaintainer(ownsMaintainer);
 
     registerPrivilegeMonitoringTask({
       getStartServices: core.getStartServices,
@@ -453,6 +406,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
       config: this.config,
+      ml: plugins.ml,
     });
 
     if (plugins.searchInferenceEndpoints) {
@@ -855,7 +809,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions, core, experimentalFeatures);
+      registerWorkflowSteps(plugins.workflowsExtensions, experimentalFeatures);
+      registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
 
     setupAlertsCapabilitiesSwitcher({
@@ -887,6 +842,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     ).catch(() => {});
 
     this.ruleMonitoringService.start(core, plugins);
+
+    if (plugins.workflowsExtensions) {
+      // Install once in the global space, then mark ready (install is awaited before ready inside
+      // the helper). Fire-and-forget: startup must not block on it.
+      void installSecurityAlertAnalysisWorkflowAndMarkReady({
+        workflowsExtensions: plugins.workflowsExtensions,
+        logger,
+      });
+    }
 
     const savedObjectsClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([

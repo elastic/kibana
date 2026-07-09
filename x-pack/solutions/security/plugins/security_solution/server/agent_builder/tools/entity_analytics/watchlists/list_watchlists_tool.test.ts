@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import {
@@ -14,8 +15,9 @@ import {
   setupMockCoreStartServices,
 } from '../../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../../common';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
 import { getWatchlistToolAvailability } from './watchlist_availability';
-import { listWatchlistsTool } from './list_watchlists_tool';
+import { listWatchlistsTool, SECURITY_LIST_WATCHLISTS_TOOL_ID } from './list_watchlists_tool';
 
 jest.mock('./watchlist_availability', () => ({
   getWatchlistToolAvailability: jest.fn(),
@@ -63,10 +65,11 @@ const buildWatchlist = (overrides: Partial<Record<string, unknown>> = {}) => ({
 describe('listWatchlistsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const tool = listWatchlistsTool(mockCore, mockLogger, mockExperimentalFeatures);
+  let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    setupMockCoreStartServices(mockCore, mockEsClient);
+    mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
     mockGetWatchlistToolAvailability.mockResolvedValue({ status: 'available' });
     mockGetUserWatchlistPrivileges.mockResolvedValue({
       privileges: {},
@@ -193,6 +196,72 @@ describe('listWatchlistsTool', () => {
 
       const error = result.results[0] as ErrorResult;
       expect(error.type).toBe(ToolResultType.error);
+    });
+
+    describe('telemetry', () => {
+      it('reports success=true with resultCount matching the filtered result length', async () => {
+        mockListFn.mockResolvedValueOnce([
+          buildWatchlist({ id: 'wl-1' }),
+          buildWatchlist({ id: 'wl-2' }),
+        ]);
+
+        await tool.handler({}, createToolHandlerContext(mockRequest, mockEsClient, mockLogger));
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_LIST_WATCHLISTS_TOOL_ID,
+            actionType: 'read',
+            spaceId: 'default',
+            success: true,
+            resultCount: 2,
+            errorMessage: undefined,
+            userConfirmationOutcome: undefined,
+          }
+        );
+      });
+
+      it('reports success=false when the caller lacks read privilege', async () => {
+        mockGetUserWatchlistPrivileges.mockResolvedValueOnce({
+          privileges: {},
+          has_all_required: false,
+          has_read_permissions: false,
+          has_write_permissions: false,
+        });
+
+        await tool.handler({}, createToolHandlerContext(mockRequest, mockEsClient, mockLogger));
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_LIST_WATCHLISTS_TOOL_ID,
+            actionType: 'read',
+            spaceId: 'default',
+            success: false,
+            resultCount: 0,
+            errorMessage: 'You do not have permission to read watchlists in this space.',
+            userConfirmationOutcome: undefined,
+          }
+        );
+      });
+
+      it('reports success=false when the client throws', async () => {
+        mockListFn.mockRejectedValueOnce(new Error('boom'));
+
+        await tool.handler({}, createToolHandlerContext(mockRequest, mockEsClient, mockLogger));
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_LIST_WATCHLISTS_TOOL_ID,
+            actionType: 'read',
+            spaceId: 'default',
+            success: false,
+            resultCount: 0,
+            errorMessage: 'boom',
+          }
+        );
+      });
     });
   });
 });

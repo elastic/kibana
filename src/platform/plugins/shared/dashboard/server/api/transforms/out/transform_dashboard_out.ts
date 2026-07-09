@@ -24,7 +24,8 @@ export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references: SavedObjectReference[] | undefined = undefined,
   isDashboardAppRequest: boolean = false,
-  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
+  useGASchemas?: boolean
 ): {
   dashboardState: DashboardState;
   warnings: Warnings;
@@ -43,7 +44,7 @@ export function transformDashboardOut(
     timeTo,
     title,
     projectRouting,
-    isApproximate,
+    esqlApproximation,
   } = attributes;
 
   // Extract tag references
@@ -55,13 +56,15 @@ export function transformDashboardOut(
     panelsJSON,
     sections,
     references,
-    isDashboardAppRequest
+    isDashboardAppRequest,
+    useGASchemas
   );
 
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
     legacyControls,
     pinned_panels,
-    references
+    references,
+    useGASchemas
   );
 
   const timeRange =
@@ -140,7 +143,7 @@ export function transformDashboardOut(
       ...(validatedState as DashboardState), // defaults have been injected at this point, so casting is safe
       /** These keys were validated seperately, since they each have unique error handling */
       ...(filters && { filters }),
-      ...(isApproximate !== undefined && { esql_approximation: isApproximate }),
+      ...(esqlApproximation !== undefined && { esql_approximation: esqlApproximation }),
       panels,
       pinned_panels: pinnedPanels,
       ...(query && { query }),

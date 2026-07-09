@@ -184,6 +184,9 @@ export const epmRouteService = {
       pkgVersion
     );
   },
+  getIlmPoliciesPath: () => {
+    return EPM_API_ROUTES.ILM_POLICIES_PATTERN;
+  },
 };
 
 export const packagePolicyRouteService = {

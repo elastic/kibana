@@ -20,15 +20,19 @@ import type {
   DefaultRouteCreateOptions,
   IoTsParamsObject,
   ServerRouteRepository,
+  ZodParamsObject,
 } from '@kbn/server-route-repository';
 import { stripNullishRequestParameters } from '@kbn/server-route-repository';
 import { merge } from 'lodash';
 import {
   decodeRequestParams,
+  makeZodValidationObject,
   parseEndpoint,
   passThroughValidationObject,
 } from '@kbn/server-route-repository';
 import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
+import { isZod, z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import apm from 'elastic-apm-node';
 import type { VersionedRouteRegistrar } from '@kbn/core-http-server';
@@ -51,6 +55,24 @@ const inspectRt = t.exact(
     query: t.exact(t.partial({ _inspect: jsonRt.pipe(t.boolean) })),
   })
 );
+
+// zod equivalent of `inspectRt`, merged into a zod route's `query` schema so
+// the `?_inspect` debug query param is accepted by every zod-validated route,
+// the same way it is for io-ts routes.
+const inspectQueryShape = { _inspect: BooleanFromString.optional() };
+
+function withInspectQueryParam(params: ZodParamsObject): ZodParamsObject {
+  const query = params.shape.query;
+
+  const queryWithInspect =
+    query instanceof z.ZodObject
+      ? query.extend(inspectQueryShape)
+      : query
+      ? z.intersection(query, z.object(inspectQueryShape))
+      : z.object(inspectQueryShape);
+
+  return params.extend({ query: queryWithInspect }) as ZodParamsObject;
+}
 
 const CLIENT_CLOSED_REQUEST = {
   statusCode: 499,
@@ -92,8 +114,16 @@ export function registerRoutes({
     const options = ('options' in route ? route.options : {}) as DefaultRouteCreateOptions &
       APMRouteCreateOptions;
     const params = 'params' in route ? route.params : undefined;
+    const paramsIsZod = params !== undefined && isZod(params);
 
     const { method, pathname, version } = parseEndpoint(endpoint);
+
+    // zod params are validated (and coerced) by Core using the schema passed
+    // to `validate` below; io-ts params (and routes without params) are
+    // validated later, inside the handler, via `decodeRequestParams`.
+    const validate = paramsIsZod
+      ? makeZodValidationObject(withInspectQueryParam(params as ZodParamsObject))
+      : passThroughValidationObject;
 
     const wrappedHandler = async (
       context: ApmPluginRequestHandlerContext,
@@ -110,16 +140,20 @@ export function registerRoutes({
       inspectableEsQueriesMap.set(request, []);
 
       try {
-        const runtimeType = params ? mergeRt(params as IoTsParamsObject, inspectRt) : inspectRt;
+        const strippedParams = stripNullishRequestParameters({
+          params: request.params,
+          body: request.body,
+          query: request.query,
+        });
 
-        const validatedParams = decodeRequestParams(
-          stripNullishRequestParameters({
-            params: request.params,
-            body: request.body,
-            query: request.query,
-          }),
-          runtimeType
-        );
+        // For zod routes, Core already validated (and coerced) the request
+        // against `validate` above, so there's nothing left to decode here.
+        const validatedParams = paramsIsZod
+          ? strippedParams
+          : decodeRequestParams(
+              strippedParams,
+              params ? mergeRt(params as IoTsParamsObject, inspectRt) : inspectRt
+            );
 
         const getApmIndices = async () => {
           const coreContext = await context.core;
@@ -232,7 +266,7 @@ export function registerRoutes({
         {
           path: pathname,
           options,
-          validate: passThroughValidationObject,
+          validate,
           security: security as RouteSecurity,
         },
         wrappedHandler
@@ -252,7 +286,7 @@ export function registerRoutes({
         {
           version,
           validate: {
-            request: passThroughValidationObject,
+            request: validate,
           },
         },
         wrappedHandler

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFacetButton, EuiFacetGroup } from '@elastic/eui';
+import { EuiFacetButton, EuiFacetGroup, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
+import { humanizeCategoryId } from '../lib/humanize_category_id';
 
 export interface CategoryFacetsProps {
   /**
@@ -22,19 +23,22 @@ export interface CategoryFacetsProps {
   onChange: (categories: string[]) => void;
 }
 
-function humanizeCategoryId(id: string): string {
-  return id
-    .split('-')
-    .map((word) => (word.length > 0 ? word[0].toUpperCase() + word.slice(1) : word))
-    .join(' ');
-}
-
 /**
  * Facet sidebar over the closed-vocabulary `categories` field. Labels humanize
  * the kebab-case category id (e.g. `threat-intel` → `Threat Intel`);
  */
 export const CategoryFacets = React.memo<CategoryFacetsProps>(
   ({ templates, selectedCategories, onChange }) => {
+    const { euiTheme } = useEuiTheme();
+
+    // Only the selected facet is emphasized; unselected facets keep the default weight.
+    const facetWeightCss = useCallback(
+      (isSelected: boolean) => ({
+        fontWeight: isSelected ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular,
+      }),
+      [euiTheme.font.weight.semiBold, euiTheme.font.weight.regular]
+    );
+
     const categoryCounts = useMemo(() => {
       const counts = new Map<string, number>();
       for (const template of templates) {
@@ -69,6 +73,7 @@ export const CategoryFacets = React.memo<CategoryFacetsProps>(
             quantity={templates.length}
             isSelected={selectedCategories.length === 0}
             onClick={clearCategories}
+            css={facetWeightCss(selectedCategories.length === 0)}
             data-test-subj="workflowLibraryCategoryFacet-all"
           >
             {i18n.translate('workflows.library.categoryFacets.allCategories', {
@@ -81,6 +86,7 @@ export const CategoryFacets = React.memo<CategoryFacetsProps>(
               quantity={count}
               isSelected={selectedCategories.includes(id)}
               onClick={() => toggleCategory(id)}
+              css={facetWeightCss(selectedCategories.includes(id))}
               data-test-subj={`workflowLibraryCategoryFacet-${id}`}
             >
               {humanizeCategoryId(id)}
