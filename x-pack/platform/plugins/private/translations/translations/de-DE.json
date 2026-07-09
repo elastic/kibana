@@ -26589,7 +26589,6 @@
     "xpack.lens.config.cannotConvertToEsqlRuntimeFieldTooltip": "Kann nicht nach ES|QL konvertieren: Runtime-Felder werden in einem kommenden Update unterstützt.",
     "xpack.lens.config.cannotConvertToEsqlTermsTooltip": "Konvertierung in ES|QL nicht möglich: Die Aggregation der Top-Werte (Begriffe) wird in einem kommenden Update unterstützt.",
     "xpack.lens.config.cannotConvertToEsqlTimeShiftTooltip": "Kann nicht nach ES|QL konvertieren: Zeitverschiebung wird in einem kommenden Update unterstützt.",
-    "xpack.lens.config.cannotConvertToEsqlTrendLineTooltip": "Kann nicht nach ES|QL konvertieren: Metrik-Visualisierungen mit Trendlinien werden in einem kommenden Update unterstützt.",
     "xpack.lens.config.cannotConvertToEsqlUnknownTooltip": "Konvertierung in ES|QL nicht möglich: Diese Visualisierung wird in einem kommenden Update unterstützt.",
     "xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip": "Konvertierung in ES|QL nicht möglich: Einige der verwendeten Einstellungen werden in einem kommenden Update unterstützt.",
     "xpack.lens.config.collapseAriaLabel": "Minimieren",
