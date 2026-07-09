@@ -120,10 +120,8 @@ export function registerSearchRoute(
               .toPromise();
 
             if (response && (response.rawResponse as unknown as IncomingMessage).pipe) {
-              const rawResponse = response.rawResponse as unknown as IncomingMessage;
-              return res.custom({
-                statusCode: rawResponse.statusCode ?? 200,
-                body: rawResponse,
+              return res.ok({
+                body: response.rawResponse,
                 headers: {
                   'kbn-search-is-restored': response.isRestored ? '?1' : '?0',
                   'kbn-search-request-params': JSON.stringify(response.requestParams),
