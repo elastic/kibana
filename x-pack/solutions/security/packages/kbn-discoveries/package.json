@@ -1,0 +1,24 @@
+{
+  "name": "@kbn/discoveries",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "sideEffects": false,
+  "scripts": {
+    "openapi:generate": "node scripts/openapi/generate",
+    "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate"
+  },
+  "dependencies": {
+    "@kbn/core": "link:../../../../../src/core",
+    "@kbn/elastic-assistant-common": "link:../../../../../x-pack/platform/packages/shared/kbn-elastic-assistant-common",
+    "@kbn/event-log-plugin": "link:../../../../../x-pack/platform/plugins/event_log",
+    "@kbn/langchain": "link:../../../../../x-pack/platform/packages/shared/kbn-langchain",
+    "@kbn/zod": "link:../../../../../src/platform/packages/shared/kbn-zod",
+    "@langchain/core": "^0.3.26",
+    "@langchain/langgraph": "^0.2.20"
+  }
+}
+
+
+
+
