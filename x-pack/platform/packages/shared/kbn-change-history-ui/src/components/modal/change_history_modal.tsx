@@ -19,6 +19,7 @@ import { ChangeHistoryModalSelectionContext } from '../../provider/change_histor
 import type { ChangeHistoryCompareRowOverride } from '../../types/change_history_compare_override';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import type { ChangeHistorySelectionSource } from '../../telemetry/types';
+import { findCommittedChangeHistoryListItem } from '../../utils/find_committed_change_history_list_item';
 import { findCurrentChangeHistoryListItem } from '../../utils/build_change_history_restore_telemetry';
 import { getRestoreVersionLabel } from '../../utils/get_restore_version_label';
 import * as i18n from '../timeline/translations';
@@ -50,12 +51,20 @@ export function ChangeHistoryModal(): JSX.Element | null {
   const lastReportedChangeIdBySourceRef = useRef<
     Partial<Record<ChangeHistorySelectionSource, string>>
   >({});
-  const { items, total, isLoading, isFetchingFirstPage, isLoadingMore, error, loadMore } =
-    useChangeHistoryList({
-      adapter,
-      objectId,
-      enabled: isOpen,
-    });
+  const {
+    items,
+    total,
+    pendingChange,
+    isLoading,
+    isFetchingFirstPage,
+    isLoadingMore,
+    error,
+    loadMore,
+  } = useChangeHistoryList({
+    adapter,
+    objectId,
+    enabled: isOpen,
+  });
 
   const reportChangeSelected = useCallback(
     (item: ChangeHistoryListItem, selectionSource: ChangeHistorySelectionSource) => {
@@ -147,7 +156,10 @@ export function ChangeHistoryModal(): JSX.Element | null {
     [requestCompareToVersion, requestRestoreVersion, supports.compare, supports.restore]
   );
 
-  const currentChange = useMemo(() => findCurrentChangeHistoryListItem(items), [items]);
+  const currentChange = useMemo(
+    () => findCommittedChangeHistoryListItem(items) ?? findCurrentChangeHistoryListItem(items),
+    [items]
+  );
   const restoreConfirmChange = useMemo(
     () =>
       restoreConfirmChangeId
@@ -223,7 +235,8 @@ export function ChangeHistoryModal(): JSX.Element | null {
   const hasNoHistory = !isLoading && !error && !hasItems;
   const showLoadingSidebar = isLoading && !hasItems && !error;
   const showListError = Boolean(error) && !hasItems && !isLoading;
-  const allItemsLoaded = hasItems && items.length >= total;
+  const committedItemCount = pendingChange ? items.length - 1 : items.length;
+  const allItemsLoaded = hasItems && committedItemCount >= total;
   const historyStartedAt = allItemsLoaded
     ? getHistoryStartedAt(items.map((item) => item.timestamp))
     : undefined;

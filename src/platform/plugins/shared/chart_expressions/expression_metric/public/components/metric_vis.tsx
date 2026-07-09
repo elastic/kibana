@@ -71,6 +71,9 @@ export interface MetricVisComponentProps {
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
 
+const getMetricSpacing = (density: MetricVisComponentProps['config']['metric']['density']) =>
+  density === 'compact' ? 'small' : 'large';
+
 function buildTrendConfig(
   { palette, textPalette, visuals, baseline }: MetricVisParam['secondaryTrend'],
   value: number | string
@@ -97,7 +100,9 @@ function buildTrendConfig(
   };
 }
 
-const DEFAULT_TILE_SIDE_LENGTH = 310;
+const DEFAULT_SINGLE_TILE_WIDTH = 300;
+const DEFAULT_SINGLE_TILE_HEIGHT = 160;
+const DEFAULT_MULTI_TILE_SIDE_LENGTH = 200;
 
 export const MetricVis = ({
   data,
@@ -124,14 +129,25 @@ export const MetricVis = ({
   );
 
   const onWillRender = useCallback(() => {
-    const maxTileSideLength =
-      grid.current.length * grid.current[0]?.length > 1 ? 200 : DEFAULT_TILE_SIDE_LENGTH;
+    const rows = grid.current.length;
+    const columns = grid.current[0]?.length ?? 0;
+    const hasMultipleTiles = rows * columns > 1;
     const event: ChartSizeEvent = {
       name: 'chartSize',
       data: {
         maxDimensions: {
-          y: { value: grid.current.length * maxTileSideLength, unit: 'pixels' },
-          x: { value: grid.current[0]?.length * maxTileSideLength, unit: 'pixels' },
+          y: {
+            value: hasMultipleTiles
+              ? rows * DEFAULT_MULTI_TILE_SIDE_LENGTH
+              : DEFAULT_SINGLE_TILE_HEIGHT,
+            unit: 'pixels',
+          },
+          x: {
+            value: hasMultipleTiles
+              ? columns * DEFAULT_MULTI_TILE_SIDE_LENGTH
+              : DEFAULT_SINGLE_TILE_WIDTH,
+            unit: 'pixels',
+          },
         },
       },
     };
@@ -363,6 +379,7 @@ export const MetricVis = ({
                   extraTextAlign: config.metric.secondaryAlign,
                   iconAlign: config.metric.iconAlign,
                   valueFontSize: config.metric.valueFontSize,
+                  spacing: getMetricSpacing(config.metric.density),
                   valuePosition: config.metric.primaryPosition,
                 },
               },

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { type Coordinate } from '@kbn/apm-types';
 import { environmentRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kueryRt, rangeRt } from '../../default_api_types';
@@ -14,7 +13,7 @@ export interface TransactionBreakdownResponse {
   timeseries: Array<{
     title: string;
     type: string;
-    data: Coordinate[];
+    data: Array<{ x: number; y: number | null }>;
     hideLegend: boolean;
     legendValue: any;
   }>;

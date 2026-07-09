@@ -8,8 +8,9 @@
 import React from 'react';
 import type { ComponentType, ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { waitFor, screen, within } from '@testing-library/react';
+import { createEvent, fireEvent, waitFor, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import { ConfigureCases } from '.';
 import {
@@ -19,7 +20,6 @@ import {
 } from '../../containers/mock';
 import {
   TestProviders,
-  buildCasesPermissions,
   noCasesSettingsPermission,
   renderWithTestingProviders,
 } from '../../common/mock';
@@ -45,20 +45,10 @@ import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/a
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useLicense } from '../../common/use_license';
-import { useLocation } from 'react-router-dom';
+import * as navigationHooks from '../../common/navigation/hooks';
 import * as i18n from './translations';
 
 jest.mock('../../common/lib/kibana');
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useLocation: jest
-    .fn()
-    .mockReturnValue({ pathname: '/', search: '', hash: '', state: undefined, key: 'default' }),
-}));
-jest.mock('../templates_v2/pages/all_templates_page', () => ({
-  __esModule: true,
-  default: () => <div data-test-subj="all-cases-templates" />,
-}));
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/configure/use_persist_configuration');
@@ -74,7 +64,6 @@ const useGetActionTypesMock = useGetActionTypes as jest.Mock;
 const getAddConnectorFlyoutMock = jest.fn();
 const getEditConnectorFlyoutMock = jest.fn();
 const useLicenseMock = useLicense as jest.Mock;
-const useLocationMock = useLocation as jest.Mock;
 
 describe('ConfigureCases', () => {
   beforeAll(() => {
@@ -1540,7 +1529,9 @@ describe('ConfigureCases', () => {
     });
   });
 
-  describe('templates tab', () => {
+  describe('settings redesign header', () => {
+    const navigateToAllCasesMock = jest.fn();
+
     beforeEach(() => {
       useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
       usePersistConfigurationMock.mockImplementation(() => usePersistConfigurationMockResponse);
@@ -1550,41 +1541,27 @@ describe('ConfigureCases', () => {
         isLoading: false,
       }));
       jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
-        templates: { enabled: true },
+        casesRedesign: { settings: true },
       } as ReturnType<typeof KibanaServices.getConfig>);
-      useLocationMock.mockReturnValue({
-        pathname: '/cases/configure/templates',
-        search: '',
-        hash: '',
-        state: undefined,
-        key: 'default',
+      jest.spyOn(navigationHooks, 'useAllCasesNavigation').mockReturnValue({
+        getAllCasesUrl: jest.fn().mockReturnValue('/app/security/cases'),
+        navigateToAllCases: navigateToAllCasesMock,
       });
     });
 
     afterEach(() => {
       jest.restoreAllMocks();
-      useLocationMock.mockReturnValue({
-        pathname: '/',
-        search: '',
-        hash: '',
-        state: undefined,
-        key: 'default',
-      });
     });
 
-    it('renders the templates page when user has manageTemplates permission', async () => {
+    it('navigates to all cases and prevents the anchor default navigation on back click', () => {
       renderWithTestingProviders(<ConfigureCases />);
 
-      expect(await screen.findByTestId('all-cases-templates')).toBeInTheDocument();
-    });
+      const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
+      const clickEvent = createEvent.click(backButton);
+      fireEvent(backButton, clickEvent);
 
-    it('renders the no privileges page when user lacks manageTemplates permission', async () => {
-      renderWithTestingProviders(<ConfigureCases />, {
-        wrapperProps: { permissions: buildCasesPermissions({ manageTemplates: false }) },
-      });
-
-      expect(await screen.findByText('Privileges required')).toBeInTheDocument();
-      expect(screen.queryByTestId('all-cases-templates')).not.toBeInTheDocument();
+      expect(clickEvent.defaultPrevented).toBe(true);
+      expect(navigateToAllCasesMock).toHaveBeenCalled();
     });
   });
 });

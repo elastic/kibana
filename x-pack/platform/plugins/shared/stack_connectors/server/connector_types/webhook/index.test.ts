@@ -344,6 +344,24 @@ describe('config validation', () => {
     );
   });
 
+  describe('OAuth2 Password', () => {
+    test('throws because OAuth2 password grant is not supported for webhook', async () => {
+      const config = {
+        method: 'post',
+        url: 'https://test.com',
+        hasAuth: true,
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'http://fake.test',
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating connector type config: error validation webhook action config: OAuth2 password grant authentication is not supported"`
+      );
+    });
+  });
+
   describe('OAuth2 Client Credentials', () => {
     test('throws if required OAuth2 config is missing', async () => {
       const config = {
