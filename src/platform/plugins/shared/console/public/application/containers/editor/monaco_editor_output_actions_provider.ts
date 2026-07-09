@@ -84,11 +84,19 @@ export class MonacoEditorOutputActionsProvider {
     } else {
       // if a request is selected, the actions buttons are placed at lineNumberOffset - scrollOffset
       const offset = this.editor.getTopForLineNumber(lineNumber) - this.editor.getScrollTop();
+      // The offset can be negative when the selected request's start line has scrolled
+      // above the current viewport (e.g. due to the debounced recalculation lagging behind
+      // a scroll or selection change). A negative offset renders the actions buttons above
+      // the editor's own visible area, where they can end up hidden behind, or overlapping
+      // the click target of, unrelated page chrome (e.g. the Console tab bars) -- silently
+      // swallowing clicks intended for the buttons. Clamp to the editor's own top edge so the
+      // buttons never escape its visible bounds. See https://github.com/elastic/kibana/issues/266698.
+      const clampedOffset = Math.max(offset, 0);
       this.setEditorActionsCss({
         visibility: 'visible',
         // Add a little bit of padding to the top of the actions buttons so that
         // it doesnt overlap with the selected request delimiter
-        top: offset + OFFSET_EDITOR_ACTIONS,
+        top: clampedOffset + OFFSET_EDITOR_ACTIONS,
       });
     }
   }
