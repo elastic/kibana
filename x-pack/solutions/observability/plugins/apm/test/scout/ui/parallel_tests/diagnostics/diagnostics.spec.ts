@@ -59,26 +59,18 @@ test.describe('Diagnostics', { tag: tags.stateful.classic }, () => {
 
     await test.step('index templates tab is populated', async () => {
       await diagnosticsPage.clickTab('index-templates-tab');
-      await expect(diagnosticsPage.getTableRows()).not.toHaveCount(0, {
-        timeout: EXTENDED_TIMEOUT,
-      });
+      await diagnosticsPage.expectTablePopulated();
     });
 
     await test.step('data streams tab is populated', async () => {
       await diagnosticsPage.clickTab('data-streams-tab');
-      await expect(diagnosticsPage.getTableRows()).not.toHaveCount(0, {
-        timeout: EXTENDED_TIMEOUT,
-      });
+      await diagnosticsPage.expectTablePopulated();
     });
 
     await test.step('indices tab is populated', async () => {
       await diagnosticsPage.clickTab('indices-tab');
-      await expect(diagnosticsPage.getTableRows('indicedWithProblems')).not.toHaveCount(0, {
-        timeout: EXTENDED_TIMEOUT,
-      });
-      await expect(diagnosticsPage.getTableRows('indicedWithoutProblems')).not.toHaveCount(0, {
-        timeout: EXTENDED_TIMEOUT,
-      });
+      await diagnosticsPage.expectTablePopulated('indicedWithProblems');
+      await diagnosticsPage.expectTablePopulated('indicedWithoutProblems');
     });
   });
 
@@ -115,8 +107,6 @@ test.describe('Diagnostics', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginAsViewer();
     await diagnosticsPage.importBundle(DIAGNOSTICS_BUNDLE);
     await diagnosticsPage.clickTab('documents-tab');
-    await expect(diagnosticsPage.getTableRows('documents-table')).not.toHaveCount(0, {
-      timeout: EXTENDED_TIMEOUT,
-    });
+    await diagnosticsPage.expectTablePopulated('documents-table');
   });
 });

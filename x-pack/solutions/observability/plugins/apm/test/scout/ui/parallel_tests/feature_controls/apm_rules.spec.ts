@@ -7,22 +7,14 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { faker } from '@faker-js/faker';
 import { test } from '../../fixtures';
 import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
-import { cleanupApmAlerts } from '../../fixtures/alerts_helpers';
-
-const RULE_NAME = `Latency threshold ${faker.string.uuid()}`;
 
 test.describe('APM feature controls - rules', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { featureControlsPage } }) => {
     await browserAuth.loginAsAdmin();
     await featureControlsPage.gotoApm();
     await featureControlsPage.waitForApmToLoad();
-  });
-
-  test.afterEach(async ({ apiServices, esClient }) => {
-    await cleanupApmAlerts({ apiServices, esClient, ruleName: RULE_NAME });
   });
 
   test('opens the latency rule flyout and shows the related dashboards section on details', async ({

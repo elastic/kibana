@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 const APM_DEEP_LINKS = [
   { title: 'Applications / Service inventory', url: '/apm/services' },
@@ -15,6 +16,7 @@ const APM_DEEP_LINKS = [
   { title: 'Applications / Traces', url: '/apm/traces' },
   { title: 'Applications / Service map', url: '/apm/service-map' },
   { title: 'Applications / Dependencies', url: '/apm/dependencies/inventory' },
+  { title: 'Applications / Settings', url: '/apm/settings/general-settings' },
 ];
 
 // The global search exposes the same APM deep links under both the `apm` and
@@ -29,21 +31,13 @@ for (const keyword of ['apm', 'applications']) {
         await navigationPage.gotoHome();
       });
 
-      test('contains all the expected deep links', async ({ pageObjects: { navigationPage } }) => {
-        await navigationPage.searchGlobalNav(keyword);
-
-        for (const { title } of APM_DEEP_LINKS) {
-          await expect(navigationPage.getSearchResult(title)).toBeVisible();
-        }
-      });
-
       for (const { title, url } of APM_DEEP_LINKS) {
         test(`navigates to ${title}`, async ({ page, pageObjects: { navigationPage } }) => {
           await expect(async () => {
             await navigationPage.searchGlobalNav(keyword);
             await navigationPage.clickSearchResult(title);
             await expect(page).toHaveURL(new RegExp(url.replace(/\//g, '\\/')), { timeout: 2000 });
-          }).toPass({ timeout: 30_000 });
+          }).toPass({ timeout: EXTENDED_TIMEOUT });
         });
       }
     }

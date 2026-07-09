@@ -27,10 +27,6 @@ export class CorrelationsPage {
     return this.page.getByTestId('apmFailedTransactionsCorrelationsTabContent');
   }
 
-  public get progressTitle() {
-    return this.page.getByTestId('apmCorrelationsProgressTitle');
-  }
-
   public get correlationsTable() {
     return this.page.getByTestId('apmCorrelationsTable');
   }

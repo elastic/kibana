@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { EXTENDED_TIMEOUT } from '../constants';
 
 export class DiagnosticsPage {
@@ -56,7 +57,21 @@ export class DiagnosticsPage {
   }
 
   getTableRows(containerTestSubj?: string) {
-    const root = containerTestSubj ? this.page.getByTestId(containerTestSubj) : this.page;
+    const root = containerTestSubj
+      ? this.page.getByTestId(containerTestSubj)
+      : this.page.getByTestId('apmDiagnosticsTemplate');
     return root.locator('.euiTableRow');
+  }
+
+  getPopulatedTableRows(containerTestSubj?: string) {
+    // EuiBasicTable renders a phantom "No items found" row when empty; exclude it so
+    // populated vs empty assertions work on the row count.
+    return this.getTableRows(containerTestSubj).filter({ hasNotText: 'No items found' });
+  }
+
+  async expectTablePopulated(containerTestSubj?: string) {
+    await expect(this.getPopulatedTableRows(containerTestSubj)).not.toHaveCount(0, {
+      timeout: EXTENDED_TIMEOUT,
+    });
   }
 }
