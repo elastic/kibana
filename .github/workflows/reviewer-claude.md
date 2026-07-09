@@ -147,19 +147,20 @@ You orchestrate specialized review subagents; you do not review the diff yoursel
 
 1. Read `/tmp/gh-aw/agent/pr-metadata.json` and `/tmp/gh-aw/agent/pr-files.json` to build the list of changed files. Do not read `pr-diff.txt` yourself — the subagents inspect the diff.
 2. Enumerate the reviewer subagents by listing `.claude/agents/pr-reviewer-*.md`. For each file, read its frontmatter `name` and `globs`. Select every subagent that has at least one changed file matching one of its `globs` (`pr-reviewer-general` uses `**/*`, so it always matches).
-3. Dispatch the selected subagents in a single parallel batch of `Task` calls, one per subagent, using each subagent's `name` as the `subagent_type`. In each task message pass only: the PR number, the repository from `GH_AW_GITHUB_REPOSITORY`, the subset of changed files that matched that subagent's `globs`, and this reviewer's workflow id `reviewer-claude`. Tell it to follow its own definition and return its findings JSON. Do not rewrite or expand a subagent's instructions, and do not add checks beyond what its definition already covers.
-4. Wait for every dispatched subagent to finish and parse each returned findings JSON. Ignore any non-JSON text a subagent returns; if a subagent returns no parseable findings, treat it as zero findings.
+3. Dispatch, in a single parallel batch of `Task` calls, both the selected concern reviewers and the `pr-review-thread-resolver` subagent, using each subagent's `name` as the `subagent_type`. Do not rewrite or expand a subagent's instructions, and do not add checks beyond what its definition already covers.
+   - Concern reviewers (`pr-reviewer-*`): pass only the PR number, the repository from `GH_AW_GITHUB_REPOSITORY`, and the subset of changed files that matched that subagent's `globs`. Each returns its findings JSON.
+   - `pr-review-thread-resolver`: pass only the PR number, the repository, and this reviewer's workflow id `reviewer-claude`. It resolves this reviewer's addressed prior threads itself and returns `{"resolved":[...],"stillOpen":[...]}`. Do not read prior threads or call `resolve-pull-request-review-thread` yourself — the resolver owns that.
+4. Wait for every dispatched subagent to finish. Parse each concern reviewer's findings JSON, and parse the thread resolver's result. Ignore any non-JSON text a subagent returns; if a subagent returns nothing parseable, treat it as zero findings (or, for the resolver, an empty result).
 5. Aggregate and filter the findings before posting:
    - Drop duplicates: collapse findings that share the same `(path, line, concern)` or that make the same point on the same line across different reviewers into one.
    - Drop nits, style/naming preferences, and anything on the do-not-report list in `.claude/skills/pr-review-core/SKILL.md`.
-   - Drop findings on unchanged lines that this reviewer's prior threads already cover (see step 7 for how to identify this reviewer's own threads).
+   - Drop any finding whose `(path, line)` matches an entry in the resolver's `stillOpen` list, so the review does not duplicate an already-open thread.
 6. Post the surviving findings:
    - Call `create-pull-request-review-comment` once per surviving finding (maximum 10), on the finding's `path`/`line`/`side`. Keep each comment focused on the single issue and its practical risk. When a finding includes a `suggestion`, add it as a GitHub `suggestion` code block for a minimal replacement on the commented lines.
    - If you posted at least one inline comment, submit exactly one `submit-pull-request-review` with the non-blocking `COMMENT` event and a concise body that does not restate the inline details.
    - If no findings survive, do not submit a review; call `noop` with exactly `No issues found`.
-7. Resolve addressed prior threads: using `pr-review-comments.json`, `pr-reviews.json`, and the current diff, find this reviewer's own prior threads. A thread is this reviewer's own only when the `workflow_id` in its originating review's marker (`<!-- gh-aw-agentic-workflow: ..., workflow_id: ..., ... -->` in `pr-reviews.json`) equals `reviewer-claude`. Resolve a matched, addressed thread with its `review_thread_id` via `resolve-pull-request-review-thread`. Do not resolve unmatched threads, already-resolved threads, or ambiguous fixes.
 
-Do not call `add-comment`, `reply-to-pull-request-review-comment`, or any other GitHub write path in review mode.
+Do not read prior review threads, call `resolve-pull-request-review-thread`, `add-comment`, `reply-to-pull-request-review-comment`, or any other GitHub write path yourself in review mode.
 
 ## Follow-up response mode
 
