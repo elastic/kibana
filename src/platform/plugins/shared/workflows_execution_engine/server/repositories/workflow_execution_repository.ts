@@ -8,26 +8,16 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus,
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
-import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
 
 export class WorkflowExecutionRepository {
-  private readonly workflowExecutionsDal: WorkflowExecutionsDataAccess;
-  private readonly indexName = WORKFLOWS_EXECUTIONS_INDEX;
-
-  constructor(
-    private esClient: ElasticsearchClient,
-    workflowExecutionsDal: WorkflowExecutionsDataAccess
-  ) {
-    this.workflowExecutionsDal = workflowExecutionsDal;
-  }
+  constructor(private workflowExecutionsDal: WorkflowExecutionsDataAccess) {}
 
   /**
    * Retrieves a workflow execution by its ID from Elasticsearch.
@@ -72,7 +62,7 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for creation');
     }
 
-    await this.workflowExecutionsDal.bulkUpsert({
+    await this.workflowExecutionsDal.bulkCreate({
       documents: workflowExecution as Partial<EsWorkflowExecution> & { id: string },
       refresh: options.refresh ?? false,
     });
@@ -101,17 +91,15 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    const bulkResponse = await this.esClient.bulk({
+    const bulkResponse = await this.workflowExecutionsDal.bulkCreate({
       refresh: options.refresh ?? false,
-      index: this.indexName,
-      operations: executions.flatMap((execution) => [{ create: { _id: execution.id } }, execution]),
+      documents: executions as Array<Partial<EsWorkflowExecution> & { id: string }>,
     });
 
     return bulkResponse.items.map((item, idx) => {
-      const op = item.create ?? item.index;
       const id = executions[idx].id as string;
-      if (op?.error) {
-        return { id, error: op.error.reason ?? JSON.stringify(op.error) };
+      if (item.error) {
+        return { id, error: item.error.reason ?? JSON.stringify(item.error) };
       }
       return { id };
     });
@@ -410,29 +398,35 @@ export class WorkflowExecutionRepository {
     workflowExecutionId: string;
     spaceId: string;
   }): Promise<boolean> {
-    const response = await this.esClient.update({
-      index: this.indexName,
-      id: params.workflowExecutionId,
-      // Near-real-time search must see this doc as PENDING before the next
-      // drain loop iteration counts slot occupancy; otherwise max:1 can double-promote.
-      refresh: 'wait_for',
-      script: {
-        lang: 'painless',
-        source: `
-          if (ctx._source.status == params.queuedStatus && ctx._source.spaceId == params.spaceId) {
-            ctx._source.status = params.pendingStatus;
-          } else {
-            ctx.op = 'noop';
-          }
-        `,
-        params: {
-          queuedStatus: ExecutionStatus.QUEUED,
-          pendingStatus: ExecutionStatus.PENDING,
-          spaceId: params.spaceId,
+    const workflowExecutions = await this.workflowExecutionsDal
+      .search({
+        query: {
+          term: {
+            id: params.workflowExecutionId,
+            spaceId: params.spaceId,
+          },
         },
-      },
+        _source_includes: ['id', 'status'],
+      })
+      .then((response) => response.hits.hits.map((hit) => hit._source as EsWorkflowExecution));
+
+    const queuedWorkflowExecutions = workflowExecutions.filter(
+      (stepExecution) => stepExecution.status === ExecutionStatus.QUEUED
+    );
+
+    if (!queuedWorkflowExecutions.length) {
+      return false;
+    }
+
+    await this.workflowExecutionsDal.bulkUpsert({
+      documents: queuedWorkflowExecutions.map((workflowExecution) => ({
+        id: workflowExecution.id,
+        status: ExecutionStatus.PENDING,
+      })),
+      refresh: 'wait_for',
     });
-    return response.result === 'updated';
+
+    return true;
   }
 
   /**

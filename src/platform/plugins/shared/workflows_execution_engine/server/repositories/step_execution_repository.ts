@@ -7,20 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
-import type { StepExecutionsDataAccess } from '@kbn/workflows/server';
+import type { StepExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server/data_access_layer';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
 
 export class StepExecutionRepository {
-  private readonly stepExecutionsDal: StepExecutionsDataAccess;
-
-  constructor(esClient: ElasticsearchClient, stepExecutionsDal: StepExecutionsDataAccess) {
-    this.stepExecutionsDal = stepExecutionsDal;
-  }
+  constructor(private stepExecutionsDal: StepExecutionsDataAccess) {}
 
   /**
    * Searches for step executions by workflow execution ID.

@@ -168,8 +168,8 @@ export class WorkflowsExecutionEnginePlugin
   } {
     const { workflowExecutionsDal, stepExecutionsDal } = this.createExecutionsDal(esClient);
     return {
-      workflowExecutionRepository: new WorkflowExecutionRepository(esClient, workflowExecutionsDal),
-      stepExecutionRepository: new StepExecutionRepository(esClient, stepExecutionsDal),
+      workflowExecutionRepository: new WorkflowExecutionRepository(workflowExecutionsDal),
+      stepExecutionRepository: new StepExecutionRepository(stepExecutionsDal),
     };
   }
 

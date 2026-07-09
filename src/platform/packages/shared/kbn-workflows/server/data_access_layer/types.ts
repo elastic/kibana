@@ -38,17 +38,23 @@ export type BulkUpsertRequestOptions = Pick<
 
 /** Unified upsert request: one or many documents, same contract. */
 export type BulkUpsertRequest<TDoc extends { id: string }> = BulkUpsertRequestOptions & {
-  documents: UpsertDocument<TDoc> | UpsertDocument<TDoc>[];
+  documents:
+    | UpsertDocument<Partial<TDoc> & { id: string }>
+    | UpsertDocument<Partial<TDoc> & { id: string }>[];
 };
 
 /** Bulk ES `create` request (fails on existing id; does not upsert). */
 export type BulkCreateRequest<TDoc extends { id: string }> = BulkUpsertRequestOptions & {
-  documents: UpsertDocument<TDoc> | UpsertDocument<TDoc>[];
+  documents:
+    | UpsertDocument<Partial<TDoc> & { id: string }>
+    | UpsertDocument<Partial<TDoc> & { id: string }>[];
 };
 
 /** Bulk ES `update` request (partial doc merge; no doc_as_upsert). */
 export type BulkUpdateRequest<TDoc extends { id: string }> = BulkUpsertRequestOptions & {
-  documents: UpsertDocument<TDoc> | UpsertDocument<TDoc>[];
+  documents:
+    | UpsertDocument<Partial<TDoc> & { id: string }>
+    | UpsertDocument<Partial<TDoc> & { id: string }>[];
 };
 
 /** Static index name or per-document resolver for multi-index bulk upserts. */
@@ -115,14 +121,10 @@ export interface ExecutionsDataAccess<TExecution extends { id: string }> {
   /**
    * Bulk ES `create`. Returns per-item outcomes and does not throw on partial failure.
    */
-  bulkCreate(
-    request: BulkCreateRequest<Partial<TExecution> & { id: string }>
-  ): Promise<BulkUpsertResponse>;
+  bulkCreate(request: BulkCreateRequest<TExecution & { id: string }>): Promise<BulkUpsertResponse>;
 
   /** @throws on any update failure */
-  bulkUpdate(
-    request: BulkUpdateRequest<Partial<TExecution> & { id: string }>
-  ): Promise<BulkUpsertResponse>;
+  bulkUpdate(request: BulkUpdateRequest<TExecution & { id: string }>): Promise<BulkUpsertResponse>;
 }
 
 export type WorkflowExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowExecution>;
