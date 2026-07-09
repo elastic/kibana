@@ -14,7 +14,12 @@ export const copyTextToClipboard = async (text: string): Promise<boolean> => {
     return false;
   }
 
-  if (typeof window.navigator?.clipboard?.writeText === 'function') {
+  // TS types declare `navigator.clipboard` as always present, but the spec marks it
+  // [SecureContext]: it is absent on insecure (plain-HTTP) origins, which self-hosted
+  // Kibana commonly runs on, and can be missing/partial in test environments.
+  // https://w3c.github.io/clipboard-apis/#navigator-interface
+  // https://developer.mozilla.org/en-US/docs/Web/API/Navigator/clipboard
+  if (typeof window.navigator.clipboard?.writeText === 'function') {
     try {
       await window.navigator.clipboard.writeText(text);
       return true;
