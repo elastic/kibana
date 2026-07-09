@@ -973,6 +973,15 @@ describe('buildDiagnosticReport', () => {
 
       expect(report).toContain('Name \\| With \\| Pipes');
     });
+
+    it('escapes backslash characters in cell values', () => {
+      const report = buildDiagnosticReport({
+        ...defaultParams,
+        connectorName: 'C:\\Users\\test',
+      });
+
+      expect(report).toContain('C:\\\\Users\\\\test');
+    });
   });
 
   describe('pre-execution checks section', () => {

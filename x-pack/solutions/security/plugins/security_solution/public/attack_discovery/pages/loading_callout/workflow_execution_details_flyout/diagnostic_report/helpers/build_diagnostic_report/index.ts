@@ -54,10 +54,16 @@ export interface BuildDiagnosticReportParams {
   sourceMetadata?: SourceMetadata | null;
 }
 
-/** Escapes Markdown table cell content to prevent formatting issues. */
+/**
+ * Escapes Markdown table cell content to prevent formatting issues.
+ *
+ * Backslashes are escaped first so that a literal backslash in the input (e.g. a
+ * Windows path or a regex fragment) cannot combine with the pipe-escaping below
+ * to emit an unescaped `|` that breaks the surrounding table row.
+ */
 const escapeCell = (value: string | number | undefined | null): string => {
   if (value == null) return '-';
-  return String(value).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+  return String(value).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\n/g, ' ');
 };
 
 /** Formats a duration in milliseconds for display. */
