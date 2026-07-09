@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
+import type { Logger } from '@kbn/logging';
 import type { RunContext } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../common/endpoint/service/response_actions/constants';
+import type { ActionDetails } from '../../../../../common/endpoint/types';
+import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
+import { getActionDetailsById } from '../../../../endpoint/services/actions';
 
 /**
  * Builds the comment recorded on a dispatched response action so its entry in
@@ -118,4 +123,86 @@ export function resolveAgentTypeFromPackages(packages: string[] = []): ResponseA
   }
 
   return 'endpoint';
+}
+
+/**
+ * Retry/timeout budget for {@link waitForActionCompletion}. Elastic Defend
+ * dispatches a fleet action and returns immediately — the endpoint agent
+ * typically takes anywhere from a few seconds up to ~90s to check in, execute
+ * the action, and write its response back. Without polling, a tool returns
+ * whatever status was true the instant the action document was written
+ * (almost always `pending`), which is what the chat UI showed for
+ * `running-processes`, `isolate`, `unisolate`, and `scan` before this fix.
+ *
+ * 300ms → 480ms → 768ms → ... doubling, capped at 5s, for up to ~85s total —
+ * long enough to observe real completions without holding the agent turn
+ * open indefinitely (the agent-builder execution runner's own idle/overall
+ * timeouts, `FOLLOW_EXECUTION_IDLE_TIMEOUT_MS` / `FOLLOW_EXECUTION_TIMEOUT_MS`,
+ * are both several minutes, so this budget sits comfortably inside them).
+ */
+const ACTION_COMPLETION_POLL_CONFIG = {
+  retries: 20,
+  minTimeout: 300,
+  maxTimeout: 5000,
+  factor: 1.6,
+};
+
+/**
+ * Polls `getActionDetailsById` until the dispatched response action reaches
+ * a terminal state (`successful`, `failed`, or `canceled`) or the retry
+ * budget is exhausted, then returns whatever the latest fetch produced.
+ *
+ * This mirrors the polling pattern the Microsoft Defender for Endpoint
+ * client already uses (`p-retry` in `ms_defender_endpoint_actions_client.ts`)
+ * and the polling the console UI does client-side via
+ * `useConsoleActionSubmitter` (`ACTION_DETAILS_REFRESH_INTERVAL`) — the agent
+ * tools had neither, so they surfaced the action's write-time snapshot
+ * instead of its outcome.
+ *
+ * Never throws: on error or exhausted retries it returns the last known
+ * `ActionDetails` (still `pending`) so the tool can report an honest,
+ * non-final status rather than failing the whole tool call.
+ */
+export async function waitForActionCompletion<T extends ActionDetails = ActionDetails>(
+  endpointAppContextService: EndpointAppContextService,
+  spaceId: string,
+  actionId: string,
+  logger: Logger
+): Promise<T> {
+  let lastKnown: T | undefined;
+
+  try {
+    return await pRetry(
+      async () => {
+        const actionDetails = await getActionDetailsById<T>(
+          endpointAppContextService,
+          spaceId,
+          actionId,
+          { bypassSpaceValidation: true }
+        );
+        lastKnown = actionDetails;
+
+        if (!actionDetails.isCompleted) {
+          throw new Error(`Action [${actionId}] is still pending`);
+        }
+
+        return actionDetails;
+      },
+      {
+        ...ACTION_COMPLETION_POLL_CONFIG,
+        onFailedAttempt: ({ attemptNumber, retriesLeft }) => {
+          logger.debug(
+            `Waiting for action [${actionId}] to complete (attempt ${attemptNumber}, ${retriesLeft} retries left)`
+          );
+        },
+      }
+    );
+  } catch (error) {
+    if (lastKnown) {
+      return lastKnown;
+    }
+
+    logger.error(`Failed to fetch completion status for action [${actionId}]: ${error.message}`);
+    throw error;
+  }
 }

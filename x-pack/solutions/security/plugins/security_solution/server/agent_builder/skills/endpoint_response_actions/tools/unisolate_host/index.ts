@@ -17,6 +17,7 @@ import {
   buildResponseActionComment,
   insufficientPrivilegesResult,
   resolveAgentTypeFromPackages,
+  waitForActionCompletion,
 } from '../types';
 
 const unisolateHostSchema = z.object({
@@ -123,7 +124,7 @@ export const unisolateHostTool = (
         });
 
         // Note: the ResponseActionsClient method is called `release`, not `unisolate`
-        const actionDetails = await responseActionsClient.release(
+        const dispatchedAction = await responseActionsClient.release(
           {
             endpoint_ids: endpointIds,
             comment: buildResponseActionComment(
@@ -133,6 +134,17 @@ export const unisolateHostTool = (
             ),
           },
           { hosts: { [endpointIds[0]]: { name: hostName } } }
+        );
+
+        // The dispatch above returns the action's write-time snapshot
+        // (almost always `pending` — the endpoint agent hasn't checked in
+        // yet). Poll until Elastic Defend reports completion so the chat
+        // response reflects the actual outcome, not just "dispatched".
+        const actionDetails = await waitForActionCompletion(
+          endpointAppContextService,
+          spaceId,
+          dispatchedAction.id,
+          logger
         );
 
         return {

@@ -17,6 +17,7 @@ import {
   buildResponseActionComment,
   insufficientPrivilegesResult,
   resolveAgentTypeFromPackages,
+  waitForActionCompletion,
 } from '../types';
 
 const scanHostSchema = z.object({
@@ -133,7 +134,7 @@ export const scanHostTool = (
           isAutomated: false,
         });
 
-        const actionDetails = await responseActionsClient.scan(
+        const dispatchedAction = await responseActionsClient.scan(
           {
             endpoint_ids: endpointIds,
             comment: buildResponseActionComment(
@@ -144,6 +145,17 @@ export const scanHostTool = (
             parameters: { path },
           },
           { hosts: { [endpointIds[0]]: { name: hostName } } }
+        );
+
+        // The dispatch above returns the action's write-time snapshot
+        // (almost always `pending` — the endpoint agent hasn't checked in
+        // yet). Poll until Elastic Defend reports completion so the chat
+        // response reflects the actual outcome, not just "dispatched".
+        const actionDetails = await waitForActionCompletion(
+          endpointAppContextService,
+          spaceId,
+          dispatchedAction.id,
+          logger
         );
 
         return {
