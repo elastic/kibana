@@ -9,8 +9,8 @@
     "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate"
   },
   "dependencies": {
-    "@langchain/core": "^0.3.26",
-    "@langchain/langgraph": "^0.2.20"
+    "@langchain/core": "^1.1.31",
+    "@langchain/langgraph": "^1.2.0"
   }
 }
 
