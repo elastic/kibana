@@ -19,8 +19,8 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana, useUiSetting } from '../../../../../common/lib/kibana';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { FlyoutLoading } from '../../../../../flyout_v2/shared/components/flyout_loading';
@@ -57,7 +57,7 @@ const UserNameComponent: React.FC<Props> = ({
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;

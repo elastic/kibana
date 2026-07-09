@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertSnoozePanelInline } from './alert_snooze_panel_inline';
-import { DataConditionType, type DataConditionTypeDescriptor } from './types';
-import { fieldChangeDescriptor } from './built_in_data_conditions';
+import { DataConditionType } from './types';
 
 const MOCKED_NOW = '2026-03-09T19:05:00.000Z';
 
@@ -121,29 +121,22 @@ describe('AlertSnoozePanelInline', () => {
       expect(await screen.findByTestId('alertSnoozeApplyButton')).toBeDisabled();
     });
 
-    it('forwards `dataConditionTypes` to ConditionalSnoozePanel and emits the custom payload shape', async () => {
-      const customDescriptor: DataConditionTypeDescriptor = {
-        id: 'custom_via_inline',
-        label: 'Via inline',
-        isComplete: () => true,
-        renderInput: () => null,
-        renderConfirmedSummary: () => null,
-        getPreviewText: () => 'via inline',
-        serialize: () => ({ type: 'custom_via_inline', marker: 'inline' }),
-      };
-
-      renderPanel({ dataConditionTypes: [fieldChangeDescriptor, customDescriptor] });
+    it('forwards `fieldOptions` to the field_change dropdown and emits the field_change payload', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      renderPanel({ fieldOptions: ['host.name'] });
       fireEvent.click(await screen.findByTestId('conditional'));
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
-      fireEvent.change(await screen.findByTestId('dataConditionType-dc-1'), {
-        target: { value: 'custom_via_inline' },
-      });
+      const combo = within(await screen.findByTestId('dataConditionField-dc-1')).getByTestId(
+        'comboBoxSearchInput'
+      );
+      await user.click(combo);
+      await user.click(await screen.findByText('host.name'));
       fireEvent.click(await screen.findByTestId('confirmDataCondition-dc-1'));
       fireEvent.click(await screen.findByTestId('alertSnoozeApplyButton'));
 
       expect(onApplyMock).toHaveBeenCalledWith({
-        conditions: [{ type: 'custom_via_inline', marker: 'inline' }],
+        conditions: [{ type: DataConditionType.FIELD_CHANGE, field: 'host.name' }],
         conditionOperator: 'any',
       });
     });

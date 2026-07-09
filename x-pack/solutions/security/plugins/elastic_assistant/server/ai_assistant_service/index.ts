@@ -760,6 +760,7 @@ export class AIAssistantService {
   ): Promise<AttackDiscoveryScheduleDataClient | null> {
     return new AttackDiscoveryScheduleDataClient({
       actionsClient: opts.actionsClient,
+      filterTags: opts.filterTags,
       logger: opts.logger,
       rulesClient: opts.rulesClient,
     });
