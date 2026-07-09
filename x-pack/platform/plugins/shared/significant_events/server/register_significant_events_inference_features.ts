@@ -36,19 +36,16 @@ const DISCOVERY_RECOMMENDED_MODELS = [
   defaultInferenceEndpoints.OPENAI_GPT_5_2,
 ];
 
-// Investigation is iterative tool-calling over an agentic loop, not a single deep-reasoning
-// pass — a fast/cheap model keeps latency and cost down without sacrificing quality.
 const INVESTIGATION_RECOMMENDED_MODELS = [
-  '.anthropic-claude-4.5-haiku-chat_completion',
-  '.openai-gpt-5.4-mini-chat_completion',
+  defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
+  defaultInferenceEndpoints.OPENAI_GPT_5_4,
 ];
 
-// Background memory upkeep favors a cheaper/faster model over the heavier
-// discovery/investigation ones.
+// Background memory upkeep is low-stakes curation, not deep reasoning — a
+// smaller/cheaper model keeps latency and cost down.
 const MEMORY_RECOMMENDED_MODELS = [
-  defaultInferenceEndpoints.OPENAI_GPT_OSS_120B,
-  defaultInferenceEndpoints.OPENAI_GPT_5_4,
-  defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
+  '.anthropic-claude-4.5-haiku-chat_completion',
+  '.openai-gpt-5.4-mini-chat_completion',
 ];
 
 /**
