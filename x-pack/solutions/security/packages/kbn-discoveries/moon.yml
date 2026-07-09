@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/attack-discovery-schedules-common'
   - '@kbn/event-log-plugin'
   - '@kbn/workflows-management-plugin'
+  - '@kbn/datemath'
 tags:
   - shared-server
   - package
