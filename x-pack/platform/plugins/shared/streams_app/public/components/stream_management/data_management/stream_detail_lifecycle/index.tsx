@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -15,6 +15,7 @@ import { StreamDetailGeneralData } from './general_data';
 import { useDataStreamStats } from './hooks/use_data_stream_stats';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
+import { LifecycleFlyoutCoordinationProvider } from './common/hooks/lifecycle_flyout_coordination';
 
 export function StreamDetailLifecycle({
   definition,
@@ -25,8 +26,6 @@ export function StreamDetailLifecycle({
 }) {
   const { timeState } = useTimefilter();
   const data = useDataStreamStats({ definition, timeState });
-  const [isSuccessfulFlyoutOpen, setIsSuccessfulFlyoutOpen] = useState(false);
-  const [isFailureStoreFlyoutOpen, setIsFailureStoreFlyoutOpen] = useState(false);
 
   const { onPageReady } = usePerformanceContext();
 
@@ -63,22 +62,20 @@ export function StreamDetailLifecycle({
   ]);
 
   return (
-    <EuiFlexGroup gutterSize="m" direction="column">
-      <StreamDetailGeneralData
-        definition={definition}
-        refreshDefinition={refreshDefinition}
-        data={data}
-        isExternalFlyoutOpen={isFailureStoreFlyoutOpen}
-        onFlyoutOpenChange={setIsSuccessfulFlyoutOpen}
-      />
-      <EuiHorizontalRule margin="m" />
-      <StreamDetailFailureStore
-        definition={definition}
-        data={data}
-        refreshDefinition={refreshDefinition}
-        isExternalFlyoutOpen={isSuccessfulFlyoutOpen}
-        onFlyoutOpenChange={setIsFailureStoreFlyoutOpen}
-      />
-    </EuiFlexGroup>
+    <LifecycleFlyoutCoordinationProvider>
+      <EuiFlexGroup gutterSize="m" direction="column">
+        <StreamDetailGeneralData
+          definition={definition}
+          refreshDefinition={refreshDefinition}
+          data={data}
+        />
+        <EuiHorizontalRule margin="m" />
+        <StreamDetailFailureStore
+          definition={definition}
+          data={data}
+          refreshDefinition={refreshDefinition}
+        />
+      </EuiFlexGroup>
+    </LifecycleFlyoutCoordinationProvider>
   );
 }

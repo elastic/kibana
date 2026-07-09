@@ -324,12 +324,12 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.riskScore).toHaveLength(1);
       expect(body.summary.riskScore[0]).toMatchObject({
         id_field: ['entity.id'],
-        score: [75],
-        asset_criticality_contribution_score: '10',
+        score: ['75.00'],
+        asset_criticality_contribution_score: '10.00',
         alert_inputs: [
           expect.objectContaining({
-            risk_score: ['50'],
-            contribution_score: ['75'],
+            risk_score: ['50.00'],
+            contribution_score: ['75.00'],
           }),
         ],
       });
@@ -338,7 +338,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.assetCriticality).toBeDefined();
       expect(body.summary.assetCriticality).toHaveLength(1);
       expect(body.summary.assetCriticality[0]).toMatchObject({
-        'asset.criticality': ['high_impact'],
+        'asset.criticality': ['High Impact'],
       });
 
       // Vulnerabilities
@@ -363,7 +363,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // Prompt and replacements
       expect(body.replacements).toBeDefined();
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
     });
 
@@ -382,12 +382,12 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.riskScore).toHaveLength(1);
       expect(body.summary.riskScore[0]).toMatchObject({
         id_field: ['entity.id'],
-        score: [45],
-        asset_criticality_contribution_score: '0',
+        score: ['45.00'],
+        asset_criticality_contribution_score: '0.00',
         alert_inputs: [
           expect.objectContaining({
-            risk_score: ['30'],
-            contribution_score: ['45'],
+            risk_score: ['30.00'],
+            contribution_score: ['45.00'],
           }),
         ],
       });
@@ -395,7 +395,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.assetCriticality).toBeDefined();
       expect(body.summary.assetCriticality).toHaveLength(1);
       expect(body.summary.assetCriticality[0]).toMatchObject({
-        'asset.criticality': ['medium_impact'],
+        'asset.criticality': ['Medium Impact'],
       });
 
       // Vulnerabilities
@@ -416,7 +416,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // Prompt and replacements
       expect(body.replacements).toBeDefined();
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
     });
 
@@ -436,7 +436,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.summary.vulnerabilities).toEqual([]);
       expect(body.summary.anomalies).toEqual([]);
       expect(body.prompt).toContain(
-        'Generate structured information for entity so a Security analyst can act.'
+        'Generate structured information for an entity so a Security analyst can act.'
       );
     });
 

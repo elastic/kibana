@@ -27,7 +27,7 @@ import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyou
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { paths } from '../../constants';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
-import { RuleKindBadge } from './rule_header_description';
+import { RuleKindBadge } from './rule_summary_header';
 import { RuleOverviewSection } from './overview';
 import { RuleSidebar } from './sidebar/rule_sidebar';
 import { useRule } from './rule_context';
@@ -184,9 +184,17 @@ export const RuleDetailPage: React.FunctionComponent = () => {
     [rule, onEdit, handleToggleEnabled, isToggling, onClone, showDeleteConfirmationModal]
   );
 
+  // AppHeaderMetadata bolds `label` (it's meant to be the key of a label/value pair) and renders
+  // `value` at a lighter weight, so the description is passed as `value` with an empty `label`
+  // to get the lighter weight without touching the shared app-header component.
   const metadata = rule.metadata?.description
     ? ([
-        { type: 'text', label: rule.metadata.description, 'data-test-subj': 'ruleDescription' },
+        {
+          type: 'text',
+          label: '',
+          value: rule.metadata.description,
+          'data-test-subj': 'ruleDescription',
+        },
       ] as AppHeaderMetadataItems)
     : undefined;
 
