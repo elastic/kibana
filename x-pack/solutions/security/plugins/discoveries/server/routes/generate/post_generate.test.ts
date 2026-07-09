@@ -10,6 +10,8 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 
+import { AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE } from '@kbn/discoveries-schemas';
+
 import { assertWorkflowsEnabled } from '../../lib/assert_workflows_enabled';
 import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../constants';
 import { registerGenerateRoute } from './post_generate';
@@ -444,8 +446,7 @@ describe('registerGenerateRoute', () => {
 
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: {
-          message:
-            'At least one alert retrieval method must be enabled: set skill_enabled, default_retrieval_enabled, or alert_retrieval_workflows_enabled to true',
+          message: AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE,
         },
       });
     });
