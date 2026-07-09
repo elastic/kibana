@@ -44668,18 +44668,6 @@ paths:
           required: false
           schema:
             type: string
-        - description: A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are included.
-          in: query
-          name: tags
-          required: false
-          schema:
-            default: []
-            description: Tag IDs associated with this dashboard.
-            items:
-              maxLength: 250
-              type: string
-            maxItems: 100
-            type: array
         - description: A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are excluded.
           in: query
           name: excluded_tags
@@ -44731,10 +44719,11 @@ paths:
                           properties:
                             description:
                               description: A short description of the markdown library item.
+                              maxLength: 10000
                               type: string
                             title:
                               description: The markdown library item title.
-                              minLength: 1
+                              maxLength: 1000
                               type: string
                           required:
                             - title
@@ -44776,7 +44765,7 @@ paths:
           description: success
         '403':
           description: forbidden
-      summary: Search markdown library items
+      summary: List markdown library items
       tags:
         - Markdowns
       x-codeSamples:
@@ -45161,13 +45150,11 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: A unique identifier. Must contain only lowercase letters, numbers, hyphens, and underscores.
+        - description: The unique ID of the markdown library item to be created or updated
           in: path
           name: id
           required: true
           schema:
-            maxLength: 250
-            minLength: 1
             type: string
       requestBody:
         content:
