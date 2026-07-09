@@ -170,6 +170,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'threat-hunting',
   'find-security-rules',
   'pci-compliance',
+  'investigate-rule',
   'siem-readiness',
 
   // O11Y
