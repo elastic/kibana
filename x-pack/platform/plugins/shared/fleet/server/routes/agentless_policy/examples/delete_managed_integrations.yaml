@@ -4,8 +4,8 @@ responses:
     content:
       application/json:
         examples:
-          createAgentlessPoliciesResponseExample:
-            description: 'Example response showing the successful result of communication initialisation over MCP protocol'
+          deleteManagedIntegrationsResponseExample:
+            description: 'Example response for deleting a managed integration'
             value:
               item:
                 id: d52a7812-5736-4fdc-aed8-72152afa1ffa
