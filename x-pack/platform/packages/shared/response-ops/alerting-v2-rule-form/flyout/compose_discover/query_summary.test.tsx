@@ -8,10 +8,31 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { QueryBlock, QuerySummary } from './query_summary';
+import { QueryBlock, QuerySummary, getQuerySummaryOverflowHeight } from './query_summary';
 
 const renderWithIntl = (ui: React.ReactElement) =>
   render(<IntlProvider locale="en">{ui}</IntlProvider>);
+
+describe('getQuerySummaryOverflowHeight', () => {
+  it('returns undefined for empty queries', () => {
+    expect(getQuerySummaryOverflowHeight('')).toBeUndefined();
+    expect(getQuerySummaryOverflowHeight('   ')).toBeUndefined();
+  });
+
+  it('returns undefined for queries up to MAX_VISIBLE_LINES', () => {
+    const fiveLineQuery = Array.from({ length: 5 }, (_, index) => `line ${index + 1}`).join('\n');
+
+    expect(getQuerySummaryOverflowHeight('FROM logs-*')).toBeUndefined();
+    expect(getQuerySummaryOverflowHeight('FROM logs-*\n| STATS count = COUNT(*)')).toBeUndefined();
+    expect(getQuerySummaryOverflowHeight(fiveLineQuery)).toBeUndefined();
+  });
+
+  it('returns overflow height when query exceeds MAX_VISIBLE_LINES', () => {
+    const sixLineQuery = Array.from({ length: 6 }, (_, index) => `line ${index + 1}`).join('\n');
+
+    expect(getQuerySummaryOverflowHeight(sixLineQuery)).toBe(240);
+  });
+});
 
 describe('QuerySummary', () => {
   it('renders empty state when query is blank', () => {

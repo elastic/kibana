@@ -19,6 +19,20 @@ const copyAriaLabel = i18n.translate(
   { defaultMessage: 'Copy query' }
 );
 
+/** Visible line cap before the block scrolls (matches the old CodeEditor summary). */
+const MAX_VISIBLE_LINES = 5;
+
+/** Matches ES|QL code block height in alerting-v2-episodes-ui rule_overview_panel. */
+const QUERY_SUMMARY_OVERFLOW_HEIGHT = 240;
+
+export const getQuerySummaryOverflowHeight = (query: string): number | undefined => {
+  if (!query.trim()) {
+    return undefined;
+  }
+
+  return query.split('\n').length > MAX_VISIBLE_LINES ? QUERY_SUMMARY_OVERFLOW_HEIGHT : undefined;
+};
+
 interface QuerySummaryProps {
   query: string;
   emptyMessage?: string;
@@ -38,6 +52,8 @@ export const QuerySummary: React.FC<QuerySummaryProps> = ({
     );
   }
 
+  const overflowHeight = getQuerySummaryOverflowHeight(query);
+
   return (
     <EuiCodeBlock
       language="esql"
@@ -45,6 +61,7 @@ export const QuerySummary: React.FC<QuerySummaryProps> = ({
       copyAriaLabel={copyAriaLabel}
       paddingSize="s"
       fontSize="s"
+      overflowHeight={overflowHeight}
       data-test-subj="composeDiscoverQuerySummary"
     >
       {query}
