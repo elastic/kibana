@@ -78,13 +78,21 @@ describe('discoverSessionApiDataSchema', () => {
   it('validates an ES|QL tab', () => {
     const validated = discoverSessionApiDataSchema.validate({
       title: 'ES|QL only',
-      tabs: [esqlTab],
+      tabs: [
+        {
+          ...esqlTab,
+          rows_per_page: 25,
+          sample_size: 500,
+        },
+      ],
     });
 
     const tab = validated.tabs[0] as DiscoverSessionApiEsqlTab;
 
     expect(tab.data_source.type).toBe(AS_CODE_ESQL_DATA_SOURCE_TYPE);
     expect(tab.data_source.query).toBe('FROM logs-* | LIMIT 10');
+    expect(tab.rows_per_page).toBe(25);
+    expect(tab.sample_size).toBe(500);
   });
 
   it('validates a multi-tab session', () => {
