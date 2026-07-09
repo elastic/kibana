@@ -15,6 +15,7 @@ import {
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -39,6 +40,13 @@ const WORKFLOWS_TO_INSTALL: Array<{
   { workflowId: SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID, spaceId: GLOBAL_WORKFLOW_SPACE_ID },
   { workflowId: SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID, spaceId: GLOBAL_WORKFLOW_SPACE_ID },
   { workflowId: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID, spaceId: GLOBAL_WORKFLOW_SPACE_ID },
+  // Code-first KI extraction. Installed globally (like the other KI workflows)
+  // and disabled in YAML — it runs on demand via the code extraction workflow
+  // client (discovery "Identify features & queries" button).
+  {
+    workflowId: SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
+    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+  },
   // Installed in the default space (not global) so its scheduled executions
   // are stored alongside the onboarding executions it triggers.
   {

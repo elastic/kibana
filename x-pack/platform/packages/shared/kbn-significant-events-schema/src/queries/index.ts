@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import type { Feature } from '../feature';
 import type { QueryWithOccurrences } from '../api/significant_events';
+import { knowledgeIndicatorSourceSchema, type KnowledgeIndicatorSource } from '../source';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '../significant_events/constants';
 
 export interface EsqlQuery {
@@ -54,6 +55,8 @@ export interface StreamQuery extends StreamQueryBase {
   evidence?: string[];
   features?: QueryFeature[];
   expires_at?: string;
+  /** Derived, read-only evidence source (code / logs / both). Never persisted. */
+  source?: KnowledgeIndicatorSource;
 }
 
 const streamQueryBaseSchema = z.object({
@@ -74,6 +77,7 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.ex
   features: z.array(queryFeatureSchema).optional(),
   esql: esqlQuerySchema,
   expires_at: z.iso.datetime().optional(),
+  source: knowledgeIndicatorSourceSchema.optional(),
 });
 
 /**

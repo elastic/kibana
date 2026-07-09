@@ -8,18 +8,24 @@
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { SignificantEventsKIsOnboardingClient } from './onboarding_workflow_client';
 import { SignificantEventsDiscoveryClient } from './significant_events_discovery_client';
+import { SignificantEventsCodeExtractionClient } from './code_extraction_workflow_client';
 import type { EbtTelemetryClient } from '../telemetry/ebt/client';
 
 export interface WorkflowClients {
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient | undefined;
   significantEventsDiscoveryClient: SignificantEventsDiscoveryClient | undefined;
+  codeExtractionClient: SignificantEventsCodeExtractionClient | undefined;
 }
 export const createWorkflowClients = (
   managementApi: WorkflowsServerPluginSetup['management'] | undefined,
   telemetry: EbtTelemetryClient
 ): WorkflowClients => {
   if (!managementApi) {
-    return { streamsKIsOnboardingClient: undefined, significantEventsDiscoveryClient: undefined };
+    return {
+      streamsKIsOnboardingClient: undefined,
+      significantEventsDiscoveryClient: undefined,
+      codeExtractionClient: undefined,
+    };
   }
 
   return {
@@ -28,5 +34,6 @@ export const createWorkflowClients = (
       telemetry,
     }),
     significantEventsDiscoveryClient: new SignificantEventsDiscoveryClient({ managementApi }),
+    codeExtractionClient: new SignificantEventsCodeExtractionClient({ managementApi }),
   };
 };

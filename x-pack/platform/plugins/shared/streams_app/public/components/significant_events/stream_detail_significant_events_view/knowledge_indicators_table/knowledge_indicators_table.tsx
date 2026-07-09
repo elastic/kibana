@@ -32,6 +32,8 @@ import { SparkPlot } from '../../../spark_plot';
 import { TableTitle } from '../../stream_detail_systems/table_title';
 import { getKnowledgeIndicatorItemId } from '../utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorType } from '../utils/get_knowledge_indicator_type';
+import { getKnowledgeIndicatorSource } from '../utils/get_knowledge_indicator_source';
+import { KnowledgeIndicatorSourceBadge } from '../knowledge_indicator_source_badge';
 
 interface KnowledgeIndicatorsTableProps {
   definition: Streams.all.Definition;
@@ -39,6 +41,7 @@ interface KnowledgeIndicatorsTableProps {
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   searchTerm: string;
   selectedTypes: string[];
+  selectedSources: string[];
   statusFilter: 'active' | 'excluded';
   selectedKnowledgeIndicatorId?: string;
   onViewDetails: (knowledgeIndicator: KnowledgeIndicator) => void;
@@ -50,6 +53,7 @@ export function KnowledgeIndicatorsTable({
   occurrencesByQueryId,
   searchTerm,
   selectedTypes,
+  selectedSources,
   statusFilter,
   selectedKnowledgeIndicatorId,
   onViewDetails,
@@ -87,6 +91,13 @@ export function KnowledgeIndicatorsTable({
         return false;
       }
 
+      const source = getKnowledgeIndicatorSource(knowledgeIndicator);
+      const matchesSource = selectedSources.length === 0 || selectedSources.includes(source);
+
+      if (!matchesSource) {
+        return false;
+      }
+
       if (!searchTerm) {
         return true;
       }
@@ -97,7 +108,7 @@ export function KnowledgeIndicatorsTable({
 
       return (knowledgeIndicator.query.title ?? '').toLowerCase().includes(searchTerm);
     });
-  }, [knowledgeIndicators, searchTerm, selectedTypes, statusFilter]);
+  }, [knowledgeIndicators, searchTerm, selectedTypes, selectedSources, statusFilter]);
 
   useEffect(() => {
     setPagination((currentPagination) => {
@@ -110,7 +121,7 @@ export function KnowledgeIndicatorsTable({
         pageIndex: 0,
       };
     });
-  }, [searchTerm, selectedTypes, statusFilter]);
+  }, [searchTerm, selectedTypes, selectedSources, statusFilter]);
 
   const isSelectionActionsDisabled = selectedKnowledgeIndicators.length === 0;
 
@@ -212,6 +223,13 @@ export function KnowledgeIndicatorsTable({
             </EuiBadge>
           );
         },
+      },
+      {
+        name: SIGNIFICANT_EVENTS_TABLE_SOURCE_COLUMN_LABEL,
+        width: '130px',
+        render: (knowledgeIndicator: KnowledgeIndicator) => (
+          <KnowledgeIndicatorSourceBadge source={getKnowledgeIndicatorSource(knowledgeIndicator)} />
+        ),
       },
       {
         name: SIGNIFICANT_EVENTS_TABLE_ACTIONS_COLUMN_LABEL,
@@ -325,6 +343,13 @@ const SIGNIFICANT_EVENTS_TABLE_STATS_QUERY_TYPE_LABEL = i18n.translate(
   'xpack.streams.significantEventsTable.columns.statsQueryTypeLabel',
   {
     defaultMessage: 'Stats query',
+  }
+);
+
+const SIGNIFICANT_EVENTS_TABLE_SOURCE_COLUMN_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.columns.sourceLabel',
+  {
+    defaultMessage: 'Source',
   }
 );
 

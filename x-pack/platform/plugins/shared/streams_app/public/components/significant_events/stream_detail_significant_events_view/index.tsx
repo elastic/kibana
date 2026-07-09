@@ -8,10 +8,13 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiToolTip,
   useEuiTheme,
@@ -42,10 +45,15 @@ import { useKnowledgeIndicatorsOnboarding } from './hooks/use_knowledge_indicato
 import { KnowledgeIndicatorRulesSelector } from './knowledge_indicator_rules_selector';
 import { KnowledgeIndicatorsStatusFilter } from './knowledge_indicators_status_filter';
 import { KnowledgeIndicatorsTypeFilter } from './knowledge_indicators_type_filter';
+import { KnowledgeIndicatorsSourceFilter } from './knowledge_indicators_source_filter';
 import { RulesTable } from './rules_table';
 import { LoadingPanel } from '../../loading_panel';
 import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
 import { getFeaturesFromKIs } from './utils/get_features_from_kis';
+import { CodeInsightsPanel, CodeIntelligencePlaceholder } from './code_insights_panel';
+import { useStreamCodeFeatures } from '../../../hooks/significant_events/use_stream_code_features';
+import { useCodeIntelligenceAvailability } from '../../../hooks/significant_events/use_code_intelligence_availability';
+import { useCodeExtraction } from './hooks/use_code_extraction';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -77,6 +85,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [selectedKnowledgeIndicatorTypes, setSelectedKnowledgeIndicatorTypes] = useState<string[]>(
     []
   );
+  const [selectedKnowledgeIndicatorSources, setSelectedKnowledgeIndicatorSources] = useState<
+    string[]
+  >([]);
   const [typeFilterOptions, setTypeFilterOptions] = useState<EuiSelectableOption[]>([
     {
       key: 'knowledge_indicator',
@@ -159,6 +170,29 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     onError: onKnowledgeIndicatorsOnboardingError,
   });
 
+  const { insights: codeInsights } = useStreamCodeFeatures(definition.stream, [], {
+    enabled: shouldFetchKnowledgeIndicators,
+  });
+
+  const {
+    available: isCodeIntelligenceAvailable,
+    isLoading: isCodeIntelligenceAvailabilityLoading,
+  } = useCodeIntelligenceAvailability({ enabled: shouldFetchKnowledgeIndicators });
+
+  const { generateFromCode, isGeneratingFromCode } = useCodeExtraction({
+    streamName: definition.stream.name,
+  });
+
+  // "Generate" runs the log-based KI onboarding and, when the stream's code has
+  // been ingested via Semantic Code Search, also kicks off code-driven KI
+  // generation for the stream.
+  const handleGenerate = useCallback(() => {
+    scheduleKnowledgeIndicatorsOnboarding();
+    if (isCodeIntelligenceAvailable) {
+      generateFromCode();
+    }
+  }, [scheduleKnowledgeIndicatorsOnboarding, isCodeIntelligenceAvailable, generateFromCode]);
+
   useInterval(
     refetch,
     knowledgeIndicatorsOnboardingState?.status === SignificantEventsWorkflowStatus.InProgress
@@ -219,21 +253,38 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     return <LoadingPanel size="xxl" />;
   }
 
+  const codeIntelligenceSection =
+    isCodeIntelligenceAvailabilityLoading ? null : !isCodeIntelligenceAvailable ? (
+      <EuiFlexItem grow={false}>
+        <CodeIntelligencePlaceholder />
+      </EuiFlexItem>
+    ) : codeInsights ? (
+      <EuiFlexItem grow={false}>
+        <CodeInsightsPanel insights={codeInsights} />
+      </EuiFlexItem>
+    ) : null;
+
   if (isEmpty) {
     return (
-      <EmptyState
-        isGenerating={isKnowledgeIndicatorsGenerationPending}
-        isCanceling={isKnowledgeIndicatorsGenerationCanceling}
-        isGenerateDisabled={isGenerateButtonDisabled}
-        onGenerateSuggestionsClick={scheduleKnowledgeIndicatorsOnboarding}
-        onCancelGenerationClick={cancelKnowledgeIndicatorsOnboarding}
-      />
+      <EuiFlexGroup direction="column" gutterSize="l">
+        {codeIntelligenceSection}
+        <EuiFlexItem grow={false}>
+          <EmptyState
+            isGenerating={isKnowledgeIndicatorsGenerationPending}
+            isCanceling={isKnowledgeIndicatorsGenerationCanceling}
+            isGenerateDisabled={isGenerateButtonDisabled}
+            onGenerateSuggestionsClick={handleGenerate}
+            onCancelGenerationClick={cancelKnowledgeIndicatorsOnboarding}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
+        {codeIntelligenceSection}
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={true}>
             <EuiFlexGroup
@@ -292,11 +343,24 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
               ) : null}
               {!isRulesSelected ? (
                 <EuiFlexItem grow={false}>
+                  <KnowledgeIndicatorsSourceFilter
+                    knowledgeIndicators={knowledgeIndicators}
+                    searchTerm={debouncedTableSearchValue}
+                    statusFilter={knowledgeIndicatorStatusFilter}
+                    selectedSources={selectedKnowledgeIndicatorSources}
+                    onSelectedSourcesChange={setSelectedKnowledgeIndicatorSources}
+                  />
+                </EuiFlexItem>
+              ) : null}
+              {!isRulesSelected ? (
+                <EuiFlexItem grow={false}>
                   <KnowledgeIndicatorsGenerationControls
                     isGenerating={isKnowledgeIndicatorsGenerationPending}
                     isCanceling={isKnowledgeIndicatorsGenerationCanceling}
                     isGenerateDisabled={isGenerateButtonDisabled}
-                    onGenerateSuggestionsClick={scheduleKnowledgeIndicatorsOnboarding}
+                    isGeneratingFromCode={isGeneratingFromCode}
+                    onGenerateSuggestionsClick={handleGenerate}
+                    onGenerateFromCodeClick={generateFromCode}
                     onCancelGenerationClick={cancelKnowledgeIndicatorsOnboarding}
                   />
                 </EuiFlexItem>
@@ -318,6 +382,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 occurrencesByQueryId={occurrencesByQueryId}
                 searchTerm={debouncedTableSearchValue}
                 selectedTypes={selectedKnowledgeIndicatorTypes}
+                selectedSources={selectedKnowledgeIndicatorSources}
                 statusFilter={knowledgeIndicatorStatusFilter}
                 selectedKnowledgeIndicatorId={selectedKnowledgeIndicatorId}
                 onViewDetails={toggleSelectedKnowledgeIndicator}
@@ -342,16 +407,21 @@ function KnowledgeIndicatorsGenerationControls({
   isGenerating,
   isCanceling,
   isGenerateDisabled,
+  isGeneratingFromCode,
   onGenerateSuggestionsClick,
+  onGenerateFromCodeClick,
   onCancelGenerationClick,
 }: {
   isGenerating: boolean;
   isCanceling: boolean;
   isGenerateDisabled: boolean;
+  isGeneratingFromCode: boolean;
   onGenerateSuggestionsClick: () => void;
+  onGenerateFromCodeClick: () => void;
   onCancelGenerationClick: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       {isGenerating ? (
@@ -394,6 +464,40 @@ function KnowledgeIndicatorsGenerationControls({
               : GENERATING_BUTTON_LABEL
             : GENERATE_MORE_BUTTON_LABEL}
         </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          isOpen={isMenuOpen}
+          closePopover={() => setIsMenuOpen(false)}
+          panelPaddingSize="none"
+          anchorPosition="downRight"
+          button={
+            <EuiButtonIcon
+              display="base"
+              size="m"
+              iconType="arrowDown"
+              aria-label={GENERATE_MENU_ARIA_LABEL}
+              isDisabled={isGenerateDisabled}
+              onClick={() => setIsMenuOpen((open) => !open)}
+            />
+          }
+        >
+          <EuiContextMenuPanel
+            items={[
+              <EuiContextMenuItem
+                key="generate-from-code"
+                icon="editorCodeBlock"
+                disabled={isGeneratingFromCode}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onGenerateFromCodeClick();
+                }}
+              >
+                {GENERATE_FROM_CODE_LABEL}
+              </EuiContextMenuItem>,
+            ]}
+          />
+        </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -445,6 +549,20 @@ const GENERATE_MORE_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsTable.generateMoreButtonLabel',
   {
     defaultMessage: 'Generate more',
+  }
+);
+
+const GENERATE_FROM_CODE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.generateFromCodeButtonLabel',
+  {
+    defaultMessage: 'Generate from code',
+  }
+);
+
+const GENERATE_MENU_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.generateMenuAriaLabel',
+  {
+    defaultMessage: 'More generation options',
   }
 );
 
