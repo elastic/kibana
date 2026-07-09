@@ -6,6 +6,7 @@
  */
 
 import { formatDuration } from '@kbn/alerting-plugin/common';
+import type { NoDataStrategy } from '@kbn/alerting-v2-schemas';
 import { recoveryStrategy, type Query, type RecoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import type { RuleApiResponse } from '../../services/rules_api';
@@ -121,6 +122,26 @@ export function formatRecoveryDelay(stateTransition: RuleApiResponse['state_tran
     timeframe: stateTransition.recovering_timeframe,
     operator: stateTransition.recovering_operator,
   });
+}
+
+const NO_DATA_STRATEGY_LABELS: Record<NoDataStrategy, string> = {
+  last_known_status: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.lastKnownStatus', {
+    defaultMessage: 'Keep last known status',
+  }),
+  emit: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.emit', {
+    defaultMessage: 'Use no data status',
+  }),
+  recover: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.recover', {
+    defaultMessage: 'Recover',
+  }),
+  none: i18n.translate('xpack.alertingV2.ruleDetails.noDataStrategy.none', {
+    defaultMessage: 'Do nothing',
+  }),
+};
+
+export function formatNoDataStrategy(strategy?: NoDataStrategy | null): string {
+  if (!strategy) return EMPTY_VALUE;
+  return NO_DATA_STRATEGY_LABELS[strategy] ?? EMPTY_VALUE;
 }
 
 export function getRecoverEsqlSegment(
