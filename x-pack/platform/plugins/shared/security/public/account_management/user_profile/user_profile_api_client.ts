@@ -75,12 +75,16 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
       return Promise.reject(new Error('Unable to retrieve user profile for anonymous paths'));
     }
 
-    const key = params?.dataPath ?? DEFAULT_PROFILE_CACHE_KEY;
+    // Sort so that e.g. `'userSettings,avatar'` and `'avatar,userSettings'` share a cache entry
+    // instead of firing two identical requests just because the namespaces were listed in a
+    // different order.
+    const dataPath = params?.dataPath?.split(',').sort().join(',');
+    const key = dataPath ?? DEFAULT_PROFILE_CACHE_KEY;
 
     if (!this._cache.has(key)) {
       const req = this.http
         .get<GetUserProfileResponse<D>>('/internal/security/user_profile', {
-          query: { dataPath: params?.dataPath },
+          query: { dataPath },
         })
         .then((response) => {
           this._userProfile$.next(merge(this._userProfile$.getValue(), response?.data ?? {}));
