@@ -206,8 +206,9 @@ describe('CreateTemplatePage', () => {
       expect(mockMutateAsync).toHaveBeenCalledTimes(1);
     });
 
-    const { definition } = (mockMutateAsync.mock.calls[0][0] as { template: { definition: string } })
-      .template;
+    const { definition } = (
+      mockMutateAsync.mock.calls[0][0] as { template: { definition: string } }
+    ).template;
     const parsed = yamlParse(definition) as { settings?: Record<string, boolean> };
     expect(parsed.settings).toEqual({ syncAlerts: true, extractObservables: true });
   });

@@ -138,7 +138,10 @@ const TemplatePreviewComponent: React.FC<TemplatePreviewProps> = ({
         data-test-subj="templatePreviewCaseDefaultsAccordion"
       >
         <EuiSpacer size="s" />
-        <TemplateCaseDefaultsForm parsedTemplate={previewDefinition} onChange={onCaseDefaultChange} />
+        <TemplateCaseDefaultsForm
+          parsedTemplate={previewDefinition}
+          onChange={onCaseDefaultChange}
+        />
       </EuiAccordion>
 
       {previewDefinition.fields.length > 0 && (
