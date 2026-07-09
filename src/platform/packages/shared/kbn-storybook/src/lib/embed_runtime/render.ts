@@ -13,6 +13,12 @@ import createCache from '@emotion/cache';
 import { EuiProvider, euiStylisPrefixer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
+import { DEFAULT_THEME, getColorMode } from '../themes';
+
+// EUI derives its default colorMode from `prefers-color-scheme` when none is set,
+// which would render the shadow-root story in the OS scheme regardless of the docs
+// page. Pin it to the Storybook default theme so the embed stays deterministic.
+const EMBED_COLOR_MODE = getColorMode(DEFAULT_THEME) === 'dark' ? 'DARK' : 'LIGHT';
 
 export interface ShadowMount {
   /** Node React renders into; also the node measured for auto-sizing. */
@@ -54,10 +60,16 @@ const ensureI18nInitialized = (): void => {
  * reset, utilities, theme, and component styles inside the shadow boundary rather
  * than the unreachable document head; the {@link I18nProvider} serves
  * `@kbn/i18n-react` consumers. Returns the bare story when not isolated.
+ *
+ * `EuiPortal`'s default insert target is set to `renderNode` so portaled overlays
+ * (modals, popovers, tooltips) mount inside the shadow root; otherwise they append
+ * to `document.body`, escaping the boundary where the scoped EUI styles live and
+ * rendering unstyled.
  */
 export const createStoryElement = (
   Story: ComponentType,
-  styleContainer: ShadowRoot | null
+  styleContainer: ShadowRoot | null,
+  renderNode: HTMLElement
 ): ReactElement => {
   const story = createElement(Story);
 
@@ -70,11 +82,15 @@ export const createStoryElement = (
   return createElement(
     EuiProvider,
     {
+      colorMode: EMBED_COLOR_MODE,
       cache: createCache({
         key: 'css',
         container: styleContainer,
         stylisPlugins: [euiStylisPrefixer],
       }),
+      componentDefaults: {
+        EuiPortal: { insert: { sibling: renderNode, position: 'after' } },
+      },
     },
     createElement(I18nProvider, null, story)
   );

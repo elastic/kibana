@@ -24,12 +24,12 @@ run(
       throw createFlagError(`Unknown alias [${alias}]`);
     }
 
+    const dist = flagsReader.boolean('dist');
     const build = flagsReader.boolean('build');
     const dev = flagsReader.boolean('dev');
-    const serve = flagsReader.boolean('serve');
 
-    if ([build, dev, serve].filter(Boolean).length !== 1) {
-      throw createFlagError('Pass exactly one of --build, --dev, or --serve');
+    if ([dist, build, dev].filter(Boolean).length !== 1) {
+      throw createFlagError('Pass exactly one of --dist, --build, or --dev');
     }
 
     const port = flagsReader.number('port') ?? 6007;
@@ -42,7 +42,17 @@ run(
     const skipStorybookBuild = flagsReader.boolean('skip-storybook-build');
     const includeAllStories = flagsReader.boolean('include-all-stories');
 
-    if (serve) {
+    if (dev) {
+      const serveDocs = flagsReader.boolean('docs');
+      const docsPath = flagsReader.string('docs-path');
+      const docsPort = flagsReader.number('docs-port');
+      if (
+        docsPort !== undefined &&
+        (!Number.isInteger(docsPort) || docsPort <= 0 || docsPort > 65535)
+      ) {
+        throw createFlagError('Expected --docs-port to be a valid port');
+      }
+
       await runStorybookDocsTestServer({
         alias,
         configDir,
@@ -50,6 +60,11 @@ run(
         baseUrl,
         skipStorybookBuild,
         includeAllStories,
+        watch: true,
+        rebuildStorybook: flagsReader.boolean('rebuild-storybook'),
+        serveDocs,
+        docsPath,
+        docsPort,
         log,
       });
       return;
@@ -61,7 +76,7 @@ run(
       baseUrl,
       skipStorybookBuild,
       includeAllStories,
-      writeArchive: build,
+      writeArchive: dist,
       log,
     });
 
@@ -79,7 +94,7 @@ sources:
     log.info(`Embeddable stories: ${manifest.stories.length}`);
   },
   {
-    usage: `node scripts/storybook_docs <alias> (--build | --dev | --serve)`,
+    usage: `node scripts/storybook_docs <alias> (--dist | --build | --dev)`,
     description: `
       Build Storybook docs artifacts for an alias.
 
@@ -89,18 +104,36 @@ sources:
           .join('\n        ')}
     `,
     flags: {
-      string: ['base-url', 'port'],
-      boolean: ['build', 'dev', 'include-all-stories', 'serve', 'skip-storybook-build'],
+      string: ['base-url', 'port', 'docs-path', 'docs-port'],
+      boolean: [
+        'dist',
+        'build',
+        'dev',
+        'docs',
+        'include-all-stories',
+        'skip-storybook-build',
+        'rebuild-storybook',
+      ],
+      default: {
+        docs: true,
+      },
       help: `
-      --build            Build docs registry, inline assets, and tarball.
-      --dev              Build docs registry and inline assets without creating a tarball.
-      --serve            Build docs artifacts and serve built_assets with CORS.
+      --dist             Build docs registry, inline assets, and a tarball.
+      --build            Build docs registry and inline assets without a tarball.
+      --dev              Serve built_assets with CORS, watch story sources, and start docs-builder.
+                         Reuses an existing static Storybook build; the watcher recompiles the
+                         inline registry bundle on story-code edits (restart to pick up added/removed stories).
       --base-url         Base URL written into docs_registry.json. Defaults to http://127.0.0.1:<port>.
-      --port             Local docs asset server port for --serve. Defaults to 6007.
+      --port             Local docs asset server port for --dev. Defaults to 6007.
+      --docs             With --dev, also start docs-builder for a colocated docset.yml (default: true). Use --no-docs to disable.
+      --docs-path        With --dev, serve a specific docset directory with docs-builder instead of auto-detecting.
+      --docs-port        Port for docs-builder serve. Defaults to docs-builder's own default (3000).
       --include-all-stories
                          Include untagged stories in the generated docs registry.
       --skip-storybook-build
-                         Reuse the existing static Storybook build.
+                         Reuse the existing static Storybook build (never rebuild, even if missing).
+      --rebuild-storybook
+                         With --dev, force a fresh static Storybook build even if one exists.
     `,
     },
   }
