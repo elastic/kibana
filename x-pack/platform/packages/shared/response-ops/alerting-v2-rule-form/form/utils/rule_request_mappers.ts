@@ -134,6 +134,10 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
   const { metadata, timeField, schedule, query, grouping } = formValues;
   const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const recoveryStrategy = resolveRecoveryStrategy(formValues);
+  const noDataStrategy =
+    formValues.kind === 'alert' && formValues.noDataStrategy
+      ? formValues.noDataStrategy
+      : undefined;
 
   return {
     metadata: mapMetadata(metadata),
@@ -141,7 +145,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     schedule: mapSchedule(schedule),
     query: ruleQueryToApiQuery(query),
     ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
-    ...(formValues.noDataStrategy ? { no_data_strategy: formValues.noDataStrategy } : {}),
+    ...(noDataStrategy ? { no_data_strategy: noDataStrategy } : {}),
     grouping: mapGrouping(grouping),
     state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
@@ -195,7 +199,7 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
     },
     query: apiQueryToFormQuery(rule.query, rule.recovery_strategy),
     recoveryStrategy: rule.recovery_strategy ?? undefined,
-    noDataStrategy: rule.no_data_strategy ?? undefined,
+    noDataStrategy: rule.no_data_strategy ?? (rule.kind === 'alert' ? 'none' : undefined),
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),

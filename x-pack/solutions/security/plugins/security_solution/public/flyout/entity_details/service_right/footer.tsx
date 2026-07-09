@@ -21,10 +21,21 @@ import { useEntityCaseTakeActionItems } from '../../../cases/attachments/entity/
 export const ServicePanelFooter = ({
   identityFields,
   entity,
+  flyoutFooterProps,
+  panelProps,
 }: {
   identityFields: IdentityFields;
   /** When entity store v2 is enabled: entity record from the store. */
   entity?: EntityStoreRecord;
+  /**
+   * Overrides forwarded to the outer `EuiFlyoutFooter` (e.g. `css` for compact spacing in the EUI
+   * system flyout). Legacy callers omit this and keep the default.
+   */
+  flyoutFooterProps?: React.ComponentProps<typeof EuiFlyoutFooter>;
+  /**
+   * Overrides for the inner `EuiPanel` (e.g. `{ paddingSize: 'none' }`). Legacy callers omit this.
+   */
+  panelProps?: React.ComponentProps<typeof EuiPanel>;
 }) => {
   const serviceName = useMemo(
     () =>
@@ -52,8 +63,8 @@ export const ServicePanelFooter = ({
   const additionalItems = useEntityCaseTakeActionItems(entityToAttach);
 
   return (
-    <EuiFlyoutFooter>
-      <EuiPanel color="transparent">
+    <EuiFlyoutFooter {...flyoutFooterProps}>
+      <EuiPanel color="transparent" {...panelProps}>
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             <AiAssistantButton

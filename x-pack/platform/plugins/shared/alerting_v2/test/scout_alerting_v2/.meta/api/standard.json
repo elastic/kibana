@@ -1,5 +1,5 @@
 {
-  "sha1": "d95577d3b507846de5498fe5aa101d5f6faa9506",
+  "sha1": "ebc396d0c378b6ae07c6fb42637326455c945498",
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -264,6 +264,34 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
         "line": 1237,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-9085e2d8ed11df7",
+      "title": "Director no_data_strategy 'last_known_status' preserves the prior episode status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 1298,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-f671f4e4f7de76d",
+      "title": "Director no_data_strategy 'recover' transitions the episode toward recovery via a no_data event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 1358,
         "column": 10
       }
     },
@@ -7227,6 +7255,62 @@
       }
     },
     {
+      "id": "2438f1e77f2c56f-33a7f656846de1b",
+      "title": "Rule executor recovery_strategy 'query' keeps breaching when data is present but neither breach nor recovery matches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1211,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-889c074e882fcac",
+      "title": "Rule executor recovery_strategy 'no_breach' recovers absent groups with data and emits no_data for absent groups without data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1308,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-aaab4e7cfe3503b",
+      "title": "Rule executor recovery_strategy 'query' emits no_data for an absent group that has no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1407,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-947ff96f9216405",
+      "title": "Rule executor recovery_strategy 'query' keeps a group breached when the breach and recovery queries both match it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1476,
+        "column": 10
+      }
+    },
+    {
       "id": "2438f1e77f2c56f-2c933d29b3535e0",
       "title": "Rule executor emits recovery events only for groups that stop breaching when others keep breaching",
       "expectedStatus": "passed",
@@ -7236,7 +7320,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1211,
+        "line": 1545,
         "column": 10
       }
     },
@@ -7250,7 +7334,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1317,
+        "line": 1651,
         "column": 10
       }
     },
@@ -7264,7 +7348,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1405,
+        "line": 1739,
         "column": 10
       }
     },
@@ -7278,7 +7362,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1456,
+        "line": 1790,
         "column": 10
       }
     },
@@ -7292,7 +7376,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1521,
+        "line": 1855,
         "column": 10
       }
     },
@@ -7306,7 +7390,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1564,
+        "line": 1898,
         "column": 10
       }
     },
@@ -7320,7 +7404,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1586,
+        "line": 1920,
         "column": 10
       }
     },
@@ -7334,7 +7418,49 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1644,
+        "line": 1978,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-f8c52c5af75599c",
+      "title": "Rule executor no_data_strategy 'last_known_status' writes a no_data rule event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 2055,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-0e4bc48e7b132d8",
+      "title": "Rule executor no_data_strategy 'recover' writes a no_data rule event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 2113,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-2b1caf2ae7578fe",
+      "title": "Rule executor no_data_strategy 'none' does not write no_data events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 2178,
         "column": 10
       }
     },
@@ -7348,7 +7474,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1721,
+        "line": 2226,
         "column": 10
       }
     },
@@ -7362,7 +7488,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1778,
+        "line": 2283,
         "column": 10
       }
     },
@@ -7376,7 +7502,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/telemetry.spec.ts",
-        "line": 105,
+        "line": 113,
         "column": 10
       }
     }

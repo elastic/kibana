@@ -286,6 +286,7 @@ export const AgentlessPackagePoliciesTable = ({
                     packagePolicy={packagePolicy}
                     agentPolicies={agentPolicies}
                     from={from || 'integrations-policy-list'}
+                    onUpgraded={refreshPackagePolicies}
                   />
                 </EuiFlexGroup>
               );
@@ -424,6 +425,7 @@ export const AgentlessPackagePoliciesTable = ({
                         })}?from=${upgradeFrom}`
                       : undefined
                   }
+                  onUpgraded={refreshPackagePolicies}
                   from={from}
                 />
               );
