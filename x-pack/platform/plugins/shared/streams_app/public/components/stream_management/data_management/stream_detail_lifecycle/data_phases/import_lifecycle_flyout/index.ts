@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { RetentionSelector, RetentionSelectorSearch } from './retention_selector';
-export type { RetentionSelectorProps, RetentionSelectorSearchProps } from './retention_selector';
-export type { RetentionOption } from './types';
+export { ImportLifecycleFlyout } from './import_lifecycle_flyout';
+export type { ImportLifecycleFlyoutProps } from './types';
