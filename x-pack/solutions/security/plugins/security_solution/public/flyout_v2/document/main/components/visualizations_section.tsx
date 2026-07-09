@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
@@ -76,6 +76,7 @@ export const VisualizationsSection = memo(
       title: LOCAL_STORAGE_SECTION_KEY,
       defaultValue: false,
     });
+    const documentTitle = useMemo(() => getDocumentTitle(hit), [hit]);
 
     const onShowAnalyzer = useCallback(
       () =>
@@ -96,10 +97,20 @@ export const VisualizationsSection = memo(
             ...defaultToolsFlyoutProperties,
             historyKey,
             session: 'start',
-            title: formatFlyoutTitle(ANALYZER_TITLE, getDocumentTitle(hit)),
+            title: formatFlyoutTitle(ANALYZER_TITLE, documentTitle),
           }
         ),
-      [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
+      [
+        documentTitle,
+        history,
+        historyKey,
+        hit,
+        onAlertUpdated,
+        overlays,
+        renderCellActions,
+        services,
+        store,
+      ]
     );
 
     const onShowSessionView = useCallback(
@@ -123,10 +134,11 @@ export const VisualizationsSection = memo(
             ...defaultToolsFlyoutProperties,
             historyKey,
             session: 'start',
-            title: formatFlyoutTitle(SESSION_VIEW_TITLE, getDocumentTitle(hit)),
+            title: formatFlyoutTitle(SESSION_VIEW_TITLE, documentTitle),
           }
         ),
       [
+        documentTitle,
         history,
         historyKey,
         hit,
@@ -159,10 +171,20 @@ export const VisualizationsSection = memo(
             ...defaultToolsFlyoutProperties,
             historyKey,
             session: 'start',
-            title: formatFlyoutTitle(GRAPH_TITLE, getDocumentTitle(hit)),
+            title: formatFlyoutTitle(GRAPH_TITLE, documentTitle),
           }
         ),
-      [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
+      [
+        documentTitle,
+        history,
+        historyKey,
+        hit,
+        onAlertUpdated,
+        overlays,
+        renderCellActions,
+        services,
+        store,
+      ]
     );
 
     return (

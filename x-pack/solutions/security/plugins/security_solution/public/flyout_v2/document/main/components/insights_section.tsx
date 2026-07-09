@@ -82,7 +82,6 @@ export const InsightsSection = memo(
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-    const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -106,6 +105,7 @@ export const InsightsSection = memo(
       () => rule?.investigation_fields?.field_names ?? [],
       [rule?.investigation_fields?.field_names]
     );
+    const documentTitle = useMemo(() => getDocumentTitle(hit), [hit]);
 
     const onShowThreatIntelligenceDetails = useCallback(() => {
       overlays.openSystemFlyout(
@@ -119,10 +119,10 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
-          title: formatFlyoutTitle(THREAT_INTELLIGENCE_TITLE, getDocumentTitle(hit)),
+          title: formatFlyoutTitle(THREAT_INTELLIGENCE_TITLE, documentTitle),
         }
       );
-    }, [history, historyKey, hit, overlays, services, store]);
+    }, [documentTitle, history, historyKey, hit, overlays, services, store]);
 
     const onShowAlert = useCallback(
       (id: string, indexName: string) =>
@@ -143,11 +143,10 @@ export const InsightsSection = memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
-            title: buildChildFlyoutTitle(getAlertHistoryTitle()),
+            title: buildFlyoutNavTitle(getAlertHistoryTitle()),
           }
         ),
       [
-        buildChildFlyoutTitle,
         defaultFlyoutProperties,
         renderCellActions,
         history,
@@ -170,10 +169,10 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
-          title: formatFlyoutTitle(ENTITIES_TITLE, getDocumentTitle(hit)),
+          title: formatFlyoutTitle(ENTITIES_TITLE, documentTitle),
         }
       );
-    }, [history, historyKey, hit, overlays, services, store]);
+    }, [documentTitle, history, historyKey, hit, overlays, services, store]);
 
     const onShowCorrelationsDetails = useCallback(() => {
       overlays.openSystemFlyout(
@@ -194,10 +193,10 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
-          title: formatFlyoutTitle(CORRELATIONS_TITLE, getDocumentTitle(hit)),
+          title: formatFlyoutTitle(CORRELATIONS_TITLE, documentTitle),
         }
       );
-    }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
+    }, [documentTitle, history, historyKey, hit, onShowAlert, overlays, services, store]);
 
     const renderFlyoutLink = useCallback(
       (props: OpenFlyoutLinkProps) => (
@@ -225,10 +224,11 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
-          title: formatFlyoutTitle(PREVALENCE_TITLE, getDocumentTitle(hit)),
+          title: formatFlyoutTitle(PREVALENCE_TITLE, documentTitle),
         }
       );
     }, [
+      documentTitle,
       renderCellActions,
       history,
       historyKey,

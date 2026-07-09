@@ -146,7 +146,6 @@ export const Host: FC<HostProps> = memo(function Host({
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
   const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
@@ -295,7 +294,7 @@ export const Host: FC<HostProps> = memo(function Host({
       }),
       {
         ...defaultDocumentFlyoutProperties,
-        title: buildChildFlyoutTitle(formatFlyoutTitle(HOST_TITLE, hostName)),
+        title: buildFlyoutNavTitle(formatFlyoutTitle(HOST_TITLE, hostName)),
         historyKey,
         session: 'inherit',
       }
@@ -310,7 +309,6 @@ export const Host: FC<HostProps> = memo(function Host({
     entityId,
     scopeId,
     defaultDocumentFlyoutProperties,
-    buildChildFlyoutTitle,
   ]);
 
   const onShowRelatedEntity = useCallback(
@@ -328,21 +326,12 @@ export const Host: FC<HostProps> = memo(function Host({
         }),
         {
           ...defaultDocumentFlyoutProperties,
-          title: buildChildFlyoutTitle(getEntityFlyoutTitle(params)),
+          title: buildFlyoutNavTitle(getEntityFlyoutTitle(params)),
           historyKey,
           session: 'inherit',
         }
       ),
-    [
-      overlays,
-      services,
-      store,
-      history,
-      scopeId,
-      historyKey,
-      defaultDocumentFlyoutProperties,
-      buildChildFlyoutTitle,
-    ]
+    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
   );
 
   const openDetailsPanel = useCallback(

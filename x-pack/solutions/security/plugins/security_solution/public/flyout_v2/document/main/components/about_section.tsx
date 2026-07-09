@@ -72,8 +72,6 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
     [hit, isAlert]
   );
 
-  const buildChildFlyoutTitle = buildFlyoutNavTitle;
-
   const onShowRuleSummary = useCallback(() => {
     overlays.openSystemFlyout(
       flyoutProviders({
@@ -85,19 +83,10 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
       {
         ...defaultDocumentFlyoutProperties,
         session: 'inherit',
-        title: buildChildFlyoutTitle(formatFlyoutTitle(RULE_TITLE, ruleName)),
+        title: buildFlyoutNavTitle(formatFlyoutTitle(RULE_TITLE, ruleName)),
       }
     );
-  }, [
-    buildChildFlyoutTitle,
-    defaultDocumentFlyoutProperties,
-    history,
-    overlays,
-    ruleId,
-    ruleName,
-    services,
-    store,
-  ]);
+  }, [defaultDocumentFlyoutProperties, history, overlays, ruleId, ruleName, services, store]);
 
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,

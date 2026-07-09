@@ -75,7 +75,6 @@ export const SessionView: FC<SessionViewProps> = memo(
     const store = useStore();
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
     const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
@@ -108,11 +107,10 @@ export const SessionView: FC<SessionViewProps> = memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
-            title: buildChildFlyoutTitle(getAlertHistoryTitle()),
+            title: buildFlyoutNavTitle(getAlertHistoryTitle()),
           }
         ),
       [
-        buildChildFlyoutTitle,
         defaultFlyoutProperties,
         history,
         onAlertUpdated,
@@ -180,14 +178,11 @@ export const SessionView: FC<SessionViewProps> = memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
-            title: buildChildFlyoutTitle(
-              formatFlyoutTitle(SESSION_VIEW_DETAILS_TITLE, processName)
-            ),
+            title: buildFlyoutNavTitle(formatFlyoutTitle(SESSION_VIEW_DETAILS_TITLE, processName)),
           }
         );
       },
       [
-        buildChildFlyoutTitle,
         defaultFlyoutProperties,
         handleJumpToEvent,
         history,

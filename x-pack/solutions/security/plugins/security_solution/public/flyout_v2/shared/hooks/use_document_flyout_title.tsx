@@ -66,7 +66,6 @@ export const useDocumentFlyoutTitle = ({
   const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const isAlert = useMemo(
     () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -95,11 +94,10 @@ export const useDocumentFlyoutTitle = ({
         ...defaultFlyoutProperties,
         historyKey,
         session: 'inherit',
-        title: buildChildFlyoutTitle(sessionTitle),
+        title: buildFlyoutNavTitle(sessionTitle),
       }
     );
   }, [
-    buildChildFlyoutTitle,
     defaultFlyoutProperties,
     history,
     historyKey,

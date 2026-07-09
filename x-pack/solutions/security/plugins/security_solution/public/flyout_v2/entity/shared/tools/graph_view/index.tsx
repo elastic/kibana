@@ -69,7 +69,6 @@ export const GraphView = memo(
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
     const onShowDocument = useCallback(
       (documentId: string, indexName?: string, isEvent?: boolean) =>
@@ -91,18 +90,10 @@ export const GraphView = memo(
             ...defaultFlyoutProperties,
             historyKey,
             session: 'inherit',
-            title: buildChildFlyoutTitle(isEvent ? EVENT_TITLE : getAlertHistoryTitle()),
+            title: buildFlyoutNavTitle(isEvent ? EVENT_TITLE : getAlertHistoryTitle()),
           }
         ),
-      [
-        overlays,
-        services,
-        store,
-        history,
-        defaultFlyoutProperties,
-        historyKey,
-        buildChildFlyoutTitle,
-      ]
+      [overlays, services, store, history, defaultFlyoutProperties, historyKey]
     );
 
     const onShowNetwork = useCallback(
@@ -118,18 +109,10 @@ export const GraphView = memo(
             ...defaultFlyoutProperties,
             historyKey,
             session: 'inherit',
-            title: buildChildFlyoutTitle(formatFlyoutTitle(NETWORK_TITLE, ip)),
+            title: buildFlyoutNavTitle(formatFlyoutTitle(NETWORK_TITLE, ip)),
           }
         ),
-      [
-        overlays,
-        services,
-        store,
-        history,
-        defaultFlyoutProperties,
-        historyKey,
-        buildChildFlyoutTitle,
-      ]
+      [overlays, services, store, history, defaultFlyoutProperties, historyKey]
     );
 
     const onShowGrouped = useCallback(
@@ -157,7 +140,7 @@ export const GraphView = memo(
             ...defaultFlyoutProperties,
             historyKey,
             session: 'inherit',
-            title: buildChildFlyoutTitle(
+            title: buildFlyoutNavTitle(
               params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE
             ),
           }
@@ -172,7 +155,6 @@ export const GraphView = memo(
         onShowEntity,
         defaultFlyoutProperties,
         historyKey,
-        buildChildFlyoutTitle,
       ]
     );
 

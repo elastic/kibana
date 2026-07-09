@@ -78,7 +78,6 @@ export const ResolverWithoutProviders = React.memo(
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const { openPreviewPanel } = useExpandableFlyoutApi();
-    const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
     useResolverQueryParamCleaner(resolverComponentInstanceID);
     /**
@@ -164,11 +163,10 @@ export const ResolverWithoutProviders = React.memo(
             {
               ...defaultFlyoutProperties,
               session: 'inherit',
-              title: buildChildFlyoutTitle(getAlertHistoryTitle()),
+              title: buildFlyoutNavTitle(getAlertHistoryTitle()),
             }
           ),
       [
-        buildChildFlyoutTitle,
         defaultFlyoutProperties,
         handleAlertUpdated,
         history,
@@ -201,7 +199,7 @@ export const ResolverWithoutProviders = React.memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
-            title: buildChildFlyoutTitle(ANALYZER_PREVIEW_TITLE),
+            title: buildFlyoutNavTitle(ANALYZER_PREVIEW_TITLE),
           }
         );
       } else {
@@ -214,7 +212,6 @@ export const ResolverWithoutProviders = React.memo(
         });
       }
     }, [
-      buildChildFlyoutTitle,
       defaultFlyoutProperties,
       history,
       onShowEvent,

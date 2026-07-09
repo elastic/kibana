@@ -103,7 +103,6 @@ export const Service: FC<ServiceProps> = memo(function Service({
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const safeContextID = contextID ?? scopeId ?? 'service-panel';
 
@@ -195,7 +194,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
       }),
       {
         ...defaultDocumentFlyoutProperties,
-        title: buildChildFlyoutTitle(formatFlyoutTitle(SERVICE_TITLE, serviceName)),
+        title: buildFlyoutNavTitle(formatFlyoutTitle(SERVICE_TITLE, serviceName)),
         historyKey,
         session: 'inherit',
       }
@@ -210,7 +209,6 @@ export const Service: FC<ServiceProps> = memo(function Service({
     scopeId,
     historyKey,
     defaultDocumentFlyoutProperties,
-    buildChildFlyoutTitle,
   ]);
 
   const onShowRelatedEntity = useCallback(
@@ -228,21 +226,12 @@ export const Service: FC<ServiceProps> = memo(function Service({
         }),
         {
           ...defaultDocumentFlyoutProperties,
-          title: buildChildFlyoutTitle(getEntityFlyoutTitle(params)),
+          title: buildFlyoutNavTitle(getEntityFlyoutTitle(params)),
           historyKey,
           session: 'inherit',
         }
       ),
-    [
-      overlays,
-      services,
-      store,
-      history,
-      scopeId,
-      historyKey,
-      defaultDocumentFlyoutProperties,
-      buildChildFlyoutTitle,
-    ]
+    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
   );
 
   const openDetailsPanel = useCallback(

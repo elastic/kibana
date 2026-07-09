@@ -84,7 +84,6 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const { getGenericEntity } = useGetGenericEntity(params);
   const genericInsightsValue = getGenericEntity.data?._source?.entity.id;
@@ -146,7 +145,7 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session: 'inherit',
-        title: buildChildFlyoutTitle(formatFlyoutTitle(GENERIC_ENTITY_TITLE, genericInsightsValue)),
+        title: buildFlyoutNavTitle(formatFlyoutTitle(GENERIC_ENTITY_TITLE, genericInsightsValue)),
       }
     );
   }, [
@@ -157,7 +156,6 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
     params,
     historyKey,
     defaultDocumentFlyoutProperties,
-    buildChildFlyoutTitle,
     genericInsightsValue,
   ]);
 

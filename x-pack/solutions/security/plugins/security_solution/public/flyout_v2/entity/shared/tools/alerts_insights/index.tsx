@@ -61,7 +61,6 @@ export const AlertsInsights = memo(
     const store = useStore();
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const buildChildFlyoutTitle = buildFlyoutNavTitle;
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
@@ -85,11 +84,11 @@ export const AlertsInsights = memo(
             ...defaultFlyoutProperties,
             historyKey,
             session: 'inherit',
-            title: buildChildFlyoutTitle(getAlertHistoryTitle()),
+            title: buildFlyoutNavTitle(getAlertHistoryTitle()),
           }
         );
       },
-      [services, store, history, defaultFlyoutProperties, historyKey, buildChildFlyoutTitle]
+      [services, store, history, defaultFlyoutProperties, historyKey]
     );
 
     return (

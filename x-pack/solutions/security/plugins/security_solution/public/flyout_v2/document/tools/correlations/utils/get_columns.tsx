@@ -106,6 +106,7 @@ export const getColumns = ({
             <OpenFlyoutLink
               field={ALERT_RULE_NAME}
               value={ruleId}
+              displayValue={ruleName}
               data-test-subj={`${dataTestSubj}RuleLink`}
             >
               <span>{ruleName}</span>

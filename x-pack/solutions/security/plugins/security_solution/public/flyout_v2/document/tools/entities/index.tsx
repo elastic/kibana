@@ -109,7 +109,6 @@ export const EntityDetails = memo(
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
     const openEntityFlyout = useCallback(
       (children: ReactNode, title: string) => {
@@ -118,18 +117,10 @@ export const EntityDetails = memo(
           historyKey,
           session: 'inherit',
           outsideClickCloses: false,
-          title: buildChildFlyoutTitle(title),
+          title: buildFlyoutNavTitle(title),
         });
       },
-      [
-        overlays,
-        services,
-        store,
-        history,
-        defaultDocumentFlyoutProperties,
-        historyKey,
-        buildChildFlyoutTitle,
-      ]
+      [overlays, services, store, history, defaultDocumentFlyoutProperties, historyKey]
     );
 
     const openToolFlyout = useCallback(

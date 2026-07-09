@@ -30,9 +30,16 @@ export interface OpenFlyoutLinkProps {
    */
   field: string;
   /**
-   * Field value
+   * Field value. Used both to open the flyout and, by default, to derive its history title.
    */
   value: string;
+  /**
+   * Value to use for the link text and history title instead of `value`. For fields where the
+   * navigation target and the display text differ (e.g. rule name links, which navigate by rule
+   * UUID but display the rule name), pass the display value here so the title isn't derived from
+   * the UUID.
+   */
+  displayValue?: string;
   /**
    * The source document record. When provided, enables entity resolution for host/user flyouts.
    */
@@ -68,6 +75,7 @@ export type OpenFlyoutLinkRenderer = FC<OpenFlyoutLinkProps>;
 export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   field,
   value,
+  displayValue,
   hit,
   asParent = false,
   children,
@@ -80,12 +88,12 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
+  const titleValue = displayValue ?? value;
   const flyoutTitle = useMemo(
-    () => buildFlyoutTitleFromField(field, value) ?? value,
-    [field, value]
+    () => buildFlyoutTitleFromField(field, titleValue) ?? titleValue,
+    [field, titleValue]
   );
 
   const onClick = useCallback(() => {
@@ -105,7 +113,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
           historyKey,
           session: asParent ? 'start' : 'inherit',
           outsideClickCloses: asParent,
-          title: asParent ? flyoutTitle : buildChildFlyoutTitle(flyoutTitle),
+          title: asParent ? flyoutTitle : buildFlyoutNavTitle(flyoutTitle),
         }
       );
     }
@@ -119,7 +127,6 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
     asParent,
     historyKey,
     flyoutTitle,
-    buildChildFlyoutTitle,
   ]);
 
   if (!flyoutContent) {
@@ -128,7 +135,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 
   return (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>
-      {children ?? value}
+      {children ?? titleValue}
     </EuiLink>
   );
 };

@@ -80,7 +80,6 @@ export const SessionViewDetails = memo(
     const store = useStore();
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
     const onShowAlertDetails = useCallback(
       (alertId: string, alertIndex: string) => {
@@ -101,12 +100,11 @@ export const SessionViewDetails = memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
-            title: buildChildFlyoutTitle(getAlertHistoryTitle()),
+            title: buildFlyoutNavTitle(getAlertHistoryTitle()),
           }
         );
       },
       [
-        buildChildFlyoutTitle,
         defaultFlyoutProperties,
         history,
         onAlertUpdated,

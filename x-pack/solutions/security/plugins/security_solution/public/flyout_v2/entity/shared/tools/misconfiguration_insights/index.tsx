@@ -74,7 +74,6 @@ export const MisconfigurationInsights = memo(
     const store = useStore();
     const history = useHistory();
     const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const buildChildFlyoutTitle = buildFlyoutNavTitle;
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
@@ -89,7 +88,7 @@ export const MisconfigurationInsights = memo(
           }),
           {
             ...defaultDocumentFlyoutProperties,
-            title: buildChildFlyoutTitle(formatFlyoutTitle(ENTITY_TITLE[entityType], value)),
+            title: buildFlyoutNavTitle(formatFlyoutTitle(ENTITY_TITLE[entityType], value)),
             historyKey,
             session: 'inherit',
           }
@@ -101,7 +100,6 @@ export const MisconfigurationInsights = memo(
         store,
         history,
         defaultDocumentFlyoutProperties,
-        buildChildFlyoutTitle,
         entityType,
         value,
         historyKey,

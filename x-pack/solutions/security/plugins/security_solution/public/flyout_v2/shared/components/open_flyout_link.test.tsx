@@ -111,6 +111,16 @@ describe('<OpenFlyoutLink />', () => {
 
       expect(getByTestId('customTestId')).toBeInTheDocument();
     });
+
+    it('should derive the history title from displayValue instead of value when provided', () => {
+      const { getByTestId } = renderOpenFlyoutLink({ displayValue: 'my-alias' });
+
+      getByTestId(OPEN_FLYOUT_LINK_TEST_ID).click();
+      expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ title: expect.stringContaining('my-alias') })
+      );
+    });
   });
 
   describe('when the field is not supported', () => {

@@ -71,7 +71,6 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   const eventContext = useContext(StatefulEventContext);
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const ruleName = `${value}`;
   const ruleId = linkValue;
@@ -106,7 +105,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
           {
             ...defaultDocumentFlyoutProperties,
             session: 'inherit',
-            title: buildChildFlyoutTitle(formatFlyoutTitle(RULE_TITLE, ruleName)),
+            title: buildFlyoutNavTitle(formatFlyoutTitle(RULE_TITLE, ruleName)),
           }
         );
         return;
@@ -135,7 +134,6 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       store,
       history,
       defaultDocumentFlyoutProperties,
-      buildChildFlyoutTitle,
       ruleName,
     ]
   );

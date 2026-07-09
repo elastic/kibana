@@ -147,7 +147,6 @@ export const User: FC<UserProps> = memo(function User({
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
   const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
@@ -298,7 +297,7 @@ export const User: FC<UserProps> = memo(function User({
       }),
       {
         ...defaultDocumentFlyoutProperties,
-        title: buildChildFlyoutTitle(formatFlyoutTitle(USER_TITLE, userName)),
+        title: buildFlyoutNavTitle(formatFlyoutTitle(USER_TITLE, userName)),
         historyKey,
         session: 'inherit',
       }
@@ -313,7 +312,6 @@ export const User: FC<UserProps> = memo(function User({
     entityId,
     scopeId,
     defaultDocumentFlyoutProperties,
-    buildChildFlyoutTitle,
   ]);
 
   const onShowRelatedEntity = useCallback(
@@ -331,21 +329,12 @@ export const User: FC<UserProps> = memo(function User({
         }),
         {
           ...defaultDocumentFlyoutProperties,
-          title: buildChildFlyoutTitle(getEntityFlyoutTitle(params)),
+          title: buildFlyoutNavTitle(getEntityFlyoutTitle(params)),
           historyKey,
           session: 'inherit',
         }
       ),
-    [
-      overlays,
-      services,
-      store,
-      history,
-      scopeId,
-      historyKey,
-      defaultDocumentFlyoutProperties,
-      buildChildFlyoutTitle,
-    ]
+    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
   );
 
   const openDetailsPanel = useCallback(

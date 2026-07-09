@@ -52,7 +52,6 @@ export const OverviewTab = memo(({ hit, onAttackUpdated }: OverviewTabProps) => 
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const { openAttackCorrelations, openAttackEntities } = useFlyoutApi();
-  const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
   const alertIds = useAttackAlertIds(hit);
 
@@ -76,11 +75,10 @@ export const OverviewTab = memo(({ hit, onAttackUpdated }: OverviewTabProps) => 
           ...defaultDocumentFlyoutProperties,
           historyKey,
           session: 'inherit',
-          title: buildChildFlyoutTitle(getAlertHistoryTitle()),
+          title: buildFlyoutNavTitle(getAlertHistoryTitle()),
         }
       ),
     [
-      buildChildFlyoutTitle,
       defaultDocumentFlyoutProperties,
       history,
       historyKey,

@@ -7,6 +7,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
+import { ALERT_ATTACK_DISCOVERY_TITLE } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
@@ -19,8 +20,6 @@ import { NotesDetails } from '../../flyout_v2/shared/tools/notes';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { formatFlyoutTitle, NOTES_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
-
-const FIELD_ATTACK_TITLE = 'kibana.alert.attack_discovery.title' as const;
 
 export interface AttackFlyoutHeaderProps {
   hit: DataTableRecord;
@@ -41,7 +40,7 @@ export const AttackFlyoutHeader = ({
   const isSecurityApp = useIsInSecurityApp();
   const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const attackTitle = useMemo(
-    () => getFieldValue(hit, FIELD_ATTACK_TITLE) as string | undefined,
+    () => getFieldValue(hit, ALERT_ATTACK_DISCOVERY_TITLE) as string | undefined,
     [hit]
   );
 

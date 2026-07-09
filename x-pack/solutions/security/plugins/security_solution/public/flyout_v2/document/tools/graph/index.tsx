@@ -68,7 +68,6 @@ export const GraphDetails = memo(
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const buildChildFlyoutTitle = buildFlyoutNavTitle;
 
     const onShowDocument = useCallback(
       (documentId: string, indexName?: string, isEvent?: boolean) =>
@@ -90,11 +89,10 @@ export const GraphDetails = memo(
             ...defaultFlyoutProperties,
             historyKey,
             session: 'inherit',
-            title: buildChildFlyoutTitle(isEvent ? EVENT_TITLE : getAlertHistoryTitle()),
+            title: buildFlyoutNavTitle(isEvent ? EVENT_TITLE : getAlertHistoryTitle()),
           }
         ),
       [
-        buildChildFlyoutTitle,
         defaultFlyoutProperties,
         history,
         historyKey,
@@ -119,18 +117,10 @@ export const GraphDetails = memo(
             ...defaultFlyoutProperties,
             historyKey,
             session: 'inherit',
-            title: buildChildFlyoutTitle(formatFlyoutTitle(NETWORK_TITLE, ip)),
+            title: buildFlyoutNavTitle(formatFlyoutTitle(NETWORK_TITLE, ip)),
           }
         ),
-      [
-        buildChildFlyoutTitle,
-        defaultFlyoutProperties,
-        history,
-        historyKey,
-        overlays,
-        services,
-        store,
-      ]
+      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
     );
 
     const onShowEntity = useCallback(
@@ -159,21 +149,11 @@ export const GraphDetails = memo(
             ...defaultFlyoutProperties,
             historyKey,
             session: 'inherit',
-            title: buildChildFlyoutTitle(
-              getEntityFlyoutTitle({ engineType, entityId, entityName })
-            ),
+            title: buildFlyoutNavTitle(getEntityFlyoutTitle({ engineType, entityId, entityName })),
           }
         );
       },
-      [
-        buildChildFlyoutTitle,
-        defaultFlyoutProperties,
-        history,
-        historyKey,
-        overlays,
-        services,
-        store,
-      ]
+      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
     );
 
     const onShowGrouped = useCallback(
@@ -201,13 +181,12 @@ export const GraphDetails = memo(
             ...defaultFlyoutProperties,
             historyKey,
             session: 'inherit',
-            title: buildChildFlyoutTitle(
+            title: buildFlyoutNavTitle(
               params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE
             ),
           }
         ),
       [
-        buildChildFlyoutTitle,
         defaultFlyoutProperties,
         history,
         historyKey,

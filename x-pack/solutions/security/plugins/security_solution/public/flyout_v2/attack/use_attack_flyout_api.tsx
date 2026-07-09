@@ -14,6 +14,7 @@ import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
+import { ALERT_ATTACK_DISCOVERY_TITLE } from '@kbn/elastic-assistant-common';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
@@ -31,7 +32,8 @@ import {
 } from '../shared/constants/flyout_titles';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 
-const FIELD_ATTACK_TITLE = 'kibana.alert.attack_discovery.title' as const;
+const getAttackTitle = (hit: DataTableRecord): string | undefined =>
+  getFieldValue(hit, ALERT_ATTACK_DISCOVERY_TITLE) as string | undefined;
 
 // Lazy-loaded so consumers of this hook don't statically pull the attack flyout graph into their
 // bundle; the chunk only loads when the flyout (or one of its tools) is actually opened.
@@ -172,12 +174,11 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
 
   const openAttackCorrelations = useCallback(
     ({ hit, alertIds, onShowAlert }: OpenAttackCorrelationsParams) => {
-      const attackTitle = getFieldValue(hit, FIELD_ATTACK_TITLE) as string | undefined;
       open(<CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />, {
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
-        title: formatFlyoutTitle(ATTACK_CORRELATIONS_TITLE, attackTitle),
+        title: formatFlyoutTitle(ATTACK_CORRELATIONS_TITLE, getAttackTitle(hit)),
       });
     },
     [open, historyKey]
@@ -185,12 +186,11 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
 
   const openAttackEntities = useCallback(
     ({ hit, alertIds }: OpenAttackEntitiesParams) => {
-      const attackTitle = getFieldValue(hit, FIELD_ATTACK_TITLE) as string | undefined;
       open(<EntitiesDetails hit={hit} alertIds={alertIds} />, {
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
-        title: formatFlyoutTitle(ATTACK_ENTITIES_TITLE, attackTitle),
+        title: formatFlyoutTitle(ATTACK_ENTITIES_TITLE, getAttackTitle(hit)),
       });
     },
     [open, historyKey]
