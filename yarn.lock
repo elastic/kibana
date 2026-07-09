@@ -7096,12 +7096,9 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-log-plugin@link:x-pack/platform/plugins/event_log":
-  version "0.0.0"
-  uid ""
-
 "@kbn/event-log-plugin@link:x-pack/platform/plugins/shared/event_log":
   version "0.0.0"
+  uid ""
 
 "@kbn/event-stacktrace@link:x-pack/platform/packages/shared/kbn-event-stacktrace":
   version "0.0.0"

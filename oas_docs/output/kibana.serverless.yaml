@@ -85642,6 +85642,20 @@ components:
             - type
       description: Secondary visualization displayed behind the primary metric value, either a bar chart (with optional max value) or a trend line.
       title: Complementary Visualization
+    Kibana_HTTP_APIs_metricComplementaryVizESQL:
+      anyOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricComplementaryBar'
+        - additionalProperties: false
+          type: object
+          properties:
+            type:
+              enum:
+                - trend
+              type: string
+          required:
+            - type
+      description: Bar chart or trendline shown behind the primary metric value.
+      title: Complementary Visualization
     Kibana_HTTP_APIs_metricESQL:
       additionalProperties: false
       description: Metric chart configuration for ES|QL queries
@@ -85789,7 +85803,7 @@ components:
                       - background
                     type: string
                   background_chart:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_metricComplementaryBar'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_metricComplementaryVizESQL'
                   color:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'

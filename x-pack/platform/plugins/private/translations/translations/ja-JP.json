@@ -26683,7 +26683,6 @@
     "xpack.lens.config.cannotConvertToEsqlRuntimeFieldTooltip": "ES|QLに変換できません。ランタイムフィールドは今後のアップデートでサポートされる予定です。",
     "xpack.lens.config.cannotConvertToEsqlTermsTooltip": "ES|QLに変換できません：トップ値（terms）アグリゲーションは、今後のアップデートでサポートされる予定です。",
     "xpack.lens.config.cannotConvertToEsqlTimeShiftTooltip": "ES|QLに変換できません。タイムシフトは今後のアップデートでサポートされる予定です。",
-    "xpack.lens.config.cannotConvertToEsqlTrendLineTooltip": "ES|QLに変換できません。トレンドラインを使ったメトリクスの可視化は今後のアップデートでサポートされる予定です。",
     "xpack.lens.config.cannotConvertToEsqlUnknownTooltip": "ES|QLに変換できません。この可視化は今後のアップデートでサポートされる予定です。",
     "xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip": "ES|QLに変換できません。一部の設定は今後のアップデートでサポートされる予定です。",
     "xpack.lens.config.collapseAriaLabel": "折りたたみ",
