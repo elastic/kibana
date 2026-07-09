@@ -23,7 +23,7 @@ export function createLatencyEvaluator({
     config: {
       name: 'Latency',
       buildQuery: (traceId) => `FROM traces-*
-| WHERE trace.id == "${traceId}"
+| WHERE trace_id == "${traceId}"
 | STATS total_duration_ns = MAX(duration)
 | EVAL latency_seconds = TO_DOUBLE(total_duration_ns) / 1000000000
 | KEEP latency_seconds`,
@@ -49,7 +49,7 @@ export function createSpanLatencyEvaluator({
     config: {
       name: 'Latency',
       buildQuery: (traceId) => `FROM traces-*
-| WHERE trace.id == "${traceId}" AND name == "${spanName}"
+| WHERE trace_id == "${traceId}" AND name == "${spanName}"
 | EVAL latency_seconds = TO_DOUBLE(duration) / 1000000000
 | KEEP latency_seconds`,
       extractResult: (response) => {
