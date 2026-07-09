@@ -7,34 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects, ScoutParallelTestFixtures } from '@kbn/scout';
+import type { ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
-import type { DiscoverWorkerFixtures } from './common';
+import type { DiscoverTestFixtures as DiscoverCommonTestFixtures } from './common';
 import { spaceTest as spaceBaseTest } from './common';
 
-export interface DiscoverPageObjects extends PageObjects {
+export type DiscoverPageObjects = DiscoverCommonTestFixtures['pageObjects'] & {
   docViewer: DocViewer;
-}
+};
 
-export interface DiscoverTestFixtures extends ScoutParallelTestFixtures {
+export interface DiscoverTestFixtures {
   pageObjects: DiscoverPageObjects;
 }
 
-export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWorkerFixtures>({
-  pageObjects: async (
-    {
-      pageObjects,
-      page,
-    }: {
-      pageObjects: DiscoverTestFixtures['pageObjects'];
-      page: DiscoverTestFixtures['page'];
-    },
-    use: (pageObjects: DiscoverTestFixtures['pageObjects']) => Promise<void>
-  ) => {
-    await use({
+export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, ScoutParallelWorkerFixtures>({
+  pageObjects: async ({ pageObjects, page }, use) => {
+    const extendedPageObjects: DiscoverPageObjects = {
       ...pageObjects,
       docViewer: createLazyPageObject(DocViewer, page),
-    });
+    };
+
+    await use(extendedPageObjects);
   },
 });
