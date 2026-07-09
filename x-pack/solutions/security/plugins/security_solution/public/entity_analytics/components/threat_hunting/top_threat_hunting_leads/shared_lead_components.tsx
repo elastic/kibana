@@ -5,29 +5,172 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React from 'react';
+import { EuiBadge, EuiFlexGroup, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiPopover,
-  EuiText,
-} from '@elastic/eui';
-import { TAGS_SECTION } from './translations';
-import { getEntityIcon, MAX_VISIBLE_TAGS } from './utils';
+  EntityPanelKeyByType,
+  EntityPanelParamByType,
+} from '../../../../flyout/entity_details/shared/constants';
+import { getOpenEntityFlyoutLabel, VIEW_ENTITY_DETAILS } from './translations';
+import { getEntityIcon } from './utils';
+
+const ENTITY_BADGE_NAME_CLASS = 'leadEntityBadge__name';
+const ENTITY_BADGE_NAME_MAX_WIDTH = 220;
+
+// Lets the badge shrink below its content width (rather than overflowing the
+// card) when the surrounding card/panel is narrower than the badge's natural
+// size, e.g. on small screens.
+const entityBadgeContainerCss = css`
+  display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
+  vertical-align: bottom;
+`;
+
+const isKnownEntityType = (type: string): type is EntityType =>
+  (Object.values(EntityType) as string[]).includes(type);
+
+interface EntityBadgeProps {
+  entity: { type: string; name: string; id?: string };
+  scopeId: string;
+}
+
+/**
+ * Renders an entity's name/type as a badge. When the entity type maps to a
+ * known entity flyout panel, clicking the badge opens that entity's flyout
+ * instead of triggering the surrounding card's click handler (e.g. opening
+ * the Agent Builder chat).
+ */
+export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => {
+  const { openFlyout } = useExpandableFlyoutApi();
+  const { euiTheme } = useEuiTheme();
+
+  const badgeContent = (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      responsive={false}
+      component="span"
+      css={css`
+        min-width: 0;
+        max-width: 100%;
+      `}
+    >
+      <EuiIcon type={getEntityIcon(entity.type)} size="s" aria-hidden={true} />
+      <span
+        className={ENTITY_BADGE_NAME_CLASS}
+        css={css`
+          color: ${euiTheme.colors.textPrimary};
+          font-weight: ${euiTheme.font.weight.medium};
+          display: inline-block;
+          min-width: 0;
+          max-width: min(${ENTITY_BADGE_NAME_MAX_WIDTH}px, 100%);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          vertical-align: bottom;
+        `}
+      >
+        {entity.name}
+      </span>
+    </EuiFlexGroup>
+  );
+
+  if (!isKnownEntityType(entity.type)) {
+    return (
+      <EuiBadge color="hollow" css={entityBadgeContainerCss}>
+        {badgeContent}
+      </EuiBadge>
+    );
+  }
+
+  const panelKey = EntityPanelKeyByType[entity.type];
+  const panelParam = EntityPanelParamByType[entity.type];
+
+  if (!panelKey || !panelParam) {
+    return (
+      <EuiBadge color="hollow" css={entityBadgeContainerCss}>
+        {badgeContent}
+      </EuiBadge>
+    );
+  }
+
+  // Prefer the real Entity Store EUID (e.g. `host:8c67cb16-...`) so the
+  // flyout resolves the entity directly by id. Older leads persisted before
+  // this field existed fall back to `type:name`, which is only correct when
+  // the display name happens to be the entity's raw id (e.g. hosts without a
+  // friendly name) — best-effort, but strictly better than a name-only match.
+  const entityId = entity.id ?? `${entity.type}:${entity.name}`;
+
+  const openEntityFlyout = () => {
+    openFlyout({
+      right: {
+        id: panelKey,
+        params: {
+          [panelParam]: entity.name,
+          entityId,
+          contextID: scopeId,
+          scopeId,
+        },
+      },
+    });
+  };
+
+  // Rendered as a `span[role=button]` (rather than passing `onClick` to
+  // `EuiBadge`, which would render a nested `<button>`) since these badges
+  // sit inside other clickable elements (cards/panels) that are themselves
+  // rendered as `<button>`, and nested buttons are invalid HTML.
+  return (
+    <EuiToolTip content={VIEW_ENTITY_DETAILS} position="top">
+      <span
+        role="button"
+        tabIndex={0}
+        aria-label={getOpenEntityFlyoutLabel(entity.name)}
+        data-test-subj={`leadEntityBadge-${entity.name}`}
+        css={css`
+          display: inline-block;
+          min-width: 0;
+          max-width: 100%;
+          vertical-align: bottom;
+
+          &:hover .${ENTITY_BADGE_NAME_CLASS} {
+            text-decoration: underline;
+          }
+        `}
+        onClick={(e) => {
+          e.stopPropagation();
+          openEntityFlyout();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            e.stopPropagation();
+            openEntityFlyout();
+          }
+        }}
+      >
+        <EuiBadge color="hollow" css={entityBadgeContainerCss}>
+          {badgeContent}
+        </EuiBadge>
+      </span>
+    </EuiToolTip>
+  );
+};
 
 export const renderTextWithEntities = (
   text: string,
-  entities: Array<{ type: string; name: string }>
+  entities: Array<{ type: string; name: string; id?: string }>,
+  scopeId: string
 ): React.ReactNode => {
   if (!entities.length) return text;
 
   interface Match {
     start: number;
     end: number;
-    entity: { type: string; name: string };
+    entity: { type: string; name: string; id?: string };
   }
   const matches: Match[] = [];
 
@@ -57,12 +200,7 @@ export const renderTextWithEntities = (
         parts.push(text.slice(lastEnd, match.start));
       }
       parts.push(
-        <EuiBadge color="hollow" key={`entity-${match.start}`}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} component="span">
-            <EuiIcon type={getEntityIcon(match.entity.type)} size="s" aria-hidden={true} />
-            <span>{match.entity.name}</span>
-          </EuiFlexGroup>
-        </EuiBadge>
+        <EntityBadge entity={match.entity} scopeId={scopeId} key={`entity-${match.start}`} />
       );
       lastEnd = match.end;
     }
@@ -73,73 +211,4 @@ export const renderTextWithEntities = (
   }
 
   return <>{parts}</>;
-};
-
-export const TagsPopover: React.FC<{ tags: string[] }> = ({ tags }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const closeTimer = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(
-    () => () => {
-      if (closeTimer.current) clearTimeout(closeTimer.current);
-    },
-    []
-  );
-
-  const open = useCallback(() => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    setIsOpen(true);
-  }, []);
-
-  const scheduleClose = useCallback(() => {
-    closeTimer.current = setTimeout(() => setIsOpen(false), 100);
-  }, []);
-
-  const hiddenTags = tags.slice(MAX_VISIBLE_TAGS);
-
-  return (
-    <EuiPopover
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      panelPaddingSize="s"
-      anchorPosition="downCenter"
-      ownFocus={false}
-      aria-label={TAGS_SECTION}
-      button={
-        <span
-          role="button"
-          tabIndex={0}
-          onMouseEnter={open}
-          onMouseLeave={scheduleClose}
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsOpen((prev) => !prev);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsOpen((prev) => !prev);
-            }
-          }}
-        >
-          <EuiBadge color="hollow">{`+${hiddenTags.length}`}</EuiBadge>
-        </span>
-      }
-    >
-      <div onMouseEnter={open} onMouseLeave={scheduleClose} style={{ maxWidth: 320 }}>
-        <EuiText size="xs">
-          <strong>{TAGS_SECTION}</strong>
-        </EuiText>
-        <EuiHorizontalRule margin="xs" />
-        <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-          {hiddenTags.map((tag) => (
-            <EuiFlexItem grow={false} key={tag}>
-              <EuiBadge color="hollow">{tag}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </div>
-    </EuiPopover>
-  );
 };

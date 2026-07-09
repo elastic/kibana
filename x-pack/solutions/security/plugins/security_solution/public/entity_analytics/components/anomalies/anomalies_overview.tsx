@@ -10,9 +10,11 @@ import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -27,11 +29,14 @@ import type {
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
+import { useKibana } from '../../../common/lib/kibana';
 import { MitreAttackChain } from './mitre/components/mitre_attack_chain';
 import {
   ENTITY_ANOMALIES_ALL_LINK_TOOLTIP,
   ENTITY_ANOMALIES_ALL_LINK_TITLE,
   ENTITY_ANOMALIES_RECENT_TABLE_TITLE,
+  ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING,
+  ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING_LINK,
   getEntityAnomaliesCountLabel,
   ENTITY_ANOMALY_TABLE_JOB_COLUMN,
   ENTITY_ANOMALY_TABLE_TIMESTAMP_COLUMN,
@@ -43,6 +48,7 @@ import { truncatedAnchorCss } from './table/constants';
 import {
   ANOMALIES_SECTION_EXPANDABLE_PANEL_TEST_ID,
   ANOMALIES_RECENT_TABLE_TEST_ID,
+  ANOMALIES_MISSING_THREAT_TACTICS_WARNING_TEST_ID,
 } from './test_ids';
 
 const RECENT_TABLE_OTHER_COLUMN_WIDTH = '35.71%';
@@ -52,14 +58,20 @@ interface AnomaliesOverviewProps {
   data: GetAnomalyOverviewResponse;
   isPreviewMode?: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  hideHeaderIcons?: boolean;
 }
 
 export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
   data,
   isPreviewMode,
   openDetailsPanel,
+  hideHeaderIcons,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana();
+  const integrationsUrl = services.application.getUrlForApp('integrations', {
+    path: '/installed',
+  });
 
   const uniqueTactics = useMemo(() => Object.keys(data.tacticCounts), [data.tacticCounts]);
   const totalAnomaliesCount = data.totalAnomaliesCount;
@@ -124,7 +136,7 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
     <ExpandablePanel
       data-test-subj={ANOMALIES_SECTION_EXPANDABLE_PANEL_TEST_ID}
       header={{
-        iconType: !isPreviewMode ? 'chevronLimitLeft' : undefined,
+        iconType: !isPreviewMode && !hideHeaderIcons ? 'chevronLimitLeft' : undefined,
         title: (
           <EuiText
             size="xs"
@@ -138,6 +150,25 @@ export const AnomaliesOverview: React.FC<AnomaliesOverviewProps> = ({
         link,
       }}
     >
+      {data.hasJobsMissingThreatTactics && (
+        <>
+          <EuiCallOut
+            data-test-subj={ANOMALIES_MISSING_THREAT_TACTICS_WARNING_TEST_ID}
+            announceOnMount={false}
+            size="s"
+            color="warning"
+            iconType="warning"
+          >
+            <p>
+              {ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING}{' '}
+              <EuiLink href={integrationsUrl} target="_blank" external>
+                {ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING_LINK}
+              </EuiLink>
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false} css={statCellCss}>
           <EuiFlexGroup direction="column" gutterSize="none">
