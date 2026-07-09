@@ -166,7 +166,7 @@ Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong in
 ## Fix proposal
 
 - Propose a fix only when you can point to a likely file or code area.
-- Prefer the smallest plausible change.
+- Prefer the smallest change that resolves the root cause **and** brings the test in line with our best practices — not a narrower band-aid that leaves the anti-pattern in place. Best practices are the north star for the fix.
 - For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change.
 - For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
@@ -275,11 +275,27 @@ Wrap **everything after the summary** in a single `<details>` block so the issue
 
 State only *what to change* — the "why" belongs in Root cause & evidence, so do not restate the failure or the reasoning here.
 
-- **Single file:** name the `file:line` and the one change, as a single sentence or a short diff. Do not paste surrounding code that already exists — link to it.
-- **Multiple files:** a table of `file:line` → change, one row each. No rationale column.
+**Recommend one fix.** Pick the best option and commit to it — don't lay out competing options, and never use a table of alternatives (a table makes them look equally good). If a genuine alternative is worth noting, add it as a single sentence *after* the recommendation, clearly subordinate to it.
+
+**Anchor the fix to best practices.** Prefer the fix that brings the test in line with our best practices over a narrower patch that leaves the anti-pattern in place. When the fix maps to a best-practice rule, cite that rule as a section-scoped Markdown link (see below) so the developer learns the underlying guideline.
+
+- **Single file:** name the `file:line` and the change, as a single sentence or a short diff. Do not paste surrounding code that already exists — link to it.
+- **Multiple files (one fix spanning several):** a short table of `file:line` → change, one row per file. This lists the parts of the *one* recommended fix, not a menu of alternatives. No rationale column.
 - **No concrete fix:** in one or two sentences, name the evidence that would unblock one.
 
-Multiple fix ideas are fine — list them briefly and flag the one you'd recommend.
+##### Linking to best practices
+
+Kibana Scout/FTR test best practices live in three docs. Don't guess from keywords — read the actual headings to find the matching section:
+
+- UI tests: `docs/extend/testing/ui-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/ui-best-practices`
+- API tests: `docs/extend/testing/api-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/api-best-practices`
+- General (applies to both UI and API): `docs/extend/testing/scout-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/best-practices`
+
+When a section with the same intent exists in both the specific and the general doc, prefer the specific one. Cite a rule as a **section-scoped Markdown link**, never the doc root, using the section heading text as the link label. Infer the `#anchor` from the explicit heading id in the markdown source — e.g. the heading `## Wait for UI updates after actions [wait-for-ui-updates-when-the-next-action-requires-it]` yields:
+
+`[Wait for UI updates after actions](https://www.elastic.co/docs/extend/kibana/scout/ui-best-practices#wait-for-ui-updates-when-the-next-action-requires-it)`
+
+Only link a section that genuinely matches; if none fits, omit the link rather than force-fitting one.
 
 #### Root cause & evidence (required)
 
