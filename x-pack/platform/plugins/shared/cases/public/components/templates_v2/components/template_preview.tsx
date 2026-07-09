@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef } from 'react';
-import { EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiEmptyPrompt, EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { parse as parseYaml } from 'yaml';
-import type { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
 import { TemplateMetadataPreview } from './template_metadata_preview';
 import * as i18n from '../translations';
-
-type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 
 interface TemplatePreviewProps {
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
@@ -25,8 +22,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefault
   const { control } = useFormContext();
   const values = useWatch({ control, defaultValue: { definition: '' } });
 
-  // Store the last valid parsed template
-  const lastValidTemplateRef = useRef<ParsedTemplateDefinition | null>(null);
+  const isEmpty = !values.definition || values.definition.trim() === '';
 
   const parsedTemplate = useMemo(() => {
     try {
@@ -74,18 +70,38 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefault
     }
   }, [values.definition]);
 
-  if (parsedTemplate.success && parsedTemplate.data) {
-    lastValidTemplateRef.current = parsedTemplate.data;
+  // Nothing entered yet: neutral empty state.
+  if (isEmpty) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="templatePreviewEmpty"
+        iconType="eye"
+        color="subdued"
+        paddingSize="m"
+        titleSize="xs"
+        title={<h3>{i18n.PREVIEW_EMPTY_TITLE}</h3>}
+        body={<p>{i18n.PREVIEW_EMPTY_BODY}</p>}
+      />
+    );
   }
 
-  // Use last valid template if current parsing failed
-  const parsedTemplateData = parsedTemplate.success
-    ? parsedTemplate.data
-    : lastValidTemplateRef.current;
-
-  if (!parsedTemplateData) {
-    return null;
+  // Definition present but not parseable: the errors prevent rendering the fields,
+  // so surface a clear, actionable error instead of a stale or blank panel.
+  if (!parsedTemplate.success || !parsedTemplate.data) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="templatePreviewError"
+        iconType="warning"
+        color="warning"
+        paddingSize="m"
+        titleSize="xs"
+        title={<h3>{i18n.PREVIEW_UNAVAILABLE_TITLE}</h3>}
+        body={<p>{i18n.PREVIEW_UNAVAILABLE_BODY}</p>}
+      />
+    );
   }
+
+  const parsedTemplateData = parsedTemplate.data;
 
   return (
     <div>

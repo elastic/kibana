@@ -64,6 +64,7 @@ describe('setupDependencies', () => {
       minPayloadSize: new ByteSizeValue(10 * 1024),
     },
     collectQueueMetrics: false,
+    hitlExternalResume: { enabled: true },
   };
 
   let mockDependencies: ReturnType<typeof mockContextDependencies>;
