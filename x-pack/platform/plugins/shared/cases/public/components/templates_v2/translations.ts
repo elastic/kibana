@@ -27,16 +27,24 @@ export const EDIT_TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.editTem
   defaultMessage: 'Edit template',
 });
 
-export const BACK_TO_TEMPLATES = i18n.translate('xpack.cases.templates.backToTemplates', {
-  defaultMessage: 'Back to Templates',
-});
-
 export const TEMPLATE_FIELDS_LABEL = i18n.translate('xpack.cases.templates.templateFieldsLabel', {
   defaultMessage: 'Fields',
 });
 
 export const TEMPLATE_SAVED = i18n.translate('xpack.cases.templates.templateSaved', {
   defaultMessage: 'Saved',
+});
+
+export const RESET = i18n.translate('xpack.cases.templates.reset', {
+  defaultMessage: 'Reset',
+});
+
+export const DRAFT_SAVED = i18n.translate('xpack.cases.templates.draftSaved', {
+  defaultMessage: 'Draft saved',
+});
+
+export const SAVING_DRAFT = i18n.translate('xpack.cases.templates.savingDraft', {
+  defaultMessage: 'Saving…',
 });
 
 export const VALIDATION_LOADING_EDITOR = i18n.translate(
@@ -363,6 +371,30 @@ export const EXPORT_TEMPLATE = i18n.translate('xpack.cases.templates.exportTempl
 
 export const PREVIEW_TEMPLATE = i18n.translate('xpack.cases.templates.previewTemplate', {
   defaultMessage: 'Preview',
+});
+
+export const PREVIEW_UNAVAILABLE_TITLE = i18n.translate(
+  'xpack.cases.templates.previewUnavailableTitle',
+  {
+    defaultMessage: "Can't preview this template",
+  }
+);
+
+export const PREVIEW_UNAVAILABLE_BODY = i18n.translate(
+  'xpack.cases.templates.previewUnavailableBody',
+  {
+    defaultMessage:
+      'The template definition has errors. Fix the issues highlighted in the editor to preview the fields.',
+  }
+);
+
+export const PREVIEW_EMPTY_TITLE = i18n.translate('xpack.cases.templates.previewEmptyTitle', {
+  defaultMessage: 'Nothing to preview yet',
+});
+
+export const PREVIEW_EMPTY_BODY = i18n.translate('xpack.cases.templates.previewEmptyBody', {
+  defaultMessage:
+    'Add a template definition in the editor to see how it will appear when creating a case.',
 });
 
 export const DELETE_TEMPLATE = i18n.translate('xpack.cases.templates.deleteTemplate', {
@@ -723,4 +755,42 @@ export const INVALID_YAML_NON_OBJECT = i18n.translate(
 export const INVALID_YAML_DEFINITION = i18n.translate(
   'xpack.cases.templates.invalidYamlDefinition',
   { defaultMessage: 'Invalid YAML definition' }
+);
+
+export const CONNECTOR_TITLE = i18n.translate('xpack.cases.templates.preview.connectorTitle', {
+  defaultMessage: 'Connector',
+});
+
+export const FIELDS_TAB_LABEL = i18n.translate('xpack.cases.templates.renderPanel.fieldsTab', {
+  defaultMessage: 'Fields',
+});
+
+export const SETTINGS_TAB_LABEL = i18n.translate('xpack.cases.templates.renderPanel.settingsTab', {
+  defaultMessage: 'Settings',
+});
+
+export const SETTINGS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.templates.settings.sectionTitle',
+  { defaultMessage: 'Case settings' }
+);
+
+export const SETTINGS_SECTION_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.settings.sectionDescription',
+  {
+    defaultMessage:
+      'Defaults applied to cases created from this template. These are managed here, not in the YAML.',
+  }
+);
+
+export const CONNECTOR_SECTION_TITLE = i18n.translate(
+  'xpack.cases.templates.settings.connectorSectionTitle',
+  { defaultMessage: 'External connector' }
+);
+
+export const CONNECTOR_NOT_FOUND = i18n.translate(
+  'xpack.cases.templates.preview.connectorNotFound',
+  {
+    defaultMessage:
+      'Connector not found. Cases created from this template will fall back to no connector.',
+  }
 );

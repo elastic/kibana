@@ -49,6 +49,8 @@ describe('TemplateEditorLayout', () => {
     isYamlSaved: false,
     previewWidth: 400,
     onPreviewWidthChange: jest.fn(),
+    onSettingsChange: jest.fn(),
+    onConnectorChange: jest.fn(),
   };
 
   beforeEach(() => {

@@ -7,22 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChangeHistoryCompareSpec, ChangeHistoryDetail } from '@kbn/change-history-ui';
+import type { ChangeHistoryCompareSpec } from '@kbn/change-history-ui';
+
+import {
+  getWorkflowChangeHistoryRowDisplay,
+  getWorkflowChangeHistoryVersionNumber,
+  type WorkflowChangeHistoryBadgeColor,
+} from './get_workflow_change_history_row_display';
+
+export type WorkflowChangeHistoryCompareBadgeColor = WorkflowChangeHistoryBadgeColor;
 
 export interface WorkflowChangeHistoryCompareIndicator {
   baselineVersion?: number;
   currentVersion?: number;
+  currentBadgeLabel?: string;
+  currentBadgeColor?: WorkflowChangeHistoryCompareBadgeColor;
 }
 
-const getVersionNumber = (change: ChangeHistoryDetail): number | undefined => {
-  const version = change.metadata?.version;
-  return typeof version === 'number' ? version : undefined;
-};
-
-/** Baseline = older side; target = newer side. */
+/** Baseline = older side; target = newer / selected side. */
 export const getWorkflowChangeHistoryCompareIndicator = (
   compareSpec: ChangeHistoryCompareSpec
-): WorkflowChangeHistoryCompareIndicator => ({
-  baselineVersion: getVersionNumber(compareSpec.baseline),
-  currentVersion: getVersionNumber(compareSpec.target),
-});
+): WorkflowChangeHistoryCompareIndicator => {
+  const currentVersion = getWorkflowChangeHistoryVersionNumber(compareSpec.target);
+  const targetDisplay = getWorkflowChangeHistoryRowDisplay(compareSpec.target);
+
+  return {
+    baselineVersion: getWorkflowChangeHistoryVersionNumber(compareSpec.baseline),
+    ...(currentVersion != null
+      ? { currentVersion }
+      : {
+          ...(targetDisplay.badgeLabel
+            ? {
+                currentBadgeLabel: targetDisplay.badgeLabel,
+                currentBadgeColor: targetDisplay.badgeColor,
+              }
+            : {}),
+        }),
+  };
+};

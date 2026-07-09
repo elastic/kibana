@@ -19,6 +19,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
+import { useSecurityMlModuleJobIds } from '../../../../common/components/ml/hooks/use_security_ml_module_job_ids';
 import type { AnomalyBand } from '../anomaly_bands';
 import {
   useRecentAnomaliesDataEsqlSource,
@@ -119,6 +120,23 @@ const useFilteredEntityIds = (spaceId?: string): FilteredEntityIds => {
   };
 };
 
+interface SecurityJobIds {
+  /** `undefined` while the installed security ML jobs are still loading. */
+  jobIds: string[] | undefined;
+  isLoading: boolean;
+}
+
+/**
+ * Resolves the ML jobs in the `security`/`siem` ML group, matching the
+ * server's `getSecurityMlJobIds` (all module-defined security jobs, whether
+ * installed or not) so this panel is constrained to the same job set as the
+ * anomaly overview/summary APIs.
+ */
+const useSecurityJobIds = (): SecurityJobIds => {
+  const { jobIds, loading } = useSecurityMlModuleJobIds();
+  return { jobIds: loading ? undefined : jobIds, isLoading: loading };
+};
+
 interface MlAnomaliesIndexExists {
   indexExists: boolean | undefined;
   isLoading: boolean;
@@ -156,20 +174,23 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   const search = useKibana().services.data.search.search;
   const timeFilter = useRecentAnomaliesTimeFilter(params.timeRange);
   const { entityIds, isLoading: isEntityIdsLoading } = useFilteredEntityIds(params.spaceId);
+  const { jobIds: securityJobIds, isLoading: isSecurityJobIdsLoading } = useSecurityJobIds();
   const { indexExists: mlIndexExists, isLoading: isMlIndexLoading } = useMlAnomaliesIndexExists();
   const noFilterMatches = entityIds !== undefined && entityIds.length === 0;
+  const noSecurityJobs = securityJobIds !== undefined && securityJobIds.length === 0;
   const rowField = params.viewBy === 'jobId' ? 'job_id' : 'entity_id';
 
   const topRowsEsqlSource = useRecentAnomaliesTopRowsEsqlSource({
     ...params,
     rowsLimit: 5,
     entityIds,
+    jobIds: securityJobIds,
   });
 
   const { isLoading, data, isError } = useQuery(
-    [timeFilter, topRowsEsqlSource, entityIds, mlIndexExists],
+    [timeFilter, topRowsEsqlSource, entityIds, securityJobIds, mlIndexExists],
     async ({ signal }) => {
-      if (!topRowsEsqlSource || noFilterMatches || !mlIndexExists) {
+      if (!topRowsEsqlSource || noFilterMatches || noSecurityJobs || !mlIndexExists) {
         return { records: [], rawResponse: undefined };
       }
       const esqlResult = await getESQLResults({
@@ -183,7 +204,10 @@ const useRecentAnomaliesTopRowsQuery = (params: {
         rawResponse: esqlResult?.response,
       };
     },
-    { enabled: !!topRowsEsqlSource && !isEntityIdsLoading && !isMlIndexLoading }
+    {
+      enabled:
+        !!topRowsEsqlSource && !isEntityIdsLoading && !isSecurityJobIdsLoading && !isMlIndexLoading,
+    }
   );
 
   const records = data?.records;
@@ -201,7 +225,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   );
 
   return {
-    isLoading: isLoading || isEntityIdsLoading || isMlIndexLoading,
+    isLoading: isLoading || isEntityIdsLoading || isSecurityJobIdsLoading || isMlIndexLoading,
     rowLabels: records?.map((each) => each[rowField]),
     entityMetadata,
     isError,
@@ -224,7 +248,9 @@ export const useRecentAnomaliesQuery = (params: {
   const search = useKibana().services.data.search.search;
   const timeFilter = useRecentAnomaliesTimeFilter(params.timeRange);
   const { entityIds, isLoading: isEntityIdsLoading } = useFilteredEntityIds(params.spaceId);
+  const { jobIds: securityJobIds, isLoading: isSecurityJobIdsLoading } = useSecurityJobIds();
   const noFilterMatches = entityIds !== undefined && entityIds.length === 0;
+  const noSecurityJobs = securityJobIds !== undefined && securityJobIds.length === 0;
 
   const {
     rowLabels,
@@ -239,6 +265,7 @@ export const useRecentAnomaliesQuery = (params: {
     ...params,
     rowLabels,
     entityIds,
+    jobIds: securityJobIds,
     timeRange: params.timeRange,
   });
 
@@ -255,9 +282,9 @@ export const useRecentAnomaliesQuery = (params: {
     rowLabels: string[];
     rawResponse?: ESQLSearchResponse;
   }>(
-    [timeFilter, anomalyDataEsqlSource, rowLabels, entityIds],
+    [timeFilter, anomalyDataEsqlSource, rowLabels, entityIds, securityJobIds],
     async ({ signal }) => {
-      if (!anomalyDataEsqlSource || !hasAnomaliesData || noFilterMatches) {
+      if (!anomalyDataEsqlSource || !hasAnomaliesData || noFilterMatches || noSecurityJobs) {
         return { anomalyRecords: [], rowLabels: [] };
       }
       const esqlResult = await getESQLResults({
@@ -279,7 +306,8 @@ export const useRecentAnomaliesQuery = (params: {
       };
     },
     {
-      enabled: !!anomalyDataEsqlSource && !!rowLabels && !isEntityIdsLoading,
+      enabled:
+        !!anomalyDataEsqlSource && !!rowLabels && !isEntityIdsLoading && !isSecurityJobIdsLoading,
       keepPreviousData: true,
     }
   );

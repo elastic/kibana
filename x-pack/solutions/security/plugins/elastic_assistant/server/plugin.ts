@@ -31,6 +31,7 @@ import {
 } from './inference_feature';
 import type {
   AssistantTool,
+  AttackDiscoveryWorkflowExecutorFactory,
   ElasticAssistantPluginCoreSetupDependencies,
   ElasticAssistantPluginSetup,
   ElasticAssistantPluginSetupDependencies,
@@ -79,6 +80,7 @@ export class ElasticAssistantPlugin
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly config: ConfigSchema;
   private readonly isDev: boolean;
+  private workflowExecutorFactory?: AttackDiscoveryWorkflowExecutorFactory;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
@@ -190,6 +192,11 @@ export class ElasticAssistantPlugin
       getRegisteredTools: (pluginName: string | string[]) => {
         return appContextService.getRegisteredTools(pluginName);
       },
+      registerAttackDiscoveryWorkflowExecutor: (
+        factory: AttackDiscoveryWorkflowExecutorFactory
+      ) => {
+        this.workflowExecutorFactory = factory;
+      },
     };
   }
 
@@ -277,6 +284,7 @@ export class ElasticAssistantPlugin
     plugins.alerting.registerType(
       getAttackDiscoveryScheduleType({
         core,
+        getWorkflowExecutorFactory: () => this.workflowExecutorFactory,
         logger: this.logger,
         publicBaseUrl: core.http.basePath.publicBaseUrl,
         telemetry: core.analytics,
