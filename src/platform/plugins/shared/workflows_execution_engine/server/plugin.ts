@@ -97,7 +97,7 @@ import {
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
-import { createIndexes } from '../common';
+import { createWorkflowExecutionsDataAccess, createStepExecutionsDataAccess } from '@kbn/workflows/server';
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -1381,11 +1381,20 @@ export class WorkflowsExecutionEnginePlugin
       // Clear the cached promise on rejection so a transient failure (e.g. an ES
       // circuit_breaking_exception) doesn't poison every subsequent call. In-flight
       // callers still share the same attempt; only the *next* call after rejection
-      // gets a fresh `createIndexes` invocation.
-      const attempt = createIndexes({
-        esClient: coreStart.elasticsearch.client.asInternalUser,
-        logger: this.logger,
-      });
+      // gets a fresh execution-index init invocation.
+      const esClient = coreStart.elasticsearch.client.asInternalUser;
+      const attempt = Promise.all([
+        createWorkflowExecutionsDataAccess({
+          source: 'system_index',
+          esClient,
+          logger: this.logger,
+        }).init(),
+        createStepExecutionsDataAccess({
+          source: 'system_index',
+          esClient,
+          logger: this.logger,
+        }).init(),
+      ]);
       this.initializePromise = attempt;
       attempt.catch(() => {
         if (this.initializePromise === attempt) {

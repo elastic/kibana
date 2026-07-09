@@ -10,15 +10,23 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import {
+  createStepExecutionsDataAccess,
+  getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared,
+} from '@kbn/workflows/server';
+import type { StepExecutionsDataAccess } from '@kbn/workflows/server';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
 
 export class StepExecutionRepository {
-  private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
+  private readonly stepExecutionsDal: StepExecutionsDataAccess;
 
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(esClient: ElasticsearchClient) {
+    this.stepExecutionsDal = createStepExecutionsDataAccess({
+      source: 'system_index',
+      esClient,
+    });
+  }
 
   /**
    * Searches for step executions by workflow execution ID.
@@ -29,8 +37,7 @@ export class StepExecutionRepository {
   public async searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
-    const response = await this.esClient.search<EsWorkflowStepExecution>({
-      index: this.indexName,
+    const response = await this.stepExecutionsDal.search({
       query: {
         match: { workflowRunId: executionId },
       },
@@ -51,8 +58,7 @@ export class StepExecutionRepository {
     stepExecutionIds?: string[]
   ): Promise<EsWorkflowStepExecution[]> {
     return getStepExecutionsByWorkflowExecutionShared({
-      esClient: this.esClient,
-      stepsExecutionIndex: this.indexName,
+      stepExecutionsDal: this.stepExecutionsDal,
       workflowExecutionId,
       stepExecutionIds,
     });
@@ -78,26 +84,10 @@ export class StepExecutionRepository {
     sourceIncludes?: StepExecutionField[],
     sourceExcludes?: StepExecutionField[]
   ): Promise<EsWorkflowStepExecution[]> {
-    const response = await this.esClient.mget<EsWorkflowStepExecution>({
-      index: this.indexName,
-      ids: stepExecutionIds,
-      ...(sourceIncludes?.length ? { _source_includes: sourceIncludes } : {}),
-      ...(sourceExcludes?.length ? { _source_excludes: sourceExcludes } : {}),
+    return this.stepExecutionsDal.getByIds(stepExecutionIds, {
+      sourceIncludes,
+      sourceExcludes,
     });
-
-    const outputExplicitlyRequested = !!sourceIncludes?.includes('output' as StepExecutionField);
-
-    const stepExecutions: EsWorkflowStepExecution[] = [];
-    for (const doc of response.docs) {
-      if ('found' in doc && doc.found && doc._source) {
-        const source = doc._source as EsWorkflowStepExecution;
-        if (outputExplicitlyRequested && source.output === undefined) {
-          source.output = null;
-        }
-        stepExecutions.push(source);
-      }
-    }
-    return stepExecutions;
   }
 
   /**
@@ -136,29 +126,9 @@ export class StepExecutionRepository {
       }
     });
 
-    const bulkResponse = await this.esClient.bulk({
+    await this.stepExecutionsDal.bulkUpsert({
+      documents: stepExecutions as Array<Partial<EsWorkflowStepExecution> & { id: string }>,
       refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
-      index: this.indexName,
-      body: stepExecutions.flatMap((stepExecution) => [
-        { update: { _id: stepExecution.id } },
-        { doc: stepExecution, doc_as_upsert: true },
-      ]),
     });
-
-    if (bulkResponse.errors) {
-      const erroredDocuments = bulkResponse.items
-        .filter((item) => item.update?.error)
-        .map((item) => ({
-          id: item.update?._id,
-          error: item.update?.error,
-          status: item.update?.status,
-        }));
-
-      throw new Error(
-        `Failed to upsert ${erroredDocuments.length} step executions: ${JSON.stringify(
-          erroredDocuments
-        )}`
-      );
-    }
   }
 }

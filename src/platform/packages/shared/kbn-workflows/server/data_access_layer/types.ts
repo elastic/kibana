@@ -99,7 +99,9 @@ export interface ExecutionsDataAccess<TExecution extends { id: string }> {
   getByIds(ids: string[], options?: GetExecutionsByIdsOptions<TExecution>): Promise<TExecution[]>;
 
   /** @throws on any upsert failure */
-  bulkUpsert(request: BulkUpsertRequest<TExecution>): Promise<BulkUpsertResponse>;
+  bulkUpsert(
+    request: BulkUpsertRequest<Partial<TExecution> & { id: string }>
+  ): Promise<BulkUpsertResponse>;
 }
 
 export type WorkflowExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowExecution>;

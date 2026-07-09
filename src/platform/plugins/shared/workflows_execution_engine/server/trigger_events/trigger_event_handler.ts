@@ -46,8 +46,6 @@ import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_exec
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { ScheduleWorkflow } from '../types';
 
-const SCHEDULE_CONCURRENCY = 20;
-
 export interface EmitEventParams {
   triggerId: string;
   payload: Record<string, unknown>;
@@ -66,6 +64,8 @@ export interface TriggerEventHandlerDeps {
   logger: Logger;
   triggerEventsClientPromise?: Promise<TriggerEventsDataStreamClient | undefined>;
 }
+
+const SCHEDULE_CONCURRENCY = 20;
 
 interface ScheduleEventParams {
   payload: Record<string, unknown>;
