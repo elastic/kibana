@@ -181,6 +181,7 @@ tags:
     description: |
       Fleet uninstall tokens APIs enable you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
     x-displayName: Fleet uninstall tokens
+  - name: Links
   - description: |
       Programmatically integrate with Logstash configuration management.
       > warn
@@ -44487,6 +44488,802 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/links:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/links</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of links library items. Each result includes title, description, and metadata. Use `GET /api/links/{id}` to retrieve the complete state.
+      operationId: get-links
+      parameters:
+        - description: The page of results to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of results to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
+        - description: Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+        - description: A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are included.
+          in: query
+          name: tags
+          required: false
+          schema:
+            default: []
+            description: Tag IDs associated with this dashboard.
+            items:
+              maxLength: 250
+              type: string
+            maxItems: 100
+            type: array
+        - description: A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are excluded.
+          in: query
+          name: excluded_tags
+          required: false
+          schema:
+            default: []
+            description: Tag IDs associated with this dashboard.
+            items:
+              maxLength: 250
+              type: string
+            maxItems: 100
+            type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                searchLinks:
+                  description: Returns a paginated list of links library items. Each result includes title, description, and metadata. Use `GET /api/links/{id}` to retrieve the complete state.
+                  summary: Search links library items response
+                  value:
+                    data:
+                      - data:
+                          description: A collection of important links
+                          title: Important Resources
+                        id: 0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
+                        meta:
+                          created_at: '2026-06-03T23:33:39.979Z'
+                          created_by: u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0
+                          managed: false
+                          updated_at: '2026-06-03T23:33:39.979Z'
+                          updated_by: u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0
+                          version: WzEwNywxXQ==
+                    meta:
+                      page: 1
+                      per_page: 20
+                      total: 1
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    description: List of links library items matching the query.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        data:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: A short description of the links library item.
+                              maxLength: 10000
+                              type: string
+                            title:
+                              description: The links library item title.
+                              maxLength: 1000
+                              type: string
+                          required:
+                            - title
+                        id:
+                          maxLength: 250
+                          type: string
+                        meta:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                      required:
+                        - id
+                        - data
+                        - meta
+                    maxItems: 1000
+                    minItems: 0
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      page:
+                        default: 1
+                        description: The returned page of results.
+                        minimum: 1
+                        type: number
+                      per_page:
+                        default: 20
+                        description: The number of results returned per page.
+                        maximum: 1000
+                        minimum: 1
+                        type: number
+                      total:
+                        description: The total number of results matching the query.
+                        type: number
+                    required:
+                      - total
+                required:
+                  - data
+                  - meta
+          description: success
+        '403':
+          description: forbidden
+      summary: List links library items
+      tags:
+        - Links
+      x-codeSamples:
+        - label: Search links library items - cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/links?query=welcome&per_page=10" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Search links library items - Console
+          lang: Console
+          source: |
+            GET kbn:/api/links?query=welcome&per_page=10
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/links</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a new links library item and returns its ID, full state, and metadata.
+      operationId: post-links
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createLinks:
+                summary: Create a links library item
+                value:
+                  description: A collection of important links
+                  layout: horizontal
+                  links:
+                    - destination: dashboard-abc-123
+                      label: Overview
+                      type: dashboardLink
+                    - destination: https://www.elastic.co/docs
+                      label: Elastic Documentation
+                      type: externalLink
+                  title: Important Resources
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  type: string
+                layout:
+                  description: Whether to display the links in a horizontal or vertical layout.
+                  enum:
+                    - horizontal
+                    - vertical
+                  type: string
+                links:
+                  description: The list of links to display.
+                  items:
+                    discriminator:
+                      mapping:
+                        dashboardLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
+                        externalLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                      propertyName: type
+                    oneOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                  maxItems: 100
+                  type: array
+                tags:
+                  description: Tag IDs associated with this library item.
+                  items:
+                    maxLength: 250
+                    type: string
+                  maxItems: 1000
+                  type: array
+                title:
+                  type: string
+              required:
+                - links
+                - title
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                createLinks:
+                  description: Creates a new links library item and returns its ID, full state, and metadata.
+                  summary: Create links library item response
+                  value:
+                    data:
+                      description: A collection of important links
+                      layout: horizontal
+                      links:
+                        - destination: dashboard-abc-123
+                          label: Overview
+                          options:
+                            open_in_new_tab: false
+                            use_filters: true
+                            use_time_range: true
+                          type: dashboardLink
+                        - destination: https://www.elastic.co/docs
+                          label: Elastic Documentation
+                          options:
+                            encode_url: true
+                            open_in_new_tab: true
+                          type: externalLink
+                      title: Important Resources
+                    id: 0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
+                    meta:
+                      created_at: '2026-06-03T23:33:39.979Z'
+                      created_by: u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0
+                      managed: false
+                      updated_at: '2026-06-03T23:33:39.979Z'
+                      updated_by: u_EWATCHX9oIEsmcXj8aA1FkcaY3DE-XEpsiGTjrR2PmM_0
+                      version: WzEwNywxXQ==
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        type: string
+                      layout:
+                        description: Whether to display the links in a horizontal or vertical layout.
+                        enum:
+                          - horizontal
+                          - vertical
+                        type: string
+                      links:
+                        description: The list of links to display.
+                        items:
+                          discriminator:
+                            mapping:
+                              dashboardLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
+                              externalLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                            propertyName: type
+                          oneOf:
+                            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
+                            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                        maxItems: 100
+                        type: array
+                      tags:
+                        description: Tag IDs associated with this library item.
+                        items:
+                          maxLength: 250
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      title:
+                        type: string
+                    required:
+                      - links
+                      - title
+                  id:
+                    description: The unique ID of the links library item, as returned by the create or search endpoints.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+      summary: Create a links library item
+      tags:
+        - Links
+      x-codeSamples:
+        - label: Create a links library item - cURL
+          lang: curl
+          source: |-
+            curl \
+              -X POST "${KIBANA_URL}/api/links" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+              "title": "Important Resources",
+              "description": "A collection of important links",
+              "links": [
+                {
+                  "label": "Overview",
+                  "type": "dashboardLink",
+                  "destination": "dashboard-abc-123"
+                },
+                {
+                  "label": "Elastic Documentation",
+                  "type": "externalLink",
+                  "destination": "https://www.elastic.co/docs"
+                }
+              ],
+              "layout": "horizontal"
+            }'
+        - label: Create a links library item - Console
+          lang: Console
+          source: |
+            POST kbn:/api/links
+            {
+              "summary": "Create a links library item",
+              "value": {
+                "title": "Important Resources",
+                "description": "A collection of important links",
+                "links": [
+                  {
+                    "label": "Overview",
+                    "type": "dashboardLink",
+                    "destination": "dashboard-abc-123"
+                  },
+                  {
+                    "label": "Elastic Documentation",
+                    "type": "externalLink",
+                    "destination": "https://www.elastic.co/docs"
+                  }
+                ],
+                "layout": "horizontal"
+              }
+            }
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/links/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/links/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Permanently deletes a links library item by ID.
+      operationId: delete-links-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique ID of the links library item, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 250
+            type: string
+      responses:
+        '204':
+          description: No content, the links library item was successfully deleted.
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+        '404':
+          description: A links library item with the given ID was not found.
+      summary: Delete a links library item
+      tags:
+        - Links
+      x-codeSamples:
+        - label: Delete a links library item - cURL
+          lang: cURL
+          source: |
+            curl -X DELETE "${KIBANA_URL}/api/links/0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - label: Delete a links library item - Console
+          lang: Console
+          source: |
+            DELETE kbn:/api/links/0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/links/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the complete state of a links library item by ID.
+      operationId: get-links-id
+      parameters:
+        - description: The unique ID of the links library item, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 250
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getLinksResponse:
+                  description: The full links library item state including `links`, `layout`, `title`, `description`, and metadata.
+                  summary: Get links library item response
+                  value:
+                    data:
+                      description: A collection of important links
+                      layout: horizontal
+                      links:
+                        - destination: dashboard-abc-123
+                          label: Overview
+                          options:
+                            open_in_new_tab: false
+                            use_filters: true
+                            use_time_range: true
+                          type: dashboardLink
+                        - destination: https://www.elastic.co/docs
+                          label: Elastic Documentation
+                          options:
+                            encode_url: true
+                            open_in_new_tab: true
+                          type: externalLink
+                      title: Important Resources
+                    id: 0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:00:00.000Z'
+                      version: WzU5LDFd
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        type: string
+                      layout:
+                        description: Whether to display the links in a horizontal or vertical layout.
+                        enum:
+                          - horizontal
+                          - vertical
+                        type: string
+                      links:
+                        description: The list of links to display.
+                        items:
+                          discriminator:
+                            mapping:
+                              dashboardLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
+                              externalLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                            propertyName: type
+                          oneOf:
+                            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
+                            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                        maxItems: 100
+                        type: array
+                      tags:
+                        description: Tag IDs associated with this library item.
+                        items:
+                          maxLength: 250
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      title:
+                        type: string
+                    required:
+                      - links
+                      - title
+                  id:
+                    description: The unique ID of the links library item, as returned by the create or search endpoints.
+                    maxLength: 250
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: success
+        '403':
+          description: forbidden
+        '404':
+          description: A links library item with the given ID was not found.
+      summary: Get a links library item by ID
+      tags:
+        - Links
+      x-codeSamples:
+        - label: Get a links library item - cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/links/0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - label: Get a links library item - Console
+          lang: Console
+          source: |
+            GET kbn:/api/links/0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/links/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replaces the full state of a links library item. Partial updates are not supported.
+        To make incremental changes, retrieve the item first, modify the fields you need, then send the complete object back.
+
+        If no item exists with the specified ID, a new one is created.
+      operationId: put-links-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique ID of the links library item to be created or updated
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              upsertLinks:
+                summary: Upsert a links library item
+                value:
+                  description: A collection of important links
+                  layout: vertical
+                  links:
+                    - destination: dashboard-abc-123
+                      label: Overview
+                      options:
+                        open_in_new_tab: false
+                        use_filters: true
+                        use_time_range: true
+                      type: dashboardLink
+                    - destination: https://www.elastic.co/docs
+                      label: Elastic Documentation
+                      options:
+                        encode_url: true
+                        open_in_new_tab: true
+                      type: externalLink
+                  title: Important Resources
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  type: string
+                layout:
+                  description: Whether to display the links in a horizontal or vertical layout.
+                  enum:
+                    - horizontal
+                    - vertical
+                  type: string
+                links:
+                  description: The list of links to display.
+                  items:
+                    discriminator:
+                      mapping:
+                        dashboardLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
+                        externalLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                      propertyName: type
+                    oneOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                  maxItems: 100
+                  type: array
+                tags:
+                  description: Tag IDs associated with this library item.
+                  items:
+                    maxLength: 250
+                    type: string
+                  maxItems: 1000
+                  type: array
+                title:
+                  type: string
+              required:
+                - links
+                - title
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                upsertLinks:
+                  description: The complete updated links library item state after a full replacement. PUT replaces the entire item, so any fields omitted from the request are reset to their defaults.
+                  summary: Update links library item response
+                  value:
+                    data:
+                      description: A collection of important links
+                      layout: vertical
+                      links:
+                        - destination: dashboard-abc-123
+                          label: Overview
+                          options:
+                            open_in_new_tab: false
+                            use_filters: true
+                            use_time_range: true
+                          type: dashboardLink
+                        - destination: https://www.elastic.co/docs
+                          label: Elastic Documentation
+                          options:
+                            encode_url: true
+                            open_in_new_tab: true
+                          type: externalLink
+                      title: Important Resources
+                    id: 0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T11:00:00.000Z'
+                      version: WzYwLDFd
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_LinksItemResponse'
+          description: updated
+        '201':
+          content:
+            application/json:
+              examples:
+                createdLinks:
+                  description: Returned when the upsert created a new item because no item existed with the specified ID.
+                  summary: Create links library item response (via upsert)
+                  value:
+                    data:
+                      description: A collection of important links
+                      layout: horizontal
+                      links:
+                        - destination: dashboard-abc-123
+                          label: Overview
+                          options:
+                            open_in_new_tab: false
+                            use_filters: true
+                            use_time_range: true
+                          type: dashboardLink
+                        - destination: https://www.elastic.co/docs
+                          label: Elastic Documentation
+                          options:
+                            encode_url: true
+                            open_in_new_tab: true
+                          type: externalLink
+                      title: Important Resources
+                    id: 0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
+                    meta:
+                      created_at: '2026-04-13T10:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T10:00:00.000Z'
+                      version: WzU5LDFd
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_LinksItemResponse'
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+        '409':
+          description: conflict
+      summary: Upsert links library item
+      tags:
+        - Links
+      x-codeSamples:
+        - label: Upsert a links library item - cURL
+          lang: curl
+          source: |-
+            curl \
+              -X PUT "${KIBANA_URL}/api/links/0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+              "title": "Important Resources",
+              "description": "A collection of important links",
+              "links": [
+                {
+                  "label": "Overview",
+                  "type": "dashboardLink",
+                  "destination": "dashboard-abc-123",
+                  "options": {
+                    "open_in_new_tab": false,
+                    "use_time_range": true,
+                    "use_filters": true
+                  }
+                },
+                {
+                  "label": "Elastic Documentation",
+                  "type": "externalLink",
+                  "destination": "https://www.elastic.co/docs",
+                  "options": {
+                    "encode_url": true,
+                    "open_in_new_tab": true
+                  }
+                }
+              ],
+              "layout": "vertical"
+            }'
+        - label: Upsert a links library item - Console
+          lang: Console
+          source: |
+            PUT kbn:/api/links/0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
+            {
+              "title": "Important Resources",
+              "description": "A collection of important links",
+              "links": [
+                {
+                  "label": "Overview",
+                  "type": "dashboardLink",
+                  "destination": "dashboard-abc-123",
+                  "options": {
+                    "open_in_new_tab": false,
+                    "use_time_range": true,
+                    "use_filters": true
+                  }
+                },
+                {
+                  "label": "Elastic Documentation",
+                  "type": "externalLink",
+                  "destination": "https://www.elastic.co/docs",
+                  "options": {
+                    "encode_url": true,
+                    "open_in_new_tab": true
+                  }
+                }
+              ],
+              "layout": "vertical"
+            }
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/lists:
     delete:
       description: |
@@ -82894,10 +83691,13 @@ components:
           minLength: 1
           type: string
         description:
+          description: A short description of the panel.
           type: string
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         max_series_to_plot:
           default: 6
@@ -82926,6 +83726,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         view_type:
           default: charts
@@ -82949,14 +83750,18 @@ components:
           minLength: 1
           type: string
         description:
+          description: A short description of the panel.
           type: string
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
       required:
         - data_view_id
@@ -82972,6 +83777,7 @@ components:
           minLength: 1
           type: string
         description:
+          description: A short description of the panel.
           type: string
         field_name:
           description: The text field on which to run pattern analysis.
@@ -82979,8 +83785,10 @@ components:
           minLength: 1
           type: string
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         minimum_time_range:
           default: no_minimum
@@ -83010,6 +83818,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
       required:
         - data_view_id
@@ -83392,14 +84201,17 @@ components:
           maxItems: 2
           type: array
         description:
+          description: A short description of the panel.
           type: string
         environment:
           default: ENVIRONMENT_ALL
           maxLength: 1024
           type: string
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         kuery:
           maxLength: 2048
@@ -83430,6 +84242,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
       title: apm-service-map-embeddable
       type: object
@@ -85934,10 +86747,13 @@ components:
               minLength: 1
               type: string
             description:
+              description: A short description of the panel.
               type: string
             hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
               type: boolean
             hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
               type: boolean
             show_distributions:
               default: false
@@ -85946,6 +86762,7 @@ components:
             time_range:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
             title:
+              description: The panel title.
               type: string
             view_type:
               enum:
@@ -85958,10 +86775,13 @@ components:
           type: object
           properties:
             description:
+              description: A short description of the panel.
               type: string
             hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
               type: boolean
             hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
               type: boolean
             query:
               additionalProperties: false
@@ -85981,6 +86801,7 @@ components:
             time_range:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
             title:
+              description: The panel title.
               type: string
             view_type:
               enum:
@@ -86198,6 +87019,7 @@ components:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -86297,8 +87119,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -86397,6 +87221,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -87447,6 +88272,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -87546,8 +88372,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -87618,6 +88446,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -89926,6 +90755,7 @@ components:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -90025,8 +90855,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -90132,6 +90964,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -90881,6 +91714,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -90980,8 +91814,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -91016,6 +91852,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -92059,6 +92896,7 @@ components:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -92158,8 +92996,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -92202,6 +93042,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -92758,6 +93599,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -92857,8 +93699,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -92900,6 +93744,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -94596,8 +95441,9 @@ components:
         tags:
           description: Tag IDs to associate with this dashboard.
           items:
+            maxLength: 250
             type: string
-          maxItems: 100
+          maxItems: 1000
           type: array
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
@@ -94822,6 +95668,7 @@ components:
               description: Panel configuration stored inline
               properties:
                 description:
+                  description: A short description of the panel.
                   type: string
                 drilldowns:
                   items:
@@ -94857,8 +95704,10 @@ components:
                   maxItems: 100
                   type: array
                 hide_border:
+                  description: When true, the panel border is hidden. Defaults to false.
                   type: boolean
                 hide_title:
+                  description: When true, the panel title is hidden. Defaults to false.
                   type: boolean
                 tabs:
                   description: Inline tab configuration. Used when no `ref_id` is set. Currently supports one tab.
@@ -95059,6 +95908,7 @@ components:
                 time_range:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
                 title:
+                  description: The panel title.
                   type: string
               required:
                 - tabs
@@ -95068,6 +95918,7 @@ components:
               description: Panel configuration stored in a linked library item
               properties:
                 description:
+                  description: A short description of the panel.
                   type: string
                 drilldowns:
                   items:
@@ -95103,8 +95954,10 @@ components:
                   maxItems: 100
                   type: array
                 hide_border:
+                  description: When true, the panel border is hidden. Defaults to false.
                   type: boolean
                 hide_title:
+                  description: When true, the panel title is hidden. Defaults to false.
                   type: boolean
                 overrides:
                   additionalProperties: false
@@ -95192,6 +96045,7 @@ components:
                 time_range:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
                 title:
+                  description: The panel title.
                   type: string
               required:
                 - ref_id
@@ -95263,6 +96117,7 @@ components:
           type: object
           properties:
             description:
+              description: A short description of the panel.
               type: string
             drilldowns:
               items:
@@ -95337,8 +96192,10 @@ components:
               maxItems: 100
               type: array
             hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
               type: boolean
             hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
               type: boolean
             image_config:
               additionalProperties: false
@@ -95390,6 +96247,7 @@ components:
               required:
                 - src
             title:
+              description: The panel title.
               type: string
           required:
             - image_config
@@ -95417,19 +96275,22 @@ components:
               description: Panel configuration stored inline
               properties:
                 description:
+                  description: A short description of the panel.
                   type: string
                 hide_border:
+                  description: When true, the panel border is hidden. Defaults to false.
                   type: boolean
                 hide_title:
+                  description: When true, the panel title is hidden. Defaults to false.
                   type: boolean
                 layout:
-                  description: Denote whether to display the links in a horizontal or vertical layout
+                  description: Whether to display the links in a horizontal or vertical layout.
                   enum:
                     - horizontal
                     - vertical
                   type: string
                 links:
-                  description: The list of links to display
+                  description: The list of links to display.
                   items:
                     discriminator:
                       mapping:
@@ -95442,6 +96303,7 @@ components:
                   maxItems: 100
                   type: array
                 title:
+                  description: The panel title.
                   type: string
               required:
                 - links
@@ -95451,16 +96313,20 @@ components:
               description: Panel configuration stored in a linked library item
               properties:
                 description:
+                  description: A short description of the panel.
                   type: string
                 hide_border:
+                  description: When true, the panel border is hidden. Defaults to false.
                   type: boolean
                 hide_title:
+                  description: When true, the panel title is hidden. Defaults to false.
                   type: boolean
                 ref_id:
-                  description: The unique identifier of the Links library item
+                  description: The unique identifier of the links library item.
                   title: Reference ID
                   type: string
                 title:
+                  description: The panel title.
                   type: string
               required:
                 - ref_id
@@ -95493,10 +96359,13 @@ components:
                 content:
                   type: string
                 description:
+                  description: A short description of the panel.
                   type: string
                 hide_border:
+                  description: When true, the panel border is hidden. Defaults to false.
                   type: boolean
                 hide_title:
+                  description: When true, the panel title is hidden. Defaults to false.
                   type: boolean
                 settings:
                   additionalProperties: false
@@ -95506,6 +96375,7 @@ components:
                       default: true
                       type: boolean
                 title:
+                  description: The panel title.
                   type: string
               required:
                 - content
@@ -95516,15 +96386,19 @@ components:
               description: Panel configuration stored in a linked library item
               properties:
                 description:
+                  description: A short description of the panel.
                   type: string
                 hide_border:
+                  description: When true, the panel border is hidden. Defaults to false.
                   type: boolean
                 hide_title:
+                  description: When true, the panel title is hidden. Defaults to false.
                   type: boolean
                 ref_id:
                   description: The unique identifier of the markdown library item.
                   type: string
                 title:
+                  description: The panel title.
                   type: string
               required:
                 - ref_id
@@ -95747,6 +96621,7 @@ components:
           type: object
           properties:
             description:
+              description: A short description of the panel.
               type: string
             filters:
               additionalProperties: false
@@ -95838,10 +96713,13 @@ components:
                   maxItems: 100
                   type: array
             hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
               type: boolean
             hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
               type: boolean
             title:
+              description: The panel title.
               type: string
             view:
               description: View mode for the monitors embeddable (defaults to cardView)
@@ -95873,6 +96751,7 @@ components:
           type: object
           properties:
             description:
+              description: A short description of the panel.
               type: string
             drilldowns:
               items:
@@ -95997,10 +96876,13 @@ components:
                   maxItems: 100
                   type: array
             hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
               type: boolean
             hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
               type: boolean
             title:
+              description: The panel title.
               type: string
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
@@ -96090,6 +96972,7 @@ components:
               description: Panel configuration stored in a linked library item
               properties:
                 description:
+                  description: A short description of the panel.
                   type: string
                 drilldowns:
                   items:
@@ -96187,8 +97070,10 @@ components:
                   maxItems: 100
                   type: array
                 hide_border:
+                  description: When true, the panel border is hidden. Defaults to false.
                   type: boolean
                 hide_title:
+                  description: When true, the panel title is hidden. Defaults to false.
                   type: boolean
                 ref_id:
                   type: string
@@ -96200,6 +97085,7 @@ components:
                 time_range:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
                 title:
+                  description: The panel title.
                   type: string
               required:
                 - ref_id
@@ -96421,12 +97307,13 @@ components:
       title: Field settings or runtime field
     Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink:
       additionalProperties: false
+      description: Link type. Set to dashboardLink for a link to another dashboard.
       properties:
         destination:
-          description: Linked dashboard saved object id
+          description: Linked dashboard saved object ID.
           type: string
         label:
-          description: The label of the link to be displayed in the UI
+          description: The label of the link displayed in the UI.
           type: string
         options:
           additionalProperties: false
@@ -96459,12 +97346,13 @@ components:
       type: object
     Kibana_HTTP_APIs_kbn-link-type-externalLink:
       additionalProperties: false
+      description: Link type. Set to externalLink for a URL outside Kibana.
       properties:
         destination:
-          description: The external URL to link to
+          description: The external URL to link to.
           type: string
         label:
-          description: The label of the link to be displayed in the UI
+          description: The label of the link displayed in the UI.
           type: string
         options:
           additionalProperties: false
@@ -96479,7 +97367,7 @@ components:
               type: boolean
             open_in_new_tab:
               default: true
-              description: Whether to open this link in a new tab when clicked
+              description: Whether to open this link in a new tab when clicked.
               type: boolean
         type:
           enum:
@@ -97022,6 +97910,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -97121,8 +98010,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -97155,6 +98046,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -97641,6 +98533,59 @@ components:
         - data
         - meta
       title: Visualization Response
+      type: object
+    Kibana_HTTP_APIs_LinksItemResponse:
+      additionalProperties: false
+      description: Response containing a links library item with metadata.
+      properties:
+        data:
+          additionalProperties: false
+          type: object
+          properties:
+            description:
+              type: string
+            layout:
+              description: Whether to display the links in a horizontal or vertical layout.
+              enum:
+                - horizontal
+                - vertical
+              type: string
+            links:
+              description: The list of links to display.
+              items:
+                discriminator:
+                  mapping:
+                    dashboardLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
+                    externalLink: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+                  propertyName: type
+                oneOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-panel-type-dashboardLink'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
+              maxItems: 100
+              type: array
+            tags:
+              description: Tag IDs associated with this library item.
+              items:
+                maxLength: 250
+                type: string
+              maxItems: 1000
+              type: array
+            title:
+              type: string
+          required:
+            - links
+            - title
+        id:
+          description: The unique ID of the links library item, as returned by the create or search endpoints.
+          maxLength: 250
+          type: string
+        meta:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+      required:
+        - id
+        - data
+        - meta
+      title: LinksItemResponse
       type: object
     Kibana_HTTP_APIs_logs-alert-document-count-create-rule-body-alerting:
       additionalProperties: false
@@ -98490,6 +99435,7 @@ components:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -98589,8 +99535,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -98681,6 +99629,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -98743,6 +99692,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -98842,8 +99792,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -98904,6 +99856,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -100740,10 +101693,13 @@ components:
       description: Anomaly Charts embeddable
       properties:
         description:
+          description: A short description of the panel.
           type: string
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         job_ids:
           description: Anomaly detection job or group IDs whose results are shown in the charts.
@@ -100833,6 +101789,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
       required:
         - job_ids
@@ -100844,10 +101801,13 @@ components:
           type: object
           properties:
             description:
+              description: A short description of the panel.
               type: string
             hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
               type: boolean
             hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
               type: boolean
             job_ids:
               description: IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.
@@ -100869,6 +101829,7 @@ components:
             time_range:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
             title:
+              description: The panel title.
               type: string
           required:
             - job_ids
@@ -100877,10 +101838,13 @@ components:
           type: object
           properties:
             description:
+              description: A short description of the panel.
               type: string
             hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
               type: boolean
             hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
               type: boolean
             job_ids:
               description: IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.
@@ -100902,6 +101866,7 @@ components:
             time_range:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
             title:
+              description: The panel title.
               type: string
             view_by:
               description: Field name used to split anomalies into a view-by swim lane.
@@ -100919,6 +101884,7 @@ components:
       description: Single Metric Viewer embeddable
       properties:
         description:
+          description: A short description of the panel.
           type: string
         forecast_id:
           description: Identifier of a forecast to overlay on the chart.
@@ -100929,8 +101895,10 @@ components:
           maxLength: 1000
           type: string
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         job_ids:
           description: Anomaly detection job ID whose results are shown in the single metric viewer.
@@ -100957,6 +101925,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
       required:
         - job_ids
@@ -102578,6 +103547,7 @@ components:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -102723,8 +103693,10 @@ components:
           minItems: 1
           type: array
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -102763,6 +103735,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -103665,6 +104638,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -103788,8 +104762,10 @@ components:
           minItems: 1
           type: array
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -103831,6 +104807,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -106984,6 +107961,7 @@ components:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -107106,8 +108084,10 @@ components:
           minItems: 1
           type: array
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -107155,6 +108135,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -107891,6 +108872,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -108002,8 +108984,10 @@ components:
           minItems: 1
           type: array
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -108050,6 +109034,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -108271,6 +109256,7 @@ components:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -108370,8 +109356,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -108430,6 +109418,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -108451,6 +109440,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -108550,8 +109540,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -108586,6 +109578,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -109979,6 +110972,7 @@ components:
       description: SLO Alerts embeddable schema
       properties:
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -110014,8 +111008,10 @@ components:
           maxItems: 100
           type: array
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         slos:
           default: []
@@ -110038,6 +111034,7 @@ components:
           maxItems: 100
           type: array
         title:
+          description: The panel title.
           type: string
       title: slo-alerts-embeddable
       type: object
@@ -110046,6 +111043,7 @@ components:
       description: SLO Burn Rate embeddable schema
       properties:
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -110085,8 +111083,10 @@ components:
           maxLength: 32
           type: string
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         slo_id:
           description: The ID of the SLO to display the burn rate for
@@ -110098,6 +111098,7 @@ components:
           maxLength: 512
           type: string
         title:
+          description: The panel title.
           type: string
       required:
         - slo_id
@@ -110109,6 +111110,7 @@ components:
       description: SLO Error Budget embeddable schema
       properties:
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -110144,8 +111146,10 @@ components:
           maxItems: 100
           type: array
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         slo_id:
           description: The ID of the SLO to display the error budget for
@@ -110157,6 +111161,7 @@ components:
           maxLength: 512
           type: string
         title:
+          description: The panel title.
           type: string
       required:
         - slo_id
@@ -110167,6 +111172,7 @@ components:
       description: SLO Group Overview embeddable schema
       properties:
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -110235,14 +111241,17 @@ components:
               maxLength: 2048
               type: string
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         overview_mode:
           enum:
             - groups
           type: string
         title:
+          description: The panel title.
           type: string
       required:
         - overview_mode
@@ -110420,6 +111429,7 @@ components:
       description: SLO Single Overview embeddable schema
       properties:
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -110455,8 +111465,10 @@ components:
           maxItems: 100
           type: array
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         overview_mode:
           enum:
@@ -110476,6 +111488,7 @@ components:
           maxLength: 512
           type: string
         title:
+          description: The panel title.
           type: string
       required:
         - slo_id
@@ -111664,6 +112677,7 @@ components:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -111763,8 +112777,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -111816,6 +112832,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -112255,6 +113272,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -112354,8 +113372,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -112402,6 +113422,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -113089,6 +114110,7 @@ components:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -113211,8 +114233,10 @@ components:
           minItems: 1
           type: array
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -113259,6 +114283,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -113995,6 +115020,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -114106,8 +115132,10 @@ components:
           minItems: 1
           type: array
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -114154,6 +115182,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -115591,6 +116620,7 @@ components:
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -115713,8 +116743,10 @@ components:
           minItems: 1
           type: array
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -115761,6 +116793,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -116503,6 +117536,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -116614,8 +117648,10 @@ components:
           minItems: 1
           type: array
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         ignore_global_filters:
           default: false
@@ -116662,6 +117698,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -118390,6 +119427,7 @@ components:
         axis:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_xy_axis_config'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -118489,8 +119527,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         layers:
           description: ES|QL chart layers
@@ -118511,6 +119551,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:
@@ -118528,6 +119569,7 @@ components:
         axis:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_xy_axis_config'
         description:
+          description: A short description of the panel.
           type: string
         drilldowns:
           items:
@@ -118627,8 +119669,10 @@ components:
         filters:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_lensPanelFilters'
         hide_border:
+          description: When true, the panel border is hidden. Defaults to false.
           type: boolean
         hide_title:
+          description: When true, the panel title is hidden. Defaults to false.
           type: boolean
         layers:
           description: Chart layers
@@ -118651,6 +119695,7 @@ components:
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
+          description: The panel title.
           type: string
         type:
           enum:

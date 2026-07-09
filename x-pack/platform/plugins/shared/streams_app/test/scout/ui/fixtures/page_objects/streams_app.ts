@@ -354,10 +354,21 @@ export class StreamsApp {
   }
 
   // Streams header utility methods
+
+  /**
+   * The shared app header only renders the first two badges inline and collapses the rest into a
+   * "Show N more badges" overflow popover (overflow triggers at more than three badges). Call this
+   * from tests that drive a stream with enough badges to overflow (e.g. TSDB streams) so overflowed
+   * badges like the lifecycle badge become assertable.
+   */
+  async openBadgesOverflow() {
+    await this.page.testSubj.click('appHeaderBadgesOverflow');
+  }
+
   async verifyLifecycleBadge(streamName: string, expectedLabel: string) {
-    await expect(
-      this.page.locator(`[data-test-subj="lifecycleBadge-${streamName}"]`)
-    ).toContainText(expectedLabel);
+    await expect(this.page.testSubj.locator(`lifecycleBadge-${streamName}`)).toContainText(
+      expectedLabel
+    );
   }
 
   async verifyClassicBadge() {
