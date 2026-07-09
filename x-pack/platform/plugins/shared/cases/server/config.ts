@@ -29,7 +29,7 @@ export const ConfigSchema = schema.object({
    * in production. Enabling v2 has no effect on v1 — they coexist independently.
    */
   analyticsV2: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
     /**
      * Reconciliation cadence in minutes. The reconciliation task is the
      * durability backstop for v2's fire-and-forget write hooks: every
@@ -69,7 +69,7 @@ export const ConfigSchema = schema.object({
      * the gating contract retires alongside the v2 service if both are
      * ever sunset together.
      */
-    enableAdminRoutes: schema.boolean({ defaultValue: false }),
+    enableAdminRoutes: schema.boolean({ defaultValue: true }),
     /**
      * Wall-clock budget for the one-shot reset task scheduled by
      * `POST /internal/cases/_analyticsV2/reset`. The reset task does a
@@ -114,10 +114,10 @@ export const ConfigSchema = schema.object({
     }),
   }),
   attachments: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   chat: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   markdownPlugins: schema.object({
     lens: schema.boolean({ defaultValue: true }),
@@ -155,15 +155,15 @@ export const ConfigSchema = schema.object({
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
   // WARN: enabling this feature and disabling it later is not supported (saved objects will throw errors)
   templates: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
   // Temporary feature flag for the Cases UX redesign (elastic/security-team#17398).
   // Once the redesigned UI fully replaces the current one, this config block will be removed.
   casesRedesign: schema.object({
-    list: schema.boolean({ defaultValue: false }),
-    details: schema.boolean({ defaultValue: false }),
-    settings: schema.boolean({ defaultValue: false }),
+    list: schema.boolean({ defaultValue: true }),
+    details: schema.boolean({ defaultValue: true }),
+    settings: schema.boolean({ defaultValue: true }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
 });
