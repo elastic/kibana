@@ -60,16 +60,23 @@ export class NavigationPage {
     return this.page.locator('.navSearch__panel .euiSelectableList__list');
   }
 
-  private async waitForSearchResults() {
-    await this.page.getByTestId('nav-search-option').first().waitFor({
-      state: 'attached',
-      timeout: EXTENDED_TIMEOUT,
-    });
+  private get searchPanel() {
+    return this.page.locator('.navSearch__panel');
+  }
 
-    const loadingSpinner = this.page.locator('.navSearch__panel .euiLoadingSpinner');
+  private async waitForSearchResults() {
+    await this.searchPanel.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+
+    const loadingSpinner = this.searchPanel.locator('.euiLoadingSpinner');
     if ((await loadingSpinner.count()) > 0) {
       await loadingSpinner.waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
     }
+
+    await expect
+      .poll(async () => this.searchPanel.getByTestId('nav-search-option').count(), {
+        timeout: EXTENDED_TIMEOUT,
+      })
+      .toBeGreaterThan(0);
   }
 
   getSearchResult(title: string) {
@@ -105,6 +112,6 @@ export class NavigationPage {
 
   async clickSearchResult(title: string) {
     await this.scrollUntilSearchResultRendered(title);
-    await this.getSearchResult(title).first().click();
+    await this.getSearchResult(title).click();
   }
 }
