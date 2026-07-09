@@ -250,6 +250,27 @@ describe('FrequencySelector', () => {
       const next = onChange.mock.calls[0][0] as RecurrenceFormState;
       expect(next.interval).toBe(9999);
     });
+
+    it('keeps `repeatUnit` sticky across a Daily round trip (frequency change does not reset it)', () => {
+      const onChange = jest.fn();
+      const { rerender } = renderWithProviders(
+        <FrequencySelector
+          value={{ ...baseRecurrence(), frequency: 'custom', repeatUnit: 'months' }}
+          onChange={onChange}
+        />
+      );
+
+      fireEvent.click(screen.getByLabelText(FREQUENCY_DAILY));
+      const afterDaily = onChange.mock.calls[0][0] as RecurrenceFormState;
+      expect(afterDaily.frequency).toBe('daily');
+      expect(afterDaily.repeatUnit).toBe('months');
+
+      rerender(<FrequencySelector value={afterDaily} onChange={onChange} />);
+      fireEvent.click(screen.getByLabelText(FREQUENCY_CUSTOM));
+      const afterCustom = onChange.mock.calls[1][0] as RecurrenceFormState;
+
+      expect(afterCustom.repeatUnit).toBe('months');
+    });
   });
 
   describe('change handling', () => {
