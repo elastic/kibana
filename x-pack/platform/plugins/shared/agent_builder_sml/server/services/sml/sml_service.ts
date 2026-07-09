@@ -29,7 +29,7 @@ import type { SmlCrawler } from './types';
 import { smlIndexName } from './sml_storage';
 import { SmlAuthzEnumerationIncompleteError, SmlCorpusTooLargeError } from './sml_errors';
 // ES client usage pattern in this module:
-// - Read operations (search, get, list, checkAccess) use `esClient.asInternalUser` directly with
+// - Read operations (search, getDocuments, checkAccess) use `esClient.asInternalUser` directly with
 //   `allow_no_indices: true` / `ignore_unavailable: true` so they silently handle a missing index.
 // - Every write path (origin-mode crawler, HTTP PUT/DELETE) goes through `SmlIndexer` so
 //   type-registration enforcement, permission derivation, and storage shape stay consistent.
