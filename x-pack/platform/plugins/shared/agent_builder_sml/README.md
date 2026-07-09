@@ -2,7 +2,6 @@
 
 The Agent Builder SML plugin provides a centralized service for indexing, crawling, and searching Kibana assets (visualizations, dashboards, connectors, workflows, rules, action policies, significant events) via the **Semantic Metadata Layer (SML)**.
 
-Renamed from `agent_context_layer` — SML is an Agent Builder feature; this plugin is the SML implementation shared across the Agent Builder plugin family.
 
 ## Overview
 
