@@ -18,7 +18,7 @@ import type YAML from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
-import { isTriggerType } from '@kbn/workflows';
+import { isTriggerType, WORKFLOWS_UI_STEP_MINIMAP_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
@@ -175,7 +175,11 @@ export const WorkflowYAMLEditor = ({
   onStepRun,
   editorRef: parentEditorRef,
 }: WorkflowYAMLEditorProps) => {
-  const { notifications, http } = useKibana().services;
+  const { notifications, http, uiSettings } = useKibana().services;
+  // Experimental: the step minimap is gated behind a workflows UI setting,
+  // following the same pattern as the visual editor / execution graph flags.
+  const isStepMinimapEnabled =
+    uiSettings?.get<boolean>(WORKFLOWS_UI_STEP_MINIMAP_SETTING_ID, false) ?? false;
 
   const saveYaml = useSaveYaml();
   const isSaving = useSelector(selectIsSavingYaml);
@@ -335,6 +339,20 @@ export const WorkflowYAMLEditor = ({
     navigateToErrorPosition(editorRef.current, error.startLineNumber, error.startColumn);
   }, []);
 
+  const updateContainerPosition = useCallback(
+    (stepInfo: StepInfo, _editor: monaco.editor.IStandaloneCodeEditor) => {
+      if (!_editor || !stepInfo) {
+        return;
+      }
+
+      setPositionStyles({
+        top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
+        right: isExecutionYaml || !isStepMinimapEnabled ? '0px' : `${MINIMAP_RESERVE_PX}px`,
+      });
+    },
+    [isExecutionYaml, isStepMinimapEnabled]
+  );
+
   useEffect(() => {
     if (!isEditorMounted) {
       return;
@@ -350,7 +368,7 @@ export const WorkflowYAMLEditor = ({
       }, 50)
     );
     return () => disposeListener?.dispose();
-  }, [isEditorMounted]);
+  }, [isEditorMounted, updateContainerPosition]);
 
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useRegisterKeyboardCommands();
   const { registerHoverCommands, unregisterHoverCommands } = useRegisterHoverCommands();
@@ -528,26 +546,12 @@ export const WorkflowYAMLEditor = ({
     isEditorMounted,
   });
 
-  const updateContainerPosition = (
-    stepInfo: StepInfo,
-    _editor: monaco.editor.IStandaloneCodeEditor
-  ) => {
-    if (!_editor || !stepInfo) {
-      return;
-    }
-
-    setPositionStyles({
-      top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
-      right: isExecutionYaml ? '0px' : `${MINIMAP_RESERVE_PX}px`,
-    });
-  };
-
   useEffect(() => {
     if (!focusedStepInfo || !editorRef.current) {
       return;
     }
     updateContainerPosition(focusedStepInfo, editorRef.current);
-  }, [isEditorMounted, focusedStepInfo]);
+  }, [isEditorMounted, focusedStepInfo, updateContainerPosition]);
 
   useEffect(() => {
     if (!isEditorMounted) {
@@ -803,16 +807,18 @@ export const WorkflowYAMLEditor = ({
         </div>
       ) : null}
       <div css={styles.editorAreaWrapper}>
-        <div css={styles.minimapContainer} ref={minimapContainerRef}>
-          <WorkflowStepMinimap
-            editorRef={editorRef}
-            validationErrors={validationErrors}
-            scrollContainerRef={minimapContainerRef}
-            isEditorMounted={isEditorMounted}
-          />
-        </div>
+        {isStepMinimapEnabled ? (
+          <div css={styles.minimapContainer} ref={minimapContainerRef}>
+            <WorkflowStepMinimap
+              editorRef={editorRef}
+              validationErrors={validationErrors}
+              scrollContainerRef={minimapContainerRef}
+              isEditorMounted={isEditorMounted}
+            />
+          </div>
+        ) : null}
         <div
-          css={styles.editorContainer}
+          css={[styles.editorContainer, !isStepMinimapEnabled && { paddingRight: 0 }]}
           className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
         >
           <YamlEditor

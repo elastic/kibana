@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { monaco } from '@kbn/monaco';
-import type { NestedStepKey, StepInfo } from '@kbn/workflows-yaml';
+import type { StepInfo } from '@kbn/workflows-yaml';
 import {
   selectEditorFocusedStepInfo,
   selectEditorWorkflowLookup,
@@ -27,7 +27,7 @@ import {
 
 const ITEM_HEIGHT = 32;
 const DOT_R = 4;
-const TRACK_W = 24;
+const TRACK_W = 32;
 const PILL_TRACK_GAP = 6;
 const MAX_LABEL_W = MINIMAP_WIDTH_PX - TRACK_W - PILL_TRACK_GAP;
 const PILL_H = 22;
@@ -35,8 +35,9 @@ const PILL_RADIUS = 11;
 
 // Single-track (no nesting): centred in the column
 const TRACK_X = 10;
-// Two-track (nesting present)
-const OUTER_TRACK_X = 18; // top-level steps
+// Two-track (nesting present). Spread wide enough that the middle connector
+// lane ((outer+inner)/2) keeps clear daylight from both rails and their dots.
+const OUTER_TRACK_X = 26; // top-level steps
 const INNER_TRACK_X = 6; // nested steps
 // Nested pills are slightly narrower so they visually indent from parent pills
 const NESTED_PILL_INDENT = 10;
@@ -46,22 +47,21 @@ type StepSeverity = 'error' | 'warning' | null;
 const getStepSeverity = (step: StepInfo, errors: YamlValidationResult[]): StepSeverity => {
   let hasWarning = false;
   for (const err of errors) {
-    if (
-      err.severity === null ||
-      err.startLineNumber < step.lineStart ||
-      err.startLineNumber > step.lineEnd
-    ) {
-      continue;
+    const isInStepRange =
+      err.severity !== null &&
+      err.startLineNumber >= step.lineStart &&
+      err.startLineNumber <= step.lineEnd;
+    if (isInStepRange) {
+      if (err.severity === 'error') return 'error';
+      if (err.severity === 'warning') hasWarning = true;
     }
-    if (err.severity === 'error') return 'error';
-    if (err.severity === 'warning') hasWarning = true;
   }
   return hasWarning ? 'warning' : null;
 };
 
 interface BranchGroup {
-  /** Which nested key this branch came from. */
-  branchKey: NestedStepKey;
+  /** Stable identity of this branch: parent-of-branch-root + branchKey. */
+  branchId: string;
   /** Index of the first step in this branch. */
   firstIndex: number;
   /** Index of the last step in this branch. */
@@ -71,11 +71,8 @@ interface BranchGroup {
 interface ParentGroup {
   /** Index of the depth-0 parent step. */
   parentIndex: number;
-  /** Branches under this parent, one per distinct branchKey. */
+  /** Branches under this parent, sorted by firstIndex. Each gets its own rail + connector. */
   branches: BranchGroup[];
-  /** Span covering ALL nested descendants (for the inner rail). */
-  firstChildIndex: number;
-  lastChildIndex: number;
 }
 
 interface NestingInfo {
@@ -88,9 +85,10 @@ const buildNestingInfo = (
   stepEntries: Array<[string, StepInfo]>,
   stepsMap: Record<string, StepInfo>
 ): NestingInfo => {
-  const indexMap = new Map<string, number>(stepEntries.map(([id], i) => [id, i]));
-
-  // Depth via parentStepId chain
+  // Depth via parentStepId chain. The chain may pass through container nodes
+  // (e.g. `parallel` branch entries that have a `name` but no `type`) which are
+  // not registered steps — the walk stops there, still yielding depth >= 1,
+  // which is all the two-track layout needs.
   const depths = new Map<string, number>();
   for (const [id, step] of stepEntries) {
     let d = 0;
@@ -102,78 +100,57 @@ const buildNestingInfo = (
     depths.set(id, d);
   }
 
-  // Walk up to the depth-0 ancestor (the "scope owner")
-  const getTopLevelAncestorId = (stepId: string): string | undefined => {
-    let parentId = stepsMap[stepId]?.parentStepId;
-    while (parentId && (depths.get(parentId) ?? 0) > 0) {
-      parentId = stepsMap[parentId]?.parentStepId;
+  // Group nested steps under their top-level ancestor, found positionally:
+  // entries are sorted by lineStart and a parent's line range contains its whole
+  // subtree, so the owning top-level step is simply the last depth-0 step seen.
+  // This stays correct even when parentStepId points at an unregistered
+  // container node (whose id can't be resolved through stepsMap).
+  //
+  // Within a parent, group by branch identity: the (parentStepId, branchKey)
+  // pair of the highest chain node below the top level. Distinct branches
+  // (`steps` vs `else`, or separate `parallel` branch containers) must NOT be
+  // joined by one rail — they are alternative paths, not a sequence.
+  const groupMap = new Map<number, Map<string, { firstIndex: number; lastIndex: number }>>();
+  let topLevelIndex = -1;
+  let topLevelId: string | undefined;
+
+  stepEntries.forEach(([stepId, step], index) => {
+    if ((depths.get(stepId) ?? 0) === 0) {
+      topLevelIndex = index;
+      topLevelId = stepId;
+      return;
     }
-    return parentId;
-  };
+    // Nested step appearing before any top-level step (malformed YAML) — leave ungrouped.
+    if (topLevelIndex === -1) return;
 
-  // For DIRECT children of a top-level parent, group by branchKey.
-  // Deeply nested children are folded into whichever branch their
-  // direct-child ancestor belongs to.
-  const groupMap = new Map<
-    number,
-    {
-      byBranch: Map<string, { firstIndex: number; lastIndex: number }>;
-      firstChildIndex: number;
-      lastChildIndex: number;
+    // Walk up to the branch root: the highest node whose parent is either the
+    // top-level ancestor itself or an unregistered container under it.
+    let node: StepInfo = step;
+    while (node.parentStepId && node.parentStepId !== topLevelId && stepsMap[node.parentStepId]) {
+      node = stepsMap[node.parentStepId];
     }
-  >();
+    const branchId = `${node.parentStepId ?? ''}:${node.branchKey ?? 'steps'}`;
 
-  for (const [stepId, step] of stepEntries) {
-    const depth = depths.get(stepId) ?? 0;
-    if (depth === 0) continue;
-
-    const topParentId = getTopLevelAncestorId(stepId);
-    const parentIdx = topParentId != null ? indexMap.get(topParentId) : undefined;
-    const childIdx = indexMap.get(stepId);
-    if (parentIdx == null || childIdx == null) continue;
-
-    // Resolve the branchKey: use the step's own branchKey if it's a direct child,
-    // otherwise walk up to find which direct child it belongs to.
-    let resolvedBranchKey: NestedStepKey | undefined = step.branchKey;
-    if (depth > 1) {
-      let ancestor: StepInfo | undefined = step;
-      while (ancestor && (depths.get(ancestor.stepId) ?? 0) > 1) {
-        ancestor = ancestor.parentStepId ? stepsMap[ancestor.parentStepId] : undefined;
-      }
-      resolvedBranchKey = ancestor?.branchKey;
+    let byBranch = groupMap.get(topLevelIndex);
+    if (!byBranch) {
+      byBranch = new Map();
+      groupMap.set(topLevelIndex, byBranch);
     }
-    const bk = resolvedBranchKey ?? 'steps';
-
-    const existing = groupMap.get(parentIdx);
-    if (!existing) {
-      groupMap.set(parentIdx, {
-        byBranch: new Map([[bk, { firstIndex: childIdx, lastIndex: childIdx }]]),
-        firstChildIndex: childIdx,
-        lastChildIndex: childIdx,
-      });
+    const branch = byBranch.get(branchId);
+    if (!branch) {
+      byBranch.set(branchId, { firstIndex: index, lastIndex: index });
     } else {
-      const branch = existing.byBranch.get(bk);
-      if (!branch) {
-        existing.byBranch.set(bk, { firstIndex: childIdx, lastIndex: childIdx });
-      } else {
-        branch.firstIndex = Math.min(branch.firstIndex, childIdx);
-        branch.lastIndex = Math.max(branch.lastIndex, childIdx);
-      }
-      existing.firstChildIndex = Math.min(existing.firstChildIndex, childIdx);
-      existing.lastChildIndex = Math.max(existing.lastChildIndex, childIdx);
+      branch.firstIndex = Math.min(branch.firstIndex, index);
+      branch.lastIndex = Math.max(branch.lastIndex, index);
     }
-  }
+  });
 
   const parentGroups: ParentGroup[] = [];
-  for (const [parentIndex, { byBranch, firstChildIndex, lastChildIndex }] of groupMap) {
-    const branches: BranchGroup[] = [...byBranch.entries()].map(
-      ([bk, { firstIndex, lastIndex }]) => ({
-        branchKey: bk as NestedStepKey,
-        firstIndex,
-        lastIndex,
-      })
-    );
-    parentGroups.push({ parentIndex, branches, firstChildIndex, lastChildIndex });
+  for (const [parentIndex, byBranch] of groupMap) {
+    const branches: BranchGroup[] = [...byBranch.entries()]
+      .map(([branchId, { firstIndex, lastIndex }]) => ({ branchId, firstIndex, lastIndex }))
+      .sort((a, b) => a.firstIndex - b.firstIndex);
+    parentGroups.push({ parentIndex, branches });
   }
 
   const hasNesting = [...depths.values()].some((d) => d > 0);
@@ -278,11 +255,9 @@ export const WorkflowStepMinimap = ({
       stepEntries.map(([id, step]) => [id, step.lineEnd])
     );
     for (const [, step] of stepEntries) {
-      if (step.parentStepId && effectiveLineEnd.has(step.parentStepId)) {
-        effectiveLineEnd.set(
-          step.parentStepId,
-          Math.min(effectiveLineEnd.get(step.parentStepId)!, step.lineStart - 1)
-        );
+      const parentEnd = step.parentStepId ? effectiveLineEnd.get(step.parentStepId) : undefined;
+      if (step.parentStepId && parentEnd !== undefined) {
+        effectiveLineEnd.set(step.parentStepId, Math.min(parentEnd, step.lineStart - 1));
       }
     }
 
@@ -430,44 +405,67 @@ export const WorkflowStepMinimap = ({
                 ];
               })}
 
-          {/* Inner rails — one segment per parent's full nested span */}
+          {/* Inner rails — one segment per branch, so alternative branches
+            (`else`, separate `parallel` branches) are not joined into one line */}
           {hasNesting &&
-            parentGroups.map(({ parentIndex, firstChildIndex, lastChildIndex }) => (
-              <line
-                key={`inner-rail-${parentIndex}`}
-                x1={INNER_TRACK_X}
-                y1={firstChildIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2}
-                x2={INNER_TRACK_X}
-                y2={lastChildIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2}
-                stroke={railColor}
-                strokeWidth={2}
-                strokeLinecap="round"
-              />
-            ))}
+            parentGroups.flatMap(({ parentIndex, branches }) =>
+              branches
+                .filter(({ firstIndex, lastIndex }) => lastIndex > firstIndex)
+                .map(({ branchId, firstIndex, lastIndex }) => (
+                  <line
+                    key={`inner-rail-${parentIndex}-${branchId}`}
+                    x1={INNER_TRACK_X}
+                    y1={firstIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2}
+                    x2={INNER_TRACK_X}
+                    y2={lastIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2}
+                    stroke={railColor}
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                  />
+                ))
+            )}
 
-          {/* Branch connectors — one per parent, connecting only to the first (nearest) child.
-            Skipping later-branch connectors avoids long arcs that jump over intermediate steps. */}
+          {/* Branch connectors — one per branch, from the parent to the branch's
+            first step. The nearest branch gets a short S-curve; branches further
+            down drop through a middle lane so the connector neither overlaps the
+            dashed outer rail nor the earlier branches' inner rails. */}
           {hasNesting &&
-            parentGroups.flatMap(({ parentIndex, branches, firstChildIndex }) => {
+            parentGroups.flatMap(({ parentIndex, branches }) => {
               const parentCy = parentIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2;
-              return branches
-                .filter(({ firstIndex }) => firstIndex === firstChildIndex)
-                .map(({ branchKey, firstIndex }) => {
-                  const childCy = firstIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2;
-                  const startY = parentCy + DOT_R + 2;
+              return branches.map(({ branchId, firstIndex }) => {
+                const childCy = firstIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2;
+                const startY = parentCy + DOT_R + 2;
+                let d: string;
+                if (childCy - startY <= ITEM_HEIGHT) {
                   const midY = (startY + childCy) / 2;
-                  const d = `M ${OUTER_TRACK_X} ${startY} C ${OUTER_TRACK_X} ${midY} ${INNER_TRACK_X} ${midY} ${INNER_TRACK_X} ${childCy}`;
-                  return (
-                    <path
-                      key={`connector-${parentIndex}-${branchKey}`}
-                      d={d}
-                      fill="none"
-                      stroke={railColor}
-                      strokeWidth={1.5}
-                      strokeLinecap="round"
-                    />
-                  );
-                });
+                  d = `M ${OUTER_TRACK_X} ${startY} C ${OUTER_TRACK_X} ${midY} ${INNER_TRACK_X} ${midY} ${INNER_TRACK_X} ${childCy}`;
+                } else {
+                  const laneX = (OUTER_TRACK_X + INNER_TRACK_X) / 2;
+                  const bend = ITEM_HEIGHT / 2;
+                  const outY = startY + bend;
+                  const inY = childCy - bend;
+                  d = [
+                    `M ${OUTER_TRACK_X} ${startY}`,
+                    `C ${OUTER_TRACK_X} ${(startY + outY) / 2} ${laneX} ${
+                      (startY + outY) / 2
+                    } ${laneX} ${outY}`,
+                    `L ${laneX} ${inY}`,
+                    `C ${laneX} ${(inY + childCy) / 2} ${INNER_TRACK_X} ${
+                      (inY + childCy) / 2
+                    } ${INNER_TRACK_X} ${childCy}`,
+                  ].join(' ');
+                }
+                return (
+                  <path
+                    key={`connector-${parentIndex}-${branchId}`}
+                    d={d}
+                    fill="none"
+                    stroke={railColor}
+                    strokeWidth={1.5}
+                    strokeLinecap="round"
+                  />
+                );
+              });
             })}
 
           {/* Dots — outer track for top-level, inner for nested */}
@@ -502,6 +500,7 @@ export const WorkflowStepMinimap = ({
           return (
             <button
               key={stepId}
+              type="button"
               title={stepId}
               onClick={(e) => {
                 handleStepClick(step);

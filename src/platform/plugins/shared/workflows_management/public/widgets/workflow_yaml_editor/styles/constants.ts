@@ -29,7 +29,7 @@ export const EDITOR_SCROLLBAR_WIDTH_PX = 14;
 export const EDITOR_PADDING_TOP_PX = 24;
 
 /** Width of the step minimap panel (label area + track column). */
-export const MINIMAP_WIDTH_PX = 176;
+export const MINIMAP_WIDTH_PX = 184;
 
 /** Horizontal padding inside the minimap container on each side.
  *  Gives the viewport indicator border room so it doesn't clip the severity dots (left)

@@ -31,6 +31,11 @@ jest.mock('../../../shared/ui/yaml_editor', () => ({
           const editorMock = {
             getModel: jest.fn(),
             dispose: jest.fn(),
+            // Used by WorkflowStepMinimap's viewport tracking
+            getVisibleRanges: jest.fn(() => []),
+            onDidScrollChange: jest.fn(() => ({ dispose: jest.fn() })),
+            onDidLayoutChange: jest.fn(() => ({ dispose: jest.fn() })),
+            onDidChangeCursorPosition: jest.fn(() => ({ dispose: jest.fn() })),
           } as unknown as monaco.editor.IStandaloneCodeEditor;
           if (el) {
             editorDidMount?.(editorMock);
