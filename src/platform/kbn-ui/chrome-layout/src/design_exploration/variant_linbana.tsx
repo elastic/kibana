@@ -17,7 +17,6 @@ import {
   DESIGN_EXPLORATION_PADDING,
   DESIGN_EXPLORATION_PADDING_COMPACT,
   DESIGN_EXPLORATION_SCROLLED_BODY_ATTR,
-  DESIGN_EXPLORATION_TOP_BAR_HEIGHT,
   designExplorationVariantScope,
 } from './design_exploration_shared';
 
@@ -36,6 +35,7 @@ const LINEAR_SURFACE = 'lch(98.94 0.5 282)'; // content / header surface
 const LINEAR_SURFACE_NAV = 'lch(96.5 0.5 282)'; // nav step off content surface
 const LINEAR_PANEL_PADDING = DESIGN_EXPLORATION_PADDING_COMPACT + 4;
 const LINEAR_PADDING = 20;
+const LINEAR_TOP_BAR_HEIGHT = 56;
 
 export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
   const scope = designExplorationVariantScope(LINBANA_VARIANT_ID);
@@ -214,12 +214,12 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [data-test-subj='globalQueryBar'] {
       padding: ${LINEAR_PADDING}px !important;
-      padding-block: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
+      padding-block-end: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
     }
 
     ${scope} [data-test-subj='controls-group-wrapper'] {
-      padding-inline: ${LINEAR_PADDING}px !important;
-      padding-bottom: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
+      padding: ${LINEAR_PADDING}px !important;
+      padding-block-start: 0 !important;
     }
 
     ${scope}:has(.dshDashboardViewportWrapper--isFullscreen) [data-test-subj='controls-group-wrapper'] {
@@ -231,7 +231,7 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
        the content, flat and static, no scroll-triggered elevation change. */
     ${scope}:has([data-test-subj='dashboardContainer'], #dashboardListingHeading)
       [data-test-subj='appHeader'] {
-      padding-inline: 12px !important;
+      padding-inline: ${LINEAR_PADDING}px !important;
       padding-block: 4px !important;
       margin-inline: 0 !important;
       margin-top: 0 !important;
@@ -278,13 +278,13 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutApplication:has([data-test-subj='appHeader']) {
-      --kbn-application--top-bar-height: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
+      --kbn-application--top-bar-height: ${LINEAR_TOP_BAR_HEIGHT}px !important;
       border-radius: ${LINEAR_RADIUS_CONTROL}px !important;
       border: ${LINEAR_HAIRLINE} !important;
     }
 
     ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR}) .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader']) {
-      height: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
+      height: ${LINEAR_TOP_BAR_HEIGHT}px !important;
       opacity: 1;
       overflow: visible !important;
       transition: opacity 200ms ease !important;
@@ -306,7 +306,7 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
-      top: ${DESIGN_EXPLORATION_TOP_BAR_HEIGHT}px !important;
+      top: ${LINEAR_TOP_BAR_HEIGHT}px !important;
       width: 100% !important;
       background-color: transparent !important;
       backdrop-filter: none !important;
