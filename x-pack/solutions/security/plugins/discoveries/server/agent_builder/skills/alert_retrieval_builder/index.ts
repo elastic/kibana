@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getRunStepDefinition } from './get_run_step_definition';
+export { alertRetrievalBuilderSkill } from './alert_retrieval_builder_skill';

@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { getRunStepDefinition } from './get_run_step_definition';
+import { i18n } from '@kbn/i18n';
+
+export const SUGGESTED_ACTIONS = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.workflowExecutionDetailsFlyout.failureActions.suggestedActions',
+  {
+    defaultMessage: 'Suggested actions',
+  }
+);

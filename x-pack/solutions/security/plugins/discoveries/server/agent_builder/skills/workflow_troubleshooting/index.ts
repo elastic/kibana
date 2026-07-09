@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getRunStepDefinition } from './get_run_step_definition';
+export { createWorkflowTroubleshootingSkill } from './workflow_troubleshooting_skill';
