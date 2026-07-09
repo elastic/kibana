@@ -773,8 +773,16 @@ export const WorkflowYAMLEditor = ({
   );
 
   const options = useMemo(() => {
-    return { ...editorOptions, readOnly: isReadOnlyYaml };
-  }, [isReadOnlyYaml]);
+    return {
+      ...editorOptions,
+      readOnly: isReadOnlyYaml,
+      // The step minimap doubles as the scroll indicator — hide Monaco's own
+      // vertical scrollbar while it is shown.
+      ...(isStepMinimapEnabled && {
+        scrollbar: { useShadows: false, vertical: 'hidden' as const, verticalScrollbarSize: 0 },
+      }),
+    };
+  }, [isReadOnlyYaml, isStepMinimapEnabled]);
 
   useEffect(() => {
     // Patch setModelMarkers to set initial markers (monaco-react#70) and to intercept/format
