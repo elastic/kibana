@@ -166,7 +166,7 @@ export class WorkflowsExecutionEnginePlugin
     });
   }
 
-  private createRepositories(esClient: ElasticsearchClient): {
+  private createScopedRepositories(esClient: ElasticsearchClient): {
     workflowExecutionRepository: WorkflowExecutionRepository;
     stepExecutionRepository: StepExecutionRepository;
   } {
@@ -272,7 +272,7 @@ export class WorkflowsExecutionEnginePlugin
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
               const { workflowExecutionRepository, stepExecutionRepository } =
-                this.createRepositories(esClient);
+                this.createScopedRepositories(esClient);
 
               const interruptedOutcome = await resolveInterruptedWorkflowRunTask({
                 workflowExecutionRepository,
@@ -398,7 +398,7 @@ export class WorkflowsExecutionEnginePlugin
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
               const { workflowExecutionRepository, stepExecutionRepository } =
-                this.createRepositories(esClient);
+                this.createScopedRepositories(esClient);
 
               const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
                 workflowExecutionRepository,
@@ -520,7 +520,7 @@ export class WorkflowsExecutionEnginePlugin
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
               const { workflowExecutionRepository, stepExecutionRepository } =
-                this.createRepositories(esClient);
+                this.createScopedRepositories(esClient);
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId, {
                 includeGlobal: true,
@@ -695,7 +695,7 @@ export class WorkflowsExecutionEnginePlugin
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
     const { workflowExecutionRepository, stepExecutionRepository } =
-      this.createRepositories(esClient);
+      this.createScopedRepositories(esClient);
     const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
