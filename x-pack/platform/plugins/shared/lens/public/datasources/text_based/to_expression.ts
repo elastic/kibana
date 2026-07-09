@@ -17,28 +17,30 @@ function getExpressionForLayer(
   layerId: string,
   refs: IndexPatternRef[]
 ): Ast | null {
-  if (!layer.columns || layer.columns?.length === 0) {
+  if (!layer.columns || !Array.isArray(layer.columns) || layer.columns?.length === 0) {
     return null;
   }
 
   let idMapper: Record<string, OriginalColumn[]> = {};
   layer.columns.forEach((col) => {
+    // Only pick fields that OriginalColumn declares; the Omit<> drops the
+    // `interval: never` discriminant that doesn't apply to text-based columns.
+    const entry = {
+      id: col.columnId,
+      label: col.customLabel ? col.label ?? col.fieldName : col.fieldName,
+      variable: col.variable,
+      ...(col.params?.dropPartials !== undefined ? { dropPartials: col.params.dropPartials } : {}),
+      format: col.params?.format,
+      dataType: col.meta?.type as OriginalColumn['dataType'],
+      customLabel: col.customLabel,
+      operationType: 'literal',
+    } as OriginalColumn;
     if (idMapper[col.fieldName]) {
-      idMapper[col.fieldName].push({
-        id: col.columnId,
-        label: col.customLabel ? col.label : col.fieldName,
-        variable: col?.variable,
-      } as OriginalColumn);
+      idMapper[col.fieldName].push(entry);
     } else {
       idMapper = {
         ...idMapper,
-        [col.fieldName]: [
-          {
-            id: col.columnId,
-            label: col.customLabel ? col.label : col.fieldName,
-            variable: col?.variable,
-          } as OriginalColumn,
-        ],
+        [col.fieldName]: [entry],
       };
     }
   });
@@ -105,6 +107,11 @@ function getExpressionForLayer(
         isTextBased: [true],
       },
     });
+    textBasedQueryToAst.chain.push({
+      type: 'function',
+      function: 'lens_date_histogram_textbased',
+      arguments: {},
+    });
     textBasedQueryToAst.chain.push(...formatterOverrides);
     return textBasedQueryToAst;
   } else {
@@ -125,6 +132,11 @@ function getExpressionForLayer(
             idMap: [JSON.stringify(idMapper)],
             isTextBased: [true],
           },
+        },
+        {
+          type: 'function',
+          function: 'lens_date_histogram_textbased',
+          arguments: {},
         },
         ...formatterOverrides,
       ],

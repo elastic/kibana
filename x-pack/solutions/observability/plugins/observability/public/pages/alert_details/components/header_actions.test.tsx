@@ -30,6 +30,10 @@ jest.mock('../../../utils/kibana_react');
 jest.mock('../../../hooks/use_fetch_rule');
 jest.mock('../hooks/use_alert_snooze_state');
 
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names', () => ({
+  useAlertFieldNames: () => ({ fieldNames: [], isLoading: false }),
+}));
+
 jest.mock('@kbn/response-ops-alert-snooze', () => ({
   useAlertSnooze: jest.fn(),
   AlertSnoozePanelInline: jest.fn(({ onApply, onBack }) => (

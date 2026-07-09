@@ -322,6 +322,7 @@ export interface DocLinks {
     readonly ingestDataToSecurity: string;
     readonly automaticImport: string;
     readonly attacksPage: string;
+    readonly mitreCoverage: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -504,6 +505,7 @@ export interface DocLinks {
     teamsAction: string;
     casesWebhookAction: string;
     connectors: string;
+    agentBuilderConnectors: string;
   }>;
   readonly taskManager: Readonly<{
     healthMonitoring: string;

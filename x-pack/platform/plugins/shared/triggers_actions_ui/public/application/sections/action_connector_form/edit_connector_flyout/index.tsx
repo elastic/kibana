@@ -150,6 +150,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     actionTypeRegistry,
     actionTypeId: connector.actionTypeId,
     http,
+    docLinks,
     uiSettings,
   });
 
@@ -480,6 +481,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           subFeature={actionTypeModel?.subFeature}
           isTestable={isTestable}
           hideRulesTab={hideRulesTab}
+          docsUrl={actionTypeModel?.docsUrl}
         />
         <EuiFlyoutBody>
           {selectedTab === EditConnectorTabs.Configuration && renderConfigurationTab()}

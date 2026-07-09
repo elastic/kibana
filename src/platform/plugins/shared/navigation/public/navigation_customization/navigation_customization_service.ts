@@ -13,12 +13,14 @@ import type { CoreStart } from '@kbn/core/public';
 import type {
   ChromeProjectNavigationNode,
   NavigationCustomization,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { getNavigationNodeIcon } from '@kbn/core-chrome-browser-navigation-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { NAV_CUSTOMIZATION_STORAGE_KEY } from '../../common/constants';
+import { NavigationCustomizationReporter } from './navigation_customization_reporter';
 
 /**
  * Upper bound for waiting on the first navigation snapshot when the modal is opened.
@@ -36,6 +38,7 @@ export interface NavigationCustomizationServiceUiDeps {
   core: CoreStart;
   chrome: InternalChromeStart;
   security?: SecurityPluginStart;
+  solution?: SolutionId;
 }
 
 /**
@@ -52,6 +55,7 @@ export interface NavigationCustomizationServiceUiDeps {
  */
 export class NavigationCustomizationService {
   private readonly stop$ = new ReplaySubject<void>(1);
+  private readonly reporter = new NavigationCustomizationReporter();
   private handlerRegistered = false;
   private menuLinkAdded = false;
 
@@ -91,10 +95,23 @@ export class NavigationCustomizationService {
    *   project-nav solution; in serverless mode both capabilities are enabled
    *   together inside the `getNavigation$` subscription.
    */
-  enableUi({ core, chrome, security }: NavigationCustomizationServiceUiDeps): void {
+  enableUi({ core, chrome, security, solution }: NavigationCustomizationServiceUiDeps): void {
     if (!this.handlerRegistered) {
       this.handlerRegistered = true;
       chrome.project.registerCustomizeNavigationHandler(() => this.openModal(core, chrome));
+    }
+
+    // Once the active space resolves, enable save reporting and emit the
+    // per-load nav-state event (the reporter dedupes it to once per lifecycle).
+    if (solution) {
+      this.reporter.markSolutionResolved();
+      this.reporter.reportLoadedOnce({
+        analytics: core.analytics,
+        getCurrentUser: () => core.security.authc.getCurrentUser(),
+        savedCustomization: core.userStorage.get<NavigationCustomization>(
+          NAV_CUSTOMIZATION_STORAGE_KEY
+        ),
+      });
     }
 
     if (!this.menuLinkAdded && security) {
@@ -135,12 +152,11 @@ export class NavigationCustomizationService {
         defaultItemIds,
         computeMoves,
         onChange: (c) => chrome.project.setNavigationCustomization(c),
-        onSave: (c) => {
+        onSave: (c, order, hiddenIds) => {
           // The live nav was already updated optimistically via onChange. The
-          // server write can still fail (e.g. a read-only user lacks write
-          // access to the user-storage saved object), so surface a toast rather
-          // than letting the failure pass silently and the change vanish on the
-          // next page load.
+          // User Storage write can still fail, so surface a toast rather than
+          // letting the failure pass silently and the change vanish on the next
+          // page load.
           //
           // When the user applied a reset (or manually returned every item to
           // its default position/visibility), the customization is the identity
@@ -151,28 +167,31 @@ export class NavigationCustomizationService {
               ? core.userStorage.remove(NAV_CUSTOMIZATION_STORAGE_KEY)
               : core.userStorage.set(NAV_CUSTOMIZATION_STORAGE_KEY, c);
 
-          persist.catch((error: Error) => {
-            // `toastMessage` provides a friendlier, actionable body than the raw
-            // HTTP error (which is just "Internal Server Error"); the underlying
-            // error stays available via the toast's "See the full error" action.
-            core.notifications.toasts.addError(error, {
-              title: i18n.translate('navigation.customization.saveErrorTitle', {
-                defaultMessage: 'Unable to save navigation customization',
-              }),
-              toastMessage: i18n.translate('navigation.customization.saveErrorMessage', {
-                defaultMessage:
-                  'Your navigation customization could not be saved. You might not have permission to save preferences in this space.',
-              }),
+          persist
+            .then(() => {
+              // Report the persisted layout (gated on a resolved solution).
+              this.reporter.reportSave({
+                analytics: core.analytics,
+                customization: c,
+                order,
+                hiddenIds,
+              });
+            })
+            .catch((error: Error) => {
+              core.notifications.toasts.addError(error, {
+                title: i18n.translate('navigation.customization.saveErrorTitle', {
+                  defaultMessage: 'Unable to save navigation customization',
+                }),
+                toastMessage: i18n.translate('navigation.customization.saveErrorMessage', {
+                  defaultMessage: 'Your navigation customization could not be saved.',
+                }),
+              });
             });
-          });
+
           closeModal();
         },
         onReset: () => {
-          // Only update the live preview — the server write is deferred until
-          // the user clicks Apply, keeping Reset consistent with the
-          // preview-until-Apply model used by every other edit in this modal.
-          // If the user cancels after a Reset, onClose restores savedCustomization
-          // and the server is never touched, so the stored value is preserved.
+          // Only update the live preview, user has not yet clicked Apply.
           chrome.project.setNavigationCustomization(undefined);
           return this.getNavigationItems(chrome).then((nav) => nav.items);
         },
