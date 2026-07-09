@@ -40,6 +40,7 @@ function setupContext({ canReadSlos = true }: { canReadSlos?: boolean } = {}) {
         navigateToUrl: mockNavigateToUrl,
         capabilities: { slo: { read: canReadSlos } },
       },
+      http: { basePath: { prepend: (path: string) => path } },
     },
   });
 }

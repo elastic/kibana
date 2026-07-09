@@ -11,7 +11,7 @@ import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceFlyoutService } from '..';
-import { AnomaliesBadge } from '../../../app/service_inventory/service_list/anomalies_badge';
+import { FlyoutAnomaliesBadge } from './flyout_anomalies_badge';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 import { AlertsBadge } from '../../badge/alerts_badge';
 import { SloStatusBadge } from '../../slo_status_badge';
@@ -117,7 +117,7 @@ export function ServiceBadges({
       )}
       {showAnomalyBadge && (
         <EuiFlexItem grow={false} data-test-subj="serviceFlyoutAnomaliesBadge">
-          <AnomaliesBadge
+          <FlyoutAnomaliesBadge
             score={anomalyData.anomalyScore}
             detectorType={anomalyData.detectorType}
             navigationProps={
@@ -126,14 +126,8 @@ export function ServiceBadges({
                     serviceName: service.name,
                     anomalyEnvironment: anomalyData.anomalyEnvironment,
                     agentName: service.agentName,
-                    query: {
-                      rangeFrom,
-                      rangeTo,
-                      environment,
-                      kuery,
-                      comparisonEnabled: true,
-                      serviceGroup: '',
-                    },
+                    rangeFrom,
+                    rangeTo,
                   }
                 : undefined
             }
