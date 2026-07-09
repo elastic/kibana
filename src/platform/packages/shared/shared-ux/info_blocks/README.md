@@ -18,5 +18,5 @@ import { InfoBlocks } from '@kbn/shared-ux-info-blocks';
 ## Behavior
 
 - Renders up to 6 blocks. Passing more than 6 is a consumer bug and is not validated at runtime.
-- Responsive column collapse (3 → 2 → 1): blocks lay out in up to 3 columns; when a block would fall below (breakpoint), the column count steps down so blocks never shrink past (the breakpoint) (they wrap to more rows).
+- Responsive column collapse (3 → 2 → 1): blocks lay out in up to 3 columns; when a block would fall below 140px wide, the column count steps down so blocks never shrink past that width (they wrap to more rows).
 - `compressed` tightens spacing; it is intended to be driven by the flyout header's collapse state.

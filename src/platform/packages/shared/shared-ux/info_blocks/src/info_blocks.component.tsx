@@ -15,13 +15,12 @@ import type { InfoBlocksProps } from './types';
 
 /** Maximum number of columns */
 const MAX_COLUMNS = 3;
-/** Below this width a block collapses to fewer columns */
-const MIN_BLOCK_WIDTH = 140;
 /**
- * Dividers between blocks stop this far short of the grid corners (per the
- * Figma "border detail"), so the lines never meet at the intersections.
+ * Per-block minimum width (px) below which the grid drops a column. This is a
+ * fixed design requirement, not an EUI screen breakpoint, so it stays a literal
+ * constant rather than a theme value.
  */
-const DIVIDER_CORNER_GAP = '20px';
+const MIN_BLOCK_WIDTH = 140;
 
 /**
  * Computes the responsive column count from the available width: up to
@@ -49,6 +48,9 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
   const cellPadding = compressed ? euiTheme.size.s : euiTheme.size.m;
   const dividerColor = euiTheme.border.color;
   const dividerThickness = euiTheme.border.width.thin;
+  // Dividers stop this far short of the grid corners so the lines never meet
+  // at the intersections.
+  const dividerCornerGap = euiTheme.size.base;
 
   return (
     <EuiPanel
@@ -65,7 +67,7 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
       {items.map((item, index) => {
         // Dividers are drawn as pseudo-elements.
         //  - ::before = vertical divider on the inline-END of every non-last
-        //    column, inset from top/bottom by DIVIDER_CORNER_GAP so it stops
+        //    column, inset from top/bottom by dividerCornerGap so it stops
         //    short of the corners. Drawing on the end (not the start) means a
         //    partial last row still gets a divider to the right of its last
         //    filled block — the empty trailing cells have no cell to draw one.
@@ -92,7 +94,7 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
                       content: '';
                       position: absolute;
                       inset-inline-end: 0;
-                      inset-block: ${DIVIDER_CORNER_GAP};
+                      inset-block: ${dividerCornerGap};
                       inline-size: ${dividerThickness};
                       background-color: ${dividerColor};
                     }
@@ -104,8 +106,8 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
                       content: '';
                       position: absolute;
                       inset-block-end: 0;
-                      inset-inline-start: ${isFirstColumn ? DIVIDER_CORNER_GAP : '0'};
-                      inset-inline-end: ${isLastColumn ? DIVIDER_CORNER_GAP : '0'};
+                      inset-inline-start: ${isFirstColumn ? dividerCornerGap : '0'};
+                      inset-inline-end: ${isLastColumn ? dividerCornerGap : '0'};
                       block-size: ${dividerThickness};
                       background-color: ${dividerColor};
                     }
