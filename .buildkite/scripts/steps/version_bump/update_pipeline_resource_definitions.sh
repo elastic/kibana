@@ -13,12 +13,33 @@ FILES=(
   ".buildkite/pipeline-resource-definitions/kibana-console-definitions-sync.yml"
   ".buildkite/pipeline-resource-definitions/kibana-es-snapshots.yml"
   ".buildkite/pipeline-resource-definitions/kibana-on-merge.yml"
+  ".buildkite/pipeline-resource-definitions/kibana-scout-update-metadata.yml"
 )
+
+branch_pattern="${BRANCH//./\\.}"
 
 for file in "${FILES[@]}"; do
   echo "Updating branch_configuration in $file"
-  sed -i "s/branch_configuration: main/branch_configuration: main ${BRANCH}/" "$file"
+  if ! grep -Eq "branch_configuration:.*[[:space:]]${branch_pattern}([[:space:]]|$)" "$file"; then
+    sed -i "s/branch_configuration: main/branch_configuration: main ${BRANCH}/g" "$file"
+  fi
 done
+
+if ! grep -Fxq "        Daily build (${BRANCH}):" ".buildkite/pipeline-resource-definitions/kibana-es-snapshots.yml"; then
+  sed -i "/^          branch: main$/a\\
+        Daily build (${BRANCH}):\\
+          cronline: 0 22 * * * America/New_York\\
+          message: Daily build\\
+          branch: '${BRANCH}'" ".buildkite/pipeline-resource-definitions/kibana-es-snapshots.yml"
+fi
+
+if ! grep -Fxq "        Daily (${BRANCH}):" ".buildkite/pipeline-resource-definitions/kibana-scout-update-metadata.yml"; then
+  sed -i "/^          branch: main$/a\\
+        Daily (${BRANCH}):\\
+          cronline: 0 0 * * * America/New_York\\
+          message: Daily Scout metadata update\\
+          branch: '${BRANCH}'" ".buildkite/pipeline-resource-definitions/kibana-scout-update-metadata.yml"
+fi
 
 echo --- Committing pipeline resource definition changes
 
@@ -28,7 +49,12 @@ git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 head_branch="update-pipeline-resource-defs-$(date +%F_%H-%M-%S)"
 git checkout -b "$head_branch"
 git add "${FILES[@]}"
-git commit -m "[pipeline resource definitions] Add branch ${BRANCH} to branch_configuration"
+if git diff --cached --quiet; then
+  echo "No pipeline resource definition changes needed for ${BRANCH}"
+  exit 0
+fi
+
+git commit -m "[pipeline resource definitions] Add branch ${BRANCH} to pipeline resources"
 
 git push origin "$head_branch"
 
