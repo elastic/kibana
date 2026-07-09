@@ -44,6 +44,7 @@ export interface SignificantEventsParams {
   filters?: { ruleUnbacked?: RuleUnbackedFilter; queryIds?: string[]; minSeverityScore?: number };
   searchMode?: SearchMode;
   alertsReader?: ISignificantEventsAlertsReader;
+  spaceId: string;
 }
 
 export interface SignificantEventsDependencies {
@@ -132,12 +133,14 @@ export async function computeOccurrences(
     from,
     to,
     bucketSize,
+    spaceId,
     alertsReader = ALERTS_READER_V1,
   }: {
     ruleIds: string[];
     from: Date;
     to: Date;
     bucketSize: string;
+    spaceId: string;
     alertsReader?: ISignificantEventsAlertsReader;
   },
   { scopedClusterClient }: { scopedClusterClient: IScopedClusterClient }
@@ -185,6 +188,7 @@ export async function computeOccurrences(
           value,
           esqlUnit,
           limit: batchRuleIds.length * buckets,
+          spaceId,
         }),
         filter: timeRangeFilter,
         drop_null_columns: true,
@@ -256,7 +260,7 @@ export async function getQueryOccurrences(
   dependencies: SignificantEventsDependencies
 ): Promise<QueryOccurrences> {
   const { kiClient, scopedClusterClient } = dependencies;
-  const { from, to, bucketSize, alertsReader = ALERTS_READER_V1 } = params;
+  const { from, to, bucketSize, spaceId, alertsReader = ALERTS_READER_V1 } = params;
 
   const queryLinks = await fetchQueryLinks(params, kiClient);
   if (isEmpty(queryLinks)) {
@@ -270,7 +274,7 @@ export async function getQueryOccurrences(
 
   const ruleIds = [...new Set(queryLinks.map((queryLink) => queryLink.rule_id))];
   const occurrences = await computeOccurrences(
-    { ruleIds, from, to, bucketSize, alertsReader },
+    { ruleIds, from, to, bucketSize, spaceId, alertsReader },
     { scopedClusterClient }
   );
   return { queryLinks, ...occurrences };
