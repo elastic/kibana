@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { selectEvaluators, parseSelectedEvaluators, isCodeOnlyMode, filterEvaluatorsByKind } from './filter';
+import {
+  selectEvaluators,
+  parseSelectedEvaluators,
+  isCodeOnlyMode,
+  filterEvaluatorsByKind,
+} from './filter';
 import type { Evaluator } from '../types';
 
 describe('evaluator filter', () => {
