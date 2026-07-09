@@ -1146,15 +1146,3 @@ const hydrateDocument = (source: SmlDocument): SmlDocument => {
   if (source.references !== undefined) doc.references = source.references;
   return doc;
 };
-
-/**
- * True when a document with the given `spaces` field is visible from
- * `spaceId`. Wildcard (`'*'`) entries are treated as global.
- *
- * Exported so route helpers (HTTP upsert/delete cross-space guard) can
- * apply the same predicate used internally by `findByOrigin`.
- */
-export const isVisibleInSpace = (spaces: string[] | undefined, spaceId: string): boolean => {
-  if (!spaces || spaces.length === 0) return false;
-  return spaces.includes(spaceId) || spaces.includes('*');
-};

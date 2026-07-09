@@ -326,22 +326,14 @@ export type { SmlSearchFilters, SmlSearchConstraints } from './http_api';
 export type SmlDeleteScope = SmlIngestionMethod | 'all';
 
 /**
- * Origin-mode mixin for `indexAttachment`.
+ * Internal `indexAttachment` params. By the time the call reaches the
+ * service or indexer, the public wrapper has already resolved a scoped
+ * saved-objects client, an internal ES client, and the space list.
  *
  * Content is produced by the registered type's `getSmlEntry` hook. The
  * resulting entry is tagged `ingestion_method: 'crawled'`. If the target
  * `origin_id` already has an `ingestion_method: 'manual'` entry, the call
  * is a no-op unless `force: true` is provided.
- */
-export interface SmlIndexAttachmentOriginMode {
-  /** Override existing manual entries. Default: false. */
-  force?: boolean;
-}
-
-/**
- * Internal `indexAttachment` params. By the time the call reaches the
- * service or indexer, the public wrapper has already resolved a scoped
- * saved-objects client, an internal ES client, and the space list.
  */
 export interface SmlIndexerParams {
   originId: string;

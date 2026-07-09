@@ -1193,7 +1193,7 @@ attach them to a conversation.
 │  └────────────────────────────┘                              │
 └──────────────────────────────────────────────────────────────┘
                           │
-                          │ agentBuilder.sml.registerType(...)
+                          │ agentBuilder.smlService.registerType(...)
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
 │  agent_builder plugin (server)                               │
@@ -1296,29 +1296,23 @@ export const myAssetSmlType: SmlTypeDefinition = {
       const attrs = so.attributes as { title?: string; description?: string };
 
       return {
-        chunks: [
-          {
-            type: 'my-asset',
-            title: attrs.title ?? originId,
-            content: [attrs.title, attrs.description].filter(Boolean).join('\n'),
-            // Permissions required to access this item.
-            // - `kibana.privileges[]` lists Kibana feature privileges (e.g.,
-            //   `saved_object:my-saved-object-type/get`).
-            // - `elasticsearch.indices[]` lists concrete ES index/alias/data
-            //   stream names
-            // Users without all listed privileges/indices won't see the item
-            // in search results.
-            permissions: {
-              kibana: { privileges: [{ name: 'saved_object:my-saved-object-type/get' }] },
-              elasticsearch: { indices: [] },
-            },
-          },
-        ],
+        type: 'my-asset',
+        title: attrs.title ?? originId,
+        content: [attrs.title, attrs.description].filter(Boolean).join('\n'),
       };
     } catch {
       return undefined;
     }
   },
+
+  // Optional: permissions required to access this item. Omit for
+  // publicly-readable entries — the indexer then stamps empty permissions.
+  // `kibana.privileges[]` lists Kibana feature privileges (e.g.,
+  // `saved_object:my-saved-object-type/get`). Users without all listed
+  // privileges won't see the item in search results.
+  getPermissions: async (originId, context) => ({
+    kibana: { privileges: [{ name: 'saved_object:my-saved-object-type/get' }] },
+  }),
 
   // Convert an SML document back into a conversation attachment.
   // Called when the AI agent wants to "attach" a search result.
@@ -1351,7 +1345,7 @@ import { myAssetSmlType } from './sml_types/my_asset';
 
 export class MyPlugin implements Plugin {
   setup(core: CoreSetup, { agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) {
-    agentBuilder.sml.registerType(myAssetSmlType);
+    agentBuilder.smlService.registerType(myAssetSmlType);
   }
 }
 ```
@@ -1370,19 +1364,20 @@ memory, so even types with millions of items won't cause OOM.
 Use `createPointInTimeFinder` with `namespaces: ['*']` to enumerate across
 all spaces. The crawler indexes everything; access control happens at query time.
 
-##### `getSmlEntry()` — Chunks and permissions
+##### `getSmlEntry()` and `getPermissions()`
 
-You can return multiple chunks per item (e.g. if a dashboard has multiple
-panels). Each chunk gets its own document in the SML index.
+Every SML type produces exactly one entry per `originId` — `getSmlEntry`
+returns a single entry, not a list of chunks.
 
-The `permissions` array should list the Kibana saved object privileges
-required to access the underlying asset. Common patterns:
+`getPermissions`'s `kibana.privileges[]` should list the Kibana saved object
+privileges required to access the underlying asset. Common patterns:
 
-- `['saved_object:lens/get']` for Lens visualizations
-- `['saved_object:dashboard/get']` for dashboards
-- `['saved_object:search/get']` for saved searches
+- `[{ name: 'saved_object:lens/get' }]` for Lens visualizations
+- `[{ name: 'saved_object:dashboard/get' }]` for dashboards
+- `[{ name: 'saved_object:search/get' }]` for saved searches
 
-Users without the listed privileges won't see the item in `sml_search` results.
+Users without the listed privileges won't see the item in `sml_search`
+results. Omit `getPermissions` for publicly-readable entries.
 
 ##### `toAttachment()` — Resolving saved objects
 
@@ -1409,22 +1404,19 @@ The default is `10m` if you don't specify `fetchFrequency`.
 
 #### Real-world example: Visualizations
 
-The visualization SML type is registered in
-`x-pack/platform/plugins/shared/agent_builder_platform/server/sml_types/visualization.ts`.
-
-It:
-- Lists all `lens` saved objects across all spaces
-- Extracts title, description, chart type, and ES|QL query as searchable content
-- Sets `permissions: { kibana: { privileges: [{ name: 'saved_object:lens/get' }] }, elasticsearch: { indices: [] } }`
-- Converts results back to Lens API format for the attachment renderer
-- Uses a 1-hour crawl interval
+The visualization SML type currently lives in `agent_context_layer` and is
+slated to move to `agent_builder_platform` as part of the consumer-migration
+follow-up to the SML relocation. Once migrated, it will:
+- List all `lens` saved objects across all spaces
+- Extract title, description, chart type, and ES|QL query as searchable content
+- Set `getPermissions` to `{ kibana: { privileges: [{ name: 'saved_object:lens/get' }] } }`
+- Convert results back to Lens API format for the attachment renderer
+- Use a 1-hour crawl interval
 
 ```typescript
 // Registration (in agent_builder_platform plugin setup):
-setupDeps.agentBuilder.sml.registerType(visualizationSmlType);
+setupDeps.agentBuilder.smlService.registerType(visualizationSmlType);
 ```
-
-The full implementation is ~130 lines and serves as the reference for new types.
 
 ## Streams lifecycle (frontend)
 

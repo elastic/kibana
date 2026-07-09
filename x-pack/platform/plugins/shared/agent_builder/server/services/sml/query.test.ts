@@ -19,7 +19,6 @@ import {
   getDocumentsByIds,
   findByOrigin,
   findByOriginAcrossSpaces,
-  isVisibleInSpace,
   buildOriginUri,
 } from './query';
 import { SmlAuthzEnumerationIncompleteError } from './sml_authz_enumeration_incomplete_error';
@@ -171,15 +170,6 @@ const makePermissions = (kibanaPrivs: string[] = []) => ({
 });
 
 describe('SML query helpers', () => {
-  it('isVisibleInSpace matches an exact space', () => {
-    expect(isVisibleInSpace(['default'], 'default')).toBe(true);
-    expect(isVisibleInSpace(['other'], 'default')).toBe(false);
-  });
-
-  it('isVisibleInSpace treats "*" as globally visible', () => {
-    expect(isVisibleInSpace(['*'], 'anything')).toBe(true);
-  });
-
   it('buildOriginUri formats type://originId', () => {
     expect(buildOriginUri('dashboard', 'abc-123')).toBe('dashboard://abc-123');
   });

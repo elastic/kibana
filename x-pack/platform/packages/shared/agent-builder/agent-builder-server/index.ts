@@ -172,7 +172,6 @@ export type {
   SmlIndexAction,
   SmlCrawler,
   SmlDeleteScope,
-  SmlIndexAttachmentOriginMode,
   SmlIndexerParams,
   SmlIndexerDeleteAttachmentParams,
   SmlService,
