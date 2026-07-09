@@ -9,6 +9,7 @@ import {
   buildVegaSavedVis,
   extractVegaSpecFromSavedVis,
   normalizeVegaConfig,
+  prettyPrintVegaSpec,
   VEGA_VIS_TYPE,
 } from './vega_saved_vis';
 
@@ -33,20 +34,35 @@ describe('buildVegaSavedVis', () => {
   });
 });
 
+describe('prettyPrintVegaSpec', () => {
+  it('re-indents a minified JSON spec with two spaces', () => {
+    expect(prettyPrintVegaSpec('{"mark":"bar"}')).toBe('{\n  "mark": "bar"\n}');
+  });
+
+  it('is idempotent for an already-indented spec', () => {
+    const pretty = '{\n  "mark": "bar"\n}';
+    expect(prettyPrintVegaSpec(pretty)).toBe(pretty);
+  });
+
+  it('returns the original text when the spec is not valid JSON', () => {
+    const hjson = '{mark: bar}';
+    expect(prettyPrintVegaSpec(hjson)).toBe(hjson);
+  });
+});
+
 describe('extractVegaSpecFromSavedVis', () => {
-  it('reads the spec, title, and description from a Vega legacy-vis config', () => {
-    const spec = '{"mark":"bar"}';
+  it('reads the spec, title, and description from a Vega legacy-vis config, pretty-printing the spec', () => {
     const config = {
       savedVis: {
         type: 'vega',
         title: 'Title',
         description: 'Desc',
-        params: { spec },
+        params: { spec: '{"mark":"bar"}' },
       },
     };
 
     expect(extractVegaSpecFromSavedVis(config)).toEqual({
-      spec,
+      spec: '{\n  "mark": "bar"\n}',
       title: 'Title',
       description: 'Desc',
     });
