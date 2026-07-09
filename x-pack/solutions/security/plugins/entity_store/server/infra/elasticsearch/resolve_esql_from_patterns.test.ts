@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { resolveFrom, resolveLocalAndRemoteFrom } from './resolve_esql_from_patterns';
+import { resolveEsqlFromClause } from './resolve_esql_from_patterns';
 
 const makeEsClient = (resolveIndex: jest.Mock) =>
   ({ indices: { resolveIndex } } as unknown as ElasticsearchClient);
@@ -24,78 +24,42 @@ const resolveWith = (partial: Partial<ResolveResponse>): ResolveResponse => ({
   ...partial,
 });
 
-describe('resolveFrom', () => {
+describe('resolveEsqlFromClause', () => {
   const logger = loggerMock.create();
   beforeEach(() => jest.clearAllMocks());
+
+  const run = (resolveIndex: jest.Mock, include: string[], exclude: string[] = []) =>
+    resolveEsqlFromClause(makeEsClient(resolveIndex), { include, exclude }, logger);
 
   it('passes existing patterns through unchanged', async () => {
     const resolveIndex = jest
       .fn()
       .mockResolvedValue(resolveWith({ indices: [{ name: 'logs-a', attributes: ['open'] }] }));
 
-    const result = await resolveFrom(makeEsClient(resolveIndex), ['logs-*', 'logs-a'], logger);
-
-    expect(result).toEqual(['logs-*', 'logs-a']);
+    expect(await run(resolveIndex, ['logs-*', 'logs-a'])).toEqual(['logs-*', 'logs-a']);
   });
 
   it('drops a concrete index that does not exist, keeps empty wildcards', async () => {
     const resolveIndex = jest.fn().mockResolvedValue(emptyResolve);
 
-    const result = await resolveFrom(
-      makeEsClient(resolveIndex),
-      ['logs-*', 'fluentd-windows-events'],
-      logger
-    );
+    const result = await run(resolveIndex, ['logs-*', 'fluentd-windows-events']);
 
     expect(result).toEqual(['logs-*']); // wildcard stays, missing concrete dropped
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('fluentd-windows-events'));
   });
 
-  it('falls back to the raw patterns on resolve failure', async () => {
-    const resolveIndex = jest.fn().mockRejectedValue(new Error('connection refused'));
-
-    const result = await resolveFrom(makeEsClient(resolveIndex), ['logs-*', 'x'], logger);
-
-    expect(result).toEqual(['logs-*', 'x']);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('connection refused'));
-  });
-
-  it('returns [] and does not call resolveIndex when include is empty', async () => {
-    const resolveIndex = jest.fn();
-
-    expect(await resolveFrom(makeEsClient(resolveIndex), [], logger)).toEqual([]);
-    expect(resolveIndex).not.toHaveBeenCalled();
-  });
-});
-
-describe('resolveLocalAndRemoteFrom', () => {
-  const logger = loggerMock.create();
-  beforeEach(() => jest.clearAllMocks());
-
-  const run = (resolveIndex: jest.Mock, include: string[], exclude: string[] = []) =>
-    resolveLocalAndRemoteFrom(makeEsClient(resolveIndex), { include, exclude }, logger);
-
-  it('splits local and remote, negating excludes last', async () => {
+  it('negates an exclusion whose target exists', async () => {
     const resolveIndex = jest
       .fn()
       .mockResolvedValue(resolveWith({ indices: [{ name: 'logs-a', attributes: ['open'] }] }));
 
-    const { local, remote } = await run(
-      resolveIndex,
-      ['logs-*', 'remote:logs-*'],
-      ['logs-a', 'remote:logs-b']
-    );
-
-    expect(local).toEqual(['logs-*', '-logs-a']);
-    expect(remote).toEqual(['remote:logs-*', '-remote:logs-b']);
+    expect(await run(resolveIndex, ['logs-*'], ['logs-a'])).toEqual(['logs-*', '-logs-a']);
   });
 
   it('drops a no-op exclusion whose concrete target does not exist', async () => {
     const resolveIndex = jest.fn().mockResolvedValue(emptyResolve);
 
-    const { local } = await run(resolveIndex, ['logs-*'], ['does-not-exist']);
-
-    expect(local).toEqual(['logs-*']); // no dangling `-does-not-exist`
+    expect(await run(resolveIndex, ['logs-*'], ['does-not-exist'])).toEqual(['logs-*']);
   });
 
   it('reroutes a data stream with a closed backing index', async () => {
@@ -121,10 +85,8 @@ describe('resolveLocalAndRemoteFrom', () => {
         })
       );
 
-    const { local } = await run(resolveIndex, ['logs-ds']);
-
     // the closed data stream is dropped as a positive; its open backing is read and it's negated
-    expect(local).toEqual(['.ds-logs-ds-000002', '-logs-ds']);
+    expect(await run(resolveIndex, ['logs-ds'])).toEqual(['.ds-logs-ds-000002', '-logs-ds']);
   });
 
   it('excludes a closed standalone index', async () => {
@@ -137,20 +99,23 @@ describe('resolveLocalAndRemoteFrom', () => {
       })
     );
 
-    const { local } = await run(resolveIndex, ['standalone-*']);
-
-    expect(local).toEqual(['standalone-*', '-standalone-closed']);
+    expect(await run(resolveIndex, ['standalone-*'])).toEqual([
+      'standalone-*',
+      '-standalone-closed',
+    ]);
   });
 
-  it('excludes the alerts index when it exists (folded in as an exclusion)', async () => {
-    const resolveIndex = jest
-      .fn()
-      .mockResolvedValue(
-        resolveWith({ indices: [{ name: '.alerts-security', attributes: ['open'] }] })
-      );
+  it('falls back to the raw patterns on resolve failure', async () => {
+    const resolveIndex = jest.fn().mockRejectedValue(new Error('connection refused'));
 
-    const { local } = await run(resolveIndex, ['logs-*', '.alerts-security'], ['.alerts-security']);
+    expect(await run(resolveIndex, ['logs-*', 'x'])).toEqual(['logs-*', 'x']);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('connection refused'));
+  });
 
-    expect(local).toEqual(['logs-*', '-.alerts-security']);
+  it('returns [] and does not call resolveIndex when include is empty', async () => {
+    const resolveIndex = jest.fn();
+
+    expect(await run(resolveIndex, [])).toEqual([]);
+    expect(resolveIndex).not.toHaveBeenCalled();
   });
 });

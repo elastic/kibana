@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { EsqlFromClauseTargets } from '../../../infra/elasticsearch/resolve_esql_from_patterns';
 import type { RemoteLogExtractionStateClient } from '../../saved_objects/remote_log_extraction_state';
 
 /**
@@ -17,14 +18,17 @@ export interface RemoteExtractionStrategy {
   readonly id: 'ccs' | 'cps';
   readonly client: ElasticsearchClient;
   readonly stateClient: RemoteLogExtractionStateClient;
-  buildPatterns(args: { localIndexPatterns: string[]; remoteIndexPatterns: string[] }): string[];
+  buildPatterns(args: {
+    local: EsqlFromClauseTargets;
+    remote: EsqlFromClauseTargets;
+  }): EsqlFromClauseTargets;
 }
 
 /**
- * this unique string excludes all indices on the origin project from the CPS scope.
+ * Excludes all indices on the origin project from the CPS scope (the resolver negates it).
  * see https://www.elastic.co/docs/reference/query-languages/esql/esql-cross-serverless-projects#exclude-specific-projects
  */
-const EXCLUDED_ORIGIN = '-_origin:*';
+const EXCLUDED_ORIGIN = '_origin:*';
 
 const isNotSystemIndex = (indexPattern: string) => !indexPattern.startsWith('.');
 
@@ -35,7 +39,7 @@ export const createCcsStrategy = (
   id: 'ccs',
   client: esClient,
   stateClient,
-  buildPatterns: ({ remoteIndexPatterns }) => remoteIndexPatterns,
+  buildPatterns: ({ remote }) => remote,
 });
 
 export const createCpsStrategy = (
@@ -45,8 +49,8 @@ export const createCpsStrategy = (
   id: 'cps',
   client: cpsClient,
   stateClient,
-  buildPatterns: ({ localIndexPatterns }) => [
-    ...localIndexPatterns.filter(isNotSystemIndex), // avoids verification errors on remote clusters
-    EXCLUDED_ORIGIN,
-  ],
+  buildPatterns: ({ local }) => ({
+    include: local.include.filter(isNotSystemIndex), // avoids verification errors on remote clusters
+    exclude: [...local.exclude, EXCLUDED_ORIGIN],
+  }),
 });

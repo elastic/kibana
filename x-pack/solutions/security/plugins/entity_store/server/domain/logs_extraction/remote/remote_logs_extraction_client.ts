@@ -34,7 +34,10 @@ import {
 } from '../log_pagination_probe_query_builder';
 import { executeEsqlQuery } from '../../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../../infra/elasticsearch/ingest';
-import { resolveFrom } from '../../../infra/elasticsearch/resolve_esql_from_patterns';
+import {
+  resolveEsqlFromClause,
+  type EsqlFromClauseTargets,
+} from '../../../infra/elasticsearch/resolve_esql_from_patterns';
 import { getUpdatesEntitiesDataStreamName } from '../../asset_manager/updates_data_stream';
 import {
   applyMaxLagCutoff,
@@ -47,7 +50,7 @@ import { getErrorMessage } from '../../../../common';
 
 interface RemoteExtractToUpdatesParams {
   type: EntityType;
-  remoteIndexPatterns: string[];
+  remoteTargets: EsqlFromClauseTargets;
   docsLimit: number;
   maxLogsPerPage: number;
   lookbackPeriod: string;
@@ -119,7 +122,7 @@ export class RemoteLogsExtractionClient {
 
   private async doExtractToUpdates({
     type,
-    remoteIndexPatterns,
+    remoteTargets,
     docsLimit,
     maxLogsPerPage,
     lookbackPeriod,
@@ -132,13 +135,13 @@ export class RemoteLogsExtractionClient {
     maxLogsPerWindow,
     maxLogsPerWindowCapBehavior,
   }: RemoteExtractToUpdatesParams): Promise<RemoteExtractToUpdatesResult> {
-    if (remoteIndexPatterns.length === 0) {
+    if (remoteTargets.include.length === 0) {
       return { count: 0, pages: 0 };
     }
 
-    const effectiveRemoteIndexPatterns = await resolveFrom(
+    const effectiveRemoteIndexPatterns = await resolveEsqlFromClause(
       this.strategy.client,
-      remoteIndexPatterns,
+      remoteTargets,
       this.logger
     );
 
