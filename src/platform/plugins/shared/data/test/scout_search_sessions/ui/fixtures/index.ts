@@ -14,8 +14,6 @@ import type {
   ScoutPage,
 } from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
-
-import { ManagementPage } from '@kbn/management-plugin/test/scout/ui/fixtures/page_objects/management_page';
 import { BackgroundSearchManagementPage } from './page_objects/background_search_management_page';
 
 export interface BackgroundSearchTestFixtures extends ScoutParallelTestFixtures {
@@ -42,7 +40,6 @@ export const spaceTest = spaceBaseTest.extend<
     await use({
       ...pageObjects,
       backgroundSearchManagement: createLazyPageObject(BackgroundSearchManagementPage, page),
-      management: new ManagementPage(page),
     });
   },
 });

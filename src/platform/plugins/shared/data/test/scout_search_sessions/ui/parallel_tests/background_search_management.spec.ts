@@ -94,8 +94,6 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
       );
     }
     dashboardId = delayed5s.id;
-
-    await scoutSpace.uiSettings.set({ defaultIndex: 'logstash-*', 'search:timeout': 10_000 });
     await deleteAllBackgroundSearches(kbnClient, scoutSpace.id);
   });
 
@@ -105,7 +103,6 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
 
   spaceTest.afterAll(async ({ kbnClient, scoutSpace }) => {
     await deleteAllBackgroundSearches(kbnClient, scoutSpace.id);
-    await scoutSpace.uiSettings.unset('defaultIndex', 'search:timeout');
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
@@ -122,7 +119,6 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
   spaceTest(
     'saves a background search from a dashboard, verifies it in management, then deletes it',
     async ({ page, pageObjects }) => {
-      // End-to-end journey across dashboard + management pages.
       spaceTest.setTimeout(180_000);
       const searchName = `Background search - ${uuidv4()}`;
 
@@ -131,24 +127,19 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
       });
 
       await spaceTest.step('submit query and save as a background search', async () => {
-        // Click the main submit button to trigger a fresh search.
         const submitBtn = page.testSubj.locator('querySubmitButton');
         await submitBtn.waitFor({ state: 'visible', timeout: 15_000 });
         await submitBtn.click();
 
-        // The secondary "Send to background" button appears while the search is running.
-        // Click it to persist the search as a background search.
+        // Click the "Send to background" button appears while the search is running to create a background search
         const bgSubmitBtn = page.testSubj.locator('querySubmitButton-secondary-button');
         await bgSubmitBtn.waitFor({ state: 'visible', timeout: 15_000 });
         await bgSubmitBtn.click();
 
-        // Wait for the toast confirming the background search has been saved.
         await page.testSubj
           .locator('backgroundSearchToastLink')
           .waitFor({ state: 'visible', timeout: 20_000 });
 
-        // Wait for the dashboard to finish rendering — this ensures all search IDs are
-        // registered in the background search's idMapping before we navigate away.
         await pageObjects.dashboard.waitForRenderComplete();
       });
 
@@ -192,7 +183,6 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
 
         // Trigger an explicit refresh to wait for the initial data load.
         await pageObjects.backgroundSearchManagement.refresh();
-
         await pageObjects.backgroundSearchManagement.expectRowCount(1);
         await pageObjects.backgroundSearchManagement.deleteRow();
         await pageObjects.backgroundSearchManagement.waitForEmptyTable(30_000);

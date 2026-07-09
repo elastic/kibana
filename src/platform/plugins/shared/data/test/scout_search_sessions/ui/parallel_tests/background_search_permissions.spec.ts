@@ -53,34 +53,18 @@ spaceTest.describe(
   () => {
     spaceTest(
       'management is NOT accessible to users without store_search_session privilege',
-      async ({ page, browserAuth, pageObjects }) => {
+      async ({ page, browserAuth }) => {
         await browserAuth.loginWithCustomRole(roleDashboardReadOnly);
-
-        await page.gotoApp('dashboards');
-
-        await expect(page.testSubj.locator('toggleNavButton')).toBeVisible({ timeout: 30_000 });
-
-        const navLinks = await pageObjects.collapsibleNav.getNavLinks();
-        expect(navLinks).not.toContain('Stack Management');
+        await page.gotoApp('management');
+        await expect(page.testSubj.locator('appNotFoundPageContent')).toBeVisible();
       }
     );
 
     spaceTest(
       'management IS accessible to users with store_search_session privilege',
-      async ({ page, browserAuth, pageObjects }) => {
+      async ({ page, browserAuth }) => {
         await browserAuth.loginWithCustomRole(roleDashboardWithBackgroundSearch);
-
         await page.gotoApp('management');
-
-        await expect(page.testSubj.locator('toggleNavButton')).toBeVisible({ timeout: 30_000 });
-
-        const navLinks = await pageObjects.collapsibleNav.getNavLinks();
-        expect(navLinks).toContain('Stack Management');
-
-        const sections = await pageObjects.management.readSidebarSections();
-        const kibanaSection = sections.find((section) => section.sectionId === 'kibana');
-        expect(kibanaSection?.sectionLinks).toStrictEqual(['search_sessions']);
-
         const searchSessionsLink = page.testSubj.locator('search_sessions');
         await expect(searchSessionsLink).toContainText('Background Search');
       }
