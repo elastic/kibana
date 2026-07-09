@@ -11,7 +11,8 @@
     "@kbn/apm-api-shared",
     "@kbn/apm-ui-shared",
     "@kbn/apm-types",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": ["target/**/*"]
 }
