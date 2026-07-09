@@ -63,8 +63,7 @@ dependsOn:
   - '@kbn/restorable-state'
   - '@kbn/lens-common'
   - '@kbn/ebt-click'
-  - '@kbn/apm-api-shared'
-  - '@kbn/zod'
+  - '@kbn/apm-ui-components-plugin'
 tags:
   - plugin
   - prod
