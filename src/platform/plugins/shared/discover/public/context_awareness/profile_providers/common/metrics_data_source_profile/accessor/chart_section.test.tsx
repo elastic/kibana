@@ -83,6 +83,9 @@ jest.mock('../../../../../hooks/use_discover_services', () => ({
       },
     },
     logger: mockLogger,
+    discoverFeatureFlags: {
+      getMetricsExperienceSortEnabled: jest.fn(() => false),
+    },
   })),
 }));
 
@@ -198,6 +201,7 @@ describe('MetricsExperienceGridWrapper', () => {
         links: { query: { queryESQL: mockEsqlReferenceHref } },
       }),
       logger: mockScopedLogger,
+      isSortingEnabled: false,
     });
   });
 

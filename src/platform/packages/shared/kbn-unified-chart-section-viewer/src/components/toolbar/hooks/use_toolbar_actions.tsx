@@ -14,6 +14,7 @@ import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { css } from '@emotion/react';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
+import { useExternalServices } from '../../../context/external_services';
 import { DimensionsSelector } from '../dimensions_selector';
 import { SortSelector } from '../sort_selector';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
@@ -46,6 +47,7 @@ export const useToolbarActions = ({
     onMetricsSortChange,
   } = useMetricsExperienceState();
   const onDimensionsSelectionChange = onDimensionsChangeProp ?? onDimensionsChange;
+  const isSortingEnabled = useExternalServices()?.isSortingEnabled ?? false;
 
   const { euiTheme } = useEuiTheme();
 
@@ -69,7 +71,9 @@ export const useToolbarActions = ({
           metricItems={metricItems}
         />
       ),
-      <SortSelector sort={metricsSort} onChange={onMetricsSortChange} fullWidth={isSmallScreen} />,
+      isSortingEnabled ? (
+        <SortSelector sort={metricsSort} onChange={onMetricsSortChange} fullWidth={isSmallScreen} />
+      ) : null,
     ],
     [
       isSmallScreen,
@@ -81,6 +85,7 @@ export const useToolbarActions = ({
       metricItems,
       metricsSort,
       onMetricsSortChange,
+      isSortingEnabled,
     ]
   );
 

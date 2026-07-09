@@ -21,6 +21,8 @@ export interface ExternalServices {
   /** Host doc links for Discover ErrorCallout ES|QL reference footer. */
   docLinks?: DocLinksStart;
   logger?: Logger;
+  /** Gates the metrics grid sort control. */
+  isSortingEnabled?: boolean;
 }
 
 const ExternalServicesContext = createContext<ExternalServices | undefined>(undefined);
