@@ -101,7 +101,7 @@ describe('sml_task_definitions', () => {
       const callArg = mockTaskManager.registerTaskDefinitions.mock.calls[0][0];
       expect(callArg).toHaveProperty(SML_CRAWLER_TASK_TYPE);
       expect(callArg[SML_CRAWLER_TASK_TYPE]).toMatchObject({
-        title: 'Agent Context Layer: SML Crawler',
+        title: 'Agent Builder SML Crawler',
         timeout: '10m',
         maxAttempts: 3,
       });

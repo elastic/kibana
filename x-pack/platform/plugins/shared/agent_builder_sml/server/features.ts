@@ -14,7 +14,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
   features.registerKibanaFeature({
     id: AGENT_BUILDER_SML_FEATURE_ID,
     name: i18n.translate('xpack.agentBuilderSml.feature.name', {
-      defaultMessage: 'Agent Context Layer',
+      defaultMessage: 'Agent Builder - Semantic Metadata Layer (SML)',
     }),
     minimumLicense: 'enterprise',
     order: 1001,

@@ -50,12 +50,12 @@ export interface SmlSearchFilters {
 }
 
 /**
- * Max length of `query` for POST `/internal/agent_context_layer/sml/_search`.
+ * Max length of `query` for POST `/internal/agent_builder_sml/sml/_search`.
  */
 export const SML_HTTP_SEARCH_QUERY_MAX_LENGTH = 512;
 
 /**
- * Response body for `POST /internal/agent_context_layer/sml/_search`.
+ * Response body for `POST /internal/agent_builder_sml/sml/_search`.
  */
 export interface SmlSearchHttpResponse {
   results: SmlSearchHttpResultItem[];
@@ -79,13 +79,13 @@ export interface SmlSearchHttpResultItem {
 }
 
 /**
- * Max length of `query` for POST `/internal/agent_context_layer/sml/_autocomplete`.
+ * Max length of `query` for POST `/internal/agent_builder_sml/sml/_autocomplete`.
  * Autocomplete payloads are user-typed prefixes - shorter than full retrieval queries.
  */
 export const SML_HTTP_AUTOCOMPLETE_QUERY_MAX_LENGTH = 256;
 
 /**
- * Response body for `POST /internal/agent_context_layer/sml/_autocomplete`.
+ * Response body for `POST /internal/agent_builder_sml/sml/_autocomplete`.
  */
 export interface SmlAutocompleteHttpResponse {
   results: SmlAutocompleteHttpResultItem[];

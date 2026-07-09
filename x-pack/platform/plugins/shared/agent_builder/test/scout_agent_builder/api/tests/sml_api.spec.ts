@@ -24,7 +24,7 @@ import {
   API_AGENT_BUILDER,
   COMMON_HEADERS,
   INTERNAL_AGENT_BUILDER,
-  INTERNAL_AGENT_CONTEXT_LAYER,
+  INTERNAL_AGENT_BUILDER_SML,
 } from '../fixtures/constants';
 import { postConverse } from '../fixtures/converse_http';
 
@@ -84,8 +84,8 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     ...adminInteractiveCookieHeader,
   });
 
-  apiTest('POST /internal/agent_builder/sml/_search autocomplete', async ({ apiClient }) => {
-    const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
+  apiTest('POST /internal/agent_builder_sml/sml/_search autocomplete', async ({ apiClient }) => {
+    const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER_SML}/sml/_search`, {
       headers: ih(),
       body: { query: 'pacif', size: 20 },
       responseType: 'json',
@@ -100,9 +100,9 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   });
 
   apiTest(
-    'POST /internal/agent_builder/sml/_search wildcard returns item fields',
+    'POST /internal/agent_builder_sml/sml/_search wildcard returns item fields',
     async ({ apiClient }) => {
-      const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
+      const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER_SML}/sml/_search`, {
         headers: ih(),
         body: { query: '*', size: 10 },
         responseType: 'json',
@@ -119,8 +119,8 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     }
   );
 
-  apiTest('POST /internal/agent_builder/sml/_search rejects empty query', async ({ apiClient }) => {
-    const response = await apiClient.post(`${INTERNAL_AGENT_CONTEXT_LAYER}/sml/_search`, {
+  apiTest('POST /internal/agent_builder_sml/sml/_search rejects empty query', async ({ apiClient }) => {
+    const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER_SML}/sml/_search`, {
       headers: ih(),
       body: { query: '' },
       responseType: 'json',
