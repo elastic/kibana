@@ -13,10 +13,15 @@
  * the workflow via its `alert` trigger, and grades the `ai.agent` step's structured verdict
  * against the golden label.
  *
- * Each task indexes a UNIQUE alert id (and deletes it afterwards). The workflow is idempotent per
- * alert (it tags/notes analyzed alerts and short-circuits on the `already_analyzed` gate), so
- * reusing a fixed id across repetitions would skip every run after the first. A fresh id per
- * invocation keeps each repetition an independent, un-analyzed alert.
+ * Each task indexes a UNIQUE alert (fresh alert id AND fresh rule uuid) and deletes it afterwards.
+ * Two independent reasons require the freshness:
+ *   1. A unique alert `_id` keeps the workflow's `already_analyzed` tag gate from skipping a
+ *      repetition (the workflow tags analyzed alerts and short-circuits on re-runs).
+ *   2. A unique rule uuid keeps each run's enrichment isolated. The eval runner runs tasks
+ *      concurrently (repetitions default to 5-way concurrency), and every enrichment query in the
+ *      workflow (prevalence, noise signal, close history, rule metadata) filters on the alert's
+ *      rule uuid. With a shared rule uuid, concurrent repetitions of the same base alert would
+ *      count each other and feed nondeterministic context to the model under test.
  *
  * Evaluators:
  *   - ClassificationAccuracy (CODE, primary): predicted verdict == golden label.
@@ -104,6 +109,7 @@ evaluate.describe(
       'classifies alerts with the expected true/false positive verdict',
       async ({ executorClient, evaluators, esClient, fetch, log }) => {
         const examples: AlertAnalysisExample[] = ALERT_ANALYSIS_EVAL_ALERTS.map((alert) => ({
+          id: alert.id,
           input: { alertId: alert.id },
           output: { classification: alert.expected },
           metadata: {
@@ -143,13 +149,25 @@ evaluate.describe(
                 throw new Error(`No synthetic alert found for id ${alertId}`);
               }
 
-              // Fresh id per run so the workflow's `already_analyzed` gate never skips a repetition.
+              // Fresh alert id AND rule uuid per run so concurrent repetitions never share state:
+              // the unique `_id` bypasses the workflow's `already_analyzed` tag gate, and the unique
+              // rule uuid (which `preprocessAlertInputs` maps to `event.rule.id`) scopes every
+              // enrichment query to just this alert. Overriding the flattened rule keys via spread is
+              // safe because `base.doc` stores dotted keys as top-level properties (primitive values),
+              // so this clones without mutating the shared base document.
               const uniqueAlertId = `${alertId}-${randomUUID()}`;
+              const uniqueRuleId = `${uniqueAlertId}-rule`;
+              const document = {
+                ...base.doc,
+                'kibana.alert.uuid': uniqueAlertId,
+                'kibana.alert.rule.uuid': uniqueRuleId,
+                'kibana.alert.rule.rule_id': uniqueRuleId,
+              };
               createdAlertIds.add(uniqueAlertId);
               await esClient.index({
                 index: alertIndex,
                 id: uniqueAlertId,
-                document: base.doc,
+                document,
                 refresh: 'wait_for',
               });
 

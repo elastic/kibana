@@ -8,9 +8,10 @@
 /**
  * Labeled synthetic alerts for the alert-analysis managed workflow eval.
  *
- * Each alert is indexed into `.alerts-security.alerts-default` in `beforeAll`, then the real
- * workflow is run against it end-to-end. The workflow's `ai.agent` step classifies the alert
- * true_positive / false_positive, and we grade that verdict against `expected`.
+ * For each eval example the spec indexes a fresh copy of the alert (with a per-run unique alert
+ * and rule uuid) into `.alerts-security.alerts-default`, runs the real workflow end-to-end, then
+ * deletes it. The workflow's `ai.agent` step classifies the alert true_positive / false_positive,
+ * and we grade that verdict against `expected`.
  *
  * The dataset exercises the four confidence tiers the workflow prompt reasons over
  * (see the `<alert_confidence_tier>` and `<reasoning_process>` sections of
@@ -21,9 +22,11 @@
  *   - Tier 3 (behavior, technique with legitimate uses, signed vendor process) → false_positive (Gate D)
  *   - Tier 4 (generic/threshold rule, benign signed process) → false_positive (Gate D)
  *
- * Every alert carries its own rule uuid so the workflow's per-rule enrichment queries
- * (prevalence, close history, related alerts) resolve to just the seed — the verdict is
- * driven by the alert's own observable fields, which is what this suite measures.
+ * Each alert carries a base rule uuid here, but the spec overrides it with a per-run unique uuid
+ * before indexing (see the task in the spec). That is what guarantees the workflow's per-rule
+ * enrichment queries (prevalence, close history, rule metadata) resolve to just the single seeded
+ * alert even when repetitions run concurrently — the verdict is driven by the alert's own
+ * observable fields, which is what this suite measures.
  *
  * Fields are stored as flattened (dotted) keys, matching how detection alerts are indexed;
  * the run route's `preprocessAlertInputs` expands them before the agent sees them. The rule
@@ -408,7 +411,3 @@ export const ALERT_ANALYSIS_EVAL_ALERTS: LabeledAlert[] = [
   GENERIC_THRESHOLD,
   SCHEDULED_TASK,
 ];
-
-export const ALERT_ANALYSIS_EVAL_IDS: string[] = ALERT_ANALYSIS_EVAL_ALERTS.map(
-  (alert) => alert.id
-);
