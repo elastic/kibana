@@ -10,9 +10,9 @@ import type { Logger } from '@kbn/logging';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
-import { FIND_RULES_INLINE_TOOL_ID } from './find_rules_tool';
-import { DISCOVER_RULE_TAGS_INLINE_TOOL_ID } from './discover_rule_tags_tool';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import { createFindRulesInlineTool } from './find_rules_tool';
+import { createDiscoverRuleTagsInlineTool } from './discover_rule_tags_tool';
 
 interface FindRulesSkillDeps {
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
@@ -20,8 +20,8 @@ interface FindRulesSkillDeps {
 }
 
 export const createFindRulesSkill = ({
-  getStartServices: _getStartServices,
-  logger: _logger,
+  getStartServices,
+  logger,
 }: FindRulesSkillDeps): SkillDefinition<'find-security-rules', 'skills/security/rules'> =>
   defineSkillType({
     id: 'find-security-rules',
@@ -237,10 +237,9 @@ Examples:
 ## No Actions
 
 This skill is read-only. Never suggest or offer to enable, disable, edit, delete, duplicate, or bulk-edit rules. Do not prompt the user to take any action on the rules returned. If the user asks to modify a rule, direct them to the Detection Rules UI.`,
-    getRegistryTools: () => [
-      SECURITY_ALERTS_TOOL_ID,
-      FIND_RULES_INLINE_TOOL_ID,
-      DISCOVER_RULE_TAGS_INLINE_TOOL_ID,
+    getRegistryTools: () => [SECURITY_ALERTS_TOOL_ID],
+    getInlineTools: () => [
+      createFindRulesInlineTool({ getStartServices, logger }),
+      createDiscoverRuleTagsInlineTool({ getStartServices, logger }),
     ],
-    getInlineTools: () => [],
   });

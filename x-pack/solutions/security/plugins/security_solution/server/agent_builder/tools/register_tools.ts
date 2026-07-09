@@ -27,8 +27,6 @@ import {
 } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
-import { findRulesTool } from '../skills/find_rules/find_rules_tool';
-import { discoverRuleTagsTool } from '../skills/find_rules/discover_rule_tags_tool';
 import { pciComplianceTool } from './pci_compliance_tool';
 import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import { pciFieldMapperTool } from './pci_field_mapper_tool';
@@ -63,8 +61,6 @@ export const registerTools = (
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
-  agentBuilder.tools.register(findRulesTool(core, logger));
-  agentBuilder.tools.register(discoverRuleTagsTool(core, logger));
   agentBuilder.tools.register(getEntityTool(core, logger, ml, experimentalFeatures));
   agentBuilder.tools.register(addEntitiesToWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(createWatchlistTool(core, logger, experimentalFeatures));

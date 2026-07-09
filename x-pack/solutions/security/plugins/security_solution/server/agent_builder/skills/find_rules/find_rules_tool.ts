@@ -6,12 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { type as detectionRuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { prepareKQLStringParam } from '../../../../common/utils/kql';
 import {
   convertRulesFilterToKQL,
@@ -24,7 +25,7 @@ import {
   TAGS_FIELD,
 } from '../../../../common/detection_engine/rule_management/rule_fields';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
+import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
 export const FIND_RULES_INLINE_TOOL_ID = 'security.find_rules';
 
@@ -194,6 +195,11 @@ export function buildToolFilter(params: FilterInput): string | undefined {
 
 // ---- Tool handler ----
 
+interface FindRulesToolDeps {
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
+  logger: Logger;
+}
+
 type RuleFromFind = Awaited<ReturnType<typeof findRules>>['data'][number];
 
 function summarizeRule(rule: RuleFromFind) {
@@ -220,10 +226,10 @@ function buildNoResultsHint(total: number, hasTagFilter: boolean): string {
     : ' Consider broadening the filter or calling `security.discover_rule_tags` to explore available tag values.';
 }
 
-export const findRulesTool = (
-  core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger
-): BuiltinToolDefinition<typeof findRulesSchema> => ({
+export const createFindRulesInlineTool = ({
+  getStartServices,
+  logger,
+}: FindRulesToolDeps): BuiltinSkillBoundedTool<typeof findRulesSchema> => ({
   id: FIND_RULES_INLINE_TOOL_ID,
   type: ToolType.builtin,
   description:
@@ -241,7 +247,7 @@ export const findRulesTool = (
   schema: findRulesSchema,
   handler: async (input, { request }) => {
     try {
-      const [, startPlugins] = await core.getStartServices();
+      const [, startPlugins] = await getStartServices();
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
 
       const kqlFilter = buildToolFilter(input);
@@ -299,5 +305,4 @@ export const findRulesTool = (
       };
     }
   },
-  tags: ['security', 'detection-rules'],
 });
