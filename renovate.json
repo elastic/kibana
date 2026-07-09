@@ -2571,6 +2571,14 @@
       "addLabels": ["Team:EUI"],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "groupName": "jsondiffpatch",
+      "matchDepNames": ["jsondiffpatch"],
+      "reviewers": ["team:kibana-presentation", "team:security-solution"],
+      "matchBaseBranches": ["main"],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
     }
   ],
   "customManagers": [
