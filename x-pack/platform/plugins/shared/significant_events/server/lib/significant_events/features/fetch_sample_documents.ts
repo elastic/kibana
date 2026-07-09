@@ -12,12 +12,48 @@ import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import { getDiverseSampleDocuments, getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { conditionToESQLAst } from '@kbn/streamlang';
+import { withSpan } from '@kbn/apm-utils';
 import { getEntityFilters } from './get_entity_filters';
 import { parseError } from '../../streams/parse_error';
 
 const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits: [] };
 
 type SamplingStrategy = 'entity-filtered' | 'diverse' | 'random';
+
+/**
+ * Compose multiple AbortSignals into one. Native `AbortSignal.any` is available
+ * in Node 20+, but jsdom (used by Kibana's default jest preset, incl. this
+ * plugin's) ships an older `AbortSignal` polyfill without it, so we fall back
+ * manually for test parity.
+ */
+const anySignal = (signals: AbortSignal[]): AbortSignal => {
+  if (typeof AbortSignal.any === 'function') return AbortSignal.any(signals);
+  const controller = new AbortController();
+  for (const s of signals) {
+    if (s.aborted) {
+      controller.abort(s.reason);
+      return controller.signal;
+    }
+    s.addEventListener('abort', () => controller.abort(s.reason), { once: true });
+  }
+  return controller.signal;
+};
+
+/** Same jsdom gap as `anySignal`: `AbortSignal.timeout` is also missing there. */
+const timeoutSignal = (ms: number): AbortSignal => {
+  if (typeof AbortSignal.timeout === 'function') return AbortSignal.timeout(ms);
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(new Error(`Timed out after ${ms}ms`)), ms);
+  return controller.signal;
+};
+
+/**
+ * Each sampling arm gets its own deadline (see `signal` on
+ * `GetSampleDocumentsEsqlParams`), but arms run concurrently via `Promise.all`,
+ * so `samplingTimeoutMs` is not additive across them.
+ */
+const armDeadline = (signal: AbortSignal, samplingTimeoutMs: number): AbortSignal =>
+  anySignal([signal, timeoutSignal(samplingTimeoutMs)]);
 
 export async function fetchSampleDocuments({
   esClient,
@@ -31,6 +67,8 @@ export async function fetchSampleDocuments({
   diverseRatio,
   maxEntityFilters,
   diverseOffset = 0,
+  signal,
+  samplingTimeoutMs,
 }: {
   esClient: ElasticsearchClient;
   index: string;
@@ -43,6 +81,8 @@ export async function fetchSampleDocuments({
   diverseRatio: number;
   diverseOffset?: number;
   maxEntityFilters: number;
+  signal: AbortSignal;
+  samplingTimeoutMs: number;
 }) {
   if (entityFilteredRatio < 0 || diverseRatio < 0) {
     throw new Error(
@@ -62,20 +102,45 @@ export async function fetchSampleDocuments({
 
     const [{ hits: diverseHits }, { hits: randomHits }] = await Promise.all([
       diverseSize > 0
-        ? getDiverseSampleDocuments({
-            esClient,
-            index,
-            start,
-            end,
-            size: diverseSize,
-            offset: diverseOffset,
-            logger,
-          }).catch((err) => {
+        ? withSpan(
+            {
+              name: 'sample_documents_diverse',
+              labels: { stream: index, strategy: 'diverse', sampleSize: String(diverseSize) },
+            },
+            () =>
+              getDiverseSampleDocuments({
+                esClient,
+                index,
+                start,
+                end,
+                size: diverseSize,
+                offset: diverseOffset,
+                logger,
+                signal: armDeadline(signal, samplingTimeoutMs),
+              })
+          ).catch((err) => {
             logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
             return EMPTY_SAMPLE;
           })
         : Promise.resolve(EMPTY_SAMPLE),
-      getSampleDocumentsEsql({ esClient, index, start, end, sampleSize: size }),
+      withSpan(
+        {
+          name: 'sample_documents_random',
+          labels: { stream: index, strategy: 'random', sampleSize: String(size) },
+        },
+        () =>
+          getSampleDocumentsEsql({
+            esClient,
+            index,
+            start,
+            end,
+            sampleSize: size,
+            signal: armDeadline(signal, samplingTimeoutMs),
+          })
+      ).catch((err) => {
+        logger.warn(`Random sampling query failed: ${parseError(err).message}`);
+        return EMPTY_SAMPLE;
+      }),
     ]);
 
     const { documents, bucketCounts } = mergeDocuments(
@@ -108,38 +173,73 @@ export async function fetchSampleDocuments({
 
   const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
     await Promise.all([
-      getSampleDocumentsEsql({
-        esClient,
-        index,
-        start,
-        end,
-        sampleSize: entityFilteredSize,
-        whereCondition,
-        unmappedFields: 'LOAD',
-      }).catch((err) => {
-        logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
-        return EMPTY_SAMPLE;
-      }),
-      diverseSize > 0
-        ? getDiverseSampleDocuments({
+      withSpan(
+        {
+          name: 'sample_documents_entity_filtered',
+          labels: {
+            stream: index,
+            strategy: 'entity-filtered',
+            sampleSize: String(entityFilteredSize),
+          },
+        },
+        () =>
+          getSampleDocumentsEsql({
             esClient,
             index,
             start,
             end,
-            size: diverseSize + entityFilteredSize,
-            offset: diverseOffset,
-            logger,
-          }).catch((err) => {
+            sampleSize: entityFilteredSize,
+            whereCondition,
+            unmappedFields: 'LOAD',
+            signal: armDeadline(signal, samplingTimeoutMs),
+          })
+      ).catch((err) => {
+        logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
+        return EMPTY_SAMPLE;
+      }),
+      diverseSize > 0
+        ? withSpan(
+            {
+              name: 'sample_documents_diverse',
+              labels: {
+                stream: index,
+                strategy: 'diverse',
+                sampleSize: String(diverseSize + entityFilteredSize),
+              },
+            },
+            () =>
+              getDiverseSampleDocuments({
+                esClient,
+                index,
+                start,
+                end,
+                size: diverseSize + entityFilteredSize,
+                offset: diverseOffset,
+                logger,
+                signal: armDeadline(signal, samplingTimeoutMs),
+              })
+          ).catch((err) => {
             logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
             return EMPTY_SAMPLE;
           })
         : Promise.resolve(EMPTY_SAMPLE),
-      getSampleDocumentsEsql({
-        esClient,
-        index,
-        start,
-        end,
-        sampleSize: size,
+      withSpan(
+        {
+          name: 'sample_documents_random',
+          labels: { stream: index, strategy: 'random', sampleSize: String(size) },
+        },
+        () =>
+          getSampleDocumentsEsql({
+            esClient,
+            index,
+            start,
+            end,
+            sampleSize: size,
+            signal: armDeadline(signal, samplingTimeoutMs),
+          })
+      ).catch((err) => {
+        logger.warn(`Random sampling query failed: ${parseError(err).message}`);
+        return EMPTY_SAMPLE;
       }),
     ]);
 

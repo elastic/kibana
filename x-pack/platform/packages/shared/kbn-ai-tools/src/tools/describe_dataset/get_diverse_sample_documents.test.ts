@@ -31,6 +31,8 @@ const logger = {
   debug: jest.fn(),
 } as unknown as Logger;
 
+const signal = new AbortController().signal;
+
 const countResponse = (total: number) => ({
   columns: [{ name: 'total', type: 'long' }],
   values: [[total]],
@@ -118,6 +120,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
+      signal,
       index: ['logs-a', 'logs-b'],
       start: 100,
       end: 200,
@@ -155,6 +158,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
+      signal,
       index: '$.query',
       start: 100,
       end: 200,
@@ -183,6 +187,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
+      signal,
       index: 'logs.otel.android',
       start: 100,
       end: 200,
@@ -209,6 +214,7 @@ describe('getDiverseSampleDocuments', () => {
 
     await getDiverseSampleDocuments({
       esClient,
+      signal,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -226,6 +232,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
+      signal,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -250,6 +257,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
+      signal,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -260,6 +268,7 @@ describe('getDiverseSampleDocuments', () => {
 
     expect(getSampleDocumentsEsqlMock).toHaveBeenCalledWith({
       esClient,
+      signal,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -284,6 +293,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
+      signal,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -314,6 +324,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
+      signal,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -340,6 +351,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
+      signal,
       index: ['logs-a', 'logs-b'],
       start: 100,
       end: 200,

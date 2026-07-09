@@ -10,6 +10,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
 import { buildCountQuery } from '../../utils/build_count_query';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
+import { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '../../utils/default_esql_query_timeout';
 import { getSampleDocumentsEsql } from './get_sample_documents';
 import { mergeSampleDocumentsWithSchema } from './merge_sample_documents_with_schema';
 
@@ -26,14 +27,16 @@ export async function describeDataset({
   index: string | string[];
   kql?: string;
 }) {
+  const signal = AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
   const [columns, sampleDocs, total] = await Promise.all([
-    getEsqlColumnSchema({ esClient, index, start, end }),
+    getEsqlColumnSchema({ esClient, index, start, end, signal }),
     getSampleDocumentsEsql({
       esClient,
       index,
       start,
       end,
       kql,
+      signal,
     }),
     runEsqlPopulationCount({ esClient, index, start, end, kql }),
   ]);

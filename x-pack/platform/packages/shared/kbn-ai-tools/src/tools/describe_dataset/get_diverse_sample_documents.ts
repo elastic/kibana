@@ -39,6 +39,14 @@ interface GetDiverseSampleDocumentsOptions {
   offset: number;
   size?: number;
   logger: Logger;
+  /**
+   * Aborts every underlying `esql.query` call this helper issues (schema
+   * detection, count, categorize, and the representative-document fetch
+   * loop) when triggered. See `signal` on `GetSampleDocumentsEsqlParams` for
+   * why this is required rather than relying on the ES client's configured
+   * `requestTimeout`.
+   */
+  signal: AbortSignal;
 }
 
 export async function getDiverseSampleDocuments({
@@ -49,14 +57,15 @@ export async function getDiverseSampleDocuments({
   size = 100,
   offset,
   logger,
+  signal,
 }: GetDiverseSampleDocumentsOptions): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
   const timeRangeFilter = dateRangeQuery(start, end);
   const filter = { bool: { filter: timeRangeFilter } };
   const indices = Array.isArray(index) ? index : [index];
 
   const [messageField, totalDocs] = await Promise.all([
-    detectMessageField({ esClient, index, start, end }),
-    runEsqlCount({ esClient, indices, filter }),
+    detectMessageField({ esClient, index, start, end, signal }),
+    runEsqlCount({ esClient, indices, filter, signal }),
   ]);
 
   if (totalDocs === 0) {
@@ -73,6 +82,7 @@ export async function getDiverseSampleDocuments({
       start,
       end,
       sampleSize: size,
+      signal,
     });
     return { hits };
   }
@@ -91,7 +101,7 @@ export async function getDiverseSampleDocuments({
   //
   // Ask for size+offset rows so we can client-side slice the window
   // [offset, offset+size] after sorting by count.
-  const categorizeResponse = (await esClient.esql.query({
+  const categorizeQueryParams = {
     query: buildCategorizeWithSampleQuery({
       indices,
       field: messageField,
@@ -100,6 +110,9 @@ export async function getDiverseSampleDocuments({
     }),
     filter,
     drop_null_columns: true,
+  };
+  const categorizeResponse = (await esClient.esql.query(categorizeQueryParams, {
+    signal,
   })) as unknown as ESQLSearchResponse;
 
   const window = parseCategorizeWithSampleRows(categorizeResponse)
@@ -120,6 +133,7 @@ export async function getDiverseSampleDocuments({
     field: messageField,
     sampleValues,
     filter,
+    signal,
   });
 
   // Emit one document per category, preserving the count-descending window order.
@@ -164,18 +178,20 @@ async function fetchRepresentativeDocuments({
   field,
   sampleValues,
   filter,
+  signal,
 }: {
   esClient: ElasticsearchClient;
   indices: string[];
   field: string;
   sampleValues: string[];
   filter: { bool: { filter: ReturnType<typeof dateRangeQuery> } };
+  signal: AbortSignal;
 }): Promise<Map<string, SearchHit<Record<string, unknown>>>> {
   const valueToHit = new Map<string, SearchHit<Record<string, unknown>>>();
   let pending = sampleValues;
 
   while (pending.length > 0) {
-    const fetchResponse = (await esClient.esql.query({
+    const fetchQueryParams = {
       query: buildSourceFetchQuery({
         indices,
         field,
@@ -184,6 +200,9 @@ async function fetchRepresentativeDocuments({
       }),
       filter,
       drop_null_columns: true,
+    };
+    const fetchResponse = (await esClient.esql.query(fetchQueryParams, {
+      signal,
     })) as unknown as ESQLSearchResponse;
 
     const docs = parseEsqlSourceDocuments(fetchResponse);
@@ -258,13 +277,15 @@ async function detectMessageField({
   index,
   start,
   end,
+  signal,
 }: {
   esClient: ElasticsearchClient;
   index: string | string[];
   start: number;
   end: number;
+  signal: AbortSignal;
 }): Promise<string | undefined> {
-  const columns = await getEsqlColumnSchema({ esClient, index, start, end });
+  const columns = await getEsqlColumnSchema({ esClient, index, start, end, signal });
   const textColumnNames = new Set(
     columns.filter((column) => column.type === 'text').map((column) => column.name)
   );
@@ -282,15 +303,20 @@ async function runEsqlCount({
   esClient,
   indices,
   filter,
+  signal,
 }: {
   esClient: ElasticsearchClient;
   indices: string[];
   filter: { bool: { filter: ReturnType<typeof dateRangeQuery> } };
+  signal: AbortSignal;
 }): Promise<number> {
-  const response = (await esClient.esql.query({
+  const countQueryParams = {
     query: esql.from(indices).pipe`STATS total = COUNT(*)`.print('basic'),
     filter,
     drop_null_columns: true,
+  };
+  const response = (await esClient.esql.query(countQueryParams, {
+    signal,
   })) as unknown as ESQLSearchResponse;
   const total = response.values[0]?.[0];
 
