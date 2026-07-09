@@ -19,8 +19,17 @@ async function infraLoader() {
   return m.questions;
 }
 
+async function casesLoader() {
+  const m = await import('./questions/cases');
+  return m.questions;
+}
+
 const feedbackRegistry: FeedbackRegistry = new Map([
   [DEFAULT_REGISTRY_ID, () => import('./questions/default').then((m) => m.questions)],
+  ['cases', casesLoader],
+  ['cases_create', casesLoader],
+  ['cases_configure', casesLoader],
+  ['cases_templates', casesLoader],
   [
     'ml:anomalyExplorer',
     () => import('./questions/machine_learning').then((m) => m.anomalyExplorerQuestions),
