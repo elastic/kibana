@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * as testData from './constants';
-export * from './helpers';
-export * from './open_in_lens_helpers';
+export { DASHBOARD_API_PATH, DASHBOARD_API_VERSION } from '@kbn/scout/constants';
