@@ -7,7 +7,7 @@
 
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 
 export const createMockSmlService = () => ({
   search: jest.fn(),
@@ -23,7 +23,7 @@ export const createMockSmlService = () => ({
 
 const createMockUiSettingsClient = (enabled = true) => ({
   get: jest.fn().mockImplementation(async (key: string) => {
-    if (key === CONTEXT_ENGINE_ENABLED_SETTING_ID) return enabled;
+    if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) return enabled;
     return undefined;
   }),
 });

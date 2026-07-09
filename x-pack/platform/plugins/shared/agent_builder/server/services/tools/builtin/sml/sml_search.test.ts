@@ -10,10 +10,7 @@ import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common/tool
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import type { SmlSearchResult } from '@kbn/agent-builder-sml-plugin/server';
-import {
-  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-  CONTEXT_ENGINE_ENABLED_SETTING_ID,
-} from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { createSmlSearchTool } from './sml_search';
 
 const buildAvailabilityContext = (flags: Record<string, boolean>) =>
@@ -54,12 +51,11 @@ describe('createSmlSearchTool', () => {
   });
 
   describe('availability', () => {
-    it('is available only when both experimental features and the Context Engine are enabled', async () => {
+    it('is available when experimental features are enabled', async () => {
       const tool = createSmlSearchTool({ getAgentBuilderSml });
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
-          [CONTEXT_ENGINE_ENABLED_SETTING_ID]: true,
         })
       );
       expect(result.status).toBe('available');
@@ -70,18 +66,6 @@ describe('createSmlSearchTool', () => {
       const result = await tool.availability!.handler(
         buildAvailabilityContext({
           [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
-          [CONTEXT_ENGINE_ENABLED_SETTING_ID]: true,
-        })
-      );
-      expect(result.status).toBe('unavailable');
-    });
-
-    it('is unavailable when the Context Engine is disabled', async () => {
-      const tool = createSmlSearchTool({ getAgentBuilderSml });
-      const result = await tool.availability!.handler(
-        buildAvailabilityContext({
-          [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
-          [CONTEXT_ENGINE_ENABLED_SETTING_ID]: false,
         })
       );
       expect(result.status).toBe('unavailable');

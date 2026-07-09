@@ -14,7 +14,7 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { Logger } from '@kbn/logging';
-import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlService } from './types';
 
 /**
@@ -85,12 +85,12 @@ export const registerSmlCrawlerTaskDefinition = ({
 
             const soClient = savedObjects.createInternalRepository();
             const uiSettingsClient = uiSettings.asScopedToClient(soClient);
-            const contextEngineEnabled = await uiSettingsClient.get<boolean>(
-              CONTEXT_ENGINE_ENABLED_SETTING_ID
+            const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
+              AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
             );
-            if (!contextEngineEnabled) {
+            if (!experimentalFeaturesEnabled) {
               logger.debug(
-                `SML crawler: Context Engine disabled — skipping crawl for type '${attachmentType}'`
+                `SML crawler: Agent Builder experimental features disabled — skipping crawl for type '${attachmentType}'`
               );
               return { state: {} };
             }
