@@ -588,7 +588,7 @@ export interface SmlService {
    * Fetch SML documents by their chunk IDs, scoped to a space.
    *
    * **Internal use only — does NOT perform permission checks.** The public
-   * `AgentContextLayerPluginStart.getDocuments` wraps this with an access
+   * `AgentBuilderSmlPluginStart.getDocuments` wraps this with an access
    * check and filters out unauthorized IDs before fetching. Direct callers
    * MUST authorize IDs (via `checkItemsAccess`) before invoking this method,
    * or use it only from system contexts where the user's privileges are
