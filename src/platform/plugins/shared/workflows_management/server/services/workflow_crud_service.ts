@@ -1341,8 +1341,6 @@ export class WorkflowCrudService {
    *   that here: re-using the ID of a soft-deleted workflow would (a) silently
    *   resurrect the tombstone or (b) be rejected by `op_type: 'create'`, both
    *   of which are wrong for a "globally unique human-readable ID" contract.
-   * - **`_source: false`**: only `_id` is needed; suppressing the source avoids
-   *   transferring full workflow payloads for potentially 500 candidates.
    */
   private async checkExistingIds(ids: string[]): Promise<Set<string>> {
     if (ids.length === 0) {
@@ -1351,7 +1349,6 @@ export class WorkflowCrudService {
 
     const response = await this.deps.workflowStorage.getClient().search({
       query: { ids: { values: ids } },
-      _source: false,
       size: ids.length,
       track_total_hits: false,
     });

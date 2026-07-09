@@ -796,14 +796,6 @@ describe('WorkflowCrudService', () => {
       expect(searchArgs.query).toEqual({ ids: { values: ['tombstoned-id', 'new-id'] } });
     });
 
-    it('suppresses _source in the search so full workflow payloads are not transferred', async () => {
-      const { deps, client } = makeDeps();
-      client.search.mockResolvedValueOnce({ hits: { hits: [] } });
-      const service = new WorkflowCrudService(deps);
-      await service.findExistingWorkflowIds(['x']);
-      const searchArgs = client.search.mock.calls[0][0];
-      expect(searchArgs._source).toBe(false);
-    });
   });
 
   describe('bulkCreateWorkflows', () => {
