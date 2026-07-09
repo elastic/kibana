@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
 import { runManualOrchestration } from '.';
@@ -592,6 +592,56 @@ describe('runManualOrchestration', () => {
     });
   });
 
+  describe('step failure telemetry', () => {
+    const createAnalytics = (): AnalyticsServiceSetup =>
+      ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup);
+
+    it('reports the resolved default validation workflow id when validation_workflow_id is the empty-string sentinel', async () => {
+      const analytics = createAnalytics();
+      mockRunValidationStep.mockRejectedValue(new Error('validation boom'));
+
+      await expect(
+        runManualOrchestration({
+          ...baseParams,
+          analytics,
+          workflowConfig: { ...baseParams.workflowConfig, validation_workflow_id: '' },
+        })
+      ).rejects.toThrow('validation boom');
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        'attack_discovery_step_failure',
+        expect.objectContaining({
+          step: 'validation',
+          workflow_id: 'validate',
+        })
+      );
+    });
+
+    it('reports the custom validation workflow id when one is configured', async () => {
+      const analytics = createAnalytics();
+      mockRunValidationStep.mockRejectedValue(new Error('validation boom'));
+
+      await expect(
+        runManualOrchestration({
+          ...baseParams,
+          analytics,
+          workflowConfig: {
+            ...baseParams.workflowConfig,
+            validation_workflow_id: 'custom-validate',
+          },
+        })
+      ).rejects.toThrow('validation boom');
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        'attack_discovery_step_failure',
+        expect.objectContaining({
+          step: 'validation',
+          workflow_id: 'custom-validate',
+        })
+      );
+    });
+  });
+
   describe('pipeline timeout', () => {
     beforeEach(() => {
       jest.useFakeTimers();
@@ -710,6 +760,53 @@ describe('runManualOrchestration', () => {
       await expect(
         runManualOrchestration({ ...baseParams, pipelineTimeoutMs: 10 * 60 * 1000 })
       ).rejects.toThrow(/pipeline.*budget.*exceeded/i);
+    });
+
+    it('reports a sane telemetry duration when the budget is exceeded before the generation step', async () => {
+      const analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup;
+
+      mockRunRetrievalStep.mockImplementation(async () => {
+        jest.advanceTimersByTime(11 * 60 * 1000);
+        return mockAlertRetrievalResult;
+      });
+
+      await expect(
+        runManualOrchestration({ ...baseParams, analytics, pipelineTimeoutMs: 10 * 60 * 1000 })
+      ).rejects.toThrow(PipelineStepError);
+
+      const failureCall = (analytics.reportEvent as jest.Mock).mock.calls.find(
+        ([eventType]: [string]) => eventType === 'attack_discovery_step_failure'
+      );
+
+      // Regression guard: before the fix, `generationStart` was still 0 when the
+      // budget check threw, so the reported duration was ~1.7e12ms (Date.now()).
+      expect(failureCall?.[1].duration_ms).toBeLessThanOrEqual(11 * 60 * 1000);
+    });
+
+    it('reports a sane telemetry duration when the budget is exceeded before the validation step', async () => {
+      const analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup;
+
+      mockRunRetrievalStep.mockImplementation(async () => {
+        jest.advanceTimersByTime(3 * 60 * 1000);
+        return mockAlertRetrievalResult;
+      });
+
+      mockRunGenerationStep.mockImplementation(async () => {
+        jest.advanceTimersByTime(8 * 60 * 1000);
+        return mockGenerationResult;
+      });
+
+      await expect(
+        runManualOrchestration({ ...baseParams, analytics, pipelineTimeoutMs: 10 * 60 * 1000 })
+      ).rejects.toThrow(PipelineStepError);
+
+      const failureCall = (analytics.reportEvent as jest.Mock).mock.calls.find(
+        ([eventType]: [string]) => eventType === 'attack_discovery_step_failure'
+      );
+
+      // Regression guard: before the fix, `validationStart` was still 0 when the
+      // budget check threw, so the reported duration was ~1.7e12ms (Date.now()).
+      expect(failureCall?.[1].duration_ms).toBeLessThanOrEqual(11 * 60 * 1000);
     });
 
     it('succeeds when all steps complete within the pipeline budget', async () => {
