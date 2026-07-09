@@ -28,8 +28,8 @@ describe('config validation', () => {
             "enabled": false,
           },
           "casesRedesign": Object {
-            "details": true,
-            "list": true,
+            "details": false,
+            "list": false,
             "settings": false,
           },
           "chat": Object {
@@ -140,7 +140,7 @@ describe('config validation', () => {
             "enabled": true,
           },
           "templates": Object {
-            "enabled": true,
+            "enabled": false,
           },
         }
       `);
