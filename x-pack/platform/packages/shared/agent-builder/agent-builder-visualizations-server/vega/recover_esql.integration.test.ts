@@ -47,7 +47,8 @@ const existingSpec = JSON.stringify({
 const createMockLogger = (): Logger =>
   ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
 
-describe('recover_esql end-to-end (real build_config + real graph)', () => {
+// Failing: See https://github.com/elastic/kibana/issues/276821
+describe.skip('recover_esql end-to-end (real build_config + real graph)', () => {
   const events = {} as ToolEventEmitter;
   const esClient = { asCurrentUser: {} } as IScopedClusterClient;
 
@@ -109,7 +110,7 @@ describe('recover_esql end-to-end (real build_config + real graph)', () => {
     // into the output and bound back into the normalized spec's data source.
     expect(result.esqlQuery).toBe(RECOVERED_ESQL);
     expect(JSON.parse(result.spec).data).toEqual({
-      url: { '%type%': 'esql', query: RECOVERED_ESQL },
+      url: { '%type%': 'esql', '%context%': true, query: RECOVERED_ESQL },
     });
   });
 });

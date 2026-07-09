@@ -62,7 +62,8 @@ export class UiamOAuth implements UiamOAuthType {
 
   async listClients(
     request: KibanaRequest,
-    clientId?: string
+    clientId?: string,
+    projectId?: string
   ): Promise<{ clients: UiamOAuthClientResponse[] } | null> {
     if (!this.license.isEnabled()) {
       return null;
@@ -72,7 +73,7 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug('Attempting to list OAuth clients');
 
     try {
-      const result = await this.uiam.listOAuthClients(accessToken, clientId);
+      const result = await this.uiam.listOAuthClients(accessToken, clientId, projectId);
       this.logger.debug('OAuth clients listed successfully');
       return result;
     } catch (e) {

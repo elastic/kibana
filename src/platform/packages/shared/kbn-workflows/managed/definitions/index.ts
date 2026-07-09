@@ -9,6 +9,15 @@
 
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from './alert_analysis';
 import {
+  ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW,
+  ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW,
+  ATTACK_DISCOVERY_GENERATION_WORKFLOW,
+  ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW,
+  ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW,
+  ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW,
+  ATTACK_DISCOVERY_VALIDATE_WORKFLOW,
+} from './discoveries';
+import {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW,
   SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW,
@@ -31,6 +40,15 @@ import {
 } from './significant_events/memory';
 import { EXAMPLE_MANAGED_WORKFLOW } from './workflows_extensions_example';
 
+export {
+  ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
+  ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
+  ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+  ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
+  ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
+  ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
+  ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+} from './discoveries';
 export { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows_extensions_example';
 export {
   SECURITY_ALERT_ANALYSIS_WORKFLOW,
@@ -58,7 +76,23 @@ export {
 } from './significant_events';
 export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './significant_events/investigation';
 
+// Registering the AD workflow definitions in the managed-workflows registry is
+// FF-off safe: membership only makes a definition *discoverable by id* (which the
+// discoveries plugin's integrity check exercises in tests). Registry membership
+// installs nothing on its own — installation into Elasticsearch is a separate,
+// explicit step performed by the owner (the discoveries plugin), and that plugin
+// gates the install on the `securitySolution.attackDiscoveryWorkflowsEnabled`
+// feature flag (read at start; see the discoveries plugin's `start()`). So with
+// the FF off these definitions are inert, discoverable data — never installed or
+// executed.
 export const managedWorkflowDefinitions = [
+  ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW,
+  ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW,
+  ATTACK_DISCOVERY_GENERATION_WORKFLOW,
+  ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW,
+  ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW,
+  ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW,
+  ATTACK_DISCOVERY_VALIDATE_WORKFLOW,
   EXAMPLE_MANAGED_WORKFLOW,
   SECURITY_ALERT_ANALYSIS_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,

@@ -87,13 +87,13 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(setTagsStep).toBeDefined();
     // The short tag names: `.classification.` and `.confidence.`, not the old longer
     // `.output.classification.` / `.output.confidence_score.` segments. (The trailing
-    // `steps.onechat_runAgent_step.output.structured_output.*` is the agent step's output value that
+    // `steps.runAgent_step.output.structured_output.*` is the agent step's output value that
     // fills the tag, not part of the tag name.)
     expect(setTagsStep.with.tags_to_add).toEqual([
       '{{ variables.tag_prefix }}',
       '{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}',
-      '{{ variables.tag_prefix }}.classification.{{ steps.onechat_runAgent_step.output.structured_output.classification | downcase }}',
-      '{{ variables.tag_prefix }}.confidence.{{ steps.onechat_runAgent_step.output.structured_output.confidence_score }}',
+      '{{ variables.tag_prefix }}.classification.{{ steps.runAgent_step.output.structured_output.classification | downcase }}',
+      '{{ variables.tag_prefix }}.confidence.{{ steps.runAgent_step.output.structured_output.confidence_score }}',
     ]);
     // The auto-close suffix is short too.
     expect(workflow.consts.closed_tag_suffix).toBe('closed');
@@ -120,7 +120,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   });
 
   it('passes the runtime connector id and create-conversation flag to the AI agent step', () => {
-    const agentStep = findStepByName(workflow.steps, 'onechat_runAgent_step') as {
+    const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
       'connector-id': string;
       'create-conversation': string;
     };
@@ -162,6 +162,27 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(agentStep.with.attachments[0].data.alert).toBe('{{ variables.minimal_alert | json:2 }}');
   });
 
+  it('adds token usage metadata to the verdict note', () => {
+    const verdictNoteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+    const note = verdictNoteStep.with.body.note.note;
+
+    expect(note).toContain('steps.runAgent_step.output.metadata.usage.inputTokens');
+    expect(note).toContain('steps.runAgent_step.output.metadata.usage.outputTokens');
+    expect(note).toContain('steps.runAgent_step.output.metadata.usage.totalTokens');
+  });
+
+  it('formats the verdict note timestamp with a human-readable date filter', () => {
+    const verdictNoteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+
+    expect(verdictNoteStep.with.body.note.note).toContain(
+      "{{ execution.startedAt | date: '%B %d, %Y at %H:%M:%S UTC' }}"
+    );
+  });
+
   it('gates auto-close on the runtime thresholds using a 0-1 confidence scale', () => {
     const autoCloseStep = findStepByName(workflow.steps, 'check_auto_close_conditions') as {
       condition: string;
@@ -177,7 +198,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       'variables.auto_close_confidence_score_max_threshold'
     );
 
-    const agentStep = findStepByName(workflow.steps, 'onechat_runAgent_step') as {
+    const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
       with: { schema: { properties: { confidence_score: { minimum: number; maximum: number } } } };
     };
     // The LLM schema maximum must stay on the same 0-1 scale as the thresholds, or `score <= 1.0`

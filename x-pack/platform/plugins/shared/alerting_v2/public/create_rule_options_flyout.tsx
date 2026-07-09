@@ -303,7 +303,7 @@ const CreateRuleOptionsFlyoutInner = ({
       onCreateWithAgent={navigateToAgentBuilder}
       createWithAgentDisabled={createWithAgentDisabled}
       createWithAgentTooltipText={createWithAgentTooltipText}
-      onCreateThresholdAlert={() => setStep({ type: 'threshold' })}
+      onCreateThresholdRule={() => setStep({ type: 'threshold' })}
       legacyRuleTypes={legacyPanelItems}
     />
   );

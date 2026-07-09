@@ -20,10 +20,13 @@ import * as timelineActions from '../../../../store/actions';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 
 jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
   useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
 }));
+jest.mock('../../../../../flyout_v2/use_flyout_api');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn(() => ({
@@ -42,9 +45,6 @@ const mockUiSettingsGet = jest.fn().mockReturnValue(false);
 const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
   <div>{'MockDocumentFlyoutWrapper'}</div>
 ));
-const mockAttackFlyoutWrapper = jest.fn((_props?: unknown) => (
-  <div>{'MockAttackFlyoutWrapper'}</div>
-));
 
 const updateSampleSizeSpy = jest.spyOn(timelineActions, 'updateSampleSize');
 
@@ -54,9 +54,6 @@ jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
 }));
 jest.mock('../../../../../flyout_v2/document/main/document_flyout_wrapper', () => ({
   DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
-}));
-jest.mock('../../../../../flyout_v2/attack/main/attack_flyout_wrapper', () => ({
-  AttackFlyoutWrapper: (props: unknown) => mockAttackFlyoutWrapper(props),
 }));
 jest.mock('../../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../../common/lib/kibana');
@@ -153,6 +150,8 @@ const getTimelineFromStore = (
 };
 
 describe('unified data table', () => {
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
+
   beforeEach(() => {
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
       openFlyout: openFlyoutMock,
@@ -160,6 +159,8 @@ describe('unified data table', () => {
     });
     mockUiSettingsGet.mockReturnValue(false);
     jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
   });
   afterEach(() => {
     updateSampleSizeSpy.mockClear();
@@ -221,7 +222,7 @@ describe('unified data table', () => {
   );
 
   it(
-    'opens AttackFlyoutWrapper via system flyout when enableNewFlyout setting is enabled and row is an attack discovery alert',
+    'opens the new attack flyout when enableNewFlyout setting is enabled and row is an attack discovery alert',
     async () => {
       jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
@@ -231,13 +232,16 @@ describe('unified data table', () => {
       fireEvent.click(screen.getByTestId('docTableExpandToggleColumn'));
 
       await waitFor(() => {
-        expect(mockOpenSystemFlyout).toHaveBeenCalled();
+        expect(flyoutApi.openAttackFlyout).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attackId: 'attack-1',
+            indexName: 'attack-index',
+          })
+        );
       });
 
-      const flyoutElement = mockOpenSystemFlyout.mock.calls[0][0];
-      expect(flyoutElement.props.attackId).toBe('attack-1');
-      expect(flyoutElement.props.indexName).toBe('attack-index');
-      expect(flyoutElement.props.onAttackUpdated).toBe(refetchMock);
+      // attack rows no longer go through the inline system flyout or the document flyout api
+      expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
       expect(mockDocumentFlyoutWrapper).not.toHaveBeenCalled();
     },
     SPECIAL_TEST_TIMEOUT
