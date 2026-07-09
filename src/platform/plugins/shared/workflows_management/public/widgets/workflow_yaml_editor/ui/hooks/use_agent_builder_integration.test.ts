@@ -624,20 +624,18 @@ describe('useAgentBuilderIntegration', () => {
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
 
-      const { rerender } = renderHook(
-        (props: {
-          editorRef: React.MutableRefObject<any>;
-          isEditorMounted: boolean;
-          workflowId?: string;
-        }) => useAgentBuilderIntegration(props),
-        {
-          initialProps: {
-            editorRef: { current: editor },
-            isEditorMounted: true,
-            workflowId: undefined,
-          },
-        }
-      );
+      interface Props {
+        editorRef: React.MutableRefObject<any>;
+        isEditorMounted: boolean;
+        workflowId?: string;
+      }
+      const { rerender } = renderHook((props: Props) => useAgentBuilderIntegration(props), {
+        initialProps: {
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: undefined,
+        } as Props,
+      });
 
       // Flip from create (no id) to saved detail (real id). The main effect
       // cleanup+rerun fires; the sidebar close must NOT.

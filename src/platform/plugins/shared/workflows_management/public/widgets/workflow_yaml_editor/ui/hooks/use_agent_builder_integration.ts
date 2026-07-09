@@ -19,8 +19,8 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { setAiAssisted } from '../../../../entities/workflows/store/workflow_detail/slice';
 import {
   AttachmentBridge,
-  ProposalManager,
   consumeSidebarRestoreFor,
+  ProposalManager,
   setActiveProposalManager,
   setLastCreateAttachmentId,
   setSidebarOpen,
