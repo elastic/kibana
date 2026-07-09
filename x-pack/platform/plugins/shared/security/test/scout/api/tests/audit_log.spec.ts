@@ -51,7 +51,27 @@ const waitForAuditEvent = async (
   );
 };
 
+const TEST_DASHBOARD_ID = 'audit-log-otel-test-dashboard';
+
 apiTest.describe('Audit log — OTel field shape', { tag: tags.serverless.security.complete }, () => {
+  // Seeded so `saved_object_find` below has a hit to find — Kibana only emits a
+  // saved_object_find audit event per matched object, not per requested type, so
+  // a query that legitimately returns zero results never produces an audit event.
+  apiTest.beforeAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects.create({
+      type: 'dashboard',
+      id: TEST_DASHBOARD_ID,
+      overwrite: true,
+      attributes: {
+        title: 'Audit log OTel test dashboard',
+      },
+    });
+  });
+
+  apiTest.afterAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects.delete({ type: 'dashboard', id: TEST_DASHBOARD_ID });
+  });
+
   apiTest(
     'user_login success: renamed OTel fields, event.type default applied',
     async ({ apiClient, esClient, config }) => {
@@ -195,6 +215,7 @@ apiTest.describe('Audit log — OTel field shape', { tag: tags.serverless.securi
           must: [
             { term: { 'event.action': 'saved_object_find' } },
             { term: { 'kibana.saved_object.type': 'dashboard' } },
+            { term: { 'kibana.saved_object.id': TEST_DASHBOARD_ID } },
             recentTimestamp,
           ],
         },
