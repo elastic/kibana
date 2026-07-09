@@ -197,7 +197,7 @@ const getRecentlyClosedGroupTabTitles = async (page: ScoutPage, groupIndex: numb
 
 spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
-    await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
+    await discoverScoutSpace.setupDiscoverDefaults();
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
