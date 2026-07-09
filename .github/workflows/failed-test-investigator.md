@@ -200,7 +200,7 @@ This issue may have been investigated before (for example, it was reopened after
 
 Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 seconds on it: the visible header must carry the verdict on its own, and the collapsed details must be skimmable, not exhaustive.
 
-**Write tight.** Use bullet points, not paragraphs. Concretely:
+**Write tight.** Use bullet points, not paragraphs; every sentence must be earned. Concretely:
 
 - State the **single** dominant cause. Do not enumerate every call, file, wait, or step you inspected — that reasoning is what got you to the answer, not the answer.
 - Cite evidence with an inline link to the code line, log, or screenshot instead of reproducing it. Never paste large blocks of existing code — link to the line range.
@@ -279,7 +279,7 @@ State only *what to change* — the "why" belongs in Root cause & evidence, so d
 - **Multiple files:** a table of `file:line` → change, one row each. No rationale column.
 - **No concrete fix:** in one or two sentences, name the evidence that would unblock one.
 
-Recommend a single fix. Add an alternative only if it is genuinely likely to be preferred, in one sentence.
+Multiple fix ideas are fine — list them briefly and flag the one you'd recommend.
 
 #### Root cause & evidence (required)
 
