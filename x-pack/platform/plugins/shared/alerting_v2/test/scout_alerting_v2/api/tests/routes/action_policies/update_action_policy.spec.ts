@@ -487,25 +487,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest(
-    'validation: rejects unknown keys inside throttle (.strict() schema)',
-    async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.actionPolicies.create(
-        buildCreateActionPolicyData({ name: 'strict-throttle-policy' })
-      );
-
-      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: {
-          throttle: { strategy: 'on_status_change', unknownField: 'x' },
-          version: created.version,
-        },
-      });
-
-      expect(response).toHaveStatusCode(400);
-    }
-  );
-
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.patch(getActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },

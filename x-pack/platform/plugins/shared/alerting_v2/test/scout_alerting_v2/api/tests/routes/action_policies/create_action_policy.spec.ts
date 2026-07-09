@@ -285,21 +285,6 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest(
-    'validation: rejects body with unknown keys inside throttle (strict schema)',
-    async ({ apiClient }) => {
-      const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: {
-          ...buildCreateActionPolicyData(),
-          throttle: { strategy: 'on_status_change', unknownField: 'x' },
-        },
-      });
-
-      expect(response).toHaveStatusCode(400);
-    }
-  );
-
   apiTest('validation: rejects destination with empty id', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },

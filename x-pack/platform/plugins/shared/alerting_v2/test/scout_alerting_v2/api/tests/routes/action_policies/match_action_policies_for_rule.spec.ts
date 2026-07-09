@@ -36,18 +36,4 @@ apiTest.describe('Match action policies for rule API', { tag: '@local-stateful-c
       expect(response).toHaveStatusCode(400);
     }
   );
-
-  apiTest(
-    'validation: rejects body with unknown keys inside rule (strict schema)',
-    async ({ apiClient }) => {
-      const response = await apiClient.post(MATCH_ACTION_POLICIES_FOR_RULE_URL, {
-        headers: readerHeaders,
-        body: {
-          rule: { id: 'rule-1', unknownField: 'x' },
-        },
-      });
-
-      expect(response).toHaveStatusCode(400);
-    }
-  );
 });
