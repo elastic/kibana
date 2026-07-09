@@ -158,19 +158,39 @@ export const TemplateFieldRenderer: FC<TemplateFieldRendererProps> = ({
   const resolvedOwner = owner ?? contextOwner[0];
   const { resolvedFields, isLoading } = useResolvedFields(parsedTemplate.fields, resolvedOwner);
 
-  // Content-based key to detect real field definition changes (vs same-content re-parses).
-  const fieldsKey = useMemo(
+  // Full-content signature — changes whenever the resolved fields actually change, INCLUDING a
+  // default value. Drives the stable-reference update below so external default edits (typed in the
+  // YAML editor) flow into the live inner form via useYamlFormSync.
+  const contentKey = useMemo(
     () => resolvedFields.map((f) => JSON.stringify(f)).join('|'),
     [resolvedFields]
   );
 
-  // Stabilize the resolvedFields reference — only update when content actually changes.
-  // This prevents useYamlFormSync effects from re-running when identical YAML is re-parsed
-  // into a new object reference (e.g. on every keystroke in the YAML editor).
+  // Structural signature — deliberately EXCLUDES metadata.default (the two-way-bound value the user
+  // edits in the preview). Only this gates the remount `key` below: keying on the default would
+  // remount the inner form on every keystroke / date click once the debounced YAML round-trip lands,
+  // stealing input focus and closing the date-picker popover. Structural changes (fields
+  // added/removed/renamed, control/type/options/validation/display) still change it and correctly
+  // rebuild the form. useYamlFormSync already syncs default changes into the mounted form.
+  const structuralKey = useMemo(
+    () =>
+      resolvedFields
+        .map((field) => {
+          const metadataWithoutDefault: Record<string, unknown> = { ...(field.metadata ?? {}) };
+          delete metadataWithoutDefault.default;
+          return JSON.stringify({ ...field, metadata: metadataWithoutDefault });
+        })
+        .join('|'),
+    [resolvedFields]
+  );
+
+  // Stabilize the resolvedFields reference — only update when content actually changes (contentKey),
+  // not on every identical re-parse. This keeps useYamlFormSync effects from re-running needlessly
+  // while still handing the inner form fresh defaults when they genuinely change.
   const stableResolvedFieldsRef = useRef(resolvedFields);
-  const prevFieldsKeyRef = useRef(fieldsKey);
-  if (prevFieldsKeyRef.current !== fieldsKey) {
-    prevFieldsKeyRef.current = fieldsKey;
+  const prevContentKeyRef = useRef(contentKey);
+  if (prevContentKeyRef.current !== contentKey) {
+    prevContentKeyRef.current = contentKey;
     stableResolvedFieldsRef.current = resolvedFields;
   }
 
@@ -178,7 +198,7 @@ export const TemplateFieldRenderer: FC<TemplateFieldRendererProps> = ({
 
   return (
     <TemplateFieldRendererInner
-      key={fieldsKey}
+      key={structuralKey}
       resolvedFields={stableResolvedFieldsRef.current}
       onFieldDefaultChange={onFieldDefaultChange}
     />

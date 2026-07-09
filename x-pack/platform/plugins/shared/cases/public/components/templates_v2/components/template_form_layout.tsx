@@ -610,7 +610,6 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             metadataErrors={metadataErrors}
             onMetadataChange={handleMetadataChange}
             formResetKey={formResetKey}
-            isYamlDefinitionValid={isYamlDefinitionValid}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

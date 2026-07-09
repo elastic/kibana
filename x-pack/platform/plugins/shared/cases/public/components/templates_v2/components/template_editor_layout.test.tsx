@@ -59,7 +59,6 @@ describe('TemplateEditorLayout', () => {
     metadata: { name: 'Template', description: '', tags: [] },
     metadataErrors: {},
     onMetadataChange: jest.fn(),
-    isYamlDefinitionValid: true,
   };
 
   beforeEach(() => {
@@ -119,13 +118,12 @@ describe('TemplateEditorLayout', () => {
     expect(screen.getByText(SAVED_TEXT)).toBeInTheDocument();
   });
 
-  it('shows the invalid-YAML prompt on the Fields tab when the definition is invalid', () => {
-    renderWithTestingProviders(
-      <TemplateEditorLayout {...defaultProps} isYamlDefinitionValid={false} />
-    );
+  it('keeps the preview mounted on the Fields tab (it renders its own empty/invalid states)', () => {
+    // Regression guard: the preview must never be conditionally unmounted based on YAML validity —
+    // remounting on recovery leaves it stale until a tab switch (see TemplatePreview's own states).
+    renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} yamlValue="name: [" />);
 
-    expect(screen.getByTestId('templateRenderPanelInvalidYaml')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockTemplatePreview')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockTemplatePreview')).toBeInTheDocument();
   });
 
   it('shows a required-name indicator on the Configuration tab when the name is invalid', () => {

@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import {
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiLoadingSpinner,
   EuiNotificationBadge,
@@ -53,7 +52,6 @@ interface TemplateEditorLayoutProps {
   metadataErrors: TemplateMetadataErrors;
   onMetadataChange: (metadata: TemplateMetadata) => void;
   formResetKey?: number;
-  isYamlDefinitionValid: boolean;
 }
 
 type ActiveTab = 'fields' | 'configuration';
@@ -64,6 +62,10 @@ type ActiveTab = 'fields' | 'configuration';
  * not bound to. Configuration (identity + settings + connector) is panel-owned. A required-name
  * indicator on the Configuration tab surfaces when the template name is missing/invalid, so
  * defaulting to the Fields tab never hides that required step.
+ *
+ * The preview is always mounted; it renders its own empty/invalid states from the definition
+ * internally. It must NOT be unmounted while the YAML is invalid — remounting on recovery would
+ * reset its watch subscription and leave it stale until a tab switch.
  */
 export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   isLoading,
@@ -84,7 +86,6 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   metadataErrors,
   onMetadataChange,
   formResetKey,
-  isYamlDefinitionValid,
 }) => {
   const styles = useMemoCss(componentStyles);
   const [activeTab, setActiveTab] = useState<ActiveTab>('fields');
@@ -137,24 +138,12 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
 
   const fieldsPreview = (
     <div css={styles.previewPanel} data-test-subj="templatePreviewPanel">
-      {isYamlDefinitionValid ? (
-        <TemplatePreview
-          settings={settings}
-          connector={connector}
-          onFieldDefaultChange={onFieldDefaultChange}
-          onCaseDefaultChange={onCaseDefaultChange}
-        />
-      ) : (
-        <EuiEmptyPrompt
-          data-test-subj="templateRenderPanelInvalidYaml"
-          iconType="warning"
-          color="warning"
-          paddingSize="m"
-          titleSize="xs"
-          title={<h3>{i18n.PREVIEW_UNAVAILABLE_TITLE}</h3>}
-          body={<p>{i18n.PREVIEW_UNAVAILABLE_BODY}</p>}
-        />
-      )}
+      <TemplatePreview
+        settings={settings}
+        connector={connector}
+        onFieldDefaultChange={onFieldDefaultChange}
+        onCaseDefaultChange={onCaseDefaultChange}
+      />
     </div>
   );
 
