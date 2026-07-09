@@ -85,6 +85,7 @@ import {
   registerAttachmentUiDefinitions,
   registerEntityAnalyticsDashboardAttachment,
   registerEntityAttachment,
+  registerEntityGraphAttachment,
   registerRuleAttachment,
   registerRulePreviewAttachment,
 } from './agent_builder/attachment_types';
@@ -341,6 +342,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerEntityAnalyticsDashboardAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
+        searchSession: plugins.data.search.session,
+      });
+      registerEntityGraphAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        http: core.http,
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
         searchSession: plugins.data.search.session,

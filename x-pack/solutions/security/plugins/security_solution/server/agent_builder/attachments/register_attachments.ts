@@ -14,6 +14,7 @@ import { createAlertAttachmentType } from './alert';
 import { createBulkAlertsAttachmentType } from './alerts';
 import { createEntityAttachmentType } from './entity';
 import { createEntityAnalyticsDashboardAttachmentType } from './entity_analytics_dashboard';
+import { createEntityGraphAttachmentType } from './entity_graph';
 import { createSiemReadinessAttachmentType } from './siem_readiness';
 import { createRulePreviewAttachmentType, getRulePreviewAlertCount } from './rule_preview';
 
@@ -34,6 +35,7 @@ export const registerAttachments = async (
   agentBuilder.attachments.registerType(createBulkAlertsAttachmentType(core, logger));
   agentBuilder.attachments.registerType(createEntityAttachmentType());
   agentBuilder.attachments.registerType(createEntityAnalyticsDashboardAttachmentType());
+  agentBuilder.attachments.registerType(createEntityGraphAttachmentType());
   agentBuilder.attachments.registerType(createRuleAttachmentType(core, logger));
   agentBuilder.attachments.registerType(createSiemReadinessAttachmentType());
 
