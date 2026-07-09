@@ -159,8 +159,8 @@ const HAS_NON_CRLF_LINE_ENDING = /(^|[^\r])\n|\r(?!\n)/;
  * EOL, then records `rangeOffset` / `rangeLength` from that same buffer:
  * https://github.com/microsoft/vscode/blob/e7e037083ff4455cf320e344325dacb480062c3c/src/vs/editor/common/model/pieceTreeTextBuffer/pieceTreeTextBuffer.ts#L276-L290
  *
- * Without this, CRLF shadow values and LF-based Monaco offsets drift by one extra `\r`
- * per preceding line break, replacing the wrong character.
+ * Without this, an LF shadow is one `\r` shorter per preceding line break than a CRLF
+ * Monaco model, so model offsets replace the wrong character.
  */
 const normalizeEndOfLine = (value: string, eol: string): string => {
   if (eol === '\n' && !value.includes('\r')) {
