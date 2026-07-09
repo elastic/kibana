@@ -103,8 +103,11 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const { width } = useResizeObserver(container);
 
-  const columns = getInfoBlocksColumnCount(width, items.length);
-  const layout = getInfoBlocksLayout(items, columns);
+  // Empty spacers only exist to shape the full layout; the compressed layout
+  // drops them so it stays dense.
+  const visibleItems = compressed ? items.filter((item) => !isEmptyInfoBlock(item)) : items;
+  const columns = getInfoBlocksColumnCount(width, visibleItems.length);
+  const layout = getInfoBlocksLayout(visibleItems, columns);
   const cellPadding = compressed ? euiTheme.size.s : euiTheme.size.m;
   const dividerColor = euiTheme.border.color;
   const dividerThickness = euiTheme.border.width.thin;
@@ -124,7 +127,7 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
         grid-template-columns: repeat(${columns}, minmax(0, 1fr));
       `}
     >
-      {items.map((item, index) => {
+      {visibleItems.map((item, index) => {
         // Placement + divider hints come from the single layout pass so they
         // stay correct across empty spacers and the live column count.
         const cell = layout[index];

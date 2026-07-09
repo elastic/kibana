@@ -29,7 +29,9 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   // "Big number" values map their font size to the matching euiTheme.size token.
-  const bigNumberFontSize = valueSize ? euiTheme.size[valueSize] : undefined;
+  // In the compressed layout the big number is suppressed so the value matches
+  // the surrounding text.
+  const bigNumberFontSize = valueSize && !compressed ? euiTheme.size[valueSize] : undefined;
   // Plain text values (and titles) truncate to a single line via
   // EuiTextTruncate so a long string never overflows its column. Node values
   // (badges, links, images) manage their own layout and render as-is.
@@ -45,7 +47,7 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
         <EuiTextTruncate text={title} />
       </EuiText>
       <EuiText
-        size={compressed ? 'xs' : 's'}
+        size="s"
         css={css`
           font-weight: ${euiTheme.font.weight.bold};
           ${bigNumberFontSize
