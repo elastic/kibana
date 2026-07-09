@@ -1,0 +1,40 @@
+project: 'Content List'
+
+registry: internal
+
+storybook:
+  # Registry of embeddable Storybook stories that resolves `:::{storybook}` directives
+  # (`:id: kibana:content_management:<story>`). The committed default is the registry
+  # published from `main` by the storybook-docs CI step. Local serve and per-PR previews
+  # override it via the allow-listed `KIBANA_STORYBOOK_REGISTRY` env var without editing
+  # this file (docs-builder env interpolation, elastic/docs-builder#3486).
+  registry: ${KIBANA_STORYBOOK_REGISTRY:-https://ci-artifacts.kibana.dev/storybooks/main/storybook-docs/docs_registry.json}
+
+# Rooted at `content-management/` so it sits above the `content_management` Storybook alias
+# config (`kbn-content-management-storybook`); the storybook-docs dev server walks up from
+# that config to auto-detect this docset. The site content lives under
+# `content_list/kbn-content-list-docs/`; everything else in the tree (package READMEs, the
+# playground scratch area, non-doc guides, build output) is excluded.
+exclude:
+  - '**/README.md'
+  - '**/README.mdx'
+  - '**/target/**'
+  - 'content_list/kbn-content-list-docs/src/playground/**'
+  - 'content_list/kbn-content-list-assembly/GETTING_STARTED.md'
+  - 'content_list/kbn-content-list-assembly/RECIPES.md'
+
+toc:
+  - file: index.md
+  - file: content_list/kbn-content-list-docs/src/docs/start_here.md
+  - folder: content_list/kbn-content-list-docs/src/docs/content_list
+    file: index.md
+    children:
+      - file: getting_started.md
+      - file: recipes.md
+      - file: design_guidelines.md
+  - folder: content_list/kbn-content-list-docs/src/docs/assembly
+    file: index.md
+    children:
+      - file: getting_started.md
+      - file: recipes.md
+      - file: design_guidelines.md
