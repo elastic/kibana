@@ -82,6 +82,7 @@ dependsOn:
   - '@kbn/console-plugin'
   - '@kbn/scout'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/actions-utils'
 tags:
   - plugin
   - prod
