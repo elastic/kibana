@@ -68,7 +68,7 @@ async function* yieldPages(...pages: SmlListItem[][]): AsyncIterable<SmlListItem
 const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTypeDefinition => ({
   id: 'test-type',
   list: jest.fn().mockReturnValue(yieldPages()),
-  getSmlData: jest.fn().mockResolvedValue({ chunks: [] }),
+  getSmlEntry: jest.fn().mockResolvedValue(undefined),
   toAttachment: jest.fn().mockResolvedValue(undefined),
   ...overrides,
 });
@@ -76,7 +76,7 @@ const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTy
 const mockIndexer = {
   indexAttachment: jest.fn().mockResolvedValue(undefined),
   deleteAttachment: jest.fn().mockResolvedValue(undefined),
-  deleteChunks: jest.fn().mockResolvedValue(undefined),
+  deleteEntry: jest.fn().mockResolvedValue(undefined),
 };
 
 const createMockLogger = () => {

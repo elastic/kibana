@@ -117,8 +117,8 @@ export type SmlIndexAttachmentContentParams = SmlIndexAttachmentBaseParams &
 
 /**
  * Discriminated union — `content` selects the mode:
- * - omitted → origin mode (calls `getSmlData`, marks `'crawled'`)
- * - provided → content mode (skips `getSmlData`, marks `'manual'`)
+ * - omitted → origin mode (calls `getSmlEntry`, marks `'crawled'`)
+ * - provided → content mode (skips `getSmlEntry`, marks `'manual'`)
  *
  * `action: 'delete'` is valid on either variant; the indexer ignores
  * `content` and `force` when deleting and removes only `'crawled'` chunks.

@@ -52,7 +52,7 @@ export const createActionPolicySmlType = ({
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
     try {
       const repository = getInternalRepository();
       const so = await repository.get<ActionPolicySavedObjectAttributes>(
@@ -72,13 +72,9 @@ export const createActionPolicySmlType = ({
       );
 
       return {
-        chunks: [
-          {
-            type: ACTION_POLICY_SML_TYPE,
-            title: name,
-            content: contentParts.join('\n'),
-          },
-        ],
+        type: ACTION_POLICY_SML_TYPE,
+        title: name,
+        content: contentParts.join('\n'),
       };
     } catch (error) {
       context.logger.warn(

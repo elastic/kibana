@@ -53,7 +53,7 @@ const mockTaskManager = {
 const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTypeDefinition => ({
   id: 'visualization',
   list: jest.fn(),
-  getSmlData: jest.fn(),
+  getSmlEntry: jest.fn(),
   toAttachment: jest.fn(),
   ...overrides,
 });

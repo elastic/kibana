@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SmlChunk, SmlPermissions, SmlService } from './services/sml/types';
+import type { SmlEntry, SmlPermissions, SmlService } from './services/sml/types';
 import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
 // Hand-built rather than `coreMock` — these builders only touch
@@ -41,7 +41,7 @@ const baseParams = {
   action: 'create' as const,
 };
 
-const chunks: SmlChunk[] = [{ type: 'dashboard', content: 'some content', title: 'title' }];
+const entry: SmlEntry = { type: 'dashboard', content: 'some content', title: 'title' };
 
 const permissions: SmlPermissions = {
   kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
@@ -55,7 +55,7 @@ describe('buildIndexAttachment', () => {
 
     await indexAttachment({
       ...baseParams,
-      content: chunks,
+      content: entry,
       createdAt: '2024-01-01T00:00:00Z',
       permissions,
     });
@@ -65,7 +65,7 @@ describe('buildIndexAttachment', () => {
     if (callArgs.content === undefined) {
       throw new Error('expected content-mode params');
     }
-    expect(callArgs.content).toBe(chunks);
+    expect(callArgs.content).toBe(entry);
     expect(callArgs.createdAt).toBe('2024-01-01T00:00:00Z');
     expect(callArgs.permissions).toEqual(permissions);
     expect(callArgs.spaces).toEqual(['space-1']);
@@ -77,13 +77,13 @@ describe('buildIndexAttachment', () => {
     const deps = buildDeps({ spaceFromRequest: 'space-1' });
     const indexAttachment = buildIndexAttachment(deps);
 
-    await indexAttachment({ ...baseParams, content: chunks });
+    await indexAttachment({ ...baseParams, content: entry });
 
     const callArgs = deps.smlService.indexAttachment.mock.calls[0][0];
     if (callArgs.content === undefined) {
       throw new Error('expected content-mode params');
     }
-    expect(callArgs.content).toBe(chunks);
+    expect(callArgs.content).toBe(entry);
     expect('permissions' in callArgs).toBe(false);
     expect('createdAt' in callArgs).toBe(false);
   });
@@ -103,7 +103,7 @@ describe('buildIndexAttachment', () => {
     const deps = buildDeps();
     const indexAttachment = buildIndexAttachment(deps);
 
-    await indexAttachment({ ...baseParams, content: chunks });
+    await indexAttachment({ ...baseParams, content: entry });
 
     const callArgs = deps.smlService.indexAttachment.mock.calls[0][0];
     expect(callArgs.spaces).toEqual(['default']);
@@ -113,7 +113,7 @@ describe('buildIndexAttachment', () => {
     const deps = buildDeps({ spaceFromRequest: 'auto-space' });
     const indexAttachment = buildIndexAttachment(deps);
 
-    await indexAttachment({ ...baseParams, content: chunks, spaceId: 'explicit-space' });
+    await indexAttachment({ ...baseParams, content: entry, spaceId: 'explicit-space' });
 
     const callArgs = deps.smlService.indexAttachment.mock.calls[0][0];
     expect(callArgs.spaces).toEqual(['explicit-space']);
@@ -125,7 +125,7 @@ describe('buildIndexAttachment', () => {
 
     await indexAttachment({
       ...baseParams,
-      content: chunks,
+      content: entry,
       includedHiddenTypes: ['hidden-type'],
     });
 

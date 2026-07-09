@@ -37,7 +37,7 @@ import type { SmlService } from './types';
  * returned unfiltered, following the standard Kibana open-access convention.
  *
  * SML type implementers are responsible for setting correct `permissions`
- * arrays in their `getSmlData` hook (see `SmlTypeDefinition`).
+ * arrays in their `getSmlEntry` hook (see `SmlTypeDefinition`).
  */
 export const SML_CRAWLER_TASK_TYPE = 'agent_builder_sml:sml_crawler';
 

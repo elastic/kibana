@@ -27,8 +27,7 @@ export type { ConversationListOptions } from '@kbn/agent-builder-common';
 
 export type {
   SmlTypeDefinition,
-  SmlChunk,
-  SmlData,
+  SmlEntry,
   SmlContext,
   SmlToAttachmentContext,
   SmlListItem,

@@ -46,7 +46,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
       [Symbol.asyncIterator]: () => ({ next: async () => ({ done: true as const, value: [] }) }),
     }),
 
-    getSmlData: async (originId, context) => {
+    getSmlEntry: async (originId, context) => {
       try {
         const so = await context.savedObjectsClient.get('action', originId);
         const attrs = so.attributes as { name?: string; actionTypeId?: string };
@@ -69,13 +69,9 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         ];
 
         return {
-          chunks: [
-            {
-              type: CONNECTOR_SML_TYPE,
-              title: name,
-              content: contentParts.join('\n'),
-            },
-          ],
+          type: CONNECTOR_SML_TYPE,
+          title: name,
+          content: contentParts.join('\n'),
         };
       } catch (error) {
         context.logger.warn(

@@ -53,7 +53,7 @@ export const createRuleSmlType = ({
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
     try {
       const repository = getInternalRepository();
       const so = await repository.get<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, originId);
@@ -67,13 +67,9 @@ export const createRuleSmlType = ({
       const contentParts = [name, description, kind, tags, query].filter(Boolean);
 
       return {
-        chunks: [
-          {
-            type: RULE_SML_TYPE,
-            title: name,
-            content: contentParts.join('\n'),
-          },
-        ],
+        type: RULE_SML_TYPE,
+        title: name,
+        content: contentParts.join('\n'),
       };
     } catch (error) {
       context.logger.warn(
