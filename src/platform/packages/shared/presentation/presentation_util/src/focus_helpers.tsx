@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Stable DOM id for a panel's context menu ("...") toggle button. Shared between the
- * embeddable panel hover actions (which render the button) and `openLazyFlyout` (which
- * restores focus to it) so focus can return to the persistent toggle when a flyout
- * opened from the panel closes — even if the action ran asynchronously and the context
- * menu (and the transient menu item that had focus) was already torn down (WCAG 2.4.3
- * Focus Order).
- */
+// Shared with the embeddable panel hover actions (which render the button) so focus can
+// return to the panel's context menu toggle when a flyout opened from the panel closes.
 export const getPanelContextMenuTriggerId = (panelId: string) =>
   `presentationPanelContextMenu-${panelId}`;
 
@@ -28,10 +22,8 @@ const getFirstFocusable = (el: HTMLElement | null): HTMLElement | null => {
 
 const focusPreservingVisibility = (el: HTMLElement) => {
   const previousInlineVisibility = el.style.visibility;
-  // `visibility: visible` on the element overrides an inherited `visibility: hidden`
-  // from an ancestor (e.g. the hover-actions toolbar), so the programmatic focus lands
-  // without revealing the whole toolbar. Keyboard users still get the CSS
-  // `:focus-visible` reveal while the element stays focused.
+  // `visibility: visible` on the element overrides an inherited `hidden` (e.g. from the
+  // hover-actions toolbar), so focus can land without revealing the whole toolbar.
   el.style.visibility = 'visible';
 
   el.focus();
@@ -41,15 +33,12 @@ const focusPreservingVisibility = (el: HTMLElement) => {
     el.style.visibility = previousInlineVisibility;
   };
 
+  // No focusout will fire if focus didn't land (e.g. disabled/detached), so restore now.
   if (document.activeElement !== el) {
-    // The focus did not land (e.g. the element is disabled or was detached), so no
-    // `focusout` will ever fire. Restore the overridden visibility immediately to
-    // avoid leaving the element permanently overridden.
     restore();
     return;
   }
 
-  // Restore the original visibility once focus leaves the element.
   el.addEventListener('focusout', restore);
 };
 
@@ -58,8 +47,7 @@ export const focusFirstFocusable = (target: Element | null | (() => Element | nu
     const el = typeof target === 'function' ? target() : target;
     if (!el) return;
     if (el.contains(document.activeElement)) {
-      // only focus the first element of the target if the currently focused element is not
-      // a descendant of it (ie. the focus was not already set by the target's own content)
+      // don't steal focus if it's already inside the target (set by the target's own content)
       return;
     }
     const focusable = getFirstFocusable(el as HTMLElement);

@@ -30,10 +30,8 @@ interface OpenLazyFlyoutParams {
   flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string; focusedPanelId?: string };
 }
 
-/**
- * Re-queries `el` by its id (so focus survives a re-render that replaced the node),
- * falling back to the node itself while it is still attached to the DOM.
- */
+// Re-query by id so focus survives a re-render that replaced the node; fall back to the
+// node itself while it is still attached.
 const resolveAttachedElement = (el: HTMLElement | null): HTMLElement | null => {
   if (!el) return null;
   if (el.id) {
@@ -78,17 +76,13 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
       : null;
 
   const getTriggerElement = () => {
-    // An explicit trigger id always wins.
+    // Priority: explicit triggerId → the element that had focus (re-queried by id to
+    // survive a re-render) → the panel's "..." toggle (for context-menu actions whose
+    // menu item is gone by the time an async flyout opens).
     const byTriggerId = triggerId ? document.getElementById(triggerId) : null;
     if (byTriggerId) return byTriggerId;
-    // Then the element that had focus, re-queried by id so focus survives a re-render
-    // that replaced the node (e.g. Lens inline edit) and only used while still attached.
     const byFocusedElement = resolveAttachedElement(previouslyFocusedElement);
     if (byFocusedElement) return byFocusedElement;
-    // Finally, for a panel flyout, fall back to the panel's persistent "..." toggle.
-    // This covers actions launched from the context menu that open the flyout
-    // asynchronously, where the menu (and the menu item that had focus) is gone by
-    // the time the flyout opens.
     return focusedPanelId
       ? document.getElementById(getPanelContextMenuTriggerId(focusedPanelId))
       : null;
@@ -97,9 +91,8 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const onClose = () => {
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
-    // Resolve the trigger element lazily: closing the flyout can re-render the
-    // triggering panel, so the element must be looked up after that render (inside
-    // focusFirstFocusable's deferred callback) to avoid focusing a stale node.
+    // Resolve lazily: closing can re-render the panel, so the trigger is looked up after
+    // that render (inside focusFirstFocusable's deferred callback).
     focusFirstFocusable(getTriggerElement);
   };
 
