@@ -271,28 +271,22 @@ export const getRequestFromEditor = (
   return { method: upperCaseMethod, url, data };
 };
 
-export const containsComments = (requestData: string) => {
-  let insideString = false;
-  let prevChar = '';
-  for (let i = 0; i < requestData.length; i++) {
-    const char = requestData[i];
-    const nextChar = requestData[i + 1];
+const requestDataTokensRegex = new RegExp(
+  [
+    /"""[\s\S]*?"""/.source, // Triple-quoted strings
+    /"(?:\\.|[^"\\])*"/.source, // JSON strings
+    /\/\/[^\r\n]*/.source, // // comments
+    /#[^\r\n]*/.source, // # comments
+    /\/\*[\s\S]*?\*\//.source, // Block comments
+  ].join('|'),
+  'g'
+);
 
-    if (!insideString && char === '"') {
-      insideString = true;
-    } else if (insideString && char === '"' && prevChar !== '\\') {
-      insideString = false;
-    } else if (!insideString) {
-      if (char === '/' && (nextChar === '/' || nextChar === '*')) {
-        return true;
-      }
-    }
+const isSlashCommentToken = (token: string) => token.startsWith('//') || token.startsWith('/*');
+const isCommentToken = (token: string) => isSlashCommentToken(token) || token.startsWith('#');
 
-    prevChar = char;
-  }
-
-  return false;
-};
+export const containsComments = (requestData: string) =>
+  requestData.match(requestDataTokensRegex)?.some(isSlashCommentToken) ?? false;
 
 export const indentData = (dataString: string): string => {
   try {
@@ -304,24 +298,37 @@ export const indentData = (dataString: string): string => {
   }
 };
 
+const removeCommentsFromDataWithTripleQuotes = (dataString: string): string | null => {
+  const dataWithoutComments = dataString.replace(requestDataTokensRegex, (token) =>
+    isCommentToken(token) ? ' ' : token
+  );
+
+  const { collapsedTripleQuotesData } = collapseTripleQuoteStrings(dataWithoutComments);
+  try {
+    parse(collapsedTripleQuotesData);
+    return dataWithoutComments;
+  } catch {
+    return null;
+  }
+};
+
 /**
  * This function removes comments from the request data.
  *
  * The comment removal is done by parsing the data with hjson and stringifying the result.
- * Since hjson can't parse multi-line strings in triple quotes, if the direct parsing fails,
- * the triple-quote strings are temporarily collapsed before parsing and restored afterwards.
- * This way comments are removed even when the data combines them with triple-quote strings,
- * while comments inside triple-quote strings (e.g. Painless comments) are preserved.
+ * Since hjson can't parse multi-line strings in triple quotes, a token-aware fallback removes
+ * comments outside quoted strings and validates the result after collapsing triple-quote strings.
+ * Comments inside triple-quote strings (e.g. Painless comments) are preserved.
  * If the data can't be parsed at all, it is returned unchanged.
  */
 export const removeCommentsFromData = (dataString: string): string => {
   try {
     return JSON.stringify(parse(dataString), null, 2);
-  } catch (e) {
-    const { collapsedTripleQuotesData, tripleQuoteStrings } =
-      collapseTripleQuoteStrings(dataString);
-    const dataWithoutComments = indentData(collapsedTripleQuotesData);
-    return expandTripleQuoteStrings(dataWithoutComments, tripleQuoteStrings);
+  } catch {
+    if (!dataString.includes('"""')) {
+      return dataString;
+    }
+    return removeCommentsFromDataWithTripleQuotes(dataString) ?? dataString;
   }
 };
 

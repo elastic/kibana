@@ -673,6 +673,21 @@ describe('requests_utils', () => {
     }`;
       expect(containsComments(requestData)).toBe(true);
     });
+
+    it('should ignore comment-like sequences inside triple-quote strings', () => {
+      const requestData = `{
+      "script": """def quote = '"'; // painless comment"""
+    }`;
+      expect(containsComments(requestData)).toBe(false);
+    });
+
+    it('should detect comments outside triple-quote strings', () => {
+      const requestData = `{
+      // request comment
+      "script": """def quote = '"'; // painless comment"""
+    }`;
+      expect(containsComments(requestData)).toBe(true);
+    });
   });
 
   describe('removeCommentsFromData', () => {
@@ -719,6 +734,42 @@ describe('requests_utils', () => {
       const result = removeCommentsFromData(requestData);
       expect(result).not.toContain('// comment');
       expect(JSON.parse(result)).toEqual({ url: 'https://elastic.co', pattern: '/*' });
+    });
+
+    it('preserves a literal value matching the triple-quote placeholder', () => {
+      const requestData = `{
+  // comment
+  "literal": ${TRIPLE_QUOTE_STRINGS_MARKER},
+  "script": """return 1;"""
+}`;
+      const result = removeCommentsFromData(requestData);
+      expect(result).not.toContain('// comment');
+      expect(result).toMatch(/"literal"\s*:\s*"\{tripleQuoteString\}"/);
+      expect(result).toMatch(/"script"\s*:\s*"""return 1;"""/);
+    });
+
+    it('preserves triple-quote values when object keys are reordered during parsing', () => {
+      const requestData = `{
+  // comment
+  "z": """first""",
+  "1": """second"""
+}`;
+      const result = removeCommentsFromData(requestData);
+      expect(result).not.toContain('// comment');
+      expect(result).toMatch(/"z"\s*:\s*"""first"""/);
+      expect(result).toMatch(/"1"\s*:\s*"""second"""/);
+    });
+
+    it('ignores triple-quote delimiters inside comments', () => {
+      const requestData = `{
+  // this comment mentions """
+  /* this block comment also mentions """ */
+  "script": """return 1;"""
+}`;
+      const result = removeCommentsFromData(requestData);
+      expect(result).not.toContain('this comment mentions');
+      expect(result).not.toContain('this block comment');
+      expect(result).toMatch(/"script"\s*:\s*"""return 1;"""/);
     });
 
     it('returns invalid data unchanged', () => {
