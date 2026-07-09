@@ -24,7 +24,7 @@ export const registerAgentBuilderTools = (
   agentBuilder.tools.register(checkIntegrationTool(osqueryContext, logger));
   agentBuilder.tools.register(listSavedQueriesTool(osqueryContext, logger));
   agentBuilder.tools.register(getTableSchemaTool(osqueryContext, logger, schemaService));
-  agentBuilder.tools.register(runLiveQueryTool(osqueryContext, logger));
+  agentBuilder.tools.register(runLiveQueryTool(osqueryContext, logger, schemaService));
   agentBuilder.tools.register(listPacksTool(osqueryContext, logger));
   logger.info(
     'Osquery Agent Builder tools registered (check_integration, list_saved_queries, get_table_schema, run_live_query, list_packs)'
