@@ -394,8 +394,7 @@ function _getInputSecretPaths(
     if (input.streams.length) {
       input.streams.forEach((stream, streamIndex) => {
         const streamVarDefs =
-          streamSecretVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`] ||
-          {};
+          streamSecretVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`] || {};
         Object.entries(stream.vars || {}).forEach(([name, configEntry]) => {
           if (streamVarDefs[name] || isSecretRefValue(configEntry)) {
             currentInputVarPaths.push({
