@@ -9,13 +9,15 @@
 
 import { shade, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { monaco } from '@kbn/monaco';
 import type { StepInfo } from '@kbn/workflows-yaml';
 import {
   selectEditorFocusedStepInfo,
   selectEditorWorkflowLookup,
+  selectEditorYaml,
+  selectEditorYamlDocument,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import {
@@ -176,19 +178,32 @@ export const WorkflowStepMinimap = ({
 }: WorkflowStepMinimapProps) => {
   const { euiTheme } = useEuiTheme();
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
+  const yamlDocument = useSelector(selectEditorYamlDocument);
+  const yamlString = useSelector(selectEditorYaml);
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
 
-  const stepEntries: Array<[string, StepInfo]> = useMemo(
-    () =>
-      workflowLookup
-        ? Object.entries(workflowLookup.steps).sort(([, a], [, b]) => a.lineStart - b.lineStart)
-        : [],
-    [workflowLookup]
-  );
+  const current = useMemo(() => {
+    const steps = workflowLookup?.steps ?? {};
+    const entries = Object.entries(steps).sort(([, a], [, b]) => a.lineStart - b.lineStart);
+    return { entries, steps };
+  }, [workflowLookup]);
+
+  // While the user types, the YAML is often transiently unparseable and the
+  // lookup collapses to nothing. Blanking the minimap on every such keystroke
+  // makes it flicker, so keep the last known-good step list until the document
+  // parses again. A valid document with genuinely no steps still hides it.
+  const lastNonEmptyRef = useRef(current);
+  if (current.entries.length > 0) {
+    lastNonEmptyRef.current = current;
+  }
+  const isDocBroken =
+    Boolean(yamlString?.trim()) && (!yamlDocument || yamlDocument.errors.length > 0);
+  const { entries: stepEntries, steps: stepsMap } =
+    current.entries.length === 0 && isDocBroken ? lastNonEmptyRef.current : current;
 
   const { depths, parentGroups, hasNesting } = useMemo(
-    () => buildNestingInfo(stepEntries, workflowLookup?.steps ?? {}),
-    [stepEntries, workflowLookup]
+    () => buildNestingInfo(stepEntries, stepsMap),
+    [stepEntries, stepsMap]
   );
 
   const handleStepClick = useCallback(
