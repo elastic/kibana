@@ -36,6 +36,26 @@ describe('createAlertActionBodySchema', () => {
 });
 
 describe('bulkCreateAlertActionBodySchema', () => {
+  it('accepts a valid bulk item for every action variant (strict union intersected with group_hash)', () => {
+    const items = [
+      { action_type: ALERT_EPISODE_ACTION_TYPE.ACK, episode_id: 'episode-1', group_hash: 'g1' },
+      { action_type: ALERT_EPISODE_ACTION_TYPE.UNACK, episode_id: 'episode-1', group_hash: 'g1' },
+      {
+        action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+        episode_id: 'episode-1',
+        assignee_uid: null,
+        group_hash: 'g1',
+      },
+      { action_type: ALERT_EPISODE_ACTION_TYPE.TAG, tags: ['p1'], group_hash: 'g1' },
+      { action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE, group_hash: 'g1' },
+      { action_type: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE, group_hash: 'g1' },
+      { action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE, reason: 'reason', group_hash: 'g1' },
+      { action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE, reason: 'reason', group_hash: 'g1' },
+    ];
+
+    expect(() => bulkCreateAlertActionBodySchema.parse(items)).not.toThrow();
+  });
+
   it('rejects unknown keys on the bulk group_hash wrapper (strict)', () => {
     expect(() =>
       bulkCreateAlertActionBodySchema.parse([
