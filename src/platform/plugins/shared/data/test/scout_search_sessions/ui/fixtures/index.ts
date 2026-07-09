@@ -19,7 +19,6 @@ import { BackgroundSearchManagementPage } from './page_objects/background_search
 export interface BackgroundSearchTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: PageObjects & {
     backgroundSearchManagement: BackgroundSearchManagementPage;
-    management: ManagementPage;
   };
 }
 

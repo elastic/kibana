@@ -25,10 +25,6 @@ export class BackgroundSearchManagementPage {
     await this.page.gotoApp('management/kibana/search_sessions');
     await this.table.waitFor({ state: 'visible', timeout: 30_000 });
   }
-  async refresh(timeout = 30_000) {
-    await this.page.testSubj.click('sessionManagementRefreshBtn');
-    await expect(this.rows()).not.toHaveCount(0, { timeout });
-  }
 
   private rows(): Locator {
     return this.table.getByTestId('searchSessionsRow');
@@ -36,10 +32,6 @@ export class BackgroundSearchManagementPage {
 
   async expectRowCount(count: number, timeout = 30_000) {
     await expect(this.rows()).toHaveCount(count, { timeout });
-  }
-
-  async waitForEmptyTable(timeout = 30_000) {
-    await expect(this.rows()).toHaveCount(0, { timeout });
   }
 
   async waitForRowStatus(targetStatus: string, timeout = 30_000) {
@@ -57,12 +49,6 @@ export class BackgroundSearchManagementPage {
     const input = this.page.testSubj.locator('editNameInput');
     await input.fill(newName);
     await this.page.testSubj.click('confirmEditName');
-  }
-
-  async deleteRow() {
-    await this.table.getByTestId('sessionManagementActionsCol').click();
-    await this.page.testSubj.click('sessionManagementPopoverAction-delete');
-    await this.page.testSubj.click('confirmModalConfirmButton');
   }
 
   async viewRow() {

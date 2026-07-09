@@ -105,7 +105,7 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
    *  6. Verify the dashboard panel is rendered.
    */
   spaceTest(
-    'saves a background search from a dashboard, verifies it in management, then deletes it',
+    'saves a background search from a dashboard, verifies it in management',
     async ({ page, pageObjects }) => {
       spaceTest.setTimeout(180_000);
       const searchName = `Background search - ${uuidv4()}`;
