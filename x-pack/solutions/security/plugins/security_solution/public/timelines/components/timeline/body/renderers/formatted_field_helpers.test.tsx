@@ -15,6 +15,9 @@ import { useKibana } from '../../../../../common/lib/kibana';
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../../common/components/user_privileges');
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
+}));
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;

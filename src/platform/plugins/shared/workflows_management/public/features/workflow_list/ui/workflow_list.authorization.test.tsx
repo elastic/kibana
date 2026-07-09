@@ -282,6 +282,33 @@ describe('Authorization matrix', () => {
     }
   );
 
+  it('disables the edit row action for managed workflows', () => {
+    setKibanaCapabilities({
+      createWorkflow: true,
+      updateWorkflow: true,
+      deleteWorkflow: true,
+      executeWorkflow: true,
+    });
+    renderList({ item: createWorkflowListItem({ id: 'managed-wf', managed: true }) });
+
+    expectControlDisabled('editWorkflowAction', true);
+  });
+
+  it('explains why managed workflows cannot be edited', async () => {
+    setKibanaCapabilities({
+      createWorkflow: true,
+      updateWorkflow: true,
+      deleteWorkflow: true,
+      executeWorkflow: true,
+    });
+    renderList({ item: createWorkflowListItem({ id: 'managed-wf', managed: true }) });
+
+    const editAction = screen.getByTestId('editWorkflowAction');
+    await userEvent.hover(editAction.parentElement ?? editAction);
+
+    expect(await screen.findByText('Managed workflows cannot be edited')).toBeInTheDocument();
+  });
+
   it('disables the delete row action for managed workflows', async () => {
     setKibanaCapabilities({
       createWorkflow: true,

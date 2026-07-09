@@ -177,6 +177,36 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
     });
   });
 
+  it('passes the attachment filter through to the rule list', async () => {
+    mockFindRules([
+      createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),
+      createRule({ id: 'rule-2', enabled: false }),
+    ]);
+    const handler = router.versioned.getRoute('get', ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE).versions[
+      '1'
+    ].handler;
+
+    await handler(
+      context,
+      createRequest({
+        method: 'get',
+        path: ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
+        query: { search: '', attachment_filter: 'attached', page: 1, per_page: 20 },
+      }),
+      mockResponse
+    );
+
+    expect(mockResponse.ok).toHaveBeenCalledWith({
+      body: {
+        total: 1,
+        attached: 1,
+        page: 1,
+        perPage: 20,
+        rules: [{ id: 'rule-1', name: 'Rule rule-1', enabled: true, attached: true }],
+      },
+    });
+  });
+
   it('returns attachment stats', async () => {
     mockFindRules([
       createRule({ id: 'rule-1', actions: [createWorkflowAction()] }),

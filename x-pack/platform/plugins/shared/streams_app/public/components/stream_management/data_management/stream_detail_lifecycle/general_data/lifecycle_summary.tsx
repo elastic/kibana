@@ -128,6 +128,8 @@ interface LifecycleSummaryProps {
     showDefaultRepositoryRequiredBadge: boolean;
     onUpgradeEnterprise?: () => void;
     createDefaultRepositoryHref?: string;
+    manageRepositoriesHref?: string;
+    hasExistingRepositories?: boolean;
     onRefreshDefaultRepository?: () => void;
     isRefreshingDefaultRepository?: boolean;
   };
@@ -525,6 +527,8 @@ const NonIlmLifecycleSummary = ({
         onUpgradeEnterprise: frozenPhaseGating.onUpgradeEnterprise,
         showDefaultRepositoryCallout: frozenPhaseGating.showDefaultRepositoryRequiredBadge,
         createDefaultRepositoryHref: frozenPhaseGating.createDefaultRepositoryHref,
+        manageRepositoriesUrl: frozenPhaseGating.manageRepositoriesHref,
+        hasExistingRepositories: frozenPhaseGating.hasExistingRepositories,
         onRefreshDefaultRepository: frozenPhaseGating.onRefreshDefaultRepository,
         isRefreshingDefaultRepository: frozenPhaseGating.isRefreshingDefaultRepository,
       }

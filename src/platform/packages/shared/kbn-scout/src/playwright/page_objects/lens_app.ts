@@ -56,8 +56,17 @@ export class LensApp {
     await expect(this.lensApp).toBeVisible();
   }
 
-  async switchToVisualization(visType: string) {
+  /**
+   * Switches the active visualization via the chart switcher.
+   *
+   * @param visType Chart switcher test-subj suffix (e.g. `lnsMetric`, `bar`), not the display label.
+   * @param options.search Optional filter text when the target chart is easier to find by label.
+   */
+  async switchToVisualization(visType: string, options?: { search?: string }) {
     await this.openChartSwitchPopover();
+    if (options?.search) {
+      await this.page.testSubj.locator('lnsChartSwitchSearch').fill(options.search);
+    }
     await this.page.testSubj.locator(`lnsChartSwitchPopover_${visType}`).click();
   }
 
