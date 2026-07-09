@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FullTraceWaterfallProps } from '@kbn/apm-types';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { FullScreenWaterfall, type FullScreenWaterfallProps } from '.';
+import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
-import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 import { FlyoutHistoryKeyContext } from '../../../../doc_viewer_flyout/flyout_history_key_context';
 
 const testHistoryKey = Symbol('testHistoryKey');
@@ -53,13 +54,6 @@ let capturedWaterfallProps: {
   onErrorClick?: (params: any) => void;
 } = {};
 
-jest.mock('@kbn/apm-ui-shared', () => ({
-  TraceWaterfallWithFetching: (props: any) => {
-    capturedWaterfallProps = props;
-    return <div data-test-subj="fullTraceWaterfall">FullTraceWaterfall</div>;
-  },
-}));
-
 describe('FullScreenWaterfall', () => {
   const defaultProps: FullScreenWaterfallProps = {
     traceId: 'test-trace-id',
@@ -80,6 +74,13 @@ describe('FullScreenWaterfall', () => {
   beforeAll(() => {
     setUnifiedDocViewerServices({
       ...mockUnifiedDocViewerServices,
+      apmUIComponents: {
+        ...mockUnifiedDocViewerServices.apmUIComponents,
+        TraceWaterfallWithFetching: (props: FullTraceWaterfallProps) => {
+          capturedWaterfallProps = props;
+          return mockUnifiedDocViewerServices.apmUIComponents.TraceWaterfallWithFetching(props);
+        },
+      },
     } as unknown as UnifiedDocViewerServices);
   });
 
@@ -104,14 +105,14 @@ describe('FullScreenWaterfall', () => {
   it('renders the full trace waterfall immediately on standard open', () => {
     renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} />);
 
-    expect(screen.getByTestId('fullTraceWaterfall')).toBeInTheDocument();
+    expect(screen.getByTestId('trace-waterfall-with-fetching')).toBeInTheDocument();
   });
 
   describe('when service name is undefined', () => {
     it('renders the full trace waterfall', () => {
       renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} serviceName={undefined} />);
 
-      expect(screen.getByTestId('fullTraceWaterfall')).toBeInTheDocument();
+      expect(screen.getByTestId('trace-waterfall-with-fetching')).toBeInTheDocument();
     });
   });
 

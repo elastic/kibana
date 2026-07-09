@@ -32,6 +32,16 @@ jest.mock('../../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   }),
 }));
 
+jest.mock('../../../../../context/kibana_context/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      apmUIComponents: {
+        TraceWaterfall: require('@kbn/apm-ui-shared').TraceWaterfall,
+      },
+    },
+  }),
+}));
+
 const mockRouterLink = jest.fn().mockReturnValue('/mock-service-overview-url');
 
 jest.mock('../../../../../hooks/use_apm_router', () => ({
