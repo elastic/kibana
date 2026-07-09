@@ -121,7 +121,6 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
    */
   getPermissions: () => ({
     kibana: { privileges: [{ name: `api:${WorkflowsManagementApiActions.read}` }] },
-    elasticsearch: { indices: [] },
   }),
 
   toAttachment: async (item, context) => {

@@ -124,7 +124,6 @@ describe('createSignificantEventSmlType', () => {
     });
     expect(permissions).toEqual({
       kibana: { privileges: [{ name: 'api:read_stream' }] },
-      elasticsearch: { indices: [] },
     });
   });
 
@@ -147,7 +146,6 @@ describe('createSignificantEventSmlType', () => {
           spaces: ['default'],
           permissions: {
             kibana: { privileges: [{ name: 'api:read_stream' }] },
-            elasticsearch: { indices: [] },
           },
           ingestion_method: 'manual',
         },

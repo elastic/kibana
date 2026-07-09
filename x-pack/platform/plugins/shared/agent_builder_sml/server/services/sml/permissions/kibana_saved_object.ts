@@ -22,6 +22,5 @@ export const kibanaSavedObjectPermissions = ({
   }
   return {
     kibana: { privileges: [{ name: `saved_object:${savedObjectType}/get` }] },
-    elasticsearch: { indices: [] },
   };
 };

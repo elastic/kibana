@@ -197,7 +197,6 @@ describe('connectorSmlType', () => {
       const permissions = connectorSmlType.getPermissions!('conn-1', createContext() as never);
       expect(permissions).toEqual({
         kibana: { privileges: [{ name: 'saved_object:action/get' }] },
-        elasticsearch: { indices: [] },
       });
     });
   });

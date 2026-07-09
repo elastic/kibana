@@ -110,7 +110,6 @@ export const createActionPolicySmlType = ({
     kibana: {
       privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}` }],
     },
-    elasticsearch: { indices: [] },
   }),
 
   toAttachment: async (item, context) => {

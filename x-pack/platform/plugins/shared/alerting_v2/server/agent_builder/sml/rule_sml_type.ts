@@ -95,7 +95,6 @@ export const createRuleSmlType = ({
    */
   getPermissions: () => ({
     kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
-    elasticsearch: { indices: [] },
   }),
 
   toAttachment: async (item, context) => {

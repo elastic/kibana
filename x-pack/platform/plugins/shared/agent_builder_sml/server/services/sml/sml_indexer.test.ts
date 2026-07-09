@@ -165,7 +165,6 @@ describe('createSmlIndexer', () => {
       const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
       const getPermissions = jest.fn().mockReturnValue({
         kibana: { privileges: [{ name: 'perm1' }] },
-        elasticsearch: { indices: [] },
       });
       const registry = createMockRegistry(
         createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
@@ -224,7 +223,6 @@ describe('createSmlIndexer', () => {
         spaces: ['default', 'space-2'],
         permissions: {
           kibana: { privileges: [{ name: 'perm1' }] },
-          elasticsearch: { indices: [] },
         },
         ingestion_method: 'crawled',
         discovery_labels: [
@@ -259,7 +257,6 @@ describe('createSmlIndexer', () => {
       const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
       const getPermissions = jest.fn().mockReturnValue({
         kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-        elasticsearch: { indices: [] },
       });
       const registry = createMockRegistry(
         createMockSmlTypeDefinition({ id: 'dashboard', getSmlEntry, getPermissions })
@@ -305,7 +302,6 @@ describe('createSmlIndexer', () => {
         spaces: ['default'],
         permissions: {
           kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-          elasticsearch: { indices: [] },
         },
         ingestion_method: 'crawled',
       });
@@ -710,8 +706,7 @@ describe('createSmlIndexer', () => {
         // origin-mode — `getPermissions` is the single source of truth.
         const getPermissions = jest.fn().mockReturnValue({
           kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-          elasticsearch: { indices: [] },
-        });
+          });
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
         );
@@ -750,8 +745,7 @@ describe('createSmlIndexer', () => {
             content: 'one',
             permissions: {
               kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-              elasticsearch: { indices: [] },
-            },
+                  },
             ingestion_method: 'manual',
           })
         );
@@ -819,8 +813,7 @@ describe('createSmlIndexer', () => {
         const ops = bulkMock.mock.calls[0][0].operations;
         expect(ops[0].index.document.permissions).toEqual({
           kibana: { privileges: [] },
-          elasticsearch: { indices: [] },
-        });
+          });
       });
 
       it('content mode for an unregistered type writes chunks with empty permissions and warns once per type', async () => {
@@ -866,8 +859,7 @@ describe('createSmlIndexer', () => {
         const ops = bulkMock.mock.calls[0][0].operations;
         expect(ops[0].index.document.permissions).toEqual({
           kibana: { privileges: [] },
-          elasticsearch: { indices: [] },
-        });
+          });
         // Document type is preserved on the stored chunk so reads can
         // still filter by it via the existing `type` term query.
         expect(ops[0].index.document.type).toBe('my_notes');
@@ -1029,29 +1021,25 @@ describe('createSmlIndexer', () => {
           name: 'registered, no getPermissions hook + requestedPermissions supplied → stamps the requested permissions',
           registered: true,
           requestedPermissions: {
-            kibana: { privileges: [] },
-            elasticsearch: { indices: [{ name: 'my-index' }, { name: 'my-data-stream' }] },
+            kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
           },
           expectedPermissions: {
-            kibana: { privileges: [] },
-            elasticsearch: { indices: [{ name: 'my-index' }, { name: 'my-data-stream' }] },
+            kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
           },
         },
         {
           name: 'registered, no getPermissions hook + requestedPermissions omitted → stamps empty permissions',
           registered: true,
-          expectedPermissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
+          expectedPermissions: { kibana: { privileges: [] } },
         },
         {
           name: 'unregistered type + requestedPermissions supplied → stamps the requested permissions',
           registered: false,
           requestedPermissions: {
-            kibana: { privileges: [] },
-            elasticsearch: { indices: [{ name: 'my-index' }] },
+            kibana: { privileges: [{ name: 'api:some/read' }] },
           },
           expectedPermissions: {
-            kibana: { privileges: [] },
-            elasticsearch: { indices: [{ name: 'my-index' }] },
+            kibana: { privileges: [{ name: 'api:some/read' }] },
           },
         },
       ])(
@@ -1091,8 +1079,7 @@ describe('createSmlIndexer', () => {
 
         const getPermissions = jest.fn().mockReturnValue({
           kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-          elasticsearch: { indices: [] },
-        });
+          });
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getPermissions })
         );
@@ -1110,8 +1097,7 @@ describe('createSmlIndexer', () => {
               content: { type: 'lens', title: 'T', content: 'c' },
             }),
             permissions: {
-              kibana: { privileges: [] },
-              elasticsearch: { indices: [{ name: 'spoofed-index' }] },
+              kibana: { privileges: [{ name: 'spoofed-priv' }] },
             },
           })
         ).rejects.toBeInstanceOf(SmlPermissionsConflictError);
@@ -1128,8 +1114,7 @@ describe('createSmlIndexer', () => {
 
         const getPermissions = jest.fn().mockReturnValue({
           kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-          elasticsearch: { indices: [] },
-        });
+          });
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getPermissions })
         );
@@ -1151,8 +1136,7 @@ describe('createSmlIndexer', () => {
         const ops = bulkMock.mock.calls[0][0].operations;
         expect(ops[0].index.document.permissions).toEqual({
           kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-          elasticsearch: { indices: [] },
-        });
+          });
       });
     });
 
@@ -1183,8 +1167,7 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
           kibana: { privileges: [] },
-          elasticsearch: { indices: [] },
-        });
+          });
       });
 
       it('awaits async getPermissions and stamps the resolved value', async () => {
@@ -1198,12 +1181,10 @@ describe('createSmlIndexer', () => {
           async () =>
             new Promise<{
               kibana: { privileges: Array<{ name: string }> };
-              elasticsearch: { indices: unknown[] };
             }>((resolve) =>
               setImmediate(() =>
                 resolve({
                   kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-                  elasticsearch: { indices: [] },
                 })
               )
             )
@@ -1228,14 +1209,12 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
           kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-          elasticsearch: { indices: [] },
-        });
+          });
       });
 
       it('getPermissions returning partial shape gets folded into fully-shaped permissions', async () => {
-        // Half-populated returns from a hand-written hook are common — the
-        // indexer normalises them so the document mapping always sees both
-        // sub-arrays.
+        // Half-populated returns from a hand-written hook are normalised so
+        // the document mapping always sees the kibana sub-array.
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -1244,7 +1223,6 @@ describe('createSmlIndexer', () => {
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const getPermissions = jest.fn().mockReturnValue({
           kibana: { privileges: [{ name: 'p1' }] },
-          // intentionally missing elasticsearch
         } as unknown);
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
@@ -1265,8 +1243,7 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
           kibana: { privileges: [{ name: 'p1' }] },
-          elasticsearch: { indices: [] },
-        });
+          });
       });
 
       it('getPermissions throw: propagates the throw and leaves existing chunks intact (fail-closed)', async () => {
@@ -1321,8 +1298,7 @@ describe('createSmlIndexer', () => {
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const getPermissions = jest.fn().mockResolvedValue({
           kibana: { privileges: [{ name: 'p1' }] },
-          elasticsearch: { indices: [] },
-        });
+          });
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
         );
@@ -1344,8 +1320,7 @@ describe('createSmlIndexer', () => {
         expect(ops).toHaveLength(1);
         expect(ops[0].index.document.permissions).toEqual({
           kibana: { privileges: [{ name: 'p1' }] },
-          elasticsearch: { indices: [] },
-        });
+          });
       });
     });
   });

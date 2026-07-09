@@ -39,23 +39,13 @@ export interface SmlKibanaPrivilege {
 }
 
 /**
- * A single concrete Elasticsearch index / alias / data stream name whose
- * data a chunk's content depends on. Used by the search-time post-filter
- * to gate chunks behind the user's ES `read` privilege on each name.
- */
-export interface SmlElasticsearchIndex {
-  name: string;
-}
-
-/**
- * Permissions required to access a chunk, split by access boundary.
+ * Permissions required to access a chunk.
  *
- * Both sub-objects are always present (with possibly-empty arrays) on
- * stored documents to keep the schema rigid and predictable.
+ * The `kibana` sub-object is always present (with a possibly-empty array)
+ * on stored documents to keep the schema rigid and predictable.
  */
 export interface SmlPermissions {
   kibana: { privileges: SmlKibanaPrivilege[] };
-  elasticsearch: { indices: SmlElasticsearchIndex[] };
 }
 
 /**
@@ -240,7 +230,7 @@ export interface SmlDocument {
   spaces: string[];
   /**
    * Permissions required to access the underlying element. Always present
-   * on stored documents; inner arrays may be empty.
+   * on stored documents; the inner privileges array may be empty.
    */
   permissions: SmlPermissions;
   /** How this chunk was produced. */

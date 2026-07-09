@@ -45,7 +45,6 @@ const entry: SmlEntry = { type: 'dashboard', content: 'some content', title: 'ti
 
 const permissions: SmlPermissions = {
   kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-  elasticsearch: { indices: [] },
 };
 
 describe('buildIndexAttachment', () => {

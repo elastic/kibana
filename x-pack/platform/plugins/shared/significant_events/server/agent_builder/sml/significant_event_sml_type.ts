@@ -111,7 +111,6 @@ export const createSignificantEventSmlType = ({
      */
     getPermissions: () => ({
       kibana: { privileges: [{ name: `api:${STREAMS_API_PRIVILEGES.read}` }] },
-      elasticsearch: { indices: [] },
     }),
 
     toAttachment: async (item, context) => {

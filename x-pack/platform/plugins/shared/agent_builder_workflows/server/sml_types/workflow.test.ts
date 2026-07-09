@@ -49,7 +49,6 @@ const createSmlDocument = (overrides: Partial<SmlDocument> = {}): SmlDocument =>
   spaces: ['default'],
   permissions: {
     kibana: { privileges: [] },
-    elasticsearch: { indices: [] },
   },
   ingestion_method: 'crawled',
   ...overrides,
@@ -442,7 +441,6 @@ describe('workflowSmlType', () => {
       });
       expect(permissions).toEqual({
         kibana: { privileges: [{ name: `api:${WorkflowsManagementApiActions.read}` }] },
-        elasticsearch: { indices: [] },
       });
     });
   });
