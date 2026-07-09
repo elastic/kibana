@@ -279,9 +279,8 @@ describe('usePackQueryForm', () => {
   });
 
   describe('deserializedSchedule', () => {
-    // Regression (#276903): a single `deserializedSchedule` must seed both
-    // `defaultValues.schedule` and `originalStartDate` so a no-op edit can't
-    // trip a false "start date in the past" error.
+    // Regression (#276903): must be a single memoized value, not two
+    // independent `deserializeSchedule` calls that can diverge.
     const NOW = new Date('2026-06-19T12:00:00.000Z');
 
     beforeEach(() => {
@@ -292,9 +291,7 @@ describe('usePackQueryForm', () => {
       jest.useRealTimers();
     });
 
-    // Missing `start_date` makes `deserializeSchedule` fall back to `new Date()`
-    // at runtime — the scenario where two independent calls diverge. Cast
-    // through `unknown` to hit that path without widening the prop types.
+    // Missing `start_date` forces `deserializeSchedule`'s `new Date()` fallback.
     const rruleWithoutStartDate = { rrule: 'FREQ=DAILY' } as unknown as {
       rrule: string;
       start_date: string;
@@ -344,8 +341,6 @@ describe('usePackQueryForm', () => {
 
       const firstStartDate = result.current.deserializedSchedule.startDate.getTime();
 
-      // Advance the clock and re-render with the same `packSchedule`: a single
-      // memoized value must stay stable rather than re-evaluating `new Date()`.
       jest.setSystemTime(new Date(NOW.getTime() + 60_000));
       rerender(initialProps);
 

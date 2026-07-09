@@ -171,10 +171,7 @@ describe('ScheduleSection', () => {
       });
 
       it('does not re-seed when already in rrule mode (clicking the selected card is a no-op)', () => {
-        // ScheduleTypeSelector's handleSelect early-returns when the clicked
-        // card matches the current value, so onChange never fires — the
-        // user-chosen startDate is untouched because handleTypeChange never
-        // runs for a same-mode "transition".
+        // Same-mode click never fires onChange, so handleTypeChange never runs.
         const onChange = jest.fn();
         const chosenStartDate = new Date('2026-06-25T00:00:00.000Z');
         const state = recurrenceState({ startDate: chosenStartDate });

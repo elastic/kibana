@@ -446,11 +446,8 @@ describe('PackForm', () => {
   });
 
   describe('interval → rrule edit transition (issue #276903)', () => {
-    // Regression coverage for the "editing an enabled interval pack and
-    // switching to Date & time silently fails" bug: the stale interval-era
-    // startDate tripped a false START_DATE_IN_PAST_ERROR, so `onSubmit`
-    // returned without ever calling `updateAsync` and the pack appeared to
-    // revert to Interval with `enabled` seemingly lost.
+    // Regression: a stale interval-era startDate tripped a false
+    // START_DATE_IN_PAST_ERROR and silently blocked the save.
     const NOW = new Date('2026-06-19T12:00:00.000Z');
 
     beforeEach(() => {
@@ -519,12 +516,8 @@ describe('PackForm', () => {
       expect(mockAddDanger).not.toHaveBeenCalled();
     });
 
-    // The "user genuinely back-dates the start" blocked-submit path is not
-    // reproducible through this component's UI (the date picker blocks manual
-    // text entry via `onChangeRaw`, and `minDate`/`minTime` keep the calendar
-    // popover from offering past slots) — it is covered at the unit level in
-    // `validation.test.ts` ("still flags a newly-picked past start even in
-    // edit mode").
+    // The genuinely-blocked-submit path isn't reproducible via this UI (the
+    // date picker can't select a past slot) — covered in `validation.test.ts`.
   });
 
   describe('schedule submit-gate UX (toast on click)', () => {

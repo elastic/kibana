@@ -95,10 +95,9 @@ const stripInheritedScheduleFields = (
 };
 
 /**
- * Deserialize the query's own override, or fall back to the inherited pack
- * schedule. Computed once and reused for both the form's `schedule`
- * defaultValue and `originalStartDate` so they can't diverge on independent
- * `new Date()` fallbacks.
+ * Deserializes the query's own override, or falls back to the inherited
+ * pack schedule. Reused for both `defaultValues.schedule` and
+ * `originalStartDate` so they can't diverge.
  */
 const deserializeQuerySchedule = (
   payload: PackSOQueryFormData | undefined,
@@ -220,7 +219,6 @@ export const usePackQueryForm = ({
     [uniqueQueryIds, defaultValue]
   );
 
-  // Reused to seed `defaultValues.schedule` and as the caller's `originalStartDate`.
   const deserializedSchedule = useMemo(
     () => deserializeQuerySchedule(defaultValue, packSchedule),
     [defaultValue, packSchedule]

@@ -63,12 +63,8 @@ export const ScheduleSection = ({
 }: ScheduleSectionProps) => {
   const handleTypeChange = useCallback(
     (scheduleType: ScheduleType) => {
-      // Transitioning into recurrence mode from a non-recurrence state carries
-      // a stale interval-era `startDate` placeholder that was never meant to
-      // anchor a recurrence — re-seed it to a fresh valid slot so the past-
-      // start validation isn't tripped by a value the user never chose. Only
-      // fires on the transition *into* rrule so an in-session rrule start
-      // date is never clobbered (design.md D1).
+      // Re-seed startDate on transition into rrule mode so a stale
+      // interval-era value doesn't trip the past-start validation.
       if (scheduleType === 'rrule' && value.scheduleType !== 'rrule') {
         const startDate = roundUpTo30Min(new Date());
         onChange({

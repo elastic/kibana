@@ -103,12 +103,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const isRruleSchedulingEnabled = ExperimentalFeaturesService.get().rruleScheduling;
 
-  // Computed once per `defaultValue` and reused both to seed the form's
-  // `defaultValues.schedule` and as `originalStartDate` below, so
-  // `startIsUnchanged` in `validateScheduleFormData` compares the current
-  // `startDate` against the exact value the form was initialized with rather
-  // than a second independent `deserializeSchedule` call landing on a
-  // different `roundUpTo30Min(new Date())` timestamp (design.md D2).
+  // Computed once and reused for both `defaultValues.schedule` and
+  // `originalStartDate` so they can't diverge on independent `new Date()` calls.
   const deserializedSchedule = useMemo(
     () =>
       isRruleSchedulingEnabled
