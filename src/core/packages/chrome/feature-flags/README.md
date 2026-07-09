@@ -37,8 +37,13 @@ feature_flags.overrides:
 ```
 
 Use `isDesignExploration(featureFlags)` to branch on the flag. Styles are scoped via
-`body[data-design-exploration='true']` (see `DesignExplorationChromeGlobalStyles` in
-`@kbn/ui-chrome-layout`).
+`body[data-design-exploration='true']` and `body[data-design-exploration-variant='{id}']`
+(see `DesignExplorationChromeGlobalStyles` in `@kbn/ui-chrome-layout`).
+
+Variant selection is stored in sessionStorage (`DESIGN_EXPLORATION_VARIANT_SESSION_KEY`) and
+switched from the dev toolbar. Helpers: `getDesignExplorationVariant()`,
+`setDesignExplorationVariant(id)`. Variant ids are listed in `DESIGN_EXPLORATION_VARIANT_OPTIONS`
+(keep in sync with `@kbn/ui-chrome-layout` variant files).
 
 For app-specific overrides, add a plugin-level `<Global>` component scoped to the same body
 attribute:

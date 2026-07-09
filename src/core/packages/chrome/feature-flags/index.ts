@@ -14,6 +14,21 @@ export const NEXT_CHROME_SESSION_STORAGE_KEY = 'dev.core.chrome.next';
 
 export const DESIGN_EXPLORATION_FEATURE_FLAG_KEY = 'core.chrome.designExploration';
 
+export const DESIGN_EXPLORATION_VARIANT_SESSION_KEY = 'dev.core.chrome.designExploration.variant';
+
+export const DEFAULT_DESIGN_EXPLORATION_VARIANT_ID = 'verbana';
+
+export interface DesignExplorationVariantOption {
+  id: string;
+  label: string;
+}
+
+/** Keep in sync with design exploration variant style files in @kbn/ui-chrome-layout. */
+export const DESIGN_EXPLORATION_VARIANT_OPTIONS: DesignExplorationVariantOption[] = [
+  { id: 'verbana', label: 'Verbana' },
+  { id: 'baseline', label: 'Baseline' },
+];
+
 type FeatureFlagsBooleanReader = Pick<FeatureFlagsStart, 'getBooleanValue'>;
 
 const isNextChromeFeatureFlagEnabled = (featureFlags: FeatureFlagsBooleanReader): boolean =>
@@ -49,3 +64,28 @@ export const toggleNextChrome = (featureFlags: FeatureFlagsBooleanReader): void 
  */
 export const isDesignExploration = (featureFlags: FeatureFlagsBooleanReader): boolean =>
   featureFlags.getBooleanValue(DESIGN_EXPLORATION_FEATURE_FLAG_KEY, false);
+
+export const isDesignExplorationVariantId = (variantId: string): boolean =>
+  DESIGN_EXPLORATION_VARIANT_OPTIONS.some(({ id }) => id === variantId);
+
+export const getDesignExplorationVariant = (): string => {
+  try {
+    const storedVariantId = sessionStorage.getItem(DESIGN_EXPLORATION_VARIANT_SESSION_KEY);
+    if (storedVariantId && isDesignExplorationVariantId(storedVariantId)) {
+      return storedVariantId;
+    }
+  } catch {
+    // ignore sessionStorage access errors
+  }
+
+  return DEFAULT_DESIGN_EXPLORATION_VARIANT_ID;
+};
+
+export const setDesignExplorationVariant = (variantId: string): void => {
+  if (!isDesignExplorationVariantId(variantId)) {
+    return;
+  }
+
+  sessionStorage.setItem(DESIGN_EXPLORATION_VARIANT_SESSION_KEY, variantId);
+  window.location.reload();
+};

@@ -16,7 +16,7 @@ import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal
 import { BehaviorSubject } from 'rxjs';
 import { type DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
 
-import { NEXT_CHROME_FEATURE_FLAG_KEY } from '@kbn/core-chrome-feature-flags';
+import { NEXT_CHROME_FEATURE_FLAG_KEY, isDesignExploration, isNextChrome } from '@kbn/core-chrome-feature-flags';
 
 export type UnregisterItemFn = () => void;
 export interface DeveloperToolbarItemRegistry {
@@ -100,6 +100,18 @@ export class DeveloperToolbarPlugin
           priority: 1,
         });
       });
+    }
+
+    if (isDesignExploration(core.featureFlags) && isNextChrome(core.featureFlags)) {
+      import('@kbn/core-chrome-feature-flags/design_exploration_variant_toggle').then(
+        ({ DesignExplorationVariantToggle }) => {
+          this.registerItem({
+            id: 'Design exploration',
+            children: <DesignExplorationVariantToggle />,
+            priority: 1,
+          });
+        }
+      );
     }
 
     return {
