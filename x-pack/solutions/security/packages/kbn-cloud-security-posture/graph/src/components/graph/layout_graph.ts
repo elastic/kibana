@@ -199,7 +199,15 @@ const layoutStackedLabels = (
   };
 };
 
-/** Position/size of a node after `layout()` has run. */
+/**
+ * Position/size of a node after `layout()` has run.
+ *
+ * Mirrors the shape this file previously cast to (dagre v2's `Dagre.Node`, removed in v3).
+ * dagre v3's `NodeLabel` marks x/y optional (unset pre-layout) and `graphlib.Graph` now
+ * defaults its generics to `any`, so `g.node(id)` is `any` and this cast is unchecked.
+ * Kept as a local mirror to keep the v3 migration minimal; properly typing the graph is
+ * left to the owning team.
+ */
 interface DagrePositionedNode {
   x: number;
   y: number;
