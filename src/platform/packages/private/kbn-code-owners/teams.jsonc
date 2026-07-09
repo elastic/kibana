@@ -940,6 +940,20 @@
     ]
   },
   {
+    "id": "streams-ui",
+    "name": "Streams UI",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/streams-ui",
+      "label": "Team:streams-ui"
+    },
+    "responsibilities": [
+      "Streams"
+    ]
+  },
+  {
     "id": "workchat-eng",
     "name": "Agent Builder",
     "areas": [

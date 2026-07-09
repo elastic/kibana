@@ -27,6 +27,7 @@ import {
   getCasesConfigureCreateTemplatePath,
   getCasesConfigureEditTemplatePath,
   getCasesConfigureFieldLibraryPath,
+  getCasesConfigureTemplatesPath,
 } from '../../common/navigation';
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
@@ -39,6 +40,8 @@ import type { AllFieldDefinitionsPageProps } from '../field_library/pages/all_fi
 import { KibanaServices } from '../../common/lib/kibana/services';
 
 const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../case_view'));
+
+const AllTemplatesLazy: FC = lazy(() => import('../templates_v2/pages/all_templates_page'));
 
 const CreateTemplateLazy: FC<CreateTemplatePageProps> = lazy(
   () => import('../templates_v2/pages/create_template/page')
@@ -56,9 +59,6 @@ const AllFieldDefinitionsLazy: FC<AllFieldDefinitionsPageProps> = lazy(
 // These will progressively replace the current pages and the FF will be removed.
 const AllCasesRedesignLazy = lazy(() => import('../cases_redesign/all_cases'));
 const CaseViewRedesignLazy: FC<CaseViewProps> = lazy(() => import('../cases_redesign/case_view'));
-const ConfigureCasesRedesignLazy = lazy(
-  () => import('../cases_redesign/configure_cases/configure_cases')
-);
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timelineIntegration }) => {
   const { basePath, permissions } = useCasesContext();
@@ -76,7 +76,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
   const casesRedesign = {
     list: config?.casesRedesign?.list ?? false,
     details: config?.casesRedesign?.details ?? false,
-    settings: config?.casesRedesign?.settings ?? false,
   };
 
   return (
@@ -104,6 +103,18 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
             <NoPrivilegesPage pageName={i18n.CREATE_CASE_PAGE_NAME} />
           )}
         </Route>
+
+        {isTemplatesEnabled && (
+          <Route exact path={getCasesConfigureTemplatesPath(basePath)}>
+            {permissions.manageTemplates ? (
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <AllTemplatesLazy />
+              </Suspense>
+            ) : (
+              <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+            )}
+          </Route>
+        )}
 
         {isTemplatesEnabled && (
           <Route exact path={getCasesConfigureFieldLibraryPath(basePath)}>
@@ -143,13 +154,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
 
         <Route path={getCasesConfigurePath(basePath)}>
           {permissions.settings ? (
-            casesRedesign.settings ? (
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <ConfigureCasesRedesignLazy />
-              </Suspense>
-            ) : (
-              <ConfigureCases />
-            )
+            <ConfigureCases />
           ) : (
             <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
           )}
