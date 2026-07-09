@@ -68,14 +68,14 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           kind: 'alert',
           metadata: { name: 'alert-rule-2' },
           time_field: '@timestamp',
-          schedule: { every: '5m', lookback: '10m' },
+          schedule: { every: '5m' },
           query: {
-            format: 'composed',
-            base: 'FROM metrics-* | STATS count = COUNT(*) BY host.name',
-            breach: { segment: '| WHERE count > 5' },
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | LIMIT 5' },
+            no_data: { query: 'FROM metrics-* | STATS c = COUNT(*)' },
           },
           no_data_strategy: 'recover',
-          recovery_strategy: 'no_breach',
+          recovery_strategy: undefined,
           grouping: undefined,
         })
       ),
@@ -103,6 +103,22 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 5' } },
           recovery_strategy: 'none',
           no_data_strategy: 'none',
+          grouping: undefined,
+        })
+      ),
+      apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          kind: 'alert',
+          metadata: { name: 'alert-rule-5' },
+          time_field: '@timestamp',
+          schedule: { every: '5m', lookback: '10m' },
+          query: {
+            format: 'composed',
+            base: 'FROM metrics-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: '| WHERE count > 5' },
+          },
+          no_data_strategy: 'recover',
+          recovery_strategy: 'no_breach',
           grouping: undefined,
         })
       ),
@@ -143,13 +159,13 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
     expect(state.has_errors).toBe(false);
 
     // Rule stats
-    expect(state.count_total).toBe(5);
-    expect(state.count_enabled).toBe(4);
+    expect(state.count_total).toBe(6);
+    expect(state.count_enabled).toBe(5);
     expect(state.count_agent_builder_assisted).toBe(1);
-    expect(state.count_by_kind).toStrictEqual({ alert: 4, signal: 1 });
+    expect(state.count_by_kind).toStrictEqual({ alert: 5, signal: 1 });
     expect(sortByName(state.count_by_schedule)).toStrictEqual([
       { name: '1m', value: 1 },
-      { name: '5m', value: 4 },
+      { name: '5m', value: 5 },
     ]);
     expect(sortByName(state.count_by_lookback)).toStrictEqual([
       { name: '10m', value: 1 },
@@ -157,11 +173,11 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
     ]);
     expect(state.count_with_grouping).toBe(1);
     expect(state.avg_grouping_fields_count).toBe(2);
-    expect(state.count_by_query_format).toStrictEqual({ standalone: 4, composed: 1 });
+    expect(state.count_by_query_format).toStrictEqual({ standalone: 5, composed: 1 });
     expect(state.count_by_recovery_strategy).toStrictEqual({ no_breach: 1, query: 1, none: 1 });
     expect(state.count_by_no_data_strategy).toStrictEqual({
       last_known_status: 1,
-      recover: 1,
+      recover: 2,
       none: 1,
     });
 
