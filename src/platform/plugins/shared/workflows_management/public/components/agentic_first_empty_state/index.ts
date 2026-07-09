@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowsEmptyState } from './workflows_empty_state';
-export { AgenticFirstEmptyState, AgenticFirstEmptyStateLive } from './agentic_first_empty_state';
-export type {
-  AgenticFirstEmptyStateLiveProps,
-  AgenticFirstEmptyStateProps,
-  AgenticFirstExample,
+export {
+  AgenticFirstEmptyState,
+  type AgenticFirstEmptyStateProps,
+  type AgenticFirstExample,
 } from './agentic_first_empty_state';
+export {
+  AgenticFirstEmptyStateLive,
+  type AgenticFirstEmptyStateLiveProps,
+} from './agentic_first_empty_state_live';
