@@ -23,7 +23,8 @@ import { expect } from '@kbn/scout/ui';
 import {
   clearStoredQueryMode,
   switchToMode,
-  type QueryMode, getCurrentAndStoredMode,
+  type QueryMode,
+  getCurrentAndStoredMode,
 } from '../fixtures/common/helpers';
 import { spaceTest } from '../fixtures/common';
 
