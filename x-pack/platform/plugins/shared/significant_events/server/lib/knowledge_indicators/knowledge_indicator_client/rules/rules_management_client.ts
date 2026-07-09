@@ -29,7 +29,6 @@ export interface IRulesManagementClient {
   /** Best-effort bulk delete: implementations should swallow 404/400 for missing rules. */
   bulkDeleteRules(ids: string[]): Promise<void>;
 
-  /** Returns all rule IDs owned by Streams for the given stream name. */
   findOwnedRuleIds(streamName: string): Promise<string[]>;
 }
 

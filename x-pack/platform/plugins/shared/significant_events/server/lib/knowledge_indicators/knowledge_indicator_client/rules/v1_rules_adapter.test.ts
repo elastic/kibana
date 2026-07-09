@@ -16,7 +16,7 @@ import {
 } from './rules_management_client';
 
 interface StubFindResult {
-  data: Array<{ id: string }>;
+  data: Array<{ id: string; tags: string[] }>;
   total: number;
   page: number;
   perPage: number;
@@ -184,7 +184,10 @@ describe('RulesAdapterV1', () => {
     it('returns rule ids for the given stream', async () => {
       const rc = makeRulesClient();
       rc.find.mockResolvedValueOnce({
-        data: [{ id: 'r-1' }, { id: 'r-2' }],
+        data: [
+          { id: 'r-1', tags: ['streams', 'my-stream'] },
+          { id: 'r-2', tags: ['streams', 'my-stream'] },
+        ],
         total: 2,
         page: 1,
         perPage: 500,
@@ -199,6 +202,7 @@ describe('RulesAdapterV1', () => {
           consumers: [STREAMS_RULE_CONSUMER],
           ruleTypeIds: [STREAMS_ESQL_RULE_TYPE_ID],
           filter: 'alert.attributes.tags: "my-stream"',
+          fields: ['id', 'tags'],
         }),
       });
     });
@@ -207,13 +211,13 @@ describe('RulesAdapterV1', () => {
       const rc = makeRulesClient();
       rc.find
         .mockResolvedValueOnce({
-          data: [{ id: 'r-1' }],
+          data: [{ id: 'r-1', tags: ['streams', 'my-stream'] }],
           total: 2,
           page: 1,
           perPage: 500,
         })
         .mockResolvedValueOnce({
-          data: [{ id: 'r-2' }],
+          data: [{ id: 'r-2', tags: ['streams', 'my-stream'] }],
           total: 2,
           page: 2,
           perPage: 500,

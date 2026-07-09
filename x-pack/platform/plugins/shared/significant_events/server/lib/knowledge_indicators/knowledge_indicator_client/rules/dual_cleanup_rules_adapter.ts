@@ -23,9 +23,9 @@ import type {
  * sides are targeted. Errors from the legacy adapter are logged and swallowed so a
  * missing legacy rule never blocks the primary operation.
  *
- * `findOwnedRuleIds` unions both sides (a flag flip doesn't migrate existing rules) and, unlike
- * the other methods, does not swallow legacy failures — its result feeds reconcileStream's
- * delete-by-absence decision, where a partial union would wrongly tombstone legacy-owned queries.
+ * `findOwnedRuleIds` unions both sides (flag flips don't migrate existing rules) and, unlike
+ * the other methods, propagates legacy errors — a partial union would wrongly orphan-delete
+ * legacy-owned rules via reconcileStream.
  */
 export class DualCleanupRulesAdapter implements IRulesManagementClient {
   constructor(

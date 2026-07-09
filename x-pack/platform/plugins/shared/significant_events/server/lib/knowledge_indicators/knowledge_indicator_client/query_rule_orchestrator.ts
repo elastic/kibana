@@ -414,8 +414,7 @@ export class QueryRuleOrchestrator {
       orphanRulesDeleted = orphans.length;
     }
 
-    // Seam: a rule-backed query whose rule was deleted out of band (invisible to the
-    // orphan sweep above, since it's absent from `ownedRuleIds`) gets tombstoned here.
+    // Catches out-of-band rule deletions the orphan sweep above missed (absent from ownedRuleIds).
     const staleQueryIds = backedLinks
       .filter((link) => !ownedRuleIdSet.has(link.rule_id) && !candidateIdSet.has(link.query.id))
       .map((link) => link.query.id);
