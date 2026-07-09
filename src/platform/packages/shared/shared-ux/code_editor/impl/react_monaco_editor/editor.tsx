@@ -225,7 +225,7 @@ export function MonacoEditor({
    */
   const lastKnownValueRef = useRef<string>(value ?? defaultValue);
   useEffect(() => {
-    if (typeof value === 'string') {
+    if (typeof value === 'string' && value !== lastKnownValueRef.current) {
       const modelEol = editor.current?.getModel()?.getEOL();
       lastKnownValueRef.current = modelEol ? normalizeEndOfLine(value, modelEol) : value;
     }
@@ -362,7 +362,7 @@ export function MonacoEditor({
     if (editor.current) {
       // In controlled mode, `value` changes on every keystroke. Avoid calling `editor.getValue()`
       // (which materializes the full model) by comparing against our shadow copy first.
-      if (typeof value !== 'string') {
+      if (typeof value !== 'string' || value === lastKnownValueRef.current) {
         return;
       }
 

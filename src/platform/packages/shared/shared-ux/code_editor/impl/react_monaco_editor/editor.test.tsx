@@ -218,7 +218,7 @@ describe('react monaco editor onChange performance', () => {
     cleanup();
   });
 
-  it('does not pushEditOperations for controlled rerenders when value matches last known value', async () => {
+  it('does not normalize or push edits when a controlled rerender matches the shadow value', async () => {
     const originalCreateModel = monaco.editor.createModel.bind(monaco.editor);
     let pushEditOperationsSpy: jest.SpyInstance | undefined;
     const createModelSpy = jest
@@ -251,14 +251,19 @@ describe('react monaco editor onChange performance', () => {
 
     expect(onChange).toHaveBeenCalledWith('abXXXXefghij', event);
 
-    rerender(<MonacoEditor value="abXXXXefghij" onChange={onChange} options={{}} />);
+    const stringIncludesSpy = jest.spyOn(String.prototype, 'includes');
+    try {
+      rerender(<MonacoEditor value="abXXXXefghij" onChange={onChange} options={{}} />);
 
-    expect(pushEditOperationsSpy).toBeDefined();
-    expect(pushEditOperationsSpy!).not.toHaveBeenCalled();
-    expect(editorPushUndoStop).not.toHaveBeenCalled();
-
-    createModelSpy.mockRestore();
-    cleanup();
+      expect(stringIncludesSpy).not.toHaveBeenCalledWith('\r');
+      expect(pushEditOperationsSpy).toBeDefined();
+      expect(pushEditOperationsSpy!).not.toHaveBeenCalled();
+      expect(editorPushUndoStop).not.toHaveBeenCalled();
+    } finally {
+      stringIncludesSpy.mockRestore();
+      createModelSpy.mockRestore();
+      cleanup();
+    }
   });
 
   describe('WHEN the Monaco model uses CRLF and the controlled value uses LF', () => {
