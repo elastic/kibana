@@ -8,14 +8,31 @@
  */
 
 type PlainObject = Record<string, unknown>;
+// A container we build into during reconstruction: either a plain object keyed by
+// string, or an array indexed by a numeric segment.
+type Container = PlainObject | unknown[];
 
 const isPlainObject = (value: unknown): value is PlainObject =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
+
+// A segment addresses an array element when it is a run of digits (e.g. `9`).
+const isArrayIndex = (segment: string): boolean => /^\d+$/.test(segment);
 
 // Keys that would let a crafted path walk into the prototype chain and pollute
 // Object.prototype during the write phase below. The shared Liquid engine enforces
 // `ownPropertyOnly` for template access; this keeps the raw JS traversal here in step.
 const UNSAFE_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor']);
+
+const getChild = (container: Container, key: string): unknown =>
+  Array.isArray(container) ? container[Number(key)] : container[key];
+
+const setChild = (container: Container, key: string, value: unknown): void => {
+  if (Array.isArray(container)) {
+    container[Number(key)] = value;
+  } else {
+    container[key] = value;
+  }
+};
 
 // Deep clone limited to JSON-serializable values. Leaf values are cloned so the
 // returned object never shares references with `source`, which keeps callers from
@@ -50,6 +67,12 @@ const copyPath = (source: PlainObject, result: PlainObject, path: string): void 
   for (const segment of segments) {
     if (isPlainObject(cursor) && Object.prototype.hasOwnProperty.call(cursor, segment)) {
       cursor = cursor[segment];
+    } else if (
+      Array.isArray(cursor) &&
+      isArrayIndex(segment) &&
+      Object.prototype.hasOwnProperty.call(cursor, segment)
+    ) {
+      cursor = cursor[Number(segment)];
     } else {
       return;
     }
@@ -59,15 +82,23 @@ const copyPath = (source: PlainObject, result: PlainObject, path: string): void 
     return;
   }
 
-  let target = result;
+  // Rebuild the path in `result`. Each intermediate container is an array when the
+  // next segment is a numeric index (so `users.9.surname` yields an array with the
+  // element at index 9, positions preserved) and a plain object otherwise.
+  let target: Container = result;
   for (let i = 0; i < segments.length - 1; i++) {
     const segment = segments[i];
-    if (!isPlainObject(target[segment])) {
-      target[segment] = {};
+    const childShouldBeArray = isArrayIndex(segments[i + 1]);
+    const existing = getChild(target, segment);
+    const existingIsRightType = childShouldBeArray
+      ? Array.isArray(existing)
+      : isPlainObject(existing);
+    if (!existingIsRightType) {
+      setChild(target, segment, childShouldBeArray ? [] : {});
     }
-    target = target[segment] as PlainObject;
+    target = getChild(target, segment) as Container;
   }
-  target[segments[segments.length - 1]] = cloneValue(cursor);
+  setChild(target, segments[segments.length - 1], cloneValue(cursor));
 };
 
 /**
@@ -75,7 +106,9 @@ const copyPath = (source: PlainObject, result: PlainObject, path: string): void 
  * preserving the original nested structure and value types (numbers, booleans, and
  * arrays are kept as-is, not stringified).
  *
- * - Paths that are absent, or that traverse through a non-object, are skipped.
+ * - Paths that are absent, or that traverse through a non-object/non-array, are skipped.
+ * - Numeric segments index into arrays (`users.9.surname`); the picked structure keeps
+ *   the array shape and the element's original index (intervening positions stay empty).
  * - Paths containing `__proto__`, `prototype`, or `constructor` are skipped to
  *   avoid prototype pollution.
  * - The `source` is never mutated; leaf values are deep-cloned.
@@ -83,6 +116,8 @@ const copyPath = (source: PlainObject, result: PlainObject, path: string): void 
  *
  * @example
  * pickObjectFields({ a: { b: 1, c: 2 }, d: 3 }, ['a.b', 'd']) // => { a: { b: 1 }, d: 3 }
+ * @example
+ * pickObjectFields({ users: [{ name: 'a', age: 1 }] }, ['users.0.name']) // => { users: [{ name: 'a' }] }
  */
 export const pickObjectFields = (source: unknown, paths: readonly string[]): unknown => {
   if (!isPlainObject(source)) {

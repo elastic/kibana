@@ -59,6 +59,35 @@ describe('pickObjectFields', () => {
     expect(pickObjectFields({ a: 1 }, [])).toEqual({});
   });
 
+  it('picks a field from an array element by numeric index', () => {
+    const source = { users: [{ name: 'a', age: 1 }, { name: 'b' }] };
+    expect(pickObjectFields(source, ['users.0.name'])).toEqual({ users: [{ name: 'a' }] });
+  });
+
+  it('merges picks across array indices into one array', () => {
+    const source = {
+      users: [
+        { name: 'a', age: 1 },
+        { name: 'b', age: 2 },
+      ],
+    };
+    expect(pickObjectFields(source, ['users.0.name', 'users.1.age'])).toEqual({
+      users: [{ name: 'a' }, { age: 2 }],
+    });
+  });
+
+  it('preserves the original index when picking a later array element', () => {
+    const source = { users: [{ name: 'a' }, { name: 'b' }] };
+    // A sparse pick keeps element 1 at index 1; the hole serializes as null.
+    expect(JSON.stringify(pickObjectFields(source, ['users.1.name']))).toBe(
+      '{"users":[null,{"name":"b"}]}'
+    );
+  });
+
+  it('skips an out-of-bounds array index', () => {
+    expect(pickObjectFields({ users: [{ name: 'a' }] }, ['users.5.name'])).toEqual({});
+  });
+
   it('skips paths containing prototype-pollution segments', () => {
     // A source with own `__proto__`/`constructor` keys, as JSON.parse produces.
     const source = JSON.parse('{"__proto__":{"polluted":true},"constructor":{"polluted":true}}');
