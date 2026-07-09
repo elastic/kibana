@@ -13,17 +13,24 @@ import { convertPreviousRounds } from '../utils/to_langchain_messages';
 import { attachmentTypeInstructions, renderAttachmentPrompt } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
-import { formatDate } from './utils/helpers';
 import { getFileSystemInstructions } from './utils/filestore';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
+import { renderRenderersPrompt } from './utils/renderers';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
 export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { actions, cycleLimit, processedConversation, resultTransformer, toolManager } = params;
+  const {
+    actions,
+    cycleLimit,
+    processedConversation,
+    resultTransformer,
+    toolManager,
+    conversationTimestamp,
+  } = params;
 
   // Generate messages from the conversation's rounds, optionally
   // injecting a compaction summary for older compacted rounds.
@@ -33,6 +40,7 @@ export const getResearchAgentPrompt = async (
     conversation: processedConversation,
     resultTransformer,
     compactionSummary: processedConversation.compactionSummary,
+    conversationTimestamp,
   });
 
   return [
@@ -48,15 +56,13 @@ export const getResearchAgentPrompt = async (
 };
 
 const getAgentSystemMessage = async ({
-  configuration: {
-    research: { instructions: customInstructions },
-  },
-  conversationTimestamp,
+  configuration: { instructions: customInstructions },
   processedConversation: { attachmentTypes, versionedAttachmentPresentation },
   outputSchema,
   skills,
   experimentalFeatures,
   capabilities,
+  renderers,
 }: ResearchAgentPromptParams): Promise<string> => {
   const visEnabled = capabilities.visualizations;
 
@@ -140,6 +146,5 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ${renderAttachmentPrompt()}
 
-## ADDITIONAL INFO
-- Current date: ${formatDate(conversationTimestamp)}`);
+${renderRenderersPrompt(renderers, { bashEnabled: experimentalFeatures.bash })}`);
 };

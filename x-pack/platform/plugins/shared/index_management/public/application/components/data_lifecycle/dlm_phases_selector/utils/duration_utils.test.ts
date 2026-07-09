@@ -169,6 +169,57 @@ describe('duration_utils', () => {
         })
       ).toEqual({ isValid: true });
     });
+
+    it('rejects a delete duration greater than the maximum retention', () => {
+      expect(
+        validateDurations(
+          {
+            frozen: { enabled: false, value: '30', unit: 'd' },
+            delete: { enabled: true, value: '400', unit: 'd' },
+          },
+          '365d'
+        )
+      ).toEqual({
+        deleteError: 'Must occur before the maximum retention (365d).',
+        isValid: false,
+      });
+    });
+
+    it('compares the delete duration against the maximum retention across units', () => {
+      expect(
+        validateDurations(
+          {
+            frozen: { enabled: false, value: '30', unit: 'd' },
+            delete: { enabled: true, value: '25', unit: 'h' },
+          },
+          '1d'
+        ).isValid
+      ).toBe(false);
+    });
+
+    it('is valid when the delete duration is within the maximum retention', () => {
+      expect(
+        validateDurations(
+          {
+            frozen: { enabled: false, value: '30', unit: 'd' },
+            delete: { enabled: true, value: '365', unit: 'd' },
+          },
+          '365d'
+        )
+      ).toEqual({ isValid: true });
+    });
+
+    it('ignores the maximum retention when the delete phase is disabled', () => {
+      expect(
+        validateDurations(
+          {
+            frozen: { enabled: false, value: '30', unit: 'd' },
+            delete: { enabled: false, value: '400', unit: 'd' },
+          },
+          '365d'
+        )
+      ).toEqual({ isValid: true });
+    });
   });
 
   describe('getDurationUnitSelectOptions', () => {

@@ -80,6 +80,16 @@ export interface EmbeddableConversationProps {
   attachments?: ConversationAttachment[];
 
   /**
+   * Optional heading shown on the empty "new conversation" screen in place of the
+   * default "How can I help you?" greeting. Use this to surface a page-specific
+   * call to action (e.g. "What do you want to automate?" for the workflow editor).
+   *
+   * The value is rendered as plain text; embedders are expected to pass an
+   * already-translated string.
+   */
+  greetingMessage?: string;
+
+  /**
    * Browser API tools that the agent can use to interact with the page.
    * Tools are executed browser-side when the LLM requests them.
    *

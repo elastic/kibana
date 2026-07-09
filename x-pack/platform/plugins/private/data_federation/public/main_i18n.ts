@@ -48,6 +48,12 @@ export const mainTranslations = {
       editActionDescription: i18n.translate('xpack.dataFederation.table.editActionDescription', {
         defaultMessage: 'Edit data source',
       }),
+      editActionUnsupportedTypeDescription: i18n.translate(
+        'xpack.dataFederation.table.editActionUnsupportedTypeDescription',
+        {
+          defaultMessage: 'This data source type is not supported for editing in this view.',
+        }
+      ),
       deleteAction: i18n.translate('xpack.dataFederation.table.deleteAction', {
         defaultMessage: 'Delete',
       }),
@@ -55,6 +61,13 @@ export const mainTranslations = {
         'xpack.dataFederation.table.deleteActionDescription',
         {
           defaultMessage: 'Delete data source',
+        }
+      ),
+      deleteActionHasDataSetsDescription: i18n.translate(
+        'xpack.dataFederation.table.deleteActionHasDataSetsDescription',
+        {
+          defaultMessage:
+            'To delete a data source, you must first delete all datasets that read from it.',
         }
       ),
       caption: i18n.translate('xpack.dataFederation.table.caption', {

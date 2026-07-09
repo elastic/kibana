@@ -57,6 +57,14 @@ export const AIValueUpsellingPageLazy = withSuspenseUpsell(
   )
 );
 
+export const AlertAnalysisWorkflowUpsellingPageLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./pages/alert_analysis_workflow').then(({ AlertAnalysisWorkflowUpsellingPageESS }) => ({
+      default: AlertAnalysisWorkflowUpsellingPageESS,
+    }))
+  )
+);
+
 export const GraphVisualizationUpsellingSectionLazy = withSuspenseUpsell(
   lazy(() =>
     import('./sections/graph_visualization_upselling').then(

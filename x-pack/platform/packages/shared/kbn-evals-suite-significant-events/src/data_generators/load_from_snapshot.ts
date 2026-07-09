@@ -23,7 +23,7 @@ import { DEFAULT_LOGS_INDEX } from '../constants';
 
 /**
  * Raw query knowledge-indicator doc as captured from the KI data stream. Carries
- * `query.rule_id`, which the investigator/judge match against `detection.rule_uuid`.
+ * `query.rule_id`, which the discovery/judge match against `detection.rule_uuid`.
  */
 export interface SnapshotQueryKi {
   id?: string;

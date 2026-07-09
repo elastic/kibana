@@ -8,6 +8,7 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type { MetricVisualizationState } from '@kbn/lens-common';
 
 import { validator } from '../utils/validator';
 import type { MetricConfig } from '../../schema/charts/metric';
@@ -27,6 +28,7 @@ import {
   breakdownMetricAPIAttributes,
   complexMetricAPIAttributes,
   complexESQLMetricAPIAttributes,
+  esqlMetricWithTrendAPIAttributes,
   metricAPIWithTermsRankedBySecondary,
 } from './lens_api_config.mock';
 
@@ -78,12 +80,38 @@ describe('Metric', () => {
       validator.metric.fromApi(complexESQLMetricAPIAttributes);
     });
 
+    it('should convert an ESQL metric with trend background chart', () => {
+      validator.metric.fromApi(esqlMetricWithTrendAPIAttributes);
+    });
+
     it('should convert a metric with a terms agg ranked by secondary metric', () => {
       validator.metric.fromApi(metricAPIWithTermsRankedBySecondary);
     });
   });
 
-  describe('color default application', () => {
+  describe('trendline persistence', () => {
+    it('should preserve an ESQL metric trendline when serializing renderable Lens state', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const lensState = builder.fromAPIFormat(esqlMetricWithTrendAPIAttributes);
+      const visualization = lensState.state.visualization as MetricVisualizationState;
+
+      expect(visualization.trendlineLayerId).toBeDefined();
+      expect(visualization.trendlineMetricAccessor).toBeDefined();
+      expect(visualization.trendlineTimeAccessor).toBeDefined();
+
+      delete visualization.trendlineLayerType;
+
+      const apiOutput = builder.toAPIFormat(lensState) as MetricConfig;
+      const [primaryMetric] = apiOutput.metrics;
+
+      expect(primaryMetric).toMatchObject({
+        type: 'primary',
+        background_chart: { type: 'trend' },
+      });
+    });
+  });
+
+  describe('default application', () => {
     const baseMetric = {
       type: 'metric',
       title: 'Color default test',
@@ -130,6 +158,16 @@ describe('Metric', () => {
 
       expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
       expect(apiOutput.metrics[1].color).toEqual(NO_COLOR);
+    });
+
+    it('should emit default density when no density is specified', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseMetric);
+      const apiOutput = builder.toAPIFormat(lensState) as MetricConfig;
+      const visualization = lensState.state.visualization as MetricVisualizationState;
+
+      expect(visualization.density).toBe('default');
+      expect(apiOutput.styling?.density).toBe('default');
     });
   });
 });
