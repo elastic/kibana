@@ -272,4 +272,49 @@ describe('spec connector with API fetch', () => {
     // Should show connector selection again
     expect(await screen.findByTestId('spec-connector-test-card')).toBeInTheDocument();
   });
+
+  describe('documentation link resolution', () => {
+    it('derives the docs link from the connector id when the spec has no docsUrl', async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('spec-connector-test-card'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('create-connector-flyout-header-docs-link')).toHaveAttribute(
+          'href',
+          `${appMockRenderer.coreStart.docLinks.links.alerting.connectors}/spec-connector-test-action-type`
+        );
+      });
+    });
+
+    it('links to the connectors index when the spec docsUrl is an empty string (no dedicated page)', async () => {
+      appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue({
+        ...mockSpecResponse,
+        metadata: { ...mockSpecResponse.metadata, docs_url: '' },
+      });
+
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('spec-connector-test-card'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('create-connector-flyout-header-docs-link')).toHaveAttribute(
+          'href',
+          appMockRenderer.coreStart.docLinks.links.alerting.connectors
+        );
+      });
+    });
+  });
 });
