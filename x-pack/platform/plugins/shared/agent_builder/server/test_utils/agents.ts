@@ -22,6 +22,7 @@ export const createMockedAgentRegistry = (): AgentRegistryMock => {
     create: jest.fn(),
     update: jest.fn(),
     list: jest.fn(),
+    getIds: jest.fn(),
     delete: jest.fn(),
     getAccessControl: jest.fn(),
     updateAccessControl: jest.fn(),

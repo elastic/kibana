@@ -5,12 +5,15 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import type { AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import { environmentRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeRt } from '../../default_api_types';
 
 export interface ServiceAnomalyScoreResponse {
   anomalyScore?: number;
+  detectorType?: AnomalyDetectorType;
+  anomalyEnvironment?: Environment;
 }
 
 export const serviceAnomalyScoreRoute = defineRoute<ServiceAnomalyScoreResponse>()({

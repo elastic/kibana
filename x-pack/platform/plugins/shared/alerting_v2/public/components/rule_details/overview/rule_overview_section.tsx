@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
 import { AlertTimelineSection } from './alert_timeline/alert_timeline_section';
-import { DashboardArtifactsSection } from './artifacts';
+import { ArtifactsSection } from './artifacts';
 import { SignalRuleOverview } from './signal_rule_overview';
 import { useRule } from '../rule_context';
 
@@ -18,7 +18,9 @@ export const RuleOverviewSection: React.FC = () => {
   return (
     <div data-test-subj="ruleOverviewSection">
       {rule.kind === 'signal' ? (
-        <SignalRuleOverview />
+        <EuiErrorBoundary>
+          <SignalRuleOverview />
+        </EuiErrorBoundary>
       ) : (
         <EuiErrorBoundary>
           <AlertTimelineSection />
@@ -27,7 +29,7 @@ export const RuleOverviewSection: React.FC = () => {
       {rule.kind === 'alert' ? (
         <>
           <EuiSpacer size="l" />
-          <DashboardArtifactsSection />
+          <ArtifactsSection />
         </>
       ) : null}
     </div>

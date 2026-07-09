@@ -8,18 +8,18 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPageHeader,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   logicalCSS,
   useEuiTheme,
 } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { RenderDocumentViewCallback, SortOrder } from '@kbn/unified-data-table';
 import {
@@ -53,7 +53,6 @@ import {
   EpisodeSeverityCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { ExperimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
@@ -70,6 +69,16 @@ import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 
 const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
+
+const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): AppHeaderMenu => ({
+  primaryActionItem: {
+    id: 'manageRules',
+    label: i18n.EPISODES_LIST_MANAGE_RULES,
+    iconType: 'gear',
+    href: manageRulesHref,
+    testId: 'alertingV2EpisodesListManageRules',
+  },
+});
 
 const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
@@ -174,14 +183,9 @@ export const AlertEpisodesListPage = () => {
     timeRange,
   });
 
-  const { data: filteredKpis } = useEpisodesKpisQuery({ services, filterState, timeRange });
-  const { data: totalKpis } = useEpisodesKpisQuery({ services, timeRange });
+  const { data: kpis } = useEpisodesKpisQuery({ services, filterState, timeRange });
 
-  const filteredAlertEpisodesCount = filteredKpis?.alertsCount ?? 0;
-  /* The two KPI queries resolve independently; clamping avoids briefly showing an
-  impossible "filtered > total" state when the filtered count updates first.
-  */
-  const totalAlertEpisodesCount = Math.max(totalKpis?.alertsCount ?? 0, filteredAlertEpisodesCount);
+  const alertEpisodesCount = kpis?.alertsCount ?? 0;
 
   const sort: SortOrder[] = useMemo(
     () => [[sortState.sortField, sortState.sortDirection]],
@@ -240,14 +244,7 @@ export const AlertEpisodesListPage = () => {
           >
             <EuiFlexItem grow={false}>
               <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
-                <FormattedMessage
-                  id="xpack.alertingV2.episodes.itemCount"
-                  defaultMessage="Showing {filtered} of {total} {total, plural, one {alert} other {alerts}}"
-                  values={{
-                    filtered: <strong>{filteredAlertEpisodesCount}</strong>,
-                    total: <strong>{totalAlertEpisodesCount}</strong>,
-                  }}
-                />
+                {i18n.EPISODES_LIST_ITEM_COUNT(alertEpisodesCount)}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -270,13 +267,7 @@ export const AlertEpisodesListPage = () => {
           </EuiFlexGroup>
         ),
       }),
-    [
-      euiTheme.size.s,
-      filteredAlertEpisodesCount,
-      handleClearFilters,
-      hasActiveFilters,
-      totalAlertEpisodesCount,
-    ]
+    [euiTheme.size.s, alertEpisodesCount, handleClearFilters, hasActiveFilters]
   );
 
   const episodeActions: EpisodeAction[] = useMemo(
@@ -393,6 +384,14 @@ export const AlertEpisodesListPage = () => {
     [rulesCache, isLoadingRules, rowHeight, services.userProfile]
   );
 
+  const episodesMenu = useMemo(
+    () =>
+      getEpisodesListMenu({
+        manageRulesHref: services.http.basePath.prepend(paths.ruleList),
+      }),
+    [services.http.basePath]
+  );
+
   return (
     <div
       data-test-subj="alertingV2EpisodesListPage"
@@ -404,30 +403,12 @@ export const AlertEpisodesListPage = () => {
         min-width: 0;
       `}
     >
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false} component="span">
-              {i18n.EPISODES_LIST_PAGE_TITLE}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} component="span">
-              <ExperimentalBadge />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        rightSideItems={[
-          <EuiButton
-            key="manage-rules"
-            color="text"
-            size="s"
-            iconType="gear"
-            href={services.http.basePath.prepend(paths.ruleList)}
-            data-test-subj="alertingV2EpisodesListManageRules"
-          >
-            {i18n.EPISODES_LIST_MANAGE_RULES}
-          </EuiButton>,
-        ]}
+      <AppHeader
+        sticky={false}
+        title={i18n.EPISODES_LIST_PAGE_TITLE}
+        titleAppend={<ExperimentalBadge />}
+        padding={{ bleed: 'm' }}
+        menu={episodesMenu}
       />
       <EuiSpacer size="m" />
 
@@ -518,6 +499,7 @@ export const AlertEpisodesListPage = () => {
                     onUpdateRowHeight={setRowHeight}
                     configRowHeight={rowHeight}
                     customBulkActions={customBulkActions}
+                    hideDefaultBulkActions
                     rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                     visibleRowLeadingControls={3}
                     enableComparisonMode={false}

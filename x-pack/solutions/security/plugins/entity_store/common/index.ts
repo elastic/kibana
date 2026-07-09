@@ -61,6 +61,9 @@ export const ENTITY_STORE_ROUTES = {
     RESOLUTION_LINK: `${PUBLIC_BASE_ROUTE}/resolution/link`,
     RESOLUTION_UNLINK: `${PUBLIC_BASE_ROUTE}/resolution/unlink`,
     RESOLUTION_GROUP: `${PUBLIC_BASE_ROUTE}/resolution/group`,
+    RESOLUTION_RULES_LIST: `${PUBLIC_BASE_ROUTE}/resolution/rules`,
+    RESOLUTION_RULES_ENABLE: `${PUBLIC_BASE_ROUTE}/resolution/rules/{id}/enable`,
+    RESOLUTION_RULES_DISABLE: `${PUBLIC_BASE_ROUTE}/resolution/rules/{id}/disable`,
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE_ROUTE}/check_privileges`,
@@ -81,8 +84,8 @@ export {
   GetEntityMaintainersResponse,
 } from './entity_maintainers';
 
-export { RESOLUTION_RULE_IDS } from './domain/resolution_rules/constants';
-export type { ResolutionRuleId } from './domain/resolution_rules/constants';
+export { RESOLUTION_RULE_IDS, RESOLUTION_RULE_KINDS } from './domain/resolution_rules/constants';
+export type { ResolutionRuleId, ResolutionRuleKind } from './domain/resolution_rules/constants';
 
 export const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
@@ -100,7 +103,36 @@ export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
-export type { Entity } from './domain/definitions/entity.gen';
+export type {
+  Entity,
+  HostEntity,
+  UserEntity,
+  ServiceEntity,
+  GenericEntity,
+  EntityField,
+  EngineMetadata,
+  Asset,
+} from './domain/definitions/entity.gen';
+export type {
+  EntitySummaryHighlight,
+  EntitySummaryStaleness,
+  EntitySummaryStalenessSignal,
+  EntitySummaryStalenessSnapshot,
+  EntitySummaryStalenessEntitySnapshot,
+  EntitySummaryStalenessReason,
+  SaveEntityAiSummaryParams,
+  SaveEntityAiSummarySummary,
+  PersistedEntityAiSummary,
+  GetPersistedAiSummaryResponse,
+} from './domain/definitions/entity_summary_staleness';
+// Entity AI summary runtime helpers (staleness detection, structural caps, request-length
+// caps) intentionally live behind the `@kbn/entity-store/common/entity_summary` subpath, NOT
+// this page-load barrel, so they only ship in the chunks that use them (lazy flyout / server)
+// rather than on every page load. Only the erased-at-build-time types stay in the barrel.
+export type {
+  EntitySummaryContent,
+  CappedEntitySummaryContent,
+} from './domain/definitions/entity_summary_limits';
 
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). */
@@ -110,12 +142,13 @@ export interface IdentitySourceFields {
 }
 
 export type { NonEcsTimelineDataRow } from './domain/euid/non_ecs_timeline_data';
-export type { AssetCriticalityLevel } from './domain/definitions/entity.gen';
+export type { AssetCriticalityLevel, EntityRiskLevels } from './domain/definitions/entity.gen';
 
 export {
   ENTITY_LATEST,
   ENTITY_UPDATES,
   ENTITY_HISTORY,
+  ENTITY_METADATA,
   ENTITY_BASE_PREFIX,
   ENTITY_SCHEMA_VERSION_V2,
   MAPPING_VERSION,
@@ -123,4 +156,31 @@ export {
   getEntitiesAlias,
   getLatestEntitiesIndexName,
   getLatestEntityIndexPattern,
+  getEntityMetadataAlias,
+  getMetadataEntityIndexPattern,
 } from './domain/entity_index';
+
+export type {
+  EngineStatus,
+  EngineDescriptor,
+  EngineComponentResource,
+  EngineComponentStatus,
+  GetEntityStoreStatusResponse,
+  InitEntityStoreResponse,
+  InspectQuery,
+  ListEntitiesResponse,
+} from './api_types';
+
+export { RELATIONSHIP_KINDS } from './domain/entity_metadata/relationship_metadata';
+export type {
+  RelationshipKind,
+  RelationshipMetadataDoc,
+  RelationshipMetadataMaintainer,
+} from './domain/entity_metadata/relationship_metadata';
+export { AI_SUMMARY_EVENT_ACTION } from './domain/entity_metadata/ai_summary_metadata';
+export type {
+  AiSummaryMetadataDoc,
+  AiSummaryHighlightItem,
+  AiSummaryMetadataStaleness,
+  AiSummaryMetadataStalenessSnapshot,
+} from './domain/entity_metadata/ai_summary_metadata';

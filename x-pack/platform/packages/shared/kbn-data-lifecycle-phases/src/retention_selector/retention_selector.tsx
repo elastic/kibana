@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState, type RefObject } from 'react';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -23,6 +23,9 @@ import type { RetentionOption } from './types';
 import { RetentionSelectableRow } from './retention_selectable_row';
 import { getRetentionSelectorStyles } from './styles';
 import { retentionSelectorStrings as strings } from './strings';
+import { useFlyoutNestedScrollHeight } from '../hooks/use_flyout_nested_scroll_height';
+
+const NO_FLYOUT_SCROLL_CONTAINER_REF: RefObject<HTMLElement | null> = { current: null };
 
 export type RetentionSelectorMethod = string;
 
@@ -80,6 +83,11 @@ export interface RetentionSelectorProps {
    * - `badge`: inside the row badge (Streams import flyout)
    */
   inspectPlacement?: 'rowAction' | 'badge';
+  /**
+   * When provided with `height="full"`, the list gets a fixed nested scroll
+   * height while the surrounding `EuiFlyoutBody` keeps its own scroll.
+   */
+  flyoutScrollContainerRef?: RefObject<HTMLElement | null>;
 }
 
 export const RetentionSelector = ({
@@ -96,11 +104,21 @@ export const RetentionSelector = ({
   inspectButtonLabel,
   methodFilter,
   inspectPlacement = 'rowAction',
+  flyoutScrollContainerRef,
 }: RetentionSelectorProps) => {
   const { euiTheme } = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
   const [isMethodFilterPopoverOpen, setIsMethodFilterPopoverOpen] = useState(false);
-  const styles = getRetentionSelectorStyles({ euiTheme, height });
+  const listScrollRef = useRef<HTMLDivElement>(null);
+  const nestedScrollHeight = useFlyoutNestedScrollHeight(
+    flyoutScrollContainerRef ?? NO_FLYOUT_SCROLL_CONTAINER_REF,
+    listScrollRef
+  );
+  const styles = getRetentionSelectorStyles({
+    euiTheme,
+    height,
+    nestedScrollHeight: height === 'full' ? nestedScrollHeight : undefined,
+  });
 
   const defaultGetMethodForOption = useCallback(
     (option: RetentionOption): RetentionSelectorMethod | undefined => option.method,
@@ -244,7 +262,14 @@ export const RetentionSelector = ({
           </EuiPanel>
         </EuiFlexItem>
       ) : (
-        <EuiFlexItem css={styles.scrollContainer}>{list}</EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          ref={listScrollRef}
+          css={styles.scrollContainer}
+          data-test-subj="retentionSelectorListScroll"
+        >
+          {list}
+        </EuiFlexItem>
       )}
     </EuiFlexGroup>
   );

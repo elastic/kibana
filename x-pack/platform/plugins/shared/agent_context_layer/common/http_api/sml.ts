@@ -106,10 +106,16 @@ export interface SmlHttpItem {
 }
 
 /**
- * Response body for `GET /internal/agent_context_layer/sml/{id}`.
+ * Response body for `GET /internal/agent_context_layer/sml/{originId}`.
+ *
+ * Returns every chunk written under the origin (the workflow step's
+ * content mode can write multiple chunks per origin, the crawler may
+ * write one, etc.). Consumers iterate; ordering is not guaranteed.
+ * `items` is empty (not 404) is impossible — when no chunks exist or
+ * none are visible to the caller, the route returns 404 directly.
  */
 export interface SmlGetHttpResponse {
-  item: SmlHttpItem;
+  items: SmlHttpItem[];
 }
 
 /**
@@ -130,23 +136,6 @@ export interface SmlListHttpResponse {
   page: number;
   per_page: number;
   items: SmlHttpItem[];
-}
-
-/**
- * Response body for `PUT /internal/agent_context_layer/sml/{id}`.
- */
-export interface SmlUpsertHttpResponse {
-  item: SmlHttpItem;
-  /** Whether the document was newly created (vs. updated in place). */
-  created: boolean;
-}
-
-/**
- * Response body for `DELETE /internal/agent_context_layer/sml/{id}`.
- */
-export interface SmlDeleteHttpResponse {
-  id: string;
-  deleted: boolean;
 }
 
 /**

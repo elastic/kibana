@@ -73,7 +73,7 @@ export class DataGrid {
     await this.waitUntilFieldListHasCountOfFields();
     await this.page.testSubj.fill('fieldListFiltersFieldSearch', field);
     await this.page.testSubj.click(`fieldToggle-${field}`);
-    await this.waitUntilSearchingHasFinished();
+    await this.waitForLoad();
   }
 
   async changeRowsPerPageTo(rowsPerPage: number) {
@@ -282,7 +282,7 @@ export class DataGrid {
       await this.page.testSubj.click(`pagination-button-${lastPageNumber}`);
     }
 
-    await this.waitUntilSearchingHasFinished();
+    await this.waitForLoad();
   }
 
   async goToNextInTableSearchMatch() {
@@ -326,6 +326,14 @@ export class DataGrid {
 
   async openDocViewerTab(tabId: string) {
     await this.page.testSubj.click(`docViewerTab-${tabId}`);
+  }
+
+  getDocViewer(): Locator {
+    return this.page.testSubj.locator('kbnDocViewer');
+  }
+
+  getDocViewerTab(tabId: string): Locator {
+    return this.page.testSubj.locator(`docViewerTab-${tabId}`);
   }
 
   async openGridDisplaySettings() {
@@ -434,7 +442,7 @@ export class DataGrid {
     await input.waitFor({ state: 'visible' });
     await input.fill(newValue.toString());
     await input.press('Enter');
-    await this.waitUntilSearchingHasFinished();
+    await this.waitForLoad();
     await this.page.keyboard.press('Escape');
   }
 
@@ -478,11 +486,10 @@ export class DataGrid {
   }
 
   async waitForDocViewerFlyoutOpen() {
-    const docViewer = this.page.testSubj.locator('kbnDocViewer');
-    await docViewer.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.getDocViewer().waitFor({ state: 'visible', timeout: 30_000 });
   }
 
-  async waitUntilSearchingHasFinished() {
+  async waitForLoad() {
     try {
       await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
         state: 'visible',

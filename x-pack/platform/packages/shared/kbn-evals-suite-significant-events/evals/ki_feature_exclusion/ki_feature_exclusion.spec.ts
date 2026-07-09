@@ -11,7 +11,6 @@ import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
   cleanSignificantEventsDataStreams,
-  listAvailableSnapshots,
   replaySignificantEventsSnapshot,
 } from '../../src/data_generators/replay';
 import { evaluate } from '../../src/evaluate';
@@ -23,6 +22,7 @@ import {
   type KIFeatureExclusionScenario,
 } from '../../src/datasets';
 import { createExcludeSemanticEvaluator } from '../../src/evaluators/ki_feature_exclusion/evaluators';
+import { buildAvailableSnapshotsBySource } from '../shared';
 import { runExcludeExperiment } from './run_exclude_experiment';
 
 evaluate.describe.configure({ timeout: 1_200_000 });
@@ -35,22 +35,13 @@ evaluate.describe(
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
     evaluate.beforeAll(async ({ esClient, log }) => {
-      const uniqueCatalogSources = new Map<string, GcsConfig>();
-      for (const dataset of activeDatasets) {
-        for (const scenario of dataset.kiFeatureExclusion ?? []) {
-          const source = resolveScenarioSnapshotSource({
-            scenarioId: scenario.input.scenario_id,
-            datasetGcs: dataset.gcs,
-            snapshotSource: scenario.snapshot_source,
-          });
-          uniqueCatalogSources.set(snapshotCatalogKey(source.gcs), source.gcs);
-        }
-      }
-
-      for (const [catalogSourceKey, gcs] of uniqueCatalogSources.entries()) {
-        const availableSnapshots = await listAvailableSnapshots(esClient, log, gcs);
-        availableSnapshotsBySource.set(catalogSourceKey, new Set(availableSnapshots));
-      }
+      const snapshots = await buildAvailableSnapshotsBySource(
+        activeDatasets,
+        (dataset) => dataset.kiFeatureExclusion ?? [],
+        esClient,
+        log
+      );
+      snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
     });
 
     for (const dataset of activeDatasets) {

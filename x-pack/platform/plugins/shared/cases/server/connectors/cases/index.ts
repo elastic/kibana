@@ -51,6 +51,7 @@ interface GetCasesConnectorTypeArgs {
   getSpaceId: (request?: KibanaRequest) => string;
   serverlessProjectType?: string;
   isCasesAttachmentsEnabled: boolean;
+  isTemplatesEnabled: boolean;
 }
 
 export const getCasesConnectorType = ({
@@ -60,6 +61,7 @@ export const getCasesConnectorType = ({
   getUiSettingsClient,
   serverlessProjectType,
   isCasesAttachmentsEnabled,
+  isTemplatesEnabled,
 }: GetCasesConnectorTypeArgs): SubActionConnectorType<
   CasesConnectorConfig,
   CasesConnectorSecrets
@@ -74,6 +76,7 @@ export const getCasesConnectorType = ({
         getUnsecuredSavedObjectsClient,
         getUiSettingsClient,
         isCasesAttachmentsEnabled,
+        isTemplatesEnabled,
       },
       connectorParams: params,
     }),
@@ -158,6 +161,7 @@ export const getCasesConnectorAdapter = ({
         timeWindow: params.subActionParams.timeWindow,
         maximumCasesToOpen,
         templateId: params.subActionParams.templateId,
+        templateVersion: params.subActionParams.templateVersion,
         internallyManagedAlerts,
       };
 

@@ -8,6 +8,7 @@
 import { EuiContextMenu, EuiPopover, EuiPopoverTitle, useGeneratedHtmlId } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { getFieldFormat } from '../../../shared/utils/get_field_format';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import type { Status } from '../../../../../common/api/detection_engine';
 import {
@@ -53,9 +54,6 @@ interface StatusPopoverButtonProps {
    */
   disabled: boolean;
 }
-
-const getFieldFormat = (field?: { format?: string | SerializedFieldFormat }) =>
-  typeof field?.format === 'string' ? field.format : field?.format?.id;
 
 /**
  * Renders a button and its popover to display the status of an alert and allows the user to change it.

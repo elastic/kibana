@@ -8,19 +8,20 @@
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPageHeader,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
   type EuiTableSelectionType,
 } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import type {
   ActionPolicyBulkAction,
@@ -34,6 +35,7 @@ import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ExperimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDestinationsSummary } from '../../components/action_policy/action_policy_destinations_summary';
+import { PopoverItems } from '../../components/popover_items';
 import { ActionPolicySnoozePopover } from '../../components/action_policy/action_policy_snooze_popover';
 import { ActionPolicyStateBadge } from '../../components/action_policy/action_policy_state_badge';
 import { DeleteActionPolicyConfirmModal } from '../../components/action_policy/delete_confirmation_modal';
@@ -57,6 +59,29 @@ import { ActionPolicyActionsCell } from './components/action_policy_actions_cell
 import { UpdateApiKeyConfirmationModal } from './components/update_api_key_confirmation_modal';
 
 const DEFAULT_PER_PAGE = 20;
+
+const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
+  'xpack.alertingV2.actionPoliciesList.pageTitle',
+  {
+    defaultMessage: 'Action Policies',
+  }
+);
+
+const getActionPoliciesListMenu = ({
+  navigateToCreate,
+}: {
+  navigateToCreate: () => void;
+}): AppHeaderMenu => ({
+  primaryActionItem: {
+    id: 'createActionPolicy',
+    label: i18n.translate('xpack.alertingV2.actionPoliciesList.createPolicyButton', {
+      defaultMessage: 'Create policy',
+    }),
+    iconType: 'plusInCircle',
+    run: navigateToCreate,
+    testId: 'createActionPolicyButton',
+  },
+});
 
 const descriptionTextStyle = css`
   text-overflow: ellipsis;
@@ -117,9 +142,9 @@ export const ListActionPoliciesPage = () => {
     setSelectedPolicies([]);
   }, []);
 
-  const navigateToCreate = () => {
+  const navigateToCreate = useCallback(() => {
     navigateToUrl(basePath.prepend(paths.actionPolicyCreate));
-  };
+  }, [navigateToUrl, basePath]);
 
   const navigateToEdit = (id: string) => {
     navigateToUrl(basePath.prepend(paths.actionPolicyEdit(id)));
@@ -242,6 +267,7 @@ export const ListActionPoliciesPage = () => {
   const columns: Array<EuiBasicTableColumn<ActionPolicyResponse>> = [
     {
       field: 'name',
+      minWidth: '100px',
       name: (
         <FormattedMessage
           id="xpack.alertingV2.actionPoliciesList.column.name"
@@ -281,6 +307,7 @@ export const ListActionPoliciesPage = () => {
     },
     {
       field: 'tags',
+      width: '180px',
       name: (
         <FormattedMessage
           id="xpack.alertingV2.actionPoliciesList.column.tags"
@@ -289,14 +316,34 @@ export const ListActionPoliciesPage = () => {
       ),
       render: (tags: string[] | null) => {
         if (!tags || tags.length === 0) return null;
+        const visibleCount = 1;
+        const overflowCount = tags.length - visibleCount;
         return (
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {tags.map((tag) => (
-              <EuiFlexItem grow={false} key={tag}>
-                <EuiBadge color="hollow">{tag}</EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <PopoverItems
+            items={tags}
+            numberOfItemsToDisplay={visibleCount}
+            popoverTitle={i18n.translate(
+              'xpack.alertingV2.actionPoliciesList.column.tags.popoverTitle',
+              { defaultMessage: 'Tags' }
+            )}
+            popoverButtonTitle={`+${overflowCount}`}
+            dataTestPrefix="actionPolicyTags"
+            renderItem={(tag) => (
+              <EuiToolTip key={tag} content={tag} position="top">
+                <EuiBadge
+                  color="hollow"
+                  title=""
+                  css={{
+                    maxWidth: 150,
+                    minWidth: 0,
+                    '.euiBadge__text': { minWidth: 0 },
+                  }}
+                >
+                  {tag}
+                </EuiBadge>
+              </EuiToolTip>
+            )}
+          />
         );
       },
     },
@@ -357,7 +404,7 @@ export const ListActionPoliciesPage = () => {
           defaultMessage="Notify"
         />
       ),
-      width: '120px',
+      width: '50px',
       render: (_snoozedUntil: string | undefined, policy: ActionPolicyResponse) => {
         if (!policy.enabled) {
           return null;
@@ -405,30 +452,19 @@ export const ListActionPoliciesPage = () => {
 
   const errorMessage = isError && error ? error.message : null;
 
+  const actionPoliciesMenu = useMemo(
+    () => getActionPoliciesListMenu({ navigateToCreate }),
+    [navigateToCreate]
+  );
+
   return (
     <>
-      <EuiPageHeader
-        pageTitle={
-          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false} component="span">
-              <FormattedMessage
-                id="xpack.alertingV2.actionPoliciesList.pageTitle"
-                defaultMessage="Action Policies"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} component="span">
-              <ExperimentalBadge />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        rightSideItems={[
-          <EuiButton key="create-policy" onClick={navigateToCreate} fill>
-            <FormattedMessage
-              id="xpack.alertingV2.actionPoliciesList.createPolicyButton"
-              defaultMessage="Create policy"
-            />
-          </EuiButton>,
-        ]}
+      <AppHeader
+        sticky={false}
+        title={ACTION_POLICIES_LIST_PAGE_TITLE}
+        titleAppend={<ExperimentalBadge />}
+        padding={{ bleed: 'm' }}
+        menu={actionPoliciesMenu}
       />
       <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
         <EuiSpacer size="m" />
@@ -509,6 +545,7 @@ export const ListActionPoliciesPage = () => {
             loading={isFetching}
             pagination={pagination}
             responsiveBreakpoint={false}
+            scrollableInline={true}
             css={css`
               .euiTableHeaderMobile .euiCheckbox {
                 display: none;
