@@ -27,10 +27,7 @@ import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
 import { SmlCrawlerImpl } from './sml_crawler';
 import type { SmlCrawler } from './types';
 import { smlIndexName } from './sml_storage';
-import {
-  SmlAuthzEnumerationIncompleteError,
-  SmlCorpusTooLargeError,
-} from './sml_errors';
+import { SmlAuthzEnumerationIncompleteError, SmlCorpusTooLargeError } from './sml_errors';
 // ES client usage pattern in this module:
 // - Read operations (search, get, list, checkAccess) use `esClient.asInternalUser` directly with
 //   `allow_no_indices: true` / `ignore_unavailable: true` so they silently handle a missing index.
@@ -219,9 +216,7 @@ const getAuthorizedPrivileges = async ({
     const checkPrivileges = securityAuthz.checkPrivilegesDynamicallyWithRequest(request);
     const response = await checkPrivileges({ kibana: permissions });
 
-    return new Set(
-      response.privileges.kibana.filter((p) => p.authorized).map((p) => p.privilege)
-    );
+    return new Set(response.privileges.kibana.filter((p) => p.authorized).map((p) => p.privilege));
   } catch (error) {
     logger.warn(`SML privilege check failed; failing closed: ${(error as Error).message}`);
     return new Set();
@@ -540,10 +535,7 @@ const checkItemsAccess = async ({
       accessMap.set(id, false);
       continue;
     }
-    accessMap.set(
-      id,
-      kbnPrivs.length === 0 || kbnPrivs.every((p) => authorizedPerms.has(p))
-    );
+    accessMap.set(id, kbnPrivs.length === 0 || kbnPrivs.every((p) => authorizedPerms.has(p)));
   }
 
   return accessMap;
@@ -1263,4 +1255,3 @@ const hydrateDocument = (source: SmlDocument): SmlDocument => {
   if (source.references !== undefined) doc.references = source.references;
   return doc;
 };
-

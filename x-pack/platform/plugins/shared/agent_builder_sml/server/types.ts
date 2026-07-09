@@ -87,8 +87,7 @@ interface SmlIndexAttachmentBaseParams {
   includedHiddenTypes?: string[];
 }
 
-type SmlIndexAttachmentOriginParams = SmlIndexAttachmentBaseParams &
-  SmlIndexAttachmentOriginMode;
+type SmlIndexAttachmentOriginParams = SmlIndexAttachmentBaseParams & SmlIndexAttachmentOriginMode;
 
 /**
  * Params for `indexAttachment`. Content is resolved via the registered type's

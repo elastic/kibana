@@ -12,10 +12,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import { SmlSearchFilterType } from '../../../common/http_api/sml';
 import { createSmlService, isNotFoundError } from './sml_service';
-import {
-  SmlAuthzEnumerationIncompleteError,
-  SmlCorpusTooLargeError,
-} from './sml_errors';
+import { SmlAuthzEnumerationIncompleteError, SmlCorpusTooLargeError } from './sml_errors';
 import { smlIndexName } from './sml_storage';
 import type { SmlTypeDefinition } from './types';
 
@@ -124,20 +121,16 @@ const createMockLogger = () => {
  * Build a `checkPrivileges` mock that handles `kibana` privilege inputs.
  */
 const buildCheckPrivilegesMock = (authorizedKibana: Set<string>) =>
-  jest
-    .fn()
-    .mockImplementation(async (req: { kibana?: string[] }) => ({
-      privileges: {
-        kibana: (req.kibana ?? []).map((privilege) => ({
-          privilege,
-          authorized: authorizedKibana.has(privilege),
-        })),
-      },
-    }));
+  jest.fn().mockImplementation(async (req: { kibana?: string[] }) => ({
+    privileges: {
+      kibana: (req.kibana ?? []).map((privilege) => ({
+        privilege,
+        authorized: authorizedKibana.has(privilege),
+      })),
+    },
+  }));
 
-const createMockSecurityAuthz = (
-  authorizedPrivileges: string[]
-): AuthorizationServiceSetup => {
+const createMockSecurityAuthz = (authorizedPrivileges: string[]): AuthorizationServiceSetup => {
   const checkPrivileges = buildCheckPrivilegesMock(new Set(authorizedPrivileges));
   return {
     checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
@@ -1678,5 +1671,4 @@ describe('SmlService', () => {
       ).not.toHaveBeenCalled();
     });
   });
-
 });

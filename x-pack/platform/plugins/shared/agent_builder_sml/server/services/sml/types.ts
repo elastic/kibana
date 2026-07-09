@@ -114,7 +114,7 @@ export interface SmlListItem {
 /**
  * Server-side type definition for SML (Semantic Metadata Layer).
  *
- * Registered via `agentContextLayer.registerType()` during plugin setup.
+ * Registered via `agentBuilderSml.registerType()` during plugin setup.
  *
  * Solutions register these to make their content discoverable via the SML.
  */

@@ -122,7 +122,9 @@ class SmlIndexerImpl implements SmlIndexer {
     const originUri = `${attachmentType}://${originId}`;
 
     this.logger.info(
-      `SML indexer: indexAttachment called — originId='${originId}', type='${attachmentType}', action='${action}', spaces=[${spaces.join(', ')}]`
+      `SML indexer: indexAttachment called — originId='${originId}', type='${attachmentType}', action='${action}', spaces=[${spaces.join(
+        ', '
+      )}]`
     );
 
     if (action === 'delete') {
@@ -175,7 +177,9 @@ class SmlIndexerImpl implements SmlIndexer {
     }
 
     this.logger.debug(
-      `SML indexer: getSmlEntry returned entry for origin '${originId}'. Title: '${smlEntry.title}', content length: ${smlEntry.content?.length ?? 0}`
+      `SML indexer: getSmlEntry returned entry for origin '${originId}'. Title: '${
+        smlEntry.title
+      }', content length: ${smlEntry.content?.length ?? 0}`
     );
 
     // Resolve permissions BEFORE `deleteEntry` so a hook throw doesn't
