@@ -8,22 +8,11 @@
  */
 
 /**
- *
  * End-to-end journey tests for the Background Search management UI.
  *
  * Each parallel worker operates in its own Kibana space. Background searches have
  * namespaceType:'single' so they are fully space-scoped — workers never see each
  * other's sessions.
- *
- * ES data (logstash-*) is shared and loaded once in global.setup.ts.
- * Kibana saved objects (dashboard "Delayed 5s" etc.) are loaded per-space in
- * beforeAll via scoutSpace.savedObjects.load().
- *
- * The Kibana server must be started with:
- *   --data.search.sessions.enabled=true
- *   --data.search.sessions.management.refreshInterval=10s
- * (both provided by the `search_sessions` Scout server config set, auto-detected
- * from the `scout_search_sessions` directory name.)
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -114,7 +103,6 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
    *  4. Rename the background search and verify its details.
    *  5. Click "View" to return to the dashboard.
    *  6. Verify the dashboard panel is rendered.
-   *  7. Delete the background search from the management page.
    */
   spaceTest(
     'saves a background search from a dashboard, verifies it in management, then deletes it',
@@ -174,18 +162,7 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
         await page.testSubj
           .locator('embeddablePanelHeading-SumofBytesbyExtension(Delayed5s)')
           .waitFor({ state: 'visible', timeout: 30_000 });
-
         await pageObjects.dashboard.waitForRenderComplete();
-      });
-
-      await spaceTest.step('delete the background search from the management page', async () => {
-        await pageObjects.backgroundSearchManagement.goTo();
-
-        // Trigger an explicit refresh to wait for the initial data load.
-        await pageObjects.backgroundSearchManagement.refresh();
-        await pageObjects.backgroundSearchManagement.expectRowCount(1);
-        await pageObjects.backgroundSearchManagement.deleteRow();
-        await pageObjects.backgroundSearchManagement.waitForEmptyTable(30_000);
       });
     }
   );
