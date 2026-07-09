@@ -21,7 +21,7 @@ import { isNonEmptyString } from '@kbn/zod-helpers/v4';
  * A string that does not contain only whitespace characters.
  */
 export type NonEmptyString = z.infer<typeof NonEmptyString>;
-export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);
+export const NonEmptyString = z.string().min(1).max(1024).superRefine(isNonEmptyString);
 
 /**
  * A string that represents a timestamp in ISO 8601 format and does not contain only whitespace characters.
@@ -72,15 +72,15 @@ export const ApiConfig = z.object({
   /**
    * Connector ID
    */
-  connector_id: z.string(),
+  connector_id: z.string().max(1024),
   /**
    * Action type ID
    */
-  action_type_id: z.string().optional(),
+  action_type_id: z.string().max(1024).optional(),
   /**
    * Default system prompt ID
    */
-  default_system_prompt_id: z.string().optional(),
+  default_system_prompt_id: z.string().max(1024).optional(),
   /**
    * Provider
    */
@@ -88,5 +88,5 @@ export const ApiConfig = z.object({
   /**
    * Model
    */
-  model: z.string().optional(),
+  model: z.string().max(1024).optional(),
 });

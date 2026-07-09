@@ -31,7 +31,7 @@ import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_histo
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { DocumentFlyoutWrapper } from '../../main/document_flyout_wrapper';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
-import { Network } from '../../../network/main';
+import { useFlyoutApi } from '../../../use_flyout_api';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { renderEntityDetails } from '../../../entity/shared/render_entity_details';
 
@@ -61,6 +61,7 @@ export const GraphDetails = memo(
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const { openNetworkFlyoutAsChild } = useFlyoutApi();
 
     const onShowDocument = useCallback(
       (documentId: string, indexName?: string) =>
@@ -97,17 +98,8 @@ export const GraphDetails = memo(
     );
 
     const onShowNetwork = useCallback(
-      (ip: string) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: <Network ip={ip} flowTarget={FlowTargetSourceDest.source} />,
-          }),
-          { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
-        ),
-      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
+      (ip: string) => openNetworkFlyoutAsChild({ ip, flowTarget: FlowTargetSourceDest.source }),
+      [openNetworkFlyoutAsChild]
     );
 
     const onShowEntity = useCallback(

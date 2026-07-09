@@ -25,6 +25,7 @@ paths:
               properties:
                 alerts_index_pattern:
                   type: string
+                  maxLength: 1024
                   description: Alerts index pattern for retrieval
                 replacements:
                   $ref: '../../../common_attributes.schema.yaml#/components/schemas/Replacements'
@@ -34,6 +35,7 @@ paths:
                   description: Connector configuration
                 end:
                   type: string
+                  maxLength: 1024
                   description: End time for alert retrieval
                 filter:
                   type: object
@@ -45,6 +47,7 @@ paths:
                   default: 10
                 start:
                   type: string
+                  maxLength: 1024
                   description: Start time for alert retrieval
                 source:
                   type: string
@@ -60,12 +63,15 @@ paths:
                   properties:
                     action_execution_uuid:
                       type: string
+                      maxLength: 1024
                       description: UUID of the alerting action execution
                     rule_id:
                       type: string
+                      maxLength: 1024
                       description: ID of the alerting rule that triggered this generation
                     rule_name:
                       type: string
+                      maxLength: 1024
                       description: Name of the alerting rule that triggered this generation
                 workflow_config:
                   type: object
@@ -90,6 +96,7 @@ paths:
                         when alert_retrieval_workflows_enabled is true.
                       items:
                         type: string
+                        maxLength: 1024
                       default: []
                     alert_retrieval_workflows_enabled:
                       type: boolean
@@ -101,6 +108,7 @@ paths:
                       default: false
                     esql_query:
                       type: string
+                      maxLength: 10000
                       description: >-
                         ES|QL query for alert retrieval (required when default_retrieval_enabled is
                         true and alert_retrieval_mode is 'esql').
@@ -112,6 +120,7 @@ paths:
                       default: true
                     validation_workflow_id:
                       type: string
+                      maxLength: 1024
                       description: ID of the validation workflow to use (or 'default' for built-in)
                       default: default
       responses:
