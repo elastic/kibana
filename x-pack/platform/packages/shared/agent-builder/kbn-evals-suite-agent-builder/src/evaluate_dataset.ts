@@ -135,7 +135,10 @@ const createAgentBuilderTrajectoryEvaluator = (): Evaluator<DatasetExample, Task
       getToolCallSteps(output as TaskOutput)
         .map((step) => step.tool_id)
         .filter((id): id is string => Boolean(id) && id !== FILESTORE_READ_TOOL_ID),
-    goldenPathExtractor: () => [],
+    goldenPathExtractor: (expected) => {
+      const exp = expected as { tool_sequence?: string[] } | undefined;
+      return exp?.tool_sequence ?? [];
+    },
     orderWeight: 0.6,
     coverageWeight: 0.4,
   });
