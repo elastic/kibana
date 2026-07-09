@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { settingDefinitions } from '../setting_definitions';
 import type { SettingValidation } from '../setting_definitions/types';
 
@@ -21,6 +22,17 @@ const knownSettings = settingDefinitions.reduce<Record<string, SettingValidation
 export const serviceRt = t.partial({
   name: t.string,
   environment: t.string,
+});
+
+/**
+ * zod equivalent, additive (see `default_api_types.ts` in `@kbn/apm-api-shared`
+ * for why - elastic/kibana#243355). `settingsRt`/`agentConfigurationIntakeRt`
+ * are not ported here yet: they pull in the whole per-setting validation
+ * subsystem in `../setting_definitions`, which needs its own migration pass.
+ */
+export const serviceSchema = z.object({
+  name: z.string().optional(),
+  environment: z.string().optional(),
 });
 
 export const settingsRt = t.intersection([t.record(t.string, t.string), t.partial(knownSettings)]);

@@ -35,6 +35,7 @@ export {
 // Runtime types
 export {
   serviceRt,
+  serviceSchema,
   settingsRt,
   agentConfigurationIntakeRt,
 } from './src/agent_configuration/runtime_types/agent_configuration_intake_rt';
