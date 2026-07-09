@@ -73,10 +73,12 @@ export const createEndpointFleetServicesFactoryMock = (
     jest.spyOn(fleetInternalServicesMocked, 'getSoClient');
     jest.spyOn(fleetInternalServicesMocked, 'isEndpointPackageInstalled');
 
-    // Set the Fleet Agent Service client to the o ne provided by the fleet mocks. This is needed here
-    // because of changes done to the factory to wrap the Agent Service client with Proxy in order to
+    // Because of changes done to the factory to wrap the Agent Service client with Proxy, we also now
+    // need to convert these methods to jest mock functions
     // handle striping out the version suffix from `policy_id` field
-    fleetInternalServicesMocked.agent = fleetDependencies.agentService.asInternalUser;
+    jest.spyOn(fleetInternalServicesMocked.agent, 'getAgent');
+    jest.spyOn(fleetInternalServicesMocked.agent, 'getByIds');
+    jest.spyOn(fleetInternalServicesMocked.agent, 'listAgents');
 
     return fleetInternalServicesMocked;
   });
