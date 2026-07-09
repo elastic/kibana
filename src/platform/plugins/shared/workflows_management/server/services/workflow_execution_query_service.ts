@@ -28,11 +28,7 @@ import type {
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 
 import type { WorkflowExecutionQueryDeps } from './types';
-import {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '../../common';
+import { WORKFLOWS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
 import {
   buildWorkflowExecutionsSearchQuery,
@@ -149,9 +145,8 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<ChildWorkflowExecutionItem[]> {
     return getChildWorkflowExecutions({
-      esClient: this.deps.esClient,
+      workflowExecutionsDal: this.deps.workflowExecutionsDal,
       stepExecutionsDal: this.deps.stepExecutionsDal,
-      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
       parentExecutionId,
       spaceId,
     });
