@@ -97,6 +97,7 @@ interface ReferencedContentFileRowProps {
   skillName: string;
   onRemove: () => void;
   isEditing: boolean;
+  canEdit: boolean;
   onStartEdit: () => void;
   onStopEdit: () => void;
 }
@@ -107,6 +108,7 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
   skillName,
   onRemove,
   isEditing,
+  canEdit,
   onStartEdit,
   onStopEdit,
 }) => {
@@ -184,6 +186,7 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
                   };
                   onStartEdit();
                 }}
+                disabled={!canEdit}
                 aria-label={labels.skills.referencedFileSection.editFileAriaLabel}
                 data-test-subj={`agentBuilderSkillReferencedContentEdit-${index}`}
               />
@@ -343,6 +346,7 @@ const SkillReferencedContentFieldArrayEdit: React.FC<{ control: Control<SkillFor
                   skillName={skillName}
                   onRemove={() => handleRemove(index)}
                   isEditing={activeIndex === index}
+                  canEdit={activeIndex === null}
                   onStartEdit={() => setActiveIndex(index)}
                   onStopEdit={() => setActiveIndex(null)}
                 />
