@@ -14,7 +14,7 @@
     "@kbn/config-schema",
     "@kbn/analytics",
     "@kbn/core-http-server",
-    "@kbn/core-chrome-browser"
+    "@kbn/projects-solutions-groups"
   ],
   "exclude": [
     "target/**/*",

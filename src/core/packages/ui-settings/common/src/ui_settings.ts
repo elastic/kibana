@@ -10,7 +10,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Type } from '@kbn/config-schema';
 import type { UiCounterMetricType } from '@kbn/analytics';
-import type { SolutionId } from '@kbn/core-chrome-browser';
+import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 
 /**
  * UI element type to represent the settings.
