@@ -94,6 +94,7 @@ dependsOn:
   - '@kbn/field-utils'
   - '@kbn/react-hooks'
   - '@kbn/scout'
+  - '@kbn/content-list-scout'
   - '@kbn/react-kibana-mount'
   - '@kbn/css-utils'
   - '@kbn/licensing-types'
