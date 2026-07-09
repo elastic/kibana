@@ -866,6 +866,7 @@ export const RulesList = ({
             onSearchPopulate={onSearchPopulate}
           />
         )}
+        <EuiSpacer size="xs" />
 
         {showRulesList && (
           <>
