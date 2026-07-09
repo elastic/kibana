@@ -7,16 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { writeErrorHandler } from '@kbn/as-code-utils';
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
-import { createRequestBodySchema, createResponseBodySchema } from './schemas';
-import { create } from './create';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
+import { commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
 import { createMarkdownOASOperationObject } from '../oas_examples';
+import { create } from './create';
+import { createRequestBodySchema, createResponseBodySchema } from './schemas';
 
-export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerCreateRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  usageCounter: UsageCounter | undefined,
+  logger: Logger
+) {
   const createRoute = router.post({
     path: MARKDOWN_API_PATH,
     summary: 'Create a markdown library item',
@@ -57,8 +63,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden({ body: { message: e.message } });
         }
-
-        return res.badRequest({ body: { message: e.message } });
+        return writeErrorHandler(e, res, logger, req);
       }
     }
   );

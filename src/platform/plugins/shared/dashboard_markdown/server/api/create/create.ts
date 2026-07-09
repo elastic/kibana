@@ -16,13 +16,15 @@ import type { StoredMarkdownState } from '../../markdown_saved_object';
 
 export async function create(
   requestCtx: RequestHandlerContext,
-  createBody: MarkdownCreateRequestBody
+  createBody: MarkdownCreateRequestBody,
+  id?: string
 ): Promise<MarkdownCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
   const savedObject = await core.savedObjects.client.create<StoredMarkdownState>(
     MARKDOWN_SAVED_OBJECT_TYPE,
-    createBody
+    createBody,
+    { id }
   );
 
   return getMarkdownCRUResponseBody(savedObject);
