@@ -20,5 +20,4 @@ export {
   SmlAuthzEnumerationIncompleteError,
   SmlCorpusTooLargeError,
   SmlUnregisteredTypeError,
-  SmlPermissionsConflictError,
 } from './errors';

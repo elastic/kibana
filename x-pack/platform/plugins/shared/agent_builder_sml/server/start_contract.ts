@@ -26,10 +26,6 @@ interface StartContractDeps {
 /**
  * Builds `AgentBuilderSmlPluginStart.indexAttachment`, translating public
  * request-scoped params into the internal `SmlIndexerParams` shape.
- *
- * `createdAt`/`permissions` are folded in after `base` rather than included
- * in it because they're content-mode-only; hoisting them into `base` would
- * make them reachable from the origin-mode branch too.
  */
 export const buildIndexAttachment =
   ({ smlService, elasticsearch, savedObjects, spaces, logger }: StartContractDeps) =>
@@ -43,7 +39,7 @@ export const buildIndexAttachment =
     });
     const spaceId =
       params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-    const base = {
+    return smlService.indexAttachment({
       originId: params.originId,
       attachmentType: params.attachmentType,
       action: params.action,
@@ -51,16 +47,8 @@ export const buildIndexAttachment =
       esClient: elasticsearch.client.asInternalUser,
       savedObjectsClient: soClient,
       logger,
-    };
-    if (params.content !== undefined) {
-      return smlService.indexAttachment({
-        ...base,
-        content: params.content,
-        ...(params.createdAt !== undefined ? { createdAt: params.createdAt } : {}),
-        ...(params.permissions !== undefined ? { permissions: params.permissions } : {}),
-      });
-    }
-    return smlService.indexAttachment({ ...base, force: params.force });
+      force: params.force,
+    });
   };
 
 /**

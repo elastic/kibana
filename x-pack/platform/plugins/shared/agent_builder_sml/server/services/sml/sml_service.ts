@@ -36,9 +36,9 @@ import { MAX_CHUNKS_PER_ORIGIN } from '../../../common/constants';
 // ES client usage pattern in this module:
 // - Read operations (search, get, list, checkAccess) use `esClient.asInternalUser` directly with
 //   `allow_no_indices: true` / `ignore_unavailable: true` so they silently handle a missing index.
-// - Every write path (origin-mode crawler, content-mode workflow step, HTTP PUT/DELETE) goes
-//   through `SmlIndexer` so type-registration enforcement, permission derivation, and storage
-//   shape stay consistent. There are no document-write paths in this file.
+// - Every write path (origin-mode crawler, HTTP PUT/DELETE) goes through `SmlIndexer` so
+//   type-registration enforcement, permission derivation, and storage shape stay consistent.
+//   There are no document-write paths in this file.
 
 export interface SmlServiceSetup {
   /**

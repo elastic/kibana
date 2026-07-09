@@ -18,7 +18,6 @@ export type {
   AgentBuilderSmlPluginStart,
   SmlIndexAttachmentParams,
   SmlIndexAttachmentOriginParams,
-  SmlIndexAttachmentContentParams,
   SmlDeleteAttachmentParams,
 } from './types';
 
@@ -38,7 +37,6 @@ export type {
   SmlIngestionMethod,
   SmlDeleteScope,
   SmlIndexAttachmentOriginMode,
-  SmlIndexAttachmentContentMode,
 } from './services/sml/types';
 
 export { kibanaSavedObjectPermissions } from './services/sml/permissions/kibana_saved_object';

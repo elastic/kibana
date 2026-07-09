@@ -24,7 +24,6 @@ import type {
   SmlIndexAction,
   SmlDeleteScope,
   SmlIndexAttachmentOriginMode,
-  SmlIndexAttachmentContentMode,
 } from './services/sml/types';
 import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 
@@ -77,12 +76,7 @@ export interface AgentBuilderSmlPluginStart {
 }
 
 /**
- * Common params shared by both modes of `AgentBuilderSmlPluginStart.indexAttachment`.
- *
- * The mode is selected by the discriminator fields from
- * {@link SmlIndexAttachmentOriginMode} / {@link SmlIndexAttachmentContentMode}, which are
- * shared with the internal `SmlIndexerParams` so the public and internal unions cannot
- * drift on the discriminator.
+ * Common params for `AgentBuilderSmlPluginStart.indexAttachment`.
  */
 interface SmlIndexAttachmentBaseParams {
   request: KibanaRequest;
@@ -96,20 +90,12 @@ interface SmlIndexAttachmentBaseParams {
 export type SmlIndexAttachmentOriginParams = SmlIndexAttachmentBaseParams &
   SmlIndexAttachmentOriginMode;
 
-export type SmlIndexAttachmentContentParams = SmlIndexAttachmentBaseParams &
-  SmlIndexAttachmentContentMode;
-
 /**
- * Discriminated union — `content` selects the mode:
- * - omitted → origin mode (calls `getSmlEntry`, marks `'crawled'`)
- * - provided → content mode (skips `getSmlEntry`, marks `'manual'`)
- *
- * `action: 'delete'` is valid on either variant; the indexer ignores
- * `content` and `force` when deleting and removes only `'crawled'` chunks.
+ * Params for `indexAttachment`. Content is resolved via the registered type's
+ * `getSmlEntry` hook (origin mode). Resulting chunks are tagged
+ * `ingestion_method: 'crawled'`.
  */
-export type SmlIndexAttachmentParams =
-  | SmlIndexAttachmentOriginParams
-  | SmlIndexAttachmentContentParams;
+export type SmlIndexAttachmentParams = SmlIndexAttachmentOriginParams;
 
 /**
  * Params for `AgentBuilderSmlPluginStart.deleteAttachment`.

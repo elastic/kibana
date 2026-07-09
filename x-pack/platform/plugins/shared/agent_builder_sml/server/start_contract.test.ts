@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SmlEntry, SmlPermissions, SmlService } from './services/sml/types';
+import type { SmlService } from './services/sml/types';
 import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
 // Hand-built rather than `coreMock` — these builders only touch
@@ -41,68 +41,26 @@ const baseParams = {
   action: 'create' as const,
 };
 
-const entry: SmlEntry = { type: 'dashboard', content: 'some content', title: 'title' };
-
-const permissions: SmlPermissions = {
-  kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-};
-
 describe('buildIndexAttachment', () => {
-  it('forwards permissions and createdAt to smlService.indexAttachment in content mode', async () => {
-    const deps = buildDeps({ spaceFromRequest: 'space-1' });
-    const indexAttachment = buildIndexAttachment(deps);
-
-    await indexAttachment({
-      ...baseParams,
-      content: entry,
-      createdAt: '2024-01-01T00:00:00Z',
-      permissions,
-    });
-
-    expect(deps.smlService.indexAttachment).toHaveBeenCalledTimes(1);
-    const callArgs = deps.smlService.indexAttachment.mock.calls[0][0];
-    if (callArgs.content === undefined) {
-      throw new Error('expected content-mode params');
-    }
-    expect(callArgs.content).toBe(entry);
-    expect(callArgs.createdAt).toBe('2024-01-01T00:00:00Z');
-    expect(callArgs.permissions).toEqual(permissions);
-    expect(callArgs.spaces).toEqual(['space-1']);
-    expect(callArgs.esClient).toBe(deps.esInternalClient);
-    expect(callArgs.savedObjectsClient).toBe(deps.soClient);
-  });
-
-  it('omits permissions and createdAt from the call when not supplied in content mode', async () => {
-    const deps = buildDeps({ spaceFromRequest: 'space-1' });
-    const indexAttachment = buildIndexAttachment(deps);
-
-    await indexAttachment({ ...baseParams, content: entry });
-
-    const callArgs = deps.smlService.indexAttachment.mock.calls[0][0];
-    if (callArgs.content === undefined) {
-      throw new Error('expected content-mode params');
-    }
-    expect(callArgs.content).toBe(entry);
-    expect('permissions' in callArgs).toBe(false);
-    expect('createdAt' in callArgs).toBe(false);
-  });
-
-  it('forwards force in origin mode (no content)', async () => {
+  it('forwards force to smlService.indexAttachment', async () => {
     const deps = buildDeps({ spaceFromRequest: 'space-1' });
     const indexAttachment = buildIndexAttachment(deps);
 
     await indexAttachment({ ...baseParams, force: true });
 
+    expect(deps.smlService.indexAttachment).toHaveBeenCalledTimes(1);
     const callArgs = deps.smlService.indexAttachment.mock.calls[0][0];
     expect(callArgs.force).toBe(true);
-    expect('content' in callArgs).toBe(false);
+    expect(callArgs.spaces).toEqual(['space-1']);
+    expect(callArgs.esClient).toBe(deps.esInternalClient);
+    expect(callArgs.savedObjectsClient).toBe(deps.soClient);
   });
 
   it('falls back to the default space when no spaces service and no spaceId are provided', async () => {
     const deps = buildDeps();
     const indexAttachment = buildIndexAttachment(deps);
 
-    await indexAttachment({ ...baseParams, content: entry });
+    await indexAttachment(baseParams);
 
     const callArgs = deps.smlService.indexAttachment.mock.calls[0][0];
     expect(callArgs.spaces).toEqual(['default']);
@@ -112,7 +70,7 @@ describe('buildIndexAttachment', () => {
     const deps = buildDeps({ spaceFromRequest: 'auto-space' });
     const indexAttachment = buildIndexAttachment(deps);
 
-    await indexAttachment({ ...baseParams, content: entry, spaceId: 'explicit-space' });
+    await indexAttachment({ ...baseParams, spaceId: 'explicit-space' });
 
     const callArgs = deps.smlService.indexAttachment.mock.calls[0][0];
     expect(callArgs.spaces).toEqual(['explicit-space']);
@@ -124,7 +82,6 @@ describe('buildIndexAttachment', () => {
 
     await indexAttachment({
       ...baseParams,
-      content: entry,
       includedHiddenTypes: ['hidden-type'],
     });
 
