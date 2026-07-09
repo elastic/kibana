@@ -47,6 +47,7 @@ import {
 import type { PackagePolicy } from '../../types';
 
 import { ListResponseSchema } from '../schema/utils';
+import { getInstallation, getPackageInfo, removeInstallation } from '../../services/epm/packages';
 
 import {
   bulkGetPackagePoliciesHandler,
@@ -149,6 +150,7 @@ jest.mock('../../services/epm/packages', () => {
     ensureInstalledPackage: jest.fn(() => Promise.resolve()),
     getPackageInfo: jest.fn(() => Promise.resolve()),
     getInstallation: jest.fn(),
+    removeInstallation: jest.fn(),
     getInstallations: jest.fn().mockResolvedValue({
       saved_objects: [
         {
@@ -581,6 +583,109 @@ describe('When calling package policy', () => {
       const validationResp = PackagePolicyResponseSchema.validate(responseItem);
       expect(validationResp).toEqual(responseItem);
     });
+
+    describe('when disableAgentlessLegacyAPI is enabled', () => {
+      beforeEach(() => {
+        appContextService.start(
+          createAppContextStartContractMock({}, false, undefined, {
+            disableAgentlessLegacyAPI: true,
+          })
+        );
+      });
+
+      it('should reject when the existing package policy is agentless', async () => {
+        packagePolicyServiceMock.get.mockResolvedValue({
+          ...existingPolicy,
+          supports_agentless: true,
+        });
+
+        await expect(routeHandler(context, getUpdateKibanaRequest(), response)).rejects.toThrow(
+          /To update managed integrations.*Offending ID: 1\./
+        );
+        expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject when the request body sets supports_agentless', async () => {
+        await expect(
+          routeHandler(
+            context,
+            getUpdateKibanaRequest({ supports_agentless: true } as any),
+            response
+          )
+        ).rejects.toThrow(/To update managed integrations/);
+        expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject when request policy_ids target an agentless agent policy', async () => {
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          { id: 'agentless', is_managed: false, supports_agentless: true },
+        ]);
+
+        await expect(
+          routeHandler(
+            context,
+            getUpdateKibanaRequest({ policy_ids: ['agentless'] } as any),
+            response
+          )
+        ).rejects.toThrow(
+          /To add integrations to a managed integration.*Offending IDs: agentless\./
+        );
+        expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject when request policy_id targets an agentless agent policy', async () => {
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          { id: 'agentless', is_managed: false, supports_agentless: true },
+        ]);
+
+        await expect(
+          routeHandler(context, getUpdateKibanaRequest({ policy_id: 'agentless' } as any), response)
+        ).rejects.toThrow(/To add integrations to a managed integration/);
+        expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject when a parent agent policy is agentless', async () => {
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          { id: '2', is_managed: false, supports_agentless: true },
+        ]);
+
+        await expect(routeHandler(context, getUpdateKibanaRequest(), response)).rejects.toThrow(
+          /To update managed integrations.*Offending ID: 1\./
+        );
+        expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should allow updating non-agentless package policies', async () => {
+        await routeHandler(context, getUpdateKibanaRequest(), response);
+
+        expect(response.ok).toHaveBeenCalled();
+      });
+    });
+
+    it('should allow updating agentless package policies when disableAgentlessLegacyAPI is disabled', async () => {
+      packagePolicyServiceMock.get.mockResolvedValue({
+        ...existingPolicy,
+        supports_agentless: true,
+      });
+
+      await routeHandler(context, getUpdateKibanaRequest(), response);
+
+      expect(response.ok).toHaveBeenCalled();
+      // Flag off: the legacy agentless write is allowed but logged so it stays
+      // measurable before the flag is flipped fleet-wide.
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
+    });
+
+    it('should not log the legacy agentless deprecation for non-agentless updates when the flag is disabled', async () => {
+      await routeHandler(context, getUpdateKibanaRequest(), response);
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(appContextService.getLogger().warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
+    });
   });
 
   describe('list api handler', () => {
@@ -772,7 +877,7 @@ describe('When calling package policy', () => {
       });
 
       await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
-        /To create agentless package policies, use the Fleet agentless policies API./
+        /To create managed integrations, use the managed integrations API./
       );
     });
 
@@ -791,6 +896,136 @@ describe('When calling package policy', () => {
       });
       const validationResp = CreatePackagePolicyResponseSchema.validate(expectedResponse);
       expect(validationResp).toEqual(expectedResponse);
+    });
+
+    describe('when disableAgentlessLegacyAPI is enabled', () => {
+      const agentlessOnlyTemplate = {
+        name: 'template',
+        deployment_modes: { agentless: { enabled: true }, default: { enabled: false } },
+      };
+      const mixedTemplate = {
+        name: 'template',
+        deployment_modes: { agentless: { enabled: true }, default: { enabled: true } },
+      };
+
+      beforeEach(() => {
+        appContextService.start(
+          createAppContextStartContractMock({}, false, undefined, {
+            disableAgentlessLegacyAPI: true,
+          })
+        );
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: false }]);
+      });
+
+      it('should reject packages that only support agentless deployment', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue({
+          policy_templates: [agentlessOnlyTemplate],
+        });
+        (getInstallation as jest.Mock).mockResolvedValue({ install_status: 'installing' });
+
+        const request = httpServerMock.createKibanaRequest({
+          body: testPackagePolicy,
+        });
+
+        await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
+          /can only be used as a managed integration/
+        );
+        // The rejection happens before anything is installed or created, so the
+        // catch-block rollback must not run — even when a concurrent request has
+        // the package mid-install.
+        expect(removeInstallation).not.toHaveBeenCalled();
+      });
+
+      it('should reject when a target agent policy is agentless', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue({
+          policy_templates: [mixedTemplate],
+        });
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          { supports_agentless: true },
+        ]);
+
+        const request = httpServerMock.createKibanaRequest({
+          body: testPackagePolicy,
+        });
+
+        await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
+          /To add integrations to a managed integration/
+        );
+      });
+
+      it('should allow mixed-deployment packages in default mode', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue({
+          policy_templates: [mixedTemplate],
+        });
+        (
+          (await context.fleet).packagePolicyService
+            .asCurrentUser as jest.Mocked<PackagePolicyClient>
+        ).create.mockResolvedValue(testPackagePolicy);
+
+        const request = httpServerMock.createKibanaRequest({
+          body: testPackagePolicy,
+        });
+
+        await createPackagePolicyHandler(context, request, response);
+
+        expect(response.ok).toHaveBeenCalled();
+      });
+
+      it('should resolve the agentless-only check with skipArchive to avoid a full archive download', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue({
+          policy_templates: [mixedTemplate],
+        });
+        (
+          (await context.fleet).packagePolicyService
+            .asCurrentUser as jest.Mocked<PackagePolicyClient>
+        ).create.mockResolvedValue(testPackagePolicy);
+
+        const request = httpServerMock.createKibanaRequest({ body: testPackagePolicy });
+
+        await createPackagePolicyHandler(context, request, response);
+
+        // The pre-`try` agentless-only detection only needs deployment_modes, so it
+        // must resolve from the registry manifest (skipArchive) rather than pulling
+        // and verifying the full archive before any other validation.
+        expect(getPackageInfo).toHaveBeenCalledWith(expect.objectContaining({ skipArchive: true }));
+      });
+    });
+
+    it('should allow to create agentless package policies when disableAgentlessLegacyAPI is disabled', async () => {
+      (
+        (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>
+      ).create.mockResolvedValue(testPackagePolicy);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: { ...testPackagePolicy, supports_agentless: true },
+      });
+
+      await createPackagePolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(getPackageInfo).not.toHaveBeenCalled();
+      expect(agentPolicyService.getByIds).not.toHaveBeenCalled();
+      // Flag off: the legacy agentless write is allowed but logged so it stays
+      // measurable before the flag is flipped fleet-wide.
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
+    });
+
+    it('should not log the legacy agentless deprecation for non-agentless creates when the flag is disabled', async () => {
+      packagePolicyServiceMock.get.mockResolvedValue(testPackagePolicy);
+      (
+        (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>
+      ).create.mockResolvedValue(testPackagePolicy);
+
+      const request = httpServerMock.createKibanaRequest({ body: testPackagePolicy });
+
+      await createPackagePolicyHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(appContextService.getLogger().warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('legacy_agentless_write_deprecation')
+      );
     });
   });
 
@@ -923,6 +1158,89 @@ describe('When calling package policy', () => {
         body: responseBody,
       });
     });
+
+    it('should not look up target policies when disableAgentlessLegacyAPI is disabled', async () => {
+      packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1'],
+        },
+      });
+      await upgradePackagePolicyHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: responseBody,
+      });
+      expect(packagePolicyServiceMock.getByIDs).not.toHaveBeenCalled();
+    });
+
+    describe('when disableAgentlessLegacyAPI is enabled', () => {
+      beforeEach(() => {
+        appContextService.start(
+          createAppContextStartContractMock({}, false, undefined, {
+            disableAgentlessLegacyAPI: true,
+          })
+        );
+      });
+
+      it('should reject the whole request when any target package policy is agentless', async () => {
+        packagePolicyServiceMock.getByIDs.mockResolvedValue([
+          { id: '1', policy_ids: [] },
+          { id: '2', policy_ids: [], supports_agentless: true },
+        ] as unknown as PackagePolicy[]);
+
+        const request = httpServerMock.createKibanaRequest({
+          body: {
+            packagePolicyIds: ['1', '2'],
+          },
+        });
+
+        // Only the offending id is named, so a batch owner can self-remediate.
+        await expect(upgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
+          /To upgrade managed integrations.*Offending IDs: 2\./
+        );
+        expect(packagePolicyServiceMock.bulkUpgrade).not.toHaveBeenCalled();
+      });
+
+      it('should reject when a target package policy belongs to an agentless agent policy', async () => {
+        packagePolicyServiceMock.getByIDs.mockResolvedValue([
+          { id: '1', policy_ids: ['agentless-ap'] },
+        ] as unknown as PackagePolicy[]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
+          { id: 'agentless-ap', supports_agentless: true },
+        ]);
+
+        const request = httpServerMock.createKibanaRequest({
+          body: {
+            packagePolicyIds: ['1'],
+          },
+        });
+
+        await expect(upgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
+          /Offending IDs: 1\./
+        );
+        expect(packagePolicyServiceMock.bulkUpgrade).not.toHaveBeenCalled();
+      });
+
+      it('should upgrade regular package policies', async () => {
+        packagePolicyServiceMock.getByIDs.mockResolvedValue([
+          { id: '1', policy_ids: ['regular-ap'] },
+        ] as unknown as PackagePolicy[]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ id: 'regular-ap' }]);
+        packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
+
+        const request = httpServerMock.createKibanaRequest({
+          body: {
+            packagePolicyIds: ['1'],
+          },
+        });
+
+        await upgradePackagePolicyHandler(context, request, response);
+
+        expect(response.ok).toHaveBeenCalledWith({
+          body: responseBody,
+        });
+      });
+    });
   });
 
   describe('dry run upgrade api handler', () => {
@@ -1031,6 +1349,42 @@ describe('When calling package policy', () => {
       expect(response.ok).toHaveBeenCalledWith({
         body: responseBody,
       });
+    });
+
+    it('should not look up target policies when disableAgentlessLegacyAPI is disabled', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1', '2'],
+        },
+      });
+      await dryRunUpgradePackagePolicyHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: responseBody,
+      });
+      expect(packagePolicyServiceMock.getByIDs).not.toHaveBeenCalled();
+    });
+
+    it('should reject agentless package policies when disableAgentlessLegacyAPI is enabled', async () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, false, undefined, {
+          disableAgentlessLegacyAPI: true,
+        })
+      );
+      packagePolicyServiceMock.getByIDs.mockResolvedValue([
+        { id: '1', policy_ids: [] },
+        { id: '2', policy_ids: [], supports_agentless: true },
+      ] as unknown as PackagePolicy[]);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1', '2'],
+        },
+      });
+
+      await expect(dryRunUpgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
+        /To upgrade managed integrations/
+      );
+      expect(packagePolicyServiceMock.getUpgradeDryRunDiff).not.toHaveBeenCalled();
     });
   });
 });

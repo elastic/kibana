@@ -248,9 +248,15 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
-   * DEMO BRANCH ONLY — re-enable to false before merge. Enabled here for PR cloud QA demo.
+   * Gates skill registration so the feature can ship dark and be enabled per environment.
    */
-  endpointForensicAnalysisSkill: true,
+  endpointForensicAnalysisSkill: false,
+
+  /**
+   * Enables the investigate-rule Agent Builder skill.
+   * Gates skill registration so the feature can ship dark and be enabled per environment.
+   */
+  investigateRuleSkill: false,
 
   /**
    * Enables the find-security-rules Agent Builder skill.
@@ -322,6 +328,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.5
    */
   attacksPageTourEnabled: false,
+
+  /**
+   * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift
+   * from the locally stored kibana mappings after a MITRE version bump.
+   */
+  mitreAttackUpdatesUIEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
