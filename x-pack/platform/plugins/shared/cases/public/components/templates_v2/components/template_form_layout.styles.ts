@@ -11,12 +11,18 @@ import { css } from '@emotion/react';
 export const componentStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
-      // Cancel the surrounding EuiPageSection padding (paddingSize="l") on all sides so
-      // the header runs edge-to-edge and sits close to the top bar (no wasted vertical
-      // space), and the editor/preview split is full width.
-      marginBlock: `-${euiTheme.size.l}`,
+      // The header cancels the surrounding EuiPageSection's top/side padding itself (via
+      // `padding={{ bleed: 'l' }}`), so only the bottom margin needs cancelling here for the
+      // editor/preview split to reach the bottom edge with no wasted vertical space.
+      marginBottom: `-${euiTheme.size.l}`,
+    }),
+  editorWrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      // Break out of the page's side gutter so the editor/preview split runs edge-to-edge,
+      // matching the header's own bleed.
       marginInline: `-${euiTheme.size.l}`,
       overflow: 'hidden',
+      minHeight: 0,
     }),
   pageTemplate: css({
     flexGrow: 0,
