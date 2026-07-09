@@ -32,10 +32,6 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
-import {
-  createStepExecutionsDataAccess,
-  createWorkflowExecutionsDataAccess,
-} from '@kbn/workflows/server';
 import type {
   StepExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
