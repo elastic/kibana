@@ -29,7 +29,6 @@ import {
 } from '../internal_state';
 import {
   createTabRuntimeState,
-  selectUrlProfileStateDefinition,
   selectTabRuntimeState,
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
@@ -264,21 +263,10 @@ export const updateTabs: InternalStateThunkActionCreator<
       if (nextTab && nextTabDataStateContainer) {
         const { timeRange, refreshInterval, filters: globalFilters } = nextTab.globalState;
         const { filters: appFilters, query } = nextTab.appState;
-        const profileStateDefinition = selectUrlProfileStateDefinition(
-          runtimeStateManager,
-          nextTab.id
-        );
-        const filteredProfileUrlState = profileStateDefinition
-          ? services.profileStateRegistry.filterFieldsByType({
-              profileState: nextTab.profileState[profileStateDefinition.key],
-              stateKey: profileStateDefinition.key,
-              stateTypes: [ProfileStateType.Url],
-            })
-          : undefined;
-        const profileStateForUrl =
-          profileStateDefinition && filteredProfileUrlState
-            ? { [profileStateDefinition.key]: filteredProfileUrlState }
-            : undefined;
+        const profileStateForUrl = services.profileStateRegistry.pickStateByType({
+          profileStateMap: nextTab.profileState,
+          stateTypes: [ProfileStateType.Url],
+        });
 
         await Promise.all([
           urlStateStorage.set<QueryState>(
@@ -293,7 +281,11 @@ export const updateTabs: InternalStateThunkActionCreator<
           urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, nextTab.appState, {
             replace: true,
           }),
-          urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, { replace: true }),
+          urlStateStorage.set(
+            PROFILE_STATE_URL_KEY,
+            Object.keys(profileStateForUrl).length > 0 ? profileStateForUrl : undefined,
+            { replace: true }
+          ),
         ]);
 
         services.timefilter.setTime(timeRange ?? services.timefilter.getTimeDefaults());
