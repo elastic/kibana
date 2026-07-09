@@ -99,6 +99,22 @@ describe('correctCommonEsqlMistakes', () => {
     });
   });
 
+  it('does not throw when WHERE clause body starts on the next line', () => {
+    expectQuery({
+      input: `FROM logs-azure.auditlogs-*
+| WHERE event.category == "configuration" AND azure.auditlogs.operation_name == "Update conditional access policy"
+| MV_EXPAND azure.auditlogs.properties.target_resources
+| WHERE
+    azure.auditlogs.properties.target_resources.display_name IN ("excludedUsers", "excludedGroups") AND
+    azure.auditlogs.properties.target_resources.old_value != azure.auditlogs.properties.target_resources.new_value`,
+      expectedOutput: `FROM logs-azure.auditlogs-*
+| WHERE event.category == "configuration" AND azure.auditlogs.operation_name == "Update conditional access policy"
+| MV_EXPAND azure.auditlogs.properties.target_resources
+| WHERE azure.auditlogs.properties.target_resources.display_name IN ("excludedUsers", "excludedGroups") AND
+    azure.auditlogs.properties.target_resources.old_value != azure.auditlogs.properties.target_resources.new_value`,
+    });
+  });
+
   it('replaces single-quote escaped strings with double-quote escaped strings', () => {
     expectQuery({
       input: `FROM nyc_taxis
