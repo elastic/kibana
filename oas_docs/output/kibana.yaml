@@ -337,6 +337,7 @@ tags:
   - description: Manage Kibana short URLs.
     name: short url
     x-displayName: Short URLs
+  - name: significant_events
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
@@ -10839,6 +10840,12 @@ paths:
             default: 50
             minimum: 1
             type: number
+        - description: Whether to filter by scheduled or ad-hoc attack discovery generations. If omitted, both types are returned. Use `true` to return only scheduled generations or `false` to return only ad-hoc (interactive or action-triggered) generations.
+          in: query
+          name: scheduled
+          required: false
+          schema:
+            type: boolean
         - description: Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
           example: now-24h
           in: query
@@ -11121,7 +11128,6 @@ paths:
                   - connector_id
                   - discoveries
                   - execution_uuid
-                  - loading_message
                   - start
                   - status
           description: Indicates a successful call.
@@ -13503,6 +13509,100 @@ paths:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case tags
+      tags:
+        - cases
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/cases/templates:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/templates</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of case templates. Requires the Cases feature to be enabled in the space.
+      operationId: getCaseTemplatesDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_page_index'
+        - $ref: '#/components/parameters/Cases_page_size'
+        - $ref: '#/components/parameters/Cases_template_sort_field'
+        - $ref: '#/components/parameters/Cases_sort_order'
+        - $ref: '#/components/parameters/Cases_search'
+        - $ref: '#/components/parameters/Cases_owner_filter'
+        - $ref: '#/components/parameters/Cases_template_tags'
+        - $ref: '#/components/parameters/Cases_template_author'
+        - $ref: '#/components/parameters/Cases_template_is_enabled'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCaseTemplatesResponse:
+                  $ref: '#/components/examples/Cases_get_case_templates_response'
+              schema:
+                $ref: '#/components/schemas/Cases_get_case_templates_response'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+      summary: Get all case templates
+      tags:
+        - cases
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/cases/templates/{template_id}:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/templates/{template_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the details of a case template. Requires the Cases feature to be enabled in the space.
+      operationId: getCaseTemplateDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_template_id'
+        - $ref: '#/components/parameters/Cases_template_version'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCaseTemplateResponse:
+                  $ref: '#/components/examples/Cases_get_case_template_response'
+              schema:
+                $ref: '#/components/schemas/Cases_template_v2_response'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The template was not found.
+      summary: Get a case template by ID
       tags:
         - cases
       x-metaTags:
@@ -46904,6 +47004,7 @@ paths:
               properties:
                 description:
                   description: A description of the pipeline.
+                  maxLength: 1024
                   type: string
                 pipeline:
                   description: A definition for the pipeline.
@@ -54474,7 +54575,8 @@ paths:
                     records: []
                     total: 0
                 pageModeExample:
-                  description: A paginated list of host entities sorted by timestamp in descending order, including query inspection data.
+                  description: |
+                    A paginated list of host entities sorted by timestamp in descending order, including query inspection data.
                   summary: Page mode response with host entities
                   value:
                     inspect:
@@ -54516,7 +54618,8 @@ paths:
                             type: linux
                     total: 1
                 searchAfterModeExample:
-                  description: A cursor-based response with entities and a search_after token for the next page.
+                  description: |
+                    A cursor-based response with entities and a search_after token for the next page.
                   summary: Search-after mode response
                   value:
                     entities:
@@ -62016,7 +62119,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the resolution group for a given entity, returning all linked entities. Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Get the resolution group for a given entity, returning all linked entities.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: get-security-entity-store-resolution-group
       parameters:
         - description: The entity identifier to look up the resolution group for.
@@ -62093,6 +62196,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/security/entity_store/resolution/group?entity_id=user:jane.doe@example.com
+      x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -62105,7 +62209,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Link one or more entities to a target entity, creating a resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s). Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Link one or more entities to a target entity, creating a resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s).<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: post-security-entity-store-resolution-link
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62203,6 +62307,163 @@ paths:
               "target_id": "user:jane.doe@example.com",
               "entity_ids": ["user:jdoe@example.com"]
             }
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/resolution/rules:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List managed entity resolution rules and their effective enabled state for this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: get-security-entity-store-resolution-rules
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                rulesListExample:
+                  description: Lists the managed resolution rules and their enabled state in the current space.
+                  summary: Managed resolution rules
+                  value:
+                    rules:
+                      - enabled: false
+                        id: related_user_alias_resolution
+                        kind: related_user_alias_resolution
+                        managed: true
+                      - enabled: true
+                        id: email_exact_match
+                        kind: email_exact_match
+                        managed: true
+          description: Entity resolution rules.
+      summary: List entity resolution rules
+      tags:
+        - Security entity store
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/resolution/rules/{id}/disable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules/{id}/disable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Disable a managed entity resolution rule in this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: put-security-entity-store-resolution-rules-id-disable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The stable identifier of the entity resolution rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 100
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ruleDisabledExample:
+                  description: The related user alias resolution rule was disabled in the current space.
+                  summary: Rule disabled
+                  value:
+                    enabled: false
+                    id: related_user_alias_resolution
+                    kind: related_user_alias_resolution
+                    managed: true
+          description: Updated entity resolution rule.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The requested entity resolution rule does not exist.
+                  summary: Unknown rule
+                  value:
+                    error: Not Found
+                    message: Saved object [entity-resolution-rule/unknown] not found
+                    statusCode: 404
+          description: Unknown entity resolution rule.
+      summary: Disable an entity resolution rule
+      tags:
+        - Security entity store
+      x-state: Generally available; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/resolution/rules/{id}/enable:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/rules/{id}/enable</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Enable a managed entity resolution rule in this space.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: put-security-entity-store-resolution-rules-id-enable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The stable identifier of the entity resolution rule.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 100
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ruleEnabledExample:
+                  description: The related user alias resolution rule was enabled in the current space.
+                  summary: Rule enabled
+                  value:
+                    enabled: true
+                    id: related_user_alias_resolution
+                    kind: related_user_alias_resolution
+                    managed: true
+          description: Updated entity resolution rule.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The requested entity resolution rule does not exist.
+                  summary: Unknown rule
+                  value:
+                    error: Not Found
+                    message: Saved object [entity-resolution-rule/unknown] not found
+                    statusCode: 404
+          description: Unknown entity resolution rule.
+      summary: Enable an entity resolution rule
+      tags:
+        - Security entity store
+      x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -62215,7 +62476,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Remove one or more entities from their resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s). Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+        Remove one or more entities from their resolution group. Changes become visible on subsequent reads after the next index refresh (typically <1s).<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
       operationId: post-security-entity-store-resolution-unlink
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62299,6 +62560,7 @@ paths:
             {
               "entity_ids": ["user:jdoe@example.com"]
             }
+      x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -65230,6 +65492,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65267,7 +65530,7 @@ paths:
           description: List of queries linked to the stream.
       summary: Get stream queries
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -65297,6 +65560,7 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65327,16 +65591,19 @@ paths:
                             properties:
                               description:
                                 default: ''
+                                maxLength: 10000
                                 type: string
                               esql:
                                 type: object
                                 properties:
                                   query:
+                                    maxLength: 10000
                                     type: string
                                 required:
                                   - query
                               evidence:
                                 items:
+                                  maxLength: 10000
                                   type: string
                                 type: array
                               expires_at:
@@ -65365,6 +65632,7 @@ paths:
                             type: object
                             properties:
                               id:
+                                maxLength: 255
                                 type: string
                             required:
                               - id
@@ -65378,7 +65646,7 @@ paths:
           description: Bulk operation completed successfully.
       summary: Bulk update queries
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -65408,12 +65676,14 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The identifier of the query to remove.
           in: path
           name: queryId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65431,7 +65701,7 @@ paths:
           description: The query was removed successfully.
       summary: Remove a query from a stream
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -65460,12 +65730,14 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The identifier of the query.
           in: path
           name: queryId
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -65483,17 +65755,20 @@ paths:
               properties:
                 description:
                   default: ''
+                  maxLength: 10000
                   type: string
                 esql:
                   additionalProperties: false
                   type: object
                   properties:
                     query:
+                      maxLength: 10000
                       type: string
                   required:
                     - query
                 evidence:
                   items:
+                    maxLength: 10000
                     type: string
                   type: array
                 expires_at:
@@ -65514,7 +65789,7 @@ paths:
           description: The query was added or updated successfully.
       summary: Upsert a query to a stream
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -65537,24 +65812,28 @@ paths:
           name: name
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: Start of the time range as an ISO 8601 date string.
           in: query
           name: from
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: End of the time range as an ISO 8601 date string.
           in: query
           name: to
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: The bucket size for aggregating events (e.g. "1m", "1h").
           in: query
           name: bucketSize
           required: true
           schema:
+            maxLength: 255
             pattern: ^(\d+)([smhd])$
             type: string
         - description: Query string to filter significant events on metadata fields
@@ -65562,6 +65841,7 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: 'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). When omitted, defaults to hybrid with a silent keyword fallback on failure. When set explicitly, failures propagate as errors.'
           in: query
@@ -65623,7 +65903,7 @@ paths:
           description: Significant events for the stream.
       summary: Read the significant events
       tags:
-        - streams
+        - significant_events
       x-state: Experimental; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -70126,8 +70406,10 @@ paths:
                       message: Approve change to production?
                     isTestRun: false
                     output:
-                      approved: true
-                      reason: looks good
+                      respondedBy: alice
+                      response:
+                        approved: true
+                        reason: looks good
                     scopeStack: []
                     spaceId: default
                     startedAt: '2025-11-20T12:00:01.000Z'
@@ -70152,6 +70434,210 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/executions/{executionId}/step/{stepExecutionId}
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/workflows/executions/{executionId}/steps/{stepId}/resume/external:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Resume a paused `waitForApproval` step (pauses the workflow and waits for a human to approve/decline before execution continues) or `waitForInput` step (passes the expected input values as query parameters in the URL). Returns an HTML confirmation page.
+      operationId: get-workflows-executions-executionid-steps-stepid-resume-external
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: Workflow step execution ID
+          in: path
+          name: stepId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: The token created when the workflow execution was paused. Authenticates the request to resume execution.
+          in: query
+          name: token
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: Indicates whether a human reviewer approved the paused step. Required for `waitForApproval` when resuming an approval step.
+          in: query
+          name: approved
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - enum:
+                  - 'true'
+                type: string
+              - enum:
+                  - 'false'
+                type: string
+      responses:
+        '200':
+          content:
+            text/html:
+              examples:
+                externalResumeSuccessExample:
+                  description: Success page confirming the response was received
+                  value: <!DOCTYPE html><html><body><h1>Thank you</h1><p>Your response was received. You can close this window.</p></body></html>
+              schema:
+                type: string
+          description: An HTML confirmation page confirming that the response was received and the workflow execution was resumed.
+      summary: Resume a workflow execution from an external link
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token=${RESUME_TOKEN}&approved=true"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token={resumeToken}&approved=true
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Resume a workflow execution that is paused and waiting for external input. Submit input values as a JSON request body, authenticated with a token query parameter. Returns an HTML confirmation page.
+      operationId: post-workflows-executions-executionid-steps-stepid-resume-external
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: Workflow step execution ID
+          in: path
+          name: stepId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: The resume token authenticating this request.
+          in: query
+          name: token
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              externalResumeInputRequestExample:
+                description: Example external input payload for a waitForInput step
+                value:
+                  description: Escalated from Slack triage
+                  severity: high
+            schema: {}
+      responses:
+        '200':
+          content:
+            text/html:
+              examples:
+                externalResumeInputSuccessExample:
+                  description: Success page confirming the input was received
+                  value: <!DOCTYPE html><html><body><h1>Thank you</h1><p>Your response was received. You can close this window.</p></body></html>
+              schema:
+                type: string
+          description: An HTML confirmation page confirming that the input was received and the workflow execution was resumed.
+      summary: Submit external input for a paused workflow execution
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token=${RESUME_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d '{"severity":"high"}'
+        - lang: Console
+          source: |
+            POST kbn://api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token={resumeToken}
+            Content-Type: application/json
+
+            {"severity":"high"}
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns an HTML form for submitting external input to a paused waitForInput step. Does not resume the execution.
+      operationId: get-workflows-executions-executionid-steps-stepid-resume-external-form
+      parameters:
+        - description: Workflow execution ID
+          in: path
+          name: executionId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: Workflow step execution ID
+          in: path
+          name: stepId
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+        - description: The resume token authenticating this request.
+          in: query
+          name: token
+          required: true
+          schema:
+            maxLength: 128
+            type: string
+      responses:
+        '200':
+          content:
+            text/html:
+              examples:
+                externalResumeFormExample:
+                  description: Form page for external input submission
+                  value: <!DOCTYPE html><html><body><h1>Submit your response</h1><form method="POST"><button type="submit">Submit</button></form></body></html>
+              schema:
+                type: string
+          description: HTML form page for submitting external input to a paused waitForInput step
+      summary: Get the external input form for a paused workflow execution
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form?token=${RESUME_TOKEN}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form?token={resumeToken}
       x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
@@ -71708,7 +72194,9 @@ paths:
                           message: Approve change to production?
                         isTestRun: false
                         output:
-                          approved: true
+                          respondedBy: alice
+                          response:
+                            approved: true
                         scopeStack: []
                         spaceId: default
                         startedAt: '2025-11-20T12:00:02.000Z'
@@ -73976,6 +74464,35 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzM2LDFd
+    Cases_get_case_template_response:
+      summary: A case template.
+      value:
+        definition: {}
+        definitionString: 'fields: []'
+        deletedAt: null
+        isLatest: true
+        latestVersion: 1
+        name: My Template
+        owner: cases
+        templateId: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+        templateVersion: 1
+    Cases_get_case_templates_response:
+      summary: A paginated list of case templates.
+      value:
+        page: 1
+        perPage: 20
+        templates:
+          - definition: {}
+            definitionString: 'fields: []'
+            deletedAt: null
+            fieldSearchMatches: false
+            isLatest: true
+            latestVersion: 1
+            name: My Template
+            owner: cases
+            templateId: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+            templateVersion: 1
+        total: 1
     Cases_get_comment_response:
       summary: A single user comment retrieved from a case
       value:
@@ -74076,6 +74593,12 @@ components:
         error: Unauthorized
         message: Unable to authenticate with the provided credentials.
         statusCode: 401
+    Cases_response_404:
+      summary: The requested resource was not found.
+      value:
+        error: Not Found
+        message: Saved object [cases-template/9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42] not found
+        statusCode: 404
     Cases_set_case_configuration_request:
       summary: Set the closure type, custom fields, and default connector for Stack Management cases.
       value:
@@ -78425,6 +78948,70 @@ components:
         oneOf:
           - $ref: '#/components/schemas/Cases_string'
           - $ref: '#/components/schemas/Cases_string_array'
+    Cases_template_author:
+      description: Filters the returned templates by author username.
+      example: elastic
+      in: query
+      name: author
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/Cases_string'
+          - $ref: '#/components/schemas/Cases_string_array'
+    Cases_template_id:
+      description: The identifier for the template.
+      example: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+      in: path
+      name: template_id
+      required: true
+      schema:
+        maxLength: 36
+        type: string
+    Cases_template_is_enabled:
+      description: Filters the returned templates by their enabled state.
+      example: true
+      in: query
+      name: isEnabled
+      schema:
+        type: boolean
+    Cases_template_sort_field:
+      description: Determines which field is used to sort the results.
+      example: name
+      in: query
+      name: sortField
+      required: false
+      schema:
+        default: name
+        enum:
+          - templateId
+          - name
+          - templateVersion
+          - owner
+          - deletedAt
+          - author
+          - usageCount
+          - fieldCount
+          - lastUsedAt
+          - isDefault
+          - isLatest
+        type: string
+    Cases_template_tags:
+      description: Filters the returned templates by tags.
+      example: tag-1
+      in: query
+      name: tags
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/Cases_string'
+          - $ref: '#/components/schemas/Cases_string_array'
+    Cases_template_version:
+      description: The version number of the template to retrieve. If omitted, the latest version is returned.
+      example: 1
+      in: query
+      name: version
+      required: false
+      schema:
+        minimum: 1
+        type: integer
     Cases_to:
       description: |
         Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression.
@@ -80329,6 +80916,36 @@ components:
         - page
         - per_page
         - total
+    Cases_get_case_templates_response:
+      description: Response returned by the get all case templates API.
+      type: object
+      properties:
+        page:
+          description: The page number of the returned results.
+          type: integer
+        perPage:
+          description: The number of results per page.
+          type: integer
+        templates:
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Cases_template_v2_response'
+              - type: object
+                properties:
+                  fieldSearchMatches:
+                    description: Whether the search query matched a field name in this template.
+                    type: boolean
+                required:
+                  - fieldSearchMatches
+          type: array
+        total:
+          description: The total number of templates matching the query.
+          type: integer
+      required:
+        - templates
+        - page
+        - perPage
+        - total
     Cases_owner:
       description: |
         The application that owns the cases: Stack Management, Observability, or Elastic Security.
@@ -80784,6 +81401,101 @@ components:
         type: string
       maxItems: 200
       type: array
+    Cases_template_v2_response:
+      description: A case template (v2).
+      type: object
+      properties:
+        author:
+          description: The username of the template author.
+          maxLength: 1000
+          type: string
+        definition:
+          description: The parsed template definition.
+        definitionString:
+          description: The raw YAML definition string.
+          maxLength: 30000
+          type: string
+        deletedAt:
+          description: The date the template was soft-deleted, or null if active.
+          format: date-time
+          nullable: true
+          type: string
+        description:
+          description: A human-readable description of the template.
+          maxLength: 30000
+          type: string
+        fieldCount:
+          description: The number of fields defined in the template.
+          type: integer
+        fieldNames:
+          description: Metadata about each field defined in the template.
+          items:
+            type: object
+            properties:
+              control:
+                maxLength: 50
+                type: string
+              label:
+                maxLength: 256
+                type: string
+              name:
+                maxLength: 256
+                type: string
+              type:
+                maxLength: 50
+                type: string
+            required:
+              - name
+              - label
+              - type
+              - control
+          type: array
+        isDefault:
+          description: Whether this is the default template for its owner.
+          type: boolean
+        isEnabled:
+          description: Whether the template is enabled.
+          type: boolean
+        isLatest:
+          description: Whether this is the latest version of the template.
+          type: boolean
+        lastUsedAt:
+          description: The date the template was last used to create a case.
+          format: date-time
+          type: string
+        latestVersion:
+          description: The latest version number of this template.
+          type: integer
+        name:
+          description: The display name of the template.
+          maxLength: 100
+          type: string
+        owner:
+          description: The owning solution (e.g. cases, observability, securitySolution).
+          maxLength: 50
+          type: string
+        tags:
+          $ref: '#/components/schemas/Cases_template_tags'
+        templateId:
+          description: The unique identifier of the template, shared across all versions.
+          maxLength: 36
+          type: string
+        templateVersion:
+          description: The version number of this template revision.
+          type: integer
+        usageCount:
+          description: The number of times this template has been used to create a case.
+          type: integer
+      required:
+        - templateId
+        - name
+        - owner
+        - definition
+        - definitionString
+        - templateVersion
+        - deletedAt
+        - isLatest
+        - latestVersion
     Cases_templates:
       items:
         type: object
@@ -87912,13 +88624,36 @@ components:
       description: Duration format between time units.
       properties:
         from:
-          description: Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.
+          description: Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.
+          enum:
+            - ps
+            - ns
+            - us
+            - ms
+            - s
+            - min
+            - h
+            - d
+            - w
+            - mo
+            - 'y'
           type: string
         suffix:
           description: Suffix appended to the formatted value.
           type: string
         to:
-          description: Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.
+          description: 'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.'
+          enum:
+            - auto
+            - auto-approximate
+            - ms
+            - s
+            - min
+            - h
+            - d
+            - w
+            - mo
+            - 'y'
           type: string
         type:
           enum:
@@ -88640,6 +89375,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_numericFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_byteFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_durationFormat'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyDurationFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_customFormat'
       description: Number display format for the dimension value.
       title: Format Type
@@ -96004,6 +96740,29 @@ components:
         - shift
       title: Legacy color by value (absolute)
       type: object
+    Kibana_HTTP_APIs_legacyDurationFormat:
+      additionalProperties: false
+      description: Legacy duration format used when the `asCode.useGASchemas` feature flag is disabled. Accepts free-form unit strings (no enum validation) to preserve pre-GA behavior.
+      properties:
+        from:
+          description: Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.
+          type: string
+        suffix:
+          description: Suffix appended to the formatted value.
+          type: string
+        to:
+          description: Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.
+          type: string
+        type:
+          enum:
+            - duration
+          type: string
+      required:
+        - type
+        - from
+        - to
+      title: Duration Format (Legacy)
+      type: object
     Kibana_HTTP_APIs_legacyMetricCountMetric:
       additionalProperties: false
       properties:
@@ -97690,6 +98449,20 @@ components:
             - type
       description: Secondary visualization displayed behind the primary metric value, either a bar chart (with optional max value) or a trend line.
       title: Complementary Visualization
+    Kibana_HTTP_APIs_metricComplementaryVizESQL:
+      anyOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricComplementaryBar'
+        - additionalProperties: false
+          type: object
+          properties:
+            type:
+              enum:
+                - trend
+              type: string
+          required:
+            - type
+      description: Bar chart or trendline shown behind the primary metric value.
+      title: Complementary Visualization
     Kibana_HTTP_APIs_metricESQL:
       additionalProperties: false
       description: Metric chart configuration for ES|QL queries
@@ -97837,7 +98610,7 @@ components:
                       - background
                     type: string
                   background_chart:
-                    $ref: '#/components/schemas/Kibana_HTTP_APIs_metricComplementaryBar'
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_metricComplementaryVizESQL'
                   color:
                     anyOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
@@ -122602,21 +123375,56 @@ components:
             successful_generations:
               description: The number of successful generations for the same connector id, for the current user
               type: number
+        conversation_id:
+          description: Identifier of the persisted Agent Builder conversation for skill-based alert retrieval (optional; present only when the skill retrieval mode ran)
+          type: string
         discoveries:
           description: The number of new Attack discovery alerts (max kibana.alert.rule.execution.metrics.alert_counts.new) for this generation
           type: number
+        duplicates_dropped_count:
+          description: The number of attack discoveries dropped as duplicates during the persist step
+          type: integer
         end:
           description: When generation ended (max event.end)
+          type: string
+        error_category:
+          description: Structured error category from server classification (optional; absent for successful generations)
           type: string
         execution_uuid:
           description: The unique identifier (kibana.alert.rule.execution.uuid) for the generation
           type: string
+        failed_workflow_id:
+          description: Workflow ID that caused the failure (optional; absent for successful generations)
+          type: string
+        generated_count:
+          description: The number of attack discoveries generated before deduplication and hallucination filtering
+          type: integer
+        hallucinations_filtered_count:
+          description: The number of attack discoveries filtered as hallucinations during the validation step
+          type: integer
         loading_message:
           description: Generation loading message (kibana.alert.rule.execution.status)
           type: string
+        persisted_count:
+          description: The number of attack discoveries successfully persisted after deduplication and hallucination filtering
+          type: integer
         reason:
           description: Reason for failed generations (event.reason)
           type: string
+        source_metadata:
+          description: Source metadata for scheduled generations (rule_id, rule_name, action_execution_uuid)
+          nullable: true
+          type: object
+          properties:
+            action_execution_uuid:
+              description: The action execution UUID from the alerting framework
+              type: string
+            rule_id:
+              description: The ID of the alerting rule that triggered this generation
+              type: string
+            rule_name:
+              description: The name of the alerting rule that triggered this generation
+              type: string
         start:
           description: When generation started (min event.start)
           type: string
@@ -122629,11 +123437,24 @@ components:
             - started
             - succeeded
           type: string
+        step_event_actions:
+          description: Synthesized per-step lifecycle markers (e.g. step-start, step-complete, step-fail) derived from raw event.action values. The array is ordered by step sequence (alert retrieval, generation, validation), with each step contributing 0-2 tokens that indicate its execution status.
+          items:
+            type: string
+          type: array
+        workflow_executions:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionsTracking'
+          description: Workflow execution tracking for alert retrieval, generation, and validation workflows
+        workflow_id:
+          description: The workflow definition ID for deep linking
+          type: string
+        workflow_run_id:
+          description: The workflow execution ID for monitoring
+          type: string
       required:
         - connector_id
         - discoveries
         - execution_uuid
-        - loading_message
         - start
         - status
     Security_Attack_discovery_API_AttackDiscoveryGenerationConfig:
@@ -122844,6 +123665,43 @@ components:
           description: User name.
           example: John Doe
           type: string
+    Security_Attack_discovery_API_WorkflowExecutionReference:
+      type: object
+      properties:
+        workflowId:
+          description: The workflow definition ID
+          type: string
+        workflowName:
+          description: The human-readable workflow name (optional; used by the UI to display a label)
+          type: string
+        workflowRunId:
+          description: The workflow execution ID
+          type: string
+      required:
+        - workflowId
+        - workflowRunId
+    Security_Attack_discovery_API_WorkflowExecutionsTracking:
+      description: Workflow execution tracking for manual orchestration
+      type: object
+      properties:
+        alertRetrieval:
+          description: Alert retrieval workflow executions (one per workflow invoked)
+          items:
+            $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionReference'
+          nullable: true
+          type: array
+        gate:
+          description: Generation-phase gate (skill) executions, including any net-new alert re-fetch the skill triggers
+          items:
+            $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionReference'
+          nullable: true
+          type: array
+        generation:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionReference'
+          nullable: true
+        validation:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionReference'
+          nullable: true
     Security_Detections_API_AlertAssignees:
       type: object
       properties:
@@ -123674,6 +124532,12 @@ components:
           type: object
         reason:
           $ref: '#/components/schemas/Security_Detections_API_Reason'
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Security_Detections_API_RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created. Limited to 100 entries per request; larger maps are rejected.
+          maxProperties: 100
+          type: object
         status:
           enum:
             - closed
@@ -127311,6 +128175,17 @@ components:
               $ref: '#/components/schemas/Security_Detections_API_RunScriptOsConfigValues'
       required:
         - command
+    Security_Detections_API_RuntimeFieldType:
+      description: The data type for the runtime field type. Determines how the field value is indexed and queried.
+      enum:
+        - keyword
+        - long
+        - double
+        - date
+        - ip
+        - boolean
+        - geo_point
+      type: string
     Security_Detections_API_SavedObjectResolveAliasPurpose:
       enum:
         - savedObjectConversion
@@ -127868,6 +128743,12 @@ components:
           type: string
         query:
           additionalProperties: true
+          type: object
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Security_Detections_API_RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry, a runtime field of the specified type is created reading its value from `_source[fieldName]` and included in the query as `runtime_mappings`. Use this to reference fields stored on the alert `_source` that are not part of the Elastic Common Schema (ECS) of the alerts index mapping, for example, custom fields that the rule's source index defined when the alerts were created.
+          maxProperties: 100
           type: object
         status:
           $ref: '#/components/schemas/Security_Detections_API_AlertStatusExceptClosed'
@@ -139351,6 +140232,11 @@ components:
         - from
       type: object
       properties:
+        allowHtml:
+          description: |
+            When `true`, the connector can send emails with HTML-formatted content in the body. Defaults to `false`. This option is unavailable when `service` is `elastic_cloud`.
+          default: false
+          type: boolean
         clientId:
           description: |
             The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format. If `service` is `exchange_server`, this property is required.

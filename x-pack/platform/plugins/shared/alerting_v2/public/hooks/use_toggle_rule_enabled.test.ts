@@ -106,4 +106,34 @@ describe('useToggleRuleEnabled', () => {
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });
   });
+
+  it('stays in a loading state until the invalidated queries have refetched', async () => {
+    mockUpdateRule.mockResolvedValue(mockEnabledRuleResponse);
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
+    let resolveInvalidate: () => void = () => {};
+    const invalidatePromise = new Promise<void>((resolve) => {
+      resolveInvalidate = resolve;
+    });
+    jest.spyOn(queryClient, 'invalidateQueries').mockReturnValue(invalidatePromise);
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
+
+    const { result } = renderHook(() => useToggleRuleEnabled(), { wrapper });
+
+    result.current.mutate({ id: 'rule-1', enabled: true });
+
+    // The success toast fires synchronously before invalidation is awaited, so once
+    // it has been called we know the mutation is now blocked on the invalidation promise.
+    await waitFor(() => expect(mockAddSuccess).toHaveBeenCalled());
+    expect(result.current.isLoading).toBe(true);
+
+    resolveInvalidate();
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+  });
 });

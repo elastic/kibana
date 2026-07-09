@@ -82,6 +82,13 @@ export function useLoadSnapshotRepositories() {
   });
 }
 
+export function loadSnapshotRepositories() {
+  return sendRequest<SnapshotRepositoriesInfo>({
+    path: `${API_BASE_PATH}/snapshot_repositories`,
+    method: 'get',
+  });
+}
+
 export function useLoadDataStreams({ includeStats }: { includeStats: boolean }) {
   return useRequest<DataStream[]>({
     path: `${API_BASE_PATH}/data_streams`,

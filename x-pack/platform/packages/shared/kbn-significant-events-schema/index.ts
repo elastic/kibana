@@ -82,9 +82,11 @@ export {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
   type SignificantEventInvestigation,
-  type SignificantEventInvestigationStatus,
+  type InvestigationHypothesis,
+  type InvestigationState,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
-  SIGNIFICANT_EVENT_INVESTIGATION_STATUS_OPTIONS,
+  INVESTIGATION_PROGRESS_UI_EVENT,
+  INVESTIGATE_STEP_ID,
   detectionSchema,
   discoverySchema,
   significantEventSchema,
@@ -92,7 +94,11 @@ export {
   significantEventsTuningConfigSchema,
   validateSignificantEventsTuningConfig,
   significantEventInvestigationSchema,
-  significantEventInvestigationStatusSchema,
+  investigationStateSchema,
+  MAX_ID_LENGTH,
+  MAX_RULE_NAME_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_TITLE_LENGTH,
 } from './src/significant_events';
 
 export type {
