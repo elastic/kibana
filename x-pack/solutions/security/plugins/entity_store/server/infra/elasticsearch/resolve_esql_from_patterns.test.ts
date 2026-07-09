@@ -89,6 +89,32 @@ describe('resolveEsqlFromClause', () => {
     expect(await run(resolveIndex, ['logs-ds'])).toEqual(['.ds-logs-ds-000002', '-logs-ds']);
   });
 
+  it('keeps a data stream whose backing indices are all open untouched', async () => {
+    const resolveIndex = jest
+      .fn()
+      .mockResolvedValueOnce(
+        resolveWith({
+          data_streams: [
+            {
+              name: 'logs-ds',
+              backing_indices: ['.ds-logs-ds-000001', '.ds-logs-ds-000002'],
+              timestamp_field: '@timestamp',
+            },
+          ],
+        })
+      )
+      .mockResolvedValueOnce(
+        resolveWith({
+          indices: [
+            { name: '.ds-logs-ds-000001', attributes: ['open'] },
+            { name: '.ds-logs-ds-000002', attributes: ['open'] },
+          ],
+        })
+      );
+
+    expect(await run(resolveIndex, ['logs-ds'])).toEqual(['logs-ds']);
+  });
+
   it('excludes a closed standalone index', async () => {
     const resolveIndex = jest.fn().mockResolvedValue(
       resolveWith({
@@ -117,5 +143,20 @@ describe('resolveEsqlFromClause', () => {
 
     expect(await run(resolveIndex, [])).toEqual([]);
     expect(resolveIndex).not.toHaveBeenCalled();
+  });
+
+  it('resolves with closed and hidden indices surfaced so they can be handled', async () => {
+    const resolveIndex = jest.fn().mockResolvedValue(emptyResolve);
+
+    await run(resolveIndex, ['logs-*']);
+
+    expect(resolveIndex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: ['logs-*'],
+        expand_wildcards: ['open', 'closed', 'hidden'],
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      })
+    );
   });
 });
