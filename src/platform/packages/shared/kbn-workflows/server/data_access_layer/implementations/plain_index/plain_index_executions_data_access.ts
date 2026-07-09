@@ -11,9 +11,13 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { executeIndexBulkCreate } from './execute_index_bulk_create';
+import { executeIndexBulkUpdate } from './execute_index_bulk_update';
 import { executeIndexBulkUpsert } from './execute_index_bulk_upsert';
 import { createOrUpdateIndex } from '../../init/create_or_update_index';
 import type {
+  BulkCreateRequest,
+  BulkUpdateRequest,
   BulkUpsertRequest,
   BulkUpsertResponse,
   ExecutionsCountRequest,
@@ -96,6 +100,22 @@ export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
 
   public async bulkUpsert(request: BulkUpsertRequest<TExecution>): Promise<BulkUpsertResponse> {
     return executeIndexBulkUpsert({
+      esClient: this.deps.esClient,
+      indexName: this.deps.indexName,
+      request,
+    });
+  }
+
+  public async bulkCreate(request: BulkCreateRequest<TExecution>): Promise<BulkUpsertResponse> {
+    return executeIndexBulkCreate({
+      esClient: this.deps.esClient,
+      indexName: this.deps.indexName,
+      request,
+    });
+  }
+
+  public async bulkUpdate(request: BulkUpdateRequest<TExecution>): Promise<BulkUpsertResponse> {
+    return executeIndexBulkUpdate({
       esClient: this.deps.esClient,
       indexName: this.deps.indexName,
       request,

@@ -19,13 +19,20 @@ export { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from './mappings/step_execut
 export { TOKEN_USAGE_MAPPING } from './mappings/token_usage_mapping';
 
 export { executeIndexBulkUpsert } from './implementations/plain_index/execute_index_bulk_upsert';
+export { executeIndexBulkCreate } from './implementations/plain_index/execute_index_bulk_create';
+export { executeIndexBulkUpdate } from './implementations/plain_index/execute_index_bulk_update';
 export {
   EMPTY_BULK_UPSERT_RESPONSE,
+  assertBulkUpdateSuccess,
   assertBulkUpsertSuccess,
+  throwBulkUpdateError,
   throwBulkUpsertError,
+  throwBulkWriteError,
 } from './lib/bulk_upsert_error';
 export {
   toBulkUpsertResponseFromBulk,
+  toBulkUpsertResponseFromCreate,
+  toBulkUpsertResponseFromCreateError,
   toBulkUpsertResponseFromUpdate,
 } from './lib/bulk_upsert_response';
 export {
@@ -56,6 +63,8 @@ export {
 } from './implementations/create_executions_dal';
 
 export type {
+  BulkCreateRequest,
+  BulkUpdateRequest,
   BulkUpsertIndexResolver,
   BulkUpsertItemResponse,
   BulkUpsertRequest,
@@ -74,12 +83,16 @@ export type {
   GetWorkflowExecutionsByIdsOptions,
   StepExecutionSourceProjectionField,
   StepExecutionUpsertDocument,
+  StepExecutionsBulkCreateRequest,
+  StepExecutionsBulkUpdateRequest,
   StepExecutionsBulkUpsertRequest,
   StepExecutionsCountRequest,
   StepExecutionsSearchRequest,
   UpsertDocument,
   WorkflowExecutionSourceProjectionField,
   WorkflowExecutionUpsertDocument,
+  WorkflowExecutionsBulkCreateRequest,
+  WorkflowExecutionsBulkUpdateRequest,
   WorkflowExecutionsBulkUpsertRequest,
   WorkflowExecutionsCountRequest,
   WorkflowExecutionsSearchRequest,

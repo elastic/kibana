@@ -14,35 +14,29 @@ import {
   extractBulkWriteEsOptions,
   resolveBulkIndexName,
 } from './execute_index_bulk_common';
-import {
-  assertBulkUpsertSuccess,
-  EMPTY_BULK_UPSERT_RESPONSE,
-} from '../../lib/bulk_upsert_error';
+import { EMPTY_BULK_UPSERT_RESPONSE } from '../../lib/bulk_upsert_error';
 import {
   toBulkUpsertResponseFromBulk,
-  toBulkUpsertResponseFromUpdate,
+  toBulkUpsertResponseFromCreate,
+  toBulkUpsertResponseFromCreateError,
 } from '../../lib/bulk_upsert_response';
 import {
   assertUpsertDocumentsHaveIds,
   normalizeUpsertDocuments,
 } from '../../lib/normalize_upsert_documents';
-import type {
-  BulkUpsertIndexResolver,
-  BulkUpsertRequest,
-  BulkUpsertResponse,
-} from '../../types';
+import type { BulkCreateRequest, BulkUpsertIndexResolver, BulkUpsertResponse } from '../../types';
 
-interface ExecuteIndexBulkUpsertParams<TDoc extends { id: string }> {
+interface ExecuteIndexBulkCreateParams<TDoc extends { id: string }> {
   esClient: ElasticsearchClient;
   indexName: BulkUpsertIndexResolver<TDoc>;
-  request: BulkUpsertRequest<TDoc>;
+  request: BulkCreateRequest<TDoc>;
 }
 
-export const executeIndexBulkUpsert = async <TDoc extends { id: string }>({
+export const executeIndexBulkCreate = async <TDoc extends { id: string }>({
   esClient,
   indexName,
   request,
-}: ExecuteIndexBulkUpsertParams<TDoc>): Promise<BulkUpsertResponse> => {
+}: ExecuteIndexBulkCreateParams<TDoc>): Promise<BulkUpsertResponse> => {
   const normalizedDocuments = normalizeUpsertDocuments(request.documents);
 
   if (normalizedDocuments.length === 0) {
@@ -56,15 +50,19 @@ export const executeIndexBulkUpsert = async <TDoc extends { id: string }>({
   if (normalizedDocuments.length === 1) {
     const document = normalizedDocuments[0];
     const resolvedIndexName = resolveBulkIndexName(indexName, document);
-    const updateResponse = await esClient.update<TDoc>({
-      index: resolvedIndexName,
-      id: document.id,
-      ...esOptions,
-      doc: document,
-      doc_as_upsert: true,
-    });
 
-    return assertBulkUpsertSuccess(toBulkUpsertResponseFromUpdate(updateResponse, document.id));
+    try {
+      const createResponse = await esClient.create<TDoc>({
+        index: resolvedIndexName,
+        id: document.id,
+        ...esOptions,
+        document,
+      });
+
+      return toBulkUpsertResponseFromCreate(createResponse, document.id);
+    } catch (error: unknown) {
+      return toBulkUpsertResponseFromCreateError(error, document.id);
+    }
   }
 
   const sharedIndexName = allDocumentsShareIndex(normalizedDocuments, indexName);
@@ -77,15 +75,15 @@ export const executeIndexBulkUpsert = async <TDoc extends { id: string }>({
 
       return [
         {
-          update: {
+          create: {
             ...(sharedIndexName === undefined ? { _index: resolvedIndexName } : {}),
             _id: document.id,
           },
         },
-        { doc: document, doc_as_upsert: true },
+        document,
       ];
     }),
   });
 
-  return assertBulkUpsertSuccess(toBulkUpsertResponseFromBulk(bulkResponse, normalizedDocuments));
+  return toBulkUpsertResponseFromBulk(bulkResponse, normalizedDocuments);
 };

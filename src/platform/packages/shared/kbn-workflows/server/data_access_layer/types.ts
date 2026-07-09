@@ -41,6 +41,16 @@ export type BulkUpsertRequest<TDoc extends { id: string }> = BulkUpsertRequestOp
   documents: UpsertDocument<TDoc> | UpsertDocument<TDoc>[];
 };
 
+/** Bulk ES `create` request (fails on existing id; does not upsert). */
+export type BulkCreateRequest<TDoc extends { id: string }> = BulkUpsertRequestOptions & {
+  documents: UpsertDocument<TDoc> | UpsertDocument<TDoc>[];
+};
+
+/** Bulk ES `update` request (partial doc merge; no doc_as_upsert). */
+export type BulkUpdateRequest<TDoc extends { id: string }> = BulkUpsertRequestOptions & {
+  documents: UpsertDocument<TDoc> | UpsertDocument<TDoc>[];
+};
+
 /** Static index name or per-document resolver for multi-index bulk upserts. */
 export type BulkUpsertIndexResolver<TDoc extends { id: string }> =
   | string
@@ -101,6 +111,18 @@ export interface ExecutionsDataAccess<TExecution extends { id: string }> {
   bulkUpsert(
     request: BulkUpsertRequest<Partial<TExecution> & { id: string }>
   ): Promise<BulkUpsertResponse>;
+
+  /**
+   * Bulk ES `create`. Returns per-item outcomes and does not throw on partial failure.
+   */
+  bulkCreate(
+    request: BulkCreateRequest<Partial<TExecution> & { id: string }>
+  ): Promise<BulkUpsertResponse>;
+
+  /** @throws on any update failure */
+  bulkUpdate(
+    request: BulkUpdateRequest<Partial<TExecution> & { id: string }>
+  ): Promise<BulkUpsertResponse>;
 }
 
 export type WorkflowExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowExecution>;
@@ -117,6 +139,12 @@ export type StepExecutionUpsertDocument = UpsertDocument<EsWorkflowStepExecution
 
 export type WorkflowExecutionsBulkUpsertRequest = BulkUpsertRequest<EsWorkflowExecution>;
 export type StepExecutionsBulkUpsertRequest = BulkUpsertRequest<EsWorkflowStepExecution>;
+
+export type WorkflowExecutionsBulkCreateRequest = BulkCreateRequest<EsWorkflowExecution>;
+export type StepExecutionsBulkCreateRequest = BulkCreateRequest<EsWorkflowStepExecution>;
+
+export type WorkflowExecutionsBulkUpdateRequest = BulkUpdateRequest<EsWorkflowExecution>;
+export type StepExecutionsBulkUpdateRequest = BulkUpdateRequest<EsWorkflowStepExecution>;
 
 export type WorkflowExecutionSourceProjectionField =
   ExecutionSourceProjectionField<EsWorkflowExecution>;

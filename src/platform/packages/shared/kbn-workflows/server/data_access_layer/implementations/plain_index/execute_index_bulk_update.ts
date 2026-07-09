@@ -14,10 +14,7 @@ import {
   extractBulkWriteEsOptions,
   resolveBulkIndexName,
 } from './execute_index_bulk_common';
-import {
-  assertBulkUpsertSuccess,
-  EMPTY_BULK_UPSERT_RESPONSE,
-} from '../../lib/bulk_upsert_error';
+import { assertBulkUpdateSuccess, EMPTY_BULK_UPSERT_RESPONSE } from '../../lib/bulk_upsert_error';
 import {
   toBulkUpsertResponseFromBulk,
   toBulkUpsertResponseFromUpdate,
@@ -27,22 +24,22 @@ import {
   normalizeUpsertDocuments,
 } from '../../lib/normalize_upsert_documents';
 import type {
+  BulkUpdateRequest,
   BulkUpsertIndexResolver,
-  BulkUpsertRequest,
   BulkUpsertResponse,
 } from '../../types';
 
-interface ExecuteIndexBulkUpsertParams<TDoc extends { id: string }> {
+interface ExecuteIndexBulkUpdateParams<TDoc extends { id: string }> {
   esClient: ElasticsearchClient;
   indexName: BulkUpsertIndexResolver<TDoc>;
-  request: BulkUpsertRequest<TDoc>;
+  request: BulkUpdateRequest<TDoc>;
 }
 
-export const executeIndexBulkUpsert = async <TDoc extends { id: string }>({
+export const executeIndexBulkUpdate = async <TDoc extends { id: string }>({
   esClient,
   indexName,
   request,
-}: ExecuteIndexBulkUpsertParams<TDoc>): Promise<BulkUpsertResponse> => {
+}: ExecuteIndexBulkUpdateParams<TDoc>): Promise<BulkUpsertResponse> => {
   const normalizedDocuments = normalizeUpsertDocuments(request.documents);
 
   if (normalizedDocuments.length === 0) {
@@ -61,10 +58,9 @@ export const executeIndexBulkUpsert = async <TDoc extends { id: string }>({
       id: document.id,
       ...esOptions,
       doc: document,
-      doc_as_upsert: true,
     });
 
-    return assertBulkUpsertSuccess(toBulkUpsertResponseFromUpdate(updateResponse, document.id));
+    return assertBulkUpdateSuccess(toBulkUpsertResponseFromUpdate(updateResponse, document.id));
   }
 
   const sharedIndexName = allDocumentsShareIndex(normalizedDocuments, indexName);
@@ -82,10 +78,10 @@ export const executeIndexBulkUpsert = async <TDoc extends { id: string }>({
             _id: document.id,
           },
         },
-        { doc: document, doc_as_upsert: true },
+        { doc: document },
       ];
     }),
   });
 
-  return assertBulkUpsertSuccess(toBulkUpsertResponseFromBulk(bulkResponse, normalizedDocuments));
+  return assertBulkUpdateSuccess(toBulkUpsertResponseFromBulk(bulkResponse, normalizedDocuments));
 };

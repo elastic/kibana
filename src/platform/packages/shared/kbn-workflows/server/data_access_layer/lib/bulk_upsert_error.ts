@@ -15,7 +15,10 @@ export const EMPTY_BULK_UPSERT_RESPONSE: BulkUpsertResponse = {
   items: [],
 };
 
-export const throwBulkUpsertError = (response: BulkUpsertResponse): never => {
+export const throwBulkWriteError = (
+  operation: 'create' | 'update' | 'upsert',
+  response: BulkUpsertResponse
+): never => {
   const erroredDocuments = response.items
     .filter((item) => item.error !== undefined)
     .map((item) => ({
@@ -25,13 +28,29 @@ export const throwBulkUpsertError = (response: BulkUpsertResponse): never => {
     }));
 
   throw new Error(
-    `Failed to upsert ${erroredDocuments.length} document(s): ${JSON.stringify(erroredDocuments)}`
+    `Failed to ${operation} ${erroredDocuments.length} document(s): ${JSON.stringify(erroredDocuments)}`
   );
+};
+
+export const throwBulkUpsertError = (response: BulkUpsertResponse): never => {
+  return throwBulkWriteError('upsert', response);
+};
+
+export const throwBulkUpdateError = (response: BulkUpsertResponse): never => {
+  return throwBulkWriteError('update', response);
 };
 
 export const assertBulkUpsertSuccess = (response: BulkUpsertResponse): BulkUpsertResponse => {
   if (response.errors) {
     throwBulkUpsertError(response);
+  }
+
+  return response;
+};
+
+export const assertBulkUpdateSuccess = (response: BulkUpsertResponse): BulkUpsertResponse => {
+  if (response.errors) {
+    throwBulkUpdateError(response);
   }
 
   return response;

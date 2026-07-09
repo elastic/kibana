@@ -40,6 +40,66 @@ const mapBulkItemToUpsertResponse = (
   };
 };
 
+const getErrorMeta = (
+  error: unknown
+): { status: number; errorCause?: estypes.ErrorCause; reason: string } => {
+  if (error instanceof Error) {
+    if ('meta' in error) {
+      const meta = (error as { meta?: { statusCode?: number; body?: { error?: estypes.ErrorCause } } })
+        .meta;
+      return {
+        status: meta?.statusCode ?? 500,
+        errorCause: meta?.body?.error,
+        reason: error.message,
+      };
+    }
+
+    return { status: 500, reason: error.message };
+  }
+
+  return { status: 500, reason: String(error) };
+};
+
+export const toBulkUpsertResponseFromCreateError = (
+  error: unknown,
+  id: string
+): BulkUpsertResponse => {
+  const { status, errorCause, reason } = getErrorMeta(error);
+
+  return {
+    took: 0,
+    errors: true,
+    items: [
+      {
+        id,
+        status,
+        error: errorCause ?? { type: 'create_error', reason },
+      },
+    ],
+  };
+};
+
+export const toBulkUpsertResponseFromCreate = (
+  response: estypes.CreateResponse,
+  id: string
+): BulkUpsertResponse => {
+  const item: BulkUpsertItemResponse = {
+    id: response._id ?? id,
+    status: 201,
+    result: response.result,
+    _shards: response._shards,
+    _seq_no: response._seq_no,
+    _primary_term: response._primary_term,
+    _version: response._version,
+  };
+
+  return {
+    took: 0,
+    errors: false,
+    items: [item],
+  };
+};
+
 export const toBulkUpsertResponseFromUpdate = (
   response: estypes.UpdateResponse,
   id: string
