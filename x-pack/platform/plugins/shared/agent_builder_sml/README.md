@@ -44,7 +44,7 @@ setup(core, { agentBuilderSml }) {
   agentBuilderSml.registerType({
     id: 'my-asset',
     list: async function* (context) { /* yield pages of items */ },
-    getSmlData: async (originId, context) => { /* return chunks to index */ },
+    getSmlEntry: async (originId, context) => { /* return entry to index */ },
     toAttachment: async (doc, context) => { /* convert to attachment */ },
     fetchFrequency: () => '30m', // optional, defaults to 10m
   });
@@ -73,3 +73,5 @@ SML surfaces that live in the Agent Builder family of plugins additionally requi
 ## Index naming
 
 SML data is stored in `.chat-sml-data` and crawler state in `.chat-sml-crawler-state`, using the `.chat-*` system index prefix registered in the Elasticsearch `kibana_system` role.
+
+The `permissions` mapping no longer has an `elasticsearch.indices` sub-object (removed once every registered type was confirmed to hardcode it empty) — if a `.chat-sml-data` document from before that change ever populated `permissions.elasticsearch.indices`, it needs a reindex before this mapping change is safe; this has not been verified against a live deployment.
