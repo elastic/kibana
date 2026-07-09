@@ -22,11 +22,11 @@ describe('MiniCallout', () => {
     expect(screen.getByText(defaultProps.title as string)).toBeInTheDocument();
   });
 
-  it('renders the MiniCallout component with the provided iconType and color', () => {
+  it('renders the MiniCallout component with the provided color and a default icon', () => {
     const { container } = render(<MiniCallout {...defaultProps} />);
 
     const miniCallout = screen.getByTestId('mini-callout');
-    const icon = container.querySelector('[data-euiicon-type="info"]');
+    const icon = container.querySelector('[data-euiicon-type="infoFill"]');
     expect(icon).not.toBeNull();
     expect(miniCallout).toHaveAttribute(
       'class',
