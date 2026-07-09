@@ -84539,7 +84539,7 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePercentage'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValue'
-      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and named palettes.
+      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and for named palettes.
       title: Color By Value
     Kibana_HTTP_APIs_colorByValueAbsolute:
       additionalProperties: false
@@ -84587,15 +84587,15 @@ components:
       type: object
     Kibana_HTTP_APIs_colorByValuePalette:
       additionalProperties: false
-      description: Color by value using a named palette applied relative to the value range.
+      description: Color by value using a named palette, with colors distributed across the range of values.
       properties:
         open_above:
           default: true
-          description: Defines whether values above the colored value range use the palette's highest color instead of being left uncolored. Defaults to `true`.
+          description: When true, values above the range's maximum keep the palette's highest color instead of being left uncolored.
           type: boolean
         open_below:
           default: false
-          description: Defines whether values below the colored value range use the palette's lowest color instead of being left uncolored. Defaults to `false`.
+          description: When true, values below the range's minimum keep the palette's lowest color instead of being left uncolored.
           type: boolean
         palette:
           description: The name of the palette to apply across the value range (for example, `status`, `temperature`).
