@@ -19,6 +19,15 @@ jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
 }));
 jest.mock('../../../../hooks/use_kibana');
+const mockTelemetry = {
+  reportWorkflowAiChatOpened: jest.fn(),
+  reportWorkflowAiSessionCompleted: jest.fn(),
+  reportAiProposalReceived: jest.fn(),
+  reportAiProposalResolved: jest.fn(),
+};
+jest.mock('../../../../hooks/use_telemetry', () => ({
+  useTelemetry: () => mockTelemetry,
+}));
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: jest.fn(),
@@ -108,11 +117,14 @@ const expectedAttachment = (yaml: string, overrides?: { workflowId?: string; nam
   },
 });
 
+const WORKFLOW_EDITOR_GREETING = 'What do you want to automate?';
+
 const expectedChatConfig = (
   attachment: ReturnType<typeof expectedAttachment>,
   attachmentId: string = MOCK_UUID
 ) => ({
   sessionTag: `workflow-editor:${attachmentId}`,
+  greetingMessage: WORKFLOW_EDITOR_GREETING,
   attachments: [attachment],
 });
 
@@ -144,6 +156,23 @@ describe('useAgentBuilderIntegration', () => {
       const expected = expectedAttachment(INITIAL_YAML);
       expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(expectedChatConfig(expected));
       expect(agentBuilder.addAttachment).toHaveBeenCalledWith(expected);
+    });
+
+    it('propagates the workflow-editor greetingMessage in the chat config', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(
+        expect.objectContaining({ greetingMessage: WORKFLOW_EDITOR_GREETING })
+      );
     });
 
     it('does not sync when editor is not mounted', () => {
@@ -386,6 +415,122 @@ describe('useAgentBuilderIntegration', () => {
     });
   });
 
+  describe('auto-open on editor mount', () => {
+    it('opens the sidebar exactly once when the editor becomes ready', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { rerender } = renderHook(
+        (props: {
+          editorRef: React.MutableRefObject<any>;
+          isEditorMounted: boolean;
+          workflowName?: string;
+        }) => useAgentBuilderIntegration(props),
+        {
+          initialProps: {
+            editorRef: { current: editor },
+            isEditorMounted: true,
+            workflowName: 'Original Name',
+          },
+        }
+      );
+
+      expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.openChat).toHaveBeenCalledWith(
+        expect.objectContaining({ greetingMessage: WORKFLOW_EDITOR_GREETING })
+      );
+
+      // Re-render with prop changes must not re-fire the auto-open.
+      rerender({
+        editorRef: { current: editor },
+        isEditorMounted: true,
+        workflowName: 'Updated Name',
+      });
+      expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not auto-open when the editor is not yet mounted', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: false,
+        })
+      );
+
+      expect(agentBuilder.openChat).not.toHaveBeenCalled();
+    });
+
+    it('tags chat-opened and session-completed telemetry with autoOpened=true on auto-open', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { unmount } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-1',
+        })
+      );
+
+      expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+      expect(mockTelemetry.reportWorkflowAiChatOpened).toHaveBeenCalledWith({
+        entryPoint: 'workflow_editor',
+        sessionType: 'edit',
+        workflowId: 'wf-1',
+        autoOpened: true,
+      });
+
+      unmount();
+      expect(mockTelemetry.reportWorkflowAiSessionCompleted).toHaveBeenCalledWith(
+        expect.objectContaining({ autoOpened: true })
+      );
+    });
+
+    it('does not re-emit chat-opened when the user opens the chat after an auto-open', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { result } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-1',
+        })
+      );
+
+      expect(mockTelemetry.reportWorkflowAiChatOpened).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        result.current.openAgentChat();
+      });
+
+      expect(mockTelemetry.reportWorkflowAiChatOpened).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not auto-open when experimental features are disabled', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      useUiSettingMock.mockReturnValue(false);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      expect(agentBuilder.openChat).not.toHaveBeenCalled();
+    });
+  });
+
   describe('openAgentChat', () => {
     it('calls openChat with workflow attachment and session tag', () => {
       const agentBuilder = createMockAgentBuilder();
@@ -407,6 +552,7 @@ describe('useAgentBuilderIntegration', () => {
 
       expect(agentBuilder.openChat).toHaveBeenCalledWith({
         sessionTag: 'workflow-editor:wf-456',
+        greetingMessage: WORKFLOW_EDITOR_GREETING,
         initialMessage: undefined,
         autoSendInitialMessage: undefined,
         attachments: [

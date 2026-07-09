@@ -10,6 +10,7 @@ import {
   mockTitleGeneration,
   mockTitleGenerationWithError,
   mockFinalAnswer,
+  mockHangingFinalAnswer,
   mockAgentToolCall,
   mockAgentParallelToolCalls,
   mockSearchToolCallWithNaturalLanguageGen,
@@ -53,6 +54,26 @@ export const setupAgentDirectError = async ({
     mockTitleGenerationWithError(proxy, titleError ?? error);
   }
   mockFinalAnswer(proxy, error);
+};
+
+/**
+ * Simple request scenario - generates a title then leaves the final answer request hanging so
+ * the execution can be aborted while it is running. Resolves once the agent has issued the
+ * (hanging) final answer request.
+ */
+export const setupAgentHangingAnswer = ({
+  proxy,
+  title = 'New discussion',
+  continueConversation = false,
+}: {
+  title?: string;
+  proxy: LlmProxy;
+  continueConversation?: boolean;
+}): Promise<void> => {
+  if (!continueConversation) {
+    mockTitleGeneration(proxy, title);
+  }
+  return mockHangingFinalAnswer(proxy);
 };
 
 /**

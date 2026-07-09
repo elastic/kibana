@@ -86,6 +86,9 @@ const mockContext = {
     savedObjects: {
       client: savedObjectsClient,
     },
+    featureFlags: {
+      getBooleanValue: jest.fn().mockResolvedValue(true),
+    },
   },
 } as unknown as AwaitedProperties<RequestHandlerContext>;
 

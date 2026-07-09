@@ -8,20 +8,28 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_EXCLUDED_GAP_REASONS, gapReasonType } from '@kbn/alerting-plugin/common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
 } from '@kbn/management-settings-ids';
 import { snakeCase } from 'lodash';
+import {
+  TAG_PREFIX_MAX_LENGTH,
+  TAG_PREFIX_PATTERN,
+  TAG_PREFIX_VALIDATION_MESSAGE,
+} from '../common/workflows/alert_analysis_workflow';
 import { DefaultClosingReasonSchema } from '../common/types';
 import {
   APP_ID,
@@ -828,6 +836,29 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
     technicalPreview: true,
     readonly: true,
   },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowAgentIdLabel', {
+      defaultMessage: 'Alert analysis workflow agent',
+    }),
+    // The agent id is redacted from telemetry (see `sensitive` below); we only report whether a
+    // non-default agent is configured, never which one.
+    sensitive: true,
+    value: agentBuilderDefaultAgentId,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowAgentIdDescription',
+      {
+        defaultMessage:
+          'The Agent Builder agent used by the alert analysis workflow to classify alerts.',
+      }
+    ),
+    type: 'string',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.string({ minLength: 1, maxLength: 64 }),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
   [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]: {
     name: i18n.translate(
       'xpack.securitySolution.uiSettings.alertAnalysisWorkflowCreateConversationLabel',
@@ -845,6 +876,35 @@ export const getAlertAnalysisWorkflowSettings = (): SettingsConfig => ({
     category: [APP_ID],
     requiresPageReload: false,
     schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+    readonly: true,
+  },
+  [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.alertAnalysisWorkflowTagPrefixLabel', {
+      defaultMessage: 'Alert analysis workflow tag prefix',
+    }),
+    value: 'alert-analysis',
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertAnalysisWorkflowTagPrefixDescription',
+      {
+        defaultMessage:
+          'Prefix for the tags the alert analysis workflow adds to alerts it analyzes (for example {example}). Changing it means alerts tagged under the old prefix are no longer recognized as analyzed.',
+        values: { example: 'alert-analysis.classification.false_positive' },
+      }
+    ),
+    type: 'string',
+    category: [APP_ID],
+    requiresPageReload: false,
+    // The prefix is interpolated verbatim into the workflow's Liquid tag expressions, so it is
+    // constrained to a safe tag-namespace charset here too (this path is writable through the
+    // settings API, not just the workflow settings page).
+    schema: schema.string({
+      minLength: 1,
+      maxLength: TAG_PREFIX_MAX_LENGTH,
+      validate: (value) =>
+        TAG_PREFIX_PATTERN.test(value) ? undefined : TAG_PREFIX_VALIDATION_MESSAGE,
+    }),
     solutionViews: ['classic', 'security'],
     technicalPreview: true,
     readonly: true,
