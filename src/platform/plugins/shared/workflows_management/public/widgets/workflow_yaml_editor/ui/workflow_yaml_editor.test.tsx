@@ -12,7 +12,6 @@ import React from 'react';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
-import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
@@ -672,63 +671,13 @@ steps:
     });
   });
 
-  describe('agent builder auto-open', () => {
-    const mockUseAgentBuilderIntegration = useAgentBuilderIntegration as jest.MockedFunction<
-      typeof useAgentBuilderIntegration
-    >;
-
-    const setupAvailable = () => {
-      const openAgentChat = jest.fn();
-      mockUseAgentBuilderIntegration.mockReturnValue({
-        openAgentChat,
-        isAgentBuilderAvailable: true,
-        proposalManager: null,
-      } as unknown as ReturnType<typeof useAgentBuilderIntegration>);
-      return openAgentChat;
-    };
-
-    it('opens the agent chat once when available', async () => {
-      const openAgentChat = setupAvailable();
-      const store = createMockStore();
-
-      const { rerender } = renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
-
-      await waitFor(() => {
-        expect(openAgentChat).toHaveBeenCalledTimes(1);
-      });
-
-      // Simulate a re-render (e.g. validation cycle producing a new openAgentChat identity)
-      rerender(<WorkflowYAMLEditor {...defaultProps} />);
-      rerender(<WorkflowYAMLEditor {...defaultProps} />);
-
-      expect(openAgentChat).toHaveBeenCalledTimes(1);
-    });
-
-    it('still opens the agent chat when the editor is read-only (managed workflow)', async () => {
-      const openAgentChat = setupAvailable();
-      const store = createMockStore();
-      store.dispatch(setWorkflow({ ...mockWorkflow, managed: true }));
-      store.dispatch(setActiveTab('workflow'));
-
-      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
-
-      await waitFor(() => {
-        expect(openAgentChat).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    it('still opens the agent chat on the executions tab', async () => {
-      const openAgentChat = setupAvailable();
-      const store = createMockStore();
-      store.dispatch(setActiveTab('executions'));
-
-      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
-
-      await waitFor(() => {
-        expect(openAgentChat).toHaveBeenCalledTimes(1);
-      });
-    });
-  });
+  // Auto-open of the agent chat lives inside useAgentBuilderIntegration and is
+  // covered by use_agent_builder_integration.test.ts, which asserts:
+  // - the sidebar auto-opens exactly once on /workflows/create (no workflowId),
+  // - it does NOT auto-open when landing on an existing workflow detail view,
+  // - and the auto-open path does not double-fire on re-renders.
+  // workflow_yaml_editor no longer calls openAgentChat directly, so there is
+  // nothing meaningful to observe at this layer via a mocked hook.
 
   describe('hover commands', () => {
     it('should register keyboard commands when editor mounts', async () => {

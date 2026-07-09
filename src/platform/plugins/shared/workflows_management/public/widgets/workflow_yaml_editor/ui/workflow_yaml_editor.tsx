@@ -340,7 +340,7 @@ export const WorkflowYAMLEditor = ({
   }, [validationErrors, dispatch]);
 
   // Agent Builder integration for AI-assisted editing
-  const { openAgentChat, isAgentBuilderAvailable } = useAgentBuilderIntegration({
+  const { isAgentBuilderAvailable } = useAgentBuilderIntegration({
     editorRef,
     isEditorMounted,
     workflowId: workflow?.id,
@@ -348,17 +348,8 @@ export const WorkflowYAMLEditor = ({
     validationErrors,
   });
 
-  const hasAutoOpenedAgentChatRef = useRef(false);
-  const openAgentChatRef = useRef(openAgentChat);
-  openAgentChatRef.current = openAgentChat;
-
-  useEffect(() => {
-    if (!isEditorMounted || !isAgentBuilderAvailable || hasAutoOpenedAgentChatRef.current) {
-      return;
-    }
-    hasAutoOpenedAgentChatRef.current = true;
-    openAgentChatRef.current();
-  }, [isEditorMounted, isAgentBuilderAvailable]);
+  // Auto-open of the agent chat sidebar is owned by useAgentBuilderIntegration
+  // and scoped to new workflows only (`/workflows/create`). See its comment.
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {

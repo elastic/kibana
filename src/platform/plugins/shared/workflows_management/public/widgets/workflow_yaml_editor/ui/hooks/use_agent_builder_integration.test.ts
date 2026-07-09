@@ -34,6 +34,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 const useUiSettingMock = useUiSetting as jest.MockedFunction<typeof useUiSetting>;
 jest.mock('uuid', () => ({ v4: () => 'mock-uuid-1234' }));
+const mockSetActiveProposalManager = jest.fn();
+const mockSetLastCreateAttachmentId = jest.fn();
 jest.mock('../../../../features/ai_integration', () => ({
   AttachmentBridge: jest.fn().mockImplementation(() => ({
     start: jest.fn(),
@@ -45,6 +47,8 @@ jest.mock('../../../../features/ai_integration', () => ({
     getDiffHunks: jest.fn().mockReturnValue([]),
     hasPendingProposals: jest.fn().mockReturnValue(false),
   })),
+  setActiveProposalManager: (...args: unknown[]) => mockSetActiveProposalManager(...args),
+  setLastCreateAttachmentId: (...args: unknown[]) => mockSetLastCreateAttachmentId(...args),
 }));
 jest.mock('../../../../features/ai_integration/proposal_tracker', () => ({
   ProposalTracker: jest.fn().mockImplementation(() => ({
@@ -416,7 +420,7 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('auto-open on editor mount', () => {
-    it('opens the sidebar exactly once when the editor becomes ready', () => {
+    it('opens the sidebar exactly once on the create route (no workflowId)', () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -450,6 +454,23 @@ describe('useAgentBuilderIntegration', () => {
       expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
     });
 
+    it('does NOT auto-open on an existing workflow detail view', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-1',
+        })
+      );
+
+      expect(agentBuilder.openChat).not.toHaveBeenCalled();
+      expect(mockTelemetry.reportWorkflowAiChatOpened).not.toHaveBeenCalled();
+    });
+
     it('does not auto-open when the editor is not yet mounted', () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
@@ -474,15 +495,14 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
-          workflowId: 'wf-1',
         })
       );
 
       expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
       expect(mockTelemetry.reportWorkflowAiChatOpened).toHaveBeenCalledWith({
         entryPoint: 'workflow_editor',
-        sessionType: 'edit',
-        workflowId: 'wf-1',
+        sessionType: 'create',
+        workflowId: undefined,
         autoOpened: true,
       });
 
@@ -501,7 +521,6 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
-          workflowId: 'wf-1',
         })
       );
 
@@ -528,6 +547,61 @@ describe('useAgentBuilderIntegration', () => {
       );
 
       expect(agentBuilder.openChat).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cleanup closes the chat sidebar', () => {
+    it('closes the chat sidebar on unmount (navigate-away)', () => {
+      const agentBuilder = createMockAgentBuilder();
+      const chatRef = { close: jest.fn() };
+      agentBuilder.openChat.mockReturnValue({ chatRef });
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { unmount } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      // Auto-open path opened the chat; unmount must close it.
+      unmount();
+
+      expect(chatRef.close).toHaveBeenCalled();
+    });
+  });
+
+  describe('conversation handoff registration', () => {
+    it('registers the unsaved attachment id when there is no workflowId', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      expect(mockSetLastCreateAttachmentId).toHaveBeenCalledWith(MOCK_UUID);
+    });
+
+    it('clears the create-attachment registration when a workflowId is present', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-abc',
+        })
+      );
+
+      expect(mockSetLastCreateAttachmentId).toHaveBeenCalledWith(undefined);
     });
   });
 

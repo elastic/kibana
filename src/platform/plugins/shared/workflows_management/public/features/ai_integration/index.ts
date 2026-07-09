@@ -14,3 +14,11 @@ export { AttachmentBridge, baseProposalId } from './attachment_bridge';
 
 export { ProposalTracker } from './proposal_tracker';
 export type { ProposalStatus, ProposalRecord } from './proposal_tracker';
+
+export { setActiveProposalManager, acceptAllActiveProposals } from './active_proposal_manager';
+
+export {
+  setLastCreateAttachmentId,
+  getLastCreateAttachmentId,
+  carryConversationToWorkflow,
+} from './conversation_handoff';

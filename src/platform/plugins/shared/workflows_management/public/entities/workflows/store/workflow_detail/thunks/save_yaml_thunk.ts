@@ -13,6 +13,10 @@ import { WorkflowApi } from '@kbn/workflows-ui';
 import { loadWorkflowThunk } from './load_workflow_thunk';
 import { PLUGIN_ID } from '../../../../../../common';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
+import {
+  acceptAllActiveProposals,
+  carryConversationToWorkflow,
+} from '../../../../../features/ai_integration';
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
@@ -51,6 +55,12 @@ export const saveYamlThunk = createAsyncThunk<
         });
 
     const isAiAssisted = selectAiAssisted(getState());
+
+    // Hitting Save is an implicit acceptance of any AI-generated accept/reject
+    // decorations on screen — resolve them so the persisted YAML matches what
+    // the user just saw. This mutates the Monaco model synchronously; the
+    // yamlString read below picks up the accepted content.
+    acceptAllActiveProposals();
 
     try {
       const state = getState();
@@ -105,6 +115,11 @@ export const saveYamlThunk = createAsyncThunk<
         // Invalidate relevant queries to refresh the UI
         queryClient.invalidateQueries({ queryKey: ['workflows'] });
         queryClient.invalidateQueries({ queryKey: ['workflows', id] });
+
+        // Carry the AI chat conversation started on /workflows/create onto the
+        // saved workflow's session tag so the detail view opens with the same
+        // conversation and message history rather than an empty chat.
+        carryConversationToWorkflow(workflow.id);
 
         // Navigate to the workflow detail page
         application.navigateToApp(PLUGIN_ID, { path: workflow.id });

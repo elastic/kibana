@@ -20,6 +20,13 @@ export interface WorkflowYamlChangedPayload {
   beforeYaml: string;
   afterYaml: string;
   workflowId?: string;
+  /**
+   * Stable identifier of the attachment the payload was produced against.
+   * Present on new events; older events without this field fall back to the
+   * `workflowId` match. Used to key edits to the conversation's originating
+   * workflow so a still-running agent does not mutate a newly-viewed workflow.
+   */
+  attachmentId?: string;
   name?: string;
   attachmentVersion?: number;
   toolId?: string;
@@ -53,7 +60,7 @@ export class AttachmentBridge {
   private onProposalReceived:
     | ((params: { proposalId: string; toolId: string; workflowId?: string }) => void)
     | undefined;
-  private workflowId: string | undefined;
+  private attachmentId: string | undefined;
 
   start(
     chat$: Observable<BrowserChatEvent>,
@@ -62,7 +69,13 @@ export class AttachmentBridge {
     tracker: ProposalTracker,
     options?: {
       onError?: (err: unknown) => void;
-      workflowId?: string;
+      /**
+       * Stable id of the attachment this bridge is bound to. Incoming YAML-change
+       * events whose `attachmentId` does not match this value are ignored — this
+       * keeps in-flight agent edits scoped to the workflow the conversation was
+       * started against, even after the user navigates to a different workflow.
+       */
+      attachmentId?: string;
       onProposalReceived?: (params: {
         proposalId: string;
         toolId: string;
@@ -75,7 +88,7 @@ export class AttachmentBridge {
     this.tracker = tracker;
     this.onError = options?.onError ?? (() => {});
     this.onProposalReceived = options?.onProposalReceived;
-    this.workflowId = options?.workflowId;
+    this.attachmentId = options?.attachmentId;
 
     this.subscription = chat$.subscribe((event) => {
       if (isToolUiEvent(event, WORKFLOW_YAML_CHANGED_EVENT)) {
@@ -102,7 +115,7 @@ export class AttachmentBridge {
       proposalId: `simulated-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       beforeYaml: model.getValue(),
       afterYaml,
-      workflowId: this.workflowId,
+      attachmentId: this.attachmentId,
     });
   }
 
@@ -113,7 +126,7 @@ export class AttachmentBridge {
     this.tracker = null;
     this.editorRef = null;
     this.processedProposals.clear();
-    this.workflowId = undefined;
+    this.attachmentId = undefined;
   }
 
   private handleYamlChanged(payload: WorkflowYamlChangedPayload): void {
@@ -122,7 +135,16 @@ export class AttachmentBridge {
 
     const { proposalId, beforeYaml, afterYaml, attachmentVersion, workflowId, toolId } = payload;
 
-    if (this.workflowId && workflowId && workflowId !== this.workflowId) return;
+    // Drop payloads produced for a different attachment (e.g. a still-running
+    // conversation from workflow A whose event lands after the user navigated
+    // to workflow B). `attachmentId` is a stable per-editor UUID that works for
+    // both saved workflows and unsaved /workflows/create sessions. Fall back to
+    // the older `workflowId` field for events emitted before the server was
+    // updated to include `attachmentId`.
+    if (this.attachmentId) {
+      const payloadAttachmentId = payload.attachmentId ?? workflowId;
+      if (payloadAttachmentId && payloadAttachmentId !== this.attachmentId) return;
+    }
 
     if (this.processedProposals.has(proposalId)) return;
     if (this.processedProposals.size >= AttachmentBridge.PROCESSED_PROPOSALS_CAP) {

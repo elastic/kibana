@@ -38,6 +38,15 @@ jest.mock('../../../../../shared/lib/query_client', () => ({
 }));
 const { queryClient } = jest.requireMock('../../../../../shared/lib/query_client');
 
+// Mock AI integration side-effects — the thunk resolves pending diff decorations
+// and carries the create-time conversation onto the saved workflow's session tag.
+const mockAcceptAllActiveProposals = jest.fn();
+const mockCarryConversationToWorkflow = jest.fn();
+jest.mock('../../../../../features/ai_integration', () => ({
+  acceptAllActiveProposals: (...args: unknown[]) => mockAcceptAllActiveProposals(...args),
+  carryConversationToWorkflow: (...args: unknown[]) => mockCarryConversationToWorkflow(...args),
+}));
+
 // Set up initial state with workflow and yaml
 const mockWorkflow: WorkflowDetailDto = {
   id: 'test-workflow-1',
@@ -123,6 +132,9 @@ describe('saveYamlThunk', () => {
       expect(mockWorkflowApi.createWorkflow).toHaveBeenCalledWith({
         yaml: 'name: New Workflow\nsteps: []',
       });
+      // On successful create, hand off the /workflows/create chat conversation
+      // onto the newly-saved workflow so its detail view opens with history.
+      expect(mockCarryConversationToWorkflow).toHaveBeenCalledWith('test-workflow-1');
       expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
       expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
         queryKey: ['workflows', undefined],
@@ -155,6 +167,30 @@ describe('saveYamlThunk', () => {
       );
       expect(result.type).toBe('detail/saveYamlThunk/rejected');
       expect(result.payload).toBe('Creation failed');
+    });
+  });
+
+  describe('AI proposal handling', () => {
+    it('accepts pending AI diff decorations before persisting on update', async () => {
+      store.dispatch(setWorkflow(mockWorkflow));
+      store.dispatch(setYamlString('name: With Pending Diff\nsteps: []'));
+      mockWorkflowApi.updateWorkflow.mockResolvedValue(undefined as any);
+      mockLoadWorkflowThunk.mockImplementation(((_arg: any) => {
+        return async () => {};
+      }) as any);
+
+      await store.dispatch(saveYamlThunk());
+
+      expect(mockAcceptAllActiveProposals).toHaveBeenCalled();
+    });
+
+    it('accepts pending AI diff decorations before creating a new workflow', async () => {
+      store.dispatch(setYamlString('name: Brand New\nsteps: []'));
+      mockWorkflowApi.createWorkflow.mockResolvedValue(mockWorkflow);
+
+      await store.dispatch(saveYamlThunk());
+
+      expect(mockAcceptAllActiveProposals).toHaveBeenCalled();
     });
   });
 
