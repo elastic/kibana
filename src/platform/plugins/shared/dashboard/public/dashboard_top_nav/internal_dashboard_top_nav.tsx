@@ -41,10 +41,10 @@ import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/publ
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
-import type { AppHeaderBadge } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
 import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
 import { UI_SETTINGS } from '../../common/constants';
-import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
+import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
@@ -422,6 +422,17 @@ export function InternalDashboardTopNav({
     [lastSavedId]
   );
 
+  // Chrome Next hides the classic breadcrumbs, so the header carries its own back button that leads to the dashboard listing page.
+  const backToListing = useMemo<AppHeaderBack>(
+    () => ({
+      href: coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
+        path: `#${LANDING_PAGE_PATH}`,
+      }),
+      label: getDashboardBreadcrumb(),
+    }),
+    []
+  );
+
   // `inline`/`registered` modes pass badges and favorite to the header component directly (see render);
   // only `legacy` mode pushes them through the chrome APIs.
   useEffect(() => {
@@ -455,6 +466,7 @@ export function InternalDashboardTopNav({
       {headerMode === 'inline' && viewMode !== 'print' && (
         <AppHeader
           title={dashboardTitle}
+          back={backToListing}
           menu={appMenuConfig}
           badges={appHeaderBadges}
           favorite={favoriteButton}
