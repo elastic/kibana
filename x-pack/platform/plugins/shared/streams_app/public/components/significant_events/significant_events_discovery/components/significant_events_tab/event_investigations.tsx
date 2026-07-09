@@ -112,20 +112,16 @@ const useReferenceHref = () => {
   );
 };
 
-const InvestigationRow = ({
-  investigation,
-  initialIsOpen,
-}: {
-  investigation: SignificantEventInvestigation;
-  initialIsOpen: boolean;
-}) => {
+/**
+ * Fetches the live/replayed investigation stream and everything `InvestigationOutput` needs to
+ * render it. Shared by the bare single-investigation case and the per-row accordion used when
+ * there's more than one.
+ */
+const useInvestigationOutputProps = (investigation: SignificantEventInvestigation) => {
   const {
     core: { http },
   } = useKibana();
   const getReferenceHref = useReferenceHref();
-  const { started_at: startedAt, completed_at: completedAt, workflow_execution_id } = investigation;
-  const duration = formatDuration(startedAt, completedAt);
-  const accordionId = useGeneratedHtmlId({ prefix: 'sigEventInvestigation' });
 
   /**
    * The hook's `status` is authoritative over the doc-derived flag — it settles as soon as the
@@ -135,9 +131,41 @@ const InvestigationRow = ({
    */
   const { state, error, status } = useInvestigationState({
     http,
-    workflowExecutionId: workflow_execution_id,
+    workflowExecutionId: investigation.workflow_execution_id,
     isRunning: isInvestigationRunning(investigation),
   });
+
+  return { state, error, status, getReferenceHref };
+};
+
+const InvestigationContent = ({
+  investigation,
+}: {
+  investigation: SignificantEventInvestigation;
+}) => {
+  const { state, error, status, getReferenceHref } = useInvestigationOutputProps(investigation);
+
+  return (
+    <InvestigationOutput
+      status={status}
+      state={state}
+      error={error}
+      getReferenceHref={getReferenceHref}
+    />
+  );
+};
+
+const InvestigationRow = ({
+  investigation,
+  initialIsOpen,
+}: {
+  investigation: SignificantEventInvestigation;
+  initialIsOpen: boolean;
+}) => {
+  const { state, error, status, getReferenceHref } = useInvestigationOutputProps(investigation);
+  const { started_at: startedAt, completed_at: completedAt } = investigation;
+  const duration = formatDuration(startedAt, completedAt);
+  const accordionId = useGeneratedHtmlId({ prefix: 'sigEventInvestigation' });
 
   return (
     <EuiAccordion
@@ -170,8 +198,17 @@ interface EventInvestigationsProps {
   event: SignificantEvent;
 }
 
+/**
+ * When there's exactly one investigation, the "Investigations" title and the per-row accordion
+ * (timestamp/duration button) are pure overhead — nothing to disambiguate — so the output is
+ * shown directly. With zero or multiple investigations, the wrapper still earns its place.
+ */
 export const EventInvestigations = ({ event }: EventInvestigationsProps) => {
   const investigations = event.investigations ?? [];
+
+  if (investigations.length === 1) {
+    return <InvestigationContent investigation={investigations[0]} />;
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">

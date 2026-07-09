@@ -42,6 +42,9 @@ import { ProvenanceSection } from './provenance';
 import { hasRunningInvestigation } from '../shared/investigation_status';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 
+const SUMMARY_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.summaryTitle', {
+  defaultMessage: 'Summary',
+});
 const LIFECYCLE_TITLE = i18n.translate('xpack.streams.sigEventsTab.flyout.lifecycleTitle', {
   defaultMessage: 'Lifecycle',
 });
@@ -91,6 +94,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   } = useFetchSignificantEventLifecycle(event.event_id);
 
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'significantEventFlyout' });
+  const summaryAccordionId = useGeneratedHtmlId({ prefix: 'sigEventSummary' });
   const lifecycleAccordionId = useGeneratedHtmlId({ prefix: 'sigEventLifecycle' });
 
   // Use the latest event version from the lifecycle response — lifecycle fetches all
@@ -109,6 +113,16 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   );
 
   const isInvestigationRunning = hasRunningInvestigation(latestEvent);
+
+  // Once an investigation has actually finished, its findings (surfaced via "How we got here"
+  // and the investigation output itself) are far more useful than the triage-derived summary —
+  // promote them above the fold and push the summary/root-cause/lifecycle content down.
+  const hasCompletedInvestigation = useMemo(
+    () =>
+      latestEvent.investigations?.some((investigation) => investigation.completed_at != null) ??
+      false,
+    [latestEvent.investigations]
+  );
 
   // Poll lifecycle while a pending investigation is in progress, or briefly after the
   // footer button triggers one (the async workflow step may not have written back yet).
@@ -145,6 +159,21 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     };
   }, [latestEvent, focusedSignificantEventService]);
 
+  const summaryAccordion = (
+    <EuiAccordion
+      id={summaryAccordionId}
+      data-test-subj="sigEventSummaryAccordion"
+      buttonContent={
+        <EuiTitle size="xs">
+          <h3>{SUMMARY_TITLE}</h3>
+        </EuiTitle>
+      }
+    >
+      <EuiSpacer size="s" />
+      <SigEventDetails event={event} />
+    </EuiAccordion>
+  );
+
   return (
     <EuiFlyout onClose={onClose} size="m" aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
@@ -169,19 +198,39 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
 
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m">
-          <SigEventDetails event={event} />
+          {hasCompletedInvestigation ? (
+            <>
+              <ProvenanceSection
+                event={latestEvent}
+                lifecycle={lifecycleData}
+                isLoading={isLifecycleLoading}
+              />
 
-          <EuiHorizontalRule margin="none" />
+              <EuiHorizontalRule margin="none" />
 
-          <ProvenanceSection
-            event={latestEvent}
-            lifecycle={lifecycleData}
-            isLoading={isLifecycleLoading}
-          />
+              <EventInvestigations event={latestEvent} />
 
-          <EuiHorizontalRule margin="none" />
+              <EuiHorizontalRule margin="none" />
 
-          <EventInvestigations event={latestEvent} />
+              {summaryAccordion}
+            </>
+          ) : (
+            <>
+              {summaryAccordion}
+
+              <EuiHorizontalRule margin="none" />
+
+              <ProvenanceSection
+                event={latestEvent}
+                lifecycle={lifecycleData}
+                isLoading={isLifecycleLoading}
+              />
+
+              <EuiHorizontalRule margin="none" />
+
+              <EventInvestigations event={latestEvent} />
+            </>
+          )}
 
           <EuiHorizontalRule margin="none" />
 
