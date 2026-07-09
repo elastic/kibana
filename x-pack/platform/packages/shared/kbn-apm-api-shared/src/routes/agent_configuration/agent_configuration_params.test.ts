@@ -6,6 +6,7 @@
  */
 
 import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
+import { createOrUpdateAgentConfigurationRoute } from './create_or_update_configuration';
 import { deleteAgentConfigurationRoute } from './delete_configuration';
 import { agentConfigurationAgentNameRoute } from './get_agent_name';
 import { getSingleAgentConfigurationRoute } from './get_single_configuration';
@@ -92,5 +93,41 @@ describe('searchAgentConfigurationRoute params', () => {
 
   it('rejects a missing service', () => {
     expectParseError(searchAgentConfigurationRoute.params!.safeParse({ body: {} }));
+  });
+});
+
+describe('createOrUpdateAgentConfigurationRoute params', () => {
+  it('accepts a valid body without a query', () => {
+    const result = createOrUpdateAgentConfigurationRoute.params!.safeParse({
+      body: {
+        service: { name: 'opbeans-java', environment: 'production' },
+        settings: { transaction_sample_rate: '0.5' },
+      },
+    });
+
+    expectParseSuccess(result);
+  });
+
+  it('coerces the optional overwrite query param from a string', () => {
+    const result = createOrUpdateAgentConfigurationRoute.params!.safeParse({
+      query: { overwrite: 'true' },
+      body: { service: {}, settings: {} },
+    });
+
+    expectParseSuccess(result);
+  });
+
+  it('rejects a body with an out-of-range known setting', () => {
+    expectParseError(
+      createOrUpdateAgentConfigurationRoute.params!.safeParse({
+        body: { service: {}, settings: { transaction_sample_rate: '5' } },
+      })
+    );
+  });
+
+  it('rejects a body missing settings', () => {
+    expectParseError(
+      createOrUpdateAgentConfigurationRoute.params!.safeParse({ body: { service: {} } })
+    );
   });
 });
