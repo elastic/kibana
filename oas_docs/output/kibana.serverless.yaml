@@ -80625,6 +80625,19 @@ components:
                 required:
                   - name
                   - message
+              missing_assets:
+                items:
+                  additionalProperties: true
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                    - id
+                    - type
+                type: array
               target_version:
                 type: string
             required:
