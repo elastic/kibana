@@ -45,6 +45,8 @@
     "@kbn/alerts-ui-shared",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/deeplinks-analytics",
+    "@kbn/cloud-plugin",
+    "@kbn/licensing-plugin",
     "@kbn/react-query",
   ],
   "exclude": [

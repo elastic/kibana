@@ -18,8 +18,10 @@
       "actions",
       "esUiShared",
       "kibanaReact",
-      "triggersActionsUi"
+      "triggersActionsUi",
+      "licensing"
     ],
+    "optionalPlugins": ["cloud"],
     "extraPublicDirs": [
       "public/common"
     ]
