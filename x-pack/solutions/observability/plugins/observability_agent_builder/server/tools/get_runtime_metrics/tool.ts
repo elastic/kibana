@@ -16,6 +16,7 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
+import { MAX_KQL_FILTER_LENGTH, MAX_SHORT_STRING_LENGTH } from '../../utils/schema_limits';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { OBSERVABILITY_GET_HOSTS_TOOL_ID } from '../get_hosts/tool';
 import { OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID } from '../get_trace_metrics/tool';
@@ -34,10 +35,12 @@ const getRuntimeMetricsToolSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   serviceName: z
     .string()
+    .max(MAX_SHORT_STRING_LENGTH)
     .optional()
     .describe('Filter to a specific service. If omitted, use kqlFilter to narrow results.'),
   serviceEnvironment: z
     .string()
+    .max(MAX_SHORT_STRING_LENGTH)
     .optional()
     .describe(
       'The environment that the service is running in. Leave empty to query for all environments.'
@@ -51,6 +54,7 @@ const getRuntimeMetricsToolSchema = z.object({
     .describe('Maximum number of service nodes to return'),
   kqlFilter: z
     .string()
+    .max(MAX_KQL_FILTER_LENGTH)
     .optional()
     .describe(
       'KQL filter to narrow down results. Examples: "service.name: ad", "host.name: web-*".'

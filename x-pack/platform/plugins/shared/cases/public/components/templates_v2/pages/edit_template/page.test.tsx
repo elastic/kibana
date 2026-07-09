@@ -16,6 +16,7 @@ jest.mock('../../../../common/navigation', () => ({
   useTemplateViewParams: () => mockUseTemplateViewParams(),
   useCasesTemplatesNavigation: () => ({
     navigateToCasesTemplates: mockNavigateToCasesTemplates,
+    getCasesTemplatesUrl: jest.fn().mockReturnValue('/app/security/cases/configure/templates'),
   }),
 }));
 

@@ -39,7 +39,11 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           metadata: { name: 'alert-rule-1', tags: [AGENT_BUILDER_TAG] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 10' } },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | LIMIT 10' },
+            no_data: { query: 'FROM metrics-* | STATS c = COUNT(*)' },
+          },
           grouping: { fields: ['host.name', 'service.name'] },
           no_data_strategy: 'last_known_status',
           // Builder defaults to `no_breach`; original FTR rule had no recovery strategy.
@@ -67,6 +71,9 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           schedule: { every: '5m', lookback: '10m' },
           // Composed format + explicit recovery_strategy so telemetry exercises
           // both query formats and a non-default recovery_strategy value.
+          // Composed rules reuse `base` as their data-presence query and are
+          // exempt from the no_data query-block requirement that standalone
+          // rules have (see isNoDataQueryProvidedForStrategy).
           query: {
             format: 'composed',
             base: 'FROM metrics-* | STATS count = COUNT(*) BY host.name',
@@ -84,14 +91,17 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           time_field: '@timestamp',
           schedule: { every: '5m' },
           // recovery_strategy 'query' requires a query.recovery block; exercises
-          // the two values ('query', 'emit') no other rule in this suite covers.
+          // the only recovery_strategy value ('query') no other rule in this
+          // suite covers. Note: no_data_strategy 'emit' is NOT tested anywhere
+          // in this suite — the create/update API currently rejects it outright
+          // (isNoDataStrategyNotEmit in rule_data_schema.ts), even with a
+          // query.no_data block provided.
           query: {
             format: 'standalone',
             breach: { query: 'FROM metrics-* | LIMIT 5' },
             recovery: { query: 'FROM metrics-* | LIMIT 3' },
           },
           recovery_strategy: 'query',
-          no_data_strategy: 'emit',
           grouping: undefined,
         })
       ),
@@ -165,7 +175,6 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
     expect(state.count_by_no_data_strategy).toStrictEqual({
       last_known_status: 1,
       recover: 1,
-      emit: 1,
       none: 1,
     });
 
