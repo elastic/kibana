@@ -14,7 +14,7 @@ export const getChangedSettings = (
   applied: MetricsGridSettings
 ): Partial<MetricsGridSettings> =>
   Object.fromEntries(
-    Object.keys(draft)
+    (Object.keys(draft) as Array<keyof MetricsGridSettings>)
       .filter((key) => draft[key] !== applied[key])
       .map((key) => [key, draft[key]])
   );
