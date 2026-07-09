@@ -8,6 +8,7 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
+import type { EdgeLabel } from '@dagrejs/dagre';
 import { createTypedGraph } from './create_typed_graph';
 import type { WorkflowSettings, WorkflowYaml } from '../..';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
@@ -108,7 +109,11 @@ export class WorkflowGraph {
     return this.graph.edges().map((edge) => ({ v: edge.v, w: edge.w }));
   }
 
-  public getEdge(edgeMetadata: { v: string; w: string }): { label?: string } | undefined {
+  // TODO(workflows team): this graph never runs through dagre's layout, and no `setEdge`
+  // call in this package provides a label, so `getEdge()` always resolves to `undefined`
+  // at runtime today. Kept typed as `EdgeLabel` (dagre's real edge-label type, the direct
+  // successor of the old `GraphEdge`) so the API stays truthful if a label is ever wired up.
+  public getEdge(edgeMetadata: { v: string; w: string }): EdgeLabel | undefined {
     return this.graph.edge(edgeMetadata);
   }
 
