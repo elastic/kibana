@@ -163,8 +163,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
         await genAiSettingsApi('POST /internal/gen_ai_settings/agent_builder/tracing_dashboard', {
           params: {
             body: {
-              enabled: unsavedChanges[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]
-                ?.unsavedValue as boolean,
+              enabled: Boolean(
+                unsavedChanges[AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]?.unsavedValue
+              ),
             },
           },
           signal: null,
