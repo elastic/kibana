@@ -558,7 +558,7 @@ describe('LibraryFetcher.getTemplate', () => {
 describe('LibraryFetcher.getHealth', () => {
   it('starts with no timestamps and no error', () => {
     const fetcher = buildFetcher();
-    expect(fetcher.getHealth()).toEqual({ sourceMode: 'http' });
+    expect(fetcher.getHealth()).toEqual({ sourceMode: 'http', lastRefreshAt: null });
   });
 
   it('records a successful refresh', async () => {

@@ -10,9 +10,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   ALERT_SEVERITY_CRITICAL,
+  ALERT_SEVERITY_MAJOR,
   ALERT_SEVERITY_HIGH,
   ALERT_SEVERITY_MEDIUM,
+  ALERT_SEVERITY_MINOR,
   ALERT_SEVERITY_LOW,
+  ALERT_SEVERITY_WARNING,
   ALERT_SEVERITY_INFO,
 } from '@kbn/rule-data-utils';
 import { EuiFieldText } from '@elastic/eui';
@@ -315,7 +318,7 @@ describe('DataConditionPanel', () => {
   });
 
   describe('severity_equals dropdown', () => {
-    it('lists only the five primary severity levels in highest → lowest order', () => {
+    it('lists the full severity superset in highest → lowest order', () => {
       render(
         <DataConditionPanel
           entry={createEntry({ type: DataConditionType.SEVERITY_EQUALS, value: undefined })}
@@ -332,9 +335,12 @@ describe('DataConditionPanel', () => {
 
       expect(offered).toEqual([
         ALERT_SEVERITY_CRITICAL,
+        ALERT_SEVERITY_MAJOR,
         ALERT_SEVERITY_HIGH,
         ALERT_SEVERITY_MEDIUM,
+        ALERT_SEVERITY_MINOR,
         ALERT_SEVERITY_LOW,
+        ALERT_SEVERITY_WARNING,
         ALERT_SEVERITY_INFO,
       ]);
     });

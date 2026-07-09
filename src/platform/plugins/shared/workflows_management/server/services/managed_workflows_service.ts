@@ -13,6 +13,7 @@ import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
+  getManagedWorkflowVisibilityContexts,
   type ManagedWorkflowDefinition,
   type ManagedWorkflowId,
   type ManagedWorkflowTemplateValues,
@@ -31,7 +32,7 @@ import { updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
-import { maybeApplyWorkflowVersion } from '../lib/workflow_version';
+import { applyWorkflowVersion } from '../lib/workflow_version';
 import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
@@ -209,8 +210,7 @@ export class ManagedWorkflowsService {
         spaceId,
         now,
       });
-      const versioningEnabled = this.deps.crudService.isWorkflowVersioningEnabled();
-      const documentWithVersion = maybeApplyWorkflowVersion(document, undefined, versioningEnabled);
+      const documentWithVersion = applyWorkflowVersion(document, undefined);
       const savedDocument = await this.deps.crudService.createWorkflowDocument(
         workflowDocumentId,
         spaceId,
@@ -266,8 +266,7 @@ export class ManagedWorkflowsService {
       enabled,
       createdAt: existing.created_at,
     });
-    const versioningEnabled = this.deps.crudService.isWorkflowVersioningEnabled();
-    const documentWithVersion = maybeApplyWorkflowVersion(document, existing, versioningEnabled);
+    const documentWithVersion = applyWorkflowVersion(document, existing);
     const savedDocument = await this.deps.crudService.writeWorkflowDocumentWithOcc(
       workflowDocumentId,
       spaceId,
@@ -681,6 +680,7 @@ export class ManagedWorkflowsService {
       managedTemplateValues: managedTemplateValues as Record<string, unknown> | null,
       originManagedWorkflowId: definition.id,
       lifecycle: definition.management.lifecycle,
+      managedVisibilityContexts: this.getManagedVisibilityContexts(definition),
       managedVersion: definition.version,
     };
 
@@ -792,5 +792,9 @@ export class ManagedWorkflowsService {
     next: ManagedWorkflowTemplateValues | null
   ): boolean {
     return JSON.stringify(existing ?? null) === JSON.stringify(next ?? null);
+  }
+
+  private getManagedVisibilityContexts(definition: ManagedWorkflowDefinition): string[] {
+    return getManagedWorkflowVisibilityContexts(definition.visibility);
   }
 }

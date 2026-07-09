@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
-  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-} from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { createGenAiSettingsServerRoute } from '../create_gen_ai_settings_server_route';
 
 const syncAgentBuilderTracingPlatformFeaturesRoute = createGenAiSettingsServerRoute({
@@ -30,13 +27,7 @@ const syncAgentBuilderTracingPlatformFeaturesRoute = createGenAiSettingsServerRo
       coreStart.savedObjects.getScopedClient(request)
     );
 
-    const tracingEnabled = await uiSettingsClient.get<boolean>(
-      AGENT_BUILDER_TRACING_ENABLED_SETTING_ID
-    );
-    const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
-      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-    );
-    const enabled = tracingEnabled && experimentalFeaturesEnabled;
+    const enabled = await uiSettingsClient.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID);
 
     const agentBuilderPlatformStart = await plugins.agentBuilderPlatform.start();
     await agentBuilderPlatformStart.tracingFeatures.sync({

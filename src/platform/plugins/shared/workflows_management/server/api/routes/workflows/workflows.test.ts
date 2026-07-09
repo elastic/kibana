@@ -10,6 +10,10 @@
 import type { IRouter } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows/managed';
 import { registerWorkflowRoutes } from '.';
 import { ManagedWorkflowReadForbiddenError } from '../../managed_workflow_read_error';
 import type { RouteDependencies } from '../types';
@@ -220,6 +224,64 @@ describe('Workflow routes', () => {
         includeExecutionHistory: true,
         includeManagedExecutionHistory: false,
       });
+    });
+
+    it('should normalize selector visibility context to an array for api.getWorkflows', async () => {
+      mockApi.getWorkflows.mockResolvedValue({ workflows: [], total: 0 });
+      const request = httpServerMock.createKibanaRequest({
+        query: {
+          managed: 'all',
+          visibilityContext: getManagedWorkflowSelectorVisibilityContext('rule_action'),
+        },
+      });
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.read]: true,
+        [WorkflowsManagementApiActions.readManaged]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({
+          managedFilter: 'all',
+          visibilityContext: [getManagedWorkflowSelectorVisibilityContext('rule_action')],
+        }),
+        'default-space',
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
+      );
+    });
+
+    it('should pass multiple visibility contexts to api.getWorkflows', async () => {
+      mockApi.getWorkflows.mockResolvedValue({ workflows: [], total: 0 });
+      const visibilityContext = [
+        getManagedWorkflowSelectorVisibilityContext('rule_action'),
+        getManagedWorkflowSolutionVisibilityContext('security'),
+      ];
+      const request = httpServerMock.createKibanaRequest({
+        query: {
+          managed: 'all',
+          visibilityContext,
+        },
+      });
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.read]: true,
+        [WorkflowsManagementApiActions.readManaged]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({
+          managedFilter: 'all',
+          visibilityContext,
+        }),
+        'default-space',
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
+      );
     });
 
     it('should return forbidden when user lacks read privilege', async () => {

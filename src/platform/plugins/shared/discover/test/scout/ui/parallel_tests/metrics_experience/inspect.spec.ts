@@ -10,7 +10,8 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../../fixtures/metrics_experience';
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/272561
+spaceTest.describe.skip(
   'Metrics in Discover - Inspect',
   {
     tag: testData.METRICS_EXPERIENCE_TAGS,

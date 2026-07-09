@@ -372,4 +372,80 @@ describe('useFleetServerHostsForm', () => {
     await act(() => result.current.submit());
     await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
   });
+
+  it('should send explicit null when clearing an existing ssl secret key', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    testRenderer.startServices.http.put.mockResolvedValue({});
+    const { result } = testRenderer.renderHook(() =>
+      useFleetServerHostsForm(
+        {
+          id: 'id1',
+          name: 'fleet server 1',
+          host_urls: ['https://test.fr'],
+          is_default: false,
+          is_preconfigured: false,
+          secrets: {
+            ssl: {
+              key: { id: 'secret-key-id-123' },
+            },
+          },
+        },
+        onSuccess
+      )
+    );
+
+    act(() => result.current.inputs.sslKeySecretInput.setValue(''));
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => {
+      expect(onSuccess).toBeCalled();
+      const [, putOptions] = testRenderer.startServices.http.put.mock.calls[0] as unknown as [
+        string,
+        { body: string }
+      ];
+      const body = JSON.parse(putOptions.body);
+      expect(body.secrets?.ssl?.key).toBeNull();
+    });
+  });
+
+  it('should preserve an untouched secret when clearing a different one', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    testRenderer.startServices.http.put.mockResolvedValue({});
+    const { result } = testRenderer.renderHook(() =>
+      useFleetServerHostsForm(
+        {
+          id: 'id1',
+          name: 'fleet server 1',
+          host_urls: ['https://test.fr'],
+          is_default: false,
+          is_preconfigured: false,
+          secrets: {
+            ssl: {
+              key: { id: 'secret-key-id-123' },
+              es_key: { id: 'secret-es-key-id-456' },
+            },
+          },
+        },
+        onSuccess
+      )
+    );
+
+    act(() => result.current.inputs.sslKeySecretInput.setValue(''));
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => {
+      expect(onSuccess).toBeCalled();
+      const [, putOptions] = testRenderer.startServices.http.put.mock.calls[0] as unknown as [
+        string,
+        { body: string }
+      ];
+      const body = JSON.parse(putOptions.body);
+      expect(body.secrets?.ssl?.key).toBeNull();
+      expect(body.secrets?.ssl?.es_key).toEqual({ id: 'secret-es-key-id-456' });
+    });
+  });
 });

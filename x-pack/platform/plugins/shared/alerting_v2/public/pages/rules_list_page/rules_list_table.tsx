@@ -20,8 +20,10 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -33,8 +35,8 @@ import { BULK_FILTER_MAX_RULES, getRootEsqlQuery, type RuleKind } from '@kbn/ale
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { RULE_KIND_ICONS, RULE_KIND_LABELS, RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { RuleKindBadge } from '../../components/rule_details/rule_summary_header';
 import { RuleActionsMenu } from './rule_actions_menu';
 
 const labelsContainerStyle = css`
@@ -99,6 +101,10 @@ export interface RulesListTableProps {
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
+  /** Id of the rule whose enabled state is currently being toggled, if any. */
+  togglingRuleId?: string;
+  /** True while a bulk enable/disable mutation is in flight, so individual switches don't race it. */
+  isBulkTogglingEnabled?: boolean;
 
   /** Pagination callback */
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
@@ -132,6 +138,8 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onClone,
   onDelete,
   onToggleEnabled,
+  togglingRuleId,
+  isBulkTogglingEnabled,
   onTableChange,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -314,34 +322,34 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         ),
         width: '10%',
         sortable: true,
-        render: (kind: RuleKind) => (
-          <EuiToolTip content={RULE_KIND_TOOLTIPS[kind]}>
-            <EuiBadge color="hollow" iconType={RULE_KIND_ICONS[kind]} iconSide="left" tabIndex={0}>
-              {RULE_KIND_LABELS[kind]}
-            </EuiBadge>
-          </EuiToolTip>
-        ),
+        render: (kind: RuleKind) => <RuleKindBadge kind={kind} />,
       },
       {
         field: 'enabled',
         name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.status" defaultMessage="Status" />
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.column.enabled"
+            defaultMessage="Enabled"
+          />
         ),
         width: '8%',
         sortable: true,
-        render: (enabled: boolean) =>
-          enabled ? (
-            <EuiBadge color="success" data-test-subj="ruleStatusEnabled">
-              {i18n.translate('xpack.alertingV2.rulesList.statusEnabled', {
-                defaultMessage: 'Enabled',
-              })}
-            </EuiBadge>
+        render: (enabled: boolean, rule: RuleApiResponse) =>
+          togglingRuleId === rule.id ? (
+            <EuiLoadingSpinner data-test-subj={`ruleEnabledSpinner-${rule.id}`} size="m" />
           ) : (
-            <EuiBadge color="default" data-test-subj="ruleStatusDisabled">
-              {i18n.translate('xpack.alertingV2.rulesList.statusDisabled', {
-                defaultMessage: 'Disabled',
+            <EuiSwitch
+              compressed
+              showLabel={false}
+              label={i18n.translate('xpack.alertingV2.rulesList.column.enabled.switchLabel', {
+                defaultMessage: 'Enabled: {ruleName}',
+                values: { ruleName: rule.metadata?.name ?? rule.id },
               })}
-            </EuiBadge>
+              checked={enabled}
+              disabled={Boolean(togglingRuleId) || Boolean(isBulkTogglingEnabled)}
+              onChange={() => onToggleEnabled(rule)}
+              data-test-subj={`ruleEnabledSwitch-${rule.id}`}
+            />
           ),
       },
       {
@@ -379,13 +387,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RuleActionsMenu
-                rule={rule}
-                onEdit={onEdit}
-                onClone={onClone}
-                onDelete={onDelete}
-                onToggleEnabled={onToggleEnabled}
-              />
+              <RuleActionsMenu rule={rule} onEdit={onEdit} onClone={onClone} onDelete={onDelete} />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
@@ -403,6 +405,8 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       onClone,
       onDelete,
       onToggleEnabled,
+      togglingRuleId,
+      isBulkTogglingEnabled,
     ]
   );
 

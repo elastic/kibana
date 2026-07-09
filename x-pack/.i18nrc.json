@@ -43,6 +43,7 @@
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "solutions/search/plugins/enterprise_search",
     "xpack.features": "platform/plugins/shared/features",
+    "xpack.dataFederation": "platform/plugins/private/data_federation",
     "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
     "xpack.fileUpload": "platform/plugins/private/file_upload",
@@ -61,6 +62,7 @@
     "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
     "xpack.inference": "platform/plugins/shared/inference",
     "xpack.inferenceWorkflows": "platform/plugins/shared/inference_workflows",
+    "xpack.investigationOutput": "platform/packages/shared/kbn-investigation-output",
     "xpack.inventory": "solutions/observability/plugins/inventory",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
     "xpack.lens": "platform/plugins/shared/lens",
@@ -99,6 +101,7 @@
     "xpack.observabilityLogsOverview": ["platform/packages/shared/logs-overview/src/components"],
     "xpack.agentBuilder": [
       "platform/plugins/shared/agent_builder",
+      "platform/plugins/shared/agent_builder_visualizations",
       "platform/packages/shared/agent-builder"
     ],
     "xpack.agentBuilderPlatform": "platform/plugins/shared/agent_builder_platform",
@@ -136,6 +139,7 @@
     "xpack.sessionView": "solutions/security/plugins/session_view",
     "xpack.sharedComponents": "platform/packages/shared/kbn-shared-components",
     "xpack.changeHistoryUi": "platform/packages/shared/kbn-change-history-ui",
+    "xpack.significantEvents": ["platform/plugins/shared/significant_events"],
     "xpack.streams": ["platform/plugins/shared/streams_app"],
     "xpack.slo": "solutions/observability/plugins/slo",
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
@@ -159,7 +163,6 @@
     "xpack.watcher": "platform/plugins/private/watcher",
     "xpack.eventStacktrace": "platform/packages/shared/kbn-event-stacktrace",
     "xpack.notificationCenter": "platform/plugins/shared/notification_center"
-    
   },
   "exclude": ["examples"],
   "translations": [

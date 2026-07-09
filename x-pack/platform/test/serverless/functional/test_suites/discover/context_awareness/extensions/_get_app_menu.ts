@@ -23,7 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
-  describe('extension getAppMenu', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/273917
+  describe.skip('extension getAppMenu', () => {
     before(async () => {
       await svlCommonPage.loginAsAdmin();
       await esArchiver.loadIfNeeded(

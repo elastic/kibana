@@ -6,12 +6,24 @@
  */
 import { ProcessorEvent } from '@kbn/apm-types-shared';
 import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
 export const processorEventRt = t.union([
   t.literal(ProcessorEvent.transaction),
   t.literal(ProcessorEvent.error),
   t.literal(ProcessorEvent.metric),
   t.literal(ProcessorEvent.span),
+]);
+
+/**
+ * zod equivalent, additive (see `default_api_types.ts` in `@kbn/apm-api-shared`
+ * for why - elastic/kibana#243355).
+ */
+export const processorEventSchema = z.union([
+  z.literal(ProcessorEvent.transaction),
+  z.literal(ProcessorEvent.error),
+  z.literal(ProcessorEvent.metric),
+  z.literal(ProcessorEvent.span),
 ]);
 
 /**

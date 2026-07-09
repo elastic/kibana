@@ -107,12 +107,21 @@ safe-outputs:
   add-labels:
     allowed:
       - failure:ai-fixable
-      - failure:test-design
+      - failure:test-needs-update
       - failure:test-environment
       - failure:application
       - failure:ci-environment
       - failure:inconclusive
     max: 2
+    target: *issue_number
+  # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
+  # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
+  # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
+  remove-labels:
+    allowed:
+      - failure:*
+      - ai:fix-flaky
+    max: 3
     target: *issue_number
 
 strict: false
@@ -146,7 +155,7 @@ Every conclusion must cite specific evidence. Do not guess.
 
 Set `classification` based on where the evidence points:
 
-- **`test-design`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
+- **`test-needs-update`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
 - **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference).
 - **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug).
 - **`ci-environment`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
@@ -168,7 +177,7 @@ Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong in
 
 Add exactly one classification label to the issue that matches the chosen `classification`:
 
-- `failure:test-design`: when `classification` is `test-design`
+- `failure:test-needs-update`: when `classification` is `test-needs-update`
 - `failure:test-environment`: when `classification` is `test-environment`
 - `failure:application`: when `classification` is `application`
 - `failure:ci-environment`: when `classification` is `ci-environment`
@@ -177,6 +186,10 @@ Add exactly one classification label to the issue that matches the chosen `class
 ### "Is the issue fixable?" label
 
 Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
+
+### Refresh stale labels on re-investigation
+
+This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification and `failure:ai-fixable` only if a fix is still available, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
 
 ## Attribution
 
@@ -197,7 +210,7 @@ Add the following snippet of Markdown right after (and outside) the `<details>` 
 
 ```markdown
 > [!TIP]
-> Label this issue `ai:fix-flaky` and an agent will **open a fix PR** for you. This usually takes 15–20 minutes, and the PR will appear below this comment. Share early feedback in #appex-qa.
+> Label this issue `ai:fix-flaky` and an agent will **open a fix PR** for you. This usually takes 15–20 minutes, and the PR will appear below this comment. Share early feedback in #kibana-qa.
 ```
 
 If a fix PR is already up (in draft or in review) in the Kibana repository, mention the PR link in the same tip block (instead of suggesting to add the label).

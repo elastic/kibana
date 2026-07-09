@@ -7,13 +7,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import {
-  ALERT_SEVERITY_CRITICAL,
-  ALERT_SEVERITY_HIGH,
-  ALERT_SEVERITY_MEDIUM,
-  ALERT_SEVERITY_LOW,
-  ALERT_SEVERITY_INFO,
-} from '@kbn/rule-data-utils';
+import { ALERT_SEVERITY_VALUES } from '@kbn/rule-data-utils';
 import {
   DataConditionType,
   type AlertSeverityLevel,
@@ -25,29 +19,28 @@ import * as i18n from './translations';
 // Per-severity i18n labels and badge colors.
 const SEVERITY_LABELS: Record<AlertSeverityLevel, string> = {
   critical: i18n.SEVERITY_CRITICAL,
+  major: i18n.SEVERITY_MAJOR,
   high: i18n.SEVERITY_HIGH,
   medium: i18n.SEVERITY_MEDIUM,
+  minor: i18n.SEVERITY_MINOR,
   low: i18n.SEVERITY_LOW,
+  warning: i18n.SEVERITY_WARNING,
   info: i18n.SEVERITY_INFO,
 };
 
 // Mapped to EUI badge color tokens.
 const SEVERITY_COLORS: Record<AlertSeverityLevel, string> = {
   critical: 'danger',
+  major: 'danger',
   high: 'warning',
   medium: 'success',
+  minor: 'success',
   low: 'primary',
+  warning: 'default',
   info: 'default',
 };
 
-const SEVERITY_DROPDOWN_VALUES: readonly AlertSeverityLevel[] = [
-  ALERT_SEVERITY_CRITICAL,
-  ALERT_SEVERITY_HIGH,
-  ALERT_SEVERITY_MEDIUM,
-  ALERT_SEVERITY_LOW,
-  ALERT_SEVERITY_INFO,
-];
-const SEVERITY_OPTIONS = SEVERITY_DROPDOWN_VALUES.map((value) => ({
+const SEVERITY_OPTIONS = ALERT_SEVERITY_VALUES.map((value) => ({
   value,
   text: SEVERITY_LABELS[value],
 }));
