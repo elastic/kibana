@@ -11,8 +11,8 @@ import type {
   SmlSearchConstraints,
   SmlSearchFilters,
   SmlSearchHttpResponse,
-} from '@kbn/agent-context-layer-plugin/public';
-import { smlAutocompletePath, smlSearchPath } from '@kbn/agent-context-layer-plugin/public';
+} from '@kbn/agent-builder-sml-plugin/public';
+import { smlAutocompletePath, smlSearchPath } from '@kbn/agent-builder-sml-plugin/public';
 
 /**
  * Browser client for SML.

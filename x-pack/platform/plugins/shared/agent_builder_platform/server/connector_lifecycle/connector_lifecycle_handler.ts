@@ -17,7 +17,7 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { AgentContextLayerPluginStart } from '@kbn/agent-context-layer-plugin/server';
+import type { AgentBuilderSmlPluginStart } from '@kbn/agent-builder-sml-plugin/server';
 import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
 
 interface ConnectorLifecycleHandlerDeps {
@@ -25,7 +25,7 @@ interface ConnectorLifecycleHandlerDeps {
   getStartServices: () => Promise<
     [
       CoreStart,
-      { spaces?: SpacesPluginStart; agentContextLayer: AgentContextLayerPluginStart },
+      { spaces?: SpacesPluginStart; agentBuilderSml: AgentBuilderSmlPluginStart },
       unknown
     ]
   >;
@@ -65,7 +65,7 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         if (!isExperimentalEnabled || !isContextEngineEnabled) return;
 
         try {
-          await startDeps.agentContextLayer.indexAttachment({
+          await startDeps.agentBuilderSml.indexAttachment({
             request,
             originId: connectorId,
             attachmentType: AttachmentType.connector,
@@ -101,7 +101,7 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         const request = params.request;
 
         try {
-          await startDeps.agentContextLayer.indexAttachment({
+          await startDeps.agentBuilderSml.indexAttachment({
             request,
             originId: connectorId,
             attachmentType: AttachmentType.connector,

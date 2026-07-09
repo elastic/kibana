@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import {
   withLensReferences,

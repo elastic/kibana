@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SmlData, SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlData, SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
