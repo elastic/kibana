@@ -1,5 +1,5 @@
 ---
-navigation_title: Feedback components
+navigation_title: Feedback
 ---
 
 # @kbn/ui-feedback [kbn-ui-feedback]
