@@ -124,7 +124,7 @@ export const getRequestBody = ({
 export const getWorkflowConfig = (
   spaceId: string
 ): {
-  alert_retrieval_mode: 'custom_only' | 'custom_query' | 'esql';
+  alert_retrieval_mode: 'custom_query' | 'esql';
   alert_retrieval_workflow_ids: string[];
   esql_query?: string;
   validation_workflow_id: string;

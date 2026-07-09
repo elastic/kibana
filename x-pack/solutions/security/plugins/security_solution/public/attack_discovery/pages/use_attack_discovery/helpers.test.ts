@@ -344,7 +344,7 @@ describe('getWorkflowConfig', () => {
   describe('with custom workflow configuration', () => {
     const mockSettings = {
       alertRetrievalWorkflowIds: ['workflow-1', 'workflow-2'],
-      alertRetrievalMode: 'custom_only' as const,
+      alertRetrievalMode: 'custom_query' as const,
       validationWorkflowId: 'custom-validation',
     };
     let result: ReturnType<typeof getWorkflowConfig>;
@@ -363,7 +363,7 @@ describe('getWorkflowConfig', () => {
     });
 
     it('returns alert_retrieval_mode', () => {
-      expect(result.alert_retrieval_mode).toBe('custom_only');
+      expect(result.alert_retrieval_mode).toBe('custom_query');
     });
 
     it('returns validation_workflow_id', () => {
@@ -556,7 +556,7 @@ describe('callInternalGenerateApi', () => {
   describe('workflow configuration in request body', () => {
     const mockSettings = {
       alertRetrievalWorkflowIds: ['workflow-1', 'workflow-2'],
-      alertRetrievalMode: 'custom_only' as const,
+      alertRetrievalMode: 'custom_query' as const,
       validationWorkflowId: 'custom-validation',
     };
 
@@ -591,7 +591,7 @@ describe('callInternalGenerateApi', () => {
       const options = mockPost.mock.calls[0][1] as unknown as { body?: string };
       const requestBody = JSON.parse(options?.body as string);
 
-      expect(requestBody.workflow_config.alert_retrieval_mode).toBe('custom_only');
+      expect(requestBody.workflow_config.alert_retrieval_mode).toBe('custom_query');
     });
 
     it('includes validation_workflow_id', async () => {

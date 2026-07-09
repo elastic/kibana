@@ -15,7 +15,7 @@ export interface WorkflowItem {
   tags?: string[];
 }
 
-export type AlertRetrievalMode = 'custom_only' | 'custom_query' | 'esql';
+export type AlertRetrievalMode = 'custom_query' | 'esql';
 
 export interface WorkflowConfiguration {
   alertRetrievalMode: AlertRetrievalMode;
