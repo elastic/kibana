@@ -54,6 +54,13 @@ export interface ConnectorMetadata {
   displayName: string;
   icon?: string;
   description: string;
+  /**
+   * Documentation URL for this connector type. Set it when the id-based derivation
+   * wouldn't resolve to the published page (e.g. a differing slug or a third-party site).
+   * Use an empty string when the connector has no dedicated page: it resolves to the
+   * connectors index via the doc-links service. When omitted, the URL is derived from
+   * the connector id.
+   */
   docsUrl?: string;
   minimumLicense: LicenseType;
   isTechnicalPreview?: boolean;

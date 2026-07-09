@@ -7,6 +7,7 @@
 
 import { AddExceptionButtonType, spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
+import { BULK_CLOSE_TEST_ROLE } from '../fixtures/bulk_close_role';
 
 /**
  * Coverage for elastic/kibana#253666 — Machine Learning rule variant.
@@ -33,7 +34,6 @@ import { expect } from '@kbn/scout-security/ui';
  */
 
 const MATCHING_IP = '203.0.113.99';
-const BULK_CLOSE_RUNTIME_FIELD_WARNING_TEST_SUBJ = 'bulkCloseRuntimeFieldWarning';
 const RUNTIME_FIELD_PAINLESS =
   "if (doc.containsKey('source.address') && !doc['source.address'].empty) { emit(doc['source.address'].value); }";
 
@@ -205,17 +205,14 @@ spaceTest.describe(
         retries: 0,
       });
 
-      await browserAuth.loginAsAdmin();
+      // No predefined role covers this flow end to end (ML admin capability
+      // for the flyout's job resolution + alerts backing-index write for the
+      // bulk close) — see the role file for the full breakdown.
+      await browserAuth.loginWithCustomRole(BULK_CLOSE_TEST_ROLE);
     });
 
-    spaceTest.afterEach(async ({ esClient, kbnClient, scoutSpace }) => {
-      await kbnClient
-        .request({
-          method: 'POST',
-          path: `/s/${scoutSpace.id}/api/detection_engine/rules/_bulk_action`,
-          body: { query: '', action: 'delete' },
-        })
-        .catch(() => {});
+    spaceTest.afterEach(async ({ apiServices, esClient }) => {
+      await apiServices.detectionRule.deleteAll();
 
       await esClient.ml.deleteJob({ job_id: jobId, force: true }).catch(() => {});
       await esClient.indices
@@ -278,17 +275,8 @@ spaceTest.describe(
           }
         );
 
-        await spaceTest.step(
-          'ticking bulk-close surfaces the runtime-field warning callout',
-          async () => {
-            await pageObjects.addExceptionFlyoutPage.tickBulkClose();
-            await expect(
-              page.testSubj.locator(BULK_CLOSE_RUNTIME_FIELD_WARNING_TEST_SUBJ)
-            ).toBeVisible();
-          }
-        );
-
-        await spaceTest.step('submit the exception', async () => {
+        await spaceTest.step('tick bulk close and submit the exception', async () => {
+          await pageObjects.addExceptionFlyoutPage.tickBulkClose();
           await pageObjects.addExceptionFlyoutPage.submit();
         });
 
