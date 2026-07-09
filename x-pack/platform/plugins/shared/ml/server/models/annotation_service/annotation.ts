@@ -98,7 +98,6 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient, mlC
     };
 
     if (isAnnotation(annotation) === false) {
-      // No need to translate, this will not be exposed in the UI.
       throw new Error('invalid annotation format');
     }
 
