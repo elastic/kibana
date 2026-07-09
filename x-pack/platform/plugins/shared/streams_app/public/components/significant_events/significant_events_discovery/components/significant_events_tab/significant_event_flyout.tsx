@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
@@ -20,6 +21,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -36,6 +38,7 @@ import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { SigEventDetails } from '../../../significant_event_details/sig_event_details';
 import { EventInvestigations } from './event_investigations';
+import { ProvenanceSection } from './provenance';
 import { hasRunningInvestigation } from '../shared/investigation_status';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 
@@ -88,11 +91,22 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   } = useFetchSignificantEventLifecycle(event.event_id);
 
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'significantEventFlyout' });
+  const lifecycleAccordionId = useGeneratedHtmlId({ prefix: 'sigEventLifecycle' });
 
   // Use the latest event version from the lifecycle response — lifecycle fetches all
   // versions via findByDiscoverySlug (no time filter), so it captures newly-written
   // versions that fall outside the time-filtered list query used by the parent table.
   const latestEvent = useMemo(() => lifecycleData?.events.at(-1) ?? event, [lifecycleData, event]);
+
+  const lifecycleEntryCount = useMemo(
+    () =>
+      lifecycleData
+        ? lifecycleData.detections.length +
+          lifecycleData.discoveries.filter(({ kind }) => kind !== 'handled').length +
+          lifecycleData.events.length
+        : 0,
+    [lifecycleData]
+  );
 
   const isInvestigationRunning = hasRunningInvestigation(latestEvent);
 
@@ -159,14 +173,36 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
 
           <EuiHorizontalRule margin="none" />
 
+          <ProvenanceSection
+            event={latestEvent}
+            lifecycle={lifecycleData}
+            isLoading={isLifecycleLoading}
+          />
+
+          <EuiHorizontalRule margin="none" />
+
           <EventInvestigations event={latestEvent} />
 
           <EuiHorizontalRule margin="none" />
 
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiTitle size="xs">
-              <h3>{LIFECYCLE_TITLE}</h3>
-            </EuiTitle>
+          <EuiAccordion
+            id={lifecycleAccordionId}
+            data-test-subj="sigEventLifecycleAccordion"
+            buttonContent={
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiTitle size="xs">
+                  <h3>{LIFECYCLE_TITLE}</h3>
+                </EuiTitle>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('xpack.streams.sigEventsTab.flyout.lifecycleSummary', {
+                    defaultMessage: '{count, plural, one {# entry} other {# entries}}',
+                    values: { count: lifecycleEntryCount },
+                  })}
+                </EuiText>
+              </EuiFlexGroup>
+            }
+          >
+            <EuiSpacer size="s" />
             {isLifecycleLoading ? (
               <EuiLoadingSpinner size="m" />
             ) : isLifecycleError ? (
@@ -180,7 +216,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
             ) : (
               <LifecycleTimeline data={lifecycleData} />
             )}
-          </EuiFlexGroup>
+          </EuiAccordion>
         </EuiFlexGroup>
       </EuiFlyoutBody>
 

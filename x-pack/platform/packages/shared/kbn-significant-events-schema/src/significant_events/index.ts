@@ -29,6 +29,10 @@ export {
   investigationStateSchema,
   type InvestigationHypothesis,
   type InvestigationState,
+  type InvestigationReference,
+  type InvestigationChart,
+  type InvestigationNodeKind,
+  type InvestigationTreeNode,
 } from './investigation_state';
 export {
   type SignificantEventsTuningConfig,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InvestigationState } from '@kbn/significant-events-schema';
+import type { InvestigationReference, InvestigationState } from '@kbn/significant-events-schema';
 
 /**
  * Where an investigation is in its lifecycle, from the point of view of a consumer rendering it:
@@ -24,4 +24,10 @@ export interface InvestigationOutputProps {
   state?: InvestigationState;
   /** Detail message for the `failed` and `unavailable` statuses. */
   error?: string;
+  /**
+   * Resolves a reference on an investigation-trail node into a link — e.g. a Discover URL for
+   * `query` references. References without a resolvable href render as plain chips, so this is
+   * optional and may return `undefined` per reference.
+   */
+  getReferenceHref?: (reference: InvestigationReference) => string | undefined;
 }

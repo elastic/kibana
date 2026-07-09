@@ -23,7 +23,7 @@ const toolDescription = dedent`
     'xpack.significantEvents.agentBuilder.tools.investigationProgressReport.description',
     {
       defaultMessage:
-        'Report the full current state of the investigation, so the user can see live progress before the investigation finishes. This is a snapshot, not a diff: every call must include every hypothesis considered so far, each with its own confidence and status — not just what changed since the last call.',
+        'Report the full current state of the investigation, so the user can see live progress before the investigation finishes. This is a snapshot, not a diff: every call must include every hypothesis considered so far (each with its own confidence and status) and the complete investigation trail in "tree" — every node reported before plus whatever was added or resolved since, never a subset.',
     }
   )}
 

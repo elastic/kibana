@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -17,11 +18,14 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationOutputProps } from './types';
+import { HypothesesSummary } from './hypotheses_summary';
 import { HypothesisRow } from './hypothesis_row';
+import { InvestigationTree } from './investigation_tree';
 import { buildHeader, buildFinalResultsMarkdown } from './utils';
 
 /**
@@ -35,8 +39,25 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
   status,
   state,
   error,
+  getReferenceHref,
 }) => {
   const hypotheses = state?.hypotheses ?? [];
+  const tree = state?.tree ?? [];
+  /**
+   * When the agent reported an investigation trail, that tree IS the story — hypotheses appear
+   * in it as nodes with their evidence nested underneath, so the flat hypothesis list would be
+   * redundant. The list remains the fallback for investigations without a trail (older runs,
+   * or agents that don't report one).
+   */
+  const hasTree = tree.length > 0;
+  const referenceCount = tree.reduce((sum, node) => sum + (node.references?.length ?? 0), 0);
+  /**
+   * The trail starts open while the investigation runs (following it live is the point) and
+   * collapsed once it's over — the header, scoreboard and conclusion carry the outcome, and
+   * the full trail is one click away for readers who want to retrace the reasoning.
+   */
+  const [isTrailOpen, setIsTrailOpen] = useState(status === 'running');
+  const trailAccordionId = useGeneratedHtmlId({ prefix: 'investigationTrail' });
   /**
    * Only shown once the investigation has actually finished — a mid-run `conclusion` is
    * still a draft (and occasionally arrives with markdown mangled by the model over-escaping
@@ -98,7 +119,52 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
 
       <EuiSpacer size="s" />
 
-      {hypotheses.length === 0 ? (
+      {hasTree ? (
+        <div
+          css={css`
+            padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
+          `}
+          data-test-subj="investigationOutputTree"
+        >
+          <HypothesesSummary hypotheses={hypotheses} />
+          {hypotheses.length > 0 && <EuiSpacer size="m" />}
+          <EuiAccordion
+            id={trailAccordionId}
+            forceState={isTrailOpen ? 'open' : 'closed'}
+            onToggle={setIsTrailOpen}
+            data-test-subj="investigationOutputTrailAccordion"
+            buttonContent={
+              <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xxs">
+                    <h4>
+                      {i18n.translate('xpack.investigationOutput.investigationTrailTitle', {
+                        defaultMessage: 'Investigation trail',
+                      })}
+                    </h4>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate('xpack.investigationOutput.investigationTrailSummary', {
+                      defaultMessage:
+                        '{stepCount, plural, one {# step} other {# steps}} · {referenceCount, plural, one {# reference} other {# references}}',
+                      values: { stepCount: tree.length, referenceCount },
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <EuiSpacer size="m" />
+            <InvestigationTree
+              nodes={tree}
+              hypotheses={hypotheses}
+              getReferenceHref={getReferenceHref}
+            />
+          </EuiAccordion>
+        </div>
+      ) : hypotheses.length === 0 ? (
         <EuiText
           size="s"
           color="subdued"

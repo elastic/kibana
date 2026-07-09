@@ -51,7 +51,117 @@ const finalState: InvestigationState = {
   gaps_found: ['No profiling data available'],
 };
 
+const treeState: InvestigationState = {
+  ...liveState,
+  tree: [
+    {
+      id: 'n1',
+      kind: 'observation',
+      title: 'Latency spiked at 14:02',
+      detail: 'p99 jumped from 120ms to 4s.',
+      status: 'done',
+      references: [
+        {
+          type: 'query',
+          label: 'p99 latency by service',
+          esql: 'FROM traces-* | STATS p99 = PERCENTILE(duration, 99)',
+          time_range: { from: '2026-07-09T13:00:00Z', to: '2026-07-09T15:00:00Z' },
+        },
+      ],
+    },
+    {
+      id: 'n2',
+      parent_id: 'n1',
+      kind: 'hypothesis',
+      title: 'Connection pool exhaustion after the 14:02 deploy',
+      status: 'active',
+    },
+    {
+      id: 'n3',
+      parent_id: 'n1',
+      kind: 'dead_end',
+      title: 'Checked disk saturation — flat, abandoning',
+      status: 'abandoned',
+      references: [{ type: 'ki', ki_name: 'Host disk metrics', stream_name: 'metrics-system' }],
+    },
+    {
+      id: 'n4',
+      parent_id: 'n3',
+      kind: 'action',
+      title: 'Ran disk IOPS query',
+      status: 'done',
+    },
+  ],
+};
+
 describe('InvestigationOutput', () => {
+  describe('investigation trail', () => {
+    it('renders the tree instead of the flat hypothesis list when the state carries one', () => {
+      renderWithI18n(<InvestigationOutput status="running" state={treeState} />);
+
+      expect(screen.getByTestId('investigationOutputTree')).toBeInTheDocument();
+      expect(screen.getAllByTestId('investigationTreeNode')).toHaveLength(3);
+      expect(screen.queryByTestId('investigationOutputHypotheses')).not.toBeInTheDocument();
+      // Hypothesis node picks up the confidence of the matching hypotheses entry.
+      expect(screen.getByTestId('investigationTreeNodeConfidence')).toHaveTextContent('60%');
+      // Dead-end branch stays visible.
+      expect(screen.getByText('Checked disk saturation — flat, abandoning')).toBeInTheDocument();
+      // Every hypothesis gets an at-a-glance scoreboard chip.
+      expect(screen.getByTestId('investigationHypothesesSummary')).toBeInTheDocument();
+      expect(screen.getByTestId('investigationHypothesisChip-dismissed')).toBeInTheDocument();
+    });
+
+    it('hides node detail behind a per-node toggle', () => {
+      renderWithI18n(<InvestigationOutput status="running" state={treeState} />);
+
+      // n1 is `done`, so its long-form detail starts collapsed…
+      expect(screen.queryByText('p99 jumped from 120ms to 4s.')).not.toBeInTheDocument();
+      // …until the node header is clicked.
+      fireEvent.click(screen.getByText('Latency spiked at 14:02'));
+      expect(screen.getByText('p99 jumped from 120ms to 4s.')).toBeInTheDocument();
+    });
+
+    it('collapses the sub-steps of settled branches behind a count', () => {
+      renderWithI18n(<InvestigationOutput status="running" state={treeState} />);
+
+      // n4 sits under the abandoned dead-end n3 — hidden until the branch is expanded.
+      expect(screen.queryByText('Ran disk IOPS query')).not.toBeInTheDocument();
+      const showBranch = screen.getByTestId('investigationTreeNodeShowBranch');
+      expect(showBranch).toHaveTextContent('Show 1 step');
+      fireEvent.click(showBranch);
+      expect(screen.getByText('Ran disk IOPS query')).toBeInTheDocument();
+    });
+
+    it('starts with the trail collapsed once the investigation is complete', () => {
+      renderWithI18n(
+        <InvestigationOutput status="complete" state={{ ...finalState, tree: treeState.tree }} />
+      );
+
+      const accordionButton = screen
+        .getByTestId('investigationOutputTrailAccordion')
+        .querySelector('button[aria-expanded]');
+      expect(accordionButton).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('links query references through getReferenceHref and leaves unresolved ones as plain chips', () => {
+      renderWithI18n(
+        <InvestigationOutput
+          status="running"
+          state={treeState}
+          getReferenceHref={(reference) =>
+            reference.type === 'query' ? 'https://example.com/discover' : undefined
+          }
+        />
+      );
+
+      const queryChip = screen.getByTestId('investigationNodeReference-query');
+      expect(queryChip.closest('a')).toHaveAttribute('href', 'https://example.com/discover');
+      const kiChip = screen.getByTestId('investigationNodeReference-ki');
+      expect(kiChip.closest('a')).toBeNull();
+      expect(screen.getByText('Host disk metrics')).toBeInTheDocument();
+    });
+  });
+
   it('renders a generic gathering-evidence message and an empty hypotheses placeholder when running with no state yet', () => {
     renderWithI18n(<InvestigationOutput status="running" />);
 

@@ -105,6 +105,47 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     ],
     conclusion: 'Connection pool exhaustion caused by the 14:02 deploy.',
     gaps_found: ['No profiling data available'],
+    tree: [
+      {
+        id: 'n1',
+        kind: 'observation',
+        title: 'Latency spike at 14:02',
+        detail: 'p99 latency jumped from 120ms to 4s.',
+        status: 'done',
+        references: [
+          {
+            type: 'query',
+            label: 'p99 latency by service',
+            esql: 'FROM traces | STATS p99 = PERCENTILE(duration, 99) BY service.name',
+            time_range: { from: '2026-07-09T13:00:00Z', to: '2026-07-09T15:00:00Z' },
+          },
+          { type: 'rule', rule_name: 'Checkout error rate', rule_uuid: 'abc-123' },
+        ],
+        chart: {
+          title: 'p99 latency (checkout-service)',
+          type: 'line',
+          unit: 'ms',
+          series: [
+            {
+              name: 'p99',
+              points: [
+                { x: '2026-07-09T13:55:00Z', y: 120 },
+                { x: '2026-07-09T14:05:00Z', y: 4000 },
+              ],
+            },
+          ],
+          annotations: [{ x: '2026-07-09T14:02:00Z', label: 'Deploy' }],
+        },
+      },
+      {
+        id: 'n2',
+        parent_id: 'n1',
+        kind: 'dead_end',
+        title: 'Checked disk saturation — flat, abandoning',
+        status: 'abandoned',
+        references: [{ type: 'ki', ki_name: 'Host disk metrics', stream_name: 'metrics-system' }],
+      },
+    ],
   };
 
   it('accepts a valid payload under both the YAML JSON Schema and the zod schema', () => {
@@ -151,5 +192,38 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(oversized)).toBe(false);
     expect(investigationStateSchema.safeParse(oversized).success).toBe(false);
+  });
+
+  it('rejects a tree node missing a required field under both schemas', () => {
+    const invalidNode = {
+      summary: 'ok',
+      hypotheses: [],
+      tree: [{ id: 'n1', kind: 'observation' }], // missing title
+    };
+
+    expect(validate(invalidNode)).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidNode).success).toBe(false);
+  });
+
+  it('rejects an invalid tree node kind under both schemas', () => {
+    const invalidKind = {
+      summary: 'ok',
+      hypotheses: [],
+      tree: [{ id: 'n1', kind: 'guess', title: 'X' }],
+    };
+
+    expect(validate(invalidKind)).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidKind).success).toBe(false);
+  });
+
+  it('rejects a reference missing its type under both schemas', () => {
+    const invalidReference = {
+      summary: 'ok',
+      hypotheses: [],
+      tree: [{ id: 'n1', kind: 'evidence', title: 'X', references: [{ label: 'no type' }] }],
+    };
+
+    expect(validate(invalidReference)).toBe(false);
+    expect(investigationStateSchema.safeParse(invalidReference).success).toBe(false);
   });
 });

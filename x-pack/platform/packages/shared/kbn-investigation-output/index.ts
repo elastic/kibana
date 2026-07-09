@@ -6,6 +6,7 @@
  */
 
 export { InvestigationOutput } from './src/investigation_output';
+export { InvestigationTree, type InvestigationTreeProps } from './src/investigation_tree';
 export {
   useInvestigationState,
   type UseInvestigationStateResult,

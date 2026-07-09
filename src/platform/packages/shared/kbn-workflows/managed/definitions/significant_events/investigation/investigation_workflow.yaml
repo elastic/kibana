@@ -147,6 +147,136 @@ steps:
             items:
               type: string
               maxLength: 10000
+          tree:
+            type: array
+            maxItems: 200
+            description: >
+              The investigation trail: a decision tree of every step of the investigation in the
+              order it happened — observations, hypotheses, actions, evidence, decisions, dead
+              ends, and the conclusion — including branches that led nowhere. Every claim grounded
+              in data must cite references; nodes may embed a small chart when a timeseries
+              materially supports them.
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  maxLength: 255
+                parent_id:
+                  type: string
+                  maxLength: 255
+                kind:
+                  type: string
+                  enum: [observation, hypothesis, action, evidence, decision, dead_end, conclusion]
+                title:
+                  type: string
+                  maxLength: 512
+                detail:
+                  type: string
+                  maxLength: 10000
+                status:
+                  type: string
+                  enum: [active, done, abandoned, confirmed, dismissed]
+                references:
+                  type: array
+                  maxItems: 10
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        enum: [query, ki, rule]
+                      label:
+                        type: string
+                        maxLength: 512
+                      esql:
+                        type: string
+                        maxLength: 10000
+                      time_range:
+                        type: object
+                        properties:
+                          from:
+                            type: string
+                            maxLength: 64
+                          to:
+                            type: string
+                            maxLength: 64
+                        required:
+                          - from
+                          - to
+                      ki_name:
+                        type: string
+                        maxLength: 512
+                      stream_name:
+                        type: string
+                        maxLength: 255
+                      rule_name:
+                        type: string
+                        maxLength: 512
+                      rule_uuid:
+                        type: string
+                        maxLength: 255
+                    required:
+                      - type
+                chart:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      maxLength: 512
+                    type:
+                      type: string
+                      enum: [line, bar]
+                    unit:
+                      type: string
+                      maxLength: 255
+                    series:
+                      type: array
+                      maxItems: 5
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            maxLength: 512
+                          points:
+                            type: array
+                            maxItems: 120
+                            items:
+                              type: object
+                              properties:
+                                x:
+                                  type: string
+                                  maxLength: 64
+                                y:
+                                  type: number
+                              required:
+                                - x
+                                - y
+                        required:
+                          - points
+                    annotations:
+                      type: array
+                      maxItems: 10
+                      items:
+                        type: object
+                        properties:
+                          x:
+                            type: string
+                            maxLength: 64
+                          label:
+                            type: string
+                            maxLength: 512
+                        required:
+                          - x
+                          - label
+                  required:
+                    - type
+                    - series
+              required:
+                - id
+                - kind
+                - title
         required:
           - summary
           - hypotheses

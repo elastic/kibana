@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import moment from 'moment';
 import {
   EuiAccordion,
@@ -17,13 +17,18 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import type {
+  InvestigationReference,
   SignificantEvent,
   SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 import { InvestigationOutput, useInvestigationState } from '@kbn/investigation-output';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { useKibana } from '../../../../../hooks/use_kibana';
+import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { isInvestigationRunning } from '../shared/investigation_status';
 
 const SECTION_TITLE = i18n.translate(
@@ -53,6 +58,60 @@ const formatDuration = (startedAt: string, completedAt?: string): string => {
   return moment.duration(diffMs).humanize();
 };
 
+/**
+ * Resolves references on investigation-trail nodes into links back to the real thing:
+ * - `query` — a Discover link running the exact ES|QL, scoped to the time range the agent
+ *   evaluated it over (last 24h as a fallback).
+ * - `ki` — the Knowledge Indicators tab pre-filtered to the referenced indicator's name (the
+ *   reference carries the KI's name, not its id, so a search filter is the stable target).
+ * - `rule` — the rule's details page in Rules management, when the agent supplied its uuid.
+ */
+const useReferenceHref = () => {
+  const {
+    core: { http },
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+  const router = useStreamsAppRouter();
+
+  return useCallback(
+    (reference: InvestigationReference): string | undefined => {
+      switch (reference.type) {
+        case 'query': {
+          if (!reference.esql) return undefined;
+          const discoverLocator =
+            share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+          return discoverLocator?.getRedirectUrl({
+            query: { esql: reference.esql },
+            timeRange: reference.time_range ?? { from: 'now-24h', to: 'now' },
+          });
+        }
+        case 'ki': {
+          if (!reference.ki_name) return undefined;
+          return router.link('/_discovery/{tab}', {
+            path: { tab: 'knowledge_indicators' },
+            query: {
+              search: reference.ki_name,
+              // Entity/infrastructure KIs are inferred (non-computed) features, but the
+              // reference doesn't say which kind it is — show computed ones too so the
+              // filtered list is guaranteed to contain the target.
+              showComputed: 'true',
+            },
+          });
+        }
+        case 'rule': {
+          if (!reference.rule_uuid) return undefined;
+          return http.basePath.prepend(
+            `${triggersActionsRoute}${getRuleDetailsRoute(reference.rule_uuid)}`
+          );
+        }
+      }
+    },
+    [share.url.locators, router, http.basePath]
+  );
+};
+
 const InvestigationRow = ({
   investigation,
   initialIsOpen,
@@ -63,6 +122,7 @@ const InvestigationRow = ({
   const {
     core: { http },
   } = useKibana();
+  const getReferenceHref = useReferenceHref();
   const { started_at: startedAt, completed_at: completedAt, workflow_execution_id } = investigation;
   const duration = formatDuration(startedAt, completedAt);
   const accordionId = useGeneratedHtmlId({ prefix: 'sigEventInvestigation' });
@@ -96,7 +156,12 @@ const InvestigationRow = ({
       }
     >
       <EuiSpacer size="s" />
-      <InvestigationOutput status={status} state={state} error={error} />
+      <InvestigationOutput
+        status={status}
+        state={state}
+        error={error}
+        getReferenceHref={getReferenceHref}
+      />
     </EuiAccordion>
   );
 };
