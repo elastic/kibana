@@ -11,6 +11,7 @@ import { Agent } from 'undici';
 
 import {
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS,
+  MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS,
   MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS,
   MOCK_IDP_UIAM_COSMOS_DB_NAME,
   MOCK_IDP_UIAM_COSMOS_DB_URL,
@@ -438,6 +439,236 @@ export async function updateTestApiKey(
     return {
       success: false,
       message: `✗ Error updating test API key: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    };
+  }
+}
+
+interface TestOAuthConnectionData {
+  connectionId: string;
+  clientId: string;
+  organizationId: string;
+  userId: string;
+  resource: string;
+  name?: string;
+  nameOrigin?: 'generated' | 'user-defined';
+  scopes?: string[];
+  revoked?: boolean;
+  expired?: boolean;
+  created?: string;
+}
+
+interface PersistableOAuthConnection {
+  id: string;
+  user_id: string;
+  organization_id: string;
+  client_id: string;
+  scopes: string[];
+  resource: string;
+  connection_name?: { name: string; name_origin: 'generated' | 'user-defined' };
+  revoked: boolean;
+  expired: boolean;
+  created: string;
+  metadata: { created: string };
+}
+
+function createOAuthConnectionDocument(
+  connectionData: TestOAuthConnectionData
+): PersistableOAuthConnection {
+  const nowIso = new Date().toISOString();
+  const document: PersistableOAuthConnection = {
+    id: connectionData.connectionId,
+    user_id: connectionData.userId,
+    organization_id: connectionData.organizationId,
+    client_id: connectionData.clientId,
+    scopes: connectionData.scopes ?? ['all'],
+    resource: connectionData.resource,
+    revoked: connectionData.revoked ?? false,
+    expired: connectionData.expired ?? false,
+    created: connectionData.created ?? nowIso,
+    metadata: { created: nowIso },
+  };
+
+  if (connectionData.name) {
+    document.connection_name = {
+      name: connectionData.name,
+      name_origin: connectionData.nameOrigin ?? 'user-defined',
+    };
+  }
+
+  return document;
+}
+
+/**
+ * Seed a test OAuth connection in Cosmos DB.
+ *
+ * @param connectionData - Connection data to seed.
+ * @returns Promise that resolves when the connection is created.
+ *
+ * @example
+ * ```ts
+ * await seedTestOAuthConnection({
+ *   connectionId: 'conn-123',
+ *   clientId: 'client-abc',
+ *   organizationId: 'org1234567890',
+ *   userId: '1234567890',
+ *   resource: 'http://localhost:5620/api/agent_builder/mcp',
+ *   name: 'My connection',
+ *   scopes: ['all'],
+ * });
+ * ```
+ */
+export async function seedTestOAuthConnection(
+  connectionData: TestOAuthConnectionData
+): Promise<{ success: boolean; message: string; response?: any }> {
+  try {
+    const response = await fetch(
+      `${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS}/docs`,
+      {
+        method: 'POST',
+        headers: {
+          ...generateCosmosDBApiRequestHeaders(
+            'POST',
+            'docs',
+            `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS}`
+          ),
+          'x-ms-documentdb-partitionkey': JSON.stringify([connectionData.clientId]),
+        },
+        body: JSON.stringify(createOAuthConnectionDocument(connectionData)),
+        // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+        dispatcher: httpsAgent,
+      }
+    );
+
+    const responseData = await response.json();
+    if (response.status === 201) {
+      return {
+        success: true,
+        message: `✓ Test OAuth connection created successfully: ${connectionData.connectionId}`,
+        response: responseData,
+      };
+    }
+
+    if (response.status === 409) {
+      // Connection already exists, replace it instead.
+      return await updateTestOAuthConnection(connectionData);
+    }
+
+    return {
+      success: false,
+      message: `✗ Failed to create test OAuth connection (HTTP ${response.status})`,
+      response: responseData,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `✗ Error creating test OAuth connection: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    };
+  }
+}
+
+/**
+ * Update (replace) an existing OAuth connection in Cosmos DB.
+ *
+ * @param connectionData - Connection data to update.
+ * @returns Promise that resolves when the connection is updated.
+ */
+export async function updateTestOAuthConnection(
+  connectionData: TestOAuthConnectionData
+): Promise<{ success: boolean; message: string; response?: any }> {
+  try {
+    const response = await fetch(
+      `${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS}/docs/${connectionData.connectionId}`,
+      {
+        method: 'PUT',
+        headers: {
+          ...generateCosmosDBApiRequestHeaders(
+            'PUT',
+            'docs',
+            `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS}/docs/${connectionData.connectionId}`
+          ),
+          'x-ms-documentdb-partitionkey': JSON.stringify([connectionData.clientId]),
+        },
+        body: JSON.stringify(createOAuthConnectionDocument(connectionData)),
+        // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+        dispatcher: httpsAgent,
+      }
+    );
+
+    const responseData = await response.json();
+    if (response.status === 200) {
+      return {
+        success: true,
+        message: `✓ Test OAuth connection updated successfully: ${connectionData.connectionId}`,
+        response: responseData,
+      };
+    }
+
+    return {
+      success: false,
+      message: `✗ Failed to update test OAuth connection (HTTP ${response.status})`,
+      response: responseData,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `✗ Error updating test OAuth connection: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    };
+  }
+}
+
+/**
+ * Delete a seeded OAuth connection from Cosmos DB.
+ *
+ * @param connectionId - The connection document id.
+ * @param clientId - The owning client id (partition key).
+ * @returns Promise that resolves when the connection is deleted or absent.
+ */
+export async function deleteTestOAuthConnection({
+  connectionId,
+  clientId,
+}: {
+  connectionId: string;
+  clientId: string;
+}): Promise<{ success: boolean; message: string }> {
+  try {
+    const response = await fetch(
+      `${MOCK_IDP_UIAM_COSMOS_DB_URL}/dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS}/docs/${connectionId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          ...generateCosmosDBApiRequestHeaders(
+            'DELETE',
+            'docs',
+            `dbs/${MOCK_IDP_UIAM_COSMOS_DB_NAME}/colls/${MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS}/docs/${connectionId}`
+          ),
+          'x-ms-documentdb-partitionkey': JSON.stringify([clientId]),
+        },
+        // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+        dispatcher: httpsAgent,
+      }
+    );
+
+    if (response.status === 204 || response.status === 404) {
+      return {
+        success: true,
+        message: `✓ Test OAuth connection deleted: ${connectionId}`,
+      };
+    }
+
+    return {
+      success: false,
+      message: `✗ Failed to delete test OAuth connection (HTTP ${response.status})`,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `✗ Error deleting test OAuth connection: ${
         error instanceof Error ? error.message : String(error)
       }`,
     };
