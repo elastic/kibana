@@ -14,6 +14,16 @@ export interface LanguageCount {
   count: number;
 }
 
+/** A recognized Infrastructure-as-Code technology detected from file paths. */
+export type IacKind = 'kubernetes' | 'helm' | 'compose' | 'terraform' | 'pulumi' | 'cloudformation';
+
+/** An IaC signal: the technology detected and an example file evidencing it. */
+export interface IacSignal {
+  kind: IacKind;
+  /** Example repository-relative file path evidencing this signal. */
+  path: string;
+}
+
 export interface RepoClassification {
   repoType: RepoType;
   isApp: boolean;
@@ -21,6 +31,8 @@ export interface RepoClassification {
   /** Highest-volume application (programming) language, if any. */
   primaryLanguage?: string;
   languages: LanguageCount[];
+  /** IaC file-path signals that contributed to the classification (may be empty). */
+  iacSignals: IacSignal[];
 }
 
 /**
@@ -104,6 +116,14 @@ export interface CodeRepositoryReader {
   getChangeFingerprint(repository: string): Promise<string | undefined>;
   /** Language document-count histogram for the repository. */
   getLanguageHistogram(repository: string): Promise<LanguageCount[]>;
+  /**
+   * Detects Infrastructure-as-Code signals (Kubernetes manifests, Helm charts,
+   * Compose files, Terraform, …) by matching known file-path patterns against
+   * the repository's indexed files. Empty when none are found. Deterministic —
+   * complements the language histogram, which cannot distinguish IaC YAML from
+   * an application's config YAML.
+   */
+  detectIacSignals(repository: string): Promise<IacSignal[]>;
   /** Distinct `service.name` values observed in the given log index/pattern. */
   getObservedServiceNames(index: string): Promise<string[]>;
   /** Semantic code search over the repository. */

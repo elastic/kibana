@@ -14,10 +14,55 @@ import {
 import { SCS_SEMANTIC_SEARCH_TOOL_ID } from '../../semantic_code_search_grounding/semantic_code_search_tools';
 import { resolveIndexForRepository as resolveCodeIndex } from '../../semantic_code_search_grounding/resolve_code_index';
 import { LOGGING_CHUNK_TAG } from './constants';
-import type { CodeHit, CodeRepositoryReader, LanguageCount, LoggingChunk } from './types';
+import type {
+  CodeHit,
+  CodeRepositoryReader,
+  IacKind,
+  IacSignal,
+  LanguageCount,
+  LoggingChunk,
+} from './types';
 
 /** SCS directory-discovery workflow tool installed via `scs install-agentic-interfaces`. */
 const SCS_DISCOVER_DIRECTORIES_TOOL_ID = 'scs.discover_directories';
+
+// Deterministic Infrastructure-as-Code detection: file-path patterns matched
+// against the `filePath` field of the SCS `*_locations` documents (which also
+// carry `repository`). `*` in an ES wildcard matches any characters including
+// `/`, so `*/k8s/*` matches a `k8s/` segment anywhere in the path. Kept
+// filename/path based (not content) so it stays cheap and deterministic.
+const IAC_FILE_PATTERNS: ReadonlyArray<{ kind: IacKind; patterns: readonly string[] }> = [
+  { kind: 'terraform', patterns: ['*.tf', '*.tf.json'] },
+  { kind: 'pulumi', patterns: ['pulumi.yaml', 'pulumi.yml', '*/pulumi.yaml', '*/pulumi.yml'] },
+  { kind: 'helm', patterns: ['chart.yaml', 'chart.yml', '*/chart.yaml', '*/chart.yml'] },
+  {
+    kind: 'compose',
+    patterns: [
+      '*docker-compose*.yml',
+      '*docker-compose*.yaml',
+      'compose.yaml',
+      'compose.yml',
+      '*/compose.yaml',
+      '*/compose.yml',
+    ],
+  },
+  {
+    kind: 'kubernetes',
+    patterns: [
+      'k8s/*',
+      '*/k8s/*',
+      'kubernetes/*',
+      '*/kubernetes/*',
+      '*/manifests/*',
+      '*kustomization.yaml',
+      '*kustomization.yml',
+    ],
+  },
+  {
+    kind: 'cloudformation',
+    patterns: ['*/cloudformation/*', '*.cfn.yaml', '*.cfn.yml', '*.cfn.json'],
+  },
+];
 
 const MAX_LANGUAGES = 50;
 const MAX_SERVICE_NAMES = 50;
@@ -164,17 +209,24 @@ export function createCodeRepositoryReader({
     },
 
     async getLanguageHistogram(repository) {
-      const index = await resolveIndex(repository);
-      if (!index) {
-        return [];
-      }
       try {
-        const response = await esClient.search({
-          index,
-          size: 0,
-          track_total_hits: false,
-          aggs: { languages: { terms: { field: 'language', size: MAX_LANGUAGES } } },
-        });
+        // Aggregate `language` over the `code-*` wildcard scoped by `repository`
+        // rather than a single resolved index: SCS spreads a repository across
+        // several sub-indices (`_chunks`, `_locations`, `_commits`, `_settings`,
+        // …) and `resolveIndexForRepository` may return any of them (e.g. the
+        // tiny `_settings` index, which has no `language` field → empty
+        // histogram). Only chunk docs carry `language`, so the wildcard yields
+        // exactly the chunk-language distribution.
+        const response = await esClient.search(
+          {
+            index: 'code-*',
+            size: 0,
+            track_total_hits: false,
+            query: { bool: { filter: [{ term: { repository } }] } },
+            aggs: { languages: { terms: { field: 'language', size: MAX_LANGUAGES } } },
+          },
+          { ignore: [404] }
+        );
         const buckets =
           (
             response.aggregations?.languages as {
@@ -193,6 +245,48 @@ export function createCodeRepositoryReader({
         );
         return [];
       }
+    },
+
+    async detectIacSignals(repository) {
+      const signals = await Promise.all(
+        IAC_FILE_PATTERNS.map(async ({ kind, patterns }): Promise<IacSignal | undefined> => {
+          try {
+            // Query the `code-*` wildcard: only the `*_locations` documents carry
+            // `filePath` (the content-deduped chunk index does not), and those
+            // also carry `repository`, so this is correctly scoped.
+            const response = await esClient.search<{ filePath?: string }>(
+              {
+                index: 'code-*',
+                size: 1,
+                track_total_hits: false,
+                _source: ['filePath'],
+                query: {
+                  bool: {
+                    filter: [{ term: { repository } }],
+                    should: patterns.map((pattern) => ({
+                      wildcard: { filePath: { value: pattern, case_insensitive: true } },
+                    })),
+                    minimum_should_match: 1,
+                  },
+                },
+              },
+              { ignore: [404] }
+            );
+            const path = response.hits.hits[0]?._source?.filePath;
+            return typeof path === 'string' && path.length > 0 ? { kind, path } : undefined;
+          } catch (error) {
+            logger.debug(
+              `code_features: IaC probe (${kind}) failed for "${repository}": ${errorMessage(
+                error
+              )}`
+            );
+            return undefined;
+          }
+        })
+      );
+      return signals
+        .filter((signal): signal is IacSignal => signal !== undefined)
+        .sort((a, b) => a.kind.localeCompare(b.kind));
     },
 
     async getObservedServiceNames(index) {

@@ -59,6 +59,7 @@ const createReader = (overrides: Partial<CodeRepositoryReader> = {}): CodeReposi
   ),
   getLoggingChunks: jest.fn(async () => []),
   discoverServices: jest.fn(async () => []),
+  detectIacSignals: jest.fn(async () => []),
   ...overrides,
 });
 

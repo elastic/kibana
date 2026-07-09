@@ -57,4 +57,34 @@ describe('classifyRepository', () => {
     expect(result.isApp).toBe(false);
     expect(result.primaryLanguage).toBeUndefined();
   });
+
+  it('classifies as both when app languages coexist with IaC file signals (no IaC language)', () => {
+    const result = classifyRepository(
+      [
+        { language: 'typescript', count: 100 },
+        { language: 'yaml', count: 30 },
+      ],
+      [{ kind: 'kubernetes', path: 'kubernetes/deployment.yaml' }]
+    );
+    expect(result.repoType).toBe('both');
+    expect(result.isApp).toBe(true);
+    expect(result.isIac).toBe(true);
+    expect(result.primaryLanguage).toBe('typescript');
+    expect(result.iacSignals).toEqual([{ kind: 'kubernetes', path: 'kubernetes/deployment.yaml' }]);
+  });
+
+  it('classifies as iac from file signals alone when there are no app languages', () => {
+    const result = classifyRepository(
+      [{ language: 'markdown', count: 10 }],
+      [{ kind: 'helm', path: 'chart/Chart.yaml' }]
+    );
+    expect(result.repoType).toBe('iac');
+    expect(result.isApp).toBe(false);
+    expect(result.isIac).toBe(true);
+  });
+
+  it('defaults iacSignals to an empty array when omitted', () => {
+    const result = classifyRepository([{ language: 'go', count: 10 }]);
+    expect(result.iacSignals).toEqual([]);
+  });
 });

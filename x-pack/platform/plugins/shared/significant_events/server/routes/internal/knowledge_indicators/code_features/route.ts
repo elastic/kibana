@@ -29,6 +29,7 @@ import {
   identifyCodeQueries,
   reconcileCodeAndLogQueries,
   linkServiceEntities,
+  type ServiceCodeMetadata,
   type StreamSamplingSource,
 } from '../../../../lib/knowledge_indicators/code_intelligence';
 
@@ -372,7 +373,13 @@ const serviceDistributionRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<{ codeOnly: number; both: number; logsOnly: number }> => {
+  }): Promise<{
+    codeOnly: number;
+    both: number;
+    logsOnly: number;
+    /** Names of services known from code but not yet observed in logs. */
+    codeOnlyServices: string[];
+  }> => {
     const scopedClients = await getScopedClients({ request });
     const { licensing, uiSettingsClient } = scopedClients;
 
@@ -381,7 +388,7 @@ const serviceDistributionRoute = createServerRoute({
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const streamNames = await kiClient.getStreamNamesWithKnowledgeIndicators();
     if (streamNames.length === 0) {
-      return { codeOnly: 0, both: 0, logsOnly: 0 };
+      return { codeOnly: 0, both: 0, logsOnly: 0, codeOnlyServices: [] };
     }
 
     const { hits } = await kiClient.getFeatures(streamNames, {
@@ -418,17 +425,21 @@ const serviceDistributionRoute = createServerRoute({
     let codeOnly = 0;
     let both = 0;
     let logsOnly = 0;
-    for (const { code, log } of byService.values()) {
+    const codeOnlyServices: string[] = [];
+    for (const [name, { code, log }] of byService.entries()) {
       if (code && log) {
         both += 1;
       } else if (code) {
         codeOnly += 1;
+        codeOnlyServices.push(name);
       } else if (log) {
         logsOnly += 1;
       }
     }
 
-    return { codeOnly, both, logsOnly };
+    codeOnlyServices.sort((a, b) => a.localeCompare(b));
+
+    return { codeOnly, both, logsOnly, codeOnlyServices };
   },
 });
 
@@ -535,6 +546,44 @@ const resetCodeFeaturesRoute = createServerRoute({
 // (it reasons over the repo layout) rather than by directory-name parsing.
 // ---------------------------------------------------------------------------
 
+const trimToUndefined = (value: string | null | undefined): string | undefined => {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+};
+
+const nonEmptyStrings = (values: string[] | null | undefined): string[] | undefined => {
+  const cleaned = (values ?? []).map((value) => value.trim()).filter((value) => value.length > 0);
+  return cleaned.length > 0 ? cleaned : undefined;
+};
+
+/**
+ * Normalizes the agent-reported per-service metadata into a compact object,
+ * dropping blank strings/empty arrays the workflow may send for fields the agent
+ * could not determine.
+ */
+const buildServiceCodeMetadata = (service: {
+  version?: string | null;
+  environmentVariables?: string[] | null;
+  configPaths?: string[] | null;
+  loggingPattern?: string | null;
+  tracing?: boolean | null;
+  gitSha?: string | null;
+}): ServiceCodeMetadata | undefined => {
+  const metadata: ServiceCodeMetadata = {};
+  const version = trimToUndefined(service.version);
+  if (version) metadata.version = version;
+  const environmentVariables = nonEmptyStrings(service.environmentVariables);
+  if (environmentVariables) metadata.environmentVariables = environmentVariables;
+  const configPaths = nonEmptyStrings(service.configPaths);
+  if (configPaths) metadata.configPaths = configPaths;
+  const loggingPattern = trimToUndefined(service.loggingPattern);
+  if (loggingPattern) metadata.loggingPattern = loggingPattern;
+  if (typeof service.tracing === 'boolean') metadata.tracing = service.tracing;
+  const gitSha = trimToUndefined(service.gitSha);
+  if (gitSha) metadata.gitSha = gitSha;
+  return Object.keys(metadata).length > 0 ? metadata : undefined;
+};
+
 const identifyServiceRoute = createServerRoute({
   endpoint: 'POST /internal/streams/code_intelligence/_identify_service',
   options: {
@@ -553,6 +602,15 @@ const identifyServiceRoute = createServerRoute({
       service: z.object({
         name: z.string(),
         language: z.string().optional(),
+        // Additional code-derived service metadata gathered by the agent. All
+        // optional: the agent omits what it cannot determine, and the workflow
+        // may send empty strings/nulls for absent fields (normalized below).
+        version: z.string().nullish(),
+        environmentVariables: z.array(z.string()).nullish(),
+        configPaths: z.array(z.string()).nullish(),
+        loggingPattern: z.string().nullish(),
+        tracing: z.boolean().nullish(),
+        gitSha: z.string().nullish(),
         evidence: z
           .array(
             z.object({
@@ -647,6 +705,7 @@ const identifyServiceRoute = createServerRoute({
         repository,
         fingerprint: featureResult.fingerprint,
         citations: service.evidence ?? undefined,
+        metadata: buildServiceCodeMetadata(service),
         streams,
         esClient,
         kiClient,

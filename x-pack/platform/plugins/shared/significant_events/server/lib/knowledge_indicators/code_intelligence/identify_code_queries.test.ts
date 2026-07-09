@@ -48,6 +48,7 @@ const createReader = (chunks: LoggingChunk[]): CodeRepositoryReader => ({
   searchCode: jest.fn(async () => []),
   getLoggingChunks: jest.fn(async () => chunks),
   discoverServices: jest.fn(async () => []),
+  detectIacSignals: jest.fn(async () => []),
 });
 
 /**

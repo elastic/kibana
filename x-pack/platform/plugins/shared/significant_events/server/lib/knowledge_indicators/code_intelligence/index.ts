@@ -44,6 +44,7 @@ export {
   linkServiceEntities,
   resolveIngestingStreams,
   resolveLogBearingStreams,
+  type ServiceCodeMetadata,
   type StreamSamplingSource,
   type LogStreamBinding,
 } from './link_ingesting_streams';

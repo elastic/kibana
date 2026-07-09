@@ -39,6 +39,8 @@ import { useDiscoveryFeaturesApi } from '../../../../../hooks/significant_events
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { CodeIntelligencePlaceholder } from '../../../stream_detail_significant_events_view/code_insights_panel';
 import { CodeIntelligenceServiceDistribution } from './code_intelligence_service_distribution';
+import { CodeIntelligenceLanguageDistribution } from './code_intelligence_language_distribution';
+import { CodeIntelligenceRepositoryTypeDistribution } from './code_intelligence_repository_type_distribution';
 import { RepositoryFilter } from './repository_filter';
 import { KnowledgeIndicatorActionsCell } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
 import { KnowledgeIndicatorDetailsFlyout } from '../../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
@@ -177,6 +179,63 @@ export function CodeIntelligenceTab() {
 
   const features = useMemo(
     () => getFeaturesFromKIs(codeKnowledgeIndicators),
+    [codeKnowledgeIndicators]
+  );
+
+  // Distribution of identified languages, derived from the code `language`
+  // feature KIs (title carries the language value), sorted most-common first.
+  const languageDistribution = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const ki of codeKnowledgeIndicators) {
+      if (ki.kind !== 'feature' || ki.feature.subtype !== 'language') continue;
+      const language =
+        ki.feature.title ??
+        (typeof ki.feature.properties?.language === 'string'
+          ? ki.feature.properties.language
+          : undefined);
+      if (!language) continue;
+      counts.set(language, (counts.get(language) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .map(([language, count]) => ({ language, count }))
+      .sort((a, b) => b.count - a.count || a.language.localeCompare(b.language));
+  }, [codeKnowledgeIndicators]);
+
+  // Distribution of repository classifications, derived from the code
+  // `repo_type` feature KIs (title carries the human-readable classification).
+  const repositoryTypeDistribution = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const ki of codeKnowledgeIndicators) {
+      if (ki.kind !== 'feature' || ki.feature.subtype !== 'repo_type') continue;
+      const type =
+        ki.feature.title ??
+        (typeof ki.feature.properties?.repo_type === 'string'
+          ? ki.feature.properties.repo_type
+          : undefined);
+      if (!type) continue;
+      counts.set(type, (counts.get(type) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .map(([type, count]) => ({ type, count }))
+      .sort((a, b) => b.count - a.count || a.type.localeCompare(b.type));
+  }, [codeKnowledgeIndicators]);
+
+  // Opens the details flyout for a service by name (used by the coverage badges),
+  // matching the service `entity` KI the same way the table rows are keyed.
+  const handleServiceNameClick = useCallback(
+    (serviceName: string) => {
+      const match = codeKnowledgeIndicators.find(
+        (ki) =>
+          ki.kind === 'feature' &&
+          ki.feature.subtype === 'service' &&
+          ((typeof ki.feature.properties?.name === 'string' &&
+            ki.feature.properties.name === serviceName) ||
+            ki.feature.title === serviceName)
+      );
+      if (match) {
+        setSelectedKnowledgeIndicatorId(getKnowledgeIndicatorItemId(match));
+      }
+    },
     [codeKnowledgeIndicators]
   );
 
@@ -383,11 +442,25 @@ export function CodeIntelligenceTab() {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <CodeIntelligenceServiceDistribution
-            codeOnly={distribution.codeOnly}
-            both={distribution.both}
-            logsOnly={distribution.logsOnly}
-          />
+          <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+            <EuiFlexItem>
+              <CodeIntelligenceServiceDistribution
+                codeOnly={distribution.codeOnly}
+                both={distribution.both}
+                logsOnly={distribution.logsOnly}
+                codeOnlyServices={distribution.codeOnlyServices}
+                onServiceClick={handleServiceNameClick}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <CodeIntelligenceLanguageDistribution languages={languageDistribution} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <CodeIntelligenceRepositoryTypeDistribution
+                repositoryTypes={repositoryTypeDistribution}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>

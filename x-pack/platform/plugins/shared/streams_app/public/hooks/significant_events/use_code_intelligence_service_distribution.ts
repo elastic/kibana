@@ -44,6 +44,7 @@ export function useCodeIntelligenceServiceDistribution({
     codeOnly: data?.codeOnly ?? 0,
     both: data?.both ?? 0,
     logsOnly: data?.logsOnly ?? 0,
+    codeOnlyServices: data?.codeOnlyServices ?? [],
     isLoading,
   };
 }

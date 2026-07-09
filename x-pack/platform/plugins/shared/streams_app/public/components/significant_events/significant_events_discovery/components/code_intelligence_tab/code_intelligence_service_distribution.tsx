@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -14,6 +23,10 @@ interface Props {
   codeOnly: number;
   both: number;
   logsOnly: number;
+  /** Names of services found in code but not yet observed in logs. */
+  codeOnlyServices?: string[];
+  /** Opens the details flyout for the clicked service, when provided. */
+  onServiceClick?: (serviceName: string) => void;
 }
 
 /**
@@ -21,7 +34,13 @@ interface Props {
  * (code only / code & logs / logs only) with a legend of counts. Shows how the
  * services discovered from code overlap with those observed in logs.
  */
-export function CodeIntelligenceServiceDistribution({ codeOnly, both, logsOnly }: Props) {
+export function CodeIntelligenceServiceDistribution({
+  codeOnly,
+  both,
+  logsOnly,
+  codeOnlyServices = [],
+  onServiceClick,
+}: Props) {
   const { euiTheme } = useEuiTheme();
   const total = codeOnly + both + logsOnly;
 
@@ -30,7 +49,7 @@ export function CodeIntelligenceServiceDistribution({ codeOnly, both, logsOnly }
       key: 'code',
       label: CODE_ONLY_LABEL,
       count: codeOnly,
-      color: '#FDDDE9',
+      color: euiTheme.colors.backgroundLightAccent,
     },
     { key: 'both', label: BOTH_LABEL, count: both, color: euiTheme.colors.backgroundLightSuccess },
     {
@@ -43,16 +62,17 @@ export function CodeIntelligenceServiceDistribution({ codeOnly, both, logsOnly }
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-      <EuiTitle size="xxs">
+      <EuiTitle size="xs">
         <h3>{TITLE}</h3>
       </EuiTitle>
+      <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
         {SUBTITLE}
       </EuiText>
       <div
         css={css`
           display: flex;
-          margin-top: ${euiTheme.size.s};
+          margin-top: ${euiTheme.size.m};
           height: 12px;
           border-radius: ${euiTheme.border.radius.small};
           overflow: hidden;
@@ -75,7 +95,7 @@ export function CodeIntelligenceServiceDistribution({ codeOnly, both, logsOnly }
               />
             ))}
       </div>
-      <EuiFlexGroup gutterSize="l" responsive={false} wrap css={{ marginTop: euiTheme.size.s }}>
+      <EuiFlexGroup gutterSize="l" responsive={false} wrap css={{ marginTop: euiTheme.size.m }}>
         {segments.map((segment) => (
           <EuiFlexItem grow={false} key={segment.key}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -99,12 +119,40 @@ export function CodeIntelligenceServiceDistribution({ codeOnly, both, logsOnly }
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
+      {codeOnlyServices.length > 0 && (
+        <>
+          <EuiSpacer size="xl" />
+          <EuiText size="xs" color="subdued">
+            {NOT_SHIPPING_LOGS_LABEL}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {codeOnlyServices.map((name) =>
+              onServiceClick ? (
+                <EuiFlexItem grow={false} key={name}>
+                  <EuiBadge
+                    color="hollow"
+                    onClick={() => onServiceClick(name)}
+                    onClickAriaLabel={VIEW_SERVICE_DETAILS_LABEL(name)}
+                  >
+                    {name}
+                  </EuiBadge>
+                </EuiFlexItem>
+              ) : (
+                <EuiFlexItem grow={false} key={name}>
+                  <EuiBadge color="hollow">{name}</EuiBadge>
+                </EuiFlexItem>
+              )
+            )}
+          </EuiFlexGroup>
+        </>
+      )}
     </EuiPanel>
   );
 }
 
 const TITLE = i18n.translate('xpack.streams.codeIntelligenceTab.distribution.title', {
-  defaultMessage: 'Service coverage',
+  defaultMessage: 'Services',
 });
 const SUBTITLE = i18n.translate('xpack.streams.codeIntelligenceTab.distribution.subtitle', {
   defaultMessage: 'Services discovered in code vs. observed in logs',
@@ -118,3 +166,12 @@ const BOTH_LABEL = i18n.translate('xpack.streams.codeIntelligenceTab.distributio
 const LOGS_ONLY_LABEL = i18n.translate('xpack.streams.codeIntelligenceTab.distribution.logsOnly', {
   defaultMessage: 'Logs only',
 });
+const NOT_SHIPPING_LOGS_LABEL = i18n.translate(
+  'xpack.streams.codeIntelligenceTab.distribution.notShippingLogs',
+  { defaultMessage: 'Found in code, not found in logs yet:' }
+);
+const VIEW_SERVICE_DETAILS_LABEL = (serviceName: string) =>
+  i18n.translate('xpack.streams.codeIntelligenceTab.distribution.viewServiceDetails', {
+    defaultMessage: 'View details for {serviceName}',
+    values: { serviceName },
+  });

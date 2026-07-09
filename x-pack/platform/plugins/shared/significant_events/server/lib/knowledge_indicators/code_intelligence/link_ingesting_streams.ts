@@ -146,6 +146,46 @@ const SERVICE_ENTITY_SUBTYPE = 'service';
 /** Confidence for a service the agent read directly from source. */
 const SERVICE_ENTITY_CONFIDENCE = 100;
 
+/**
+ * Additional code-derived facts about a service that the `scs.code_researcher`
+ * agent reports alongside its identity. Stored on the service entity KI's
+ * properties so they travel with the service (and merge onto any log-derived
+ * entity during reconciliation).
+ */
+export interface ServiceCodeMetadata {
+  /** Declared service/app version (package manifest, chart, pinned image tag). */
+  version?: string;
+  /** Notable telemetry/logging env vars, e.g. `OTEL_SERVICE_NAME=cartservice`. */
+  environmentVariables?: string[];
+  /** Repository-relative OTel/logging SDK config file paths. */
+  configPaths?: string[];
+  /** How the service logs: `otel`, `other`, or `unknown`. */
+  loggingPattern?: string;
+  /** Whether the service is instrumented for distributed tracing. */
+  tracing?: boolean;
+  /** Commit SHA the evidence was read at, when known. */
+  gitSha?: string;
+}
+
+/** Maps {@link ServiceCodeMetadata} onto snake_cased entity KI property keys. */
+const serviceMetadataToProperties = (
+  metadata: ServiceCodeMetadata | undefined
+): Record<string, unknown> => {
+  if (!metadata) {
+    return {};
+  }
+  const properties: Record<string, unknown> = {};
+  if (metadata.version) properties.version = metadata.version;
+  if (metadata.environmentVariables?.length) {
+    properties.environment_variables = metadata.environmentVariables;
+  }
+  if (metadata.configPaths?.length) properties.config_paths = metadata.configPaths;
+  if (metadata.loggingPattern) properties.logging_pattern = metadata.loggingPattern;
+  if (typeof metadata.tracing === 'boolean') properties.tracing = metadata.tracing;
+  if (metadata.gitSha) properties.git_sha = metadata.gitSha;
+  return properties;
+};
+
 const matchesService = (feature: Feature, serviceName: string): boolean => {
   const name = typeof feature.properties?.name === 'string' ? feature.properties.name : undefined;
   const normalized = serviceName.trim().toLowerCase();
@@ -172,6 +212,7 @@ export async function linkServiceEntities({
   repository,
   fingerprint,
   citations,
+  metadata,
   streams,
   esClient,
   kiClient,
@@ -183,6 +224,8 @@ export async function linkServiceEntities({
   fingerprint?: string;
   /** Source files the agent cited as evidence for this service, if any. */
   citations?: CodeEvidenceCitation[];
+  /** Additional code-derived facts about the service (version, env vars, etc.). */
+  metadata?: ServiceCodeMetadata;
   streams: StreamSamplingSource[];
   esClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
@@ -198,6 +241,7 @@ export async function linkServiceEntities({
   const evidence = formatCitations(citations, ref) ?? [
     `code: ${ref} service identified by scs.code_researcher agent`,
   ];
+  const metadataProperties = serviceMetadataToProperties(metadata);
 
   // Find existing log-derived service entities to merge onto.
   const matches = new Map<string, Feature>();
@@ -235,7 +279,7 @@ export async function linkServiceEntities({
       description: predicted
         ? `Service "${serviceName}" predicted from code (not yet observed in logs).`
         : `Service "${serviceName}" corroborated by code.`,
-      properties: { repository, name: serviceName, predicted },
+      properties: { repository, name: serviceName, predicted, ...metadataProperties },
       confidence: SERVICE_ENTITY_CONFIDENCE,
       evidence,
     };

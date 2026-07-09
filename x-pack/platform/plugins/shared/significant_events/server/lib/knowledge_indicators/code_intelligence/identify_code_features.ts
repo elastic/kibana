@@ -84,7 +84,11 @@ export async function identifyCodeFeatures({
     return { status: 'noop', repository };
   }
 
-  const classification = classifyRepository(await reader.getLanguageHistogram(repository));
+  const [languageHistogram, iacSignals] = await Promise.all([
+    reader.getLanguageHistogram(repository),
+    reader.detectIacSignals(repository),
+  ]);
+  const classification = classifyRepository(languageHistogram, iacSignals);
   const observedServiceNames = await reader.getObservedServiceNames(samplingIndex);
   const serviceName = await resolveServiceName({
     repository,
@@ -158,7 +162,11 @@ export async function identifyCodeFeaturesForRepository({
   runId,
 }: IdentifyCodeForRepositoryOptions): Promise<IdentifyCodeForRepositoryResult> {
   const fingerprint = await reader.getChangeFingerprint(repository);
-  const classification = classifyRepository(await reader.getLanguageHistogram(repository));
+  const [languageHistogram, iacSignals] = await Promise.all([
+    reader.getLanguageHistogram(repository),
+    reader.detectIacSignals(repository),
+  ]);
+  const classification = classifyRepository(languageHistogram, iacSignals);
 
   // Primary enumeration: leverage the installed SCS directory-discovery tool to
   // find the services in a (mono)repo — this is how services are laid out in
@@ -273,7 +281,11 @@ export async function identifyCodeFeaturesForService({
   const streamName = serviceNameValue;
 
   const fingerprint = await reader.getChangeFingerprint(repository);
-  const classification = classifyRepository(await reader.getLanguageHistogram(repository));
+  const [languageHistogram, iacSignals] = await Promise.all([
+    reader.getLanguageHistogram(repository),
+    reader.detectIacSignals(repository),
+  ]);
+  const classification = classifyRepository(languageHistogram, iacSignals);
 
   const persisted: FeatureUpsert[] = [];
 
@@ -366,6 +378,16 @@ const REPO_TYPE_TITLES: Record<RepoClassification['repoType'], string> = {
   both: 'Application & infrastructure',
 };
 
+/**
+ * Evidence for a `repo_type` feature: the language-based classification line
+ * plus one citation per detected IaC file signal (Kubernetes/Helm/Compose/…),
+ * so a `both`/`iac` classification points at the exact infrastructure files.
+ */
+const buildRepoTypeEvidence = (classification: RepoClassification, ref: string): string[] => [
+  `code: ${ref} classified as ${classification.repoType} from indexed languages`,
+  ...classification.iacSignals.map((signal) => `code: ${ref}:${signal.path} (${signal.kind})`),
+];
+
 const MAX_SNIPPET_LENGTH = 160;
 
 /**
@@ -389,6 +411,97 @@ export function formatCitations(
       return `code: ${ref}:${location}${suffix}`;
     });
   return lines.length > 0 ? lines : undefined;
+}
+
+/**
+ * Builds the repository-level code features — `repo_type` (always) and the
+ * repo-wide primary `language` (optional) — keyed by the repository so they
+ * collapse to a single KI per repository regardless of how many services the
+ * repository deploys. Uses classification-derived (histogram) evidence rather
+ * than any single service's citations, since these describe the whole repo.
+ */
+function buildRepositoryFeatures({
+  repository,
+  fingerprint,
+  classification,
+  includePrimaryLanguage,
+}: {
+  repository: string;
+  fingerprint: string | undefined;
+  classification: RepoClassification;
+  includePrimaryLanguage: boolean;
+}): FeatureUpsert[] {
+  const ref = fingerprint ? `${repository}@${fingerprint}` : repository;
+  const features: FeatureUpsert[] = [
+    {
+      id: CODE_FEATURE_SUBTYPE_REPO_TYPE,
+      stream_name: repository,
+      type: CODE_ANALYSIS_FEATURE_TYPE,
+      subtype: CODE_FEATURE_SUBTYPE_REPO_TYPE,
+      title: REPO_TYPE_TITLES[classification.repoType],
+      description: `Repository ${repository} classified as ${classification.repoType}.`,
+      properties: {
+        repository,
+        repo_type: classification.repoType,
+        languages: classification.languages,
+      },
+      confidence: 90,
+      evidence: buildRepoTypeEvidence(classification, ref),
+      meta: buildCodeChangeMeta({ repository, fingerprint }),
+    },
+  ];
+
+  if (includePrimaryLanguage && classification.primaryLanguage) {
+    features.push({
+      id: CODE_FEATURE_SUBTYPE_LANGUAGE,
+      stream_name: repository,
+      type: CODE_ANALYSIS_FEATURE_TYPE,
+      subtype: CODE_FEATURE_SUBTYPE_LANGUAGE,
+      title: classification.primaryLanguage,
+      description: `Primary application language is ${classification.primaryLanguage}.`,
+      properties: { repository, language: classification.primaryLanguage },
+      confidence: 90,
+      evidence: [`code: ${ref} primary language ${classification.primaryLanguage}`],
+      meta: buildCodeChangeMeta({ repository, fingerprint }),
+    });
+  }
+
+  return features;
+}
+
+/**
+ * Builds a per-service `language` feature keyed by the service stream, used when
+ * the agent resolved a language specific to this service (polyglot monorepos).
+ */
+function buildServiceLanguageFeature({
+  serviceStream,
+  repository,
+  fingerprint,
+  language,
+  citations,
+}: {
+  serviceStream: string;
+  repository: string;
+  fingerprint: string | undefined;
+  language: string;
+  citations?: CodeEvidenceCitation[];
+}): FeatureUpsert[] {
+  const ref = fingerprint ? `${repository}@${fingerprint}` : repository;
+  const citationEvidence = formatCitations(citations, ref);
+  return [
+    {
+      id: CODE_FEATURE_SUBTYPE_LANGUAGE,
+      stream_name: serviceStream,
+      type: CODE_ANALYSIS_FEATURE_TYPE,
+      subtype: CODE_FEATURE_SUBTYPE_LANGUAGE,
+      title: language,
+      description: `Primary language is ${language}.`,
+      properties: { repository, language },
+      confidence: 90,
+      evidence: citationEvidence ?? [`code: ${ref} primary language ${language}`],
+      meta: buildCodeChangeMeta({ repository, fingerprint }),
+    },
+  ];
 }
 
 function buildCodeFeatures({
@@ -431,9 +544,7 @@ function buildCodeFeatures({
       languages: classification.languages,
     },
     confidence: 90,
-    evidence: citationEvidence ?? [
-      `code: ${ref} classified as ${classification.repoType} from indexed languages`,
-    ],
+    evidence: citationEvidence ?? buildRepoTypeEvidence(classification, ref),
     meta: buildCodeChangeMeta({ repository, fingerprint }),
   });
 
