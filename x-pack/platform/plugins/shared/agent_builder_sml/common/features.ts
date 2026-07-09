@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export const AGENT_CONTEXT_LAYER_FEATURE_ID = 'agentContextLayer';
+export const AGENT_BUILDER_SML_FEATURE_ID = 'agentBuilderSml';
 
 export const apiPrivileges = {
-  readAgentContextLayer: `${AGENT_CONTEXT_LAYER_FEATURE_ID}:read`,
-  writeAgentContextLayer: `${AGENT_CONTEXT_LAYER_FEATURE_ID}:write`,
+  readAgentBuilderSml: `${AGENT_BUILDER_SML_FEATURE_ID}:read`,
+  writeAgentBuilderSml: `${AGENT_BUILDER_SML_FEATURE_ID}:write`,
 };

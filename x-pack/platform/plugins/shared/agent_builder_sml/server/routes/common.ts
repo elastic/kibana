@@ -27,11 +27,11 @@ export const toSmlHttpItem = (doc: SmlDocument): SmlHttpItem => ({
 });
 
 export const READ_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [apiPrivileges.readAgentContextLayer] },
+  authz: { requiredPrivileges: [apiPrivileges.readAgentBuilderSml] },
 };
 
 export const WRITE_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [apiPrivileges.writeAgentContextLayer] },
+  authz: { requiredPrivileges: [apiPrivileges.writeAgentBuilderSml] },
 };
 
 export const withSmlFeatureFlag =
