@@ -48,6 +48,7 @@ export interface ScheduleSectionProps {
 const weekdaysAreValid = (data: ScheduleFormData): boolean => {
   if (data.scheduleType !== 'rrule') return true;
   if (data.recurrence.frequency !== 'custom') return true;
+  if ((data.recurrence.repeatUnit ?? 'weeks') !== 'weeks') return true;
 
   return data.recurrence.byweekday.length > 0;
 };

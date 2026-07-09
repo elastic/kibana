@@ -51,8 +51,11 @@ export const validateScheduleFormData = (
     return errors;
   }
 
-  // (a) Custom (WEEKLY) recurrence with no weekday selected never fires.
-  if (data.recurrence.frequency === 'custom' && data.recurrence.byweekday.length === 0) {
+  // (a) Custom + Week(s) recurrence with no weekday selected never fires.
+  // Custom + Month(s)/Year(s) has no weekday selection to validate (D39).
+  const isCustomWeekly =
+    data.recurrence.frequency === 'custom' && (data.recurrence.repeatUnit ?? 'weeks') === 'weeks';
+  if (isCustomWeekly && data.recurrence.byweekday.length === 0) {
     errors.push(AT_LEAST_ONE_DAY_ERROR);
   }
 
