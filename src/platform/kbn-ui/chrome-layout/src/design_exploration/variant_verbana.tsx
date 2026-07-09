@@ -233,8 +233,8 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) {
-      width: calc(100% - ${DESIGN_EXPLORATION_PADDING * 1.25}px) !important;
-      margin: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
+      width: calc(100% - ${DESIGN_EXPLORATION_PADDING}px) !important;
+      margin: 8px !important;
       min-height: 48px !important;
     }
 
@@ -280,8 +280,8 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']
       .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
-      width: calc(100% - ${DESIGN_EXPLORATION_PADDING}px * 1.5) !important;
-      margin: ${DESIGN_EXPLORATION_PADDING}px 12px !important;
+      width: calc(100% - ${DESIGN_EXPLORATION_PADDING}px) !important;
+      margin: ${DESIGN_EXPLORATION_PADDING}px 8px !important;
       border-radius: ${scrolledBarBorderRadius} !important;
       box-shadow: ${embeddablePanelShadow} !important;
       background-color: color-mix(
