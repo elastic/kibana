@@ -8,12 +8,21 @@
 import * as t from 'io-ts';
 import { z } from '@kbn/zod/v4';
 import { settingDefinitions } from '../setting_definitions';
-import type { SettingValidation } from '../setting_definitions/types';
+import type { SettingValidation, SettingZodValidation } from '../setting_definitions/types';
 
 // retrieve validation from config definitions settings and validate on the server
 const knownSettings = settingDefinitions.reduce<Record<string, SettingValidation>>(
   (acc, { key, validation }) => {
     acc[key] = validation;
+    return acc;
+  },
+  {}
+);
+
+// zod equivalent of `knownSettings`, additive (io-ts -> zod migration).
+const knownSettingsZod = settingDefinitions.reduce<Record<string, SettingZodValidation>>(
+  (acc, { key, zodValidation }) => {
+    acc[key] = zodValidation;
     return acc;
   },
   {}
@@ -26,9 +35,7 @@ export const serviceRt = t.partial({
 
 /**
  * zod equivalent, additive (see `default_api_types.ts` in `@kbn/apm-api-shared`
- * for why - elastic/kibana#243355). `settingsRt`/`agentConfigurationIntakeRt`
- * are not ported here yet: they pull in the whole per-setting validation
- * subsystem in `../setting_definitions`, which needs its own migration pass.
+ * for why - elastic/kibana#243355).
  */
 export const serviceSchema = z.object({
   name: z.string().optional(),
@@ -44,3 +51,29 @@ export const agentConfigurationIntakeRt = t.intersection([
     settings: settingsRt,
   }),
 ]);
+
+/**
+ * zod equivalent of `settingsRt`: every value must be a string, and known
+ * settings additionally pass their per-setting validation (mirrors io-ts's
+ * `t.intersection([t.record(t.string, t.string), t.partial(knownSettings)])`).
+ */
+export const settingsSchema = z.record(z.string(), z.string()).superRefine((settings, ctx) => {
+  for (const [key, validator] of Object.entries(knownSettingsZod)) {
+    const value = settings[key];
+    if (value !== undefined) {
+      const result = validator.safeParse(value);
+      if (!result.success) {
+        for (const issue of result.error.issues) {
+          ctx.addIssue({ code: 'custom', path: [key], message: issue.message });
+        }
+      }
+    }
+  }
+});
+
+// zod equivalent of `agentConfigurationIntakeRt`, additive.
+export const agentConfigurationIntakeSchema = z.object({
+  agent_name: z.string().optional(),
+  service: serviceSchema,
+  settings: settingsSchema,
+});
