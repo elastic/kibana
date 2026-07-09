@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  carryConversationToWorkflow,
-  getLastCreateAttachmentId,
-  setLastCreateAttachmentId,
-} from './conversation_handoff';
+import { carryConversationToWorkflow, setLastCreateAttachmentId } from './conversation_handoff';
 
 describe('conversation_handoff', () => {
   beforeEach(() => {
@@ -63,13 +59,21 @@ describe('conversation_handoff', () => {
     ).toBeNull();
   });
 
-  it('clears the registered create attachment id after use (single-shot handoff)', () => {
+  it('single-shot: a second carry after consume does not migrate again', () => {
     setLastCreateAttachmentId('unsaved-uuid-A');
-    expect(getLastCreateAttachmentId()).toBe('unsaved-uuid-A');
+    window.localStorage.setItem(
+      'agentBuilder.lastConversation.workflow-editor:unsaved-uuid-A.default',
+      'conv-1'
+    );
 
     carryConversationToWorkflow('saved-wf-1');
+    carryConversationToWorkflow('saved-wf-2');
 
-    expect(getLastCreateAttachmentId()).toBeUndefined();
+    expect(
+      window.localStorage.getItem(
+        'agentBuilder.lastConversation.workflow-editor:saved-wf-2.default'
+      )
+    ).toBeNull();
   });
 
   it('is a no-op when source and target ids match (e.g. already-saved workflow re-save)', () => {

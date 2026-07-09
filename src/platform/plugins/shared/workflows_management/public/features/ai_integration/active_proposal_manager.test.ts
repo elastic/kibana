@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  __resetActiveProposalManagerForTest,
-  acceptAllActiveProposals,
-  setActiveProposalManager,
-} from './active_proposal_manager';
+import { acceptAllActiveProposals, setActiveProposalManager } from './active_proposal_manager';
 import type { ProposalManager } from './proposed_changes';
 
 const createStub = (hasPending: boolean) =>
@@ -22,7 +18,7 @@ const createStub = (hasPending: boolean) =>
 
 describe('active_proposal_manager', () => {
   afterEach(() => {
-    __resetActiveProposalManagerForTest();
+    setActiveProposalManager(null);
   });
 
   it('does nothing when no manager is registered', () => {

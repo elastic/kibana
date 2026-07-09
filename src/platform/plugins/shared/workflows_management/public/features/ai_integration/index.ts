@@ -17,8 +17,4 @@ export type { ProposalStatus, ProposalRecord } from './proposal_tracker';
 
 export { setActiveProposalManager, acceptAllActiveProposals } from './active_proposal_manager';
 
-export {
-  setLastCreateAttachmentId,
-  getLastCreateAttachmentId,
-  carryConversationToWorkflow,
-} from './conversation_handoff';
+export { setLastCreateAttachmentId, carryConversationToWorkflow } from './conversation_handoff';

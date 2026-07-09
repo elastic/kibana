@@ -27,8 +27,6 @@ export const setLastCreateAttachmentId = (attachmentId: string | undefined): voi
   lastCreateAttachmentId = attachmentId;
 };
 
-export const getLastCreateAttachmentId = (): string | undefined => lastCreateAttachmentId;
-
 /**
  * Copy every persisted conversation-id entry keyed by the create session's
  * tag onto the saved workflow's tag. The stored keys include an agent id

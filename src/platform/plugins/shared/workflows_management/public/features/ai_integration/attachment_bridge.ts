@@ -69,12 +69,6 @@ export class AttachmentBridge {
     tracker: ProposalTracker,
     options?: {
       onError?: (err: unknown) => void;
-      /**
-       * Stable id of the attachment this bridge is bound to. Incoming YAML-change
-       * events whose `attachmentId` does not match this value are ignored — this
-       * keeps in-flight agent edits scoped to the workflow the conversation was
-       * started against, even after the user navigates to a different workflow.
-       */
       attachmentId?: string;
       onProposalReceived?: (params: {
         proposalId: string;

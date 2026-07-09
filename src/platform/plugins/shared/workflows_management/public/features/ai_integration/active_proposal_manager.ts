@@ -24,7 +24,3 @@ export const acceptAllActiveProposals = (): void => {
     active.acceptAll();
   }
 };
-
-export const __resetActiveProposalManagerForTest = (): void => {
-  active = null;
-};

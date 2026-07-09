@@ -671,14 +671,6 @@ steps:
     });
   });
 
-  // Auto-open of the agent chat lives inside useAgentBuilderIntegration and is
-  // covered by use_agent_builder_integration.test.ts, which asserts:
-  // - the sidebar auto-opens exactly once on /workflows/create (no workflowId),
-  // - it does NOT auto-open when landing on an existing workflow detail view,
-  // - and the auto-open path does not double-fire on re-renders.
-  // workflow_yaml_editor no longer calls openAgentChat directly, so there is
-  // nothing meaningful to observe at this layer via a mocked hook.
-
   describe('hover commands', () => {
     it('should register keyboard commands when editor mounts', async () => {
       const store = createMockStore();

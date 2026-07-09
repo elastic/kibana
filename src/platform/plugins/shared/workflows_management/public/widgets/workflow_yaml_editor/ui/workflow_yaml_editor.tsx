@@ -348,9 +348,6 @@ export const WorkflowYAMLEditor = ({
     validationErrors,
   });
 
-  // Auto-open of the agent chat sidebar is owned by useAgentBuilderIntegration
-  // and scoped to new workflows only (`/workflows/create`). See its comment.
-
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {
       return;
