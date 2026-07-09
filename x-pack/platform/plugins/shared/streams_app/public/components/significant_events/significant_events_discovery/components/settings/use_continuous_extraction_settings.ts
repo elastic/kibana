@@ -12,7 +12,7 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
 } from '@kbn/management-settings-ids';
-import { DEFAULT_EXTRACTION_INTERVAL_HOURS } from '@kbn/streams-plugin/common';
+import { DEFAULT_EXTRACTION_INTERVAL_HOURS } from '@kbn/significant-events-plugin/common';
 
 export interface ContinuousExtractionState {
   enabled: boolean;

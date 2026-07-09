@@ -267,7 +267,8 @@ export function usePackagePolicyWithRelatedData(
         // raised) on every load: this hook can re-run with a different `packagePolicyId` without
         // a remount, and a stale `true` from a previously loaded agentless policy would route the
         // next policy's save through the agentless PUT, which the server rejects.
-        setDetectedAgentless(Boolean(packagePolicyData?.item?.supports_agentless));
+        const isAgentlessInstance = Boolean(packagePolicyData?.item?.supports_agentless);
+        setDetectedAgentless(isAgentlessInstance);
 
         if (packagePolicyData!.item.policy_ids && packagePolicyData!.item.policy_ids.length > 0) {
           const { data, error: agentPolicyError } = await sendBulkGetAgentPolicies(
@@ -285,15 +286,27 @@ export function usePackagePolicyWithRelatedData(
           setAgentPolicies(data?.items ?? []);
         }
 
-        const { data: upgradePackagePolicyDryRunData, error: upgradePackagePolicyDryRunError } =
-          await sendUpgradePackagePolicyDryRun([packagePolicyId]);
+        // Skip the legacy upgrade dry-run for agentless policies only when the legacy API is disabled;
+        // forced-upgrade entry points would otherwise 400 before rendering the edit page.
+        const legacyAgentlessApiDisabled =
+          ExperimentalFeaturesService.get().disableAgentlessLegacyAPI;
+        let upgradePackagePolicyDryRunData: UpgradePackagePolicyDryRunResponse | undefined;
+        if (legacyAgentlessApiDisabled && isAgentlessInstance) {
+          // Clear any upgrade state left over from a previously loaded policy.
+          setDryRunData(undefined);
+        } else {
+          const { data, error: upgradePackagePolicyDryRunError } =
+            await sendUpgradePackagePolicyDryRun([packagePolicyId]);
 
-        if (upgradePackagePolicyDryRunError) {
-          throw upgradePackagePolicyDryRunError;
-        }
+          if (upgradePackagePolicyDryRunError) {
+            throw upgradePackagePolicyDryRunError;
+          }
 
-        if (ignore) {
-          return;
+          if (ignore) {
+            return;
+          }
+
+          upgradePackagePolicyDryRunData = data ?? undefined;
         }
 
         const hasUpgrade = upgradePackagePolicyDryRunData

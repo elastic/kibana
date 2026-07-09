@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { ConversationSource, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
   type Conversation,
@@ -43,6 +43,7 @@ import {
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
   exists(conversationId: string): Promise<boolean>;
+  getBySource(source: ConversationSource): Promise<Conversation | undefined>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(
     conversation: ConversationUpdateRequest,
@@ -144,6 +145,39 @@ class ConversationClientImpl implements ConversationClient {
         return false;
       }
 
+      throw error;
+    }
+  }
+
+  async getBySource(source: ConversationSource): Promise<Conversation | undefined> {
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      query: {
+        bool: {
+          filter: [
+            createSpaceDslFilter(this.space),
+            { term: { 'source.type': source.type } },
+            { term: { 'source.external_conversation_id': source.external_conversation_id } },
+          ],
+        },
+      },
+    });
+
+    const hit = response.hits.hits[0] as Document | undefined;
+    if (!hit || !hit._id) {
+      return undefined;
+    }
+
+    try {
+      return fromEs(
+        await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' })
+      );
+    } catch (error) {
+      if (isConversationNotFoundError(error)) {
+        return undefined;
+      }
       throw error;
     }
   }

@@ -279,7 +279,7 @@ export const makeDataViewWithRuntime = (
     () =>
       ({
         id,
-        title: '.cases,.cases-activity',
+        title: '.cases,.cases-activity,.cases-attachments',
         runtimeFieldMap: { ...dv.__runtimeFieldMap },
       } as DataViewSpec)
   );
