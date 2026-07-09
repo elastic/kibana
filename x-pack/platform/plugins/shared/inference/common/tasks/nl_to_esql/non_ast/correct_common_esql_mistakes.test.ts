@@ -99,7 +99,7 @@ describe('correctCommonEsqlMistakes', () => {
     });
   });
 
-  it('does not throw when WHERE clause body starts on the next line', () => {
+  it('should handle WHERE clause with newline character correctly', () => {
     expectQuery({
       input: `FROM logs-azure.auditlogs-*
 | WHERE event.category == "configuration" AND azure.auditlogs.operation_name == "Update conditional access policy"
