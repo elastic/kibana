@@ -29,7 +29,10 @@ const SAMPLE_ITEMS: InfoBlockItem[] = [
   { title: 'Region', value: 'us-east-1' },
 ];
 
-type DefaultArgs = { numberOfItems: number; compressed: boolean };
+interface DefaultArgs {
+  numberOfItems: number;
+  compressed: boolean;
+}
 
 export const Default: StoryObj<DefaultArgs> = {
   argTypes: {
