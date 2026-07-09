@@ -42,13 +42,6 @@ export const TEMPLATE_METADATA_SECTION_DESCRIPTION = i18n.translate(
   }
 );
 
-export const TEMPLATE_METADATA_NOT_IN_YAML_BADGE = i18n.translate(
-  'xpack.cases.templates.templateMetadataNotInYamlBadge',
-  {
-    defaultMessage: 'Not in YAML',
-  }
-);
-
 export const TEMPLATE_NAME_LABEL = i18n.translate('xpack.cases.templates.templateNameLabel', {
   defaultMessage: 'Template name',
 });

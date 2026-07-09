@@ -7,11 +7,8 @@
 
 import React from 'react';
 import {
-  EuiBadge,
   EuiDescribedFormGroup,
   EuiErrorBoundary,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -40,8 +37,8 @@ interface TemplateConfigurationTabProps {
 /**
  * The Configuration tab: a Kibana settings-page (described-form-group) for the template's identity
  * (name/description/tags), case settings, and default connector. None of this lives in the editor
- * YAML — it is panel-owned and merged into the definition on save (hence the "Not in YAML" badge).
- * The connector form is error-boundaried so a flaky async connector fetch can never blank the tab.
+ * YAML — it is panel-owned and merged into the definition on save. The connector form is
+ * error-boundaried so a flaky async connector fetch can never blank the tab.
  */
 export const TemplateConfigurationTab: React.FC<TemplateConfigurationTabProps> = ({
   metadata,
@@ -71,22 +68,9 @@ export const TemplateConfigurationTab: React.FC<TemplateConfigurationTabProps> =
           padding: ${euiTheme.size.xl} ${euiTheme.size.l};
         `}
       >
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h2>{i18n.CONFIGURATION_TAB_LABEL}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge
-              color="hollow"
-              iconType="documentEdit"
-              data-test-subj="templateConfigNotInYamlBadge"
-            >
-              {i18n.TEMPLATE_METADATA_NOT_IN_YAML_BADGE}
-            </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="s">
+          <h2>{i18n.CONFIGURATION_TAB_LABEL}</h2>
+        </EuiTitle>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
           {i18n.CONFIGURATION_TAB_DESCRIPTION}

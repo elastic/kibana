@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt, EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiEmptyPrompt, EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { parse as parseYaml } from 'yaml';
 import type {
@@ -127,23 +127,39 @@ const TemplatePreviewComponent: React.FC<TemplatePreviewProps> = ({
 
   return (
     <div>
-      <EuiText size="xs" color="subdued">
-        <strong>{i18n.CASE_DEFAULTS_SECTION_TITLE}</strong>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <TemplateCaseDefaultsForm parsedTemplate={previewDefinition} onChange={onCaseDefaultChange} />
+      <EuiAccordion
+        id="templatePreviewCaseDefaults"
+        initialIsOpen
+        buttonContent={
+          <EuiText size="xs" color="subdued">
+            <strong>{i18n.CASE_DEFAULTS_SECTION_TITLE}</strong>
+          </EuiText>
+        }
+        data-test-subj="templatePreviewCaseDefaultsAccordion"
+      >
+        <EuiSpacer size="s" />
+        <TemplateCaseDefaultsForm parsedTemplate={previewDefinition} onChange={onCaseDefaultChange} />
+      </EuiAccordion>
 
       {previewDefinition.fields.length > 0 && (
         <>
           <EuiHorizontalRule margin="m" />
-          <EuiText size="xs" color="subdued">
-            <strong>{i18n.TEMPLATE_FIELDS_LABEL}</strong>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <TemplateFieldRenderer
-            parsedTemplate={previewDefinition}
-            onFieldDefaultChange={onFieldDefaultChange}
-          />
+          <EuiAccordion
+            id="templatePreviewFields"
+            initialIsOpen
+            buttonContent={
+              <EuiText size="xs" color="subdued">
+                <strong>{i18n.TEMPLATE_FIELDS_LABEL}</strong>
+              </EuiText>
+            }
+            data-test-subj="templatePreviewFieldsAccordion"
+          >
+            <EuiSpacer size="s" />
+            <TemplateFieldRenderer
+              parsedTemplate={previewDefinition}
+              onFieldDefaultChange={onFieldDefaultChange}
+            />
+          </EuiAccordion>
         </>
       )}
     </div>
