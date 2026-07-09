@@ -665,7 +665,7 @@ describe('UpdateTemplateInputSchema', () => {
     }
   });
 
-  it('rejects update input without name', () => {
+  it('accepts update input without a name (identity is derived server-side)', () => {
     const updateWithoutName = {
       owner: 'securitySolution',
       definition: 'fields:\n  - name: updated_field\n    type: keyword',
@@ -673,7 +673,12 @@ describe('UpdateTemplateInputSchema', () => {
 
     const result = UpdateTemplateInputSchema.safeParse(updateWithoutName);
 
-    expect(result.success).toBe(false);
+    // `name` is optional on the wire — the route/service derive it from the definition's
+    // case-default title. The schema must accept the update without it.
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.name).toBeUndefined();
+    }
   });
 
   it('requires owner and definition (PUT semantics)', () => {
