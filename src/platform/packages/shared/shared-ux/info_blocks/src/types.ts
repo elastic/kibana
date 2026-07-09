@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { _EuiThemeSize } from '@elastic/eui';
+import type { _EuiThemeSize, EuiTextProps } from '@elastic/eui';
 
 export interface InfoBlockItem {
   /** Fixed-style text label rendered above the value. */
@@ -20,7 +20,9 @@ export interface InfoBlockItem {
    * `euiTheme.size` token as its font size (e.g. `'xl'`). The title is
    * unaffected. When omitted, the value uses the default text size.
    */
-  valueSize?: _EuiThemeSize;
+  size?: _EuiThemeSize;
+  /** Color for the value text, passed through to `EuiText` (e.g. `'success'`). */
+  color?: EuiTextProps['color'];
   'data-test-subj'?: string;
 }
 

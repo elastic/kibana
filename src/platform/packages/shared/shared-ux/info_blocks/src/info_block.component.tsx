@@ -23,7 +23,8 @@ export interface InfoBlockProps extends InfoBlockItem {
 export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   title,
   value,
-  valueSize,
+  size,
+  color,
   compressed,
   ...rest
 }) => {
@@ -31,7 +32,7 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   // "Big number" values map their font size to the matching euiTheme.size token.
   // In the compressed layout the big number is suppressed so the value matches
   // the surrounding text.
-  const bigNumberFontSize = valueSize && !compressed ? euiTheme.size[valueSize] : undefined;
+  const bigNumberFontSize = size && !compressed ? euiTheme.size[size] : undefined;
   // Plain text values (and titles) truncate to a single line via
   // EuiTextTruncate so a long string never overflows its column. Node values
   // (badges, links, images) manage their own layout and render as-is.
@@ -48,6 +49,7 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
       </EuiText>
       <EuiText
         size="s"
+        color={color}
         css={css`
           font-weight: ${euiTheme.font.weight.bold};
           ${bigNumberFontSize

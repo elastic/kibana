@@ -150,9 +150,9 @@ export const Compressed: Story = {
 // A mix of "big number" values and regular values. "Severity" shares a row with
 // the big-number "Healthy" block to show both cells take the same row height.
 const BIG_NUMBER_ITEMS: InfoBlockItem[] = [
-  { title: 'Risk score', value: '90', valueSize: 'xl' },
+  { title: 'Risk score', value: '90', size: 'xl' },
   ...SAMPLE_ITEMS.slice(0, 3),
-  { title: 'Healthy', value: '5', valueSize: 'xl' },
+  { title: 'Healthy', value: '5', size: 'xl', color: 'success' },
 ];
 
 export const BigNumber: Story = {
@@ -167,7 +167,7 @@ export const BigNumber: Story = {
 // the live column count: at 2 columns it fills 1 remaining cell, at 3 columns
 // it fills 2. Drive the width (or the 3 -> 2 -> 1 collapse) to see it adapt.
 const EMPTY_BLOCK_ITEMS: InfoBlocksItem[] = [
-  { title: 'Risk score', value: '90', valueSize: 'xl' },
+  { title: 'Risk score', value: '90', size: 'xl' },
   EMPTY_INFO_BLOCK,
   ...SAMPLE_ITEMS.slice(0, 4),
 ];
@@ -222,7 +222,7 @@ export const InlineSvg: Story = {
 };
 
 // No-op handler for the interactive controls below.
-const noop = () => { };
+const noop = () => {};
 
 // A truncating link with a trailing copy action, matching the SAMPLE_ITEMS
 // "Resource" pattern.

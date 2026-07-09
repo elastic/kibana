@@ -28,7 +28,7 @@ import { InfoBlocks, EMPTY_INFO_BLOCK } from '@kbn/shared-ux-info-blocks';
 
 <InfoBlocks
   items={[
-    { title: 'Risk score', value: '90', valueSize: 'xl' },
+    { title: 'Risk score', value: '90', size: 'xl' },
     EMPTY_INFO_BLOCK,
     { title: 'Vendor', value: 'Elastic' },
   ]}

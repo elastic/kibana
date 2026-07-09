@@ -53,7 +53,7 @@ describe('InfoBlocks', () => {
     render(
       <InfoBlocks
         items={[
-          { title: 'Risk score', value: '90', valueSize: 'xl' },
+          { title: 'Risk score', value: '90', size: 'xl' },
           EMPTY_INFO_BLOCK,
           { title: 'Vendor', value: 'Elastic' },
           { title: 'Result', value: 'Success' },
@@ -68,7 +68,7 @@ describe('InfoBlocks', () => {
 });
 
 describe('getInfoBlocksLayout (empty-block placement + divider hints)', () => {
-  const RISK: InfoBlocksItem = { title: 'Risk score', value: '90', valueSize: 'xl' };
+  const RISK: InfoBlocksItem = { title: 'Risk score', value: '90', size: 'xl' };
   const withEmpty: InfoBlocksItem[] = [
     RISK,
     EMPTY_INFO_BLOCK,
