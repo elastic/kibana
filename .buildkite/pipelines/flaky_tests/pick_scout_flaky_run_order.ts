@@ -16,11 +16,9 @@ import {
   type ScoutFlakyRequest,
 } from '#pipeline-utils';
 
-// Instead of discovering every Scout config in the repo, we resolve ONLY the configs the
-// user requested. This keeps the flaky runner fast and immune to unrelated/broken configs
-// (which is why the previous full-discovery path needed `--skip-validation`). The scoped
-// `discover-playwright-configs --configs <paths>` writes the manifest below, which we then
-// read to plan the per-(arch, domain) Buildkite steps.
+// Resolve ONLY the requested configs (scoped `discover-playwright-configs --configs <paths>`)
+// instead of the whole repo: keeps the flaky runner fast and immune to unrelated/broken
+// configs. It writes the manifest we read below to plan per-(arch, domain) Buildkite steps.
 const MANIFEST_RELATIVE_PATH = path.join('.scout', 'test_configs', 'scout_playwright_configs.json');
 
 // Normalize an optional leading "./" so paths match the discovery manifest and the CLI allow-list.
