@@ -1,0 +1,56 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.d.ts"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-server",
+    "@kbn/alerting-plugin",
+    "@kbn/attack-discovery-schedules-common",
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-utils",
+    "@kbn/i18n",
+    "@kbn/management-settings-ids",
+    "@kbn/rule-registry-plugin",
+    "@kbn/discoveries",
+    "@kbn/security-plugin",
+    "@kbn/scout-security",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/securitysolution-utils",
+    "@kbn/spaces-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows-management-plugin",
+    "@kbn/workflows-yaml",
+    "@kbn/zod",
+    "@kbn/logging-mocks",
+    "@kbn/event-log-plugin",
+    "@kbn/inference-common",
+    "@kbn/elastic-assistant-common",
+    "@kbn/actions-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/core-spaces-common",
+    "@kbn/inference-plugin",
+    "@kbn/utility-types",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/security-ai-prompts",
+    "@kbn/core-http-server-mocks",
+    "@kbn/security-solution-features",
+    "@kbn/discoveries-schemas",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/alerts-as-data-utils"
+  ]
+}
