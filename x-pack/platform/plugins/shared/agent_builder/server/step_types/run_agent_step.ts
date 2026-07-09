@@ -16,10 +16,14 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { firstValueFrom, tap, toArray } from 'rxjs';
 import type { ServiceManager } from '../services';
 import {
+  CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
+  ConnectorOrInferenceIdConflictError,
   resolveConnectorOrInferenceId,
 } from '../../common/resolve_connector_or_inference_id';
+import { normalizeOptionalStringParam } from '../../common/normalize_optional_string_param';
 import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_step';
+import { resolveConnectorIdByFeature } from '../utils/resolve_connector_id_by_feature';
 
 /**
  * Server step definition for the "ai.agent" step.
@@ -40,12 +44,19 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
       } = { inputTokens: 0, outputTokens: 0, cachedTokens: 0, totalTokens: 0 };
 
       try {
-        const { schema, message, conversation_id: conversationId, attachments } = context.input;
+        const {
+          schema,
+          message,
+          conversation_id: conversationId,
+          attachments,
+          metadata,
+        } = context.input;
 
         const {
           'agent-id': agentId,
           'connector-id': connectorIdRaw,
           'inference-id': inferenceIdRaw,
+          'connector-id-by-feature': connectorIdByFeatureRaw,
           'create-conversation': createConversation,
           'plugin-id': pluginId,
           'aggregate-by': aggregateBy,
@@ -58,10 +69,28 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         }
 
         const effectiveAgentId = (agentId as string | undefined) || agentBuilderDefaultAgentId;
-        const effectiveConnectorId = resolveConnectorOrInferenceId(
+        let effectiveConnectorId = resolveConnectorOrInferenceId(
           { connectorId: connectorIdRaw, inferenceId: inferenceIdRaw },
           CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW
         );
+
+        const connectorIdByFeature = normalizeOptionalStringParam(connectorIdByFeatureRaw);
+        if (connectorIdByFeature !== undefined) {
+          if (effectiveConnectorId !== undefined) {
+            throw new ConnectorOrInferenceIdConflictError(
+              CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW
+            );
+          }
+          const { searchInferenceEndpoints } = serviceManager.internalStart ?? {};
+          if (!searchInferenceEndpoints) {
+            throw new Error('searchInferenceEndpoints service is not available');
+          }
+          effectiveConnectorId = await resolveConnectorIdByFeature({
+            featureId: connectorIdByFeature,
+            request,
+            searchInferenceEndpoints,
+          });
+        }
 
         const storeConversation = createConversation || Boolean(conversationId);
 
@@ -78,6 +107,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           mode: AgentExecutionMode.conversation,
           request,
           abortSignal: context.abortSignal,
+          metadata,
           params: {
             agentId: effectiveAgentId,
             connectorId: effectiveConnectorId,

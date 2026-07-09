@@ -1423,7 +1423,7 @@ export default function (providerContext: FtrProviderContext) {
               namespace: 'default',
               description: 'tata',
             }),
-          /400 "Bad Request" To update agentless agent policies, use the Fleet agentless policies API./
+          /400 "Bad Request" To update agentless agent policies, use the agentless policies API./
         );
       });
     });
