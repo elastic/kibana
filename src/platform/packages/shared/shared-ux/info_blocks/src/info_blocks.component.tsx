@@ -17,6 +17,11 @@ import type { InfoBlocksProps } from './types';
 const MAX_COLUMNS = 3;
 /** Below this width a block collapses to fewer columns */
 const MIN_BLOCK_WIDTH = 140;
+/**
+ * Dividers between blocks stop this far short of the grid corners (per the
+ * Figma "border detail"), so the lines never meet at the intersections.
+ */
+const DIVIDER_CORNER_GAP = '20px';
 
 /**
  * Computes the responsive column count from the available width: up to
@@ -42,6 +47,8 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
 
   const columns = getInfoBlocksColumnCount(width, items.length);
   const cellPadding = compressed ? euiTheme.size.s : euiTheme.size.m;
+  const dividerColor = euiTheme.border.color;
+  const dividerThickness = euiTheme.border.width.thin;
 
   return (
     <EuiPanel
@@ -56,17 +63,54 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
       `}
     >
       {items.map((item, index) => {
-        // Vertical dividers between columns; horizontal dividers between rows.
-        const isFirstColumn = index % columns === 0;
-        const isFirstRow = index < columns;
+        // Dividers are drawn as pseudo-elements.
+        //  - ::before = vertical divider on the inline-END of every non-last
+        //    column, inset from top/bottom by DIVIDER_CORNER_GAP so it stops
+        //    short of the corners. Drawing on the end (not the start) means a
+        //    partial last row still gets a divider to the right of its last
+        //    filled block — the empty trailing cells have no cell to draw one.
+        //  - ::after = horizontal divider between rows, drawn on the block-END
+        //    of every cell that has a row below it. Drawing it on the (always
+        //    full) upper row lets it span the whole width even when the last
+        //    row is partial, and it stays SOLID through the interior column
+        //    intersections — only the outer ends are inset by the gap.
+        const column = index % columns;
+        const isFirstColumn = column === 0;
+        const isLastColumn = column === columns - 1;
+        const hasRowBelow =
+          Math.floor(index / columns) < Math.floor((items.length - 1) / columns);
         return (
           <div
             key={item['data-test-subj'] ?? index}
             css={css`
+              position: relative;
               min-width: 0;
               padding: ${cellPadding};
-              ${!isFirstColumn ? `border-inline-start: ${euiTheme.border.thin};` : ''}
-              ${!isFirstRow ? `border-block-start: ${euiTheme.border.thin};` : ''}
+              ${!isLastColumn
+                ? `
+                    &::before {
+                      content: '';
+                      position: absolute;
+                      inset-inline-end: 0;
+                      inset-block: ${DIVIDER_CORNER_GAP};
+                      inline-size: ${dividerThickness};
+                      background-color: ${dividerColor};
+                    }
+                  `
+                : ''}
+              ${hasRowBelow
+                ? `
+                    &::after {
+                      content: '';
+                      position: absolute;
+                      inset-block-end: 0;
+                      inset-inline-start: ${isFirstColumn ? DIVIDER_CORNER_GAP : '0'};
+                      inset-inline-end: ${isLastColumn ? DIVIDER_CORNER_GAP : '0'};
+                      block-size: ${dividerThickness};
+                      background-color: ${dividerColor};
+                    }
+                  `
+                : ''}
             `}
           >
             <InfoBlock {...item} compressed={compressed} />
