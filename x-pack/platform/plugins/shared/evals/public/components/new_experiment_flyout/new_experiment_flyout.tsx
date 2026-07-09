@@ -25,6 +25,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -132,6 +133,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const history = useHistory();
   const { services } = useKibana();
   const toasts = services.notifications?.toasts;
+  const flyoutTitleId = useGeneratedHtmlId();
 
   const { data: connectorsData, isLoading: connectorsLoading } = useModelConnectors();
   const { data: datasetsData, isLoading: datasetsLoading } = useDatasets({ perPage: 1000 });
@@ -451,10 +453,16 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     : [];
 
   return (
-    <EuiFlyout onClose={onClose} size="m" ownFocus data-test-subj="evalsNewExperimentFlyout">
+    <EuiFlyout
+      onClose={onClose}
+      size="m"
+      ownFocus
+      aria-labelledby={flyoutTitleId}
+      data-test-subj="evalsNewExperimentFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{strings.title}</h2>
+          <h2 id={flyoutTitleId}>{strings.title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
