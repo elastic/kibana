@@ -78,13 +78,19 @@ describe('episodes_table_config', () => {
       expect(readEpisodesTableConfigFromStorage(storage as any)).toEqual(stored);
     });
 
-    it('writes the full config to localStorage at the expected key', () => {
+    it('writes only non-default fields to localStorage at the expected key', () => {
+      const storage = createMockStorage();
+      writeEpisodesTableConfigToStorage(storage as any, { rowHeight: -1 });
+      expect(storage.set).toHaveBeenCalledWith(EPISODES_TABLE_CONFIG_STORAGE_KEY, {
+        rowHeight: -1,
+      });
+    });
+
+    it('removes the storage key when the config equals defaults', () => {
       const storage = createMockStorage();
       writeEpisodesTableConfigToStorage(storage as any, DEFAULT_EPISODES_TABLE_CONFIG);
-      expect(storage.set).toHaveBeenCalledWith(
-        EPISODES_TABLE_CONFIG_STORAGE_KEY,
-        DEFAULT_EPISODES_TABLE_CONFIG
-      );
+      expect(storage.set).not.toHaveBeenCalled();
+      expect(storage.remove).toHaveBeenCalledWith(EPISODES_TABLE_CONFIG_STORAGE_KEY);
     });
 
     it('round-trips config through storage', () => {
@@ -110,6 +116,20 @@ describe('episodes_table_config', () => {
     it('ignores invalid rowHeight values', () => {
       const storage = createMockStorage({ rowHeight: 'not-a-number' });
       expect(readEpisodesTableConfigFromStorage(storage as any)).toBeUndefined();
+    });
+
+    it('ignores out-of-range and non-integer rowHeight values', () => {
+      for (const rowHeight of [99999, -2, 21, 1.5, NaN, Infinity]) {
+        const storage = createMockStorage({ rowHeight });
+        expect(readEpisodesTableConfigFromStorage(storage as any)).toBeUndefined();
+      }
+    });
+
+    it('accepts in-range rowHeight values (auto, single, and custom line counts)', () => {
+      for (const rowHeight of [-1, 1, 20]) {
+        const storage = createMockStorage({ rowHeight });
+        expect(readEpisodesTableConfigFromStorage(storage as any)).toEqual({ rowHeight });
+      }
     });
   });
 

@@ -29,7 +29,14 @@ type AppStateRecord = Record<string, unknown> & {
   [EPISODES_TABLE_APP_STATE_KEY]?: unknown;
 };
 
-const isValidRowHeight = (v: unknown): v is number => isNumber(v) && Number.isFinite(v);
+// Bounds the row height to a valid line count (`auto` is -1). Values come from the URL and
+// localStorage, so an unbounded check would let a bad value render absurdly tall rows. Mirrors
+// @kbn/unified-data-table's `isValidRowHeight`, which isn't exported for reuse.
+const MIN_ROW_HEIGHT = -1;
+const MAX_ROW_HEIGHT = 20;
+
+const isValidRowHeight = (v: unknown): v is number =>
+  isNumber(v) && Number.isInteger(v) && v >= MIN_ROW_HEIGHT && v <= MAX_ROW_HEIGHT;
 
 function decodeEpisodesTableConfig(raw: unknown): Partial<EpisodesTableConfig> | undefined {
   if (!isPlainObject(raw)) return undefined;
@@ -71,7 +78,14 @@ export const writeEpisodesTableConfigToStorage = (
   storage: Storage,
   config: EpisodesTableConfig
 ): void => {
-  storage.set(EPISODES_TABLE_CONFIG_STORAGE_KEY, config);
+  // Strip default fields before persisting, like the URL write, so untouched fields keep tracking
+  // the current default instead of being pinned. Drop the key entirely when nothing diverges.
+  const serialized = encodeEpisodesTableConfig(config);
+  if (serialized === null) {
+    storage.remove(EPISODES_TABLE_CONFIG_STORAGE_KEY);
+  } else {
+    storage.set(EPISODES_TABLE_CONFIG_STORAGE_KEY, serialized);
+  }
 };
 
 export const readEpisodesTableConfigFromUrl = (
