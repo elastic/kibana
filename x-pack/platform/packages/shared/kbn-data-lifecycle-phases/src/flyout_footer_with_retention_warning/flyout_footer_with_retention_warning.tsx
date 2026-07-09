@@ -83,6 +83,10 @@ export const FlyoutFooterWithRetentionWarning = ({
 }: FlyoutFooterWithRetentionWarningProps) => {
   const { euiTheme } = useEuiTheme();
   const styles = getFlyoutFooterWithRetentionWarningStyles({ euiTheme });
+  const warningBody =
+    warningType === 'ilm_policy'
+      ? footerStrings.downsamplingNotAppliedBodyIlmPolicy
+      : footerStrings.downsamplingNotAppliedBody;
 
   const warningBody =
     warningType === 'ilm_policy'
