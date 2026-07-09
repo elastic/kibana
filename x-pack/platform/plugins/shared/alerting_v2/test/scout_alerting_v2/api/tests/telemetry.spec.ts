@@ -69,11 +69,6 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           metadata: { name: 'alert-rule-2' },
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '10m' },
-          // Composed format + explicit recovery_strategy so telemetry exercises
-          // both query formats and a non-default recovery_strategy value.
-          // Composed rules reuse `base` as their data-presence query and are
-          // exempt from the no_data query-block requirement that standalone
-          // rules have (see isNoDataQueryProvidedForStrategy).
           query: {
             format: 'composed',
             base: 'FROM metrics-* | STATS count = COUNT(*) BY host.name',
@@ -90,12 +85,6 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           metadata: { name: 'alert-rule-3' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          // recovery_strategy 'query' requires a query.recovery block; exercises
-          // the only recovery_strategy value ('query') no other rule in this
-          // suite covers. Note: no_data_strategy 'emit' is NOT tested anywhere
-          // in this suite — the create/update API currently rejects it outright
-          // (isNoDataStrategyNotEmit in rule_data_schema.ts), even with a
-          // query.no_data block provided.
           query: {
             format: 'standalone',
             breach: { query: 'FROM metrics-* | LIMIT 5' },
@@ -111,8 +100,6 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           metadata: { name: 'alert-rule-4' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          // Explicit opt-out of both recovery and no-data behavior — exercises
-          // recovery_strategy 'none' and no_data_strategy 'none'.
           query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 5' } },
           recovery_strategy: 'none',
           no_data_strategy: 'none',
