@@ -98,9 +98,9 @@ jest.mock('./workflows_utility_bar', () => ({
 }));
 
 jest.mock('../../../components', () => ({
-  WorkflowsEmptyState: ({ onCreateWorkflow }: { onCreateWorkflow?: () => void }) => (
+  AgenticFirstEmptyState: ({ onStartManually }: { onStartManually?: () => void }) => (
     <div data-test-subj="workflows-empty-state">
-      <button type="button" onClick={onCreateWorkflow}>
+      <button type="button" onClick={onStartManually}>
         {'Create Workflow'}
       </button>
     </div>
