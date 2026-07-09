@@ -1,5 +1,5 @@
 {
-  "sha1": "ebc396d0c378b6ae07c6fb42637326455c945498",
+  "sha1": "0f7093b106455a9694cf32a958ec74e5ccccd141",
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -615,6 +615,286 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/end_to_end.spec.ts",
         "line": 130,
         "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-e997d03111e6325",
+      "title": "Alerting v2 alerts implicit index privileges get-role API surfaces the expected implicit grant: built-in viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 317,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-5033a3cbeaa689b",
+      "title": "Alerting v2 alerts implicit index privileges .rule-events access respects the implicit grant: built-in viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 325,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-3cc2969d8707083",
+      "title": "Alerting v2 alerts implicit index privileges get-role API surfaces the expected implicit grant: built-in editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 317,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-b5d59157185e344",
+      "title": "Alerting v2 alerts implicit index privileges .rule-events access respects the implicit grant: built-in editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 325,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-8fa069ba5b94eed",
+      "title": "Alerting v2 alerts implicit index privileges get-role API surfaces the expected implicit grant: built-in admin (kibana_admin)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 317,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-b01a33a00e7caf1",
+      "title": "Alerting v2 alerts implicit index privileges .rule-events access respects the implicit grant: built-in admin (kibana_admin)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 325,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-49ecb4a0664f7b7",
+      "title": "Alerting v2 alerts implicit index privileges get-role API surfaces the expected implicit grant: custom alerts:read in all spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 317,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-d153d9c79058efc",
+      "title": "Alerting v2 alerts implicit index privileges .rule-events access respects the implicit grant: custom alerts:read in all spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 325,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-6f18d93662cb743",
+      "title": "Alerting v2 alerts implicit index privileges get-role API surfaces the expected implicit grant: custom alerts:all in all spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 317,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-9084109bec901bb",
+      "title": "Alerting v2 alerts implicit index privileges .rule-events access respects the implicit grant: custom alerts:all in all spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 325,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-e0705e70384f618",
+      "title": "Alerting v2 alerts implicit index privileges get-role API surfaces the expected implicit grant: custom alerts:read in the marketing space only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 317,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-2feed9ceab3231b",
+      "title": "Alerting v2 alerts implicit index privileges .rule-events access respects the implicit grant: custom alerts:read in the marketing space only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 325,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-ade324ce90b635e",
+      "title": "Alerting v2 alerts implicit index privileges get-role API surfaces the expected implicit grant: custom alerts:all in the marketing space only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 317,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-feca381b466642a",
+      "title": "Alerting v2 alerts implicit index privileges .rule-events access respects the implicit grant: custom alerts:all in the marketing space only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 325,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-31a5a4c046431e4",
+      "title": "Alerting v2 alerts implicit index privileges get-role API surfaces the expected implicit grant: custom alerts:read in the marketing + finance spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 317,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-df6bd36b93d06cf",
+      "title": "Alerting v2 alerts implicit index privileges .rule-events access respects the implicit grant: custom alerts:read in the marketing + finance spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 325,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-402188d3ae15b15",
+      "title": "Alerting v2 alerts implicit index privileges get-role API surfaces the expected implicit grant: custom alerting_v2 rules only (no alerts privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 317,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-533ce9463efa58d",
+      "title": "Alerting v2 alerts implicit index privileges .rule-events access respects the implicit grant: custom alerting_v2 rules only (no alerts privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 325,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-99ad181ed589357",
+      "title": "Alerting v2 alerts implicit index privileges get-role API surfaces the expected implicit grant: custom role without any alerting_v2 privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 317,
+        "column": 14
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-aee3ca9ea7ae0ea",
+      "title": "Alerting v2 alerts implicit index privileges .rule-events access respects the implicit grant: custom role without any alerting_v2 privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 325,
+        "column": 14
       }
     },
     {
