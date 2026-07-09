@@ -71,6 +71,15 @@ export interface ContentProps {
   enableGraphAndResolutionNavigation?: boolean;
   /** When true, hides the chevron icons in the risk summary and alerts section headers. Used by the v2 flyout. */
   hideHeaderIcons?: boolean;
+  /**
+   * When provided, clicking a related entity in the resolution section is delegated to this callback
+   * (used by the new EUI system flyout) instead of the legacy expandable flyout.
+   */
+  onShowEntity?: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 }
 
 /**
@@ -94,6 +103,7 @@ export const Content = ({
   prefetchedResolutionRisk,
   enableGraphAndResolutionNavigation = true,
   hideHeaderIcons = false,
+  onShowEntity,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
   const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
@@ -169,6 +179,7 @@ export const Content = ({
             entityType={EntityType.host}
             scopeId={scopeId}
             openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
+            onShowEntity={onShowEntity}
           />
           <EuiHorizontalRule />
         </>

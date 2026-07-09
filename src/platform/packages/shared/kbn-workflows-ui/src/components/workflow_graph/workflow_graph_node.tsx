@@ -16,7 +16,8 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, TRIGGER_STEP_TYPES } from '@kbn/workflows';
 import { useWorkflowGraphActions } from './workflow_graph_actions_context';
-import { ParallelIcon } from '../step_icons/parallel_icon';
+import type { RenderStepIcon } from './workflow_graph_actions_context';
+import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
 
 export interface WorkflowGraphNodeData extends Record<string, unknown> {
   readonly label: string;
@@ -49,89 +50,29 @@ function getStepMaxAttempts(step: WorkflowGraphNodeData['step']): number | undef
   return typeof value === 'number' && value > 0 ? value : undefined;
 }
 
-const STEP_TYPE_ICON: Record<string, IconType> = {
-  if: 'branch',
-  foreach: 'refresh',
-  parallel: ParallelIcon,
-  merge: 'merge',
-  atomic: 'package',
-  manual: 'bolt',
-  alert: 'bell',
-  scheduled: 'clock',
-  wait: 'clock',
-  http: 'globe',
-  elasticsearch: 'logoElasticsearch',
-  kibana: 'logoKibana',
-};
-
-function getNodeIcon(stepType: string): IconType {
-  const base = stepType.split('.')[0];
-  return STEP_TYPE_ICON[base] ?? 'package';
-}
-
 // Branded multi-color icons keep their natural palette; everything else is
 // tinted with the trigger/step accent color.
 const LOGO_ICONS = new Set<IconType>(['logoElasticsearch', 'logoKibana']);
 
-function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
-  const { stepType, label, isTrigger, stepExecution, preview, step } = node.data;
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
-  const isTriggerNode = isTrigger || TRIGGER_STEP_TYPES.has(stepType);
+interface NodePalette {
+  readonly outerBorder: string;
+  readonly iconAreaBg: string;
+  readonly innerBoxBorder: string;
+  readonly iconColor: string;
+  readonly selectedBorder: string;
+}
 
-  // Node card colors, sourced from Borealis semantic tokens so they adapt to
-  // light/dark automatically. Each token is the closest match to the design;
-  // the trailing comment shows the light-mode hex each token resolves to (or
-  // approximates).
-  const { colors } = euiTheme;
-  // Card outer border + icon pane are tinted to the node's family:
-  // step = light blue, trigger = light pink.
-  const STEP_OUTER_BORDER = colors.backgroundLightPrimary; // #d8e6ff
-  const STEP_ICON_AREA_BG = colors.backgroundLightPrimary; // ~#e3edff
-  const STEP_INNER_BOX_BORDER = colors.borderBaseSubdued; // ~#e4e7f1
-  const STEP_ICON_COLOR = colors.primary; // ~#61a2ff (light primary #0b64dd)
-  const STEP_LABEL_COLOR = colors.textHeading; // #111c2c
-  const RUNNING_BORDER = colors.primary; // ~#bfdbff
-  const SUCCESS_BG = colors.backgroundBaseSuccess; // ~#d0f3f2
-  const SUCCESS_COLOR = colors.success; // ~#16c5c0
-  const TRIGGER_OUTER_BORDER = colors.backgroundLightAccent; // #ffdbe8
-  const TRIGGER_ICON_AREA_BG = colors.backgroundBaseAccent; // ~#fff3f9
-  const TRIGGER_INNER_BOX_BORDER = colors.borderBaseAccent; // #ffc7db
-  const TRIGGER_ICON_COLOR = colors.accent; // ~#ee72a6 (light accent #bc1e70)
-  const STEP_SELECTED_BORDER = colors.primary; // ~#a3c4ff
-  const TRIGGER_SELECTED_BORDER = colors.accent; // ~#ffddea
+type EuiTheme = ReturnType<typeof useEuiTheme>['euiTheme'];
 
-  // Theme-derived palettes — adapt to dark/light mode automatically.
-  const palette = isTriggerNode
-    ? {
-        outerBorder: TRIGGER_OUTER_BORDER,
-        iconAreaBg: TRIGGER_ICON_AREA_BG,
-        innerBoxBorder: TRIGGER_INNER_BOX_BORDER,
-        iconColor: TRIGGER_ICON_COLOR,
-        selectedBorder: TRIGGER_SELECTED_BORDER,
-      }
-    : {
-        outerBorder: STEP_OUTER_BORDER,
-        iconAreaBg: STEP_ICON_AREA_BG,
-        innerBoxBorder: STEP_INNER_BOX_BORDER,
-        iconColor: STEP_ICON_COLOR,
-        selectedBorder: STEP_SELECTED_BORDER,
-      };
+// ----------- Pure color/state helpers -----------
 
-  const statusSuccessColor = SUCCESS_COLOR;
-  const statusSuccessBg = SUCCESS_BG;
-  const statusFailColor = euiTheme.colors.danger;
-  const statusFailBg = euiTheme.colors.backgroundBaseDanger;
+interface ExecutionState {
+  readonly isRunning: boolean;
+  readonly isSuccess: boolean;
+  readonly isFailed: boolean;
+}
 
-  const iconType = getNodeIcon(stepType);
-  const maxAttempts = getStepMaxAttempts(step);
-  const targetHandlePos = node.targetPosition ?? Position.Top;
-  const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
-
-  const isActive = node.selected;
-  const [isHovered, setIsHovered] = useState(false);
-  const { onStepRun, canRunSteps, renderStepIcon, onStepSelect } = useWorkflowGraphActions();
-  const execStatus = stepExecution?.status;
+function resolveExecutionState(execStatus: ExecutionStatus | undefined): ExecutionState {
   const isRunning =
     execStatus === ExecutionStatus.RUNNING ||
     execStatus === ExecutionStatus.WAITING ||
@@ -142,97 +83,427 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
     execStatus === ExecutionStatus.FAILED ||
     execStatus === ExecutionStatus.TIMED_OUT ||
     execStatus === ExecutionStatus.CANCELLED;
-  // Outer border: a successfully-run step keeps the
-  // DEFAULT gray outer border — the status reads from the icon area /
-  // inner box / icon. Only when the row is selected does the border take
-  // on the status colour. Running is its own state and always shows the
-  // Working border (`#bfdbff`) since that's how the in-progress signal is
-  // expressed in the design system.
-  const borderColor = isActive
-    ? isFailed
-      ? statusFailColor
-      : isSuccess
-      ? statusSuccessColor
-      : isRunning
-      ? RUNNING_BORDER
-      : palette.selectedBorder
-    : isRunning
-    ? RUNNING_BORDER
-    : palette.outerBorder;
-  const iconAreaBg = isSuccess ? statusSuccessBg : isFailed ? statusFailBg : palette.iconAreaBg;
-  // Inner box border keeps its default neutral colour when only selection
-  // is active (the selected state leaves the inner box border at #e4e7f1);
-  // run states still recolour it as before.
-  const innerBoxBorder = isSuccess
-    ? statusSuccessColor
-    : isFailed
-    ? statusFailColor
-    : palette.innerBoxBorder;
-  // Retry badge — Warning variant
-  const RETRY_BADGE_BG = colors.backgroundBaseWarning; // ~#fde9b5
-  const RETRY_BADGE_COLOR = colors.textWarning; // #825803
+  return { isRunning, isSuccess, isFailed };
+}
 
-  // 10px for static/executed, 8px for working/running
-  const borderRadius = isRunning ? 8 : 10;
-  const hasStatusIcon = isRunning || isSuccess || isFailed;
-  // Hover actions hide when an execution-status icon is visible so they
-  // don't overlap. They still show on hover/select when there's no status.
-  const showActions =
-    Boolean(canRunSteps && onStepRun) && (isHovered || isActive) && !isTrigger && !hasStatusIcon;
+function pickByExecStatus(
+  isSuccess: boolean,
+  isFailed: boolean,
+  success: string,
+  failed: string,
+  idle: string
+): string {
+  if (isSuccess) return success;
+  if (isFailed) return failed;
+  return idle;
+}
+
+function resolveBorderColor(
+  { isRunning, isSuccess, isFailed }: ExecutionState,
+  isActive: boolean,
+  options: { running: string; success: string; fail: string; selected: string; idle: string }
+): string {
+  if (isRunning) return options.running;
+  if (!isActive) return options.idle;
+  if (isFailed) return options.fail;
+  if (isSuccess) return options.success;
+  return options.selected;
+}
+
+interface NodeColors {
+  readonly palette: NodePalette;
+  readonly triggerIconColor: string;
+  readonly stepLabelColor: string;
+  readonly borderColor: string;
+  readonly iconAreaBg: string;
+  readonly innerBoxBorder: string;
+  readonly iconColor: string;
+  readonly forceTriggerPinkFill: boolean;
+  readonly retryBadgeBg: string;
+  readonly retryBadgeColor: string;
+  readonly statusSuccessColor: string;
+  readonly statusFailColor: string;
+  readonly borderRadius: number;
+  readonly hasStatusIcon: boolean;
+}
+
+export function resolveNodeColors(
+  euiTheme: EuiTheme,
+  isTriggerNode: boolean,
+  { isRunning, isSuccess, isFailed }: ExecutionState,
+  isActive: boolean
+): NodeColors {
+  const { colors } = euiTheme;
+
+  // Step palette tokens
+  const stepOuterBorder = colors.backgroundLightPrimary;
+  const stepIconAreaBg = colors.backgroundLightPrimary;
+  const stepInnerBoxBorder = colors.borderBaseSubdued;
+  const stepIconColor = colors.primary;
+  const stepSelectedBorder = colors.primary;
+
+  // Trigger palette tokens
+  const triggerOuterBorder = colors.backgroundLightAccent;
+  const triggerIconAreaBg = colors.backgroundBaseAccent;
+  const triggerInnerBoxBorder = colors.borderBaseAccent;
+  const triggerIconColor = colors.accent;
+  const triggerSelectedBorder = colors.accent;
+
+  // Execution status tokens
+  const statusRunningBorder = colors.primary;
+  const statusSuccessBg = colors.backgroundBaseSuccess;
+  const statusSuccessColor = colors.success;
+  const statusFailColor = colors.danger;
+
+  const palette: NodePalette = isTriggerNode
+    ? {
+        outerBorder: triggerOuterBorder,
+        iconAreaBg: triggerIconAreaBg,
+        innerBoxBorder: triggerInnerBoxBorder,
+        iconColor: triggerIconColor,
+        selectedBorder: triggerSelectedBorder,
+      }
+    : {
+        outerBorder: stepOuterBorder,
+        iconAreaBg: stepIconAreaBg,
+        innerBoxBorder: stepInnerBoxBorder,
+        iconColor: stepIconColor,
+        selectedBorder: stepSelectedBorder,
+      };
+
+  // Running always shows the in-progress ring. Active nodes take the status
+  // colour after execution; idle nodes show the family tint.
+  const borderColor = resolveBorderColor({ isRunning, isSuccess, isFailed }, isActive, {
+    running: statusRunningBorder,
+    success: statusSuccessColor,
+    fail: statusFailColor,
+    selected: palette.selectedBorder,
+    idle: palette.outerBorder,
+  });
+
+  const iconAreaBg = pickByExecStatus(
+    isSuccess,
+    isFailed,
+    statusSuccessBg,
+    colors.backgroundBaseDanger,
+    palette.iconAreaBg
+  );
+
+  // Inner box border keeps neutral while only selection is active; status
+  // states recolour it.
+  const innerBoxBorder = pickByExecStatus(
+    isSuccess,
+    isFailed,
+    statusSuccessColor,
+    statusFailColor,
+    palette.innerBoxBorder
+  );
+
+  // Trigger icon stays pink while idle; once execution kicks off it shares
+  // the same success/failed colours as regular steps.
+  const iconColor = pickByExecStatus(
+    isSuccess,
+    isFailed,
+    statusSuccessColor,
+    statusFailColor,
+    palette.iconColor
+  );
+
+  // Triggers in their idle pink state need a hard `fill` override because
+  // EuiIcon paints `fill` directly onto the SVG paths, beating CSS `color`
+  // inheritance.
+  const forceTriggerPinkFill = isTriggerNode && !isSuccess && !isFailed;
+
+  return {
+    palette,
+    triggerIconColor,
+    stepLabelColor: colors.textHeading,
+    borderColor,
+    iconAreaBg,
+    innerBoxBorder,
+    iconColor,
+    forceTriggerPinkFill,
+    retryBadgeBg: colors.backgroundBaseWarning,
+    retryBadgeColor: colors.textWarning,
+    statusSuccessColor,
+    statusFailColor,
+    borderRadius: isRunning ? 8 : 10,
+    hasStatusIcon: isRunning || isSuccess || isFailed,
+  };
+}
+
+// ----------- Sub-components -----------
+
+// Renders the step or trigger icon — custom renderStepIcon or EuiIcon fallback.
+function NodeStepIcon({
+  iconType,
+  iconColor,
+  forceTriggerPinkFill,
+  triggerIconColor,
+  renderStepIcon,
+  stepType,
+  isTrigger,
+}: {
+  iconType: ReturnType<typeof getStepIconType>;
+  iconColor: string;
+  forceTriggerPinkFill: boolean;
+  triggerIconColor: string;
+  renderStepIcon?: RenderStepIcon;
+  stepType: string;
+  isTrigger: boolean;
+}) {
+  if (renderStepIcon) {
+    return (
+      <div
+        css={[
+          { color: iconColor, display: 'flex' },
+          forceTriggerPinkFill && { '& svg, & svg *': { fill: triggerIconColor } },
+        ]}
+      >
+        {renderStepIcon({ stepType, isTrigger, size: 'm', color: iconColor })}
+      </div>
+    );
+  }
+  return (
+    <EuiIcon
+      type={iconType}
+      size="m"
+      color={LOGO_ICONS.has(String(iconType)) ? undefined : iconColor}
+      aria-hidden={true}
+    />
+  );
+}
+
+// Compact preview card — icon-only, used in the workflow-list hover popover.
+function NodePreviewCard({
+  stepType,
+  label,
+  isTrigger,
+  isTriggerNode,
+  iconType,
+  palette,
+  triggerIconColor,
+  renderStepIcon,
+  targetHandlePos,
+  sourceHandlePos,
+}: {
+  stepType: string;
+  label: string;
+  isTrigger?: boolean;
+  isTriggerNode: boolean;
+  iconType: ReturnType<typeof getStepIconType>;
+  palette: NodePalette;
+  triggerIconColor: string;
+  renderStepIcon?: RenderStepIcon;
+  targetHandlePos: Position;
+  sourceHandlePos: Position;
+}) {
+  return (
+    <>
+      {!isTrigger && <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />}
+      <div
+        aria-label={`${stepType}: ${label}`}
+        css={{
+          width: '100%',
+          height: '100%',
+          background: palette.iconAreaBg,
+          border: `1px solid ${palette.outerBorder}`,
+          borderRadius: 6,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <NodeStepIcon
+          iconType={iconType}
+          iconColor={palette.iconColor}
+          forceTriggerPinkFill={isTriggerNode}
+          triggerIconColor={triggerIconColor}
+          renderStepIcon={renderStepIcon}
+          stepType={stepType}
+          isTrigger={isTrigger ?? false}
+        />
+      </div>
+      <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
+    </>
+  );
+}
+
+// Warning badge showing the retry-on-failure max-attempts count.
+function NodeRetryBadge({
+  maxAttempts,
+  bgColor,
+  textColor,
+  fontFamily,
+}: {
+  maxAttempts: number;
+  bgColor: string;
+  textColor: string;
+  fontFamily: string;
+}) {
+  return (
+    <EuiToolTip
+      content={i18n.translate('workflowsUi.graphNode.retryBadgeTooltip', {
+        defaultMessage:
+          'Retries on failure up to {count, plural, one {# attempt} other {# attempts}}',
+        values: { count: maxAttempts },
+      })}
+      disableScreenReaderOutput
+    >
+      <div
+        tabIndex={0}
+        data-test-subj="workflowGraphNodeRetryBadge"
+        aria-label={i18n.translate('workflowsUi.graphNode.retryBadgeAria', {
+          defaultMessage: '{count, plural, one {# retry} other {# retries}} on failure',
+          values: { count: maxAttempts },
+        })}
+        css={{
+          flex: '0 0 auto',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 2,
+          paddingLeft: 8,
+          paddingRight: 8,
+          paddingTop: 4,
+          paddingBottom: 4,
+          borderRadius: 999,
+          background: bgColor,
+          color: textColor,
+          fontFamily,
+          fontSize: 12,
+          fontWeight: 400,
+          lineHeight: 1,
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        <EuiIcon type="refresh" size="s" color={textColor} aria-hidden />
+        <span>{maxAttempts}</span>
+      </div>
+    </EuiToolTip>
+  );
+}
+
+// Execution-status indicator: spinner (running), check (success), or error (failed).
+function NodeStatusIcon({
+  isRunning,
+  isSuccess,
+  successColor,
+  failColor,
+}: {
+  isRunning: boolean;
+  isSuccess: boolean;
+  successColor: string;
+  failColor: string;
+}) {
+  return (
+    <div
+      css={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 16,
+        height: 16,
+      }}
+      aria-label={
+        isRunning
+          ? i18n.translate('workflowsUi.graphNode.statusRunning', { defaultMessage: 'Running' })
+          : isSuccess
+          ? i18n.translate('workflowsUi.graphNode.statusSuccess', {
+              defaultMessage: 'Completed successfully',
+            })
+          : i18n.translate('workflowsUi.graphNode.statusFailed', { defaultMessage: 'Failed' })
+      }
+    >
+      {isRunning ? (
+        <EuiLoadingSpinner size="m" />
+      ) : isSuccess ? (
+        <EuiIcon type="checkInCircleFilled" color={successColor} size="m" aria-hidden={true} />
+      ) : (
+        <EuiIcon type="errorFill" color={failColor} size="m" aria-hidden={true} />
+      )}
+    </div>
+  );
+}
+
+// Hover-action strip containing the run-step button.
+function NodeRunActions({
+  onStepRun,
+  canRunSteps,
+  label,
+}: {
+  onStepRun?: (label: string) => void;
+  canRunSteps?: boolean;
+  label: string;
+}) {
   const runLabel = i18n.translate('workflowsUi.graphNode.runStep', { defaultMessage: 'Run step' });
+  return (
+    <div
+      css={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 4 }}
+      // Stop clicks/mousedowns on the icons from bubbling to the node
+      // selection / pane handlers in React Flow.
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+      role="presentation"
+    >
+      <EuiToolTip content={runLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="play"
+          size="s"
+          color="success"
+          aria-label={runLabel}
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            onStepRun?.(label);
+          }}
+          isDisabled={!onStepRun || canRunSteps === false}
+          data-test-subj="workflowGraphNodeRunStep"
+        />
+      </EuiToolTip>
+    </div>
+  );
+}
+
+// ----------- Main node component -----------
+
+function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
+  const { stepType, label, isTrigger, stepExecution, preview, step } = node.data;
+  const { euiTheme } = useEuiTheme();
+  const isTriggerNode = isTrigger || TRIGGER_STEP_TYPES.has(stepType);
+
+  const iconType = isTriggerNode ? getTriggerTypeIconType(stepType) : getStepIconType(stepType);
+  const maxAttempts = getStepMaxAttempts(step);
+  const targetHandlePos = node.targetPosition ?? Position.Top;
+  const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
+
+  const isActive = node.selected;
+  const [isHovered, setIsHovered] = useState(false);
+  const { onStepRun, canRunSteps, renderStepIcon, onStepSelect } = useWorkflowGraphActions();
+
+  const execState = resolveExecutionState(stepExecution?.status);
+  const colors = resolveNodeColors(euiTheme, isTriggerNode, execState, isActive ?? false);
+
+  const showActions =
+    Boolean(canRunSteps && onStepRun) &&
+    (isHovered || isActive) &&
+    !isTrigger &&
+    !colors.hasStatusIcon;
 
   // Compact icon-only render for the workflow-list hover preview. All hooks
   // above are still called every render, so the early return is safe.
   if (preview) {
     return (
-      <>
-        {!isTrigger && <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />}
-        <div
-          aria-label={`${stepType}: ${label}`}
-          css={{
-            width: '100%',
-            height: '100%',
-            background: palette.iconAreaBg,
-            border: `1px solid ${palette.outerBorder}`,
-            borderRadius: 6,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {renderStepIcon ? (
-            <div
-              css={[
-                { color: palette.iconColor, display: 'flex' },
-                isTriggerNode && {
-                  '& svg, & svg *': { fill: TRIGGER_ICON_COLOR },
-                },
-              ]}
-            >
-              {renderStepIcon({
-                stepType,
-                isTrigger: isTrigger ?? false,
-                size: 'm',
-                color: palette.iconColor,
-              })}
-            </div>
-          ) : (
-            <EuiIcon
-              type={iconType}
-              size="m"
-              color={
-                isTriggerNode
-                  ? TRIGGER_ICON_COLOR
-                  : LOGO_ICONS.has(iconType)
-                  ? undefined
-                  : palette.iconColor
-              }
-              aria-hidden={true}
-            />
-          )}
-        </div>
-        <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
-      </>
+      <NodePreviewCard
+        stepType={stepType}
+        label={label}
+        isTrigger={isTrigger}
+        isTriggerNode={isTriggerNode}
+        iconType={iconType}
+        palette={colors.palette}
+        triggerIconColor={colors.triggerIconColor}
+        renderStepIcon={renderStepIcon}
+        targetHandlePos={targetHandlePos}
+        sourceHandlePos={sourceHandlePos}
+      />
     );
   }
 
@@ -262,8 +533,8 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             // Flat card: a 1px border tinted to the node's
             // family (light blue for steps, light pink for triggers) via
             // `palette.outerBorder`. Active/running/status states recolor it.
-            border: `1px solid ${borderColor}`,
-            borderRadius,
+            border: `1px solid ${colors.borderColor}`,
+            borderRadius: colors.borderRadius,
             // Clip children to the card's rounded shape so the icon pane's
             // corners stay concentric with the card border (otherwise the pane
             // and card render two slightly different corner arcs).
@@ -286,7 +557,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
           css={{
             flex: '0 0 auto',
             height: '100%',
-            background: iconAreaBg,
+            background: colors.iconAreaBg,
             display: 'flex',
             alignItems: 'center',
             padding: 12,
@@ -298,7 +569,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
               width: 40,
               height: 40,
               background: euiTheme.colors.backgroundBasePlain,
-              border: `1px solid ${innerBoxBorder}`,
+              border: `1px solid ${colors.innerBoxBorder}`,
               borderRadius: 8,
               display: 'flex',
               alignItems: 'center',
@@ -306,51 +577,15 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
               transition: 'border-color 120ms ease',
             }}
           >
-            {(() => {
-              // Trigger icon stays in its "Datavis Default Color 4" pink ONLY
-              // while the workflow hasn't run yet. Once execution kicks off,
-              // the trigger picks up the same success/failed colours as the
-              // regular step rows — so a successful run paints the trigger
-              // turquoise alongside the rest of the graph.
-              const iconColor = isSuccess
-                ? statusSuccessColor
-                : isFailed
-                ? statusFailColor
-                : isTriggerNode
-                ? TRIGGER_ICON_COLOR
-                : palette.iconColor;
-              // Triggers in their idle pink state need a hard `fill` override
-              // because EuiIcon paints `fill` directly onto the SVG paths,
-              // beating CSS `color` inheritance.
-              const forceTriggerPinkFill = isTriggerNode && !isSuccess && !isFailed;
-              if (renderStepIcon) {
-                return (
-                  <div
-                    css={[
-                      { color: iconColor, display: 'flex' },
-                      forceTriggerPinkFill && {
-                        '& svg, & svg *': { fill: TRIGGER_ICON_COLOR },
-                      },
-                    ]}
-                  >
-                    {renderStepIcon({
-                      stepType,
-                      isTrigger: isTrigger ?? false,
-                      size: 'm',
-                      color: iconColor,
-                    })}
-                  </div>
-                );
-              }
-              return (
-                <EuiIcon
-                  type={iconType}
-                  size="m"
-                  color={LOGO_ICONS.has(iconType) ? undefined : iconColor}
-                  aria-hidden={true}
-                />
-              );
-            })()}
+            <NodeStepIcon
+              iconType={iconType}
+              iconColor={colors.iconColor}
+              forceTriggerPinkFill={colors.forceTriggerPinkFill}
+              triggerIconColor={colors.triggerIconColor}
+              renderStepIcon={renderStepIcon}
+              stepType={stepType}
+              isTrigger={isTrigger ?? false}
+            />
           </div>
         </div>
 
@@ -362,7 +597,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             fontStyle: 'normal',
             fontWeight: 500,
             lineHeight: '24px',
-            color: STEP_LABEL_COLOR,
+            color: colors.stepLabelColor,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -372,114 +607,30 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
         >
           {label}
         </span>
+
         {/* Retry-on-failure badge: the configured max-attempts taken from
             either `step.retry` or `step['on-failure'].retry`. Mirrors the
             badge in the execution detail step list. */}
         {maxAttempts != null && (
-          <EuiToolTip
-            content={i18n.translate('workflowsUi.graphNode.retryBadgeTooltip', {
-              defaultMessage:
-                'Retries on failure up to {count, plural, one {# attempt} other {# attempts}}',
-              values: { count: maxAttempts },
-            })}
-            disableScreenReaderOutput
-          >
-            <div
-              data-test-subj="workflowGraphNodeRetryBadge"
-              aria-label={i18n.translate('workflowsUi.graphNode.retryBadgeAria', {
-                defaultMessage: '{count, plural, one {# retry} other {# retries}} on failure',
-                values: { count: maxAttempts },
-              })}
-              css={{
-                flex: '0 0 auto',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 2,
-                paddingLeft: 8,
-                paddingRight: 8,
-                paddingTop: 4,
-                paddingBottom: 4,
-                borderRadius: 999,
-                background: RETRY_BADGE_BG,
-                color: RETRY_BADGE_COLOR,
-                fontFamily: euiTheme.font.family,
-                fontSize: 12,
-                fontWeight: 400,
-                lineHeight: 1,
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            >
-              <EuiIcon type="refresh" size="s" color={RETRY_BADGE_COLOR} aria-hidden />
-              <span>{maxAttempts}</span>
-            </div>
-          </EuiToolTip>
+          <NodeRetryBadge
+            maxAttempts={maxAttempts}
+            bgColor={colors.retryBadgeBg}
+            textColor={colors.retryBadgeColor}
+            fontFamily={euiTheme.font.family}
+          />
         )}
-        {hasStatusIcon && (
-          <div
-            css={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 16,
-              height: 16,
-            }}
-            aria-label={
-              isRunning
-                ? i18n.translate('workflowsUi.graphNode.statusRunning', {
-                    defaultMessage: 'Running',
-                  })
-                : isSuccess
-                ? i18n.translate('workflowsUi.graphNode.statusSuccess', {
-                    defaultMessage: 'Completed successfully',
-                  })
-                : i18n.translate('workflowsUi.graphNode.statusFailed', {
-                    defaultMessage: 'Failed',
-                  })
-            }
-          >
-            {isRunning ? (
-              <EuiLoadingSpinner size="m" />
-            ) : isSuccess ? (
-              <EuiIcon
-                type="checkInCircleFilled"
-                color={statusSuccessColor}
-                size="m"
-                aria-hidden={true}
-              />
-            ) : (
-              <EuiIcon type="errorFill" color={statusFailColor} size="m" aria-hidden={true} />
-            )}
-          </div>
+
+        {colors.hasStatusIcon && (
+          <NodeStatusIcon
+            isRunning={execState.isRunning}
+            isSuccess={execState.isSuccess}
+            successColor={colors.statusSuccessColor}
+            failColor={colors.statusFailColor}
+          />
         )}
+
         {showActions && (
-          <div
-            css={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-              marginLeft: 4,
-            }}
-            // Stop clicks/mousedowns on the icons from bubbling to the node
-            // selection / pane handlers in React Flow.
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-            role="presentation"
-          >
-            <EuiToolTip content={runLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="play"
-                size="s"
-                color="success"
-                aria-label={runLabel}
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  onStepRun?.(label);
-                }}
-                isDisabled={!onStepRun || canRunSteps === false}
-                data-test-subj="workflowGraphNodeRunStep"
-              />
-            </EuiToolTip>
-          </div>
+          <NodeRunActions onStepRun={onStepRun} canRunSteps={canRunSteps} label={label} />
         )}
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
