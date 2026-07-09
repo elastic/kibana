@@ -137,7 +137,9 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       );
     }
     if (!agentlessAgentPolicy.supports_agentless) {
-      logger.error('[Managed Integrations API] Agentless agent policy does not have agentless enabled');
+      logger.error(
+        '[Managed Integrations API] Agentless agent policy does not have agentless enabled'
+      );
       throw new AgentlessAgentConfigError(
         'Agentless agent policy does not have supports_agentless enabled'
       );
@@ -267,10 +269,14 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     }
 
     if (!agentlessConfig) {
-      logger.error('[Managed Integrations API] kibana.yml is currently missing Agentless API configuration');
+      logger.error(
+        '[Managed Integrations API] kibana.yml is currently missing Agentless API configuration'
+      );
     }
 
-    logger.debug(`[Managed Integrations API] Deleting agentless agent with TLS config with certificate`);
+    logger.debug(
+      `[Managed Integrations API] Deleting agentless agent with TLS config with certificate`
+    );
 
     logger.debug(
       `[Managed Integrations API] Deleting agentless deployment with request config ${requestConfigDebugStatus}`
@@ -333,10 +339,14 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     }
 
     if (!agentlessConfig) {
-      logger.error('[Managed Integrations API] kibana.yml is currently missing Agentless API configuration');
+      logger.error(
+        '[Managed Integrations API] kibana.yml is currently missing Agentless API configuration'
+      );
     }
 
-    logger.info(`[Managed Integrations API] Upgrading agentless agent with TLS config with certificate`);
+    logger.info(
+      `[Managed Integrations API] Upgrading agentless agent with TLS config with certificate`
+    );
 
     logger.info(
       `[Managed Integrations API] Upgrade agentless deployment with request config ${requestConfigDebugStatus}`
@@ -392,10 +402,14 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     }
 
     if (!agentlessConfig) {
-      logger.error('[Managed Integrations API] kibana.yml is currently missing Agentless API configuration');
+      logger.error(
+        '[Managed Integrations API] kibana.yml is currently missing Agentless API configuration'
+      );
     }
 
-    logger.debug(`[Managed Integrations API] Listing managed integration deployments with TLS config with certificate`);
+    logger.debug(
+      `[Managed Integrations API] Listing managed integration deployments with TLS config with certificate`
+    );
 
     logger.debug(
       `[Managed Integrations API] Listing managed integration deployments with request config ${requestConfigDebugStatus}`
@@ -626,9 +640,9 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     } else {
       // Something happened in setting up the request that triggered an Error
       logger.error(
-        `[Managed Integrations API] ${action + 'ing'} the agentless agent failed ${errorLogCodeCause(
-          error
-        )} ${requestConfigDebugStatus}`,
+        `[Managed Integrations API] ${
+          action + 'ing'
+        } the agentless agent failed ${errorLogCodeCause(error)} ${requestConfigDebugStatus}`,
         errorMetadataWithRequestConfig
       );
 
@@ -954,7 +968,9 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         await fn();
       } catch (e) {
         logger.info(
-          `[Managed Integrations API] Attempt ${i + 1} failed to ${action} agentless deployment, retrying...`
+          `[Managed Integrations API] Attempt ${
+            i + 1
+          } failed to ${action} agentless deployment, retrying...`
         );
         if (i === retries - 1) {
           logger.error(
