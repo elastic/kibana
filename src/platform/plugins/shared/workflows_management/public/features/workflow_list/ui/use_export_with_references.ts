@@ -110,13 +110,6 @@ export const useExportWithReferences = ({
           });
           onComplete?.();
         } catch (err) {
-          notifications?.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
-            title: i18n.translate('workflows.export.error', {
-              defaultMessage: 'Failed to export workflows',
-            }),
-            toastLifeTimeMs: TOAST_LIFE_TIME_MS,
-          });
-        } catch (err) {
           const exportError = err instanceof Error ? err : new Error(String(err));
           notifications?.toasts.addError(exportError, {
             title: i18n.translate('workflows.export.error', {
