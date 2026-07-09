@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   CoreSetup,
   CoreStart,
+  ElasticsearchClient,
   KibanaRequest,
   Logger,
   Plugin,
@@ -31,6 +32,15 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
+import {
+  createStepExecutionsDataAccess,
+  createWorkflowExecutionsDataAccess,
+} from '@kbn/workflows/server';
+import type {
+  StepExecutionsDataAccess,
+  WorkflowExecutionsDataAccess,
+} from '@kbn/workflows/server/data_access_layer';
+import { createExecutionsDal } from '@kbn/workflows/server/data_access_layer';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import {
   maybeDrainConcurrencyQueueAfterTerminal,
@@ -97,7 +107,6 @@ import {
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
 import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
-import { createWorkflowExecutionsDataAccess, createStepExecutionsDataAccess } from '@kbn/workflows/server';
 
 /**
  * Max Task Manager attempts for `workflow:run`.
@@ -145,6 +154,28 @@ export class WorkflowsExecutionEnginePlugin
   private initializePromise?: Promise<void>;
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
+
+  private createExecutionsDal(esClient: ElasticsearchClient): {
+    workflowExecutionsDal: WorkflowExecutionsDataAccess;
+    stepExecutionsDal: StepExecutionsDataAccess;
+  } {
+    return createExecutionsDal({
+      source: 'system_index',
+      esClient,
+      logger: this.logger,
+    });
+  }
+
+  private createRepositories(esClient: ElasticsearchClient): {
+    workflowExecutionRepository: WorkflowExecutionRepository;
+    stepExecutionRepository: StepExecutionRepository;
+  } {
+    const { workflowExecutionsDal, stepExecutionsDal } = this.createExecutionsDal(esClient);
+    return {
+      workflowExecutionRepository: new WorkflowExecutionRepository(esClient, workflowExecutionsDal),
+      stepExecutionRepository: new StepExecutionRepository(esClient, stepExecutionsDal),
+    };
+  }
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -240,8 +271,8 @@ export class WorkflowsExecutionEnginePlugin
               };
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-              const stepExecutionRepository = new StepExecutionRepository(esClient);
+              const { workflowExecutionRepository, stepExecutionRepository } =
+                this.createRepositories(esClient);
 
               const interruptedOutcome = await resolveInterruptedWorkflowRunTask({
                 workflowExecutionRepository,
@@ -275,6 +306,8 @@ export class WorkflowsExecutionEnginePlugin
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
                 });
                 if (runResult?.shouldDeleteTask) {
                   return {
@@ -364,8 +397,8 @@ export class WorkflowsExecutionEnginePlugin
               };
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-              const stepExecutionRepository = new StepExecutionRepository(esClient);
+              const { workflowExecutionRepository, stepExecutionRepository } =
+                this.createRepositories(esClient);
 
               const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
                 workflowExecutionRepository,
@@ -392,6 +425,8 @@ export class WorkflowsExecutionEnginePlugin
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
                   internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
                 });
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
@@ -484,8 +519,8 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-              const stepExecutionRepository = new StepExecutionRepository(esClient);
+              const { workflowExecutionRepository, stepExecutionRepository } =
+                this.createRepositories(esClient);
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId, {
                 includeGlobal: true,
@@ -627,6 +662,8 @@ export class WorkflowsExecutionEnginePlugin
                 workflowsExecutionEngine,
                 meteringService: this.meteringService,
                 internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                workflowExecutionRepository,
+                stepExecutionRepository,
               });
 
               const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
@@ -657,7 +694,8 @@ export class WorkflowsExecutionEnginePlugin
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+    const { workflowExecutionRepository, stepExecutionRepository } =
+      this.createRepositories(esClient);
     const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
@@ -872,6 +910,8 @@ export class WorkflowsExecutionEnginePlugin
           workflowsExecutionEngine,
           meteringService: this.meteringService,
           internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+          workflowExecutionRepository,
+          stepExecutionRepository,
         });
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
@@ -1342,6 +1382,7 @@ export class WorkflowsExecutionEnginePlugin
     const triggerEventHandler = new TriggerEventHandler({
       coreStart,
       workflowRepository,
+      workflowExecutionRepository,
       workflowsExtensions: plugins.workflowsExtensions,
       spaces: plugins.spaces?.spacesService,
       scheduleWorkflow,
@@ -1383,18 +1424,10 @@ export class WorkflowsExecutionEnginePlugin
       // callers still share the same attempt; only the *next* call after rejection
       // gets a fresh execution-index init invocation.
       const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const attempt = Promise.all([
-        createWorkflowExecutionsDataAccess({
-          source: 'system_index',
-          esClient,
-          logger: this.logger,
-        }).init(),
-        createStepExecutionsDataAccess({
-          source: 'system_index',
-          esClient,
-          logger: this.logger,
-        }).init(),
-      ]);
+      const { workflowExecutionsDal, stepExecutionsDal } = this.createExecutionsDal(esClient);
+      const attempt = Promise.all([workflowExecutionsDal.init(), stepExecutionsDal.init()]).then(
+        (): void => undefined
+      );
       this.initializePromise = attempt;
       attempt.catch(() => {
         if (this.initializePromise === attempt) {

@@ -15,7 +15,6 @@ import {
   ExecutionStatus,
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
-import { createWorkflowExecutionsDataAccess } from '@kbn/workflows/server';
 import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
@@ -23,11 +22,11 @@ export class WorkflowExecutionRepository {
   private readonly workflowExecutionsDal: WorkflowExecutionsDataAccess;
   private readonly indexName = WORKFLOWS_EXECUTIONS_INDEX;
 
-  constructor(private esClient: ElasticsearchClient) {
-    this.workflowExecutionsDal = createWorkflowExecutionsDataAccess({
-      source: 'system_index',
-      esClient,
-    });
+  constructor(
+    private esClient: ElasticsearchClient,
+    workflowExecutionsDal: WorkflowExecutionsDataAccess
+  ) {
+    this.workflowExecutionsDal = workflowExecutionsDal;
   }
 
   /**

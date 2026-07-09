@@ -15,6 +15,8 @@ import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
@@ -33,6 +35,8 @@ export async function resumeWorkflow({
   workflowsExecutionEngine,
   meteringService,
   internalResumeWorkflowExecution,
+  workflowExecutionRepository,
+  stepExecutionRepository,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -44,6 +48,8 @@ export async function resumeWorkflow({
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
   internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository: StepExecutionRepository;
 }): Promise<void> {
   let setupResult: Awaited<ReturnType<typeof setupDependencies>>;
   try {
@@ -53,6 +59,8 @@ export async function resumeWorkflow({
       logger,
       config,
       dependencies,
+      workflowExecutionRepository,
+      stepExecutionRepository,
       fakeRequest,
       workflowsExecutionEngine
     );
@@ -79,7 +87,6 @@ export async function resumeWorkflow({
     workflowExecutionGraph,
     esClient,
     workflowTaskManager,
-    workflowExecutionRepository,
   } = setupResult;
 
   const loadedExecution = workflowExecutionState.getWorkflowExecution();

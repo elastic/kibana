@@ -10,10 +10,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import {
-  createStepExecutionsDataAccess,
-  getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared,
-} from '@kbn/workflows/server';
+import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
 import type { StepExecutionsDataAccess } from '@kbn/workflows/server';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
@@ -21,11 +18,8 @@ export type StepExecutionField = keyof EsWorkflowStepExecution;
 export class StepExecutionRepository {
   private readonly stepExecutionsDal: StepExecutionsDataAccess;
 
-  constructor(esClient: ElasticsearchClient) {
-    this.stepExecutionsDal = createStepExecutionsDataAccess({
-      source: 'system_index',
-      esClient,
-    });
+  constructor(esClient: ElasticsearchClient, stepExecutionsDal: StepExecutionsDataAccess) {
+    this.stepExecutionsDal = stepExecutionsDal;
   }
 
   /**
