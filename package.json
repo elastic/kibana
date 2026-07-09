@@ -1800,6 +1800,7 @@
     "@kbn/evals-extensions": "link:x-pack/platform/packages/shared/kbn-evals-extensions",
     "@kbn/evals-suite-agent-builder": "link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder",
     "@kbn/evals-suite-agent-builder-dashboards": "link:x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards",
+    "@kbn/evals-suite-agent-builder-visualizations": "link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder-visualizations",
     "@kbn/evals-suite-alert-analysis-workflow": "link:x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow",
     "@kbn/evals-suite-alerting-v2": "link:x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2",
     "@kbn/evals-suite-alerts-rag": "link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag",
