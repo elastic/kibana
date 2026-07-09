@@ -348,7 +348,18 @@ export const useEditFailedLifecycleFlyout = ({
     });
   };
 
+  // The Apply button stays enabled even when nothing changed for accessibility;
+  // applying without changes closes the flyout as a no-op.
+  const hasMainFlyoutChanges = !(
+    inheritLifecycle === inheritOptions.isCurrentlyInherited &&
+    failureStoreEnabledDraft === failureStoreEnabled
+  );
+
   const saveMainFlyout = () => {
+    if (!hasMainFlyoutChanges) {
+      closeMainFlyout();
+      return;
+    }
     if (inheritLifecycle) {
       performSaveMainFlyout();
       return;
@@ -511,9 +522,7 @@ export const useEditFailedLifecycleFlyout = ({
           onApply={saveMainFlyout}
           isApplyDisabled={
             isSaving ||
-            (inheritLifecycle && inheritedFetchEnabled && inheritedFailureStoreOrNull === null) ||
-            (inheritLifecycle === inheritOptions.isCurrentlyInherited &&
-              failureStoreEnabledDraft === failureStoreEnabled)
+            (inheritLifecycle && inheritedFetchEnabled && inheritedFailureStoreOrNull === null)
           }
           showWarning={false}
         />

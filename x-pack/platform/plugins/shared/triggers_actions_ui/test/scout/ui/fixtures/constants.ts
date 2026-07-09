@@ -55,3 +55,20 @@ export const RULE_DETAILS_TEST_SUBJECTS = {
   ALERTS_SEARCH_BAR_ROW: 'ruleDetailsAlertsSearchBarRow',
   ALERTS_TABLE_EMPTY_STATE: 'alertsTableEmptyState',
 } as const;
+
+export const STACK_ALERTS_PAGE_PATH =
+  '/app/management/insightsAndAlerting/triggersActionsAlerts' as const;
+export const STACK_ALERTS_INDEX = '.alerts-stack.alerts-default' as const;
+export const STACK_ALERTS_INDEX_PATTERN = '.alerts-stack.alerts-*' as const;
+
+export const STACK_ALERTS_PAGE_TEST_SUBJECTS = {
+  TABLE_LOADED: 'alertsTableIsLoaded',
+  TABLE_LOADING: 'internalAlertsPageLoading',
+  ROW_ACTIONS_MORE: 'alertsTableRowActionMore',
+  ACTIONS_MENU: 'alertsTableActionsMenu',
+  RULE_NAME_LINK: 'alertRuleNameLink',
+  RULE_NAME_TEXT: 'alertRuleName',
+  FLYOUT_OVERVIEW_PANEL: 'alertFlyoutOverviewTabPanel',
+  ROW_EXPAND: 'expand-event',
+  ALERT_FLYOUT: 'alertFlyout',
+} as const;

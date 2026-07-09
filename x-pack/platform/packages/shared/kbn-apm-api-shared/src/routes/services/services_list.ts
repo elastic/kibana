@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import type { AgentName } from '@kbn/elastic-agent-utils';
-import type { ServiceHealthStatus, SloStatus } from '@kbn/apm-types';
+import type { AnomalyDetectorType, Environment, SloStatus } from '@kbn/apm-types';
 import { environmentRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import {
@@ -25,8 +25,9 @@ export interface MergedServiceStat {
   latency?: number | null;
   transactionErrorRate?: number;
   throughput?: number;
-  healthStatus?: ServiceHealthStatus;
   anomalyScore?: number;
+  detectorType?: AnomalyDetectorType;
+  anomalyEnvironment?: Environment;
   alertsCount?: number;
   sloStatus?: SloStatus;
   sloCount?: number;

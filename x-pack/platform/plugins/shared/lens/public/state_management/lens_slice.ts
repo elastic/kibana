@@ -827,14 +827,14 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         const activeVisualization =
           payload.visualizationId && visualizationMap[payload.visualizationId];
         const visualization = state.visualization;
-        let newVizState = visualization.state;
+        let newVisState = visualization.state;
         const ids: string[] = [];
         if (activeVisualization && activeVisualization.getLayerIds) {
           const layerIds = activeVisualization.getLayerIds(visualization.state);
           ids.push(...Object.values(layerIds));
-          newVizState = activeVisualization.initialize(() => ids[0]);
+          newVisState = activeVisualization.initialize(() => ids[0]);
         }
-        const currentVizId = ids[0];
+        const currentVisId = ids[0];
 
         const datasourceState = current(state).datasourceStates[payload.newDatasourceId]
           ? current(state).datasourceStates[payload.newDatasourceId]?.state
@@ -843,7 +843,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             );
         const updatedState = datasourceMap[payload.newDatasourceId].insertLayer(
           datasourceState,
-          currentVizId
+          currentVisId
         );
 
         return {
@@ -857,7 +857,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           activeDatasourceId: payload.newDatasourceId,
           visualization: {
             ...visualization,
-            state: newVizState,
+            state: newVisState,
           },
         };
       })

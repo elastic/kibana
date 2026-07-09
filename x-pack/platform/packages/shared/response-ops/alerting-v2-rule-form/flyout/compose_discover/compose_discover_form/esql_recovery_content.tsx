@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useWatch } from 'react-hook-form';
-import { EuiBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CustomRecoveryRenderProps } from '../types';
@@ -18,7 +18,6 @@ export const EsqlRecoveryContent: React.FC<CustomRecoveryRenderProps> = ({ state
   const query = useWatch<FormValues, 'query'>({ name: 'query' });
   const baseQuery = query?.format === 'composed' ? query.base : '';
   const recoveryBlock = query?.format === 'composed' ? query.recovery?.segment ?? '' : '';
-  const hasValidRecoveryBlock = Boolean(recoveryBlock.trim());
 
   return (
     <>
@@ -56,34 +55,19 @@ export const EsqlRecoveryContent: React.FC<CustomRecoveryRenderProps> = ({ state
         )}
       />
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="editorCodeBlock"
-            isDisabled={state.childOpen}
-            onClick={() =>
-              dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert: true })
-            }
-            data-test-subj="composeDiscoverEditRecovery"
-          >
-            <FormattedMessage
-              id="xpack.alertingV2.composeDiscover.recoveryCondition.editRecoveryButtonLabel"
-              defaultMessage="Edit recovery query"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-        {hasValidRecoveryBlock && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="success">
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.recoveryCondition.customConditionSetBadgeLabel"
-                defaultMessage="Custom condition set"
-              />
-            </EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <EuiButton
+        size="s"
+        color="text"
+        iconType="chevronLimitLeft"
+        isDisabled={state.childOpen}
+        onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert: true })}
+        data-test-subj="composeDiscoverEditRecovery"
+      >
+        <FormattedMessage
+          id="xpack.alertingV2.composeDiscover.recoveryCondition.editRecoveryButtonLabel"
+          defaultMessage="Edit recovery query"
+        />
+      </EuiButton>
     </>
   );
 };

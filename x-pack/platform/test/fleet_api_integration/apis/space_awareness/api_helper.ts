@@ -48,6 +48,10 @@ import type {
   GetAgentlessPolicyResponse,
   ListAgentlessPoliciesRequest,
   ListAgentlessPoliciesResponse,
+  UpdateAgentlessPolicyRequest,
+  UpdateAgentlessPolicyResponse,
+  BulkUpgradeAgentlessPoliciesResponse,
+  AgentlessPolicyUpgradeDryRunResponse,
   PutDownloadSourceRequest,
 } from '@kbn/fleet-plugin/common/types';
 import type {
@@ -125,6 +129,52 @@ export class SpaceTestApiClient {
       .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send(data);
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
+  async updateAgentlessPolicy(
+    policyId: string,
+    data: UpdateAgentlessPolicyRequest['body'],
+    spaceId?: string
+  ): Promise<UpdateAgentlessPolicyResponse> {
+    const res = await this.supertest
+      .put(`${this.getBaseUrl(spaceId)}/api/fleet/agentless_policies/${policyId}`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .send(data);
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
+  async bulkUpgradeAgentlessPolicies(
+    policyIds: string[],
+    spaceId?: string
+  ): Promise<BulkUpgradeAgentlessPoliciesResponse> {
+    const res = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agentless_policies/_upgrade`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ policyIds });
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
+  async upgradeAgentlessPoliciesDryRun(
+    policyIds: string[],
+    spaceId?: string
+  ): Promise<AgentlessPolicyUpgradeDryRunResponse> {
+    const res = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/agentless_policies/_upgrade/dryrun`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ policyIds });
 
     expectStatusCode200(res);
 

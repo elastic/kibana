@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
+import { assertFlyoutChartsRendered } from '../../fixtures/service_flyout_helpers';
 import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 const APM_DASHBOARD_DATA_VIEW_TITLE = 'traces-apm*,logs-apm*,metrics-apm*';
@@ -63,7 +64,7 @@ test.describe(
       });
 
       await test.step('set time range to last 24 hours so synth data stays in range vs globalSetup', async () => {
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24 hours');
         await expect(page.getByTestId('dateRangePickerControlButton')).toContainText(
           'Last 24 hours'
         );
@@ -188,7 +189,7 @@ test.describe(
         });
         await expect(pageObjects.serviceFlyoutPage.title).toHaveText(SERVICE_MAP_TEST_SERVICE);
         await expect(pageObjects.serviceFlyoutPage.actions).toBeVisible();
-        await pageObjects.serviceFlyoutPage.expectChartsRendered([
+        await assertFlyoutChartsRendered(pageObjects.serviceFlyoutPage, [
           'latency',
           'throughput',
           'failedTransactionRate',
@@ -263,7 +264,7 @@ test.describe(
 
       await test.step('open a new dashboard with a 24h time range', async () => {
         await pageObjects.dashboard.openNewDashboard({ timeout: EXTENDED_TIMEOUT * 2 });
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24 hours');
         await page.getByTestId('dateRangePickerControlButton').blur();
       });
 
@@ -374,7 +375,7 @@ test.describe(
       await test.step('the panel reflects dashboard global time range changes', async () => {
         // The dashboard's global time isn't stored with the saved object, so pin it to a
         // window that covers the synth data before the panel starts inheriting it.
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24 hours');
         await page.getByTestId('dateRangePickerControlButton').blur();
 
         // Drop the panel-level custom time range so the panel inherits the dashboard's

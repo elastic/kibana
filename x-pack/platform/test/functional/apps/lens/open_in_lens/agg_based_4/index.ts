@@ -62,7 +62,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
     });
 
-    loadTestFile(require.resolve('./heatmap'));
     loadTestFile(require.resolve('./navigation'));
   });
 }

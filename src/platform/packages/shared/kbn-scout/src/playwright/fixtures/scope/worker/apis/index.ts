@@ -20,6 +20,8 @@ import type { FleetApiService } from './fleet';
 import { getFleetApiHelper } from './fleet';
 import type { SampleDataApiService } from './sample_data';
 import { getSampleDataApiHelper } from './sample_data';
+import type { SavedObjectsApiService } from './saved_objects';
+import { getSavedObjectsApiHelper } from './saved_objects';
 import type { SpacesApiService } from './spaces';
 import { getSpacesApiHelper } from './spaces';
 import type { StreamsApiService } from './streams';
@@ -34,6 +36,7 @@ export interface ApiServicesFixture {
   fleet: FleetApiService;
   ml: MlApiService;
   sampleData: SampleDataApiService;
+  savedObjects: SavedObjectsApiService;
   spaces: SpacesApiService;
   streams: StreamsApiService;
   core: CoreApiService;
@@ -56,6 +59,7 @@ export const apiServicesFixture = coreWorkerFixtures.extend<
         fleet: getFleetApiHelper(log, kbnClient),
         ml: getMlApiHelper(log, kbnClient, esClient),
         sampleData: getSampleDataApiHelper(log, kbnClient),
+        savedObjects: getSavedObjectsApiHelper(log, kbnClient),
         spaces: getSpacesApiHelper(log, kbnClient),
         streams: getStreamsApiService({ kbnClient, log }),
         core: getCoreApiHelper(log, kbnClient),

@@ -38,7 +38,7 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens visualization panels (source: "request") and markdown panels (source: "config", type: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based Lens panels instead.'
+      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega visualization panels (source: "request", which keep their existing renderer) and markdown panels (source: "config", type: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based panels instead.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;
@@ -120,6 +120,7 @@ export const editPanelsOperation = defineOperation({
             nlQuery: panelInput.query,
             chartType: panelInput.chartType,
             esql: panelInput.esql,
+            renderer: panelInput.renderer,
             existingPanel,
           })
         )

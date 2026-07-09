@@ -1,9 +1,9 @@
 {
-  "sha1": "c277b6355c68db2a771bb2ca3dfe90a840ec44f1",
+  "sha1": "3e6560834b077899ad61f2bae26b858a6d781dd5",
   "tests": [
     {
       "id": "a85e30db18dd980-231d31d916345e0",
-      "title": "Stack Management \u2014 data section transform_user sees only transform in the data section",
+      "title": "Stack Management — data section transform_user sees only transform in the data section",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -17,7 +17,7 @@
     },
     {
       "id": "a85e30db18dd980-062ac9da8baab63",
-      "title": "Stack Management \u2014 data section manage_ilm sees index_lifecycle_management in the data section",
+      "title": "Stack Management — data section manage_ilm sees index_lifecycle_management in the data section",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -31,7 +31,7 @@
     },
     {
       "id": "a85e30db18dd980-1b731d7876730e0",
-      "title": "Stack Management \u2014 data section ccr_user sees cross_cluster_replication and the full cluster:manage data section",
+      "title": "Stack Management — data section ccr_user sees cross_cluster_replication and the full cluster:manage data section",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -45,7 +45,7 @@
     },
     {
       "id": "a85e30db18dd980-94855b8ec67dddd",
-      "title": "Stack Management \u2014 data section index_management_user sees index_management and transform in the data section",
+      "title": "Stack Management — data section index_management_user sees index_management and transform in the data section",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -53,13 +53,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/data_section.spec.ts",
-        "line": 108,
+        "line": 109,
         "column": 7
       }
     },
     {
       "id": "d9da0a72c35da72-c5a20c77cc86c74",
-      "title": "Stack Management \u2014 nav link access kibana_admin sees the nav link and only Kibana-privilege-driven sections",
+      "title": "Stack Management — nav link access kibana_admin sees the nav link and only Kibana-privilege-driven sections",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -73,7 +73,7 @@
     },
     {
       "id": "d9da0a72c35da72-b8fa2a8c07ef16c",
-      "title": "Stack Management \u2014 nav link access no management privileges \u2014 Stack Management nav link is absent and app is inaccessible",
+      "title": "Stack Management — nav link access no management privileges — Stack Management nav link is absent and app is inaccessible",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -87,7 +87,7 @@
     },
     {
       "id": "bad08ef0cbf2e37-6fecfa373f1b9b3",
-      "title": "Stack Management \u2014 ingest, security, and stack sections logstash_read_user sees only the ingest section with pipelines",
+      "title": "Stack Management — ingest, security, and stack sections logstash_read_user sees only the ingest section with pipelines",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -101,7 +101,7 @@
     },
     {
       "id": "bad08ef0cbf2e37-dd7cc6062509486",
-      "title": "Stack Management \u2014 ingest, security, and stack sections manage_security sees only the security section with all four links",
+      "title": "Stack Management — ingest, security, and stack sections manage_security sees only the security section with all four links",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -115,7 +115,7 @@
     },
     {
       "id": "bad08ef0cbf2e37-d579dbac266af75",
-      "title": "Stack Management \u2014 ingest, security, and stack sections cluster:manage surfaces ingest, data (incl. remote_clusters) and stack (license_management) sections",
+      "title": "Stack Management — ingest, security, and stack sections cluster:manage surfaces ingest, data (incl. remote_clusters) and stack (license_management) sections",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

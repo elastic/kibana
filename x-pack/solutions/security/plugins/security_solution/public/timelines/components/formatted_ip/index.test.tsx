@@ -16,6 +16,10 @@ import { NetworkPanelKey } from '../../../flyout/network_details';
 import { createExpandableFlyoutApiMock } from '../../../common/mock/expandable_flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
+jest.mock('../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
+}));
+
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
   return {
