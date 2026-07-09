@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiGlobalToastListToast as EuiToast, UseEuiTheme } from '@elastic/eui';
-import { EuiGlobalToastList } from '@elastic/eui';
+import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import { EuiGlobalToastList, useEuiTheme } from '@elastic/eui';
 import React, { useEffect, useState, type FunctionComponent, useCallback } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Observable } from 'rxjs';
@@ -43,6 +43,8 @@ export const GlobalToastList: FunctionComponent<Props> = ({
   dismissToast,
   reportEvent,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const [toasts, setToasts] = useState<State['toasts']>([]);
   const [idToToasts, setIdToToasts] = useState<State['idToToasts']>({});
 
@@ -103,7 +105,7 @@ export const GlobalToastList: FunctionComponent<Props> = ({
       data-test-subj="globalToastList"
       toasts={toasts.map(convertToEui)}
       dismissToast={closeToastsRepresentedById}
-      css={({ euiTheme }: UseEuiTheme) => css`
+      css={css`
         /* Temporary override until underlying EUI bug is fixed */
         .euiToast {
           overflow: visible;
