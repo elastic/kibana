@@ -2134,11 +2134,6 @@
   resolved "https://registry.yarnpkg.com/@discoveryjs/natural-compare/-/natural-compare-1.1.0.tgz#75f0642ad64701ffa9d42f1d7ada3b83f4e67cf3"
   integrity sha512-yuctPJs5lRXoI8LkpVZGAV6n+DKOuEsfpfcIDQ8ZjWHwazqk1QjBc4jMlof0UlZHyUqv4dwsOTooMiAmtzvwXA==
 
-"@dmsnell/diff-match-patch@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@dmsnell/diff-match-patch/-/diff-match-patch-1.1.0.tgz#5bac00243fa2583fa970d9865609f632dcd90e32"
-  integrity sha512-yejLPmM5pjsGvxS9gXablUSbInW7H976c/FJ4iQxWIm7/38xBySRemTPDe34lhg1gVLbJntX0+sH0jYfU+PN9A==
-
 "@dnd-kit/accessibility@^3.1.1":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@dnd-kit/accessibility/-/accessibility-3.1.1.tgz#3b4202bd6bb370a0730f6734867785919beac6af"
@@ -28473,11 +28468,6 @@ mutation-observer@1.0.3:
   resolved "https://registry.yarnpkg.com/mutation-observer/-/mutation-observer-1.0.3.tgz#42e9222b101bca82e5ba9d5a7acf4a14c0f263d0"
   integrity sha512-M/O/4rF2h776hV7qGMZUH3utZLO/jK7p8rnNgGkjKUw8zCGjRQPxB8z6+5l8+VjRUQ3dNYu4vjqXYLr+U8ZVNA==
 
-mutative@1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/mutative/-/mutative-1.3.0.tgz#9cb4f216813267487fadfae794881ed6ee69f444"
-  integrity sha512-8MJj6URmOZAV70dpFe1YnSppRTKC4DsMkXQiBDFayLcDI4ljGokHxmpqaBQuDWa4iAxWaJJ1PS8vAmbntjjKmQ==
-
 mute-stream@0.0.8:
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.8.tgz#1630c42b2251ff81e2a283de96a5497ea92e5e0d"
@@ -34903,11 +34893,6 @@ trace@3.2.0:
   integrity sha512-o5sIvza+ygxvws5TAtDX/SwMzgyS5YaeGpNkPd0TFVtYTNQp2nRpC/o7YU4A/zP6Hp4hDrLOgaZUKNc3c4huMQ==
   dependencies:
     stack-chain "^2.0.0"
-
-travels@1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/travels/-/travels-1.3.1.tgz#b379278316ce2f0583c7ad30d421d334b10dfd85"
-  integrity sha512-l71Cw0HqoCW9isx1a3pBya8h2jWu2DuzEb9za2xdt0wWAkxzepwj/WSwBrGYgwGJksMcU/V3JB0TY4FmZul9bg==
 
 traverse@~0.6.6:
   version "0.6.6"
