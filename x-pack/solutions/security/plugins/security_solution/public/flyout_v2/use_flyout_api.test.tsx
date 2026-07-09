@@ -7,8 +7,11 @@
 
 import { renderHook } from '@testing-library/react';
 import { FlowTargetSourceDest } from '../../common/search_strategy/security_solution/network';
+import type { Indicator } from '../../common/threat_intelligence/types/indicator';
 import { useAttackFlyoutApi } from './attack/use_attack_flyout_api';
 import { createAttackFlyoutApiMock } from './attack/use_attack_flyout_api.mock';
+import { useIocFlyoutApi } from './ioc/use_ioc_flyout_api';
+import { createIocFlyoutApiMock } from './ioc/use_ioc_flyout_api.mock';
 import { useNetworkFlyoutApi } from './network/use_network_flyout_api';
 import { createNetworkFlyoutApiMock } from './network/use_network_flyout_api.mock';
 import { useRuleFlyoutApi } from './rule/use_rule_flyout_api';
@@ -16,6 +19,7 @@ import { createRuleFlyoutApiMock } from './rule/use_rule_flyout_api.mock';
 import { useFlyoutApi } from './use_flyout_api';
 
 jest.mock('./attack/use_attack_flyout_api');
+jest.mock('./ioc/use_ioc_flyout_api');
 jest.mock('./network/use_network_flyout_api');
 jest.mock('./rule/use_rule_flyout_api');
 
@@ -24,11 +28,13 @@ describe('useFlyoutApi', () => {
     jest.clearAllMocks();
   });
 
-  it('exposes the attack, network, and rule flyout methods from composed per-type hooks', () => {
+  it('exposes the attack, IOC, network, and rule methods from composed per-type hooks', () => {
     const attackApi = createAttackFlyoutApiMock();
+    const iocApi = createIocFlyoutApiMock();
     const networkApi = createNetworkFlyoutApiMock();
     const ruleApi = createRuleFlyoutApiMock();
     jest.mocked(useAttackFlyoutApi).mockReturnValue(attackApi);
+    jest.mocked(useIocFlyoutApi).mockReturnValue(iocApi);
     jest.mocked(useNetworkFlyoutApi).mockReturnValue(networkApi);
     jest.mocked(useRuleFlyoutApi).mockReturnValue(ruleApi);
 
@@ -37,10 +43,13 @@ describe('useFlyoutApi', () => {
     const attackParams = { attackId: 'attack-1', indexName: '.alerts-security' };
     const networkParams = { ip: '1.2.3.4', flowTarget: FlowTargetSourceDest.source };
     const ruleParams = { ruleId: 'rule-1' };
+    const iocParams = { indicator: { _id: 'ioc-1', fields: {} } as unknown as Indicator };
 
     // The facade surfaces the composed methods, and calling one delegates to the per-type hook.
     result.current.openAttackFlyout(attackParams);
     result.current.openAttackFlyoutAsChild(attackParams);
+    result.current.openIocFlyout(iocParams);
+    result.current.openIocFlyoutAsChild(iocParams);
     result.current.openNetworkFlyout(networkParams);
     result.current.openNetworkFlyoutAsChild(networkParams);
     result.current.openRuleFlyout(ruleParams);
@@ -48,6 +57,8 @@ describe('useFlyoutApi', () => {
 
     expect(attackApi.openAttackFlyout).toHaveBeenCalledWith(attackParams);
     expect(attackApi.openAttackFlyoutAsChild).toHaveBeenCalledWith(attackParams);
+    expect(iocApi.openIocFlyout).toHaveBeenCalledWith(iocParams);
+    expect(iocApi.openIocFlyoutAsChild).toHaveBeenCalledWith(iocParams);
     expect(networkApi.openNetworkFlyout).toHaveBeenCalledWith(networkParams);
     expect(networkApi.openNetworkFlyoutAsChild).toHaveBeenCalledWith(networkParams);
     expect(ruleApi.openRuleFlyout).toHaveBeenCalledWith(ruleParams);
