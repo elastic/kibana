@@ -273,52 +273,79 @@ export async function identifyCodeFeaturesForService({
   const streamName = serviceNameValue;
 
   const fingerprint = await reader.getChangeFingerprint(repository);
+  const classification = classifyRepository(await reader.getLanguageHistogram(repository));
 
-  const { hits: existingFeatures } = await kiClient.getFeatures(streamName, {
+  const persisted: FeatureUpsert[] = [];
+
+  // Repository-level features (repo type, and the repo-wide primary language
+  // when the agent didn't provide a service-specific one) are keyed by the
+  // *repository*, not the service. Every service in a (mono)repo shares the same
+  // deterministic UUID, so these collapse to a single KI per repository instead
+  // of being duplicated once per service. Skipped when the repository is
+  // unchanged since it was last classified.
+  const { hits: existingRepoFeatures } = await kiClient.getFeatures(repository, {
     type: [CODE_ANALYSIS_FEATURE_TYPE],
     includeExcluded: true,
   });
-
-  const state = readCodeChangeState(existingFeatures);
-  if (isUnchanged(state, fingerprint)) {
-    logger.debug(
-      `code_features: service "${streamName}" from "${repository}" unchanged (fingerprint ${fingerprint}); noop`
+  const repoUnchanged = isUnchanged(readCodeChangeState(existingRepoFeatures), fingerprint);
+  if (!repoUnchanged) {
+    const repoIncoming = buildRepositoryFeatures({
+      repository,
+      fingerprint,
+      classification,
+      includePrimaryLanguage: !language,
+    });
+    const reconciledRepo = reconcileCodeFeatures({
+      incoming: repoIncoming,
+      existing: existingRepoFeatures,
+      runId,
+    });
+    await kiClient.bulk(
+      repository,
+      reconciledRepo.map((feature) => ({ index: { feature } }))
     );
-    return { streamName, status: 'noop', fingerprint };
+    persisted.push(...reconciledRepo);
   }
 
-  const repoClassification = classifyRepository(await reader.getLanguageHistogram(repository));
-  // Prefer the agent's per-service language: in a monorepo the repo-wide primary
-  // language rarely matches an individual service.
-  const classification: RepoClassification = language
-    ? { ...repoClassification, primaryLanguage: language }
-    : repoClassification;
+  // Per-service language: only emitted when the agent resolved a language for
+  // this specific service (meaningful in a polyglot monorepo). Keyed by the
+  // service so distinct services keep distinct languages. The service identity
+  // itself is an `entity`/`service` KI on the ingesting stream (see
+  // `linkServiceEntities`), so no `service_name` feature is written here.
+  if (language) {
+    const { hits: existingServiceFeatures } = await kiClient.getFeatures(streamName, {
+      type: [CODE_ANALYSIS_FEATURE_TYPE],
+      includeExcluded: true,
+    });
+    const serviceIncoming = buildServiceLanguageFeature({
+      serviceStream: streamName,
+      repository,
+      fingerprint,
+      language,
+      citations: evidence,
+    });
+    const reconciledService = reconcileCodeFeatures({
+      incoming: serviceIncoming,
+      existing: existingServiceFeatures,
+      runId,
+    });
+    await kiClient.bulk(
+      streamName,
+      reconciledService.map((feature) => ({ index: { feature } }))
+    );
+    persisted.push(...reconciledService);
+  }
 
-  // The service identity is emitted separately as an `entity`/`service` KI on
-  // the ingesting stream (see `linkServiceEntities`), so only the repo-level
-  // `repo_type` and `language` features are written here.
-  const incoming = buildCodeFeatures({
-    streamName,
-    repository,
-    fingerprint,
-    classification,
-    serviceName: undefined,
-    citations: evidence,
-    includeServiceFeature: false,
-  });
-
-  const reconciled = reconcileCodeFeatures({ incoming, existing: existingFeatures, runId });
-
-  await kiClient.bulk(
-    streamName,
-    reconciled.map((feature) => ({ index: { feature } }))
-  );
-
+  const status = persisted.length > 0 ? 'updated' : 'noop';
   logger.debug(
-    `code_features: persisted ${reconciled.length} code feature(s) for service "${streamName}" from "${repository}"`
+    `code_features: persisted ${
+      persisted.length
+    } code feature(s) for service "${streamName}" from "${repository}" (repo ${
+      repoUnchanged ? 'unchanged' : 'updated'
+    })`
   );
 
-  return { streamName, status: 'updated', features: reconciled, fingerprint };
+  return { streamName, status, features: persisted, fingerprint };
 }
 
 /** Falls back to the repository stamped on an existing `code_analysis` feature. */

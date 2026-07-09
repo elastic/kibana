@@ -18,7 +18,11 @@ import {
   CODE_FEATURE_SUBTYPE_REPO_TYPE,
   CODE_FEATURE_SUBTYPE_SERVICE_NAME,
 } from './constants';
-import { identifyCodeFeatures, identifyCodeFeaturesForRepository } from './identify_code_features';
+import {
+  identifyCodeFeatures,
+  identifyCodeFeaturesForRepository,
+  identifyCodeFeaturesForService,
+} from './identify_code_features';
 import type { CodeHit, CodeRepositoryReader } from './types';
 
 const STREAM = 'logs.checkout';
@@ -253,5 +257,66 @@ describe('identifyCodeFeaturesForRepository (code-first, no logs)', () => {
     expect(result.status).toBe('no_service');
     expect(result.services).toEqual([]);
     expect(bulk).not.toHaveBeenCalled();
+  });
+});
+
+describe('identifyCodeFeaturesForService (repo-level vs service-level keying)', () => {
+  it('keys repo_type by the repository (not the service) and per-service language by the service', async () => {
+    const { kiClient, bulk } = createKiClient([]);
+    const result = await identifyCodeFeaturesForService({
+      repository: REPO,
+      serviceName: 'cartservice',
+      language: 'go',
+      kiClient,
+      reader: createReader(),
+      logger: loggerMock.create(),
+      runId: 'run-svc',
+    });
+
+    expect(result.status).toBe('updated');
+    expect(result.streamName).toBe('cartservice');
+
+    const byStream = Object.fromEntries(bulk.mock.calls.map((call) => [call[0], call[1]]));
+    expect(Object.keys(byStream).sort()).toEqual([REPO, 'cartservice'].sort());
+
+    // repo_type is written to the repository stream so it collapses to one KI
+    // per repository regardless of how many services reference it.
+    const repoOps = byStream[REPO];
+    expect(repoOps.map((op) => op.index.feature.subtype)).toContain(CODE_FEATURE_SUBTYPE_REPO_TYPE);
+    expect(repoOps.every((op) => op.index.feature.stream_name === REPO)).toBe(true);
+    // With an agent-provided per-service language, the repo-wide language is not
+    // emitted at the repository level.
+    expect(repoOps.map((op) => op.index.feature.subtype)).not.toContain(
+      CODE_FEATURE_SUBTYPE_LANGUAGE
+    );
+
+    // The service-specific language is keyed by the service stream.
+    const serviceOps = byStream.cartservice;
+    expect(serviceOps.map((op) => op.index.feature.subtype)).toEqual([
+      CODE_FEATURE_SUBTYPE_LANGUAGE,
+    ]);
+    expect(serviceOps[0].index.feature.properties.language).toBe('go');
+    expect(serviceOps[0].index.feature.stream_name).toBe('cartservice');
+  });
+
+  it('writes the repo-wide primary language at the repository level when the agent gives none', async () => {
+    const { kiClient, bulk } = createKiClient([]);
+    await identifyCodeFeaturesForService({
+      repository: REPO,
+      serviceName: 'cartservice',
+      kiClient,
+      reader: createReader(),
+      logger: loggerMock.create(),
+      runId: 'run-svc',
+    });
+
+    // Only the repository stream is written (repo_type + primary language); no
+    // per-service code_analysis feature is created.
+    expect(bulk.mock.calls.map((call) => call[0])).toEqual([REPO]);
+    const repoOps = bulk.mock.calls[0][1];
+    expect(repoOps.map((op) => op.index.feature.subtype).sort()).toEqual(
+      [CODE_FEATURE_SUBTYPE_LANGUAGE, CODE_FEATURE_SUBTYPE_REPO_TYPE].sort()
+    );
+    expect(repoOps.every((op) => op.index.feature.stream_name === REPO)).toBe(true);
   });
 });

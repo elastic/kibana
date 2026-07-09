@@ -71,6 +71,21 @@ steps:
             (prefer the value configured in code, e.g. OTEL_SERVICE_NAME / resource
             attributes; otherwise the conventional service/directory name).
           - language: the primary implementation language of that service.
+          - version: the service/app version if declared in code (package manifest such
+            as package.json / pom.xml / Cargo.toml, Helm chart, or a pinned image tag).
+            Omit when you cannot determine it — never guess.
+          - environmentVariables: notable runtime environment variables that configure
+            telemetry or logging (e.g. OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT,
+            OTEL_RESOURCE_ATTRIBUTES), each as a "NAME" or "NAME=value" string.
+          - configPaths: repository-relative paths of the OpenTelemetry / logging SDK
+            configuration files that apply to this service.
+          - loggingPattern: how the service emits logs — "otel" when it uses the
+            OpenTelemetry logging SDK/collector, "other" for a different logging stack,
+            or "unknown" when you cannot tell.
+          - tracing: true if the service is instrumented for distributed tracing
+            (OpenTelemetry tracing SDK / auto-instrumentation), false otherwise.
+          - gitSha: the commit SHA the evidence was read at, if your tools expose it.
+            Omit when unknown — never invent one.
           - evidence: the specific source file(s) that made you conclude this is a
             deployable service — its entrypoint, Dockerfile, build manifest, or the
             OTEL_SERVICE_NAME / resource-attribute configuration. Cite the exact file
@@ -95,6 +110,28 @@ steps:
                 language:
                   type: string
                   description: 'Primary implementation language of the service.'
+                version:
+                  type: string
+                  description: 'Service/app version if declared in code (package manifest, Helm chart, or pinned image tag). Omit when unknown.'
+                environmentVariables:
+                  type: array
+                  description: 'Notable telemetry/logging env vars (e.g. OTEL_SERVICE_NAME), each as "NAME" or "NAME=value".'
+                  items:
+                    type: string
+                configPaths:
+                  type: array
+                  description: 'Repository-relative paths of the OTel/logging SDK config files for this service.'
+                  items:
+                    type: string
+                loggingPattern:
+                  type: string
+                  description: 'How the service logs: "otel", "other", or "unknown".'
+                tracing:
+                  type: boolean
+                  description: 'Whether the service is instrumented for distributed tracing.'
+                gitSha:
+                  type: string
+                  description: 'Commit SHA the evidence was read at, when known. Omit when unknown.'
                 evidence:
                   type: array
                   description: 'Source files that identify this service. Use only real paths/lines returned by your tools.'
@@ -142,6 +179,12 @@ steps:
                 service:
                   name: '{{ foreach.item.name }}'
                   language: '{{ foreach.item.language }}'
+                  version: '{{ foreach.item.version }}'
+                  environmentVariables: '${{ foreach.item.environmentVariables }}'
+                  configPaths: '${{ foreach.item.configPaths }}'
+                  loggingPattern: '{{ foreach.item.loggingPattern }}'
+                  tracing: '${{ foreach.item.tracing }}'
+                  gitSha: '{{ foreach.item.gitSha }}'
                   evidence: '${{ foreach.item.evidence }}'
             on-failure:
               retry:
