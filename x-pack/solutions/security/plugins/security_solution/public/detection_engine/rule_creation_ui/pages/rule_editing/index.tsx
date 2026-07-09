@@ -49,7 +49,7 @@ import { StepDefineRule } from '../../components/step_define_rule';
 import { useExperimentalFeatureFieldsTransform } from '../../components/step_define_rule/use_experimental_feature_fields_transform';
 import { StepScheduleRule } from '../../components/step_schedule_rule';
 import { StepRuleActions } from '../../../rule_creation/components/step_rule_actions';
-import { formatRule } from '../rule_creation/helpers';
+import { formatRule, getApiOnlyThreatMatchFields } from '../rule_creation/helpers';
 import {
   getActionMessageParams,
   getStepsData,
@@ -392,17 +392,19 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     const localDefineStepData: DefineStepRule = defineFieldsTransform({
       ...defineStepData,
     });
+    const formattedRule = formatRule<RuleUpdateProps>(
+      localDefineStepData,
+      aboutStepData,
+      scheduleStepData,
+      actionsStepData,
+      triggersActionsUi.actionTypeRegistry,
+      rule?.exceptions_list
+    );
     const updatedRule = await updateRule({
-      ...formatRule<RuleUpdateProps>(
-        localDefineStepData,
-        aboutStepData,
-        scheduleStepData,
-        actionsStepData,
-        triggersActionsUi.actionTypeRegistry,
-        rule?.exceptions_list
-      ),
+      ...formattedRule,
+      ...getApiOnlyThreatMatchFields(rule),
       ...(ruleId ? { id: ruleId } : {}),
-    });
+    } as RuleUpdateProps);
 
     addSuccess(i18n.SUCCESSFULLY_SAVED_RULE(updatedRule?.name ?? ''));
     navigateToApp(APP_UI_ID, {
@@ -416,7 +418,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     defineFieldsTransform,
     addSuccess,
     navigateToApp,
-    rule?.exceptions_list,
+    rule,
     ruleId,
     scheduleStepData,
     startTransaction,
