@@ -35,13 +35,14 @@ interface TranslationTabProps {
   onTranslationUpdate?: (ruleName: string, ruleQuery: string) => Promise<void>;
 }
 
+const contentColumnStyle: React.CSSProperties = {
+  flexBasis: 0,
+  minWidth: 0,
+};
+
 export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
   ({ migrationRule, matchedPrebuiltRule, onTranslationUpdate }) => {
     const { euiTheme } = useEuiTheme();
-    const contentColumnStyle: React.CSSProperties = {
-      flexBasis: 0,
-      minWidth: 0,
-    };
     const isInstalled = !!migrationRule.elastic_rule?.id;
 
     return (
