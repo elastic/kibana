@@ -43,6 +43,24 @@ const addFileEbtProps = getEbtProps({
   detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
 });
 
+const editFileEbtProps = getEbtProps({
+  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+  action: AGENT_BUILDER_UI_EBT.action.globalManagement.EDIT_REFERENCED_FILE,
+  detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+});
+
+const saveFileEbtProps = getEbtProps({
+  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+  action: AGENT_BUILDER_UI_EBT.action.globalManagement.SAVE_REFERENCED_FILE,
+  detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+});
+
+const cancelFileEbtProps = getEbtProps({
+  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+  action: AGENT_BUILDER_UI_EBT.action.globalManagement.CANCEL_REFERENCED_FILE,
+  detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+});
+
 const removeFileEbtProps = getEbtProps({
   element: AGENT_BUILDER_UI_EBT.element.pageContent,
   action: AGENT_BUILDER_UI_EBT.action.globalManagement.REMOVE_REFERENCED_FILE,
@@ -189,6 +207,7 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
                 disabled={!canEdit}
                 aria-label={labels.skills.referencedFileSection.editFileAriaLabel}
                 data-test-subj={`agentBuilderSkillReferencedContentEdit-${index}`}
+                {...editFileEbtProps}
               />
             </EuiToolTip>
           </EuiFlexItem>
@@ -233,6 +252,7 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
               size="s"
               onClick={handleCancel}
               data-test-subj={`agentBuilderSkillReferencedContentCancel-${index}`}
+              {...cancelFileEbtProps}
             >
               {labels.skills.referencedFileSection.cancelButton}
             </EuiButtonEmpty>
@@ -247,6 +267,7 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
                 Boolean(pathField.fieldState.error)
               }
               data-test-subj={`agentBuilderSkillReferencedContentDone-${index}`}
+              {...saveFileEbtProps}
             >
               {labels.skills.referencedFileSection.doneButton}
             </EuiButton>
