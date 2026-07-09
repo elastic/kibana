@@ -33,6 +33,8 @@ import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
 import {
   HOST_NAME_FIELD_NAME,
+  LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 
@@ -120,13 +122,27 @@ export const InvestigationSection = memo(
     }, [history, historyKey, hit, overlays, services, store]);
 
     const renderFlyoutLink = useCallback(
-      (props: OpenFlyoutLinkProps) => (
-        <OpenFlyoutLink
-          {...props}
-          asParent={props.field === HOST_NAME_FIELD_NAME || props.field === USER_NAME_FIELD_NAME}
-        />
-      ),
-      []
+      (props: OpenFlyoutLinkProps) => {
+        // Rule name fields: substitute the rule UUID as the link target (the flyout is keyed by
+        // UUID) while keeping the rule name as the displayed text. When no UUID is available,
+        // render plain text to avoid opening the rule flyout with an invalid id.
+        if (
+          props.field === SIGNAL_RULE_NAME_FIELD_NAME ||
+          props.field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME
+        ) {
+          if (!ruleId) {
+            return <>{props.children}</>;
+          }
+          return <OpenFlyoutLink {...props} value={ruleId} asParent />;
+        }
+        return (
+          <OpenFlyoutLink
+            {...props}
+            asParent={props.field === HOST_NAME_FIELD_NAME || props.field === USER_NAME_FIELD_NAME}
+          />
+        );
+      },
+      [ruleId]
     );
 
     return (
