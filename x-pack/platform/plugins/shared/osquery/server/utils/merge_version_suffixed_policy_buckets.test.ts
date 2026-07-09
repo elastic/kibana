@@ -30,9 +30,9 @@ describe('mergeVersionSuffixedPolicyBuckets', () => {
   });
 
   it('normalizes to the base id even when only a suffixed variant exists', () => {
-    expect(mergeVersionSuffixedPolicyBuckets([{ id: 'policy-1#9.4', name: 'policy-1#9.4', size: 4 }])).toEqual([
-      { id: 'policy-1', name: 'policy-1', size: 4 },
-    ]);
+    expect(
+      mergeVersionSuffixedPolicyBuckets([{ id: 'policy-1#9.4', name: 'policy-1#9.4', size: 4 }])
+    ).toEqual([{ id: 'policy-1', name: 'policy-1', size: 4 }]);
   });
 
   it('merges multiple suffixed variants of the same base policy', () => {
