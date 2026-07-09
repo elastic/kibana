@@ -109,6 +109,7 @@ main()
     console.log('Flaky runner stats comment added to PR!');
   })
   .catch((e) => {
-    console.error(e);
-    process.exit(1);
+    // Best-effort: never fail the build on a reporting hiccup, and don't use
+    // `soft_fail` (it would mask real failures from earlier steps).
+    console.error('Failed to post flaky runner stats comment (non-fatal):', e);
   });
