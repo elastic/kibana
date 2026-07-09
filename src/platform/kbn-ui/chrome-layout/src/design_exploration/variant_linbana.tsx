@@ -35,7 +35,7 @@ const LINEAR_SURFACE = 'lch(98.94 0.5 282)'; // content / header surface
 const LINEAR_SURFACE_NAV = 'lch(96.5 0.5 282)'; // nav step off content surface
 const LINEAR_PANEL_PADDING = DESIGN_EXPLORATION_PADDING_COMPACT + 4;
 const LINEAR_PADDING = 20;
-const LINEAR_TOP_BAR_HEIGHT = 56;
+const LINEAR_TOP_BAR_HEIGHT = 48;
 const LINEAR_APP_HEADER_TRANSITION_MS = 200;
 
 export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
@@ -218,6 +218,17 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
       padding-block-end: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
     }
 
+    ${scope}
+    .euiFormControlLayout:has([data-test-subj='queryInput'], [data-test-subj='dateRangePickerControlButton']):not(:focus-within):not(:has(:invalid, [aria-invalid='true'])) {
+      border: ${LINEAR_HAIRLINE} !important;
+      border-radius: ${LINEAR_RADIUS_CONTROL}px !important;
+    }
+
+    ${scope}
+    .euiFormControlLayout:has([data-test-subj='queryInput'], [data-test-subj='dateRangePickerControlButton']):focus-within:not(:has(:invalid, [aria-invalid='true'])) {
+      border: 1px solid ${LINEAR_ACCENT} !important;
+    }
+
     ${scope} [data-test-subj='controls-group-wrapper'] {
       padding: ${LINEAR_PADDING}px !important;
       padding-block-start: 0 !important;
@@ -302,7 +313,8 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR}) [data-test-subj='appHeader'] > div {
       opacity: 1;
-      transition: opacity ${LINEAR_APP_HEADER_TRANSITION_MS}ms ease !important;
+      transition: opacity ${LINEAR_APP_HEADER_TRANSITION_MS}ms ease
+        ${LINEAR_APP_HEADER_TRANSITION_MS}ms !important;
     }
 
     /* Header stays flat and pinned — no margin/backdrop/radius change on
@@ -346,17 +358,21 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
       min-height: 0 !important;
       overflow: hidden !important;
       pointer-events: none !important;
+      transition: height ${LINEAR_APP_HEADER_TRANSITION_MS}ms ease
+        ${LINEAR_APP_HEADER_TRANSITION_MS}ms !important;
     }
 
     ${scope}[${DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
       [data-test-subj='appHeader'] > div {
       opacity: 0 !important;
       pointer-events: none !important;
+      transition: opacity ${LINEAR_APP_HEADER_TRANSITION_MS}ms ease !important;
     }
 
     ${scope}[${DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
       .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
       top: 0 !important;
+      transition: top ${LINEAR_APP_HEADER_TRANSITION_MS}ms ease ${LINEAR_APP_HEADER_TRANSITION_MS}ms !important;
     }
 
     /* No scroll-triggered background/blur/radius change — deliberately
