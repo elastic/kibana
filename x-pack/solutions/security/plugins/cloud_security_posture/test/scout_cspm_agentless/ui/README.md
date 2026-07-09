@@ -87,7 +87,7 @@ Tests intercept the agentless policy API, capture request data, and validate sha
 let capturedRequestBody: AgentlessPolicyRequestBody | null = null;
 
 // Route handler ONLY captures data - no assertions here (avoids conditional expect)
-await page.route(/\/api\/fleet\/(managed_integrations|agentless_policies)/, async (route, request) => {
+await page.route(/\/api\/fleet\/managed_integrations/, async (route, request) => {
   if (request.method() === 'POST') {
     capturedRequestBody = request.postDataJSON();
     await route.fulfill({
@@ -153,7 +153,7 @@ interface AgentlessPolicyRequestBody {
 }
 ```
 
-> **Note:** Use regex pattern `/\/api\/fleet\/(managed_integrations|agentless_policies)/` to match the current route and its deprecated alias, with space prefixes and query parameters.
+> **Note:** Use regex pattern `/\/api\/fleet\/managed_integrations/` to match the route with space prefixes and query parameters. The UI only calls `managed_integrations`; the deprecated `agentless_policies` alias is never hit from our code, so it does not need to be intercepted.
 
 ---
 

@@ -106,28 +106,26 @@ export function createMockAgentlessPolicyResponse(
 }
 
 /**
- * Mocks the managed integrations API route (and its deprecated agentless_policies alias),
- * capturing POST requests and returning mock responses.
+ * Mocks the managed integrations API route, capturing POST requests and returning mock responses.
+ * The UI only calls `managed_integrations`; the deprecated `agentless_policies` alias is never hit
+ * from our code, so it does not need to be intercepted.
  */
 export async function mockAgentlessPoliciesWithCapture(
   page: ScoutPage,
   onPostCapture: (body: AgentlessPolicyRequestBody) => void,
   connectorId?: string
 ) {
-  await page.route(
-    /\/api\/fleet\/(managed_integrations|agentless_policies)/,
-    async (route, request) => {
-      if (request.method() === 'POST') {
-        const capturedRequestBody = request.postDataJSON() as AgentlessPolicyRequestBody;
-        onPostCapture(capturedRequestBody);
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(createMockAgentlessPolicyResponse(capturedRequestBody, connectorId)),
-        });
-      } else {
-        await route.continue();
-      }
+  await page.route(/\/api\/fleet\/managed_integrations/, async (route, request) => {
+    if (request.method() === 'POST') {
+      const capturedRequestBody = request.postDataJSON() as AgentlessPolicyRequestBody;
+      onPostCapture(capturedRequestBody);
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(createMockAgentlessPolicyResponse(capturedRequestBody, connectorId)),
+      });
+    } else {
+      await route.continue();
     }
-  );
+  });
 }
