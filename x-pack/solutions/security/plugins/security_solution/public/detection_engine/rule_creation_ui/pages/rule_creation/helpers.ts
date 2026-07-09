@@ -54,6 +54,7 @@ import { DataSourceType, AlertSuppressionDurationType } from '../../../common/ty
 import type {
   RuleCreateProps,
   RuleResponse,
+  ThreatMatchRuleUpdateProps,
   AlertSuppression,
   RequiredFieldInput,
   SeverityMapping,
@@ -704,7 +705,7 @@ export const formatRule = <T>(
  */
 export const getApiOnlyThreatMatchFields = (
   rule: RuleResponse
-): { concurrent_searches?: number; items_per_search?: number } =>
+): Pick<ThreatMatchRuleUpdateProps, 'concurrent_searches' | 'items_per_search'> =>
   rule.type === 'threat_match'
     ? { concurrent_searches: rule.concurrent_searches, items_per_search: rule.items_per_search }
     : {};
