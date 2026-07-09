@@ -198,11 +198,17 @@ This issue may have been investigated before (for example, it was reopened after
 
 ## Comment format
 
-Post exactly one comment on the issue. Keep the content concise and actionable.
+Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 seconds on it: the visible header must carry the verdict on its own, and the collapsed details must be skimmable, not exhaustive.
+
+**Write tight — borrow the PR-body discipline of the Flaky Test Fixer.** Prefer bullet points over paragraphs, and every sentence must be earned. Concretely:
+
+- State the **single** dominant cause. Do not enumerate every call, file, wait, or step you inspected — that reasoning is what got you to the answer, not the answer.
+- Cite evidence with an inline link to the code line, log, or screenshot instead of reproducing it. Never paste large blocks of existing code — link to the line range.
+- Cut anything that does not change what the reader does next. If a sentence only proves you were thorough, delete it.
 
 Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
 
-The comment has different parts: a compact header that stays visible on the issue page (one `####` headline + metadata + summary), and a `<details>` block that hides everything else, as well as a comment to label the issue to trigger the flaky test fixer workflow (it is only posted under certain conditions, more info below).
+The comment has different parts: a compact header that stays visible on the issue page (one `####` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a comment to label the issue to trigger the flaky test fixer workflow (it is only posted under certain conditions, more info below).
 
 **Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
 
@@ -210,22 +216,37 @@ Add the following snippet of Markdown right after (and outside) the `<details>` 
 
 ```markdown
 > [!TIP]
-> Label this issue `ai:fix-flaky` and an agent will **open a fix PR** for you. This usually takes 15–20 minutes, and the PR will appear below this comment. Share early feedback in #kibana-qa.
+> Label this issue `ai:fix-flaky` and an agent will **open a fix PR** for you. This usually takes 15–20 minutes.
 ```
 
 If a fix PR is already up (in draft or in review) in the Kibana repository, mention the PR link in the same tip block (instead of suggesting to add the label).
 
 ### 1. Visible header (required)
 
-Three things in order, with a blank line between each:
+A `####` heading followed by one summary sentence — nothing else, no standing metadata lines:
 
 ```
-#### [{classification}] {One-line description of what broke}
+#### {Verdict} — {very short reason}
 
-**Confidence:** {level} | **Introduced by:** {commit/PR if known — omit this segment entirely if unknown}
-
-**Summary:** One or two sentences explaining the exact failure point.
+{One sentence pinpointing the exact failure point — the assertion, line, or error that fired.}
 ```
+
+**Heading** — a short natural-language phrase (~10 words max), not a full sentence. Start with the plain-English verdict for the classification, then an em dash, then a very short reason:
+
+| classification | verdict phrase |
+|---|---|
+| `test-needs-update` | Test needs an update |
+| `test-environment` | Test environment issue |
+| `application` | Application bug |
+| `ci-environment` | CI environment issue |
+| `inconclusive` | Inconclusive |
+
+Example: `#### Test needs an update — the case is too long for a 60s budget`. **Do not repeat the failing test's name** — the issue title already has it, so describe the *failure*, not the test.
+
+**Summary** — one sentence that *adds* precision beyond the heading (the exact error, line, or step); never a paraphrase of it. No `**Summary:**` label.
+
+- **Confidence:** do not print it by default. Surface it only when it is `low` or `inconclusive`, as a short parenthetical in the summary (e.g. "…*low confidence: no Playwright trace was uploaded*").
+- **Introduced by:** no standing line. Mention an implicated commit/PR only when evidence strongly points to it, as an inline link inside the summary.
 
 ### 2. Collapsible investigation (required)
 
@@ -252,27 +273,29 @@ Wrap **everything after the summary** in a single `<details>` block so the issue
 
 #### Proposed fix (required)
 
-Provide the most direct path to resolution.
+State only *what to change* — the "why" belongs in Root cause & evidence, so do not restate the failure or the reasoning here.
 
-- **Single file:** lead directly with the suggested code diff or specific action.
-- **Multiple files:** use a brief table to list affected files, followed by the necessary changes.
-- **No concrete fix:** clearly state what additional evidence or investigation is needed to propose one.
+- **Single file:** name the `file:line` and the one change, as a single sentence or a short diff. Do not paste surrounding code that already exists — link to it.
+- **Multiple files:** a table of `file:line` → change, one row each. No rationale column.
+- **No concrete fix:** in one or two sentences, name the evidence that would unblock one.
+
+Recommend a single fix. Add an alternative only if it is genuinely likely to be preferred, in one sentence.
 
 #### Root cause & evidence (required)
 
-Explain _why_ the failure occurred, citing specific evidence. Choose the format that best fits the complexity of the bug:
+Explain _why_ it failed in a few tight sentences or bullets, each anchored to a specific piece of evidence (inline link to a code line, commit, log, or screenshot). Lead with the decisive evidence.
 
-- Use concise paragraphs with inline Markdown links pointing to specific code lines, commits, or files.
-- Use an ASCII timeline diagram for race conditions, multi-component bugs, or complex state leaks.
-- Fold relevant evidence (like missing `data-test-subj` attributes, failing network calls, or screenshot descriptions) directly into this narrative.
+- State the single root cause; don't re-walk the investigation or list every call in the test.
+- Use an ASCII timeline **only** for a genuine race condition, cascade, or multi-component state leak — never for a linear explanation.
+- Fold supporting evidence (missing `data-test-subj`, a failing request, screenshot state) into the narrative rather than listing it separately.
 
 #### Additional context (optional)
 
-Include the following only if they provide high-value, actionable signal:
+Omit this section unless it changes what the reader does next. When present, keep it to a couple of one-line bullets:
 
-- **Ruled out:** a brief note on alternative hypotheses that were investigated and dismissed.
-- **Verification:** specific steps to reproduce the failure or confirm the fix.
-- **Open questions:** unresolved design or environmental issues blocking a definitive fix ("a screenshot would have helped troubleshoot this" is a valid open question).
+- **Ruled out:** the dismissed alternatives in a **single** bullet — not one bullet per hypothesis.
+- **Verification:** the one command or step that reproduces the failure or confirms the fix.
+- **Open questions:** a blocker to a definitive fix (e.g. "no trace or screenshot was uploaded").
 
 #### Data collection issues (troubleshooting)
 
