@@ -40,11 +40,18 @@ import type { TransformListRow } from '../../../../common';
 import { getTransformProgress, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
+import { useAppDependencies } from '../../../../app_dependencies';
 
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 import { TransformTaskStateBadge } from './transform_task_state_badge';
+import { ProjectScopeColumn } from './project_scope_column';
 
 const TRUNCATE_TEXT_LINES = 3;
+
+type TransformListColumn =
+  | EuiTableComputedColumnType<TransformListRow>
+  | EuiTableFieldDataColumnType<TransformListRow>
+  | EuiTableActionsColumnType<TransformListRow>;
 
 const TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG = i18n.translate(
   'xpack.transform.transformList.needsReauthorizationBadge.insufficientPermissions',
@@ -67,6 +74,8 @@ export const useColumns = (
 ) => {
   const NoStatsFallbackComponent = transformsStatsLoading ? EuiLoadingSpinner : StatsUnknown;
   const { canStartStopTransform } = useTransformCapabilities();
+  const { cps } = useAppDependencies();
+  const cpsManager = cps?.cpsManager;
 
   const { actions, modals } = useActions({
     forceDisable: transformSelection.length > 0,
@@ -86,18 +95,7 @@ export const useColumns = (
     setExpandedRowItemIds([...expandedRowItemIds]);
   }
 
-  const columns: [
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableFieldDataColumnType<TransformListRow>,
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableFieldDataColumnType<TransformListRow>,
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableComputedColumnType<TransformListRow>,
-    EuiTableActionsColumnType<TransformListRow>
-  ] = [
+  const columns: TransformListColumn[] = [
     {
       name: (
         <EuiScreenReaderOnly>
@@ -271,6 +269,27 @@ export const useColumns = (
         );
       },
     },
+    ...(cpsManager
+      ? [
+          {
+            name: i18n.translate('xpack.transform.projectScope', {
+              defaultMessage: 'Project scope',
+            }),
+            'data-test-subj': 'transformListColumnProjectScope',
+            sortable: (item: TransformListRow) => item.config.source.project_routing ?? '',
+            truncateText: true,
+            render(item: TransformListRow) {
+              return (
+                <ProjectScopeColumn
+                  cpsManager={cpsManager}
+                  projectRouting={item.config.source.project_routing}
+                />
+              );
+            },
+            width: '160px',
+          } satisfies EuiTableComputedColumnType<TransformListRow>,
+        ]
+      : []),
     {
       name: i18n.translate('xpack.transform.type', { defaultMessage: 'Type' }),
       'data-test-subj': 'transformListColumnType',
