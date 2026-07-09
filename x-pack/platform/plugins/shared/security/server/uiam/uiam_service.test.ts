@@ -8,7 +8,8 @@
 import fs from 'fs';
 import undici from 'undici';
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { CoreKibanaRequest, ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import {
@@ -1408,6 +1409,45 @@ describe('UiamService', () => {
         'https://uiam.service/uiam/api/v1/oauth/clients/client%2Fid%23y/connections/conn%2Fid%3Fx/_revoke',
         expect.objectContaining({ method: 'POST' })
       );
+    });
+  });
+
+  describe('OAuth credential store', () => {
+    it('returns the stored OAuth access token for the same request', () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      uiamService.setOAuthCredential(request, 'essu_original_oauth_token');
+
+      expect(uiamService.getOAuthCredential(request)).toBe('essu_original_oauth_token');
+    });
+
+    it('returns undefined for a request that has no stored OAuth token', () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      expect(uiamService.getOAuthCredential(request)).toBeUndefined();
+    });
+
+    it('resolves the token across different KibanaRequest instances wrapping the same raw request', () => {
+      // The authentication-phase request and the route-handler request are distinct KibanaRequest
+      // instances backed by the same raw Hapi request. Keying on the raw request must bridge them.
+      const authPhaseRequest = httpServerMock.createKibanaRequest();
+      const rawRequest = ensureRawRequest(authPhaseRequest);
+      const handlerPhaseRequest = CoreKibanaRequest.from(rawRequest);
+
+      expect(handlerPhaseRequest).not.toBe(authPhaseRequest);
+
+      uiamService.setOAuthCredential(authPhaseRequest, 'essu_original_oauth_token');
+
+      expect(uiamService.getOAuthCredential(handlerPhaseRequest)).toBe('essu_original_oauth_token');
+    });
+
+    it('keeps tokens isolated between different requests', () => {
+      const requestA = httpServerMock.createKibanaRequest();
+      const requestB = httpServerMock.createKibanaRequest();
+
+      uiamService.setOAuthCredential(requestA, 'essu_token_a');
+
+      expect(uiamService.getOAuthCredential(requestB)).toBeUndefined();
     });
   });
 });

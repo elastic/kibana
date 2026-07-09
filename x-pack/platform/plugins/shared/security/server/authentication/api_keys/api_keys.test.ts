@@ -787,6 +787,59 @@ describe('API Keys', () => {
           },
         });
       });
+
+      it('prefers the stored original OAuth token over the ephemeral authorization header', async () => {
+        const mockUiam = uiamServiceMock.create();
+        mockUiam.getClientAuthentication.mockReturnValue({
+          scheme: 'SharedSecret',
+          value: 'uiam-shared-secret',
+        });
+        // After token exchange, the request header only carries the short-lived ephemeral token,
+        // but the original OAuth access token was preserved in the request-scoped store.
+        mockUiam.getOAuthCredential.mockReturnValue('essu_uiam_original_token');
+
+        const apiKeysWithUiam = new APIKeys({
+          clusterClient: mockClusterClient,
+          logger,
+          license: mockLicense,
+          applicationName: 'kibana-.kibana',
+          kibanaFeatures: [],
+          uiam: mockUiam,
+        });
+
+        mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+          id: '123',
+          name: 'key-name',
+          api_key: 'abc123',
+          encoded: 'utf8',
+        });
+
+        const request = httpServerMock.createKibanaRequest({
+          headers: { authorization: `Bearer essu_uiam_ephemeral_token` },
+        });
+
+        await apiKeysWithUiam.grantAsInternalUser(request, {
+          name: 'test_api_key',
+          role_descriptors: roleDescriptors,
+          expiration: '1d',
+        });
+
+        expect(mockUiam.getOAuthCredential).toHaveBeenCalledWith(request);
+        expect(mockUiam.getClientAuthentication).toHaveBeenCalled();
+        expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+            expiration: '1d',
+          },
+          grant_type: 'access_token',
+          access_token: 'essu_uiam_original_token',
+          client_authentication: {
+            scheme: 'SharedSecret',
+            value: 'uiam-shared-secret',
+          },
+        });
+      });
     });
   });
 

@@ -25,6 +25,9 @@ export const servers: ScoutServerConfig = {
         MOCK_IDP_UIAM_OAUTH_BASE_URL,
       ])}`,
       `--xpack.security.mcp.oauth2.metadata.resource=http://localhost:5620/api/agent_builder/mcp`,
+      // Accept UIAM OAuth access tokens on all public routes (not only `security:acceptUiamOAuth`
+      // tagged routes), so non-MCP public APIs can be exercised with an OAuth bearer token.
+      `--xpack.security.authc.http.uiam.taggedRoutesOnly=false`,
     ],
   },
 };

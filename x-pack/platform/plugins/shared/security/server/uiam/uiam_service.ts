@@ -6,10 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
+import type { Request } from '@hapi/hapi';
 import { readFileSync } from 'fs';
 import { Agent } from 'undici';
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
@@ -184,6 +186,23 @@ export interface UiamServicePublic {
   exchangeOAuthToken(accessToken: string): Promise<string>;
 
   /**
+   * Stores the original UIAM OAuth access token for the given request so that downstream consumers
+   * (e.g. API key granting) can use it after the request `Authorization` header has been replaced
+   * with the short-lived ephemeral token during token exchange. The token is keyed on the raw
+   * request, so it remains accessible across the authentication and route-handler lifecycle phases.
+   * @param request The incoming request the OAuth token was presented on.
+   * @param accessToken The original UIAM OAuth access token.
+   */
+  setOAuthCredential(request: KibanaRequest, accessToken: string): void;
+
+  /**
+   * Returns the original UIAM OAuth access token previously stored for the request, or `undefined`
+   * if the request was not authenticated via UIAM OAuth token exchange.
+   * @param request The incoming request.
+   */
+  getOAuthCredential(request: KibanaRequest): string | undefined;
+
+  /**
    * Revokes a UIAM API key by its ID.
    * @param apiKeyId The ID of the API key to revoke.
    * @param apiKey The API key to revoke; will be used for authentication on this request.
@@ -299,6 +318,10 @@ export class UiamService implements UiamServicePublic {
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
+  // Request-scoped store of the original UIAM OAuth access token, keyed on the raw request so it
+  // survives the `Authorization` header being overwritten with the ephemeral token after exchange.
+  // A `WeakMap` keeps the lifetime tied to the request and avoids any manual cleanup.
+  readonly #oauthCredentials = new WeakMap<Request, string>();
 
   constructor(logger: Logger, config: UiamConfigType, options: UiamServiceOptions) {
     this.#logger = logger;
@@ -332,6 +355,20 @@ export class UiamService implements UiamServicePublic {
       authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
       [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
     };
+  }
+
+  /**
+   * See {@link UiamServicePublic.setOAuthCredential}.
+   */
+  setOAuthCredential(request: KibanaRequest, accessToken: string): void {
+    this.#oauthCredentials.set(ensureRawRequest(request), accessToken);
+  }
+
+  /**
+   * See {@link UiamServicePublic.getOAuthCredential}.
+   */
+  getOAuthCredential(request: KibanaRequest): string | undefined {
+    return this.#oauthCredentials.get(ensureRawRequest(request));
   }
 
   /**

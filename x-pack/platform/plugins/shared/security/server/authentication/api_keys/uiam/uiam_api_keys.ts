@@ -62,7 +62,13 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       return null;
     }
 
-    const authorization = UiamAPIKeys.getAuthorizationHeader(request);
+    // Prefer the original UIAM OAuth access token captured during token exchange (if any). After
+    // exchange, the request `Authorization` header carries only the short-lived ephemeral token,
+    // which cannot be used to grant a durable API key.
+    const originalOAuthToken = this.uiam.getOAuthCredential(request);
+    const authorization = originalOAuthToken
+      ? new HTTPAuthorizationHeader('Bearer', originalOAuthToken)
+      : UiamAPIKeys.getAuthorizationHeader(request);
 
     this.logger.debug('Trying to grant an API key');
     this.logger.debug(`Using authorization scheme: ${authorization.scheme}`);

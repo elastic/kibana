@@ -298,6 +298,14 @@ export const ConfigSchema = schema.object({
           taggedRoutesOnly: schema.boolean({ defaultValue: true }),
         }),
       }),
+      uiam: offeringBasedSchema({
+        serverless: schema.object({
+          // When `true`, only routes marked with the `ROUTE_TAG_ACCEPT_UIAM_OAUTH` tag accept UIAM
+          // OAuth access tokens. When `false`, UIAM OAuth access tokens are also accepted on any
+          // route with `access: 'public'`.
+          taggedRoutesOnly: schema.boolean({ defaultValue: true }),
+        }),
+      }),
     }),
   }),
   audit: schema.object({

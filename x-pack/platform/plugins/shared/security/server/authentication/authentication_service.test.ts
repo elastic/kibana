@@ -945,6 +945,90 @@ describe('AuthenticationService', () => {
 
         expect(mockOnPreResponseToolkit.next).toHaveBeenCalledWith();
       });
+
+      it('returns WWW-Authenticate header for 401 on a public route when `authc.http.uiam.taggedRoutesOnly` is disabled', async () => {
+        const mockReturnedValue = { type: 'render' as any };
+        const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate(
+            {
+              authc: { http: { uiam: { taggedRoutesOnly: false } } },
+              mcp: {
+                oauth2: {
+                  metadata: {
+                    authorization_servers: ['https://localhost:9200'],
+                    resource: 'http://localhost:5620',
+                  },
+                },
+              },
+            },
+            { serverless: true }
+          ),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+
+        const { onPreResponseHandler } = getService();
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              kibanaRouteOptions: { xsrfRequired: true, access: 'public' },
+            }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: null,
+            error: { code: -32000, message: 'Unauthorized' },
+          }),
+          headers: {
+            'WWW-Authenticate': expect.stringContaining('Bearer resource_metadata="'),
+            'Content-Type': 'application/json',
+          },
+        });
+      });
+
+      it('does not return WWW-Authenticate header for 401 on a public route when `taggedRoutesOnly` is enabled', async () => {
+        const mockReturnedValue = { type: 'next' as any };
+        const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate(
+            {
+              mcp: {
+                oauth2: {
+                  metadata: {
+                    authorization_servers: ['https://localhost:9200'],
+                    resource: 'http://localhost:5620',
+                  },
+                },
+              },
+            },
+            { serverless: true }
+          ),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+
+        const { onPreResponseHandler } = getService();
+        await onPreResponseHandler(
+          httpServerMock.createKibanaRequest({
+            kibanaRouteOptions: { xsrfRequired: true, access: 'public' },
+          }),
+          { statusCode: 401 },
+          mockOnPreResponseToolkit
+        );
+
+        expect(mockOnPreResponseToolkit.render).not.toHaveBeenCalled();
+      });
     });
 
     it('ignores responses if authenticator is not initialized', async () => {
