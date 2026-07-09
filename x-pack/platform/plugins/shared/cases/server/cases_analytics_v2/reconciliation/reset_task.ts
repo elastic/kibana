@@ -13,6 +13,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
 import type { CasesActivityV2WriterContract } from '../writer/activity';
+import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
 import { runFullReset } from './reset_runner';
 
 /**
@@ -49,8 +50,8 @@ export const RESET_TASK_ID = 'cases-analyticsV2-reset';
 /**
  * State persisted to the reset task SO. Written at two moments:
  *   1. Mid-run progress: a wall-clock-throttled wrapper around
- *      `taskManager.bulkUpdateState` pushes `phase`, `cases_processed`,
- *      `activity_processed`, and `started_at` every ~30s during the
+ *      `taskManager.bulkUpdateState` pushes `phase`, the per-surface
+ *      `*_processed` counts, and `started_at` every ~30s during the
  *      walk so `/state.active_reset.state` reflects live progress.
  *      Fields not yet known stay at their initial values.
  *   2. Final return: the runner returns the fully-populated shape at the
@@ -58,36 +59,43 @@ export const RESET_TASK_ID = 'cases-analyticsV2-reset';
  *      auto-removes the SO shortly after. A `/state` call landing in
  *      that brief window sees the complete final state.
  *
- * On total failure (both surfaces threw) the runner throws instead of
+ * On total failure (every surface threw) the runner throws instead of
  * returning, which preserves the SO with the most recent throttled
- * write — so `phase`, `cases_processed`, and `activity_processed` still
- * reflect how far the walk got.
+ * write — so the per-surface `*_processed` counts still reflect how far
+ * each concurrent walk got before the throw.
  */
 export interface ResetTaskState {
   /**
-   * Surface currently being walked. Mid-run: `'cases'` or `'activity'`.
-   * Final-state write: `'completed'`. On total failure the SO is
-   * preserved with the surface that died.
+   * Coarse task phase. `'running'` while the walk is in flight,
+   * `'completed'` on the final-state write. The three surfaces are
+   * walked concurrently, so there is no single "surface currently being
+   * walked" to report here — per-surface progress lives in the
+   * `*_processed` counts below. On total failure the SO is preserved
+   * with `phase: 'running'` (the last throttled write before the throw).
    */
-  phase: 'cases' | 'activity' | 'completed' | null;
+  phase: 'running' | 'completed' | null;
   /**
-   * Cumulative cases-surface processed count. Updates live during the
-   * cases walk via the throttled progress writer; frozen at its final
-   * value once the activity walk starts. `null` until the first cases
-   * page completes.
+   * Cumulative cases-surface processed count. Updates live throughout
+   * the walk via the throttled progress writer. Because the three
+   * surfaces run concurrently, this advances alongside
+   * `activity_processed` and `attachments_processed` rather than one
+   * surface at a time. `null` until the first cases page completes.
    */
   cases_processed: number | null;
   /** Cumulative activity-surface processed count. Same lifecycle as `cases_processed`. */
   activity_processed: number | null;
-  /** Periodic-task cursors seeded after both walks complete. Final-write only. */
+  /** Cumulative attachments-surface processed count. Same lifecycle as `cases_processed`. */
+  attachments_processed: number | null;
+  /** Periodic-task cursors seeded after all walks complete. Final-write only. */
   cases_cursor: string | null;
   activity_cursor: string | null;
+  attachments_cursor: string | null;
   /** Wall-clock at task-runner entry. Set in the initial throttled write. */
   started_at: string;
   /** Wall-clock at task-runner exit. Final-write only; null mid-run. */
   completed_at: string | null;
   /**
-   * Per-surface error message if either walk threw. Final-write only.
+   * Per-surface error message if a walk threw. Final-write only.
    * `runFullReset`'s per-surface isolation captures these in the result
    * rather than propagating; stashing the message here lets `/state`
    * consumers distinguish "succeeded" from "succeeded with a partial
@@ -95,6 +103,7 @@ export interface ResetTaskState {
    */
   cases_error: string | null;
   activity_error: string | null;
+  attachments_error: string | null;
   [key: string]: unknown;
 }
 
@@ -147,6 +156,7 @@ interface RegisterResetTaskArgs {
     savedObjectsClient: SavedObjectsClientContract;
     writer: CasesAnalyticsV2WriterContract;
     activityWriter: CasesActivityV2WriterContract;
+    attachmentsWriter: CasesAttachmentsV2WriterContract;
     taskManager: TaskManagerStartContract;
   }>;
 }
@@ -168,7 +178,7 @@ export function registerResetTask({
     [RESET_TASK_TYPE]: {
       title: 'Cases analytics v2 full reset',
       description:
-        'One-shot full backfill of the .cases and .cases-activity analytics indices. Scheduled by POST /internal/cases/_analyticsV2/reset; runs the same walks the periodic reconciliation task does, but with lastRunAt: undefined so every doc is re-emitted.',
+        'One-shot full backfill of the .cases, .cases-activity, and .cases-attachments analytics indices. Scheduled by POST /internal/cases/_analyticsV2/reset; runs the same walks the periodic reconciliation task does, but with lastRunAt: undefined so every doc is re-emitted.',
       // Configurable per-tenant; at 10K spaces / ~15M activity docs the
       // default 60m is too low and administrators raise it in `kibana.yml`.
       // The config schema's `max: 1440` keeps it bounded. Task Manager
@@ -209,15 +219,18 @@ export function registerResetTask({
           // reads from this same reference (no copy) so each flush
           // captures whatever the most recent page reported.
           const liveState: ResetTaskState = {
-            phase: 'cases',
+            phase: 'running',
             cases_processed: null,
             activity_processed: null,
+            attachments_processed: null,
             cases_cursor: null,
             activity_cursor: null,
+            attachments_cursor: null,
             started_at: startedAt,
             completed_at: null,
             cases_error: null,
             activity_error: null,
+            attachments_error: null,
           };
 
           const flushProgress = async () => {
@@ -243,7 +256,7 @@ export function registerResetTask({
 
           try {
             // Initial flush so `/state.active_reset.state` shows
-            // `phase: 'cases', started_at: ...` immediately rather than
+            // `phase: 'running', started_at: ...` immediately rather than
             // the placeholder `{}` Task Manager wrote at schedule time.
             // The first `onProgress` callback would also fire this
             // (leading edge), but the first page can be slow on a cold
@@ -255,55 +268,60 @@ export function registerResetTask({
               savedObjectsClient: deps.savedObjectsClient,
               writer: deps.writer,
               activityWriter: deps.activityWriter,
+              attachmentsWriter: deps.attachmentsWriter,
               taskManager: deps.taskManager,
               intervalMinutes: reconciliationIntervalMinutes,
               pageDelayMs,
               logger,
               onProgress: ({ phase, processed }) => {
-                liveState.phase = phase;
+                // The three surfaces walk concurrently, so `phase` here is
+                // only the per-page discriminator for routing the count to
+                // the right surface — the top-level `liveState.phase` stays
+                // `'running'` for the whole walk (see `ResetTaskState.phase`).
                 if (phase === 'cases') {
                   liveState.cases_processed = processed;
-                } else {
+                } else if (phase === 'activity') {
                   liveState.activity_processed = processed;
+                } else {
+                  liveState.attachments_processed = processed;
                 }
                 throttledFlush.schedule();
               },
             });
 
             const completedAt = new Date().toISOString();
-            const casesErrorMessage =
-              result.casesError != null
-                ? result.casesError instanceof Error
-                  ? result.casesError.message
-                  : String(result.casesError)
-                : null;
-            const activityErrorMessage =
-              result.activityError != null
-                ? result.activityError instanceof Error
-                  ? result.activityError.message
-                  : String(result.activityError)
-                : null;
+            const casesErrorMessage = errorToMessage(result.casesError);
+            const activityErrorMessage = errorToMessage(result.activityError);
+            const attachmentsErrorMessage = errorToMessage(result.attachmentsError);
 
             const finalState: ResetTaskState = {
               phase: 'completed',
               cases_processed: result.cases?.processed ?? liveState.cases_processed,
               activity_processed: result.activity?.processed ?? liveState.activity_processed,
+              attachments_processed:
+                result.attachments?.processed ?? liveState.attachments_processed,
               cases_cursor: result.casesCursor,
               activity_cursor: result.activityCursor,
+              attachments_cursor: result.attachmentsCursor,
               started_at: startedAt,
               completed_at: completedAt,
               cases_error: casesErrorMessage,
               activity_error: activityErrorMessage,
+              attachments_error: attachmentsErrorMessage,
             };
 
-            // Both surfaces failed: throw so the SO survives with
+            // Every surface failed: throw so the SO survives with
             // `status: 'failed'` and the most recent throttled
             // `liveState` (capturing how far each walk got). The
-            // message includes both per-surface errors so consumers can
+            // message includes every per-surface error so consumers can
             // distinguish from a deps-resolution failure.
-            if (result.casesError != null && result.activityError != null) {
+            if (
+              result.casesError != null &&
+              result.activityError != null &&
+              result.attachmentsError != null
+            ) {
               throw new Error(
-                `cases-analyticsV2: full reset failed on both surfaces. cases: ${casesErrorMessage}. activity: ${activityErrorMessage}`
+                `cases-analyticsV2: full reset failed on every surface. cases: ${casesErrorMessage}. activity: ${activityErrorMessage}. attachments: ${attachmentsErrorMessage}`
               );
             }
 
@@ -422,6 +440,16 @@ export async function fetchResetTask({
     );
     return null;
   }
+}
+
+/**
+ * Maps a captured error (or `null`) to a human-readable message string
+ * suitable for the `*_error` slots on `ResetTaskState`. Returns `null`
+ * when the input is `null` so the SO field stays nullable.
+ */
+function errorToMessage(err: unknown): string | null {
+  if (err == null) return null;
+  return err instanceof Error ? err.message : String(err);
 }
 
 /**

@@ -7,7 +7,7 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '@kbn/streams-plugin/common';
+import { SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface DiscoverySettingsContextValue {
