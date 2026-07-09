@@ -173,11 +173,12 @@ export const useAgentBuilderIntegration = ({
 
     // Remember the unsaved-workflow attachment id so the save thunk can carry
     // the conversation onto the saved workflow's session tag after creation.
-    // Cleared once a real workflowId exists.
+    // The value is consumed (and cleared) inside `carryConversationToWorkflow`
+    // — do NOT clear it here on workflowId presence. Dispatching setWorkflow
+    // re-fires this effect, and clearing would race the save thunk's carry
+    // call, leaving the detail view with an empty chat.
     if (!workflowId) {
       setLastCreateAttachmentId(attachmentId);
-    } else {
-      setLastCreateAttachmentId(undefined);
     }
 
     const bridge = new AttachmentBridge();

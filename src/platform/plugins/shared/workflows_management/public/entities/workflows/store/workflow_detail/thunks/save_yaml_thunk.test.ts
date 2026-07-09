@@ -135,6 +135,13 @@ describe('saveYamlThunk', () => {
       // On successful create, hand off the /workflows/create chat conversation
       // onto the newly-saved workflow so its detail view opens with history.
       expect(mockCarryConversationToWorkflow).toHaveBeenCalledWith('test-workflow-1');
+      // Regression guard: the carry must run BEFORE dispatch(setWorkflow(...))
+      // and BEFORE navigateToApp, otherwise the re-render triggered by the
+      // dispatch clears the module-level create attachmentId and the handoff
+      // no-ops (found via end-to-end verification of PR #277135).
+      const carryOrder = mockCarryConversationToWorkflow.mock.invocationCallOrder[0];
+      const navOrder = mockServices.application.navigateToApp.mock.invocationCallOrder[0];
+      expect(carryOrder).toBeLessThan(navOrder);
       expect(queryClient.invalidateQueries).toHaveBeenCalledWith({ queryKey: ['workflows'] });
       expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
         queryKey: ['workflows', undefined],

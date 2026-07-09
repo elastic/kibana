@@ -109,17 +109,20 @@ export const saveYamlThunk = createAsyncThunk<
           aiAssisted: isAiAssisted,
         });
 
+        // Carry the AI chat conversation started on /workflows/create onto the
+        // saved workflow's session tag BEFORE dispatching setWorkflow. The
+        // dispatch flips workflowId in Redux, which triggers the agent-builder
+        // integration effect to re-run — and its cleanup would clear the
+        // module-level create attachment id before we get a chance to consume
+        // it, leaving the detail view with an empty chat.
+        carryConversationToWorkflow(workflow.id);
+
         // Update the workflow in the store
         dispatch(setWorkflow(workflow));
 
         // Invalidate relevant queries to refresh the UI
         queryClient.invalidateQueries({ queryKey: ['workflows'] });
         queryClient.invalidateQueries({ queryKey: ['workflows', id] });
-
-        // Carry the AI chat conversation started on /workflows/create onto the
-        // saved workflow's session tag so the detail view opens with the same
-        // conversation and message history rather than an empty chat.
-        carryConversationToWorkflow(workflow.id);
 
         // Navigate to the workflow detail page
         application.navigateToApp(PLUGIN_ID, { path: workflow.id });

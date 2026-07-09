@@ -588,7 +588,11 @@ describe('useAgentBuilderIntegration', () => {
       expect(mockSetLastCreateAttachmentId).toHaveBeenCalledWith(MOCK_UUID);
     });
 
-    it('clears the create-attachment registration when a workflowId is present', () => {
+    it('does NOT register or clear the create-attachment when a workflowId is present', () => {
+      // The module-level value is single-shot — consumed by
+      // carryConversationToWorkflow in the save thunk. Clearing here would
+      // race the thunk's carry call after `dispatch(setWorkflow(...))`, since
+      // the resulting re-render re-fires this effect with workflowId set.
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -601,7 +605,7 @@ describe('useAgentBuilderIntegration', () => {
         })
       );
 
-      expect(mockSetLastCreateAttachmentId).toHaveBeenCalledWith(undefined);
+      expect(mockSetLastCreateAttachmentId).not.toHaveBeenCalled();
     });
   });
 
