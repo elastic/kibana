@@ -243,9 +243,11 @@ describe('TaskPool', () => {
       });
 
       const taskFailedToRun = mockTask();
+      // a non-Error rejection value (e.g. a raw ES response), assigned to a
+      // variable so we throw an identifier rather than a literal
+      const nonErrorRejection = { statusCode: 500, error: {} };
       taskFailedToRun.run.mockImplementation(async () => {
-        // eslint-disable-next-line no-throw-literal
-        throw { statusCode: 500, error: {} };
+        throw nonErrorRejection;
       });
 
       const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);
@@ -268,9 +270,9 @@ describe('TaskPool', () => {
       });
 
       const taskFailedToRun = mockTask();
+      const esStyleRejection = { statusCode: 500, error: { message: 'nested boom' } };
       taskFailedToRun.run.mockImplementation(async () => {
-        // eslint-disable-next-line no-throw-literal
-        throw { statusCode: 500, error: { message: 'nested boom' } };
+        throw esStyleRejection;
       });
 
       const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);
@@ -293,9 +295,9 @@ describe('TaskPool', () => {
       });
 
       const taskFailedToMarkAsRunning = mockTask();
+      const nonErrorRejection = { statusCode: 409, error: {} };
       taskFailedToMarkAsRunning.markTaskAsRunning.mockImplementation(async () => {
-        // eslint-disable-next-line no-throw-literal
-        throw { statusCode: 409, error: {} };
+        throw nonErrorRejection;
       });
 
       await expect(pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()])).rejects.toEqual({
@@ -720,9 +722,9 @@ describe('TaskPool', () => {
       });
 
       const taskFailedToRun = mockTask();
+      const nonErrorRejection = { statusCode: 500, error: {} };
       taskFailedToRun.run.mockImplementation(async () => {
-        // eslint-disable-next-line no-throw-literal
-        throw { statusCode: 500, error: {} };
+        throw nonErrorRejection;
       });
 
       const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);

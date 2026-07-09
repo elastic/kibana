@@ -7,6 +7,7 @@
 
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { Logger } from '@kbn/core/server';
+import { safeJsonStringify } from '@kbn/std';
 import { pipe } from 'fp-ts/pipeable';
 import { getOrElse, map } from 'fp-ts/Option';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
@@ -168,7 +169,7 @@ export async function executor(
         typeof rawResponseMessage === 'string'
           ? rawResponseMessage
           : rawResponseMessage != null
-          ? JSON.stringify(rawResponseMessage)
+          ? safeJsonStringify(rawResponseMessage)
           : undefined;
       const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
       const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;

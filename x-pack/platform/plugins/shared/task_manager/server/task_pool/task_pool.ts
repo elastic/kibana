@@ -14,6 +14,7 @@ import { Subject } from 'rxjs';
 import type { Duration } from 'moment';
 import moment from 'moment';
 import { padStart } from 'lodash';
+import { safeJsonStringify } from '@kbn/std';
 import type { Logger } from '@kbn/core/server';
 import type { TaskRunner } from '../task_running';
 import { isTaskSavedObjectNotFoundError } from '../lib/is_task_not_found_error';
@@ -39,7 +40,9 @@ const getErrorMessage = (error: unknown): string => {
     if (typeof nested?.message === 'string') {
       return nested.message;
     }
-    return JSON.stringify(error);
+    // `safeJsonStringify` won't throw on circular references (it omits them);
+    // fall back to `String(error)` only if it can't serialize the value at all.
+    return safeJsonStringify(error) ?? String(error);
   }
   return String(error);
 };

@@ -8,6 +8,7 @@
 import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
+import { safeJsonStringify } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
@@ -110,7 +111,7 @@ const buildSlackExecutorSuccessResponse = <T extends SlackAPiResponse>({
       typeof rawError === 'string'
         ? rawError
         : rawError != null
-        ? JSON.stringify(rawError)
+        ? safeJsonStringify(rawError)
         : undefined;
     return serviceErrorResult(CONNECTOR_ID, serviceMessage);
   }
