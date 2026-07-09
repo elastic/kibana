@@ -16,7 +16,7 @@ import {
   getImportedDashboardId,
 } from '../../../fixtures';
 
-spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentAgnostic }, () => {
   let xyDashboardId: string;
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {

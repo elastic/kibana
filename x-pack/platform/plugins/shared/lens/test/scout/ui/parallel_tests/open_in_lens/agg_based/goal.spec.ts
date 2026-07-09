@@ -9,7 +9,7 @@ import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData, convertToLensByTitle, getImportedDashboardId } from '../../../fixtures';
 
-spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymentAgnostic }, () => {
   let goalDashboardId: string;
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {

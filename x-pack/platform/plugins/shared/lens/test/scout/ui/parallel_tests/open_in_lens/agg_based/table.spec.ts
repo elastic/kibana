@@ -30,7 +30,7 @@ const getDimensionFlyoutComboBoxSelectedOptions = async (
   return value ? [value] : [];
 };
 
-spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deploymentAgnostic }, () => {
   let tableDashboardId: string;
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
