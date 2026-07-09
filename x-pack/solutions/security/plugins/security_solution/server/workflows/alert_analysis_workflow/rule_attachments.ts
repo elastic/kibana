@@ -8,7 +8,6 @@
 import pMap from 'p-map';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { systemConnectorActionRefPrefix } from '@kbn/alerting-plugin/common';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import type {
   AlertAnalysisWorkflowRuleAttachmentService,
@@ -77,50 +76,17 @@ const normalizeSearch = (search: string): string | undefined => {
   return trimmed.length > 0 ? trimmed : undefined;
 };
 
-// KQL matching rules that have this workflow's system action attached. Mirrors how the connector
-// rules list finds rules using a system connector (see triggers_actions_ui connector_rules_list),
-// but also pins the flattened `workflowId` so a rule attached to a *different* workflow via the same
-// shared `.workflows` system connector is not counted as attached to this one.
-const buildAttachedRulesFilter = (workflowId: string): string =>
-  `alert.attributes.actions:{ actionRef: "${systemConnectorActionRefPrefix}${ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID}" and params.subActionParams.workflowId: "${workflowId}" }`;
-
-// Match the Rules page: a single search term becomes a `name.keyword: *term*` substring filter
-// (plus the MITRE/index attributes), so `Endpoin`/`Sec`/`Def` match like they do there. The plain
-// `search`/`searchFields` used before only matched whole words/prefixes.
-const buildSearchClause = (search: string): string | undefined => {
-  const normalizedSearch = normalizeSearch(search);
-  return normalizedSearch ? convertRuleSearchTermToKQL(normalizedSearch) : undefined;
-};
-
-// Translates the attachment filter into a KQL clause so the narrowing happens server-side (via the
-// count-only + paginated read paths) instead of pulling every matching rule into memory to filter.
-const buildAttachmentFilterClause = (
-  workflowId: string,
-  attachmentFilter: RuleAttachmentFilter
-): string | undefined => {
-  const attachedFilter = buildAttachedRulesFilter(workflowId);
-
-  if (attachmentFilter === 'attached') {
-    return attachedFilter;
+const compareRulesByStableDefaultSort = (ruleA: RuleAlertType, ruleB: RuleAlertType): number => {
+  if (ruleA.enabled !== ruleB.enabled) {
+    return ruleA.enabled ? -1 : 1;
   }
 
-  if (attachmentFilter === 'not_attached') {
-    return `not (${attachedFilter})`;
+  const nameComparison = ruleA.name.localeCompare(ruleB.name);
+  if (nameComparison !== 0) {
+    return nameComparison;
   }
 
-  return undefined;
-};
-
-// ANDs the provided KQL clauses (dropping empty ones), parenthesizing each so their internal `and`/
-// `or`/`not` operators don't bleed across clause boundaries.
-const combineFilters = (clauses: Array<string | undefined>): string | undefined => {
-  const presentClauses = clauses.filter((clause): clause is string => Boolean(clause));
-
-  if (presentClauses.length === 0) {
-    return undefined;
-  }
-
-  return presentClauses.map((clause) => `(${clause})`).join(' and ');
+  return ruleA.id.localeCompare(ruleB.id);
 };
 
 const getRuleActions = (
@@ -196,59 +162,43 @@ const toRuleAttachmentSummary = (
   attached: hasAlertAnalysisWorkflowAction(rule, workflowId),
 });
 
-// Count-only find (no hits fetched) so the preview scales far past the old MAX_RULES_TO_ATTACH cap
-// (which threw once more than 2000 matched) instead of erroring. The alerting rules client does not
-// set `track_total_hits`, so `total` is exact up to Elasticsearch's default 10,000 ceiling and
-// saturates at 10,000 beyond that. The `filter` narrows the count, e.g. to rules matching the search
-// term, the attachment filter, or that already have the workflow attached.
-const countMatchingRules = async ({
+const getMatchingRules = async ({
   rulesClient,
-  filter,
+  search,
 }: {
   rulesClient: RulesClient;
-  filter?: string;
-}): Promise<number> => {
-  const { total } = await findRules({
+  search: string;
+}): Promise<MatchingRulesResult> => {
+  const normalizedSearch = normalizeSearch(search);
+  const result = await findRules({
     rulesClient,
-    filter,
+    // Match the Rules page: a single search term becomes a `name.keyword: *term*` substring
+    // filter (plus the MITRE/index attributes), so `Endpoin`/`Sec`/`Def` match like they do
+    // there. The plain `search`/`searchFields` used before only matched whole words/prefixes.
+    filter: normalizedSearch ? convertRuleSearchTermToKQL(normalizedSearch) : undefined,
     fields: undefined,
     page: 1,
-    perPage: 0,
+    perPage: MAX_RULES_TO_ATTACH,
     sortField: undefined,
     sortOrder: undefined,
     search: undefined,
     searchFields: undefined,
   });
 
-  return total;
+  if (result.total > MAX_RULES_TO_ATTACH) {
+    throw new BadRequestError(
+      `More than ${MAX_RULES_TO_ATTACH} rules matched the filter query. Try to narrow it down.`
+    );
+  }
+
+  return {
+    total: result.total,
+    rules: result.data.sort(compareRulesByStableDefaultSort),
+  };
 };
 
-// Server-side sorted + paginated fetch. Sorting is delegated to the rules client (by name) so the
-// order is stable across pages without pulling every matching rule into memory.
-const fetchMatchingRules = async ({
-  rulesClient,
-  filter,
-  page,
-  perPage,
-}: {
-  rulesClient: RulesClient;
-  filter?: string;
-  page: number;
-  perPage: number;
-}): Promise<MatchingRulesResult> => {
-  const { data, total } = await findRules({
-    rulesClient,
-    filter,
-    fields: undefined,
-    page,
-    perPage,
-    sortField: 'name',
-    sortOrder: 'asc',
-    search: undefined,
-    searchFields: undefined,
-  });
-
-  return { total, rules: data };
+const countAttachedRules = (rules: RuleAlertType[], workflowId: string): number => {
+  return rules.filter((rule) => hasAlertAnalysisWorkflowAction(rule, workflowId)).length;
 };
 
 const getRulesMissingWorkflowAction = (
@@ -263,6 +213,22 @@ const getRulesWithWorkflowAction = (
   workflowId: string
 ): RuleAlertType[] => {
   return rules.filter((rule) => hasAlertAnalysisWorkflowAction(rule, workflowId));
+};
+
+const filterRulesByAttachment = (
+  rules: RuleAlertType[],
+  workflowId: string,
+  attachmentFilter: RuleAttachmentFilter
+): RuleAlertType[] => {
+  if (attachmentFilter === 'attached') {
+    return getRulesWithWorkflowAction(rules, workflowId);
+  }
+
+  if (attachmentFilter === 'not_attached') {
+    return getRulesMissingWorkflowAction(rules, workflowId);
+  }
+
+  return rules;
 };
 
 const getRulesByIds = async ({
@@ -313,48 +279,27 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
 
   return {
     async getRuleAttachmentStats({ search, attachmentFilter }) {
-      const searchClause = buildSearchClause(search);
-      const attachmentClause = buildAttachmentFilterClause(workflowId, attachmentFilter);
-      const attachedClause = buildAttachedRulesFilter(workflowId);
+      const { rules } = await getMatchingRules({ rulesClient, search });
+      const filteredRules = filterRulesByAttachment(rules, workflowId, attachmentFilter);
 
-      const [total, attached] = await Promise.all([
-        countMatchingRules({
-          rulesClient,
-          filter: combineFilters([searchClause, attachmentClause]),
-        }),
-        countMatchingRules({
-          rulesClient,
-          filter: combineFilters([searchClause, attachmentClause, attachedClause]),
-        }),
-      ]);
-
-      return { total, attached };
+      return {
+        total: filteredRules.length,
+        attached: countAttachedRules(filteredRules, workflowId),
+      };
     },
 
     async getRuleAttachments({ search, attachmentFilter, page, perPage }) {
-      const searchClause = buildSearchClause(search);
-      const attachmentClause = buildAttachmentFilterClause(workflowId, attachmentFilter);
-      const attachedClause = buildAttachedRulesFilter(workflowId);
-
-      const [{ total, rules }, attached] = await Promise.all([
-        fetchMatchingRules({
-          rulesClient,
-          filter: combineFilters([searchClause, attachmentClause]),
-          page,
-          perPage,
-        }),
-        countMatchingRules({
-          rulesClient,
-          filter: combineFilters([searchClause, attachmentClause, attachedClause]),
-        }),
-      ]);
+      const { rules } = await getMatchingRules({ rulesClient, search });
+      const filteredRules = filterRulesByAttachment(rules, workflowId, attachmentFilter);
+      const startIndex = (page - 1) * perPage;
+      const pageRules = filteredRules.slice(startIndex, startIndex + perPage);
 
       return {
-        total,
-        attached,
+        total: filteredRules.length,
+        attached: countAttachedRules(filteredRules, workflowId),
         page,
         perPage,
-        rules: rules.map((rule) => toRuleAttachmentSummary(rule, workflowId)),
+        rules: pageRules.map((rule) => toRuleAttachmentSummary(rule, workflowId)),
       };
     },
 
@@ -362,24 +307,13 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
       search,
       attachmentFilter,
     }): Promise<RuleAttachmentSelection> {
-      // Bulk attach/detach is bounded platform-wide (the rules client turns ids into KQL OR clauses,
-      // capped by ES maxClauseCount), so selection enumerates at most MAX_RULES_TO_ATTACH matching
-      // rules by name order rather than every match. Browsing/preview stays uncapped via the
-      // count-only + paginated read paths above.
-      const searchClause = buildSearchClause(search);
-      const attachmentClause = buildAttachmentFilterClause(workflowId, attachmentFilter);
-
-      const { total, rules } = await fetchMatchingRules({
-        rulesClient,
-        filter: combineFilters([searchClause, attachmentClause]),
-        page: 1,
-        perPage: MAX_RULES_TO_ATTACH,
-      });
-      const rulesMissingWorkflowAction = getRulesMissingWorkflowAction(rules, workflowId);
-      const rulesWithWorkflowAction = getRulesWithWorkflowAction(rules, workflowId);
+      const { rules } = await getMatchingRules({ rulesClient, search });
+      const filteredRules = filterRulesByAttachment(rules, workflowId, attachmentFilter);
+      const rulesMissingWorkflowAction = getRulesMissingWorkflowAction(filteredRules, workflowId);
+      const rulesWithWorkflowAction = getRulesWithWorkflowAction(filteredRules, workflowId);
 
       return {
-        total,
+        total: filteredRules.length,
         attached: rulesWithWorkflowAction.length,
         selectable: rulesMissingWorkflowAction.length,
         attachedRuleIds: rulesWithWorkflowAction.map(({ id }) => id),
