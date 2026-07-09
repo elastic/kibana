@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/significant-events-plugin",
   "owner": "@elastic/obs-sig-events-team",
-  "description": "Signficant Events",
+  "description": "Significant Events",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
@@ -39,6 +39,7 @@
       "workflowsExtensions",
       "workflowsManagement"
     ],
-    "requiredBundles": []
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
   }
 }

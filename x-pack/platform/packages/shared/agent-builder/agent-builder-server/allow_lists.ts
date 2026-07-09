@@ -103,8 +103,8 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
-  `${internalNamespaces.platformSignificantEvents}.discovery.investigator`,
-  `${internalNamespaces.platformSignificantEvents}.discovery.judge`,
+  `${internalNamespaces.streams}.sig-events.discovery`,
+  `${internalNamespaces.streams}.sig-events.discovery-judge`,
   `${internalNamespaces.platformSignificantEvents}.investigation`,
 ] as const;
 
@@ -185,7 +185,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   `${internalNamespaces.search}.rag-chatbot`,
   `${internalNamespaces.search}.use-case-library`,
   `${internalNamespaces.search}.elasticsearch-tutorial`,
-  'skill-authoring',
+  'skill-management',
   'connector-authoring',
 ] as const;
 

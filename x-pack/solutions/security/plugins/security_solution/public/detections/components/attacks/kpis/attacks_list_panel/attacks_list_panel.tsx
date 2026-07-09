@@ -28,9 +28,9 @@ import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details
 import { SeverityBar } from '../../../../../entity_analytics/components/severity/severity_bar';
 import { useAttacksListData } from './use_attacks_list_data';
 import type { AttacksListItem } from './types';
-import { useKibana, useUiSetting } from '../../../../../common/lib/kibana';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
-import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../../../common/constants';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { AttackFlyoutWrapper } from '../../../../../flyout_v2/attack/main/attack_flyout_wrapper';
@@ -76,7 +76,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
     const { openFlyout } = useExpandableFlyoutApi();
     const { services } = useKibana();
     const { telemetry, overlays } = services;
-    const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
+    const enableNewFlyout = useIsNewFlyoutEnabled();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const store = useStore();
     const history = useHistory();

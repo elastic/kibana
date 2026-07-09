@@ -73,6 +73,7 @@ import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types'
 import { shallowEqual } from '../utils/shallow_equal';
 import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
 import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
+import { QuerySubmitTrigger } from '../search_bar/query_submit_metadata';
 
 /** Feature flag key for the new DateRangePicker. Falls back to `true` (new picker). */
 const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
@@ -163,7 +164,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onChange: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  onSubmit: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
+  onSubmit: (
+    payload: { dateRange: TimeRange; query?: Query | QT },
+    trigger?: QuerySubmitTrigger
+  ) => void;
   onSendToBackground: (payload: { dateRange: TimeRange; query?: Query | QT }) => Promise<void>;
   onCancel?: () => void;
   onDraftChange?: (draft: UnifiedSearchDraft | undefined) => void;
@@ -516,12 +520,15 @@ export const QueryBarTopRow = React.memo(
     });
 
     const onSubmit = useCallback(
-      ({ query, dateRange }: { query?: Query | QT; dateRange: TimeRange }) => {
+      (
+        { query, dateRange }: { query?: Query | QT; dateRange: TimeRange },
+        trigger?: QuerySubmitTrigger
+      ) => {
         if (timeHistory) {
           timeHistory.add(dateRange);
         }
 
-        propsOnSubmit({ query, dateRange });
+        propsOnSubmit({ query, dateRange }, trigger);
       },
       [timeHistory, propsOnSubmit]
     );
@@ -532,10 +539,13 @@ export const QueryBarTopRow = React.memo(
           persistedLog.add(queryRef.current.query);
         }
         event.preventDefault();
-        onSubmit({
-          query: queryRef.current,
-          dateRange: dateRangeRef.current,
-        });
+        onSubmit(
+          {
+            query: queryRef.current,
+            dateRange: dateRangeRef.current,
+          },
+          QuerySubmitTrigger.QUERY_BAR_SUBMIT
+        );
       },
       [persistedLog, onSubmit]
     );
@@ -605,7 +615,7 @@ export const QueryBarTopRow = React.memo(
         };
 
         if (isQuickSelection) {
-          onSubmit(retVal);
+          onSubmit(retVal, QuerySubmitTrigger.TIME_FILTER);
         } else {
           propsOnChange(retVal);
         }
@@ -627,10 +637,13 @@ export const QueryBarTopRow = React.memo(
       ({ start, end, isInvalid }: DateRangePickerOnChangeProps) => {
         setIsDateRangeInvalid(isInvalid);
         if (!isInvalid) {
-          onSubmit({
-            query: queryRef.current,
-            dateRange: { from: start, to: end },
-          });
+          onSubmit(
+            {
+              query: queryRef.current,
+              dateRange: { from: start, to: end },
+            },
+            QuerySubmitTrigger.TIME_FILTER
+          );
         }
       },
       [onSubmit]
@@ -708,10 +721,13 @@ export const QueryBarTopRow = React.memo(
 
     const onInputSubmit = useCallback(
       (query: Query) => {
-        onSubmit({
-          query,
-          dateRange: dateRangeRef.current,
-        });
+        onSubmit(
+          {
+            query,
+            dateRange: dateRangeRef.current,
+          },
+          QuerySubmitTrigger.QUERY_BAR_SUBMIT
+        );
       },
       [onSubmit]
     );
