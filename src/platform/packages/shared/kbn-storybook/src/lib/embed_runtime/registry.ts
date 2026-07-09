@@ -90,7 +90,7 @@ export const createDocsRegistry = ({
     const { renderNode, styleContainer } = createShadowMount(container);
     const root = createRoot(renderNode);
     roots.set(container, root);
-    root.render(createStoryElement(Story, styleContainer));
+    root.render(createStoryElement(Story, styleContainer, renderNode));
     resize.observe(container, renderNode, storybookId, options.onResize);
   };
 

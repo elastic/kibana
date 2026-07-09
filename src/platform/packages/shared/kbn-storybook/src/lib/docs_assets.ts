@@ -13,7 +13,7 @@ import { mkdir, readFile, stat, writeFile } from 'fs/promises';
 import { dirname, join, resolve } from 'path';
 import archiver from 'archiver';
 import webpack from 'webpack';
-import type { Configuration, StatsError } from 'webpack';
+import type { Configuration, StatsError, Watching } from 'webpack';
 import { default as WebpackConfig } from '../webpack.config';
 import { EMBEDDABLE_STORYBOOK_TAG } from './embeddable';
 
@@ -389,6 +389,50 @@ export const buildInlineRegistryBundle = async ({
       });
     });
   });
+};
+
+export interface WatchInlineRegistryBundleResult {
+  watching: Watching;
+  /** Resolves after the first compile completes (rejects if it fails), so callers can serve a ready bundle. */
+  firstBuild: Promise<void>;
+}
+
+// Rebuilds registry.js whenever a file in the bundle's import graph changes. webpack tracks the
+// graph itself, so only story-code edits trigger a rebuild; adding/removing stories or changing
+// shared deps requires a restart because those come from the one-time static Storybook build.
+export const watchInlineRegistryBundle = ({
+  entryPath,
+  docsDir,
+  onRebuild,
+}: CreateInlineRegistryWebpackConfigOptions & {
+  onRebuild?: (error: Error | undefined) => void;
+}): WatchInlineRegistryBundleResult => {
+  const config = createInlineRegistryWebpackConfig({ entryPath, docsDir });
+  const compiler = webpack(config);
+
+  let settleFirstBuild: (error?: Error) => void = () => {};
+  const firstBuild = new Promise<void>((resolvePromise, reject) => {
+    settleFirstBuild = (error) => (error ? reject(error) : resolvePromise());
+  });
+  let firstBuildSettled = false;
+
+  const watching = compiler.watch({ aggregateTimeout: 300 }, (runError, stats) => {
+    const compileError = runError
+      ? runError
+      : (() => {
+          const errors = stats?.toJson({ errors: true }).errors ?? [];
+          return errors.length ? new Error(errors.map(formatWebpackError).join('\n\n')) : undefined;
+        })();
+
+    if (!firstBuildSettled) {
+      firstBuildSettled = true;
+      settleFirstBuild(compileError);
+    }
+
+    onRebuild?.(compileError);
+  });
+
+  return { watching, firstBuild };
 };
 
 export const createDocsManifest = ({

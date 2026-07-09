@@ -193,6 +193,14 @@ describe('createDocsRegistry', () => {
       expect(element.props.cache).toEqual({ options: cacheOptions });
       expect(element.props.children.type).toBe(I18nProvider);
 
+      // colorMode is pinned so the shadow-root story ignores the OS `prefers-color-scheme`.
+      expect(element.props.colorMode).toBe('LIGHT');
+
+      // Portaled overlays default into the shadow root's node so their scoped EUI styles apply.
+      expect(element.props.componentDefaults).toEqual({
+        EuiPortal: { insert: { sibling: renderNode, position: 'after' } },
+      });
+
       // Auto-sizing measures the rendered node (12), never the un-isolated host (40).
       expect(onResize).toHaveBeenCalledWith({ height: 12 });
     } finally {
