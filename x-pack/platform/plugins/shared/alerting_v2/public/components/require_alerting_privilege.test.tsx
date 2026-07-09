@@ -18,16 +18,31 @@ jest.mock('@kbn/core-di-browser');
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const mockCanRead = jest.fn<boolean, [AlertingV2Feature]>();
+const mockCanWrite = jest.fn<boolean, [AlertingV2Feature]>();
 
 const mockReadableFeatures = (readable: (feature: AlertingV2Feature) => boolean) => {
   mockCanRead.mockImplementation(readable);
-  mockUseService.mockReturnValue({ canRead: mockCanRead } as unknown as UserCapabilities);
+  mockUseService.mockReturnValue({
+    canRead: mockCanRead,
+    canWrite: mockCanWrite,
+  } as unknown as UserCapabilities);
 };
 
-const renderGate = (features: RequireAlertingPrivilegeProps['features'] = ['rules']) =>
+const mockWritableFeatures = (writable: (feature: AlertingV2Feature) => boolean) => {
+  mockCanWrite.mockImplementation(writable);
+  mockUseService.mockReturnValue({
+    canRead: mockCanRead,
+    canWrite: mockCanWrite,
+  } as unknown as UserCapabilities);
+};
+
+const renderGate = (
+  features: RequireAlertingPrivilegeProps['features'] = ['rules'],
+  { requireWrite }: { requireWrite?: boolean } = {}
+) =>
   render(
     <I18nProvider>
-      <RequireAlertingPrivilege features={features} pageName="Rules">
+      <RequireAlertingPrivilege features={features} pageName="Rules" requireWrite={requireWrite}>
         <div data-test-subj="gatedContent">Gated content</div>
       </RequireAlertingPrivilege>
     </I18nProvider>
@@ -69,5 +84,26 @@ describe('RequireAlertingPrivilege', () => {
 
     expect(screen.queryByTestId('gatedContent')).not.toBeInTheDocument();
     expect(screen.getByTestId('alertingRequiredPrivilegesPrompt')).toBeInTheDocument();
+  });
+
+  describe('when requireWrite is set', () => {
+    it('renders children when the user can write the required feature', () => {
+      mockWritableFeatures(() => true);
+      renderGate(['actionPolicies'], { requireWrite: true });
+
+      expect(screen.getByTestId('gatedContent')).toBeInTheDocument();
+      expect(mockCanWrite).toHaveBeenCalledWith('actionPolicies');
+    });
+
+    it('renders the interstitial when the user cannot write the required feature', () => {
+      mockWritableFeatures(() => false);
+      renderGate(['actionPolicies'], { requireWrite: true });
+
+      expect(screen.queryByTestId('gatedContent')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertingRequiredPrivilegesPrompt')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('alertingRequiredPrivilege-alerting_v2_action_policies')
+      ).toBeInTheDocument();
+    });
   });
 });
