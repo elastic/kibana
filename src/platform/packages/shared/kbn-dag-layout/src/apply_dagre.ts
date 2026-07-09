@@ -8,6 +8,7 @@
  */
 
 import dagre, { graphlib } from '@dagrejs/dagre';
+import type { EdgeLabel } from '@dagrejs/dagre';
 import {
   alignDagreCrossAxisInPlace,
   type CrossAxis,
@@ -22,10 +23,6 @@ import type {
   DagPositionedNode,
 } from './types';
 import { CROSS_AXIS_DELTA_TOLERANCE, STRAIGHT_X_THRESHOLD } from './constants';
-
-interface DagreLayoutEdge {
-  points?: Array<{ x: number; y: number }>;
-}
 
 /** Drops Dagre waypoints when endpoints align but middle segments still spread laterally. */
 export const resolveShiftedEdgePoints = ({
@@ -96,7 +93,7 @@ export function applyDagre(
   });
 
   const routedEdges: DagPositionedEdge[] = edges.map((edge) => {
-    const dagreEdge = g.edge(edge.source, edge.target) as DagreLayoutEdge | undefined;
+    const dagreEdge = g.edge(edge.source, edge.target) as EdgeLabel | undefined;
     const rawPoints = dagreEdge?.points;
     const beforeSource = centersBefore.get(edge.source);
     const beforeTarget = centersBefore.get(edge.target);

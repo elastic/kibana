@@ -6,6 +6,7 @@
  */
 
 import { graphlib, layout } from '@dagrejs/dagre';
+import type { NodeLabel } from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel, Size } from '../types';
 import { getStackNodeStyle } from '../node/styles';
@@ -198,14 +199,6 @@ const layoutStackedLabels = (
     children,
   };
 };
-
-/** Position/size of a node after `layout()` has run; Dagre's own types mark these optional pre-layout. */
-interface DagrePositionedNode {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
 
 /**
  * Shared context for graph alignment operations.
@@ -440,9 +433,10 @@ const alignNodesCenterInPlace = (
   const helpers: GraphHelpers = {
     g,
     filter,
-    Y: (id: string) => (g.node(id) as DagrePositionedNode).y,
-    Height: (id: string) => (g.node(id) as DagrePositionedNode).height,
-    setY: (id: string, y: number) => ((g.node(id) as DagrePositionedNode).y = y),
+    // `y` is only optional pre-layout; this runs after `layout(g)`, so it's always set here.
+    Y: (id: string) => (g.node(id) as NodeLabel & { y: number }).y,
+    Height: (id: string) => (g.node(id) as NodeLabel).height,
+    setY: (id: string, y: number) => ((g.node(id) as NodeLabel).y = y),
     prevNodeY: {},
     nodesById,
   };
