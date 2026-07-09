@@ -68,13 +68,11 @@ test.describe(
     });
 
     test('navigates to the next page when clicking the pagination button', async ({ page }) => {
-      // Filter to the bulk dataset so there are enough services to paginate.
-      await page.testSubj.fill('tableSearchInput', testData.MULTIPLE_SERVICES_PREFIX);
-      await expect(page.getByTestId('pagination-button-1')).toBeEnabled({
+      await expect(page.getByText(testData.SERVICE_OPBEANS_JAVA)).toBeVisible({
         timeout: EXTENDED_TIMEOUT,
       });
 
-      await page.getByTestId('pagination-button-1').click();
+      await page.getByTestId('pagination-button-1').click({ timeout: EXTENDED_TIMEOUT });
       await expect(page).toHaveURL(/page=1/);
     });
 
