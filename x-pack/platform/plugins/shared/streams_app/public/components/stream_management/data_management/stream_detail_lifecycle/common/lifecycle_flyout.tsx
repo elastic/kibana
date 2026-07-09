@@ -39,8 +39,9 @@ export const LifecycleFlyout = ({
   ...flyoutProps
 }: LifecycleFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
+  const headerPadding = headerContent ? euiTheme.size.l : euiTheme.size.xl;
   const headerStyles = css`
-    padding: ${euiTheme.size.l};
+    padding: ${headerPadding};
   `;
 
   return (
