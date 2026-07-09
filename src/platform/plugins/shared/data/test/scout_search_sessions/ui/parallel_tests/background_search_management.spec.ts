@@ -116,12 +116,10 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
 
       await spaceTest.step('submit query and save as a background search', async () => {
         const submitBtn = page.testSubj.locator('querySubmitButton');
-        await submitBtn.waitFor({ state: 'visible', timeout: 15_000 });
         await submitBtn.click();
 
         // Click the "Send to background" button appears while the search is running to create a background search
         const bgSubmitBtn = page.testSubj.locator('querySubmitButton-secondary-button');
-        await bgSubmitBtn.waitFor({ state: 'visible', timeout: 15_000 });
         await bgSubmitBtn.click();
 
         await page.testSubj
