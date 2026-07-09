@@ -19,7 +19,7 @@ interface ModeDefinition {
 }
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, unifiedFieldList, unifiedTabs } = getPageObjects([
+  const { common, discover, unifiedTabs } = getPageObjects([
     'common',
     'discover',
     'unifiedFieldList',
