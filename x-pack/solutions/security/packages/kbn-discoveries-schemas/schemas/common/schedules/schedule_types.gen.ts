@@ -26,15 +26,15 @@ export const AttackDiscoveryApiConfig = z.object({
   /**
    * Connector ID
    */
-  connector_id: z.string(),
+  connector_id: z.string().max(1024),
   /**
    * Action type ID
    */
-  action_type_id: z.string(),
+  action_type_id: z.string().max(1024),
   /**
    * Default system prompt ID
    */
-  default_system_prompt_id: z.string().optional(),
+  default_system_prompt_id: z.string().max(1024).optional(),
   /**
    * Provider
    */
@@ -42,11 +42,11 @@ export const AttackDiscoveryApiConfig = z.object({
   /**
    * Model
    */
-  model: z.string().optional(),
+  model: z.string().max(1024).optional(),
   /**
    * The name of the connector
    */
-  name: z.string().optional(),
+  name: z.string().max(1024).optional(),
 });
 
 /**
@@ -61,7 +61,7 @@ export const WorkflowConfig = z.object({
   /**
    * Array of user-created alert retrieval workflow IDs to execute. Only meaningful when alert_retrieval_workflows_enabled is true.
    */
-  alert_retrieval_workflow_ids: z.array(z.string()).optional().default([]),
+  alert_retrieval_workflow_ids: z.array(z.string().max(1024)).optional().default([]),
   /**
    * Toggle 3 - whether the user-created alert retrieval workflows run.
    */
@@ -73,7 +73,7 @@ export const WorkflowConfig = z.object({
   /**
    * ES|QL query for alert retrieval (required when default_retrieval_enabled is true and alert_retrieval_mode is 'esql').
    */
-  esql_query: z.string().optional(),
+  esql_query: z.string().max(10000).optional(),
   /**
    * Toggle 1 - whether the attack discovery skill performs its own additional alert retrieval.
    */
@@ -81,7 +81,7 @@ export const WorkflowConfig = z.object({
   /**
    * ID of the validation workflow to use (or 'default' for built-in)
    */
-  validation_workflow_id: z.string().optional().default('default'),
+  validation_workflow_id: z.string().max(1024).optional().default('default'),
 });
 
 /**
@@ -95,8 +95,8 @@ export const Filters = z.array(z.unknown());
  */
 export type Query = z.infer<typeof Query>;
 export const Query = z.object({
-  query: z.union([z.string(), z.object({}).catchall(z.unknown())]),
-  language: z.string(),
+  query: z.union([z.string().max(10000), z.object({}).catchall(z.unknown())]),
+  language: z.string().max(1024),
 });
 
 /**
@@ -107,7 +107,7 @@ export const AttackDiscoveryScheduleParams = z.object({
   /**
    * The index pattern to get alerts from
    */
-  alerts_index_pattern: z.string(),
+  alerts_index_pattern: z.string().max(1024),
   /**
    * LLM API configuration
    */
@@ -119,7 +119,7 @@ export const AttackDiscoveryScheduleParams = z.object({
   /**
    * End time for alert retrieval
    */
-  end: z.string().optional(),
+  end: z.string().max(1024).optional(),
   filters: Filters.optional(),
   query: Query.optional(),
   /**
@@ -129,7 +129,7 @@ export const AttackDiscoveryScheduleParams = z.object({
   /**
    * Start time for alert retrieval
    */
-  start: z.string().optional(),
+  start: z.string().max(1024).optional(),
   /**
    * Workflow configuration for alert retrieval and validation
    */
@@ -141,14 +141,17 @@ export const IntervalSchedule = z.object({
   /**
    * The schedule interval
    */
-  interval: z.string(),
+  interval: z.string().max(1024),
 });
 
 /**
  * Defines how often schedule actions are taken. Time interval in seconds, minutes, hours, or days.
  */
 export type ScheduleActionThrottle = z.infer<typeof ScheduleActionThrottle>;
-export const ScheduleActionThrottle = z.string().regex(/^[1-9]\d*[smhd]$/);
+export const ScheduleActionThrottle = z
+  .string()
+  .max(1024)
+  .regex(/^[1-9]\d*[smhd]$/);
 
 /**
  * The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`, or `onThrottleInterval`
@@ -188,20 +191,20 @@ export const ScheduleActionParams = z.object({}).catchall(z.unknown());
  * Groups actions by use cases. Use `default` for alert notifications.
  */
 export type ScheduleActionGroup = z.infer<typeof ScheduleActionGroup>;
-export const ScheduleActionGroup = z.string();
+export const ScheduleActionGroup = z.string().max(1024);
 
 /**
  * The connector ID.
  */
 export type ScheduleActionId = z.infer<typeof ScheduleActionId>;
-export const ScheduleActionId = z.string();
+export const ScheduleActionId = z.string().max(1024);
 
 export type ScheduleGeneralAction = z.infer<typeof ScheduleGeneralAction>;
 export const ScheduleGeneralAction = z.object({
   /**
    * The action type used for sending notifications.
    */
-  action_type_id: z.string(),
+  action_type_id: z.string().max(1024),
   group: ScheduleActionGroup,
   id: ScheduleActionId,
   params: ScheduleActionParams,
@@ -215,7 +218,7 @@ export const ScheduleSystemAction = z.object({
   /**
    * The action type used for sending notifications.
    */
-  action_type_id: z.string(),
+  action_type_id: z.string().max(1024),
   id: ScheduleActionId,
   params: ScheduleActionParams,
   uuid: NonEmptyString.optional(),
@@ -311,7 +314,7 @@ export const AttackDiscoveryScheduleCreateProps = z.object({
   /**
    * The name of the schedule
    */
-  name: z.string(),
+  name: z.string().max(1024),
   /**
    * Indicates whether the schedule is enabled
    */
@@ -338,7 +341,7 @@ export const AttackDiscoveryScheduleUpdateProps = z.object({
   /**
    * The name of the schedule
    */
-  name: z.string(),
+  name: z.string().max(1024),
   /**
    * The schedule configuration parameters
    */
