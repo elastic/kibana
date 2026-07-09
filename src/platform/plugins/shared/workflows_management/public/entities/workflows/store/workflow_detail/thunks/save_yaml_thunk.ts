@@ -29,7 +29,7 @@ import {
   selectWorkflowId,
   selectYamlString,
 } from '../selectors';
-import { setWorkflow } from '../slice';
+import { setWorkflow, setYamlString } from '../slice';
 
 export type SaveYamlParams = void;
 export type SaveYamlResponse = void;
@@ -60,9 +60,13 @@ export const saveYamlThunk = createAsyncThunk<
 
     // Hitting Save is an implicit acceptance of any AI-generated accept/reject
     // decorations on screen — resolve them so the persisted YAML matches what
-    // the user just saw. This mutates the Monaco model synchronously; the
-    // yamlString read below picks up the accepted content.
-    acceptAllActiveProposals();
+    // the user just saw. `acceptAllActiveProposals` returns the post-accept
+    // model content; sync it into Redux explicitly so the read below is the
+    // definitive value even if the model→Redux debounce is still pending.
+    const postAcceptYaml = acceptAllActiveProposals();
+    if (postAcceptYaml != null) {
+      dispatch(setYamlString(postAcceptYaml));
+    }
 
     try {
       const state = getState();

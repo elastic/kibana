@@ -34,10 +34,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 const useUiSettingMock = useUiSetting as jest.MockedFunction<typeof useUiSetting>;
 jest.mock('uuid', () => ({ v4: () => 'mock-uuid-1234' }));
-const mockSetActiveProposalManager = jest.fn();
-const mockSetLastCreateAttachmentId = jest.fn();
-const mockSetSidebarOpen = jest.fn();
-const mockConsumeSidebarRestoreFor = jest.fn().mockReturnValue(false);
 jest.mock('../../../../features/ai_integration', () => ({
   AttachmentBridge: jest.fn().mockImplementation(() => ({
     start: jest.fn(),
@@ -49,11 +45,22 @@ jest.mock('../../../../features/ai_integration', () => ({
     getDiffHunks: jest.fn().mockReturnValue([]),
     hasPendingProposals: jest.fn().mockReturnValue(false),
   })),
-  setActiveProposalManager: (...args: unknown[]) => mockSetActiveProposalManager(...args),
-  setLastCreateAttachmentId: (...args: unknown[]) => mockSetLastCreateAttachmentId(...args),
-  setSidebarOpen: (...args: unknown[]) => mockSetSidebarOpen(...args),
-  consumeSidebarRestoreFor: (...args: unknown[]) => mockConsumeSidebarRestoreFor(...args),
+  setActiveProposalManager: jest.fn(),
+  setLastCreateAttachmentId: jest.fn(),
+  setSidebarOpen: jest.fn(),
+  consumeSidebarRestoreFor: jest.fn().mockReturnValue(false),
 }));
+
+type AiIntegrationModule = typeof import('../../../../features/ai_integration');
+const {
+  setLastCreateAttachmentId: mockSetLastCreateAttachmentId,
+  setSidebarOpen: mockSetSidebarOpen,
+  consumeSidebarRestoreFor: mockConsumeSidebarRestoreFor,
+} = jest.requireMock('../../../../features/ai_integration') as {
+  setLastCreateAttachmentId: jest.MockedFunction<AiIntegrationModule['setLastCreateAttachmentId']>;
+  setSidebarOpen: jest.MockedFunction<AiIntegrationModule['setSidebarOpen']>;
+  consumeSidebarRestoreFor: jest.MockedFunction<AiIntegrationModule['consumeSidebarRestoreFor']>;
+};
 jest.mock('../../../../features/ai_integration/proposal_tracker', () => ({
   ProposalTracker: jest.fn().mockImplementation(() => ({
     onAllResolved: jest.fn().mockReturnValue(jest.fn()),

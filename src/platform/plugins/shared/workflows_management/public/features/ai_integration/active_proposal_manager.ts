@@ -16,11 +16,26 @@ import type { ProposalManager } from './proposed_changes';
 let active: ProposalManager | null = null;
 
 export const setActiveProposalManager = (manager: ProposalManager | null): void => {
+  if (manager && active && manager !== active) {
+    // Only one workflow editor mounts at a time — an overwrite means the
+    // previous editor's cleanup didn't run or ran out of order. Warn so the
+    // regression is visible instead of silently discarded.
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[workflowsManagement] Overwriting active ProposalManager while previous still registered.'
+    );
+  }
   active = manager;
 };
 
-export const acceptAllActiveProposals = (): void => {
-  if (active?.hasPendingProposals()) {
-    active.acceptAll();
-  }
+/**
+ * Accept any pending AI diff decorations on the active editor and return the
+ * post-accept model content — so callers (the save thunk) can dispatch the
+ * updated YAML into Redux instead of relying on the async model→Redux sync.
+ * Returns `undefined` if there was nothing to accept.
+ */
+export const acceptAllActiveProposals = (): string | undefined => {
+  if (!active?.hasPendingProposals()) return undefined;
+  active.acceptAll();
+  return active.getCurrentContent();
 };

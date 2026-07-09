@@ -42,16 +42,27 @@ const { queryClient } = jest.requireMock('../../../../../shared/lib/query_client
 // carries the create-time conversation onto the saved workflow's session tag,
 // and requests the sidebar to re-open on the destination if it was open at
 // save time (since navigateToApp remounts the app).
-const mockAcceptAllActiveProposals = jest.fn();
-const mockCarryConversationToWorkflow = jest.fn();
-const mockIsSidebarOpen = jest.fn().mockReturnValue(false);
-const mockRequestSidebarRestore = jest.fn();
 jest.mock('../../../../../features/ai_integration', () => ({
-  acceptAllActiveProposals: (...args: unknown[]) => mockAcceptAllActiveProposals(...args),
-  carryConversationToWorkflow: (...args: unknown[]) => mockCarryConversationToWorkflow(...args),
-  isSidebarOpen: () => mockIsSidebarOpen(),
-  requestSidebarRestore: (...args: unknown[]) => mockRequestSidebarRestore(...args),
+  acceptAllActiveProposals: jest.fn(),
+  carryConversationToWorkflow: jest.fn(),
+  isSidebarOpen: jest.fn().mockReturnValue(false),
+  requestSidebarRestore: jest.fn(),
 }));
+
+type AiIntegrationModule = typeof import('../../../../../features/ai_integration');
+const {
+  acceptAllActiveProposals: mockAcceptAllActiveProposals,
+  carryConversationToWorkflow: mockCarryConversationToWorkflow,
+  isSidebarOpen: mockIsSidebarOpen,
+  requestSidebarRestore: mockRequestSidebarRestore,
+} = jest.requireMock('../../../../../features/ai_integration') as {
+  acceptAllActiveProposals: jest.MockedFunction<AiIntegrationModule['acceptAllActiveProposals']>;
+  carryConversationToWorkflow: jest.MockedFunction<
+    AiIntegrationModule['carryConversationToWorkflow']
+  >;
+  isSidebarOpen: jest.MockedFunction<AiIntegrationModule['isSidebarOpen']>;
+  requestSidebarRestore: jest.MockedFunction<AiIntegrationModule['requestSidebarRestore']>;
+};
 
 // Set up initial state with workflow and yaml
 const mockWorkflow: WorkflowDetailDto = {
@@ -219,6 +230,33 @@ describe('saveYamlThunk', () => {
   });
 
   describe('AI proposal handling', () => {
+    it('uses the post-accept YAML returned by acceptAllActiveProposals to persist', async () => {
+      // Regression: reading yamlString from Redux immediately after accepting
+      // can race with the Monaco→Redux sync. The thunk must sync the returned
+      // post-accept content into Redux before persisting.
+      mockAcceptAllActiveProposals.mockReturnValue('name: Accepted YAML\nsteps: []');
+      store.dispatch(setYamlString('name: PRE-accept — stale\nsteps: []'));
+      mockWorkflowApi.createWorkflow.mockResolvedValue(mockWorkflow);
+
+      await store.dispatch(saveYamlThunk());
+
+      expect(mockWorkflowApi.createWorkflow).toHaveBeenCalledWith({
+        yaml: 'name: Accepted YAML\nsteps: []',
+      });
+    });
+
+    it('falls back to Redux yamlString when there is nothing to accept', async () => {
+      mockAcceptAllActiveProposals.mockReturnValue(undefined);
+      store.dispatch(setYamlString('name: From Redux\nsteps: []'));
+      mockWorkflowApi.createWorkflow.mockResolvedValue(mockWorkflow);
+
+      await store.dispatch(saveYamlThunk());
+
+      expect(mockWorkflowApi.createWorkflow).toHaveBeenCalledWith({
+        yaml: 'name: From Redux\nsteps: []',
+      });
+    });
+
     it('accepts pending AI diff decorations before persisting on update', async () => {
       store.dispatch(setWorkflow(mockWorkflow));
       store.dispatch(setYamlString('name: With Pending Diff\nsteps: []'));

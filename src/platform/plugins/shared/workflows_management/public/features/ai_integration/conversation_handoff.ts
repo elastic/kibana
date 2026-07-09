@@ -85,8 +85,19 @@ export const carryConversationToWorkflow = (savedWorkflowId: string): void => {
     if (value != null) {
       const suffix = key.slice(fromPrefix.length);
       const targetKey = `${STORAGE_KEY_PREFIX}${toTag}.${suffix}`;
-      window.localStorage.setItem(targetKey, value);
-      window.localStorage.removeItem(key);
+      // Split writes/removes so a quota-exceeded setItem does not leave a
+      // stale source key behind, and a failing removeItem does not prevent us
+      // from trying to migrate the next key.
+      try {
+        window.localStorage.setItem(targetKey, value);
+      } catch {
+        // best-effort — ignore quota/serialization errors
+      }
+      try {
+        window.localStorage.removeItem(key);
+      } catch {
+        // best-effort
+      }
     }
   }
 };

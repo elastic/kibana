@@ -10,10 +10,11 @@
 import { acceptAllActiveProposals, setActiveProposalManager } from './active_proposal_manager';
 import type { ProposalManager } from './proposed_changes';
 
-const createStub = (hasPending: boolean) =>
+const createStub = (hasPending: boolean, content = 'yaml: after') =>
   ({
     hasPendingProposals: jest.fn().mockReturnValue(hasPending),
     acceptAll: jest.fn(),
+    getCurrentContent: jest.fn().mockReturnValue(content),
   } as unknown as ProposalManager);
 
 describe('active_proposal_manager', () => {
@@ -21,21 +22,21 @@ describe('active_proposal_manager', () => {
     setActiveProposalManager(null);
   });
 
-  it('does nothing when no manager is registered', () => {
-    expect(() => acceptAllActiveProposals()).not.toThrow();
+  it('returns undefined and does nothing when no manager is registered', () => {
+    expect(acceptAllActiveProposals()).toBeUndefined();
   });
 
-  it('does not call acceptAll when there are no pending proposals', () => {
+  it('returns undefined and does not call acceptAll when there are no pending proposals', () => {
     const manager = createStub(false);
     setActiveProposalManager(manager);
-    acceptAllActiveProposals();
+    expect(acceptAllActiveProposals()).toBeUndefined();
     expect(manager.acceptAll).not.toHaveBeenCalled();
   });
 
-  it('calls acceptAll on the registered manager when proposals are pending', () => {
-    const manager = createStub(true);
+  it('accepts and returns the post-accept editor content', () => {
+    const manager = createStub(true, 'yaml: accepted');
     setActiveProposalManager(manager);
-    acceptAllActiveProposals();
+    expect(acceptAllActiveProposals()).toBe('yaml: accepted');
     expect(manager.acceptAll).toHaveBeenCalledTimes(1);
   });
 
@@ -45,5 +46,15 @@ describe('active_proposal_manager', () => {
     setActiveProposalManager(null);
     acceptAllActiveProposals();
     expect(manager.acceptAll).not.toHaveBeenCalled();
+  });
+
+  it('warns when a manager is overwritten while a previous one is still registered', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    setActiveProposalManager(createStub(false));
+    setActiveProposalManager(createStub(false));
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('Overwriting active ProposalManager')
+    );
+    warn.mockRestore();
   });
 });
