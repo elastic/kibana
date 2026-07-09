@@ -7,9 +7,9 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
-  createEsqlEquivalenceEvaluator,
   createTrajectoryEvaluator,
   getStringMeta,
+  withEvaluatorSpan,
   type DefaultEvaluators,
   type EvalsExecutorClient,
   type EvaluationDataset,
@@ -23,6 +23,8 @@ import type { VisualizationAgentEvaluationChatClient } from './chat_client';
 import { extractVisualizationEsql, getToolIds } from './extract_visualization';
 import { createEsqlValidityEvaluator } from './evaluators/esql_validity';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
+import { createEsqlResultEquivalenceEvaluator } from './evaluators/esql_result_equivalence';
+import { createCalibratedEsqlEquivalenceEvaluator } from './evaluators/esql_functional_equivalence';
 import { visualizationSkillActivatedEvaluator } from './skill_selection_evaluators';
 
 export type VisualizationDatasetExample = Example<
@@ -113,12 +115,22 @@ export function createEvaluateDataset({
   esClient: EsClient;
   log: ToolingLog;
 }): EvaluateDataset {
-  const esqlValidityEvaluator = createEsqlValidityEvaluator<
+  // Each ES|QL evaluator is wrapped in a named `withEvaluatorSpan` so its
+  // work shows up as a discrete span on the task's trace (mirrors the
+  // security ES|QL regression suite), making per-evaluator latency and
+  // failures observable in the golden cluster.
+  const baseValidityEvaluator = createEsqlValidityEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
   >({ queryExtractor });
 
-  const esqlExecutionEvaluator = createEsqlExecutionEvaluator<
+  const esqlValidityEvaluator: VisualizationAgentEvaluator = {
+    ...baseValidityEvaluator,
+    evaluate: (args) =>
+      withEvaluatorSpan('EsqlValidity', {}, () => baseValidityEvaluator.evaluate(args)),
+  };
+
+  const baseExecutionEvaluator = createEsqlExecutionEvaluator<
     VisualizationDatasetExample,
     VisualizationAgentTaskOutput
   >({
@@ -131,12 +143,52 @@ export function createEvaluateDataset({
     includeHitDetection: ({ metadata }) => Boolean(metadata?.includeHitDetection),
   });
 
-  const esqlEquivalenceEvaluator = createEsqlEquivalenceEvaluator({
+  const esqlExecutionEvaluator: VisualizationAgentEvaluator = {
+    ...baseExecutionEvaluator,
+    evaluate: (args) =>
+      withEvaluatorSpan('EsqlExecution', {}, () => baseExecutionEvaluator.evaluate(args)),
+  };
+
+  // Calibrated three-point LLM judge (ported from the security ES|QL
+  // regression suite) replaces the framework's binary Yes/No default.
+  // Cosmetic-but-imperfect visualization queries (column-alias differences,
+  // interchangeable bucketing granularity, `?_tstart`/`?_tend` vs literal
+  // ranges) earn partial credit instead of a hard 0. Same evaluator name +
+  // a `judgeVersion` metadata stamp keep golden-cluster history continuous.
+  const baseEquivalenceEvaluator = createCalibratedEsqlEquivalenceEvaluator({
     inferenceClient,
     log,
     predictionExtractor,
     groundTruthExtractor,
   });
+
+  const esqlEquivalenceEvaluator: Evaluator = {
+    ...baseEquivalenceEvaluator,
+    evaluate: (args) =>
+      withEvaluatorSpan('EsqlFunctionalEquivalence', {}, () =>
+        baseEquivalenceEvaluator.evaluate(args)
+      ),
+  };
+
+  // Deterministic complement to the LLM judge: executes gold + candidate and
+  // compares result rows via Jaccard similarity. Ignores row order and
+  // rounds floats so aggregation/precision drift doesn't spuriously fail.
+  const baseResultEquivalenceEvaluator = createEsqlResultEquivalenceEvaluator<
+    VisualizationDatasetExample,
+    VisualizationAgentTaskOutput
+  >({
+    esClient,
+    predictionExtractor,
+    groundTruthExtractor,
+  });
+
+  const esqlResultEquivalenceEvaluator: VisualizationAgentEvaluator = {
+    ...baseResultEquivalenceEvaluator,
+    evaluate: (args) =>
+      withEvaluatorSpan('EsqlResultEquivalence', {}, () =>
+        baseResultEquivalenceEvaluator.evaluate(args)
+      ),
+  };
 
   const trajectoryEvaluator = createTrajectoryEvaluator({
     extractToolCalls: (output) => getToolIds(output as VisualizationAgentTaskOutput),
@@ -177,6 +229,7 @@ export function createEvaluateDataset({
         esqlValidityEvaluator,
         esqlExecutionEvaluator,
         esqlEquivalenceEvaluator,
+        esqlResultEquivalenceEvaluator,
         trajectoryEvaluator,
       ]),
       ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),

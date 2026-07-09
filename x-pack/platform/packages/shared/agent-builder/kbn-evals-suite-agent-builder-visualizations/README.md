@@ -8,9 +8,11 @@ It drives the full `/api/agent_builder/converse` flow, extracts the ES|QL backin
 
 Per [issue #277136](https://github.com/elastic/kibana/issues/277136), "correct" for visualization ES|QL is not the same as for analytical ES|QL. This first increment covers:
 
+- **Visualization skill activated** (`CODE`) — the request loaded the visualization skill and called `platform.core.create_visualization` (guards against the agent answering with raw ES|QL / a table instead of a rendered visualization).
 - **ES|QL Validity** (`CODE`) — the generated query parses via `@kbn/esql-language`.
 - **ES|QL Execution Validity** (`CODE`) — the query executes against real sample data and (per example) returns rows. This is the tier that surfaces the fast-model regressions that motivated the suite.
-- **ES|QL functional equivalence** (`LLM` judge) — the generated query is equivalent to the ground-truth query in the dataset.
+- **ES|QL Functional Equivalence** (`LLM` judge) — the generated query is equivalent to the ground-truth query. Uses a calibrated three-point rubric (`equivalent` / `equivalent_with_caveats` / `not_equivalent`) with explicit allow/deny lists, ported from `@kbn/evals-suite-security-esql-generation-regression`, so cosmetic differences (aliases, interchangeable bucketing, `?_tstart`/`?_tend` vs literal ranges) earn partial credit rather than a hard 0.
+- **ES|QL Result Equivalence** (`CODE`) — executes gold + candidate and compares result rows via Jaccard similarity (row-order- and float-tolerant); a deterministic complement to the LLM judge.
 - **Trajectory** — the agent routed the request to `load_skill` → `platform.core.create_visualization`.
 - **Trace-based** — tokens / latency / tool-call counts from OTel spans.
 
@@ -30,4 +32,4 @@ Seed examples live inline in `evals/visualization_creation/visualization_creatio
 
 ## Notes
 
-The ES|QL validity/execution evaluators and the `?_tstart` / `?_tend` bind-param substitution are copied from `@kbn/evals-suite-security-esql-generation-regression` because Kibana module-visibility rules forbid importing across sibling `functional-tests` suites. If a third suite needs them, consider promoting them into `@kbn/evals` (which already exports `createEsqlEquivalenceEvaluator`).
+The ES|QL validity, execution, result-equivalence, and calibrated functional-equivalence evaluators plus the `?_tstart` / `?_tend` bind-param substitution are copied from `@kbn/evals-suite-security-esql-generation-regression` because Kibana module-visibility rules forbid importing across sibling `functional-tests` suites. If a third suite needs them, consider promoting them into `@kbn/evals` (which already exports the v1 `createEsqlEquivalenceEvaluator`).

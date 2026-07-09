@@ -13,6 +13,8 @@
     "@kbn/evals",
     "@kbn/evals-phoenix-executor",
     "@kbn/inference-common",
-    "@kbn/tooling-log"
+    "@kbn/inference-prompt-utils",
+    "@kbn/tooling-log",
+    "@kbn/zod"
   ]
 }
