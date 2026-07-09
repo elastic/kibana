@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { useChangeHistoryRestore } from '../../hooks/use_change_history_restore';
 import { useChangeHistoryConfig } from '../../provider/use_change_history_config';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import { buildChangeHistoryRestoreTelemetryParams } from '../../utils/build_change_history_restore_telemetry';
+import { resolveChangeHistoryPendingChange } from '../../utils/resolve_change_history_pending_change';
 import { getRestoreVersionLabel } from '../../utils/get_restore_version_label';
 import * as i18n from './restore_translations';
 
@@ -27,12 +28,18 @@ export function ChangeHistoryRestoreConfirmModal({
   onClose,
   onRestored,
 }: ChangeHistoryRestoreConfirmModalProps): JSX.Element | null {
-  const { objectId, supports, telemetry } = useChangeHistoryConfig();
+  const { adapter, objectId, supports, telemetry } = useChangeHistoryConfig();
+  const [pendingChange] = useState(() =>
+    resolveChangeHistoryPendingChange(adapter, supports.unsavedChanges)
+  );
   const { restoreChange, isRestoring, error, clearError } = useChangeHistoryRestore({ onRestored });
 
   const restoreTelemetry = useMemo(
-    () => buildChangeHistoryRestoreTelemetryParams(change, currentChange),
-    [change, currentChange]
+    () => ({
+      ...buildChangeHistoryRestoreTelemetryParams(change, currentChange),
+      ...(pendingChange ? { hadUnsavedLocalEdits: true } : {}),
+    }),
+    [change, currentChange, pendingChange]
   );
   const versionLabel = getRestoreVersionLabel(change);
 
@@ -79,6 +86,14 @@ export function ChangeHistoryRestoreConfirmModal({
       data-test-subj="changeHistoryRestoreConfirmModal"
     >
       <p>{i18n.RESTORE_CONFIRM_BODY(versionLabel)}</p>
+      {pendingChange ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut announceOnMount color="warning" iconType="alert">
+            <p>{i18n.RESTORE_UNSAVED_CHANGES_WARNING}</p>
+          </EuiCallOut>
+        </>
+      ) : null}
       {error ? (
         <>
           <EuiSpacer size="m" />

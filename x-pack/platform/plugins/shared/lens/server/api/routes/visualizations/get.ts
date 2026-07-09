@@ -7,6 +7,10 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
+import {
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
+} from '@kbn/as-code-shared-schemas';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import type { TypeOf } from '@kbn/config-schema';
 
@@ -82,13 +86,21 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
     },
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
+        const { core } = await ctx.resolve(['core']);
+        // Fallback is `true` so on-prem stacks (which have no remote feature-flag service)
+        // enforce GA schemas by default. Serverless sets the flag explicitly via phased rollout.
+        const useGASchemas = await core.featureFlags.getBooleanValue(
+          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+        );
+
         const client = contentManagement.contentClient
           .getForRequest({ request: req, requestHandlerContext: ctx })
           .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
         try {
           const { result } = await client.get(req.params.id);
-          const responseItem = getLensResponseItem(builder, result.item);
+          const responseItem = getLensResponseItem(builder, result.item, useGASchemas);
 
           return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
             body: responseItem,

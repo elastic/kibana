@@ -16,7 +16,6 @@ import { searchAlerts } from '../common/operations/search_alerts';
 import { validateSearchAlertsParams } from '../common/validators/validate_search_alerts_params';
 import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts_index';
 import { withSiemErrorHandling } from '../with_siem_error_handling';
-import { buildSearchAttacksParams } from './build_search_attacks_params';
 
 export const searchAttacksRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -39,7 +38,7 @@ export const searchAttacksRoute = (router: SecuritySolutionPluginRouter) => {
         },
       },
       async (context, request, response) => {
-        const params = buildSearchAttacksParams(request.body);
+        const params = request.body;
         const validationError = validateSearchAlertsParams(params);
         if (validationError) {
           return buildSiemResponse(response).error({ statusCode: 400, body: validationError });

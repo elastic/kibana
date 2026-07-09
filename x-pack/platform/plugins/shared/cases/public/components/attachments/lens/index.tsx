@@ -125,4 +125,7 @@ export const getVisualizationAttachmentType = () =>
     getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_VISUALIZATION }),
     getAttachmentTabViewObject: () => ({ children: LensAttachmentsTab }),
     schema: LensAttachmentPayloadSchema,
+    // `data.state` is the embeddable input bag, produced by the "Add to case"
+    // flow and not authorable in YAML, so lens is excluded from workflow steps.
+    workflowSchema: false,
   });

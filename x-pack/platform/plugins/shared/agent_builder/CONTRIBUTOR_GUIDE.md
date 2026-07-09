@@ -292,36 +292,6 @@ agentBuilder.agents.register({
 });
 ```
 
-### Specific research and answer instructions
-
-It is possible to specify specific research and answer instructions for an agent, to avoid
-mixing instructions, which can sometimes be confusing for the agent. It also allows to specify
-different instructions for each step of the agent's flow..
-
-```ts
-agentBuilder.agents.register({
-  id: 'platform.core.dashboard',
-  name: 'Dashboard agent',
-  description: 'Agent specialized in dashboard related tasks',
-  avatar_icon: 'dashboardApp',
-  configuration: {
-    research: {
-      instructions:
-        'You are a dashboard builder specialist assistant. Always uses the XXX tool when the user wants to YYY...',
-    },
-    answer: {
-      instructions:
-        'When answering, if a dashboard configuration is present in the results, always render it using [...]',
-    },
-    tools: [
-      {
-        tool_ids: [someListOfToolIds],
-      },
-    ],
-  },
-});
-```
-
 Refer to [`AgentConfiguration`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts)
 for the full list of available configuration options.
 
@@ -793,6 +763,104 @@ const myAttachmentType: AttachmentTypeDefinition<'my_type', MyContent> = {
 4. The UI shows a panel listing stale attachments, letting the user add the refreshed version or dismiss
 
 Refer to [`AttachmentStaleCheckResult`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/stale_check.ts) for the result types returned by the stale check API.
+****
+## Registering renderers
+
+Renderers let the agent display rich, typed objects inline in a chat reply — dashboards, tables, or any
+plugin-owned visualization. This is not generative UI: the agent produces a typed data payload, and a
+predefined renderer registered by your plugin draws it. Attachments (above) are an *input-to-LLM*
+abstraction; renderers are an *output* abstraction, and the two are independent.
+
+**How it works end-to-end:**
+
+1. When the bash tool is enabled (`agentBuilder:bashSupport` advanced setting) and at least one renderer
+   is registered, the agent's prompt advertises every registered render type and its payload JSON schema.
+2. The agent writes the payload to a file in its `/workspace` virtual filesystem using bash. The file
+   content is the raw payload matching your schema (no wrapper). The recommended location is
+   `/workspace/renders/{type}/{id}.json`, with a new file per create/edit so earlier replies keep their
+   original render.
+3. The agent emits a directive in its reply: `<render path="/workspace/renders/{type}/{id}.json" type="{type}" />`.
+   The `type` attribute selects the renderer.
+4. When the round completes, the browser fetches the file (via a conversation-scoped internal API),
+   validates it against your renderer's `payloadSchema`, and mounts your `render` function. Any failure
+   (missing file, invalid payload, unknown type) shows a structured error callout instead. Renders resolve
+   on round completion and on reload — the workspace is only persisted at the end of a round, so a
+   skeleton is shown while the round is streaming.
+
+Renderer output is wrapped in an error boundary, so a throwing renderer degrades to an error callout
+rather than taking down the chat.
+
+### Server-side registration
+
+Register the renderer type using the `renderers.register` API of the `agentBuilder` plugin's setup contract.
+This is what advertises the type (and its payload schema) to the agent:
+
+```ts
+class MyPlugin {
+  setup(core: CoreSetup, { agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) {
+    agentBuilder.renderers.register(myRendererDefinition);
+  }
+}
+```
+
+```ts
+import { z } from '@kbn/zod/v4';
+import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
+
+// Define the payload schema once in your plugin's common/ folder and import it
+// on both the server and browser sides, so what the agent is told to produce is
+// exactly what the browser validates.
+const tablePayloadSchema = z.object({
+  columns: z.array(z.string()),
+  rows: z.array(z.record(z.string(), z.unknown())),
+});
+
+const tableRendererDefinition: RendererTypeDefinition = {
+  // unique renderer type; correlates the server and browser registrations and the <render> directive
+  type: 'table',
+  // zod schema the payload is validated against before mounting
+  payloadSchema: tablePayloadSchema,
+  // optional description injected into the agent prompt alongside the schema
+  getAgentDescription: () => 'Renders a dataset as an interactive table.',
+};
+```
+
+### Browser-side registration
+
+Register the matching UI definition using the `renderers.register` API of the `agentBuilder` plugin's
+start contract. **A renderer type must be registered on both sides with the same `type`** — a
+server-only registration means the agent is told it can render the type, but directives for it will
+fail to resolve in the UI.
+
+```ts
+import React from 'react';
+import { EuiBasicTable } from '@elastic/eui';
+import type { RendererUIDefinition } from '@kbn/agent-builder-browser';
+
+const tableRendererUIDefinition: RendererUIDefinition<typeof tablePayloadSchema> = {
+  type: 'table',
+  payloadSchema: tablePayloadSchema,
+  // renders the validated payload inline in the conversation
+  render: (payload) => (
+    <EuiBasicTable
+      columns={payload.columns.map((column) => ({ field: column, name: column }))}
+      items={payload.rows}
+    />
+  ),
+};
+
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    agentBuilder.renderers.register(tableRendererUIDefinition);
+  }
+}
+```
+
+`RendererUIDefinition` also accepts optional members reserved for the canvas (expanded flyout) surface:
+`getHeader`, `getActionButtons`, `renderCanvas`, and `canvasWidth`. Refer to
+[`RendererUIDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-browser/renderers/contract.ts)
+and [`RendererTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/renderers/type_definition.ts)
+for the full contracts.
 
 ## Chat integration and pending attachments
 
