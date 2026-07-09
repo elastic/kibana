@@ -7,10 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import {
-  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-  CONTEXT_ENGINE_ENABLED_SETTING_ID,
-} from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
 
@@ -21,9 +18,8 @@ jest.mock('@kbn/connector-specs', () => ({
 
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
 
-const createMockUiSettingsClient = (contextEngineEnabled = true, experimentalEnabled = true) => ({
+const createMockUiSettingsClient = (experimentalEnabled = true) => ({
   get: jest.fn().mockImplementation(async (key: string) => {
-    if (key === CONTEXT_ENGINE_ENABLED_SETTING_ID) return contextEngineEnabled;
     if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) return experimentalEnabled;
     return undefined;
   }),
@@ -116,21 +112,8 @@ describe('createConnectorLifecycleHandler', () => {
       );
     });
 
-    it('skips when the Context Engine is disabled', async () => {
-      const uiSettingsClient = createMockUiSettingsClient(false);
-      const agentBuilderSml = createMockAgentBuilderSml();
-      const handler = createConnectorLifecycleHandler({
-        logger,
-        getStartServices: createMockGetStartServices(uiSettingsClient, agentBuilderSml),
-      });
-
-      await handler.onPostCreate(createBaseParams() as any);
-
-      expect(agentBuilderSml.indexAttachment).not.toHaveBeenCalled();
-    });
-
     it('skips when Agent Builder experimental features are disabled', async () => {
-      const uiSettingsClient = createMockUiSettingsClient(true, false);
+      const uiSettingsClient = createMockUiSettingsClient(false);
       const agentBuilderSml = createMockAgentBuilderSml();
       const handler = createConnectorLifecycleHandler({
         logger,

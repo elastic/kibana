@@ -7,10 +7,7 @@
 
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/logging';
-import {
-  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-  CONTEXT_ENGINE_ENABLED_SETTING_ID,
-} from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   ConnectorLifecyclePostCreateParams,
   ConnectorLifecyclePostDeleteParams,
@@ -56,13 +53,11 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         const soClient = coreStart.savedObjects.getScopedClient(request);
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
         // SML ingest lives in the Agent Builder family, so crawling connectors
-        // into SML requires both the Agent Builder experimental flag and the
-        // dedicated Context Engine flag. Both must be enabled.
-        const [isExperimentalEnabled, isContextEngineEnabled] = await Promise.all([
-          uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID),
-          uiSettingsClient.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID),
-        ]);
-        if (!isExperimentalEnabled || !isContextEngineEnabled) return;
+        // into SML requires only the Agent Builder experimental flag.
+        const isExperimentalEnabled = await uiSettingsClient.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
+        if (!isExperimentalEnabled) return;
 
         try {
           await startDeps.agentBuilderSml.indexAttachment({
