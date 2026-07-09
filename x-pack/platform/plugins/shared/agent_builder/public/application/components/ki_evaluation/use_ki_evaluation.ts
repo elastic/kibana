@@ -28,7 +28,7 @@ import { useKibana } from '../../hooks/use_kibana';
 
 const MAX_TRACES_PER_PAGE = 100;
 
-export type EvalStep = 'traces' | 'results';
+export type EvalStep = 'traces' | 'reference_data' | 'results';
 
 export interface TraceValidation {
   valid: boolean;
@@ -96,6 +96,8 @@ export interface KiEvaluationState {
   tracesByProject: Record<string, ProjectTracesState>;
   evaluators: ListEvaluatorsResponse['evaluators'];
   connectorId?: string;
+  /** Per-trace ground-truth data keyed by trace_id. Used by evaluators that declare reference_data_schema (e.g. correctness). */
+  traceReferenceData: Record<string, Record<string, string>>;
   evaluationResults: EvaluatorScore[];
   experimentId?: string;
   experimentScores: GetEvaluationExperimentScoresResponse['scores'];
@@ -115,6 +117,7 @@ export const useKiEvaluation = () => {
     projectsLoading: false,
     tracesByProject: {},
     evaluators: [],
+    traceReferenceData: {},
     evaluationResults: [],
     experimentScores: [],
     isRunning: false,
@@ -243,10 +246,28 @@ export const useKiEvaluation = () => {
     });
   }, []);
 
+  const goToStep = useCallback(
+    (step: EvalStep) => setPartialState({ currentStep: step, error: undefined }),
+    [setPartialState]
+  );
+
+  const setTraceReferenceData = useCallback((traceId: string, field: string, value: string) => {
+    setState((prev) => ({
+      ...prev,
+      traceReferenceData: {
+        ...prev.traceReferenceData,
+        [traceId]: { ...(prev.traceReferenceData[traceId] ?? {}), [field]: value },
+      },
+    }));
+  }, []);
+
   const runEvaluation = useCallback(
     async (connectorId: string, evaluatorNames: string[]) => {
       const allProjectTraces = Object.values(state.tracesByProject).flatMap((p) => p.traces);
       const selectedTraces = allProjectTraces.filter((vt) => vt.selected);
+
+      // Build a lookup of evaluator kind by name so we know which ones need connector_id.
+      const evaluatorKindByName = new Map(state.evaluators.map((e) => [e.name, e.kind] as const));
 
       setPartialState({
         connectorId,
@@ -268,15 +289,24 @@ export const useKiEvaluation = () => {
 
         try {
           const evaluators: EvaluateRequestBodyInput['evaluators'] = evaluatorNames
-            .filter((name) => name !== 'groundedness' || validation.hasChatEvents)
+            // Skip LLM evaluators when the trace has no chat data (they'd fail anyway).
+            .filter((name) => evaluatorKindByName.get(name) !== 'llm' || validation.hasChatEvents)
             .map((name) =>
-              name === 'groundedness' ? { name, connector_id: connectorId } : { name }
+              evaluatorKindByName.get(name) === 'llm'
+                ? { name, connector_id: connectorId }
+                : { name }
             );
 
+          const referenceData = state.traceReferenceData[trace.trace_id];
           const body: EvaluateRequestBodyInput = {
             subject: {
               mode: 'single-turn',
-              traces: [{ trace_id: trace.trace_id }],
+              traces: [
+                {
+                  trace_id: trace.trace_id,
+                  ...(referenceData ? { reference_data: referenceData } : {}),
+                },
+              ],
             },
             evaluators,
           };
@@ -386,7 +416,7 @@ export const useKiEvaluation = () => {
         });
       }
     },
-    [http, state.tracesByProject, setPartialState]
+    [http, state.tracesByProject, state.evaluators, state.traceReferenceData, setPartialState]
   );
 
   const fetchExperimentScores = useCallback(
@@ -414,6 +444,7 @@ export const useKiEvaluation = () => {
       projectsLoading: false,
       tracesByProject: {},
       evaluators: [],
+      traceReferenceData: {},
       evaluationResults: [],
       experimentScores: [],
       isRunning: false,
@@ -434,6 +465,8 @@ export const useKiEvaluation = () => {
     toggleAllTracesForProject,
     runEvaluation,
     fetchExperimentScores,
+    goToStep,
+    setTraceReferenceData,
     reset,
   };
 };

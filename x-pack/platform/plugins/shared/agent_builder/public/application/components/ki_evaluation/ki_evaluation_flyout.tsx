@@ -33,6 +33,9 @@ import {
   EuiAccordion,
   EuiAvatar,
   EuiSkeletonText,
+  EuiTextArea,
+  EuiHorizontalRule,
+  EuiLink,
   useGeneratedHtmlId,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -82,6 +85,8 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
     toggleAllTracesForProject,
     runEvaluation,
     fetchExperimentScores,
+    goToStep,
+    setTraceReferenceData,
     reset,
   } = useKiEvaluation();
 
@@ -94,12 +99,31 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
     fetchEvaluators();
   }, [fetchProjects, fetchEvaluators]);
 
-  // Once evaluators are fetched, default-select all of them.
+  // Default-select only evaluators that don't require user-supplied reference data.
   useEffect(() => {
     if (state.evaluators.length > 0 && selectedEvaluatorNames.length === 0) {
-      setSelectedEvaluatorNames(state.evaluators.map((e) => e.name));
+      setSelectedEvaluatorNames(
+        state.evaluators.filter((e) => !e.reference_data_schema).map((e) => e.name)
+      );
     }
   }, [state.evaluators, selectedEvaluatorNames.length]);
+
+  const needsReferenceData = useMemo(
+    () =>
+      state.evaluators.some(
+        (e) => e.reference_data_schema && selectedEvaluatorNames.includes(e.name)
+      ),
+    [state.evaluators, selectedEvaluatorNames]
+  );
+
+  const handleProceedFromTraces = useCallback(() => {
+    if (!selectedConnectorId || selectedEvaluatorNames.length === 0) return;
+    if (needsReferenceData) {
+      goToStep('reference_data');
+    } else {
+      runEvaluation(selectedConnectorId, selectedEvaluatorNames);
+    }
+  }, [selectedConnectorId, selectedEvaluatorNames, needsReferenceData, goToStep, runEvaluation]);
 
   const handleRunEvaluation = useCallback(() => {
     if (selectedConnectorId && selectedEvaluatorNames.length > 0) {
@@ -178,6 +202,16 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
           />
         )}
 
+        {state.currentStep === 'reference_data' && (
+          <ReferenceDataStep
+            tracesByProject={state.tracesByProject}
+            evaluators={state.evaluators}
+            selectedEvaluatorNames={selectedEvaluatorNames}
+            traceReferenceData={state.traceReferenceData}
+            onSetReferenceData={setTraceReferenceData}
+          />
+        )}
+
         {state.currentStep === 'results' && (
           <ResultsStep results={state.evaluationResults} experimentId={state.experimentId} />
         )}
@@ -196,21 +230,54 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
             {state.currentStep === 'traces' && (
               <EuiButton
                 fill
-                onClick={handleRunEvaluation}
+                onClick={handleProceedFromTraces}
                 isLoading={state.isRunning}
                 isDisabled={!canRun}
                 data-test-subj="kiEvalRunButton"
               >
-                {state.isRunning
-                  ? state.progressMessage ??
-                    i18n.translate('xpack.agentBuilder.kiEval.runningEvaluation', {
-                      defaultMessage: 'Running evaluation...',
+                {needsReferenceData
+                  ? i18n.translate('xpack.agentBuilder.kiEval.nextReferenceData', {
+                      defaultMessage: 'Next: provide expected outputs',
                     })
                   : i18n.translate('xpack.agentBuilder.kiEval.runEvaluation', {
                       defaultMessage: 'Run evaluation ({count} traces)',
                       values: { count: selectedCount },
                     })}
               </EuiButton>
+            )}
+            {state.currentStep === 'reference_data' && (
+              <EuiFlexGroup gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => goToStep('traces')}
+                    iconType="arrowLeft"
+                    iconSide="left"
+                  >
+                    {i18n.translate('xpack.agentBuilder.kiEval.backToTraces', {
+                      defaultMessage: 'Back',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    onClick={handleRunEvaluation}
+                    isLoading={state.isRunning}
+                    isDisabled={!canRun}
+                    data-test-subj="kiEvalRunButton"
+                  >
+                    {state.isRunning
+                      ? state.progressMessage ??
+                        i18n.translate('xpack.agentBuilder.kiEval.runningEvaluation', {
+                          defaultMessage: 'Running evaluation...',
+                        })
+                      : i18n.translate('xpack.agentBuilder.kiEval.runEvaluation', {
+                          defaultMessage: 'Run evaluation ({count} traces)',
+                          values: { count: selectedCount },
+                        })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
             {state.currentStep === 'results' && (
               <EuiButton fill onClick={handleClose}>
@@ -236,7 +303,12 @@ interface TracesStepProps {
   tracesByProject: Record<string, ProjectTracesState>;
   selectedConnectorId: string;
   defaultConnectorId?: string;
-  evaluators: Array<{ name: string; kind: 'llm' | 'code' }>;
+  evaluators: Array<{
+    name: string;
+    kind: 'llm' | 'code';
+    description: string;
+    reference_data_schema?: Record<string, unknown>;
+  }>;
   selectedEvaluatorNames: string[];
   selectedCount: number;
   onConnectorChange: (id: string) => void;
@@ -349,24 +421,44 @@ const TracesStep: React.FC<TracesStepProps> = ({
                 `}
                 data-test-subj="kiEvalEvaluatorSelector"
               >
-                {evaluators.map((e) => (
-                  <EuiCheckbox
-                    key={e.name}
-                    id={`kiEvalEvaluator-${e.name}`}
-                    checked={selectedEvaluatorNames.includes(e.name)}
-                    onChange={() => handleEvaluatorChange(e.name)}
-                    label={
-                      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="s">{e.name}</EuiText>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiBadge color="hollow">{e.kind}</EuiBadge>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    }
-                  />
-                ))}
+                {evaluators.map((e) => {
+                  const requiresInput = Boolean(e.reference_data_schema);
+                  const checkbox = (
+                    <EuiCheckbox
+                      key={e.name}
+                      id={`kiEvalEvaluator-${e.name}`}
+                      checked={selectedEvaluatorNames.includes(e.name)}
+                      onChange={() => handleEvaluatorChange(e.name)}
+                      label={
+                        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiText size="s">{e.name}</EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiBadge color="hollow">{e.kind}</EuiBadge>
+                          </EuiFlexItem>
+                          {requiresInput && (
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge color="warning" iconType="indexEdit">
+                                {i18n.translate(
+                                  'xpack.agentBuilder.kiEval.evaluatorRequiresInput',
+                                  { defaultMessage: 'requires input' }
+                                )}
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          )}
+                        </EuiFlexGroup>
+                      }
+                    />
+                  );
+                  return e.description ? (
+                    <EuiToolTip key={e.name} content={e.description} position="top">
+                      {checkbox}
+                    </EuiToolTip>
+                  ) : (
+                    checkbox
+                  );
+                })}
               </div>
             </EuiPanel>
           </EuiFormRow>
@@ -729,6 +821,111 @@ const ProjectTracesContent: React.FC<ProjectTracesContentProps> = ({
 };
 
 // ---------------------------------------------------------------------------
+// ReferenceDataStep — collect expected outputs for evaluators that need them
+// ---------------------------------------------------------------------------
+
+interface ReferenceDataStepProps {
+  tracesByProject: Record<string, ProjectTracesState>;
+  evaluators: Array<{
+    name: string;
+    kind: 'llm' | 'code';
+    description: string;
+    reference_data_schema?: Record<string, unknown>;
+  }>;
+  selectedEvaluatorNames: string[];
+  traceReferenceData: Record<string, Record<string, string>>;
+  onSetReferenceData: (traceId: string, field: string, value: string) => void;
+}
+
+const ReferenceDataStep: React.FC<ReferenceDataStepProps> = ({
+  tracesByProject,
+  evaluators,
+  selectedEvaluatorNames,
+  traceReferenceData,
+  onSetReferenceData,
+}) => {
+  const selectedTraces = Object.values(tracesByProject)
+    .flatMap((p) => p.traces)
+    .filter((vt) => vt.selected);
+
+  const evaluatorsNeedingInput = evaluators.filter(
+    (e) => e.reference_data_schema && selectedEvaluatorNames.includes(e.name)
+  );
+
+  return (
+    <>
+      <EuiCallOut
+        color="warning"
+        iconType="indexEdit"
+        size="s"
+        title={i18n.translate('xpack.agentBuilder.kiEval.referenceDataRequired', {
+          defaultMessage:
+            'The selected evaluator(s) require expected outputs to compare against. Fill in the fields below for each trace.',
+        })}
+      />
+      <EuiSpacer size="m" />
+
+      {selectedTraces.map((vt, idx) => (
+        <React.Fragment key={vt.trace.trace_id}>
+          <EuiPanel paddingSize="m" hasBorder>
+            <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>{vt.trace.name}</strong>
+                </EuiText>
+                {vt.trace.user_prompt && (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <EuiText size="xs" color="subdued">
+                      <em>
+                        {i18n.translate('xpack.agentBuilder.kiEval.userPromptLabel', {
+                          defaultMessage: 'User prompt:',
+                        })}
+                      </em>{' '}
+                      {vt.trace.user_prompt}
+                    </EuiText>
+                  </>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+
+            {evaluatorsNeedingInput.map((e) => (
+              <EuiFormRow
+                key={e.name}
+                label={i18n.translate('xpack.agentBuilder.kiEval.expectedOutputLabel', {
+                  defaultMessage: 'Expected output ({evaluator})',
+                  values: { evaluator: e.name },
+                })}
+                helpText={e.description}
+                fullWidth
+              >
+                <EuiTextArea
+                  value={traceReferenceData[vt.trace.trace_id]?.expected ?? ''}
+                  onChange={(ev) =>
+                    onSetReferenceData(vt.trace.trace_id, 'expected', ev.target.value)
+                  }
+                  placeholder={i18n.translate(
+                    'xpack.agentBuilder.kiEval.expectedOutputPlaceholder',
+                    { defaultMessage: 'Enter the expected answer for this trace…' }
+                  )}
+                  rows={3}
+                  fullWidth
+                  compressed
+                  data-test-subj={`kiEvalExpectedOutput-${vt.trace.trace_id}`}
+                />
+              </EuiFormRow>
+            ))}
+          </EuiPanel>
+          {idx < selectedTraces.length - 1 && <EuiHorizontalRule margin="s" />}
+        </React.Fragment>
+      ))}
+    </>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // ResultsStep
 // ---------------------------------------------------------------------------
 
@@ -761,16 +958,24 @@ const ResultsStep: React.FC<{
         iconType="check"
       >
         <p>
-          {i18n.translate('xpack.agentBuilder.kiEval.resultsSummaryDesc', {
-            defaultMessage:
-              '{okCount} scores recorded, {errCount} errors. Experiment ID: {experimentId}',
-            values: {
-              okCount,
-              errCount,
-              experimentId: experimentId ?? 'N/A',
-            },
+          {i18n.translate('xpack.agentBuilder.kiEval.resultsSummaryCounts', {
+            defaultMessage: '{okCount} scores recorded, {errCount} errors.',
+            values: { okCount, errCount },
           })}
         </p>
+        {experimentId && (
+          <p>
+            {i18n.translate('xpack.agentBuilder.kiEval.experimentIdLabel', {
+              defaultMessage: 'Experiment ID:',
+            })}{' '}
+            <EuiLink
+              href={`/app/management/ai/evals/experiments/${experimentId}?execution_id=${experimentId}`}
+              target="_blank"
+            >
+              {experimentId}
+            </EuiLink>
+          </p>
+        )}
       </EuiCallOut>
       <EuiSpacer size="m" />
       <ScoresTable results={results} />
@@ -826,9 +1031,23 @@ const ScoresTable: React.FC<{ results: EvaluatorScoreRow[] }> = ({ results }) =>
       name: i18n.translate('xpack.agentBuilder.kiEval.scoreLabel', {
         defaultMessage: 'Label / Error',
       }),
-      truncateText: true,
-      render: (label: string, item: EvaluatorScoreRow) =>
-        item.status === 'error' ? item.errorMessage ?? '—' : label ?? '—',
+      render: (label: string, item: EvaluatorScoreRow) => {
+        const text = item.status === 'error' ? item.errorMessage ?? '—' : label ?? '—';
+        return (
+          <EuiToolTip content={text} position="top">
+            <span
+              css={css`
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+              `}
+            >
+              {text}
+            </span>
+          </EuiToolTip>
+        );
+      },
     },
   ];
 
