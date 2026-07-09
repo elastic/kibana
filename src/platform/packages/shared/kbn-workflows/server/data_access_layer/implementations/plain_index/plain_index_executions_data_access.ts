@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { executeIndexBulkUpsert } from './execute_index_bulk_upsert';
 import { createOrUpdateIndex } from '../../init/create_or_update_index';
 import type {
   BulkUpsertRequest,
@@ -19,7 +20,6 @@ import type {
   ExecutionsSearchRequest,
   GetExecutionsByIdsOptions,
 } from '../../types';
-import { executeIndexBulkUpsert } from './execute_index_bulk_upsert';
 
 export interface PlainIndexExecutionsDataAccessDeps<TExecution extends { id: string }> {
   esClient: ElasticsearchClient;
@@ -32,8 +32,9 @@ export interface PlainIndexExecutionsDataAccessDeps<TExecution extends { id: str
   ) => TExecution;
 }
 
-export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
-  implements ExecutionsDataAccess<TExecution>
+export class PlainIndexExecutionsDataAccess<
+  TExecution extends Record<string, unknown> & { id: string }
+> implements ExecutionsDataAccess<TExecution>
 {
   constructor(private readonly deps: PlainIndexExecutionsDataAccessDeps<TExecution>) {}
 

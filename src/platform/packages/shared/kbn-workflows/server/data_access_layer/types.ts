@@ -75,7 +75,10 @@ export interface CreateStepExecutionsDataAccessDeps {
   logger?: Logger;
 }
 
-export type ExecutionSourceProjectionField<TExecution extends { id: string }> = keyof TExecution;
+export type ExecutionSourceProjectionField<TExecution extends { id: string }> = Extract<
+  keyof TExecution,
+  string
+>;
 
 export interface GetExecutionsByIdsOptions<TExecution extends { id: string }> {
   sourceIncludes?: ExecutionSourceProjectionField<TExecution>[];
