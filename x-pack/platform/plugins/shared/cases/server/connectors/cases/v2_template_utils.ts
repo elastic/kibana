@@ -21,12 +21,6 @@ export type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSc
 /**
  * Parse a raw YAML definition string into a validated ParsedTemplateDefinition.
  * Returns null if the YAML is invalid or fails schema validation.
- *
- * Uses the `yaml` package (not `js-yaml`) to match the parser used everywhere else
- * templates are read (routes, `resolveTemplateFields`, the UI form sync). `js-yaml`
- * defaults to YAML 1.1 scalar resolution (e.g. `no`/`yes`/`off`/`on`/octals parse as
- * booleans or numbers rather than strings), which would silently diverge from the
- * `extended_fields` the UI pre-fills for the same stored definition.
  */
 export const parseTemplateDefinition = (
   definitionYaml: string
