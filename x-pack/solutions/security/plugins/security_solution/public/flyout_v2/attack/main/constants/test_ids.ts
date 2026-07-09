@@ -35,3 +35,7 @@ export const INSIGHTS_SECTION_TEST_ID =
 export const FOOTER_TEST_ID = `${ATTACK_FLYOUT_V2_PREFIX}-footer` as const;
 export const FOOTER_TAKE_ACTION_BUTTON_TEST_ID =
   `${ATTACK_FLYOUT_V2_PREFIX}-footer-take-action-button` as const;
+
+export const TABLE_TAB_CONTENT_TEST_ID = `${ATTACK_FLYOUT_V2_PREFIX}-table` as const;
+export const TABLE_TAB_SEARCH_INPUT_TEST_ID =
+  `${ATTACK_FLYOUT_V2_PREFIX}-table-search-input` as const;

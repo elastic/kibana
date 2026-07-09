@@ -98,6 +98,9 @@ describe('when calling the Suggestions route handler', () => {
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
     mockScopedEsClient = elasticsearchServiceMock.createScopedClusterClient();
+    (
+      mockScopedEsClient.asInternalUser.cluster.remoteInfo as unknown as jest.Mock
+    ).mockResolvedValue({});
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockResponse = httpServerMock.createResponseFactory();
 
@@ -876,6 +879,68 @@ describe('when calling the Suggestions route handler', () => {
             message: expect.stringContaining('Search service error'),
           }),
         });
+      });
+    });
+
+    describe('when CCS is enabled', () => {
+      beforeEach(() => {
+        (mockEndpointContext.service.isCcsEnabled as jest.Mock).mockResolvedValue(true);
+        suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
+          config$,
+          mockEndpointContext
+        );
+      });
+
+      it('should pass a CCS-prefixed index pattern to the suggestion method when remotes are connected', async () => {
+        const spaceId = 'default';
+        const mockIntegrationNamespaces = { endpoint: ['default'] };
+        const mockIndexPattern = 'logs-endpoint.events.process-default';
+
+        applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
+
+        const mockContext = requestContextMock.convertContext(
+          createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
+        );
+
+        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+
+        const mockFleetServices = {
+          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+        };
+        mockEndpointContext.service.getInternalFleetServices = jest
+          .fn()
+          .mockReturnValue(mockFleetServices);
+
+        buildIndexNameWithNamespaceMock.mockReturnValue(mockIndexPattern);
+
+        const mockRequest = httpServerMock.createKibanaRequest<
+          TypeOf<typeof EndpointSuggestionsSchema.params>,
+          never,
+          never
+        >({
+          params: { suggestion_type: 'eventFilters' },
+          body: {
+            field: 'process.id',
+            query: 'test-query',
+            filters: [],
+            fieldMeta: 'test-field-meta',
+          },
+        });
+
+        await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
+
+        expect(termsEnumSuggestionsMock).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.any(Object),
+          mockScopedEsClient.asInternalUser,
+          `${mockIndexPattern},*:${mockIndexPattern}`,
+          'process.id',
+          'test-query',
+          [],
+          'test-field-meta',
+          expect.any(Object)
+        );
+        expect(mockResponse.ok).toHaveBeenCalled();
       });
     });
 

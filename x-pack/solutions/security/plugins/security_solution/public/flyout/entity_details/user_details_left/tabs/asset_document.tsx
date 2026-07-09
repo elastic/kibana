@@ -15,7 +15,8 @@ import { i18n } from '@kbn/i18n';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { JsonTab } from '../../../../flyout_v2/document/main/tabs/json_tab';
-import { TableTab } from '../../../document_details/right/tabs/table_tab';
+import { TableTab } from '../../../../flyout_v2/document/main/tabs/table_tab';
+import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { useDocumentDetailsContext } from '../../../document_details/shared/context';
 import { FLYOUT_BODY_TEST_ID, JSON_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './test_ids';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
@@ -44,7 +45,7 @@ const useFilterOptions = (
   );
 
 export const AssetDocumentTab: FC<Partial<AssetDocumentPanelProps>> = memo(() => {
-  const { searchHit, isRulePreview } = useDocumentDetailsContext();
+  const { searchHit, scopeId, isRulePreview } = useDocumentDetailsContext();
 
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
@@ -59,7 +60,14 @@ export const AssetDocumentTab: FC<Partial<AssetDocumentPanelProps>> = memo(() =>
             defaultMessage="Table"
           />
         ),
-        content: <TableTab />,
+        content: (
+          <TableTab
+            hit={hit}
+            scopeId={scopeId}
+            isRulePreview={isRulePreview}
+            renderCellActions={cellActionRenderer}
+          />
+        ),
       },
       {
         id: JSON_TAB_TEST_ID,
@@ -73,7 +81,7 @@ export const AssetDocumentTab: FC<Partial<AssetDocumentPanelProps>> = memo(() =>
         content: <JsonTab hit={hit} isRulePreview={isRulePreview} />,
       },
     ],
-    [hit, isRulePreview]
+    [hit, scopeId, isRulePreview]
   );
 
   const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);

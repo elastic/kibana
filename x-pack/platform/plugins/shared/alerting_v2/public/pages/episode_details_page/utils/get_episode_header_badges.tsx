@@ -96,7 +96,11 @@ const renderIconBadge =
   (iconType: string, tooltip: string, dataTestSubj: string) =>
   ({ badgeText }: { badgeText: string }) =>
     (
-      <EuiToolTip content={tooltip} disableScreenReaderOutput>
+      <EuiToolTip
+        content={tooltip}
+        disableScreenReaderOutput
+        anchorProps={{ css: { display: 'flex' } }}
+      >
         <EuiBadge
           color="hollow"
           iconType={iconType}

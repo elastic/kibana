@@ -311,15 +311,31 @@ const RiskInputsTabContent = <T extends EntityType>({
   const isResolutionView =
     selectedView === RiskScoreLeftPanelSubTab.RESOLUTION && hasResolutionScore;
 
-  const showTimeline = isRiskScoreHistoryEnabled && entityId !== undefined && !isResolutionView;
+  // The resolution-group history lives in the same time-series stream as the
+  // entity history, keyed by the resolution target's id with `score_type=resolution`.
+  // Switch the timeline's identity and score type by the active sub-tab so the
+  // chart and point-in-time contributions follow the view.
+  const resolutionTargetEntityId = resolutionGroup?.target
+    ? getEntityId(resolutionGroup.target)
+    : undefined;
+  const historyEntityId = isResolutionView ? resolutionTargetEntityId : entityId;
+  const historyScoreType: RiskScoreHistoryEntry['score_type'] = isResolutionView
+    ? 'resolution'
+    : 'base';
+  const historyEntityName =
+    isResolutionView && resolutionGroup?.target
+      ? getEntityName(resolutionGroup.target) || entityName
+      : entityName;
+
+  const showTimeline = isRiskScoreHistoryEnabled && historyEntityId !== undefined;
   const pitSelectionActive = showTimeline && selectedTimestamp !== undefined;
 
   const { data: pitHistoryData, isFetching: pitFetching } = useRiskScoreHistory({
     entityType,
-    entityId,
+    entityId: historyEntityId,
     from: selectedTimestamp,
     to: selectedTimestamp,
-    scoreType: 'base',
+    scoreType: historyScoreType,
     includeContributions: true,
     pageSize: 1,
     skip: !pitSelectionActive,
@@ -328,10 +344,10 @@ const RiskInputsTabContent = <T extends EntityType>({
   const pitEntry = pitSelectionActive ? pitHistoryData?.entries[0] : undefined;
   const pitRiskScore = useMemo(
     () =>
-      pitEntry !== undefined && entityId !== undefined
-        ? mkEntityRiskScore(entityType, entityName, entityId, pitEntry)
+      pitEntry !== undefined && historyEntityId !== undefined
+        ? mkEntityRiskScore(entityType, historyEntityName, historyEntityId, pitEntry)
         : undefined,
-    [pitEntry, entityId, entityType, entityName]
+    [pitEntry, historyEntityId, entityType, historyEntityName]
   );
 
   const onHistoryRangeChange = useCallback((from: string) => {
@@ -349,9 +365,9 @@ const RiskInputsTabContent = <T extends EntityType>({
   const latestRiskScore = isResolutionView ? resolutionRiskScore : entityRiskScore;
   const activeRiskScore = pitRiskScore ?? latestRiskScore;
   const activeInspectRiskScore = isResolutionView ? inspectResolutionRiskScore : inspectRiskScore;
-  const activeRiskScoreLoading = isResolutionView
-    ? loadingResolutionRiskScore
-    : loadingRiskScore || (pitSelectionActive && pitFetching);
+  const activeRiskScoreLoading =
+    (isResolutionView ? loadingResolutionRiskScore : loadingRiskScore) ||
+    (pitSelectionActive && pitFetching);
   const activeRiskScoreRefetch = isResolutionView ? refetchResolutionRiskScore : refetch;
 
   useQueryInspector({
@@ -565,19 +581,21 @@ const RiskInputsTabContent = <T extends EntityType>({
         </>
       )}
 
-      {showTimeline && entityId !== undefined && (
-        <RiskScoreTimeline
-          entityType={entityType}
-          entityId={entityId}
-          from={historyFrom}
-          to={HISTORY_RANGE_TO}
-          scoreType="base"
-          selectedTimestamp={selectedTimestamp}
-          onPointSelect={setSelectedTimestamp}
-          onRangeChange={onHistoryRangeChange}
-        />
+      {showTimeline && historyEntityId !== undefined && (
+        <>
+          <RiskScoreTimeline
+            entityType={entityType}
+            entityId={historyEntityId}
+            from={historyFrom}
+            to={HISTORY_RANGE_TO}
+            scoreType={historyScoreType}
+            selectedTimestamp={selectedTimestamp}
+            onPointSelect={setSelectedTimestamp}
+            onRangeChange={onHistoryRangeChange}
+          />
+          <EuiSpacer size="m" />
+        </>
       )}
-      <EuiSpacer size="m" />
       {pitSelectionActive && (
         <>
           <EuiCallOut
