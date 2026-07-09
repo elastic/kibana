@@ -10,6 +10,7 @@ import { render, screen, act, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { SeverityOption } from '@kbn/ml-plugin/public/application/explorer/hooks/use_severity_options';
 import { AnomaliesTab } from './anomalies_tab';
+import { ANOMALIES_TAB_ERROR_TEST_ID } from './test_ids';
 
 // ─── Hook mocks ──────────────────────────────────────────────────────────────
 
@@ -463,18 +464,6 @@ describe('AnomaliesTab', () => {
       expect(chain).toHaveAttribute('data-selected-tactic', '');
     });
 
-    it('shows the persistent first tactic badge and disables tactic selection when overview errored', () => {
-      mockUseAnomalyOverview.mockReturnValue({
-        ...emptyOverview,
-        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
-        isError: true,
-      });
-      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
-      const chain = screen.getByTestId('mock-mitre-attack-chain');
-      expect(chain).toHaveAttribute('data-show-persistent-first-tactic-badge', 'true');
-      expect(chain).toHaveAttribute('data-has-select-handler', 'false');
-    });
-
     it('does not show the persistent first tactic badge and allows tactic selection when there are anomalies', () => {
       mockUseAnomalyOverview.mockReturnValue({
         ...emptyOverview,
@@ -507,16 +496,6 @@ describe('AnomaliesTab', () => {
       expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-empty', 'true');
     });
 
-    it('sets the timeline isEmpty prop when the overview errored, even with time bucket data', () => {
-      mockUseAnomalyOverview.mockReturnValue({
-        ...emptyOverview,
-        data: { ...emptyOverview.data, anomalyByTimeBucket: [{ x: 0, y: 1 }] },
-        isError: true,
-      });
-      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
-      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-empty', 'true');
-    });
-
     it('clears the timeline isLoading and isEmpty props when overview has data and no error', () => {
       mockUseAnomalyOverview.mockReturnValue({
         ...emptyOverview,
@@ -532,6 +511,45 @@ describe('AnomaliesTab', () => {
       mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isLoading: true });
       render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
       expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'true');
+    });
+  });
+
+  describe('tab error state', () => {
+    it('shows the error prompt and hides the attack chain, timeline, and table when the overview errors', () => {
+      mockUseAnomalyOverview.mockReturnValue({ ...emptyOverview, data: undefined, isError: true });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId(ANOMALIES_TAB_ERROR_TEST_ID)).toBeInTheDocument();
+      expect(screen.queryByTestId('mock-mitre-attack-chain')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-timeline')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-table')).not.toBeInTheDocument();
+    });
+
+    it('shows the error prompt and hides the attack chain, timeline, and table when the summary errors', () => {
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, data: undefined, isError: true });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId(ANOMALIES_TAB_ERROR_TEST_ID)).toBeInTheDocument();
+      expect(screen.queryByTestId('mock-mitre-attack-chain')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-timeline')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-table')).not.toBeInTheDocument();
+    });
+
+    it('does not show the error prompt when there is no error', () => {
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.queryByTestId(ANOMALIES_TAB_ERROR_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('does not show the error prompt for the date-range-too-old error, since the specific warning callout covers it', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: undefined,
+        isError: true,
+        error: {
+          response: { status: 400 },
+          body: { message: '`from` must not be older than 1 year' },
+        },
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.queryByTestId(ANOMALIES_TAB_ERROR_TEST_ID)).not.toBeInTheDocument();
     });
   });
 });

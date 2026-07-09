@@ -51,6 +51,7 @@ import {
   ANOMALIES_TAB_ATTACK_CHAIN_TEST_ID,
   ANOMALIES_TAB_MANAGE_JOBS_BUTTON_TEST_ID,
   ANOMALIES_TAB_DATE_RANGE_ERROR_TEST_ID,
+  ANOMALIES_TAB_ERROR_TEST_ID,
 } from './test_ids';
 import { MitreAttackChain } from './mitre/components/mitre_attack_chain';
 import { AnomalyTabTimelineSection } from './anomalies_tab_timeline';
@@ -64,6 +65,7 @@ import {
 } from './table/constants';
 import { AnomaliesBorderedVisPanel } from './anomalies_bordered_vis_panel';
 import { MitreAttackChainPlaceholder } from './mitre/components/mitre_attack_chain_placeholder';
+import { AnomaliesErrorPrompt } from './anomalies_error_prompt';
 
 const TIME_RANGE_PRESETS: TimeRangeBoundsOption[] = [
   { start: 'now-15m', end: 'now', label: ENTITY_ANOMALY_DATE_RANGE_LAST_15_MINUTES },
@@ -186,7 +188,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     [anomalyOverview.data?.anomalyByTimeBucket]
   );
   const isLoading = anomalyOverview.isLoading;
-  const isEmpty = anomalyOverview.isError || anomalyOverview.data?.totalAnomaliesCount === 0;
+  const isEmpty = anomalyOverview.data?.totalAnomaliesCount === 0;
 
   const anomalySummary = useAnomalySummary({
     entityId,
@@ -231,6 +233,10 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     anomalySummary.isFetching,
     anomalySummary.error,
   ]);
+
+  // The date-range-too-old case gets its own actionable warning above, so it
+  // takes precedence over the generic error prompt.
+  const hasError = (anomalyOverview.isError || anomalySummary.isError) && !isDateRangeTooOld;
 
   const {
     services: { ml },
@@ -298,57 +304,63 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
           <EuiSpacer size="m" />
         </>
       )}
-      {(isLoading || uniqueTactics.length > 0) && (
-        <EuiAccordion
-          id="entity-anomalies-tab-attack-chain-accordion"
-          data-test-subj={ANOMALIES_TAB_ATTACK_CHAIN_TEST_ID}
-          initialIsOpen
-          buttonContent={
-            <EuiTitle size="xs">
-              <h3>{ENTITY_ANOMALIES_TAB_ATTACK_CHAIN_TITLE}</h3>
-            </EuiTitle>
-          }
-        >
-          <EuiSpacer size="m" />
-          <AnomaliesBorderedVisPanel>
-            {isLoading ? (
-              <MitreAttackChainPlaceholder>
-                <EuiLoadingChart size="l" />
-              </MitreAttackChainPlaceholder>
-            ) : (
-              <MitreAttackChain
-                anomalyCountByTactic={anomalyOverview?.data?.tacticCounts ?? {}}
-                onSelectTactic={isEmpty ? undefined : handleSelectTactic}
-                selectedTactic={isEmpty ? null : selectedTactic}
-                triggeredTactics={uniqueTactics}
-                showLabels
-                showPersistentFirstTacticBadge={isEmpty}
-              />
-            )}
-          </AnomaliesBorderedVisPanel>
-        </EuiAccordion>
+      {hasError ? (
+        <AnomaliesErrorPrompt variant="leftTab" data-test-subj={ANOMALIES_TAB_ERROR_TEST_ID} />
+      ) : (
+        <>
+          {(isLoading || uniqueTactics.length > 0) && (
+            <EuiAccordion
+              id="entity-anomalies-tab-attack-chain-accordion"
+              data-test-subj={ANOMALIES_TAB_ATTACK_CHAIN_TEST_ID}
+              initialIsOpen
+              buttonContent={
+                <EuiTitle size="xs">
+                  <h3>{ENTITY_ANOMALIES_TAB_ATTACK_CHAIN_TITLE}</h3>
+                </EuiTitle>
+              }
+            >
+              <EuiSpacer size="m" />
+              <AnomaliesBorderedVisPanel>
+                {isLoading ? (
+                  <MitreAttackChainPlaceholder>
+                    <EuiLoadingChart size="l" />
+                  </MitreAttackChainPlaceholder>
+                ) : (
+                  <MitreAttackChain
+                    anomalyCountByTactic={anomalyOverview?.data?.tacticCounts ?? {}}
+                    onSelectTactic={isEmpty ? undefined : handleSelectTactic}
+                    selectedTactic={isEmpty ? null : selectedTactic}
+                    triggeredTactics={uniqueTactics}
+                    showLabels
+                    showPersistentFirstTacticBadge={isEmpty}
+                  />
+                )}
+              </AnomaliesBorderedVisPanel>
+            </EuiAccordion>
+          )}
+          <EuiSpacer size="l" />
+          <AnomalyTabTimelineSection
+            anomalies={anomalyByTimeBucket}
+            selectedTactic={selectedTactic}
+            timeRangeMs={timeRangeMs}
+            isLoading={anomalyOverview.isLoading}
+            isEmpty={anomalyByTimeBucket.length === 0}
+          />
+          <EuiSpacer size="l" />
+          <AnomalyTabTableSection
+            anomalies={anomalySummaryAnomalies}
+            entityType={entityType}
+            onTableChange={handleTableChange}
+            page={anomalySummary.data?.page ?? tablePageIndex + 1}
+            pageSize={anomalySummary.data?.page_size ?? tablePageSize}
+            sortField={tableSortField}
+            sortDirection={tableSortDirection}
+            timeRange={{ from: start, to: end }}
+            total={anomalySummary.data?.total ?? 0}
+            isLoading={anomalySummary.isLoading}
+          />
+        </>
       )}
-      <EuiSpacer size="l" />
-      <AnomalyTabTimelineSection
-        anomalies={anomalyByTimeBucket}
-        selectedTactic={selectedTactic}
-        timeRangeMs={timeRangeMs}
-        isLoading={anomalyOverview.isLoading}
-        isEmpty={anomalyOverview.isError || anomalyByTimeBucket.length === 0}
-      />
-      <EuiSpacer size="l" />
-      <AnomalyTabTableSection
-        anomalies={anomalySummaryAnomalies}
-        entityType={entityType}
-        onTableChange={handleTableChange}
-        page={anomalySummary.data?.page ?? tablePageIndex + 1}
-        pageSize={anomalySummary.data?.page_size ?? tablePageSize}
-        sortField={tableSortField}
-        sortDirection={tableSortDirection}
-        timeRange={{ from: start, to: end }}
-        total={anomalySummary.data?.total ?? 0}
-        isLoading={anomalySummary.isLoading}
-      />
     </div>
   );
 };
