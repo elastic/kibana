@@ -35,7 +35,7 @@ const LINEAR_SURFACE = 'lch(98.94 0.5 282)'; // content / header surface
 const LINEAR_SURFACE_NAV = 'lch(96.5 0.5 282)'; // nav step off content surface
 const LINEAR_PANEL_PADDING = DESIGN_EXPLORATION_PADDING_COMPACT + 4;
 const LINEAR_PADDING = 20;
-const LINEAR_TOP_BAR_HEIGHT = 48;
+const LINEAR_TOP_BAR_HEIGHT = 57;
 const LINEAR_APP_HEADER_TRANSITION_MS = 200;
 
 export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
