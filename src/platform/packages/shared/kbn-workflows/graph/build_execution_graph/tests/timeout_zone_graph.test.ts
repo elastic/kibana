@@ -108,6 +108,33 @@ describe('convertToWorkflowGraph', () => {
       );
       expect(executionGraph.node('enterTimeoutZone_run-child-sync')).toBeUndefined();
     });
+
+    it('a workflow.execute step with an explicit timeout gets a wrapping enter-timeout-zone node', () => {
+      const workflowWithTimedSyncExecute = {
+        name: 'Parent with timed workflow.execute',
+        version: '1' as const,
+        enabled: true,
+        triggers: [{ type: 'manual' as const }],
+        steps: [
+          {
+            name: 'run-child-sync',
+            type: 'workflow.execute',
+            timeout: '15m',
+            with: { 'workflow-id': 'child-workflow-id' },
+          } as WorkflowExecuteStep,
+        ],
+      } as WorkflowYaml;
+
+      const executionGraph = convertToWorkflowGraph(workflowWithTimedSyncExecute);
+
+      expect(executionGraph.node('enterTimeoutZone_run-child-sync')).toEqual(
+        expect.objectContaining({
+          type: 'enter-timeout-zone',
+          stepId: 'run-child-sync',
+          timeout: '15m',
+        })
+      );
+    });
   });
 
   describe('workflow-level timeout', () => {

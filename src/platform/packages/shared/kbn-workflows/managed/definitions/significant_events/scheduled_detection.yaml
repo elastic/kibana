@@ -22,6 +22,10 @@ triggers:
 steps:
   - name: detect
     type: workflow.execute
+    # Matches the child's own settings.timeout (and this workflow's own 10m ceiling above).
+    # If the child is terminalized by its own recovery path instead of completing normally,
+    # nothing else notifies this parent — it would otherwise stay waiting_for_child indefinitely.
+    timeout: "10m"
     with:
       workflow-id: "system-significant-events-detection"
       inputs:

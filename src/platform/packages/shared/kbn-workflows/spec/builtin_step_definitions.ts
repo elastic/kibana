@@ -269,6 +269,17 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     workflow-id: "child_workflow"
     inputs:
       alertId: "{{ workflow.event.id }}"`,
+        `- name: run_child_workflow_with_timeout
+  type: workflow.execute
+  # Bounds the parent's wait on this child. Set this to at least the child's own
+  # timeout: if the child is terminalized by its own recovery path (e.g. after an
+  # interrupted run), the parent is not otherwise notified and would stay
+  # "waiting_for_child" forever without this.
+  timeout: 15m
+  with:
+    workflow-id: "child_workflow"
+    inputs:
+      alertId: "{{ workflow.event.id }}"`,
       ],
     },
   },

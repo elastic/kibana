@@ -130,6 +130,10 @@ steps:
     steps:
       - name: identify_features
         type: workflow.execute
+        # Buffer over the child's own settings.timeout (15m). If the child is terminalized by
+        # its own recovery path instead of completing normally, nothing else notifies this
+        # parent — it would otherwise stay waiting_for_child indefinitely.
+        timeout: "17m"
         with:
           workflow-id: "system-streams-ki-features-identification"
           inputs:
@@ -161,6 +165,9 @@ steps:
     steps:
       - name: generate_queries
         type: workflow.execute
+        # Buffer over the child's own settings.timeout (10m) — see the comment on
+        # `identify_features` above.
+        timeout: "12m"
         with:
           workflow-id: "system-streams-ki-queries-generation"
           inputs:

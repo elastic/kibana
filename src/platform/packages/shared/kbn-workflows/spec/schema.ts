@@ -906,7 +906,7 @@ export const WorkflowExecuteStepInputSchema = z.object({
 
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
   with: WorkflowExecuteStepInputSchema,
-});
+}).merge(TimeoutPropSchema);
 
 export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.execute'),
