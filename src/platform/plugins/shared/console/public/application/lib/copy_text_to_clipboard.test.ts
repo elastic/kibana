@@ -37,34 +37,56 @@ describe('WHEN copying text to the clipboard', () => {
     });
   });
 
-  it('SHOULD copy with the document copy helper first', async () => {
+  it('SHOULD copy with the async Clipboard API first', async () => {
+    await expect(copyTextToClipboard('response')).resolves.toBe(true);
+
+    expect(writeText).toHaveBeenCalledWith('response');
+    expect(mockCopyToClipboard).not.toHaveBeenCalled();
+  });
+
+  it('SHOULD fall back to the document copy helper when the Clipboard API write rejects', async () => {
+    writeText.mockRejectedValue(new Error('Clipboard write failed'));
+
+    await expect(copyTextToClipboard('response')).resolves.toBe(true);
+
+    expect(mockCopyToClipboard).toHaveBeenCalledWith('response');
+  });
+
+  it('SHOULD fall back to the document copy helper when the Clipboard API is unavailable', async () => {
+    Object.defineProperty(window.navigator, 'clipboard', {
+      configurable: true,
+      value: undefined,
+    });
+
+    await expect(copyTextToClipboard('response')).resolves.toBe(true);
+
+    expect(mockCopyToClipboard).toHaveBeenCalledWith('response');
+  });
+
+  it('SHOULD fall back to the document copy helper when Clipboard API writeText is unavailable', async () => {
+    Object.defineProperty(window.navigator, 'clipboard', {
+      configurable: true,
+      value: {},
+    });
+
     await expect(copyTextToClipboard('response')).resolves.toBe(true);
 
     expect(mockCopyToClipboard).toHaveBeenCalledWith('response');
     expect(writeText).not.toHaveBeenCalled();
   });
 
-  it('SHOULD fall back to the async Clipboard API when document copy returns false', async () => {
+  it('SHOULD return false when both copy methods fail', async () => {
+    writeText.mockRejectedValue(new Error('Clipboard write failed'));
     mockCopyToClipboard.mockReturnValue(false);
 
-    await expect(copyTextToClipboard('response')).resolves.toBe(true);
-
-    expect(writeText).toHaveBeenCalledWith('response');
+    await expect(copyTextToClipboard('response')).resolves.toBe(false);
   });
 
-  it('SHOULD fall back to the async Clipboard API when document copy throws', async () => {
+  it('SHOULD return false when the Clipboard API rejects and document copy throws', async () => {
+    writeText.mockRejectedValue(new Error('Clipboard write failed'));
     mockCopyToClipboard.mockImplementation(() => {
       throw new Error('Document copy failed');
     });
-
-    await expect(copyTextToClipboard('response')).resolves.toBe(true);
-
-    expect(writeText).toHaveBeenCalledWith('response');
-  });
-
-  it('SHOULD return false when both copy methods fail', async () => {
-    mockCopyToClipboard.mockReturnValue(false);
-    writeText.mockRejectedValue(new Error('Clipboard write failed'));
 
     await expect(copyTextToClipboard('response')).resolves.toBe(false);
   });
@@ -73,27 +95,6 @@ describe('WHEN copying text to the clipboard', () => {
     await expect(copyTextToClipboard('')).resolves.toBe(false);
 
     expect(mockCopyToClipboard).not.toHaveBeenCalled();
-    expect(writeText).not.toHaveBeenCalled();
-  });
-
-  it('SHOULD return false when document copy fails and the Clipboard API is unavailable', async () => {
-    mockCopyToClipboard.mockReturnValue(false);
-    Object.defineProperty(window.navigator, 'clipboard', {
-      configurable: true,
-      value: undefined,
-    });
-
-    await expect(copyTextToClipboard('response')).resolves.toBe(false);
-  });
-
-  it('SHOULD return false when document copy fails and Clipboard API writeText is unavailable', async () => {
-    mockCopyToClipboard.mockReturnValue(false);
-    Object.defineProperty(window.navigator, 'clipboard', {
-      configurable: true,
-      value: {},
-    });
-
-    await expect(copyTextToClipboard('response')).resolves.toBe(false);
     expect(writeText).not.toHaveBeenCalled();
   });
 });

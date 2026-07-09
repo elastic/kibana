@@ -14,21 +14,21 @@ export const copyTextToClipboard = async (text: string): Promise<boolean> => {
     return false;
   }
 
-  try {
-    if (copyToClipboard(text)) {
-      return true;
-    }
-  } catch {
-    // Fall back to the async Clipboard API below.
-  }
-
   if (typeof window.navigator?.clipboard?.writeText === 'function') {
     try {
       await window.navigator.clipboard.writeText(text);
       return true;
     } catch {
-      // Ignore and fall through to return false.
+      // Fall back to the document-copy helper below.
     }
+  }
+
+  try {
+    if (copyToClipboard(text)) {
+      return true;
+    }
+  } catch {
+    // Ignore and fall through to return false.
   }
 
   return false;
