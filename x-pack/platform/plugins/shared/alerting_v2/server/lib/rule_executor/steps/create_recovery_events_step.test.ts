@@ -276,7 +276,7 @@ describe('CreateRecoveryEventsStep', () => {
       expect(alertEvents).toHaveLength(2);
       expect(alertEvents.every((e: AlertEvent) => e.rule.version === 9)).toBe(true);
     });
-      
+
     describe('with a data-presence result', () => {
       it('recovers only absent groups that still have data', async () => {
         const { step, internalEsClient } = createStep();
