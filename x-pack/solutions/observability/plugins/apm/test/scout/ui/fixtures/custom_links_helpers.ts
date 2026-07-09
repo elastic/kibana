@@ -8,11 +8,7 @@
 import type { ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import type { CustomLinksPage } from './page_objects/custom_links';
-import {
-  EXTENDED_TIMEOUT,
-  PRODUCTION_ENVIRONMENT,
-  SERVICE_SYNTH_NODE_1,
-} from './constants';
+import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT, SERVICE_SYNTH_NODE_1 } from './constants';
 
 export const TEMPLATE_URL =
   'http://scoutURLExample.com/ftw/app/apm/services/{{service.name}}/transactions/view?comparisonEnabled=true&environment={{service.environment}}';
