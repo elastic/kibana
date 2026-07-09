@@ -24,7 +24,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { EisModelStatus } from '../common/types';
+import type { EisModelStatus, CspRegion } from '../common/types';
 
 export * from '../common/types';
 
@@ -94,4 +94,16 @@ export interface EndpointDeprecationInfo {
   name: string;
   status: EisModelStatus;
   metadata: EisInferenceEndpointMetadata;
+}
+
+/** Ordered list of EIS geo codes for display in the region picker. */
+export const GEO_ORDER = ['apac', 'eu', 'us', 'other'] as const;
+
+export interface RegionZoneCount {
+  geo: string;
+  modelCount: number;
+  totalCount: number;
+  modelRegions: CspRegion[];
+  /** True when the model only has geo-level availability (no csp+region data). Show badge without counter. */
+  geoOnly: boolean;
 }

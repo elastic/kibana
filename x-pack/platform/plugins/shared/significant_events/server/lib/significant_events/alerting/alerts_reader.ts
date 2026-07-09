@@ -53,6 +53,7 @@ export interface OccurrencesEsqlParams {
   value: number;
   esqlUnit: string;
   limit: number;
+  spaceId: string;
 }
 
 export interface ISignificantEventsAlertsReader {
