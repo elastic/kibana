@@ -11,15 +11,28 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
+import { runWithSpan } from '../../telemetry/traces';
+
+/**
+ * When provided, the query execution is wrapped in an APM/OTel span via `runWithSpan`. `name`
+ * is the short operation identifier (e.g. `probe_query`, `extraction_query`) — callers on the
+ * remote/CCS path distinguish themselves with a `remote_` prefix (e.g. `remote_probe_query`).
+ */
+export interface ExecuteEsqlQueryTelemetry {
+  name: string;
+  namespace: string;
+  type: EntityType;
+}
 
 interface ExecuteEsqlQueryParams {
   esClient: ElasticsearchClient;
   query: string;
   abortController?: AbortController;
   excludeColdFrozenTiers?: boolean;
+  telemetry?: ExecuteEsqlQueryTelemetry;
 }
 
-export const executeEsqlQuery = async ({
+const doExecuteEsqlQuery = async ({
   esClient,
   query,
   abortController,
@@ -41,6 +54,25 @@ export const executeEsqlQuery = async ({
   )) as unknown as ESQLSearchResponse;
 
   return response;
+};
+
+export const executeEsqlQuery = async ({
+  telemetry,
+  ...params
+}: ExecuteEsqlQueryParams): Promise<ESQLSearchResponse> => {
+  if (!telemetry) {
+    return doExecuteEsqlQuery(params);
+  }
+
+  return runWithSpan({
+    name: `entityStore.logs_extraction.${telemetry.name}`,
+    namespace: telemetry.namespace,
+    attributes: {
+      'entity_store.logs_extraction.operation': telemetry.name,
+      'entity_store.entity.type': telemetry.type,
+    },
+    cb: () => doExecuteEsqlQuery(params),
+  });
 };
 
 /**

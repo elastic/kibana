@@ -75,7 +75,12 @@ const FlyoutHeaderComponent: React.FC<{
       <EuiFlexGroup gutterSize="s" alignItems="center">
         {icon ? (
           <EuiFlexItem grow={false}>
-            <EuiIcon type={icon} size="m" data-test-subj="edit-connector-flyout-header-icon" />
+            <EuiIcon
+              type={icon}
+              size="m"
+              data-test-subj="edit-connector-flyout-header-icon"
+              aria-hidden={true}
+            />
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={false}>

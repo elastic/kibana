@@ -1,5 +1,5 @@
 {
-  "sha1": "748d5d9878a54c67e3fcad600c34e763015881f5",
+  "sha1": "e7ee148fbdb83c4422d5b6a667cdaf2feba8d076",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -3373,14 +3373,14 @@
     {
       "id": "18a3ead9f515e1f-6fe4c6137b25361",
       "title": "Query streams - Delete query stream should support deleting an existing query stream",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/delete_query_stream.spec.ts",
-        "line": 45,
+        "line": 46,
         "column": 7
       }
     },

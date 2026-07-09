@@ -369,6 +369,59 @@ export default ({ getService }: FtrProviderContext): void => {
               });
             });
           }
+
+          describe('revision', () => {
+            for (const isCustomized of [false, true]) {
+              for (const targetType of ['query', 'eql'] as const) {
+                const sameType = targetType === 'query';
+
+                it(`sets a rule revision + 1 when upgrading a ${
+                  isCustomized ? 'customized' : 'non-customized'
+                } rule to ${sameType ? 'the same' : 'a different'} rule type`, async () => {
+                  await setUpRuleUpgrade({
+                    assets: {
+                      installed: {
+                        type: 'query',
+                        name: 'Initial name',
+                        version: 1,
+                      },
+                      patch: isCustomized ? { name: 'Customized name' } : {},
+                      upgrade: {
+                        type: targetType,
+                        name: 'Updated name',
+                        version: 2,
+                      },
+                    },
+                    removeInstalledAssets: !withHistoricalVersions,
+                    deps,
+                  });
+
+                  const ruleBeforeUpgrade = await detectionsApi.readRule({
+                    query: { rule_id: DEFAULT_TEST_RULE_ID },
+                  });
+                  const revisionBeforeUpgrade = ruleBeforeUpgrade.body.revision;
+
+                  await performUpgradePrebuiltRules(es, supertest, {
+                    mode: ModeEnum.SPECIFIC_RULES,
+                    rules: [
+                      {
+                        rule_id: DEFAULT_TEST_RULE_ID,
+                        revision: revisionBeforeUpgrade,
+                        version: 2,
+                        pick_version: 'TARGET',
+                      },
+                    ],
+                  });
+
+                  const upgradedRule = await detectionsApi.readRule({
+                    query: { rule_id: DEFAULT_TEST_RULE_ID },
+                  });
+
+                  expect(upgradedRule.body.revision).toBe(revisionBeforeUpgrade + 1);
+                });
+              }
+            }
+          });
         }
       );
     }
