@@ -57,6 +57,12 @@ export interface EntityMaintainerListEntry {
   taskSnapshot?: TaskSnapshot;
 }
 
+export interface EntityMaintainerStatusEntry {
+  id: string;
+  taskStatus: EntityMaintainerTaskStatus;
+  lastSuccessTimestamp: string | null;
+}
+
 interface EntityMaintainersClientDeps {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -296,54 +302,12 @@ export class EntityMaintainersClient {
   }
 
   public async getMaintainers(ids?: string[]): Promise<EntityMaintainerListEntry[]> {
-    const entries = entityMaintainersRegistry.getAll();
-    const filteredEntries = ids?.length ? entries.filter(({ id }) => ids.includes(id)) : entries;
-
-    const results = await Promise.all(
-      filteredEntries.map(async (entry): Promise<EntityMaintainerListEntry> => {
-        const { id, interval, description, minLicense } = entry;
-        const taskId = getTaskId(id, this.namespace);
-        let taskSnapshot: TaskSnapshot | undefined;
-        let nextRunAt: string | null = null;
-        let taskStatus: EntityMaintainerTaskStatus = EntityMaintainerTaskStatus.NEVER_STARTED;
-
-        try {
-          const task = await this.taskManager.get(taskId);
-          const { metadata, state, taskStatus: taskStatusFromState } = task.state;
-          nextRunAt = task.runAt?.toISOString() ?? null;
-          taskStatus = taskStatusFromState;
-          const runs = metadata?.runs ?? 0;
-          const lastSuccessTimestamp = metadata?.lastSuccessTimestamp ?? null;
-          const lastErrorTimestamp = metadata?.lastErrorTimestamp ?? null;
-          taskSnapshot = {
-            runs,
-            lastSuccessTimestamp,
-            lastErrorTimestamp,
-            state,
-          };
-        } catch (error) {
-          // NotFound is part of the expected flow, it means the task has been registered but has not been scheduled yet.
-          if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
-            this.logger.error(`Failed to get task snapshot for entity maintainer: ${id}`, {
-              error,
-            });
-            throw error;
-          }
-        }
-
-        return {
-          id,
-          taskStatus,
-          interval,
-          description,
-          nextRunAt,
-          minLicense,
-          taskSnapshot,
-        };
-      })
-    );
-
-    return results;
+    return getMaintainers({
+      taskManager: this.taskManager,
+      namespace: this.namespace,
+      logger: this.logger,
+      ids,
+    });
   }
 
   private async getSyncExecutionContext({
@@ -395,3 +359,83 @@ export class EntityMaintainersClient {
     };
   }
 }
+
+const getMaintainers = async ({
+  taskManager,
+  namespace,
+  logger,
+  ids,
+}: {
+  taskManager: TaskManagerStartContract;
+  namespace: string;
+  logger: Logger;
+  ids?: string[];
+}): Promise<EntityMaintainerListEntry[]> => {
+  const entries = entityMaintainersRegistry.getAll();
+  const filteredEntries = ids?.length ? entries.filter(({ id }) => ids.includes(id)) : entries;
+
+  const results = await Promise.all(
+    filteredEntries.map(async (entry): Promise<EntityMaintainerListEntry> => {
+      const { id, interval, description, minLicense } = entry;
+      const taskId = getTaskId(id, namespace);
+      let taskSnapshot: TaskSnapshot | undefined;
+      let nextRunAt: string | null = null;
+      let taskStatus: EntityMaintainerTaskStatus = EntityMaintainerTaskStatus.NEVER_STARTED;
+
+      try {
+        const task = await taskManager.get(taskId);
+        const { metadata, state, taskStatus: taskStatusFromState } = task.state;
+        nextRunAt = task.runAt?.toISOString() ?? null;
+        taskStatus = taskStatusFromState;
+        const runs = metadata?.runs ?? 0;
+        const lastSuccessTimestamp = metadata?.lastSuccessTimestamp ?? null;
+        const lastErrorTimestamp = metadata?.lastErrorTimestamp ?? null;
+        taskSnapshot = {
+          runs,
+          lastSuccessTimestamp,
+          lastErrorTimestamp,
+          state,
+        };
+      } catch (error) {
+        // NotFound is part of the expected flow, it means the task has been registered but has not been scheduled yet.
+        if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          logger.error(`Failed to get task snapshot for entity maintainer: ${id}`, {
+            error,
+          });
+          throw error;
+        }
+      }
+
+      return {
+        id,
+        taskStatus,
+        interval,
+        description,
+        nextRunAt,
+        minLicense,
+        taskSnapshot,
+      };
+    })
+  );
+
+  return results;
+};
+
+export const getMaintainerStatus = async ({
+  taskManager,
+  namespace,
+  logger,
+  ids,
+}: {
+  taskManager: TaskManagerStartContract;
+  namespace: string;
+  logger: Logger;
+  ids?: string[];
+}): Promise<EntityMaintainerStatusEntry[]> => {
+  const entries = await getMaintainers({ taskManager, namespace, logger, ids });
+  return entries.map(({ id, taskStatus, taskSnapshot }) => ({
+    id,
+    taskStatus,
+    lastSuccessTimestamp: taskSnapshot?.lastSuccessTimestamp ?? null,
+  }));
+};

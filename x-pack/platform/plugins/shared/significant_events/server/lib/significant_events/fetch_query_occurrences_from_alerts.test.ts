@@ -85,11 +85,13 @@ const makeStatsResponse = (
 const FROM = new Date('2026-01-01T00:00:00.000Z');
 const TO = new Date('2026-01-01T00:05:00.000Z'); // 5 minutes => 6 buckets at 1m incl. boundaries
 const BUCKET = '1m';
+const SPACE_ID = 'default';
 
 const defaultV2Params = {
   from: FROM,
   to: TO,
   bucketSize: BUCKET,
+  spaceId: SPACE_ID,
   alertsReader: ALERTS_READER_V2,
 };
 
@@ -98,7 +100,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     const { kiClient, scopedClusterClient, esqlQuery } = createMocks([]);
 
     const result = await fetchQueryOccurrencesFromAlerts(
-      { from: FROM, to: TO, bucketSize: BUCKET },
+      { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
       { kiClient, scopedClusterClient }
     );
 
@@ -120,7 +122,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     );
 
     const result = await fetchQueryOccurrencesFromAlerts(
-      { from: FROM, to: TO, bucketSize: BUCKET },
+      { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
       { kiClient, scopedClusterClient }
     );
 
@@ -144,7 +146,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     );
 
     const result = await fetchQueryOccurrencesFromAlerts(
-      { from: FROM, to: TO, bucketSize: BUCKET },
+      { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
       { kiClient, scopedClusterClient }
     );
 
@@ -169,7 +171,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     );
 
     const result = await fetchQueryOccurrencesFromAlerts(
-      { from: FROM, to: TO, bucketSize: BUCKET },
+      { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
       { kiClient, scopedClusterClient }
     );
 
@@ -185,7 +187,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     );
 
     const result = await fetchQueryOccurrencesFromAlerts(
-      { from: FROM, to: TO, bucketSize: BUCKET },
+      { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
       { kiClient, scopedClusterClient }
     );
 
@@ -206,7 +208,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     await expect(
       fetchQueryOccurrencesFromAlerts(
-        { from: FROM, to: TO, bucketSize: BUCKET },
+        { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
         { kiClient, scopedClusterClient }
       )
     ).rejects.toThrow(/verification_exception|Unknown column/);
@@ -221,7 +223,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     await expect(
       fetchQueryOccurrencesFromAlerts(
-        { from: FROM, to: TO, bucketSize: BUCKET },
+        { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
         { kiClient, scopedClusterClient }
       )
     ).rejects.toBeInstanceOf(SecurityError);
@@ -236,7 +238,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
 
     await expect(
       fetchQueryOccurrencesFromAlerts(
-        { from: FROM, to: TO, bucketSize: BUCKET },
+        { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
         { kiClient, scopedClusterClient }
       )
     ).rejects.toThrow('cluster meltdown');
@@ -257,7 +259,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     });
 
     const result = await fetchQueryOccurrencesFromAlerts(
-      { from: FROM, to: TO, bucketSize: BUCKET },
+      { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
       { kiClient, scopedClusterClient }
     );
 
@@ -279,7 +281,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     );
 
     const queryOccurrences = await getQueryOccurrences(
-      { from: FROM, to: TO, bucketSize: BUCKET },
+      { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
       { kiClient, scopedClusterClient }
     );
 
@@ -303,7 +305,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     );
 
     const queryOccurrences = await getQueryOccurrences(
-      { from: FROM, to: TO, bucketSize: BUCKET },
+      { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
       { kiClient, scopedClusterClient }
     );
 
@@ -320,7 +322,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     esqlQuery.mockResolvedValueOnce(makeStatsResponse([]));
 
     await fetchQueryOccurrencesFromAlerts(
-      { from: FROM, to: TO, bucketSize: '1m' },
+      { from: FROM, to: TO, bucketSize: '1m', spaceId: SPACE_ID },
       { kiClient, scopedClusterClient }
     );
 
@@ -338,7 +340,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     esqlQuery.mockResolvedValueOnce(makeStatsResponse([]));
 
     await getQueryOccurrences(
-      { from: FROM, to: TO, bucketSize: BUCKET },
+      { from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
       { kiClient, scopedClusterClient }
     );
 
@@ -368,7 +370,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       );
 
     const queryOccurrences = await getQueryOccurrences(
-      { from, to, bucketSize: '1m' },
+      { from, to, bucketSize: '1m', spaceId: SPACE_ID },
       { kiClient, scopedClusterClient }
     );
 
@@ -385,7 +387,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     esqlQuery.mockResolvedValueOnce(makeStatsResponse([]));
 
     await computeOccurrences(
-      { ruleIds: ['rule-a'], from: FROM, to: TO, bucketSize: BUCKET },
+      { ruleIds: ['rule-a'], from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
       { scopedClusterClient }
     );
 
@@ -398,7 +400,7 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     const { scopedClusterClient, esqlQuery } = createMocks();
 
     const result = await computeOccurrences(
-      { ruleIds: [], from: FROM, to: TO, bucketSize: BUCKET },
+      { ruleIds: [], from: FROM, to: TO, bucketSize: BUCKET, spaceId: SPACE_ID },
       { scopedClusterClient }
     );
 
