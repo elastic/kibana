@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen, act, waitFor } from '@testing-library/react';
+import { createEvent, fireEvent, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
 import type { YamlEditorFormValues } from './template_form';
 import { TemplateFormLayout } from './template_form_layout';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import { renderWithTestingProviders } from '../../../common/mock';
 import * as i18n from '../translations';
 
 jest.mock('./template_form', () => ({
@@ -46,9 +49,12 @@ jest.mock('./template_editor_layout', () => ({
   },
 }));
 
+const mockNavigateToCasesTemplates = jest.fn();
+
 jest.mock('../../../common/navigation', () => ({
   useCasesTemplatesNavigation: () => ({
-    navigateToCasesTemplates: jest.fn(),
+    getCasesTemplatesUrl: jest.fn().mockReturnValue('/templates'),
+    navigateToCasesTemplates: mockNavigateToCasesTemplates,
   }),
 }));
 
@@ -114,31 +120,33 @@ describe('TemplateFormLayout', () => {
   });
 
   it('renders the layout with title', () => {
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
-    expect(screen.getByText(i18n.ADD_TEMPLATE_TITLE)).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      i18n.ADD_TEMPLATE_TITLE
+    );
   });
 
   it('renders the YAML editor', () => {
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
     expect(screen.getByTestId('template-yaml-editor')).toBeInTheDocument();
   });
 
   it('renders the preview panel', () => {
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
     expect(screen.getByTestId('template-preview')).toBeInTheDocument();
   });
 
   it('renders create button for new template', () => {
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
     expect(screen.getByTestId('saveTemplateHeaderButton')).toHaveTextContent(i18n.CREATE_TEMPLATE);
   });
 
   it('renders save button for edit template', () => {
-    render(<TestWrapper onCreate={mockOnCreate} isEdit />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} isEdit />);
 
     expect(screen.getByTestId('saveTemplateHeaderButton')).toHaveTextContent(i18n.SAVE_TEMPLATE);
   });
@@ -152,13 +160,13 @@ describe('TemplateFormLayout', () => {
       isSaved: false,
     });
 
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
     expect(screen.queryByTestId('resetTemplateButton')).not.toBeInTheDocument();
     expect(screen.queryByText('Unsaved changes')).not.toBeInTheDocument();
   });
 
-  it('renders reset button when there are changes', () => {
+  it('renders reset button when there are changes', async () => {
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: 'name: Modified',
       onChange: jest.fn(),
@@ -167,13 +175,15 @@ describe('TemplateFormLayout', () => {
       isSaved: false,
     });
 
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
-    expect(screen.getByTestId('resetTemplateButton')).toBeInTheDocument();
+    await openAppMenuOverflow();
+
+    expect(await screen.findByTestId('resetTemplateButton')).toBeInTheDocument();
     expect(screen.getByText('Unsaved changes')).toBeInTheDocument();
   });
 
-  it('renders reset button when only the Settings tab has changes', () => {
+  it('renders reset button when only the Settings tab has changes', async () => {
     // YAML buffer is unchanged (matches initialValue), but a persisted Settings-tab draft differs
     // from the template's defaults — this should still count as unsaved changes.
     mockUseCasesLocalStorage.mockReturnValue([
@@ -181,14 +191,16 @@ describe('TemplateFormLayout', () => {
       jest.fn(),
     ]);
 
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
-    expect(screen.getByTestId('resetTemplateButton')).toBeInTheDocument();
+    await openAppMenuOverflow();
+
+    expect(await screen.findByTestId('resetTemplateButton')).toBeInTheDocument();
     expect(screen.getByText('Unsaved changes')).toBeInTheDocument();
   });
 
   it('persists Settings-tab changes to the draft', () => {
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
     act(() => {
       capturedEditorLayoutProps.onSettingsChange?.({ syncAlerts: false });
@@ -208,9 +220,10 @@ describe('TemplateFormLayout', () => {
       mockSetStoredFormState,
     ]);
 
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
-    await userEvent.click(screen.getByTestId('resetTemplateButton'));
+    await openAppMenuOverflow();
+    await userEvent.click(await screen.findByTestId('resetTemplateButton'));
     await userEvent.click(screen.getByText(i18n.REVERT_MODAL_CONFIRM));
 
     expect(mockHandleReset).toHaveBeenCalled();
@@ -231,7 +244,7 @@ describe('TemplateFormLayout', () => {
       isSaved: false,
     });
 
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
     await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
 
@@ -243,7 +256,7 @@ describe('TemplateFormLayout', () => {
     });
   });
 
-  it('shows correct tooltip for reset button in create mode', async () => {
+  it('shows revert action in create mode', async () => {
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: 'name: Modified',
       onChange: jest.fn(),
@@ -252,15 +265,16 @@ describe('TemplateFormLayout', () => {
       isSaved: false,
     });
 
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
-    const resetButton = screen.getByTestId('resetTemplateButton');
-    await userEvent.hover(resetButton);
+    await openAppMenuOverflow();
 
-    expect(await screen.findByText(i18n.REVERT_TO_DEFAULT)).toBeInTheDocument();
+    expect(await screen.findByTestId('resetTemplateButton')).toHaveTextContent(
+      i18n.REVERT_TO_DEFAULT
+    );
   });
 
-  it('shows correct tooltip for reset button in edit mode', async () => {
+  it('shows revert action in edit mode', async () => {
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: 'name: Modified',
       onChange: jest.fn(),
@@ -269,12 +283,13 @@ describe('TemplateFormLayout', () => {
       isSaved: false,
     });
 
-    render(<TestWrapper onCreate={mockOnCreate} isEdit />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} isEdit />);
 
-    const resetButton = screen.getByTestId('resetTemplateButton');
-    await userEvent.hover(resetButton);
+    await openAppMenuOverflow();
 
-    expect(await screen.findByText(i18n.REVERT_TO_LAST_SAVED)).toBeInTheDocument();
+    expect(await screen.findByTestId('resetTemplateButton')).toHaveTextContent(
+      i18n.REVERT_TO_LAST_SAVED
+    );
   });
 
   it('shows confirmation modal when reset button is clicked', async () => {
@@ -286,9 +301,10 @@ describe('TemplateFormLayout', () => {
       isSaved: false,
     });
 
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
-    await userEvent.click(screen.getByTestId('resetTemplateButton'));
+    await openAppMenuOverflow();
+    await userEvent.click(await screen.findByTestId('resetTemplateButton'));
 
     expect(screen.getByText(i18n.REVERT_MODAL_TITLE)).toBeInTheDocument();
     expect(screen.getByText(i18n.REVERT_MODAL_BODY)).toBeInTheDocument();
@@ -303,9 +319,10 @@ describe('TemplateFormLayout', () => {
       isSaved: false,
     });
 
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
-    await userEvent.click(screen.getByTestId('resetTemplateButton'));
+    await openAppMenuOverflow();
+    await userEvent.click(await screen.findByTestId('resetTemplateButton'));
     await userEvent.click(screen.getByText(i18n.REVERT_MODAL_CONFIRM));
 
     expect(mockHandleReset).toHaveBeenCalled();
@@ -320,16 +337,17 @@ describe('TemplateFormLayout', () => {
       isSaved: false,
     });
 
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
-    await userEvent.click(screen.getByTestId('resetTemplateButton'));
+    await openAppMenuOverflow();
+    await userEvent.click(await screen.findByTestId('resetTemplateButton'));
     await userEvent.click(screen.getByText(i18n.REVERT_MODAL_CANCEL));
 
     expect(mockHandleReset).not.toHaveBeenCalled();
     expect(screen.queryByText(i18n.REVERT_MODAL_TITLE)).not.toBeInTheDocument();
   });
 
-  it('disables reset button when saving', () => {
+  it('disables reset button when saving', async () => {
     mockUseDebouncedYamlEdit.mockReturnValue({
       value: 'name: Modified',
       onChange: jest.fn(),
@@ -338,10 +356,11 @@ describe('TemplateFormLayout', () => {
       isSaved: false,
     });
 
-    render(<TestWrapper onCreate={mockOnCreate} isSaving />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} isSaving />);
 
     expect(screen.getByTestId('saveTemplateHeaderButton')).toBeDisabled();
-    expect(screen.getByTestId('resetTemplateButton')).toBeDisabled();
+    await openAppMenuOverflow();
+    expect(await screen.findByTestId('resetTemplateButton')).toBeDisabled();
   });
 
   it('disables save button when template definition is invalid', () => {
@@ -359,15 +378,26 @@ fields:
       isSaved: false,
     });
 
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
     expect(screen.getByTestId('saveTemplateHeaderButton')).toBeDisabled();
   });
 
   it('renders back to templates button', () => {
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
 
-    expect(screen.getByText(i18n.BACK_TO_TEMPLATES)).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toBeInTheDocument();
+  });
+
+  it('navigates to templates and prevents the anchor default navigation on back click', () => {
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
+
+    const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
+    const clickEvent = createEvent.click(backButton);
+    fireEvent(backButton, clickEvent);
+
+    expect(clickEvent.defaultPrevented).toBe(true);
+    expect(mockNavigateToCasesTemplates).toHaveBeenCalled();
   });
 });
 
@@ -391,7 +421,7 @@ describe('handleFieldDefaultChange', () => {
       isSaving: false,
       isSaved: false,
     });
-    render(<TestWrapper onCreate={mockOnCreate} />);
+    renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
   };
 
   const checkboxYaml = `name: Test
