@@ -21,7 +21,11 @@ import type { IconType } from '@elastic/eui';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 
 import { i18n } from '@kbn/i18n';
-import { getConnectorCompatibility, getConnectorFeatureName } from '@kbn/actions-plugin/common';
+import {
+  AgentBuilderConnectorFeatureId,
+  getConnectorCompatibility,
+  getConnectorFeatureName,
+} from '@kbn/actions-plugin/common';
 import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
 import {
   DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
@@ -39,6 +43,7 @@ import { ActionTypeMenu } from '../action_type_menu';
 import type { ResetForm } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { useConnectorCreateForm } from '../use_connector_create_form';
+import { useKibana } from '../../../../common/lib/kibana';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
@@ -63,6 +68,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   initialConnector,
   icon,
 }) => {
+  const { docLinks } = useKibana().services;
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
   const [actionType, setActionType] = useState<ActionType | null>(null);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
@@ -241,6 +247,12 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         actionTypeMessage={actionTypeModel?.selectMessage}
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
         isExperimental={actionTypeModel?.isExperimental}
+        docsUrl={actionTypeModel?.docsUrl}
+        selectConnectorDocsUrl={
+          featureId === AgentBuilderConnectorFeatureId
+            ? docLinks.links.alerting.agentBuilderConnectors
+            : undefined
+        }
       />
       <EuiFlyoutBody
         banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}
