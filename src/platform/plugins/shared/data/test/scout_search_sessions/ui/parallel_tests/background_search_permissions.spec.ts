@@ -8,19 +8,9 @@
  */
 
 /**
- * Migrated from: x-pack/platform/test/search_sessions_integration/tests/apps/management/search_sessions/sessions_management_permissions.ts
- * FTR config:    x-pack/platform/test/search_sessions_integration/config.management.ts
  *
  * Tests that the Background Search management UI is gated correctly behind the
- * `store_search_session` Kibana privilege:
- *
- * - Without `store_search_session`: "Stack Management" must be absent from the nav.
- * - With `store_search_session`: "Stack Management" must appear in the nav and the
- *   background search section must be accessible.
- *
- * Each test calls loginWithCustomRole() independently — no shared state is needed.
- * Workers use different, auto-named custom roles (custom_role_worker_N) so there
- * is no role-name collision when running in parallel.
+ * `store_search_session` Kibana privilege
  */
 
 import type { KibanaRole } from '@kbn/scout';

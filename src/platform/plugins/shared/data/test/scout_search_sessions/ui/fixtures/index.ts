@@ -11,9 +11,9 @@ import type {
   PageObjects,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
+  ScoutPage,
 } from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
-import type { ScoutPage } from '@kbn/scout';
 
 import { ManagementPage } from '@kbn/management-plugin/test/scout/ui/fixtures/page_objects/management_page';
 import { BackgroundSearchManagementPage } from './page_objects/background_search_management_page';

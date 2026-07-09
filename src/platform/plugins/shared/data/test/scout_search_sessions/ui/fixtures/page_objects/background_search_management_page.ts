@@ -21,17 +21,10 @@ export class BackgroundSearchManagementPage {
     this.table = this.page.testSubj.locator('searchSessionsMgmtUiTable');
   }
 
-  /** Navigate to the Background Search management page and wait for the table. */
   async goTo() {
     await this.page.gotoApp('management/kibana/search_sessions');
     await this.table.waitFor({ state: 'visible', timeout: 30_000 });
   }
-
-  /**
-   * Click the Refresh button and wait for at least one row to appear.
-   * Use this after goTo() when you expect rows — the initial async data fetch
-   * may not have completed when the table DOM element first becomes visible.
-   */
   async refresh(timeout = 30_000) {
     await this.page.testSubj.click('sessionManagementRefreshBtn');
     await expect(this.rows()).not.toHaveCount(0, { timeout });
@@ -41,11 +34,6 @@ export class BackgroundSearchManagementPage {
     return this.table.getByTestId('searchSessionsRow');
   }
 
-  /**
-   * Retrying assertion that the table has exactly `count` rows. Prefer this over a
-   * one-shot count read: the table re-fetches asynchronously (on refresh or the 10 s
-   * auto-refresh), so it can momentarily render 0 rows mid-reload.
-   */
   async expectRowCount(count: number, timeout = 30_000) {
     await expect(this.rows()).toHaveCount(count, { timeout });
   }
@@ -54,12 +42,7 @@ export class BackgroundSearchManagementPage {
     await expect(this.rows()).toHaveCount(0, { timeout });
   }
 
-  /**
-   * Wait for the row's status badge to reach `targetStatus`.
-   * The management page auto-refreshes every 10 s when the server is started with
-   * `--data.search.sessions.management.refreshInterval=10s`.
-   */
-  async waitForRowStatus(targetStatus: string, timeout = 60_000) {
+  async waitForRowStatus(targetStatus: string, timeout = 30_000) {
     const badge = this.table.getByTestId('sessionManagementStatusLabel');
     await expect(badge).toHaveAttribute('data-test-status', targetStatus, { timeout });
   }
