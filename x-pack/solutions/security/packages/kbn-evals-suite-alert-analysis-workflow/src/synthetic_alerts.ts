@@ -32,6 +32,17 @@
  * the run route's `preprocessAlertInputs` expands them before the agent sees them. The rule
  * identity fields (`consumer`, `producer`, `rule_type_id`) are required for
  * `preprocessAlertInputs` to build the trigger event.
+ *
+ * Realistic noise (see `buildNoiseEnvelope`): every alert is padded with the bulky, low-signal
+ * ECS + alert-framework fields a real Elastic Defend / SIEM alert carries (agent, ecs, host.os,
+ * process lineage/binary metadata, `kibana.alert.*` internals, `Endpoint`/`Events`/`Responses`,
+ * rule config, etc.). This exists so the suite can meaningfully validate changes that narrow the
+ * alert `_source` sent to the model — e.g. the `pick` filter in
+ * https://github.com/elastic/kibana/pull/277085. Without the noise, a field allow-list would have
+ * nothing to strip and the before/after comparison would be a no-op. The noise is deliberately
+ * limited to fields that the workflow's `build_alert_observable_context` step does NOT read, so it
+ * only bloats the attachment `_source` (what `pick` trims) and never changes the reasoning message
+ * the model classifies on — keeping the golden labels valid.
  */
 
 import type { Classification } from './constants';
@@ -65,8 +76,130 @@ interface BuildAlertParams {
   observable: Record<string, unknown>;
 }
 
+/**
+ * Bulky, low-signal fields a real Elastic Defend / SIEM alert `_source` carries, modeled on an
+ * actual endpoint alert. Every field here is attachment-only noise: none is read by the workflow's
+ * `build_alert_observable_context` step, so padding with it bloats the raw `_source` (which the
+ * `pick` allow-list is meant to trim) without altering the model's reasoning message. Values are
+ * partly derived from `id` so the noise looks per-alert-authentic rather than obviously constant.
+ */
+const buildNoiseEnvelope = (id: string, timestamp: string): Record<string, unknown> => ({
+  // Agent / data stream / ECS / elastic provenance
+  agent: {
+    id: `agent-${id}`,
+    type: 'endpoint',
+    version: '8.19.0',
+    build: { original: 'version: 8.19.0, compiled: Tue Jan 3 00:00:00 2023, branch: 8.19' },
+  },
+  'data_stream.dataset': 'endpoint.alerts',
+  'data_stream.namespace': 'default',
+  'data_stream.type': 'logs',
+  'ecs.version': '8.11.0',
+  'elastic.agent.id': `agent-${id}`,
+
+  // Host padding (host.name / host.hostname are per-alert signal, so excluded here)
+  'host.id': `host-${id}`,
+  'host.architecture': 'x86_64',
+  'host.os.name': 'Windows',
+  'host.os.family': 'windows',
+  'host.os.type': 'windows',
+  'host.os.kernel': '21H2 (10.0.20348.1366)',
+  'host.os.version': '21H2 (10.0.20348.1366)',
+  'host.os.platform': 'windows',
+  'host.os.full': 'Windows Server 2022 Datacenter 21H2 (10.0.20348.1366)',
+  'host.ip': ['172.31.5.24', 'fe80::ea43:a574:e9a5:ba47', '127.0.0.1', '::1'],
+  'host.mac': ['02:09:70:09:67:67'],
+
+  // Event provenance (event.code/category/type/outcome are per-alert signal; these are not read
+  // by the observable-context step)
+  'event.module': 'endpoint',
+  'event.dataset': 'endpoint.alerts',
+  'event.agent_id_status': 'verified',
+  'event.sequence': 50079,
+  'event.id': `${id}-event`,
+  'event.created': timestamp,
+  'event.ingested': timestamp,
+  'event.risk_score': 99,
+
+  // Process lineage / binary metadata (observable-context reads name/executable/command_line/
+  // code_signature/parent only; the rest is noise, though a few survive the allow-list on purpose)
+  'process.entity_id': `entity-${id}`,
+  'process.pid': 6789,
+  'process.args_count': 3,
+  'process.working_directory': 'C:\\Windows\\system32',
+  'process.hash.md5': '266aedbec51e35277729294996a213dd',
+  'process.hash.sha1': '855a676f3018e78a37a9fb4aaa159584ec21c85c',
+  'process.hash.sha256': '9f68f5fc21270a06bb934b5f3fa5aee2068a56a1260d4e7e4b48f2dca501b8c9',
+  'process.pe.imphash': '939d090d03567fad6f1ac6f2c641a4b2',
+  'process.pe.original_file_name': 'HOSTPROC.EXE',
+  'process.Ext': { ancestry: [`entity-${id}-p1`, `entity-${id}-p2`] },
+
+  // Alert-framework internals
+  'kibana.alert.depth': 1,
+  'kibana.alert.ancestors': [
+    { depth: 0, index: '.ds-logs-endpoint.alerts-default', id: `${id}-anc`, type: 'event' },
+  ],
+  'kibana.alert.original_time': timestamp,
+  'kibana.alert.intended_timestamp': timestamp,
+  'kibana.alert.last_detected': timestamp,
+  'kibana.alert.start': timestamp,
+  'kibana.alert.original_event.action': 'rule_detection',
+  'kibana.alert.original_event.category': ['malware'],
+  'kibana.alert.original_event.dataset': 'endpoint.alerts',
+  'kibana.alert.original_event.id': `${id}-oe`,
+  'kibana.alert.original_event.kind': 'alert',
+  'kibana.alert.original_event.module': 'endpoint',
+  'kibana.alert.original_data_stream.dataset': 'endpoint.alerts',
+  'kibana.alert.original_data_stream.namespace': 'default',
+  'kibana.alert.original_data_stream.type': 'logs',
+  'kibana.space_ids': ['default'],
+  'kibana.version': '8.19.0',
+  'kibana.alert.workflow_assignee_ids': [],
+
+  // Rule configuration internals
+  'kibana.alert.rule.author': [],
+  'kibana.alert.rule.created_at': '2024-01-01T00:00:00.000Z',
+  'kibana.alert.rule.created_by': 'elastic',
+  'kibana.alert.rule.updated_at': '2024-01-01T00:00:00.000Z',
+  'kibana.alert.rule.updated_by': 'elastic',
+  'kibana.alert.rule.enabled': true,
+  'kibana.alert.rule.from': 'now-3660s',
+  'kibana.alert.rule.to': 'now',
+  'kibana.alert.rule.interval': '1h',
+  'kibana.alert.rule.immutable': false,
+  'kibana.alert.rule.max_signals': 100,
+  'kibana.alert.rule.revision': 0,
+  'kibana.alert.rule.version': 1,
+  'kibana.alert.rule.indices': ['logs-endpoint.alerts-*'],
+  'kibana.alert.rule.exceptions_list': [],
+  'kibana.alert.rule.false_positives': [],
+  'kibana.alert.rule.risk_score_mapping': [],
+  'kibana.alert.rule.severity_mapping': [],
+  'kibana.alert.rule.tags': [],
+  'kibana.alert.rule.execution.uuid': `${id}-exec`,
+  'kibana.alert.rule.parameters': {
+    description: 'synthetic',
+    risk_score: 99,
+    severity: 'high',
+    type: 'query',
+    language: 'kuery',
+    query: '*',
+    index: ['logs-endpoint.alerts-*'],
+  },
+
+  // Bulky endpoint payload objects (dropped entirely by the allow-list)
+  Endpoint: {
+    policy: { applied: { id: `policy-${id}`, status: 'success', name: 'Default' } },
+    capabilities: ['isolation'],
+    state: { isolation: false },
+  },
+  Events: [{ '@timestamp': timestamp, event: { kind: 'event', category: ['process'] } }],
+  Responses: [{ '@timestamp': timestamp, action: { field: ['process'] }, result: 0 }],
+});
+
 // Rule identity shared by every synthetic alert. `rule_type_id`/`consumer`/`producer` mirror a
-// SIEM query rule so the run route resolves a registered rule type when building the event.
+// SIEM query rule so the run route resolves a registered rule type when building the event. The
+// noise envelope is spread first so the per-alert signal fields below always win on any overlap.
 const buildDoc = ({
   id,
   index,
@@ -78,6 +211,7 @@ const buildDoc = ({
   technique,
   observable,
 }: BuildAlertParams): Record<string, unknown> => ({
+  ...buildNoiseEnvelope(id, ts(index)),
   '@timestamp': ts(index),
   'kibana.alert.uuid': id,
   'kibana.alert.workflow_status': 'open',
