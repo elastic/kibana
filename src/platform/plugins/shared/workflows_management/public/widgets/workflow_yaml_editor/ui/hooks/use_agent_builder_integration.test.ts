@@ -551,7 +551,7 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('cleanup closes the chat sidebar', () => {
-    it('closes the chat sidebar on unmount (navigate-away)', () => {
+    it('closes the chat sidebar on unmount (leaves the workflow app)', () => {
       const agentBuilder = createMockAgentBuilder();
       const chatRef = { close: jest.fn() };
       agentBuilder.openChat.mockReturnValue({ chatRef });
@@ -569,6 +569,73 @@ describe('useAgentBuilderIntegration', () => {
       unmount();
 
       expect(chatRef.close).toHaveBeenCalled();
+    });
+
+    it('does NOT close the sidebar when workflowId flips (create → saved detail)', () => {
+      // Repro of the bug the initial fix caused: after Save the sidebar was
+      // closing because the effect cleanup ran on workflowId change and
+      // called chatRef.close(). The close is now scoped to true unmount.
+      const agentBuilder = createMockAgentBuilder();
+      const chatRef = { close: jest.fn() };
+      agentBuilder.openChat.mockReturnValue({ chatRef });
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { rerender } = renderHook(
+        (props: {
+          editorRef: React.MutableRefObject<any>;
+          isEditorMounted: boolean;
+          workflowId?: string;
+        }) => useAgentBuilderIntegration(props),
+        {
+          initialProps: {
+            editorRef: { current: editor },
+            isEditorMounted: true,
+            workflowId: undefined,
+          },
+        }
+      );
+
+      // Flip from create (no id) to saved detail (real id). The main effect
+      // cleanup+rerun fires; the sidebar close must NOT.
+      rerender({
+        editorRef: { current: editor },
+        isEditorMounted: true,
+        workflowId: 'wf-just-saved',
+      });
+
+      expect(chatRef.close).not.toHaveBeenCalled();
+    });
+
+    it('does NOT close the sidebar when workflowName changes (unrelated dep churn)', () => {
+      const agentBuilder = createMockAgentBuilder();
+      const chatRef = { close: jest.fn() };
+      agentBuilder.openChat.mockReturnValue({ chatRef });
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { rerender } = renderHook(
+        (props: {
+          editorRef: React.MutableRefObject<any>;
+          isEditorMounted: boolean;
+          workflowName?: string;
+        }) => useAgentBuilderIntegration(props),
+        {
+          initialProps: {
+            editorRef: { current: editor },
+            isEditorMounted: true,
+            workflowName: 'Old Name',
+          },
+        }
+      );
+
+      rerender({
+        editorRef: { current: editor },
+        isEditorMounted: true,
+        workflowName: 'New Name',
+      });
+
+      expect(chatRef.close).not.toHaveBeenCalled();
     });
   });
 

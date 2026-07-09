@@ -277,10 +277,11 @@ export const useAgentBuilderIntegration = ({
       }
       modelListener?.dispose();
       conversationIdSub.unsubscribe();
-      // Close the sidebar on navigate-away from the workflow detail/create route
-      // so it does not stay open on the workflow list or an unrelated app.
-      chatRefHandle.current?.close();
-      chatRefHandle.current = null;
+      // NB: do NOT close the sidebar here. This cleanup runs on every deps
+      // change — including the workflowId flip from `/workflows/create` to
+      // `/workflows/${savedId}` after Save — and closing here would drop the
+      // user out of an in-progress conversation. The unmount-only effect
+      // below handles closing on true navigate-away.
       agentBuilder.clearChatConfig();
       bridge.stop();
       attachmentBridgeRef.current = null;
@@ -365,6 +366,17 @@ export const useAgentBuilderIntegration = ({
     hasAutoOpenedRef.current = true;
     openAgentChat({ isAutoOpen: true });
   }, [isEditorMounted, agentBuilder, isExperimentalEnabled, workflowId, openAgentChat]);
+
+  // Close the sidebar only on true unmount (user leaves the workflow
+  // detail/create scope for the list or another app). Empty deps so it does
+  // NOT fire between intra-scope transitions like /create → /:savedId, where
+  // an in-progress conversation should stay visible.
+  useEffect(() => {
+    return () => {
+      chatRefHandle.current?.close();
+      chatRefHandle.current = null;
+    };
+  }, []);
 
   return {
     openAgentChat,
