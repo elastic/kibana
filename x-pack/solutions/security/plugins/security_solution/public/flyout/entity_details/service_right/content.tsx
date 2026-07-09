@@ -42,6 +42,15 @@ interface ServicePanelContentProps {
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.service>;
+  /**
+   * When provided, clicking a related entity in the resolution section is delegated to this
+   * callback (used by the new EUI system flyout) instead of the legacy expandable flyout.
+   */
+  onShowEntity?: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 }
 
 export const ServicePanelContent = ({
@@ -59,6 +68,7 @@ export const ServicePanelContent = ({
   onAssetCriticalityChange,
   entityStoreEntityId,
   prefetchedResolutionRisk,
+  onShowEntity,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
@@ -105,6 +115,7 @@ export const ServicePanelContent = ({
             entityType={EntityType.service}
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
+            onShowEntity={onShowEntity}
           />
           <EuiHorizontalRule />
         </>

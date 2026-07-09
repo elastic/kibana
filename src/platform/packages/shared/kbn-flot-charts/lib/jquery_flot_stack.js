@@ -35,8 +35,6 @@ charts or filled areas).
 
 */
 
-import jQuery from 'jquery';
-
 (function ($) {
     var options = {
         series: { stack: null } // or number/string

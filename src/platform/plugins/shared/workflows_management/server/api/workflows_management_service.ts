@@ -484,6 +484,19 @@ export class WorkflowsService {
     );
   }
 
+  public async claimHitlStepForExternalResume(
+    stepExecutionId: string,
+    respondedBy: string,
+    spaceId: string
+  ): Promise<boolean> {
+    await this.ensureInitialized();
+    return this.executionQueryService.markStepAsResponded(
+      stepExecutionId,
+      { respondedBy, respondedAt: new Date().toISOString(), channel: 'external' },
+      spaceId
+    );
+  }
+
   public async getWaitingStepExecutionId(
     executionId: string,
     spaceId: string
