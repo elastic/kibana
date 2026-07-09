@@ -1,8 +1,8 @@
-# Agent Context Layer (`agentContextLayer`)
+# Agent Builder SML (`agentBuilderSml`)
 
-The Agent Context Layer plugin provides a centralized service for indexing, crawling, and searching Kibana assets (visualizations, dashboards, connectors, workflows, etc.) via the **Semantic Metadata Layer (SML)**.
+The Agent Builder SML plugin provides a centralized service for indexing, crawling, and searching Kibana assets (visualizations, dashboards, connectors, workflows, rules, action policies, significant events) via the **Semantic Metadata Layer (SML)**.
 
-It was extracted from the `agentBuilder` plugin to serve as an independent, shared platform service.
+Renamed from `agent_context_layer` — SML is an Agent Builder feature; this plugin is the SML implementation shared across the Agent Builder plugin family.
 
 ## Overview
 
@@ -19,7 +19,7 @@ The SML makes Kibana content discoverable by maintaining a search index of asset
 ### Setup
 
 ```typescript
-interface AgentContextLayerPluginSetup {
+interface AgentBuilderSmlPluginSetup {
   registerType(definition: SmlTypeDefinition): void;
 }
 ```
@@ -27,38 +27,21 @@ interface AgentContextLayerPluginSetup {
 ### Start
 
 ```typescript
-interface AgentContextLayerPluginStart {
-  search(params): Promise<{ results: SmlSearchResult[]; total: number }>;
-  /**
-   * Fetch SML documents by chunk IDs. Permission checks are performed internally
-   * — the returned map only contains documents the user (identified by `request`)
-   * is authorized to access. Unauthorized or missing IDs are absent from the
-   * result.
-   */
-  getDocuments(params: {
-    ids: string[];
-    request: KibanaRequest;
-    spaceId?: string; // resolved from request when omitted
-  }): Promise<Map<string, SmlDocument>>;
+interface AgentBuilderSmlPluginStart {
+  search(params): Promise<{ results: SmlSearchResult[] }>;
   getTypeDefinition(typeId: string): SmlTypeDefinition | undefined;
   resolveSmlAttachItems(params): Promise<SmlResolvedItemResult[]>;
   indexAttachment(params: SmlIndexAttachmentParams): Promise<void>;
 }
 ```
 
-> Note: an explicit `checkItemsAccess` primitive is intentionally **not** part of
-> the public contract. `getDocuments` is safe by default and `resolveSmlAttachItems`
-> covers the "convert chunks to attachments" workflow. If you find yourself wanting
-> a standalone access check, use `getDocuments` and look at which IDs are present
-> in the result.
-
 ## Registering an SML type
 
-During plugin setup, call `agentContextLayer.registerType()` with an `SmlTypeDefinition`:
+During plugin setup, call `agentBuilderSml.registerType()` with an `SmlTypeDefinition`:
 
 ```typescript
-setup(core, { agentContextLayer }) {
-  agentContextLayer.registerType({
+setup(core, { agentBuilderSml }) {
+  agentBuilderSml.registerType({
     id: 'my-asset',
     list: async function* (context) { /* yield pages of items */ },
     getSmlData: async (originId, context) => { /* return chunks to index */ },
@@ -72,13 +55,18 @@ setup(core, { agentContextLayer }) {
 
 | Plugin | Types registered |
 |--------|-----------------|
-| `agentBuilderPlatform` | `visualization`, `connector` |
+| `agentBuilderPlatform` | `connector` |
 | `agentBuilderDashboards` | `dashboard` |
-| `workflowsManagement` | `workflow` |
+| `agentBuilderVisualizations` | `visualization` |
+| `agentBuilderWorkflows` | `workflow` |
+| `alertingV2` | `rule`, `action_policy` |
+| `significantEvents` | `significant_event` |
+
+`workflowsManagement` calls `indexAttachment` indirectly (via a callback passed in by `agentBuilderWorkflows`) but does not register a type. `agentBuilder` itself is the only real caller of `search`/`resolveSmlAttachItems`.
 
 ## Feature gating
 
-SML functionality is gated behind the `contextEngine:enabled` UI setting (the Context Engine feature flag, registered by this plugin). Everything owned by this plugin — the HTTP routes (`withSmlFeatureFlag`), the crawler tasks, and the workflow index step — checks `contextEngine:enabled` alone.
+SML functionality is gated behind the `contextEngine:enabled` UI setting. Everything owned by this plugin — the HTTP routes (`withSmlFeatureFlag`), the crawler tasks — checks `contextEngine:enabled` alone.
 
 SML surfaces that live in the Agent Builder family of plugins additionally require `agentBuilder:experimentalFeatures`, so they are gated on **both** flags: the `sml_search` / `sml_attach` tools, the internal `_attach` route, and the `@` command menu (in `agent_builder`), plus the connector lifecycle handler that crawls connectors into SML (in `agent_builder_platform`). This keeps SML behind Agent Builder's own experimental gate even if the Context Engine flag graduates independently.
 
