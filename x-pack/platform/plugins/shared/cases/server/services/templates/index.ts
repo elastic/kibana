@@ -348,7 +348,9 @@ export class TemplatesService {
         isLatest: true,
         deletedAt: null,
         definition: normalizedDefinition,
-        name: input.name,
+        // Template identity name; falls back to the definition's case-default title when a caller
+        // omits it (API back-compat — the route validates the definition first, so `name` exists).
+        name: input.name ?? parsedDefinition.name,
         owner: input.owner,
         templateId: v4(),
         description: input.description,
@@ -387,7 +389,9 @@ export class TemplatesService {
         templateVersion: currentTemplate.attributes.templateVersion + 1,
         isLatest: true,
         definition: normalizedDefinition,
-        name: input.name,
+        // See createTemplate: PUT may omit the identity name; fall back to the case-default title.
+        // (PATCH resolves `name` to the existing value in its route before reaching here.)
+        name: input.name ?? parsedDefinition.name,
         owner: input.owner,
         templateId: currentTemplate.attributes.templateId,
         deletedAt: null,

@@ -911,6 +911,29 @@ describe('TemplatesService', () => {
     );
   });
 
+  it('derives the identity name from the definition case-default title when create input omits name', async () => {
+    const definition = buildDefinition('Derived case title');
+    const service = createService();
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.createTemplate(
+      // No top-level `name` — the service must fall back to the definition's case-default title.
+      { owner: 'securitySolution', definition },
+      'alice',
+      'generated-id'
+    );
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      CASE_TEMPLATE_SAVED_OBJECT,
+      expect.objectContaining({ name: 'Derived case title' }),
+      expect.any(Object)
+    );
+  });
+
   it('persists isEnabled: false when explicitly set to false on create', async () => {
     const definition = buildDefinition('Disabled Template');
     const service = createService();
