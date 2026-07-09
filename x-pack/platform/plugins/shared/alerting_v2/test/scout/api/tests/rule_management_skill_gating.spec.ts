@@ -19,18 +19,16 @@ const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => s
 // The alerting V2 `rule-management` skill is registered as a built-in Agent
 // Builder skill but gated behind the `alerting:v2:enabled` advanced setting.
 apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', () => {
-  let didEnableAlertingV2 = false;
-
-  apiTest.afterAll(async ({ apiClient, requestAuth }) => {
-    if (!didEnableAlertingV2) {
-      return;
-    }
+  // `alerting:v2:enabled` is a global (deployment-wide) setting that persists
+  // across suites sharing the same Kibana instance. Reset it to its registered
+  // default after each test via DELETE rather than pinning an explicit value,
+  // matching the convention in custom_branding's settings.spec.ts.
+  apiTest.afterEach(async ({ apiClient, requestAuth }) => {
     const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
-    await apiClient.post(`${GLOBAL_SETTINGS_API}/${ALERTING_V2_ENABLED_SETTING}`, {
-      headers: { ...COMMON_HEADERS, ...apiKeyHeader },
-      body: { value: false },
-      responseType: 'json',
-    });
+    await apiClient.delete(
+      `${GLOBAL_SETTINGS_API}/${encodeURIComponent(ALERTING_V2_ENABLED_SETTING)}`,
+      { headers: { ...COMMON_HEADERS, ...apiKeyHeader }, responseType: 'json' }
+    );
   });
 
   apiTest(
@@ -46,6 +44,9 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
 
       expect(response).toHaveStatusCode(200);
       expect(Array.isArray(response.body.results)).toBe(true);
+      // Anchor against a positive signal so a regressed/empty skills endpoint
+      // can't make this negative assertion pass vacuously.
+      expect(response.body.results.length).toBeGreaterThan(0);
       expect(getSkillIds(response.body.results)).not.toContain(RULE_MANAGEMENT_SKILL_ID);
     }
   );
@@ -65,7 +66,6 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
         `${GLOBAL_SETTINGS_API}/${ALERTING_V2_ENABLED_SETTING}`,
         { headers, body: { value: true }, responseType: 'json' }
       );
-      didEnableAlertingV2 = true;
       expect(setResponse).toHaveStatusCode(200);
 
       const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
