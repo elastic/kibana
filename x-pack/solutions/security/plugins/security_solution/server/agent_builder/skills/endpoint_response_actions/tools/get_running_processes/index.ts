@@ -17,6 +17,7 @@ import {
   buildResponseActionComment,
   insufficientPrivilegesResult,
   resolveAgentTypeFromPackages,
+  waitForActionCompletion,
 } from '../types';
 
 const getRunningProcessesSchema = z.object({
@@ -115,7 +116,7 @@ export const getRunningProcessesTool = (
           isAutomated: false,
         });
 
-        const actionDetails = await responseActionsClient.runningProcesses(
+        const dispatchedAction = await responseActionsClient.runningProcesses(
           {
             endpoint_ids: endpointIds,
             comment: buildResponseActionComment(
@@ -125,6 +126,17 @@ export const getRunningProcessesTool = (
             ),
           },
           { hosts: { [endpointIds[0]]: { name: hostName } } }
+        );
+
+        // The dispatch above returns the action's write-time snapshot
+        // (almost always `pending` — the endpoint agent hasn't checked in
+        // yet). Poll until Elastic Defend reports completion so the chat
+        // response reflects the actual process list, not just "dispatched".
+        const actionDetails = await waitForActionCompletion(
+          endpointAppContextService,
+          spaceId,
+          dispatchedAction.id,
+          logger
         );
 
         return {
