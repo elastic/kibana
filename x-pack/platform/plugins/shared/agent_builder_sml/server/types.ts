@@ -29,22 +29,22 @@ import type {
 } from './services/sml/types';
 import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 
-export interface AgentContextLayerSetupDependencies {
+export interface AgentBuilderSmlSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
 }
 
-export interface AgentContextLayerStartDependencies {
+export interface AgentBuilderSmlStartDependencies {
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
 }
 
-export interface AgentContextLayerPluginSetup {
+export interface AgentBuilderSmlPluginSetup {
   registerType: (definition: SmlTypeDefinition) => void;
 }
 
-export interface AgentContextLayerPluginStart {
+export interface AgentBuilderSmlPluginStart {
   search: (params: {
     query: string;
     size?: number;
@@ -93,7 +93,7 @@ export interface AgentContextLayerPluginStart {
 }
 
 /**
- * Common params shared by both modes of `AgentContextLayerPluginStart.indexAttachment`.
+ * Common params shared by both modes of `AgentBuilderSmlPluginStart.indexAttachment`.
  *
  * The mode is selected by the discriminator fields from
  * {@link SmlIndexAttachmentOriginMode} / {@link SmlIndexAttachmentContentMode}, which are
@@ -128,7 +128,7 @@ export type SmlIndexAttachmentParams =
   | SmlIndexAttachmentContentParams;
 
 /**
- * Params for `AgentContextLayerPluginStart.deleteAttachment`.
+ * Params for `AgentBuilderSmlPluginStart.deleteAttachment`.
  *
  * Distinct from `indexAttachment({ action: 'delete' })` only in that callers
  * can choose to wipe `'manual'` or `'all'` chunks via `ingestionMethod`. With

@@ -8,39 +8,39 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentContextLayerPublicPluginSetupDeps {}
+export interface AgentBuilderSmlPublicPluginSetupDeps {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentContextLayerPublicPluginStartDeps {}
+export interface AgentBuilderSmlPublicPluginStartDeps {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentContextLayerPublicPluginSetup {}
+export interface AgentBuilderSmlPublicPluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentContextLayerPublicPluginStart {}
+export interface AgentBuilderSmlPublicPluginStart {}
 
-export class AgentContextLayerPublicPlugin
+export class AgentBuilderSmlPublicPlugin
   implements
     Plugin<
-      AgentContextLayerPublicPluginSetup,
-      AgentContextLayerPublicPluginStart,
-      AgentContextLayerPublicPluginSetupDeps,
-      AgentContextLayerPublicPluginStartDeps
+      AgentBuilderSmlPublicPluginSetup,
+      AgentBuilderSmlPublicPluginStart,
+      AgentBuilderSmlPublicPluginSetupDeps,
+      AgentBuilderSmlPublicPluginStartDeps
     >
 {
   constructor(_context: PluginInitializerContext) {}
 
   public setup(
-    _core: CoreSetup<AgentContextLayerPublicPluginStartDeps, AgentContextLayerPublicPluginStart>,
-    _deps: AgentContextLayerPublicPluginSetupDeps
-  ): AgentContextLayerPublicPluginSetup {
+    _core: CoreSetup<AgentBuilderSmlPublicPluginStartDeps, AgentBuilderSmlPublicPluginStart>,
+    _deps: AgentBuilderSmlPublicPluginSetupDeps
+  ): AgentBuilderSmlPublicPluginSetup {
     return {};
   }
 
   public start(
     _coreStart: CoreStart,
-    _deps: AgentContextLayerPublicPluginStartDeps
-  ): AgentContextLayerPublicPluginStart {
+    _deps: AgentBuilderSmlPublicPluginStartDeps
+  ): AgentBuilderSmlPublicPluginStart {
     return {};
   }
 

@@ -8,8 +8,8 @@
 import type { CoreStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type {
-  AgentContextLayerPluginStart,
-  AgentContextLayerStartDependencies,
+  AgentBuilderSmlPluginStart,
+  AgentBuilderSmlStartDependencies,
   SmlIndexAttachmentParams,
   SmlDeleteAttachmentParams,
 } from './types';
@@ -19,12 +19,12 @@ interface StartContractDeps {
   smlService: SmlService;
   elasticsearch: CoreStart['elasticsearch'];
   savedObjects: CoreStart['savedObjects'];
-  spaces: AgentContextLayerStartDependencies['spaces'];
+  spaces: AgentBuilderSmlStartDependencies['spaces'];
   logger: Logger;
 }
 
 /**
- * Builds `AgentContextLayerPluginStart.indexAttachment`, translating public
+ * Builds `AgentBuilderSmlPluginStart.indexAttachment`, translating public
  * request-scoped params into the internal `SmlIndexerParams` shape.
  *
  * `createdAt`/`permissions` are folded in after `base` rather than included
@@ -35,7 +35,7 @@ export const buildIndexAttachment =
   ({ smlService, elasticsearch, savedObjects, spaces, logger }: StartContractDeps) =>
   async (
     params: SmlIndexAttachmentParams
-  ): ReturnType<AgentContextLayerPluginStart['indexAttachment']> => {
+  ): ReturnType<AgentBuilderSmlPluginStart['indexAttachment']> => {
     const soClient = savedObjects.getScopedClient(params.request, {
       ...(params.includedHiddenTypes?.length
         ? { includedHiddenTypes: params.includedHiddenTypes }
@@ -64,7 +64,7 @@ export const buildIndexAttachment =
   };
 
 /**
- * Builds `AgentContextLayerPluginStart.deleteAttachment` — same
+ * Builds `AgentBuilderSmlPluginStart.deleteAttachment` — same
  * request-to-internal-params translation as {@link buildIndexAttachment},
  * for the dedicated delete path that lets callers choose which
  * `ingestionMethod` scope to wipe.
@@ -73,7 +73,7 @@ export const buildDeleteAttachment =
   ({ smlService, elasticsearch, savedObjects, spaces, logger }: StartContractDeps) =>
   async (
     params: SmlDeleteAttachmentParams
-  ): ReturnType<AgentContextLayerPluginStart['deleteAttachment']> => {
+  ): ReturnType<AgentBuilderSmlPluginStart['deleteAttachment']> => {
     const soClient = savedObjects.getScopedClient(params.request, {
       ...(params.includedHiddenTypes?.length
         ? { includedHiddenTypes: params.includedHiddenTypes }

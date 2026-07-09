@@ -11,7 +11,7 @@ import type { SmlSearchHttpResponse, SmlSearchHttpResultItem } from '../../commo
 import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH, SmlSearchFilterType } from '../../common/http_api/sml';
 import { smlSearchPath } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
-import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
+import type { AgentBuilderSmlStartDependencies, AgentBuilderSmlPluginStart } from '../types';
 import {
   SmlAuthzEnumerationIncompleteError,
   SmlCorpusTooLargeError,
@@ -28,7 +28,7 @@ export const registerSearchRoute = ({
   getSmlService,
 }: {
   router: IRouter;
-  coreSetup: CoreSetup<AgentContextLayerStartDependencies, AgentContextLayerPluginStart>;
+  coreSetup: CoreSetup<AgentBuilderSmlStartDependencies, AgentBuilderSmlPluginStart>;
   logger: Logger;
   getSmlService: () => SmlService;
 }) => {

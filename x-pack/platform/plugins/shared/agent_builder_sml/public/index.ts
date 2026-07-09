@@ -7,11 +7,11 @@
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core-plugins-browser';
 import {
-  AgentContextLayerPublicPlugin,
-  type AgentContextLayerPublicPluginSetup,
-  type AgentContextLayerPublicPluginSetupDeps,
-  type AgentContextLayerPublicPluginStart,
-  type AgentContextLayerPublicPluginStartDeps,
+  AgentBuilderSmlPublicPlugin,
+  type AgentBuilderSmlPublicPluginSetup,
+  type AgentBuilderSmlPublicPluginSetupDeps,
+  type AgentBuilderSmlPublicPluginStart,
+  type AgentBuilderSmlPublicPluginStartDeps,
 } from './plugin';
 
 export { smlSearchPath, smlAutocompletePath, internalApiPath } from '../common/constants';
@@ -31,8 +31,8 @@ export type {
 } from '../common/http_api/sml';
 
 export const plugin: PluginInitializer<
-  AgentContextLayerPublicPluginSetup,
-  AgentContextLayerPublicPluginStart,
-  AgentContextLayerPublicPluginSetupDeps,
-  AgentContextLayerPublicPluginStartDeps
-> = (context: PluginInitializerContext) => new AgentContextLayerPublicPlugin(context);
+  AgentBuilderSmlPublicPluginSetup,
+  AgentBuilderSmlPublicPluginStart,
+  AgentBuilderSmlPublicPluginSetupDeps,
+  AgentBuilderSmlPublicPluginStartDeps
+> = (context: PluginInitializerContext) => new AgentBuilderSmlPublicPlugin(context);
