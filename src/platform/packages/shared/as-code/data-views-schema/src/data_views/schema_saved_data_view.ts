@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import { fieldSettingsFieldNameSchema, indexPatternSchema, timeFieldSchema } from './common';
 import {
   savedCompositeRuntimeFieldSchema,
@@ -33,17 +34,7 @@ export const savedFieldSettingsSchema = schema.oneOf(
 
 export const savedDataViewSpecSchema = schema.object(
   {
-    id: schema.maybe(
-      schema.string({
-        minLength: 1,
-        maxLength: 256,
-        meta: {
-          title: 'Data view ID',
-          description:
-            'Kibana provides a unique identifier for each data view, or you can create your own.',
-        },
-      })
-    ),
+    id: schema.maybe(asCodeIdSchema),
     name: schema.maybe(
       schema.string({
         minLength: 1,
