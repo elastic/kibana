@@ -6,7 +6,6 @@
  */
 
 export { SmlError } from './sml_error';
-export { SmlResultWindowExceededError } from './sml_result_window_exceeded_error';
 export { SmlAuthzEnumerationIncompleteError } from './sml_authz_enumeration_incomplete_error';
 export { SmlCorpusTooLargeError } from './sml_corpus_too_large_error';
 export { SmlUnregisteredTypeError } from './sml_unregistered_type_error';

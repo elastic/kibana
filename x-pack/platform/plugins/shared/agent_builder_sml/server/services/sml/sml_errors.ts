@@ -16,7 +16,6 @@
  */
 export {
   SmlError,
-  SmlResultWindowExceededError,
   SmlAuthzEnumerationIncompleteError,
   SmlCorpusTooLargeError,
   SmlUnregisteredTypeError,
