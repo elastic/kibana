@@ -173,12 +173,10 @@ export const useAgentBuilderIntegration = ({
     proposalManagerRef.current = manager;
     setActiveProposalManager(manager);
 
-    // Remember the unsaved-workflow attachment id so the save thunk can carry
-    // the conversation onto the saved workflow's session tag after creation.
-    // The value is consumed (and cleared) inside `carryConversationToWorkflow`
-    // — do NOT clear it here on workflowId presence. Dispatching setWorkflow
-    // re-fires this effect, and clearing would race the save thunk's carry
-    // call, leaving the detail view with an empty chat.
+    // Only set on the create route — the value is consumed by
+    // `carryConversationToWorkflow` in the save thunk. Clearing here on
+    // workflowId presence would race that consume after setWorkflow re-fires
+    // this effect.
     if (!workflowId) {
       setLastCreateAttachmentId(attachmentId);
     }
@@ -329,9 +327,6 @@ export const useAgentBuilderIntegration = ({
             diagnostics: serializeClientDiagnostics(validationErrors),
           }),
         ],
-        // Track the sidebar's open/closed state at module scope so the save
-        // thunk can decide whether to restore it on the destination workflow
-        // after `application.navigateToApp` remounts the app.
         onClose: () => setSidebarOpen(false),
       });
       chatRefHandle.current = chatRef;
@@ -360,17 +355,9 @@ export const useAgentBuilderIntegration = ({
     ]
   );
 
-  // Auto-open the sidebar for two cases:
-  //   1. New workflows (no workflowId yet) so first-time users land in the
-  //      AI flow on /workflows/create.
-  //   2. The workflow just saved from /workflows/create with the sidebar open
-  //      — `requestSidebarRestore` was set by the save thunk before
-  //      `application.navigateToApp` remounts the app; consume it here so
-  //      the in-progress conversation resurfaces on the detail view.
-  // Existing workflows opened directly must NOT auto-open — users navigating
-  // between saved workflows should decide when to open the chat themselves.
-  // Guarded by hasAutoOpenedRef so it never re-fires within the same session
-  // — if the user closes the sidebar, it stays closed until they open it.
+  // Auto-open only on /workflows/create, or on a saved workflow whose sidebar
+  // the save thunk requested we restore. Never on an existing workflow the
+  // user navigated to directly. Guarded per-mount so a manual close stays.
   useEffect(() => {
     if (!isEditorMounted || !agentBuilder || !isExperimentalEnabled) return;
     if (hasAutoOpenedRef.current) return;
@@ -384,13 +371,10 @@ export const useAgentBuilderIntegration = ({
     openAgentChat({ isAutoOpen: true });
   }, [isEditorMounted, agentBuilder, isExperimentalEnabled, workflowId, openAgentChat]);
 
-  // Close the sidebar only on true unmount (user leaves the workflow
-  // detail/create scope for the list or another app). Empty deps so it does
-  // NOT fire between intra-scope transitions like /create → /:savedId, where
-  // an in-progress conversation should stay visible. Note: same-app nav
-  // through `application.navigateToApp` remounts the tree, so this effect's
-  // cleanup runs there — the save thunk sets `requestSidebarRestore` before
-  // navigating, and the auto-open effect above consumes it on remount.
+  // Close the sidebar on unmount (leaving the workflow scope). Empty deps so
+  // it does not fire on prop changes. `application.navigateToApp` remounts
+  // the tree, so create → detail also fires this — the save thunk handles
+  // that case via `requestSidebarRestore`.
   useEffect(() => {
     return () => {
       chatRefHandle.current?.close();

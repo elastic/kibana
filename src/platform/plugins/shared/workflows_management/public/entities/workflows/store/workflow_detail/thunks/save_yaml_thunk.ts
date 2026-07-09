@@ -58,11 +58,9 @@ export const saveYamlThunk = createAsyncThunk<
 
     const isAiAssisted = selectAiAssisted(getState());
 
-    // Hitting Save is an implicit acceptance of any AI-generated accept/reject
-    // decorations on screen — resolve them so the persisted YAML matches what
-    // the user just saw. `acceptAllActiveProposals` returns the post-accept
-    // model content; sync it into Redux explicitly so the read below is the
-    // definitive value even if the model→Redux debounce is still pending.
+    // Save implicitly accepts any pending AI diff decorations. Dispatch the
+    // post-accept YAML into Redux explicitly — the Monaco→Redux sync is
+    // debounced and may not have flushed by the read below.
     const postAcceptYaml = acceptAllActiveProposals();
     if (postAcceptYaml != null) {
       dispatch(setYamlString(postAcceptYaml));
@@ -115,18 +113,13 @@ export const saveYamlThunk = createAsyncThunk<
           aiAssisted: isAiAssisted,
         });
 
-        // Carry the AI chat conversation started on /workflows/create onto the
-        // saved workflow's session tag BEFORE dispatching setWorkflow. The
-        // dispatch flips workflowId in Redux, which triggers the agent-builder
-        // integration effect to re-run — and its cleanup would clear the
-        // module-level create attachment id before we get a chance to consume
-        // it, leaving the detail view with an empty chat.
+        // Migrate the create-session chat onto the saved workflow's tag
+        // BEFORE `dispatch(setWorkflow)` — the resulting re-render of the
+        // agent-builder integration would otherwise race the consume.
         carryConversationToWorkflow(workflow.id);
 
-        // If the user was mid-conversation with the AI (sidebar open at save
-        // time), request the destination workflow's editor to re-open the
-        // sidebar on mount. `application.navigateToApp` below remounts the
-        // whole workflows app, so we can't just leave the sidebar untouched.
+        // If the sidebar was open at save time, ask the destination editor
+        // to re-open it — the `navigateToApp` below remounts the app.
         if (isSidebarOpen()) {
           requestSidebarRestore(workflow.id);
         }

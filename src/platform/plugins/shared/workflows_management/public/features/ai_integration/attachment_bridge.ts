@@ -20,12 +20,7 @@ export interface WorkflowYamlChangedPayload {
   beforeYaml: string;
   afterYaml: string;
   workflowId?: string;
-  /**
-   * Stable identifier of the attachment the payload was produced against.
-   * Present on new events; older events without this field fall back to the
-   * `workflowId` match. Used to key edits to the conversation's originating
-   * workflow so a still-running agent does not mutate a newly-viewed workflow.
-   */
+  /** Stable per-editor id; the bridge drops payloads whose id doesn't match. */
   attachmentId?: string;
   name?: string;
   attachmentVersion?: number;
@@ -129,12 +124,9 @@ export class AttachmentBridge {
 
     const { proposalId, beforeYaml, afterYaml, attachmentVersion, workflowId, toolId } = payload;
 
-    // Drop payloads produced for a different attachment (e.g. a still-running
-    // conversation from workflow A whose event lands after the user navigated
-    // to workflow B). `attachmentId` is a stable per-editor UUID that works for
-    // both saved workflows and unsaved /workflows/create sessions. Fall back to
-    // the older `workflowId` field for events emitted before the server was
-    // updated to include `attachmentId`.
+    // Drop events for a different attachment (e.g. a still-running convo from
+    // workflow A landing after the user navigated to B). Fall back to
+    // `workflowId` for events emitted before the server added `attachmentId`.
     if (this.attachmentId) {
       const payloadAttachmentId = payload.attachmentId ?? workflowId;
       if (payloadAttachmentId && payloadAttachmentId !== this.attachmentId) return;
