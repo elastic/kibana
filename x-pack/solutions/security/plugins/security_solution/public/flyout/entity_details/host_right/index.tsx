@@ -161,7 +161,8 @@ export const HostPanel = memo(function HostPanel({
   }, [calculateEntityRiskScore, refetchEntitiesTable]);
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
-    onSuccess: onAssetCriticalityChanged,
+    onSuccess: calculateEntityRiskScore,
+    refetchEntityRecord: entityFromStoreResult.refetch,
   });
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
@@ -326,6 +327,7 @@ export const HostPanel = memo(function HostPanel({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={isPreviewMode}
             entityRecord={observedHost.entityRecord ?? undefined}
+            refetchEntityRecord={entityFromStoreResult.refetch}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
           />

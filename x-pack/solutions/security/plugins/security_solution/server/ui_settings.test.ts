@@ -7,10 +7,12 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import {
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
 } from '@kbn/management-settings-ids';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { initUiSettings } from './ui_settings';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import {
@@ -82,6 +84,20 @@ describe('initUiSettings', () => {
             type: 'number',
             technicalPreview: true,
           }),
+      })
+    );
+  });
+
+  it('registers the alert analysis workflow agent setting defaulting to the default agent', () => {
+    initUiSettings(mockUiSettings, mockExperimentalFeatures, false);
+
+    const registeredSettings = (mockUiSettings.register as jest.Mock).mock.calls[0][0];
+    expect(registeredSettings[SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID]).toEqual(
+      expect.objectContaining({
+        value: agentBuilderDefaultAgentId,
+        type: 'string',
+        sensitive: true,
+        technicalPreview: true,
       })
     );
   });

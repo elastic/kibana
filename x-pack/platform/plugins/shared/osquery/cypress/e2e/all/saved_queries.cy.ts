@@ -15,7 +15,6 @@ import {
   ADD_QUERY_BUTTON,
   customActionEditSavedQuerySelector,
   customActionRunSavedQuerySelector,
-  EDIT_PACK_HEADER_BUTTON,
   rowActionsMenuSelector,
   SAVED_QUERY_DROPDOWN_SELECT,
 } from '../../screens/packs';
@@ -202,8 +201,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   // Migrated to Jest component test: public/form/results_type_field.test.tsx
   // Phase 2 migration — form field default values are UI-only assertions
 
-  // Failing: See https://github.com/elastic/kibana/issues/276571
-  describe.skip('prebuilt', () => {
+  describe('prebuilt', () => {
     let packName: string;
     let packId: string;
     let savedQueryId: string;
@@ -267,7 +265,6 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
     it('user can edit prebuilt saved query under pack', () => {
       preparePack(packName);
-      cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
       cy.contains(`Edit ${packName}`);
       cy.getBySel(ADD_QUERY_BUTTON).click();
 

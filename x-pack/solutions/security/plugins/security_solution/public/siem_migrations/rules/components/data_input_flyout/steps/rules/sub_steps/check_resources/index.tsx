@@ -45,6 +45,18 @@ export const useCheckResourcesStep = ({
     return status;
   }, [isLoading, error, status]);
 
+  if (migrationSource === MigrationSource.SENTINEL) {
+    return {
+      title: i18n.RULES_DATA_INPUT_CHECK_RESOURCES_SENTINEL_TITLE,
+      status: uploadStepStatus,
+      children: (
+        <EuiText size="s" data-test-subj="checkResourcesDescription">
+          {i18n.RULES_DATA_INPUT_CHECK_RESOURCES_SENTINEL_DESCRIPTION}
+        </EuiText>
+      ),
+    };
+  }
+
   if (migrationSource === MigrationSource.QRADAR) {
     return {
       title: i18n.RULES_DATA_INPUT_CHECK_RESOURCES_QRADAR_TITLE,
