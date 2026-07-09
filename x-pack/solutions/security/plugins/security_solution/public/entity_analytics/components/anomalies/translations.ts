@@ -32,6 +32,19 @@ export const ENTITY_ANOMALIES_RECENT_TABLE_TITLE = i18n.translate(
   { defaultMessage: 'Recent anomalies' }
 );
 
+export const ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.missingThreatTacticsWarning',
+  {
+    defaultMessage:
+      'Some of the ML jobs powering this attack chain are missing MITRE ATT&CK tactic mappings.',
+  }
+);
+
+export const ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING_LINK = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.missingThreatTacticsWarningLink',
+  { defaultMessage: 'Update to the latest integration version' }
+);
+
 export const getEntityAnomaliesCountLabel = (count: number) =>
   i18n.translate(
     'xpack.securitySolution.entityAnalytics.entityAnomalies.overview.anomaliesCountLabel',
