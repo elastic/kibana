@@ -41,6 +41,7 @@ export {
   EMPTY_BULK_UPSERT_RESPONSE,
   toBulkUpsertResponseFromBulk,
   toBulkUpsertResponseFromUpdate,
+  validateCreateExecutionsDataAccessParams,
   validateCreateWorkflowExecutionsDataAccessParams,
   validateCreateStepExecutionsDataAccessParams,
 } from './data_access_layer';
@@ -68,6 +69,7 @@ export type {
   StepExecutionUpsertDocument,
   WorkflowExecutionsBulkUpsertRequest,
   StepExecutionsBulkUpsertRequest,
+  CreateExecutionsDataAccessDeps,
   CreateWorkflowExecutionsDataAccessDeps,
   CreateStepExecutionsDataAccessDeps,
   GetStepExecutionsByIdsOptions,

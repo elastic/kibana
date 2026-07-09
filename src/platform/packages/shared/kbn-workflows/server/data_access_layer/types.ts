@@ -63,7 +63,7 @@ export type BulkUpsertResponse = Pick<estypes.BulkResponse, 'took' | 'errors' | 
   items: BulkUpsertItemResponse[];
 };
 
-export interface CreateWorkflowExecutionsDataAccessDeps {
+export interface CreateExecutionsDataAccessDeps {
   source: ExecutionStorageSource;
   esClient: ElasticsearchClient;
   /** Required when source is `data_stream`; ignored for index-backed sources. */
@@ -71,12 +71,11 @@ export interface CreateWorkflowExecutionsDataAccessDeps {
   logger?: Logger;
 }
 
-export interface CreateStepExecutionsDataAccessDeps {
-  source: ExecutionStorageSource;
-  esClient: ElasticsearchClient;
-  dataStreamClient?: ExecutionDataStreamClient;
-  logger?: Logger;
-}
+/** @deprecated Use {@link CreateExecutionsDataAccessDeps} */
+export type CreateWorkflowExecutionsDataAccessDeps = CreateExecutionsDataAccessDeps;
+
+/** @deprecated Use {@link CreateExecutionsDataAccessDeps} */
+export type CreateStepExecutionsDataAccessDeps = CreateExecutionsDataAccessDeps;
 
 export type ExecutionSourceProjectionField<TExecution extends { id: string }> = Extract<
   keyof TExecution,

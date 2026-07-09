@@ -8,33 +8,36 @@
  */
 
 import type {
+  CreateExecutionsDataAccessDeps,
   CreateStepExecutionsDataAccessDeps,
   CreateWorkflowExecutionsDataAccessDeps,
   ExecutionStorageSource,
 } from '../types';
 
-export const validateCreateWorkflowExecutionsDataAccessParams = (
-  deps: CreateWorkflowExecutionsDataAccessDeps
+export const validateCreateExecutionsDataAccessParams = (
+  deps: CreateExecutionsDataAccessDeps
 ): void => {
   if (deps.source === 'data_stream' && deps.dataStreamClient === undefined) {
     throw new Error(
-      'dataStreamClient is required when creating WorkflowExecutionsDataAccess with source "data_stream"'
+      'dataStreamClient is required when creating executions data access with source "data_stream"'
     );
   }
+};
+
+export const validateCreateWorkflowExecutionsDataAccessParams = (
+  deps: CreateWorkflowExecutionsDataAccessDeps
+): void => {
+  validateCreateExecutionsDataAccessParams(deps);
 };
 
 export const validateCreateStepExecutionsDataAccessParams = (
   params: CreateStepExecutionsDataAccessDeps
 ): void => {
-  if (params.source === 'data_stream' && params.dataStreamClient === undefined) {
-    throw new Error(
-      'dataStreamClient is required when creating StepExecutionsDataAccess with source "data_stream"'
-    );
-  }
+  validateCreateExecutionsDataAccessParams(params);
 };
 
 export const createUnsupportedStorageSourceError = (
-  entity: 'WorkflowExecutionsDataAccess' | 'StepExecutionsDataAccess',
+  entity: 'WorkflowExecutionsDataAccess' | 'StepExecutionsDataAccess' | 'ExecutionsDataAccess',
   source: ExecutionStorageSource
 ): Error => {
   return new Error(`${entity} for source "${source}" is not implemented yet`);

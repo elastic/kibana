@@ -33,9 +33,8 @@ export interface PlainIndexExecutionsDataAccessDeps<TExecution extends { id: str
   ) => TExecution;
 }
 
-export class PlainIndexExecutionsDataAccess<
-  TExecution extends Record<string, unknown> & { id: string }
-> implements ExecutionsDataAccess<TExecution>
+export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
+  implements ExecutionsDataAccess<TExecution>
 {
   constructor(private readonly deps: PlainIndexExecutionsDataAccessDeps<TExecution>) {}
 
