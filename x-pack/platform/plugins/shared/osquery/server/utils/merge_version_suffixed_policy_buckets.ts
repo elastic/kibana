@@ -13,20 +13,9 @@ export interface PolicyBucket {
   size: number;
 }
 
-/**
- * Merges `policy_id` aggregation buckets that differ only by Fleet's
- * version-specific suffix (`<policyId>#<major.minor>`) back into their base
- * policy id, summing bucket sizes.
- *
- * Without this, a policy with both suffixed and unsuffixed agents shows up as
- * multiple entries in aggregation results, one of which is keyed by the raw
- * (unresolvable) suffixed id and fails the subsequent agent-policy name
- * lookup by base id.
- *
- * Buckets are re-sorted by combined size (descending) because merging can
- * change the relative ranking of a policy that callers may truncate to a
- * top-N list.
- */
+// Merges policy_id buckets that differ only by Fleet's version suffix back
+// into their base id, summing sizes, then re-sorts by size since merging can
+// change a policy's rank in a top-N list.
 export const mergeVersionSuffixedPolicyBuckets = (buckets: PolicyBucket[]): PolicyBucket[] => {
   const merged = new Map<string, PolicyBucket>();
 

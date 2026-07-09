@@ -55,11 +55,8 @@ export const generateAgentOption = (
       value: {
         groupType,
         groups: {
-          // Normalized to the base policy id so this matches the policy
-          // group's key, which is likewise normalized (see
-          // `mergeVersionSuffixedPolicyBuckets`) — otherwise selecting a
-          // policy and one of its version-suffixed agents would count that
-          // agent twice.
+          // Normalized so it matches the policy group's key; otherwise a
+          // policy and one of its version-suffixed agents double-count.
           policy: stripPolicyIdVersionSuffix(agent.policy_id ?? ''),
           platform: agent.local_metadata.os.platform,
         },

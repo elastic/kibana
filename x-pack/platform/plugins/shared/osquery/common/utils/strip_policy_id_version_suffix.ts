@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-/**
- * Mirrors Fleet's own `hasVersionSuffix`/`removeVersionSuffixFromPolicyId`
- * (`x-pack/platform/plugins/shared/fleet/common/services/version_specific_policies_utils.ts`),
- * duplicated here because those helpers are not exported from
- * `@kbn/fleet-plugin`'s public `common` entry point.
- *
- * Only strips a trailing `#<major>.<minor>` suffix. A custom Fleet policy id
- * may legitimately contain a `#` that isn't a version suffix (e.g.
- * `policy#123`), and must be left untouched.
- */
+// Mirrors Fleet's hasVersionSuffix/removeVersionSuffixFromPolicyId (not exported
+// from @kbn/fleet-plugin's common entry point). Only strips a trailing
+// #<major>.<minor>, since a custom policy id may legitimately contain a
+// non-version "#" (e.g. `policy#123`).
 const VERSION_SUFFIX_PATTERN = /#\d+\.\d+$/;
 
 export const stripPolicyIdVersionSuffix = (policyId: string): string =>
