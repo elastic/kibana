@@ -82,11 +82,13 @@ export function startTrackingHistory<T extends object = {}>({
   };
 
   const keyDownHandler = (event: KeyboardEvent) => {
-    if (event.metaKey) {
-      if (event.key === 'z') {
+    const isModifier = event.ctrlKey || event.metaKey;
+    if (isModifier) {
+      const key = event.key.toLocaleLowerCase();
+      if (key === 'z') {
         event.preventDefault();
         undoPatch();
-      } else if (event.key === 'y') {
+      } else if (key === 'y') {
         event.preventDefault(); // prevent default behaviour (for example, on chrome, this opens history by default)
         redoPatch();
       }

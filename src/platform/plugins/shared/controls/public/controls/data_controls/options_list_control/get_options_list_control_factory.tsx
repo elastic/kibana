@@ -253,7 +253,6 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         .pipe(debounceTime(0))
         .subscribe(
           ([dataViews, fieldName, selectedOptions, existsSelected, exclude, sectionId]) => {
-            console.log({ dataViews, fieldName, selectedOptions: [...(selectedOptions ?? [])] });
             const dataView = dataViews?.[0];
             if (!dataView) return;
 
@@ -300,7 +299,6 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         },
         applySerializedState: (nextState) => {
           const normalizedState = normalizeEsqlSort(nextState);
-          console.log({ normalizedState });
           dataControlManager.reinitializeState(normalizedState);
           selectionsManager.reinitializeState(normalizedState);
           editorStateManager.reinitializeState(normalizedState);
