@@ -106,9 +106,7 @@ spaceTest.describe(
       await dataGrid.runInTableSearch(searchTerm);
       await dataGrid.goToNextInTableSearchMatch();
       expect(await dataGrid.getInTableSearchTerm()).toBe(searchTerm);
-      expect((await dataGrid.getInTableSearchMatchesCounter().innerText()).trim()).toBe(
-        updatedActiveMatch
-      );
+      await expect(dataGrid.getInTableSearchMatchesCounter()).toHaveText(updatedActiveMatch);
       expect(await dataGrid.getCurrentPageNumber()).toBe('3');
 
       await unifiedTabs.createNewTab();
@@ -119,9 +117,7 @@ spaceTest.describe(
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
       expect(await dataGrid.getInTableSearchTerm()).toBe(searchTerm);
-      expect((await dataGrid.getInTableSearchMatchesCounter().innerText()).trim()).toBe(
-        updatedActiveMatch
-      );
+      await expect(dataGrid.getInTableSearchMatchesCounter()).toHaveText(updatedActiveMatch);
       expect(await dataGrid.getCurrentPageNumber()).toBe('3');
 
       await dataGrid.closeInTableSearch();

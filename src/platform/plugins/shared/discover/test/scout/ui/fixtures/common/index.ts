@@ -67,3 +67,4 @@ export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWork
 
 export { testData };
 export { tags };
+export { countMatchingRequests } from './network';

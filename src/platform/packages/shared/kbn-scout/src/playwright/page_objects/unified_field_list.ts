@@ -97,6 +97,50 @@ export class UnifiedFieldList {
     await this.waitUntilSidebarHasLoaded();
   }
 
+  async getAvailableFieldCount(): Promise<number> {
+    await this.waitUntilSidebarHasLoaded();
+    const text = await this.page.testSubj
+      .locator('fieldListGroupedAvailableFields-count')
+      .innerText();
+
+    return Number(text.trim());
+  }
+
+  async expectAvailableFieldCount(count: number): Promise<void> {
+    await this.waitUntilSidebarHasLoaded();
+    await expect(this.page.testSubj.locator('fieldListGroupedAvailableFields-count')).toHaveText(
+      String(count)
+    );
+  }
+
+  async clearFieldSearch(): Promise<void> {
+    await this.searchField('');
+  }
+
+  async openFieldTypeFilter(): Promise<void> {
+    await this.page.testSubj.locator('fieldListFiltersFieldTypeFilterToggle').click();
+    await this.page.testSubj
+      .locator('fieldListFiltersFieldTypeFilterOptions')
+      .waitFor({ state: 'visible' });
+  }
+
+  async closeFieldTypeFilter(): Promise<void> {
+    await this.page.testSubj.locator('fieldListFiltersFieldTypeFilterToggle').click();
+    await this.page.testSubj
+      .locator('fieldListFiltersFieldTypeFilterOptions')
+      .waitFor({ state: 'hidden' });
+  }
+
+  async selectFieldTypeFilter(type: string): Promise<void> {
+    await this.page.testSubj.locator(`typeFilter-${type}`).click();
+  }
+
+  async clearFieldTypeFilters(): Promise<void> {
+    await this.openFieldTypeFilter();
+    await this.page.testSubj.locator('fieldListFiltersFieldTypeFilterClearAll').click();
+    await this.closeFieldTypeFilter();
+  }
+
   getAvailableField(field: string) {
     return this.page.testSubj
       .locator('fieldListGroupedAvailableFields')

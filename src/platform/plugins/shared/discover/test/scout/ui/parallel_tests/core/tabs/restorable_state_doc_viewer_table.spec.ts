@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects, ScoutPage } from '@kbn/scout';
+import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures/common';
 
@@ -18,16 +18,6 @@ const openTableDocViewer = async ({ dataGrid, discover }: PageObjects) => {
   expect(await discover.isShowingDocViewer()).toBe(true);
   await dataGrid.openDocViewerTab(DOC_VIEWER_TABLE_TAB_ID);
   await dataGrid.getDocViewer().waitFor({ state: 'visible' });
-};
-
-const getShowOnlySelectedSwitch = (page: ScoutPage) =>
-  page.testSubj.locator('unifiedDocViewerShowOnlySelectedFieldsSwitch');
-
-const expectShowOnlySelected = async (page: ScoutPage, checked: boolean) => {
-  await expect(getShowOnlySelectedSwitch(page)).toHaveAttribute(
-    'aria-checked',
-    checked ? 'true' : 'false'
-  );
 };
 
 spaceTest.describe(
@@ -97,7 +87,7 @@ spaceTest.describe(
 
         await unifiedFieldList.clickFieldListItemAdd('utc_time');
         await discover.waitUntilTabIsLoaded();
-        await expectShowOnlySelected(page, false);
+        await discover.expectDocViewerShowOnlySelectedFields(false);
 
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
@@ -113,15 +103,15 @@ spaceTest.describe(
 
         await unifiedFieldList.clickFieldListItemAdd('utc_time');
         await discover.waitUntilTabIsLoaded();
-        await expectShowOnlySelected(page, false);
-        await getShowOnlySelectedSwitch(page).click();
-        await expectShowOnlySelected(page, true);
+        await discover.expectDocViewerShowOnlySelectedFields(false);
+        await discover.clickDocViewerShowOnlySelectedFieldsSwitch();
+        await discover.expectDocViewerShowOnlySelectedFields(true);
 
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
         await dataGrid.getDocViewer().waitFor({ state: 'visible' });
         expect(await discover.getDocViewerFieldTypeFilterCount()).toBe('1');
-        await expectShowOnlySelected(page, false);
+        await discover.expectDocViewerShowOnlySelectedFields(false);
       }
     );
 

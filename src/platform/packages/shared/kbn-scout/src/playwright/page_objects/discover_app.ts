@@ -1083,6 +1083,16 @@ export class DiscoverApp {
       .innerText();
   }
 
+  async clickDocViewerShowOnlySelectedFieldsSwitch(): Promise<void> {
+    await this.page.testSubj.locator('unifiedDocViewerShowOnlySelectedFieldsSwitch').click();
+  }
+
+  async expectDocViewerShowOnlySelectedFields(checked: boolean): Promise<void> {
+    await expect(
+      this.page.testSubj.locator('unifiedDocViewerShowOnlySelectedFieldsSwitch')
+    ).toHaveAttribute('aria-checked', checked ? 'true' : 'false');
+  }
+
   async isDocViewerSwitchChecked(testSubj: string): Promise<boolean> {
     return (await this.page.testSubj.locator(testSubj).getAttribute('aria-checked')) === 'true';
   }

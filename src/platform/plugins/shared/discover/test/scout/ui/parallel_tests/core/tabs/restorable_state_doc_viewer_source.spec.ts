@@ -7,35 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects, ScoutPage } from '@kbn/scout';
+import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../fixtures/common';
+import { countMatchingRequests, spaceTest } from '../../../fixtures/common';
 
 const DOC_VIEWER_SOURCE_TAB_ID = 'doc_view_source';
 const DOC_VIEWER_TABLE_TAB_ID = 'doc_view_table';
 const ESE_SEARCH_ENDPOINT = '/internal/search/ese';
-
-const countMatchingRequests = async (
-  page: ScoutPage,
-  endpoint: string,
-  action: () => Promise<void>
-): Promise<number> => {
-  let count = 0;
-  const listener = (request: { url: () => string }) => {
-    if (request.url().includes(endpoint)) {
-      count++;
-    }
-  };
-
-  page.on('request', listener);
-  try {
-    await action();
-  } finally {
-    page.off('request', listener);
-  }
-
-  return count;
-};
 
 const openSourceDocViewer = async ({ dataGrid, discover }: PageObjects, rowIndex: number) => {
   await dataGrid.openAndWaitForDocViewerFlyout({ rowIndex });

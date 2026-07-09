@@ -7,39 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures/common';
-
-const expectAvailableFieldCount = async (page: ScoutPage, count: number) => {
-  await expect(page.testSubj.locator('fieldListGroupedAvailableFields-count')).toHaveText(
-    count.toString()
-  );
-};
-
-const clearSidebarFieldSearch = async (page: ScoutPage) => {
-  await page.testSubj.locator('fieldListFiltersFieldSearch').fill('');
-};
-
-const openSidebarFieldTypeFilter = async (page: ScoutPage) => {
-  await page.testSubj.locator('fieldListFiltersFieldTypeFilterToggle').click();
-  await page.testSubj
-    .locator('fieldListFiltersFieldTypeFilterOptions')
-    .waitFor({ state: 'visible' });
-};
-
-const closeSidebarFieldTypeFilter = async (page: ScoutPage) => {
-  await page.testSubj.locator('fieldListFiltersFieldTypeFilterToggle').click();
-  await page.testSubj
-    .locator('fieldListFiltersFieldTypeFilterOptions')
-    .waitFor({ state: 'hidden' });
-};
-
-const clearSidebarFieldTypeFilters = async (page: ScoutPage) => {
-  await openSidebarFieldTypeFilter(page);
-  await page.testSubj.locator('fieldListFiltersFieldTypeFilterClearAll').click();
-  await closeSidebarFieldTypeFilter(page);
-};
 
 spaceTest.describe(
   'Discover tabs - restorable sidebar state',
@@ -101,45 +70,43 @@ spaceTest.describe(
       expect(await discover.getSidebarWidth()).toBe(updatedWidth);
     });
 
-    spaceTest('restores sidebar field filters per tab', async ({ page, pageObjects }) => {
+    spaceTest('restores sidebar field filters per tab', async ({ pageObjects }) => {
       const { discover, unifiedFieldList, unifiedTabs } = pageObjects;
       const initialCount = 48;
 
-      await expectAvailableFieldCount(page, initialCount);
+      await unifiedFieldList.expectAvailableFieldCount(initialCount);
 
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
-      await expectAvailableFieldCount(page, initialCount);
+      await unifiedFieldList.expectAvailableFieldCount(initialCount);
       await unifiedFieldList.searchField('i');
-      await expectAvailableFieldCount(page, 28);
+      await unifiedFieldList.expectAvailableFieldCount(28);
 
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
-      await expectAvailableFieldCount(page, initialCount);
+      await unifiedFieldList.expectAvailableFieldCount(initialCount);
       await unifiedFieldList.searchField('e');
-      await expectAvailableFieldCount(page, 42);
-      await openSidebarFieldTypeFilter(page);
-      await page.testSubj.locator('typeFilter-number').click();
-      await closeSidebarFieldTypeFilter(page);
-      await expectAvailableFieldCount(page, 4);
+      await unifiedFieldList.expectAvailableFieldCount(42);
+      await unifiedFieldList.openFieldTypeFilter();
+      await unifiedFieldList.selectFieldTypeFilter('number');
+      await unifiedFieldList.closeFieldTypeFilter();
+      await unifiedFieldList.expectAvailableFieldCount(4);
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
-      await expectAvailableFieldCount(page, initialCount);
+      await unifiedFieldList.expectAvailableFieldCount(initialCount);
 
       await unifiedTabs.selectTab(1);
       await discover.waitUntilTabIsLoaded();
-      await expectAvailableFieldCount(page, 28);
+      await unifiedFieldList.expectAvailableFieldCount(28);
 
       await unifiedTabs.selectTab(2);
       await discover.waitUntilTabIsLoaded();
-      await expectAvailableFieldCount(page, 4);
+      await unifiedFieldList.expectAvailableFieldCount(4);
 
-      await clearSidebarFieldSearch(page);
-      await clearSidebarFieldTypeFilters(page);
-      await expect(page.testSubj.locator('fieldListGroupedAvailableFields-count')).toHaveText(
-        initialCount.toString()
-      );
+      await unifiedFieldList.clearFieldSearch();
+      await unifiedFieldList.clearFieldTypeFilters();
+      await unifiedFieldList.expectAvailableFieldCount(initialCount);
     });
   }
 );
