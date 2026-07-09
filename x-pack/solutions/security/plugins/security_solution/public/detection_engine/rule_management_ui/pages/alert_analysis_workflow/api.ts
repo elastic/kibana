@@ -15,6 +15,7 @@ import {
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
   type AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody,
   type AlertAnalysisWorkflowSettings,
+  type RuleAttachmentFilter,
   type RuleAttachmentPage,
   type RuleAttachmentSelection,
   type RuleAttachmentStats,
@@ -33,6 +34,7 @@ export {
 
 export type { AlertAnalysisWorkflowSettings };
 export type {
+  RuleAttachmentFilter,
   RuleAttachmentPage,
   RuleAttachmentSelection,
   RuleAttachmentStats,
@@ -85,11 +87,13 @@ export const saveAlertAnalysisWorkflowSettings = ({
 export const fetchAlertAnalysisWorkflowRuleAttachments = ({
   http,
   search,
+  attachmentFilter,
   page,
   perPage,
 }: {
   http: HttpStart;
   search: string;
+  attachmentFilter: RuleAttachmentFilter;
   page: number;
   perPage: number;
 }): Promise<RuleAttachmentPage> => {
@@ -98,6 +102,7 @@ export const fetchAlertAnalysisWorkflowRuleAttachments = ({
     version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
     query: {
       search,
+      attachment_filter: attachmentFilter,
       page,
       per_page: perPage,
     },
@@ -107,28 +112,32 @@ export const fetchAlertAnalysisWorkflowRuleAttachments = ({
 export const fetchAlertAnalysisWorkflowRuleAttachmentStats = ({
   http,
   search,
+  attachmentFilter,
 }: {
   http: HttpStart;
   search: string;
+  attachmentFilter: RuleAttachmentFilter;
 }): Promise<RuleAttachmentStats> => {
   return http.fetch<RuleAttachmentStats>(ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE, {
     method: 'GET',
     version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
-    query: { search },
+    query: { search, attachment_filter: attachmentFilter },
   });
 };
 
 export const fetchAlertAnalysisWorkflowRuleAttachmentSelection = ({
   http,
   search,
+  attachmentFilter,
 }: {
   http: HttpStart;
   search: string;
+  attachmentFilter: RuleAttachmentFilter;
 }): Promise<RuleAttachmentSelection> => {
   return http.fetch<RuleAttachmentSelection>(ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE, {
     method: 'GET',
     version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
-    query: { search },
+    query: { search, attachment_filter: attachmentFilter },
   });
 };
 

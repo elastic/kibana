@@ -23,6 +23,7 @@ import { internalKIResetKisRoutes } from './internal/knowledge_indicators/reset_
 import { internalMemoryRoutes } from './internal/memory/route';
 import { internalPromptsRoutes } from './internal/prompts/route';
 import { reconcileRoutes } from './internal/knowledge_indicators/reconcile_route';
+import { internalScheduledDiscoveryRoutes } from './internal/scheduled_discovery/route';
 import { queryRoutes } from './queries/route';
 import { significantEventsRoutes } from './significant_events/route';
 
@@ -46,6 +47,7 @@ export const significantEventsRouteRepository = {
   ...internalMemoryRoutes,
   ...internalPromptsRoutes,
   ...reconcileRoutes,
+  ...internalScheduledDiscoveryRoutes,
   // public APIs
   ...queryRoutes,
   ...significantEventsRoutes,

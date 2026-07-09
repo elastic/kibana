@@ -15,6 +15,7 @@ import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { OnboardClusterResponse } from '../types';
 import { getCurrentClusterData } from '../lib/cluster_info';
 import { createStorageService } from '../lib/create_storage_service';
+import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
 
 const bodySchema = schema.object({
   apiKey: schema.string({ minLength: 1 }),
@@ -42,12 +43,7 @@ export const registerAuthenticateRoute = ({
   router.get(
     {
       path: `${API_BASE_PATH}/config`,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route returns public configuration information.',
-        },
-      },
+      security: CLOUD_CONNECT_READ_SECURITY,
       validate: false,
       options: {
         access: 'internal',
@@ -94,13 +90,7 @@ export const registerAuthenticateRoute = ({
   router.post(
     {
       path: `${API_BASE_PATH}/authenticate`,
-      security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates authentication to the Cloud Connect API and handles authorization there.',
-        },
-      },
+      security: CLOUD_CONNECT_MANAGE_SECURITY,
       validate: {
         body: bodySchema,
       },
