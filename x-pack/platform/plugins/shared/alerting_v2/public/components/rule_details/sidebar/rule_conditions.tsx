@@ -15,6 +15,7 @@ import { useRule } from '../rule_context';
 import {
   EMPTY_VALUE,
   formatAlertDelay,
+  formatNoDataStrategy,
   formatRecoveryDelay,
   getRecoverEsqlSegment,
 } from '../utils';
@@ -138,6 +139,13 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
             }),
             description: formatRecoveryDelay(rule.state_transition),
             'data-test-subj': 'alertingV2RuleDetailsRecoveryDelay',
+          },
+          {
+            title: i18n.translate('xpack.alertingV2.ruleDetails.noDataBehavior', {
+              defaultMessage: 'No data behavior',
+            }),
+            description: formatNoDataStrategy(rule.no_data_strategy ?? 'none'),
+            'data-test-subj': 'alertingV2RuleDetailsNoDataStrategy',
           },
         ]
       : []),

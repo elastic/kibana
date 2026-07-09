@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { httpServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import type { ConnectorSpecWireResponse } from '../apis/fetch_connector_spec';
@@ -17,6 +17,8 @@ import {
 } from './action_type_model_utils';
 
 type LooseConnectorFormTransform = (data: Record<string, unknown>) => Record<string, unknown>;
+
+const docLinks = docLinksServiceMock.createStartContract();
 
 function minimalConnectorSpecForForm(): ConnectorSpecResponse {
   return {
@@ -92,7 +94,7 @@ describe('action_type_model_utils', () => {
     };
 
     it('maps base spec metadata, subtype, and validateParams', async () => {
-      const model = transformSpecToActionTypeModel(baseSpec);
+      const model = transformSpecToActionTypeModel(baseSpec, docLinks);
       expect(model.id).toBe('test-connector');
       expect(model.actionTypeTitle).toBe('Test Connector');
       expect(model.selectMessage).toBe('A test connector description');
@@ -103,29 +105,101 @@ describe('action_type_model_utils', () => {
     it('sets isExperimental from is_technical_preview metadata', () => {
       const validSchema = serializeConnectorSpec(connectorsSpecs.AlienVaultOTXConnector)
         .schema as Record<string, unknown>;
-      const modelDefault = transformSpecToActionTypeModel({ ...baseSpec, schema: validSchema });
+      const modelDefault = transformSpecToActionTypeModel(
+        { ...baseSpec, schema: validSchema },
+        docLinks
+      );
       expect(modelDefault.isExperimental).toBe(false);
 
-      const modelPreview = transformSpecToActionTypeModel({
-        ...baseSpec,
-        schema: validSchema,
-        metadata: { ...baseSpec.metadata, isTechnicalPreview: true },
-      });
+      const modelPreview = transformSpecToActionTypeModel(
+        {
+          ...baseSpec,
+          schema: validSchema,
+          metadata: { ...baseSpec.metadata, isTechnicalPreview: true },
+        },
+        docLinks
+      );
       expect(modelPreview.isExperimental).toBe(true);
     });
 
     it('uses metadata icon when set, otherwise plugs when id is not in the icon map', () => {
-      const withIcon = transformSpecToActionTypeModel({
-        ...baseSpec,
-        metadata: { ...baseSpec.metadata, icon: 'custom-icon' },
-      });
+      const withIcon = transformSpecToActionTypeModel(
+        {
+          ...baseSpec,
+          metadata: { ...baseSpec.metadata, icon: 'custom-icon' },
+        },
+        docLinks
+      );
       expect(withIcon.iconClass).toBe('custom-icon');
-      expect(transformSpecToActionTypeModel(baseSpec).iconClass).toBe('plugs');
+      expect(transformSpecToActionTypeModel(baseSpec, docLinks).iconClass).toBe('plugs');
+    });
+
+    describe('docsUrl derivation', () => {
+      const DOCS_BASE = 'https://www.elastic.co/docs/reference/kibana/connectors-kibana/';
+
+      it('derives the docs url from a dot-prefixed connector id', () => {
+        const model = transformSpecToActionTypeModel(
+          {
+            ...baseSpec,
+            metadata: { ...baseSpec.metadata, id: '.box' },
+          },
+          docLinks
+        );
+        expect(model.docsUrl).toBe(`${DOCS_BASE}box-action-type`);
+      });
+
+      it('converts underscores in the connector id to hyphens', () => {
+        const model = transformSpecToActionTypeModel(
+          {
+            ...baseSpec,
+            metadata: { ...baseSpec.metadata, id: '.google_drive' },
+          },
+          docLinks
+        );
+        expect(model.docsUrl).toBe(`${DOCS_BASE}google-drive-action-type`);
+      });
+
+      it('converts camelCase in the connector id to kebab-case', () => {
+        const model = transformSpecToActionTypeModel(
+          {
+            ...baseSpec,
+            metadata: { ...baseSpec.metadata, id: '.myFancyConnector' },
+          },
+          docLinks
+        );
+        expect(model.docsUrl).toBe(`${DOCS_BASE}my-fancy-connector-action-type`);
+      });
+
+      it('uses the explicit docsUrl from spec metadata when provided', () => {
+        const model = transformSpecToActionTypeModel(
+          {
+            ...baseSpec,
+            metadata: {
+              ...baseSpec.metadata,
+              id: '.box',
+              docsUrl: 'https://example.com/custom-docs',
+            },
+          },
+          docLinks
+        );
+        expect(model.docsUrl).toBe('https://example.com/custom-docs');
+      });
+
+      it('links to the connectors index from the doc-links service when docsUrl is an empty string', () => {
+        const model = transformSpecToActionTypeModel(
+          {
+            ...baseSpec,
+            metadata: { ...baseSpec.metadata, id: '.aws_lambda', docsUrl: '' },
+          },
+          docLinks
+        );
+        expect(model.docsUrl).toBe(docLinks.links.alerting.connectors);
+      });
     });
   });
 
   describe('connectorForm serializer and deserializer', () => {
-    const formModel = () => transformSpecToActionTypeModel(minimalConnectorSpecForForm());
+    const formModel = () => transformSpecToActionTypeModel(minimalConnectorSpecForForm(), docLinks);
 
     it('serializer copies secrets.authType into config or returns data unchanged', () => {
       const serializer = formModel().connectorForm?.serializer as

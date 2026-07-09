@@ -21,9 +21,7 @@ jest.mock('./signal_rule_overview', () => ({
 }));
 
 jest.mock('./artifacts', () => ({
-  DashboardArtifactsSection: () => (
-    <div data-test-subj="dashboardArtifactsSectionMock">dashboards</div>
-  ),
+  ArtifactsSection: () => <div data-test-subj="artifactsSectionMock">artifacts</div>,
 }));
 
 const baseRule: RuleApiResponse = {
@@ -64,15 +62,15 @@ describe('RuleOverviewSection', () => {
     });
   });
 
-  describe('dashboard artifacts visibility', () => {
-    it('shows the dashboard artifacts section for alert rules', () => {
+  describe('artifacts visibility', () => {
+    it('shows the artifacts section for alert rules', () => {
       renderSection({ ...baseRule, kind: 'alert' });
-      expect(screen.getByTestId('dashboardArtifactsSectionMock')).toBeInTheDocument();
+      expect(screen.getByTestId('artifactsSectionMock')).toBeInTheDocument();
     });
 
-    it('does not show dashboard artifacts for signal rules', () => {
+    it('does not show artifacts for signal rules', () => {
       renderSection({ ...baseRule, kind: 'signal' });
-      expect(screen.queryByTestId('dashboardArtifactsSectionMock')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('artifactsSectionMock')).not.toBeInTheDocument();
     });
   });
 });
