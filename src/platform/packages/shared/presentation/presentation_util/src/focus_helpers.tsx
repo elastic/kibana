@@ -38,7 +38,6 @@ const focusPreservingVisibility = (el: HTMLElement) => {
   el.addEventListener('focusout', restore);
 };
 
-/**
 export const focusFirstFocusable = (target: Element | null | (() => Element | null)) => {
   setTimeout(() => {
     const el = typeof target === 'function' ? target() : target;
