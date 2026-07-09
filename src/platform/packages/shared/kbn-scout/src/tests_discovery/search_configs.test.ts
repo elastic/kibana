@@ -175,6 +175,78 @@ describe('filterModulesByScoutCiConfig', () => {
     );
   });
 
+  it('should not throw for unregistered modules when skipValidation is true', () => {
+    const scoutConfigs: ModuleDiscoveryInfo[] = [
+      {
+        name: 'pluginA',
+        group: 'group1',
+        type: 'plugin',
+        configs: [
+          {
+            path: 'pluginPathA',
+            hasTests: true,
+            tags: ['stateful-classic'],
+            serverRunFlags: ['--arch stateful --domain classic'],
+            usesParallelWorkers: true,
+          },
+        ],
+      },
+      {
+        name: 'pluginX',
+        group: 'groupX',
+        type: 'plugin',
+        configs: [
+          {
+            path: 'pluginPathX',
+            hasTests: true,
+            tags: ['stateful-classic'],
+            serverRunFlags: ['--arch stateful --domain classic'],
+            usesParallelWorkers: true,
+          },
+        ],
+      },
+    ];
+
+    let result: ModuleDiscoveryInfo[] = [];
+    expect(() => {
+      result = filterModulesByScoutCiConfig(mockLog, scoutConfigs, { skipValidation: true });
+    }).not.toThrow();
+
+    // Unregistered module is kept alongside the registered one.
+    expect(result.length).toBe(2);
+    expect(result.find((m: ModuleDiscoveryInfo) => m.name === 'pluginA')).toBeDefined();
+    expect(result.find((m: ModuleDiscoveryInfo) => m.name === 'pluginX')).toBeDefined();
+
+    // A warning is logged instead of throwing.
+    expect(mockLog.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Skipping Scout CI config validation')
+    );
+    expect(mockLog.warning).toHaveBeenCalledWith(expect.stringContaining('pluginX (plugin)'));
+  });
+
+  it('should still exclude disabled modules when skipValidation is true', () => {
+    const scoutConfigs: ModuleDiscoveryInfo[] = [
+      {
+        name: 'pluginC',
+        group: 'group2',
+        type: 'plugin',
+        configs: [
+          {
+            path: 'pluginPathC',
+            hasTests: true,
+            tags: ['stateful-classic'],
+            serverRunFlags: ['--arch stateful --domain classic'],
+            usesParallelWorkers: true,
+          },
+        ],
+      },
+    ];
+
+    const result = filterModulesByScoutCiConfig(mockLog, scoutConfigs, { skipValidation: true });
+
+    expect(result.find((m: ModuleDiscoveryInfo) => m.name === 'pluginC')).toBeUndefined();
+  });
+
   it('should log a warning for disabled plugins and packages', () => {
     const scoutConfigs: ModuleDiscoveryInfo[] = [
       {

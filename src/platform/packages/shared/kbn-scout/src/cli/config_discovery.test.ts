@@ -307,6 +307,50 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(Array.isArray(callArgs[1])).toBe(true);
   });
 
+  it('passes skipValidation to validation when "--skip-validation" is set with "--validate"', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockImplementation((flag) => {
+      if (flag === 'validate') return true;
+      if (flag === 'skip-validation') return true;
+      return false;
+    });
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    expect(filterModulesByScoutCiConfig).toHaveBeenCalled();
+    const callArgs = (filterModulesByScoutCiConfig as jest.Mock).mock.calls[0];
+    expect(callArgs[2]).toEqual({ skipValidation: true });
+  });
+
+  it('passes skipValidation to validation when "--skip-validation" is set with "--save"', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockImplementation((flag) => {
+      if (flag === 'save') return true;
+      if (flag === 'skip-validation') return true;
+      return false;
+    });
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    expect(filterModulesByScoutCiConfig).toHaveBeenCalled();
+    const callArgs = (filterModulesByScoutCiConfig as jest.Mock).mock.calls[0];
+    expect(callArgs[2]).toEqual({ skipValidation: true });
+  });
+
+  it('defaults skipValidation to false when "--skip-validation" is not set', () => {
+    flagsReader.enum.mockReturnValue('all');
+    flagsReader.boolean.mockImplementation((flag) => {
+      if (flag === 'save') return true;
+      return false;
+    });
+
+    runDiscoverPlaywrightConfigs(flagsReader, log);
+
+    expect(filterModulesByScoutCiConfig).toHaveBeenCalled();
+    const callArgs = (filterModulesByScoutCiConfig as jest.Mock).mock.calls[0];
+    expect(callArgs[2]).toEqual({ skipValidation: false });
+  });
+
   it('filters configs based on target tags for "all" target (tags.deploymentAgnostic)', () => {
     flagsReader.enum.mockReturnValue('all');
     flagsReader.boolean.mockReturnValue(false);

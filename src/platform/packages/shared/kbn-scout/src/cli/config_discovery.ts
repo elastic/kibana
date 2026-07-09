@@ -164,9 +164,11 @@ const handleFlattenedOutput = (
   flagsReader: FlagsReader,
   log: ToolingLog
 ): void => {
+  const skipValidation = flagsReader.boolean('skip-validation');
+
   // Apply CI filtering if save flag is set (for consistency with non-flattened behavior)
   const modulesToFlatten = flagsReader.boolean('save')
-    ? filterModulesByScoutCiConfig(log, filteredModules)
+    ? filterModulesByScoutCiConfig(log, filteredModules, { skipValidation })
     : filteredModules;
 
   const flattenedConfigs = flattenModulesByServerRunFlag(modulesToFlatten);
@@ -185,8 +187,12 @@ const handleNonFlattenedOutput = (
   log: ToolingLog,
   isSelective: boolean
 ): void => {
+  const skipValidation = flagsReader.boolean('skip-validation');
+
   if (flagsReader.boolean('save')) {
-    const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
+    const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules, {
+      skipValidation,
+    });
     saveModuleDiscoveryInfo(filteredForCiModules, log);
 
     const { plugins: savedPluginCount, packages: savedPackageCount } =
@@ -200,7 +206,7 @@ const handleNonFlattenedOutput = (
   }
 
   if (flagsReader.boolean('validate')) {
-    filterModulesByScoutCiConfig(log, filteredModules);
+    filterModulesByScoutCiConfig(log, filteredModules, { skipValidation });
     return;
   }
 
@@ -325,6 +331,9 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
                               with no isAffected marking.
     --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
     --validate                Validate that all discovered modules are registered in Scout CI config
+    --skip-validation         Do not fail when a discovered module is not registered in Scout CI config.
+                              Unregistered modules are kept (a warning is logged); disabled modules are
+                              still excluded. Applies to --validate, --save, and --flatten --save.
     --save                    Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
     --flatten                 Output configs in flattened format grouped by mode, group, and scout command
                               (useful for Cloud test execution)
@@ -345,16 +354,20 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
 
     # Save flattened configs for Cloud test execution
     node scripts/scout discover-playwright-configs --flatten --save
+
+    # Save configs without failing on modules not yet registered in Scout CI config
+    node scripts/scout discover-playwright-configs --save --skip-validation
   `,
   flags: {
     string: ['target', 'testing-scope'],
-    boolean: ['save', 'validate', 'flatten', 'include-custom-servers'],
+    boolean: ['save', 'validate', 'flatten', 'include-custom-servers', 'skip-validation'],
     default: {
       target: 'all',
       save: false,
       validate: false,
       flatten: false,
       'include-custom-servers': false,
+      'skip-validation': false,
     },
   },
   run: ({ flagsReader, log }) => {
