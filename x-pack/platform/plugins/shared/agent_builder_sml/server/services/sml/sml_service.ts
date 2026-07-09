@@ -28,7 +28,6 @@ import { SmlCrawlerImpl } from './sml_crawler';
 import type { SmlCrawler } from './types';
 import { smlIndexName } from './sml_storage';
 import {
-  SmlResultWindowExceededError,
   SmlAuthzEnumerationIncompleteError,
   SmlCorpusTooLargeError,
 } from './sml_errors';
@@ -166,21 +165,6 @@ class SmlServiceImpl implements SmlServiceInstance {
       getDocuments: async ({ ids, spaceId, esClient }) => {
         return getDocumentsByIds({ ids, spaceId, esClient, logger });
       },
-      listDocuments: async ({ spaceId, esClient, page, perPage, type, originUri, tags }) => {
-        return listDocuments({
-          spaceId,
-          esClient,
-          logger,
-          page,
-          perPage,
-          type,
-          originId: originUri,
-          tags,
-        });
-      },
-      findByOrigin: async ({ type, originId, spaceId, esClient }) => {
-        return findByOrigin({ type, originId, spaceId, esClient, logger });
-      },
       findByOriginAcrossSpaces: async ({ type, originId, esClient }) => {
         return findByOriginAcrossSpaces({ type, originId, esClient, logger });
       },
@@ -213,27 +197,6 @@ const emptyPermissions = (): SmlDocument['permissions'] => ({
   kibana: { privileges: [] },
   elasticsearch: { indices: [] },
 });
-
-const isResultWindowExceededError = (error: unknown): boolean => {
-  if (!(error instanceof errors.ResponseError) || error.statusCode !== 400) return false;
-  const body = error.body as
-    | {
-        error?: {
-          reason?: string;
-          caused_by?: { reason?: string };
-          root_cause?: Array<{ reason?: string }>;
-        };
-      }
-    | undefined;
-  const reasons = [
-    body?.error?.reason,
-    body?.error?.caused_by?.reason,
-    ...(body?.error?.root_cause?.map((rc) => rc.reason) ?? []),
-  ];
-  return reasons.some(
-    (reason) => typeof reason === 'string' && reason.includes('Result window is too large')
-  );
-};
 
 /**
  * Combined privilege check for SML chunks. In a single ES `_has_privileges`
@@ -1391,90 +1354,13 @@ const extractTotalHits = (total: SearchTotalHits | number | undefined): number =
 export const buildOriginUri = (type: string, originId: string): string => `${type}://${originId}`;
 
 /**
- * Fetch every chunk written under `(type, originId)` that is visible
- * in `spaceId`.
- *
- * Every currently-registered type produces exactly one chunk per origin,
- * but this can still return more than one — content-mode writes are not
- * type-checked against that assumption, and historical/manual entries can
- * accumulate. Ordering is unspecified.
- *
- * Lookups happen via the `origin.uri` keyword field — the only mapped
- * origin identifier. The compound URI is the only safe addressable key
- * because bare `originId` is not unique across SML types (a lens id and
- * a dashboard id can legitimately collide). The HTTP routes carry both
- * pieces in the URL (`/sml/{type}/{originId}`) for the same reason.
- *
- * Results are bounded by {@link MAX_CHUNKS_PER_ORIGIN}. Overflow is
- * logged with `track_total_hits` so operators can spot a producer
- * that has gone off the rails. The first `MAX_CHUNKS_PER_ORIGIN`
- * chunks are still returned — the per-space response is a degraded
- * view rather than an error.
- */
-const findByOrigin = async ({
-  type,
-  originId,
-  spaceId,
-  esClient,
-  logger,
-}: {
-  type: string;
-  originId: string;
-  spaceId: string;
-  esClient: IScopedClusterClient;
-  logger: Logger;
-}): Promise<SmlDocument[]> => {
-  const originUri = buildOriginUri(type, originId);
-  try {
-    const response = await esClient.asInternalUser.search<SmlDocument>({
-      index: smlIndexName,
-      size: MAX_CHUNKS_PER_ORIGIN,
-      track_total_hits: true,
-      allow_no_indices: true,
-      ignore_unavailable: true,
-      query: {
-        bool: {
-          filter: [
-            { term: { 'origin.uri': originUri } },
-            {
-              bool: {
-                should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-        },
-      },
-    });
-
-    const total = extractTotalHits(response.hits.total);
-    if (total > MAX_CHUNKS_PER_ORIGIN) {
-      logger.warn(
-        `SML findByOrigin: origin '${originUri}' has ${total} chunks in space '${spaceId}' but only the first ${MAX_CHUNKS_PER_ORIGIN} are returned. Producer is likely misbehaving — investigate before the cross-space guard becomes unreliable.`
-      );
-    }
-
-    return response.hits.hits
-      .filter((hit) => hit._source != null)
-      .map((hit) => hydrateDocument(hit._source!));
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      return [];
-    }
-    logger.warn(`SML findByOrigin failed: ${(error as Error).message}`);
-    throw error;
-  }
-};
-
-/**
  * `_source` fields fetched by `findByOriginAcrossSpaces`.
  *
  * The cross-space guard only reads `id`, `type`, `spaces` (and uses
  * `origin.uri` indirectly via `hydrateDocument`'s `origin_id`
  * derivation — `origin_id` is not stored, it's parsed from the URI at
  * read time). Everything else — `content`, `title`, `description`,
- * `tags`, `permissions`, … — is pulled back on the per-space path
- * (`findByOrigin`) which is the one that surfaces to users. The
+ * `tags`, `permissions`, … — are not needed by the guard. The
  * guard runs on every PUT and DELETE, so trimming the payload here
  * matters: with `size: 1000` and a 50 KB `content` field per chunk,
  * the un-filtered version could pull up to 50 MB per guard call and
@@ -1572,9 +1458,9 @@ const findByOriginAcrossSpaces = async ({
 
 /**
  * Project an ES `_source` payload into the canonical `SmlDocument`
- * shape used everywhere downstream. Centralised because three readers
- * (getDocumentsByIds, findByOrigin, findByOriginAcrossSpaces) apply
- * the same mapping — keeping them in sync by-hand is a footgun.
+ * shape used everywhere downstream. Centralised because multiple readers
+ * (getDocumentsByIds, findByOriginAcrossSpaces) apply the same mapping —
+ * keeping them in sync by-hand is a footgun.
  */
 const hydrateDocument = (source: SmlDocument): SmlDocument => {
   const originUri = source.origin?.uri ?? '';
@@ -1605,96 +1491,10 @@ const hydrateDocument = (source: SmlDocument): SmlDocument => {
  * `spaceId`. Wildcard (`'*'`) entries are treated as global.
  *
  * Exported so route helpers (HTTP upsert/delete cross-space guard) can
- * apply the same predicate used internally by `findByOrigin`.
+ * apply the same predicate used internally by the space-filtering logic.
  */
 export const isVisibleInSpace = (spaces: string[] | undefined, spaceId: string): boolean => {
   if (!spaces || spaces.length === 0) return false;
   return spaces.includes(spaceId) || spaces.includes('*');
 };
 
-/**
- * List SML documents in a space with optional filters and pagination.
- *
- * Pagination follows the standard Kibana convention (`page` is 1-based,
- * `per_page` bounds the page size).
- */
-const listDocuments = async ({
-  spaceId,
-  esClient,
-  logger,
-  page = 1,
-  perPage = 20,
-  type,
-  originId,
-  tags,
-}: {
-  spaceId: string;
-  esClient: IScopedClusterClient;
-  logger: Logger;
-  page?: number;
-  perPage?: number;
-  type?: string;
-  originId?: string;
-  tags?: string[];
-}): Promise<{ total: number; results: SmlDocument[] }> => {
-  const filters: Array<Record<string, unknown>> = [
-    {
-      bool: {
-        should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
-        minimum_should_match: 1,
-      },
-    },
-  ];
-  if (type) {
-    filters.push({ term: { type } });
-  }
-  if (originId) {
-    filters.push({ term: { 'origin.uri': originId } });
-  }
-  if (tags && tags.length > 0) {
-    filters.push({ terms: { tags } });
-  }
-
-  try {
-    const response = await esClient.asInternalUser.search<SmlDocument>({
-      index: smlIndexName,
-      from: (page - 1) * perPage,
-      size: perPage,
-      allow_no_indices: true,
-      ignore_unavailable: true,
-      track_total_hits: true,
-      query: {
-        bool: {
-          filter: filters,
-        },
-      },
-      sort: [{ updated_at: { order: 'desc' } }],
-    });
-
-    const total =
-      typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total?.value ?? 0;
-
-    const results: SmlDocument[] = response.hits.hits
-      .filter((hit) => hit._source != null)
-      .map((hit) => hydrateDocument(hit._source!));
-
-    return { total, results };
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      return { total: 0, results: [] };
-    }
-    if (isResultWindowExceededError(error)) {
-      const responseError = error as errors.ResponseError;
-      const body = responseError.body as
-        | { error?: { root_cause?: Array<{ reason?: string }>; reason?: string } }
-        | undefined;
-      const reason =
-        body?.error?.root_cause?.[0]?.reason ?? body?.error?.reason ?? responseError.message;
-      throw new SmlResultWindowExceededError(reason);
-    }
-    logger.warn(`SML listDocuments failed: ${(error as Error).message}`);
-    throw error;
-  }
-};

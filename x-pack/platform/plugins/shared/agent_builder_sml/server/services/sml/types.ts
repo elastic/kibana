@@ -535,9 +535,7 @@ export interface SmlService {
    * Check whether the current user has access to specific SML items.
    * Returns a map of document id → authorized (true/false).
    *
-   * **Internal use only.** Callers outside the plugin should use the public
-   * `getDocuments` method, which performs this check internally and returns
-   * only authorized documents. This primitive is exposed on the internal
+   * **Internal use only.** This primitive is exposed on the internal
    * `SmlService` so `resolveSmlAttachItems` can distinguish "access denied"
    * from "not found" in its per-item error messages.
    */
@@ -566,9 +564,7 @@ export interface SmlService {
   /**
    * Fetch SML documents by their chunk IDs, scoped to a space.
    *
-   * **Internal use only — does NOT perform permission checks.** The public
-   * `AgentBuilderSmlPluginStart.getDocuments` wraps this with an access
-   * check and filters out unauthorized IDs before fetching. Direct callers
+   * **Internal use only — does NOT perform permission checks.** Direct callers
    * MUST authorize IDs (via `checkItemsAccess`) before invoking this method,
    * or use it only from system contexts where the user's privileges are
    * irrelevant (e.g. crawler/indexer tasks).
@@ -578,48 +574,6 @@ export interface SmlService {
     spaceId: string;
     esClient: IScopedClusterClient;
   }) => Promise<Map<string, SmlDocument>>;
-
-  /** List SML documents in a space with optional filters and pagination. */
-  listDocuments: (params: {
-    spaceId: string;
-    esClient: IScopedClusterClient;
-    page?: number;
-    perPage?: number;
-    type?: string;
-    originUri?: string;
-    tags?: string[];
-  }) => Promise<{ total: number; results: SmlDocument[] }>;
-
-  /**
-   * Fetch every chunk written under the compound `(type, originId)`
-   * key that is visible in `spaceId`.
-   *
-   * Used by the HTTP GET route and other origin-scoped reads. A workflow
-   * step writing in content mode (or `getSmlEntry` in origin mode) may
-   * produce a document per origin — it is returned.
-   *
-   * The caller MUST pass both `type` and `originId`. The bare
-   * `originId` is not unique on its own (a `lens` chunk and a
-   * `dashboard` chunk may legitimately share an id), so the lookup
-   * keys against the canonical `origin.uri = ${type}://${originId}`.
-   *
-   * Resolves to an empty array when no visible chunks exist; callers
-   * that need the "exists in another space" distinction (for
-   * cross-space write guards) should use
-   * {@link SmlService.findByOriginAcrossSpaces}.
-   *
-   * **Does NOT perform per-user permission checks.** The caller is
-   * expected to have already authorized the user against the space.
-   * Direct callers from request-handling contexts should layer their own
-   * `checkItemsAccess` filter on top — or wait for the route helper that
-   * does this for them.
-   */
-  findByOrigin: (params: {
-    type: string;
-    originId: string;
-    spaceId: string;
-    esClient: IScopedClusterClient;
-  }) => Promise<SmlDocument[]>;
 
   /**
    * Fetch every chunk written under the compound `(type, originId)`
