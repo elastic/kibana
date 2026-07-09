@@ -48469,12 +48469,6 @@ paths:
         Returns a paginated list of markdown library items. Each result includes title, description, and metadata, but not the content. Use `GET /api/markdowns/{id}` to retrieve the complete state.
       operationId: get-markdowns
       parameters:
-        - description: Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.
-          in: query
-          name: query
-          required: false
-          schema:
-            type: string
         - description: The page of results to return.
           in: query
           name: page
@@ -48492,6 +48486,36 @@ paths:
             maximum: 1000
             minimum: 1
             type: number
+        - description: Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+        - description: A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are included.
+          in: query
+          name: tags
+          required: false
+          schema:
+            default: []
+            description: Tag IDs associated with this dashboard.
+            items:
+              maxLength: 250
+              type: string
+            maxItems: 100
+            type: array
+        - description: A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are excluded.
+          in: query
+          name: excluded_tags
+          required: false
+          schema:
+            default: []
+            description: Tag IDs associated with this dashboard.
+            items:
+              maxLength: 250
+              type: string
+            maxItems: 100
+            type: array
       responses:
         '200':
           content:
@@ -48589,7 +48613,7 @@ paths:
           lang: Console
           source: |
             GET kbn:/api/markdowns?query=welcome&per_page=10
-      x-state: Experimental; added in 9.5.0
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -48773,7 +48797,7 @@ paths:
                 "open_links_in_new_tab": true
               }
             }
-      x-state: Experimental; added in 9.5.0
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -48823,7 +48847,7 @@ paths:
           lang: Console
           source: |
             DELETE kbn:/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
-      x-state: Experimental; added in 9.5.0
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -48936,7 +48960,7 @@ paths:
           lang: Console
           source: |
             GET kbn:/api/markdowns/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e
-      x-state: Experimental; added in 9.5.0
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -49207,7 +49231,7 @@ paths:
                 "open_links_in_new_tab": true
               }
             }
-      x-state: Experimental; added in 9.5.0
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name

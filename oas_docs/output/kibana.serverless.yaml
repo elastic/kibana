@@ -44645,12 +44645,6 @@ paths:
         Returns a paginated list of markdown library items. Each result includes title, description, and metadata, but not the content. Use `GET /api/markdowns/{id}` to retrieve the complete state.
       operationId: get-markdowns
       parameters:
-        - description: Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.
-          in: query
-          name: query
-          required: false
-          schema:
-            type: string
         - description: The page of results to return.
           in: query
           name: page
@@ -44668,6 +44662,36 @@ paths:
             maximum: 1000
             minimum: 1
             type: number
+        - description: Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+        - description: A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are included.
+          in: query
+          name: tags
+          required: false
+          schema:
+            default: []
+            description: Tag IDs associated with this dashboard.
+            items:
+              maxLength: 250
+              type: string
+            maxItems: 100
+            type: array
+        - description: A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, library items matching any of the tag IDs are excluded.
+          in: query
+          name: excluded_tags
+          required: false
+          schema:
+            default: []
+            description: Tag IDs associated with this dashboard.
+            items:
+              maxLength: 250
+              type: string
+            maxItems: 100
+            type: array
       responses:
         '200':
           content:
