@@ -22,6 +22,14 @@ export interface TestWorkflowParams {
   triggerTab?: WorkflowTriggerTab;
 }
 
+// A single validation reason can be huge when it echoes a whole schema
+// (e.g. the Elasticsearch `filter` union lists every query type). Cap each
+// reason so the error toast stays readable instead of dumping the schema.
+const MAX_REASON_LENGTH = 200;
+
+const truncateReason = (reason: string): string =>
+  reason.length > MAX_REASON_LENGTH ? `${reason.slice(0, MAX_REASON_LENGTH).trimEnd()}…` : reason;
+
 export interface TestWorkflowResponse {
   workflowExecutionId: string;
 }
@@ -92,7 +100,9 @@ export const testWorkflowThunk = createAsyncThunk<
         error.body?.attributes?.validationErrors ?? error.body?.validationErrors;
       const errorMessage =
         Array.isArray(validationErrors) && validationErrors.length > 0
-          ? `${baseMessage}:\n${validationErrors.map((reason) => `• ${reason}`).join('\n')}`
+          ? `${baseMessage}:\n${validationErrors
+              .map((reason) => `• ${truncateReason(reason)}`)
+              .join('\n')}`
           : baseMessage;
       const errorObj = error instanceof Error ? error : new Error(errorMessage);
 

@@ -157,6 +157,31 @@ describe('testWorkflowThunk', () => {
     expect(result.payload).toBe(expectedMessage);
   });
 
+  it('should truncate an oversized validation reason to keep the toast readable', async () => {
+    const longReason = `filter must be one of ${'x'.repeat(500)}`;
+    const error = {
+      body: {
+        message: 'Workflow validation failed',
+        attributes: {
+          validationErrors: [longReason],
+        },
+      },
+      message: 'Bad Request',
+    };
+
+    store.dispatch({ type: 'detail/setYamlString', payload: 'name: Test Workflow\nsteps: []' });
+    mockWorkflowApi.testWorkflow.mockRejectedValue(error);
+
+    const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
+
+    const [[reportedError]] = mockServices.notifications.toasts.addError.mock.calls;
+    expect(reportedError.message).toContain('Workflow validation failed:\n• filter must be one of');
+    expect(reportedError.message.endsWith('…')).toBe(true);
+    // Base message + bullet prefix + capped reason (200) + ellipsis, well under the raw 500+ chars.
+    expect(reportedError.message.length).toBeLessThan(250);
+    expect(result.type).toBe('detail/testWorkflowThunk/rejected');
+  });
+
   it('should fall back to body message when validationErrors is empty', async () => {
     const error = {
       body: { message: 'Workflow validation failed', attributes: { validationErrors: [] } },
