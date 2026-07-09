@@ -396,7 +396,7 @@ steps:
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *security_oss_models
           EVAL_SERVER_CONFIG_SET: 'evals_workflows'
-        timeout_in_minutes: 60
+        timeout_in_minutes: 90
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
