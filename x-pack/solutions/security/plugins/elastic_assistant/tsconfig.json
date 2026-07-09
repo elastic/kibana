@@ -108,6 +108,9 @@
     "@kbn/controls-constants",
     "@kbn/core-spaces-common",
     "@kbn/ai-assistant-common",
+    "@kbn/discoveries",
+    "@kbn/attack-discovery-schedules-common",
+    "@kbn/workflows"
   ],
   "exclude": [
     "target/**/*",

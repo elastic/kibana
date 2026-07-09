@@ -77,6 +77,8 @@ export const CASE_COMMENT_DELETE_URL = `${CASE_DETAILS_URL}/comments/{comment_id
 export const CASE_PUSH_URL = `${CASE_DETAILS_URL}/connector/{connector_id}/_push` as const;
 export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
+export const CASE_TEMPLATES_URL = `${CASES_URL}/templates` as const;
+export const CASE_TEMPLATE_DETAILS_URL = `${CASE_TEMPLATES_URL}/{template_id}` as const;
 export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions` as const;
 export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as const;
 
@@ -195,6 +197,7 @@ export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
 export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
 export const MAX_TEMPLATE_KEY_LENGTH = 36 as const; // uuidv4 length
+export const MAX_TEMPLATE_VERSION_STRING_LENGTH = 10 as const;
 export const MAX_TEMPLATE_NAME_LENGTH = 50 as const;
 export const MAX_TEMPLATE_DESCRIPTION_LENGTH = 1000 as const;
 export const MAX_TEMPLATES_LENGTH = 10 as const;

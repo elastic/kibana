@@ -68,11 +68,15 @@ export {
   isActionValid,
   buildRuleScopedMatcher,
   selectRuleSimpleActionPolicies,
+  isExplicitlyLinkedToRule,
+  isRuleScopedCatchAllMatcher,
+  summarizeExplicitlyLinkedActionPolicies,
 } from './actions_form';
 export type {
   ActionDraft,
   ActionDraftOrigin,
   RuleScopedSimpleActionPolicy,
+  LinkedActionPolicySummary,
   InlineActionStepDefinition,
   InlineActionStepType,
   InlineWorkflowActionDraft,

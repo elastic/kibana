@@ -104,6 +104,11 @@ groups:
         id: theme-darkmode
         description: |
           The UI theme that the {{product.kibana}} UI should use. Set to `enabled` or `disabled` to enable or disable the dark theme. Set to `system` to have the {{product.kibana}} UI theme follow the system theme. You must refresh the page to apply the setting.
+
+          The default value depends on your version:
+
+          * {applies_to}`stack: ga 9.5+` Defaults to `system`.
+          * {applies_to}`stack: ga 9.0-9.4` Defaults to `disabled`.
         datatype: enum
         options:
           - option: enabled
