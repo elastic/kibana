@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/agent_context_layer'],
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/agent_builder_sml'],
 };
