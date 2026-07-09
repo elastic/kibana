@@ -274,12 +274,6 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsAnomalyDetails: false,
 
   /**
-   * Enables the deprecated prebuilt rules UI
-   * Release: 9.4
-   */
-  prebuiltRulesDeprecationUIEnabled: true,
-
-  /**
    * Enables the Detection Rule Changes History API endpoint
    * (`GET /api/detection_engine/rules/_history`).
    *
