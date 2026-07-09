@@ -70,10 +70,14 @@ export class EventClient {
     return where;
   }
 
-  async bulkCreate(events: SignificantEvent[], { throwOnFail = false }: BulkCreateOptions = {}) {
+  async bulkCreate(
+    events: SignificantEvent[],
+    { throwOnFail = false, refresh }: BulkCreateOptions = {}
+  ) {
     const response = await this.clients.dataStreamClient.create({
       space: this.clients.space,
       documents: events,
+      refresh,
     });
 
     if (throwOnFail) {

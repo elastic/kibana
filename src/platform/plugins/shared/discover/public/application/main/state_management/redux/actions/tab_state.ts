@@ -18,6 +18,11 @@ import {
   isOfQueryType,
 } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+  getDefaultSort,
+} from '@kbn/discover-utils';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
@@ -221,15 +226,22 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
  * Clean ups the ES|QL query and moves to the dataview mode
  */
 export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataViewId: string }>]
-> = ({ tabId, dataViewId }) =>
-  function transitionFromESQLToDataViewThunkFn(dispatch) {
+  [TabActionPayload<{ dataView: DataView }>]
+> = ({ tabId, dataView }) =>
+  function transitionFromESQLToDataViewThunkFn(dispatch, _, { services }) {
     // Mark all profile state fields to reset when transitioning to data view mode
     dispatch(
       internalStateSlice.actions.setProfileStateFieldsToReset({
         tabId,
         fieldsToReset: 'all',
       })
+    );
+
+    const sort = getDefaultSort(
+      dataView,
+      services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+      services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+      false
     );
 
     dispatch(
@@ -241,9 +253,10 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
             query: '',
           },
           columns: [],
+          sort,
           dataSource: {
             type: DataSourceType.DataView,
-            dataViewId,
+            dataViewId: dataView.id ?? '',
           },
         },
       })
@@ -251,17 +264,6 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
 
     dispatch(transitionedFromEsqlToDataView({ tabId }));
   };
-
-const clearTimeFieldFromSort = (
-  sort: DiscoverAppState['sort'],
-  timeFieldName: string | undefined
-) => {
-  if (!Array.isArray(sort) || !timeFieldName) return sort;
-
-  const filteredSort = sort.filter(([field]) => field !== timeFieldName);
-
-  return filteredSort;
-};
 
 /**
  * Triggered when transitioning from ESQL to Dataview
@@ -282,12 +284,11 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     const currentState = getState();
     const tabState = selectTab(currentState, tabId);
     const { appState } = tabState;
-    const { query, sort } = appState;
+    const { query } = appState;
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
 
     const allFilters = [...(appState.filters ?? []), ...(tabState.globalState?.filters ?? [])];
     const queryString = getInitialESQLQuery(dataView, filterQuery, allFilters);
-    const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
 
     dispatch(
       updateAppState({
@@ -299,7 +300,7 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
             type: DataSourceType.Esql,
           },
           columns: [],
-          sort: clearedSort,
+          sort: undefined,
         },
       })
     );
