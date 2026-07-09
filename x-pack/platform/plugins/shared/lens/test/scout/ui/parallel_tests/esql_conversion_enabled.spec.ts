@@ -12,6 +12,7 @@ import {
   cancelLensInlineEditorAndWaitClosed,
   convertToEsqlViaModal,
   openDimensionEditorAndWaitForFlyout,
+  openEsqlConversionDashboard,
   openInlineEditorAndWaitVisible,
   testData,
 } from '../fixtures';
@@ -34,13 +35,8 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
     await browserAuth.loginAsPrivilegedUser();
-    const { dashboard } = pageObjects;
 
-    await dashboard.goto();
-    await pageObjects.listingTable.waitUntilTableIsLoaded();
-    await page.getByTestId(testData.ESQL_CONVERSION_DASHBOARD_TEST_ID).click();
-    await dashboard.waitForPanelsToLoad(2);
-    await dashboard.switchToEditMode();
+    await openEsqlConversionDashboard({ pageObjects, page });
   });
 
   spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {

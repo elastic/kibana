@@ -5,10 +5,30 @@
  * 2.0.
  */
 
+import { ListingTable } from '@kbn/content-list-scout';
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects, Locator, ScoutPage } from '@kbn/scout';
+import * as testData from './constants';
 
+type DashboardOnly = Pick<PageObjects, 'dashboard'>;
 type DashboardAndLens = Pick<PageObjects, 'dashboard' | 'lens'>;
+
+export async function openEsqlConversionDashboard({
+  pageObjects,
+  page,
+}: {
+  pageObjects: DashboardOnly;
+  page: ScoutPage;
+}) {
+  const { dashboard } = pageObjects;
+  const listingTable = new ListingTable(page);
+
+  await dashboard.goto();
+  await listingTable.waitUntilTableIsLoaded();
+  await page.getByTestId(testData.ESQL_CONVERSION_DASHBOARD_TEST_ID).click();
+  await dashboard.waitForPanelsToLoad(2);
+  await dashboard.switchToEditMode();
+}
 
 export async function openDimensionEditorAndWaitForFlyout(
   { lens }: DashboardAndLens,
