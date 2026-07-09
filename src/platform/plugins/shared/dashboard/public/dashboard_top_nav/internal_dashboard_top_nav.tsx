@@ -39,7 +39,6 @@ import {
 } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
-import { AppMenu } from '@kbn/core-chrome-app-menu';
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
 import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
 import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
@@ -68,6 +67,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 
 export interface InternalDashboardTopNavProps {
@@ -433,28 +433,6 @@ export function InternalDashboardTopNav({
     []
   );
 
-  // `inline`/`registered` modes pass badges and favorite to the header component directly (see render);
-  // only `legacy` mode pushes them through the chrome APIs.
-  useEffect(() => {
-    if (headerMode !== 'legacy') {
-      return;
-    }
-    coreServices.chrome.setBreadcrumbsBadges(badges);
-    return () => {
-      coreServices.chrome.setBreadcrumbsBadges([]);
-    };
-  }, [badges, headerMode]);
-
-  useEffect(() => {
-    if (headerMode !== 'legacy') {
-      return;
-    }
-    return coreServices.chrome.setBreadcrumbsAppendExtension({
-      content: <DashboardFavoriteButton dashboardId={lastSavedId} />,
-      order: 0,
-    });
-  }, [lastSavedId, headerMode]);
-
   return (
     <div css={styles.container}>
       <EuiScreenReaderOnly>
@@ -481,7 +459,7 @@ export function InternalDashboardTopNav({
         />
       )}
       {headerMode === 'legacy' && (
-        <AppMenu setAppMenu={coreServices.chrome.setAppMenu} config={appMenuConfig} />
+        <LegacyDashboardHeader badges={badges} config={appMenuConfig} lastSavedId={lastSavedId} />
       )}
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
