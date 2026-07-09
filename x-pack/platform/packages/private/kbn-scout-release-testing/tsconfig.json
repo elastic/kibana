@@ -14,8 +14,8 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/discover-plugin",
     "@kbn/scout",
-    "@kbn/test"
+    "@kbn/test",
+    "@kbn/unified-doc-viewer"
   ]
 }
