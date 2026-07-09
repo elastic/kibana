@@ -18,6 +18,18 @@ const QUERY_INDEX = {
   DURATION_SUMMARY_NOT_SUPPORTED: 1,
 } as const;
 
+// A msearch response entry can be missing (e.g. a partial failure for one of
+// the sub-queries), in which case `response.hits` is undefined. Guard against
+// that before reading `hits.total.value` to avoid a `Cannot read properties of
+// undefined (reading 'total')` crash.
+const getTotalHits = (response?: { hits?: { total?: { value?: number } } }): number => {
+  const total = response?.hits?.total;
+  if (typeof total === 'number') {
+    return total;
+  }
+  return total?.value ?? 0;
+};
+
 export interface DocumentSourcesRequest {
   apmEventClient: APMEventClient;
   start: number;
@@ -131,14 +143,14 @@ const getDocumentTypesInfo = async ({
   const hasAnyLegacyDocuments = sourceRequests.some(
     ({ documentType, rollupInterval }, index) =>
       isLegacyDocType(documentType, rollupInterval) &&
-      allResponses[index + QUERY_INDEX.DURATION_SUMMARY_NOT_SUPPORTED].hits.total.value > 0
+      getTotalHits(allResponses[index + QUERY_INDEX.DURATION_SUMMARY_NOT_SUPPORTED]) > 0
   );
 
   return sourceRequests.map(({ documentType, rollupInterval, ...queries }) => {
     const numberOfQueries = Object.values(queries).filter(Boolean).length;
     // allResponses is sorted by the order of the requests in sourceRequests
     const docTypeResponses = allResponses.splice(0, numberOfQueries);
-    const hasDocs = docTypeResponses[QUERY_INDEX.DOCUMENT_TYPE].hits.total.value > 0;
+    const hasDocs = getTotalHits(docTypeResponses[QUERY_INDEX.DOCUMENT_TYPE]) > 0;
     // can only use >=8.7 document types (ServiceTransactionMetrics or TransactionMetrics with 10m and 60m intervals)
     // if there are no legacy documents
     const canUseContinousRollupDocs = hasDocs && !hasAnyLegacyDocuments;
