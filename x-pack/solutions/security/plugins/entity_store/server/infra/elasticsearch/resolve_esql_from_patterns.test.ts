@@ -56,6 +56,14 @@ describe('resolveEsqlFromClause', () => {
     expect(await run(resolveIndex, ['logs-*'], ['logs-a'])).toEqual(['logs-*', '-logs-a']);
   });
 
+  it('returns [] when every include is also excluded (no positives left)', async () => {
+    const resolveIndex = jest
+      .fn()
+      .mockResolvedValue(resolveWith({ indices: [{ name: 'logs-a', attributes: ['open'] }] }));
+
+    expect(await run(resolveIndex, ['logs-a'], ['logs-a'])).toEqual([]);
+  });
+
   it('drops a no-op exclusion whose concrete target does not exist', async () => {
     const resolveIndex = jest.fn().mockResolvedValue(emptyResolve);
 

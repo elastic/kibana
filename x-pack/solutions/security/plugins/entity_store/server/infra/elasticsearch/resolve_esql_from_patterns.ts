@@ -158,7 +158,9 @@ const PREFLIGHT_CASES: PreflightCase[] = [
 /** Renders the final ESQL FROM clause array */
 const toEsqlFromClause = ({ include, exclude }: EsqlFromClauseTargets): string[] => {
   const excluded = new Set(exclude);
-  return [...include.filter((name) => !excluded.has(name)), ...exclude.map(negate)];
+  const positives = include.filter((name) => !excluded.has(name));
+  // No positives means nothing to read — a FROM of only negations is invalid.
+  return positives.length === 0 ? [] : [...positives, ...exclude.map(negate)];
 };
 
 /** Builds the `indices.resolveIndex` request, matching open, closed, and hidden indices */
