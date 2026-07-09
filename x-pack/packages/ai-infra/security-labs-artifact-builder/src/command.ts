@@ -8,11 +8,13 @@
 import Path from 'path';
 import yargs from 'yargs';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { DEFAULT_ELSER } from './tasks/create_index';
 import type { TaskConfig } from './types';
 import { buildArtifact } from './build_artifact';
 
-// Stub for Security Labs GitHub repo - to be replaced with actual repo URL
-const SECURITY_LABS_REPO = 'https://github.com/elastic/security-labs-content';
+// Source of truth for Security Labs articles.
+const SECURITY_LABS_REPO = 'https://github.com/elastic/security-labs-elastic-co';
+const SECURITY_LABS_CONTENT_SUBPATH = '_content/articles';
 
 // Generate today's date as default version (YYYY.MM.DD)
 const getTodayVersion = () => {
@@ -35,12 +37,12 @@ function options(y: yargs.Argv) {
     .option('targetFolder', {
       describe: 'The folder to generate the artifact in',
       string: true,
-      default: Path.join(REPO_ROOT, 'build', 'security-labs-artifacts'),
+      default: Path.join(REPO_ROOT, 'build', 'kb-artifacts'),
     })
     .option('buildFolder', {
       describe: 'The folder to use for temporary files',
       string: true,
-      default: Path.join(REPO_ROOT, 'build', 'temp-security-labs-artifacts'),
+      default: Path.join(REPO_ROOT, 'build', 'temp-kb-artifacts'),
     })
     .option('embeddingClusterUrl', {
       describe: 'The Elasticsearch cluster URL for generating embeddings',
@@ -65,8 +67,18 @@ function options(y: yargs.Argv) {
       string: true,
       default: process.env.SECURITY_LABS_REPO_URL ?? SECURITY_LABS_REPO,
     })
+    .option('githubRef', {
+      describe: 'Git ref (branch, tag, or commit) to fetch content from',
+      string: true,
+      default: process.env.SECURITY_LABS_REPO_REF ?? 'main',
+    })
+    .option('contentSubPath', {
+      describe: 'Repository-relative path that holds the article markdown',
+      string: true,
+      default: process.env.SECURITY_LABS_CONTENT_SUBPATH ?? SECURITY_LABS_CONTENT_SUBPATH,
+    })
     .option('githubToken', {
-      describe: 'GitHub token for accessing the repository',
+      describe: 'GitHub token for accessing the repository (required for internal repos)',
       string: true,
       default: process.env.GITHUB_TOKEN,
     })
@@ -75,6 +87,11 @@ function options(y: yargs.Argv) {
       string: true,
       // Check for common local paths
       default: process.env.SECURITY_LABS_CONTENT_PATH,
+    })
+    .option('inferenceId', {
+      describe: 'The inference endpoint used to generate the semantic_text embeddings',
+      string: true,
+      default: process.env.SECURITY_LABS_INFERENCE_ID ?? DEFAULT_ELSER,
     })
     .locale('en')
     .example(
@@ -98,8 +115,11 @@ export function runScript() {
         embeddingClusterUsername: argv.embeddingClusterUsername,
         embeddingClusterPassword: argv.embeddingClusterPassword,
         githubRepoUrl: argv.githubRepoUrl,
+        githubRef: argv.githubRef,
+        contentSubPath: argv.contentSubPath,
         githubToken: argv.githubToken,
         localContentPath: argv.localContentPath,
+        inferenceId: argv.inferenceId,
       };
 
       return buildArtifact(taskConfig);

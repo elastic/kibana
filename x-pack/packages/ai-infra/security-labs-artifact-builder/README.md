@@ -4,7 +4,7 @@ Script to build the Security Labs knowledge base artifacts for the AI Assistant.
 
 ## Overview
 
-This package generates pre-embedded Security Labs content artifacts that can be distributed via the Kibana Knowledge Base CDN. The artifacts contain ELSER embeddings for semantic search capabilities.
+This package generates pre-embedded Security Labs content artifacts that can be distributed via the Kibana Knowledge Base CDN. The artifacts contain `semantic_text` embeddings (ELSER by default, or Jina v5 / E5 via `--inferenceId`) for semantic search capabilities.
 
 ## Quick Start (Local Development)
 
@@ -17,8 +17,25 @@ node scripts/build_security_labs_artifact.js --localContentPath ~/dev/security-l
 
 This uses sensible defaults:
 - **Version**: Today's date in `YYYY.MM.DD` format
+- **Inference**: ELSER (`.elser-2-elasticsearch`)
 - **Elasticsearch**: `http://localhost:9200` with `elastic/changeme` credentials
-- **Output**: `{REPO_ROOT}/build/security-labs-artifacts/`
+- **Output**: `{REPO_ROOT}/build/kb-artifacts/`
+
+To fetch content directly from the (internal) `elastic/security-labs-elastic-co` repository instead of a local checkout, omit `--localContentPath` and provide a token:
+
+```bash
+GITHUB_TOKEN=ghp_xxx node scripts/build_security_labs_artifact.js
+```
+
+The fetch uses a sparse, blobless partial `git` checkout that downloads only `--contentSubPath` (`_content/articles` by default) for the requested ref — the rest of the (large) website repository is never transferred.
+
+To build a Jina v5 variant (requires an EIS-backed `.jina-embeddings-v5-text-small` endpoint on the embedding cluster):
+
+```bash
+node scripts/build_security_labs_artifact.js \
+  --localContentPath ~/dev/security-labs-elastic-co/_content/articles \
+  --inferenceId .jina-embeddings-v5-text-small
+```
 
 ## Full Command Reference
 
@@ -45,9 +62,39 @@ The date-based version for the artifact in `YYYY.MM.DD` format.
 
 **Default**: Today's date (e.g., `2025.12.11`)
 
+### `--inferenceId`
+
+The inference endpoint used to generate the `semantic_text` embeddings. Recognized values: `.elser-2-elasticsearch` (default), `.multilingual-e5-small-elasticsearch`, `.jina-embeddings-v5-text-small`. Any other value is passed through as-is. Non-ELSER ids are appended to the artifact name as `security-labs-{version}--{inferenceId}.zip`.
+
+**Default**: `.elser-2-elasticsearch`
+
+### `--githubRepoUrl`
+
+GitHub repository to fetch content from when `--localContentPath` is not provided.
+
+**Default**: `https://github.com/elastic/security-labs-elastic-co`
+
+### `--githubRef`
+
+Git ref (branch, tag, or commit) to fetch content from.
+
+**Default**: `main`
+
+### `--contentSubPath`
+
+Repository-relative path that holds the article markdown.
+
+**Default**: `_content/articles`
+
+### `--githubToken`
+
+GitHub token used to authenticate the content fetch. Required when fetching from the internal repo (i.e. when `--localContentPath` is not set).
+
+**Default**: `process.env.GITHUB_TOKEN`
+
 ### `--localContentPath`
 
-Path to a local directory containing Security Labs markdown files (`.md` or `.mdx`).
+Path to a local directory containing Security Labs markdown files (`.md` or `.mdx`). When set, GitHub fetching is skipped.
 
 The markdown files should have YAML frontmatter with the following structure:
 
@@ -70,13 +117,13 @@ Article content here...
 
 The folder to generate the artifact in.
 
-**Default**: `{REPO_ROOT}/build/security-labs-artifacts`
+**Default**: `{REPO_ROOT}/build/kb-artifacts`
 
 ### `--buildFolder`
 
 The folder to use for temporary files.
 
-**Default**: `{REPO_ROOT}/build/temp-security-labs-artifacts`
+**Default**: `{REPO_ROOT}/build/temp-kb-artifacts`
 
 ### `--embeddingClusterUrl`
 
@@ -107,8 +154,11 @@ All CLI parameters can also be set via environment variables:
 | `KIBANA_EMBEDDING_CLUSTER_PASSWORD` | Embedding cluster password |
 | `SECURITY_LABS_VERSION` | Artifact version |
 | `SECURITY_LABS_CONTENT_PATH` | Path to local content |
-| `SECURITY_LABS_REPO_URL` | GitHub repository URL (future) |
-| `GITHUB_TOKEN` | GitHub token (future) |
+| `SECURITY_LABS_REPO_URL` | GitHub repository URL |
+| `SECURITY_LABS_REPO_REF` | Git ref to fetch. Prefer a commit SHA from the article-publish trigger; defaults to `main` |
+| `SECURITY_LABS_CONTENT_SUBPATH` | Repo-relative content path (default `_content/articles`) |
+| `SECURITY_LABS_INFERENCE_ID` | Inference endpoint id (default ELSER) |
+| `GITHUB_TOKEN` | GitHub token for fetching the internal repo |
 
 ## Prerequisites
 
@@ -152,8 +202,13 @@ Each document in the NDJSON files contains:
 | `content` | semantic_text | Full article content (with ELSER embeddings) |
 | `resource_type` | keyword | Always `security_labs` |
 
+## CI / Automation
+
+In CI the artifact is built for both ELSER (local ES) and Jina v5 (EIS) inside the EIS-enabled FTR at `x-pack/platform/test/functional_gen_ai/inference/artifacts/security_labs.ts`, which writes both zips to `build/kb-artifacts` for upload to the dev KB bucket.
+
+The dedicated Buildkite pipeline (`.buildkite/pipelines/gen_ai_security_labs.yml`) has `trigger_mode: none` in its resource definition — it does not auto-run on Kibana branch/PR events. Article-publish automation in `elastic/security-labs-elastic-co` (or a manual rebuild) should trigger it via the Buildkite API and pass `SECURITY_LABS_REPO_REF` as the published commit SHA (and optionally `SECURITY_LABS_VERSION`) so the artifact content is pinned rather than racing with moving `main`.
+
 ## Future Enhancements
 
-- GitHub repository fetching (currently stubbed, use `--localContentPath` instead)
-- Support for different embedding models (currently ELSER only)
+- Air-gapped Jina support once EIS disconnected mode ships (Jina currently requires EIS/Cloud Connected Mode).
 

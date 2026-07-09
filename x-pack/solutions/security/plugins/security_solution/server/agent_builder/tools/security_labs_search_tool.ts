@@ -9,7 +9,11 @@ import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
-import { ResourceTypes, resolveDefaultInferenceIdFromInferenceGet } from '@kbn/product-doc-common';
+import {
+  ResourceTypes,
+  resolveDefaultInferenceIdFromInferenceGet,
+  resolveInstalledProductDocInferenceId,
+} from '@kbn/product-doc-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { securityTool } from './constants';
@@ -58,17 +62,23 @@ export const securityLabsSearchTool = (
           };
         }
 
-        const inferenceId = await resolveDefaultInferenceIdFromInferenceGet(
-          () => coreStart.elasticsearch.client.asInternalUser.inference.get({}),
-          { resourceType: ResourceTypes.securityLabs }
-        );
-        const isAvailable =
-          (await llmTasks.retrieveDocumentationAvailable({
-            inferenceId,
-            resourceType: ResourceTypes.securityLabs,
-          })) ?? false;
+        // Prefer the environment default (Jina when its endpoint exists, else ELSER), then
+        // fall back through the remaining candidates to whichever model actually has
+        // Security Labs content installed. On-prem clusters without a Jina endpoint resolve
+        // to ELSER automatically.
+        const inferenceId = await resolveInstalledProductDocInferenceId({
+          getDefaultInferenceId: () =>
+            resolveDefaultInferenceIdFromInferenceGet(() =>
+              coreStart.elasticsearch.client.asInternalUser.inference.get({})
+            ),
+          isDocumentationAvailable: async (candidateInferenceId) =>
+            (await llmTasks.retrieveDocumentationAvailable({
+              inferenceId: candidateInferenceId,
+              resourceType: ResourceTypes.securityLabs,
+            })) ?? false,
+        });
 
-        if (!isAvailable) {
+        if (!inferenceId) {
           const basePath = coreStart.http.basePath.get(request);
           const settingsUrl = `${basePath}${GENAI_SETTINGS_APP_PATH}`;
           return {
@@ -93,7 +103,18 @@ export const securityLabsSearchTool = (
           resourceTypes: [ResourceTypes.securityLabs],
         });
 
-        if (!result.success || result.documents.length === 0) {
+        if (!result.success) {
+          return {
+            results: [
+              createErrorResult({
+                message: 'Failed to retrieve Security Labs documentation for the given query.',
+                metadata: { query: nlQuery },
+              }),
+            ],
+          };
+        }
+
+        if (result.documents.length === 0) {
           return { results: [] };
         }
 

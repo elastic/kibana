@@ -15,6 +15,7 @@ import {
 } from '@kbn/product-doc-common';
 import { getSecurityLabsMappings } from '../artifact/mappings';
 import { getSecurityLabsManifest } from '../artifact/manifest';
+import type { SemanticTextMapping } from '../artifact/semantic_text';
 
 /**
  * Creates the final artifact zip file containing mappings, manifest, and content chunks.
@@ -23,11 +24,15 @@ export const createArtifact = async ({
   buildFolder,
   targetFolder,
   version,
+  inferenceId,
+  semanticTextMapping,
   log,
 }: {
   buildFolder: string;
   targetFolder: string;
   version: string;
+  inferenceId?: string;
+  semanticTextMapping?: SemanticTextMapping;
   log: ToolingLog;
 }) => {
   log.info(
@@ -37,7 +42,7 @@ export const createArtifact = async ({
   const zip = new AdmZip();
 
   // Add mappings
-  const mappings = getSecurityLabsMappings();
+  const mappings = getSecurityLabsMappings(semanticTextMapping);
   const mappingFileContent = JSON.stringify(mappings, undefined, 2);
   zip.addFile('mappings.json', Buffer.from(mappingFileContent, 'utf-8'));
 
@@ -53,7 +58,7 @@ export const createArtifact = async ({
   zip.addLocalFolder(buildFolder, 'content');
 
   // Write artifact
-  const artifactName = getSecurityLabsArtifactName({ version });
+  const artifactName = getSecurityLabsArtifactName({ version, inferenceId });
   const artifactPath = Path.join(targetFolder, artifactName);
   zip.writeZip(artifactPath);
 
