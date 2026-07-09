@@ -50,7 +50,7 @@ export const GridSettingsFlyout = ({
     'metricsExperience.gridSettingsFlyout.aggregationGroupDescription',
     {
       defaultMessage:
-        'Set how values are aggregated for each metric type. Changes apply to every metric of that type in this view.',
+        'Set how values are aggregated for each metric type. Changes apply to every metric of that type in this Discover tab.',
     }
   );
 
