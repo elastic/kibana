@@ -110,7 +110,6 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
                 permissions.update ? (
                   <TemplateSettingsPopover
                     caseData={caseData}
-                    isTemplatesEnabled={isTemplatesV2Enabled}
                     data-test-subj="case-view-sidebar-template-fields-settings"
                   />
                 ) : undefined
@@ -168,6 +167,11 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
                 onSubmit={onSubmitConnector}
                 showHeader={false}
                 actionsVariant="outlined"
+                // ConnectorsForm's `useForm` only reads `caseData.connector` as its
+                // `defaultValue` on mount, so remount on connector id change to pick up
+                // the committed connector/fields once the update round-trips through the
+                // server. Matches the equivalent key on the non-redesigned sidebar
+                // (case_view_activity.tsx).
                 key={caseData.connector.id}
               />
             </SidebarAccordionSection>

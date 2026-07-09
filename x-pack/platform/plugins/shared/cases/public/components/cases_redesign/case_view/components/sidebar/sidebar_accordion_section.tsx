@@ -27,7 +27,7 @@ export const SidebarAccordionSection: FC<SidebarAccordionSectionProps> = ({
   isOpen,
   onToggle,
   children,
-  'data-test-subj': dataTestSubj,
+  'data-test-subj': dataTestSubj = 'sidebar-accordion-section',
 }) => {
   const accordionId = useGeneratedHtmlId({ prefix: `case-view-sidebar-accordion-${id}` });
 

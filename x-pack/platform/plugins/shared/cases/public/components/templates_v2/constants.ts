@@ -29,6 +29,12 @@ export const DEFAULT_QUERY_PARAMS: TemplatesFindRequest = {
 
 export const LINE_CLAMP = 3;
 
+/**
+ * `perPage` used by the sidebar/header template selectors, which need the full list of
+ * enabled templates to populate a combo box rather than a paginated table.
+ */
+export const TEMPLATE_SELECTOR_PAGE_SIZE = 10000;
+
 export const MAX_TEMPLATES_PER_FILE = 100;
 
 export const MAX_TOTAL_IMPORT_TEMPLATES = 100;

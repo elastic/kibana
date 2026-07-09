@@ -127,6 +127,10 @@ const AssigneesFieldComponent: React.FC<AssigneesFieldProps> = ({
 
   const { permissions } = useCasesContext();
 
+  // Intentionally not `EuiScreenReaderOnly`: that utility moves its content off-screen
+  // (`left: -10000px`) to hide it, which also displaces the popover anchored to it,
+  // breaking the popover's positioning/visibility. This mixin instead clips the anchor
+  // to zero size in place, so the popover it anchors still opens where the user expects.
   const hiddenPopoverAnchorStyles = useMemo(
     () => css`
       position: absolute;

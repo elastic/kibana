@@ -75,6 +75,18 @@ describe('SidebarAccordionSection', () => {
     expect(screen.getByTestId('extra-action')).toBeInTheDocument();
   });
 
+  it('falls back to a default data-test-subj when none is provided', () => {
+    const onToggle = jest.fn();
+
+    render(
+      <SidebarAccordionSection id="attributes" title="Attributes" isOpen={true} onToggle={onToggle}>
+        <div>{'Child content'}</div>
+      </SidebarAccordionSection>
+    );
+
+    expect(screen.getByTestId('sidebar-accordion-section')).toBeInTheDocument();
+  });
+
   it('calls onToggle with the section id when toggled', async () => {
     const user = userEvent.setup();
     const onToggle = jest.fn();

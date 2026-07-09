@@ -12,6 +12,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { CaseUI } from '../../../../../../common';
 import { useCasesContext } from '../../../../cases_context/use_cases_context';
 import { useGetTemplates } from '../../../../templates_v2/hooks/use_get_templates';
+import { TEMPLATE_SELECTOR_PAGE_SIZE } from '../../../../templates_v2/constants';
 import { useGetTemplate } from '../../../../templates_v2/hooks/use_get_template';
 import { useChangeAppliedTemplate } from '../../../../case_view/use_change_applied_template';
 import * as commonI18n from '../../../../../common/translations';
@@ -21,13 +22,11 @@ import type { TemplateSummary } from './confirm_change_template_modal';
 
 export interface TemplateSettingsPopoverProps {
   caseData: CaseUI;
-  isTemplatesEnabled: boolean;
   'data-test-subj'?: string;
 }
 
 export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
   caseData,
-  isTemplatesEnabled,
   'data-test-subj': dataTestSubj = 'sidebar-template-settings',
 }) => {
   const { owner } = useCasesContext();
@@ -38,13 +37,12 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const { data: templatesData, isLoading: isLoadingTemplates } = useGetTemplates({
-    queryParams: { page: 1, perPage: 10000, owner, isEnabled: true },
+    queryParams: { page: 1, perPage: TEMPLATE_SELECTOR_PAGE_SIZE, owner, isEnabled: true },
   });
 
   const options: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
       (templatesData?.templates ?? []).map((t) => ({
-        key: t.templateId,
         label: t.name,
         value: t.templateId,
       })),
@@ -61,7 +59,7 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
   const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
 
   const { data: appliedTemplateData } = useGetTemplate(
-    isTemplatesEnabled ? caseData.template?.id : undefined,
+    caseData.template?.id,
     caseData.template?.version
   );
 
@@ -151,22 +149,18 @@ export const TemplateSettingsPopover: FC<TemplateSettingsPopoverProps> = ({
           <SidebarSectionSettingsButton data-test-subj={dataTestSubj} onClick={togglePopover} />
         }
       >
-        {isTemplatesEnabled && (
-          <>
-            <EuiPopoverTitle>{commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL}</EuiPopoverTitle>
-            <EuiComboBox
-              fullWidth
-              singleSelection={{ asPlainText: true }}
-              options={options}
-              selectedOptions={selectedOptions}
-              onChange={onTemplateChange}
-              isLoading={isLoadingTemplates}
-              placeholder={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER}
-              data-test-subj={`${dataTestSubj}-template-select`}
-              compressed
-            />
-          </>
-        )}
+        <EuiPopoverTitle>{commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL}</EuiPopoverTitle>
+        <EuiComboBox
+          fullWidth
+          singleSelection={{ asPlainText: true }}
+          options={options}
+          selectedOptions={selectedOptions}
+          onChange={onTemplateChange}
+          isLoading={isLoadingTemplates}
+          placeholder={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER}
+          data-test-subj={`${dataTestSubj}-template-select`}
+          compressed
+        />
       </EuiPopover>
       {pendingTemplateId !== null && (
         <ConfirmChangeTemplateModal

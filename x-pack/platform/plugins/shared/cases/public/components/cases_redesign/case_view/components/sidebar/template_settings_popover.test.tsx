@@ -70,7 +70,6 @@ const caseWithTemplate = {
 describe('TemplateSettingsPopover', () => {
   const defaultProps = {
     caseData: basicCase,
-    isTemplatesEnabled: true,
   };
 
   let user: UserEvent;
@@ -122,25 +121,10 @@ describe('TemplateSettingsPopover', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('renders the template selector when templates are enabled and the button is clicked', async () => {
+  it('renders the template selector when the button is clicked', async () => {
     renderWithTestingProviders(<TemplateSettingsPopover {...defaultProps} />);
 
     expect(await openSelector()).toBeInTheDocument();
-  });
-
-  it('does not render the template selector when templates are disabled', async () => {
-    renderWithTestingProviders(
-      <TemplateSettingsPopover {...defaultProps} isTemplatesEnabled={false} />
-    );
-
-    await user.click(screen.getByTestId('sidebar-template-settings'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('sidebar-template-settings-popover')).toBeInTheDocument();
-    });
-    expect(
-      screen.queryByTestId('sidebar-template-settings-template-select')
-    ).not.toBeInTheDocument();
   });
 
   it('supports a custom data-test-subj', () => {

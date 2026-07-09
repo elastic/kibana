@@ -40,31 +40,32 @@ export const usePendingFieldValue = <T>({
     NO_PENDING_VALUE
   );
 
-  const currentValue = pendingValue === NO_PENDING_VALUE ? committedValue : pendingValue;
+  const hasPendingValue = pendingValue !== NO_PENDING_VALUE;
+  const currentValue = hasPendingValue ? pendingValue : committedValue;
 
   const hasPendingChange = useMemo(
-    () => pendingValue !== NO_PENDING_VALUE && pendingValue !== committedValue,
-    [pendingValue, committedValue]
+    () => hasPendingValue && pendingValue !== committedValue,
+    [hasPendingValue, pendingValue, committedValue]
   );
 
   const validationError = useMemo(() => {
-    if (pendingValue === NO_PENDING_VALUE || !validate) {
+    if (!hasPendingValue || !validate) {
       return null;
     }
     return validate(pendingValue);
-  }, [pendingValue, validate]);
+  }, [hasPendingValue, pendingValue, validate]);
 
   const setPendingValue = useCallback((value: T) => {
     setPendingValueState(value);
   }, []);
 
   const onConfirm = useCallback(() => {
-    if (pendingValue === NO_PENDING_VALUE || validationError != null) {
+    if (!hasPendingValue || validationError != null) {
       return;
     }
     onSubmit(pendingValue);
     setPendingValueState(NO_PENDING_VALUE);
-  }, [pendingValue, validationError, onSubmit]);
+  }, [hasPendingValue, pendingValue, validationError, onSubmit]);
 
   const onCancel = useCallback(() => {
     setPendingValueState(NO_PENDING_VALUE);

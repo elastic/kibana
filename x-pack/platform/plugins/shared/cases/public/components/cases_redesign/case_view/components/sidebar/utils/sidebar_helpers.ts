@@ -10,13 +10,3 @@ export const isFieldUpdating = (
   loadingKey: string | null,
   key: string
 ): boolean => isLoading && loadingKey === key;
-
-export const getIsLoadingAssigneeData = (
-  isLoading: boolean,
-  loadingKey: string | null,
-  isLoadingCaseUsers: boolean,
-  isLoadingCurrentUserProfile: boolean
-): boolean =>
-  isFieldUpdating(isLoading, loadingKey, 'assignees') ||
-  isLoadingCaseUsers ||
-  isLoadingCurrentUserProfile;

@@ -76,7 +76,6 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
       )}
       {settingsAnchor && permissions.update && (
         <CaseSettingsPopover
-          caseData={caseData}
           syncAlerts={caseData.settings.syncAlerts}
           onSyncAlertsChange={onSyncAlertsChanged}
           showMetrics={showMetrics}

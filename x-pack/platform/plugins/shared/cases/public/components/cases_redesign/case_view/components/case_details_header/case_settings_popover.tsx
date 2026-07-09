@@ -6,29 +6,13 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  EuiComboBox,
-  EuiFormRow,
-  EuiPopoverTitle,
-  EuiSpacer,
-  EuiSwitch,
-  EuiWrappingPopover,
-} from '@elastic/eui';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { CaseUI } from '../../../../../../common';
-import { useCasesContext } from '../../../../cases_context/use_cases_context';
+import React from 'react';
+import { EuiPopoverTitle, EuiSpacer, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
 import { useCasesFeatures } from '../../../../../common/use_cases_features';
-import { useGetTemplates } from '../../../../templates_v2/hooks/use_get_templates';
-import { useChangeAppliedTemplate } from '../../../../case_view/use_change_applied_template';
-import { useGetTemplate } from '../../../../templates_v2/hooks/use_get_template';
-import { KibanaServices } from '../../../../../common/lib/kibana';
 import * as i18n from '../../../../case_view/translations';
-import * as commonI18n from '../../../../../common/translations';
 import { SHOW_METRICS } from '../../../translations';
 
 interface CaseSettingsPopoverProps {
-  caseData: CaseUI;
   syncAlerts: boolean;
   onSyncAlertsChange: (enabled: boolean) => void;
   showMetrics: boolean;
@@ -38,8 +22,10 @@ interface CaseSettingsPopoverProps {
   anchorElement: HTMLElement;
 }
 
+// The template selector lives exclusively in the sidebar's `TemplateSettingsPopover`, which
+// routes template changes through `ConfirmChangeTemplateModal`. It intentionally does not
+// live here as well, to avoid a second entry point that could bypass that confirmation.
 export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
-  caseData,
   syncAlerts,
   onSyncAlertsChange,
   showMetrics,
@@ -48,69 +34,8 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
   onClose,
   anchorElement,
 }) => {
-  const { owner } = useCasesContext();
   const { isSyncAlertsEnabled, metricsFeatures } = useCasesFeatures();
   const hasMetrics = metricsFeatures.length > 0;
-  const isTemplatesEnabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
-
-  const { data: templatesData, isLoading: isLoadingTemplates } = useGetTemplates({
-    queryParams: { page: 1, perPage: 10000, owner, isEnabled: true },
-  });
-
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(caseData.template?.id ?? '');
-
-  const options: Array<EuiComboBoxOptionOption<string>> = useMemo(
-    () =>
-      (templatesData?.templates ?? []).map((t) => ({
-        key: t.templateId,
-        label: t.name,
-        value: t.templateId,
-      })),
-    [templatesData?.templates]
-  );
-
-  const selectedOptions = useMemo(
-    () => options.filter((o) => o.value === selectedTemplateId),
-    [options, selectedTemplateId]
-  );
-
-  const { data: selectedTemplateData } = useGetTemplate(
-    isTemplatesEnabled ? selectedTemplateId || undefined : undefined
-  );
-  const { mutate: changeAppliedTemplate } = useChangeAppliedTemplate();
-
-  // Applied via useEffect rather than inside onTemplateChange because the
-  // template definition (fields, version) is fetched asynchronously by
-  // useGetTemplate and isn't available at the time the user selects a template.
-  useEffect(() => {
-    if (
-      isTemplatesEnabled &&
-      selectedTemplateId &&
-      selectedTemplateData &&
-      selectedTemplateData.templateId === selectedTemplateId &&
-      caseData.template?.id !== selectedTemplateId
-    ) {
-      changeAppliedTemplate({
-        caseData,
-        newTemplate: {
-          id: selectedTemplateData.templateId,
-          version: selectedTemplateData.templateVersion,
-          fields: selectedTemplateData.definition.fields,
-          settings: selectedTemplateData.definition.settings,
-        },
-      });
-    }
-  }, [
-    isTemplatesEnabled,
-    selectedTemplateId,
-    selectedTemplateData,
-    caseData,
-    changeAppliedTemplate,
-  ]);
-
-  const onTemplateChange = useCallback((selected: Array<EuiComboBoxOptionOption<string>>) => {
-    setSelectedTemplateId(selected[0]?.value ?? '');
-  }, []);
 
   return (
     <EuiWrappingPopover
@@ -123,24 +48,6 @@ export const CaseSettingsPopover: FC<CaseSettingsPopoverProps> = ({
       data-test-subj="case-settings-popover"
     >
       <EuiPopoverTitle>{i18n.CASE_SETTINGS}</EuiPopoverTitle>
-      {isTemplatesEnabled && (
-        <>
-          <EuiFormRow label={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_LABEL} fullWidth>
-            <EuiComboBox
-              fullWidth
-              singleSelection={{ asPlainText: true }}
-              options={options}
-              selectedOptions={selectedOptions}
-              onChange={onTemplateChange}
-              isLoading={isLoadingTemplates}
-              placeholder={commonI18n.APPLY_TEMPLATE_MODAL_TEMPLATE_PLACEHOLDER}
-              data-test-subj="case-settings-template-select"
-              compressed
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-        </>
-      )}
       {isSyncAlertsEnabled && (
         <>
           <EuiSwitch
