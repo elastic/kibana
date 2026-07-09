@@ -33,7 +33,7 @@ export function createSkillInvocationEvaluator({
     config: {
       name: `Skill Invoked (${skillName})`,
       buildQuery: (traceId) => `FROM traces-*
-| WHERE trace.id == "${traceId}"
+| WHERE trace_id == "${traceId}"
 | STATS
   total_spans = COUNT(*),
   total_tool_spans = COUNT(
