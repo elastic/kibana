@@ -14,6 +14,7 @@ import type {
   IndicesDataStreamsStatsDataStreamsStatsItem,
   SecurityHasPrivilegesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+import { errors } from '@elastic/elasticsearch';
 import type { MeteringStats } from '../../../lib/types';
 import {
   deserializeDataStream,
@@ -240,10 +241,22 @@ const getDataStreams = (client: IScopedClusterClient, name = '*') => {
   });
 };
 
-const getDataStreamLifecycle = (client: IScopedClusterClient, name: string) => {
-  return client.asCurrentUser.indices.getDataLifecycle({
-    name,
-  });
+const getDataStreamLifecycle = async (client: IScopedClusterClient, name: string) => {
+  // Only used to surface the cluster-wide max retention (`global_retention.max_retention`).
+  try {
+    return await client.asCurrentUser.indices.getDataLifecycle({ name });
+  } catch (error) {
+    // Global retention is best-effort: a missing stream (404) or missing privileges (403)
+    // degrade to "no global retention" rather than failing the whole data streams request.
+    // Any other error is unexpected and re-thrown so the route's error handler surfaces it.
+    if (
+      error instanceof errors.ResponseError &&
+      (error.statusCode === 403 || error.statusCode === 404)
+    ) {
+      return undefined;
+    }
+    throw error;
+  }
 };
 
 const getDataStreamsStats = (client: IScopedClusterClient, name = '*') => {

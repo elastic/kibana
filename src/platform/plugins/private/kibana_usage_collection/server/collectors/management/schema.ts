@@ -849,6 +849,45 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
     },
   },
+  'observability:streamsSigEventsScheduledDiscoveryEnabled': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Non-default value of whether scheduled Significant Events discovery is enabled.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events detection interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events review interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events discovery batch size.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events triage batch size.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': {
+    type: 'long',
+    _meta: {
+      description: 'Non-default value of the scheduled Significant Events maximum review passes.',
+    },
+  },
   'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {
@@ -908,10 +947,23 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'AI connector used by the alert analysis workflow' },
   },
+  'securitySolution:alertAnalysisWorkflowAgentId': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Agent used by the alert analysis workflow (value is redacted; the setting is sensitive)',
+    },
+  },
   'securitySolution:alertAnalysisWorkflowCreateConversation': {
     type: 'boolean',
     _meta: {
       description: 'Whether the AI agent creates a new conversation per alert analysis',
+    },
+  },
+  'securitySolution:alertAnalysisWorkflowTagPrefix': {
+    type: 'keyword',
+    _meta: {
+      description: 'Prefix for the tags the alert analysis workflow adds to analyzed alerts',
     },
   },
   'elasticRamen:enabled': {
