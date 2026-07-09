@@ -10,6 +10,7 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
@@ -34,6 +35,7 @@ export interface SecurityAlertAnalysisWorkflowSettings {
   autoCloseConfidenceScoreMinThreshold: number;
   autoCloseConfidenceScoreMaxThreshold: number;
   connectorId: string;
+  agentId: string;
   createConversation: boolean;
   tagPrefix: string;
 }
@@ -60,6 +62,7 @@ export const readSecurityAlertAnalysisWorkflowSettings = async (
   connectorId: await uiSettingsClient.get<string>(
     SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID
   ),
+  agentId: await uiSettingsClient.get<string>(SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID),
   createConversation: await uiSettingsClient.get<boolean>(
     SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION
   ),

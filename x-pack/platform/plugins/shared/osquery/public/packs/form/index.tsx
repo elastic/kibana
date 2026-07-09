@@ -109,10 +109,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       (policyId) => payload.shards?.[policyId] == null
     );
 
-    // Flag-off leak fix: strip the rrule-era schedule fields off the
-    // spread so a flag-off form never carries `schedule_type` / pack-level
-    // `interval` / `rrule_schedule` into state — and therefore never re-emits
-    // them on submit. Flag-off is byte-identical to the pre-rrule contract.
+    // Strip rrule-era fields before spreading so a flag-off form never
+    // carries them into state or re-emits them on submit.
     const {
       schedule_type: payloadScheduleType,
       interval: payloadInterval,
@@ -231,10 +229,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const onSubmit = useCallback(
     async (values: PackFormData) => {
-      // Submit-boundary gate: a controlled ScheduleSection object
-      // doesn't `register` cleanly with RHF, so the inline field errors are not
-      // enough to block submit. Re-validate the whole schedule here and abort
-      // when it fails — the inline errors already do the visual work.
+      // RHF field errors alone don't block submit for the controlled
+      // ScheduleSection object; re-validate here before allowing submit.
       if (isRruleSchedulingEnabled && values.schedule) {
         const submitScheduleErrors = validateScheduleFormData(values.schedule, {
           originalStartDate,
@@ -272,7 +268,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         return {
           ...restPayload,
           policy_ids: policies ?? [],
-          queries: convertSOQueriesToPack(payloadQueries),
+          // On edit, round-trip each query's id so the server preserves schedule_id.
+          queries: convertSOQueriesToPack(payloadQueries, { includeId: editMode }),
           shards: getShards() ?? {},
           ...scheduleFields,
         };
