@@ -14,10 +14,6 @@ export const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readAgentBuilderSml] },
 };
 
-export const WRITE_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [apiPrivileges.writeAgentBuilderSml] },
-};
-
 export const withSmlFeatureFlag =
   <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> =>
   async (ctx, request, response) => {

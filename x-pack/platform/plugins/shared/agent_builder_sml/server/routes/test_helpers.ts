@@ -17,7 +17,6 @@ export const createMockSmlService = () => ({
   indexAttachment: jest.fn(),
   deleteAttachment: jest.fn(),
   getDocuments: jest.fn(),
-  findByOriginAcrossSpaces: jest.fn(),
   getTypeDefinition: jest.fn(),
   listTypeDefinitions: jest.fn(),
   getCrawler: jest.fn(),

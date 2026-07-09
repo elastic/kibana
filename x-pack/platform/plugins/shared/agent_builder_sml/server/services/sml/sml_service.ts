@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { FieldValue, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -31,8 +31,6 @@ import {
   SmlAuthzEnumerationIncompleteError,
   SmlCorpusTooLargeError,
 } from './sml_errors';
-import { MAX_CHUNKS_PER_ORIGIN } from '../../../common/constants';
-
 // ES client usage pattern in this module:
 // - Read operations (search, get, list, checkAccess) use `esClient.asInternalUser` directly with
 //   `allow_no_indices: true` / `ignore_unavailable: true` so they silently handle a missing index.
@@ -164,9 +162,6 @@ class SmlServiceImpl implements SmlServiceInstance {
       },
       getDocuments: async ({ ids, spaceId, esClient }) => {
         return getDocumentsByIds({ ids, spaceId, esClient, logger });
-      },
-      findByOriginAcrossSpaces: async ({ type, originId, esClient }) => {
-        return findByOriginAcrossSpaces({ type, originId, esClient, logger });
       },
       getTypeDefinition: (typeId: string) => {
         return this.registry.get(typeId);
@@ -1240,133 +1235,10 @@ const getDocumentsByIds = async ({
 };
 
 /**
- * Extract the total-hit count from an ES search response in a way that
- * tolerates both the legacy numeric shape (older clients) and the
- * `{ value, relation }` object shape returned when `track_total_hits`
- * is set. Falls back to `0` when the field is absent.
- */
-const extractTotalHits = (total: SearchTotalHits | number | undefined): number => {
-  if (total === undefined) return 0;
-  if (typeof total === 'number') return total;
-  return total.value;
-};
-
-/**
- * Compose the canonical `origin.uri` from the SML `type` and bare
- * `originId`. Single source of truth for the URI scheme.
- *
- * Exported for the HTTP routes; the indexer derives it internally.
- */
-export const buildOriginUri = (type: string, originId: string): string => `${type}://${originId}`;
-
-/**
- * `_source` fields fetched by `findByOriginAcrossSpaces`.
- *
- * The cross-space guard only reads `id`, `type`, `spaces` (and uses
- * `origin.uri` indirectly via `hydrateDocument`'s `origin_id`
- * derivation — `origin_id` is not stored, it's parsed from the URI at
- * read time). Everything else — `content`, `title`, `description`,
- * `tags`, `permissions`, … — are not needed by the guard. The
- * guard runs on every PUT and DELETE, so trimming the payload here
- * matters: with `size: 1000` and a 50 KB `content` field per chunk,
- * the un-filtered version could pull up to 50 MB per guard call and
- * immediately discard 99% of it.
- *
- * Listed as a typed constant rather than inline so a future field
- * addition has a single place to consider whether the guard needs to
- * see it.
- */
-const FIND_ACROSS_SPACES_SOURCE_FIELDS: ReadonlyArray<keyof SmlDocument> = [
-  'id',
-  'type',
-  'spaces',
-  'origin',
-  'created_at',
-];
-
-/**
- * Fetch every chunk written under `(type, originId)` regardless of
- * space.
- *
- * Used by the HTTP routes' cross-space-overwrite guard and the
- * `checkItemsAccess` privilege gate — never for read paths that
- * surface data to users. The route compares the result against the
- * caller's space to decide between proceeding, 404, and (later) 409
- * semantics.
- *
- * Returns an empty array on `index_not_found` rather than throwing —
- * "no SML index yet" is a normal first-write state.
- *
- * Results are bounded by {@link MAX_CHUNKS_PER_ORIGIN}. If more than
- * the limit exists, chunks in another space might fall outside the
- * returned window — the cross-space guard would then act on an
- * incomplete view and could silently authorise a write that crosses
- * a space boundary. To prevent that, overflow throws
- * {@link SmlCorpusTooLargeError} (fail-closed). The limit is generous
- * enough that legitimate producers should never hit it (the workflow
- * step caps batches at 100, and the crawler's built-in types produce
- * 1 chunk per origin).
- *
- * Returned `SmlDocument`s carry only the fields in
- * {@link FIND_ACROSS_SPACES_SOURCE_FIELDS}; everything else is
- * defaulted to empty by `hydrateDocument`. Callers must treat the
- * result as guard-only and not surface it to users.
- */
-const findByOriginAcrossSpaces = async ({
-  type,
-  originId,
-  esClient,
-  logger,
-}: {
-  type: string;
-  originId: string;
-  esClient: IScopedClusterClient;
-  logger: Logger;
-}): Promise<SmlDocument[]> => {
-  const originUri = buildOriginUri(type, originId);
-  try {
-    const response = await esClient.asInternalUser.search<SmlDocument>({
-      index: smlIndexName,
-      size: MAX_CHUNKS_PER_ORIGIN,
-      track_total_hits: true,
-      _source: FIND_ACROSS_SPACES_SOURCE_FIELDS as unknown as string[],
-      allow_no_indices: true,
-      ignore_unavailable: true,
-      query: {
-        bool: {
-          filter: [{ term: { 'origin.uri': originUri } }],
-        },
-      },
-    });
-
-    const total = extractTotalHits(response.hits.total);
-    if (total > MAX_CHUNKS_PER_ORIGIN) {
-      throw new SmlCorpusTooLargeError(
-        `SML origin '${originUri}' has ${total} chunks, which exceeds the ${MAX_CHUNKS_PER_ORIGIN}-chunk cross-space guard limit. The write is rejected to avoid acting on a partial cross-space view. Reduce the chunk count for this origin before retrying.`
-      );
-    }
-
-    return response.hits.hits
-      .filter((hit) => hit._source != null)
-      .map((hit) => hydrateDocument(hit._source!));
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      return [];
-    }
-    // SmlCorpusTooLargeError is an intentional fail-closed signal — let it
-    // propagate without the generic "failed" warn, which would be redundant.
-    if (!(error instanceof SmlCorpusTooLargeError)) {
-      logger.warn(`SML findByOriginAcrossSpaces failed: ${(error as Error).message}`);
-    }
-    throw error;
-  }
-};
-
-/**
  * Project an ES `_source` payload into the canonical `SmlDocument`
- * shape used everywhere downstream. Centralised because multiple readers
- * (getDocumentsByIds, findByOriginAcrossSpaces) apply the same mapping —
- * keeping them in sync by-hand is a footgun.
+ * shape used everywhere downstream. Centralised because `getDocumentsByIds`
+ * (and any future reader) applies the same mapping — keeping them in sync
+ * by-hand is a footgun.
  */
 const hydrateDocument = (source: SmlDocument): SmlDocument => {
   const originUri = source.origin?.uri ?? '';
@@ -1390,17 +1262,5 @@ const hydrateDocument = (source: SmlDocument): SmlDocument => {
   if (source.user_id !== undefined) doc.user_id = source.user_id;
   if (source.references !== undefined) doc.references = source.references;
   return doc;
-};
-
-/**
- * True when a document with the given `spaces` field is visible from
- * `spaceId`. Wildcard (`'*'`) entries are treated as global.
- *
- * Exported so route helpers (HTTP upsert/delete cross-space guard) can
- * apply the same predicate used internally by the space-filtering logic.
- */
-export const isVisibleInSpace = (spaces: string[] | undefined, spaceId: string): boolean => {
-  if (!spaces || spaces.length === 0) return false;
-  return spaces.includes(spaceId) || spaces.includes('*');
 };
 
