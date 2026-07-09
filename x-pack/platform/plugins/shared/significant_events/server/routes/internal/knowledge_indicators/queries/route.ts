@@ -325,6 +325,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
     params,
     request,
     getScopedClients,
+    getSpaceId,
     server,
     logger,
   }): Promise<QueriesGetResponse> => {
@@ -366,13 +367,14 @@ const getDiscoveryQueriesRoute = createServerRoute({
     const pageLinks =
       start >= total ? [] : sortQueryLinksForTable(queryLinks).slice(start, start + perPage);
     const pageRuleIds = [...new Set(pageLinks.map((link) => link.rule_id))];
+    const spaceId = await getSpaceId(request);
     const esClient = createSignificantEventsTracedEsClient({
       client: scopedClusterClient.asCurrentUser,
       logger,
     });
 
     const occurrences = await computeOccurrences(
-      { ruleIds: pageRuleIds, from, to, bucketSize, alertsReader },
+      { ruleIds: pageRuleIds, from, to, bucketSize, spaceId, alertsReader },
       { esClient }
     );
     const queryOccurrences: QueryOccurrences = { queryLinks: pageLinks, ...occurrences };
@@ -406,6 +408,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     params,
     request,
     getScopedClients,
+    getSpaceId,
     server,
     logger,
   }): Promise<QueriesOccurrencesGetResponse> => {
@@ -432,6 +435,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
         query,
         streamNames,
         alertsReader,
+        spaceId: await getSpaceId(request),
       },
       { kiClient, esClient }
     );

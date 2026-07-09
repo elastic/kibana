@@ -230,14 +230,14 @@ export const DiscoverTopNav = ({
       if (needsSave) {
         setInitialCopyOnSave(false);
         onSaveCbRef.current = () => {
-          dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
+          dispatch(transitionFromESQLToDataView({ dataView }));
         };
         setIsSaveModalVisible(true);
         return;
       }
-      dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
+      dispatch(transitionFromESQLToDataView({ dataView }));
     },
-    [dataView.id, dispatch, services, transitionFromESQLToDataView]
+    [dataView, dispatch, services, transitionFromESQLToDataView]
   );
 
   const onOpenSaveModal = useCallback(() => {

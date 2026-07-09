@@ -94,6 +94,7 @@ const readSignificantEventsKIQueryOccurrenceStatsRoute = createServerRoute({
     params,
     request,
     getScopedClients,
+    getSpaceId,
     server,
     logger,
   }): Promise<QueryOccurrencesResponse> => {
@@ -122,6 +123,7 @@ const readSignificantEventsKIQueryOccurrenceStatsRoute = createServerRoute({
         query,
         searchMode,
         alertsReader,
+        spaceId: await getSpaceId(request),
       },
       { kiClient, esClient }
     );

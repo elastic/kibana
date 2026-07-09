@@ -21,9 +21,7 @@ export const getStructuredAnswerPrompt = async (
   params: AnswerAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
   const {
-    configuration: {
-      answer: { instructions: customInstructions },
-    },
+    configuration: { instructions: customInstructions },
     conversationTimestamp,
     actions,
     answerActions,

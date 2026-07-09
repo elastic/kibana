@@ -61,6 +61,7 @@ const readQueryOccurrencesRoute = createServerRoute({
     params,
     request,
     getScopedClients,
+    getSpaceId,
     server,
     logger,
   }): Promise<QueryOccurrencesResponse> => {
@@ -87,6 +88,7 @@ const readQueryOccurrencesRoute = createServerRoute({
         streamNames,
         searchMode,
         alertsReader,
+        spaceId: await getSpaceId(request),
       },
       { kiClient, esClient }
     );
