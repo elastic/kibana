@@ -9,14 +9,26 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
+import { RETRY_RATE_LIMIT } from '../../connector_spec';
 import type { ConnectorSpec } from '../../connector_spec';
+import {
+  BoardIdInputSchema,
+  ListListCardsInputSchema,
+  CardIdInputSchema,
+  SearchInputSchema,
+  CreateCardInputSchema,
+  UpdateCardInputSchema,
+  AddCommentInputSchema,
+} from './types';
+
+const BASE_URL = 'https://api.trello.com/1';
 
 export const Trello: ConnectorSpec = {
   metadata: {
     id: '.trello',
     displayName: 'Trello',
     description: i18n.translate('connectorSpecs.trello.metadata.description', {
-      defaultMessage: 'Access boards, lists, and cards in Trello',
+      defaultMessage: 'Search, read, and manage boards, lists, and cards in Trello',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -38,26 +50,221 @@ export const Trello: ConnectorSpec = {
     ],
   },
 
-  actions: {
-    // Placeholder action so the connector can be registered and invoked from
-    // chat. Makes no Trello API calls. Replace with real board/list/card
-    // actions in a follow-up.
-    status: {
-      isTool: true,
-      description:
-        'Placeholder for the Trello connector. Returns a static status message and does not call the Trello API. Real actions are not implemented yet.',
-      input: lazySchema(() => z.object({})),
-      handler: async () => ({
-        ok: true,
-        message: 'The Trello connector is scaffolded but has no operational actions yet.',
-      }),
+  policies: {
+    retry: {
+      retryOnStatusCodes: [...RETRY_RATE_LIMIT],
+      maxRetries: 3,
+      backoffStrategy: 'exponential',
     },
   },
 
+  actions: {
+    whoAmI: {
+      isTool: true,
+      description:
+        'Get the currently authenticated Trello member. Returns the member record for the API key/token in use. Useful for verifying which account is connected or resolving your own member ID.',
+      input: lazySchema(() => z.object({})),
+      handler: async (ctx) => {
+        const response = await ctx.client.get(`${BASE_URL}/members/me`);
+        return response.data;
+      },
+    },
+
+    listBoards: {
+      isTool: true,
+      description:
+        'List all boards the authenticated member belongs to. Use to discover boards and their IDs before drilling into lists or cards.',
+      input: lazySchema(() => z.object({})),
+      handler: async (ctx) => {
+        const response = await ctx.client.get(`${BASE_URL}/members/me/boards`);
+        return response.data;
+      },
+    },
+
+    getBoard: {
+      isTool: true,
+      description:
+        'Get the full details of a single Trello board by ID. Use when you already have a board ID and need its metadata.',
+      input: BoardIdInputSchema,
+      handler: async (ctx, input) => {
+        const response = await ctx.client.get(`${BASE_URL}/boards/${input.boardId}`);
+        return response.data;
+      },
+    },
+
+    listBoardLists: {
+      isTool: true,
+      description:
+        'List the (open) lists on a board, e.g. "To Do", "Doing", "Done". Use the returned list IDs with listListCards or createCard.',
+      input: BoardIdInputSchema,
+      handler: async (ctx, input) => {
+        const response = await ctx.client.get(`${BASE_URL}/boards/${input.boardId}/lists`);
+        return response.data;
+      },
+    },
+
+    listBoardCards: {
+      isTool: true,
+      description:
+        'List all open cards on a board, across all of its lists. Use when you need every card on a board rather than one list at a time.',
+      input: BoardIdInputSchema,
+      handler: async (ctx, input) => {
+        const response = await ctx.client.get(`${BASE_URL}/boards/${input.boardId}/cards`);
+        return response.data;
+      },
+    },
+
+    listListCards: {
+      isTool: true,
+      description:
+        "List the open cards within a single list. Use once you have a list ID (from listBoardLists) and want just that list's cards.",
+      input: ListListCardsInputSchema,
+      handler: async (ctx, input) => {
+        const response = await ctx.client.get(`${BASE_URL}/lists/${input.listId}/cards`);
+        return response.data;
+      },
+    },
+
+    getCard: {
+      isTool: true,
+      description:
+        'Get the full details of a single card by ID, including its description, due date, members, and labels. Use when you already have a card ID and need the complete record.',
+      input: CardIdInputSchema,
+      handler: async (ctx, input) => {
+        const response = await ctx.client.get(`${BASE_URL}/cards/${input.cardId}`);
+        return response.data;
+      },
+    },
+
+    getCardComments: {
+      isTool: true,
+      description:
+        'List comments posted on a card (the conversation thread). Use when you have a card ID and need to read its discussion history.',
+      input: CardIdInputSchema,
+      handler: async (ctx, input) => {
+        const response = await ctx.client.get(`${BASE_URL}/cards/${input.cardId}/actions`, {
+          params: { filter: 'commentCard' },
+        });
+        return response.data;
+      },
+    },
+
+    search: {
+      isTool: true,
+      description:
+        'Search across Trello boards and cards by keyword or query operators. Use when you need to find items by keyword rather than browsing a known board/list.',
+      input: SearchInputSchema,
+      handler: async (ctx, input) => {
+        const params: Record<string, string | number> = {
+          query: input.query,
+          modelTypes: input.modelTypes ?? 'cards,boards',
+          cards_limit: input.cardsLimit ?? 10,
+          boards_limit: input.boardsLimit ?? 10,
+        };
+        if (input.idBoards) params.idBoards = input.idBoards;
+        const response = await ctx.client.get(`${BASE_URL}/search`, { params });
+        return response.data;
+      },
+    },
+
+    createCard: {
+      isTool: true,
+      description:
+        'Create a new card in a list. Returns the created card, including its ID. Use listBoardLists first to find the target list ID.',
+      input: CreateCardInputSchema,
+      handler: async (ctx, input) => {
+        const params: Record<string, string | number> = {
+          idList: input.listId,
+          name: input.name,
+        };
+        if (input.desc) params.desc = input.desc;
+        if (input.due) params.due = input.due;
+        if (input.pos !== undefined) params.pos = input.pos;
+        if (input.idMembers) params.idMembers = input.idMembers;
+        if (input.idLabels) params.idLabels = input.idLabels;
+        const response = await ctx.client.post(`${BASE_URL}/cards`, null, { params });
+        return response.data;
+      },
+    },
+
+    updateCard: {
+      isTool: true,
+      description:
+        "Edit a card's fields, move it to another list, or archive/unarchive it. Set idList to move the card, or closed: true to archive it (there is no hard-delete action). Returns the updated card.",
+      input: UpdateCardInputSchema,
+      handler: async (ctx, input) => {
+        const params: Record<string, string | number | boolean> = {};
+        if (input.name !== undefined) params.name = input.name;
+        if (input.desc !== undefined) params.desc = input.desc;
+        if (input.due !== undefined) params.due = input.due ?? '';
+        if (input.idList !== undefined) params.idList = input.idList;
+        if (input.pos !== undefined) params.pos = input.pos;
+        if (input.closed !== undefined) params.closed = input.closed;
+        const response = await ctx.client.put(`${BASE_URL}/cards/${input.cardId}`, null, {
+          params,
+        });
+        return response.data;
+      },
+    },
+
+    addComment: {
+      isTool: true,
+      description:
+        "Post a comment on a card. Use to leave notes or updates on a card's activity feed. Returns the created comment action.",
+      input: AddCommentInputSchema,
+      handler: async (ctx, input) => {
+        const response = await ctx.client.post(
+          `${BASE_URL}/cards/${input.cardId}/actions/comments`,
+          null,
+          { params: { text: input.text } }
+        );
+        return response.data;
+      },
+    },
+  },
+
+  skill: [
+    'Trello connector — usage guidance for LLMs.',
+    '',
+    '## Typical workflow',
+    'To find a board: call listBoards (or search if you only know a keyword), then getBoard for its metadata.',
+    'To browse a board: call listBoardLists to see its lists, then listBoardCards or listListCards for the cards in it.',
+    'To read a specific card: call getCard for its details, then getCardComments for its discussion history.',
+    'Example: search(query: "login bug") → getCard(cardId) → getCardComments(cardId).',
+    '',
+    '## Writing cards',
+    'To create a card, first find the target list ID via listBoardLists, then call createCard with that listId.',
+    'To edit, move, archive, or unarchive an existing card, use updateCard: set idList to move it between lists, ' +
+      'or closed: true/false to archive/unarchive it. There is no hard-delete action — archiving is the only ' +
+      'way to remove a card through this connector.',
+    'To comment on a card, use addComment.',
+    '',
+    '## Rate limits',
+    'Trello enforces per-key and per-token rate limits (300 requests/10s per API key, 100 requests/10s per ' +
+      'token). Avoid issuing large numbers of rapid calls in a loop; batch or narrow requests where possible.',
+  ].join('\n'),
+
   test: {
-    handler: async () => ({
-      ok: true,
-      message: 'Trello connector configured (no live validation yet)',
+    description: i18n.translate('connectorSpecs.trello.test.description', {
+      defaultMessage: 'Verifies Trello connection by fetching the current member',
     }),
+    handler: async (ctx) => {
+      try {
+        const response = await ctx.client.get(`${BASE_URL}/members/me`);
+        const member = response.data;
+        return {
+          ok: true,
+          message: member?.username
+            ? `Successfully connected to Trello as ${member.username}`
+            : 'Successfully connected to Trello API',
+        };
+      } catch (error: unknown) {
+        const message =
+          error && typeof error === 'object' && 'message' in error
+            ? String((error as { message: unknown }).message)
+            : 'Unknown error';
+        return { ok: false, message };
+      }
+    },
   },
 };
