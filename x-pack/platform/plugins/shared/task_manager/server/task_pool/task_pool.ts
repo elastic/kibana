@@ -40,8 +40,6 @@ const getErrorMessage = (error: unknown): string => {
     if (typeof nested?.message === 'string') {
       return nested.message;
     }
-    // `safeJsonStringify` won't throw on circular references (it omits them);
-    // fall back to `String(error)` only if it can't serialize the value at all.
     return safeJsonStringify(error) ?? String(error);
   }
   return String(error);
