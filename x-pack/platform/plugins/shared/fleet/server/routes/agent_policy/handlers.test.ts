@@ -73,7 +73,7 @@ describe('Agent policy API handlers', () => {
       });
 
       await expect(createAgentPolicyHandler(context, request, response)).rejects.toThrow(
-        /To create agentless agent policies/
+        /To create managed integrations policies/
       );
       expect(createAgentPolicyWithPackages).not.toHaveBeenCalled();
     });

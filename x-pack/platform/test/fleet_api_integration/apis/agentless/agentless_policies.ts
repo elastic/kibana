@@ -1453,7 +1453,7 @@ export default function (providerContext: FtrProviderContext) {
               namespace: 'default',
               description: 'tata',
             }),
-          /400 "Bad Request" To update agentless agent policies, use the managed integrations API./
+          /400 "Bad Request" To update managed integrations policies, use the managed integrations API./
         );
       });
     });

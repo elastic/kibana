@@ -253,7 +253,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   if (request.body.supports_agentless) {
     if (legacyAgentlessApiDisabled) {
       throw new FleetError(
-        'To create agentless package policies, use the managed integrations API.'
+        'To create managed integrations policies, use the managed integrations API.'
       );
     }
     logLegacyAgentlessWriteDeprecation('create package policy');
@@ -274,7 +274,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       });
       if (isOnlyAgentlessIntegration(pkgInfo)) {
         throw new FleetError(
-          `Package ${pkg.name} only supports agentless deployment. To create agentless package policies, use the managed integrations API.`
+          `Package ${pkg.name} only supports agentless deployment. To create managed integrations policies, use the managed integrations API.`
         );
       }
     }
@@ -284,7 +284,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     ];
     if (await haveAgentlessAgentPolicies(soClient, parentPolicyIds)) {
       throw new FleetError(
-        'To add integrations to an agentless agent policy, use the managed integrations API.'
+        'To add integrations to a managed integration policy, use the managed integrations API.'
       );
     }
   }
@@ -435,7 +435,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   if (isAgentless) {
     if (legacyAgentlessApiDisabled) {
       throw new FleetError(
-        `To update agentless package policies, use the managed integrations API. Offending package policy: ${packagePolicyId}.`
+        `To update managed integrations policies, use the managed integrations API. Offending package policy: ${packagePolicyId}.`
       );
     }
     logLegacyAgentlessWriteDeprecation('update package policy');
@@ -451,7 +451,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
     const agentlessTargetIds = await getAgentlessAgentPolicyIds(soClient, targetParentPolicyIds);
     if (agentlessTargetIds.length > 0) {
       throw new FleetError(
-        `To add integrations to an agentless agent policy, use the managed integrations API. Managed integrations policies: ${agentlessTargetIds.join(
+        `To add integrations to a managed integration policy, use the managed integrations API. Agentless agent policies: ${agentlessTargetIds.join(
           ', '
         )}.`
       );
@@ -459,7 +459,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
 
     if (await haveAgentlessAgentPolicies(soClient, packagePolicy.policy_ids ?? [])) {
       throw new FleetError(
-        `To update agentless package policies, use the managed integrations API. Offending integration policy: ${packagePolicyId}.`
+        `To update managed integrations policies, use the managed integrations API. Offending package policy: ${packagePolicyId}.`
       );
     }
   }
@@ -671,7 +671,7 @@ const throwIfTargetsAgentlessPolicies = async (
   if (offendingIds.length > 0) {
     // The whole batch is rejected, so name the offenders for self-remediation.
     throw new FleetError(
-      `To upgrade agentless package policies, use the agentless policies API. Agentless package policies in this request: ${offendingIds.join(
+      `To upgrade managed integrations policies, use the managed integrations API. Agentless package policies in this request: ${offendingIds.join(
         ', '
       )}.`
     );

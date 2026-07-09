@@ -138,7 +138,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To create agentless package policies, use the managed integrations API/
+          /To create managed integrations policies, use the managed integrations API/
         );
       });
 
@@ -177,7 +177,7 @@ export default function (providerContext: FtrProviderContext) {
             },
           });
 
-        expectLegacyBlock(res, /To add integrations to an agentless agent policy/);
+        expectLegacyBlock(res, /To add integrations to a managed integration policy/);
       });
     });
 
@@ -192,7 +192,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To update agentless package policies, use the managed integrations API/
+          /To update managed integrations policies, use the managed integrations API/
         );
       });
 
@@ -204,7 +204,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_ids: [agentlessId],
           });
 
-        expectLegacyBlock(res, /To add integrations to an agentless agent policy/);
+        expectLegacyBlock(res, /To add integrations to a managed integration policy/);
       });
     });
 
@@ -217,7 +217,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To upgrade agentless package policies, use the managed integrations API/
+          /To upgrade managed integrations policies, use the managed integrations API/
         );
       });
 
@@ -229,7 +229,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To upgrade agentless package policies, use the managed integrations API/
+          /To upgrade managed integrations policies, use the managed integrations API/
         );
       });
 
@@ -241,7 +241,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To upgrade agentless package policies, use the managed integrations API/
+          /To upgrade managed integrations policies, use the managed integrations API/
         );
       });
     });
@@ -259,7 +259,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To create agentless agent policies, use the managed integrations API/
+          /To create managed integrations policies, use the managed integrations API/
         );
       });
 
@@ -275,7 +275,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expectLegacyBlock(
           res,
-          /To update agentless agent policies, use the managed integrations API/
+          /To update managed integrations policies, use the managed integrations API/
         );
       });
 
