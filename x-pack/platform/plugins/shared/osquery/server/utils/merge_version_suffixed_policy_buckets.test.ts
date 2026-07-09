@@ -8,15 +8,40 @@
 import { mergeVersionSuffixedPolicyBuckets } from './merge_version_suffixed_policy_buckets';
 
 describe('mergeVersionSuffixedPolicyBuckets', () => {
-  it('leaves unsuffixed, distinct buckets untouched', () => {
+  it('leaves unsuffixed, distinct buckets untouched, sorted by size descending', () => {
     expect(
       mergeVersionSuffixedPolicyBuckets([
         { id: 'policy-1', name: 'policy-1', size: 2 },
         { id: 'policy-2', name: 'policy-2', size: 3 },
       ])
     ).toEqual([
-      { id: 'policy-1', name: 'policy-1', size: 2 },
       { id: 'policy-2', name: 'policy-2', size: 3 },
+      { id: 'policy-1', name: 'policy-1', size: 2 },
+    ]);
+  });
+
+  it('does not merge a distinct policy whose id contains a non-version "#" suffix', () => {
+    expect(
+      mergeVersionSuffixedPolicyBuckets([
+        { id: 'policy', name: 'policy', size: 2 },
+        { id: 'policy#123', name: 'policy#123', size: 3 },
+      ])
+    ).toEqual([
+      { id: 'policy#123', name: 'policy#123', size: 3 },
+      { id: 'policy', name: 'policy', size: 2 },
+    ]);
+  });
+
+  it('re-sorts a merged bucket to reflect its new combined size', () => {
+    expect(
+      mergeVersionSuffixedPolicyBuckets([
+        { id: 'policy-1', name: 'policy-1', size: 1 },
+        { id: 'policy-1#9.4', name: 'policy-1#9.4', size: 1 },
+        { id: 'policy-2', name: 'policy-2', size: 1 },
+      ])
+    ).toEqual([
+      { id: 'policy-1', name: 'policy-1', size: 2 },
+      { id: 'policy-2', name: 'policy-2', size: 1 },
     ]);
   });
 

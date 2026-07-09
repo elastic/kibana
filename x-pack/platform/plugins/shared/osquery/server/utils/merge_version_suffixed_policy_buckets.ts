@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { stripPolicyIdVersionSuffix } from '../../common/utils/strip_policy_id_version_suffix';
+
 export interface PolicyBucket {
   id: string;
   name: string;
@@ -20,12 +22,16 @@ export interface PolicyBucket {
  * multiple entries in aggregation results, one of which is keyed by the raw
  * (unresolvable) suffixed id and fails the subsequent agent-policy name
  * lookup by base id.
+ *
+ * Buckets are re-sorted by combined size (descending) because merging can
+ * change the relative ranking of a policy that callers may truncate to a
+ * top-N list.
  */
 export const mergeVersionSuffixedPolicyBuckets = (buckets: PolicyBucket[]): PolicyBucket[] => {
   const merged = new Map<string, PolicyBucket>();
 
   for (const bucket of buckets) {
-    const baseId = bucket.id.split('#')[0];
+    const baseId = stripPolicyIdVersionSuffix(bucket.id);
     const existing = merged.get(baseId);
 
     merged.set(baseId, {
@@ -35,5 +41,5 @@ export const mergeVersionSuffixedPolicyBuckets = (buckets: PolicyBucket[]): Poli
     });
   }
 
-  return Array.from(merged.values());
+  return Array.from(merged.values()).sort((a, b) => b.size - a.size);
 };
