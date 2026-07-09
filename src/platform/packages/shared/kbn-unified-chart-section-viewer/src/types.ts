@@ -11,7 +11,9 @@ import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ValuesType } from 'utility-types';
 import type { ExternalServices } from './context/external_services';
+import type { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from './common/constants';
 
 interface ChartSectionActions {
   openInNewTab?: (params: {
@@ -117,3 +119,7 @@ export interface Metric {
   readonly metricTypes: MappingTimeSeriesMetricType[];
   readonly fieldTypes: ES_FIELD_TYPES[];
 }
+
+export type MetricsSortBy = ValuesType<typeof METRICS_SORT_BY>;
+export type MetricsSortDirection = ValuesType<typeof METRICS_SORT_DIRECTION>;
+export type MetricsSort = readonly [MetricsSortBy, MetricsSortDirection];

@@ -21,7 +21,6 @@ import { SearchButton } from '../../toolbar/right_side_actions/search_button';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
-import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../../common/constants';
 import {
   useDimensionsWipe,
   useDiscoverFieldForBreakdown,
@@ -54,6 +53,7 @@ export const MetricsExperienceGrid = ({
     selectedDimensions,
     onDimensionsChange,
     onPageChange,
+    metricsSort,
     profileId,
   } = useMetricsExperienceState();
 
@@ -76,10 +76,11 @@ export const MetricsExperienceGrid = ({
     searchTerm,
   });
 
+  const [sortBy, direction] = metricsSort;
   const { sortedMetricItems } = useMetricsSort({
     metricItems: filteredMetricItems,
-    sortBy: METRICS_SORT_BY.alphabetically,
-    direction: METRICS_SORT_DIRECTION.asc,
+    sortBy,
+    direction,
   });
 
   useDiscoverFieldForBreakdown(

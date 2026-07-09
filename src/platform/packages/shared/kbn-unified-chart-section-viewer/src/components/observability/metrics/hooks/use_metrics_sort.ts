@@ -8,13 +8,11 @@
  */
 
 import { useMemo } from 'react';
-import type { PickByValue, ValuesType } from 'utility-types';
-import type { ParsedMetricItem } from '../../../../types';
+import type { PickByValue } from 'utility-types';
+import type { MetricsSortBy, MetricsSortDirection, ParsedMetricItem } from '../../../../types';
 import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../../../common/constants';
 
 type MetricSortValue = string | number;
-type MetricsSortBy = ValuesType<typeof METRICS_SORT_BY>;
-type MetricsSortDirection = ValuesType<typeof METRICS_SORT_DIRECTION>;
 type SortableMetricField = keyof PickByValue<ParsedMetricItem, string | number>;
 // Metrics id points to the metric field it orders by
 const metricSortFields: Record<MetricsSortBy, SortableMetricField> = {

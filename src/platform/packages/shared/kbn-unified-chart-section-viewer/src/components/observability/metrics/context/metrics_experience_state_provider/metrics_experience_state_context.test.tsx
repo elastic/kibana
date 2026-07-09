@@ -13,6 +13,7 @@ import {
   MetricsExperienceStateContext,
   MetricsExperienceStateProvider,
 } from './metrics_experience_state_context';
+import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../../../../common/constants';
 
 jest.mock('../../../../../restorable_state', () => {
   const { useState, useCallback } = jest.requireActual('react');
@@ -170,6 +171,59 @@ describe('MetricsExperienceStateProvider', () => {
         result.current.onToggleFullscreen();
       });
       expect(result.current.isFullscreen).toBe(false);
+    });
+  });
+
+  describe('onMetricsSortChange', () => {
+    it('updates metricsSort', () => {
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+
+      act(() => {
+        result.current.onMetricsSortChange([
+          METRICS_SORT_BY.alphabetically,
+          METRICS_SORT_DIRECTION.desc,
+        ]);
+      });
+
+      expect(result.current.metricsSort).toEqual([
+        METRICS_SORT_BY.alphabetically,
+        METRICS_SORT_DIRECTION.desc,
+      ]);
+    });
+
+    it('resets currentPage to 0 when the sort changes', () => {
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+
+      act(() => {
+        result.current.onPageChange(2);
+      });
+      expect(result.current.currentPage).toBe(2);
+
+      act(() => {
+        result.current.onMetricsSortChange([
+          METRICS_SORT_BY.alphabetically,
+          METRICS_SORT_DIRECTION.desc,
+        ]);
+      });
+      expect(result.current.currentPage).toBe(0);
+    });
+
+    it('does not reset currentPage when the sort is unchanged', () => {
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+
+      act(() => {
+        result.current.onPageChange(3);
+      });
+      expect(result.current.currentPage).toBe(3);
+
+      // Re-apply the same (default) sort
+      act(() => {
+        result.current.onMetricsSortChange([
+          METRICS_SORT_BY.alphabetically,
+          METRICS_SORT_DIRECTION.asc,
+        ]);
+      });
+      expect(result.current.currentPage).toBe(3);
     });
   });
 });
