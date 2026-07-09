@@ -14,6 +14,7 @@
  *   (plus an OTel collector that indexes into Elasticsearch)
  *
  * AUDIT_LOG_INDEX must match the data stream the OTel collector writes to.
+ * ES _source is assumed to have nested field paths (standard Elasticsearch mapping).
  *
  * Assertions reflect the field renames, drops, and defaults in AUDIT_OTEL_FIELD_RENAMES,
  * AUDIT_OTEL_FIELD_DROPS, and AUDIT_OTEL_FIELD_DEFAULTS from audit_service.ts.
@@ -30,14 +31,14 @@ const KBN_XSRF = { 'kbn-xsrf': 'xxx' };
 const recentTimestamp = { range: { '@timestamp': { gte: 'now-30s' } } };
 
 /**
- * Polls ES until an audit document matching `query` appears, then returns _source.
+ * Polls ES until an audit document matching `query` appears, then returns _source as `any`.
  * Retries up to `timeoutMs` to account for the OTel batch flush delay.
  */
 const waitForAuditEvent = async (
   esClient: Client,
   query: Record<string, unknown>,
   timeoutMs = 15_000
-): Promise<unknown> => {
+): Promise<any> => {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const result = await esClient.search({ index: AUDIT_LOG_INDEX, size: 1, query });
@@ -67,7 +68,7 @@ apiTest.describe('Audit log — OTel field shape', { tag: tags.stateful.classic 
         responseType: 'json',
       });
 
-      const event = await waitForAuditEvent(esClient, {
+      const e = await waitForAuditEvent(esClient, {
         bool: {
           must: [
             { term: { 'event.action': 'user_login' } },
@@ -79,31 +80,33 @@ apiTest.describe('Audit log — OTel field shape', { tag: tags.stateful.classic 
       });
 
       // Core RFC fields
-      expect(event).toHaveProperty('event.action', 'user_login');
-      expect(event).toHaveProperty('event.outcome', 'success');
+      expect(e).toMatchObject({
+        event: { action: 'user_login', outcome: 'success' },
+      });
+
       // fieldDefaults: auth events with no event.type get ['access']
-      expect(event).toHaveProperty('event.type', ['access']);
+      expect(e.event.type).toMatchObject(['access']);
 
       // AUDIT_OTEL_FIELD_RENAMES: client.ip → source.address + source.ip
-      expect(event).toHaveProperty('source.address');
-      expect(event).toHaveProperty('source.ip');
-      expect(event).not.toHaveProperty('client.ip');
+      expect(e.source?.address).toBeDefined();
+      expect(e.source?.ip).toBeDefined();
+      expect(e.client?.ip).toBeUndefined();
 
       // AUDIT_OTEL_FIELD_RENAMES: kibana.authentication_type → authentication.type
-      expect(event).toHaveProperty('authentication.type', 'basic');
-      expect(event).not.toHaveProperty('kibana.authentication_type');
+      expect(e).toMatchObject({ authentication: { type: 'basic' } });
+      expect(e.kibana?.authentication_type).toBeUndefined();
 
       // AUDIT_OTEL_FIELD_RENAMES: kibana.space_id → kibana.space.id
-      expect(event).toHaveProperty('kibana.space.id');
-      expect(event).not.toHaveProperty('kibana.space_id');
+      expect(e.kibana?.space?.id).toBeDefined();
+      expect(e.kibana?.space_id).toBeUndefined();
 
       // AUDIT_OTEL_FIELD_DROPS: service.version and host.name excluded
-      expect(event).not.toHaveProperty('service.version');
-      expect(event).not.toHaveProperty('host.name');
+      expect(e.service?.version).toBeUndefined();
+      expect(e.host?.name).toBeUndefined();
 
       // Header rename: http.request.headers.x-forwarded-for → http.request.header.x-forwarded-for
-      expect(event).toHaveProperty('http.request.header.x-forwarded-for');
-      expect(event).not.toHaveProperty('http.request.headers.x-forwarded-for');
+      expect(e.http?.request?.header?.['x-forwarded-for']).toBeDefined();
+      expect(e.http?.request?.headers?.['x-forwarded-for']).toBeUndefined();
     }
   );
 
@@ -123,7 +126,7 @@ apiTest.describe('Audit log — OTel field shape', { tag: tags.stateful.classic 
         responseType: 'json',
       });
 
-      const event = await waitForAuditEvent(esClient, {
+      const e = await waitForAuditEvent(esClient, {
         bool: {
           must: [
             { term: { 'event.action': 'user_login' } },
@@ -133,9 +136,8 @@ apiTest.describe('Audit log — OTel field shape', { tag: tags.stateful.classic 
         },
       });
 
-      expect(event).toHaveProperty('event.action', 'user_login');
-      expect(event).toHaveProperty('event.outcome', 'failure');
-      expect(event).not.toHaveProperty('user.name');
+      expect(e).toMatchObject({ event: { action: 'user_login', outcome: 'failure' } });
+      expect(e.user?.name).toBeUndefined();
     }
   );
 
@@ -149,7 +151,7 @@ apiTest.describe('Audit log — OTel field shape', { tag: tags.stateful.classic 
         responseType: 'json',
       });
 
-      const event = await waitForAuditEvent(esClient, {
+      const e = await waitForAuditEvent(esClient, {
         bool: {
           must: [
             { term: { 'event.action': 'http_request' } },
@@ -159,14 +161,14 @@ apiTest.describe('Audit log — OTel field shape', { tag: tags.stateful.classic 
         },
       });
 
-      expect(event).toHaveProperty('event.action', 'http_request');
+      expect(e).toMatchObject({ event: { action: 'http_request' } });
 
       // AUDIT_OTEL_FIELD_RENAMES: trace.id → request.id (avoids OTel TraceId collision)
-      expect(event).toHaveProperty('request.id');
-      expect(event).not.toHaveProperty('trace.id');
+      expect(e.request?.id).toBeDefined();
+      expect(e.trace?.id).toBeUndefined();
 
       // http.request.method must be uppercase per OTel semantic conventions
-      expect(event).toHaveProperty('http.request.method', 'GET');
+      expect(e).toMatchObject({ http: { request: { method: 'GET' } } });
     }
   );
 
@@ -180,7 +182,7 @@ apiTest.describe('Audit log — OTel field shape', { tag: tags.stateful.classic 
         responseType: 'json',
       });
 
-      const event = await waitForAuditEvent(esClient, {
+      const e = await waitForAuditEvent(esClient, {
         bool: {
           must: [
             { term: { 'event.action': 'saved_object_find' } },
@@ -190,16 +192,15 @@ apiTest.describe('Audit log — OTel field shape', { tag: tags.stateful.classic 
         },
       });
 
-      expect(event).toHaveProperty('event.action', 'saved_object_find');
-      expect(event).toHaveProperty('event.outcome', 'success');
+      expect(e).toMatchObject({ event: { action: 'saved_object_find', outcome: 'success' } });
 
       // AUDIT_OTEL_FIELD_RENAMES: kibana.space_id → kibana.space.id
-      expect(event).toHaveProperty('kibana.space.id', 'default');
-      expect(event).not.toHaveProperty('kibana.space_id');
+      expect(e).toMatchObject({ kibana: { space: { id: 'default' } } });
+      expect(e.kibana?.space_id).toBeUndefined();
 
       // AUDIT_OTEL_FIELD_DROPS
-      expect(event).not.toHaveProperty('service.version');
-      expect(event).not.toHaveProperty('host.name');
+      expect(e.service?.version).toBeUndefined();
+      expect(e.host?.name).toBeUndefined();
     }
   );
 
@@ -210,18 +211,18 @@ apiTest.describe('Audit log — OTel field shape', { tag: tags.stateful.classic 
 
       await apiClient.get('api/security/logout', { headers: { ...cookieHeader } });
 
-      const event = await waitForAuditEvent(esClient, {
+      const e = await waitForAuditEvent(esClient, {
         bool: {
           must: [{ term: { 'event.action': 'user_logout' } }, recentTimestamp],
         },
       });
 
-      expect(event).toHaveProperty('event.action', 'user_logout');
+      expect(e).toMatchObject({ event: { action: 'user_logout' } });
       // fieldDefaults: auth events get event.type: ['access']
-      expect(event).toHaveProperty('event.type', ['access']);
+      expect(e.event.type).toMatchObject(['access']);
       // AUDIT_OTEL_FIELD_RENAMES: kibana.authentication_type → authentication.type
-      expect(event).toHaveProperty('authentication.type');
-      expect(event).not.toHaveProperty('kibana.authentication_type');
+      expect(e.authentication?.type).toBeDefined();
+      expect(e.kibana?.authentication_type).toBeUndefined();
     }
   );
 });
