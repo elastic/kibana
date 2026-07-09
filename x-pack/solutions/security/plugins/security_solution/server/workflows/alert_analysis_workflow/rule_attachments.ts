@@ -196,9 +196,11 @@ const toRuleAttachmentSummary = (
   attached: hasAlertAnalysisWorkflowAction(rule, workflowId),
 });
 
-// Count-only find (no hits fetched) so the preview scales to any number of matching rules instead
-// of throwing once more than MAX_RULES_TO_ATTACH match. The `filter` narrows the count, e.g. to
-// rules matching the search term, the attachment filter, or that already have the workflow attached.
+// Count-only find (no hits fetched) so the preview scales far past the old MAX_RULES_TO_ATTACH cap
+// (which threw once more than 2000 matched) instead of erroring. The alerting rules client does not
+// set `track_total_hits`, so `total` is exact up to Elasticsearch's default 10,000 ceiling and
+// saturates at 10,000 beyond that. The `filter` narrows the count, e.g. to rules matching the search
+// term, the attachment filter, or that already have the workflow attached.
 const countMatchingRules = async ({
   rulesClient,
   filter,
