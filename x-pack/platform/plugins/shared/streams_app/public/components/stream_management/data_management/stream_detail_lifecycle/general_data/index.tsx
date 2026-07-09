@@ -34,6 +34,11 @@ import {
   useLifecycleAfterSave,
 } from '../common/hooks/lifecycle_after_save';
 import { LifecyclePreviewProvider, useLifecyclePreview } from '../common/hooks/lifecycle_preview';
+import {
+  STREAM_LIFECYCLE_FLYOUT_IDS,
+  useLifecycleFlyoutCoordination,
+  useRegisterLifecycleFlyoutOpen,
+} from '../common/hooks/lifecycle_flyout_coordination';
 import { useOverrideSettingsConfirmation } from '../common/hooks/use_override_settings_confirmation';
 import { SectionPanel } from '../common/section_panel';
 import { buildDlmPreviewModel, type IlmPhasesMap } from '../common/data_lifecycle/preview_models';
@@ -54,14 +59,10 @@ const StreamDetailGeneralDataInner = ({
   definition,
   refreshDefinition,
   data,
-  isExternalFlyoutOpen = false,
-  onFlyoutOpenChange,
 }: {
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
   data: ReturnType<typeof useDataStreamStats>;
-  isExternalFlyoutOpen?: boolean;
-  onFlyoutOpenChange?: (isOpen: boolean) => void;
 }) => {
   const kibana = useKibana();
   const {
@@ -94,6 +95,8 @@ const StreamDetailGeneralDataInner = ({
   const { notifyAfterSave } = useLifecycleAfterSave();
   const { euiTheme } = useEuiTheme();
   const { ilmPhases } = useIlmPhasesColorAndDescription();
+
+  const { isAnyOtherFlyoutOpen } = useLifecycleFlyoutCoordination();
 
   const [isEditSuccessfulDeletePhaseFlyoutOpen, setIsEditSuccessfulDeletePhaseFlyoutOpen] =
     useState(false);
@@ -195,9 +198,22 @@ const StreamDetailGeneralDataInner = ({
     signal,
     updateLifecycle,
     updateInProgress,
-    isExternalFlyoutOpen: isEditSuccessfulDeletePhaseFlyoutOpen || isEditDataPhasesFlyoutOpen,
+    isExternalFlyoutOpen: isAnyOtherFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.successfulLifecycle),
   });
   closeSuccessfulLifecycleFlyoutRef.current = successfulLifecycleFlyout.closeFlyout;
+
+  useRegisterLifecycleFlyoutOpen(
+    STREAM_LIFECYCLE_FLYOUT_IDS.successfulLifecycle,
+    successfulLifecycleFlyout.isOpen
+  );
+  useRegisterLifecycleFlyoutOpen(
+    STREAM_LIFECYCLE_FLYOUT_IDS.successfulDeletePhase,
+    isEditSuccessfulDeletePhaseFlyoutOpen
+  );
+  useRegisterLifecycleFlyoutOpen(
+    STREAM_LIFECYCLE_FLYOUT_IDS.dataPhases,
+    isEditDataPhasesFlyoutOpen
+  );
 
   const baselinePreviewHeader = useMemo(() => {
     const inheritLifecycle = isInheritLifecycle(definition.stream.ingest.lifecycle);
@@ -220,11 +236,11 @@ const StreamDetailGeneralDataInner = ({
     : baselinePreviewHeader;
 
   const openEditSuccessfulDeletePhaseFlyout = useCallback(() => {
-    if (successfulLifecycleFlyout.isOpen || isEditDataPhasesFlyoutOpen || isExternalFlyoutOpen) {
+    if (isAnyOtherFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.successfulDeletePhase)) {
       return;
     }
     setIsEditSuccessfulDeletePhaseFlyoutOpen(true);
-  }, [successfulLifecycleFlyout.isOpen, isEditDataPhasesFlyoutOpen, isExternalFlyoutOpen]);
+  }, [isAnyOtherFlyoutOpen]);
 
   // Frozen phase is not available in serverless
   const dataPhaseFlowEnabled = !isServerless;
@@ -263,11 +279,7 @@ const StreamDetailGeneralDataInner = ({
         setSelectedDataPhase(phase);
         return;
       }
-      if (
-        successfulLifecycleFlyout.isOpen ||
-        isEditSuccessfulDeletePhaseFlyoutOpen ||
-        isExternalFlyoutOpen
-      ) {
+      if (isAnyOtherFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.dataPhases)) {
         return;
       }
       // Gating only applies when *adding* a not-yet-configured frozen phase. Editing an existing
@@ -286,9 +298,7 @@ const StreamDetailGeneralDataInner = ({
     },
     [
       isEditDataPhasesFlyoutOpen,
-      successfulLifecycleFlyout.isOpen,
-      isEditSuccessfulDeletePhaseFlyoutOpen,
-      isExternalFlyoutOpen,
+      isAnyOtherFlyoutOpen,
       definition.effective_lifecycle,
       frozenPhaseGating,
     ]
@@ -501,16 +511,6 @@ const StreamDetailGeneralDataInner = ({
     successfulDeletePhaseInitialPreviewValue,
   ]);
 
-  const isAnySuccessfulFlyoutOpenInternal =
-    successfulLifecycleFlyout.isOpen || isEditSuccessfulDeletePhaseFlyoutOpen;
-  const isBlockingFlyoutOpenForCrossSection =
-    isAnySuccessfulFlyoutOpenInternal || isEditDataPhasesFlyoutOpen;
-  const isAnySuccessfulFlyoutOpen = isAnySuccessfulFlyoutOpenInternal || isExternalFlyoutOpen;
-
-  useEffect(() => {
-    onFlyoutOpenChange?.(isBlockingFlyoutOpenForCrossSection);
-  }, [isBlockingFlyoutOpenForCrossSection, onFlyoutOpenChange]);
-
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="m" css={{ flexGrow: 0 }}>
@@ -566,9 +566,6 @@ const StreamDetailGeneralDataInner = ({
                 isRefreshingDefaultRepository:
                   frozenPhaseGating.flyoutProps.isRefreshingDefaultRepository,
               }}
-              isExternalFlyoutOpen={isAnySuccessfulFlyoutOpen}
-              isDataPhaseFlyoutOpen={isEditDataPhasesFlyoutOpen}
-              onDataPhaseFlyoutOpenChange={setIsEditDataPhasesFlyoutOpen}
               previewHeader={previewHeader}
             />
           ) : null}
@@ -644,14 +641,10 @@ export const StreamDetailGeneralData = ({
   definition,
   refreshDefinition,
   data,
-  isExternalFlyoutOpen,
-  onFlyoutOpenChange,
 }: {
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
   data: ReturnType<typeof useDataStreamStats>;
-  isExternalFlyoutOpen?: boolean;
-  onFlyoutOpenChange?: (isOpen: boolean) => void;
 }) => {
   return (
     <LifecycleAfterSaveProvider>
@@ -660,8 +653,6 @@ export const StreamDetailGeneralData = ({
           definition={definition}
           refreshDefinition={refreshDefinition}
           data={data}
-          isExternalFlyoutOpen={isExternalFlyoutOpen}
-          onFlyoutOpenChange={onFlyoutOpenChange}
         />
       </LifecyclePreviewProvider>
     </LifecycleAfterSaveProvider>
