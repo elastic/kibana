@@ -47,9 +47,9 @@ describe('stepVerifyAssets', () => {
     const missing = [{ type: ElasticsearchAssetType.ingestPipeline, id: 'my-pipeline' }];
     mockVerifyEsAssetsExist.mockResolvedValue(missing as any);
 
-    await expect(
-      stepVerifyAssets({ esClient, logger, esReferences } as any)
-    ).rejects.toThrow(PackageAssetsVerificationError);
+    await expect(stepVerifyAssets({ esClient, logger, esReferences } as any)).rejects.toThrow(
+      PackageAssetsVerificationError
+    );
   });
 
   it('passes missing assets in the error meta', async () => {
@@ -64,7 +64,9 @@ describe('stepVerifyAssets', () => {
     }
 
     expect(thrown).toBeInstanceOf(PackageAssetsVerificationError);
-    expect(thrown?.meta).toEqual([{ type: ElasticsearchAssetType.indexTemplate, id: 'my-template' }]);
+    expect(thrown?.meta).toEqual([
+      { type: ElasticsearchAssetType.indexTemplate, id: 'my-template' },
+    ]);
   });
 
   it('reads esReferences from context.installedPkg when context.esReferences is absent', async () => {

@@ -138,7 +138,9 @@ describe('updateEsAssetReferences', () => {
 
     // First update throws a conflict; second succeeds
     soClient.update
-      .mockRejectedValueOnce(SavedObjectsErrorHelpers.createConflictError(PACKAGES_SO_TYPE, 'my-pkg'))
+      .mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(PACKAGES_SO_TYPE, 'my-pkg')
+      )
       .mockResolvedValueOnce({
         id: 'my-pkg',
         type: PACKAGES_SO_TYPE,
