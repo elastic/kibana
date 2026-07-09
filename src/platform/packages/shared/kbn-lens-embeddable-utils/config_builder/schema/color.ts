@@ -209,14 +209,14 @@ export const colorByValuePaletteSchema = schema.object(
       defaultValue: false,
       meta: {
         description:
-          "Defines whether values below the colored value range use the palette's lowest color instead of being left uncolored. Defaults to `false`.",
+          "When true, values below the range's minimum keep the palette's lowest color instead of being left uncolored.",
       },
     }),
     open_above: schema.boolean({
       defaultValue: true,
       meta: {
         description:
-          "Defines whether values above the colored value range use the palette's highest color instead of being left uncolored. Defaults to `true`.",
+          "When true, values above the range's maximum keep the palette's highest color instead of being left uncolored.",
       },
     }),
   },
@@ -224,7 +224,8 @@ export const colorByValuePaletteSchema = schema.object(
     meta: {
       id: 'colorByValuePalette',
       title: 'Color By Value (Palette)',
-      description: 'Color by value using a named palette applied relative to the value range.',
+      description:
+        'Color by value using a named palette, with colors distributed across the range of values.',
     },
   }
 );
@@ -241,7 +242,7 @@ export const colorByValueSchema = schema.oneOf(
       id: 'colorByValue',
       title: 'Color By Value',
       description:
-        'Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and named palettes.',
+        'Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and for named palettes.',
     },
   }
 );
