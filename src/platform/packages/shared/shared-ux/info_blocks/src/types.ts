@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { _EuiThemeSize, EuiTextProps } from '@elastic/eui';
+import type { _EuiThemeFontScale, EuiTextProps } from '@elastic/eui';
 
 export interface InfoBlockItem {
   /** Fixed-style text label rendered above the value. */
@@ -16,11 +16,11 @@ export interface InfoBlockItem {
   /** Arbitrary content rendered as the block value. */
   value: ReactNode;
   /**
-   * Renders the value as a large "big number" using the matching
-   * `euiTheme.size` token as its font size (e.g. `'xl'`). The title is
-   * unaffected. When omitted, the value uses the default text size.
+   * Renders the value at the given EUI font scale (e.g. `'xl'` for a larger
+   * value), via `euiFontSize`. The title is unaffected. When omitted, the
+   * value uses the default text size.
    */
-  size?: _EuiThemeSize;
+  size?: _EuiThemeFontScale;
   /** Color for the value text, passed through to `EuiText` (e.g. `'success'`). */
   color?: EuiTextProps['color'];
   'data-test-subj'?: string;

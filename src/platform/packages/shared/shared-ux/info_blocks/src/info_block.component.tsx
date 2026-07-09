@@ -9,7 +9,7 @@
 
 import React, { type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
-import { EuiText, EuiTextTruncate, useEuiTheme } from '@elastic/eui';
+import { EuiText, EuiTextTruncate, euiFontSize, useEuiTheme } from '@elastic/eui';
 import type { InfoBlockItem } from './types';
 
 export interface InfoBlockProps extends InfoBlockItem {
@@ -28,11 +28,13 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   compressed,
   ...rest
 }) => {
-  const { euiTheme } = useEuiTheme();
-  // "Big number" values map their font size to the matching euiTheme.size token.
-  // In the compressed layout the big number is suppressed so the value matches
-  // the surrounding text.
-  const bigNumberFontSize = size && !compressed ? euiTheme.size[size] : undefined;
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+  // When `size` is set, the value renders at that EUI font scale. In the
+  // compressed layout the custom size is suppressed so the value matches the
+  // surrounding text.
+  const valueFontSize =
+    size && !compressed ? euiFontSize(euiThemeContext, size, { unit: 'px' }) : undefined;
   // Plain text values (and titles) truncate to a single line via
   // EuiTextTruncate so a long string never overflows its column. Node values
   // (badges, links, images) manage their own layout and render as-is.
@@ -52,10 +54,11 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
         color={color}
         css={css`
           font-weight: ${euiTheme.font.weight.bold};
-          ${bigNumberFontSize
+          ${valueFontSize
             ? `
-                font-size: ${bigNumberFontSize};
-                line-height: ${euiTheme.font.lineHeightMultiplier};
+                font-size: ${valueFontSize.fontSize};
+                line-height: ${valueFontSize.lineHeight};
+                font-weight: ${euiTheme.font.weight.semiBold};
               `
             : ''}
           a {
