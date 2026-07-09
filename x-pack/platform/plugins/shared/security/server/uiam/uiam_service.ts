@@ -212,8 +212,13 @@ export interface UiamServicePublic {
    * Lists OAuth clients via the UIAM service.
    * @param accessToken UIAM session access token.
    * @param clientId Optional client ID filter.
+   * @param projectId Optional project ID filter.
    */
-  listOAuthClients(accessToken: string, clientId?: string): Promise<OAuthClientsResponse>;
+  listOAuthClients(
+    accessToken: string,
+    clientId?: string,
+    projectId?: string
+  ): Promise<OAuthClientsResponse>;
 
   /**
    * Updates an OAuth client's metadata via the UIAM service.
@@ -601,13 +606,20 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.listOAuthClients}.
    */
-  async listOAuthClients(accessToken: string, clientId?: string): Promise<OAuthClientsResponse> {
+  async listOAuthClients(
+    accessToken: string,
+    clientId?: string,
+    projectId?: string
+  ): Promise<OAuthClientsResponse> {
     try {
       this.#logger.debug('Attempting to list OAuth clients.');
 
       const url = new URL(`${this.#config.url}/uiam/api/v1/oauth/clients`);
       if (clientId) {
         url.searchParams.set('client_id', clientId);
+      }
+      if (projectId) {
+        url.searchParams.set('project_id', projectId);
       }
 
       const response = await UiamService.#parseUiamResponse(

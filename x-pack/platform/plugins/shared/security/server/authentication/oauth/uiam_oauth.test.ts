@@ -139,7 +139,22 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.listClients(request, 'c1');
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.listOAuthClients).toHaveBeenCalledWith('essu_access_token', 'c1');
+      expect(mockUiam.listOAuthClients).toHaveBeenCalledWith('essu_access_token', 'c1', undefined);
+    });
+
+    it('forwards project_id filter to UIAM service', async () => {
+      const mockResponse = { clients: [] };
+      mockUiam.listOAuthClients.mockResolvedValue(mockResponse);
+      const request = createMockRequest('Bearer essu_access_token');
+
+      const result = await uiamOAuth.listClients(request, undefined, 'my-project-id');
+
+      expect(result).toEqual(mockResponse);
+      expect(mockUiam.listOAuthClients).toHaveBeenCalledWith(
+        'essu_access_token',
+        undefined,
+        'my-project-id'
+      );
     });
   });
 
