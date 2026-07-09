@@ -36,6 +36,13 @@ const DISCOVERY_RECOMMENDED_MODELS = [
   defaultInferenceEndpoints.OPENAI_GPT_5_2,
 ];
 
+// Investigation is iterative tool-calling over an agentic loop, not a single deep-reasoning
+// pass — a fast/cheap model keeps latency and cost down without sacrificing quality.
+const INVESTIGATION_RECOMMENDED_MODELS = [
+  '.anthropic-claude-4.5-haiku-chat_completion',
+  '.openai-gpt-5.4-mini-chat_completion',
+];
+
 // Background memory upkeep favors a cheaper/faster model over the heavier
 // discovery/investigation ones.
 const MEMORY_RECOMMENDED_MODELS = [
@@ -150,7 +157,7 @@ export function registerSignificantEventsInferenceFeatures(
           defaultMessage: 'Model used during root cause investigation.',
         }
       ),
-      recommendedEndpoints: DISCOVERY_RECOMMENDED_MODELS,
+      recommendedEndpoints: INVESTIGATION_RECOMMENDED_MODELS,
       ignoreGlobalDefault: true,
     },
     {
