@@ -74,6 +74,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
               type: CONNECTOR_SML_TYPE,
               title: name,
               content: contentParts.join('\n'),
+              discovery_labels: [{ kind: 'shortcut', value: `${CONNECTOR_SML_TYPE}/${name}` }],
             },
           ],
         };
