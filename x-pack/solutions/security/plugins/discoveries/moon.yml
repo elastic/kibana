@@ -50,6 +50,13 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/inference-plugin'
   - '@kbn/utility-types'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/security-ai-prompts'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/security-solution-features'
+  - '@kbn/discoveries-schemas'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/alerts-as-data-utils'
 tags:
   - plugin
   - prod
