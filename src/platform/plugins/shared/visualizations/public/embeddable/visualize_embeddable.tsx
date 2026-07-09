@@ -129,11 +129,15 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
             }
           }
 
-          const nextDataViews = await getUsedDataViews(vis);
-          const currentDataViewIds = (dataViews$.getValue() ?? []).map(({ id }) => id);
-          const nextDataViewIds = nextDataViews.map(({ id }) => id);
-          if (!isEqual(currentDataViewIds, nextDataViewIds)) {
-            dataViews$.next(nextDataViews);
+          try {
+            const nextDataViews = await getUsedDataViews(vis);
+            const currentDataViewIds = (dataViews$.getValue() ?? []).map(({ id }) => id);
+            const nextDataViewIds = nextDataViews.map(({ id }) => id);
+            if (!isEqual(currentDataViewIds, nextDataViewIds)) {
+              dataViews$.next(nextDataViews);
+            }
+          } catch {
+            // keep the previously resolved data views if resolution fails
           }
 
           const { params, abortController } = await getExpressionParams();
