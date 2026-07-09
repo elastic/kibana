@@ -173,6 +173,7 @@ const mockUseKibanaReturnValue = {
       get: jest.fn(),
       set: jest.fn(),
     },
+    telemetry: { reportEvent: jest.fn() },
     theme: {
       getTheme: jest.fn().mockReturnValue({ darkMode: false }),
     },
