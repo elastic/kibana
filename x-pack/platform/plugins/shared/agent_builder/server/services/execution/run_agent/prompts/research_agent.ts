@@ -56,9 +56,7 @@ export const getResearchAgentPrompt = async (
 };
 
 const getAgentSystemMessage = async ({
-  configuration: {
-    research: { instructions: customInstructions },
-  },
+  configuration: { instructions: customInstructions },
   processedConversation: { attachmentTypes, versionedAttachmentPresentation },
   outputSchema,
   skills,

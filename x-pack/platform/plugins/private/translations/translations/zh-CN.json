@@ -26687,7 +26687,6 @@
     "xpack.lens.config.cannotConvertToEsqlRuntimeFieldTooltip": "无法转换为 ES|QL：即将发布的更新将支持运行时字段。",
     "xpack.lens.config.cannotConvertToEsqlTermsTooltip": "无法转换为 ES|QL：即将推出的更新将支持顶值（术语）聚合。",
     "xpack.lens.config.cannotConvertToEsqlTimeShiftTooltip": "无法转换为 ES|QL：即将发布的更新将支持时间偏移。",
-    "xpack.lens.config.cannotConvertToEsqlTrendLineTooltip": "无法转换为 ES|QL：将在即将推出的更新中支持带有趋势线的指标可视化。",
     "xpack.lens.config.cannotConvertToEsqlUnknownTooltip": "无法转换为 ES|QL：即将发布的更新将支持此可视化。",
     "xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip": "无法转换为 ES|QL：使用的一些设置将在即将发布的更新中得到支持。",
     "xpack.lens.config.collapseAriaLabel": "折叠",
