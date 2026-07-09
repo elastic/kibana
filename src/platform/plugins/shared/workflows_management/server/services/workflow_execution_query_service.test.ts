@@ -11,13 +11,19 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionType } from '@kbn/workflows';
+import type {
+  StepExecutionsDataAccess,
+  WorkflowExecutionsDataAccess,
+} from '@kbn/workflows/server/data_access_layer';
 import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
 
 import { WorkflowExecutionQueryService } from './workflow_execution_query_service';
-import { WORKFLOWS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 describe('WorkflowExecutionQueryService', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockWorkflowExecutionsDal: jest.Mocked<Pick<WorkflowExecutionsDataAccess, 'search'>>;
+  let mockStepExecutionsDal: jest.Mocked<Pick<StepExecutionsDataAccess, 'search'>>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockEventLoggerService: jest.Mocked<IWorkflowEventLoggerService>;
   let service: WorkflowExecutionQueryService;
@@ -29,6 +35,16 @@ describe('WorkflowExecutionQueryService', () => {
       mget: jest.fn(),
       update: jest.fn(),
     } as any;
+    mockWorkflowExecutionsDal = {
+      search: jest.fn((request) =>
+        mockEsClient.search({ index: WORKFLOWS_EXECUTIONS_INDEX, ...request })
+      ),
+    };
+    mockStepExecutionsDal = {
+      search: jest.fn((request) =>
+        mockEsClient.search({ index: WORKFLOWS_STEP_EXECUTIONS_INDEX, ...request })
+      ),
+    };
     mockLogger = loggerMock.create();
     mockEventLoggerService = {
       getExecutionLogs: jest.fn().mockResolvedValue({ results: [], total: 0 }),
@@ -38,6 +54,8 @@ describe('WorkflowExecutionQueryService', () => {
     service = new WorkflowExecutionQueryService({
       logger: mockLogger,
       esClient: mockEsClient,
+      workflowExecutionsDal: mockWorkflowExecutionsDal,
+      stepExecutionsDal: mockStepExecutionsDal,
       workflowEventLoggerService: mockEventLoggerService,
     });
   });

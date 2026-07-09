@@ -134,10 +134,9 @@ export class WorkflowExecutionQueryService {
     options?: { includeInput?: boolean; includeOutput?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return getWorkflowExecution({
-      esClient: this.deps.esClient,
+      workflowExecutionsDal: this.deps.workflowExecutionsDal,
+      stepExecutionsDal: this.deps.stepExecutionsDal,
       logger: this.deps.logger,
-      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
-      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: executionId,
       spaceId,
       includeInput: options?.includeInput,
@@ -151,8 +150,8 @@ export class WorkflowExecutionQueryService {
   ): Promise<ChildWorkflowExecutionItem[]> {
     return getChildWorkflowExecutions({
       esClient: this.deps.esClient,
+      stepExecutionsDal: this.deps.stepExecutionsDal,
       workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
-      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       parentExecutionId,
       spaceId,
     });
@@ -225,9 +224,8 @@ export class WorkflowExecutionQueryService {
       : undefined;
 
     return searchWorkflowExecutions({
-      esClient: this.deps.esClient,
+      workflowExecutionsDal: this.deps.workflowExecutionsDal,
       logger: this.deps.logger,
-      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
       query: { bool: { must } },
       size,
       from,
@@ -242,8 +240,7 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<estypes.SearchResponse<unknown>> {
     try {
-      return await this.deps.esClient.search({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
+      return await this.deps.workflowExecutionsDal.search({
         query: buildWorkflowExecutionsSearchQuery(params.query, spaceId, {
           includeManagedExecutions: params.includeManagedExecutions,
         }),
@@ -265,15 +262,14 @@ export class WorkflowExecutionQueryService {
     executionId: string,
     spaceId: string
   ): Promise<WorkflowExecutionHistoryModel[]> {
-    const response = await this.deps.esClient.search<StepExecutionWithLegacyFields>({
-      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+    const response = (await this.deps.stepExecutionsDal.search({
       query: {
         bool: {
           must: [{ term: { executionId } }, { term: { spaceId } }],
         },
       },
       sort: [{ timestamp: { order: 'asc' } }],
-    });
+    })) as estypes.SearchResponse<StepExecutionWithLegacyFields>;
 
     return response.hits.hits.map((hit) => {
       if (!hit._source) {
@@ -298,9 +294,8 @@ export class WorkflowExecutionQueryService {
 
   async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {
     const searchResult = await searchStepExecutions({
-      esClient: this.deps.esClient,
+      stepExecutionsDal: this.deps.stepExecutionsDal,
       logger: this.deps.logger,
-      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowExecutionId: params.executionId,
       additionalQuery: { term: { id: params.id } },
       spaceId,
@@ -317,9 +312,8 @@ export class WorkflowExecutionQueryService {
     if (!params.includeOutput) sourceExcludes.push('output');
 
     return searchStepExecutions({
-      esClient: this.deps.esClient,
+      stepExecutionsDal: this.deps.stepExecutionsDal,
       logger: this.deps.logger,
-      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       workflowId: params.workflowId,
       stepId: params.stepId,
       spaceId,
@@ -360,8 +354,7 @@ export class WorkflowExecutionQueryService {
     const from = Math.max(0, (page - 1) * perPage);
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
     try {
-      response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      response = await this.deps.stepExecutionsDal.search({
         query: {
           bool: {
             must: [{ term: { spaceId } }, { term: { status: 'waiting_for_input' } }],
@@ -476,8 +469,7 @@ export class WorkflowExecutionQueryService {
     const filterMust = buildHistoryFilterClauses({ channel, workflowId, respondedBy, q });
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
     try {
-      response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      response = await this.deps.stepExecutionsDal.search({
         query: {
           bool: {
             must: [{ term: { spaceId } }, { term: { stepType: 'waitForInput' } }, ...filterMust],
@@ -574,11 +566,7 @@ export class WorkflowExecutionQueryService {
   ): Promise<ProcessedWaitForInputFacets> {
     let response: estypes.SearchResponse<EsWorkflowStepExecution, ProcessedWaitForInputFacetAggs>;
     try {
-      response = await this.deps.esClient.search<
-        EsWorkflowStepExecution,
-        ProcessedWaitForInputFacetAggs
-      >({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      response = (await this.deps.stepExecutionsDal.search({
         // `size: 0` — we only want the aggs, not the matching docs.
         size: 0,
         query: {
@@ -593,7 +581,10 @@ export class WorkflowExecutionQueryService {
           respondedBy: { terms: { field: 'hitl.respondedBy', size: maxBuckets } },
         },
         track_total_hits: false,
-      });
+      })) as unknown as estypes.SearchResponse<
+        EsWorkflowStepExecution,
+        ProcessedWaitForInputFacetAggs
+      >;
     } catch (error) {
       if (isIndexNotFoundError(error)) {
         return { channel: [], respondedBy: [] };
@@ -639,8 +630,7 @@ export class WorkflowExecutionQueryService {
 
     let response: estypes.SearchResponse<EsWorkflowStepExecution>;
     try {
-      response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      response = await this.deps.stepExecutionsDal.search({
         query: {
           bool: {
             must: [
@@ -748,8 +738,7 @@ export class WorkflowExecutionQueryService {
   /** Returns the claimable `waitForInput` step currently blocking the run. */
   async getWaitingStepExecutionId(executionId: string, spaceId: string): Promise<string | null> {
     try {
-      const response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      const response = (await this.deps.stepExecutionsDal.search({
         query: {
           bool: {
             must: [
@@ -768,7 +757,7 @@ export class WorkflowExecutionQueryService {
         sort: [{ startedAt: { order: 'desc' } }],
         size: 1,
         track_total_hits: false,
-      });
+      })) as estypes.SearchResponse<EsWorkflowStepExecution>;
       const hit = response.hits.hits[0];
       return hit?._source?.id ?? hit?._id ?? null;
     } catch (error) {
@@ -787,8 +776,7 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
     const { executionId, id } = params;
-    const response = await this.deps.esClient.search<EsWorkflowStepExecution>({
-      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+    const response = (await this.deps.stepExecutionsDal.search({
       query: {
         bool: {
           must: [{ term: { workflowRunId: executionId } }, { term: { id } }, { term: { spaceId } }],
@@ -796,7 +784,7 @@ export class WorkflowExecutionQueryService {
       },
       size: 1,
       track_total_hits: false,
-    });
+    })) as estypes.SearchResponse<EsWorkflowStepExecution>;
 
     if (response.hits.hits.length === 0) {
       return null;

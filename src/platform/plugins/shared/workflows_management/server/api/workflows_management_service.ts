@@ -37,6 +37,7 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
+import { createExecutionsDal } from '@kbn/workflows/server/data_access_layer';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
@@ -200,9 +201,17 @@ export class WorkflowsService {
       getActionsClientWithRequest: this.getActionsClientWithRequest,
     });
 
+    const { workflowExecutionsDal, stepExecutionsDal } = createExecutionsDal({
+      source: 'system_index',
+      esClient: this.esClient,
+      logger: this.logger,
+    });
+
     this.executionQueryService = new WorkflowExecutionQueryService({
       logger: this.logger,
       esClient: this.esClient,
+      workflowExecutionsDal,
+      stepExecutionsDal,
       workflowEventLoggerService: this.workflowsExecutionEngine.workflowEventLoggerService,
     });
 

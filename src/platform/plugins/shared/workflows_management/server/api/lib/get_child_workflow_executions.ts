@@ -15,11 +15,12 @@ import type {
   EsWorkflowStepExecution,
   WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
+import type { StepExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server/data_access_layer';
 interface GetChildWorkflowExecutionsParams {
   esClient: ElasticsearchClient;
+  stepExecutionsDal: StepExecutionsDataAccess;
   workflowExecutionIndex: string;
-  stepsExecutionIndex: string;
   parentExecutionId: string;
   spaceId: string;
 }
@@ -29,8 +30,8 @@ interface ChildRef {
   childExecutionId: string;
 }
 
-const STEP_SOURCE_EXCLUDES = ['input', 'output'];
-const PARENT_SOURCE_INCLUDES = ['spaceId', 'stepExecutionIds'];
+const STEP_SOURCE_EXCLUDES: (keyof EsWorkflowStepExecution)[] = ['input', 'output'];
+const PARENT_SOURCE_INCLUDES: (keyof EsWorkflowExecution)[] = ['spaceId', 'stepExecutionIds'];
 const CHILD_SOURCE_INCLUDES = [
   'spaceId',
   'workflowId',
@@ -90,8 +91,8 @@ const groupStepsByWorkflowRunId = (
 
 export const getChildWorkflowExecutions = async ({
   esClient,
+  stepExecutionsDal,
   workflowExecutionIndex,
-  stepsExecutionIndex,
   parentExecutionId,
   spaceId,
 }: GetChildWorkflowExecutionsParams): Promise<ChildWorkflowExecutionItem[]> => {
@@ -107,8 +108,7 @@ export const getChildWorkflowExecutions = async ({
   }
 
   const parentStepExecutions = await getStepExecutionsByWorkflowExecution({
-    esClient,
-    stepsExecutionIndex,
+    stepExecutionsDal,
     workflowExecutionId: parentExecutionId,
     stepExecutionIds: parentDoc.stepExecutionIds,
     sourceExcludes: STEP_SOURCE_EXCLUDES,
@@ -133,8 +133,7 @@ export const getChildWorkflowExecutions = async ({
   const childStepExecutions =
     allChildStepExecutionIds.length > 0
       ? await getStepExecutionsByWorkflowExecution({
-          esClient,
-          stepsExecutionIndex,
+          stepExecutionsDal,
           workflowExecutionId: '',
           stepExecutionIds: allChildStepExecutionIds,
           sourceExcludes: STEP_SOURCE_EXCLUDES,

@@ -8,9 +8,10 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { StepExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
 
 import { buildTimeRangeFilter } from './build_time_range_filter';
 
@@ -22,9 +23,8 @@ export interface StepExecutionListResult {
 }
 
 export interface SearchStepExecutionsParams {
-  esClient: ElasticsearchClient;
+  stepExecutionsDal: StepExecutionsDataAccess;
   logger: Logger;
-  stepsExecutionIndex: string;
   /** When set, search steps for a single workflow run (existing behavior). */
   workflowExecutionId?: string;
   /** When set, search steps across all runs of a workflow. Use with optional stepId. */
@@ -85,9 +85,8 @@ function getTotalFromResponse(
 }
 
 export const searchStepExecutions = async ({
-  esClient,
+  stepExecutionsDal,
   logger,
-  stepsExecutionIndex,
   workflowExecutionId,
   workflowId,
   stepId,
@@ -104,7 +103,7 @@ export const searchStepExecutions = async ({
   }
 
   try {
-    logger.debug(`Searching step executions in index ${stepsExecutionIndex}`);
+    logger.debug('Searching step executions');
 
     const mustQueries = buildMustQueries({
       workflowExecutionId,
@@ -120,8 +119,7 @@ export const searchStepExecutions = async ({
     const pageSize = size ?? (isPaginated ? 100 : 1000);
     const from = isPaginated && page !== undefined ? (page - 1) * pageSize : 0;
 
-    const response = await esClient.search<EsWorkflowStepExecution>({
-      index: stepsExecutionIndex,
+    const response = await stepExecutionsDal.search<EsWorkflowStepExecution>({
       query: { bool: { must: mustQueries } },
       ...(sourceExcludes?.length ? { _source: { excludes: sourceExcludes } } : {}),
       sort: 'startedAt:desc',

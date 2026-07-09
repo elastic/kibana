@@ -16,6 +16,10 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  StepExecutionsDataAccess,
+  WorkflowExecutionsDataAccess,
+} from '@kbn/workflows/server/data_access_layer';
 import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
@@ -52,6 +56,8 @@ export interface WorkflowSearchDeps extends WorkflowStorageDeps {
 export interface WorkflowExecutionQueryDeps {
   logger: Logger;
   esClient: ElasticsearchClient;
+  workflowExecutionsDal: WorkflowExecutionsDataAccess;
+  stepExecutionsDal: StepExecutionsDataAccess;
   workflowEventLoggerService: IWorkflowEventLoggerService;
 }
 
