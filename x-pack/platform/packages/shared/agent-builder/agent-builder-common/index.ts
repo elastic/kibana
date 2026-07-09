@@ -128,8 +128,6 @@ export {
   type RuntimeAgentConfigurationOverrides,
   type AgentCapabilities,
   type ResolvedAgentCapabilities,
-  type AgentAnswerStepConfiguration,
-  type AgentResearchStepConfiguration,
   agentIdRegexp,
   AgentExecutionMode,
   SubagentExecutionMode,
