@@ -8,7 +8,6 @@
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import type { SmlDocument } from '../services/sml/types';
 
 export const createMockSmlService = () => ({
   search: jest.fn(),
@@ -22,7 +21,7 @@ export const createMockSmlService = () => ({
   getCrawler: jest.fn(),
 });
 
-export const createMockUiSettingsClient = (enabled = true) => ({
+const createMockUiSettingsClient = (enabled = true) => ({
   get: jest.fn().mockImplementation(async (key: string) => {
     if (key === CONTEXT_ENGINE_ENABLED_SETTING_ID) return enabled;
     return undefined;
@@ -54,19 +53,5 @@ export const buildMockContext = (uiSettingsEnabled = true) => ({
     savedObjects: { client: {} },
   }),
 });
-
-export const sampleDocument: SmlDocument = {
-  id: 'chunk-1',
-  type: 'visualization',
-  title: 'Test Viz',
-  origin_id: 'viz-1',
-  origin: { uri: 'visualization://viz-1' },
-  content: 'some content',
-  created_at: '2024-01-01',
-  updated_at: '2024-01-02',
-  spaces: ['test-space'],
-  permissions: { kibana: { privileges: [] } },
-  ingestion_method: 'crawled',
-};
 
 export { httpServerMock, httpServiceMock };

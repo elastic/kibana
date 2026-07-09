@@ -25,18 +25,6 @@ export type {
 
 export type { ConversationListOptions } from '@kbn/agent-builder-common';
 
-export type {
-  SmlTypeDefinition,
-  SmlEntry,
-  SmlContext,
-  SmlToAttachmentContext,
-  SmlListItem,
-  SmlSearchResult,
-  SmlIndexAttachmentParams,
-} from '@kbn/agent-builder-sml-plugin/server';
-
-export { smlElasticsearchIndexMappings, smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
-
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,

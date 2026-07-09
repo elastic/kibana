@@ -14,20 +14,16 @@ import {
   type AgentBuilderSmlPublicPluginStartDeps,
 } from './plugin';
 
-export { smlSearchPath, smlAutocompletePath, internalApiPath } from '../common/constants';
+export { smlSearchPath, smlAutocompletePath } from '../common/constants';
 export {
   SML_HTTP_SEARCH_QUERY_MAX_LENGTH,
-  SML_HTTP_AUTOCOMPLETE_QUERY_MAX_LENGTH,
   SmlSearchFilterType,
 } from '../common/http_api/sml';
 export type {
   SmlSearchConstraints,
   SmlSearchFilters,
   SmlSearchHttpResponse,
-  SmlSearchHttpResultItem,
   SmlAutocompleteHttpResponse,
-  SmlAutocompleteHttpResultItem,
-  SmlMatchedDiscoveryLabel,
 } from '../common/http_api/sml';
 
 export const plugin: PluginInitializer<
