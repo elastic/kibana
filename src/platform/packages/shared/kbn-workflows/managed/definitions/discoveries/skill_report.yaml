@@ -1,0 +1,93 @@
+version: '1'
+name: Security - Attack discovery - Skill report
+description: |
+  Phase 2 of skill-driven Attack Discovery 2.0: after generation and validation
+  have produced an `execution_uuid` and persisted discoveries, this workflow
+  RESUMES the Agent Builder conversation that was persisted by the skill alert
+  retrieval workflow (Phase 1) so the attack-discovery-generator skill renders
+  the full Attack Discovery Report into that same conversation.
+
+  The `ai.agent` step continues the existing conversation via the
+  `conversation_id` input (no `create-conversation`) and drives the skill's
+  status-only path (Mode B): the skill calls the
+  `security.attack-discovery.get_status` tool with the supplied
+  `execution_uuid` and renders the report for the returned discoveries.
+
+  This workflow is invoked fire-and-forget by the AD 2.0 orchestration after
+  validation succeeds, so report failures never affect the generation outcome.
+enabled: true
+tags:
+  - Attack discovery
+  - Security
+  - AI Agent
+  - attackDiscovery:skill_report
+
+triggers:
+  - type: manual
+
+inputs:
+  additionalProperties: false
+  properties:
+    connector_id:
+      description: >
+        GenAI connector id used by the report `ai.agent` step's model routing.
+        Per Constraint A this is the same connector selected for the generation
+        request, so the report is rendered by the model the user selected rather
+        than the Agent Builder default. When omitted (or empty), the step falls
+        back to the Agent Builder default model.
+      type: string
+    conversation_id:
+      description: >
+        Identifier of the persisted Agent Builder conversation created by the
+        skill alert retrieval workflow. The report is rendered into this same
+        conversation.
+      type: string
+    execution_uuid:
+      description: >
+        The Attack Discovery 2.0 generation `execution_uuid` whose persisted
+        discoveries should be rendered as the report (via the status-only path).
+      type: string
+  required:
+    - conversation_id
+    - execution_uuid
+
+steps:
+  # Resume the persisted conversation and drive the skill's status-only path
+  # (Mode B). Passing `conversation_id` (without `create-conversation`)
+  # continues the existing conversation instead of creating a new one, so the
+  # rendered report lands in the same thread the alert retrieval phase started.
+  - name: render_report
+    type: ai.agent
+    timeout: '10m'
+    # Route the skill's model calls through the connector selected for this
+    # generation (Constraint A). When the input is empty/omitted, this renders
+    # to undefined and the step falls back to the Agent Builder default model.
+    connector-id: '${{ inputs.connector_id }}'
+    with:
+      conversation_id: ${{ inputs.conversation_id }}
+      message: >
+        The Attack Discovery generation for execution_uuid
+        {{ inputs.execution_uuid }} has completed. Use the
+        [/attack-discovery-generator](skill://attack-discovery-generator) skill
+        in status-only mode (Mode B): call the
+        `security.attack-discovery.get_status` tool with that execution_uuid
+        and render the full Attack Discovery Report for the returned
+        discoveries.
+
+        After rendering the report, perform the Missed Detection Closure pass.
+        Because this status-resume path did not run its own upstream
+        investigation, first run a best-effort, lightweight raw-log
+        corroboration of the persisted attack chains to surface malicious
+        actions the curated alert set did not catch. Emit a
+        `## ⚠️ Missed Detection` heading for each coverage gap and draft a
+        candidate ES|QL detection rule for each gap.
+
+        Then PAUSE for explicit approval: ask the user to reply with
+        `create the rule` before any detection rule is created.
+
+        Do not start a new generation and do not invoke the
+        attack-discovery.run tool. Do NOT auto-create detection rules without
+        the user's `create the rule` reply.
+    on-failure:
+      retry:
+        max-attempts: 3

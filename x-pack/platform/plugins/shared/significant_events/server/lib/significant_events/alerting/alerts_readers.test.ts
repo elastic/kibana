@@ -49,6 +49,19 @@ function createEsClient() {
 describe('SignificantEventsAlertsReaderV1', () => {
   const reader = ALERTS_READER_V1;
 
+  it('builds the occurrences ES|QL request scoped by rule uuid', () => {
+    const request = reader.buildOccurrencesEsqlRequest({
+      ruleIds: [RULE_UUID],
+      value: 30,
+      esqlUnit: 'minutes',
+      limit: 100,
+      spaceId: SPACE_ID,
+    });
+
+    expect(request.query).toContain(`kibana.alert.rule.uuid IN ("${RULE_UUID}")`);
+    expect(request.query).not.toContain('space_id');
+  });
+
   it('counts alerts with a document count query', async () => {
     const { client, count } = createEsClient();
     count.mockResolvedValue({ count: 17 });
@@ -265,6 +278,20 @@ describe('SignificantEventsAlertsReaderV1', () => {
 
 describe('SignificantEventsAlertsReaderV2', () => {
   const reader = ALERTS_READER_V2;
+
+  it('scopes the occurrences ES|QL request by type == "signal" and space_id', () => {
+    const request = reader.buildOccurrencesEsqlRequest({
+      ruleIds: [RULE_UUID],
+      value: 30,
+      esqlUnit: 'minutes',
+      limit: 100,
+      spaceId: SPACE_ID,
+    });
+
+    expect(request.query).toContain('type == "signal"');
+    expect(request.query).toContain(`space_id == "${SPACE_ID}"`);
+    expect(request.query).toContain(`rule.id IN ("${RULE_UUID}")`);
+  });
 
   it('counts alerts with a distinct group_hash cardinality aggregation', async () => {
     const { client, search } = createEsClient();
