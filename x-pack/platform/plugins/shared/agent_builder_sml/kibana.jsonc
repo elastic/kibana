@@ -1,11 +1,11 @@
 {
   "type": "plugin",
-  "id": "@kbn/agent-context-layer-plugin",
-  "owner": "@elastic/context-eng",
+  "id": "@kbn/agent-builder-sml-plugin",
+  "owner": "@elastic/workchat-eng",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
-    "id": "agentContextLayer",
+    "id": "agentBuilderSml",
     "server": true,
     "browser": true,
     "requiredPlugins": ["features", "taskManager"],
