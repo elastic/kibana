@@ -41,6 +41,9 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
         size={compressed ? 'xs' : 's'}
         css={css`
           font-weight: ${euiTheme.font.weight.bold};
+          a {
+            font-weight: inherit;
+          }
         `}
       >
         {value}

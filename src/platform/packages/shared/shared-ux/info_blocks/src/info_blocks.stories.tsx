@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { EuiHealth } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLink } from '@elastic/eui';
 import { InfoBlocks } from './info_blocks.component';
 import type { InfoBlockItem } from './types';
 
@@ -22,11 +23,42 @@ export default meta;
 const SAMPLE_ITEMS: InfoBlockItem[] = [
   { title: 'Owner', value: 'Platform' },
   { title: 'Latency', value: <EuiHealth color="success">Healthy</EuiHealth> },
+  {
+    // Long value that must truncate within its column, with a trailing copy action.
+    title: 'Resource',
+    value: (
+      <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+        <EuiFlexItem
+          grow={true}
+          css={css`
+            min-width: 0;
+          `}
+        >
+          <EuiLink
+            href="#"
+            className="eui-textTruncate"
+            css={css`
+              display: block;
+            `}
+          >
+            etcd-cspm-control-plane-8fO2b-1a2b3c4d5e6f7g8h9i0j-kube-system
+          </EuiLink>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="copyClipboard"
+            color="text"
+            size="xs"
+            aria-label="Copy resource identifier"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  },
   { title: 'Throughput', value: '1.2k tpm' },
   { title: 'Environment', value: 'production' },
   { title: 'Error rate', value: <EuiHealth color="warning">0.4%</EuiHealth> },
   { title: 'Version', value: 'v8.19.0' },
-  { title: 'Region', value: 'us-east-1' },
 ];
 
 interface DefaultArgs {
