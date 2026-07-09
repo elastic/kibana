@@ -65,6 +65,7 @@ export const esqlAsyncSearchStrategyProvider = (
         signal: options.abortSignal,
         meta: true,
         asStream: options.stream,
+        requestTimeout: 10_000, // Hardcoded 10s timeout for testing purposes
       }
     );
   }

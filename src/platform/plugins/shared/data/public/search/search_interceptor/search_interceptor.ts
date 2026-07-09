@@ -57,6 +57,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import type {
+  IEsSearchResponse,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
@@ -114,6 +115,16 @@ const MAX_CACHE_ITEMS = 50;
 const MAX_CACHE_SIZE_MB = 10;
 
 const DEFAULT_MULTIPLEXING_POLL_LENGTH = '30s';
+
+const getDefaultPartialResponse = (id: string | undefined) =>
+  ({
+    rawResponse: {
+      id,
+      is_running: false,
+      columns: [],
+      values: [],
+    },
+  } as unknown as IEsSearchResponse);
 
 export class SearchInterceptor {
   private uiSettingsSubs: Subscription[] = [];
@@ -489,6 +500,7 @@ export class SearchInterceptor {
               }
             )
           ).pipe(
+            catchError(() => of(getDefaultPartialResponse(id))),
             map((response) =>
               options.strategy === ENHANCED_ES_SEARCH_STRATEGY
                 ? toPartialResponseAfterTimeout(response)
