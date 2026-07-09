@@ -149,7 +149,7 @@ export const DocumentFlyout = memo(
           if (!ruleId) {
             return <>{props.children}</>;
           }
-          return <OpenFlyoutLink {...props} value={ruleId} />;
+          return <OpenFlyoutLink {...props} value={ruleId} asParent />;
         }
         // Host and IP fields open as a new flyout (parent) rather than a child of the current one.
         const isIpField = getEcsField(props.field)?.type === IP_FIELD_TYPE;
