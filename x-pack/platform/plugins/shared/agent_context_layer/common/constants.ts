@@ -15,10 +15,4 @@ export const smlAutocompletePath = `${internalApiPath}/sml/_autocomplete`;
 export const MAX_SML_ORIGIN_ID_LENGTH = 512;
 
 export const MAX_SML_TYPE_LENGTH = 256;
-export const MAX_SML_TITLE_LENGTH = 1024;
-export const MAX_SML_CONTENT_LENGTH = 50_000;
-export const MAX_SML_TAG_LENGTH = 100;
-export const MAX_SML_TAGS_PER_DOCUMENT = 100;
-export const MAX_SML_PERMISSIONS_NAME_LENGTH = 512;
-export const MAX_SML_PERMISSIONS_ENTRIES = 100;
 export const MAX_CHUNKS_PER_ORIGIN = 1000;

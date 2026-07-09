@@ -134,7 +134,7 @@ export interface AgentHandlerContext {
   /**
    * Saved objects client scoped to the current user.
    */
-  savedObjectsClient?: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
   /**
    * Inference model provider scoped to the current user.
    * Can be used to access the inference APIs or chatModel.

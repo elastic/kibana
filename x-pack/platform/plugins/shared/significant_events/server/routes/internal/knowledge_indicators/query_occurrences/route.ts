@@ -60,6 +60,7 @@ const readQueryOccurrencesRoute = createServerRoute({
     params,
     request,
     getScopedClients,
+    getSpaceId,
     server,
   }): Promise<QueryOccurrencesResponse> => {
     const scopedClients = await getScopedClients({ request });
@@ -81,6 +82,7 @@ const readQueryOccurrencesRoute = createServerRoute({
         streamNames,
         searchMode,
         alertsReader,
+        spaceId: await getSpaceId(request),
       },
       { kiClient, scopedClusterClient }
     );
