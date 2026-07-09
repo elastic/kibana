@@ -2040,15 +2040,6 @@
   resolved "https://registry.yarnpkg.com/@csstools/selector-specificity/-/selector-specificity-2.2.0.tgz#2cbcf822bf3764c9658c4d2e568bd0c0cb748016"
   integrity sha512-+OJ9konv95ClSTOJCmMZqpd5+YGsB2S+x6w3E1oaM8UuR5j8nTNHYSz8c9BEPGDOCMQYIEEGlVPj/VY64iTbGw==
 
-"@cypress/debugging-proxy@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@cypress/debugging-proxy/-/debugging-proxy-2.0.1.tgz#c0ef569af4c2efb6ceb329e5813bc770b133ab9e"
-  integrity sha512-kUFQSNQfvZUO5yqtiir65FPPJZKPQaA68trYiKlHuWhDu9sopjIAXoZv/ff0GbLSNDHdxIuF0VyJhJIRRHuhAw==
-  dependencies:
-    debug "^4.1.1"
-    http-proxy "^1.17.0"
-    self-signed-cert "^1.0.1"
-
 "@cypress/grep@5.1.0":
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/@cypress/grep/-/grep-5.1.0.tgz#9ca3565f51fde6721e3c00a6bdddfbf34b42378a"
@@ -4869,6 +4860,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/attack-discovery-schedules-common@link:x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/audit-log-plugin@link:x-pack/platform/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""
@@ -6698,6 +6693,18 @@
   uid ""
 
 "@kbn/discover-utils@link:src/platform/packages/shared/kbn-discover-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/discoveries-plugin@link:x-pack/solutions/security/plugins/discoveries":
+  version "0.0.0"
+  uid ""
+
+"@kbn/discoveries-schemas@link:x-pack/solutions/security/packages/kbn-discoveries-schemas":
+  version "0.0.0"
+  uid ""
+
+"@kbn/discoveries@link:x-pack/solutions/security/packages/kbn-discoveries":
   version "0.0.0"
   uid ""
 
@@ -10187,7 +10194,7 @@
   optionalDependencies:
     langsmith ">=0.4.0 <1.0.0"
 
-"@langchain/core@1.1.31":
+"@langchain/core@1.1.31", "@langchain/core@^0.3.26":
   version "1.1.31"
   resolved "https://registry.yarnpkg.com/@langchain/core/-/core-1.1.31.tgz#81882c7be8dfe138015da67b93aa73c6ab0f6962"
   integrity sha512-FxsgIUONjKaRpjx59sISgmb0OMCbAetPGyhzjGa2kX0y1f8LZ5xm9VB2db7W9HYWyLvzRWcMA51Uu4OSTJmtZQ==
@@ -10233,6 +10240,23 @@
   dependencies:
     uuid "^10.0.0"
 
+"@langchain/langgraph-checkpoint@~0.0.17":
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/@langchain/langgraph-checkpoint/-/langgraph-checkpoint-0.0.17.tgz#d0a8824eb0769567da54262adebe65db4ee6d58f"
+  integrity sha512-6b3CuVVYx+7x0uWLG+7YXz9j2iBa+tn2AXvkLxzEvaAsLE6Sij++8PPbS2BZzC+S/FPJdWsz6I5bsrqL0BYrCA==
+  dependencies:
+    uuid "^10.0.0"
+
+"@langchain/langgraph-sdk@~0.0.32":
+  version "0.0.42"
+  resolved "https://registry.yarnpkg.com/@langchain/langgraph-sdk/-/langgraph-sdk-0.0.42.tgz#401363ac74532b14e36ba94e5ebe7fb6ce287fe7"
+  integrity sha512-seOcLN6+MWxCGEVfKY2pFcFpJB56DZq7iXhe5Br/xF7Uxspm1e50Z8f0k21XOJFQyMheR6AZ9zXEBVeX1ZsDMg==
+  dependencies:
+    "@types/json-schema" "^7.0.15"
+    p-queue "^6.6.2"
+    p-retry "4"
+    uuid "^9.0.0"
+
 "@langchain/langgraph-sdk@~1.6.5":
   version "1.6.5"
   resolved "https://registry.yarnpkg.com/@langchain/langgraph-sdk/-/langgraph-sdk-1.6.5.tgz#1a089f7412239ffad1c3b52364ba6af694966424"
@@ -10252,6 +10276,16 @@
     "@langchain/langgraph-sdk" "~1.6.5"
     "@standard-schema/spec" "1.1.0"
     uuid "^10.0.0"
+
+"@langchain/langgraph@^0.2.20":
+  version "0.2.74"
+  resolved "https://registry.yarnpkg.com/@langchain/langgraph/-/langgraph-0.2.74.tgz#37367a1e8bafda3548037a91449a69a84f285def"
+  integrity sha512-oHpEi5sTZTPaeZX1UnzfM2OAJ21QGQrwReTV6+QnX7h8nDCBzhtipAw1cK616S+X8zpcVOjgOtJuaJhXa4mN8w==
+  dependencies:
+    "@langchain/langgraph-checkpoint" "~0.0.17"
+    "@langchain/langgraph-sdk" "~0.0.32"
+    uuid "^10.0.0"
+    zod "^3.23.8"
 
 "@langchain/openai@1.2.12":
   version "1.2.12"
@@ -24282,7 +24316,7 @@ http-proxy-middleware@^2.0.9:
     is-plain-obj "^3.0.0"
     micromatch "^4.0.2"
 
-http-proxy@1.18.1, http-proxy@^1.17.0, http-proxy@^1.18.1:
+http-proxy@1.18.1, http-proxy@^1.18.1:
   version "1.18.1"
   resolved "https://registry.yarnpkg.com/http-proxy/-/http-proxy-1.18.1.tgz#401541f0534884bbf95260334e72f88ee3976549"
   integrity sha512-7mz/721AbnJwIVbnaSv1Cz3Am0ZLT/UBwkC92VlxhXv/k/BBQfM2fXElQNC27BVGr0uwUpplYPQM9LnaBMR5NQ==
@@ -29478,7 +29512,7 @@ p-queue@^9.0.1:
     eventemitter3 "^5.0.1"
     p-timeout "^7.0.0"
 
-p-retry@4.6.2:
+p-retry@4, p-retry@4.6.2:
   version "4.6.2"
   resolved "https://registry.yarnpkg.com/p-retry/-/p-retry-4.6.2.tgz#9baae7184057edd4e17231cee04264106e092a16"
   integrity sha512-312Id396EbJdvRONlngUx0NydfrIQ5lsYu0znKVUzVvArzEIt08V1qhtyESbGVd1FGX7UKtiFp5uwKZdM8wIuQ==
@@ -32755,11 +32789,6 @@ selenium-webdriver@4.44.0:
     jszip "^3.10.1"
     tmp "^0.2.5"
     ws "^8.20.1"
-
-self-signed-cert@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/self-signed-cert/-/self-signed-cert-1.0.1.tgz#9e2fae07503f84fb910f4a87c5c5c6becc207bf6"
-  integrity sha512-86d1jYydqaRdUEyR9tj5nQ0d059RUWB9gdZrzDy2MJaUHii1h9EyzbAepkV1rOLO2AkSkQbXtUrqWRH4FDYWHA==
 
 selfsigned@^5.5.0:
   version "5.5.0"
@@ -37203,7 +37232,7 @@ zod-to-json-schema@^3.24.3, zod-to-json-schema@^3.25.1:
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.25.1.tgz#7f24962101a439ddade2bf1aeab3c3bfec7d84ba"
   integrity sha512-pM/SU9d3YAggzi6MtR4h7ruuQlqKtad8e9S0fmxcMi+ueAK5Korys/aWcV9LIIHTVbj01NdzxcnXSN+O74ZIVA==
 
-zod@4.4.3, zod@^3.24.1, zod@^3.24.2, "zod@^3.25 || ^4.0", "zod@^3.25.76 || ^4", zod@^4.1.11, zod@^4.3.6:
+zod@4.4.3, zod@^3.23.8, zod@^3.24.1, zod@^3.24.2, "zod@^3.25 || ^4.0", "zod@^3.25.76 || ^4", zod@^4.1.11, zod@^4.3.6:
   version "4.4.3"
   resolved "https://registry.yarnpkg.com/zod/-/zod-4.4.3.tgz#b680f172885d18bbebf21a834ea25e55a1bbf356"
   integrity sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==
