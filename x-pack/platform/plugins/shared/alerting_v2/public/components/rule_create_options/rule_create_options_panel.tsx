@@ -174,14 +174,14 @@ export const getCreateWithAgentTooltipText = ({
   return CREATE_WITH_AGENT_MISSING_SETTING_TOOLTIP;
 };
 const THRESHOLD_ALERT_TITLE = i18n.translate(
-  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertTitle',
-  { defaultMessage: 'Threshold Alert' }
+  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleTitle',
+  { defaultMessage: 'Threshold rule' }
 );
 const THRESHOLD_ALERT_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertDescription',
+  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleDescription',
   {
     defaultMessage:
-      'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',
+      'Monitor one or more metrics against a threshold. Multi-condition support with custom aggregations.',
   }
 );
 
