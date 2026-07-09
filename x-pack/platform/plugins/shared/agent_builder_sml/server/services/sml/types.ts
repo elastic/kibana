@@ -529,21 +529,6 @@ export interface SmlService {
     esClient: IScopedClusterClient;
   }) => Promise<Map<string, SmlDocument>>;
 
-  /**
-   * Fetch every chunk written under the compound `(type, originId)`
-   * key regardless of space.
-   *
-   * Used exclusively for the HTTP route's cross-space-overwrite guard:
-   * a write request from space A must be blocked when the origin is
-   * already owned by space B. Callers MUST NOT use this for read paths
-   * that surface data to users — it bypasses space isolation.
-   */
-  findByOriginAcrossSpaces: (params: {
-    type: string;
-    originId: string;
-    esClient: IScopedClusterClient;
-  }) => Promise<SmlDocument[]>;
-
   /** Get a type definition by ID */
   getTypeDefinition: (typeId: string) => SmlTypeDefinition | undefined;
 

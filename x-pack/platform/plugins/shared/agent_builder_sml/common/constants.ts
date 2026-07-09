@@ -8,8 +8,3 @@
 export const internalApiPath = '/internal/agent_context_layer';
 export const smlSearchPath = `${internalApiPath}/sml/_search`;
 export const smlAutocompletePath = `${internalApiPath}/sml/_autocomplete`;
-
-export const MAX_SML_ORIGIN_ID_LENGTH = 512;
-
-export const MAX_SML_TYPE_LENGTH = 256;
-export const MAX_CHUNKS_PER_ORIGIN = 1000;
