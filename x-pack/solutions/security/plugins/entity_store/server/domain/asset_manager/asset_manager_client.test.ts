@@ -168,12 +168,12 @@ describe('AssetManagerClient', () => {
 
   describe('getPrivileges', () => {
     let checkPrivilegesWithRequestMock: jest.Mock;
-    let getLocalIndexPatternsMock: jest.Mock;
+    let getLocalAndRemoteTargetsMock: jest.Mock;
     let getPrivilegesClient: AssetManagerClient;
 
     beforeEach(() => {
       checkPrivilegesWithRequestMock = jest.fn().mockResolvedValue({});
-      getLocalIndexPatternsMock = jest.fn();
+      getLocalAndRemoteTargetsMock = jest.fn();
 
       getPrivilegesClient = new AssetManagerClient({
         logger: loggerMock.create(),
@@ -189,7 +189,7 @@ describe('AssetManagerClient', () => {
         namespace,
         isServerless: false,
         logsExtractionClient: {
-          getLocalIndexPatterns: getLocalIndexPatternsMock,
+          getLocalAndRemoteTargets: getLocalAndRemoteTargetsMock,
         } as unknown as import('../logs_extraction').LogsExtractionClient,
         security: {
           authz: {
@@ -211,12 +211,18 @@ describe('AssetManagerClient', () => {
     });
 
     it('strips negative index patterns before forwarding to _has_privileges', async () => {
-      getLocalIndexPatternsMock.mockResolvedValue([
-        'logs-*',
-        '-logs-cloud_security_posture.*',
-        '.entities.entities-default',
-        '-logs-excluded-*',
-      ]);
+      getLocalAndRemoteTargetsMock.mockResolvedValue({
+        local: {
+          include: [
+            'logs-*',
+            '-logs-cloud_security_posture.*',
+            '.entities.entities-default',
+            '-logs-excluded-*',
+          ],
+          exclude: [],
+        },
+        remote: { include: [], exclude: [] },
+      });
 
       await getPrivilegesClient.getPrivileges({} as KibanaRequest);
 

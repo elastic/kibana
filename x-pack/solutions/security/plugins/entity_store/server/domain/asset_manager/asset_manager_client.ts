@@ -342,9 +342,12 @@ export class AssetManagerClient {
   ): Promise<CheckPrivilegesResponse> {
     const checkPrivileges = this.security.authz.checkPrivilegesDynamicallyWithRequest(request);
 
-    const sourceIndexPatterns = await this.logsExtractionClient.getLocalIndexPatterns(
+    // Check the configured source patterns, not the reconciled FROM clause: reconciliation prunes
+    // patterns that don't resolve, which would skip the very indices this check must verify access to.
+    const { local } = await this.logsExtractionClient.getLocalAndRemoteTargets(
       additionalIndexPatterns
     );
+    const sourceIndexPatterns = local.include;
 
     const kibanaPrivileges = this.security.authz.actions.savedObject.get(
       EngineDescriptorTypeName,
