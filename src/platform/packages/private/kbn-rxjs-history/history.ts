@@ -61,29 +61,50 @@ export function startTrackingHistory<T extends object = {}>({
     });
   });
 
+  const undoPatch = () => {
+    const pointer = pointer$.getValue();
+    if (pointer <= -1) return; // cannot undo - already at the bottom of the stack
+
+    const reversedPatch = jsondiffpatch.reverse(history[pointer]); // must undo the **current** patch
+    undoOrRedoAction = true;
+    currentState$.next(jsondiffpatch.patch(state$.getValue(), reversedPatch) as T);
+    pointer$.next(pointer - 1);
+  };
+
+  const redoPatch = () => {
+    const pointer = pointer$.getValue();
+    if (pointer + 1 >= history.length) return; // cannot redo - already at the top of the stack
+
+    const patch = history[pointer + 1]; // must apply the **next** patch
+    undoOrRedoAction = true;
+    currentState$.next(jsondiffpatch.patch(state$.getValue(), patch) as T);
+    pointer$.next(pointer + 1);
+  };
+
+  const keyDownHandler = (event: KeyboardEvent) => {
+    if (event.metaKey) {
+      if (event.key === 'z') {
+        event.preventDefault();
+        undoPatch();
+      } else if (event.key === 'y') {
+        event.preventDefault(); // prevent default behaviour (for example, on chrome, this opens history by default)
+        redoPatch();
+      }
+    }
+  };
+  document.addEventListener('keydown', keyDownHandler);
+
   return {
     api: {
       currentState$: currentState$.pipe(skip(1)),
       disabledActions$,
-      undo: () => {
-        const pointer = pointer$.getValue();
-
-        const reversedPatch = jsondiffpatch.reverse(history[pointer]); // must undo the **current** patch
-        undoOrRedoAction = true;
-        currentState$.next(jsondiffpatch.patch(state$.getValue(), reversedPatch) as T);
-        pointer$.next(pointer - 1);
-      },
-      redo: () => {
-        const pointer = pointer$.getValue();
-        const patch = history[pointer + 1]; // must apply the **next** patch
-        undoOrRedoAction = true;
-        currentState$.next(jsondiffpatch.patch(state$.getValue(), patch) as T);
-        pointer$.next(pointer + 1);
-      },
+      undo: undoPatch,
+      redo: redoPatch,
     },
     cleanup: () => {
       stateSubscription.unsubscribe();
       disabledActionsSubscription.unsubscribe();
+      document.removeEventListener('keydown', keyDownHandler);
     },
   };
 }
