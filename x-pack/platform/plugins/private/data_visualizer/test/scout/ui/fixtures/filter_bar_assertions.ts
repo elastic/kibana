@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export interface FilterBadgeOptions {
   field: string;
@@ -127,8 +128,15 @@ export const removeFirstPresentFilter = async (page: ScoutPage, fields: string[]
     if ((await filterBadge.count()) === 0) {
       continue;
     }
-    await filterBadge.click();
-    await page.testSubj.click('deleteFilter');
+
+    await expect(async () => {
+      await filterBadge.click();
+      const deleteFilterButton = page.testSubj.locator('deleteFilter');
+      await expect(deleteFilterButton).toBeVisible();
+      await deleteFilterButton.click();
+      await expect(filterBadge).toHaveCount(0);
+    }).toPass({ timeout: 15_000 });
+
     return;
   }
 };

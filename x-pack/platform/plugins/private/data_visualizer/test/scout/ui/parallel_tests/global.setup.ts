@@ -8,7 +8,14 @@
 import { globalSetupHook } from '@kbn/scout';
 import { testData } from '../fixtures';
 
-globalSetupHook('Ingest data to Elasticsearch', async ({ esArchiver, log }) => {
+globalSetupHook('Ingest data to Elasticsearch', async ({ apiServices, esArchiver, log }) => {
+  log.debug('[setup] set isEsqlDefault feature flag to false');
+  await apiServices.core.settings({
+    'feature_flags.overrides': {
+      'discover.isEsqlDefault': false,
+    },
+  });
+
   const archives = [
     testData.ES_ARCHIVES.FAREQUOTE,
     testData.ES_ARCHIVES.MODULE_SAMPLE_LOGS,

@@ -21,6 +21,7 @@ import {
   assertFieldStatsTabNotExists,
   assertViewModeToggleExists,
   clickViewModeFieldStatsButton,
+  gotoDiscoverClassic,
   selectDiscoverSource,
 } from '../fixtures/discover_field_stats';
 
@@ -87,7 +88,7 @@ const runDashboardFieldStatsTests = async ({
       [testData.SHOW_FIELD_STATISTICS]: true,
     });
 
-    await pageObjects.discover.goto({ queryMode: 'classic' });
+    await gotoDiscoverClassic(page, pageObjects.discover);
 
     await selectDiscoverSource(
       pageObjects.discover,
@@ -107,6 +108,7 @@ const runDashboardFieldStatsTests = async ({
   await scoutTest.step('displays Field statistics table in Dashboard when enabled', async () => {
     await pageObjects.dashboard.openNewDashboard();
     await pageObjects.dashboard.addSavedSearch(savedSearchTitle);
+    await pageObjects.dashboard.waitForRenderComplete();
 
     await pageObjects.datePicker.setAbsoluteRange({
       from: testData.DISCOVER_TIME_RANGE.start,
@@ -162,7 +164,7 @@ const runDashboardFieldStatsTests = async ({
         [testData.SHOW_FIELD_STATISTICS]: false,
       });
 
-      await pageObjects.discover.goto({ queryMode: 'classic' });
+      await gotoDiscoverClassic(page, pageObjects.discover);
       await pageObjects.discover.loadSavedSearch(savedSearchTitle);
 
       await pageObjects.datePicker.setAbsoluteRange({
@@ -198,8 +200,9 @@ spaceTest.describe('field statistics in Dashboard', { tag: tags.stateful.classic
     );
   });
 
-  spaceTest.beforeEach(async ({ browserAuth }) => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
+    await pageObjects.discover.setQueryMode('classic');
   });
 
   spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {

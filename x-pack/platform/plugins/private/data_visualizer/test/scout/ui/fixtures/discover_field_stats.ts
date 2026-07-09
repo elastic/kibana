@@ -5,13 +5,23 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
+import type { Locator, ScoutPage } from '@kbn/scout';
+
+interface DiscoverClassicNavigator {
+  goto(options: { queryMode: 'classic' }): Promise<void>;
+  getSelectedDataView(): Locator;
+}
 
 interface DiscoverSourceSelector {
   loadSavedSearch(title: string): Promise<void>;
   selectDataView(name: string): Promise<void>;
 }
+
+export const gotoDiscoverClassic = async (page: ScoutPage, discover: DiscoverClassicNavigator) => {
+  await discover.goto({ queryMode: 'classic' });
+  await expect(page.testSubj.locator('queryInput')).toBeVisible({ timeout: 30_000 });
+  await expect(discover.getSelectedDataView()).toBeVisible({ timeout: 30_000 });
+};
 
 export const selectDiscoverSource = async (
   discover: DiscoverSourceSelector,

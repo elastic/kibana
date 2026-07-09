@@ -16,6 +16,7 @@ import {
   farequoteKQLFiltersSearchTestData,
   farequoteLuceneFiltersSearchTestData,
 } from '../fixtures/expected_field_stats_random_sampler';
+import { gotoDiscoverClassic } from '../fixtures/discover_field_stats';
 import {
   addFilterAllowExistingBadges,
   getFilterFieldKeyVariants,
@@ -50,7 +51,8 @@ const openDiscoverViaSidebar = async (
   pageObjects: ExtParallelRunTestFixtures['pageObjects']
 ) => {
   await pageObjects.collapsibleNav.clickItem('Discover');
-  await page.testSubj.locator('dscPage').waitFor({ state: 'visible' });
+  await expect(page.testSubj.locator('queryInput')).toBeVisible({ timeout: 30_000 });
+  await expect(pageObjects.discover.getSelectedDataView()).toBeVisible({ timeout: 30_000 });
 };
 
 const assertFilterBarFilterContent = async (
@@ -112,7 +114,7 @@ const runFilterFromDiscoverTest = async ({
   pageObjects: ExtParallelRunTestFixtures['pageObjects'];
   data: TestData;
 }) => {
-  await pageObjects.discover.goto({ queryMode: 'classic' });
+  await gotoDiscoverClassic(page, pageObjects.discover);
   await pageObjects.discover.selectDataView('ft_farequote');
   await pageObjects.datePicker.setAbsoluteRange({
     from: testData.DISCOVER_TIME_RANGE.start,
@@ -171,6 +173,7 @@ const runFilterToDiscoverTest = async ({
     data.isSavedSearch
   );
 
+  await pageObjects.indexDataVisualizer.waitForTimeRangeSelectorSection();
   await pageObjects.indexDataVisualizer.clickUseFullDataButton(
     data.expected.totalDocCountFormatted
   );
@@ -208,8 +211,9 @@ spaceTest.describe(
       );
     });
 
-    spaceTest.beforeEach(async ({ browserAuth }) => {
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
+      await pageObjects.discover.setQueryMode('classic');
     });
 
     spaceTest.afterEach(async ({ page }) => {

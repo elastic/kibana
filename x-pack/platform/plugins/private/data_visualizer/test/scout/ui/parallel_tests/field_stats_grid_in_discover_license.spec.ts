@@ -15,6 +15,7 @@ import { farequoteDataViewTestData } from '../fixtures/expected_field_stats';
 import {
   assertFieldStatsTableNotExists,
   assertViewModeToggleExists,
+  gotoDiscoverClassic,
 } from '../fixtures/discover_field_stats';
 
 const runTestsWhenDisabled = async ({
@@ -26,7 +27,7 @@ const runTestsWhenDisabled = async ({
   pageObjects: ExtParallelRunTestFixtures['pageObjects'];
   data: TestData;
 }) => {
-  await pageObjects.discover.goto({ queryMode: 'classic' });
+  await gotoDiscoverClassic(page, pageObjects.discover);
 
   if (data.isSavedSearch) {
     await pageObjects.discover.loadSavedSearch(data.sourceIndexOrSavedSearch);
@@ -69,8 +70,9 @@ spaceTest.describe(
       });
     });
 
-    spaceTest.beforeEach(async ({ browserAuth }) => {
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
+      await pageObjects.discover.setQueryMode('classic');
     });
 
     spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
