@@ -9,3 +9,12 @@ export const VISIBLE_CHROME = 'kbnAppWrapper visibleChrome';
 export const HIDDEN_CHROME = 'kbnAppWrapper hiddenChrome';
 export const FULL_SCREEN_MODE = 'mapsFullScreenMode';
 export const EXIT_FULL_SCREEN = 'exitFullScreenModeButton';
+
+export const ES_ARCHIVES = {
+  logstashFunctional: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
+  mapsData: 'x-pack/platform/test/fixtures/es_archives/maps/data',
+} as const;
+
+export const KBN_ARCHIVES = {
+  maps: 'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json',
+} as const;
