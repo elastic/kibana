@@ -87,7 +87,7 @@ interface SmlIndexAttachmentBaseParams {
   includedHiddenTypes?: string[];
 }
 
-export type SmlIndexAttachmentOriginParams = SmlIndexAttachmentBaseParams &
+type SmlIndexAttachmentOriginParams = SmlIndexAttachmentBaseParams &
   SmlIndexAttachmentOriginMode;
 
 /**

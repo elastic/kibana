@@ -25,7 +25,7 @@ import type { SmlSearchFilters, SmlSearchConstraints } from '../../../common/htt
  * 'tagline', 'nickname', 'category', 'synonym') — the UI decides how to render
  * each kind.
  */
-export interface DiscoveryLabel {
+interface DiscoveryLabel {
   value: string;
   kind: string;
 }
@@ -34,7 +34,7 @@ export interface DiscoveryLabel {
  * A single Kibana feature privilege required to access a chunk
  * (e.g., `saved_object:lens/get`, `action:execute`).
  */
-export interface SmlKibanaPrivilege {
+interface SmlKibanaPrivilege {
   name: string;
 }
 

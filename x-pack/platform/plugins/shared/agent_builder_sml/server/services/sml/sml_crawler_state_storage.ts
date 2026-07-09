@@ -28,7 +28,7 @@ const storageSettings = {
   },
 } satisfies IndexStorageSettings;
 
-export type SmlCrawlerStateStorageSettings = typeof storageSettings;
+type SmlCrawlerStateStorageSettings = typeof storageSettings;
 
 export type SmlCrawlerStateStorage = StorageIndexAdapter<
   SmlCrawlerStateStorageSettings,

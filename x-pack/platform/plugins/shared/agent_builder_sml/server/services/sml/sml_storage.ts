@@ -102,7 +102,7 @@ export const smlElasticsearchIndexMappings = {
   properties: smlStorageSchemaProperties,
 };
 
-export type SmlStorageSettings = typeof storageSettings;
+type SmlStorageSettings = typeof storageSettings;
 
 export type SmlStorage = StorageIndexAdapter<SmlStorageSettings, SmlDocument>;
 

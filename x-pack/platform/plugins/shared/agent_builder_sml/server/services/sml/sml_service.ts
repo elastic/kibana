@@ -46,7 +46,7 @@ export interface SmlServiceSetup {
   registerType: (definition: SmlTypeDefinition) => void;
 }
 
-export interface SmlServiceStartDeps {
+interface SmlServiceStartDeps {
   logger: Logger;
   securityAuthz?: AuthorizationServiceSetup;
 }
