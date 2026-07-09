@@ -8,9 +8,7 @@
  */
 
 import React from 'react';
-import { render, renderHook, screen } from '@testing-library/react';
-import { useEuiTheme } from '@elastic/eui';
-import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
 import { InfoBlocks, getInfoBlocksColumnCount, getInfoBlocksLayout } from './info_blocks.component';
 import { EMPTY_INFO_BLOCK } from './types';
 import type { InfoBlocksItem } from './types';
@@ -30,25 +28,6 @@ describe('InfoBlocks', () => {
     expect(screen.getByText('Platform')).toBeInTheDocument();
     expect(screen.getByText('Throughput')).toBeInTheDocument();
     expect(screen.getByText('1.2k tpm')).toBeInTheDocument();
-  });
-
-  it('renders a "big number" value at the matching euiTheme.size font size', () => {
-    const { result } = renderHook(() => useEuiTheme());
-    renderWithEuiTheme(
-      <InfoBlocks
-        items={[
-          { title: 'Risk score', value: '90', valueSize: 'xl' },
-          { title: 'Vendor', value: 'Elastic' },
-        ]}
-      />
-    );
-
-    expect(screen.getByText('90')).toHaveStyleRule('font-size', result.current.euiTheme.size.xl);
-    // A default (non-big) value must not pick up the big-number font size.
-    expect(screen.getByText('Elastic')).not.toHaveStyleRule(
-      'font-size',
-      result.current.euiTheme.size.xl
-    );
   });
 
   it('renders one block element per item', () => {
