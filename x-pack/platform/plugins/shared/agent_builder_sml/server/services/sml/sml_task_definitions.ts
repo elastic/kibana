@@ -41,11 +41,11 @@ import type { SmlService } from './types';
  */
 export const SML_CRAWLER_TASK_TYPE = 'agent_builder_sml:sml_crawler';
 
-export interface SmlCrawlerTaskParams {
+interface SmlCrawlerTaskParams {
   attachmentType: string;
 }
 
-export interface SmlCrawlerDepsProvider {
+interface SmlCrawlerDepsProvider {
   smlService: SmlService;
   elasticsearch: ElasticsearchServiceStart;
   savedObjects: SavedObjectsServiceStart;

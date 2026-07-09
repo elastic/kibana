@@ -25,7 +25,7 @@ import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
 import { SmlUnregisteredTypeError } from './sml_errors';
 
-export interface SmlIndexerDeps {
+interface SmlIndexerDeps {
   registry: SmlTypeRegistry;
   logger: Logger;
 }

@@ -26,7 +26,7 @@ import { createSmlStorage, smlIndexName, type SmlStorage } from './sml_storage';
 
 export type { SmlCrawler };
 
-export interface SmlCrawlerDeps {
+interface SmlCrawlerDeps {
   indexer: SmlIndexer;
   logger: Logger;
 }

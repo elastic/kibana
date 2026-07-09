@@ -112,7 +112,7 @@ export interface SmlAutocompleteHttpResultItem {
   matched_discovery_labels?: SmlMatchedDiscoveryLabel[];
 }
 
-export interface SmlMatchedDiscoveryLabel {
+interface SmlMatchedDiscoveryLabel {
   value: string;
   kind: string;
   /**
