@@ -63,7 +63,7 @@ export interface AgentBuilderSmlPluginStart {
   getTypeDefinition: (typeId: string) => SmlTypeDefinition | undefined;
 
   resolveSmlAttachItems: (params: {
-    chunkIds: string[];
+    entryIds: string[];
     esClient: IScopedClusterClient;
     request: KibanaRequest;
     spaceId: string;
@@ -91,7 +91,7 @@ type SmlIndexAttachmentOriginParams = SmlIndexAttachmentBaseParams & SmlIndexAtt
 
 /**
  * Params for `indexAttachment`. Content is resolved via the registered type's
- * `getSmlEntry` hook (origin mode). Resulting chunks are tagged
+ * `getSmlEntry` hook (origin mode). The resulting entry is tagged
  * `ingestion_method: 'crawled'`.
  */
 export type SmlIndexAttachmentParams = SmlIndexAttachmentOriginParams;
@@ -100,7 +100,7 @@ export type SmlIndexAttachmentParams = SmlIndexAttachmentOriginParams;
  * Params for `AgentBuilderSmlPluginStart.deleteAttachment`.
  *
  * Distinct from `indexAttachment({ action: 'delete' })` only in that callers
- * can choose to wipe `'manual'` or `'all'` chunks via `ingestionMethod`. With
+ * can choose to wipe a `'manual'` or `'all'` entry via `ingestionMethod`. With
  * the default (`'crawled'`) the two are equivalent.
  */
 export interface SmlDeleteAttachmentParams {

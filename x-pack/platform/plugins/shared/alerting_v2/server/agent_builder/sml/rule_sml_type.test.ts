@@ -170,7 +170,7 @@ describe('createRuleSmlType', () => {
   });
 
   describe('getSmlEntry', () => {
-    it('returns a single chunk built from rule metadata + query', async () => {
+    it('returns a single entry built from rule metadata + query', async () => {
       getRepoSo.mockResolvedValueOnce({ id: 'rule-1', attributes: baseRuleAttrs });
 
       const result = await buildDefinition().getSmlEntry('rule-1', buildSmlContext());

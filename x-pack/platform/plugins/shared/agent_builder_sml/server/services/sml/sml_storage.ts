@@ -38,8 +38,8 @@ const smlStorageSchemaProperties = {
   tags: types.keyword({ normalizer: 'lowercase' }),
   /**
    * Autocomplete surface. The indexer auto-prepends two entries on every record:
-   *   { value: chunk.title, kind: 'title' }
-   *   { value: chunk.type,  kind: 'type'  }
+   *   { value: entry.title, kind: 'title' }
+   *   { value: entry.type,  kind: 'type'  }
    * plus any entries the producer provides (taglines, nicknames, categories, etc.).
    * The @ menu queries `discovery_labels.value` with `multi_match bool_prefix`
    * (SAYT's native query type) and reads `inner_hits` to render which entry

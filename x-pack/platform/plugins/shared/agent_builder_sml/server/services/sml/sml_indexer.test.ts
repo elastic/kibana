@@ -122,7 +122,7 @@ describe('createSmlIndexer', () => {
       expect(getSmlEntry).not.toHaveBeenCalled();
     });
 
-    it('create action: calls getSmlEntry, deletes existing chunks, bulk indexes new ones with permissions from getPermissions hook', async () => {
+    it('create action: calls getSmlEntry, deletes existing entry, indexes the new one with permissions from getPermissions hook', async () => {
       const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
       const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
       (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -327,7 +327,7 @@ describe('createSmlIndexer', () => {
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
-    it('getSmlEntry returns undefined: deletes existing chunks and does not index', async () => {
+    it('getSmlEntry returns undefined: deletes existing entry and does not index', async () => {
       const bulkMock = jest.fn();
       const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
       (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -771,12 +771,12 @@ describe('createSmlIndexer', () => {
         });
       });
 
-      it('getPermissions throw: propagates the throw and leaves existing chunks intact (fail-closed)', async () => {
-        // The throw propagates before any ES mutation: existing chunks
-        // stay intact and no un-gated chunk is written. Assert all three:
+      it('getPermissions throw: propagates the throw and leaves existing entry intact (fail-closed)', async () => {
+        // The throw propagates before any ES mutation: the existing entry
+        // stays intact and no un-gated entry is written. Assert all three:
         //  - the throw bubbles out
         //  - deleteByQuery is never called (origin not wiped)
-        //  - bulk is never called (no new chunk written)
+        //  - bulk is never called (no new entry written)
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -872,7 +872,7 @@ describe('createSmlIndexer', () => {
         : {}),
     });
 
-    it('omits ingestion_method filter when ingestionMethod is "all" (wipes every chunk for the origin)', async () => {
+    it('omits ingestion_method filter when ingestionMethod is "all" (wipes the entry for the origin)', async () => {
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();
@@ -884,8 +884,8 @@ describe('createSmlIndexer', () => {
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
-      // Space-scoped: only chunks visible in 'default' are deleted, including
-      // globally-scoped ('*') chunks. No ingestion_method term means both
+      // Space-scoped: only entries visible in 'default' are deleted, including
+      // globally-scoped ('*') entries. No ingestion_method term means both
       // manual + crawled are removed.
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-wipe-all' } },
@@ -931,7 +931,7 @@ describe('createSmlIndexer', () => {
       ]);
     });
 
-    it('scopes delete to caller space — chunks in other spaces are preserved', async () => {
+    it('scopes delete to caller space — entries in other spaces are preserved', async () => {
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();

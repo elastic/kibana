@@ -172,7 +172,7 @@ describe('createActionPolicySmlType', () => {
   });
 
   describe('getSmlEntry', () => {
-    it('returns a single chunk built from action policy metadata', async () => {
+    it('returns a single entry built from action policy metadata', async () => {
       // Title is the policy name; content is the searchable corpus an
       // agent reasons over (name + description + matcher + grouping +
       // destinations + tags). The fields are pinned so a refactor
@@ -229,12 +229,12 @@ describe('createActionPolicySmlType', () => {
       // This is the security-critical assertion the original review
       // flagged as missing. The action policies API gates reads on
       // `api:read_action_policies` (via ALERTING_V2_API_PRIVILEGES);
-      // the SML chunk MUST stamp the same privilege so a user without
-      // it cannot see policy chunks in agent context.
+      // the SML entry MUST stamp the same privilege so a user without
+      // it cannot see policy entries in agent context.
       //
       // Regression history: prior iterations of analogous SML types
       // shipped with hand-rolled privilege strings that didn't map to
-      // any registered Kibana privilege — chunks were silently
+      // any registered Kibana privilege — entries were silently
       // invisible to every caller (including superusers) because
       // `checkPrivilegesDynamicallyWithRequest` reported "unknown".
       // Pinning the privilege resolution against
@@ -268,7 +268,7 @@ describe('createActionPolicySmlType', () => {
     };
 
     it('returns an attachment input wrapping the parsed action policy', async () => {
-      // `toAttachment` is the bridge from indexed chunk -> agent
+      // `toAttachment` is the bridge from indexed entry -> agent
       // builder attachment payload. It MUST use the scoped client
       // (carries the caller's request) — not the internal repository
       // — so the read goes through the user's authorization context.
@@ -288,7 +288,7 @@ describe('createActionPolicySmlType', () => {
     });
 
     it('returns undefined when getActionPolicy throws', async () => {
-      // The chunk surfaces in search results but the policy itself
+      // The entry surfaces in search results but the policy itself
       // was deleted between index time and read time — surface this
       // as "no attachment" rather than 500-ing the whole reply.
       // `actionPolicyAttachmentDataSchema` is `.partial()`, so the

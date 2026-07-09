@@ -84,13 +84,13 @@ describe('createSmlAttachTool', () => {
     mockResolveSmlAttachItems.mockResolvedValue([
       {
         success: false,
-        chunk_id: 'chunk-1',
+        entry_id: 'entry-1',
         message: 'Access denied: you do not have the required permissions',
       },
     ]);
     const tool = createSmlAttachTool({ getAgentBuilderSml });
     const result = (await tool.handler(
-      { chunk_ids: ['chunk-1'] },
+      { entry_ids: ['entry-1'] },
       mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(1);
@@ -102,13 +102,13 @@ describe('createSmlAttachTool', () => {
     mockResolveSmlAttachItems.mockResolvedValue([
       {
         success: false,
-        chunk_id: 'chunk-1',
-        message: "SML document 'chunk-1' not found in the index",
+        entry_id: 'entry-1',
+        message: "SML document 'entry-1' not found in the index",
       },
     ]);
     const tool = createSmlAttachTool({ getAgentBuilderSml });
     const result = (await tool.handler(
-      { chunk_ids: ['chunk-1'] },
+      { entry_ids: ['entry-1'] },
       mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(1);
@@ -120,7 +120,7 @@ describe('createSmlAttachTool', () => {
     mockResolveSmlAttachItems.mockResolvedValue([
       {
         success: true,
-        chunk_id: 'chunk-1',
+        entry_id: 'entry-1',
         attachment: {
           type: 'visualization',
           data: { layers: [] },
@@ -132,7 +132,7 @@ describe('createSmlAttachTool', () => {
     mockAttachmentsAdd.mockResolvedValue({ id: 'att-123' });
     const tool = createSmlAttachTool({ getAgentBuilderSml });
     const result = (await tool.handler(
-      { chunk_ids: ['chunk-1'] },
+      { entry_ids: ['entry-1'] },
       mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(1);
@@ -151,17 +151,17 @@ describe('createSmlAttachTool', () => {
 
   it('handles multiple items with mix of success and failure', async () => {
     mockResolveSmlAttachItems.mockResolvedValue([
-      { success: false, chunk_id: 'denied-chunk', message: 'Access denied' },
+      { success: false, entry_id: 'denied-entry', message: 'Access denied' },
       {
         success: true,
-        chunk_id: 'ok-chunk',
+        entry_id: 'ok-entry',
         attachment: { type: 'visualization', data: {}, origin: 'ref-2', description: 'vis/Test' },
       },
     ]);
     mockAttachmentsAdd.mockResolvedValue({ id: 'att-456' });
     const tool = createSmlAttachTool({ getAgentBuilderSml });
     const result = (await tool.handler(
-      { chunk_ids: ['denied-chunk', 'ok-chunk'] },
+      { entry_ids: ['denied-entry', 'ok-entry'] },
       mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(2);
@@ -173,11 +173,11 @@ describe('createSmlAttachTool', () => {
     mockResolveSmlAttachItems.mockResolvedValue([]);
     const tool = createSmlAttachTool({ getAgentBuilderSml });
     await tool.handler(
-      { chunk_ids: ['chunk-a', 'chunk-b'] },
+      { entry_ids: ['entry-a', 'entry-b'] },
       mockContext as unknown as ToolHandlerContext
     );
     expect(mockResolveSmlAttachItems).toHaveBeenCalledWith({
-      chunkIds: ['chunk-a', 'chunk-b'],
+      entryIds: ['entry-a', 'entry-b'],
       esClient: mockContext.esClient,
       request: mockContext.request,
       spaceId: 'default',

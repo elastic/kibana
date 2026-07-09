@@ -32,10 +32,10 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   let adminInteractiveCookieHeader: Record<string, string>;
   let sysEsClient: Client;
 
-  // Shared search-test chunk: indexed once and reused by hit, wildcard,
+  // Shared search-test entry: indexed once and reused by hit, wildcard,
   // and compact-shape assertions so the index is never empty
   const searchRunId = randomUUID();
-  const searchChunkId = `sml-autocomplete-${searchRunId}`;
+  const searchEntryId = `sml-autocomplete-${searchRunId}`;
   const searchOriginId = `sml-origin-${searchRunId}`;
   const searchIndexedTitle = `sml autocomplete pacific bluefin ${searchRunId}`;
 
@@ -54,10 +54,10 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     const now = '2024-06-01T12:00:00.000Z';
     await sysEsClient.index({
       index: smlIndexName,
-      id: searchChunkId,
+      id: searchEntryId,
       refresh: 'wait_for',
       document: {
-        id: searchChunkId,
+        id: searchEntryId,
         type: 'visualization',
         title: searchIndexedTitle,
         origin: { uri: `visualization://${searchOriginId}` },
@@ -73,7 +73,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
 
   apiTest.afterAll(async () => {
     try {
-      await sysEsClient.delete({ index: smlIndexName, id: searchChunkId, refresh: true });
+      await sysEsClient.delete({ index: smlIndexName, id: searchEntryId, refresh: true });
     } catch {
       // ignore — already cleaned up
     }
@@ -92,7 +92,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     });
     expect(response).toHaveStatusCode(200);
     const body = response.body as SmlSearchHttpResponse;
-    const match = body.results.find((r) => r.id === searchChunkId);
+    const match = body.results.find((r) => r.id === searchEntryId);
     expect(match).toBeDefined();
     expect(match?.title).toContain('pacific');
     expect(match?.origin?.uri).toBe(`visualization://${searchOriginId}`);
@@ -119,14 +119,17 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     }
   );
 
-  apiTest('POST /internal/agent_builder_sml/sml/_search rejects empty query', async ({ apiClient }) => {
-    const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER_SML}/sml/_search`, {
-      headers: ih(),
-      body: { query: '' },
-      responseType: 'json',
-    });
-    expect(response).toHaveStatusCode(400);
-  });
+  apiTest(
+    'POST /internal/agent_builder_sml/sml/_search rejects empty query',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER_SML}/sml/_search`, {
+        headers: ih(),
+        body: { query: '' },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+    }
+  );
 
   apiTest(
     'POST /internal/agent_builder/sml/_attach returns 404 when conversation missing',
@@ -135,7 +138,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
         headers: ih(),
         body: {
           conversation_id: 'non-existent-conversation-id-for-sml-attach-scout',
-          chunk_ids: ['irrelevant-chunk-id-for-sml-attach-scout'],
+          entry_ids: ['irrelevant-entry-id-for-sml-attach-scout'],
         },
         responseType: 'json',
       });
@@ -149,10 +152,10 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   );
 
   apiTest(
-    'POST /internal/agent_builder/sml/_attach attaches chunk and persists attachment refs',
+    'POST /internal/agent_builder/sml/_attach attaches entry and persists attachment refs',
     async ({ apiClient, asAdmin, log, kbnClient }) => {
       const runId = randomUUID();
-      const chunkId = `sml-scout-attach-${runId}`;
+      const entryId = `sml-scout-attach-${runId}`;
       const indexedTitle = `sml scout attach ${runId}`;
       const llmProxy = await createLlmProxy(log);
       const { id: connectorId } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
@@ -160,10 +163,10 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       const now = '2024-06-01T12:00:00.000Z';
       await sysEsClient.index({
         index: smlIndexName,
-        id: chunkId,
+        id: entryId,
         refresh: 'wait_for',
         document: {
-          id: chunkId,
+          id: entryId,
           type: 'connector',
           title: indexedTitle,
           origin: { uri: `connector://${connectorId}` },
@@ -197,7 +200,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
 
       const attachResponse = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/sml/_attach`, {
         headers: ih(),
-        body: { conversation_id: conversationId, chunk_ids: [chunkId] },
+        body: { conversation_id: conversationId, entry_ids: [entryId] },
         responseType: 'json',
       });
       expect(attachResponse).toHaveStatusCode(200);
@@ -227,7 +230,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       llmProxy.close();
       await deleteConnectorById(kbnClient, connectorId);
       try {
-        await sysEsClient.delete({ index: smlIndexName, id: chunkId, refresh: true });
+        await sysEsClient.delete({ index: smlIndexName, id: entryId, refresh: true });
       } catch {
         // ignore — document may have been cleaned up by SML auto-indexing
       }

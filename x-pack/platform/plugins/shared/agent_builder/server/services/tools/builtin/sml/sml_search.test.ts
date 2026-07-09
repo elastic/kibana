@@ -127,7 +127,7 @@ describe('createSmlSearchTool', () => {
   it('maps document fields to the LLM-friendly hit shape', async () => {
     const hits: SmlSearchResult[] = [
       {
-        id: 'chunk-1',
+        id: 'entry-1',
         origin: { uri: 'visualization://ref-1' },
         type: 'visualization',
         title: 'CPU Chart',
@@ -151,7 +151,7 @@ describe('createSmlSearchTool', () => {
     const data = (result.results[0] as OtherResult<{ items: unknown[] }>).data;
     expect(data.items).toHaveLength(1);
     expect(data.items[0]).toEqual({
-      chunk_id: 'chunk-1',
+      entry_id: 'entry-1',
       attachment_id: 'visualization://ref-1',
       attachment_type: 'visualization',
       type: 'visualization',

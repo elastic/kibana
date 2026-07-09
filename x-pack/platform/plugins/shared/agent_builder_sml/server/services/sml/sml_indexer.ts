@@ -35,8 +35,8 @@ export interface SmlIndexer {
    * Index, update, or delete SML data for a specific item.
    *
    * The indexer resolves the type's `getSmlEntry` hook and writes the
-   * produced chunks tagged `ingestion_method: 'crawled'`. If any existing
-   * chunks for this `origin_id` carry `ingestion_method: 'manual'`, the
+   * produced entry tagged `ingestion_method: 'crawled'`. If an existing
+   * entry for this `origin_id` carries `ingestion_method: 'manual'`, the
    * call is a no-op unless `force: true` is passed.
    *
    * Unregistered types throw {@link SmlUnregisteredTypeError} — there is
@@ -44,25 +44,25 @@ export interface SmlIndexer {
    *
    * **`getPermissions` failures fail-closed.** When the registered type's
    * `getPermissions` hook throws, the call is aborted *before* any
-   * mutation (existing chunks remain intact) and the throw is propagated
+   * mutation (the existing entry remains intact) and the throw is propagated
    * to the caller. Stamping empty permissions instead would be fail-open:
    * the read-path filter treats `kbnPrivs.length === 0` as publicly
    * readable. See `resolvePermissionsForOrigin` for the full rationale.
    *
-   * For `action: 'delete'`, only chunks with `ingestion_method: 'crawled'` are
-   * removed — manual entries for the same `origin_id` are preserved. This keeps
+   * For `action: 'delete'`, only an entry with `ingestion_method: 'crawled'` is
+   * removed — a manual entry for the same `origin_id` is preserved. This keeps
    * curated content around even when the upstream object goes away (e.g.
    * transient blip, or a curator pinning standalone context to a deleted
-   * dashboard). Callers that need to wipe `'manual'` or `'all'` chunks should
+   * dashboard). Callers that need to wipe a `'manual'` or `'all'` entry should
    * use {@link SmlIndexer.deleteAttachment} instead. **Delete is intentionally
    * permissive about registration** — cleanup must keep working even when the
-   * plugin that originally registered the type is disabled, or stale chunks
-   * become unreachable from every write path.
+   * plugin that originally registered the type is disabled, or a stale entry
+   * becomes unreachable from every write path.
    */
   indexAttachment: (params: SmlIndexerParams) => Promise<void>;
 
   /**
-   * Delete chunks for an origin, with explicit control over which ingestion
+   * Delete the entry for an origin, with explicit control over which ingestion
    * method(s) are removed.
    *
    * The default scope (`'crawled'`) matches `indexAttachment({ action: 'delete' })`
@@ -209,18 +209,16 @@ class SmlIndexerImpl implements SmlIndexer {
 
     await this.deleteEntry({ originUri, esClient });
 
-    const bulkOps = [
-      this.buildIndexOp({
-        chunkId: uuidv4(),
-        entry: smlEntry,
-        originId,
-        spaces,
-        ingestionMethod: 'crawled',
-        resolvedPermissions,
-      }),
-    ];
+    const indexOp = this.buildIndexOp({
+      entryId: uuidv4(),
+      entry: smlEntry,
+      originId,
+      spaces,
+      ingestionMethod: 'crawled',
+      resolvedPermissions,
+    });
 
-    await this.executeBulk({ bulkOps, esClient, originId, chunkCount: 1 });
+    await this.executeIndexOp({ indexOp, esClient, originId });
   }
 
   async deleteAttachment(params: SmlIndexerDeleteAttachmentParams): Promise<void> {
@@ -245,7 +243,7 @@ class SmlIndexerImpl implements SmlIndexer {
   }
 
   /**
-   * Resolve the {@link SmlPermissions} to stamp on every chunk for an
+   * Resolve the {@link SmlPermissions} to stamp on the entry for an
    * origin. Called **once per origin** before any ES mutation.
    *
    * - If the type's `getPermissions` hook is present, its result is used.
@@ -273,7 +271,7 @@ class SmlIndexerImpl implements SmlIndexer {
   }
 
   private buildIndexOp({
-    chunkId,
+    entryId,
     entry,
     originId,
     spaces,
@@ -281,7 +279,7 @@ class SmlIndexerImpl implements SmlIndexer {
     resolvedPermissions,
     createdAt,
   }: {
-    chunkId: string;
+    entryId: string;
     entry: SmlEntry;
     originId: string;
     spaces: string[];
@@ -291,7 +289,7 @@ class SmlIndexerImpl implements SmlIndexer {
   }) {
     const now = new Date().toISOString();
     const document: SmlDocument = {
-      id: chunkId,
+      id: entryId,
       type: entry.type,
       title: entry.title,
       origin: { uri: `${entry.type}://${originId}` },
@@ -326,37 +324,31 @@ class SmlIndexerImpl implements SmlIndexer {
     }
     return {
       index: {
-        _id: chunkId,
+        _id: entryId,
         document,
       },
     };
   }
 
-  private async executeBulk({
-    bulkOps,
+  private async executeIndexOp({
+    indexOp,
     esClient,
     originId,
-    chunkCount,
   }: {
-    bulkOps: Array<ReturnType<SmlIndexerImpl['buildIndexOp']>>;
+    indexOp: ReturnType<SmlIndexerImpl['buildIndexOp']>;
     esClient: ElasticsearchClient;
     originId: string;
-    chunkCount: number;
   }): Promise<void> {
-    if (bulkOps.length === 0) {
-      return;
-    }
-
     const storage = createSmlStorage({ logger: this.logger, esClient });
     const smlClient = storage.getClient();
 
     this.logger.debug(
-      `SML indexer: writing ${bulkOps.length} chunk(s) to index '${smlIndexName}' for origin '${originId}'`
+      `SML indexer: writing entry to index '${smlIndexName}' for origin '${originId}'`
     );
     try {
       const response = await smlClient.bulk({
         refresh: 'wait_for',
-        operations: bulkOps,
+        operations: [indexOp],
       });
 
       if (response.errors) {
@@ -367,9 +359,7 @@ class SmlIndexerImpl implements SmlIndexer {
           )}`
         );
       } else {
-        this.logger.debug(
-          `SML indexer: successfully indexed ${chunkCount} chunk(s) for origin '${originId}'`
-        );
+        this.logger.debug(`SML indexer: successfully indexed entry for origin '${originId}'`);
       }
     } catch (error) {
       this.logger.error(
@@ -382,7 +372,7 @@ class SmlIndexerImpl implements SmlIndexer {
   }
 
   /**
-   * Return true when any chunk for this `origin_id` carries `ingestion_method: 'manual'`.
+   * Return true when the entry for this `origin_id` carries `ingestion_method: 'manual'`.
    */
   private async hasManualEntry({
     originUri,
@@ -448,10 +438,10 @@ class SmlIndexerImpl implements SmlIndexer {
       filter.push({ term: { ingestion_method: ingestionMethod } });
     }
     if (spaces && spaces.length > 0) {
-      // Scope the delete to chunks visible in at least one of the provided
-      // spaces. Mirrors `isVisibleInSpace`: a chunk is visible when its
+      // Scope the delete to entries visible in at least one of the provided
+      // spaces. Mirrors `isVisibleInSpace`: an entry is visible when its
       // `spaces` array contains the space id OR the wildcard `'*'` (global
-      // chunks).
+      // entries).
       filter.push({ terms: { spaces: [...spaces, '*'] } });
     }
     const label = ingestionMethod ? `${ingestionMethod} entry` : 'entry';

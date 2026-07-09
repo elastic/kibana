@@ -58,7 +58,7 @@ describe('registerSearchRoute', () => {
   it('returns 200 with the hit body when enabled', async () => {
     const mockResults: SmlSearchResult[] = [
       {
-        id: 'chunk-1',
+        id: 'entry-1',
         type: 'visualization',
         title: 'Test Viz',
         origin: { uri: 'viz-1' },
@@ -75,7 +75,7 @@ describe('registerSearchRoute', () => {
       body: {
         results: [
           {
-            id: 'chunk-1',
+            id: 'entry-1',
             type: 'visualization',
             origin: { uri: 'viz-1' },
             title: 'Test Viz',
@@ -92,7 +92,7 @@ describe('registerSearchRoute', () => {
   it('passes fields param to sml.search and omits unrequested fields from the response', async () => {
     const mockResults: SmlSearchResult[] = [
       {
-        id: 'chunk-1',
+        id: 'entry-1',
         type: 'visualization',
         title: 'Test Viz',
         origin: { uri: 'viz-1' },

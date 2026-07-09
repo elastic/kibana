@@ -30,7 +30,7 @@ const createSmlService = (): SmlService =>
   } as unknown as SmlService);
 
 const createSmlDoc = (overrides: Partial<SmlDocument> = {}): SmlDocument => ({
-  id: 'chunk-1',
+  id: 'entry-1',
   type: 'visualization',
   title: 'Test Viz',
   origin_id: 'ref-1',
@@ -60,21 +60,21 @@ describe('resolveSmlAttachItems', () => {
     jest.clearAllMocks();
   });
 
-  it('calls checkItemsAccess with unique chunk ids', async () => {
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', false]]));
+  it('calls checkItemsAccess with unique entry ids', async () => {
+    mockCheckItemsAccess.mockResolvedValue(new Map([['entry-1', false]]));
     await resolveSmlAttachItems({
       ...baseParams,
-      chunkIds: ['chunk-1'],
+      entryIds: ['entry-1'],
     });
     expect(mockCheckItemsAccess).toHaveBeenCalledWith({
-      ids: ['chunk-1'],
+      ids: ['entry-1'],
       spaceId: 'default',
       esClient: baseParams.esClient,
       request: baseParams.request,
     });
   });
 
-  it('calls getDocuments with all unique chunk ids', async () => {
+  it('calls getDocuments with all unique entry ids', async () => {
     mockCheckItemsAccess.mockResolvedValue(
       new Map([
         ['a', true],
@@ -84,7 +84,7 @@ describe('resolveSmlAttachItems', () => {
     mockGetDocuments.mockResolvedValue(new Map());
     await resolveSmlAttachItems({
       ...baseParams,
-      chunkIds: ['a', 'b'],
+      entryIds: ['a', 'b'],
     });
     expect(mockGetDocuments).toHaveBeenCalledWith({
       ids: ['a', 'b'],
@@ -93,48 +93,48 @@ describe('resolveSmlAttachItems', () => {
     });
   });
 
-  it('dedupes chunk ids before access and document fetch', async () => {
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
+  it('dedupes entry ids before access and document fetch', async () => {
+    mockCheckItemsAccess.mockResolvedValue(new Map([['entry-1', true]]));
     mockGetDocuments.mockResolvedValue(new Map());
     await resolveSmlAttachItems({
       ...baseParams,
-      chunkIds: ['chunk-1', 'chunk-1'],
+      entryIds: ['entry-1', 'entry-1'],
     });
     expect(mockCheckItemsAccess).toHaveBeenCalledWith({
-      ids: ['chunk-1'],
+      ids: ['entry-1'],
       spaceId: 'default',
       esClient: baseParams.esClient,
       request: baseParams.request,
     });
     expect(mockGetDocuments).toHaveBeenCalledWith({
-      ids: ['chunk-1'],
+      ids: ['entry-1'],
       spaceId: 'default',
       esClient: baseParams.esClient,
     });
   });
 
-  it('returns access denied when checkItemsAccess denies the chunk', async () => {
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', false]]));
+  it('returns access denied when checkItemsAccess denies the entry', async () => {
+    mockCheckItemsAccess.mockResolvedValue(new Map([['entry-1', false]]));
     mockGetDocuments.mockResolvedValue(new Map());
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      chunkIds: ['chunk-1'],
+      entryIds: ['entry-1'],
     });
     expect(results).toHaveLength(1);
     expect(results[0].success).toBe(false);
     if (!results[0].success) {
       expect(results[0].message).toContain('Access denied');
-      expect(results[0].chunk_id).toBe('chunk-1');
+      expect(results[0].entry_id).toBe('entry-1');
     }
     expect(mockGetTypeDefinition).not.toHaveBeenCalled();
   });
 
   it('returns not found when document is missing from getDocuments', async () => {
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
+    mockCheckItemsAccess.mockResolvedValue(new Map([['entry-1', true]]));
     mockGetDocuments.mockResolvedValue(new Map());
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      chunkIds: ['chunk-1'],
+      entryIds: ['entry-1'],
     });
     expect(results[0].success).toBe(false);
     if (!results[0].success) {
@@ -150,13 +150,13 @@ describe('resolveSmlAttachItems', () => {
       content: 'free-form note body',
       origin: { uri: 'orphan-type://note-1' },
     });
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
-    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    mockCheckItemsAccess.mockResolvedValue(new Map([['entry-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['entry-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue(undefined);
 
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      chunkIds: ['chunk-1'],
+      entryIds: ['entry-1'],
     });
 
     expect(results[0].success).toBe(true);
@@ -167,14 +167,14 @@ describe('resolveSmlAttachItems', () => {
         origin: 'orphan-type://note-1',
         description: 'orphan-type/Ad-hoc note',
       });
-      expect(results[0].chunk_id).toBe('chunk-1');
+      expect(results[0].entry_id).toBe('entry-1');
     }
   });
 
   it('returns error when toAttachment returns undefined', async () => {
     const smlDoc = createSmlDoc();
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
-    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    mockCheckItemsAccess.mockResolvedValue(new Map([['entry-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['entry-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
       list: jest.fn(),
@@ -183,7 +183,7 @@ describe('resolveSmlAttachItems', () => {
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      chunkIds: ['chunk-1'],
+      entryIds: ['entry-1'],
     });
     expect(results[0].success).toBe(false);
     if (!results[0].success) {
@@ -193,8 +193,8 @@ describe('resolveSmlAttachItems', () => {
 
   it('returns attachment data on success without persisting', async () => {
     const smlDoc = createSmlDoc();
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
-    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    mockCheckItemsAccess.mockResolvedValue(new Map([['entry-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['entry-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
       list: jest.fn(),
@@ -207,7 +207,7 @@ describe('resolveSmlAttachItems', () => {
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      chunkIds: ['chunk-1'],
+      entryIds: ['entry-1'],
     });
     expect(results[0].success).toBe(true);
     if (results[0].success) {
@@ -217,14 +217,14 @@ describe('resolveSmlAttachItems', () => {
         origin: 'custom-origin',
         description: 'visualization/Test Viz',
       });
-      expect(results[0].chunk_id).toBe('chunk-1');
+      expect(results[0].entry_id).toBe('entry-1');
     }
   });
 
   it('uses toAttachment description when provided', async () => {
     const smlDoc = createSmlDoc({ origin_id: 'so-1', origin: { uri: 'so-1' } });
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
-    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    mockCheckItemsAccess.mockResolvedValue(new Map([['entry-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['entry-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
       list: jest.fn(),
@@ -237,7 +237,7 @@ describe('resolveSmlAttachItems', () => {
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      chunkIds: ['chunk-1'],
+      entryIds: ['entry-1'],
     });
     expect(results[0].success).toBe(true);
     if (results[0].success) {
@@ -257,8 +257,8 @@ describe('resolveSmlAttachItems', () => {
       origin_id: 'so-1',
       origin: { uri: 'so-1' },
     });
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
-    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    mockCheckItemsAccess.mockResolvedValue(new Map([['entry-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['entry-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'connector',
       list: jest.fn(),
@@ -270,7 +270,7 @@ describe('resolveSmlAttachItems', () => {
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      chunkIds: ['chunk-1'],
+      entryIds: ['entry-1'],
     });
     expect(results[0].success).toBe(true);
     if (results[0].success) {
@@ -283,8 +283,8 @@ describe('resolveSmlAttachItems', () => {
       origin_id: 'fallback-origin',
       origin: { uri: 'fallback-origin' },
     });
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
-    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    mockCheckItemsAccess.mockResolvedValue(new Map([['entry-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['entry-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
       list: jest.fn(),
@@ -293,7 +293,7 @@ describe('resolveSmlAttachItems', () => {
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      chunkIds: ['chunk-1'],
+      entryIds: ['entry-1'],
     });
     expect(results[0].success).toBe(true);
     if (results[0].success) {
@@ -304,8 +304,8 @@ describe('resolveSmlAttachItems', () => {
 
   it('returns failure and logs when toAttachment throws', async () => {
     const smlDoc = createSmlDoc();
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
-    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    mockCheckItemsAccess.mockResolvedValue(new Map([['entry-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['entry-1', smlDoc]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
       list: jest.fn(),
@@ -314,24 +314,24 @@ describe('resolveSmlAttachItems', () => {
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      chunkIds: ['chunk-1'],
+      entryIds: ['entry-1'],
     });
     expect(results[0].success).toBe(false);
     if (!results[0].success) {
-      expect(results[0].message).toContain("Failed to convert SML item 'chunk-1'");
+      expect(results[0].message).toContain("Failed to convert SML item 'entry-1'");
     }
     expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
 
-  it('processes multiple chunk ids independently', async () => {
-    const docOk = createSmlDoc({ id: 'chunk-ok', origin_id: 'r-ok', origin: { uri: 'r-ok' } });
+  it('processes multiple entry ids independently', async () => {
+    const docOk = createSmlDoc({ id: 'entry-ok', origin_id: 'r-ok', origin: { uri: 'r-ok' } });
     mockCheckItemsAccess.mockResolvedValue(
       new Map([
-        ['chunk-denied', false],
-        ['chunk-ok', true],
+        ['entry-denied', false],
+        ['entry-ok', true],
       ])
     );
-    mockGetDocuments.mockResolvedValue(new Map([['chunk-ok', docOk]]));
+    mockGetDocuments.mockResolvedValue(new Map([['entry-ok', docOk]]));
     mockGetTypeDefinition.mockReturnValue({
       id: 'visualization',
       list: jest.fn(),
@@ -340,7 +340,7 @@ describe('resolveSmlAttachItems', () => {
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      chunkIds: ['chunk-denied', 'chunk-ok'],
+      entryIds: ['entry-denied', 'entry-ok'],
     });
     expect(results).toHaveLength(2);
     expect(results[0].success).toBe(false);

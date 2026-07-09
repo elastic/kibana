@@ -14,7 +14,7 @@ import type { SmlService } from './types';
 export type SmlResolvedItemResult =
   | {
       success: true;
-      chunk_id: string;
+      entry_id: string;
       attachment: {
         type: string;
         data: unknown;
@@ -24,7 +24,7 @@ export type SmlResolvedItemResult =
     }
   | {
       success: false;
-      chunk_id: string;
+      entry_id: string;
       attachment_type?: string;
       message: string;
     };
@@ -37,7 +37,7 @@ export type SmlResolvedItemResult =
  * Used by the `sml_attach` built-in tool and the internal HTTP `_attach` route.
  */
 export const resolveSmlAttachItems = async ({
-  chunkIds,
+  entryIds,
   sml,
   esClient,
   request,
@@ -45,7 +45,7 @@ export const resolveSmlAttachItems = async ({
   savedObjectsClient,
   logger,
 }: {
-  chunkIds: string[];
+  entryIds: string[];
   sml: SmlService;
   esClient: IScopedClusterClient;
   request: KibanaRequest;
@@ -53,36 +53,36 @@ export const resolveSmlAttachItems = async ({
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
 }): Promise<SmlResolvedItemResult[]> => {
-  const uniqueChunkIds = [...new Set(chunkIds)];
+  const uniqueEntryIds = [...new Set(entryIds)];
   const accessMap = await sml.checkItemsAccess({
-    ids: uniqueChunkIds,
+    ids: uniqueEntryIds,
     spaceId,
     esClient,
     request,
   });
 
   const smlDocs = await sml.getDocuments({
-    ids: uniqueChunkIds,
+    ids: uniqueEntryIds,
     spaceId,
     esClient,
   });
 
   return Promise.all(
-    uniqueChunkIds.map(async (chunkId) => {
-      if (!accessMap.get(chunkId)) {
+    uniqueEntryIds.map(async (entryId) => {
+      if (!accessMap.get(entryId)) {
         return {
           success: false,
-          chunk_id: chunkId,
-          message: `Access denied: you do not have the required permissions to access SML item '${chunkId}'`,
+          entry_id: entryId,
+          message: `Access denied: you do not have the required permissions to access SML item '${entryId}'`,
         };
       }
 
-      const smlDoc = smlDocs.get(chunkId);
+      const smlDoc = smlDocs.get(entryId);
       if (!smlDoc) {
         return {
           success: false,
-          chunk_id: chunkId,
-          message: `SML document '${chunkId}' not found in the index`,
+          entry_id: entryId,
+          message: `SML document '${entryId}' not found in the index`,
         };
       }
 
@@ -91,7 +91,7 @@ export const resolveSmlAttachItems = async ({
         // Unregistered type (e.g. workflow ad-hoc namespace): fall back to plain text attachment.
         return {
           success: true,
-          chunk_id: chunkId,
+          entry_id: entryId,
           attachment: {
             type: 'text',
             data: { title: smlDoc.title, content: smlDoc.content },
@@ -111,15 +111,15 @@ export const resolveSmlAttachItems = async ({
         if (!convertedAttachment) {
           return {
             success: false,
-            chunk_id: chunkId,
+            entry_id: entryId,
             attachment_type: smlDoc.type,
-            message: `Failed to convert SML item '${chunkId}' to attachment — toAttachment returned undefined`,
+            message: `Failed to convert SML item '${entryId}' to attachment — toAttachment returned undefined`,
           };
         }
 
         return {
           success: true,
-          chunk_id: chunkId,
+          entry_id: entryId,
           attachment: {
             type: convertedAttachment.type,
             data: convertedAttachment.data,
@@ -129,15 +129,15 @@ export const resolveSmlAttachItems = async ({
         };
       } catch (error) {
         logger.error(
-          `sml_attach: error converting item '${chunkId}' (type: ${smlDoc.type}): ${
+          `sml_attach: error converting item '${entryId}' (type: ${smlDoc.type}): ${
             error instanceof Error ? error.message : String(error)
           }`
         );
         return {
           success: false,
-          chunk_id: chunkId,
+          entry_id: entryId,
           attachment_type: smlDoc.type,
-          message: `Failed to convert SML item '${chunkId}' to attachment`,
+          message: `Failed to convert SML item '${entryId}' to attachment`,
         };
       }
     })

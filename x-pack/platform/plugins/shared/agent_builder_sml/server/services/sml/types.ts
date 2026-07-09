@@ -20,7 +20,7 @@ import type { SmlSearchFilters, SmlSearchConstraints } from '../../../common/htt
  * matches against; `kind` describes how the UI should render the matched label.
  *
  * `kind` is open (free-form keyword at the ES level). The indexer auto-prepends
- * entries with `kind: 'title'` and `kind: 'type'` derived from the chunk's title
+ * entries with `kind: 'title'` and `kind: 'type'` derived from the entry's title
  * and type fields. Producers can add additional entries with any kind (e.g.
  * 'tagline', 'nickname', 'category', 'synonym') — the UI decides how to render
  * each kind.
@@ -31,7 +31,7 @@ interface DiscoveryLabel {
 }
 
 /**
- * A single Kibana feature privilege required to access a chunk
+ * A single Kibana feature privilege required to access an entry
  * (e.g., `saved_object:lens/get`, `action:execute`).
  */
 interface SmlKibanaPrivilege {
@@ -39,7 +39,7 @@ interface SmlKibanaPrivilege {
 }
 
 /**
- * Permissions required to access a chunk.
+ * Permissions required to access an entry.
  *
  * The `kibana` sub-object is always present (with a possibly-empty array)
  * on stored documents to keep the schema rigid and predictable.
@@ -144,8 +144,8 @@ export interface SmlTypeDefinition {
   ) => Promise<AttachmentInput<string, unknown> | undefined>;
 
   /**
-   * Compute the {@link SmlPermissions} that gate access to chunks for the
-   * given `originId`. Called by the indexer for every chunk it stamps.
+   * Compute the {@link SmlPermissions} that gate access to the entry for the
+   * given `originId`. Called by the indexer for every entry it stamps.
    *
    * Authoritative when defined. `SmlEntry` does not carry a `permissions`
    * field. Types that need permission shapes the built-in helpers do not
@@ -157,7 +157,7 @@ export interface SmlTypeDefinition {
    * stamps an empty `SmlPermissions`, which the read-path security filter
    * treats as "no privileges required". A type that wraps a sensitive
    * resource MUST implement this hook — there is no other way to attach an
-   * access-control gate to its chunks.
+   * access-control gate to its entry.
    *
    * For Kibana saved-object-backed types, prefer the
    * `kibanaSavedObjectPermissions` helper over hand-writing the privilege
@@ -176,7 +176,7 @@ export interface SmlTypeDefinition {
 }
 
 /**
- * How a chunk was produced.
+ * How an entry was produced.
  *
  * - `'crawled'`: written by the SML crawler or by an event-driven `indexAttachment`
  *   origin-mode call (content fetched via `getSmlEntry`).
@@ -190,7 +190,7 @@ export type SmlIngestionMethod = 'manual' | 'crawled';
  * An SML document as stored in the system index.
  */
 export interface SmlDocument {
-  /** Unique id of the chunk */
+  /** Unique id of the entry */
   id: string;
   /** SML type (e.g., 'visualization', 'dashboard') */
   type: string;
@@ -229,7 +229,7 @@ export interface SmlDocument {
    * on stored documents; the inner privileges array may be empty.
    */
   permissions: SmlPermissions;
-  /** How this chunk was produced. */
+  /** How this entry was produced. */
   ingestion_method: SmlIngestionMethod;
 }
 
@@ -348,19 +348,19 @@ export type { SmlSearchFilters, SmlSearchConstraints } from '../../../common/htt
  *   entries. This matches the historical behavior of
  *   `indexAttachment({ action: 'delete' })` and the crawler's own semantic.
  * - `'manual'` — remove curated manual entries; preserve crawled output.
- * - `'all'` — remove every chunk for the `origin_id` regardless of how it was
+ * - `'all'` — remove the entry for the `origin_id` regardless of how it was
  *   produced. Use when the caller "owns" the origin and is fully retiring it
- *   (e.g. a workflow that wrote chunks and is now cleaning up).
+ *   (e.g. a workflow that wrote the entry and is now cleaning up).
  */
 export type SmlDeleteScope = SmlIngestionMethod | 'all';
 
 /**
  * Origin-mode mixin for `indexAttachment`.
  *
- * Content is produced by the registered type's `getSmlEntry` hook. Resulting
- * chunks are tagged `ingestion_method: 'crawled'`. If the target `origin_id`
- * already has any `ingestion_method: 'manual'` chunks, the call is a no-op
- * unless `force: true` is provided.
+ * Content is produced by the registered type's `getSmlEntry` hook. The
+ * resulting entry is tagged `ingestion_method: 'crawled'`. If the target
+ * `origin_id` already has an `ingestion_method: 'manual'` entry, the call
+ * is a no-op unless `force: true` is provided.
  */
 export interface SmlIndexAttachmentOriginMode {
   /** Override existing manual entries. Default: false. */
@@ -398,28 +398,28 @@ export type SmlIndexerParams = SmlIndexerOriginParams;
  * Internal params for `SmlIndexer.deleteAttachment` and
  * `SmlService.deleteAttachment`. Shape mirrors `SmlIndexerBaseParams` minus
  * `action` (the method itself implies delete) and adds the `ingestionMethod`
- * scope selector that lets callers wipe more than just crawled chunks.
+ * scope selector that lets callers wipe more than just the crawled entry.
  *
  * @remarks
- * `spaces` controls which chunks are deleted: only chunks whose stored
+ * `spaces` controls which entries are deleted: only entries whose stored
  * `spaces` array contains at least one of the provided space IDs (or the
  * wildcard `'*'`) are removed. HTTP-path callers (PUT/DELETE routes) pass
- * `[spaceId]` so the delete is scoped to the caller's space and chunks
+ * `[spaceId]` so the delete is scoped to the caller's space and entries
  * belonging to other spaces are left intact.
  *
  * Crawler origin-mode paths omit `spaces` (via `indexAttachment`) so
  * their deletes remain global — the crawler owns the full origin across
- * all spaces and must be able to wipe stale chunks regardless of which
- * space they were written from.
+ * all spaces and must be able to wipe a stale entry regardless of which
+ * space it was written from.
  */
 export interface SmlIndexerDeleteAttachmentParams {
   originId: string;
   attachmentType: string;
   /**
    * Space-isolation guard. `deleteEntry` filters by
-   * `{ terms: { spaces: [...spaces, '*'] } }` so only chunks whose stored
+   * `{ terms: { spaces: [...spaces, '*'] } }` so only an entry whose stored
    * `spaces` array contains one of the provided IDs (or the global wildcard
-   * `'*'`) are removed. See type-level `@remarks` for the full contract.
+   * `'*'`) is removed. See type-level `@remarks` for the full contract.
    */
   spaces: string[];
   esClient: ElasticsearchClient;
@@ -504,11 +504,11 @@ export interface SmlService {
   indexAttachment: (params: SmlIndexerParams) => Promise<void>;
 
   /**
-   * Delete chunks for an origin, with explicit control over which ingestion
+   * Delete the entry for an origin, with explicit control over which ingestion
    * method(s) are removed. See {@link SmlIndexerDeleteAttachmentParams}.
    *
    * Distinct from `indexAttachment({ action: 'delete' })` only in that
-   * callers can choose to wipe `'manual'` or `'all'` chunks. Without this
+   * callers can choose to wipe a `'manual'` or `'all'` entry. Without this
    * method, the action: 'delete' path defaults to `'crawled'` to preserve
    * the historical crawler/event-driven semantics (delete crawled output,
    * keep curated manuals).
@@ -516,7 +516,7 @@ export interface SmlService {
   deleteAttachment: (params: SmlIndexerDeleteAttachmentParams) => Promise<void>;
 
   /**
-   * Fetch SML documents by their chunk IDs, scoped to a space.
+   * Fetch SML documents by their IDs, scoped to a space.
    *
    * **Internal use only — does NOT perform permission checks.** Direct callers
    * MUST authorize IDs (via `checkItemsAccess`) before invoking this method,
