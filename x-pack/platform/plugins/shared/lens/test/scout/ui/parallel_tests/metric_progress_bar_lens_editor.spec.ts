@@ -12,13 +12,13 @@ import { testData } from '../fixtures';
 
 const STATIC_MAX_VALUE = '100000';
 
-// Hardcoded to match style output, same approach as group6/metric.ts FTR tests.
+// Hardcoded to match style output, same approach as group6/metric_primary_and_breakdown.ts FTR tests.
 const DEFAULT_PROGRESS_BAR_FILL_COLOR = 'rgb(97, 162, 255)';
 const DYNAMIC_PROGRESS_BAR_FILL_COLOR = 'rgb(36, 194, 146)';
 const STATIC_PROGRESS_BAR_FILL_COLOR = 'rgb(0, 0, 0)';
 
 function progressBarLocator(page: ScoutPage) {
-  return page.locator('.echSingleMetricProgressBar');
+  return page.locator('.echMeterFillPaint');
 }
 
 async function configureStaticMaxValueForProgressBar(

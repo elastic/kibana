@@ -5,26 +5,19 @@
  * 2.0.
  */
 
-import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
+import type { IlmPolicyPhases } from '@kbn/streams-schema';
+import type { DataPhasesFlyoutCommonProps, EditDataPhasesFlyoutChangeMeta } from '../shared';
 
-export interface EditIlmPhasesFlyoutChangeMeta {
-  invalidPhases: PhaseName[];
-}
-
-export interface EditIlmPhasesFlyoutProps {
+export interface EditIlmPhasesFlyoutProps extends DataPhasesFlyoutCommonProps {
   initialPhases: IlmPolicyPhases;
-  selectedPhase: PhaseName | undefined;
-  setSelectedPhase: (phase: PhaseName | undefined) => void;
-  onChange: (next: IlmPolicyPhases, meta: EditIlmPhasesFlyoutChangeMeta) => void;
-  onSave: (next: IlmPolicyPhases) => void;
-  onClose: () => void;
   isMetricsStream: boolean;
-  onChangeDebounceMs?: number;
-  isSaving?: boolean;
+
   canCreateRepository?: boolean;
   searchableSnapshotRepositories?: string[];
   isLoadingSearchableSnapshotRepositories?: boolean;
   onRefreshSearchableSnapshotRepositories?: () => void;
   onCreateSnapshotRepository?: () => void;
-  'data-test-subj'?: string;
+
+  onChange: (next: IlmPolicyPhases, meta: EditDataPhasesFlyoutChangeMeta) => void;
+  onSave: (next: IlmPolicyPhases) => void;
 }

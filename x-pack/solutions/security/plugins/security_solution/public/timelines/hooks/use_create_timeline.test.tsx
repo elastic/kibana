@@ -19,6 +19,7 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 import { mockGlobalState, TestProviders } from '../../common/mock';
 import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { PageScope } from '../../data_view_manager/constants';
+import { useSecurityDefaultPatterns } from '../../data_view_manager/hooks/use_security_default_patterns';
 
 jest.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../common/containers/use_global_time', () => {
@@ -32,12 +33,30 @@ jest.mock('../../common/containers/use_global_time', () => {
   };
 });
 jest.mock('../../common/lib/kibana');
-
-jest.mock('../../common/hooks/use_experimental_features');
+jest.mock('../../data_view_manager/hooks/use_security_default_patterns');
 
 describe('useCreateTimeline', () => {
   const resetDiscoverAppState = jest.fn().mockResolvedValue({});
-  (useDiscoverInTimelineContext as jest.Mock).mockReturnValue({ resetDiscoverAppState });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useDiscoverInTimelineContext as jest.Mock).mockReturnValue({ resetDiscoverAppState });
+    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
+      id: 'security-solution',
+      indexPatterns: [
+        '.siem-signals-spacename',
+        'apm-*-transaction*',
+        'auditbeat-*',
+        'endgame-*',
+        'filebeat-*',
+        'logs-*',
+        'packetbeat-*',
+        'traces-apm*',
+        'winlogbeat-*',
+        '-*elastic-cloud-logs-*',
+      ],
+    });
+  });
 
   it('should return a function', () => {
     const hookResult = renderHook(

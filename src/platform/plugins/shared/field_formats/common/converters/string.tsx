@@ -134,11 +134,9 @@ export class StringFormat extends FieldFormat {
     const missing = this.checkForMissingValueReact(val);
     if (missing) return missing;
 
+    const formatted = this.textConvert(val);
     const fieldName = field?.name;
-    if (fieldName && hit?.highlight?.[fieldName]) {
-      return getHighlightReact(this.textConvert(val), hit.highlight[fieldName]);
-    }
 
-    return this.textConvert(val);
+    return getHighlightReact(formatted, fieldName, hit);
   };
 }

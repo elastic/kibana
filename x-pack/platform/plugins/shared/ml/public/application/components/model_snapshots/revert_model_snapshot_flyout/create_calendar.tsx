@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import {
-  useEuiTheme,
   EuiButtonIcon,
   EuiDatePicker,
   EuiFieldText,
@@ -21,6 +20,8 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import type { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
@@ -231,18 +232,28 @@ export const CreateCalendar: FC<Props> = ({
                 }}
               />
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  style={{ margin: 'auto' }}
-                  color={'danger'}
-                  onClick={() => removeCalendarEvent(i)}
-                  iconType="trash"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.ml.revertModelSnapshotFlyout.createCalendar.deleteLabel',
                     {
                       defaultMessage: 'Delete event',
                     }
                   )}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    style={{ margin: 'auto' }}
+                    color={'danger'}
+                    onClick={() => removeCalendarEvent(i)}
+                    iconType="trash"
+                    aria-label={i18n.translate(
+                      'xpack.ml.revertModelSnapshotFlyout.createCalendar.deleteLabel',
+                      {
+                        defaultMessage: 'Delete event',
+                      }
+                    )}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

@@ -31,21 +31,31 @@ regenerate_gh_aw_locks() {
   fi
 
   gh extension install github/gh-aw --pin "$gh_aw_version" --force
-
-  local cmd
-  cmd="gh aw compile --purge --validate --no-check-update && gh aw lint"
-  eval "$cmd"
-  check_for_changed_files "$cmd" true "Regenerate gh-aw workflow locks"
+  gh aw compile --purge --validate --no-check-update
+  gh aw lint
 }
 
 echo --- Deduplicate yarn.lock
 cmd="node scripts/yarn_deduplicate.js && yarn kbn bootstrap && node scripts/yarn_deduplicate.js"
 eval "$cmd"
-check_for_changed_files "$cmd" true
+
+commit_message_parts=()
+if [[ -n "$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')" ]]; then
+  commit_message_parts+=("yarn dedupe")
+fi
 
 if has_gh_aw_version_change; then
   regenerate_gh_aw_locks
+  commit_message_parts+=("gh-aw compilation")
 fi
+
+commit_message="Changes from Renovate helper:"
+if [[ ${#commit_message_parts[@]} -gt 0 ]]; then
+  joined="$(printf '%s, ' "${commit_message_parts[@]}")"
+  commit_message="$commit_message ${joined%, }"
+fi
+
+check_for_changed_files "Renovate helper auto-fixes" true "$commit_message" true
 
 echo --- Additional helpers
 # We only want the deploy label on the main branch instead of all branches in the Renovate group

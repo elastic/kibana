@@ -42,7 +42,12 @@ export async function getConnectorSpecAsJsonSchema({
     const webhookSettings = configurationUtilities.getWebhookSettings();
     const isPfxEnabled = webhookSettings.ssl.pfx.enabled;
     const isEarsEnabled = configurationUtilities.isEarsEnabled();
-    const serialized = serializeConnectorSpec(spec, { isPfxEnabled, isEarsEnabled });
+    const isEarsExperimentalEnabled = configurationUtilities.isEarsExperimentalEnabled();
+    const serialized = serializeConnectorSpec(spec, {
+      isPfxEnabled,
+      isEarsEnabled,
+      isEarsExperimentalEnabled,
+    });
     return {
       metadata: serialized.metadata,
       schema: serialized.schema,

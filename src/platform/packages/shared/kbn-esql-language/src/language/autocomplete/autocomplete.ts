@@ -49,13 +49,6 @@ function isHeaderCommandSuggestion({ label }: { label: string }) {
   return label === 'SET';
 }
 
-function isFromSourceCommand(commands: ESQLAstAllCommands[]) {
-  const sourceCommandNames = new Set(esqlCommandRegistry.getSourceCommandNames());
-  const sourceCommand = commands.find(({ name }) => sourceCommandNames.has(name));
-
-  return sourceCommand?.name.toLowerCase() === 'from';
-}
-
 const orderingEngine = new SuggestionOrderingEngine();
 
 export async function suggest(
@@ -63,10 +56,7 @@ export async function suggest(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ): Promise<ISuggestionItem[]> {
-  const { innerText, correctedQuery, root, astContext } = getAutocompleteCursorContext(
-    fullText,
-    offset
-  );
+  const { innerText, root, astContext, tokens } = getAutocompleteCursorContext(fullText, offset);
 
   if (astContext.type === 'comment') {
     return [];
@@ -77,7 +67,7 @@ export async function suggest(
   const astForFields = astContext.astForContext;
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(correctedQuery, astForFields),
+    getQueryForFields(innerText, astForFields),
     innerText,
     resourceRetriever
   );
@@ -101,7 +91,6 @@ export async function suggest(
 
     const commands = esqlCommandRegistry
       .getAllCommands({
-        isCursorInSubquery: astContext.isCursorInSubquery,
         isStartingSubquery,
         queryContainsSubqueries: astContext.queryContainsSubqueries,
       })
@@ -197,6 +186,7 @@ export async function suggest(
       const rootLevelQuerySuggestions = attachReplacementRanges(innerText, rootLevelSuggestions, {
         fullText,
         offset,
+        tokens,
       });
 
       return orderingEngine.sort([...headerCommandsSuggestions, ...rootLevelQuerySuggestions], {
@@ -253,6 +243,7 @@ export async function suggest(
 
     return attachReplacementRanges(innerText, commandsSpecificSuggestions, {
       commandContext: { columns: await getColumnMapOnce() },
+      tokens,
     });
   }
   return [];
@@ -315,14 +306,11 @@ async function getSuggestionsWithinCommandExpression(
 
   const isInsideSubquery = astContext.isCursorInSubquery; // We only show resource browser suggestions in the main query
   const canSuggestResourceBrowser = (await callbacks?.canSuggestResourceBrowser?.()) ?? false;
-  const subquerySupport =
-    commandDefinition.metadata.subquerySupport === true && isFromSourceCommand(commands);
 
   const context = {
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
-    subquerySupport,
     isCursorInSubquery: astContext.isCursorInSubquery,
     isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,

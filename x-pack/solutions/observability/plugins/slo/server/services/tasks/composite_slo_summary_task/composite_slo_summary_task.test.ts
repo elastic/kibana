@@ -79,11 +79,10 @@ describe('CompositeSloSummaryTask', () => {
     enabled: true,
     experimental: {
       ruleFormV2: { enabled: false },
-      compositeSlo: { enabled: true },
     },
   } satisfies SLOConfig;
 
-  function createTask(): CompositeSloSummaryTask {
+  function createTask(options?: { compositeSloEnabled?: boolean }): CompositeSloSummaryTask {
     coreSetup = coreMock.createSetup();
     coreSetup.getStartServices.mockResolvedValue([
       {
@@ -94,6 +93,9 @@ describe('CompositeSloSummaryTask', () => {
         },
         savedObjects: {
           createInternalRepository: jest.fn().mockReturnValue(savedObjectsRepositoryMock.create()),
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(options?.compositeSloEnabled ?? true),
         },
       } as never,
       {} as never,
@@ -158,6 +160,19 @@ describe('CompositeSloSummaryTask', () => {
       );
 
       expect(mockPersist).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips computeAndPersistCompositeSummaries when composite SLO feature flag is disabled', async () => {
+      task = createTask({ compositeSloEnabled: false });
+      await task.start(createStartPlugins());
+
+      await task.runTask(
+        createConcreteTaskInstanceStub(getCompositeSloSummaryTaskId()),
+        coreSetup as CoreSetup,
+        new AbortController()
+      );
+
+      expect(mockPersist).not.toHaveBeenCalled();
     });
   });
 });

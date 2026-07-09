@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { QUERY_STATUSES } from './queries';
-export type { Query, QueryStatus } from './queries';
 export type {
   ProcessorSuggestion,
   ProcessorPropertySuggestion,
@@ -17,10 +15,7 @@ export {
   STREAMS_TIERED_FEATURES,
   STREAMS_TIERED_ML_FEATURE,
   STREAMS_TIERED_AI_FEATURE,
-  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
   ATTACHMENT_SUGGESTIONS_LIMIT,
-  DEFAULT_EXTRACTION_INTERVAL_HOURS,
-  MIN_EXTRACTION_INTERVAL_HOURS,
   FAILURE_STORE_SELECTOR,
 } from './constants';
 
@@ -39,8 +34,6 @@ export {
   extractMessagesFromField,
 } from './pattern_extraction_helpers';
 
-export type { SigEventsTuningConfig } from './sig_events_tuning_config';
-export { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from './sig_events_tuning_config';
 export {
   type StreamsAppLocation,
   type StreamsAppLocationParams,

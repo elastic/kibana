@@ -1,0 +1,19 @@
+{
+  "sha1": "1bab11fef7f1aaafe88f1b0d018dff8031017c0e",
+  "tests": [
+    {
+      "id": "868d30794e1d05f-7efa820156f3003",
+      "title": "GET /api/watcher/indices/index_patterns returns a list that includes the created data view title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/watcher/test/scout/api/tests/index_patterns.spec.ts",
+        "line": 27,
+        "column": 10
+      }
+    }
+  ]
+}

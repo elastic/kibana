@@ -81,10 +81,8 @@ export const registerUpdateDatasetRoute = ({
 
           const { datasetId } = request.params;
           const { description } = request.body;
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient();
           const updatedDataset = await datasetClient.update(datasetId, {
             description,
           });

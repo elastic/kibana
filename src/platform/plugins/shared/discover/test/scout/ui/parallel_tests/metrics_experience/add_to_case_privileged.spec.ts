@@ -47,11 +47,11 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Add to case action is visible', async () => {
-          await expect(metricsExperience.chartActions.addToCase).toBeVisible();
+          await expect(metricsExperience.chartActionsFor(cardIndex).addToCase).toBeVisible();
         });
 
         await spaceTest.step('click Add to case action', async () => {
-          await metricsExperience.chartActions.addToCase.click();
+          await metricsExperience.chartActionsFor(cardIndex).addToCase.click();
         });
 
         await spaceTest.step('verify case selector modal opens', async () => {

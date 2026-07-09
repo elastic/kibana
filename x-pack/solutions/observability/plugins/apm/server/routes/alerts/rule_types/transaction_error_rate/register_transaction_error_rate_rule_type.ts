@@ -35,7 +35,7 @@ import {
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { asyncForEach } from '@kbn/std';
 import { transactionErrorRateParamsSchema } from '@kbn/response-ops-rule-params/transaction_error_rate';
 import { unflattenObject } from '@kbn/object-utils';

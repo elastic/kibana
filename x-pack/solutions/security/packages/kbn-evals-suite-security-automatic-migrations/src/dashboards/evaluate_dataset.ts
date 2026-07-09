@@ -119,7 +119,7 @@ export function createEvaluateDataset({
 
     await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         concurrency: 3,
         task: async ({ input }) => {
           if (!input) throw new Error('Missing input for task');

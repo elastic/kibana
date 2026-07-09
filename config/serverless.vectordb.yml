@@ -19,8 +19,6 @@ xpack.features.overrides:
   dev_tools.category: "enterpriseSearch"
   ### Discover feature is moved from Analytics category to the VectorDB one.
   discover_v2.category: "enterpriseSearch"
-  ### Machine Learning feature is moved from Analytics category to the Management one.
-  ml.category: "management"
   ### Stack Alerts feature is moved from Analytics category to the VectorDB one and renamed to simply `Alerts`.
   stackAlerts:
     name: "Alerts"
@@ -37,3 +35,7 @@ uiSettings.overrides.defaultRoute: /app/vectordb
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: vectordb
+
+xpack.ml.ad.enabled: false    # Disables Anomaly Detection
+xpack.ml.dfa.enabled: false   # Disables Data Frame Analytics
+xpack.ml.nlp.enabled: false   # Disables NLP/Trained Models

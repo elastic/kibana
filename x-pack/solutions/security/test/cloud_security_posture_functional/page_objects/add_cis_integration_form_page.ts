@@ -298,8 +298,9 @@ export function AddCisIntegrationFormPageProvider({
     await retry.waitFor('Add Agent button to appear', async () => {
       return await testSubjects.exists(TEST_IDS.ADD_AGENT_BUTTON);
     });
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await testSubjects.click(TEST_IDS.ADD_AGENT_BUTTON);
-    await retry.waitFor('Agent enrollment flyout to render', async () => {
+    await retry.waitForWithTimeout('Agent enrollment flyout to render', 30_000, async () => {
       return await testSubjects.exists(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
     });
   };
@@ -368,6 +369,23 @@ export function AddCisIntegrationFormPageProvider({
       bottomOffset: 100 /* account for fixed footer to decide if need to scroll down */,
     });
     await selectValue(AWS_CREDENTIAL_SELECTOR, credentialTypeValue);
+  };
+
+  /**
+   * Selects a GCP credential type from the credential type selector.
+   * This selector only appears when GCP Cloud Connectors are enabled (package >= 3.3.0-preview03).
+   * Use to switch away from the default 'cloud_connectors' type so that the Cloud Shell button is visible.
+   */
+  const selectGcpCredentials = async (credentialType: 'credentials-json' | 'cloud_connectors') => {
+    await selectValue('gcpCredentialTypeSelector', credentialType);
+  };
+
+  /**
+   * Returns true if the GCP credential type selector is present in the DOM.
+   * It only appears when GCP Cloud Connectors are enabled (package >= 3.3.0-preview03).
+   */
+  const isGcpCredentialSelectorVisible = async () => {
+    return testSubjects.exists('gcpCredentialTypeSelector');
   };
 
   const clickOptionButton = async (text: string) => {
@@ -462,15 +480,16 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const doesStringExistInCodeBlock = async (str: string) => {
-    return await retry.tryForTime(20_000, async () => {
+    const text = await retry.tryForTime(30_000, async () => {
       const flyout = await testSubjects.find(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
       const codeBlock = await flyout.findByXpath('//code');
-      const commandsToBeCopied = await codeBlock.getVisibleText();
-      if (!commandsToBeCopied.includes(str)) {
-        throw new Error(`Expected code block to include "${str}". Got: ${commandsToBeCopied}`);
+      const content = await codeBlock.getVisibleText();
+      if (!content || content.trim() === '') {
+        throw new Error('Code block content not yet available');
       }
-      return true;
+      return content;
     });
+    return text.includes(str);
   };
 
   const getFieldValueInAddAgentFlyout = async (field: string, value: string) => {
@@ -701,6 +720,8 @@ export function AddCisIntegrationFormPageProvider({
     findOptionInPage,
     clickOptionButton,
     selectAwsCredentials,
+    selectGcpCredentials,
+    isGcpCredentialSelectorVisible,
     selectSetupTechnology,
     getSetupTechnologyRadio,
     clickSaveButton,

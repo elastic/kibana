@@ -17,10 +17,16 @@
  */
 
 /**
- * Viewport width (px) at which `Column.Name` is allowed to grow past its
- * default `64em` cap. `2560px` matches a common 4K external display width
- * — at that size the default footprint leaves enough trailing whitespace
- * that giving some of it back to the title column is a clear win.
+ * Viewport width (px) at which two `Column.Name` layout adjustments kick in:
+ * 1. The column is allowed to grow past its default `64em` cap (see
+ *    `cssWideViewportNameWidth` in `content_list_table.tsx`).
+ * 2. The in-cell title/description/tags stack flips to a wrapping row so
+ *    sparse rows pull together instead of leaving a wide gap to the next
+ *    column (see `NameCell` in `column/name/name_cell.tsx`).
+ *
+ * `2560px` matches a common 4K external display width — at that size the
+ * default footprint leaves enough trailing whitespace that giving some of
+ * it back to the title column is a clear win.
  *
  * Not tied to a named EUI breakpoint because EUI tops out at `xl` (~1200px),
  * so the value would have to be a hard-coded magic number either way.

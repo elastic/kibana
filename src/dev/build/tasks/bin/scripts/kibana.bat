@@ -33,6 +33,9 @@ IF EXIST "%CONFIG_DIR%\node.options" (
 
 :: Include pre-defined node option
 set "NODE_OPTIONS=--no-warnings --max-http-header-size=65536 %NODE_OPTIONS%"
+IF "%KBN_DISALLOW_CODE_GEN_FROM_STRINGS%"=="true" (
+  set "NODE_OPTIONS=--disallow-code-generation-from-strings %NODE_OPTIONS%"
+)
 
 :: This should run independently as the last instruction
 :: as we need NODE_OPTIONS previously set to expand

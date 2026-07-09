@@ -10,8 +10,8 @@ import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IndexDataVisualizerSpec } from '@kbn/data-visualizer-plugin/public';
-import { useTimefilter } from '@kbn/ml-date-picker';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import type {
   GetAdditionalLinksParams,
@@ -19,6 +19,9 @@ import type {
   GetAdditionalLinks,
 } from '@kbn/file-upload-common';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { MlDataSourcePicker } from '@kbn/aiops-components';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { isFullLicense } from '../../license';
@@ -26,28 +29,33 @@ import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { useDataSource } from '../../contexts/ml/data_source_context';
 import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
 import { PageTitle } from '../../components/page_title';
+
 export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
+  const { services } = useMlKibana();
   const {
-    services: {
-      docLinks,
-      dataVisualizer,
-      data: {
-        dataViews: { get: getDataView },
-      },
-      mlServices: {
-        mlApi: { recognizeIndex },
-      },
+    docLinks,
+    dataVisualizer,
+    data: {
+      dataViews: { get: getDataView },
     },
-  } = useMlKibana();
+    mlServices: {
+      mlApi: { recognizeIndex },
+    },
+  } = services;
   const mlApi = useMlApi();
   const { showNodeInfo } = useEnabledFeatures();
+  const { selectedDataView: dataView } = useDataSource();
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocator();
   const mlFeaturesDisabled = !isFullLicense();
-  getMlNodeCount(mlApi);
+
+  useEffect(() => {
+    getMlNodeCount(mlApi);
+  }, [mlApi]);
 
   const [IndexDataVisualizer, setIndexDataVisualizer] = useState<IndexDataVisualizerSpec | null>(
     null
@@ -190,34 +198,66 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
     [mlLocator, mlFeaturesDisabled]
   );
 
+  const dataSourcePicker = !esql ? (
+    <MlDataSourcePicker
+      currentDataView={dataView ?? null}
+      services={services}
+      DataViewPickerComponent={DataViewPicker}
+      SavedObjectFinderComponent={SavedObjectFinder}
+      onFieldSaved={() => mlTimefilterRefresh$.next({ lastRefresh: Date.now() })}
+    />
+  ) : undefined;
+
   return IndexDataVisualizer ? (
     <Fragment>
       {IndexDataVisualizer !== null ? (
         <>
           <MlPageHeader>
-            <EuiFlexGroup gutterSize="s" alignItems="center" direction="row">
-              <PageTitle
-                title={
+            <PageTitle
+              title={
+                esql ? (
                   <FormattedMessage
-                    id="xpack.ml.dataVisualizer.pageHeader"
-                    defaultMessage="Data Visualizer"
+                    id="xpack.ml.dataVisualizer.esql.pageHeader"
+                    defaultMessage="Index data visualizer (ES|QL)"
                   />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ml.dataVisualizer.index.pageHeader"
+                    defaultMessage="Index data visualizer"
+                  />
+                )
+              }
+            />
+          </MlPageHeader>
+          {!dataView && !esql ? (
+            <>
+              {dataSourcePicker}
+              <EuiEmptyPrompt
+                title={
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.common.noDataViewTitle"
+                      defaultMessage="No data view selected"
+                    />
+                  </h2>
+                }
+                body={
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ml.common.noDataViewBody"
+                      defaultMessage="Select a data view or Discover session to get started."
+                    />
+                  </p>
                 }
               />
-              {esql ? (
-                <>
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage id="xpack.ml.datavisualizer" defaultMessage="(ES|QL)" />
-                  </EuiFlexItem>
-                </>
-              ) : null}
-            </EuiFlexGroup>
-          </MlPageHeader>
-          <IndexDataVisualizer
-            getAdditionalLinks={getAdditionalLinks}
-            showFrozenDataTierChoice={showNodeInfo}
-            esql={esql}
-          />
+            </>
+          ) : (
+            <IndexDataVisualizer
+              getAdditionalLinks={getAdditionalLinks}
+              showFrozenDataTierChoice={showNodeInfo}
+              esql={esql}
+            />
+          )}
         </>
       ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />

@@ -59,25 +59,13 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
   };
 
   const clonePolicy = (source: ActionPolicyResponse) => {
-    const {
-      name,
-      description,
-      destinations,
-      matcher,
-      groupBy,
-      throttle,
-      tags,
-      groupingMode,
-      type,
-      ruleId,
-    } = source;
+    const { name, description, destinations, matcher, groupBy, throttle, tags, groupingMode } =
+      source;
     const data: CreateActionPolicyData = {
       name: `${name} [clone]`,
       description,
       destinations,
       groupingMode: groupingMode ?? 'per_episode',
-      type,
-      ...(type === 'single_rule' && ruleId != null && { ruleId }),
       ...(tags != null && { tags }),
       ...(matcher != null && { matcher }),
       ...(groupBy != null && { groupBy }),
@@ -88,14 +76,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
   };
 
   if (isLoading) {
-    return (
-      <LoadingFlyout
-        title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.loadingTitle', {
-          defaultMessage: 'Action policy',
-        })}
-        onClose={onClose}
-      />
-    );
+    return <LoadingFlyout onClose={onClose} />;
   }
 
   if (isError || !policy) {
@@ -136,6 +117,9 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
             (isEnabling && enableVariables === policy.id) ||
             (isDisabling && disableVariables === policy.id)
           }
+          session={'start'}
+          ownFocus={false}
+          hasAnimation={false}
         />
       )}
       {policyToDelete && (

@@ -13,7 +13,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 const mockMetric: ParsedMetricItem = {
   metricName: 'cpu.usage',
   fieldTypes: [ES_FIELD_TYPES.DOUBLE],
-  dataStream: 'metrics-*',
+  indexName: 'metrics-*',
   units: ['ms'],
   metricTypes: ['histogram'],
   dimensionFields: [
@@ -243,7 +243,7 @@ TS metrics-*
 
   it('should override index if provided in metric', () => {
     const query = createESQLQuery({
-      metricItem: { ...mockMetric, dataStream: 'custom-metrics-*' },
+      metricItem: { ...mockMetric, indexName: 'custom-metrics-*' },
     });
     expect(query).toBe(
       `
@@ -345,7 +345,7 @@ TS metrics-*
     const mockMetricWithSpecialChars: ParsedMetricItem = {
       metricName: 'cpu.usage',
       fieldTypes: [ES_FIELD_TYPES.LONG],
-      dataStream: 'metrics-*',
+      indexName: 'metrics-*',
       units: ['ms'],
       metricTypes: ['histogram'],
       dimensionFields: [{ name: 'service-name' }, { name: 'container-id' }, { name: 'host-ip' }],
@@ -394,7 +394,7 @@ TS metrics-*
       const mockMetricWithBackticks: ParsedMetricItem = {
         metricName: 'cpu.usage',
         fieldTypes: [ES_FIELD_TYPES.DOUBLE],
-        dataStream: 'metrics-*',
+        indexName: 'metrics-*',
         units: ['ms'],
         metricTypes: ['histogram'],
         dimensionFields: [{ name: 'field`with`ticks' }],
@@ -417,7 +417,7 @@ TS metrics-*
     const mockMetricWithConflictingTypes: ParsedMetricItem = {
       metricName: 'http.request.duration',
       fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
-      dataStream: 'timeseries-rich-metrics-primary',
+      indexName: 'timeseries-rich-metrics-primary',
       units: ['ms'],
       metricTypes: ['gauge'],
       dimensionFields: [{ name: 'service.name' }],
@@ -452,7 +452,7 @@ TS timeseries-rich-metrics-primary
       const mockMetricWithLongConflict: ParsedMetricItem = {
         metricName: 'requests.count',
         fieldTypes: [ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER],
-        dataStream: 'metrics-*',
+        indexName: 'metrics-*',
         units: ['count'],
         metricTypes: ['counter'],
         dimensionFields: [],
@@ -473,7 +473,7 @@ TS metrics-*
       const mockMetricMixedNumeric: ParsedMetricItem = {
         metricName: 'metric.value',
         fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
-        dataStream: 'metrics-*',
+        indexName: 'metrics-*',
         units: ['count'],
         metricTypes: ['gauge'],
         dimensionFields: [],
@@ -508,7 +508,7 @@ TS timeseries-rich-metrics-primary
       const mockMetricSingleType: ParsedMetricItem = {
         metricName: 'cpu.usage',
         fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.DOUBLE],
-        dataStream: 'metrics-*',
+        indexName: 'metrics-*',
         units: ['percent'],
         metricTypes: ['gauge'],
         dimensionFields: [],
@@ -529,7 +529,7 @@ TS metrics-*
       const mockMetricWithConflictingHistogram: ParsedMetricItem = {
         metricName: 'request.duration',
         fieldTypes: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM, ES_FIELD_TYPES.TDIGEST],
-        dataStream: 'metrics-*',
+        indexName: 'metrics-*',
         units: ['ms'],
         metricTypes: ['histogram'],
         dimensionFields: [],
@@ -557,7 +557,7 @@ TS metrics-*
     const mockMetricForBackingIndex: ParsedMetricItem = {
       metricName: 'request_duration',
       fieldTypes: [ES_FIELD_TYPES.LONG],
-      dataStream: 'edge-case-gauge-to-counter',
+      indexName: 'edge-case-gauge-to-counter',
       units: ['ms'],
       metricTypes: ['gauge'],
       dimensionFields: [],
@@ -576,7 +576,7 @@ TS .ds-edge-case-gauge-to-counter-2026.04.29-000001
       );
     });
 
-    it('should fall back to dataStream when originalSource contains a glob', () => {
+    it('should fall back to indexName when originalSource contains a glob', () => {
       const query = createESQLQuery({
         metricItem: mockMetricForBackingIndex,
         originalSource: 'edge-case-*',
@@ -589,7 +589,7 @@ TS edge-case-gauge-to-counter
       );
     });
 
-    it('should fall back to dataStream when originalSource is a comma list', () => {
+    it('should fall back to indexName when originalSource is a comma list', () => {
       const query = createESQLQuery({
         metricItem: mockMetricForBackingIndex,
         originalSource: 'ds-a,ds-b',
@@ -602,7 +602,7 @@ TS edge-case-gauge-to-counter
       );
     });
 
-    it('should fall back to dataStream when originalSource is undefined', () => {
+    it('should fall back to indexName when originalSource is undefined', () => {
       const query = createESQLQuery({
         metricItem: mockMetricForBackingIndex,
       });
@@ -614,7 +614,7 @@ TS edge-case-gauge-to-counter
       );
     });
 
-    it('should fall back to dataStream when originalSource is empty', () => {
+    it('should fall back to indexName when originalSource is empty', () => {
       const query = createESQLQuery({
         metricItem: mockMetricForBackingIndex,
         originalSource: '',

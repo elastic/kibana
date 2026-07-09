@@ -14,11 +14,11 @@ import type {
   AgentContextLayerStartDependencies,
 } from './types';
 import { registerFeatures } from './features';
+import { registerUISettings } from './ui_settings';
 import { registerSearchRoute } from './routes/search';
 import { registerGetRoute } from './routes/get';
 import { registerListRoute } from './routes/list';
-import { registerUpsertRoute } from './routes/upsert';
-import { registerDeleteRoute } from './routes/delete';
+import { registerAutocompleteRoute } from './routes/autocomplete';
 import { createSmlService, type SmlServiceInstance } from './services/sml/sml_service';
 import {
   registerSmlCrawlerTaskDefinition,
@@ -26,6 +26,7 @@ import {
 } from './services/sml/sml_task_definitions';
 import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
+import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
 export class AgentContextLayerPlugin
   implements
@@ -50,6 +51,7 @@ export class AgentContextLayerPlugin
     setupDeps: AgentContextLayerSetupDependencies
   ): AgentContextLayerPluginSetup {
     registerFeatures({ features: setupDeps.features });
+    registerUISettings({ uiSettings: coreSetup.uiSettings });
 
     const smlSetup = this.smlServiceInstance.setup({ logger: this.logger.get('sml') });
 
@@ -86,8 +88,12 @@ export class AgentContextLayerPlugin
     });
     registerGetRoute({ router, coreSetup, logger: this.logger, getSmlService });
     registerListRoute({ router, coreSetup, logger: this.logger, getSmlService });
-    registerUpsertRoute({ router, coreSetup, logger: this.logger, getSmlService });
-    registerDeleteRoute({ router, coreSetup, logger: this.logger, getSmlService });
+    registerAutocompleteRoute({
+      router,
+      coreSetup,
+      logger: this.logger,
+      getSmlService,
+    });
 
     return {
       registerType: smlSetup.registerType,
@@ -115,7 +121,7 @@ export class AgentContextLayerPlugin
       this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
     });
 
-    return {
+    const startContract: AgentContextLayerPluginStart = {
       search: smlService.search,
       getDocuments: async ({ ids, request, spaceId }) => {
         if (ids.length === 0) {
@@ -146,25 +152,23 @@ export class AgentContextLayerPlugin
       },
       getTypeDefinition: smlService.getTypeDefinition,
       resolveSmlAttachItems: (params) => resolveSmlAttachItems({ ...params, sml: smlService }),
-      indexAttachment: async (params) => {
-        const soClient = savedObjects.getScopedClient(params.request, {
-          ...(params.includedHiddenTypes?.length
-            ? { includedHiddenTypes: params.includedHiddenTypes }
-            : {}),
-        });
-        const spaceId =
-          params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-        return smlService.indexAttachment({
-          originId: params.originId,
-          attachmentType: params.attachmentType,
-          action: params.action,
-          spaces: [spaceId],
-          esClient: elasticsearch.client.asInternalUser,
-          savedObjectsClient: soClient,
-          logger: this.logger.get('sml'),
-        });
-      },
+      indexAttachment: buildIndexAttachment({
+        smlService,
+        elasticsearch,
+        savedObjects,
+        spaces,
+        logger: this.logger.get('sml'),
+      }),
+      deleteAttachment: buildDeleteAttachment({
+        smlService,
+        elasticsearch,
+        savedObjects,
+        spaces,
+        logger: this.logger.get('sml'),
+      }),
     };
+
+    return startContract;
   }
 
   stop() {}

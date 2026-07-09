@@ -8,7 +8,6 @@
 import { createDataViewSelectedListener } from './data_view_selected';
 import { selectDataViewAsync } from '../actions';
 import type { DataViewsServicePublic, FieldSpec } from '@kbn/data-views-plugin/public';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import type { RootState } from '../reducer';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../../constants';
@@ -84,7 +83,6 @@ const mockedState: RootState = {
     },
   },
 };
-const mockLogger = loggingSystemMock.createLogger();
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn(() => mockedState);
@@ -118,7 +116,6 @@ describe('createDataViewSelectedListener', () => {
           addDanger: mockToastsDanger,
         },
       } as unknown as CoreStart['notifications'],
-      logger: mockLogger,
       scope: PageScope.default,
       spaces: mockSpaces,
       storage: mockStorage,
@@ -204,7 +201,6 @@ describe('createDataViewSelectedListener', () => {
         } as unknown as CoreStart['notifications'],
         scope: PageScope.analyzer,
         spaces: mockSpaces,
-        logger: mockLogger,
         storage: mockStorage,
       });
 
@@ -238,7 +234,6 @@ describe('createDataViewSelectedListener', () => {
         } as unknown as CoreStart['notifications'],
         scope: PageScope.analyzer,
         spaces: mockSpaces,
-        logger: mockLogger,
         storage: mockStorage,
       });
 
@@ -285,7 +280,6 @@ describe('createDataViewSelectedListener', () => {
       } as unknown as CoreStart['notifications'],
       scope: PageScope.analyzer,
       spaces: mockSpaces,
-      logger: mockLogger,
       storage: mockStorage,
     });
     jest.mocked(mockDataViewsService.getDataViewLazy).mockRejectedValue(new Error('conflict'));

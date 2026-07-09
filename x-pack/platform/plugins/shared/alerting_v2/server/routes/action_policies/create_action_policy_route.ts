@@ -26,7 +26,10 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
   static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}`;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.write],
+      requiredPrivileges: [
+        ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
+        ALERTING_V2_API_PRIVILEGES.rules.read,
+      ],
     },
   };
   static routeOptions = {
@@ -41,7 +44,7 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
     response: {
       201: {
         body: () => actionPolicyResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the newly created action policy.',
       },
       400: {
         body: () => errorResponseSchema,

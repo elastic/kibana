@@ -17,6 +17,7 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiInMemoryTable,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
@@ -187,7 +188,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             ? '*'
             : basePrivilege;
 
-          let icon = <EuiIcon type="empty" size="s" />;
+          let icon = <EuiIcon type="empty" size="s" aria-hidden={true} />;
           if (privilegeCalculator.hasSupersededInheritedPrivileges(record.privilegeIndex)) {
             icon = (
               <span data-test-subj="spaceTablePrivilegeSupersededWarning">
@@ -224,38 +225,60 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           {
             render: (record: TableRow) => {
               return (
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.security.management.editRole.spacePrivilegeTable.editPrivilegesLabel',
                     {
                       defaultMessage: `Edit privileges for the following spaces: {spaceNames}.`,
                       values: { spaceNames: record.spaces.map((s) => s.name).join(', ') },
                     }
                   )}
-                  color={'primary'}
-                  iconType={'pencil'}
-                  onClick={() => this.props.onEdit(record.privilegeIndex)}
-                  data-test-subj={`privilegeEditAction-${record.privilegeIndex}`}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.security.management.editRole.spacePrivilegeTable.editPrivilegesLabel',
+                      {
+                        defaultMessage: `Edit privileges for the following spaces: {spaceNames}.`,
+                        values: { spaceNames: record.spaces.map((s) => s.name).join(', ') },
+                      }
+                    )}
+                    color={'primary'}
+                    iconType={'pencil'}
+                    onClick={() => this.props.onEdit(record.privilegeIndex)}
+                    data-test-subj={`privilegeEditAction-${record.privilegeIndex}`}
+                  />
+                </EuiToolTip>
               );
             },
           },
           {
             render: (record: TableRow) => {
               return (
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.security.management.editRole.spacePrivilegeTable.deletePrivilegesLabel',
                     {
                       defaultMessage: `Delete privileges for the following spaces: {spaceNames}.`,
                       values: { spaceNames: record.spaces.map((s) => s.name).join(', ') },
                     }
                   )}
-                  color={'danger'}
-                  iconType={'trash'}
-                  onClick={() => this.onDeleteSpacePrivilege(record)}
-                  data-test-subj={`privilegeDeleteAction-${record.privilegeIndex}`}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.security.management.editRole.spacePrivilegeTable.deletePrivilegesLabel',
+                      {
+                        defaultMessage: `Delete privileges for the following spaces: {spaceNames}.`,
+                        values: { spaceNames: record.spaces.map((s) => s.name).join(', ') },
+                      }
+                    )}
+                    color={'danger'}
+                    iconType={'trash'}
+                    onClick={() => this.onDeleteSpacePrivilege(record)}
+                    data-test-subj={`privilegeDeleteAction-${record.privilegeIndex}`}
+                  />
+                </EuiToolTip>
               );
             },
           },

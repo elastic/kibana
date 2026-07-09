@@ -16,7 +16,6 @@ import { CanvasPageProvider } from './canvas_page';
 import { LensPageProvider } from './lens_page';
 import { GisPageObject } from './gis_page';
 import { ReportingPageObject } from './reporting_page';
-import { WatcherPageObject } from './watcher_page';
 import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
 import { UserProfilePageProvider } from './user_profile_page';
 import { SnapshotRestorePageProvider } from './snapshot_restore_page';
@@ -26,7 +25,6 @@ import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
 import { BannersPageObject } from './banners_page';
 import { NavigationalSearchPageObject } from './navigational_search';
 import { TagManagementPageObject } from './tag_management_page';
-import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { IndexManagementPageProvider } from './index_management_page';
@@ -37,6 +35,7 @@ import { LogstashPageObject } from './logstash_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
 import { RollupPageObject } from './rollup_page';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
+import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -53,7 +52,6 @@ export const pageObjects = {
   lens: LensPageProvider,
   maps: GisPageObject,
   reporting: ReportingPageObject,
-  watcher: WatcherPageObject,
   searchSessionsManagement: SearchSessionsPageProvider,
   snapshotRestore: SnapshotRestorePageProvider,
   upgradeAssistant: UpgradeAssistantFlyoutObject,
@@ -62,7 +60,6 @@ export const pageObjects = {
   banners: BannersPageObject,
   navigationalSearch: NavigationalSearchPageObject,
   tagManagement: TagManagementPageObject,
-  crossClusterReplication: CrossClusterReplicationPageProvider,
   licenseManagement: LicenseManagementPageProvider,
   apiKeys: ApiKeysPageProvider,
   indexManagement: IndexManagementPageProvider,
@@ -73,4 +70,5 @@ export const pageObjects = {
   logstash: LogstashPageObject,
   rollup: RollupPageObject,
   remoteClusters: RemoteClustersPageProvider,
+  crossClusterReplication: CrossClusterReplicationPageProvider,
 };

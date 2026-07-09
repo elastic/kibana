@@ -26,6 +26,7 @@
     "@kbn/agent-builder-server",
     "@kbn/core-http-server-mocks",
     "@kbn/core-logging-server-mocks",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/es-errors"
   ]
 }

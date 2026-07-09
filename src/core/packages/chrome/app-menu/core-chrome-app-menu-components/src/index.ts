@@ -27,7 +27,13 @@ export type {
   AppMenuSwitch,
 } from './types';
 
-export { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
+export { APP_MENU_ITEM_LIMIT, APP_MENU_SHARE_ID, DEFAULT_POPOVER_WIDTH } from './constants';
+
+export {
+  APP_MENU_TEST_SUBJECTS,
+  getAppMenuItemTestSubj,
+  getAppMenuActionButtonTestSubj,
+} from './test_subjects';
 
 export {
   getDisplayedItemsAllowedAmount,
@@ -40,4 +46,5 @@ export {
   getPopoverActionItems,
   getPopoverSwitchItems,
   getIsSelectedColor,
+  hasNonGlobalStaticItems,
 } from './utils';

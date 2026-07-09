@@ -10,13 +10,12 @@
 import {
   generateHumanReadableId,
   HUMAN_READABLE_ID_MAX_LENGTH,
-  HUMAN_READABLE_ID_MIN_LENGTH,
-  HUMAN_READABLE_ID_PATTERN,
   isUnsafeId,
   isValidId,
 } from '@kbn/human-readable-id';
 import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import { z } from '@kbn/zod';
+import { workflowIdSchema } from '../workflow_id_schema';
 
 export {
   buildSuffixedCandidate,
@@ -74,13 +73,6 @@ export function detectFileFormat(bytes: Uint8Array): 'zip' | 'yaml' {
 
 export const WORKFLOW_EXPORT_VERSION = '1';
 export { MAX_WORKFLOW_YAML_LENGTH };
-
-/** Zod schema for workflow IDs — reused in WorkflowExportEntrySchema and isValidWorkflowId. */
-const workflowIdSchema = z
-  .string()
-  .min(HUMAN_READABLE_ID_MIN_LENGTH)
-  .max(HUMAN_READABLE_ID_MAX_LENGTH)
-  .regex(HUMAN_READABLE_ID_PATTERN);
 
 export const WorkflowExportEntrySchema = z.object({
   id: workflowIdSchema,

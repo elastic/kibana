@@ -190,18 +190,6 @@ export const ATTACHMENTS_TAB = i18n.translate('xpack.cases.caseView.tabs.attachm
   defaultMessage: 'Attachments',
 });
 
-export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
-  defaultMessage: 'Alerts',
-});
-
-export const EVENTS_TAB = i18n.translate('xpack.cases.caseView.tabs.events', {
-  defaultMessage: 'Events',
-});
-
-export const FILES_TAB = i18n.translate('xpack.cases.caseView.tabs.files', {
-  defaultMessage: 'Files',
-});
-
 export const OBSERVABLES_TAB = i18n.translate('xpack.cases.caseView.tabs.observables', {
   defaultMessage: 'Observables',
 });
@@ -293,3 +281,7 @@ export const ERROR_CHANGING_TEMPLATE = i18n.translate(
     defaultMessage: 'Error changing template',
   }
 );
+
+export const EXTENDED_FIELDS_TITLE = i18n.translate('xpack.cases.caseView.extendedFieldsTitle', {
+  defaultMessage: 'Extended fields',
+});

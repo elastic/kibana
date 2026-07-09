@@ -19,6 +19,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -36,6 +37,8 @@ interface DownsamplingPhaseProps {
   isBeingEdited?: boolean;
   canManageLifecycle: boolean;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
 }
 
 export const DownsamplingPhase = ({
@@ -48,6 +51,7 @@ export const DownsamplingPhase = ({
   isBeingEdited = false,
   canManageLifecycle,
   isEditLifecycleFlyoutOpen = false,
+  disableInteractions = false,
 }: DownsamplingPhaseProps) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -67,6 +71,9 @@ export const DownsamplingPhase = ({
   };
 
   const handleClick = () => {
+    if (disableInteractions) {
+      return;
+    }
     if (isEditLifecycleFlyoutOpen) {
       // When the flyout is open, navigate to the phase tab instead of showing the popover
       onEditStep?.(stepNumber, phaseName);
@@ -131,7 +138,7 @@ export const DownsamplingPhase = ({
   return (
     <EuiPopover
       button={button}
-      isOpen={isPopoverOpen && !isEditLifecycleFlyoutOpen}
+      isOpen={isPopoverOpen && !isEditLifecycleFlyoutOpen && !disableInteractions}
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="upCenter"
       aria-label={i18n.translate(
@@ -191,21 +198,32 @@ export const DownsamplingPhase = ({
 
                 {onRemoveStep && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      display="base"
-                      iconType="trash"
-                      size="s"
-                      color="danger"
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.streams.streamDetailLifecycle.removeDownsampleStep.ariaLabel',
                         {
                           defaultMessage: 'Remove downsample step {stepNumber}',
                           values: { stepNumber },
                         }
                       )}
-                      data-test-subj={`downsamplingPopover-step${stepNumber}-removeButton`}
-                      onClick={handleRemoveStep}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        display="base"
+                        iconType="trash"
+                        size="s"
+                        color="danger"
+                        aria-label={i18n.translate(
+                          'xpack.streams.streamDetailLifecycle.removeDownsampleStep.ariaLabel',
+                          {
+                            defaultMessage: 'Remove downsample step {stepNumber}',
+                            values: { stepNumber },
+                          }
+                        )}
+                        data-test-subj={`downsamplingPopover-step${stepNumber}-removeButton`}
+                        onClick={handleRemoveStep}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>

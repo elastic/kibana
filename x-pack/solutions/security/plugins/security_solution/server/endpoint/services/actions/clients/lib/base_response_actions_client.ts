@@ -415,10 +415,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       {
         type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
         attachmentId: actionId,
+        data: { content: comment || EMPTY_COMMENT },
         metadata: {
           targets,
           command,
-          comment: comment || EMPTY_COMMENT,
         },
         owner: APP_ID,
       },
@@ -521,6 +521,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   ): Promise<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>> {
     const responseDocs = await fetchEndpointActionResponses<TOutputContent, TMeta>({
       esClient: this.options.esClient,
+      endpointService: this.options.endpointService,
       actionIds: [actionId],
       agentIds,
     });
@@ -861,6 +862,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         if (actionRequests.length > 0) {
           const actionResults = await fetchActionResponses({
             esClient,
+            endpointService: this.options.endpointService,
             actionIds: actionRequests.map((action) => action.EndpointActions.action_id),
           });
           const responsesByActionId = mapResponsesByActionId(actionResults);
@@ -939,7 +941,11 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
           responseActions: {
             actionId: response.EndpointActions.action_id,
             agentType: this.agentType,
-            actionStatus: response.error ? 'failed' : 'successful',
+            actionStatus: response.EndpointActions.data?.output?.content.canceled_by
+              ? 'canceled'
+              : response.error
+              ? 'failed'
+              : 'successful',
             command: response.EndpointActions.data.command,
           },
         });

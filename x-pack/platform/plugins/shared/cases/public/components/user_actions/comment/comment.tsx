@@ -16,7 +16,6 @@ import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import * as i18n from './translations';
 import { createUnifiedAttachmentUserActionBuilder } from './unified_attachment';
-import { createActionAttachmentUserActionBuilder } from '../../attachments/host_isolation/actions';
 import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
 import {
@@ -151,7 +150,6 @@ const getCreateCommentUserAction = ({
   loadingCommentIds,
   euiTheme,
   handleDeleteComment,
-  actionsNavigation,
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
   attachment: AttachmentUIV2;
@@ -164,33 +162,24 @@ const getCreateCommentUserAction = ({
   | 'persistableStateAttachmentTypeRegistry'
 >): EuiCommentProps[] => {
   if (isLegacyAttachmentRequest(attachment)) {
-    switch (attachment.type) {
-      case AttachmentType.actions:
-        const actionBuilder = createActionAttachmentUserActionBuilder({
-          userProfiles,
-          userAction,
-          attachment,
-          actionsNavigation,
-        });
+    // Legacy `actions` attachments are projected to the unified `security.endpoint`
+    // type by the cases server before reaching the client (UI reads always use
+    // `mode: 'unified'`), so they fall through to the unified branch below
+    // rather than needing a dedicated cases-side renderer.
+    if (attachment.type === AttachmentType.externalReference) {
+      const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
+        userAction,
+        userProfiles,
+        attachment,
+        externalReferenceAttachmentTypeRegistry,
+        caseData,
+        isLoading: loadingCommentIds.includes(attachment.id),
+        handleDeleteComment,
+      });
 
-        return actionBuilder.build();
-
-      case AttachmentType.externalReference:
-        const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
-          userAction,
-          userProfiles,
-          attachment,
-          externalReferenceAttachmentTypeRegistry,
-          caseData,
-          isLoading: loadingCommentIds.includes(attachment.id),
-          handleDeleteComment,
-        });
-
-        return externalReferenceBuilder.build();
-
-      default:
-        return [];
+      return externalReferenceBuilder.build();
     }
+    return [];
   }
 
   const type = toUnifiedAttachmentType(
@@ -236,7 +225,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   euiTheme,
   handleDeleteComment,
   handleOutlineComment,
-  actionsNavigation,
   caseConnectors,
   attachments,
 }) => ({
@@ -274,7 +262,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         loadingCommentIds,
         euiTheme,
         handleDeleteComment,
-        actionsNavigation,
         caseConnectors,
         attachments,
       });

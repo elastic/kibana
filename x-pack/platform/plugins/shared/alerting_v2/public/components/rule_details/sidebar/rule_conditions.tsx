@@ -5,41 +5,35 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
+import { getBreachEsqlQuery, getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ItemValueRuleSummary } from '../item_value_rule_summary';
-import { RecoveryPolicy } from '../recovery_policy';
 import { useRule } from '../rule_context';
-import { EMPTY_VALUE, formatAlertDelay, formatRecoveryDelay } from '../utils';
+import {
+  EMPTY_VALUE,
+  formatAlertDelay,
+  formatNoDataStrategy,
+  formatRecoveryDelay,
+  getRecoverEsqlSegment,
+} from '../utils';
+import { RuleDetailsTable } from './rule_details_table';
 
 const MODE_LABELS: Record<string, string> = {
   signal: i18n.translate('xpack.alertingV2.ruleDetails.modeSignal', {
-    defaultMessage: 'Detect only',
+    defaultMessage: 'Signal',
   }),
   alert: i18n.translate('xpack.alertingV2.ruleDetails.modeAlert', {
-    defaultMessage: 'Alerting',
-  }),
-};
-
-const NO_DATA_BEHAVIOR_LABELS: Record<string, string> = {
-  no_data: i18n.translate('xpack.alertingV2.ruleDetails.noDataBehaviorNoData', {
-    defaultMessage: 'No data',
-  }),
-  last_status: i18n.translate('xpack.alertingV2.ruleDetails.noDataBehaviorLastStatus', {
-    defaultMessage: 'Keep last status',
-  }),
-  recover: i18n.translate('xpack.alertingV2.ruleDetails.noDataBehaviorRecover', {
-    defaultMessage: 'Recover',
+    defaultMessage: 'Alert',
   }),
 };
 
 export interface RuleConditionsProps {
   /**
    * `'full'` (default) shows all condition fields, matching the details page.
-   * `'summary'` hides Recovery, Alert delay, Recovery delay, and No data config — used by the rule summary flyout.
+   * `'summary'` hides Alert delay and Recovery delay — used by the rule summary flyout.
    */
   variant?: 'full' | 'summary';
 }
@@ -50,133 +44,111 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
   const rule = useRule();
   const isAlertMode = rule.kind === 'alert';
   const isSummary = variant === 'summary';
-  const dataSource = getIndexPatternFromESQLQuery(rule.evaluation?.query?.base) || EMPTY_VALUE;
+  const dataSource = getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE;
+  const recoveryCondition = getRecoverEsqlSegment(rule.query, rule.recovery_strategy);
 
   const conditionItems = [
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.dataSource', {
         defaultMessage: 'Data source',
       }),
-      description: (
-        <ItemValueRuleSummary
-          data-test-subj="alertingV2RuleDetailsDataSource"
-          itemValue={dataSource}
-        />
-      ),
+      description: dataSource,
+      'data-test-subj': 'alertingV2RuleDetailsDataSource',
     },
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.groupKey', {
         defaultMessage: 'Group key',
       }),
-      description: (
-        <ItemValueRuleSummary
-          data-test-subj="alertingV2RuleDetailsGroupBy"
-          itemValue={rule.grouping?.fields?.length ? rule.grouping.fields.join(', ') : EMPTY_VALUE}
-        />
-      ),
+      description: rule.grouping?.fields?.length ? rule.grouping.fields.join(', ') : EMPTY_VALUE,
+      'data-test-subj': 'alertingV2RuleDetailsGroupBy',
     },
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.timeField', {
         defaultMessage: 'Time field',
       }),
-      description: (
-        <ItemValueRuleSummary
-          data-test-subj="alertingV2RuleDetailsTimeField"
-          itemValue={rule.time_field ?? EMPTY_VALUE}
-        />
-      ),
+      description: rule.time_field ?? EMPTY_VALUE,
+      'data-test-subj': 'alertingV2RuleDetailsTimeField',
     },
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.schedule', {
         defaultMessage: 'Schedule',
       }),
-      description: (
-        <ItemValueRuleSummary
-          data-test-subj="alertingV2RuleDetailsSchedule"
-          itemValue={i18n.translate('xpack.alertingV2.ruleDetails.scheduleValue', {
-            defaultMessage: 'Every {interval}',
-            values: { interval: formatDuration(rule.schedule.every) },
-          })}
-        />
-      ),
+      description: i18n.translate('xpack.alertingV2.ruleDetails.scheduleValue', {
+        defaultMessage: 'Every {interval}',
+        values: { interval: formatDuration(rule.schedule.every) },
+      }),
+      'data-test-subj': 'alertingV2RuleDetailsSchedule',
     },
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.lookback', {
         defaultMessage: 'Lookback',
       }),
-      description: (
-        <ItemValueRuleSummary
-          data-test-subj="alertingV2RuleDetailsLookback"
-          itemValue={rule.schedule.lookback ? formatDuration(rule.schedule.lookback) : EMPTY_VALUE}
-        />
-      ),
+      description: rule.schedule.lookback ? formatDuration(rule.schedule.lookback) : EMPTY_VALUE,
+      'data-test-subj': 'alertingV2RuleDetailsLookback',
     },
     {
       title: i18n.translate('xpack.alertingV2.ruleDetails.mode', {
         defaultMessage: 'Mode',
       }),
-      description: (
-        <ItemValueRuleSummary
-          data-test-subj="alertingV2RuleDetailsMode"
-          itemValue={MODE_LABELS[rule.kind] ?? rule.kind}
-        />
-      ),
+      description: MODE_LABELS[rule.kind] ?? rule.kind,
+      'data-test-subj': 'alertingV2RuleDetailsMode',
     },
-    ...(isSummary
-      ? []
-      : [
-          {
-            title: i18n.translate('xpack.alertingV2.ruleDetails.recovery', {
-              defaultMessage: 'Recovery',
-            }),
-            description: <RecoveryPolicy recoveryPolicy={rule.recovery_policy} />,
-          },
-        ]),
     ...(isAlertMode && !isSummary
       ? [
           {
             title: i18n.translate('xpack.alertingV2.ruleDetails.alertDelay', {
               defaultMessage: 'Alert delay',
             }),
-            description: (
-              <ItemValueRuleSummary
-                data-test-subj="alertingV2RuleDetailsAlertDelay"
-                itemValue={formatAlertDelay(rule.state_transition)}
-              />
-            ),
+            description: formatAlertDelay(rule.state_transition),
+            'data-test-subj': 'alertingV2RuleDetailsAlertDelay',
+          },
+          {
+            title: i18n.translate('xpack.alertingV2.ruleDetails.recovery', {
+              defaultMessage: 'Recovery',
+            }),
+            description:
+              rule.recovery_strategy === 'query'
+                ? i18n.translate('xpack.alertingV2.ruleDetails.recoveryCustom', {
+                    defaultMessage: 'Custom',
+                  })
+                : i18n.translate('xpack.alertingV2.ruleDetails.recoveryDefault', {
+                    defaultMessage: 'Default',
+                  }),
+            'data-test-subj': 'alertingV2RuleDetailsRecovery',
+          },
+          {
+            title: i18n.translate('xpack.alertingV2.ruleDetails.recoveryCondition', {
+              defaultMessage: 'Recovery condition',
+            }),
+            description: recoveryCondition ? null : EMPTY_VALUE,
+            'data-test-subj': 'alertingV2RuleDetailsRecoveryCondition',
+            fullWidthContent: recoveryCondition ? (
+              <EuiCodeBlock
+                language="esql"
+                isCopyable
+                paddingSize="s"
+                data-test-subj="alertingV2RuleDetailsRecoveryConditionQuery"
+              >
+                {recoveryCondition}
+              </EuiCodeBlock>
+            ) : null,
           },
           {
             title: i18n.translate('xpack.alertingV2.ruleDetails.recoveryDelay', {
               defaultMessage: 'Recovery delay',
             }),
-            description: (
-              <ItemValueRuleSummary
-                data-test-subj="alertingV2RuleDetailsRecoveryDelay"
-                itemValue={formatRecoveryDelay(rule.state_transition)}
-              />
-            ),
+            description: formatRecoveryDelay(rule.state_transition),
+            'data-test-subj': 'alertingV2RuleDetailsRecoveryDelay',
+          },
+          {
+            title: i18n.translate('xpack.alertingV2.ruleDetails.noDataBehavior', {
+              defaultMessage: 'No data behavior',
+            }),
+            description: formatNoDataStrategy(rule.no_data_strategy ?? 'none'),
+            'data-test-subj': 'alertingV2RuleDetailsNoDataStrategy',
           },
         ]
       : []),
-    ...(isSummary
-      ? []
-      : [
-          {
-            title: i18n.translate('xpack.alertingV2.ruleDetails.noDataConfig', {
-              defaultMessage: 'No data config',
-            }),
-            description: (
-              <ItemValueRuleSummary
-                data-test-subj="alertingV2RuleDetailsNoDataConfig"
-                itemValue={
-                  rule.no_data?.behavior
-                    ? NO_DATA_BEHAVIOR_LABELS[rule.no_data.behavior] ?? rule.no_data.behavior
-                    : EMPTY_VALUE
-                }
-              />
-            ),
-          },
-        ]),
   ];
 
   return (
@@ -208,17 +180,12 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
         paddingSize="m"
         data-test-subj="alertingV2RuleDetailsBaseQuery"
       >
-        {rule.evaluation?.query?.base || EMPTY_VALUE}
+        {getBreachEsqlQuery(rule.query) || EMPTY_VALUE}
       </EuiCodeBlock>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
 
-      <EuiDescriptionList
-        compressed
-        type="column"
-        listItems={conditionItems}
-        css={{ maxWidth: 600 }}
-      />
+      <RuleDetailsTable items={conditionItems} />
     </>
   );
 };

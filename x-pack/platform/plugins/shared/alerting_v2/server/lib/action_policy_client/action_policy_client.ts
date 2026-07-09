@@ -10,6 +10,8 @@ import type {
   ActionPolicyBulkAction,
   ActionPolicyResponse,
   CreateActionPolicyDataInput,
+  MatchedActionPolicy,
+  MatcherContext,
 } from '@kbn/alerting-v2-schemas';
 import {
   createActionPolicyDataSchema,
@@ -19,6 +21,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
+import { evaluateKql } from '@kbn/eval-kql';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
@@ -33,6 +36,11 @@ import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_po
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
+import { buildSoSearch } from '../build_so_search';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
@@ -44,6 +52,8 @@ import type {
   CreateActionPolicyParams,
   FindActionPoliciesParams,
   FindActionPoliciesResponse,
+  MatchActionPoliciesForRuleParams,
+  MatchActionPoliciesForRuleResponse,
   SnoozeActionPolicyParams,
   UpdateActionPolicyApiKeyParams,
   UpdateActionPolicyParams,
@@ -85,7 +95,9 @@ export class ActionPolicyClient {
     @inject(EncryptedSavedObjectsClientToken)
     private readonly esoClient: EncryptedSavedObjectsClient,
     @inject(ActionPolicyNamespaceToken)
-    private readonly namespace: string | undefined
+    private readonly namespace: string | undefined,
+    @inject(LoggerServiceToken)
+    private readonly logger: LoggerServiceContract
   ) {}
 
   /**
@@ -167,10 +179,6 @@ export class ActionPolicyClient {
 
   public async createActionPolicy(params: CreateActionPolicyParams): Promise<ActionPolicyResponse> {
     const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, params.data, 'create');
-
-    if (parsed.type === 'single_rule' && parsed.ruleId) {
-      await this.assertRuleExists(parsed.ruleId);
-    }
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const now = new Date().toISOString();
@@ -304,10 +312,12 @@ export class ActionPolicyClient {
     const filter = this.buildFindFilter(params);
     const sortField = this.mapSortField(params.sortField);
 
+    const search = buildSoSearch(params.search);
+
     const res = await this.actionPolicySavedObjectService.find({
       page,
       perPage,
-      search: params.search,
+      search,
       filter,
       sortField,
       sortOrder: params.sortOrder,
@@ -325,6 +335,72 @@ export class ActionPolicyClient {
       page,
       perPage,
     };
+  }
+
+  public async matchActionPoliciesForRule(
+    params: MatchActionPoliciesForRuleParams
+  ): Promise<MatchActionPoliciesForRuleResponse> {
+    const { ruleId, ruleName, ruleTags } = params;
+
+    let resolvedName = ruleName ?? '';
+    let resolvedTags = ruleTags ?? [];
+
+    // If ruleId is provided but not name or tags, fetch the rule from the DB to get the current name and tags
+    if (ruleId && (ruleName === undefined || ruleTags === undefined)) {
+      try {
+        const rule = await this.rulesSavedObjectService.get(ruleId);
+        resolvedName = ruleName ?? rule.attributes.metadata.name;
+        resolvedTags = ruleTags ?? rule.attributes.metadata.tags ?? [];
+      } catch (e) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+          return { items: [] };
+        }
+        throw e;
+      }
+    }
+
+    const context: MatcherContext = {
+      last_event_timestamp: '',
+      group_hash: '',
+      episode_id: '',
+      episode_status: 'active',
+      rule: {
+        id: ruleId ?? '',
+        name: resolvedName,
+        tags: resolvedTags,
+      },
+    };
+
+    const items: MatchedActionPolicy[] = [];
+
+    const allPolicies = await this.findActionPolicies({ perPage: 100 });
+    for (const actionPolicy of allPolicies.items) {
+      if (!actionPolicy.matcher || actionPolicy.matcher.trim() === '') {
+        items.push({ actionPolicy, category: 'global' });
+        continue;
+      }
+
+      let isMatch = false;
+      try {
+        isMatch = evaluateKql(actionPolicy.matcher, context);
+      } catch (err) {
+        this.logger.warn({
+          message: () =>
+            `Failed to evaluate KQL matcher for action policy "${
+              actionPolicy.id
+            }" during pre-matching: ${
+              err instanceof Error ? err.message : String(err)
+            }. Treating as no-match.`,
+        });
+        continue;
+      }
+
+      if (isMatch) {
+        items.push({ actionPolicy, category: 'global-filtered' });
+      }
+    }
+
+    return { items };
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {
@@ -440,34 +516,9 @@ export class ActionPolicyClient {
     return { processed, total: actions.length, errors };
   }
 
-  private async assertRuleExists(ruleId: string): Promise<void> {
-    try {
-      await this.rulesSavedObjectService.get(ruleId);
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.badRequest(
-          `Cannot create single_rule action policy: rule "${ruleId}" not found in this space.`,
-          {
-            code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND_FOR_POLICY,
-            details: { rule_id: ruleId },
-          }
-        );
-      }
-      throw e;
-    }
-  }
-
   private buildFindFilter(params: FindActionPoliciesParams): KueryNode | undefined {
     const conditions: KueryNode[] = [];
     const attrPrefix = `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
-
-    if (params.destinationType) {
-      conditions.push(nodeBuilder.is(`${attrPrefix}.destinations.type`, params.destinationType));
-    }
-
-    if (params.createdBy) {
-      conditions.push(nodeBuilder.is(`${attrPrefix}.createdBy`, params.createdBy));
-    }
 
     if (params.enabled !== undefined) {
       conditions.push(nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false'));
@@ -478,14 +529,6 @@ export class ActionPolicyClient {
       conditions.push(
         tagConditions.length === 1 ? tagConditions[0] : nodeBuilder.or(tagConditions)
       );
-    }
-
-    if (params.ruleId) {
-      conditions.push(nodeBuilder.is(`${attrPrefix}.ruleId`, params.ruleId));
-    }
-
-    if (params.type) {
-      conditions.push(nodeBuilder.is(`${attrPrefix}.type`, params.type));
     }
 
     if (conditions.length === 0) {
@@ -502,8 +545,8 @@ export class ActionPolicyClient {
 
     const sortFieldMap: Record<string, string> = {
       name: 'name.keyword',
-      createdAt: 'createdAt',
-      updatedAt: 'updatedAt',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
     };
 
     return sortFieldMap[sortField];
@@ -525,24 +568,6 @@ export class ActionPolicyClient {
     const auth = await this.getDecryptedAuth(id);
     await this.actionPolicySavedObjectService.delete({ id });
     this.markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
-  }
-
-  public async deleteActionPoliciesByFilter(
-    filter: Pick<FindActionPoliciesParams, 'ruleId' | 'type' | 'destinationType' | 'tags'>
-  ): Promise<BulkActionActionPoliciesResponse> {
-    const ids: string[] = [];
-    const PAGE_SIZE = 100;
-    for (let page = 1; ; page++) {
-      const result = await this.findActionPolicies({ ...filter, page, perPage: PAGE_SIZE });
-      ids.push(...result.items.map((p) => p.id));
-      if (page * PAGE_SIZE >= result.total) break;
-    }
-    if (ids.length === 0) {
-      return { processed: 0, total: 0, errors: [] };
-    }
-    return this.bulkActionActionPolicies({
-      actions: ids.map((id) => ({ id, action: 'delete' as const })),
-    });
   }
 
   private markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {

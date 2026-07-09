@@ -20,6 +20,8 @@ export interface Attachment<
   type: Type;
   /** data bound to the attachment */
   data: DataType;
+  /** Human-readable description of the attachment */
+  description?: string;
   /** should the attachment be hidden from the user - e.g. for screen context */
   hidden?: boolean;
   /**
@@ -28,10 +30,35 @@ export interface Attachment<
    * Undefined for by-value attachments.
    */
   origin?: string;
-  /** The version number of this attachment snapshot. Undefined when version metadata is unavailable. */
-  version?: number;
-  /** Total number of versions for this attachment. Undefined when version metadata is unavailable. */
-  versionCount?: number;
+  /**
+   * Version metadata for this attachment snapshot.
+   * Undefined when version metadata is unavailable.
+   */
+  versionData?: {
+    /** The version number of this snapshot */
+    version: number;
+    /** Total number of versions for this attachment */
+    versionCount: number;
+    /** ISO timestamp of when this version was created */
+    createdAt: string;
+    /**
+     * ISO timestamp of when this attachment's content was last synced with its origin.
+     * Set when `updateOrigin` is called. Undefined when the attachment has never been saved to an origin.
+     */
+    originSyncedAt?: string;
+    /**
+     * Data from the immediately preceding version, if one exists.
+     * Used by attachment renderers to compute diffs between the current and previous version.
+     */
+    previousVersionData?: DataType;
+  };
+  /**
+   * Stable identifier for the logical group this attachment belongs to.
+   * Attachments sharing the same groupId were submitted together as a single
+   * logical entity (e.g. multiple alert batches from one bulk-add action).
+   * Undefined for standalone attachments.
+   */
+  groupId?: string;
 }
 
 /**
@@ -44,5 +71,4 @@ export type UnknownAttachment = Attachment<string, unknown>;
 export type TextAttachment = Attachment<AttachmentType.text>;
 export type ScreenContextAttachment = Attachment<AttachmentType.screenContext>;
 export type EsqlAttachment = Attachment<AttachmentType.esql>;
-export type VisualizationAttachment = Attachment<AttachmentType.visualization>;
 export type ConnectorAttachment = Attachment<AttachmentType.connector>;

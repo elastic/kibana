@@ -36,23 +36,26 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
 
       const result = await executorClient.runExperiment(
         {
-          dataset: {
-            name: 'smoke tests: score ingestion and code evaluator',
-            description: 'Verifies score ingestion and CODE evaluator execution for @kbn/evals',
-            examples: [{ input: { prompt: 'Reply with only the single word: KIBANA' } }],
-          },
+          datasets: [
+            {
+              name: 'smoke tests: score ingestion and code evaluator',
+              description: 'Verifies score ingestion and CODE evaluator execution for @kbn/evals',
+              examples: [{ input: { prompt: 'Reply with only the single word: KIBANA' } }],
+            },
+          ],
           task: async (example) => {
+            const { prompt } = example.input! as { prompt: string };
             const response = await inferenceClient.chatComplete({
               stream: false,
-              messages: [{ role: MessageRole.User, content: example.input.prompt }],
+              messages: [{ role: MessageRole.User, content: prompt }],
             });
             return { response: response.content };
           },
         },
         evaluators
       );
-      expect(result.evaluationRuns.length).toBeGreaterThan(0);
-      const scores = result.evaluationRuns.map((r) => r.result?.score);
+      expect(result[0].evaluationRuns.length).toBeGreaterThan(0);
+      const scores = result[0].evaluationRuns.map((r) => r.result?.score);
       expect(scores.every((s) => s !== undefined)).toBe(true);
     }
   );
@@ -60,15 +63,24 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
   evaluate('smoke tests: llm-judge', async ({ executorClient, inferenceClient, evaluators }) => {
     const result = await executorClient.runExperiment(
       {
-        dataset: {
-          name: 'smoke tests: llm-judge',
-          description: 'Verifies LLM-as-judge criteria evaluator execution for @kbn/evals',
-          examples: [{ input: { prompt: 'What is 2 + 2? Answer with just the number.' } }],
-        },
+        datasets: [
+          {
+            name: 'smoke tests: llm-judge',
+            description: 'Verifies LLM-as-judge criteria evaluator execution for @kbn/evals',
+            examples: [
+              {
+                input: { prompt: 'What is 2 + 2? Answer with just the number.' } as {
+                  prompt: string;
+                },
+              },
+            ],
+          },
+        ],
         task: async (example) => {
+          const { prompt } = example.input! as { prompt: string };
           const response = await inferenceClient.chatComplete({
             stream: false,
-            messages: [{ role: MessageRole.User, content: example.input.prompt }],
+            messages: [{ role: MessageRole.User, content: prompt }],
           });
           return { response: response.content };
         },
@@ -80,8 +92,8 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
         },
       ]
     );
-    expect(result.evaluationRuns.length).toBeGreaterThan(0);
-    const scores = result.evaluationRuns.map((r) => r.result?.score);
+    expect(result[0].evaluationRuns.length).toBeGreaterThan(0);
+    const scores = result[0].evaluationRuns.map((r) => r.result?.score);
     expect(scores.some((s) => typeof s === 'number' && s > 0)).toBe(true);
   });
 
@@ -92,15 +104,18 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
 
       const result = await executorClient.runExperiment(
         {
-          dataset: {
-            name: 'smoke tests: trace-retrieval',
-            description: 'Verifies that task traces are stored and retrievable',
-            examples: [{ input: { prompt: 'Say the word hello.' } }],
-          },
+          datasets: [
+            {
+              name: 'smoke tests: trace-retrieval',
+              description: 'Verifies that task traces are stored and retrievable',
+              examples: [{ input: { prompt: 'Say the word hello.' } as { prompt: string } }],
+            },
+          ],
           task: async (example) => {
+            const { prompt } = example.input! as { prompt: string };
             const response = await inferenceClient.chatComplete({
               stream: false,
-              messages: [{ role: MessageRole.User, content: example.input.prompt }],
+              messages: [{ role: MessageRole.User, content: prompt }],
             });
             return { response: response.content };
           },
@@ -108,9 +123,73 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
         [inputTokens, outputTokens]
       );
 
-      const scores = result.evaluationRuns.map((r) => r.result?.score);
+      const scores = result[0].evaluationRuns.map((r) => r.result?.score);
       expect(scores.every((s) => s !== null && s !== undefined)).toBe(true);
       expect(scores.some((s) => typeof s === 'number' && s > 0)).toBe(true);
+    }
+  );
+
+  evaluate(
+    'smoke tests: trace-based evaluators',
+    async ({ executorClient, agentBuilderClient, evaluatorClient }) => {
+      const connectorId = process.env.SMOKE_TEST_EVALUATION_CONNECTOR_ID;
+      evaluate.skip(
+        !connectorId,
+        'Set SMOKE_TEST_EVALUATION_CONNECTOR_ID to run the trace-based evaluator smoke test'
+      );
+
+      const result = await executorClient.runExperiment(
+        {
+          datasets: [
+            {
+              name: 'smoke tests: trace-based evaluators',
+              description:
+                'Verifies trace-based groundedness and correctness evaluators via the evaluator API',
+              examples: [
+                {
+                  input: { prompt: 'What is the current status of the payment service?' },
+                  output: {
+                    expected:
+                      'The status of the payment service is unknown based on the available information.',
+                  },
+                },
+              ],
+            },
+          ],
+          task: async (example) => {
+            const { prompt } = example.input! as { prompt: string };
+            const response = await agentBuilderClient.converse({
+              agentId: 'elastic-ai-agent',
+              input: prompt,
+            });
+            if (!response.traceId) {
+              throw new Error('Agent Builder response is missing traceId');
+            }
+            return { traceId: response.traceId };
+          },
+        },
+        evaluatorClient.toEvaluators([
+          { name: 'groundedness', kind: 'LLM', connectorId: connectorId! },
+          {
+            name: 'correctness',
+            kind: 'LLM',
+            connectorId: connectorId!,
+            subScores: [
+              { key: 'factuality', evaluatorName: 'Factuality' },
+              { key: 'relevance', evaluatorName: 'Relevance' },
+              { key: 'sequence_accuracy', evaluatorName: 'Sequence Accuracy' },
+            ],
+          },
+        ])
+      );
+
+      expect(result[0].evaluationRuns.length).toBeGreaterThan(0);
+
+      const groundednessRun = result[0].evaluationRuns.find((r) => r.name === 'groundedness');
+      expect(groundednessRun?.result?.label).toBeDefined();
+
+      const factualityRun = result[0].evaluationRuns.find((r) => r.name === 'Factuality');
+      expect(factualityRun?.result?.label).toBeDefined();
     }
   );
 
@@ -133,12 +212,14 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
     evaluate('snapshot restoration loads data into data streams', async ({ executorClient }) => {
       const result = await executorClient.runExperiment(
         {
-          dataset: {
-            name: 'smoke tests: es-snapshot-loader',
-            description:
-              'Verifies that @kbn/es-snapshot-loader can replay a GCS snapshot into data streams',
-            examples: [{ input: { snapshotName: 'payment-service-failures' } }],
-          },
+          datasets: [
+            {
+              name: 'smoke tests: es-snapshot-loader',
+              description:
+                'Verifies that @kbn/es-snapshot-loader can replay a GCS snapshot into data streams',
+              examples: [{ input: { snapshotName: 'payment-service-failures' } }],
+            },
+          ],
           task: async () => ({
             success: replayResult.success,
             reindexedIndices: replayResult.reindexedIndices ?? [],
@@ -159,8 +240,8 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
         ]
       );
 
-      expect(result.evaluationRuns.length).toBeGreaterThan(0);
-      const scores = result.evaluationRuns.map((r) => r.result?.score);
+      expect(result[0].evaluationRuns.length).toBeGreaterThan(0);
+      const scores = result[0].evaluationRuns.map((r) => r.result?.score);
       expect(scores.every((s) => s === 1)).toBe(true);
     });
 

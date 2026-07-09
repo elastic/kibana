@@ -23,8 +23,6 @@ export const useDebouncedYamlEdit = (
   onChangeCallback: (value: string) => void,
   templateId?: string
 ) => {
-  // For edit mode with templateId, store { templateId, definition }
-  // For create mode (no templateId), store just the string
   const [storedState, setStoredState] = useCasesLocalStorage<string | EditStateWithId>(
     storageKey,
     templateId ? { templateId, definition: initialValue } : initialValue
@@ -38,19 +36,32 @@ export const useDebouncedYamlEdit = (
   const [isSaved, setIsSaved] = useState(false);
   const savedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const initialValueRef = useRef(value);
+  const prevInitialValueRef = useRef(initialValue);
   const onChangeCallbackRef = useRef(onChangeCallback);
   onChangeCallbackRef.current = onChangeCallback;
 
+  if (prevInitialValueRef.current !== initialValue) {
+    prevInitialValueRef.current = initialValue;
+    const freshState = templateId ? { templateId, definition: initialValue } : initialValue;
+    setStoredState(freshState);
+  }
+
+  const valueForForm = value ?? '';
+  const lastNotifiedValueRef = useRef<string | null>(null);
+
   useEffect(() => {
-    onChangeCallbackRef.current(initialValueRef.current);
-  }, []);
+    if (lastNotifiedValueRef.current !== valueForForm) {
+      onChangeCallbackRef.current(valueForForm);
+      lastNotifiedValueRef.current = valueForForm;
+    }
+  }, [valueForForm]);
 
   const handleSave = useCallback(
     (newValue: string) => {
       const stateToSave = templateId ? { templateId, definition: newValue } : newValue;
       setStoredState(stateToSave);
       onChangeCallbackRef.current(newValue);
+      lastNotifiedValueRef.current = newValue;
       setIsSaving(false);
       setIsSaved(true);
 
@@ -69,9 +80,21 @@ export const useDebouncedYamlEdit = (
     const stateToSave = templateId ? { templateId, definition: initialValue } : initialValue;
     setStoredState(stateToSave);
     onChangeCallbackRef.current(initialValue);
+    lastNotifiedValueRef.current = initialValue;
   }, [setStoredState, initialValue, templateId]);
 
   const debouncedSave = useRef(debounce(handleSave, DEBOUNCE_DELAY_MS));
+
+  const clearDraft = useCallback(
+    (savedValue?: string) => {
+      debouncedSave.current.cancel();
+      const definition = savedValue ?? initialValue;
+      const stateToSave = templateId ? { templateId, definition } : definition;
+      setStoredState(stateToSave);
+      prevInitialValueRef.current = definition;
+    },
+    [setStoredState, initialValue, templateId]
+  );
 
   useEffect(() => {
     const debounced = debounce(handleSave, DEBOUNCE_DELAY_MS);
@@ -95,6 +118,7 @@ export const useDebouncedYamlEdit = (
     value,
     onChange,
     handleReset,
+    clearDraft,
     isSaving,
     isSaved,
   };

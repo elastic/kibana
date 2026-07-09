@@ -7,6 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
+
+/**
+ * Shared "Open in a Discover tab" label, used by any consumer that surfaces a
+ * navigation affordance to Discover (currently unified-doc-viewer's traces flyout
+ * and unified-chart-section-viewer's metrics-grid Lens action). Centralized here
+ * rather than in a UI library to avoid an inverted dependency where chart code
+ * pulls in the doc-viewer package solely to read a string.
+ */
+export const OPEN_IN_DISCOVER_TAB_LABEL = i18n.translate('discover.openInDiscoverTabLabel', {
+  defaultMessage: 'Open in a Discover tab',
+});
+
 export const CONTEXT_DEFAULT_SIZE_SETTING = 'context:defaultSize';
 export const CONTEXT_STEP_SETTING = 'context:step';
 export const CONTEXT_TIE_BREAKER_FIELDS_SETTING = 'context:tieBreakerFields';
@@ -32,4 +45,11 @@ export enum DataGridDensity {
   COMPACT = 'compact',
   EXPANDED = 'expanded',
   NORMAL = 'normal',
+}
+
+export enum UnifiedHistogramSuggestionType {
+  unsupported = 'unsupported',
+  lensSuggestion = 'lensSuggestion',
+  histogramForESQL = 'histogramForESQL',
+  histogramForDataView = 'histogramForDataView',
 }

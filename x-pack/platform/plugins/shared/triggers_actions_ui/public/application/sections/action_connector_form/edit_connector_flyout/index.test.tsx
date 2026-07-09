@@ -366,6 +366,38 @@ describe('EditConnectorFlyout', () => {
       await act(() => Promise.resolve());
       expect(getByText(TECH_PREVIEW_LABEL)).toBeInTheDocument();
     });
+
+    it('does not show a docs link when the connector type has no docsUrl', async () => {
+      const { queryByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(queryByTestId('edit-connector-flyout-header-docs-link')).not.toBeInTheDocument();
+    });
+
+    it('shows a docs link when the connector type has a docsUrl', async () => {
+      const connectorDocsUrl =
+        'https://www.elastic.co/docs/reference/kibana/connectors-kibana/test-action-type';
+      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, docsUrl: connectorDocsUrl });
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(getByTestId('edit-connector-flyout-header-docs-link')).toHaveAttribute(
+        'href',
+        connectorDocsUrl
+      );
+    });
   });
 
   describe('Tabs', () => {
@@ -759,7 +791,6 @@ describe('is spec connector', () => {
 
   const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
     actionConnectorFields: lazy(() => import('../connector_mock')),
-    source: 'spec',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
       return Promise.resolve(validationResult);
@@ -770,26 +801,15 @@ describe('is spec connector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    actionTypeRegistry.has.mockReturnValue(true);
+    // Spec connectors are not registered client-side; the spec fetch path is irrelevant
+    // for this test since it only asserts tab rendering, which is gated on registry lookup.
+    actionTypeRegistry.has.mockReturnValue(false);
     actionTypeRegistry.get.mockReturnValue(actionTypeModel);
     appMockRenderer = createAppMockRenderer();
     appMockRenderer.coreStart.application.capabilities = {
       ...appMockRenderer.coreStart.application.capabilities,
       actions: { save: true, show: true, execute: true },
     };
-    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue([
-      {
-        id: '.test',
-        name: 'Test',
-        enabled: true,
-        enabled_in_config: true,
-        enabled_in_license: true,
-        supported_feature_ids: [],
-        minimum_license_required: 'basic',
-        is_system_action_type: false,
-        is_deprecated: false,
-      },
-    ]);
     appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
   });

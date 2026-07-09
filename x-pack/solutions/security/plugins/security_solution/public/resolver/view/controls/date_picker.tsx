@@ -7,7 +7,7 @@
 import React, { useCallback, memo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiPopoverTitle, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiSuperDatePicker, useGeneratedHtmlId } from '@elastic/eui';
 import type { ShortDate, EuiSuperDatePickerProps } from '@elastic/eui';
 import { formatDate } from '../../../common/components/super_date_picker';
 import { StyledEuiButtonIcon } from './styles';
@@ -51,6 +51,7 @@ export const DateSelectionButton = memo(
     isOpen: boolean;
   }) => {
     const dispatch = useDispatch();
+    const datePickerTitleId = useGeneratedHtmlId();
     const setAsActivePopover = useCallback(
       () => setActivePopover('datePicker'),
       [setActivePopover]
@@ -98,8 +99,9 @@ export const DateSelectionButton = memo(
         isOpen={isOpen}
         closePopover={closePopover}
         anchorPosition="leftCenter"
+        aria-labelledby={datePickerTitleId}
       >
-        <EuiPopoverTitle css={{ textTransform: 'uppercase' }}>
+        <EuiPopoverTitle id={datePickerTitleId} css={{ textTransform: 'uppercase' }}>
           {dateRangeDescription}
         </EuiPopoverTitle>
         <EuiSuperDatePicker

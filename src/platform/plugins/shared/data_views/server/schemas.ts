@@ -185,6 +185,7 @@ export const fieldSpecSchemaFields = {
   format: schema.maybe(serializedFieldFormatSchema),
   esTypes: schema.maybe(
     schema.arrayOf(schema.string(), {
+      maxSize: 60,
       meta: { description: 'The Elasticsearch field types associated with this field.' },
     })
   ),

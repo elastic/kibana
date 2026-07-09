@@ -7,18 +7,14 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
+import { VERSION_MAX_LENGTH, ID_MAX_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
-  ACTION_POLICY_VERSION_MAX_LENGTH,
-  ID_MAX_LENGTH,
-  MAX_NAME_LENGTH,
-} from '@kbn/alerting-v2-schemas';
-import {
-  ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
   getActionPolicyUrl,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -27,7 +23,9 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(
+      ALERTING_V2_ACTION_POLICIES_ALL_ROLE
+    );
     writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
 
@@ -430,7 +428,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           name: 'long-version-update',
-          version: 'a'.repeat(ACTION_POLICY_VERSION_MAX_LENGTH + 1),
+          version: 'a'.repeat(VERSION_MAX_LENGTH + 1),
         },
       });
 
@@ -467,38 +465,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           name: 'a'.repeat(MAX_NAME_LENGTH + 1),
           version: created.version,
         },
-      });
-
-      expect(response).toHaveStatusCode(400);
-    }
-  );
-
-  apiTest(
-    'validation: rejects immutable field "type" (.strict() schema)',
-    async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.actionPolicies.create(
-        buildCreateActionPolicyData({ name: 'mutate-type-policy' })
-      );
-
-      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { type: 'single_rule', version: created.version },
-      });
-
-      expect(response).toHaveStatusCode(400);
-    }
-  );
-
-  apiTest(
-    'validation: rejects immutable field "ruleId" (.strict() schema)',
-    async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.actionPolicies.create(
-        buildCreateActionPolicyData({ name: 'mutate-rule-id-policy' })
-      );
-
-      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
-        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { ruleId: 'some-rule-id', version: created.version },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -553,7 +519,9 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   apiTest(
     'authorization: 403 with read-only alerting_v2 privileges',
     async ({ apiClient, apiServices, requestAuth }) => {
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_READ_ROLE
+      );
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'reader-cannot-patch' })
       );

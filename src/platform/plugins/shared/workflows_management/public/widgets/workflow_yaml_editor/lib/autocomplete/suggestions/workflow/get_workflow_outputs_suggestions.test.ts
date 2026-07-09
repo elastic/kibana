@@ -97,6 +97,9 @@ const createMockAutocompleteContext = (
     isInStepsContext: true,
     isInTriggersContext: false,
     isInWorkflowInputsContext: false,
+    isInEsqlQueryField: false,
+    esqlRegion: null,
+    esqlOffsetInQuery: null,
     ...overrides,
   } satisfies AutocompleteContext);
 

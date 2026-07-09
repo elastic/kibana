@@ -14,20 +14,39 @@ import {
   mockDataFormattedForFieldBrowserWithOverridenField,
 } from '../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
 import { useHighlightedFields } from './use_highlighted_fields';
+import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS } from '../../../../../common/endpoint/service/response_actions/constants';
 import { parseEcsFieldPath } from '../../../../common/lib/endpoint';
 
 jest.mock('../../../../common/experimental_features_service');
+jest.mock('../utils/get_timeline_events_details_from_record', () => ({
+  getTimelineEventsDetailsFromRecord: jest.fn(),
+}));
 
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
-const buildMockHit = (data: TimelineEventsDetailsItem[]): DataTableRecord =>
-  ({
+// The hook derives its field-browser data from the hit via `getTimelineEventsDetailsFromRecord`;
+// mock that so the hook is tested against known data, and keep `flattened` for the hit's other
+// consumers (e.g. `getEventCategoriesFromData`). The real formatter dedupes by field (last wins),
+// so dedupe here too — otherwise a concatenated field (e.g. a second `agent.id`) would be shadowed
+// by the earlier entry.
+const buildMockHit = (data: TimelineEventsDetailsItem[]): DataTableRecord => {
+  const dedupedByField = Array.from(
+    data
+      .reduce(
+        (map, item) => map.set(item.field, item),
+        new Map<string, TimelineEventsDetailsItem>()
+      )
+      .values()
+  );
+  (getTimelineEventsDetailsFromRecord as jest.Mock).mockReturnValue(dedupedByField);
+  return {
     flattened: data.reduce<Record<string, unknown>>((acc, item) => {
       acc[item.field] = item.originalValue ?? item.values;
       return acc;
     }, {}),
-  } as DataTableRecord);
+  } as DataTableRecord;
+};
 
 describe('useHighlightedFields', () => {
   it('should return data', () => {

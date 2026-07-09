@@ -12,7 +12,10 @@ import type {
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { ISessionService } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { StartServices } from '../../types';
+import type { SecurityAppStore } from '../../common/store/types';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
@@ -41,6 +44,11 @@ const ALERT_ATTACHMENT_CONFIG: AttachmentTypeConfig = {
   icon: 'bell',
 };
 
+const ALERTS_DEFAULT_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.attachments.alerts.label',
+  { defaultMessage: 'Security alerts' }
+);
+
 const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
   getLabel: (attachment: UnknownAttachmentWithLabel) => {
     const attachmentLabel = attachment?.data?.attachmentLabel;
@@ -62,6 +70,22 @@ export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceSt
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(
     ALERT_ATTACHMENT_CONFIG.type,
     createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon)
+  );
+
+  attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
+    SecurityAgentBuilderAttachments.alerts,
+    {
+      getLabel: (attachment) => {
+        const count = attachment.data?.alertIds?.length ?? 0;
+        return count > 0
+          ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
+              defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
+              values: { count },
+            })
+          : ALERTS_DEFAULT_LABEL;
+      },
+      getIcon: () => 'bell',
+    }
   );
 };
 
@@ -175,5 +199,32 @@ export const registerEntityAnalyticsDashboardAttachment = ({
     './entity_analytics_dashboard_attachment'
   ).then(({ registerEntityAnalyticsDashboardAttachment: register }) => {
     register({ attachments, application, agentBuilder, chrome, searchSession });
+  });
+};
+
+/**
+ * Registers the `security.rulePreview` attachment renderer (inline alert table showing
+ * preview results). Dynamically imports {@link ./rule_preview_attachment} so the heavy
+ * transitive deps (SecuritySolutionFlyout, RulePreviewAlertsTable, sourcerer, etc.)
+ * stay off the main `securitySolution` page-load bundle.
+ */
+export const registerRulePreviewAttachment = ({
+  attachments,
+  data,
+  spaces,
+  getServices,
+  getStore,
+}: {
+  attachments: AttachmentServiceStartContract;
+  data: DataPublicPluginStart;
+  spaces: SpacesPluginStart;
+  getServices: () => Promise<StartServices>;
+  getStore: () => Promise<SecurityAppStore>;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_rule_preview_attachment" */
+    './rule_preview'
+  ).then(({ registerRulePreviewAttachment: register }) => {
+    register({ attachments, data, spaces, getServices, getStore });
   });
 };

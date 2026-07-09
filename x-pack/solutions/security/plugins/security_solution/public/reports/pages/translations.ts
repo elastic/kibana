@@ -13,3 +13,18 @@ export const AI_VALUE_DASHBOARD = i18n.translate(
     defaultMessage: 'Value report',
   }
 );
+
+export const AI_VALUE_LOAD_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.loadErrorTitle',
+  {
+    defaultMessage: 'Unable to load data view',
+  }
+);
+
+export const AI_VALUE_LOAD_ERROR_BODY = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.loadErrorBody',
+  {
+    defaultMessage:
+      'The value report requires a ready data view, but it could not be loaded. Refresh the page and try again.',
+  }
+);

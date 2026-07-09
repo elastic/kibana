@@ -40,18 +40,62 @@ jest.mock('../../../../../hooks/use_kibana', () => ({
         streams: {
           streamsRepositoryClient: { fetch: jest.fn() },
         },
+        share: {
+          url: {
+            locators: {
+              get: jest.fn(() => ({
+                getUrl: jest.fn(async () => '/mock-index-template-url'),
+              })),
+            },
+          },
+        },
       },
     },
     services: { telemetryClient: { trackRetentionChanged: jest.fn() } },
   }),
 }));
 
+jest.mock('../../../../../hooks/use_streams_app_router', () => ({
+  useStreamsAppRouter: () => ({ link: jest.fn(() => '/mock-router-link') }),
+}));
+
+// The frozen-phase gating hook reaches into licensing/cloud/application; this test focuses on the
+// unsaved-changes prompt wiring, so stub it out with non-gating defaults.
+jest.mock('../hooks/use_dlm_frozen_phase_gating', () => ({
+  useDlmFrozenPhaseGating: () => ({
+    excludeFrozen: false,
+    addPhaseBadges: {
+      showEnterpriseLicenseRequiredBadge: false,
+      showDefaultRepositoryRequiredBadge: false,
+    },
+    flyoutProps: {
+      isMissingEnterpriseLicense: false,
+      onUpgradeEnterprise: jest.fn(),
+      onRefreshDefaultRepository: jest.fn(),
+      isRefreshingDefaultRepository: false,
+      manageRepositoriesHref: '/mock-repositories',
+      defaultRepositoryName: undefined,
+    },
+    handleAddPhaseGating: () => false,
+    modals: null,
+  }),
+}));
+
 jest.mock('../../../../../hooks/use_timefilter', () => ({
-  useTimefilter: () => ({ timeState: {} }),
+  useTimefilter: () => ({
+    timeState: {},
+    timeState$: { subscribe: () => ({ unsubscribe: () => {} }) },
+  }),
 }));
 
 jest.mock('@kbn/react-hooks', () => ({
   useAbortController: () => ({ signal: undefined }),
+  useAbortableAsync: () => ({
+    value: undefined,
+    loading: false,
+    error: undefined,
+    refresh: () => {},
+  }),
 }));
 
 jest.mock('../common/section_panel', () => ({
@@ -86,10 +130,6 @@ jest.mock('./cards/ingestion_card', () => ({
 
 jest.mock('./ingestion_rate', () => ({
   IngestionRate: () => <div data-test-subj="ingestionRate" />,
-}));
-
-jest.mock('./modal', () => ({
-  EditLifecycleModal: () => <div data-test-subj="editLifecycleModal" />,
 }));
 
 jest.mock('./lifecycle_summary', () => ({

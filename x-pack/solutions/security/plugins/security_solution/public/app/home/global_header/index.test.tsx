@@ -16,7 +16,7 @@ import {
 } from '../../../../common/constants';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { sourcererPaths } from '../../../sourcerer/containers/sourcerer_paths';
+import { dataViewPickerPaths } from '../../../sourcerer/containers/sourcerer_paths';
 
 import { DATA_VIEW_PICKER_TEST_ID } from '../../../data_view_manager/components/data_view_picker/constants';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
@@ -121,21 +121,19 @@ describe('global header', () => {
     expect(link?.getAttribute('href')).toBe(ADD_THREAT_INTELLIGENCE_DATA_PATH);
   });
 
-  // TODO: Skipping until feature flag is enabled https://github.com/elastic/security-team/issues/11959 by default
-  // it.each(sourcererPaths)('shows data view manager on %s page', (pathname) => {
-  //   (useLocation as jest.Mock).mockReturnValue({ pathname });
-  //
-  //   const { getByTestId } = render(
-  //     <TestProviders store={store}>
-  //       <GlobalHeader />
-  //     </TestProviders>
-  //   );
-  //   expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
-  // });
+  it.each(dataViewPickerPaths)('shows data view manager on %s page', (pathname) => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname });
 
-  // TODO: Skipping until feature flag is enabled https://github.com/elastic/security-team/issues/11959 by default
-  it.skip('shows data view manager on rule details page', () => {
-    (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
+    const { getByTestId } = render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+    expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('shows data view manager on rule details page', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: dataViewPickerPaths[2] });
 
     const { getByTestId } = render(
       <TestProviders store={store}>
@@ -160,7 +158,7 @@ describe('global header', () => {
     };
     const mockStore = createMockStore(mockstate);
 
-    (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
+    (useLocation as jest.Mock).mockReturnValue({ pathname: dataViewPickerPaths[2] });
 
     const { queryByTestId } = render(
       <TestProviders store={mockStore}>

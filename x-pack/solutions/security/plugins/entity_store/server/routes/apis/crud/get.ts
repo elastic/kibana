@@ -6,10 +6,11 @@
  */
 
 import path from 'node:path';
-import { ArrayFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { ArrayFromString } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
@@ -130,7 +131,7 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(querySchema),
+            query: buildStrictRouteValidationWithZod(querySchema),
           },
         },
         options: {

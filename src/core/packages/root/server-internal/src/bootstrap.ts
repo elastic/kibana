@@ -55,6 +55,14 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
 
   rootLogger.info('Kibana is starting');
 
+  // We will invert this message once we switch from opt-in to opt-out for code generation from strings.
+  // See https://github.com/elastic/kibana/issues/272315
+  if (isCodeGenerationFromStringsDisallowed()) {
+    rootLogger.info(
+      'Code generation from strings has been disallowed on this Kibana instance (--disallow-code-generation-from-strings)'
+    );
+  }
+
   cliLogger.debug('Kibana configurations evaluated in this order: ' + env.configs.join(', '));
 
   process.on('SIGHUP', () => reloadConfiguration());
@@ -127,6 +135,16 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
     }
   } catch (err) {
     await shutdown(err);
+  }
+}
+
+function isCodeGenerationFromStringsDisallowed(): boolean {
+  try {
+    // eslint-disable-next-line no-new-func -- we are intentionally trying to execute code generation from strings
+    new Function('');
+    return false;
+  } catch {
+    return true;
   }
 }
 

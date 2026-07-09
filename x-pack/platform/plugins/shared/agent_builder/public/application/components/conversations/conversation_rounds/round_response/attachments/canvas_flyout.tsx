@@ -13,8 +13,10 @@ import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
+import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 import { useCanvasContext } from './canvas_context';
 
 const DEFAULT_CANVAS_WIDTH = '50vw';
@@ -38,6 +40,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
+  const agentId = useAgentId();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
   const isNarrowViewport = useIsWithinBreakpoints(['xs', 's', 'm']);
 
@@ -88,7 +91,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   // Clear dynamic buttons when the canvas attachment changes
   useEffect(() => {
     setDynamicButtons([]);
-  }, [canvasState?.attachment.id, canvasState?.attachment.version]);
+  }, [canvasState?.attachment.id, canvasState?.attachment.versionData?.version]);
 
   const registerActionButtons = useCallback((buttons: ActionButton[]) => {
     setDynamicButtons(buttons);
@@ -102,18 +105,20 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       uiDefinition?.getActionButtons?.({
         attachment: canvasState.attachment,
         isSidebar: canvasState.isSidebar,
+        agentId,
         updateOrigin,
         openSidebarConversation: canvasState.isSidebar ? undefined : openSidebarConversation,
         isCanvas: true,
       }) ?? [];
     return [...staticButtons, ...dynamicButtons];
-  }, [canvasState, uiDefinition, updateOrigin, openSidebarConversation, dynamicButtons]);
+  }, [canvasState, uiDefinition, agentId, updateOrigin, openSidebarConversation, dynamicButtons]);
 
   if (!canvasState || !uiDefinition?.renderCanvasContent) {
     return null;
   }
 
   const { attachment, isSidebar } = canvasState;
+  const { renderCanvasContent } = uiDefinition;
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
   const header = uiDefinition?.getHeader?.({ attachment });
 
@@ -157,20 +162,24 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         previewBadgeState="preview_available"
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        <React.Fragment key={`${attachment.id}:${attachment.version ?? 'latest'}`}>
-          {uiDefinition.renderCanvasContent(
-            {
-              attachment,
-              isSidebar,
-              openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-            },
-            {
-              registerActionButtons,
-              updateOrigin,
-              closeCanvas,
-            }
-          )}
-        </React.Fragment>
+        <AttachmentRenderErrorBoundary
+          key={`${attachment.id}:${attachment.versionData?.version ?? 'latest'}`}
+        >
+          {() =>
+            renderCanvasContent(
+              {
+                attachment,
+                isSidebar,
+                openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+              },
+              {
+                registerActionButtons,
+                updateOrigin,
+                closeCanvas,
+              }
+            )
+          }
+        </AttachmentRenderErrorBoundary>
       </EuiFlyoutBody>
     </EuiFlyout>
   );

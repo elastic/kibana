@@ -8,10 +8,11 @@
 import React from 'react';
 import { act, fireEvent } from '@testing-library/react';
 
-import type { TestRenderer } from '../../../../../../../mock';
-import { createFleetTestRendererMock } from '../../../../../../../mock';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
+
+import type { TestRenderer } from '../../../../../../../mock';
+import { createFleetTestRendererMock } from '../../../../../../../mock';
 
 import { useActionStatus } from '../../hooks';
 import { useGetAgentPolicies, useAuthz } from '../../../../../hooks';
@@ -45,6 +46,7 @@ describe('AgentActivityFlyout', () => {
   const mockOnClose = jest.fn();
   const mockOnAbortSuccess = jest.fn();
   const mockAbortUpgrade = jest.fn();
+  const mockAbortUnenroll = jest.fn();
   const mockSetSearch = jest.fn();
   const mockSetSelectedStatus = jest.fn();
   const mockOpenManageAutoUpgradeModal = jest.fn();
@@ -116,6 +118,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: true,
     });
 
@@ -127,6 +130,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     result.rerender(component());
@@ -165,6 +169,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -208,6 +213,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -246,6 +252,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -286,6 +293,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -317,6 +325,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -348,6 +357,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -384,6 +394,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -417,6 +428,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -450,6 +462,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -487,6 +500,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -519,6 +533,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -553,6 +568,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -565,6 +581,76 @@ describe('AgentActivityFlyout', () => {
         .querySelector('[data-test-subj="statusDescription"]')!
         .textContent?.replace(/\s/g, '')
     ).toContain('Policy1 changed to revision 2 at Sep 15, 2022 10:00 AM.'.replace(/\s/g, ''));
+  });
+
+  it('should render scheduled unenroll activity with Cancel button and warning', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'unenroll-action-1',
+        nbAgentsActionCreated: 3,
+        nbAgentsAck: 0,
+        type: 'UNENROLL',
+        nbAgentsActioned: 3,
+        status: 'IN_PROGRESS',
+        // startTime is in the future relative to the fake clock (2022-09-15T10:00:00)
+        startTime: '2022-09-16T10:00:00.000Z',
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
+      isFirstLoading: false,
+    });
+    const result = testRenderer.render(component());
+
+    expect(
+      result.container.querySelector('[data-test-subj="unenrollInProgressTitle"]')!.textContent
+    ).toEqual('3 agents scheduled to be unenrolled');
+    expect(
+      result.container
+        .querySelector('[data-test-subj="unenrollInProgressDescription"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain('Scheduled for Sep 16, 2022 10:00 AM'.replace(/\s/g, ''));
+    expect(
+      result.container.querySelector('[data-test-subj="unenrollGracePeriodWarning"]')
+    ).toBeInTheDocument();
+    expect(result.queryByTestId('abortUnenrollBtn')).toBeInTheDocument();
+
+    act(() => {
+      fireEvent.click(result.getByTestId('abortUnenrollBtn'));
+    });
+    expect(mockAbortUnenroll).toHaveBeenCalled();
+  });
+
+  it('should NOT render Cancel button for UNENROLL action with past startTime', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'unenroll-action-2',
+        nbAgentsActionCreated: 2,
+        nbAgentsAck: 0,
+        type: 'UNENROLL',
+        nbAgentsActioned: 2,
+        status: 'IN_PROGRESS',
+        // startTime in the past (before fake clock 2022-09-15T10:00:00)
+        startTime: '2022-09-14T10:00:00.000Z',
+        creationTime: '2022-09-14T09:00:00.000Z',
+        nbAgentsFailed: 0,
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
+      isFirstLoading: false,
+    });
+    const result = testRenderer.render(component());
+
+    // Falls through to generic ActivityItem — no unenroll-specific test subj
+    expect(result.queryByTestId('unenrollInProgressTitle')).not.toBeInTheDocument();
+    expect(result.queryByTestId('abortUnenrollBtn')).not.toBeInTheDocument();
   });
 
   it('should render agent activity for policy change with agents', () => {
@@ -587,6 +673,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -623,6 +710,7 @@ describe('AgentActivityFlyout', () => {
     mockUseActionStatus.mockReturnValue({
       currentActions: mockActionStatuses,
       abortUpgrade: mockAbortUpgrade,
+      abortUnenroll: mockAbortUnenroll,
       isFirstLoading: false,
     });
     const result = testRenderer.render(component());
@@ -677,12 +765,14 @@ describe('AgentActivityFlyout', () => {
         return {
           currentActions: [failedAction],
           abortUpgrade: mockAbortUpgrade,
+          abortUnenroll: mockAbortUnenroll,
           isFirstLoading: false,
         };
       } else {
         return {
           currentActions: [inProgressAction, failedAction],
           abortUpgrade: mockAbortUpgrade,
+          abortUnenroll: mockAbortUnenroll,
           isFirstLoading: false,
         };
       }

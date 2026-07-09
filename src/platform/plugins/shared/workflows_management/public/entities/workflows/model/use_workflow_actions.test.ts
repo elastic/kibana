@@ -10,9 +10,15 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { WorkflowDetailDto, WorkflowListDto } from '@kbn/workflows';
+import type { WorkflowDetailDto, WorkflowListDto, WorkflowYaml } from '@kbn/workflows';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/src/api/workflows_api.mock';
 import { useWorkflowActions } from './use_workflow_actions';
+import {
+  workflowEventNames,
+  WorkflowLifecycleEventTypes,
+} from '../../../common/lib/telemetry/events/workflows';
+import type { TelemetryServiceClient } from '../../../common/lib/telemetry/types';
+import { WorkflowsBaseTelemetry } from '../../../common/service/telemetry';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
 import type { ClientPreflightResult } from '../../../features/import_workflows/lib/parse_import_file';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -996,6 +1002,94 @@ describe('useWorkflowActions – import mutations', () => {
         expect.objectContaining({
           isBulkAction: true,
           bulkActionCount: 5,
+        })
+      );
+    });
+
+    it('should pass workflowDefinition to telemetry for enable/disable updates', async () => {
+      mockWorkflowApi.updateWorkflow.mockResolvedValueOnce(undefined as never);
+      const workflowDefinition = {
+        version: '1',
+        name: 'Test',
+        enabled: false,
+        triggers: [{ type: 'cases.created' }],
+        steps: [],
+      } as unknown as Partial<WorkflowYaml>;
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.updateWorkflow.mutate({
+          id: 'wf-1',
+          workflow: { enabled: true },
+          workflowDefinition,
+        });
+      });
+
+      await waitFor(() => expect(result.current.updateWorkflow.isSuccess).toBe(true));
+
+      expect(mockTelemetry.reportWorkflowUpdated).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: 'wf-1',
+          workflowDefinition,
+        })
+      );
+    });
+
+    it('should not pass workflowDefinition to telemetry when mutate omits it', async () => {
+      mockWorkflowApi.updateWorkflow.mockResolvedValueOnce(undefined as never);
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.updateWorkflow.mutate({
+          id: 'wf-1',
+          workflow: { enabled: true },
+        });
+      });
+
+      await waitFor(() => expect(result.current.updateWorkflow.isSuccess).toBe(true));
+
+      const telemetryParams = mockTelemetry.reportWorkflowUpdated.mock.calls[0]?.[0];
+      expect(telemetryParams?.workflowDefinition).toBeUndefined();
+    });
+
+    it('reports hasCustomEventTrigger on list enable when workflowDefinition is provided', async () => {
+      const reportEvent = jest.fn();
+      const telemetryClient: TelemetryServiceClient = { reportEvent };
+      const realTelemetry = new WorkflowsBaseTelemetry(telemetryClient);
+      mockUseTelemetry.mockReturnValue(realTelemetry as unknown as ReturnType<typeof useTelemetry>);
+
+      mockWorkflowApi.updateWorkflow.mockResolvedValueOnce(undefined as never);
+
+      const workflowDefinition = {
+        version: '1',
+        name: 'Test',
+        enabled: false,
+        triggers: [{ type: 'cases.created' }],
+        steps: [],
+      } as unknown as Partial<WorkflowYaml>;
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.updateWorkflow.mutate({
+          id: 'wf-1',
+          workflow: { enabled: true },
+          workflowDefinition,
+        });
+      });
+
+      await waitFor(() => expect(result.current.updateWorkflow.isSuccess).toBe(true));
+
+      expect(reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged],
+          workflowId: 'wf-1',
+          enabled: true,
+          hasCustomEventTrigger: true,
+          origin: 'workflow_list',
         })
       );
     });

@@ -13,7 +13,7 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isEmpty } from 'lodash';
 import { getGroupFilters } from './helpers/get_group';
 import type { SearchConfigurationWithExtractedReferenceType } from './types';
-import type { CustomThresholdExpressionMetric } from './types';
+import type { BaseMetricExpressionParams, CustomThresholdExpressionMetric } from './types';
 import type { Group } from '../typings';
 export interface GetViewInAppUrlArgs {
   searchConfiguration?: SearchConfigurationWithExtractedReferenceType;
@@ -24,6 +24,8 @@ export interface GetViewInAppUrlArgs {
   metrics?: CustomThresholdExpressionMetric[];
   startedAt?: string;
   spaceId?: string;
+  timeSize?: BaseMetricExpressionParams['timeSize'];
+  timeUnit?: BaseMetricExpressionParams['timeUnit'];
 }
 
 export const getViewInAppLocatorParams = ({
@@ -33,11 +35,19 @@ export const getViewInAppLocatorParams = ({
   metrics = [],
   searchConfiguration,
   startedAt = new Date().toISOString(),
+  timeSize,
+  timeUnit,
 }: GetViewInAppUrlArgs) => {
   const searchConfigurationQuery = searchConfiguration?.query.query;
   const searchConfigurationFilters = searchConfiguration?.filter || [];
   const groupFilters = getGroupFilters(groups);
-  const timeRange: TimeRange | undefined = getPaddedAlertTimeRange(startedAt, endedAt);
+  const lookBackWindow =
+    timeSize !== undefined && timeUnit ? { size: timeSize, unit: timeUnit } : undefined;
+  const timeRange: TimeRange | undefined = getPaddedAlertTimeRange(
+    startedAt,
+    endedAt,
+    lookBackWindow
+  );
   timeRange.to = endedAt ? timeRange.to : 'now';
 
   const query = {
@@ -72,26 +82,10 @@ export const getViewInAppLocatorParams = ({
   };
 };
 
-export const getViewInAppUrl = ({
-  dataViewId,
-  endedAt,
-  groups,
-  logsLocator,
-  metrics = [],
-  searchConfiguration,
-  startedAt = new Date().toISOString(),
-  spaceId,
-}: GetViewInAppUrlArgs) => {
+export const getViewInAppUrl = ({ logsLocator, spaceId, ...rest }: GetViewInAppUrlArgs) => {
   if (!logsLocator) return '';
 
-  const params = getViewInAppLocatorParams({
-    dataViewId,
-    endedAt,
-    groups,
-    metrics,
-    searchConfiguration,
-    startedAt,
-  });
+  const params = getViewInAppLocatorParams(rest);
 
   return logsLocator.getRedirectUrl(params, { spaceId });
 };

@@ -11,6 +11,7 @@ import {
   createDispatcherPipelineState,
   createMatchedPair,
   createActionPolicy,
+  createRule,
 } from '../fixtures/test_utils';
 
 describe('BuildGroupsStep', () => {
@@ -292,6 +293,65 @@ describe('buildActionGroups', () => {
     expect(groups[0].episodes).toHaveLength(2);
     expect(groups[0].episodes[0].rule_id).toBe('r1');
     expect(groups[0].episodes[1].rule_id).toBe('r2');
+  });
+
+  it('populates rules map from state.rules for episodes in the group', () => {
+    const policy = createActionPolicy({ id: 'p1', groupingMode: 'all' });
+    const rules = new Map([
+      ['r1', createRule({ id: 'r1', name: 'CPU spike' })],
+      ['r2', createRule({ id: 'r2', name: 'Cert expiry' })],
+    ]);
+    const matched = [
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        policy,
+      }),
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r2', episode_id: 'e2' }),
+        policy,
+      }),
+    ];
+
+    const groups = buildActionGroups(matched, rules);
+
+    expect(groups[0].rules).toEqual({
+      r1: { name: 'CPU spike' },
+      r2: { name: 'Cert expiry' },
+    });
+  });
+
+  it('omits rules not present in state.rules', () => {
+    const policy = createActionPolicy({ id: 'p1' });
+    const rules = new Map([['r1', createRule({ id: 'r1', name: 'CPU spike' })]]);
+    const matched = [
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        policy,
+      }),
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r-missing', episode_id: 'e2' }),
+        policy,
+      }),
+    ];
+
+    const groups = buildActionGroups(matched, rules);
+
+    expect(groups[0].rules).toEqual({ r1: { name: 'CPU spike' } });
+    expect(groups[1].rules).toEqual({});
+  });
+
+  it('returns empty rules map when state.rules is undefined', () => {
+    const policy = createActionPolicy({ id: 'p1' });
+    const matched = [
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        policy,
+      }),
+    ];
+
+    const groups = buildActionGroups(matched);
+
+    expect(groups[0].rules).toEqual({});
   });
 
   it('creates one group per episode for explicit per_episode mode', () => {

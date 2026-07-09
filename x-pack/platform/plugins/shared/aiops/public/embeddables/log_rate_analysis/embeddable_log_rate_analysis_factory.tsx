@@ -28,12 +28,12 @@ import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, distinctUntilChanged, map, merge, skip, skipWhile } from 'rxjs';
+import type { LogRateAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 import { getLogRateAnalysisEmbeddableWrapperComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysis_analysis_controls';
 import type { LogRateAnalysisEmbeddableApi } from './types';
 import { EmbeddableLogRateAnalysisUserInput } from './log_rate_analysis_config_input';
-import type { LogRateAnalysisEmbeddableState } from '../../../common/embeddables/log_rate_analysis/types';
 import { canUseAiops } from '../../capabilities';
 
 export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
@@ -59,11 +59,9 @@ export const getLogRateAnalysisEmbeddableFactory = (
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const initialDataViewId =
-        runtimeState.dataViewId ?? (await pluginStart.data.dataViews.getDefaultId());
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
-        initialDataViewId ? [await pluginStart.data.dataViews.get(initialDataViewId)] : undefined
-      );
+      const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
+        await pluginStart.data.dataViews.get(runtimeState.data_view_id),
+      ]);
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
@@ -84,7 +82,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
           )
         ),
         getComparators: () => ({
-          dataViewId: 'referenceEquality',
+          data_view_id: 'referenceEquality',
           ...timeRangeComparators,
           ...titleComparators,
         }),

@@ -42,7 +42,7 @@ test.describe('Data Views spaces management', { tag: tags.stateful.classic }, ()
     await pageObjects.dataViewsManagement.waitForTableLoaded();
 
     await test.step('open share-to-space flyout', async () => {
-      await pageObjects.dataViewsManagement.openShareToSpaceFlyout();
+      await pageObjects.dataViewsManagement.openShareToSpaceFlyout('default');
     });
 
     await test.step('select the custom space and save', async () => {

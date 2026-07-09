@@ -37,6 +37,10 @@ jest.mock('../../../../../context/conversation/conversation_context', () => ({
   }),
 }));
 
+jest.mock('../../../../../hooks/use_conversation', () => ({
+  useAgentId: () => 'agent-1',
+}));
+
 jest.mock('../../../../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: () => ({
     openSidebarConversation: mockOpenSidebarConversation,
@@ -61,9 +65,57 @@ const DynamicInlineContent = ({ callbacks }: { callbacks?: InlineRenderCallbacks
   return <div>Inline content</div>;
 };
 
+const mockRenderInlineContent = jest.fn(() => <div data-test-subj="inline-attachment-content" />);
+const mockAttachmentsService = {
+  getAttachmentUiDefinition: jest.fn(() => ({
+    getLabel: () => 'Test attachment',
+    renderInlineContent: mockRenderInlineContent,
+  })),
+  updateOrigin: jest.fn(),
+} as Pick<AttachmentsService, 'getAttachmentUiDefinition' | 'updateOrigin'> as AttachmentsService;
+
+const createAttachment = (versionedValue: string, version: number): UnknownAttachment => ({
+  id: 'attachment-1',
+  type: 'test-attachment',
+  versionData: {
+    version,
+    versionCount: 1,
+    createdAt: new Date().toISOString(),
+  },
+  data: {
+    value: versionedValue,
+  },
+});
+
 describe('InlineAttachmentWithActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('shows a fallback instead of crashing when renderInlineContent throws', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const attachment: UnknownAttachment = { id: 'attachment-1', type: 'test', data: {} };
+    const attachmentsService = {
+      getAttachmentUiDefinition: jest.fn().mockReturnValue({
+        getLabel: () => 'Test attachment',
+        renderInlineContent: () => {
+          throw new Error('boom');
+        },
+      }),
+      updateOrigin: jest.fn(),
+    };
+
+    render(
+      <InlineAttachmentWithActions
+        attachment={attachment}
+        attachmentsService={attachmentsService as unknown as AttachmentsService}
+        conversationId="conversation-1"
+        isSidebar={false}
+      />
+    );
+
+    expect(screen.getByText("Couldn't render this attachment")).not.toBeNull();
   });
 
   it('renders action buttons registered by inline content', async () => {
@@ -177,5 +229,54 @@ describe('InlineAttachmentWithActions', () => {
       fireEvent.click(screen.getByRole('button', { name: INLINE_TRIGGER }));
       expect(mockOpenSidebarConversation).not.toHaveBeenCalled();
     });
+  });
+
+  it('does not rerender attachment content for equivalent attachment identity props', () => {
+    const { rerender } = render(
+      <InlineAttachmentWithActions
+        attachment={createAttachment('first', 1)}
+        attachmentsService={mockAttachmentsService}
+        conversationId="conversation-1"
+        isSidebar={false}
+      />
+    );
+
+    expect(screen.getByTestId('inline-attachment-content')).toBeInTheDocument();
+    expect(mockRenderInlineContent).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <InlineAttachmentWithActions
+        attachment={createAttachment('first', 1)}
+        attachmentsService={mockAttachmentsService}
+        conversationId="conversation-1"
+        isSidebar={false}
+      />
+    );
+
+    expect(mockRenderInlineContent).toHaveBeenCalledTimes(1);
+  });
+
+  it('rerenders attachment content when the attachment version changes', () => {
+    const { rerender } = render(
+      <InlineAttachmentWithActions
+        attachment={createAttachment('first', 1)}
+        attachmentsService={mockAttachmentsService}
+        conversationId="conversation-1"
+        isSidebar={false}
+      />
+    );
+
+    expect(mockRenderInlineContent).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <InlineAttachmentWithActions
+        attachment={createAttachment('second', 2)}
+        attachmentsService={mockAttachmentsService}
+        conversationId="conversation-1"
+        isSidebar={false}
+      />
+    );
+
+    expect(mockRenderInlineContent).toHaveBeenCalledTimes(2);
   });
 });

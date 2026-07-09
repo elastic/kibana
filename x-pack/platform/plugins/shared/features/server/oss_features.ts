@@ -228,6 +228,7 @@ export const buildOSSFeatures = ({
         },
       },
     },
+
     {
       id: 'filesSharedImage',
       name: i18n.translate('xpack.features.filesSharedImagesFeatureName', {

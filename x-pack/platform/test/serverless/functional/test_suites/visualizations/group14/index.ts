@@ -71,7 +71,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
     });
 
-    loadTestFile(require.resolve('../group3/open_in_lens/tsvb/dashboard'));
+    loadTestFile(require.resolve('../group3/open_in_lens/tsvb/convert_from_dashboard'));
     loadTestFile(require.resolve('../group3/open_in_lens/tsvb/top_n'));
     loadTestFile(require.resolve('../group3/open_in_lens/tsvb/table'));
   });

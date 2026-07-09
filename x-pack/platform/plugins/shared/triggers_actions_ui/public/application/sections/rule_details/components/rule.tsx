@@ -7,7 +7,8 @@
 
 import React, { lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery, Filter } from '@kbn/es-query';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { useHistory, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
@@ -127,6 +128,12 @@ export function RuleComponent({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const lastReloadRequestTime = useMemo(() => new Date().getTime(), [refreshToken]);
   const [alertsSearchEsQuery, setAlertsSearchEsQuery] = useState<{ bool: BoolQuery }>();
+  const [filterControls, setFilterControls] = useState<Filter[]>();
+  const [controlApi, setControlApi] = useState<FilterGroupHandler | undefined>();
+  const hasInitialControlLoadingFinished = useMemo(
+    () => Boolean(controlApi) && Array.isArray(filterControls),
+    [controlApi, filterControls]
+  );
 
   const alertsTableQuery = useMemo(() => {
     const baseRuleFilter = {
@@ -185,7 +192,7 @@ export function RuleComponent({
   ].some(Boolean);
 
   const renderRuleAlertList = useCallback(() => {
-    if (ruleType.hasAlertsMappings) {
+    if (ruleType.hasAlertsMappings && hasInitialControlLoadingFinished) {
       const alertDetailsNavigation: AlertDetailsNavigation | undefined = hasObservabilityAccess
         ? {
             appId: 'observability',
@@ -229,6 +236,7 @@ export function RuleComponent({
     data,
     fieldFormats,
     getAlertFormatter,
+    hasInitialControlLoadingFinished,
     hasObservabilityAccess,
     http,
     alertsTableQuery,
@@ -245,14 +253,20 @@ export function RuleComponent({
     () => (
       <>
         <EuiSpacer size="m" />
-        <RuleAlertSearchBar ruleTypeId={ruleType.id} onEsQueryChange={setAlertsSearchEsQuery} />
+        <RuleAlertSearchBar
+          ruleTypeId={ruleType.id}
+          filterControls={filterControls}
+          onFilterControlsChange={setFilterControls}
+          onControlApiAvailable={setControlApi}
+          onEsQueryChange={setAlertsSearchEsQuery}
+        />
         <EuiSpacer size="s" />
         <EuiFlexGroup css={{ minHeight: 450 }} direction="column">
           <EuiFlexItem>{renderRuleAlertList()}</EuiFlexItem>
         </EuiFlexGroup>
       </>
     ),
-    [renderRuleAlertList, ruleType.id]
+    [filterControls, renderRuleAlertList, ruleType.id]
   );
 
   const scrollAlertsIntoView = useCallback(

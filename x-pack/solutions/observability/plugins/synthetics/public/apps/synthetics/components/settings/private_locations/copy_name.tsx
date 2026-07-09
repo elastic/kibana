@@ -6,7 +6,14 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 
 export const CopyName = ({ text }: { text: string }) => {
   return (
@@ -17,15 +24,22 @@ export const CopyName = ({ text }: { text: string }) => {
       <EuiFlexItem grow={false}>
         <EuiCopy textToCopy={text}>
           {(copy) => (
-            <EuiButtonIcon
-              data-test-subj="syntheticsCopyNameButton"
-              color="text"
-              iconType="copy"
-              onClick={copy}
-              aria-label={i18n.translate('xpack.synthetics.copyName.copyNameButtonIconLabel', {
+            <EuiToolTip
+              content={i18n.translate('xpack.synthetics.copyName.copyNameButtonIconLabel', {
                 defaultMessage: 'Copy name',
               })}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="syntheticsCopyNameButton"
+                color="text"
+                iconType="copy"
+                onClick={copy}
+                aria-label={i18n.translate('xpack.synthetics.copyName.copyNameButtonIconLabel', {
+                  defaultMessage: 'Copy name',
+                })}
+              />
+            </EuiToolTip>
           )}
         </EuiCopy>
       </EuiFlexItem>

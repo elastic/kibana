@@ -12,7 +12,7 @@ import { filter, flatMap, mapKeys, uniq } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/server/types';
 import { satisfies } from 'semver';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { processAggregations } from '../../../common/utils/aggregations';
 import { getAgentsRequestQuerySchema } from '../../../common/api';

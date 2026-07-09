@@ -62,6 +62,16 @@ export const savedDataViewSpecSchema = schema.object(
         },
       })
     ),
+    field_filters: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 1000 }), {
+        maxSize: 10_000,
+        meta: {
+          title: 'Field filters',
+          description:
+            "Field filters can be used to exclude one or more fields when fetching a document. They may contain wildcards, such as `user*` which filters fields starting with 'user'.",
+        },
+      })
+    ),
     index_pattern: indexPatternSchema,
     time_field: timeFieldSchema,
     field_settings: schema.maybe(

@@ -12,7 +12,27 @@ export type {
   ChromeBreadcrumb,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
-export type { ChromeNext } from './chrome_next';
+export type {
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderBadgeItem,
+  AppHeaderConfig,
+  AppHeaderEditableTitle,
+  AppHeaderMetadataButtonItem,
+  AppHeaderMetadataHealthItem,
+  AppHeaderMetadataItem,
+  AppHeaderMetadataItems,
+  AppHeaderMetadataTextItem,
+  AppHeaderTab,
+  AppHeaderTabAction,
+  AppHeaderTabActions,
+  AppHeaderTabBadge,
+  AppHeaderTabIconBadge,
+  AppHeaderTitle,
+  AppHeaderTitleSaveResult,
+  ChromeNext,
+  GlobalHeaderAiButton,
+} from './chrome_next';
 export type { ChromeSetup, ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
@@ -48,6 +68,8 @@ export type {
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  NavigationCustomization,
+  NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';

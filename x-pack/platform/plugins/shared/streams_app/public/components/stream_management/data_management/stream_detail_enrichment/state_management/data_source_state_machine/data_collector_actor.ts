@@ -7,9 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
+import type { StreamlangDSL } from '@kbn/streamlang';
 import {
   definitionToESQLQuery,
   ensureMetadata,
+  getAncestors,
   getParentId,
   isDraftStream,
   isRecord,
@@ -144,6 +146,9 @@ export function createDataCollectorActor({
 
 interface DraftSampleSource {
   baseQuery: string;
+  parentIsDraft: boolean;
+  /** Processing steps from all draft ancestors, ordered root to closest parent. */
+  ancestorProcessing: StreamlangDSL;
 }
 
 /**
@@ -155,7 +160,7 @@ interface DraftSampleSource {
  *
  * Falls back to a simple `FROM <root>` when the parent cannot be resolved.
  */
-async function resolveDraftSampleSource(
+export async function resolveDraftSampleSource(
   streamsRepositoryClient: StreamsRepositoryClient,
   streamName: string
 ): Promise<DraftSampleSource> {
@@ -200,7 +205,52 @@ async function resolveDraftSampleSource(
     includeProcessing: false,
   });
 
-  return { baseQuery };
+  let ancestorProcessing: StreamlangDSL = { steps: [] };
+  if (parentIsDraft) {
+    ancestorProcessing = await collectDraftAncestorProcessing(streamsRepositoryClient, streamName);
+  }
+
+  return { baseQuery, parentIsDraft, ancestorProcessing };
+}
+
+/**
+ * Walks up the stream hierarchy and collects processing steps from all
+ * draft ancestors, ordered from root to closest parent. This mirrors the
+ * server-side `collectAncestorProcessing` in the failure store handler,
+ * but operates client-side and only includes draft ancestors (persisted
+ * ancestor processing is already baked into `_source`).
+ */
+async function collectDraftAncestorProcessing(
+  streamsRepositoryClient: StreamsRepositoryClient,
+  streamName: string
+): Promise<StreamlangDSL> {
+  const ancestorIds = getAncestors(streamName);
+  if (ancestorIds.length === 0) {
+    return { steps: [] };
+  }
+
+  const ancestors = await Promise.all(
+    ancestorIds.map((id) =>
+      streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+        signal: null,
+        params: { path: { name: id } },
+      })
+    )
+  );
+
+  const allSteps: StreamlangDSL['steps'] = [];
+
+  for (const ancestor of ancestors) {
+    if (
+      Streams.WiredStream.GetResponse.is(ancestor) &&
+      isDraftStream(ancestor.stream) &&
+      ancestor.stream.ingest.processing.steps.length > 0
+    ) {
+      allSteps.push(...ancestor.stream.ingest.processing.steps);
+    }
+  }
+
+  return { steps: allSteps };
 }
 
 type AllCollectorParams = CollectorParams & {
@@ -469,7 +519,10 @@ function isValidSearchResult(result: IEsSearchResponse): boolean {
  * Extracts documents from search result
  */
 function extractDocumentsFromResult(result: IEsSearchResponse): SampleDocument[] {
-  return result.rawResponse.hits.hits.map((doc) => doc._source);
+  return result.rawResponse.hits.hits.map((doc) => ({
+    ...(doc._source as SampleDocument),
+    _id: doc._id,
+  }));
 }
 
 /**
@@ -542,5 +595,26 @@ export function createDataCollectionFailureNotifier({
       }),
       toastMessage: error.message,
     });
+  };
+}
+
+export function notifyFetchMoreError(toasts: DataSourceMachineDeps['toasts'], error: unknown) {
+  const formattedError = getFormattedError(error);
+  toasts.addError(formattedError, {
+    title: i18n.translate('xpack.streams.enrichment.fetchMore.error', {
+      defaultMessage: 'Failed to load more matching samples.',
+    }),
+    toastMessage: formattedError.message,
+  });
+}
+
+export function createFetchMoreFailureNotifier({
+  toasts,
+}: {
+  toasts: DataSourceMachineDeps['toasts'];
+}) {
+  return (params: { event: unknown }) => {
+    const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
+    notifyFetchMoreError(toasts, event.error);
   };
 }

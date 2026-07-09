@@ -6,13 +6,12 @@
  */
 
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { AlertSelection } from '.';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { CUSTOMIZE_THE_CONNECTOR_AND_ALERTS } from './translations';
 
 jest.mock('react-router', () => ({
@@ -23,7 +22,6 @@ jest.mock('react-router', () => ({
   withRouter: jest.fn(),
 }));
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('default'),
 }));
@@ -49,9 +47,6 @@ const defaultProps = {
 };
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 
 describe('AlertSelection', () => {
   beforeEach(() => {
@@ -69,11 +64,6 @@ describe('AlertSelection', () => {
         },
       },
     } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
-
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
   });
 
   it('renders the customize alerts text', () => {

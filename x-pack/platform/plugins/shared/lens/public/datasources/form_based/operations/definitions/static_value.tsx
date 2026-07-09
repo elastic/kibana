@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import type {
-  GenericIndexPatternColumn,
+  ColumnBuildHints,
   StaticValueIndexPatternColumn,
   IndexPattern,
 } from '@kbn/lens-common';
@@ -38,9 +38,7 @@ function ofName(value: number | string | undefined) {
   });
 }
 
-function isStaticValueColumnLike(
-  col: GenericIndexPatternColumn
-): col is StaticValueIndexPatternColumn {
+function isStaticValueColumnLike(col: ColumnBuildHints): col is StaticValueIndexPatternColumn {
   return Boolean('params' in col && col.params && 'value' in col.params);
 }
 

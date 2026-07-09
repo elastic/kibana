@@ -9,14 +9,13 @@
 
 import type React from 'react';
 
+import { getStepIconType, HardcodedIcons } from '@kbn/workflows-ui';
 import {
   getDataUrlFromReactComponent,
   getIconBase64,
   getTriggerBoltFallbackDataUrl,
   resolveIconToDataUrl,
 } from './get_icon_base64';
-import { getStepIconType } from './get_step_icon_type';
-import { HardcodedIcons } from './hardcoded_icons';
 
 // Mock renderToStaticMarkup from react-dom/server
 jest.mock('react-dom/server', () => ({
@@ -29,6 +28,9 @@ jest.mock('./icons/elasticsearch.svg', () => ({
 }));
 jest.mock('./icons/kibana.svg', () => ({
   KibanaLogo: () => 'KibanaLogo',
+}));
+jest.mock('@kbn/connector-specs/icons', () => ({
+  ConnectorIconsMap: new Map([['.notion', () => null]]),
 }));
 
 const { renderToStaticMarkup } = jest.requireMock('react-dom/server') as {
@@ -151,6 +153,26 @@ describe('resolveIconToDataUrl', () => {
     expect(result).toBe(`data:image/svg+xml;base64,${btoa(svgMarkup)}`);
     expect(lazyComponent._payload._result).toHaveBeenCalledTimes(1);
   });
+
+  it('resolves an already-initialized lazy exotic component to a data URL', async () => {
+    const svgMarkup = '<svg><path d="M0 0"/></svg>';
+    renderToStaticMarkup.mockReturnValue(svgMarkup);
+
+    const InnerComponent: React.FC<{ width: number; height: number }> = () => null;
+    const lazyComponent = {
+      $$typeof: Symbol.for('react.lazy'),
+      _payload: {
+        _result: { default: InnerComponent },
+      },
+    };
+
+    const result = await resolveIconToDataUrl(
+      lazyComponent as unknown as React.ComponentType,
+      FALLBACK_URL
+    );
+
+    expect(result).toBe(`data:image/svg+xml;base64,${btoa(svgMarkup)}`);
+  });
 });
 
 describe('getIconBase64', () => {
@@ -252,6 +274,18 @@ describe('getIconBase64', () => {
       });
 
       expect(result).toBe(HardcodedIcons['.slack']);
+    });
+
+    it('returns connector spec icon for v2 actionTypeIds', async () => {
+      const svgMarkup = '<svg><path d="M0 0"/></svg>';
+      renderToStaticMarkup.mockReturnValue(svgMarkup);
+
+      const result = await getIconBase64({
+        actionTypeId: '.notion',
+        kind: 'step',
+      });
+
+      expect(result).toBe(`data:image/svg+xml;base64,${btoa(svgMarkup)}`);
     });
 
     it('returns plugs fallback for unknown actionTypeId without icon', async () => {

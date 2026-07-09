@@ -106,7 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('dashboardLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
-        await testSubjects.existOrFail('newItemButton');
+        await dashboard.expectCreateButtonExists();
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -288,7 +288,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('dashboardLandingPage', {
           timeout: config.get('timeouts.waitFor'),
         });
-        await testSubjects.missingOrFail('newItemButton');
+        await dashboard.expectCreateButtonMissing();
       });
 
       it(`shows read-only badge`, async () => {
@@ -396,7 +396,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           args: navigationArgs,
         });
         await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
-        await testSubjects.missingOrFail('newItemButton');
+        await dashboard.expectCreateButtonMissing();
       });
 
       it(`shows read-only badge`, async () => {

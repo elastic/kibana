@@ -31,7 +31,6 @@ describe('spec connector', () => {
 
   const specActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
     id: 'spec-connector',
-    source: 'spec',
     actionConnectorFields: lazy(() => import('../connector_mock')),
   });
 
@@ -129,12 +128,6 @@ describe('spec connector with API fetch', () => {
     },
   };
 
-  const specActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
-    id: 'spec-connector-test',
-    source: 'spec',
-    actionConnectorFields: lazy(() => import('../connector_mock')),
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRenderer = createAppMockRenderer();
@@ -143,9 +136,8 @@ describe('spec connector with API fetch', () => {
       actions: { save: true, show: true },
     };
     loadActionTypes.mockResolvedValue([specConnectorType]);
-    // Registered client-side (via registerConnectorTypesFromSpecs); API fetch is triggered by source==='spec'
-    actionTypeRegistry.has.mockReturnValue(true);
-    actionTypeRegistry.get.mockReturnValue(specActionTypeModel);
+    // Spec connectors are not in the UI actionTypeRegistry; useActionTypeModel fetches the spec API.
+    actionTypeRegistry.has.mockReturnValue(false);
     appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue(mockSpecResponse);
     // Enable workflows UI setting so spec connectors are displayed
     appMockRenderer.coreStart.uiSettings.get = jest.fn().mockImplementation((key: string) => {
@@ -279,5 +271,50 @@ describe('spec connector with API fetch', () => {
 
     // Should show connector selection again
     expect(await screen.findByTestId('spec-connector-test-card')).toBeInTheDocument();
+  });
+
+  describe('documentation link resolution', () => {
+    it('derives the docs link from the connector id when the spec has no docsUrl', async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('spec-connector-test-card'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('create-connector-flyout-header-docs-link')).toHaveAttribute(
+          'href',
+          `${appMockRenderer.coreStart.docLinks.links.alerting.connectors}/spec-connector-test-action-type`
+        );
+      });
+    });
+
+    it('links to the connectors index when the spec docsUrl is an empty string (no dedicated page)', async () => {
+      appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue({
+        ...mockSpecResponse,
+        metadata: { ...mockSpecResponse.metadata, docs_url: '' },
+      });
+
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('spec-connector-test-card'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('create-connector-flyout-header-docs-link')).toHaveAttribute(
+          'href',
+          appMockRenderer.coreStart.docLinks.links.alerting.connectors
+        );
+      });
+    });
   });
 });

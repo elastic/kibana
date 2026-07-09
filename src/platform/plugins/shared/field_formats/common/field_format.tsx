@@ -95,11 +95,7 @@ export abstract class FieldFormat {
 
     const formatted = this.convertToText(val, options);
     const fieldName = options?.field?.name;
-    const highlights = fieldName ? options?.hit?.highlight?.[fieldName] : undefined;
-    // getHighlightReact expects a string; guard against edge cases where convert() returns non-string
-    return highlights && typeof formatted === 'string'
-      ? getHighlightReact(formatted, highlights)
-      : formatted;
+    return getHighlightReact(formatted, fieldName, options?.hit);
   };
 
   /**

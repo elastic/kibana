@@ -14,7 +14,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { GroupingSort, ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
 import { isGroupingBucket } from '@kbn/grouping/src';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
@@ -24,6 +23,8 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
@@ -37,13 +38,16 @@ import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_sett
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
 import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_handler';
 import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
-
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
 import { AlertsTab } from './attack_details/alerts_tab';
 import { EmptyResultsPrompt } from './empty_results_prompt';
 import { dsl } from '../utils/dsl';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
-import { buildAttacksOnlyFilter, buildConnectorIdFilter } from './filtering_configs';
+import {
+  buildAttacksOnlyFilter,
+  buildAttackTypeFilter,
+  buildConnectorIdFilter,
+} from './filtering_configs';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 import { useGroupStats } from './grouping_settings/use_group_stats';
@@ -82,9 +86,21 @@ export interface TableSectionProps {
   selectedConnectorNames: string[];
 
   /**
+   * The list of selected types to filter the table
+   */
+  selectedTypes: string[];
+
+  /**
    * Callback to open the schedules flyout
    */
   openSchedulesFlyout: () => void;
+
+  /**
+   * Optional callback invoked with the attack id group keys whenever the grouped
+   * table results change (`undefined` until the first aggregation resolves).
+   * Used by the page tour to know whether any attacks match the active filters.
+   */
+  onAttackIdsChange?: (attackIds: string[] | undefined) => void;
 }
 
 /**
@@ -97,7 +113,9 @@ export const TableSection = React.memo(
     pageFilters,
     assignees,
     selectedConnectorNames,
+    selectedTypes,
     openSchedulesFlyout,
+    onAttackIdsChange,
   }: TableSectionProps) => {
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
@@ -110,9 +128,9 @@ export const TableSection = React.memo(
 
     const { to, from } = useGlobalTime();
 
-    const {
-      services: { telemetry },
-    } = useKibana();
+    const { telemetry } = useKibana().services;
+    const enableNewFlyout = useIsNewFlyoutEnabled();
+    const { openAttackFlyout } = useFlyoutApi();
 
     const [{ loading: userInfoLoading }] = useUserData();
 
@@ -150,22 +168,26 @@ export const TableSection = React.memo(
       (selectedGroup: string, bucket: RawBucket<AlertsGroupingAggregation>) => {
         const attack = getAttack(selectedGroup, bucket);
         if (attack) {
-          openFlyout({
-            right: {
-              id: AttackDetailsRightPanelKey,
-              params: {
-                attackId: attack.id,
-                indexName: dataView.getIndexPattern(),
+          if (enableNewFlyout) {
+            openAttackFlyout({ attackId: attack.id, indexName: dataView.getIndexPattern() });
+          } else {
+            openFlyout({
+              right: {
+                id: AttackDetailsRightPanelKey,
+                params: {
+                  attackId: attack.id,
+                  indexName: dataView.getIndexPattern(),
+                },
               },
-            },
-          });
+            });
+          }
           telemetry.reportEvent(AttacksEventTypes.DetailsFlyoutOpened, {
             id: attack.id,
             source: 'attacks_page_table',
           });
         }
       },
-      [dataView, getAttack, openFlyout, telemetry]
+      [dataView, enableNewFlyout, getAttack, openAttackFlyout, openFlyout, telemetry]
     );
 
     const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({
@@ -188,8 +210,9 @@ export const TableSection = React.memo(
         );
         const groupKeys = attackIdsGroupBuckets?.flatMap(({ key }) => key);
         setAttackIds(groupKeys);
+        onAttackIdsChange?.(groupKeys);
       },
-      []
+      [onAttackIdsChange]
     );
 
     // AlertsTable manages global filters itself, so not including `filters`
@@ -200,6 +223,7 @@ export const TableSection = React.memo(
         ...(pageFilters ?? []),
         ...buildAlertAssigneesFilter(assignees),
         ...buildConnectorIdFilter(selectedConnectorNames),
+        ...buildAttackTypeFilter(selectedTypes),
         ...(showAttacksOnly ? buildAttacksOnlyFilter() : []),
       ];
     }, [
@@ -207,6 +231,7 @@ export const TableSection = React.memo(
       pageFilters,
       assignees,
       selectedConnectorNames,
+      selectedTypes,
       showAttacksOnly,
     ]);
 
@@ -228,23 +253,19 @@ export const TableSection = React.memo(
         if (!attack) {
           return (
             <AlertsTab
-              groupingFilters={groupingFilters}
+              attackAlertIds={[]}
               defaultFilters={defaultFilters}
               isTableLoading={isLoading}
             />
           );
         }
 
-        const filteredAlertsCount = fieldBucket?.attackRelatedAlerts?.doc_count ?? 0;
-
         return (
           <AttackDetailsContainer
             attack={attack}
             showAnonymized={showAnonymized}
-            groupingFilters={groupingFilters}
             defaultFilters={defaultFilters}
             isTableLoading={isLoading}
-            filteredAlertsCount={filteredAlertsCount}
           />
         );
       },
@@ -267,11 +288,7 @@ export const TableSection = React.memo(
       [getAttack, statusFilter]
     );
 
-    const accordionExtraActionGroupStats = useGroupStats();
-
-    const dataViewSpec = useMemo(() => {
-      return dataView.toSpec(true);
-    }, [dataView]);
+    const accordionExtraActionGroupStats = useGroupStats({ getAttack });
 
     const emptyGroupingComponent = useMemo(
       () => <EmptyResultsPrompt openSchedulesFlyout={openSchedulesFlyout} />,
@@ -311,7 +328,6 @@ export const TableSection = React.memo(
           accordionButtonContent={defaultGroupTitleRenderers}
           accordionExtraActionGroupStats={accordionExtraActionGroupStats}
           dataView={dataView}
-          dataViewSpec={dataViewSpec}
           defaultFilters={defaultFilters}
           defaultGroupingOptions={groupingOptions}
           from={from}

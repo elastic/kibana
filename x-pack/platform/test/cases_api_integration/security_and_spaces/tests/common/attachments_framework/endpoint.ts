@@ -10,9 +10,10 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { postCaseReq } from '../../../../common/lib/mock';
+import { postCaseReq, postCommentActionsReq } from '../../../../common/lib/mock';
 import {
   createCase,
   createComment,
@@ -42,7 +43,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const validMetadata = {
     command: 'isolate',
-    comment: 'Isolated host because of suspicious activity',
     targets: [
       {
         endpointId: 'endpoint-1',
@@ -51,6 +51,15 @@ export default ({ getService }: FtrProviderContext): void => {
       },
     ],
   };
+
+  // Legacy externalReference payloads keep the analyst comment on
+  // `externalReferenceMetadata.comment`
+  const legacyMetadata = {
+    ...validMetadata,
+    comment: 'Isolated host because of suspicious activity',
+  };
+
+  const validData = { content: 'Isolated host because of suspicious activity' };
 
   describe('Endpoint unified attachment', () => {
     afterEach(async () => {
@@ -69,7 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
             externalReferenceId: 'action-id-1',
             externalReferenceStorage: { type: 'elasticSearchDoc' },
             externalReferenceAttachmentTypeId: 'endpoint',
-            externalReferenceMetadata: validMetadata,
+            externalReferenceMetadata: legacyMetadata,
             owner: 'securitySolutionFixture',
           } as unknown as AttachmentRequest,
           expectedHttpCode: 200,
@@ -87,7 +96,7 @@ export default ({ getService }: FtrProviderContext): void => {
             externalReferenceId: 'action-id-2',
             externalReferenceStorage: { type: 'elasticSearchDoc' },
             externalReferenceAttachmentTypeId: 'endpoint',
-            externalReferenceMetadata: { ...validMetadata, targets: [] },
+            externalReferenceMetadata: { ...legacyMetadata, targets: [] },
             owner: 'securitySolutionFixture',
           } as unknown as AttachmentRequest,
           expectedHttpCode: 400,
@@ -105,6 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
             attachmentId: 'action-id-3',
+            data: validData,
             metadata: { ...validMetadata, targets: [] },
             owner: 'securitySolutionFixture',
           } as unknown as AttachmentRequest,
@@ -121,6 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
             attachmentId: 'action-id-4',
+            data: validData,
             metadata: {
               ...validMetadata,
               targets: [
@@ -146,7 +157,8 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
             attachmentId: 'action-id-5',
-            metadata: { comment: validMetadata.comment, targets: validMetadata.targets },
+            data: validData,
+            metadata: { targets: validMetadata.targets },
             owner: 'securitySolutionFixture',
           } as unknown as AttachmentRequest,
           expectedHttpCode: 400,
@@ -162,11 +174,99 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
             attachmentId: 'action-id-6',
+            data: validData,
             metadata: { ...validMetadata, extra: 'nope' },
             owner: 'securitySolutionFixture',
           } as unknown as AttachmentRequest,
           expectedHttpCode: 400,
         });
+      });
+
+      it('returns 400 when `data.content` is missing', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+            attachmentId: 'action-id-6a',
+            metadata: validMetadata,
+            owner: 'securitySolutionFixture',
+          } as unknown as AttachmentRequest,
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('returns 400 when `metadata.comment` is present (lifted to data.content; strict reject)', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+            attachmentId: 'action-id-6b',
+            data: validData,
+            metadata: { ...validMetadata, comment: 'belongs on data.content' },
+            owner: 'securitySolutionFixture',
+          } as unknown as AttachmentRequest,
+          expectedHttpCode: 400,
+        });
+      });
+    });
+
+    describe('legacy `actions` writes (FF OFF)', () => {
+      // Legacy `actions` POSTs bypass the unified Zod schema (the legacy
+      // validator branches only cover externalReference / persistableState);
+      // with the FF off the cases server persists the payload as-is on
+      // `cases-comments` without invoking `actionsAttachmentTransformer`. The
+      // transformer-level rejections (empty targets, non-security owner) are
+      // exercised in the flag-ON FTR companion.
+      it('accepts a legacy `actions` POST', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const patched = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentActionsReq,
+          expectedHttpCode: 200,
+        });
+
+        expect(patched.comments?.length).to.be(1);
+        expect(patched.comments![0].type).to.be(AttachmentType.actions);
+      });
+
+      it('persists the legacy `actions` shape byte-clean on cases-comments', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        const patched = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentActionsReq,
+        });
+
+        const attachmentId = patched.comments![0].id;
+
+        const esResponse = await getSOFromKibanaIndex({
+          es,
+          soType: CASE_COMMENT_SAVED_OBJECT,
+          soId: attachmentId,
+        });
+
+        const storedAttributes = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT] as
+          | Record<string, unknown>
+          | undefined;
+        expect(storedAttributes).to.be.ok();
+
+        expect(storedAttributes!.type).to.be(AttachmentType.actions);
+        expect(storedAttributes!.comment).to.be(postCommentActionsReq.comment);
+        expect(storedAttributes!.actions).to.eql(postCommentActionsReq.actions);
+
+        // Must not leak any unified-only fields onto the legacy `actions` SO row.
+        expect(storedAttributes!).not.to.have.property('attachmentId');
+        expect(storedAttributes!).not.to.have.property('metadata');
+        expect(storedAttributes!).not.to.have.property('data');
       });
     });
 
@@ -180,6 +280,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
             attachmentId: 'action-id-7',
+            data: validData,
             metadata: validMetadata,
             owner: 'securitySolutionFixture',
           } as unknown as AttachmentRequest,
@@ -204,6 +305,13 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(storedAttributes!).not.to.have.property('attachmentId');
         expect(storedAttributes!).not.to.have.property('metadata');
         expect(storedAttributes!).not.to.have.property('data');
+
+        // The unified `data.content` is projected back to
+        // `externalReferenceMetadata.comment` for legacy on-disk shape.
+        const externalReferenceMetadata = storedAttributes!.externalReferenceMetadata as
+          | Record<string, unknown>
+          | undefined;
+        expect(externalReferenceMetadata?.comment).to.be(validData.content);
       });
     });
   });

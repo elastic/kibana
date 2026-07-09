@@ -23,6 +23,7 @@ import React, { useMemo } from 'react';
 import { Subject } from 'rxjs';
 import type { DeepPartial } from 'utility-types';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
+import { FocusedSignificantEventService } from '../public/services/significant_events/focused_significant_event_service';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 import type { StreamsAppStartDependencies } from '../public/types';
 
@@ -111,6 +112,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
     } as { start: StreamsAppStartDependencies },
     services: {
       dataStreamsClient: Promise.resolve({} as unknown as DataStreamsStatsClient),
+      focusedSignificantEventService: new FocusedSignificantEventService(),
       telemetryClient: telemetryService.getClient(),
       version: '1.0.0',
     },

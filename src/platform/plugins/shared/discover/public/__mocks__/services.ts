@@ -47,6 +47,7 @@ import type { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
+import { ProfileStateRegistry } from '../context_awareness';
 import { DiscoverEBTManager } from '../ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 import { createUrlTrackerMock } from './url_tracker.mock';
@@ -237,6 +238,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     uiActions: uiActionsPluginMock.createStartContract(),
     uiSettings: uiSettingsMock,
+    settings: corePluginMock.settings,
     http: {
       basePath: '/',
       post: jest.fn((path: string) => {
@@ -307,6 +309,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
     urlTracker: createUrlTrackerMock(),
     profilesManager: profilesManagerMock,
+    profileStateRegistry: new ProfileStateRegistry(),
     ebtManager: new DiscoverEBTManager(),
     cps: cpsPluginMock.createStartContract(),
     setHeaderActionMenu: jest.fn(),
@@ -322,10 +325,12 @@ export function createDiscoverServicesMock(): DiscoverServices {
       canSaveToDashboard: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
       getByValueTab: jest.fn(),
+      getEmbeddableId: jest.fn(() => undefined),
+      getOriginatingPath: jest.fn(() => undefined),
       clearEditorState: jest.fn(),
     },
     alertingVTwo: {
-      DynamicRuleFormFlyout: jest.fn(() => null),
+      CreateRuleOptionsFlyout: jest.fn(() => null),
     },
     trackUiMetric: jest.fn(),
     logger: { get: jest.fn(() => loggerMock.create()) },

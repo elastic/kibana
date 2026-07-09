@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/269592
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+title: Show full error details in alert action failure toasts
+description: Error toasts for failed alert actions (Assign, Tag, Open, Close, Acknowledge) now show the full error message from Elasticsearch instead of a blank message body.

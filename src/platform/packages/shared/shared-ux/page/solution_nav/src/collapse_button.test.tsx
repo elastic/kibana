@@ -14,11 +14,11 @@ import { SolutionNavCollapseButton } from './collapse_button';
 describe('SolutionNavCollapseButton', () => {
   test('renders', () => {
     render(<SolutionNavCollapseButton isCollapsed={false} />);
-    screen.getByTitle('Collapse side navigation');
+    screen.getByRole('button', { name: 'Collapse side navigation' });
   });
 
   test('isCollapsed', () => {
     render(<SolutionNavCollapseButton isCollapsed={true} />);
-    screen.getByTitle('Open side navigation');
+    screen.getByRole('button', { name: 'Open side navigation' });
   });
 });

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 
 import type { RuleResponse, RuleToImport } from '../../../../../../../common/api/detection_engine';
 import { ruleToImportHasVersion } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -31,6 +32,7 @@ export const importRules = async ({
   ruleSourceImporter,
   rules,
   savedObjectsClient,
+  changeTracking,
 }: {
   allowMissingConnectorSecrets?: boolean;
   detectionRulesClient: IDetectionRulesClient;
@@ -38,6 +40,7 @@ export const importRules = async ({
   ruleSourceImporter: IRuleSourceImporter;
   rules: RuleToImport[];
   savedObjectsClient: SavedObjectsClientContract;
+  changeTracking?: SecurityRuleChangeTracking<never>;
 }): Promise<Array<RuleResponse | RuleImportErrorObject>> => {
   const existingLists = await getReferencedExceptionLists({
     rules,
@@ -80,6 +83,7 @@ export const importRules = async ({
             ...rule,
             exceptions_list: [...exceptions],
           },
+          changeTracking,
           overrideFields: { rule_source: ruleSource, immutable },
           overwriteRules,
           allowMissingConnectorSecrets,

@@ -50,7 +50,8 @@ export const EntitySummaryGrid = memo(
       const attrs = (entityRecord.entity as Record<string, unknown>)?.attributes as
         | Record<string, unknown>
         | undefined;
-      return (attrs?.watchlists as string[] | undefined) ?? [];
+      const watchlists = attrs?.watchlists;
+      return Array.isArray(watchlists) ? (watchlists as string[]) : [];
     }, [entityRecord]);
 
     return (
@@ -87,22 +88,31 @@ export const EntitySummaryGrid = memo(
                       'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
                       { defaultMessage: 'Copy to clipboard' }
                     )}
+                    disableScreenReaderOutput
                   >
                     <EuiCopy textToCopy={entityId}>
                       {(copy) => (
-                        <EuiButtonIcon
-                          iconType="copy"
-                          aria-label={i18n.translate(
+                        <EuiToolTip
+                          content={i18n.translate(
                             'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
                             { defaultMessage: 'Copy to clipboard' }
                           )}
-                          onClick={copy}
-                          iconSize="s"
-                          color="text"
-                          css={css`
-                            transform: translateY(-50%);
-                          `}
-                        />
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            iconType="copy"
+                            aria-label={i18n.translate(
+                              'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
+                              { defaultMessage: 'Copy to clipboard' }
+                            )}
+                            onClick={copy}
+                            iconSize="s"
+                            color="text"
+                            css={css`
+                              transform: translateY(-50%);
+                            `}
+                          />
+                        </EuiToolTip>
                       )}
                     </EuiCopy>
                   </EuiToolTip>

@@ -136,7 +136,7 @@ export function getEventAnnotationService(
 
   const findAnnotationGroupContent = async (
     searchTerm: string,
-    pageSize: number,
+    pageSize?: number,
     tagsToInclude?: string[],
     tagsToExclude?: string[]
   ): Promise<{ total: number; hits: EventAnnotationGroupContent[] }> => {
@@ -176,10 +176,11 @@ export function getEventAnnotationService(
     let references: Reference[];
 
     if (dataViewSpec) {
-      if (!dataViewSpec.id)
+      if (!dataViewSpec.id) {
         throw new Error(
           'tried to create annotation group with a data view spec that did not include an ID!'
         );
+      }
 
       const { state, references: refsFromDataView } =
         DataViewPersistableStateService.extract(dataViewSpec);

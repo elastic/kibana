@@ -7,6 +7,7 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 import { AuthzDisabled } from '@kbn/core-security-server';
+import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
 
 interface MappingProperty {
   type?: string;
@@ -36,7 +37,7 @@ export const containsVectorField = (properties?: Record<string, MappingProperty>
 export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) => {
   router.get(
     {
-      path: '/internal/serverless_vectordb/deployment_stats',
+      path: DEPLOYMENT_STATS_PATH,
       validate: false,
       security: {
         authz: AuthzDisabled.delegateToESClient,
@@ -93,11 +94,23 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
           }
         }
 
+        let dashboardsCount = 0;
+        try {
+          const savedObjectsClient = core.savedObjects.getClient();
+          const result = await savedObjectsClient.find({ type: 'dashboard', perPage: 0 });
+          dashboardsCount = result.total;
+        } catch (dashboardError) {
+          logger.warn(
+            `Failed to fetch dashboard count for vectordb deployment stats: ${dashboardError.message}`
+          );
+        }
+
         return response.ok({
           body: {
             indicesCount,
             storeSizeBytes,
             vectorDocsCount,
+            dashboardsCount,
           },
         });
       } catch (error) {

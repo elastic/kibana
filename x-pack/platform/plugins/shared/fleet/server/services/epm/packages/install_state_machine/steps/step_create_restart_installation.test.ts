@@ -15,7 +15,7 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import {
   MAX_TIME_COMPLETE_INSTALL,

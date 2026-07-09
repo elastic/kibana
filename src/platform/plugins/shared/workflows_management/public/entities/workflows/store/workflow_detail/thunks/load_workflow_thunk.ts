@@ -47,7 +47,7 @@ export const loadWorkflowThunk = createAsyncThunk<
           defaultMessage: 'Failed to load workflow',
         }),
       });
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(error);
     }
   }
 );

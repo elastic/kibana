@@ -10,11 +10,12 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { WorkflowApi } from '@kbn/workflows-ui';
+import { extractWorkflowMetadata } from '../../../../../common/lib/telemetry/utils/extract_workflow_metadata';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
 import type { WorkflowTriggerTab } from '../../../../../features/run_workflow/ui/types';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { selectWorkflow, selectYamlString } from '../selectors';
+import { selectWorkflow, selectWorkflowDefinition, selectYamlString } from '../selectors';
 
 export interface TestWorkflowParams {
   inputs: Record<string, unknown>;
@@ -40,8 +41,11 @@ export const testWorkflowThunk = createAsyncThunk<
       : null;
 
     try {
-      const yamlString = selectYamlString(getState());
-      const workflow = selectWorkflow(getState());
+      const state = getState();
+      const yamlString = selectYamlString(state);
+      const workflow = selectWorkflow(state);
+      const workflowDefinition = selectWorkflowDefinition(state);
+      const { hasCustomEventTrigger } = extractWorkflowMetadata(workflowDefinition);
 
       if (!yamlString) {
         return rejectWithValue('No YAML content to test');
@@ -63,6 +67,7 @@ export const testWorkflowThunk = createAsyncThunk<
         editorType: 'yaml',
         origin: 'workflow_detail',
         triggerTab,
+        hasCustomEventTrigger,
       });
 
       // Show success notification
@@ -75,12 +80,26 @@ export const testWorkflowThunk = createAsyncThunk<
 
       return response;
     } catch (error) {
-      // Extract error message from HTTP error body if available
-      const errorMessage = error.body?.message || error.message || 'Failed to test workflow';
+      // Extract error message from HTTP error body if available. Validation
+      // failures carry the specific reasons under `body.attributes.validationErrors`
+      // (e.g. "Parallel step ... has a branch body containing unsupported
+      // flow-control"); surface those instead of the generic top-level message so
+      // the user sees *why* the workflow is invalid, not just that it is. Kibana's
+      // error-response schema strips unknown top-level fields, so the reasons are
+      // carried under the schema-allowed `attributes`.
+      const baseMessage = error.body?.message || error.message || 'Failed to test workflow';
+      const validationErrors: string[] | undefined =
+        error.body?.attributes?.validationErrors ?? error.body?.validationErrors;
+      const errorMessage =
+        Array.isArray(validationErrors) && validationErrors.length > 0
+          ? `${baseMessage}:\n${validationErrors.map((reason) => `• ${reason}`).join('\n')}`
+          : baseMessage;
       const errorObj = error instanceof Error ? error : new Error(errorMessage);
 
-      const state = getState();
-      const workflow = selectWorkflow(state);
+      const errorState = getState();
+      const workflow = selectWorkflow(errorState);
+      const workflowDefinition = selectWorkflowDefinition(errorState);
+      const { hasCustomEventTrigger } = extractWorkflowMetadata(workflowDefinition);
       const inputCount = Object.keys(inputs).length;
 
       // Report telemetry for failed test run
@@ -92,6 +111,7 @@ export const testWorkflowThunk = createAsyncThunk<
         origin: 'workflow_detail',
         editorType: 'yaml',
         triggerTab,
+        hasCustomEventTrigger,
       });
 
       notifications.toasts.addError(new Error(errorMessage), {

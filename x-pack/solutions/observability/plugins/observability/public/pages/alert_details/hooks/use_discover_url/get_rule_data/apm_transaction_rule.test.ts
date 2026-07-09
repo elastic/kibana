@@ -104,6 +104,23 @@ describe('getApmTransactionRuleData', () => {
       );
     });
 
+    it('excludes documents with an environment when ENVIRONMENT_NOT_DEFINED', () => {
+      const alert: TopAlert = {
+        ...mockAlert,
+        fields: {
+          ...mockAlert.fields,
+          [SERVICE_ENVIRONMENT]: 'ENVIRONMENT_NOT_DEFINED',
+        },
+      } as unknown as TopAlert;
+
+      const result = getApmTransactionRuleData({ alert, rule: baseRule })!;
+
+      expect(result).toBeDefined();
+      expect(result.discoverAppLocatorParams?.query?.query).toBe(
+        '(service.name:"my-service" AND transaction.type:"request" AND NOT service.environment:*)'
+      );
+    });
+
     it('builds query with all fields when transaction.name is also present', () => {
       const alert: TopAlert = {
         ...mockAlert,

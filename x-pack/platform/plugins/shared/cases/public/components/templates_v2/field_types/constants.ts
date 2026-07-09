@@ -22,6 +22,8 @@ category: General
 # tags are optional
 tags:
   - example
+# Case settings (sync alerts, extract observables) and the default connector are configured in the
+# Settings tab of the preview panel, not here.
 fields:
   - name: start_date
     control: DATE_PICKER
@@ -110,6 +112,13 @@ fields:
       required: true
       min: 0
       max: 100
+  # resolution_notes must be filled in before the case can be closed
+  - name: resolution_notes
+    control: TEXTAREA
+    label: Resolution notes
+    type: keyword
+    validation:
+      required_on_close: true
   # DATE_PICKER with show_time enabled and local timezone
   # show_when: not_empty — this field appears only when a date is selected above
   - name: scheduled_at

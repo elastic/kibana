@@ -17,17 +17,12 @@ project:
   owner: '@elastic/workchat-eng'
   sourceRoot: x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base
 dependsOn:
-  - '@kbn/agent-builder-common'
-  - '@kbn/agent-builder-genai-utils'
-  - '@kbn/agent-builder-server'
-  - '@kbn/core-elasticsearch-server'
-  - '@kbn/lens-embeddable-utils'
-  - '@kbn/logging'
+  - '@kbn/core-http-server'
+  - '@kbn/inference-tracing'
   - '@kbn/utility-types'
   - '@kbn/workflows'
   - '@kbn/workflows-management-plugin'
-  - '@kbn/zod'
-  - '@kbn/palettes'
+  - '@kbn/core-http-server-mocks'
 tags:
   - shared-server
   - package

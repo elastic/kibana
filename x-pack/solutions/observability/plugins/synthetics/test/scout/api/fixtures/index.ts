@@ -48,5 +48,7 @@ export {
   PUBLIC_API_VERSION,
   INTERNAL_API_VERSION,
   SYNTHETICS_API_URLS,
+  SYNTHETICS_MONITOR_SO_TYPES,
+  LOCAL_PUBLIC_LOCATION,
   mergeSyntheticsApiHeaders,
 } from './constants';

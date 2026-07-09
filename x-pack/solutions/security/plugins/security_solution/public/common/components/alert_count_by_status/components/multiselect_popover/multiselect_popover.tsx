@@ -46,6 +46,7 @@ export const MultiSelectPopover = React.memo(
 
     return (
       <EuiPopover
+        aria-label={title}
         ownFocus
         button={
           <EuiFilterGroup>

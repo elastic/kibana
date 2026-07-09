@@ -723,57 +723,7 @@ paths:
       summary: Generate a memory dump from the host machine
       tags:
         - Security Endpoint Management API
-  /api/endpoint/action/running_procs:
-    post:
-      description: Get a list of all processes running on an endpoint.
-      operationId: EndpointGetProcessesAction
-      requestBody:
-        content:
-          application/json:
-            examples:
-              singleEndpoint:
-                summary: Get running processes on a single endpoint
-                value:
-                  endpoint_ids:
-                    - ed518850-681a-4d60-bb98-e22640cae2a8
-            schema:
-              $ref: '#/components/schemas/GetProcessesRouteRequestBody'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                RunningProcsSuccess:
-                  summary: Running processes action successfully created
-                  value:
-                    data:
-                      agents:
-                        - ed518850-681a-4d60-bb98-e22640cae2a8
-                      agentState:
-                        ed518850-681a-4d60-bb98-e22640cae2a8:
-                          isCompleted: false
-                          wasSuccessful: false
-                      agentType: endpoint
-                      command: running-processes
-                      createdBy: elastic
-                      hosts:
-                        ed518850-681a-4d60-bb98-e22640cae2a8:
-                          name: gke-node-1235412
-                      id: 233db9ea-6733-4849-9226-5a7039c7161d
-                      isCompleted: false
-                      isExpired: false
-                      outputs: {}
-                      startedAt: '2022-07-29T19:08:49.126Z'
-                      status: pending
-                      wasSuccessful: false
-              schema:
-                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
-          description: Indicates a successful call.
-      summary: Get running processes
-      tags:
-        - Security Endpoint Management API
-  /api/endpoint/action/runscript:
+  /api/endpoint/action/run_script:
     post:
       description: Run a script on a host. Currently supported only for some agent types.
       operationId: RunScriptAction
@@ -848,6 +798,56 @@ paths:
                 $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Indicates a successful call.
       summary: Run a script
+      tags:
+        - Security Endpoint Management API
+  /api/endpoint/action/running_procs:
+    post:
+      description: Get a list of all processes running on an endpoint.
+      operationId: EndpointGetProcessesAction
+      requestBody:
+        content:
+          application/json:
+            examples:
+              singleEndpoint:
+                summary: Get running processes on a single endpoint
+                value:
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+            schema:
+              $ref: '#/components/schemas/GetProcessesRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                RunningProcsSuccess:
+                  summary: Running processes action successfully created
+                  value:
+                    data:
+                      agents:
+                        - ed518850-681a-4d60-bb98-e22640cae2a8
+                      agentState:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          isCompleted: false
+                          wasSuccessful: false
+                      agentType: endpoint
+                      command: running-processes
+                      createdBy: elastic
+                      hosts:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          name: gke-node-1235412
+                      id: 233db9ea-6733-4849-9226-5a7039c7161d
+                      isCompleted: false
+                      isExpired: false
+                      outputs: {}
+                      startedAt: '2022-07-29T19:08:49.126Z'
+                      status: pending
+                      wasSuccessful: false
+              schema:
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
+          description: Indicates a successful call.
+      summary: Get running processes
       tags:
         - Security Endpoint Management API
   /api/endpoint/action/scan:
@@ -3190,6 +3190,9 @@ components:
               isCompleted:
                 description: Whether the response action is completed for the agent ID
                 type: boolean
+              wasCanceled:
+                description: Whether the response action was canceled for the agent ID
+                type: boolean
               wasSuccessful:
                 description: Whether the response action was successful for the agent ID
                 type: boolean
@@ -3267,6 +3270,9 @@ components:
         status:
           description: The response action status
           type: string
+        wasCanceled:
+          description: Whether the response action was canceled
+          type: boolean
         wasSuccessful:
           description: Whether the response action was successful
           type: boolean

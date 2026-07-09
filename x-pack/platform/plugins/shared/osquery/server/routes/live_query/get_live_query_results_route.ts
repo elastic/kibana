@@ -10,7 +10,7 @@ import { map } from 'lodash';
 import { lastValueFrom, zip } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isFilters } from '@kbn/es-query';
 import type {
   GetLiveQueryResultsRequestQuerySchema,
@@ -181,7 +181,8 @@ export const getLiveQueryResultsRoute = (
                   search,
                   query.action_id,
                   query.agents?.length ?? 0,
-                  namespacesOrUndefined
+                  namespacesOrUndefined,
+                  spaceId
                 )
               )
             )
@@ -194,6 +195,7 @@ export const getLiveQueryResultsRoute = (
                 kuery: request.query.kuery,
                 esFilters: request.query.esFilters,
                 startDate: request.query.startDate,
+                spaceId,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100

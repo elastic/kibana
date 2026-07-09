@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/shared-components",
+  "owner": [
+    "@elastic/search-kibana"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

@@ -18,12 +18,10 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfilesSelectable } from '@kbn/user-profile-components';
 
 import { useBulkGetProfiles } from '../../hooks/use_bulk_get_profiles';
-import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
 import { useSuggestedProfiles } from '../../hooks/use_suggested_profiles';
 import { EpisodeActionFlyout, EpisodeActionFlyoutFooter } from './episode_action_flyout_layout';
 import * as i18n from './translations';
@@ -97,18 +95,10 @@ function AssigneeFlyoutNoMatchesMessage() {
 }
 
 export interface EditEpisodeAssigneeFlyoutProps {
-  /** Required for inline (single-row) usage that posts the assign action itself. */
-  episodeId?: string;
-  /** Required for inline (single-row) usage that posts the assign action itself. */
-  groupHash?: string;
   lastAssigneeUid: string | null | undefined;
   onClose: () => void;
-  /**
-   * When provided, called with the selected uid (or null) instead of posting the
-   * assign action. The bulk path uses this to gather the selection and post one
-   * action per selected episode itself. The flyout closes immediately after calling.
-   */
-  onSave?: (uid: string | null) => void;
+  /** Called with the selected uid (or `null` to clear). The flyout closes immediately after. */
+  onSave: (uid: string | null) => void;
   /**
    * Number of episodes the action will apply to. Drives plural copy in the
    * empty list message and, when > 1, keeps Save enabled even if the selection
@@ -124,8 +114,6 @@ export interface EditEpisodeAssigneeFlyoutProps {
 }
 
 export function EditEpisodeAssigneeFlyout({
-  episodeId,
-  groupHash,
   lastAssigneeUid,
   onClose,
   onSave,
@@ -133,7 +121,7 @@ export function EditEpisodeAssigneeFlyout({
   episodeCount = 1,
 }: EditEpisodeAssigneeFlyoutProps) {
   const isBulk = episodeCount > 1;
-  const { http, userProfile, notifications } = useKibana<CoreStart>().services;
+  const { userProfile, notifications } = useKibana<CoreStart>().services;
   const toasts = notifications.toasts;
 
   const [searchInput, setSearchInput] = useState('');
@@ -174,8 +162,6 @@ export function EditEpisodeAssigneeFlyout({
     return (suggestions ?? []) as UserProfileWithAvatar[];
   }, [debouncedSearch, suggestions]);
 
-  const { mutate: createAssignAction, isLoading: isSaving } = useCreateAlertAction(http);
-
   const isSaveDisabled = useMemo(() => {
     if (lastAssigneeUid && currentProfiles === undefined) {
       return true;
@@ -190,42 +176,9 @@ export function EditEpisodeAssigneeFlyout({
   }, [currentProfiles, currentProfile, isBulk, lastAssigneeUid, selectedProfile]);
 
   const handleSave = useCallback(() => {
-    const nextUid = selectedProfile?.uid ?? null;
-    if (onSave) {
-      onSave(nextUid);
-      onClose();
-      return;
-    }
-    if (!episodeId || !groupHash) {
-      return;
-    }
-    createAssignAction(
-      {
-        groupHash,
-        actionType: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
-        body: {
-          episode_id: episodeId,
-          assignee_uid: nextUid,
-        },
-      },
-      {
-        onSuccess: () => {
-          toasts.addSuccess(i18n.ASSIGNEE_FLYOUT_SAVE_SUCCESS);
-          onClose();
-        },
-        onError: (err) => {
-          toasts.addError(err instanceof Error ? err : new Error(String(err)), {
-            title: i18n.ASSIGNEE_FLYOUT_SAVE_ERROR_TITLE,
-          });
-        },
-      }
-    );
-  }, [createAssignAction, episodeId, groupHash, onClose, onSave, selectedProfile, toasts]);
-
-  const subtitle = useMemo(
-    () => (episodeId ? i18n.getAssigneeFlyoutSubtitle(episodeId) : undefined),
-    [episodeId]
-  );
+    onSave(selectedProfile?.uid ?? null);
+    onClose();
+  }, [onClose, onSave, selectedProfile]);
 
   return (
     <EpisodeActionFlyout
@@ -235,13 +188,6 @@ export function EditEpisodeAssigneeFlyout({
       ariaLabelledBy="alertingV2EditEpisodeAssigneeFlyoutTitle"
       titleId="alertingV2EditEpisodeAssigneeFlyoutTitle"
       title={i18n.ASSIGNEE_FLYOUT_TITLE}
-      subtitle={
-        subtitle ? (
-          <EuiText color="subdued" size="s">
-            <p>{subtitle}</p>
-          </EuiText>
-        ) : undefined
-      }
       footer={
         <EpisodeActionFlyoutFooter
           onClose={onClose}
@@ -250,9 +196,7 @@ export function EditEpisodeAssigneeFlyout({
           primaryLabel={i18n.ASSIGNEE_FLYOUT_SAVE}
           cancelTestSubj="alertingV2EditEpisodeAssigneeCancel"
           primaryTestSubj="alertingV2EditEpisodeAssigneeSave"
-          isPrimaryLoading={isSaving}
           isPrimaryDisabled={isSaveDisabled}
-          isCancelDisabled={isSaving}
         />
       }
     >

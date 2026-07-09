@@ -46,7 +46,7 @@ function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps
  * - If colorMapping is present → output colorMapping
  * - If palette is present → output colorByValue
  */
-function buildColorProps(
+export function buildColorProps(
   column: ColumnState
 ): Partial<Pick<NonNullable<DatatableConfig['metrics']>[number], 'apply_color_to' | 'color'>> {
   const { colorMode, palette, colorMapping } = column;

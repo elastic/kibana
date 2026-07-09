@@ -27,6 +27,7 @@ import {
   ConfigSchema,
   ParamsSchema,
 } from '@kbn/connector-schemas/http';
+import { AuthType } from '@kbn/connector-schemas/common/auth';
 import { z } from '@kbn/zod/v4';
 import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
 import type { HttpFormDataField } from '@kbn/connector-schemas/http/types/v1';
@@ -97,6 +98,9 @@ export const getConnectorType = (): HttpConnectorType => ({
       },
     },
     connector: (config, secrets) => {
+      if (config.authType === AuthType.OAuth2Password && (!secrets.user || !secrets.password)) {
+        return 'Username and password are required when OAuth2 password grant authentication is enabled';
+      }
       if (config.hasProxyAuth && !config.proxyUrl) {
         return 'proxyUrl is required when proxy authentication is enabled';
       }
@@ -146,12 +150,8 @@ function renderParameterTemplates(
     for (const [key, entry] of Object.entries(params.form_data)) {
       renderedFormData[key] = {
         content: renderMustacheString(logger, entry.content, variables, 'json'),
-        filename: entry.filename
-          ? renderMustacheString(logger, entry.filename, variables, 'json')
-          : undefined,
-        content_type: entry.content_type
-          ? renderMustacheString(logger, entry.content_type, variables, 'json')
-          : undefined,
+        filename: renderMustacheString(logger, entry.filename, variables, 'json'),
+        content_type: renderMustacheString(logger, entry.content_type, variables, 'json'),
       };
     }
     renderedParams.form_data = renderedFormData;

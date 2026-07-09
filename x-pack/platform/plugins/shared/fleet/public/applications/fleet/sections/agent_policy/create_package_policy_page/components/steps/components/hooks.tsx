@@ -9,7 +9,7 @@ import { useMemo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { LICENCE_FOR_OUTPUT_PER_INTEGRATION } from '../../../../../../../../../common/constants';
-import type { NewPackagePolicy, PackagePolicy } from '../../../../../../../../../common/types';
+import type { NewPackagePolicy } from '../../../../../../../../../common/types';
 import type { RegistryVarGroup } from '../../../../../../types';
 import { getAllowedOutputTypesForPackagePolicy } from '../../../../../../../../../common/services/output_helpers';
 import { useGetOutputs, useLicense } from '../../../../../../hooks';
@@ -30,7 +30,9 @@ export function useDataStreamId() {
 }
 
 export function useOutputs(
-  packagePolicy: Pick<PackagePolicy, 'supports_agentless'>,
+  packagePolicy: Pick<NewPackagePolicy, 'supports_agentless'> & {
+    inputs?: Array<{ type: string; enabled: boolean }>;
+  },
   packageName: string
 ) {
   const licenseService = useLicense();

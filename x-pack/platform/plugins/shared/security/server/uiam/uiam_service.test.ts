@@ -49,8 +49,9 @@ describe('UiamService', () => {
         { serverless: true }
       ).uiam,
       {
-        kibanaServerURL: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
+        kibanaServerResourceURL: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
         elasticsearchUrl: 'https://es.example.com',
+        kibanaVersion: '9.0.0',
       }
     );
   });
@@ -73,7 +74,7 @@ describe('UiamService', () => {
               sharedSecret: 'secret',
               ssl: { verificationMode: 'none' },
             },
-            { kibanaServerURL: 'https://kibana.test' }
+            { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
           )
       ).toThrowError('UIAM is not enabled.');
     });
@@ -88,7 +89,7 @@ describe('UiamService', () => {
               sharedSecret: 'secret',
               ssl: { verificationMode: 'none' },
             },
-            { kibanaServerURL: 'https://kibana.test' }
+            { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
           )
       ).toThrowError('UIAM URL is not configured.');
     });
@@ -103,7 +104,7 @@ describe('UiamService', () => {
               url: 'https://uiam.service',
               ssl: { verificationMode: 'none' },
             },
-            { kibanaServerURL: 'https://kibana.test' }
+            { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
           )
       ).toThrowError('UIAM shared secret is not configured.');
     });
@@ -118,7 +119,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'full' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).not.toHaveBeenCalled();
     });
@@ -133,7 +134,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'full', certificateAuthorities: '/some/ca/path' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -156,7 +157,7 @@ describe('UiamService', () => {
             certificateAuthorities: ['/some/ca/path-1', '/some/ca/path-2'],
           },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -181,7 +182,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'certificate', certificateAuthorities: '/some/ca/path' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -202,7 +203,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'certificate' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -224,7 +225,7 @@ describe('UiamService', () => {
           sharedSecret: 'secret',
           ssl: { verificationMode: 'none' },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -246,7 +247,7 @@ describe('UiamService', () => {
             key: '/path/to/key.pem',
           },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -274,7 +275,7 @@ describe('UiamService', () => {
             certificateAuthorities: '/some/ca/path',
           },
         },
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
       expect(agentSpy).toHaveBeenCalledTimes(1);
       expect(agentSpy).toHaveBeenCalledWith({
@@ -324,6 +325,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
         body: JSON.stringify({ refresh_token: 'old-refresh' }),
@@ -348,6 +350,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
         body: JSON.stringify({ refresh_token: 'old-refresh' }),
@@ -370,6 +373,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer old-token',
         },
@@ -395,6 +399,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer old-token',
         },
@@ -410,7 +415,7 @@ describe('UiamService', () => {
         token: 'essu_ephemeral_token_value',
         credentials: {
           oauth: {
-            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243/',
+            audience: 'https://my-project.kb.us-east-1.cloud.es.io:9243',
           },
         },
       };
@@ -426,11 +431,12 @@ describe('UiamService', () => {
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=https%3A%2F%2Fmy-project.kb.us-east-1.cloud.es.io%3A9243%2F',
+        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=https%3A%2F%2Fmy-project.kb.us-east-1.cloud.es.io%3A9243',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer essu_oauth_access_token',
           },
@@ -502,6 +508,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
@@ -544,6 +551,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'ApiKey essu_api_key',
         },
@@ -588,6 +596,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
@@ -626,6 +635,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
@@ -711,6 +721,7 @@ describe('UiamService', () => {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'ApiKey access-token',
           },
@@ -738,6 +749,7 @@ describe('UiamService', () => {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'ApiKey access-token',
           },
@@ -779,6 +791,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
         body: JSON.stringify({
@@ -828,6 +841,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
         body: JSON.stringify({
@@ -854,7 +868,7 @@ describe('UiamService', () => {
           },
           { serverless: true }
         ).uiam,
-        { kibanaServerURL: 'https://kibana.test' }
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
       );
 
       await expect(serviceWithoutUrl.convertApiKeys(['es-api-key'])).rejects.toThrowError(
@@ -881,6 +895,7 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
         body: JSON.stringify({
@@ -907,6 +922,7 @@ describe('UiamService', () => {
       await expect(
         uiamService.createOAuthClient('access-token', {
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
           client_name: 'Test Client',
         })
       ).resolves.toEqual(mockResponse);
@@ -916,11 +932,13 @@ describe('UiamService', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
         body: JSON.stringify({
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
           client_name: 'Test Client',
         }),
         dispatcher: AGENT_MOCK,
@@ -938,6 +956,7 @@ describe('UiamService', () => {
       await expect(
         uiamService.createOAuthClient('access-token', {
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
         })
       ).rejects.toThrowError('Bad request');
     });
@@ -954,6 +973,7 @@ describe('UiamService', () => {
 
       const body = {
         resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        project_id: 'test-project-id',
         client_type: 'confidential' as const,
         client_metadata: { owner: 'admin' },
         client_logo: { media_type: 'image/png', data: 'abc' },
@@ -988,6 +1008,7 @@ describe('UiamService', () => {
       await expect(
         uiamService.createOAuthClient('access-token', {
           resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          project_id: 'test-project-id',
         })
       ).rejects.toThrowError(
         '[INVALID_REDIRECT_URI/validation_error] Redirect URI must not contain a fragment (resource: redirect_uris[0])'
@@ -1010,6 +1031,7 @@ describe('UiamService', () => {
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/oauth/clients', {
         method: 'GET',
         headers: {
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
@@ -1031,6 +1053,7 @@ describe('UiamService', () => {
         {
           method: 'GET',
           headers: {
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer access-token',
           },
@@ -1078,6 +1101,7 @@ describe('UiamService', () => {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer access-token',
           },
@@ -1146,6 +1170,7 @@ describe('UiamService', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer access-token',
           },
@@ -1202,6 +1227,7 @@ describe('UiamService', () => {
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/oauth/connections', {
         method: 'GET',
         headers: {
+          'User-Agent': 'Kibana/9.0.0',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
           Authorization: 'Bearer access-token',
         },
@@ -1223,6 +1249,7 @@ describe('UiamService', () => {
         {
           method: 'GET',
           headers: {
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer access-token',
           },
@@ -1269,6 +1296,7 @@ describe('UiamService', () => {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer access-token',
           },
@@ -1340,6 +1368,7 @@ describe('UiamService', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer access-token',
           },

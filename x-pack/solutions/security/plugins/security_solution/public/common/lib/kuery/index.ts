@@ -14,7 +14,7 @@ import {
 } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import { prepareKQLParam } from '../../../../common/utils/kql';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { DataProvider, DataProvidersAnd } from '../../../../common/types';
@@ -30,10 +30,6 @@ export type PrimitiveOrArrayOfPrimitives =
 export interface CombineQueries {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
-  /**
-   * @deprecated Use `dataView` instead. Which accepts a DataView instance instead of a DataViewSpec.
-   */
-  dataViewSpec?: DataViewSpec;
   dataView: DataView;
   browserFields: BrowserFields;
   filters: Filter[];
@@ -204,32 +200,22 @@ export const isDataProviderEmpty = (dataProviders: DataProvider[]) => {
   return isEmpty(dataProviders) || isEmpty(dataProviders.filter((d) => d.enabled === true));
 };
 
-export const dataViewSpecToViewBase = (dataViewSpec?: DataViewSpec): DataViewBase => {
-  return { title: dataViewSpec?.title || '', fields: Object.values(dataViewSpec?.fields || {}) };
-};
-
 export const convertToBuildEsQuery = ({
   config,
-  dataView, // New dataview with newDataViewPickerEnabled
-  dataViewSpec, // Account for the case where sourcerer is active, but this can just use dataView
+  dataView,
   queries,
   filters,
 }: {
   config: EsQueryConfig;
   dataView: DataView;
-  /**
-   * @deprecated Use `dataView` instead. Which accepts a DataView instance instead of a DataViewSpec.
-   */
-  dataViewSpec?: DataViewSpec; // Ignored but kept for type compatibility
   queries: Query[];
   filters: Filter[];
 }): [string, undefined] | [undefined, Error] => {
   try {
-    const newDataViewExists = dataView?.id && dataView?.getIndexPattern();
     return [
       JSON.stringify(
         buildEsQuery(
-          newDataViewExists ? dataView : (dataViewSpecToViewBase(dataViewSpec) as DataView),
+          dataView,
           queries,
           filters.filter((f) => f.meta.disabled === false),
           {
@@ -255,7 +241,6 @@ export interface CombinedQuery {
 export const combineQueries = ({
   config,
   dataProviders = [],
-  dataViewSpec,
   dataView,
   browserFields,
   filters = [],
@@ -269,7 +254,6 @@ export const combineQueries = ({
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config,
       queries: [kuery],
-      dataViewSpec,
       dataView,
       filters,
     });
@@ -298,7 +282,6 @@ export const combineQueries = ({
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config,
     queries: [kuery],
-    dataViewSpec,
     dataView,
     filters,
   });

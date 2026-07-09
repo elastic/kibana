@@ -18,15 +18,11 @@ import {
 } from './test_ids';
 import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '../../../shared/components/test_ids';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageScope } from '../../../../data_view_manager/constants';
 
 jest.mock('../../../../detections/hooks/use_is_analyzer_enabled');
 jest.mock('../../../../data_view_manager/hooks/use_data_view');
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
 
 const mockUiSettingsGet = jest.fn();
@@ -86,10 +82,6 @@ describe('AnalyzerPreviewContainer', () => {
     mockServerless = undefined;
     mockUiSettingsGet.mockReturnValue(true);
     (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      selectedPatterns: ['old-analyzer-pattern'],
-    });
     (useSelectedPatterns as jest.Mock).mockReturnValue(['experimental-analyzer-pattern']);
     (useDataView as jest.Mock).mockReturnValue({
       status: 'ready',
@@ -137,15 +129,6 @@ describe('AnalyzerPreviewContainer', () => {
         hit: mockHit,
         shouldUseAncestor: false,
       })
-    );
-  });
-
-  it('should render AnalyzerPreview with sourcerer patterns when the new picker is disabled', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-
-    renderAnalyzerPreview();
-    expect(mockAnalyzerPreview).toHaveBeenCalledWith(
-      expect.objectContaining({ dataViewIndices: ['old-analyzer-pattern'] })
     );
   });
 
@@ -229,7 +212,6 @@ describe('AnalyzerPreviewContainer', () => {
   it('should use the analyzer page scope hooks', () => {
     renderAnalyzerPreview();
 
-    expect(useSourcererDataView).toHaveBeenCalledWith(PageScope.analyzer);
     expect(useSelectedPatterns).toHaveBeenCalledWith(PageScope.analyzer);
     expect(useDataView).toHaveBeenCalledWith(PageScope.analyzer);
   });
