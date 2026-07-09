@@ -48,9 +48,8 @@ const timeoutSignal = (ms: number): AbortSignal => {
 };
 
 /**
- * Each sampling arm gets its own deadline (see `signal` on
- * `GetSampleDocumentsEsqlParams`), but arms run concurrently via `Promise.all`,
- * so `samplingTimeoutMs` is not additive across them.
+ * Each sampling arm gets its own deadline, but arms run concurrently via
+ * `Promise.all`, so `samplingTimeoutMs` is not additive across them.
  */
 const armDeadline = (signal: AbortSignal, samplingTimeoutMs: number): AbortSignal =>
   anySignal([signal, timeoutSignal(samplingTimeoutMs)]);

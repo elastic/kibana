@@ -23,7 +23,6 @@ export interface GetEsqlColumnSchemaParams {
   index: string | string[];
   start?: number;
   end?: number;
-  /** Aborts the query when triggered; required — see `signal` on `GetSampleDocumentsEsqlParams`. */
   signal: AbortSignal;
 }
 

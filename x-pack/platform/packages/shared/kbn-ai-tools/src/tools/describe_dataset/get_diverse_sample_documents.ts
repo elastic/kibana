@@ -39,13 +39,6 @@ interface GetDiverseSampleDocumentsOptions {
   offset: number;
   size?: number;
   logger: Logger;
-  /**
-   * Aborts every underlying `esql.query` call this helper issues (schema
-   * detection, count, categorize, and the representative-document fetch
-   * loop) when triggered. See `signal` on `GetSampleDocumentsEsqlParams` for
-   * why this is required rather than relying on the ES client's configured
-   * `requestTimeout`.
-   */
   signal: AbortSignal;
 }
 

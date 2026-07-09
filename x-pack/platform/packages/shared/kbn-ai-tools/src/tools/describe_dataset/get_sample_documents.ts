@@ -56,14 +56,6 @@ interface GetSampleDocumentsEsqlParams {
    * internal date-range filter.
    */
   dslFilter?: QueryDslQueryContainer | QueryDslQueryContainer[];
-  /**
-   * Aborts the underlying `esql.query` call(s) when triggered. Required —
-   * without a deadline-bound signal (e.g. `AbortSignal.timeout(...)`), these
-   * queries have no client-enforced ceiling: the ES client's `requestTimeout`
-   * only takes effect when a per-call value differs from the client's
-   * configured default (see nightshift-program#572), so a query that
-   * trickles bytes back (e.g. through a keep-alive proxy) can run indefinitely.
-   */
   signal: AbortSignal;
 }
 
