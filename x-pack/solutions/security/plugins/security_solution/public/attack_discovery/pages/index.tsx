@@ -17,6 +17,8 @@ import { HeaderPage } from '../../common/components/header_page';
 import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { Actions } from './header/actions';
+import { WorkflowsMissingPrivilegesCallOut } from './workflows_missing_privileges_callout';
+import { useHasWorkflowsPrivileges } from './hooks/use_has_workflows_privileges';
 import { PageTitle } from './page_title';
 import { History } from './results/history';
 import { MovingAttacksCallout } from './moving_attacks_callout';
@@ -39,6 +41,8 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     openFlyout,
     settingsFlyout,
   } = useAttackDiscoveryControls();
+
+  const { hasWorkflowsExecute, missingPrivileges } = useHasWorkflowsPrivileges();
 
   // for showing / hiding anonymized data:
   const [showAnonymized, setShowAnonymized] = useState<boolean>(false);
@@ -64,6 +68,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       <div data-test-subj="attackDiscoveryPage">
         <HeaderPage border title={pageTitle}>
           <Actions
+            hasWorkflowsExecute={hasWorkflowsExecute}
             isLoading={isLoading}
             onGenerate={onGenerate}
             openFlyout={openFlyout}
@@ -73,6 +78,8 @@ const AttackDiscoveryPageComponent: React.FC = () => {
         </HeaderPage>
 
         <EuiSpacer size="s" />
+
+        <WorkflowsMissingPrivilegesCallOut missingPrivileges={missingPrivileges} />
 
         {enableAlertsAndAttacksAlignment && (
           <>
