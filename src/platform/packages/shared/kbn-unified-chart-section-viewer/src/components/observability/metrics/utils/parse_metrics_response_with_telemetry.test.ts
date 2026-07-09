@@ -367,6 +367,22 @@ describe('parseMetricsWithTelemetry', () => {
       expect(result.allDimensions).toEqual([{ name: 'host.name' }]);
     });
 
+    it('filters out internal dimension temporality', () => {
+      const response: MetricsESQLResponse[] = [
+        {
+          metric_name: 'cpu.usage',
+          index_name: 'my-index',
+          unit: ['percent'],
+          metric_type: 'counter',
+          field_type: ES_FIELD_TYPES.DOUBLE,
+          dimension_fields: ['host.name', 'temporality'],
+        },
+      ];
+      const result = parseMetricsWithTelemetry(response);
+      expect(result.metricItems[0].dimensionFields).toEqual([{ name: 'host.name' }]);
+      expect(result.allDimensions).toEqual([{ name: 'host.name' }]);
+    });
+
     it('filters out internal dimensions with labels._ prefix', () => {
       const response: MetricsESQLResponse[] = [
         {
@@ -395,6 +411,7 @@ describe('parseMetricsWithTelemetry', () => {
             'host.name',
             '_metric_names_hash',
             'unit',
+            'temporality',
             'labels._internal_',
             'pod.name',
           ],
