@@ -28,12 +28,12 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
 
   apiTest.beforeEach(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest('tag: writes a tag action and returns 204', async ({ apiClient, apiServices }) => {
@@ -52,7 +52,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
       body: { tags },
     });
     expect(response).toHaveStatusCode(204);
-    const actions = await apiServices.alertingV2.alertActions.find({
+    const actions = await apiServices.alertingV2.alertActionsEvents.find({
       ruleId,
       actionTypes: ['tag'],
     });
@@ -86,7 +86,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
         body: { tags: [] },
       });
       expect(response).toHaveStatusCode(204);
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['tag'],
       });
