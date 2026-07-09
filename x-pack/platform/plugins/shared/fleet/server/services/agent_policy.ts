@@ -1705,11 +1705,11 @@ class AgentPolicyService {
         // Deleting agentless deployment
         await agentlessAgentService.deleteAgentlessAgent(id);
         logger.debug(
-          `[Managed Integrations API] Successfully deleted agentless deployment for single agent policy id ${id}`
+          `[Agentless API] Successfully deleted agentless deployment for single agent policy id ${id}`
         );
       } catch (error) {
         logger.error(
-          `[Managed Integrations API] Error deleting agentless deployment for single agent policy id ${id}`
+          `[Agentless API] Error deleting agentless deployment for single agent policy id ${id}`
         );
         logger.error(error);
       }
@@ -2044,12 +2044,12 @@ class AgentPolicyService {
           try {
             await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
             logger.debug(
-              `[Managed Integrations API] Successfully deployed agentless deployment for single agent policy id ${agentPolicy.id}`
+              `[Agentless API] Successfully deployed agentless deployment for single agent policy id ${agentPolicy.id}`
             );
           } catch (error) {
             // Swallow errors
             logger.error(
-              `[Managed Integrations API] Error deploying agentless deployment for single agent policy id ${agentPolicy.id}`,
+              `[Agentless API] Error deploying agentless deployment for single agent policy id ${agentPolicy.id}`,
               { error }
             );
             if (options?.throwOnAgentlessError) {
