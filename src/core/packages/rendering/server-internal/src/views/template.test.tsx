@@ -103,5 +103,20 @@ describe('Template (boot splash)', () => {
       // the old JS-based system theme bootstrap must no longer be injected
       expect($('head script[src*="bootstrap_system_theme"]')).toHaveLength(0);
     });
+
+    it('uses the theme-specific palette for a non-borealis theme in system mode', () => {
+      // The old bootstrap script was hard-coded to the borealis palette regardless
+      // of theme; resolving colors from `getThemeStyles(themeName)` means a
+      // non-borealis theme now gets its own splash colors.
+      const $ = render({
+        ...baseMetadata,
+        darkMode: 'system',
+        injectedMetadata: { theme: { name: 'amsterdam' } },
+      } as unknown as RenderingMetadata);
+      const css = getSplashCss($);
+      expect(css).toContain('background-color: #F8FAFD;'); // amsterdam light default
+      expect(css).toContain('@media (prefers-color-scheme: dark)');
+      expect(css).toContain('background-color: #141519;'); // amsterdam dark override
+    });
   });
 });
