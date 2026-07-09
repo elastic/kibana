@@ -13,6 +13,7 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ConfigureCasesRedesign } from './configure_cases';
 import {
   customFieldsConfigurationMock,
+  observableTypesMock,
   templatesConfigurationMock,
 } from '../../../containers/mock';
 import { renderWithTestingProviders } from '../../../common/mock';
@@ -142,6 +143,25 @@ describe('ConfigureCasesRedesign', () => {
         templates: templatesConfigurationMock,
       })
     );
+  });
+
+  it('renders observable types as line-separated rows without a subdued panel', async () => {
+    useGetCaseConfigurationMock.mockImplementation(() => ({
+      ...useCaseConfigureResponse,
+      data: {
+        ...useCaseConfigureResponse.data,
+        customFields: customFieldsConfigurationMock,
+        templates: templatesConfigurationMock,
+        observableTypes: observableTypesMock,
+      },
+    }));
+
+    renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+    const row = await screen.findByTestId(`observable-type-${observableTypesMock[0].key}`);
+
+    expect(row.className).not.toContain('euiPanel');
+    expect(screen.queryByTestId('observable-types-panel')).not.toBeInTheDocument();
   });
 
   it('does not render observable types when the observables feature is disabled', async () => {

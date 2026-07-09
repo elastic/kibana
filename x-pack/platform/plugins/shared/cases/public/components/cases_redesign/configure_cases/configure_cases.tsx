@@ -63,7 +63,7 @@ ConfigureCasesBreadcrumbs.displayName = 'ConfigureCasesBreadcrumbs';
 
 const contentWrapperCss = css`
   box-sizing: content-box;
-  max-width: 960px;
+  max-width: 800px;
   width: 100%;
 `;
 
@@ -488,6 +488,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                     isLoading={isLoadingCaseConfiguration}
                     disabled={isLoadingCaseConfiguration}
                     hideTitle
+                    isRedesign
                     handleAddObservableType={() =>
                       setFlyOutVisibility({ type: 'observableTypes', visible: true })
                     }

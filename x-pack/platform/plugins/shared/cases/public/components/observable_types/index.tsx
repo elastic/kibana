@@ -30,6 +30,11 @@ export interface ObservableTypesProps {
   handleAddObservableType: () => void;
   handleDeleteObservableType: (key: string) => void;
   handleEditObservableType: (key: string) => void;
+  /**
+   * Renders the list without the surrounding subdued panel, as line-separated
+   * rows. Only used by the cases redesign settings page.
+   */
+  isRedesign?: boolean;
 }
 const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   disabled,
@@ -39,6 +44,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   handleDeleteObservableType,
   handleEditObservableType,
   observableTypes,
+  isRedesign = false,
 }) => {
   const { permissions } = useCasesContext();
   const canModifyObservableTypes = !disabled && permissions.settings;
@@ -58,17 +64,16 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
     return null;
   }
 
-  const observableTypesContent = (
-    <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
+  const listAndFooter = (
+    <>
       {observableTypes.length ? (
-        <>
-          <ObservableTypesList
-            disabled={!canModifyObservableTypes}
-            observableTypes={observableTypes}
-            onDeleteObservableType={handleDeleteObservableType}
-            onEditObservableType={onEditObservableType}
-          />
-        </>
+        <ObservableTypesList
+          disabled={!canModifyObservableTypes}
+          observableTypes={observableTypes}
+          onDeleteObservableType={handleDeleteObservableType}
+          onEditObservableType={onEditObservableType}
+          isRedesign={isRedesign}
+        />
       ) : null}
       <EuiSpacer size="s" />
       {!observableTypes.length ? (
@@ -101,7 +106,20 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
+    </>
+  );
 
+  const observableTypesContent = isRedesign ? (
+    listAndFooter
+  ) : (
+    <EuiPanel
+      data-test-subj="observable-types-panel"
+      paddingSize="s"
+      color="subdued"
+      hasBorder={false}
+      hasShadow={false}
+    >
+      {listAndFooter}
       <EuiSpacer size="s" />
     </EuiPanel>
   );

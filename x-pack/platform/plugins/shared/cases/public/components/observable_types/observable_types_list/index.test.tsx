@@ -126,4 +126,41 @@ describe('ObservableTypesList', () => {
       });
     });
   });
+
+  describe('isRedesign', () => {
+    it('renders each item inside a panel by default', async () => {
+      renderWithTestingProviders(<ObservableTypesList {...props} />);
+
+      const item = await screen.findByTestId(`observable-type-${observableTypes[0].key}`);
+
+      expect(item.className).toContain('euiPanel');
+    });
+
+    it('renders line-separated rows without panels when isRedesign is true', async () => {
+      renderWithTestingProviders(<ObservableTypesList {...props} isRedesign />);
+
+      const item = await screen.findByTestId(`observable-type-${observableTypes[0].key}`);
+
+      expect(item.className).not.toContain('euiPanel');
+      expect(await screen.findByText('Test Observable Type')).toBeInTheDocument();
+    });
+
+    it('still supports edit and delete actions when isRedesign is true', async () => {
+      renderWithTestingProviders(<ObservableTypesList {...props} isRedesign />);
+
+      const list = await screen.findByTestId('observable-types-list');
+
+      await userEvent.click(
+        await within(list).findByTestId(`${observableTypes[0].key}-observable-type-delete`)
+      );
+
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+
+      await userEvent.click(await screen.findByText('Delete'));
+
+      await waitFor(() => {
+        expect(props.onDeleteObservableType).toHaveBeenCalledWith(observableTypes[0].key);
+      });
+    });
+  });
 });
