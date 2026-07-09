@@ -747,8 +747,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           message: `The Managed Integrations API could not create the managed integration. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Managed Integrations API] Deleting the agentless deployment failed with a status 400, bad request for agentless policy.',
-          message: `The Managed Integrations API could not delete the agentless deployment. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Managed Integrations API] Deleting the managed integration deployment failed with a status 400, bad request for agentless policy.',
+          message: `The Managed Integrations API could not delete the managed integration deployment. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         upgrade: {
           log: '[Managed Integrations API] Upgrading the managed integration failed with a status 400, bad request for agentless policy.',
@@ -765,8 +765,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           message: `The Managed Integrations API could not create the managed integration because an unauthorized request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Managed Integrations API] Deleting the agentless deployment failed with a status 401 unauthorized for agentless policy.',
-          message: `The Managed Integrations API could not delete the agentless deployment because an unauthorized request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Managed Integrations API] Deleting the managed integration deployment failed with a status 401 unauthorized for agentless policy.',
+          message: `The Managed Integrations API could not delete the managed integration deployment because an unauthorized request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         upgrade: {
           log: '[Managed Integrations API] Upgrading the managed integration failed with a status 401 unauthorized for agentless policy.',
@@ -783,8 +783,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           message: `The Managed Integrations API could not create the managed integration because a forbidden request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Managed Integrations API] Deleting the agentless deployment failed with a status 403 forbidden for agentless policy.',
-          message: `The Managed Integrations API could not delete the agentless deployment because a forbidden request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Managed Integrations API] Deleting the managed integration deployment failed with a status 403 forbidden for agentless policy.',
+          message: `The Managed Integrations API could not delete the managed integration deployment because a forbidden request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         upgrade: {
           log: '[Managed Integrations API] Upgrading the managed integration failed with a status 403 forbidden for agentless policy.',
@@ -801,8 +801,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           message: `The Managed Integrations API could not create the managed integration because it returned a 404 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Managed Integrations API] Deleting the agentless deployment failed with a status 404 not found.',
-          message: `The Managed Integrations API could not delete the agentless deployment because it could not be found. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Managed Integrations API] Deleting the managed integration deployment failed with a status 404 not found.',
+          message: `The Managed Integrations API could not delete the managed integration deployment because it could not be found. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         upgrade: {
           log: '[Managed Integrations API] Upgrading the managed integration failed with a status 404 not found.',
@@ -819,7 +819,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           message: `The Managed Integrations API request timed out. Please wait a few minutes for the agent to enroll with Fleet. If the agent fails to enroll, delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Managed Integrations API] Deleting the agentless deployment failed with a status 408, the request timed out.',
+          log: '[Managed Integrations API] Deleting the managed integration deployment failed with a status 408, the request timed out.',
           message: `The Managed Integrations API request timed out. Please wait a few minutes for the deployment to be removed. If it persists, delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         upgrade: {
@@ -853,8 +853,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           message: `The Managed Integrations API could not create the managed integration because it returned a 500 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Managed Integrations API] Deleting the agentless deployment failed with a status 500 internal service error.',
-          message: `The Managed Integrations API could not delete the agentless deployment because it returned a 500 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Managed Integrations API] Deleting the managed integration deployment failed with a status 500 internal service error.',
+          message: `The Managed Integrations API could not delete the managed integration deployment because it returned a 500 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         upgrade: {
           log: '[Managed Integrations API] Upgrading the managed integration failed with a status 500 internal service error.',
@@ -871,8 +871,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           message: `The Managed Integrations API could not create the managed integration due to an unexpected error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Managed Integrations API] Deleting the agentless deployment failed with an unhandled response.',
-          message: `The Managed Integrations API could not delete the agentless deployment due to an unexpected error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Managed Integrations API] Deleting the managed integration deployment failed with an unhandled response.',
+          message: `The Managed Integrations API could not delete the managed integration deployment due to an unexpected error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         upgrade: {
           log: '[Managed Integrations API] Upgrading the managed integration failed with an unhandled response.',
@@ -886,15 +886,15 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       request_error: {
         create: {
           log: '[Managed Integrations API] Creating the managed integration failed with a request error.',
-          message: `The Managed Integrations API could not create the managed integration due to a request error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `The Managed Integrations API could not create the managed integration due to a request error. Please delete the managed integration policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         delete: {
-          log: '[Managed Integrations API] Deleting the agentless deployment failed with a request error.',
-          message: `The Managed Integrations API could not delete the agentless deployment due to a request error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          log: '[Managed Integrations API] Deleting the managed integration deployment failed with a request error.',
+          message: `The Managed Integrations API could not delete the managed integration deployment due to a request error. Please delete the managed integration policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         upgrade: {
           log: '[Managed Integrations API] Upgrading the managed integration failed with a request error.',
-          message: `The Managed Integrations API could not upgrade the managed integration due to a request error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `The Managed Integrations API could not upgrade the managed integration due to a request error. Please delete the managed integration policy ${agentlessPolicyId} and try again or contact your administrator.`,
         },
         list: {
           log: '[Managed Integrations API] Listing managed integration deployments failed with a request error.',
