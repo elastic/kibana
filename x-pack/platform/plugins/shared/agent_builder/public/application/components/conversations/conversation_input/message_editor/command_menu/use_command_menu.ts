@@ -67,11 +67,10 @@ export const useCommandMenu = (options: UseCommandMenuOptions = {}): CommandMenu
           prev.activeCommand?.command.id === result.activeCommand.command.id &&
           prev.activeCommand?.commandStartOffset === result.activeCommand.commandStartOffset;
 
+        const isStillFirstWord = !result.activeCommand.query.includes(' ');
         return {
           ...result,
-          // Carry over the known content status for the same mention;
-          // assume content for a genuinely new one until it reports in.
-          hasVisibleContent: isSameMention ? prev.hasVisibleContent : true,
+          hasVisibleContent: isStillFirstWord || !isSameMention ? true : prev.hasVisibleContent,
         };
       });
     },

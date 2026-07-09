@@ -180,6 +180,71 @@ describe('useCommandMenuCommand', () => {
     });
   });
 
+  describe('always re-checks within the first word, before any space is crossed', () => {
+    it('re-opens on backspace after being confirmed dead, so a typo can still be fixed', () => {
+      // e.g. "@connector/no_match" resolves to zero results and hides the
+      // popup — but the user hasn't moved on to other text yet, so
+      // backspacing to fix the typo must get a fresh look, not stay frozen.
+      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
+      const { result } = renderHook(() => useCommandMenu());
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+
+      act(() => {
+        result.current.reportContent(false);
+      });
+      expect(result.current.match.hasVisibleContent).toBe(false);
+
+      mockGetTextBeforeCursor.mockReturnValue('@connector/no_matc');
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+
+      expect(result.current.match.activeCommand?.query).toBe('connector/no_matc');
+      expect(result.current.match.hasVisibleContent).toBe(true);
+    });
+
+    it('re-opens on continuing to type after being confirmed dead, while still in the first word', () => {
+      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
+      const { result } = renderHook(() => useCommandMenu());
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+
+      act(() => {
+        result.current.reportContent(false);
+      });
+
+      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match2');
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+
+      expect(result.current.match.hasVisibleContent).toBe(true);
+    });
+
+    it('stops re-opening once a space is crossed, carrying the known-dead status into the next word', () => {
+      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match');
+      const { result } = renderHook(() => useCommandMenu());
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+
+      act(() => {
+        result.current.reportContent(false);
+      });
+
+      // Crossing the space into a new word — from here on, edits within
+      // this second word should NOT keep forcing a fresh re-check.
+      mockGetTextBeforeCursor.mockReturnValue('@connector/no_match this');
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+      expect(result.current.match.hasVisibleContent).toBe(false);
+    });
+  });
+
   it('disabled option prevents command detection', () => {
     mockGetTextBeforeCursor.mockReturnValue('/summarize');
 
