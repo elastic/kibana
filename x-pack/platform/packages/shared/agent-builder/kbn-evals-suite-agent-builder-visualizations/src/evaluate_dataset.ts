@@ -23,6 +23,7 @@ import type { VisualizationAgentEvaluationChatClient } from './chat_client';
 import { extractVisualizationEsql, getToolIds } from './extract_visualization';
 import { createEsqlValidityEvaluator } from './evaluators/esql_validity';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
+import { visualizationSkillActivatedEvaluator } from './skill_selection_evaluators';
 
 export type VisualizationDatasetExample = Example<
   {
@@ -172,6 +173,7 @@ export function createEvaluateDataset({
 
     await executorClient.runExperiment({ datasets: [dataset], task }, [
       ...(customEvaluators ?? [
+        visualizationSkillActivatedEvaluator,
         esqlValidityEvaluator,
         esqlExecutionEvaluator,
         esqlEquivalenceEvaluator,
