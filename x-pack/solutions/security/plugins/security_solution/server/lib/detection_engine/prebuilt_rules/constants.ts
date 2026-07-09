@@ -38,4 +38,4 @@ export const PREBUILT_RULES_UPGRADE_BATCH_SIZE = 100;
  * controlling how many rules it writes to ES per underlying bulk-create call.
  * A single constant for both layers means no nested re-chunking happens between them.
  */
-export const PREBUILT_RULES_BULK_CREATE_BATCH_SIZE = 500;
+export const PREBUILT_RULES_BULK_CREATE_BATCH_SIZE = 400;
