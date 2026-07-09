@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate, useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { selectUnit } from '@formatjs/intl-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -22,6 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
+import { WORKFLOW_DETAIL_INLINE_TOOLBAR_BREAKPOINTS } from './workflow_detail_header_layout';
+import { WorkflowDetailHeaderToolbar } from './workflow_detail_header_toolbar';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
@@ -241,14 +243,22 @@ export const WorkflowDetailHeader = React.memo(
     );
 
     const changeHistoryModal = useContext(ChangeHistoryModalContext);
-    const openHistoryModal = changeHistoryModal?.openModal;
+    const openHistoryModal = useCallback(() => {
+      changeHistoryModal?.openModal();
+    }, [changeHistoryModal]);
+    const showHistoryButton = Boolean(canReadWorkflow && !isExecutionsTab && changeHistoryModal);
+    const isAppMenuSwitchInline = useIsWithinBreakpoints([
+      ...WORKFLOW_DETAIL_INLINE_TOOLBAR_BREAKPOINTS,
+    ]);
+
     const historyItem = useMemo<AppMenuItemType | undefined>(() => {
-      if (!canReadWorkflow || !openHistoryModal || isExecutionsTab) {
+      if (!showHistoryButton || isAppMenuSwitchInline) {
         return undefined;
       }
+
       return {
         id: 'workflowHistory',
-        order: 100,
+        order: 0,
         overflow: true,
         label: i18n.translate('workflows.workflowDetailHeader.historyButton', {
           defaultMessage: 'History',
@@ -257,7 +267,51 @@ export const WorkflowDetailHeader = React.memo(
         run: openHistoryModal,
         testId: 'workflowDetailHistoryButton',
       };
-    }, [canReadWorkflow, openHistoryModal, isExecutionsTab]);
+    }, [showHistoryButton, isAppMenuSwitchInline, openHistoryModal]);
+
+    const enabledSwitchConfig = useMemo<NonNullable<AppMenuConfig['switch']> | undefined>(() => {
+      if (!workflowId) {
+        return undefined;
+      }
+
+      return {
+        id: 'enabledSwitch',
+        label: i18n.translate('workflows.workflowDetailHeader.enabled', {
+          defaultMessage: 'Enabled',
+        }),
+        labelProps: {},
+        checked: isEnabled,
+        onChange: (checked: boolean) => {
+          updateWorkflow({ workflow: { enabled: checked } });
+        },
+        disabled: isLoading || !canUpdateWorkflow || !isSchemaValid || hasUnsavedChanges,
+        tooltipContent: enabledSwitchTooltipContent,
+        'data-test-subj': 'workflowEnabledSwitch',
+      };
+    }, [
+      workflowId,
+      isEnabled,
+      updateWorkflow,
+      isLoading,
+      canUpdateWorkflow,
+      isSchemaValid,
+      hasUnsavedChanges,
+      enabledSwitchTooltipContent,
+    ]);
+
+    const titleAppend = useMemo(() => {
+      if (!enabledSwitchConfig || !isAppMenuSwitchInline) {
+        return undefined;
+      }
+
+      return (
+        <WorkflowDetailHeaderToolbar
+          switchConfig={enabledSwitchConfig}
+          showHistoryButton={showHistoryButton}
+          onOpenHistory={openHistoryModal}
+        />
+      );
+    }, [enabledSwitchConfig, isAppMenuSwitchInline, showHistoryButton, openHistoryModal]);
 
     const { handleRunClick, runConfirmationModal } = useRunWorkflowWithConfirmation(openTestModal);
 
@@ -353,27 +407,7 @@ export const WorkflowDetailHeader = React.memo(
           tooltipContent: saveWorkflowTooltipContent ?? undefined,
           testId: 'saveWorkflowHeaderButton',
         },
-        switch: workflowId
-          ? {
-              id: 'enabledSwitch',
-              label: i18n.translate('workflows.workflowDetailHeader.enabled', {
-                defaultMessage: 'Enabled',
-              }),
-              labelProps: {},
-              checked: isEnabled,
-              onChange: (checked: boolean) => {
-                updateWorkflow({ workflow: { enabled: checked } });
-              },
-              disabled:
-                !workflowId ||
-                isLoading ||
-                !canUpdateWorkflow ||
-                !isSchemaValid ||
-                hasUnsavedChanges,
-              tooltipContent: enabledSwitchTooltipContent,
-              'data-test-subj': 'workflowEnabledSwitch',
-            }
-          : undefined,
+        switch: enabledSwitchConfig && !isAppMenuSwitchInline ? enabledSwitchConfig : undefined,
         items,
       };
     }, [
@@ -381,6 +415,8 @@ export const WorkflowDetailHeader = React.memo(
       workflowId,
       executionsToggleItem,
       historyItem,
+      isAppMenuSwitchInline,
+      enabledSwitchConfig,
       isVisualEditorEnabled,
       handleSaveWorkflow,
       canSaveWorkflow,
@@ -388,13 +424,8 @@ export const WorkflowDetailHeader = React.memo(
       isSaving,
       isManagedWorkflow,
       isYamlSynced,
-      saveWorkflowTooltipContent,
-      isEnabled,
-      updateWorkflow,
-      canUpdateWorkflow,
-      isSchemaValid,
       hasUnsavedChanges,
-      enabledSwitchTooltipContent,
+      saveWorkflowTooltipContent,
       handleRunClick,
       canExecuteWorkflow,
       isSyntaxValid,
@@ -417,6 +448,7 @@ export const WorkflowDetailHeader = React.memo(
               },
             }}
             badges={badges}
+            titleAppend={titleAppend}
             menu={appMenu}
             docLink={WORKFLOWS_DOCUMENTATION_URL}
             showAddIntegrations
