@@ -254,7 +254,7 @@ Wrap **everything after the summary** in a single `<details>` block so the issue
 
 ```
 <details>
-<summary>Investigation</summary>
+<summary>Details</summary>
 
 #### Proposed fix
 
