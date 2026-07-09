@@ -167,7 +167,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
                   data-test-subj="apiKeyCertificateIdentityIcon"
                   aria-label={i18n.translate(
                     'xpack.security.management.apiKeys.table.certificateIdentityIconLabel',
-                    { defaultMessage: 'Strong identity verification enabled' }
+                    { defaultMessage: 'Strong identity verification is active' }
                   )}
                   content={i18n.translate(
                     'xpack.security.management.apiKeys.table.certificateIdentityTooltip',
