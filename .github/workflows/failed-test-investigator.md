@@ -200,7 +200,7 @@ This issue may have been investigated before (for example, it was reopened after
 
 Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 seconds on it: the visible header must carry the verdict on its own, and the collapsed details must be skimmable, not exhaustive.
 
-**Write tight — borrow the PR-body discipline of the Flaky Test Fixer.** Prefer bullet points over paragraphs, and every sentence must be earned. Concretely:
+**Write tight.** Use bullet points, not paragraphs. Concretely:
 
 - State the **single** dominant cause. Do not enumerate every call, file, wait, or step you inspected — that reasoning is what got you to the answer, not the answer.
 - Cite evidence with an inline link to the code line, log, or screenshot instead of reproducing it. Never paste large blocks of existing code — link to the line range.
@@ -297,11 +297,10 @@ Omit this section unless it changes what the reader does next. When present, kee
 - **Verification:** the one command or step that reproduces the failure or confirms the fix.
 - **Open questions:** a blocker to a definitive fix (e.g. "no trace or screenshot was uploaded").
 
-#### Data collection issues (troubleshooting)
+#### Data collection issues (only when a screenshot fetch failed)
 
-If you couldn't retrieve evidence such as screenshots or logs because of an error, document each failure here so the workflow itself can be debugged. For each one, include:
+FTR and UI (Scout/Playwright) failures ship a screenshot. Include this section **only** if you tried to fetch that screenshot and the fetch errored; otherwise omit it entirely. When you do include it, document the failure so the workflow can be debugged:
 
 - the command you ran
 - the URL (if applicable)
 - the resulting error message
-- any other detail that could be useful for the investigation
