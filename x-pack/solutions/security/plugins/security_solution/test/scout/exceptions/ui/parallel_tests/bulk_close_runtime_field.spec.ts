@@ -7,6 +7,7 @@
 
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
+import { BULK_CLOSE_TEST_ROLE } from '../fixtures/bulk_close_role';
 
 /**
  * Regression test for elastic/kibana#253666: bulk-close on an exception that
@@ -24,6 +25,9 @@ import { expect } from '@kbn/scout-security/ui';
  * exception can match it as an IP.
  */
 
+// The custom test role grants the browser user read on this pattern — the
+// exception flyout's field picker runs field caps on the source index as
+// the logged-in user.
 const SOURCE_INDEX_PREFIX = 'scout-runtime-field-bulk-close';
 const MATCHING_IP = '203.0.113.99';
 const RUNTIME_FIELD_SCRIPT =
@@ -89,7 +93,10 @@ spaceTest.describe(
         from: '2019-01-01T00:00:00.000Z',
       });
 
-      await browserAuth.loginAsAdmin();
+      // No predefined role covers this flow end to end (source-index read
+      // for the flyout's field picker + alerts backing-index write for the
+      // bulk close) — see the role file for the full breakdown.
+      await browserAuth.loginWithCustomRole(BULK_CLOSE_TEST_ROLE);
     });
 
     spaceTest.afterEach(async ({ apiServices, esClient }) => {
