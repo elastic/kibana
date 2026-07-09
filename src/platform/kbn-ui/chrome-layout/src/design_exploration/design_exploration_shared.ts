@@ -42,6 +42,15 @@ export const DESIGN_EXPLORATION_SCROLLED_BODY_ATTR = 'data-design-exploration-sc
 export const DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR =
   'data-design-exploration-app-header-hidden';
 
+/** Minimum downward scroll before hiding the dashboard AppHeader. */
+export const DESIGN_EXPLORATION_APP_HEADER_HIDE_SCROLL_THRESHOLD = 16;
+
+/** Minimum upward scroll before showing the dashboard AppHeader again. */
+export const DESIGN_EXPLORATION_APP_HEADER_SHOW_SCROLL_THRESHOLD = 8;
+
+/** Ignore hide/show toggles briefly after a visibility change while layout settles. */
+export const DESIGN_EXPLORATION_APP_HEADER_TOGGLE_COOLDOWN_MS = 300;
+
 export const DASHBOARD_CONTAINER_SELECTOR = '[data-test-subj="dashboardContainer"]';
 
 const panelSelectorList = [
@@ -77,8 +86,26 @@ export const getEmbeddablePanelShadow = (euiTheme: UseEuiTheme) => {
 };
 
 export interface DesignExplorationScrollState {
-  lastScrollTop: number;
+  /** Whether the dashboard AppHeader is currently hidden. */
+  appHeaderHidden: boolean;
+  /** Scroll position when app header visibility last changed. */
+  toggleAnchorScrollTop: number;
+  /** Timestamp after which hide/show evaluation may resume. */
+  toggleLockedUntil: number;
 }
+
+export const createDesignExplorationScrollState = (
+  scrollTop: number
+): DesignExplorationScrollState => ({
+  appHeaderHidden: false,
+  toggleAnchorScrollTop: scrollTop,
+  toggleLockedUntil: 0,
+});
+
+const lockAppHeaderToggle = (state: DesignExplorationScrollState, scrollTop: number) => {
+  state.toggleAnchorScrollTop = scrollTop;
+  state.toggleLockedUntil = Date.now() + DESIGN_EXPLORATION_APP_HEADER_TOGGLE_COOLDOWN_MS;
+};
 
 export const setBodyAttr = (attr: string, enabled: boolean) => {
   if (enabled) {
@@ -98,12 +125,40 @@ export const updateDesignExplorationScrollState = (
   setBodyAttr(DESIGN_EXPLORATION_SCROLLED_BODY_ATTR, scrollTop > 0);
 
   if (!isDashboard || scrollTop <= 0) {
+    state.appHeaderHidden = false;
+    state.toggleAnchorScrollTop = scrollTop;
+    state.toggleLockedUntil = 0;
     setBodyAttr(DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR, false);
-  } else if (scrollTop > state.lastScrollTop) {
-    setBodyAttr(DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR, true);
-  } else if (scrollTop < state.lastScrollTop) {
-    setBodyAttr(DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR, false);
+    return;
   }
 
-  state.lastScrollTop = scrollTop;
+  const now = Date.now();
+
+  if (state.toggleLockedUntil !== 0 && now >= state.toggleLockedUntil) {
+    state.toggleLockedUntil = 0;
+    state.toggleAnchorScrollTop = scrollTop;
+  }
+
+  if (state.toggleLockedUntil !== 0 && now < state.toggleLockedUntil) {
+    setBodyAttr(DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR, state.appHeaderHidden);
+    return;
+  }
+
+  const deltaFromAnchor = scrollTop - state.toggleAnchorScrollTop;
+
+  if (
+    !state.appHeaderHidden &&
+    deltaFromAnchor >= DESIGN_EXPLORATION_APP_HEADER_HIDE_SCROLL_THRESHOLD
+  ) {
+    state.appHeaderHidden = true;
+    lockAppHeaderToggle(state, scrollTop);
+  } else if (
+    state.appHeaderHidden &&
+    deltaFromAnchor <= -DESIGN_EXPLORATION_APP_HEADER_SHOW_SCROLL_THRESHOLD
+  ) {
+    state.appHeaderHidden = false;
+    lockAppHeaderToggle(state, scrollTop);
+  }
+
+  setBodyAttr(DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR, state.appHeaderHidden);
 };

@@ -18,6 +18,7 @@ import {
   DESIGN_EXPLORATION_BODY_ATTR,
   DESIGN_EXPLORATION_SCROLLED_BODY_ATTR,
   DESIGN_EXPLORATION_VARIANT_ATTR,
+  createDesignExplorationScrollState,
   updateDesignExplorationScrollState,
 } from './design_exploration_shared';
 
@@ -43,9 +44,7 @@ export const DesignExplorationChromeGlobalStyles = () => {
     document.body.setAttribute(DESIGN_EXPLORATION_VARIANT_ATTR, activeVariantId);
 
     const scrollContainer = getScrollContainer();
-    const scrollState = {
-      lastScrollTop: scrollContainer.scrollTop,
-    };
+    const scrollState = createDesignExplorationScrollState(scrollContainer.scrollTop);
     let frameId: number | undefined;
 
     const handleScroll = () => {
