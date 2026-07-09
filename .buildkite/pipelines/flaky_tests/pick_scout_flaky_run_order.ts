@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { execFileSync } from 'child_process';
 import path from 'path';
 import {
   getKibanaDir,
@@ -15,10 +16,50 @@ import {
   type ScoutFlakyRequest,
 } from '#pipeline-utils';
 
-// The manifest is produced earlier in the same step by `discover_and_plan_flaky.sh`
-// (which runs `scout discover-playwright-configs --save`); we read it directly from
-// disk rather than going through a BK artifact round-trip.
+// Instead of discovering every Scout config in the repo, we resolve ONLY the configs the
+// user requested. This keeps the flaky runner fast and immune to unrelated/broken configs
+// (which is why the previous full-discovery path needed `--skip-validation`). The scoped
+// `discover-playwright-configs --configs <paths>` writes the manifest below, which we then
+// read to plan the per-(arch, domain) Buildkite steps.
 const MANIFEST_RELATIVE_PATH = path.join('.scout', 'test_configs', 'scout_playwright_configs.json');
+
+// Normalize an optional leading "./" so paths match the discovery manifest and the CLI allow-list.
+const normalizeConfigPath = (configPath: string): string => configPath.replace(/^\.\//, '');
+
+// Resolve just the requested configs into the manifest consumed by the planner below.
+const resolveRequestedScoutConfigs = (
+  kibanaDir: string,
+  requests: ScoutFlakyRequest[],
+  discoveryTarget: string
+): void => {
+  const requestedConfigs = [
+    ...new Set(
+      requests
+        .map((req) => req?.scoutConfig)
+        .filter((configPath): configPath is string => !!configPath)
+        .map(normalizeConfigPath)
+    ),
+  ];
+
+  if (requestedConfigs.length === 0) {
+    return;
+  }
+
+  console.log(`--- Resolving ${requestedConfigs.length} requested Scout config(s)`);
+  execFileSync(
+    'node',
+    [
+      'scripts/scout',
+      'discover-playwright-configs',
+      '--target',
+      discoveryTarget,
+      '--configs',
+      requestedConfigs.join(','),
+      '--save',
+    ],
+    { cwd: kibanaDir, stdio: 'inherit' }
+  );
+};
 
 const parseRequests = (raw: string): ScoutFlakyRequest[] => {
   let parsed: unknown;
@@ -48,7 +89,12 @@ const parseRequests = (raw: string): ScoutFlakyRequest[] => {
     }
     const concurrencyGroup = process.env.SCOUT_FLAKY_CONCURRENCY_GROUP || undefined;
 
-    const manifestPath = path.resolve(getKibanaDir(), MANIFEST_RELATIVE_PATH);
+    const kibanaDir = getKibanaDir();
+
+    // Scope discovery to the requested configs and write the manifest the planner reads.
+    resolveRequestedScoutConfigs(kibanaDir, requests, getRequiredEnv('SCOUT_DISCOVERY_TARGET'));
+
+    const manifestPath = path.resolve(kibanaDir, MANIFEST_RELATIVE_PATH);
 
     await pickScoutFlakyRunOrder(manifestPath, requests, {
       concurrency,
