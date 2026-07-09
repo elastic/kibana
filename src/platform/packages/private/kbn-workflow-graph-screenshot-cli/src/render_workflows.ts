@@ -32,6 +32,8 @@ export interface RenderOptions {
   readonly width: number;
   readonly height: number;
   readonly transparent: boolean;
+  /** Dagre rank direction: `'TB'` (vertical, default) or `'LR'` (horizontal). */
+  readonly direction: 'TB' | 'LR';
   readonly settleMs: number;
   readonly concurrency: number;
   readonly serve: boolean;
@@ -118,6 +120,7 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
     width,
     height,
     transparent,
+    direction,
     settleMs,
     concurrency,
     serve,
@@ -137,7 +140,13 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
 
   // ── 2. Start local dev server ──────────────────────────────────────────────
   const entries = files.map((f) => ({ name: path.basename(f, path.extname(f)), yamlPath: f }));
-  const server = await startDevServer(entries, bundleDir, { transparent }, width, height);
+  const server = await startDevServer(
+    entries,
+    bundleDir,
+    { transparent, direction },
+    width,
+    height
+  );
   const base = `http://127.0.0.1:${server.port}`;
   log.info(`Dev server listening at ${base}/`);
 

@@ -93,6 +93,14 @@ export const runCli = (): void => {
         );
       }
 
+      const layoutFlag = (flags.layout as string | undefined) ?? 'vertical';
+      if (layoutFlag !== 'vertical' && layoutFlag !== 'horizontal') {
+        throw createFlagError(
+          `--layout "${layoutFlag}" is invalid. Use "vertical" or "horizontal".`
+        );
+      }
+      const direction = layoutFlag === 'horizontal' ? 'LR' : 'TB';
+
       const outputDirFlag = flags['output-dir'] as string | undefined;
       const outputInPlace = Boolean(flags['output-in-place']);
 
@@ -134,6 +142,7 @@ export const runCli = (): void => {
         width,
         height,
         transparent,
+        direction,
         settleMs,
         concurrency,
         serve,
@@ -153,6 +162,7 @@ export const runCli = (): void => {
           'width',
           'height',
           'theme',
+          'layout',
           'settle-ms',
           'concurrency',
           'headless',
@@ -163,6 +173,7 @@ export const runCli = (): void => {
           width: '1600',
           height: '1000',
           theme: 'light',
+          layout: 'vertical',
           'settle-ms': '500',
           concurrency: '4',
           headless: 'true',
@@ -179,6 +190,7 @@ export const runCli = (): void => {
   --width <px>            Browser viewport width in pixels. (default: 1600)
   --height <px>           Browser viewport height in pixels. (default: 1000)
   --theme <name>          Colour theme to render. Only "light" is supported. (default: light)
+  --layout <name>         Graph layout direction: "vertical" or "horizontal". (default: vertical)
   --transparent           Render with a transparent background (no dot-grid pattern).
   --settle-ms <ms>        Extra wait after the graph is ready, for icon paint.
                           (default: 500)

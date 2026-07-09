@@ -49,6 +49,7 @@ const GraphApp = () => {
           transformed={transformed}
           isYamlValid={isYamlValid}
           onStepSelect={NO_OP}
+          direction={graphConfig.direction ?? 'TB'}
           fitView
           fitViewOptions={{ padding: 0.08, minZoom: 0.1, maxZoom: 2 }}
           showMinimap={false}

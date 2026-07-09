@@ -51,6 +51,7 @@ its own source file.
 | `--width <px>` | `1600` | Browser viewport width. |
 | `--height <px>` | `1000` | Browser viewport height. |
 | `--theme <name>` | `light` | Colour theme (`light` only for now). |
+| `--layout <name>` | `vertical` | Graph layout direction: `vertical` or `horizontal`. |
 | `--transparent` | false | Transparent background (no dot-grid). |
 | `--settle-ms <ms>` | `500` | Extra wait after graph is ready (for icon paint). |
 | `--concurrency <n>` | `4` | Parallel browser pages. |

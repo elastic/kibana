@@ -9,6 +9,8 @@
 
 export interface GraphConfig {
   readonly transparent: boolean;
+  /** Dagre rank direction: `'TB'` (vertical, default) or `'LR'` (horizontal). */
+  readonly direction?: 'TB' | 'LR';
 }
 
 /**
