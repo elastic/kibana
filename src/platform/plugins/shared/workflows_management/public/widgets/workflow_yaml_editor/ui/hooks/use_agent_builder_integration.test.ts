@@ -36,6 +36,8 @@ const useUiSettingMock = useUiSetting as jest.MockedFunction<typeof useUiSetting
 jest.mock('uuid', () => ({ v4: () => 'mock-uuid-1234' }));
 const mockSetActiveProposalManager = jest.fn();
 const mockSetLastCreateAttachmentId = jest.fn();
+const mockSetSidebarOpen = jest.fn();
+const mockConsumeSidebarRestoreFor = jest.fn().mockReturnValue(false);
 jest.mock('../../../../features/ai_integration', () => ({
   AttachmentBridge: jest.fn().mockImplementation(() => ({
     start: jest.fn(),
@@ -49,6 +51,8 @@ jest.mock('../../../../features/ai_integration', () => ({
   })),
   setActiveProposalManager: (...args: unknown[]) => mockSetActiveProposalManager(...args),
   setLastCreateAttachmentId: (...args: unknown[]) => mockSetLastCreateAttachmentId(...args),
+  setSidebarOpen: (...args: unknown[]) => mockSetSidebarOpen(...args),
+  consumeSidebarRestoreFor: (...args: unknown[]) => mockConsumeSidebarRestoreFor(...args),
 }));
 jest.mock('../../../../features/ai_integration/proposal_tracker', () => ({
   ProposalTracker: jest.fn().mockImplementation(() => ({
@@ -137,6 +141,7 @@ describe('useAgentBuilderIntegration', () => {
     jest.useFakeTimers();
     mockModel = createMockModel(INITIAL_YAML);
     useUiSettingMock.mockReturnValue(true);
+    mockConsumeSidebarRestoreFor.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -471,6 +476,44 @@ describe('useAgentBuilderIntegration', () => {
       expect(mockTelemetry.reportWorkflowAiChatOpened).not.toHaveBeenCalled();
     });
 
+    it('restores the sidebar on mount when the save thunk requested it', () => {
+      // Simulates create → save → detail: save thunk called
+      // requestSidebarRestore(workflowId) before navigateToApp, and the
+      // remount consumes it here.
+      mockConsumeSidebarRestoreFor.mockImplementation((id: string) => id === 'wf-just-saved');
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-just-saved',
+        })
+      );
+
+      expect(mockConsumeSidebarRestoreFor).toHaveBeenCalledWith('wf-just-saved');
+      expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT restore when the pending id belongs to a different workflow', () => {
+      mockConsumeSidebarRestoreFor.mockImplementation((id: string) => id === 'wf-A');
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-B',
+        })
+      );
+
+      expect(agentBuilder.openChat).not.toHaveBeenCalled();
+    });
+
     it('does not auto-open when the editor is not yet mounted', () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
@@ -639,6 +682,47 @@ describe('useAgentBuilderIntegration', () => {
     });
   });
 
+  describe('sidebar-open state tracking', () => {
+    it('marks the sidebar open when openChat runs and closed via the onClose callback', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      // Auto-open ran → sidebar marked open.
+      expect(mockSetSidebarOpen).toHaveBeenCalledWith(true);
+
+      // Simulate the user closing the sidebar from its own chrome — the
+      // agent-builder plugin invokes the onClose callback we passed.
+      const openChatArgs = agentBuilder.openChat.mock.calls[0][0];
+      openChatArgs.onClose();
+      expect(mockSetSidebarOpen).toHaveBeenLastCalledWith(false);
+    });
+
+    it('marks the sidebar closed on unmount', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { unmount } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      mockSetSidebarOpen.mockClear();
+      unmount();
+      expect(mockSetSidebarOpen).toHaveBeenCalledWith(false);
+    });
+  });
+
   describe('conversation handoff registration', () => {
     it('registers the unsaved attachment id when there is no workflowId', () => {
       const agentBuilder = createMockAgentBuilder();
@@ -703,6 +787,7 @@ describe('useAgentBuilderIntegration', () => {
         attachments: [
           expectedAttachment(INITIAL_YAML, { workflowId: 'wf-456', name: 'Test Flow' }),
         ],
+        onClose: expect.any(Function),
       });
     });
 

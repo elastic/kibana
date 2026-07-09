@@ -27,6 +27,32 @@ export const setLastCreateAttachmentId = (attachmentId: string | undefined): voi
   lastCreateAttachmentId = attachmentId;
 };
 
+// Whether the AI chat sidebar is currently open. Tracked at module scope so
+// the save thunk can decide to restore it on the destination workflow after
+// `application.navigateToApp` remounts the app.
+let sidebarOpen = false;
+
+export const setSidebarOpen = (open: boolean): void => {
+  sidebarOpen = open;
+};
+
+export const isSidebarOpen = (): boolean => sidebarOpen;
+
+// Set by the save thunk when the sidebar was open at save time; consumed by
+// the destination workflow's editor mount to re-open the sidebar (preserving
+// the conversation carried by `carryConversationToWorkflow`). Single-shot.
+let pendingSidebarRestore: string | undefined;
+
+export const requestSidebarRestore = (workflowId: string): void => {
+  pendingSidebarRestore = workflowId;
+};
+
+export const consumeSidebarRestoreFor = (workflowId: string): boolean => {
+  if (pendingSidebarRestore !== workflowId) return false;
+  pendingSidebarRestore = undefined;
+  return true;
+};
+
 /**
  * Copy every persisted conversation-id entry keyed by the create session's
  * tag onto the saved workflow's tag. The stored keys include an agent id

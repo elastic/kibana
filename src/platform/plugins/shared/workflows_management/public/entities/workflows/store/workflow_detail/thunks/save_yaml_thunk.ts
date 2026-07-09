@@ -16,6 +16,8 @@ import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry'
 import {
   acceptAllActiveProposals,
   carryConversationToWorkflow,
+  isSidebarOpen,
+  requestSidebarRestore,
 } from '../../../../../features/ai_integration';
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
@@ -116,6 +118,14 @@ export const saveYamlThunk = createAsyncThunk<
         // module-level create attachment id before we get a chance to consume
         // it, leaving the detail view with an empty chat.
         carryConversationToWorkflow(workflow.id);
+
+        // If the user was mid-conversation with the AI (sidebar open at save
+        // time), request the destination workflow's editor to re-open the
+        // sidebar on mount. `application.navigateToApp` below remounts the
+        // whole workflows app, so we can't just leave the sidebar untouched.
+        if (isSidebarOpen()) {
+          requestSidebarRestore(workflow.id);
+        }
 
         // Update the workflow in the store
         dispatch(setWorkflow(workflow));

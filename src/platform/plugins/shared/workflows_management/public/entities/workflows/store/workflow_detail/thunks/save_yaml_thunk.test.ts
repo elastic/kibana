@@ -38,13 +38,19 @@ jest.mock('../../../../../shared/lib/query_client', () => ({
 }));
 const { queryClient } = jest.requireMock('../../../../../shared/lib/query_client');
 
-// Mock AI integration side-effects — the thunk resolves pending diff decorations
-// and carries the create-time conversation onto the saved workflow's session tag.
+// Mock AI integration side-effects — the thunk resolves pending diff decorations,
+// carries the create-time conversation onto the saved workflow's session tag,
+// and requests the sidebar to re-open on the destination if it was open at
+// save time (since navigateToApp remounts the app).
 const mockAcceptAllActiveProposals = jest.fn();
 const mockCarryConversationToWorkflow = jest.fn();
+const mockIsSidebarOpen = jest.fn().mockReturnValue(false);
+const mockRequestSidebarRestore = jest.fn();
 jest.mock('../../../../../features/ai_integration', () => ({
   acceptAllActiveProposals: (...args: unknown[]) => mockAcceptAllActiveProposals(...args),
   carryConversationToWorkflow: (...args: unknown[]) => mockCarryConversationToWorkflow(...args),
+  isSidebarOpen: () => mockIsSidebarOpen(),
+  requestSidebarRestore: (...args: unknown[]) => mockRequestSidebarRestore(...args),
 }));
 
 // Set up initial state with workflow and yaml
@@ -174,6 +180,41 @@ describe('saveYamlThunk', () => {
       );
       expect(result.type).toBe('detail/saveYamlThunk/rejected');
       expect(result.payload).toBe('Creation failed');
+    });
+  });
+
+  describe('sidebar restore-on-mount request', () => {
+    it('requests sidebar restore when the sidebar was open at save time', async () => {
+      mockIsSidebarOpen.mockReturnValue(true);
+      store.dispatch(setYamlString('name: With Open Sidebar\nsteps: []'));
+      mockWorkflowApi.createWorkflow.mockResolvedValue(mockWorkflow);
+
+      await store.dispatch(saveYamlThunk());
+
+      expect(mockRequestSidebarRestore).toHaveBeenCalledWith('test-workflow-1');
+    });
+
+    it('does NOT request restore when the sidebar was closed at save time', async () => {
+      mockIsSidebarOpen.mockReturnValue(false);
+      store.dispatch(setYamlString('name: Closed Sidebar\nsteps: []'));
+      mockWorkflowApi.createWorkflow.mockResolvedValue(mockWorkflow);
+
+      await store.dispatch(saveYamlThunk());
+
+      expect(mockRequestSidebarRestore).not.toHaveBeenCalled();
+    });
+
+    it('does NOT request restore on plain updates (existing workflow)', async () => {
+      // Updates don't navigate — nothing remounts, so there's nothing to restore.
+      mockIsSidebarOpen.mockReturnValue(true);
+      store.dispatch(setWorkflow(mockWorkflow));
+      store.dispatch(setYamlString('name: Updated Workflow\nsteps: []'));
+      mockWorkflowApi.updateWorkflow.mockResolvedValue(undefined as any);
+      mockLoadWorkflowThunk.mockImplementation(((_arg: any) => async () => {}) as any);
+
+      await store.dispatch(saveYamlThunk());
+
+      expect(mockRequestSidebarRestore).not.toHaveBeenCalled();
     });
   });
 
