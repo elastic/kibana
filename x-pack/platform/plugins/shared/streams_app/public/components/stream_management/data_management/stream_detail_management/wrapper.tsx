@@ -159,69 +159,29 @@ export function Wrapper({
   const isQualityLoading =
     countResult?.loading || failedDocsResult?.loading || degradedDocsResult.loading;
 
+  // Badges are ordered by relevance (per design): "Technical preview" stays pinned first, then data
+  // quality (kept visible before the overflow popover), then retention, then the stream type/mode
+  // badges. The stream type (classic/wired) is the least important and is expected to be phased out.
   const streamBadges: Array<{ label: string; node: ReactElement }> = [];
-  if (Streams.ClassicStream.GetResponse.is(definition)) {
+  if (
+    Streams.WiredStream.GetResponse.is(definition) &&
+    ROOT_STREAM_NAMES.includes(definition.stream.name as RootStreamName)
+  ) {
     streamBadges.push({
-      label: i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
-        defaultMessage: 'Classic',
-      }),
-      node: <ClassicStreamBadge />,
-    });
-  }
-
-  if (Streams.WiredStream.GetResponse.is(definition)) {
-    if (ROOT_STREAM_NAMES.includes(definition.stream.name as RootStreamName)) {
-      streamBadges.push({
-        label: i18n.translate('xpack.streams.technicalPreviewLabel', {
-          defaultMessage: 'Technical preview',
-        }),
-        node: (
-          <EuiBetaBadge
-            tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
-              defaultMessage: 'This feature is in technical preview. We are working on it...',
-            })}
-            label={i18n.translate('xpack.streams.technicalPreviewLabel', {
-              defaultMessage: 'Technical preview',
-            })}
-            iconType="flask"
-            size="s"
-            css={{ display: 'block' }}
-          />
-        ),
-      });
-    }
-    streamBadges.push({
-      label: i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
-        defaultMessage: 'Wired',
-      }),
-      node: <WiredStreamBadge />,
-    });
-    if (isDraft) {
-      streamBadges.push({
-        label: i18n.translate('xpack.streams.entityDetailViewWithoutParams.draftBadgeLabel', {
-          defaultMessage: 'Draft',
-        }),
-        node: <DraftStreamBadge />,
-      });
-    }
-  }
-  if (Streams.ingest.all.GetResponse.is(definition) && !isDraft) {
-    if (definition.index_mode === 'time_series') {
-      streamBadges.push({
-        label: i18n.translate('xpack.streams.badges.timeSeries.label', {
-          defaultMessage: 'Time series',
-        }),
-        node: <TimeSeriesBadge />,
-      });
-    }
-    streamBadges.push({
-      label: i18n.translate('xpack.streams.badges.lifecycle.title', {
-        defaultMessage: 'Data Retention',
+      label: i18n.translate('xpack.streams.technicalPreviewLabel', {
+        defaultMessage: 'Technical preview',
       }),
       node: (
-        <LifecycleBadge
-          lifecycle={definition.effective_lifecycle}
-          dataTestSubj={`lifecycleBadge-${streamId}`}
+        <EuiBetaBadge
+          tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+            defaultMessage: 'This feature is in technical preview. We are working on it...',
+          })}
+          label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+            defaultMessage: 'Technical preview',
+          })}
+          iconType="flask"
+          size="s"
+          css={{ display: 'block' }}
         />
       ),
     });
@@ -240,6 +200,52 @@ export function Wrapper({
         />
       ),
     });
+  }
+  if (Streams.ingest.all.GetResponse.is(definition) && !isDraft) {
+    streamBadges.push({
+      label: i18n.translate('xpack.streams.badges.lifecycle.title', {
+        defaultMessage: 'Data Retention',
+      }),
+      node: (
+        <LifecycleBadge
+          lifecycle={definition.effective_lifecycle}
+          dataTestSubj={`lifecycleBadge-${streamId}`}
+        />
+      ),
+    });
+    if (definition.index_mode === 'time_series') {
+      streamBadges.push({
+        label: i18n.translate('xpack.streams.badges.timeSeries.label', {
+          defaultMessage: 'Time series',
+        }),
+        node: <TimeSeriesBadge />,
+      });
+    }
+  }
+  if (Streams.ClassicStream.GetResponse.is(definition)) {
+    streamBadges.push({
+      label: i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
+        defaultMessage: 'Classic',
+      }),
+      node: <ClassicStreamBadge />,
+    });
+  }
+
+  if (Streams.WiredStream.GetResponse.is(definition)) {
+    streamBadges.push({
+      label: i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
+        defaultMessage: 'Wired',
+      }),
+      node: <WiredStreamBadge />,
+    });
+    if (isDraft) {
+      streamBadges.push({
+        label: i18n.translate('xpack.streams.entityDetailViewWithoutParams.draftBadgeLabel', {
+          defaultMessage: 'Draft',
+        }),
+        node: <DraftStreamBadge />,
+      });
+    }
   }
 
   const appHeaderBadges: AppHeaderBadge[] = streamBadges.map(({ label, node }) => ({

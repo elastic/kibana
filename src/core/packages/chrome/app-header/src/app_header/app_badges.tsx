@@ -30,7 +30,12 @@ const useBadgesStyle = () => {
       }
     `;
 
-    return { badgesContainer };
+    const overflowList = css`
+      min-inline-size: 160px;
+      max-inline-size: 240px;
+    `;
+
+    return { badgesContainer, overflowList };
   }, [euiTheme]);
 };
 
@@ -39,7 +44,7 @@ export interface AppBadgesProps {
 }
 
 export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
-  const { badgesContainer } = useBadgesStyle();
+  const { badgesContainer, overflowList } = useBadgesStyle();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   if (!badges || badges.length === 0) {
@@ -97,7 +102,13 @@ export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
             closePopover={handleClosePopover}
             panelPaddingSize="s"
           >
-            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="center">
+            <EuiFlexGroup
+              direction="row"
+              wrap
+              gutterSize="xs"
+              alignItems="flexStart"
+              css={overflowList}
+            >
               {overflowBadges.map((badge) => (
                 <EuiFlexItem grow={false} key={badge.label}>
                   <AppBadge badge={badge} />
