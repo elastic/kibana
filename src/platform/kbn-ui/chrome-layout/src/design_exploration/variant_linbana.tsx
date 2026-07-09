@@ -27,7 +27,8 @@ export const LINBANA_VARIANT_ID = 'linbana';
 // step (sidebar vs. content) rather than blur/shadow for elevation. Radii are
 // noticeably smaller and more uniform than Vercel's, and there is no
 // glassmorphism anywhere in the chrome.
-const LINEAR_RADIUS_CONTROL = 8; // buttons, inputs, nav selection pill
+const LINEAR_RADIUS_CONTROL = 8; // inputs, nav selection pill
+const LINEAR_RADIUS_BUTTON = 16; // buttons
 const LINEAR_RADIUS_PANEL = 10; // cards, panels, code viewer
 const LINEAR_RADIUS_PANEL_COMPACT = 8; // compact single-stat / metric panels
 const LINEAR_ACCENT = '#5E6AD2'; // primary button / focus accent
@@ -45,9 +46,9 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
   const LINEAR_HAIRLINE = `1px solid color-mix(in srgb, ${colors.borderBaseSubdued} 70%, transparent)`;
 
   return css`
-    ${scope} {
-      ${layoutVarName('application.marginRight')}: 0px !important;
-    }
+    // ${scope} {
+    //   ${layoutVarName('application.marginRight')}: 0px !important;
+    // }
 
     /* ----- Base surfaces ----- */
     /* Content area reads as pure white; the color *step* against the nav
@@ -192,6 +193,17 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
       box-shadow: none !important;
     }
 
+    ${scope} .euiSplitButtonActionPrimary {
+      border-radius: ${LINEAR_RADIUS_BUTTON}px 0 0 ${LINEAR_RADIUS_BUTTON}px !important;
+      padding-left: 8px !important;
+      padding-right: 0 !important;
+    }
+
+    ${scope} .euiSplitButtonActionSecondary {
+      border-radius: 0 ${LINEAR_RADIUS_BUTTON}px ${LINEAR_RADIUS_BUTTON}px 0 !important;
+      padding-right: 2px !important;
+    }
+
     // /* Secondary buttons: white fill, thin border — a quieter twin of primary. */
     // ${scope} [class*='css-'][class*='-euiButtonDisplay']:not([class*='fill']) {
     //   // background-color: ${colors.backgroundBasePlain} !important;
@@ -202,7 +214,7 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [data-test-subj='globalQueryBar'] {
       padding: ${LINEAR_PADDING}px !important;
-      padding-block: ${DESIGN_EXPLORATION_GAP}px !important;
+      padding-block: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
     }
 
     ${scope} [data-test-subj='controls-group-wrapper'] {
@@ -254,6 +266,7 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [data-test-subj='appHeader'] [class*='css-'][class*='-euiButtonDisplay'][class*='app_menu_action_button--buttonCss'] {
       background-color: transparent !important;
+      border-radius: ${LINEAR_RADIUS_BUTTON}px !important;
     }
 
     ${scope} [data-test-subj='appHeader'] [data-test-subj^='app-menu-action-button-']:hover
@@ -261,6 +274,7 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} [data-test-subj='appHeader'] [data-test-subj^='app-menu-action-button-']:focus
       [class*='app_menu_action_button--buttonCss'] {
       background-color: transparent !important;
+      border-radius: ${LINEAR_RADIUS_BUTTON}px !important;
     }
 
     ${scope} .kbnChromeLayoutApplication:has([data-test-subj='appHeader']) {
@@ -288,6 +302,7 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
       background-color: ${LINEAR_SURFACE} !important;
       box-shadow: none !important;
       outline: none !important;
+      margin-right: 8px !important;
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
