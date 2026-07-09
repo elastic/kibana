@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import {
   type ICPSManager,
@@ -102,8 +102,6 @@ const ProjectScopeLabel = ({ cpsManager, projectRouting }: ProjectScopeColumnPro
 
 export const ProjectScopeColumn = ({ cpsManager, projectRouting }: ProjectScopeColumnProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const staticLabel = getStaticProjectScopeLabel(projectRouting);
-  const label = staticLabel ?? projectRouting;
 
   if (cpsManager.getTotalProjectCount() <= 1) {
     return (
@@ -116,22 +114,18 @@ export const ProjectScopeColumn = ({ cpsManager, projectRouting }: ProjectScopeC
   return (
     <EuiPopover
       button={
-        <EuiToolTip content={label}>
-          <EuiButtonEmpty
-            size="s"
-            color="text"
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            data-test-subj="transformListProjectScopeButton"
-            aria-label={i18n.translate(
-              'xpack.transform.transformList.projectScope.openPopoverAriaLabel',
-              {
-                defaultMessage: 'Show project scope for this transform',
-              }
-            )}
-          >
-            <ProjectScopeLabel cpsManager={cpsManager} projectRouting={projectRouting} />
-          </EuiButtonEmpty>
-        </EuiToolTip>
+        <EuiLink
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          data-test-subj="transformListProjectScopeButton"
+          aria-label={i18n.translate(
+            'xpack.transform.transformList.projectScope.openPopoverAriaLabel',
+            {
+              defaultMessage: 'Show project scope for this transform',
+            }
+          )}
+        >
+          <ProjectScopeLabel cpsManager={cpsManager} projectRouting={projectRouting} />
+        </EuiLink>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}

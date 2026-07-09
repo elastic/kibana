@@ -25,6 +25,7 @@ import {
   EuiIconTip,
   RIGHT_ALIGNMENT,
   EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { useTransformCapabilities } from '../../../../hooks';
@@ -65,6 +66,59 @@ const StatsUnknown = () => (
     <FormattedMessage id="xpack.transform.transformList.statsUnknown" defaultMessage="Unknown" />
   </EuiText>
 );
+
+const TransformIdWithDescription = ({ item }: { item: TransformListRow }) => {
+  const transformId = item.config.id;
+  const description = item.config.description;
+  const transformIdContent = !isManagedTransform(item) ? (
+    <EuiToolTip content={transformId}>
+      <span>{transformId}</span>
+    </EuiToolTip>
+  ) : (
+    <>
+      <EuiToolTip
+        content={`${transformId} (${i18n.translate(
+          'xpack.transform.transformList.managedBadgeLabel',
+          {
+            defaultMessage: 'Managed',
+          }
+        )})`}
+      >
+        <span>{transformId}</span>
+      </EuiToolTip>
+      &nbsp;
+      <EuiToolTip
+        content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
+          defaultMessage:
+            'This transform is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
+        })}
+      >
+        <EuiBadge tabIndex={0} color="hollow" data-test-subj="transformListRowIsManagedBadge">
+          {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
+            defaultMessage: 'Managed',
+          })}
+        </EuiBadge>
+      </EuiToolTip>
+    </>
+  );
+
+  return (
+    <>
+      <div>{transformIdContent}</div>
+      {description ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiToolTip content={description}>
+            <EuiText color="subdued" size="s">
+              <span>{description}</span>
+            </EuiText>
+          </EuiToolTip>
+        </>
+      ) : null}
+    </>
+  );
+};
+
 export const useColumns = (
   expandedRowItemIds: TransformId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<TransformId[]>>,
@@ -155,41 +209,7 @@ export const useColumns = (
       sortable: true,
       truncateText: { lines: TRUNCATE_TEXT_LINES },
       scope: 'row',
-      render: (transformId, item) => {
-        if (!isManagedTransform(item))
-          return (
-            <EuiToolTip content={transformId}>
-              <span>{transformId}</span>
-            </EuiToolTip>
-          );
-        return (
-          <>
-            <EuiToolTip
-              content={`${transformId} (${i18n.translate(
-                'xpack.transform.transformList.managedBadgeLabel',
-                {
-                  defaultMessage: 'Managed',
-                }
-              )})`}
-            >
-              <span>{transformId}</span>
-            </EuiToolTip>
-            &nbsp;
-            <EuiToolTip
-              content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
-                defaultMessage:
-                  'This transform is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
-              })}
-            >
-              <EuiBadge tabIndex={0} color="hollow" data-test-subj="transformListRowIsManagedBadge">
-                {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
-                  defaultMessage: 'Managed',
-                })}
-              </EuiBadge>
-            </EuiToolTip>
-          </>
-        );
-      },
+      render: (_transformId, item) => <TransformIdWithDescription item={item} />,
     },
     {
       id: 'alertRule',
@@ -204,7 +224,7 @@ export const useColumns = (
         </EuiScreenReaderOnly>
       ),
       width: '30px',
-      render: (item) => {
+      render: (item: TransformListRow) => {
         const needsReauth = needsReauthorization(item);
 
         const actionMsg = canStartStopTransform
@@ -252,20 +272,6 @@ export const useColumns = (
             {needsReauthTooltipIcon}
             {alertingRulesTooltipIcon}
           </>
-        );
-      },
-    },
-    {
-      field: TRANSFORM_LIST_COLUMN.DESCRIPTION,
-      'data-test-subj': 'transformListColumnDescription',
-      name: i18n.translate('xpack.transform.description', { defaultMessage: 'Description' }),
-      sortable: true,
-      truncateText: { lines: TRUNCATE_TEXT_LINES },
-      render(text: string) {
-        return (
-          <EuiToolTip content={text}>
-            <span>{text}</span>
-          </EuiToolTip>
         );
       },
     },
