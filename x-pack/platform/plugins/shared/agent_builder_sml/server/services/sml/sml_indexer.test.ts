@@ -706,7 +706,7 @@ describe('createSmlIndexer', () => {
         // origin-mode — `getPermissions` is the single source of truth.
         const getPermissions = jest.fn().mockReturnValue({
           kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-          });
+        });
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
         );
@@ -745,7 +745,7 @@ describe('createSmlIndexer', () => {
             content: 'one',
             permissions: {
               kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-                  },
+            },
             ingestion_method: 'manual',
           })
         );
@@ -813,7 +813,7 @@ describe('createSmlIndexer', () => {
         const ops = bulkMock.mock.calls[0][0].operations;
         expect(ops[0].index.document.permissions).toEqual({
           kibana: { privileges: [] },
-          });
+        });
       });
 
       it('content mode for an unregistered type writes chunks with empty permissions and warns once per type', async () => {
@@ -859,7 +859,7 @@ describe('createSmlIndexer', () => {
         const ops = bulkMock.mock.calls[0][0].operations;
         expect(ops[0].index.document.permissions).toEqual({
           kibana: { privileges: [] },
-          });
+        });
         // Document type is preserved on the stored chunk so reads can
         // still filter by it via the existing `type` term query.
         expect(ops[0].index.document.type).toBe('my_notes');
@@ -1079,7 +1079,7 @@ describe('createSmlIndexer', () => {
 
         const getPermissions = jest.fn().mockReturnValue({
           kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-          });
+        });
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getPermissions })
         );
@@ -1114,7 +1114,7 @@ describe('createSmlIndexer', () => {
 
         const getPermissions = jest.fn().mockReturnValue({
           kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-          });
+        });
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getPermissions })
         );
@@ -1136,7 +1136,7 @@ describe('createSmlIndexer', () => {
         const ops = bulkMock.mock.calls[0][0].operations;
         expect(ops[0].index.document.permissions).toEqual({
           kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-          });
+        });
       });
     });
 
@@ -1167,7 +1167,7 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
           kibana: { privileges: [] },
-          });
+        });
       });
 
       it('awaits async getPermissions and stamps the resolved value', async () => {
@@ -1209,7 +1209,7 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
           kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-          });
+        });
       });
 
       it('getPermissions returning partial shape gets folded into fully-shaped permissions', async () => {
@@ -1243,7 +1243,7 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
           kibana: { privileges: [{ name: 'p1' }] },
-          });
+        });
       });
 
       it('getPermissions throw: propagates the throw and leaves existing chunks intact (fail-closed)', async () => {
@@ -1298,7 +1298,7 @@ describe('createSmlIndexer', () => {
         const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
         const getPermissions = jest.fn().mockResolvedValue({
           kibana: { privileges: [{ name: 'p1' }] },
-          });
+        });
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlEntry, getPermissions })
         );
@@ -1320,7 +1320,7 @@ describe('createSmlIndexer', () => {
         expect(ops).toHaveLength(1);
         expect(ops[0].index.document.permissions).toEqual({
           kibana: { privileges: [{ name: 'p1' }] },
-          });
+        });
       });
     });
   });
