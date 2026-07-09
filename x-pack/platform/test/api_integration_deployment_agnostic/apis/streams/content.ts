@@ -12,7 +12,8 @@ import {
   parseArchive,
 } from '@kbn/streams-plugin/server/lib/content';
 import { Readable } from 'stream';
-import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
+import { crc32 } from 'zlib';
+import type { ContentPack, ContentPackEntry, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import type { FieldDefinition, RoutingDefinition, Streams } from '@kbn/streams-schema';
 import { emptyAssets } from '@kbn/streams-schema';
@@ -23,12 +24,11 @@ import {
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
+import { bulkQueries, getQueries } from '../significant_events/helpers/requests';
 import {
-  bulkQueries,
   disableStreams,
   enableStreams,
   exportContent,
-  getQueries,
   getStream,
   importContent,
   previewContent,
@@ -55,6 +55,146 @@ const upsertRequest = ({
     },
   },
 });
+
+// Content-pack saved objects are stored as opaque JSON and cast on parse, so these minimal fixtures
+// are enough to exercise the read path. `padding` inflates the lens so a few of them fan out past
+// the total decompression budget.
+const lensEntry = (id: string, padding: number): ContentPackEntry =>
+  ({
+    type: 'lens',
+    id,
+    attributes: { title: id, padding: 'a'.repeat(padding) },
+    references: [],
+  } as unknown as ContentPackEntry);
+
+const dashboardEntry = (id: string, lensIds: string[]): ContentPackEntry =>
+  ({
+    type: 'dashboard',
+    id,
+    attributes: { title: id },
+    references: lensIds.map((lensId, i) => ({ name: `ref_${i}`, type: 'lens', id: lensId })),
+  } as unknown as ContentPackEntry);
+
+const wiredStreamEntry = (name: string, description: string): ContentPackStream => ({
+  type: 'stream',
+  name,
+  request: {
+    stream: {
+      type: 'wired',
+      description,
+      ingest: {
+        processing: { steps: [] },
+        settings: {},
+        wired: { fields: {}, routing: [] },
+        lifecycle: { inherit: {} },
+        failure_store: { inherit: {} },
+      },
+    },
+    ...emptyAssets,
+  },
+});
+
+// zip central-directory + local-header field offsets
+const CENSIG = 0x02014b50;
+const LOCSIG = 0x04034b50;
+const CENLEN = 24; // uncompressed size in central header
+const CENNAM = 28; // file name length
+const CENEXT = 30; // extra field length
+const CENCOM = 32; // comment length
+const CENOFF = 42; // relative offset of local header
+const CENHDR = 46; // central header fixed size
+const LOCLEN = 22; // uncompressed size in local header
+
+// Patches an entry's declared uncompressed size (central + local headers) down to `fakeSize` while
+// leaving the deflate stream intact, simulating a lying entry: the header claims it is tiny but it
+// still inflates large. adm-zip passes the central-header size to zlib as `maxOutputLength`, so the
+// synchronous inflate throws once the real output exceeds the fake size. Returns whether the entry
+// was found and patched.
+const tamperUncompressedSize = (buffer: Buffer, entryName: string, fakeSize: number): boolean => {
+  const nameBuf = Buffer.from(entryName);
+  for (let i = 0; i + CENHDR <= buffer.length; i++) {
+    if (buffer.readUInt32LE(i) !== CENSIG) continue;
+    const nameLen = buffer.readUInt16LE(i + CENNAM);
+    const extraLen = buffer.readUInt16LE(i + CENEXT);
+    const commentLen = buffer.readUInt16LE(i + CENCOM);
+    const name = buffer.subarray(i + CENHDR, i + CENHDR + nameLen);
+    if (name.equals(nameBuf)) {
+      buffer.writeUInt32LE(fakeSize, i + CENLEN);
+      const locOff = buffer.readUInt32LE(i + CENOFF);
+      if (buffer.readUInt32LE(locOff) === LOCSIG) {
+        buffer.writeUInt32LE(fakeSize, locOff + LOCLEN);
+      }
+      return true;
+    }
+    i += CENHDR + nameLen + extraLen + commentLen - 1;
+  }
+  return false;
+};
+
+// Builds an uncompressed (STORED) zip with entries at exact paths. `generateArchive` writes saved
+// objects under `<root>/kibana/<type>/`, but the importer only matches saved objects it extracts
+// directly (streams and flat `<root>/dashboard/` entries). A malicious upload is not built by
+// `generateArchive`, so this hand-rolls the exact bytes: dashboards flat under `<root>/dashboard/`
+// (where the importer picks them up and resolves their references) plus one shared lens under
+// `<root>/kibana/lens/` (where `resolveDashboard` looks references up). That is the reference
+// fan-out shape a single large object referenced by many dashboards.
+const buildStoredArchive = (files: Array<{ path: string; content: Buffer }>): Buffer => {
+  const localParts: Buffer[] = [];
+  const centralParts: Buffer[] = [];
+  let offset = 0;
+  for (const { path: filePath, content } of files) {
+    const name = Buffer.from(filePath);
+    const checksum = crc32(content); // zlib.crc32 returns an unsigned 32-bit integer
+
+    const localHeader = Buffer.alloc(30);
+    localHeader.writeUInt32LE(LOCSIG, 0);
+    localHeader.writeUInt16LE(20, 4); // version needed to extract
+    localHeader.writeUInt16LE(0, 6); // general purpose flags
+    localHeader.writeUInt16LE(0, 8); // compression method: stored
+    localHeader.writeUInt16LE(0, 10); // mod time
+    localHeader.writeUInt16LE(0, 12); // mod date
+    localHeader.writeUInt32LE(checksum, 14);
+    localHeader.writeUInt32LE(content.length, 18); // compressed size
+    localHeader.writeUInt32LE(content.length, LOCLEN); // uncompressed size
+    localHeader.writeUInt16LE(name.length, 26);
+    localHeader.writeUInt16LE(0, 28); // extra field length
+    localParts.push(localHeader, name, content);
+
+    const centralHeader = Buffer.alloc(CENHDR);
+    centralHeader.writeUInt32LE(CENSIG, 0);
+    centralHeader.writeUInt16LE(20, 4); // version made by
+    centralHeader.writeUInt16LE(20, 6); // version needed to extract
+    centralHeader.writeUInt16LE(0, 8); // general purpose flags
+    centralHeader.writeUInt16LE(0, 10); // compression method: stored
+    centralHeader.writeUInt16LE(0, 12); // mod time
+    centralHeader.writeUInt16LE(0, 14); // mod date
+    centralHeader.writeUInt32LE(checksum, 16);
+    centralHeader.writeUInt32LE(content.length, 20); // compressed size
+    centralHeader.writeUInt32LE(content.length, CENLEN); // uncompressed size
+    centralHeader.writeUInt16LE(name.length, CENNAM);
+    centralHeader.writeUInt16LE(0, CENEXT);
+    centralHeader.writeUInt16LE(0, CENCOM);
+    centralHeader.writeUInt16LE(0, 34); // disk number start
+    centralHeader.writeUInt16LE(0, 36); // internal file attributes
+    centralHeader.writeUInt32LE(0, 38); // external file attributes
+    centralHeader.writeUInt32LE(offset, CENOFF);
+    centralParts.push(centralHeader, name);
+
+    offset += localHeader.length + name.length + content.length;
+  }
+
+  const centralDirectory = Buffer.concat(centralParts);
+  const eocd = Buffer.alloc(22);
+  eocd.writeUInt32LE(0x06054b50, 0);
+  eocd.writeUInt16LE(0, 4); // disk number
+  eocd.writeUInt16LE(0, 6); // central directory disk
+  eocd.writeUInt16LE(files.length, 8);
+  eocd.writeUInt16LE(files.length, 10);
+  eocd.writeUInt32LE(centralDirectory.length, 12);
+  eocd.writeUInt32LE(offset, 16);
+  eocd.writeUInt16LE(0, 20); // comment length
+  return Buffer.concat([...localParts, centralDirectory, eocd]);
+};
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -457,6 +597,106 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect((response as unknown as { message: string }).message).to.match(
           /^Object \[content_pack-1.0.0\/stream\/a.big.stream.json\] exceeds the limit of \d+ bytes/
+        );
+      });
+
+      it('fails if an entry lies about its uncompressed size', async () => {
+        const twoMB = 2 * 1024 * 1024;
+        const archive = await generateArchive(
+          { name: 'content_pack', description: 'with a lying entry', version: '1.0.0' },
+          [wiredStreamEntry('a.big.stream', 'a'.repeat(twoMB))]
+        );
+
+        // Declare the entry as 100 bytes while its deflate stream still inflates to ~2MB. The
+        // synchronous inflate must reject it rather than allocate the full 2MB.
+        const entryName = 'content_pack-1.0.0/stream/a.big.stream.json';
+        expect(tamperUncompressedSize(archive, entryName, 100)).to.eql(true);
+
+        const response = await importContent(
+          apiClient,
+          'logs.otel',
+          {
+            include: { objects: { all: {} } },
+            content: Readable.from(archive),
+            filename: 'content_pack-1.0.0.zip',
+          },
+          400
+        );
+
+        expect((response as unknown as { message: string }).message).to.match(
+          /^Object \[content_pack-1.0.0\/stream\/a.big.stream.json\] exceeds the limit of \d+ bytes/
+        );
+      });
+
+      it('fails if the archive exceeds the total uncompressed size', async () => {
+        // ~0.9MB per stream stays under the 1MB per-entry cap; 60 of them sum to ~54MB, over the
+        // 50MB aggregate cap, while staying well under the 500-entry cap. Rejected at the metadata
+        // stage before anything is inflated.
+        const almostOneMB = 900 * 1024;
+        const streams = Array.from({ length: 60 }, (_, i) =>
+          wiredStreamEntry(`a.stream_${i}`, 'a'.repeat(almostOneMB))
+        );
+        const archive = await generateArchive(
+          { name: 'content_pack', description: 'aggregate bomb', version: '1.0.0' },
+          streams
+        );
+
+        const response = await importContent(
+          apiClient,
+          'logs.otel',
+          {
+            include: { objects: { all: {} } },
+            content: Readable.from(archive),
+            filename: 'content_pack-1.0.0.zip',
+          },
+          400
+        );
+
+        expect((response as unknown as { message: string }).message).to.match(
+          /^Content pack exceeds the maximum total uncompressed size of \d+ bytes/
+        );
+      });
+
+      it('fails if referenced objects fan out beyond the total uncompressed size', async () => {
+        // Reference fan-out bypass: one ~0.9MB lens (under the per-entry cap, counted once by the
+        // metadata guard) referenced by many dashboards. The metadata caps pass (few entries, small
+        // declared total), but materializing the lens once per dashboard blows past the runtime
+        // decompression budget. Hand-rolled rather than built with `generateArchive` so the
+        // dashboards land flat under `<root>/dashboard/`, where the importer extracts them and calls
+        // `resolveDashboard` — the path that re-reads the shared lens once per dashboard.
+        const almostOneMB = 900 * 1024;
+        const rootDir = 'content_pack-1.0.0';
+        const dashboardCount = 80;
+        const archive = buildStoredArchive([
+          {
+            path: `${rootDir}/manifest.yml`,
+            content: Buffer.from(
+              'name: content_pack\ndescription: reference fan-out bomb\nversion: 1.0.0\n'
+            ),
+          },
+          {
+            path: `${rootDir}/kibana/lens/shared_lens.json`,
+            content: Buffer.from(JSON.stringify(lensEntry('shared_lens', almostOneMB))),
+          },
+          ...Array.from({ length: dashboardCount }, (_, i) => ({
+            path: `${rootDir}/dashboard/dash_${i}.json`,
+            content: Buffer.from(JSON.stringify(dashboardEntry(`dash_${i}`, ['shared_lens']))),
+          })),
+        ]);
+
+        const response = await importContent(
+          apiClient,
+          'logs.otel',
+          {
+            include: { objects: { all: {} } },
+            content: Readable.from(archive),
+            filename: 'content_pack-1.0.0.zip',
+          },
+          400
+        );
+
+        expect((response as unknown as { message: string }).message).to.match(
+          /^Content pack exceeds the maximum total uncompressed size of \d+ bytes/
         );
       });
 

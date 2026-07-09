@@ -5,6 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
 export const instancesSortFieldRt = t.keyof({
   serviceNodeName: null,
@@ -16,3 +17,16 @@ export const instancesSortFieldRt = t.keyof({
 });
 
 export type InstancesSortField = t.TypeOf<typeof instancesSortFieldRt>;
+
+/**
+ * zod equivalent, additive (see `default_api_types.ts` in `@kbn/apm-api-shared`
+ * for why - elastic/kibana#243355).
+ */
+export const instancesSortFieldSchema = z.enum([
+  'serviceNodeName',
+  'latency',
+  'throughput',
+  'errorRate',
+  'cpuUsage',
+  'memoryUsage',
+]);

@@ -95,10 +95,11 @@ export const generateVisualizationEsql = async ({
   timeRange,
   extraInstructions,
 }: GenerateVisualizationEsqlParams): Promise<GeneratedVisualizationEsql> => {
+  const model = await modelProvider.getDefaultModel();
   const response = await generateEsql({
     nlQuery: buildEsqlEditContext(nlQuery, existingQueries),
     index,
-    modelProvider,
+    model,
     events,
     logger,
     esClient: esClient.asCurrentUser,

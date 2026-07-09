@@ -10,12 +10,14 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_ENABLED,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
 } from '@kbn/management-settings-ids';
 import {
   initSecurityManagedWorkflowsClient,
@@ -23,7 +25,7 @@ import {
 } from '../managed_workflows';
 
 /**
- * The six alert-analysis settings. Read from a space-scoped `uiSettings` client (by the settings
+ * The alert-analysis settings. Read from a space-scoped `uiSettings` client (by the settings
  * routes and by the workflow's runtime-config route), never baked into the workflow document: the
  * workflow is installed once in the global space and reads these live per space at run time.
  */
@@ -33,12 +35,14 @@ export interface SecurityAlertAnalysisWorkflowSettings {
   autoCloseConfidenceScoreMinThreshold: number;
   autoCloseConfidenceScoreMaxThreshold: number;
   connectorId: string;
+  agentId: string;
   createConversation: boolean;
+  tagPrefix: string;
 }
 
 /**
- * Reads the six `alertAnalysisWorkflow*` uiSettings from an already space-scoped
- * `IUiSettingsClient` and shapes them into the workflow's settings.
+ * Reads the `alertAnalysisWorkflow*` uiSettings from an already space-scoped `IUiSettingsClient`
+ * and shapes them into the workflow's settings.
  */
 export const readSecurityAlertAnalysisWorkflowSettings = async (
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>
@@ -58,8 +62,12 @@ export const readSecurityAlertAnalysisWorkflowSettings = async (
   connectorId: await uiSettingsClient.get<string>(
     SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CONNECTOR_ID
   ),
+  agentId: await uiSettingsClient.get<string>(SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID),
   createConversation: await uiSettingsClient.get<boolean>(
     SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION
+  ),
+  tagPrefix: await uiSettingsClient.get<string>(
+    SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX
   ),
 });
 
