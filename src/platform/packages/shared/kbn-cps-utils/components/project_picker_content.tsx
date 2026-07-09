@@ -33,6 +33,7 @@ export interface ProjectPickerContentProps {
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
   projects: UseFetchProjectsResult;
   isReadonly?: boolean;
+  showProjectRoutingControls?: boolean;
 }
 
 const projectPickerOptions = [
@@ -53,6 +54,7 @@ export const ProjectPickerContent = ({
   onProjectRoutingChange,
   projects,
   isReadonly = false,
+  showProjectRoutingControls = true,
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
   const { originProject, linkedProjects, error, isLoading } = projects;
@@ -65,21 +67,23 @@ export const ProjectPickerContent = ({
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column" responsive={false} css={styles.container}>
-      <EuiFlexItem grow={false}>
-        <EuiButtonGroup
-          isFullWidth
-          legend={strings.getProjectPickerButtonAriaLabel()}
-          idSelected={projectRouting ?? PROJECT_ROUTING.ALL}
-          options={projectPickerOptions}
-          onChange={(optionId: string) => {
-            onProjectRoutingChange(optionId);
-          }}
-          css={styles.buttonGroup}
-          buttonSize="compressed"
-          isDisabled={isReadonly}
-        />
-        <EuiHorizontalRule margin="none" />
-      </EuiFlexItem>
+      {showProjectRoutingControls ? (
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            isFullWidth
+            legend={strings.getProjectPickerButtonAriaLabel()}
+            idSelected={projectRouting ?? PROJECT_ROUTING.ALL}
+            options={projectPickerOptions}
+            onChange={(optionId: string) => {
+              onProjectRoutingChange(optionId);
+            }}
+            css={styles.buttonGroup}
+            buttonSize="compressed"
+            isDisabled={isReadonly}
+          />
+          <EuiHorizontalRule margin="none" />
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false} css={styles.projectCountHeader}>
         <EuiTitle size="xxxs">
           <h6 css={styles.projectCountTitle}>
