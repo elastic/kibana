@@ -14,7 +14,6 @@ import type {
   OptionsListSuccessResponse,
 } from '@kbn/controls-plugin/common/options_list/types';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../../common';
 import {
   buildUnmanagedWorkflowExecutionsFilter,
   buildWorkflowExecutionsSpaceFilter,
@@ -117,8 +116,7 @@ export function registerExecutionOptionsListRoute({
           if (!hasWorkflowExecutionReadPrivilege(request)) {
             return response.forbidden();
           }
-          const coreStart = await workflowsService.getCoreStart();
-          const esClient = coreStart.elasticsearch.client.asInternalUser;
+          const workflowExecutionsDal = await workflowsService.getWorkflowExecutionsDal();
           const spaceId = spaces.getSpaceId(request);
           const optionsListRequest = request.body as OptionsListRequestBody;
 
@@ -126,8 +124,7 @@ export function registerExecutionOptionsListRoute({
           const optionsListFilters = optionsListRequest.filters ?? [];
           const selectedOptions = optionsListRequest.selectedOptions;
 
-          const esResponse = await esClient.search({
-            index: WORKFLOWS_EXECUTIONS_INDEX,
+          const esResponse = await workflowExecutionsDal.search({
             size: 0,
             query: {
               bool: {

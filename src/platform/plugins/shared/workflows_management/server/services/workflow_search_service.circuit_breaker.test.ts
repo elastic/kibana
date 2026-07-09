@@ -39,6 +39,7 @@ const makeDeps = () => {
       getClient: () => storageClient,
     } as unknown as WorkflowSearchDeps['workflowStorage'],
     esClient,
+    workflowExecutionsDal: { search: jest.fn() } as WorkflowSearchDeps['workflowExecutionsDal'],
   };
   return { deps, storageClient, esClient, logger };
 };

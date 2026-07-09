@@ -62,7 +62,7 @@ describe('Internal Routes', () => {
     logWorkflowRestored: jest.Mock;
   };
   let mockTriggerEventsIsEnabled: boolean;
-  let mockSearch: jest.Mock;
+  let mockWorkflowExecutionsDalSearch: jest.Mock;
   const mockSearchTriggerEventLog = jest.fn<
     Promise<SearchTriggerEventLogResult>,
     [TriggerEventLogSearchCall]
@@ -114,7 +114,7 @@ describe('Internal Routes', () => {
       logWorkflowUpdated: jest.fn(),
       logWorkflowRestored: jest.fn(),
     };
-    mockSearch = jest.fn().mockResolvedValue({
+    mockWorkflowExecutionsDalSearch = jest.fn().mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
     });
 
@@ -125,14 +125,8 @@ describe('Internal Routes', () => {
           searchTriggerEventLog: mockSearchTriggerEventLog,
         },
       })),
-      getCoreStart: jest.fn().mockResolvedValue({
-        elasticsearch: {
-          client: {
-            asInternalUser: {
-              search: mockSearch,
-            },
-          },
-        },
+      getWorkflowExecutionsDal: jest.fn().mockResolvedValue({
+        search: mockWorkflowExecutionsDalSearch,
       }),
     };
 
@@ -747,7 +741,7 @@ describe('Internal Routes', () => {
   });
 
   it('should execute options list search with enforced space and step filters', async () => {
-    mockSearch.mockResolvedValue({
+    mockWorkflowExecutionsDalSearch.mockResolvedValue({
       aggregations: {
         suggestions: {
           buckets: [{ key: 'completed', doc_count: 4 }],
@@ -779,9 +773,8 @@ describe('Internal Routes', () => {
       response
     );
 
-    expect(mockSearch).toHaveBeenCalledWith(
+    expect(mockWorkflowExecutionsDalSearch).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
             filter: expect.arrayContaining([
@@ -813,7 +806,7 @@ describe('Internal Routes', () => {
   });
 
   it('should not exclude managed executions from options list when the user can read them', async () => {
-    mockSearch.mockResolvedValue({
+    mockWorkflowExecutionsDalSearch.mockResolvedValue({
       aggregations: {
         suggestions: { buckets: [] },
         totalCardinality: { value: 0 },
@@ -845,7 +838,7 @@ describe('Internal Routes', () => {
       response
     );
 
-    const filter = mockSearch.mock.calls[0][0].query.bool.filter;
+    const filter = mockWorkflowExecutionsDalSearch.mock.calls[0][0].query.bool.filter;
     expect(filter).not.toEqual(
       expect.arrayContaining([{ bool: { must_not: [{ term: { managed: true } }] } }])
     );

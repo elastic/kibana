@@ -77,6 +77,7 @@ export type {
   ExecutionSourceProjectionField,
   ExecutionStorageSource,
   ExecutionsCountRequest,
+  ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,
   GetExecutionsByIdsOptions,
   GetStepExecutionsByIdsOptions,
@@ -87,6 +88,7 @@ export type {
   StepExecutionsBulkUpdateRequest,
   StepExecutionsBulkUpsertRequest,
   StepExecutionsCountRequest,
+  StepExecutionsDeleteByQueryRequest,
   StepExecutionsSearchRequest,
   UpsertDocument,
   WorkflowExecutionSourceProjectionField,
@@ -95,5 +97,6 @@ export type {
   WorkflowExecutionsBulkUpdateRequest,
   WorkflowExecutionsBulkUpsertRequest,
   WorkflowExecutionsCountRequest,
+  WorkflowExecutionsDeleteByQueryRequest,
   WorkflowExecutionsSearchRequest,
 } from './types';

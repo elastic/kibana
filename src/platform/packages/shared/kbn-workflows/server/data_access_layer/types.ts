@@ -27,6 +27,9 @@ export type ExecutionsSearchRequest = Omit<estypes.SearchRequest, 'index'>;
 /** Count body without index — DAL resolves the target. */
 export type ExecutionsCountRequest = Omit<estypes.CountRequest, 'index'>;
 
+/** Delete-by-query body without index — DAL resolves the target. */
+export type ExecutionsDeleteByQueryRequest = Omit<estypes.DeleteByQueryRequest, 'index'>;
+
 /** Partial document with required id — same for single- and multi-document upserts. */
 export type UpsertDocument<TDoc extends { id: string }> = Partial<TDoc> & { id: string };
 
@@ -113,6 +116,7 @@ export interface WritableExecutionsDataAccess<TExecution extends { id: string }>
   bulkUpsert(request: BulkUpsertRequest<TExecution & { id: string }>): Promise<BulkUpsertResponse>;
   bulkCreate(request: BulkCreateRequest<TExecution & { id: string }>): Promise<BulkUpsertResponse>;
   bulkUpdate(request: BulkUpdateRequest<TExecution & { id: string }>): Promise<BulkUpsertResponse>;
+  deleteByQuery(request: ExecutionsDeleteByQueryRequest): Promise<estypes.DeleteByQueryResponse>;
 }
 
 export type ExecutionsDataAccess<TExecution extends { id: string }> =
@@ -126,6 +130,9 @@ export type StepExecutionsSearchRequest = ExecutionsSearchRequest;
 
 export type WorkflowExecutionsCountRequest = ExecutionsCountRequest;
 export type StepExecutionsCountRequest = ExecutionsCountRequest;
+
+export type WorkflowExecutionsDeleteByQueryRequest = ExecutionsDeleteByQueryRequest;
+export type StepExecutionsDeleteByQueryRequest = ExecutionsDeleteByQueryRequest;
 
 export type WorkflowExecutionUpsertDocument = UpsertDocument<EsWorkflowExecution>;
 export type StepExecutionUpsertDocument = UpsertDocument<EsWorkflowStepExecution>;

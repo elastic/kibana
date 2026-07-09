@@ -22,6 +22,7 @@ import type {
   BulkUpsertResponse,
   ExecutionsCountRequest,
   ExecutionsDataAccess,
+  ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,
   GetExecutionsByIdsOptions,
 } from '../../types';
@@ -119,6 +120,15 @@ export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
       esClient: this.deps.esClient,
       indexName: this.deps.indexName,
       request,
+    });
+  }
+
+  public async deleteByQuery(
+    request: ExecutionsDeleteByQueryRequest
+  ): Promise<estypes.DeleteByQueryResponse> {
+    return this.deps.esClient.deleteByQuery({
+      index: this.deps.indexName,
+      ...request,
     });
   }
 }

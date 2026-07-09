@@ -334,7 +334,6 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
 
     const deps: WorkflowCrudDeps = {
       logger: loggerMock.create(),
-      esClient: elasticsearchServiceMock.createElasticsearchClient(),
       workflowStorage: { getClient: () => client } as any,
       getSecurity: () =>
         ({
@@ -350,6 +349,12 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
       validationService,
       getCoreStart: () => ({} as CoreStart),
       changeHistoryService,
+      workflowExecutionsDal: {
+        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+      } as any,
+      stepExecutionsDal: {
+        deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+      } as any,
     };
 
     client.search.mockResolvedValue({

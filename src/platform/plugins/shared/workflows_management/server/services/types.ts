@@ -37,7 +37,6 @@ export interface WorkflowStorageDeps {
 
 /** Deps for WorkflowCrudService (CRUD + deletion + disable-all). */
 export interface WorkflowCrudDeps extends WorkflowStorageDeps {
-  esClient: ElasticsearchClient;
   getSecurity: () => SecurityServiceStart | undefined;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   getTaskScheduler: () => WorkflowTaskScheduler | null;
@@ -45,11 +44,14 @@ export interface WorkflowCrudDeps extends WorkflowStorageDeps {
   validationService: WorkflowValidationService;
   getCoreStart: () => CoreStart;
   changeHistoryService: IWorkflowChangeHistoryService;
+  workflowExecutionsDal: WorkflowExecutionsDataAccess;
+  stepExecutionsDal: StepExecutionsDataAccess;
 }
 
 /** Deps for WorkflowSearchService. */
 export interface WorkflowSearchDeps extends WorkflowStorageDeps {
   esClient: ElasticsearchClient;
+  workflowExecutionsDal: WorkflowExecutionsDataAccess;
 }
 
 /** Deps for WorkflowExecutionQueryService. */

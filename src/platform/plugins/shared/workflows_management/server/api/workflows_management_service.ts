@@ -37,7 +37,10 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
-import { createExecutionsDal } from '@kbn/workflows/server/data_access_layer';
+import {
+  createExecutionsDal,
+  type WorkflowExecutionsDataAccess,
+} from '@kbn/workflows/server/data_access_layer';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
@@ -137,6 +140,7 @@ export class WorkflowsService {
   private workflowStorage!: WorkflowStorage;
   private taskScheduler!: WorkflowTaskScheduler;
   private esClient!: ElasticsearchClient;
+  private workflowExecutionsDal!: WorkflowExecutionsDataAccess;
   private validationService!: WorkflowValidationService;
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
@@ -206,6 +210,7 @@ export class WorkflowsService {
       esClient: this.esClient,
       logger: this.logger,
     });
+    this.workflowExecutionsDal = workflowExecutionsDal;
 
     this.executionQueryService = new WorkflowExecutionQueryService({
       logger: this.logger,
@@ -219,13 +224,13 @@ export class WorkflowsService {
       logger: this.logger,
       workflowStorage: this.workflowStorage,
       esClient: this.esClient,
+      workflowExecutionsDal,
     });
 
     await this.initializeChangeHistoryService(coreStart);
 
     this.crudService = new WorkflowCrudService({
       logger: this.logger,
-      esClient: this.esClient,
       workflowStorage: this.workflowStorage,
       getSecurity: () => this.coreStart.security,
       workflowsExtensions: this.workflowsExtensions,
@@ -234,6 +239,8 @@ export class WorkflowsService {
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
       changeHistoryService: this.changeHistoryService,
+      workflowExecutionsDal,
+      stepExecutionsDal,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -257,6 +264,11 @@ export class WorkflowsService {
   public async getCoreStart(): Promise<CoreStart> {
     await this.ensureInitialized();
     return this.coreStart;
+  }
+
+  public async getWorkflowExecutionsDal(): Promise<WorkflowExecutionsDataAccess> {
+    await this.ensureInitialized();
+    return this.workflowExecutionsDal;
   }
 
   public async getPluginsStart(): Promise<WorkflowsServerPluginStartDeps> {
