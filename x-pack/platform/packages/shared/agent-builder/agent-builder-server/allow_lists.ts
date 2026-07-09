@@ -52,6 +52,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+  `${internalNamespaces.security}.find_rules`,
+  `${internalNamespaces.security}.discover_rule_tags`,
   `${internalNamespaces.security}.add_entities_to_watchlist`,
   `${internalNamespaces.security}.create_watchlist`,
   `${internalNamespaces.security}.delete_watchlist`,
