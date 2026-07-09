@@ -83,6 +83,8 @@ const readStreamBody = async (body: NodeJS.ReadableStream): Promise<string> => {
     const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
     totalBytes += buf.byteLength;
     if (totalBytes > MAX_ERROR_BODY_BYTES) {
+      // Stop reading, but release the underlying connection instead of abandoning a half-read stream.
+      (body as { destroy?: () => void }).destroy?.();
       break;
     }
     chunks.push(buf);
