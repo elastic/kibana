@@ -9,7 +9,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { SmlDocument } from './services/sml/types';
-import type { AgentContextLayerStartDependencies } from './types';
+import type { AgentBuilderSmlStartDependencies } from './types';
 
 const mockSmlServiceInstance = {
   setup: jest.fn(),
@@ -38,9 +38,9 @@ jest.mock('./routes/search', () => ({
   registerSearchRoute: jest.fn(),
 }));
 
-import { AgentContextLayerPlugin } from './plugin';
+import { AgentBuilderSmlPlugin } from './plugin';
 
-describe('AgentContextLayerPlugin', () => {
+describe('AgentBuilderSmlPlugin', () => {
   describe('public start contract: getDocuments', () => {
     const createDoc = (id: string): SmlDocument => ({
       id,
@@ -80,7 +80,7 @@ describe('AgentContextLayerPlugin', () => {
         listTypeDefinitions: jest.fn().mockReturnValue([]),
       });
 
-      const plugin = new AgentContextLayerPlugin(coreMock.createPluginInitializerContext());
+      const plugin = new AgentBuilderSmlPlugin(coreMock.createPluginInitializerContext());
 
       const coreSetup = coreMock.createSetup();
       plugin.setup(coreSetup as any, {
@@ -95,7 +95,7 @@ describe('AgentContextLayerPlugin', () => {
       const coreStart = coreMock.createStart();
       (coreStart.elasticsearch.client.asScoped as jest.Mock).mockReturnValue(scopedEsClient);
 
-      const startDeps: AgentContextLayerStartDependencies = {
+      const startDeps: AgentBuilderSmlStartDependencies = {
         taskManager: { schedule: jest.fn() } as any,
         spaces: spaceFromRequest
           ? ({

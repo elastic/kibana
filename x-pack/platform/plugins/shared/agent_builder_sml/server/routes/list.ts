@@ -15,7 +15,7 @@ import {
 } from '../../common/http_api/sml';
 import { smlBasePath } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
-import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
+import type { AgentBuilderSmlStartDependencies, AgentBuilderSmlPluginStart } from '../types';
 import { READ_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
 import { SmlResultWindowExceededError } from '../services/sml/sml_errors';
 
@@ -26,7 +26,7 @@ export const registerListRoute = ({
   getSmlService,
 }: {
   router: IRouter;
-  coreSetup: CoreSetup<AgentContextLayerStartDependencies, AgentContextLayerPluginStart>;
+  coreSetup: CoreSetup<AgentBuilderSmlStartDependencies, AgentBuilderSmlPluginStart>;
   logger: Logger;
   getSmlService: () => SmlService;
 }) => {

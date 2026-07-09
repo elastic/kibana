@@ -17,7 +17,7 @@ import {
 } from '../../common/http_api/sml';
 import { smlAutocompletePath } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
-import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
+import type { AgentBuilderSmlStartDependencies, AgentBuilderSmlPluginStart } from '../types';
 import { READ_SECURITY, withSmlFeatureFlag } from './common';
 
 const SML_AUTOCOMPLETE_SIZE_MAX = 50;
@@ -29,7 +29,7 @@ export const registerAutocompleteRoute = ({
   getSmlService,
 }: {
   router: IRouter;
-  coreSetup: CoreSetup<AgentContextLayerStartDependencies, AgentContextLayerPluginStart>;
+  coreSetup: CoreSetup<AgentBuilderSmlStartDependencies, AgentBuilderSmlPluginStart>;
   logger: Logger;
   getSmlService: () => SmlService;
 }) => {

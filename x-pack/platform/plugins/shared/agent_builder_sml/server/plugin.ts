@@ -8,10 +8,10 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type {
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
-  AgentContextLayerSetupDependencies,
-  AgentContextLayerStartDependencies,
+  AgentBuilderSmlPluginSetup,
+  AgentBuilderSmlPluginStart,
+  AgentBuilderSmlSetupDependencies,
+  AgentBuilderSmlStartDependencies,
 } from './types';
 import { registerFeatures } from './features';
 import { registerUISettings } from './ui_settings';
@@ -28,13 +28,13 @@ import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
 import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
-export class AgentContextLayerPlugin
+export class AgentBuilderSmlPlugin
   implements
     Plugin<
-      AgentContextLayerPluginSetup,
-      AgentContextLayerPluginStart,
-      AgentContextLayerSetupDependencies,
-      AgentContextLayerStartDependencies
+      AgentBuilderSmlPluginSetup,
+      AgentBuilderSmlPluginStart,
+      AgentBuilderSmlSetupDependencies,
+      AgentBuilderSmlStartDependencies
     >
 {
   private logger: Logger;
@@ -47,9 +47,9 @@ export class AgentContextLayerPlugin
   }
 
   setup(
-    coreSetup: CoreSetup<AgentContextLayerStartDependencies, AgentContextLayerPluginStart>,
-    setupDeps: AgentContextLayerSetupDependencies
-  ): AgentContextLayerPluginSetup {
+    coreSetup: CoreSetup<AgentBuilderSmlStartDependencies, AgentBuilderSmlPluginStart>,
+    setupDeps: AgentBuilderSmlSetupDependencies
+  ): AgentBuilderSmlPluginSetup {
     registerFeatures({ features: setupDeps.features });
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
@@ -102,8 +102,8 @@ export class AgentContextLayerPlugin
 
   start(
     coreStart: CoreStart,
-    { taskManager, spaces, security }: AgentContextLayerStartDependencies
-  ): AgentContextLayerPluginStart {
+    { taskManager, spaces, security }: AgentBuilderSmlStartDependencies
+  ): AgentBuilderSmlPluginStart {
     const { elasticsearch, savedObjects } = coreStart;
 
     this.smlService = this.smlServiceInstance.start({
@@ -121,7 +121,7 @@ export class AgentContextLayerPlugin
       this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
     });
 
-    const startContract: AgentContextLayerPluginStart = {
+    const startContract: AgentBuilderSmlPluginStart = {
       search: smlService.search,
       getDocuments: async ({ ids, request, spaceId }) => {
         if (ids.length === 0) {

@@ -7,15 +7,15 @@
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
 import type {
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
-  AgentContextLayerSetupDependencies,
-  AgentContextLayerStartDependencies,
+  AgentBuilderSmlPluginSetup,
+  AgentBuilderSmlPluginStart,
+  AgentBuilderSmlSetupDependencies,
+  AgentBuilderSmlStartDependencies,
 } from './types';
 
 export type {
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
+  AgentBuilderSmlPluginSetup,
+  AgentBuilderSmlPluginStart,
   SmlIndexAttachmentParams,
   SmlIndexAttachmentOriginParams,
   SmlIndexAttachmentContentParams,
@@ -50,11 +50,11 @@ export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_
 export { SmlSearchFilterType } from '../common/http_api/sml';
 
 export const plugin: PluginInitializer<
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
-  AgentContextLayerSetupDependencies,
-  AgentContextLayerStartDependencies
+  AgentBuilderSmlPluginSetup,
+  AgentBuilderSmlPluginStart,
+  AgentBuilderSmlSetupDependencies,
+  AgentBuilderSmlStartDependencies
 > = async (pluginInitializerContext: PluginInitializerContext) => {
-  const { AgentContextLayerPlugin } = await import('./plugin');
-  return new AgentContextLayerPlugin(pluginInitializerContext);
+  const { AgentBuilderSmlPlugin } = await import('./plugin');
+  return new AgentBuilderSmlPlugin(pluginInitializerContext);
 };
