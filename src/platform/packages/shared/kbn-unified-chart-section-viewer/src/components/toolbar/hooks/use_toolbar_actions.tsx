@@ -15,6 +15,7 @@ import { css } from '@emotion/react';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
+import { SortSelector } from '../sort_selector';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
@@ -36,8 +37,14 @@ export const useToolbarActions = ({
   isLoading = false,
   metricItems,
 }: UseToolbarActionsProps) => {
-  const { selectedDimensions, onDimensionsChange, isFullscreen, onToggleFullscreen } =
-    useMetricsExperienceState();
+  const {
+    selectedDimensions,
+    onDimensionsChange,
+    isFullscreen,
+    onToggleFullscreen,
+    metricsSort,
+    onMetricsSortChange,
+  } = useMetricsExperienceState();
   const onDimensionsSelectionChange = onDimensionsChangeProp ?? onDimensionsChange;
 
   const { euiTheme } = useEuiTheme();
@@ -62,6 +69,7 @@ export const useToolbarActions = ({
           metricItems={metricItems}
         />
       ),
+      <SortSelector sort={metricsSort} onChange={onMetricsSortChange} fullWidth={isSmallScreen} />,
     ],
     [
       isSmallScreen,
@@ -71,6 +79,8 @@ export const useToolbarActions = ({
       hideDimensionsSelector,
       isLoading,
       metricItems,
+      metricsSort,
+      onMetricsSortChange,
     ]
   );
 
