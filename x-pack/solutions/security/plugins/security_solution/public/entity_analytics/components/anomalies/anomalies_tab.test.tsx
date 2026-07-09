@@ -409,7 +409,7 @@ describe('AnomaliesTab', () => {
     it('renders a loading chart placeholder instead of the MitreAttackChain while overview is loading', () => {
       mockUseAnomalyOverview.mockReturnValue({
         ...emptyOverview,
-        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        data: undefined,
         isLoading: true,
       });
       const { container } = render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
@@ -433,6 +433,16 @@ describe('AnomaliesTab', () => {
         'data-triggered-tactics',
         JSON.stringify(['Initial Access'])
       );
+    });
+
+    it('hides the attack chain accordion once loading finishes with no tactics', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: {} },
+        isLoading: false,
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.queryByTestId('mock-mitre-attack-chain')).not.toBeInTheDocument();
     });
   });
 

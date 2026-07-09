@@ -298,7 +298,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
           <EuiSpacer size="m" />
         </>
       )}
-      {uniqueTactics.length > 0 && (
+      {(isLoading || uniqueTactics.length > 0) && (
         <EuiAccordion
           id="entity-anomalies-tab-attack-chain-accordion"
           data-test-subj={ANOMALIES_TAB_ATTACK_CHAIN_TEST_ID}

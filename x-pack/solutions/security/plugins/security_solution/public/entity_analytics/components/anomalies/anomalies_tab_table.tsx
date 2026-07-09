@@ -74,10 +74,12 @@ const compactPaginationSpacerCss = css`
     block-size: 8px;
     height: 8px;
   }
+`;
 
-  /* EUI renders the no-items message as the sole row in the table body,
-   * so :only-child reliably targets it without depending on :has(). */
-  .euiTableRow:only-child {
+// Applied only when the table has no items, so the sole rendered `.euiTableRow`
+// is guaranteed to be the no-items message row (never a real data row).
+const noItemsRowCss = css`
+  .euiTableRow {
     pointer-events: none;
 
     &:hover {
@@ -332,7 +334,13 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
               />
             </EuiText>
             <EuiSpacer size="s" />
-            <div css={compactPaginationSpacerCss}>
+            <div
+              css={
+                rows.length === 0
+                  ? [compactPaginationSpacerCss, noItemsRowCss]
+                  : compactPaginationSpacerCss
+              }
+            >
               <EuiBasicTable
                 data-test-subj={ANOMALIES_TAB_TABLE_GRID_TEST_ID}
                 tableCaption={ENTITY_ANOMALY_TABLE_CAPTION}
