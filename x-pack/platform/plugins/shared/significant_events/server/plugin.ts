@@ -21,7 +21,10 @@ import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsConfig } from '../common/config';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
+import { RelayClient } from './lib/slack_app/relay_client';
+import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import { installWorkflows } from './lib/workflows/setup/install_workflows';
 import { registerFeatureFlags } from './feature_flags';
 import { registerRules } from './lib/significant_events/rules/register_rules';
@@ -87,6 +90,7 @@ export class SignificantEventsPlugin
       SignificantEventsPluginStartDependencies
     >
 {
+  public config: SignificantEventsConfig;
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;
@@ -95,8 +99,9 @@ export class SignificantEventsPlugin
   private subscriptions: Subscription[] = [];
   private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClient>;
 
-  constructor(context: PluginInitializerContext) {
+  constructor(context: PluginInitializerContext<SignificantEventsConfig>) {
     this.isDev = context.env.mode.dev;
+    this.config = context.config.get();
     this.logger = context.logger.get();
   }
 
@@ -109,6 +114,8 @@ export class SignificantEventsPlugin
       workflowsManagement: plugins.workflowsManagement,
     } as StreamsServer;
     this.server.workflowsManagement = plugins.workflowsManagement;
+
+    core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
 
     this.ebtTelemetryService.setup(core.analytics);
 
@@ -340,6 +347,17 @@ export class SignificantEventsPlugin
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;
       this.server.agentBuilder = plugins.agentBuilder;
+
+      // Built once here rather than per-request: reads TLS cert/key/CA files from disk
+      // and keeps its own connection pool (see RelayClient's class doc).
+      const relayService = this.config.relayService;
+      if (relayService) {
+        this.server.relayClient = new RelayClient({
+          baseUrl: relayService.url,
+          tls: relayService.tls,
+          logger: this.logger.get('relay-client'),
+        });
+      }
     }
 
     initializeSignificantEventsTemplates({
