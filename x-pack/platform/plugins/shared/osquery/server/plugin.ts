@@ -51,6 +51,7 @@ import { createActionService } from './handlers/action/create_action_service';
 import { backfillScheduleIds } from './lib/backfill_schedule_ids';
 import { checkResponseActionAuthz } from './lib/check_response_action_authz';
 import { SchemaService } from './lib/schema_service';
+import { registerAgentBuilderTools } from './agent_builder/register_tools';
 
 const BACKFILL_TASK_TYPE = 'osquery:backfillScheduleIds';
 
@@ -150,6 +151,15 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     if (plugins.cases) {
       plugins.cases.attachmentFramework.registerUnified(osqueryUnifiedAttachment);
+    }
+
+    if (plugins.agentBuilder && experimentalFeatures.agentBuilderTools) {
+      registerAgentBuilderTools(
+        plugins.agentBuilder,
+        osqueryContext,
+        this.schemaService,
+        this.logger
+      );
     }
 
     return {

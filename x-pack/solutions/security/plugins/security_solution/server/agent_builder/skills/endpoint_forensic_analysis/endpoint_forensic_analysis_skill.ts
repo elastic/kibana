@@ -66,14 +66,34 @@ Do **not** load for:
 
 This skill MUST NOT invoke response actions. On response-action requests, hand off to endpoint-response-actions and stop.
 
+## Capability Detection (Phase 0 — ALWAYS FIRST)
+
+Before selecting a query path, determine what data sources are available:
+
+1. Call \`osquery.check_integration\` to see if the Osquery integration is installed and agents are enrolled.
+2. **If Osquery IS installed and agents are enrolled**: for **live-state** questions (current processes, open sockets, loaded DLLs, registry keys as of now), route to the Osquery path (steps 2b–6b below). For **historical** questions (what happened in the past), use ES|QL on Defend telemetry.
+3. **If Osquery is NOT installed**: route all questions to the ES|QL / Defend telemetry path. Inform the analyst that live host interrogation requires the Osquery integration.
+
+Use Osquery when the question asks for **current state** ("what processes are currently running", "which sockets are open right now").
+Use ES|QL when the question asks for **historical events** ("what happened at 3am", "timeline of the attack", "patient zero").
+
+Both paths can be combined in a single investigation when both integrations are available.
+
 ## Process
 
 ### 1. Discover telemetry scope
 Call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` first with host names and time window from the question.
 
-### 2. Query with ES|QL
+### 2a. Query with ES|QL (historical / Defend telemetry)
 Use \`platform.core.generate_esql\` then \`platform.core.execute_esql\` against the recommended Defend indices.
 Always scope \`@timestamp\`. Cite index and query in answers.
+
+### 2b. Query with Osquery (live state — when integration is installed)
+For live-state questions, use these Osquery tools in sequence:
+- \`osquery.list_saved_queries\` to find prebuilt queries matching the investigative need
+- \`osquery.get_table_schema\` to verify column names before authoring a custom query
+- \`osquery.run_live_query\` to dispatch a read-only SELECT query to enrolled agents
+- \`osquery.list_packs\` to find Elastic-built packs when the analyst references a pack by name
 
 ### 3. Patient zero
 Query process and network indices ordered by @timestamp ASC.
@@ -88,13 +108,17 @@ Trace outbound internal connections from source host; correlate with process cre
 
 ### 6. Persistence
 Enumerate registry run keys, scheduled tasks, services, and startup items from telemetry indices.
+When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`startup_items\` tables.
 
 ## Tool Selection Guardrails
 
+- **Always** call \`osquery.check_integration\` before using any other \`osquery.*\` tool.
 - **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL.
-- **Always** use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for forensic answers.
+- **Always** use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for historical forensic answers.
 - Do **not** use \`platform.core.search\`, \`relevance_search\`, or repeated \`platform.core.list_indices\` for reconstruction — they cannot replace scoped ES|QL on Defend telemetry.
 - Use \`platform.core.get_index_mapping\` only when field names are uncertain before generating ES|QL.
+- Use \`osquery.run_live_query\` only for **read-only SELECT queries** on enrolled agents. Never attempt shell execution or mutating Osquery tables.
+- When a prebuilt saved query matches, prefer it over authoring a custom query.
 `,
   getRegistryTools: () => [
     platformCoreTools.getIndexMapping,
