@@ -11,7 +11,6 @@ import { useCallback, useState } from 'react';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
 import { useKibana } from '../../../common/lib/kibana';
-import { AttackDiscoveryEventTypes } from '../../../common/lib/telemetry';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { getErrorToastText } from '../helpers';
 import { callInternalGenerateApi, callPublicGenerateApi, getRequestBody } from './helpers';
@@ -34,7 +33,6 @@ interface FetchAttackDiscoveriesOptions {
   overrideStart?: string;
   size?: number;
   start?: string;
-  trigger?: 'manual' | 'save_and_run';
 }
 
 export interface UseAttackDiscovery {
@@ -58,7 +56,6 @@ export const useAttackDiscovery = ({
     featureFlags,
     http,
     notifications: { toasts },
-    telemetry,
   } = useKibana().services;
 
   // Get current space ID for workflow configuration
@@ -85,7 +82,6 @@ export const useAttackDiscovery = ({
           options?.overrideFilter ?? (!isEmpty(options?.filter) ? options?.filter : undefined);
         const effectiveStart = options?.overrideStart ?? options?.start;
         const effectiveConnectorId = options?.overrideConnectorId ?? connectorId;
-        const effectiveTrigger = options?.trigger ?? 'manual';
 
         if (!effectiveConnectorId) {
           throw new Error(CONNECTOR_ERROR);
@@ -121,11 +117,6 @@ export const useAttackDiscovery = ({
             throw new Error(ALERTS_INDEX_PATTERN_ERROR);
           }
 
-          telemetry.reportEvent(AttackDiscoveryEventTypes.GenerationStarted, {
-            execution_mode: 'workflow',
-            trigger: effectiveTrigger,
-          });
-
           await callInternalGenerateApi({
             alertsIndexPattern,
             apiConfig: {
@@ -141,11 +132,6 @@ export const useAttackDiscovery = ({
             start: effectiveStart,
           });
         } else {
-          telemetry.reportEvent(AttackDiscoveryEventTypes.GenerationStarted, {
-            execution_mode: 'legacy',
-            trigger: effectiveTrigger,
-          });
-
           await callPublicGenerateApi({
             body: bodyWithOverrides,
             http,
@@ -178,7 +164,6 @@ export const useAttackDiscovery = ({
       setLoadingConnectorId,
       size,
       spaceId,
-      telemetry,
       toasts,
       traceOptions,
     ]
