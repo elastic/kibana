@@ -41,6 +41,7 @@ const makeData = (
   totalAnomaliesCount: 0,
   from: 1_000_000,
   to: 2_000_000,
+  hasJobsMissingThreatTactics: false,
   ...overrides,
 });
 
