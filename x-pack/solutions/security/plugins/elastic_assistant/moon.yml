@@ -112,6 +112,7 @@ dependsOn:
   - '@kbn/ai-assistant-common'
   - '@kbn/discoveries'
   - '@kbn/attack-discovery-schedules-common'
+  - '@kbn/workflows'
 tags:
   - plugin
   - prod
