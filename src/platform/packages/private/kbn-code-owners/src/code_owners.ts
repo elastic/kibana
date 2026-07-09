@@ -42,7 +42,7 @@ export function* getCodeOwnersLines(): Generator<string> {
 
     // Assignment override on backport branches to avoid review requests
     // The line is * @kibanamachine, let's skip that
-    if (line.match(/^\*\s+@kibanamachine$/)) continue;
+    if (line.match(/^\*\s+@kibanamachine\s*$/)) continue;
 
     yield line.trim();
   }
