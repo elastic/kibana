@@ -7,6 +7,8 @@
 
 import type { FlyoutApi } from './use_flyout_api';
 import { createAttackFlyoutApiMock } from './attack/use_attack_flyout_api.mock';
+import { createNetworkFlyoutApiMock } from './network/use_network_flyout_api.mock';
+import { createRuleFlyoutApiMock } from './rule/use_rule_flyout_api.mock';
 
 /**
  * Returns a `useFlyoutApi` return value with every method stubbed as a `jest.fn()`.
@@ -16,4 +18,6 @@ import { createAttackFlyoutApiMock } from './attack/use_attack_flyout_api.mock';
  */
 export const createFlyoutApiMock = (): jest.Mocked<FlyoutApi> => ({
   ...createAttackFlyoutApiMock(),
+  ...createNetworkFlyoutApiMock(),
+  ...createRuleFlyoutApiMock(),
 });
