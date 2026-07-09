@@ -116,6 +116,70 @@ describe('useCommandMenuCommand', () => {
     expect(result.current.match.activeCommand?.query).toBe('summarize t');
   });
 
+  describe('stickiness release once content is confirmed empty', () => {
+    it('stays sticky to the active command by default, even when another trigger is closer', () => {
+      mockGetTextBeforeCursor.mockReturnValue('@foo');
+      const { result } = renderHook(() => useCommandMenu());
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+      expect(result.current.match.activeCommand?.command.id).toBe('sml');
+
+      // A "/" now appears closer to the cursor, but nothing has reported
+      // this mention dead yet, so it stays sticky to "sml".
+      mockGetTextBeforeCursor.mockReturnValue('@foo /bar');
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+      expect(result.current.match.activeCommand?.command.id).toBe('sml');
+      expect(result.current.match.activeCommand?.query).toBe('foo /bar');
+    });
+
+    it('releases stickiness once reportContent(false) confirms the mention is dead, letting a later trigger win', () => {
+      mockGetTextBeforeCursor.mockReturnValue('@foo');
+      const { result } = renderHook(() => useCommandMenu());
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+      expect(result.current.match.activeCommand?.command.id).toBe('sml');
+
+      act(() => {
+        result.current.reportContent(false);
+      });
+
+      // The "@" mention is now known-dead. A "/" typed later in the text
+      // should win outright instead of being blocked by stale stickiness.
+      mockGetTextBeforeCursor.mockReturnValue('@foo /bar');
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+      expect(result.current.match.activeCommand?.command.id).toBe('skill');
+      expect(result.current.match.activeCommand?.query).toBe('bar');
+    });
+
+    it('resets the content assumption to true for a genuinely new mention', () => {
+      mockGetTextBeforeCursor.mockReturnValue('/summarize');
+      const { result } = renderHook(() => useCommandMenu());
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+
+      act(() => {
+        result.current.reportContent(false);
+      });
+
+      // A different "/" mention starts at a new offset (e.g. the old one
+      // was deleted and a new one typed) — it should not inherit the old
+      // mention's "dead" status.
+      mockGetTextBeforeCursor.mockReturnValue(' /other');
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+      expect(result.current.match.activeCommand?.commandStartOffset).toBe(1);
+      expect(result.current.match.hasVisibleContent).toBe(true);
+    });
+  });
+
   it('disabled option prevents command detection', () => {
     mockGetTextBeforeCursor.mockReturnValue('/summarize');
 

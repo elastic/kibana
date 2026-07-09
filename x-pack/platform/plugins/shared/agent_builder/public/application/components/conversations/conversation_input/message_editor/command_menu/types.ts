@@ -85,6 +85,8 @@ export interface CommandMatchResult {
   readonly isActive: boolean;
   /** The active command details, or null */
   readonly activeCommand: ActiveCommand | null;
+  /** Whether the active command's menu currently has anything worth showing. */
+  readonly hasVisibleContent: boolean;
 }
 
 /**

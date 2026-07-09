@@ -18,6 +18,8 @@ interface CommandMenuState {
   readonly dismiss: () => void;
   /** Handler to be called on input events */
   readonly checkInputForCommand: (element: HTMLElement) => void;
+  /** Reports whether the active command's mounted menu has anything to show */
+  readonly reportContent: (hasVisibleContent: boolean) => void;
 }
 
 interface UseCommandMenuOptions {
@@ -28,6 +30,7 @@ interface UseCommandMenuOptions {
 const INACTIVE_MATCH: CommandMatchResult = {
   isActive: false,
   activeCommand: null,
+  hasVisibleContent: true,
 };
 
 /**
@@ -49,13 +52,28 @@ export const useCommandMenu = (options: UseCommandMenuOptions = {}): CommandMenu
         return;
       }
       const textBeforeCursor = getTextBeforeCursor(element);
-      setMatch((prev) =>
-        matchCommand(
-          textBeforeCursor,
-          definitions,
-          prev.isActive ? prev.activeCommand?.command.id : undefined
-        )
-      );
+      setMatch((prev) => {
+        // Only stay sticky to the active command while there is a hope of a match
+        const stickyCommandId =
+          prev.isActive && prev.hasVisibleContent ? prev.activeCommand?.command.id : undefined;
+        const result = matchCommand(textBeforeCursor, definitions, stickyCommandId);
+
+        if (!result.isActive || !result.activeCommand) {
+          return INACTIVE_MATCH;
+        }
+
+        const isSameMention =
+          prev.isActive &&
+          prev.activeCommand?.command.id === result.activeCommand.command.id &&
+          prev.activeCommand?.commandStartOffset === result.activeCommand.commandStartOffset;
+
+        return {
+          ...result,
+          // Carry over the known content status for the same mention;
+          // assume content for a genuinely new one until it reports in.
+          hasVisibleContent: isSameMention ? prev.hasVisibleContent : true,
+        };
+      });
     },
     [enabled, definitions]
   );
@@ -64,5 +82,9 @@ export const useCommandMenu = (options: UseCommandMenuOptions = {}): CommandMenu
     setMatch((m) => ({ ...m, isActive: false }));
   }, []);
 
-  return { match, dismiss, checkInputForCommand };
+  const reportContent = useCallback((hasVisibleContent: boolean) => {
+    setMatch((prev) => (prev.isActive ? { ...prev, hasVisibleContent } : prev));
+  }, []);
+
+  return { match, dismiss, checkInputForCommand, reportContent };
 };

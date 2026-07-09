@@ -22,6 +22,7 @@ const isAtWordBoundary = (text: string, offset: number): boolean => {
 const INACTIVE_RESULT: CommandMatchResult = {
   isActive: false,
   activeCommand: null,
+  hasVisibleContent: true,
 };
 
 /**
@@ -74,7 +75,7 @@ export const matchCommand = (
   const result = active ?? best;
 
   if (result) {
-    return { isActive: true, activeCommand: result };
+    return { isActive: true, activeCommand: result, hasVisibleContent: true };
   }
 
   return INACTIVE_RESULT;
