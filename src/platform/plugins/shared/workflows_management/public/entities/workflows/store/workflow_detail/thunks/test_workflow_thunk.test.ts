@@ -157,7 +157,7 @@ describe('testWorkflowThunk', () => {
     expect(result.payload).toBe(expectedMessage);
   });
 
-  it('should truncate an oversized validation reason to keep the toast readable', async () => {
+  it('should truncate the displayed reason but keep the full context copyable via stack', async () => {
     const longReason = `filter must be one of ${'x'.repeat(500)}`;
     const error = {
       body: {
@@ -175,11 +175,21 @@ describe('testWorkflowThunk', () => {
     const result = await store.dispatch(testWorkflowThunk({ inputs: {} }));
 
     const [[reportedError]] = mockServices.notifications.toasts.addError.mock.calls;
+
+    // Displayed toast body is trimmed with an ellipsis and stays compact.
     expect(reportedError.message).toContain('Workflow validation failed:\n• filter must be one of');
     expect(reportedError.message.endsWith('…')).toBe(true);
     // Base message + bullet prefix + capped reason (200) + ellipsis, well under the raw 500+ chars.
     expect(reportedError.message.length).toBeLessThan(250);
+
+    // Full, untruncated reason is preserved on `stack` so Kibana's
+    // "See the full error" modal renders it in a copyable code block.
+    expect(reportedError.stack).toBe(`Workflow validation failed:\n• ${longReason}`);
+    expect(reportedError.stack).not.toContain('…');
+
     expect(result.type).toBe('detail/testWorkflowThunk/rejected');
+    // The rejected payload carries the trimmed message (matches the toast body).
+    expect(result.payload).toBe(reportedError.message);
   });
 
   it('should fall back to body message when validationErrors is empty', async () => {
