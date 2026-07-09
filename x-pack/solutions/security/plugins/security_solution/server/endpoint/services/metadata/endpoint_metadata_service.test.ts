@@ -303,7 +303,7 @@ describe('EndpointMetadataService', () => {
       expect(agentPolicyServiceMock.getByIds).toBeCalledWith(expect.anything(), [basePolicyId]);
     });
 
-    it('should return the stripped `policy_id` in the applied agent policy info', async () => {
+    it('should return the stripped `policy_id` in the applied agent policy info.', async () => {
       const { basePolicyId } = setupSingleHit('test-agent-policy-id#a1b2c3');
 
       const response = await metadataService.getHostMetadataList(queryOptions);
