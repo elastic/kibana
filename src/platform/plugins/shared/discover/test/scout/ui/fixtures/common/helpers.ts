@@ -12,6 +12,8 @@ import { expect } from '@kbn/scout/ui';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import { testData } from '.';
 
+export type QueryMode = 'classic' | 'esql';
+
 export const expectSampleSizeFooter = async ({
   pageObjects,
   sampleSize,
@@ -31,30 +33,12 @@ export const clearStoredQueryMode = async (page: ScoutPage): Promise<void> => {
   }, DISCOVER_QUERY_MODE_KEY);
 };
 
-export const getStoredQueryMode = async (page: ScoutPage): Promise<'classic' | 'esql' | null> => {
-  return page.evaluate((storageKey) => {
-    const storedValue = window.localStorage.getItem(storageKey);
-    if (storedValue == null) {
-      return null;
-    }
-    // The app persists the value JSON-encoded (e.g. `"esql"`).
-    try {
-      const parsedValue = JSON.parse(storedValue);
-      return parsedValue === 'classic' || parsedValue === 'esql' ? parsedValue : null;
-    } catch {
-      return null;
-    }
-  }, DISCOVER_QUERY_MODE_KEY);
-};
-
 /*
- * Waits until the persisted query mode in `localStorage` equals `expectedMode`.
- * Discover writes this value asynchronously after a mode switch, so callers
- * should wait for it (rather than asserting immediately) to avoid flakiness.
+ * Waits until the persisted query mode in `localStorage` equals `expectedMode` to prevent flakiness
  */
 export const waitForStoredQueryMode = async (
   page: ScoutPage,
-  expectedMode: 'classic' | 'esql'
+  expectedMode: QueryMode
 ): Promise<void> => {
   await page.waitForFunction(
     ([storageKey, mode]) => {
@@ -70,4 +54,45 @@ export const waitForStoredQueryMode = async (
     },
     [DISCOVER_QUERY_MODE_KEY, expectedMode] as const
   );
+};
+
+export const switchToMode = async (
+  page: ScoutPage,
+  pageObjects: ScoutTestFixtures['pageObjects'],
+  mode: QueryMode
+): Promise<void> => {
+  if (mode === 'esql') {
+    await pageObjects.discover.selectTextBaseLang();
+  } else {
+    await pageObjects.discover.selectClassicMode();
+  }
+
+  await waitForStoredQueryMode(page, mode);
+  await page.gotoApp('discover');
+  await pageObjects.discover.waitUntilTabIsLoaded();
+};
+
+const getStoredQueryMode = async (page: ScoutPage): Promise<QueryMode | null> => {
+  return page.evaluate((storageKey) => {
+    const storedValue = window.localStorage.getItem(storageKey);
+    if (storedValue == null) {
+      return null;
+    }
+    // The app persists the value JSON-encoded (e.g. `"esql"`).
+    try {
+      const parsedValue = JSON.parse(storedValue);
+      return parsedValue === 'classic' || parsedValue === 'esql' ? parsedValue : null;
+    } catch {
+      return null;
+    }
+  }, DISCOVER_QUERY_MODE_KEY);
+};
+
+export const getCurrentAndStoredMode = async (
+  page: ScoutPage,
+  pageObjects: ScoutTestFixtures['pageObjects']
+): Promise<{ currentMode: QueryMode; storedMode: QueryMode | null }> => {
+  const currentMode = await pageObjects.discover.getCurrentQueryMode();
+  const storedMode = await getStoredQueryMode(page);
+  return { currentMode, storedMode };
 };

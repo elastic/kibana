@@ -644,7 +644,8 @@ export class DiscoverApp {
     }
 
     await this.waitUntilSearchingHasFinished();
-    expect(await this.getCurrentQueryMode()).toBe('classic');
+    const queryMode = await this.getCurrentQueryMode();
+    expect(queryMode).toBe('classic');
   }
 
   async writeAndSubmitEsqlQuery(query: string) {
