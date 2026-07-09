@@ -103,29 +103,20 @@ export interface GetExecutionsByIdsOptions<TExecution extends { id: string }> {
   sourceExcludes?: ExecutionSourceProjectionField<TExecution>[];
 }
 
-export interface ExecutionsDataAccess<TExecution extends { id: string }> {
-  /** Ensure this DAL's backing store exists and is configured. Idempotent. */
-  init(): Promise<void>;
-
+export interface ReadonlyExecutionsDataAccess<TExecution extends { id: string }> {
   search(request: ExecutionsSearchRequest): Promise<estypes.SearchResponse<TExecution>>;
-
   count(request: ExecutionsCountRequest): Promise<estypes.CountResponse>;
-
   getByIds(ids: string[], options?: GetExecutionsByIdsOptions<TExecution>): Promise<TExecution[]>;
+}
 
-  /** @throws on any upsert failure */
-  bulkUpsert(
-    request: BulkUpsertRequest<Partial<TExecution> & { id: string }>
-  ): Promise<BulkUpsertResponse>;
-
-  /**
-   * Bulk ES `create`. Returns per-item outcomes and does not throw on partial failure.
-   */
+export interface WritableExecutionsDataAccess<TExecution extends { id: string }> {
+  bulkUpsert(request: BulkUpsertRequest<TExecution & { id: string }>): Promise<BulkUpsertResponse>;
   bulkCreate(request: BulkCreateRequest<TExecution & { id: string }>): Promise<BulkUpsertResponse>;
-
-  /** @throws on any update failure */
   bulkUpdate(request: BulkUpdateRequest<TExecution & { id: string }>): Promise<BulkUpsertResponse>;
 }
+
+export type ExecutionsDataAccess<TExecution extends { id: string }> =
+  ReadonlyExecutionsDataAccess<TExecution> & WritableExecutionsDataAccess<TExecution>;
 
 export type WorkflowExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowExecution>;
 export type StepExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowStepExecution>;
