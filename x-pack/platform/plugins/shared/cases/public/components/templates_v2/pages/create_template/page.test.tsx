@@ -12,7 +12,13 @@ import { CreateTemplatePage } from './page';
 import { TestProviders } from '../../../../common/mock';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 import { exampleTemplateDefinition } from '../../field_types/constants';
+import { splitTemplateDefinition } from '../../utils/template_settings_yaml';
 import * as i18n from '../../translations';
+
+// The editor buffer only holds the fields YAML; connector/settings are managed in the Settings
+// form and split out of the definition. The draft that gets persisted/reset is therefore the
+// fields-only version of the example template.
+const exampleFieldsYaml = splitTemplateDefinition(exampleTemplateDefinition).fieldsYaml;
 
 jest.mock('../../components/template_form', () => ({
   TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
@@ -32,6 +38,7 @@ jest.mock('../../hooks/use_create_template', () => ({
 jest.mock('../../../../common/navigation', () => ({
   useCasesTemplatesNavigation: () => ({
     navigateToCasesTemplates: mockNavigateToCasesTemplates,
+    getCasesTemplatesUrl: jest.fn().mockReturnValue('/app/security/cases/configure/templates'),
   }),
 }));
 
@@ -46,16 +53,21 @@ describe('CreateTemplatePage', () => {
     mockMutateAsync.mockResolvedValue(undefined);
   });
 
-  it('renders the layout with header and sections', () => {
+  it('renders the layout with header and sections', async () => {
     render(
       <TestProviders>
         <CreateTemplatePage />
       </TestProviders>
     );
 
-    expect(screen.getByText(i18n.ADD_TEMPLATE_TITLE)).toBeInTheDocument();
-    expect(screen.getByText(i18n.BACK_TO_TEMPLATES)).toBeInTheDocument();
-    expect(screen.getByTestId('saveTemplateHeaderButton')).toBeInTheDocument();
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent(i18n.ADD_TEMPLATE_TITLE);
+    expect(screen.getByTestId('appHeaderBack')).toHaveAttribute(
+      'aria-label',
+      `Back to ${i18n.TEMPLATE_TITLE}`
+    );
+    // AppMenu resolves its contents via a dynamic import, so the save button isn't available
+    // in the very first render tick.
+    expect(await screen.findByTestId('saveTemplateHeaderButton')).toBeInTheDocument();
     expect(screen.getByTestId('template-yaml-editor')).toBeInTheDocument();
     expect(screen.getByTestId('create-template-preview')).toBeInTheDocument();
   });
@@ -84,9 +96,9 @@ describe('CreateTemplatePage', () => {
       expect(mockMutateAsync).toHaveBeenCalledTimes(1);
     });
 
-    // Verify localStorage was reset to default template
+    // Verify localStorage was reset to the default template (fields-only buffer)
     await waitFor(() => {
-      expect(localStorage.getItem(storageKey)).toBe(JSON.stringify(exampleTemplateDefinition));
+      expect(localStorage.getItem(storageKey)).toBe(JSON.stringify(exampleFieldsYaml));
     });
 
     // Verify navigation was called
@@ -137,8 +149,8 @@ describe('CreateTemplatePage', () => {
       expect(mockMutateAsync).toHaveBeenCalledTimes(1);
     });
 
-    // Verify the localStorage value is the default example template
+    // Verify the localStorage value is the default example template (fields-only buffer)
     const storedValue = localStorage.getItem(storageKey);
-    expect(storedValue).toBe(JSON.stringify(exampleTemplateDefinition));
+    expect(storedValue).toBe(JSON.stringify(exampleFieldsYaml));
   });
 });

@@ -139,7 +139,7 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
   return (
     <EuiFlyout onClose={onClose} size="m" data-test-subj="fieldDefinitionFlyout">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h2>
             {isEditing
               ? i18n.FIELD_DEFINITION_FORM_TITLE_EDIT
