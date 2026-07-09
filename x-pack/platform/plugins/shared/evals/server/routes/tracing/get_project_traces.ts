@@ -123,7 +123,9 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
               filter: [
                 ...filters,
                 {
-                  terms: { 'scope.name': ['@kbn/evals', 'inference'] },
+                  terms: {
+                    'scope.name': ['@kbn/evals', 'inference', 'com.anthropic.claude_code.tracing'],
+                  },
                 },
               ],
             },
@@ -289,7 +291,12 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
                       { terms: { trace_id: traceIds } },
                       {
                         terms: {
-                          event_name: ['gen_ai.user.message', 'gen_ai.choice'],
+                          event_name: [
+                            'gen_ai.user.message',
+                            'gen_ai.choice',
+                            'user_prompt',
+                            'assistant_response',
+                          ],
                         },
                       },
                     ],
@@ -300,13 +307,15 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
                     terms: { field: 'trace_id', size: traceIds.length },
                     aggs: {
                       user_messages: {
-                        filter: { term: { event_name: 'gen_ai.user.message' } },
+                        filter: {
+                          terms: { event_name: ['gen_ai.user.message', 'user_prompt'] },
+                        },
                       },
                       first_user_prompt: {
                         top_hits: {
                           size: 1,
                           sort: [{ '@timestamp': { order: 'asc' } }],
-                          _source: ['attributes.content'],
+                          _source: ['attributes.content', 'attributes.prompt'],
                         },
                       },
                     },
@@ -324,7 +333,7 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
                       first_user_prompt: {
                         hits: {
                           hits: Array<{
-                            _source?: { attributes?: { content?: string } };
+                            _source?: { attributes?: { content?: string; prompt?: string } };
                           }>;
                         };
                       };
@@ -334,11 +343,13 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
 
               for (const bucket of chatBuckets) {
                 const promptHit = bucket.first_user_prompt?.hits?.hits?.[0];
+                const promptAttrs = promptHit?._source?.attributes ?? {};
+                const rawPrompt =
+                  (promptAttrs.content as string | undefined) ??
+                  (promptAttrs.prompt as string | undefined);
                 chatEvidenceMap[bucket.key] = {
                   hasChatEvents: bucket.doc_count > 0,
-                  userPrompt: promptHit?._source?.attributes?.content
-                    ? String(promptHit._source.attributes.content).substring(0, 200)
-                    : undefined,
+                  userPrompt: rawPrompt ? rawPrompt.substring(0, 200) : undefined,
                 };
               }
             } catch (chatError) {

@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
@@ -13,10 +14,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiTitle,
-  EuiStepsHorizontal,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -25,59 +24,47 @@ import {
   EuiCallOut,
   EuiLoadingSpinner,
   EuiBadge,
-  EuiSelectable,
   EuiPanel,
   EuiSuperSelect,
   EuiFormRow,
   EuiCheckbox,
   EuiToolTip,
   EuiIcon,
+  EuiAccordion,
+  EuiAvatar,
+  EuiSkeletonText,
   useGeneratedHtmlId,
   type EuiBasicTableColumn,
-  type EuiSelectableOption,
-  type EuiStepsHorizontalProps,
 } from '@elastic/eui';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { TracingProject } from '@kbn/evals-common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDefaultConnector } from '../../hooks/chat/use_default_connector';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
-import { useKiEvaluation, type EvalStep, type ValidatedTrace } from './use_ki_evaluation';
+import { RoundTraceButton } from '../conversations/conversation_rounds/round_response/round_trace_button';
+import { useKiEvaluation, type ValidatedTrace, type ProjectTracesState } from './use_ki_evaluation';
 
-const STEP_IDS: EvalStep[] = ['projects', 'traces', 'evaluate', 'results'];
+interface ProviderInfo {
+  label: string;
+  iconType: string;
+  color: string;
+}
 
-const STEP_LABELS: Record<EvalStep, string> = {
-  projects: i18n.translate('xpack.agentBuilder.kiEval.step.projects', {
-    defaultMessage: 'Select project',
-  }),
-  traces: i18n.translate('xpack.agentBuilder.kiEval.step.traces', {
-    defaultMessage: 'Select traces',
-  }),
-  evaluate: i18n.translate('xpack.agentBuilder.kiEval.step.evaluate', {
-    defaultMessage: 'Run evaluation',
-  }),
-  results: i18n.translate('xpack.agentBuilder.kiEval.step.results', {
-    defaultMessage: 'Results',
-  }),
-};
-
-const STEP_DESCRIPTIONS: Record<EvalStep, string> = {
-  projects: i18n.translate('xpack.agentBuilder.kiEval.desc.projects', {
-    defaultMessage:
-      'Choose a tracing project that contains Agent Builder conversation traces. These are OTel traces stored in the traces-* index.',
-  }),
-  traces: i18n.translate('xpack.agentBuilder.kiEval.desc.traces', {
-    defaultMessage:
-      'Select which traces to evaluate. Traces missing required data are flagged with warnings. LLM evaluators (groundedness) require private data to be enabled in the tracing config.',
-  }),
-  evaluate: i18n.translate('xpack.agentBuilder.kiEval.desc.evaluate', {
-    defaultMessage:
-      'Each trace is being graded by the evaluators. LLM-based evaluators use the selected connector. Code-based evaluators (latency, tokens) run locally. Traces without chat data skip LLM evaluators automatically.',
-  }),
-  results: i18n.translate('xpack.agentBuilder.kiEval.desc.results', {
-    defaultMessage:
-      'Evaluation complete. Scores have been ingested into the evals plugin. You can view the experiment in the Evals management section or compare it with future runs.',
-  }),
+const getProviderInfo = (projectName: string): ProviderInfo => {
+  const lower = projectName.toLowerCase();
+  if (lower.includes('elastic')) {
+    return { label: 'Elastic', iconType: 'logoElastic', color: '#00bfb3' };
+  }
+  if (lower.includes('claude') || lower.includes('anthropic')) {
+    return { label: 'Anthropic', iconType: 'sparkles', color: '#d4a96a' };
+  }
+  if (lower.includes('openai') || lower.includes('gpt')) {
+    return { label: 'OpenAI', iconType: 'sparkles', color: '#74aa9c' };
+  }
+  if (lower.includes('gemini') || lower.includes('google')) {
+    return { label: 'Google', iconType: 'sparkles', color: '#4285f4' };
+  }
+  return { label: projectName, iconType: 'dot', color: '#6b7280' };
 };
 
 interface Props {
@@ -90,9 +77,9 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
     selectedCount,
     fetchProjects,
     fetchEvaluators,
-    selectProject,
+    loadProjectTraces,
     toggleTraceSelection,
-    toggleAllTraces,
+    toggleAllTracesForProject,
     runEvaluation,
     fetchExperimentScores,
     reset,
@@ -100,34 +87,25 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
 
   const { selectedConnector: savedConnector, defaultConnectorId } = useConnectorSelection();
   const [selectedConnectorId, setSelectedConnectorId] = useState(savedConnector ?? '');
+  const [selectedEvaluatorNames, setSelectedEvaluatorNames] = useState<string[]>([]);
 
   useEffect(() => {
     fetchProjects();
     fetchEvaluators();
   }, [fetchProjects, fetchEvaluators]);
 
-  const currentStepIndex = STEP_IDS.indexOf(state.currentStep);
-
-  const horizontalSteps: EuiStepsHorizontalProps['steps'] = useMemo(
-    () =>
-      STEP_IDS.map((stepId, idx) => ({
-        title: STEP_LABELS[stepId],
-        status:
-          idx < currentStepIndex
-            ? ('complete' as const)
-            : idx === currentStepIndex
-            ? ('current' as const)
-            : ('disabled' as const),
-        onClick: () => {},
-      })),
-    [currentStepIndex]
-  );
+  // Once evaluators are fetched, default-select all of them.
+  useEffect(() => {
+    if (state.evaluators.length > 0 && selectedEvaluatorNames.length === 0) {
+      setSelectedEvaluatorNames(state.evaluators.map((e) => e.name));
+    }
+  }, [state.evaluators, selectedEvaluatorNames.length]);
 
   const handleRunEvaluation = useCallback(() => {
-    if (selectedConnectorId) {
-      runEvaluation(selectedConnectorId);
+    if (selectedConnectorId && selectedEvaluatorNames.length > 0) {
+      runEvaluation(selectedConnectorId, selectedEvaluatorNames);
     }
-  }, [selectedConnectorId, runEvaluation]);
+  }, [selectedConnectorId, selectedEvaluatorNames, runEvaluation]);
 
   useEffect(() => {
     if (state.currentStep === 'results' && state.experimentId) {
@@ -141,6 +119,12 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
   }, [reset, onClose]);
 
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'kiEvalFlyout' });
+
+  const canRun =
+    !state.isRunning &&
+    Boolean(selectedConnectorId) &&
+    selectedEvaluatorNames.length > 0 &&
+    selectedCount > 0;
 
   return (
     <EuiFlyout
@@ -157,16 +141,9 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
             })}
           </h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiStepsHorizontal steps={horizontalSteps} size="s" />
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiText size="s" color="subdued">
-          <p>{STEP_DESCRIPTIONS[state.currentStep]}</p>
-        </EuiText>
-        <EuiSpacer size="m" />
-
         {state.error && (
           <>
             <EuiCallOut
@@ -183,32 +160,21 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
           </>
         )}
 
-        {state.currentStep === 'projects' && (
-          <ProjectsStep
-            projects={state.projects}
-            isLoading={state.isLoading}
-            onSelect={selectProject}
-          />
-        )}
-
         {state.currentStep === 'traces' && (
           <TracesStep
-            validatedTraces={state.validatedTraces}
-            isLoading={state.isLoading}
+            projects={state.projects}
+            projectsLoading={state.projectsLoading}
+            tracesByProject={state.tracesByProject}
             selectedConnectorId={selectedConnectorId}
             defaultConnectorId={defaultConnectorId}
-            onConnectorChange={setSelectedConnectorId}
-            onToggleTrace={toggleTraceSelection}
-            onToggleAll={toggleAllTraces}
+            evaluators={state.evaluators}
+            selectedEvaluatorNames={selectedEvaluatorNames}
             selectedCount={selectedCount}
-          />
-        )}
-
-        {state.currentStep === 'evaluate' && (
-          <EvaluateStep
-            isLoading={state.isLoading}
-            progressMessage={state.progressMessage}
-            results={state.evaluationResults}
+            onConnectorChange={setSelectedConnectorId}
+            onEvaluatorsChange={setSelectedEvaluatorNames}
+            onLoadProjectTraces={loadProjectTraces}
+            onToggleTrace={toggleTraceSelection}
+            onToggleAll={toggleAllTracesForProject}
           />
         )}
 
@@ -231,13 +197,19 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
               <EuiButton
                 fill
                 onClick={handleRunEvaluation}
-                isDisabled={!selectedConnectorId || selectedCount === 0}
+                isLoading={state.isRunning}
+                isDisabled={!canRun}
                 data-test-subj="kiEvalRunButton"
               >
-                {i18n.translate('xpack.agentBuilder.kiEval.runEvaluation', {
-                  defaultMessage: 'Run evaluation ({count} traces)',
-                  values: { count: selectedCount },
-                })}
+                {state.isRunning
+                  ? state.progressMessage ??
+                    i18n.translate('xpack.agentBuilder.kiEval.runningEvaluation', {
+                      defaultMessage: 'Running evaluation...',
+                    })
+                  : i18n.translate('xpack.agentBuilder.kiEval.runEvaluation', {
+                      defaultMessage: 'Run evaluation ({count} traces)',
+                      values: { count: selectedCount },
+                    })}
               </EuiButton>
             )}
             {state.currentStep === 'results' && (
@@ -254,91 +226,40 @@ export const KiEvaluationFlyout: React.FC<Props> = ({ onClose }) => {
   );
 };
 
-const ProjectsStep: React.FC<{
+// ---------------------------------------------------------------------------
+// TracesStep
+// ---------------------------------------------------------------------------
+
+interface TracesStepProps {
   projects: TracingProject[];
-  isLoading: boolean;
-  onSelect: (project: TracingProject) => void;
-}> = ({ projects, isLoading, onSelect }) => {
-  if (isLoading) {
-    return (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s">
-            {i18n.translate('xpack.agentBuilder.kiEval.loadingProjects', {
-              defaultMessage: 'Loading tracing projects...',
-            })}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  if (projects.length === 0) {
-    return (
-      <EuiCallOut
-        announceOnMount
-        title={i18n.translate('xpack.agentBuilder.kiEval.noProjects', {
-          defaultMessage: 'No tracing projects found',
-        })}
-        color="warning"
-        iconType="warning"
-      >
-        <p>
-          {i18n.translate('xpack.agentBuilder.kiEval.noProjectsDesc', {
-            defaultMessage:
-              'No OTel traces found in the traces-* index. Make sure Agent Builder tracing is enabled and you have had some conversations.',
-          })}
-        </p>
-      </EuiCallOut>
-    );
-  }
-
-  const options: EuiSelectableOption[] = projects.map((p) => ({
-    label: `${p.name} (${p.trace_count} traces)`,
-    key: p.name,
-  }));
-
-  return (
-    <EuiSelectable
-      options={options}
-      singleSelection
-      onChange={(newOptions) => {
-        const selected = newOptions.find((o) => o.checked === 'on');
-        if (selected) {
-          const project = projects.find((p) => p.name === selected.key);
-          if (project) {
-            onSelect(project);
-          }
-        }
-      }}
-      listProps={{ bordered: true }}
-    >
-      {(list) => list}
-    </EuiSelectable>
-  );
-};
-
-const TracesStep: React.FC<{
-  validatedTraces: ValidatedTrace[];
-  isLoading: boolean;
+  projectsLoading: boolean;
+  tracesByProject: Record<string, ProjectTracesState>;
   selectedConnectorId: string;
   defaultConnectorId?: string;
-  onConnectorChange: (connectorId: string) => void;
-  onToggleTrace: (traceId: string) => void;
-  onToggleAll: (selected: boolean) => void;
+  evaluators: Array<{ name: string; kind: 'llm' | 'code' }>;
+  selectedEvaluatorNames: string[];
   selectedCount: number;
-}> = ({
-  validatedTraces,
-  isLoading,
+  onConnectorChange: (id: string) => void;
+  onEvaluatorsChange: (names: string[]) => void;
+  onLoadProjectTraces: (project: TracingProject) => void;
+  onToggleTrace: (projectName: string, traceId: string) => void;
+  onToggleAll: (projectName: string, selected: boolean) => void;
+}
+
+const TracesStep: React.FC<TracesStepProps> = ({
+  projects,
+  projectsLoading,
+  tracesByProject,
   selectedConnectorId,
   defaultConnectorId: parentDefaultConnectorId,
+  evaluators,
+  selectedEvaluatorNames,
+  selectedCount,
   onConnectorChange,
+  onEvaluatorsChange,
+  onLoadProjectTraces,
   onToggleTrace,
   onToggleAll,
-  selectedCount,
 }) => {
   const {
     services: { http, settings },
@@ -371,28 +292,317 @@ const TracesStep: React.FC<{
     [connectors]
   );
 
-  if (isLoading) {
-    return (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="m" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s">
-            {i18n.translate('xpack.agentBuilder.kiEval.loadingTraces', {
-              defaultMessage: 'Loading traces...',
+  const handleEvaluatorChange = useCallback(
+    (optionId: string) => {
+      const next = selectedEvaluatorNames.includes(optionId)
+        ? selectedEvaluatorNames.filter((n) => n !== optionId)
+        : [...selectedEvaluatorNames, optionId];
+      onEvaluatorsChange(next);
+    },
+    [selectedEvaluatorNames, onEvaluatorsChange]
+  );
+
+  return (
+    <>
+      {/* Connector selector */}
+      <EuiFormRow
+        label={i18n.translate('xpack.agentBuilder.kiEval.connectorLabel', {
+          defaultMessage: 'LLM connector',
+        })}
+        helpText={i18n.translate('xpack.agentBuilder.kiEval.connectorHelp', {
+          defaultMessage:
+            'Used by LLM-based evaluators (e.g. groundedness). Code-based evaluators do not require a connector.',
+        })}
+      >
+        <EuiSuperSelect
+          options={connectorOptions}
+          valueOfSelected={selectedConnectorId}
+          onChange={onConnectorChange}
+          isLoading={connectorsLoading}
+          placeholder={i18n.translate('xpack.agentBuilder.kiEval.connectorPlaceholder', {
+            defaultMessage: 'Select a connector',
+          })}
+          data-test-subj="kiEvalConnectorSelector"
+          fullWidth
+        />
+      </EuiFormRow>
+
+      <EuiSpacer size="xl" />
+
+      {/* Evaluator selector */}
+      {evaluators.length > 0 && (
+        <>
+          <EuiFormRow
+            label={i18n.translate('xpack.agentBuilder.kiEval.evaluatorsLabel', {
+              defaultMessage: 'Evaluators',
             })}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            helpText={i18n.translate('xpack.agentBuilder.kiEval.evaluatorsHelp', {
+              defaultMessage: 'Choose which evaluators to run against the selected traces.',
+            })}
+          >
+            <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
+              <div
+                css={css`
+                  display: grid;
+                  grid-template-columns: repeat(3, 1fr);
+                  gap: 23px 31px;
+                `}
+                data-test-subj="kiEvalEvaluatorSelector"
+              >
+                {evaluators.map((e) => (
+                  <EuiCheckbox
+                    key={e.name}
+                    id={`kiEvalEvaluator-${e.name}`}
+                    checked={selectedEvaluatorNames.includes(e.name)}
+                    onChange={() => handleEvaluatorChange(e.name)}
+                    label={
+                      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s">{e.name}</EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="hollow">{e.kind}</EuiBadge>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    }
+                  />
+                ))}
+              </div>
+            </EuiPanel>
+          </EuiFormRow>
+          <EuiSpacer size="xl" />
+        </>
+      )}
+
+      {/* Trace source/provider panels */}
+      <EuiText size="s" color="subdued">
+        <p>
+          {i18n.translate('xpack.agentBuilder.kiEval.sourcesDesc', {
+            defaultMessage:
+              'Select traces from the providers below. Expand a provider to view and choose individual traces.',
+          })}
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
+
+      {projectsLoading && (
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              {i18n.translate('xpack.agentBuilder.kiEval.loadingProjects', {
+                defaultMessage: 'Loading trace sources...',
+              })}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+
+      {!projectsLoading && projects.length === 0 && (
+        <EuiCallOut
+          announceOnMount
+          title={i18n.translate('xpack.agentBuilder.kiEval.noProjects', {
+            defaultMessage: 'No trace sources found',
+          })}
+          color="warning"
+          iconType="warning"
+        >
+          <p>
+            {i18n.translate('xpack.agentBuilder.kiEval.noProjectsDesc', {
+              defaultMessage:
+                'No OTel traces found in the traces-* index. Make sure Agent Builder tracing is enabled and you have had some conversations.',
+            })}
+          </p>
+        </EuiCallOut>
+      )}
+
+      {projects.map((project) => {
+        const llmEvaluatorNames = evaluators
+          .filter((e) => e.kind === 'llm' && selectedEvaluatorNames.includes(e.name))
+          .map((e) => e.name);
+        const tokenEvaluatorNames = ['input_tokens', 'output_tokens', 'tool_calls'].filter((name) =>
+          selectedEvaluatorNames.includes(name)
+        );
+        return (
+          <ProjectSourcePanel
+            key={project.name}
+            project={project}
+            projectState={tracesByProject[project.name]}
+            selectedCount={
+              (tracesByProject[project.name]?.traces ?? []).filter((vt) => vt.selected).length
+            }
+            totalSelectedCount={selectedCount}
+            llmEvaluatorNames={llmEvaluatorNames}
+            tokenEvaluatorNames={tokenEvaluatorNames}
+            onExpand={onLoadProjectTraces}
+            onToggleTrace={onToggleTrace}
+            onToggleAll={onToggleAll}
+          />
+        );
+      })}
+    </>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// ProjectSourcePanel — accordion for a single provider/project
+// ---------------------------------------------------------------------------
+
+interface ProjectSourcePanelProps {
+  project: TracingProject;
+  projectState?: ProjectTracesState;
+  selectedCount: number;
+  totalSelectedCount: number;
+  llmEvaluatorNames: string[];
+  tokenEvaluatorNames: string[];
+  onExpand: (project: TracingProject) => void;
+  onToggleTrace: (projectName: string, traceId: string) => void;
+  onToggleAll: (projectName: string, selected: boolean) => void;
+}
+
+const ProjectSourcePanel: React.FC<ProjectSourcePanelProps> = ({
+  project,
+  projectState,
+  selectedCount,
+  llmEvaluatorNames,
+  tokenEvaluatorNames,
+  onExpand,
+  onToggleTrace,
+  onToggleAll,
+}) => {
+  const provider = useMemo(() => getProviderInfo(project.name), [project.name]);
+  const accordionId = useGeneratedHtmlId({ prefix: `kiEvalProject-${project.name}` });
+
+  const handleToggle = useCallback(
+    (isOpen: boolean) => {
+      if (isOpen) onExpand(project);
+    },
+    [onExpand, project]
+  );
+
+  const buttonContent = (
+    <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          {provider.iconType === 'logoElastic' ? (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="logoElastic" size="l" aria-hidden={true} />
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false}>
+              <EuiAvatar name={provider.label} size="s" color={provider.color} type="space" />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="subdued">{provider.label}</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>{project.name}</strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">
+                {i18n.translate('xpack.agentBuilder.kiEval.traceCount', {
+                  defaultMessage: '{count} traces',
+                  values: { count: project.trace_count },
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {selectedCount > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="primary">
+                {i18n.translate('xpack.agentBuilder.kiEval.selectedCount', {
+                  defaultMessage: '{count} selected',
+                  values: { count: selectedCount },
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  return (
+    <>
+      <EuiPanel paddingSize="m" hasBorder>
+        <EuiAccordion
+          id={accordionId}
+          buttonContent={buttonContent}
+          onToggle={handleToggle}
+          paddingSize="m"
+        >
+          <ProjectTracesContent
+            projectName={project.name}
+            projectState={projectState}
+            selectedCount={selectedCount}
+            llmEvaluatorNames={llmEvaluatorNames}
+            tokenEvaluatorNames={tokenEvaluatorNames}
+            onToggleTrace={onToggleTrace}
+            onToggleAll={onToggleAll}
+          />
+        </EuiAccordion>
+      </EuiPanel>
+      <EuiSpacer size="s" />
+    </>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// ProjectTracesContent — traces table inside the accordion
+// ---------------------------------------------------------------------------
+
+interface ProjectTracesContentProps {
+  projectName: string;
+  projectState?: ProjectTracesState;
+  selectedCount: number;
+  llmEvaluatorNames: string[];
+  tokenEvaluatorNames: string[];
+  onToggleTrace: (projectName: string, traceId: string) => void;
+  onToggleAll: (projectName: string, selected: boolean) => void;
+}
+
+const ProjectTracesContent: React.FC<ProjectTracesContentProps> = ({
+  projectName,
+  projectState,
+  selectedCount,
+  llmEvaluatorNames,
+  tokenEvaluatorNames,
+  onToggleTrace,
+  onToggleAll,
+}) => {
+  if (!projectState || projectState.isLoading) {
+    return <EuiSkeletonText lines={3} />;
+  }
+
+  if (projectState.error) {
+    return (
+      <EuiCallOut
+        color="danger"
+        iconType="error"
+        size="s"
+        title={projectState.error}
+        announceOnMount
+      />
     );
   }
 
-  const invalidCount = validatedTraces.filter((vt) => !vt.validation.valid).length;
-  const withoutChatData = validatedTraces.filter(
-    (vt) => vt.validation.valid && !vt.validation.hasChatEvents
-  ).length;
-  const validCount = validatedTraces.filter((vt) => vt.validation.valid).length;
+  const { traces } = projectState;
+  const validCount = traces.filter((vt) => vt.validation.valid).length;
   const allValidSelected = validCount > 0 && selectedCount === validCount;
 
   const columns: Array<EuiBasicTableColumn<ValidatedTrace>> = [
@@ -400,9 +610,9 @@ const TracesStep: React.FC<{
       field: 'selected',
       name: (
         <EuiCheckbox
-          id="kiEvalSelectAll"
+          id={`kiEvalSelectAll-${projectName}`}
           checked={allValidSelected}
-          onChange={() => onToggleAll(!allValidSelected)}
+          onChange={() => onToggleAll(projectName, !allValidSelected)}
           aria-label={i18n.translate('xpack.agentBuilder.kiEval.selectAll', {
             defaultMessage: 'Select all valid traces',
           })}
@@ -414,7 +624,7 @@ const TracesStep: React.FC<{
           id={`kiEval-${item.trace.trace_id}`}
           checked={item.selected}
           disabled={!item.validation.valid}
-          onChange={() => onToggleTrace(item.trace.trace_id)}
+          onChange={() => onToggleTrace(projectName, item.trace.trace_id)}
           aria-label={i18n.translate('xpack.agentBuilder.kiEval.selectTrace', {
             defaultMessage: 'Select trace {name}',
             values: { name: item.trace.name },
@@ -466,9 +676,18 @@ const TracesStep: React.FC<{
             </EuiToolTip>
           );
         }
-        if (item.validation.warnings.length > 0) {
+        const affectedEvaluators = [
+          ...(!item.validation.hasChatEvents ? llmEvaluatorNames : []),
+          ...(!item.validation.hasTokenData ? tokenEvaluatorNames : []),
+        ];
+        if (affectedEvaluators.length > 0) {
+          const tooltipMsg = i18n.translate('xpack.agentBuilder.kiEval.evaluatorsMightFail', {
+            defaultMessage:
+              'Evaluators {names} might fail because the trace is missing required data.',
+            values: { names: affectedEvaluators.join(', ') },
+          });
           return (
-            <EuiToolTip content={item.validation.warnings.join(' ')}>
+            <EuiToolTip content={tooltipMsg}>
               <EuiBadge tabIndex={0} color="warning">
                 <EuiIcon type="warning" size="s" aria-hidden={true} /> Warnings
               </EuiBadge>
@@ -481,127 +700,37 @@ const TracesStep: React.FC<{
     {
       name: '',
       width: '40px',
-      render: (item: ValidatedTrace) => (
-        <EuiToolTip
-          content={i18n.translate('xpack.agentBuilder.kiEval.viewTrace', {
-            defaultMessage: 'View trace in Discover',
-          })}
-        >
-          <EuiButtonIcon
-            iconType="popout"
-            aria-label={i18n.translate('xpack.agentBuilder.kiEval.viewTraceAriaLabel', {
-              defaultMessage: 'View trace {name} in Discover',
-              values: { name: item.trace.name },
-            })}
-            href={`/app/discover#/?_a=(query:(language:kuery,query:'trace.id: "${item.trace.trace_id}"'))`}
-            target="_blank"
-            size="xs"
-          />
-        </EuiToolTip>
-      ),
+      render: (item: ValidatedTrace) => <RoundTraceButton traceId={item.trace.trace_id} />,
     },
   ];
 
   return (
     <>
-      {withoutChatData > 0 && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate('xpack.agentBuilder.kiEval.missingChatData', {
-              defaultMessage:
-                '{count} {count, plural, one {trace is} other {traces are}} missing chat data',
-              values: { count: withoutChatData },
-            })}
-            color="warning"
-            iconType="warning"
-            size="s"
-          >
-            <p>
-              {i18n.translate('xpack.agentBuilder.kiEval.missingChatDataDesc', {
-                defaultMessage:
-                  'LLM evaluators (groundedness) will be skipped for these traces. To include them, enable private data (user prompts & LLM responses) in your Agent Builder tracing configuration. Code-based evaluators will still run.',
-              })}
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="s" />
-        </>
-      )}
-
-      {invalidCount > 0 && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate('xpack.agentBuilder.kiEval.invalidTraces', {
-              defaultMessage:
-                '{count} {count, plural, one {trace is} other {traces are}} invalid and cannot be selected',
-              values: { count: invalidCount },
-            })}
-            color="danger"
-            iconType="error"
-            size="s"
-          >
-            <p>
-              {i18n.translate('xpack.agentBuilder.kiEval.invalidTracesDesc', {
-                defaultMessage:
-                  'These traces have no spans. Check if tracing is configured correctly.',
-              })}
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="s" />
-        </>
-      )}
-
-      <EuiPanel paddingSize="m" hasBorder>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>
-                {i18n.translate('xpack.agentBuilder.kiEval.tracesSummary', {
-                  defaultMessage: '{selected} of {total} traces selected',
-                  values: { selected: selectedCount, total: validatedTraces.length },
-                })}
-              </strong>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiBasicTable
-          items={validatedTraces}
-          columns={columns}
-          tableLayout="fixed"
-          tableCaption={i18n.translate('xpack.agentBuilder.kiEval.tracesTableCaption', {
-            defaultMessage: 'Traces available for evaluation',
+      <EuiText size="xs" color="subdued">
+        <strong>
+          {i18n.translate('xpack.agentBuilder.kiEval.tracesSummary', {
+            defaultMessage: '{selected} of {total} traces selected',
+            values: { selected: selectedCount, total: traces.length },
           })}
-        />
-      </EuiPanel>
+        </strong>
+      </EuiText>
+      <EuiSpacer size="s" />
 
-      <EuiSpacer size="l" />
-
-      <EuiFormRow
-        label={i18n.translate('xpack.agentBuilder.kiEval.connectorLabel', {
-          defaultMessage: 'LLM connector',
+      <EuiBasicTable
+        items={traces}
+        columns={columns}
+        tableLayout="fixed"
+        tableCaption={i18n.translate('xpack.agentBuilder.kiEval.tracesTableCaption', {
+          defaultMessage: 'Traces available for evaluation',
         })}
-        helpText={i18n.translate('xpack.agentBuilder.kiEval.connectorHelp', {
-          defaultMessage:
-            'Select the model used by LLM-based evaluators (e.g. groundedness). Code-based evaluators (latency, tokens) do not require a connector.',
-        })}
-      >
-        <EuiSuperSelect
-          options={connectorOptions}
-          valueOfSelected={selectedConnectorId}
-          onChange={onConnectorChange}
-          isLoading={connectorsLoading}
-          placeholder={i18n.translate('xpack.agentBuilder.kiEval.connectorPlaceholder', {
-            defaultMessage: 'Select a connector',
-          })}
-          data-test-subj="kiEvalConnectorSelector"
-          fullWidth
-        />
-      </EuiFormRow>
+      />
     </>
   );
 };
+
+// ---------------------------------------------------------------------------
+// ResultsStep
+// ---------------------------------------------------------------------------
 
 interface EvaluatorScoreRow {
   traceId: string;
@@ -614,33 +743,6 @@ interface EvaluatorScoreRow {
   status: 'ok' | 'error';
   errorMessage?: string;
 }
-
-const EvaluateStep: React.FC<{
-  isLoading: boolean;
-  progressMessage?: string;
-  results: EvaluatorScoreRow[];
-}> = ({ isLoading, progressMessage, results }) => {
-  return (
-    <>
-      {isLoading && (
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">{progressMessage}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      {results.length > 0 && (
-        <>
-          <EuiSpacer size="m" />
-          <ScoresTable results={results} />
-        </>
-      )}
-    </>
-  );
-};
 
 const ResultsStep: React.FC<{
   results: EvaluatorScoreRow[];

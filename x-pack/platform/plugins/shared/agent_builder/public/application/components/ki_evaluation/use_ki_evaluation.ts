@@ -28,7 +28,7 @@ import { useKibana } from '../../hooks/use_kibana';
 
 const MAX_TRACES_PER_PAGE = 100;
 
-export type EvalStep = 'projects' | 'traces' | 'evaluate' | 'results';
+export type EvalStep = 'traces' | 'results';
 
 export interface TraceValidation {
   valid: boolean;
@@ -42,6 +42,12 @@ export interface ValidatedTrace {
   trace: TraceSummary;
   validation: TraceValidation;
   selected: boolean;
+}
+
+export interface ProjectTracesState {
+  traces: ValidatedTrace[];
+  isLoading: boolean;
+  error?: string;
 }
 
 export const validateTrace = (trace: TraceSummary): TraceValidation => {
@@ -86,14 +92,14 @@ interface EvaluatorScore {
 export interface KiEvaluationState {
   currentStep: EvalStep;
   projects: TracingProject[];
-  selectedProject?: TracingProject;
-  validatedTraces: ValidatedTrace[];
+  projectsLoading: boolean;
+  tracesByProject: Record<string, ProjectTracesState>;
   evaluators: ListEvaluatorsResponse['evaluators'];
   connectorId?: string;
   evaluationResults: EvaluatorScore[];
   experimentId?: string;
   experimentScores: GetEvaluationExperimentScoresResponse['scores'];
-  isLoading: boolean;
+  isRunning: boolean;
   error?: string;
   progressMessage?: string;
 }
@@ -104,13 +110,14 @@ export const useKiEvaluation = () => {
   } = useKibana();
 
   const [state, setState] = useState<KiEvaluationState>({
-    currentStep: 'projects',
+    currentStep: 'traces',
     projects: [],
-    validatedTraces: [],
+    projectsLoading: false,
+    tracesByProject: {},
     evaluators: [],
     evaluationResults: [],
     experimentScores: [],
-    isLoading: false,
+    isRunning: false,
   });
 
   const setPartialState = useCallback(
@@ -119,25 +126,16 @@ export const useKiEvaluation = () => {
   );
 
   const fetchProjects = useCallback(async () => {
-    setPartialState({
-      isLoading: true,
-      error: undefined,
-      progressMessage: 'Fetching tracing projects...',
-    });
+    setPartialState({ projectsLoading: true, error: undefined });
     try {
       const response = await http!.get<GetTracingProjectsResponse>(EVALS_TRACING_PROJECTS_URL, {
         version: API_VERSIONS.internal.v1,
       });
-      setPartialState({
-        projects: response.projects,
-        isLoading: false,
-        progressMessage: undefined,
-      });
+      setPartialState({ projects: response.projects, projectsLoading: false });
     } catch (e) {
       setPartialState({
-        isLoading: false,
+        projectsLoading: false,
         error: `Failed to fetch projects: ${e.message ?? e}`,
-        progressMessage: undefined,
       });
     }
   }, [http, setPartialState]);
@@ -153,15 +151,19 @@ export const useKiEvaluation = () => {
     }
   }, [http, setPartialState]);
 
-  const selectProject = useCallback(
+  const loadProjectTraces = useCallback(
     async (project: TracingProject) => {
-      setPartialState({
-        selectedProject: project,
-        currentStep: 'traces',
-        isLoading: true,
-        error: undefined,
-        progressMessage: `Fetching traces from "${project.name}"...`,
-      });
+      const alreadyLoaded = state.tracesByProject[project.name];
+      if (alreadyLoaded?.traces.length > 0 || alreadyLoaded?.isLoading) return;
+
+      setState((prev) => ({
+        ...prev,
+        tracesByProject: {
+          ...prev.tracesByProject,
+          [project.name]: { traces: [], isLoading: true },
+        },
+      }));
+
       try {
         const url = EVALS_TRACING_PROJECT_TRACES_URL.replace(
           '{projectName}',
@@ -174,56 +176,81 @@ export const useKiEvaluation = () => {
 
         const validated = response.traces.map((trace) => {
           const validation = validateTrace(trace);
-          return {
-            trace,
-            validation,
-            selected: validation.valid,
-          };
+          return { trace, validation, selected: false };
         });
-        setPartialState({
-          validatedTraces: validated,
-          isLoading: false,
-          progressMessage: undefined,
-        });
+
+        setState((prev) => ({
+          ...prev,
+          tracesByProject: {
+            ...prev.tracesByProject,
+            [project.name]: { traces: validated, isLoading: false },
+          },
+        }));
       } catch (e) {
-        setPartialState({
-          isLoading: false,
-          error: `Failed to fetch traces: ${e.message ?? e}`,
-          progressMessage: undefined,
-        });
+        setState((prev) => ({
+          ...prev,
+          tracesByProject: {
+            ...prev.tracesByProject,
+            [project.name]: {
+              traces: [],
+              isLoading: false,
+              error: `Failed to fetch traces: ${e.message ?? e}`,
+            },
+          },
+        }));
       }
     },
-    [http, setPartialState]
+    [http, state.tracesByProject]
   );
 
-  const toggleTraceSelection = useCallback((traceId: string) => {
-    setState((prev) => ({
-      ...prev,
-      validatedTraces: prev.validatedTraces.map((vt) =>
-        vt.trace.trace_id === traceId && vt.validation.valid
-          ? { ...vt, selected: !vt.selected }
-          : vt
-      ),
-    }));
+  const toggleTraceSelection = useCallback((projectName: string, traceId: string) => {
+    setState((prev) => {
+      const projectTraces = prev.tracesByProject[projectName];
+      if (!projectTraces) return prev;
+      return {
+        ...prev,
+        tracesByProject: {
+          ...prev.tracesByProject,
+          [projectName]: {
+            ...projectTraces,
+            traces: projectTraces.traces.map((vt) =>
+              vt.trace.trace_id === traceId && vt.validation.valid
+                ? { ...vt, selected: !vt.selected }
+                : vt
+            ),
+          },
+        },
+      };
+    });
   }, []);
 
-  const toggleAllTraces = useCallback((selected: boolean) => {
-    setState((prev) => ({
-      ...prev,
-      validatedTraces: prev.validatedTraces.map((vt) =>
-        vt.validation.valid ? { ...vt, selected } : vt
-      ),
-    }));
+  const toggleAllTracesForProject = useCallback((projectName: string, selected: boolean) => {
+    setState((prev) => {
+      const projectTraces = prev.tracesByProject[projectName];
+      if (!projectTraces) return prev;
+      return {
+        ...prev,
+        tracesByProject: {
+          ...prev.tracesByProject,
+          [projectName]: {
+            ...projectTraces,
+            traces: projectTraces.traces.map((vt) =>
+              vt.validation.valid ? { ...vt, selected } : vt
+            ),
+          },
+        },
+      };
+    });
   }, []);
 
   const runEvaluation = useCallback(
-    async (connectorId: string) => {
-      const selectedTraces = state.validatedTraces.filter((vt) => vt.selected);
+    async (connectorId: string, evaluatorNames: string[]) => {
+      const allProjectTraces = Object.values(state.tracesByProject).flatMap((p) => p.traces);
+      const selectedTraces = allProjectTraces.filter((vt) => vt.selected);
 
       setPartialState({
-        currentStep: 'evaluate',
         connectorId,
-        isLoading: true,
+        isRunning: true,
         error: undefined,
         evaluationResults: [],
         progressMessage: 'Starting evaluation...',
@@ -240,16 +267,11 @@ export const useKiEvaluation = () => {
         });
 
         try {
-          const evaluators: EvaluateRequestBodyInput['evaluators'] = [
-            { name: 'latency' },
-            { name: 'input_tokens' },
-            { name: 'output_tokens' },
-            { name: 'tool_calls' },
-          ];
-
-          if (validation.hasChatEvents) {
-            evaluators.unshift({ name: 'groundedness', connector_id: connectorId });
-          }
+          const evaluators: EvaluateRequestBodyInput['evaluators'] = evaluatorNames
+            .filter((name) => name !== 'groundedness' || validation.hasChatEvents)
+            .map((name) =>
+              name === 'groundedness' ? { name, connector_id: connectorId } : { name }
+            );
 
           const body: EvaluateRequestBodyInput = {
             subject: {
@@ -350,13 +372,13 @@ export const useKiEvaluation = () => {
 
         setPartialState({
           experimentId,
-          isLoading: false,
+          isRunning: false,
           progressMessage: undefined,
           currentStep: 'results',
         });
       } catch (e) {
         setPartialState({
-          isLoading: false,
+          isRunning: false,
           error: `Scores ingested but experiment creation failed: ${e.message ?? e}`,
           progressMessage: undefined,
           currentStep: 'results',
@@ -364,7 +386,7 @@ export const useKiEvaluation = () => {
         });
       }
     },
-    [http, state.validatedTraces, setPartialState]
+    [http, state.tracesByProject, setPartialState]
   );
 
   const fetchExperimentScores = useCallback(
@@ -387,26 +409,29 @@ export const useKiEvaluation = () => {
 
   const reset = useCallback(() => {
     setState({
-      currentStep: 'projects',
+      currentStep: 'traces',
       projects: [],
-      validatedTraces: [],
+      projectsLoading: false,
+      tracesByProject: {},
       evaluators: [],
       evaluationResults: [],
       experimentScores: [],
-      isLoading: false,
+      isRunning: false,
     });
   }, []);
 
-  const selectedCount = state.validatedTraces.filter((vt) => vt.selected).length;
+  const selectedCount = Object.values(state.tracesByProject)
+    .flatMap((p) => p.traces)
+    .filter((vt) => vt.selected).length;
 
   return {
     state,
     selectedCount,
     fetchProjects,
     fetchEvaluators,
-    selectProject,
+    loadProjectTraces,
     toggleTraceSelection,
-    toggleAllTraces,
+    toggleAllTracesForProject,
     runEvaluation,
     fetchExperimentScores,
     reset,
