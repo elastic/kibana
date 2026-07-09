@@ -4,8 +4,8 @@ responses:
     content:
       application/json:
         examples:
-          getAgentlessPolicyResponseExample:
-            description: 'Example response for getting an agentless policy by ID'
+          getManagedIntegrationResponseExample:
+            description: 'Example response for getting a managed integration by ID'
             value:
               item:
                 id: d52a7812-5736-4fdc-aed8-72152afa1ffa
