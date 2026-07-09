@@ -1,7 +1,7 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except compliance with the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
 
@@ -201,42 +201,38 @@ evaluate.describe(
       }
     );
 
-    evaluate(
-      'custom read-only Osquery — unsigned DLLs',
-      async ({ evaluateForensicDataset }) => {
-        await evaluateForensicDataset({
-          dataset: {
-            name: 'security: endpoint-forensic-analysis-slice2-custom-unsigned-dll',
-            description:
-              'Slice 2: agent authors custom read-only Osquery when no prebuilt matches.',
-            examples: [
-              {
-                input: {
-                  question:
-                    'Are there any unsigned DLLs loaded by processes running under the finance user session on WKSTN-RECV01?',
-                },
-                output: {
-                  criteria: [
-                    'Authors a custom read-only Osquery query (processes, authenticode, etc.)',
-                    'Does not use Osquery tables that execute commands or mutate state',
-                    'Surfaces query text and host id in the response',
-                  ],
-                  tool_sequence: [
-                    OSQUERY_CHECK_INTEGRATION,
-                    OSQUERY_LIST_SAVED_QUERIES,
-                    OSQUERY_GET_TABLE_SCHEMA,
-                    OSQUERY_RUN_LIVE_QUERY,
-                  ],
-                },
-                metadata: {
-                  golden_id: 'ef-011-osquery-custom-unsigned-dll',
-                  row_type: 'happy',
-                },
+    evaluate('custom read-only Osquery — unsigned DLLs', async ({ evaluateForensicDataset }) => {
+      await evaluateForensicDataset({
+        dataset: {
+          name: 'security: endpoint-forensic-analysis-slice2-custom-unsigned-dll',
+          description: 'Slice 2: agent authors custom read-only Osquery when no prebuilt matches.',
+          examples: [
+            {
+              input: {
+                question:
+                  'Are there any unsigned DLLs loaded by processes running under the finance user session on WKSTN-RECV01?',
               },
-            ],
-          },
-        });
-      }
-    );
+              output: {
+                criteria: [
+                  'Authors a custom read-only Osquery query (processes, authenticode, etc.)',
+                  'Does not use Osquery tables that execute commands or mutate state',
+                  'Surfaces query text and host id in the response',
+                ],
+                tool_sequence: [
+                  OSQUERY_CHECK_INTEGRATION,
+                  OSQUERY_LIST_SAVED_QUERIES,
+                  OSQUERY_GET_TABLE_SCHEMA,
+                  OSQUERY_RUN_LIVE_QUERY,
+                ],
+              },
+              metadata: {
+                golden_id: 'ef-011-osquery-custom-unsigned-dll',
+                row_type: 'happy',
+              },
+            },
+          ],
+        },
+      });
+    });
   }
 );
