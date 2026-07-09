@@ -36,6 +36,7 @@ const LINEAR_SURFACE_NAV = 'lch(96.5 0.5 282)'; // nav step off content surface
 const LINEAR_PANEL_PADDING = DESIGN_EXPLORATION_PADDING_COMPACT + 4;
 const LINEAR_PADDING = 20;
 const LINEAR_TOP_BAR_HEIGHT = 56;
+const LINEAR_APP_HEADER_TRANSITION_MS = 200;
 
 export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
   const scope = designExplorationVariantScope(LINBANA_VARIANT_ID);
@@ -283,11 +284,25 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
       border: ${LINEAR_HAIRLINE} !important;
     }
 
+    /* Opaque topBar shell — never faded — so scroll content cannot bleed through on reveal. */
     ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR}) .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader']) {
       height: ${LINEAR_TOP_BAR_HEIGHT}px !important;
+      min-height: 0 !important;
+      opacity: 1 !important;
+      overflow: hidden !important;
+      background-color: ${LINEAR_SURFACE} !important;
+      transition: height ${LINEAR_APP_HEADER_TRANSITION_MS}ms ease !important;
+    }
+
+    ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR}) [data-test-subj='appHeader'] {
+      opacity: 1 !important;
+      position: relative !important;
+      top: auto !important;
+    }
+
+    ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR}) [data-test-subj='appHeader'] > div {
       opacity: 1;
-      overflow: visible !important;
-      transition: opacity 200ms ease !important;
+      transition: opacity ${LINEAR_APP_HEADER_TRANSITION_MS}ms ease !important;
     }
 
     /* Header stays flat and pinned — no margin/backdrop/radius change on
@@ -315,7 +330,7 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
       border: none !important;
       border-block-end: ${LINEAR_HAIRLINE} !important;
       box-shadow: none !important;
-      transition: none !important;
+      transition: top ${LINEAR_APP_HEADER_TRANSITION_MS}ms ease !important;
     }
 
     ${scope}[${DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
@@ -328,8 +343,14 @@ export const createLinbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope}[${DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
       .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader']) {
       height: 0 !important;
-      opacity: 0 !important;
+      min-height: 0 !important;
       overflow: hidden !important;
+      pointer-events: none !important;
+    }
+
+    ${scope}[${DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
+      [data-test-subj='appHeader'] > div {
+      opacity: 0 !important;
       pointer-events: none !important;
     }
 
