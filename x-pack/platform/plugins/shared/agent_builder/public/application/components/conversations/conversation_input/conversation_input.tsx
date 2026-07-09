@@ -22,15 +22,29 @@ import {
   useHasActiveConversation,
   useIsAwaitingPrompt,
 } from '../../../hooks/use_conversation';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
+import { useConversationMessageQueue } from '../../../context/conversation_message_queue/conversation_message_queue_context';
 import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
+import { MessageQueue } from './message_queue';
 import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
 
+const EMPTY_QUEUE: readonly string[] = [];
+
 const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.container.label', {
   defaultMessage: 'Message input form',
 });
+
+const messages = {
+  invalidCommandBadge: i18n.translate('xpack.agentBuilder.conversationInput.invalidCommandBadge', {
+    defaultMessage: 'Your message contains an invalid command. Remove the command and try again.',
+  }),
+  messageQueueFull: i18n.translate('xpack.agentBuilder.conversationInput.messageQueue.full', {
+    defaultMessage: 'Message queue is full. Wait for the agent to finish before queuing more.',
+  }),
+};
 
 const flexGrowZeroStyles = css`
   flex-grow: 0;
@@ -109,13 +123,29 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     useConversationContext();
   const submitMessage = useSubmitMessage();
 
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
+  const { queues, enqueue, remove, isMessageQueueFull } = useConversationMessageQueue();
+
+  const messageQueue: readonly string[] = conversationId
+    ? queues.get(conversationId) ?? EMPTY_QUEUE
+    : EMPTY_QUEUE;
+  const isQueueFull = Boolean(conversationId) && isMessageQueueFull(conversationId!);
+  const canQueueMessage = isExperimentalFeaturesEnabled && Boolean(conversationId);
+
+  const canDrainQueue =
+    canQueueMessage && !isResponseLoading && !isAwaitingPrompt && messageQueue.length > 0;
+
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
 
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
   const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isResuming;
+
   const isSubmitDisabled =
-    messageEditorController.isEmpty || isResponseLoading || !isAgentIdValid || isAwaitingPrompt;
+    messageEditorController.isEmpty ||
+    !isAgentIdValid ||
+    isAwaitingPrompt ||
+    (isExperimentalFeaturesEnabled ? isQueueFull : isResponseLoading);
 
   const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
@@ -173,6 +203,22 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     };
   }, [conversationId, messageEditorController, isAwaitingPrompt]);
 
+  useEffect(() => {
+    if (!canDrainQueue) return;
+    const next = messageQueue[0];
+    if (next === undefined) return;
+
+    // Delay sending the message by 1 second so the user always sees the queue in the UI before sending the message
+    const timeoutId = setTimeout(() => {
+      remove(conversationId!, 0);
+      submitMessage(next);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [canDrainQueue, conversationId, remove, submitMessage, messageQueue]);
+
   const handleSubmit = () => {
     if (isSubmitDisabled) {
       return;
@@ -182,17 +228,18 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       content = messageEditorController.getContent();
     } catch (contentError) {
       if (contentError instanceof CommandBadgeSerializationError) {
-        addErrorToast(
-          i18n.translate('xpack.agentBuilder.conversationInput.invalidCommandBadge', {
-            defaultMessage:
-              'Your message contains an invalid command. Remove the command and try again.',
-          })
-        );
+        addErrorToast(messages.invalidCommandBadge);
       }
+      return;
+    }
+    if (canQueueMessage && isQueueFull) {
+      addErrorToast(messages.messageQueueFull);
       return;
     }
     if (onSubmitOverride) {
       onSubmitOverride(content);
+    } else if (canQueueMessage && isResponseLoading) {
+      enqueue(conversationId!, content);
     } else {
       submitMessage(content);
     }
@@ -201,34 +248,39 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   };
 
   return (
-    <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
-      {visibleAttachments.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <AttachmentPillsRow attachments={visibleAttachments} removable />
+    <>
+      {canQueueMessage && (
+        <MessageQueue queue={messageQueue} onRemove={(i) => remove(conversationId!, i)} />
+      )}
+      <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
+        {visibleAttachments.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <AttachmentPillsRow attachments={visibleAttachments} removable />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem css={editorContainerStyles}>
+          <MessageEditor
+            messageEditor={messageEditor}
+            onSubmit={handleSubmit}
+            disabled={isInputDisabled}
+            placeholder={placeholder}
+            ariaLabel={messageEditorAriaLabel}
+            data-test-subj="agentBuilderConversationInputEditor"
+          />
         </EuiFlexItem>
-      )}
-      <EuiFlexItem css={editorContainerStyles}>
-        <MessageEditor
-          messageEditor={messageEditor}
-          onSubmit={handleSubmit}
-          disabled={isInputDisabled}
-          placeholder={placeholder}
-          ariaLabel={messageEditorAriaLabel}
-          data-test-subj="agentBuilderConversationInputEditor"
-        />
-      </EuiFlexItem>
-      {!isAgentDeleted && (
-        <InputActions
-          onSubmit={handleSubmit}
-          isSubmitDisabled={isSubmitDisabled}
-          resetToPendingMessage={() => {
-            if (pendingMessage) {
-              messageEditorController.setContent(pendingMessage);
-            }
-          }}
-          agentId={agentId}
-        />
-      )}
-    </InputContainer>
+        {!isAgentDeleted && (
+          <InputActions
+            onSubmit={handleSubmit}
+            isSubmitDisabled={isSubmitDisabled}
+            resetToPendingMessage={() => {
+              if (pendingMessage) {
+                messageEditorController.setContent(pendingMessage);
+              }
+            }}
+            agentId={agentId}
+          />
+        )}
+      </InputContainer>
+    </>
   );
 };
