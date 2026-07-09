@@ -453,12 +453,6 @@ export class JobsListViewUI extends Component {
 
         <UpgradeWarning />
 
-        {/* <CpsProjectRoutingCallout
-          http={this.context.services.http}
-          uiActions={this.context.services.uiActions}
-          onUpdateFlyoutClose={() => this.refreshJobSummaryList()}
-        /> */}
-
         <>
           <SpaceManagementContextWrapper>
             {noJobsFound ? <AnomalyDetectionEmptyState showDocsLink /> : null}

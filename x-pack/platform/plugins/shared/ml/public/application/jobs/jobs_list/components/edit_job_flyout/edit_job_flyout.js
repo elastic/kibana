@@ -310,16 +310,11 @@ export class EditJobFlyoutUI extends Component {
       this._initialJobFormState.datafeedProjectRouting !== undefined &&
       newJobData.datafeedProjectRouting !== this._initialJobFormState.datafeedProjectRouting
     ) {
-      const { overlays, rendering, cps, mlServices } = this.props.kibana.services;
+      const { overlays, rendering } = this.props.kibana.services;
       try {
         await showProjectRoutingChangeConfirmModal({
           overlays,
           rendering,
-          jobIds: [this.state.job.job_id],
-          selectedProjectRouting: newJobData.datafeedProjectRouting,
-          getJobs: mlServices.mlApi.jobs.jobs,
-          cpsManager: cps?.cpsManager,
-          showScopeChangeCounts: false,
         });
       } catch {
         return;

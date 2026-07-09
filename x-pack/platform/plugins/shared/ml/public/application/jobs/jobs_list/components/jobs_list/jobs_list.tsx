@@ -29,6 +29,7 @@ import {
   type EuiTableSelectionType,
 } from '@elastic/eui';
 
+import { JOB_STATE } from '../../../../../../common/constants/states';
 import { toLocaleString } from '../../../../util/string_utils';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { ResultLinks, useActionsMenuContent } from '../job_actions';
@@ -268,6 +269,8 @@ export const JobsList: FC<JobsListProps> = ({
         sortable: false,
         truncateText: false,
         width: '80px',
+        render: (datafeedState: string, job: MlSummaryJobWithSpaces) =>
+          job.jobState === JOB_STATE.FAILED ? job.jobState : datafeedState,
       },
       {
         name: i18n.translate('xpack.ml.jobsList.latestTimestampLabel', {
