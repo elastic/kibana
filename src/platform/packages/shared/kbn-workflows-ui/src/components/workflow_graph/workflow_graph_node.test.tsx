@@ -14,7 +14,11 @@ import {
   type WorkflowGraphActions,
   WorkflowGraphActionsContext,
 } from './workflow_graph_actions_context';
-import { WorkflowGraphNode, type WorkflowGraphNodeData } from './workflow_graph_node';
+import {
+  resolveNodeColors,
+  WorkflowGraphNode,
+  type WorkflowGraphNodeData,
+} from './workflow_graph_node';
 
 // Stub @xyflow/react's Handle — it requires an internal React Flow context that
 // isn't available in unit tests, and we're not testing connection logic here.
@@ -193,5 +197,142 @@ describe('WorkflowGraphNode', () => {
     // In preview mode the outer div is an aria-label'd div, not a role=button,
     // and there is no label text rendered as a <span>.
     expect(queryByTitle('hidden-label')).toBeNull();
+  });
+});
+
+describe('resolveNodeColors', () => {
+  const theme = {
+    colors: {
+      backgroundLightPrimary: 'step-outer-bg',
+      borderBaseSubdued: 'step-inner-border',
+      primary: 'primary-color',
+      backgroundLightAccent: 'trigger-outer-bg',
+      backgroundBaseAccent: 'trigger-icon-bg',
+      borderBaseAccent: 'trigger-inner-border',
+      accent: 'accent-color',
+      backgroundBaseSuccess: 'success-bg',
+      success: 'success-color',
+      danger: 'danger-color',
+      backgroundBaseDanger: 'danger-bg',
+      backgroundBaseWarning: 'warning-bg',
+      textWarning: 'warning-text',
+      textHeading: 'heading-color',
+    },
+  } as any;
+
+  const idle = { isRunning: false, isSuccess: false, isFailed: false };
+  const running = { isRunning: true, isSuccess: false, isFailed: false };
+  const success = { isRunning: false, isSuccess: true, isFailed: false };
+  const failed = { isRunning: false, isSuccess: false, isFailed: true };
+
+  describe('borderColor', () => {
+    it('uses family tint for idle unselected step', () => {
+      const { borderColor } = resolveNodeColors(theme, false, idle, false);
+      expect(borderColor).toBe('step-outer-bg');
+    });
+
+    it('uses running border regardless of selection state', () => {
+      expect(resolveNodeColors(theme, false, running, false).borderColor).toBe('primary-color');
+      expect(resolveNodeColors(theme, false, running, true).borderColor).toBe('primary-color');
+    });
+
+    it('uses selection border for selected idle node', () => {
+      const { borderColor } = resolveNodeColors(theme, false, idle, true);
+      expect(borderColor).toBe('primary-color'); // palette.selectedBorder
+    });
+
+    it('uses success color for selected completed node', () => {
+      const { borderColor } = resolveNodeColors(theme, false, success, true);
+      expect(borderColor).toBe('success-color');
+    });
+
+    it('uses fail color for selected failed node', () => {
+      const { borderColor } = resolveNodeColors(theme, false, failed, true);
+      expect(borderColor).toBe('danger-color');
+    });
+
+    it('uses family tint for unselected completed node', () => {
+      // Status reads from icon area/border/color; outer border stays neutral.
+      const { borderColor } = resolveNodeColors(theme, false, success, false);
+      expect(borderColor).toBe('step-outer-bg');
+    });
+  });
+
+  describe('iconAreaBg / innerBoxBorder / iconColor', () => {
+    it('applies success tokens when completed', () => {
+      const { iconAreaBg, innerBoxBorder, iconColor } = resolveNodeColors(
+        theme,
+        false,
+        success,
+        false
+      );
+      expect(iconAreaBg).toBe('success-bg');
+      expect(innerBoxBorder).toBe('success-color');
+      expect(iconColor).toBe('success-color');
+    });
+
+    it('applies danger tokens when failed', () => {
+      const { iconAreaBg, innerBoxBorder, iconColor } = resolveNodeColors(
+        theme,
+        false,
+        failed,
+        false
+      );
+      expect(iconAreaBg).toBe('danger-bg');
+      expect(innerBoxBorder).toBe('danger-color');
+      expect(iconColor).toBe('danger-color');
+    });
+
+    it('uses palette defaults when idle, regardless of selection', () => {
+      const { iconAreaBg, innerBoxBorder, iconColor } = resolveNodeColors(theme, false, idle, true);
+      expect(iconAreaBg).toBe('step-outer-bg'); // palette.iconAreaBg
+      expect(innerBoxBorder).toBe('step-inner-border'); // palette.innerBoxBorder
+      expect(iconColor).toBe('primary-color'); // palette.iconColor
+    });
+  });
+
+  describe('trigger node', () => {
+    it('uses trigger palette colors', () => {
+      const { palette } = resolveNodeColors(theme, true, idle, false);
+      expect(palette.outerBorder).toBe('trigger-outer-bg');
+      expect(palette.iconAreaBg).toBe('trigger-icon-bg');
+      expect(palette.innerBoxBorder).toBe('trigger-inner-border');
+      expect(palette.iconColor).toBe('accent-color');
+    });
+
+    it('sets forceTriggerPinkFill when idle', () => {
+      const { forceTriggerPinkFill } = resolveNodeColors(theme, true, idle, false);
+      expect(forceTriggerPinkFill).toBe(true);
+    });
+
+    it('clears forceTriggerPinkFill when completed', () => {
+      const { forceTriggerPinkFill } = resolveNodeColors(theme, true, success, false);
+      expect(forceTriggerPinkFill).toBe(false);
+    });
+
+    it('clears forceTriggerPinkFill when failed', () => {
+      const { forceTriggerPinkFill } = resolveNodeColors(theme, true, failed, false);
+      expect(forceTriggerPinkFill).toBe(false);
+    });
+  });
+
+  describe('borderRadius and hasStatusIcon', () => {
+    it('borderRadius is 8 and hasStatusIcon is true when running', () => {
+      const { borderRadius, hasStatusIcon } = resolveNodeColors(theme, false, running, false);
+      expect(borderRadius).toBe(8);
+      expect(hasStatusIcon).toBe(true);
+    });
+
+    it('borderRadius is 10 and hasStatusIcon is false when idle', () => {
+      const { borderRadius, hasStatusIcon } = resolveNodeColors(theme, false, idle, false);
+      expect(borderRadius).toBe(10);
+      expect(hasStatusIcon).toBe(false);
+    });
+
+    it('borderRadius is 10 and hasStatusIcon is true when completed', () => {
+      const { borderRadius, hasStatusIcon } = resolveNodeColors(theme, false, success, false);
+      expect(borderRadius).toBe(10);
+      expect(hasStatusIcon).toBe(true);
+    });
   });
 });

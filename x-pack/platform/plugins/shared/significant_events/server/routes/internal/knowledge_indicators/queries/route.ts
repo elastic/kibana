@@ -320,7 +320,13 @@ const getDiscoveryQueriesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ params, request, getScopedClients, server }): Promise<QueriesGetResponse> => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    getSpaceId,
+    server,
+  }): Promise<QueriesGetResponse> => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
@@ -359,9 +365,10 @@ const getDiscoveryQueriesRoute = createServerRoute({
     const pageLinks =
       start >= total ? [] : sortQueryLinksForTable(queryLinks).slice(start, start + perPage);
     const pageRuleIds = [...new Set(pageLinks.map((link) => link.rule_id))];
+    const spaceId = await getSpaceId(request);
 
     const occurrences = await computeOccurrences(
-      { ruleIds: pageRuleIds, from, to, bucketSize, alertsReader },
+      { ruleIds: pageRuleIds, from, to, bucketSize, spaceId, alertsReader },
       { scopedClusterClient }
     );
     const queryOccurrences: QueryOccurrences = { queryLinks: pageLinks, ...occurrences };
@@ -395,6 +402,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     params,
     request,
     getScopedClients,
+    getSpaceId,
     server,
   }): Promise<QueriesOccurrencesGetResponse> => {
     const scopedClients = await getScopedClients({ request });
@@ -416,6 +424,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
         query,
         streamNames,
         alertsReader,
+        spaceId: await getSpaceId(request),
       },
       { kiClient, scopedClusterClient }
     );

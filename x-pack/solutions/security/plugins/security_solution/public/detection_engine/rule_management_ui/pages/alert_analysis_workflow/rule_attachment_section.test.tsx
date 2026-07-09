@@ -201,9 +201,12 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
       expect(screen.getByText('Rule 1')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Workflow action')).toBeInTheDocument();
+    // Scope badge assertions to the table: the attachment-status filter dropdown also renders
+    // "Attached" / "Not attached" option labels, which would otherwise be matched here.
+    const table = screen.getByTestId('alertAnalysisWorkflowRuleAttachmentTable');
+    expect(within(table).getByText('Workflow action')).toBeInTheDocument();
     // Page 1 rules are all attached...
-    expect(screen.getAllByText('Attached')).toHaveLength(PAGE_1_RULES.length);
+    expect(within(table).getAllByText('Attached')).toHaveLength(PAGE_1_RULES.length);
     // ...but none of the checkboxes are pre-checked, since selection is decoupled from state.
     PAGE_1_RULES.forEach((rule) => {
       expect(getRowCheckbox(rule.id)).not.toBeChecked();
@@ -215,7 +218,11 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
       expect(screen.getByText('Rule 6')).toBeInTheDocument();
     });
 
-    expect(screen.getAllByText('Not attached')).toHaveLength(PAGE_2_RULES.length);
+    expect(
+      within(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentTable')).getAllByText(
+        'Not attached'
+      )
+    ).toHaveLength(PAGE_2_RULES.length);
   });
 
   it('attaches the workflow to the selected rules', async () => {
@@ -268,6 +275,114 @@ describe('AlertAnalysisWorkflowRuleAttachmentSection', () => {
         detachRuleIds: ['p1-rule-3'],
         dryRun: false,
       });
+    });
+  });
+
+  it('reloads the rule list with the selected attachment filter', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Rule 1')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByTestId('alertAnalysisWorkflowRuleAttachmentAttachmentFilter'), {
+      target: { value: 'attached' },
+    });
+
+    await waitFor(() => {
+      const calls = coreStart.http.fetch.mock.calls as unknown as Array<
+        [string, { query?: Record<string, unknown> }]
+      >;
+      const listCall = [...calls]
+        .reverse()
+        .find(([path]) => path === ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE);
+      expect(listCall?.[1]?.query?.attachment_filter).toBe('attached');
+    });
+  });
+
+  it('disables the cancel button and keeps the dialog open while an update is in flight', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Rule 1')).toBeInTheDocument();
+    });
+
+    // Defer the update so the in-flight state persists long enough to assert on it.
+    let resolveUpdate: (value: unknown) => void = () => {};
+    const updatePromise = new Promise((resolve) => {
+      resolveUpdate = resolve;
+    });
+    coreStart.http.fetch.mockImplementation(async (...args: unknown[]) => {
+      const [path, options] = args as [
+        string,
+        { method?: string; query?: Record<string, unknown>; body?: string }
+      ];
+
+      if (path === ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE) {
+        return updatePromise;
+      }
+
+      if (path === ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE) {
+        return { total: TOTAL_RULES, attached: ATTACHED_RULES };
+      }
+
+      if (path === ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE) {
+        const page = (options?.query?.page as number) ?? 1;
+        const rules = page === 1 ? PAGE_1_RULES : PAGE_2_RULES;
+        return { page, perPage: PER_PAGE, total: TOTAL_RULES, attached: ATTACHED_RULES, rules };
+      }
+
+      return {};
+    });
+
+    await userEvent.click(getRowCheckbox('p1-rule-1'));
+    await runBulkAction('attach');
+
+    const modal = screen.getByTestId('alertAnalysisWorkflowRuleAttachmentConfirmModal');
+    await userEvent.click(
+      within(modal).getByTestId('alertAnalysisWorkflowRuleAttachmentConfirmModalConfirmButton')
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('alertAnalysisWorkflowRuleAttachmentUpdatingIndicator')
+      ).toBeInTheDocument();
+    });
+
+    // Cancel is disabled while the request is in flight (the server operation can't be aborted),
+    // instead of silently doing nothing, and the dialog stays open.
+    expect(
+      within(modal).getByTestId('alertAnalysisWorkflowRuleAttachmentConfirmModalCancelButton')
+    ).toBeDisabled();
+
+    resolveUpdate({ matched: 1, updated: 1 });
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('alertAnalysisWorkflowRuleAttachmentConfirmModal')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it('closes the confirmation dialog when cancel is clicked before confirming', async () => {
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText('Rule 1')).toBeInTheDocument();
+    });
+
+    await userEvent.click(getRowCheckbox('p1-rule-1'));
+    await runBulkAction('attach');
+
+    const modal = screen.getByTestId('alertAnalysisWorkflowRuleAttachmentConfirmModal');
+    await userEvent.click(
+      within(modal).getByTestId('alertAnalysisWorkflowRuleAttachmentConfirmModalCancelButton')
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('alertAnalysisWorkflowRuleAttachmentConfirmModal')
+      ).not.toBeInTheDocument();
     });
   });
 
