@@ -8,10 +8,9 @@
 import { kibanaSavedObjectPermissions } from './kibana_saved_object';
 
 describe('kibanaSavedObjectPermissions', () => {
-  it('returns the standard `saved_object:<type>/get` privilege with an empty elasticsearch slot', () => {
+  it('returns the standard `saved_object:<type>/get` privilege', () => {
     expect(kibanaSavedObjectPermissions({ savedObjectType: 'lens' })).toEqual({
       kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-      elasticsearch: { indices: [] },
     });
   });
 
@@ -31,7 +30,6 @@ describe('kibanaSavedObjectPermissions', () => {
     expect(first).not.toBe(second);
     expect(first.kibana).not.toBe(second.kibana);
     expect(first.kibana.privileges).not.toBe(second.kibana.privileges);
-    expect(first.elasticsearch).not.toBe(second.elasticsearch);
 
     // Mutating the first result must not affect the second — SML types that
     // want to append extra privileges should be safe to do so without

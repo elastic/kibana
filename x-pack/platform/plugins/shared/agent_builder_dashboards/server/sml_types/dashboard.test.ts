@@ -202,7 +202,6 @@ describe('dashboardSmlType', () => {
         spaces: ['default'],
         permissions: {
           kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-          elasticsearch: { indices: [] },
         },
         ingestion_method: 'crawled',
       },
@@ -264,7 +263,6 @@ describe('dashboardSmlType', () => {
         spaces: ['default'],
         permissions: {
           kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-          elasticsearch: { indices: [] },
         },
         ingestion_method: 'crawled',
       },
@@ -310,7 +308,6 @@ describe('dashboardSmlType', () => {
 
     expect(permissions).toEqual({
       kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-      elasticsearch: { indices: [] },
     });
   });
 

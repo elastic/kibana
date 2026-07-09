@@ -263,7 +263,6 @@ describe('visualizationSmlType', () => {
       const permissions = visualizationSmlType.getPermissions!('viz-1', createContext() as never);
       expect(permissions).toEqual({
         kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-        elasticsearch: { indices: [] },
       });
     });
   });

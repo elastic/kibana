@@ -30,7 +30,6 @@ export type {
   SmlListItem,
   SmlPermissions,
   SmlKibanaPrivilege,
-  SmlElasticsearchIndex,
   SmlSearchResult,
   SmlSearchConstraints,
   SmlSearchFilters,

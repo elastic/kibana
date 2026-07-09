@@ -433,18 +433,16 @@ class SmlIndexerImpl implements SmlIndexer {
       const result = await definition.getPermissions(originId, context);
       return {
         kibana: { privileges: result.kibana?.privileges ?? [] },
-        elasticsearch: { indices: result.elasticsearch?.indices ?? [] },
       };
     }
 
     if (requestedPermissions) {
       return {
         kibana: { privileges: requestedPermissions.kibana?.privileges ?? [] },
-        elasticsearch: { indices: requestedPermissions.elasticsearch?.indices ?? [] },
       };
     }
 
-    return { kibana: { privileges: [] }, elasticsearch: { indices: [] } };
+    return { kibana: { privileges: [] } };
   }
 
   private buildIndexOp({
@@ -476,7 +474,6 @@ class SmlIndexerImpl implements SmlIndexer {
       spaces,
       permissions: {
         kibana: { privileges: resolvedPermissions.kibana?.privileges ?? [] },
-        elasticsearch: { indices: resolvedPermissions.elasticsearch?.indices ?? [] },
       },
       ingestion_method: ingestionMethod,
     };
