@@ -190,7 +190,7 @@ const emptyPermissions = (): SmlDocument['permissions'] => ({
 });
 
 /**
- * Privilege check for SML chunks. Batch-checks which of the given Kibana
+ * Privilege check for SML entries. Batch-checks which of the given Kibana
  * action strings are authorized for the user in the current space via a
  * single `_has_privileges` call (Kibana's `checkPrivileges` wrapper).
  *
@@ -373,8 +373,8 @@ const resolveAuthorizedUniverse = async ({
 
 /**
  * Filter a single page of results by the current user's Kibana privileges.
- * Every action string a chunk lists must be authorized for the user;
- * chunks with no `kibana.privileges` pass trivially.
+ * Every action string an entry lists must be authorized for the user;
+ * entries with no `kibana.privileges` pass trivially.
  *
  * Used by the search loop (per page) and directly by autocomplete (single
  * pass). When the security plugin is absent (dev / test), the function is
@@ -1175,7 +1175,7 @@ const autocompleteSml = async ({
 };
 
 /**
- * Fetch SML documents by their chunk IDs, scoped to a space.
+ * Fetch SML documents by their IDs, scoped to a space.
  */
 const getDocumentsByIds = async ({
   ids,

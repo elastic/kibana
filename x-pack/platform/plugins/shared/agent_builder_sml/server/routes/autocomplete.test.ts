@@ -81,7 +81,7 @@ describe('registerAutocompleteRoute', () => {
   it('returns 200 with autocomplete results and per-row provenance when enabled', async () => {
     const mockResults: SmlAutocompleteResult[] = [
       {
-        id: 'chunk-1',
+        id: 'entry-1',
         type: 'connector',
         title: 'GitHub Connector',
         origin: { uri: 'gh-1' },
@@ -100,7 +100,7 @@ describe('registerAutocompleteRoute', () => {
       body: {
         results: [
           {
-            id: 'chunk-1',
+            id: 'entry-1',
             type: 'connector',
             origin: { uri: 'gh-1' },
             title: 'GitHub Connector',
@@ -117,7 +117,7 @@ describe('registerAutocompleteRoute', () => {
   it('returns matched_discovery_labels as [] when absent on the result', async () => {
     const mockResults: SmlAutocompleteResult[] = [
       {
-        id: 'chunk-2',
+        id: 'entry-2',
         type: 'dashboard',
         title: 'Sales Q3',
         origin: { uri: 'dash-1' },
@@ -136,7 +136,7 @@ describe('registerAutocompleteRoute', () => {
   it('does not leak server-only fields (permissions, spaces) into the HTTP response', async () => {
     const mockResults: SmlAutocompleteResult[] = [
       {
-        id: 'chunk-3',
+        id: 'entry-3',
         type: 'visualization',
         title: 'V',
         origin: { uri: 'v-1' },

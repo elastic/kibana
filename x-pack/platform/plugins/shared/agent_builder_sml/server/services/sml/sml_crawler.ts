@@ -449,7 +449,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
   }
 
   /**
-   * Return the subset of `originIds` that already have at least one chunk with
+   * Return the subset of `originIds` that already have an entry with
    * `ingestion_method: 'manual'` in the SML data index. Used to skip dispatching
    * the indexer for items that are protected by a user-curated entry.
    *
@@ -483,8 +483,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
             ],
           },
         },
-        // Collapse so we get at most one hit per origin.uri even if multiple
-        // manual chunks exist for the same origin.
+        // Collapse so we get at most one hit per origin.uri.
         collapse: { field: 'origin.uri' },
       });
 

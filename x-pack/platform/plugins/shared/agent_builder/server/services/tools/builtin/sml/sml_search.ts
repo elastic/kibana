@@ -64,8 +64,8 @@ export const createSmlSearchTool = ({
     'When to use this tool:\n' +
     "- The user asks about something that likely exists as a Kibana asset but you don't know its exact title.\n" +
     '- You need to discover what is available before deciding how to proceed.\n' +
-    '- You want to surface candidates to attach to the conversation (then pass chunk_id to sml_attach).\n\n' +
-    'Each result includes: chunk_id, attachment_id, attachment_type, type, title, description (when present), ' +
+    '- You want to surface candidates to attach to the conversation (then pass entry_id to sml_attach).\n\n' +
+    'Each result includes: entry_id, attachment_id, attachment_type, type, title, description (when present), ' +
     'tags, references (URI strings to related SML records), and content (the full indexed content for the record).\n\n' +
     'Examples:\n' +
     '1. Plain natural-language query:\n' +
@@ -76,7 +76,7 @@ export const createSmlSearchTool = ({
     '     { "query": "github", "types": ["connector"] }\n' +
     '4. Wildcard inventory check:\n' +
     '     { "query": "*", "size": 50 }\n\n' +
-    'To bring a result into the conversation as an attachment, pass its chunk_id to sml_attach.',
+    'To bring a result into the conversation as an attachment, pass its entry_id to sml_attach.',
   schema: smlSearchSchema,
   tags: ['sml', 'search'],
   availability: {
@@ -162,7 +162,7 @@ export const createSmlSearchTool = ({
           type: ToolResultType.other,
           data: {
             items: searchResult.results.map((hit) => ({
-              chunk_id: hit.id,
+              entry_id: hit.id,
               attachment_id: hit.origin.uri,
               attachment_type: hit.type,
               type: hit.type,

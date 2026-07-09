@@ -54,7 +54,7 @@ export function registerInternalSmlRoutes({
       validate: {
         body: schema.object({
           conversation_id: schema.string(),
-          chunk_ids: schema.arrayOf(schema.string(), {
+          entry_ids: schema.arrayOf(schema.string(), {
             minSize: 1,
             maxSize: SML_HTTP_ATTACH_ITEMS_MAX,
           }),
@@ -67,7 +67,7 @@ export function registerInternalSmlRoutes({
       async (ctx, request, response) => {
         const { conversations: conversationsService, attachments: attachmentsService } =
           getInternalServices();
-        const { conversation_id: conversationId, chunk_ids: chunkIds } = request.body;
+        const { conversation_id: conversationId, entry_ids: entryIds } = request.body;
         const [coreStart, startDeps] = await coreSetup.getStartServices();
         const agentBuilderSml = startDeps.agentBuilderSml;
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
@@ -85,7 +85,7 @@ export function registerInternalSmlRoutes({
         }
 
         const resolvedItems = await agentBuilderSml.resolveSmlAttachItems({
-          chunkIds,
+          entryIds,
           esClient,
           request,
           spaceId,
@@ -103,7 +103,7 @@ export function registerInternalSmlRoutes({
             if (!r.success) {
               return {
                 success: false,
-                chunk_id: r.chunk_id,
+                entry_id: r.entry_id,
                 attachment_type: r.attachment_type,
                 message: r.message,
               };
@@ -118,15 +118,15 @@ export function registerInternalSmlRoutes({
 
               return {
                 success: true,
-                chunk_id: r.chunk_id,
+                entry_id: r.entry_id,
                 conversation_attachment_id: added.id,
                 attachment_type: r.attachment.type,
-                message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.chunk_id}'`,
+                message: `Attachment '${added.id}' of type '${r.attachment.type}' created from SML item '${r.entry_id}'`,
               };
             } catch (e) {
               return {
                 success: false,
-                chunk_id: r.chunk_id,
+                entry_id: r.entry_id,
                 attachment_type: r.attachment.type,
                 message: e instanceof Error ? e.message : String(e),
               };

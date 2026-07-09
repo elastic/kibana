@@ -452,7 +452,7 @@ describe('SmlService', () => {
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(false),
         values: [
-          makeEsqlRow('chunk-1', 'lens', 'My Viz', 'ref-1', ['saved_object:lens/get'], {
+          makeEsqlRow('entry-1', 'lens', 'My Viz', 'ref-1', ['saved_object:lens/get'], {
             description: 'A lens viz',
             includeContent: false,
           }),
@@ -469,7 +469,7 @@ describe('SmlService', () => {
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0]).toEqual({
-        id: 'chunk-1',
+        id: 'entry-1',
         type: 'lens',
         title: 'My Viz',
         origin: { uri: 'ref-1' },
@@ -493,7 +493,7 @@ describe('SmlService', () => {
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(true),
         values: [
-          makeEsqlRow('chunk-1', 'lens', 'My Viz', 'ref-1', ['saved_object:lens/get'], {
+          makeEsqlRow('entry-1', 'lens', 'My Viz', 'ref-1', ['saved_object:lens/get'], {
             description: 'A lens viz',
             refUris: ['lens:other:uuid'],
             content: 'content text',
@@ -511,7 +511,7 @@ describe('SmlService', () => {
       });
 
       expect(result.results[0]).toEqual({
-        id: 'chunk-1',
+        id: 'entry-1',
         type: 'lens',
         title: 'My Viz',
         origin: { uri: 'ref-1' },
@@ -531,7 +531,7 @@ describe('SmlService', () => {
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(false),
         values: [
-          makeEsqlRow('chunk-bare', 'connector', 'Bare', 'b1', [], {
+          makeEsqlRow('entry-bare', 'connector', 'Bare', 'b1', [], {
             includeContent: false,
           }),
         ],
@@ -562,7 +562,7 @@ describe('SmlService', () => {
         columns: makeEsqlColumns(true),
         values: [
           makeEsqlRow(
-            'chunk-2',
+            'entry-2',
             'dashboard',
             'Sales Q3',
             'dash-100',
@@ -588,7 +588,7 @@ describe('SmlService', () => {
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0]).toEqual({
-        id: 'chunk-2',
+        id: 'entry-2',
         type: 'dashboard',
         title: 'Sales Q3',
         origin: { uri: 'dash-100' },
@@ -609,8 +609,8 @@ describe('SmlService', () => {
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(true),
         values: [
-          makeEsqlRow('chunk-1', 'lens', 'A', 'r1', [], { content: '' }),
-          makeEsqlRow('chunk-2', 'lens', 'B', 'r2', [], { content: '' }),
+          makeEsqlRow('entry-1', 'lens', 'A', 'r1', [], { content: '' }),
+          makeEsqlRow('entry-2', 'lens', 'B', 'r2', [], { content: '' }),
         ],
       } as any);
 
@@ -753,8 +753,8 @@ describe('SmlService', () => {
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(true),
         values: [
-          makeEsqlRow('chunk-1', 'lens', 'Lens', 'r1', ['saved_object:lens/get'], { content: '' }),
-          makeEsqlRow('chunk-2', 'dashboard', 'Dashboard', 'r2', ['saved_object:dashboard/get'], {
+          makeEsqlRow('entry-1', 'lens', 'Lens', 'r1', ['saved_object:lens/get'], { content: '' }),
+          makeEsqlRow('entry-2', 'dashboard', 'Dashboard', 'r2', ['saved_object:dashboard/get'], {
             content: '',
           }),
         ],
@@ -786,7 +786,7 @@ describe('SmlService', () => {
 
       esqlQueryMock.mockResolvedValue({
         columns: makeEsqlColumns(true),
-        values: [makeEsqlRow('chunk-1', 'lens', 'Lens', 'r1', [], { content: '' })],
+        values: [makeEsqlRow('entry-1', 'lens', 'Lens', 'r1', [], { content: '' })],
       } as any);
 
       const result = await smlService.search({
@@ -958,7 +958,7 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'chunk-1',
+                id: 'entry-1',
                 type: 'connector',
                 title: 'GitHub Connector',
                 origin: { uri: 'gh-1' },
@@ -1006,7 +1006,7 @@ describe('SmlService', () => {
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0]).toEqual({
-        id: 'chunk-1',
+        id: 'entry-1',
         type: 'connector',
         title: 'GitHub Connector',
         origin: { uri: 'gh-1' },
@@ -1034,7 +1034,7 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'chunk-2',
+                id: 'entry-2',
                 type: 'dashboard',
                 title: 'Sales Q3',
                 origin: { uri: 'dash-1' },
@@ -1056,7 +1056,7 @@ describe('SmlService', () => {
       });
 
       expect(result.results[0]).toEqual({
-        id: 'chunk-2',
+        id: 'entry-2',
         type: 'dashboard',
         title: 'Sales Q3',
         origin: { uri: 'dash-1' },
@@ -1098,7 +1098,7 @@ describe('SmlService', () => {
           hits: [
             {
               _source: {
-                id: 'chunk-allowed',
+                id: 'entry-allowed',
                 type: 'dashboard',
                 title: 'Allowed',
                 origin: { uri: 'd1' },
@@ -1109,7 +1109,7 @@ describe('SmlService', () => {
             },
             {
               _source: {
-                id: 'chunk-denied',
+                id: 'entry-denied',
                 type: 'connector',
                 title: 'Denied',
                 origin: { uri: 'c1' },
@@ -1131,7 +1131,7 @@ describe('SmlService', () => {
       });
 
       expect(result.results).toHaveLength(1);
-      expect(result.results[0].id).toBe('chunk-allowed');
+      expect(result.results[0].id).toBe('entry-allowed');
     });
 
     describe('pre-aggregation authz filter (MV_CONTAINS subset)', () => {
