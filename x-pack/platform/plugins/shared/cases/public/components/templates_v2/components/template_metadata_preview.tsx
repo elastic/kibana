@@ -13,10 +13,14 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { z } from '@kbn/zod/v4';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
 import type { CaseSeverity } from '../../../../common/types/domain';
+import { ConnectorTypes } from '../../../../common/types/domain';
 import { SeverityHealth } from '../../severity/config';
+import { useCasesFeatures } from '../../../common/use_cases_features';
 import * as commonI18n from '../../../common/translations';
 import { SEVERITY_TITLE } from '../../severity/translations';
 import { componentStyles } from './template_metadata_preview.styles';
+import { MetadataRow } from './metadata_row';
+import { TemplateConnectorPreview } from './template_connector_preview';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 
@@ -26,8 +30,10 @@ export interface TemplateMetadataPreviewProps {
 
 export const TemplateMetadataPreview: FC<TemplateMetadataPreviewProps> = ({ parsedTemplate }) => {
   const styles = useMemoCss(componentStyles);
-  const { name, description, tags, severity, category } = parsedTemplate;
+  const { name, description, tags, severity, category, settings, connector } = parsedTemplate;
   const { euiTheme } = useEuiTheme();
+  // Hidden where alert syncing is not a feature (e.g. Observability), matching the editor form.
+  const { isSyncAlertsEnabled } = useCasesFeatures();
   return (
     <dl css={styles.list}>
       <MetadataRow label={commonI18n.NAME}>
@@ -73,25 +79,32 @@ export const TemplateMetadataPreview: FC<TemplateMetadataPreviewProps> = ({ pars
           </EuiFlexGroup>
         </MetadataRow>
       )}
+
+      {isSyncAlertsEnabled && settings?.syncAlerts !== undefined && (
+        <MetadataRow label={commonI18n.SYNC_ALERTS}>
+          <EuiText size="s">
+            {settings.syncAlerts
+              ? commonI18n.SYNC_ALERTS_SWITCH_LABEL_ON
+              : commonI18n.SYNC_ALERTS_SWITCH_LABEL_OFF}
+          </EuiText>
+        </MetadataRow>
+      )}
+
+      {settings?.extractObservables !== undefined && (
+        <MetadataRow label={commonI18n.EXTRACT_OBSERVABLES_LABEL}>
+          <EuiText size="s">
+            {settings.extractObservables
+              ? commonI18n.EXTRACT_OBSERVABLES_SWITCH_LABEL_ON
+              : commonI18n.EXTRACT_OBSERVABLES_SWITCH_LABEL_OFF}
+          </EuiText>
+        </MetadataRow>
+      )}
+
+      {connector && connector.type !== ConnectorTypes.none && (
+        <TemplateConnectorPreview connector={connector} />
+      )}
     </dl>
   );
 };
 
 TemplateMetadataPreview.displayName = 'TemplateMetadataPreview';
-
-const MetadataRow: FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => {
-  const styles = useMemoCss(componentStyles);
-
-  return (
-    <div css={styles.row}>
-      <dt>
-        <EuiText size="xs" color="subdued">
-          <strong>{label}</strong>
-        </EuiText>
-      </dt>
-      <dd css={styles.value}>{children}</dd>
-    </div>
-  );
-};
-
-MetadataRow.displayName = 'MetadataRow';

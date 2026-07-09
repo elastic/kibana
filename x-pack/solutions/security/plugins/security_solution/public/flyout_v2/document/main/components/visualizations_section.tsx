@@ -26,6 +26,7 @@ import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { AnalyzerGraph } from '../../tools/analyzer';
 import { useSessionViewConfig } from '../../tools/session_view/hooks/use_session_view_config';
 import { SessionView } from '../../tools/session_view';
+import { GraphDetails } from '../../tools/graph';
 import { defaultToolsFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 
@@ -137,6 +138,30 @@ export const VisualizationsSection = memo(
       ]
     );
 
+    const onShowGraph = useCallback(
+      () =>
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <GraphDetails
+                hit={hit}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
+            ),
+          }),
+          {
+            ...defaultToolsFlyoutProperties,
+            historyKey,
+            session: 'start',
+          }
+        ),
+      [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
+    );
+
     return (
       <ExpandableSection
         data-test-subj={VISUALIZATION_SECTION_TEST_ID}
@@ -159,7 +184,9 @@ export const VisualizationsSection = memo(
           shouldUseAncestor={false}
           showIcon={false}
         />
-        {hasGraphData && <GraphPreviewContainer disableNavigation hit={hit} showIcon={false} />}
+        {hasGraphData && (
+          <GraphPreviewContainer hit={hit} onShowGraph={onShowGraph} showIcon={false} />
+        )}
       </ExpandableSection>
     );
   }

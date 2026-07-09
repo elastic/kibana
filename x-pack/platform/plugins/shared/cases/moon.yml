@@ -124,6 +124,8 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/ai-assistant-common'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
