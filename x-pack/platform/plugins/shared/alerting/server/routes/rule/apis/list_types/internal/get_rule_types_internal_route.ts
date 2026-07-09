@@ -18,7 +18,7 @@ import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
 /**
  * When `true`, the response also includes rule types the user can read as alerts
- * (not only as rules). Alert views opt in so alerts-only users can receive a list 
+ * (not only as rules). Alert views opt in so alerts-only users can receive a list
  * of rule types for which they can read alerts. */
 const querySchema = schema.object({
   include_alert_authorized: schema.boolean({ defaultValue: false }),

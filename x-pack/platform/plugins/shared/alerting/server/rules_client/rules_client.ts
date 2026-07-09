@@ -252,8 +252,7 @@ export class RulesClient {
 
   public runSoon = (options: RunSoonParams) => runSoon(this.context, options);
 
-  public listRuleTypes = (options?: ListRuleTypesOptions) =>
-    listRuleTypes(this.context, options);
+  public listRuleTypes = (options?: ListRuleTypesOptions) => listRuleTypes(this.context, options);
 
   public scheduleBackfill = (params: ScheduleBackfillParams) =>
     scheduleBackfill(this.context, params);
