@@ -123,7 +123,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
           values: { name: decodedName },
         })}
         back="/app/management/data/index_management/component_templates"
-        padding={{ bleed: 'l' }}
+        padding={{ bleed: 'm' }}
       />
 
       <EuiPageSection restrictWidth style={{ width: '100%' }} paddingSize="none">

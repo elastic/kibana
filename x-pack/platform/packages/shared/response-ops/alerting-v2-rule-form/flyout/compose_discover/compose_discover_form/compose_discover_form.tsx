@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useWatch } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
@@ -26,6 +26,7 @@ import { RULE_BUILDER_REGISTRY } from '../rule_builder';
 import { isActionValid } from '../../../actions_form';
 import { ModeSelect } from '../../../form/fields/mode_select';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
+import { NoDataStrategySelect } from '../../../form/fields/no_data_strategy_select';
 import { ScheduleField } from '../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../form/fields/lookback_window_field';
 import { AlertConditionStep } from './alert_condition_step';
@@ -45,6 +46,7 @@ interface Props {
   isEditing: boolean;
   ruleId?: string;
   builderType?: string;
+  onManualSplit?: () => void;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -59,6 +61,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         dispatch={props.dispatch}
         services={props.services}
         isEditing={props.isEditing}
+        onManualSplit={props.onManualSplit}
       />
     ),
     validate: (methods, s) => {
@@ -117,12 +120,8 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         <CentralizedActionPoliciesPanel http={props.services.http} />
         <EuiSpacer size="m" />
         <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
-        {props.ruleId === undefined && (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <NotificationsStep />
-          </>
-        )}
+        <EuiHorizontalRule margin="m" />
+        <NotificationsStep http={props.services.http} ruleId={props.ruleId} />
       </>
     ),
     validate: (methods) => {
@@ -177,8 +176,11 @@ export const ComposeDiscoverForm = ({
   isEditing,
   ruleId,
   builderType,
+  onManualSplit,
 }: Props) => {
+  const { setValue } = useFormContext<FormValues>();
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
+  const noDataStrategy = useWatch<FormValues, 'noDataStrategy'>({ name: 'noDataStrategy' });
   const { steps, renderCustomRecovery } = useMemo(
     () => getSteps(isAlert, builderType),
     [isAlert, builderType]
@@ -194,6 +196,7 @@ export const ComposeDiscoverForm = ({
     isEditing,
     ruleId,
     renderCustomRecovery,
+    onManualSplit,
   });
 
   if (!isAlertConditionStep) {
@@ -205,7 +208,7 @@ export const ComposeDiscoverForm = ({
       <ModeSelect
         value={isAlert ? 'alert' : 'signal'}
         onChange={onKindChange}
-        disabled={(!builderType && !state.queryCommitted) || isEditing}
+        disabled={(!builderType && !state.queryCommitted) || isEditing || state.childOpen}
         compressed
         data-test-subj="composeDiscoverModeSelect"
       />
@@ -215,6 +218,13 @@ export const ComposeDiscoverForm = ({
         <>
           <EuiSpacer size="m" />
           <AlertDelayField />
+          <EuiSpacer size="m" />
+          <NoDataStrategySelect
+            value={noDataStrategy ?? 'none'}
+            onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
+            compressed
+            data-test-subj="composeDiscoverNoDataStrategy"
+          />
         </>
       )}
       <EuiSpacer size="m" />

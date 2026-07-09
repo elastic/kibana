@@ -153,7 +153,11 @@ const EmptyCallout: React.FC = () => (
   </EuiCallOut>
 );
 
-const SplitFailedCallout: React.FC = () => (
+interface SplitFailedCalloutProps {
+  onManualSplit?: () => void;
+}
+
+const SplitFailedCallout: React.FC<SplitFailedCalloutProps> = ({ onManualSplit }) => (
   <EuiCallOut
     announceOnMount={false}
     size="s"
@@ -163,7 +167,16 @@ const SplitFailedCallout: React.FC = () => (
     title={i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.splitFailedCalloutTitle', {
       defaultMessage: "Couldn't automatically separate base query from alert condition.",
     })}
-  />
+  >
+    {onManualSplit && (
+      <EuiButton size="s" onClick={onManualSplit} data-test-subj="esqlSummarySeparateManually">
+        {i18n.translate(
+          'xpack.alertingV2.composeDiscover.esqlSummary.separateManuallyButtonLabel',
+          { defaultMessage: 'Separate base and alert' }
+        )}
+      </EuiButton>
+    )}
+  </EuiCallOut>
 );
 
 const NoAlertConditionCallout: React.FC = () => (
@@ -185,9 +198,12 @@ const NoAlertConditionCallout: React.FC = () => (
   </EuiCallOut>
 );
 
-const getSummaryCallout = (state: EsqlSummaryState): React.ReactElement | null => {
+const getSummaryCallout = (
+  state: EsqlSummaryState,
+  onManualSplit?: () => void
+): React.ReactElement | null => {
   if (state === 'empty') return <EmptyCallout />;
-  if (state === 'split_failed') return <SplitFailedCallout />;
+  if (state === 'split_failed') return <SplitFailedCallout onManualSplit={onManualSplit} />;
   if (state === 'no_alert_condition') return <NoAlertConditionCallout />;
   return null;
 };
@@ -198,6 +214,8 @@ interface EsqlQuerySummarySectionProps {
   /** Disables the edit CTA while the sandbox is already open. */
   isEditorOpen: boolean;
   onOpenEditor: () => void;
+  /** When provided, shown as a CTA inside the split-failed callout. */
+  onManualSplit?: () => void;
 }
 
 export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = ({
@@ -205,6 +223,7 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
   queryCommitted,
   isEditorOpen,
   onOpenEditor,
+  onManualSplit,
 }) => {
   const state = getEsqlSummaryState(queryCommitted, query);
   // Once a query is committed, the read-only Base query / Alert condition blocks are
@@ -213,14 +232,14 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
   const baseQuery = query.format === 'composed' ? query.base : query.breach.query;
   const alertBlock = query.format === 'composed' ? query.breach.segment : '';
 
-  const ctaLabel =
-    state === 'before_apply' || state === 'empty'
-      ? i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.openEditorButtonLabel', {
-          defaultMessage: 'Open query editor',
-        })
-      : i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.editQueryButtonLabel', {
-          defaultMessage: 'Edit query',
-        });
+  const isEditCta = state !== 'before_apply' && state !== 'empty';
+  const ctaLabel = isEditCta
+    ? i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.editQueryButtonLabel', {
+        defaultMessage: 'Edit query',
+      })
+    : i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.openEditorButtonLabel', {
+        defaultMessage: 'Open query editor',
+      });
 
   return (
     <div data-test-subj={`esqlQuerySummarySection-${state}`}>
@@ -229,7 +248,7 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
       </EuiText>
       <EuiSpacer size="s" />
 
-      {getSummaryCallout(state)}
+      {getSummaryCallout(state, onManualSplit)}
       {state !== 'success' && state !== 'before_apply' && <EuiSpacer size="m" />}
 
       {showBlocks ? (
@@ -265,7 +284,8 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
       <EuiSpacer size="s" />
       <EuiButton
         size="s"
-        iconType="editorCodeBlock"
+        color={isEditCta ? 'text' : undefined}
+        iconType={isEditCta ? 'chevronLimitLeft' : 'editorCodeBlock'}
         isDisabled={isEditorOpen}
         onClick={onOpenEditor}
         data-test-subj="esqlSummaryOpenEditor"

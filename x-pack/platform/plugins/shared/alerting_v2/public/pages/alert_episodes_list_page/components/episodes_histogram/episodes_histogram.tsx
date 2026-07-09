@@ -204,7 +204,7 @@ export const EpisodesHistogram = ({
   const handleBreakdownFieldChange = useCallback(
     (field: DataViewField | undefined) => {
       // UnifiedBreakdownFieldSelector hands back a DataViewField whose .name is the display label
-      // (e.g. 'Status'). Map it back to the column id (e.g. 'effective_status') for storage.
+      // (e.g. 'Status'). Map it back to the column id (e.g. 'episode.status') for storage.
       const col = HISTOGRAM_BREAKDOWN_COLUMNS.find((c) => c.name === field?.name);
       onBreakdownFieldChange(col?.id);
     },

@@ -8,12 +8,11 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { useEntityStoreEuidApi, FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EuiSpacer } from '@elastic/eui';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { ESQuery } from '../../../../common/typed_json';
 import { buildEntityNameFilter, type RiskSeverity } from '../../../../common/search_strategy';
-import { useUiSetting } from '../../../common/lib/kibana';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
@@ -25,6 +24,7 @@ import { FlyoutLoading } from '../../../flyout_v2/shared/components/flyout_loadi
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { ServicePanelContent } from './content';
 import { ServicePanelHeader } from './header';
+import { ServicePanelFooter } from './footer';
 import { useObservedService } from './hooks/use_observed_service';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { IdentityFields } from '../../document_details/shared/utils';
@@ -66,7 +66,6 @@ export const ServicePanel = memo(function ServicePanel({
   isPreviewMode = false,
 }: ServicePanelProps) {
   const safeContextID = contextID ?? scopeId ?? 'service-panel';
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const serviceStoreIdentityFields = useMemo(
     () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
     [entityId, serviceName]
@@ -75,7 +74,7 @@ export const ServicePanel = memo(function ServicePanel({
     entityId,
     identityFields: serviceStoreIdentityFields,
     entityType: 'service',
-    skip: !entityStoreV2Enabled,
+    skip: false,
   });
 
   const euidApi = useEntityStoreEuidApi();
@@ -97,7 +96,7 @@ export const ServicePanel = memo(function ServicePanel({
     filterQuery: serviceNameFilterQuery as unknown as ESQuery | undefined,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
-    skip: entityStoreV2Enabled,
+    skip: true,
   });
 
   const { inspect, loading, data: serviceRisk } = riskScoreState;
@@ -112,6 +111,7 @@ export const ServicePanel = memo(function ServicePanel({
     (refetchEntitiesTable as Refetch | null)?.();
   }, [refetchEntitiesTable]);
 
+  const entityStoreV2Enabled = true;
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
       entityType: EntityType.service,
@@ -129,7 +129,8 @@ export const ServicePanel = memo(function ServicePanel({
   }, [calculateEntityRiskScore, refetchEntitiesTable]);
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
-    onSuccess: onAssetCriticalityChanged,
+    onSuccess: calculateEntityRiskScore,
+    refetchEntityRecord: entityFromStoreResult.refetch,
   });
 
   useQueryInspector({
@@ -141,9 +142,7 @@ export const ServicePanel = memo(function ServicePanel({
     setQuery,
   });
 
-  const entityStoreEntityId = entityStoreV2Enabled
-    ? entityFromStoreResult.entityRecord?.entity?.id
-    : undefined;
+  const entityStoreEntityId = entityFromStoreResult.entityRecord?.entity?.id;
 
   const onCriticalitySave = entityFromStoreResult.entityRecord
     ? (level: CriticalityLevelWithUnassigned) =>
@@ -225,6 +224,7 @@ export const ServicePanel = memo(function ServicePanel({
         ) : (
           <ServicePanelContent
             entityRecord={entityFromStoreResult.entityRecord ?? undefined}
+            refetchEntityRecord={entityFromStoreResult.refetch}
             serviceName={serviceName}
             observedService={observedService}
             riskScoreState={riskScoreState}
@@ -239,6 +239,14 @@ export const ServicePanel = memo(function ServicePanel({
           />
         )}
       </FlyoutBody>
+      {!isPreviewMode && (
+        <ServicePanelFooter
+          identityFields={documentEntityIdentifiers}
+          entity={
+            entityStoreV2Enabled ? entityFromStoreResult.entityRecord ?? undefined : undefined
+          }
+        />
+      )}
     </>
   );
 });

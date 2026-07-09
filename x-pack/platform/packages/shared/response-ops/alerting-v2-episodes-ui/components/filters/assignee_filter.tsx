@@ -6,12 +6,18 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { partition } from 'lodash';
 import { EuiFilterButton, EuiPopover } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserAvatar } from '@kbn/user-profile-components';
 import { useBulkGetProfiles } from '../../hooks/use_bulk_get_profiles';
+import { useCurrentUserProfile } from '../../hooks/use_current_user_profile';
 import { InlineFilterPopover } from './inline_filter_popover';
 import * as i18n from './translations';
+
+const MAX_VISIBLE_OPTIONS = 20;
 
 interface AlertEpisodesAssigneeFilterProps {
   selectedAssigneeUid?: string;
@@ -39,20 +45,25 @@ export function AlertEpisodesAssigneeFilter({
     errorTitle: i18n.ASSIGNEE_FILTER_BULK_GET_ERROR_TITLE,
   });
 
+  const { data: currentUserProfile } = useCurrentUserProfile({ userProfile });
+  const currentUserUid = currentUserProfile?.uid;
+
   const allOptions = useMemo(
     () =>
-      profiles.map((p) => ({
+      (profiles as UserProfileWithAvatar[]).map((p) => ({
         label: p.user.full_name || p.user.email || p.user.username,
         value: p.uid,
+        prepend: <UserAvatar user={p.user} avatar={p.data?.avatar} size="s" />,
       })),
     [profiles]
   );
 
   const options = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return allOptions;
-    return allOptions.filter((o) => o.label.toLowerCase().includes(q));
-  }, [allOptions, search]);
+    const filtered = q ? allOptions.filter((o) => o.label.toLowerCase().includes(q)) : allOptions;
+    const [currentUser, rest] = partition(filtered, (o) => o.value === currentUserUid);
+    return [...currentUser, ...rest].slice(0, MAX_VISIBLE_OPTIONS);
+  }, [allOptions, search, currentUserUid]);
 
   const handleSelectionChange = useCallback(
     (values: string[]) => {
