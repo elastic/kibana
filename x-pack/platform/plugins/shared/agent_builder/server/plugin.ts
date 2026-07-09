@@ -166,7 +166,7 @@ export class AgentBuilderPlugin
     const smlTools = createSmlTools({
       getAgentBuilderSml: () => {
         if (!this.startDeps) {
-          throw new Error('Agent Context Layer not available — plugin has not started');
+          throw new Error('Agent Builder SML not available — plugin has not started');
         }
         return this.startDeps.agentBuilderSml;
       },
