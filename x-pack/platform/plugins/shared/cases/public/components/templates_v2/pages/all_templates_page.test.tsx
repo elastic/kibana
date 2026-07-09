@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { createEvent, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { AllTemplatesPage } from './all_templates_page';
 import { renderWithTestingProviders, createTestQueryClient } from '../../../common/mock';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -20,13 +22,22 @@ jest.mock('../../use_breadcrumbs', () => ({
   useCasesTemplatesBreadcrumbs: jest.fn(),
 }));
 
+const mockNavigateToAllCases = jest.fn();
 const mockNavigateToCasesCreateTemplate = jest.fn();
 const mockNavigateToCasesEditTemplate = jest.fn();
 
 jest.mock('../../../common/navigation/hooks', () => ({
+  useAllCasesNavigation: () => ({
+    getAllCasesUrl: jest.fn().mockReturnValue('/'),
+    navigateToAllCases: mockNavigateToAllCases,
+  }),
   useCasesCreateTemplateNavigation: () => ({
     getCasesCreateTemplateUrl: jest.fn().mockReturnValue('/templates/create'),
     navigateToCasesCreateTemplate: mockNavigateToCasesCreateTemplate,
+  }),
+  useCasesFieldLibraryNavigation: () => ({
+    getCasesFieldLibraryUrl: jest.fn().mockReturnValue('/field-library'),
+    navigateToCasesFieldLibrary: jest.fn(),
   }),
 }));
 
@@ -117,9 +128,23 @@ describe('AllTemplatesPage', () => {
       wrapperProps: { queryClient },
     });
 
-    await waitFor(() => {
-      expect(screen.getByTestId('all-templates-header')).toBeInTheDocument();
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
+    expect(screen.getByTestId('create-template-button')).toBeInTheDocument();
+  });
+
+  it('navigates to all cases and prevents the anchor default navigation on back click', async () => {
+    const queryClient = createTestQueryClient();
+
+    renderWithTestingProviders(<AllTemplatesPage />, {
+      wrapperProps: { queryClient },
     });
+
+    const backButton = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.back);
+    const clickEvent = createEvent.click(backButton);
+    fireEvent(backButton, clickEvent);
+
+    expect(clickEvent.defaultPrevented).toBe(true);
+    expect(mockNavigateToAllCases).toHaveBeenCalled();
   });
 
   it('renders the info panel', async () => {
@@ -303,7 +328,8 @@ describe('AllTemplatesPage', () => {
 
     expect(screen.queryByTestId('template-flyout')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('import-template-button'));
+    await openAppMenuOverflow();
+    await userEvent.click(await screen.findByTestId('import-template-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('template-flyout')).toBeInTheDocument();
@@ -321,7 +347,8 @@ describe('AllTemplatesPage', () => {
       expect(screen.getByTestId('templates-table')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByTestId('import-template-button'));
+    await openAppMenuOverflow();
+    await userEvent.click(await screen.findByTestId('import-template-button'));
 
     await waitFor(() => {
       expect(screen.getByTestId('template-flyout')).toBeInTheDocument();

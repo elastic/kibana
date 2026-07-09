@@ -10840,6 +10840,12 @@ paths:
             default: 50
             minimum: 1
             type: number
+        - description: Whether to filter by scheduled or ad-hoc attack discovery generations. If omitted, both types are returned. Use `true` to return only scheduled generations or `false` to return only ad-hoc (interactive or action-triggered) generations.
+          in: query
+          name: scheduled
+          required: false
+          schema:
+            type: boolean
         - description: Start of the time range for filtering generations. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
           example: now-24h
           in: query
@@ -11122,7 +11128,6 @@ paths:
                   - connector_id
                   - discoveries
                   - execution_uuid
-                  - loading_message
                   - start
                   - status
           description: Indicates a successful call.
@@ -13504,6 +13509,100 @@ paths:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case tags
+      tags:
+        - cases
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/cases/templates:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/templates</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of case templates. Requires the Cases feature to be enabled in the space.
+      operationId: getCaseTemplatesDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_page_index'
+        - $ref: '#/components/parameters/Cases_page_size'
+        - $ref: '#/components/parameters/Cases_template_sort_field'
+        - $ref: '#/components/parameters/Cases_sort_order'
+        - $ref: '#/components/parameters/Cases_search'
+        - $ref: '#/components/parameters/Cases_owner_filter'
+        - $ref: '#/components/parameters/Cases_template_tags'
+        - $ref: '#/components/parameters/Cases_template_author'
+        - $ref: '#/components/parameters/Cases_template_is_enabled'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCaseTemplatesResponse:
+                  $ref: '#/components/examples/Cases_get_case_templates_response'
+              schema:
+                $ref: '#/components/schemas/Cases_get_case_templates_response'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+      summary: Get all case templates
+      tags:
+        - cases
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/cases/templates/{template_id}:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/templates/{template_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the details of a case template. Requires the Cases feature to be enabled in the space.
+      operationId: getCaseTemplateDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_template_id'
+        - $ref: '#/components/parameters/Cases_template_version'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCaseTemplateResponse:
+                  $ref: '#/components/examples/Cases_get_case_template_response'
+              schema:
+                $ref: '#/components/schemas/Cases_template_v2_response'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The template was not found.
+      summary: Get a case template by ID
       tags:
         - cases
       x-metaTags:
@@ -46905,6 +47004,7 @@ paths:
               properties:
                 description:
                   description: A description of the pipeline.
+                  maxLength: 1024
                   type: string
                 pipeline:
                   description: A definition for the pipeline.
@@ -74364,6 +74464,35 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzM2LDFd
+    Cases_get_case_template_response:
+      summary: A case template.
+      value:
+        definition: {}
+        definitionString: 'fields: []'
+        deletedAt: null
+        isLatest: true
+        latestVersion: 1
+        name: My Template
+        owner: cases
+        templateId: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+        templateVersion: 1
+    Cases_get_case_templates_response:
+      summary: A paginated list of case templates.
+      value:
+        page: 1
+        perPage: 20
+        templates:
+          - definition: {}
+            definitionString: 'fields: []'
+            deletedAt: null
+            fieldSearchMatches: false
+            isLatest: true
+            latestVersion: 1
+            name: My Template
+            owner: cases
+            templateId: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+            templateVersion: 1
+        total: 1
     Cases_get_comment_response:
       summary: A single user comment retrieved from a case
       value:
@@ -74464,6 +74593,12 @@ components:
         error: Unauthorized
         message: Unable to authenticate with the provided credentials.
         statusCode: 401
+    Cases_response_404:
+      summary: The requested resource was not found.
+      value:
+        error: Not Found
+        message: Saved object [cases-template/9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42] not found
+        statusCode: 404
     Cases_set_case_configuration_request:
       summary: Set the closure type, custom fields, and default connector for Stack Management cases.
       value:
@@ -78813,6 +78948,70 @@ components:
         oneOf:
           - $ref: '#/components/schemas/Cases_string'
           - $ref: '#/components/schemas/Cases_string_array'
+    Cases_template_author:
+      description: Filters the returned templates by author username.
+      example: elastic
+      in: query
+      name: author
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/Cases_string'
+          - $ref: '#/components/schemas/Cases_string_array'
+    Cases_template_id:
+      description: The identifier for the template.
+      example: 9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42
+      in: path
+      name: template_id
+      required: true
+      schema:
+        maxLength: 36
+        type: string
+    Cases_template_is_enabled:
+      description: Filters the returned templates by their enabled state.
+      example: true
+      in: query
+      name: isEnabled
+      schema:
+        type: boolean
+    Cases_template_sort_field:
+      description: Determines which field is used to sort the results.
+      example: name
+      in: query
+      name: sortField
+      required: false
+      schema:
+        default: name
+        enum:
+          - templateId
+          - name
+          - templateVersion
+          - owner
+          - deletedAt
+          - author
+          - usageCount
+          - fieldCount
+          - lastUsedAt
+          - isDefault
+          - isLatest
+        type: string
+    Cases_template_tags:
+      description: Filters the returned templates by tags.
+      example: tag-1
+      in: query
+      name: tags
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/Cases_string'
+          - $ref: '#/components/schemas/Cases_string_array'
+    Cases_template_version:
+      description: The version number of the template to retrieve. If omitted, the latest version is returned.
+      example: 1
+      in: query
+      name: version
+      required: false
+      schema:
+        minimum: 1
+        type: integer
     Cases_to:
       description: |
         Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression.
@@ -80717,6 +80916,36 @@ components:
         - page
         - per_page
         - total
+    Cases_get_case_templates_response:
+      description: Response returned by the get all case templates API.
+      type: object
+      properties:
+        page:
+          description: The page number of the returned results.
+          type: integer
+        perPage:
+          description: The number of results per page.
+          type: integer
+        templates:
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Cases_template_v2_response'
+              - type: object
+                properties:
+                  fieldSearchMatches:
+                    description: Whether the search query matched a field name in this template.
+                    type: boolean
+                required:
+                  - fieldSearchMatches
+          type: array
+        total:
+          description: The total number of templates matching the query.
+          type: integer
+      required:
+        - templates
+        - page
+        - perPage
+        - total
     Cases_owner:
       description: |
         The application that owns the cases: Stack Management, Observability, or Elastic Security.
@@ -81172,6 +81401,101 @@ components:
         type: string
       maxItems: 200
       type: array
+    Cases_template_v2_response:
+      description: A case template (v2).
+      type: object
+      properties:
+        author:
+          description: The username of the template author.
+          maxLength: 1000
+          type: string
+        definition:
+          description: The parsed template definition.
+        definitionString:
+          description: The raw YAML definition string.
+          maxLength: 30000
+          type: string
+        deletedAt:
+          description: The date the template was soft-deleted, or null if active.
+          format: date-time
+          nullable: true
+          type: string
+        description:
+          description: A human-readable description of the template.
+          maxLength: 30000
+          type: string
+        fieldCount:
+          description: The number of fields defined in the template.
+          type: integer
+        fieldNames:
+          description: Metadata about each field defined in the template.
+          items:
+            type: object
+            properties:
+              control:
+                maxLength: 50
+                type: string
+              label:
+                maxLength: 256
+                type: string
+              name:
+                maxLength: 256
+                type: string
+              type:
+                maxLength: 50
+                type: string
+            required:
+              - name
+              - label
+              - type
+              - control
+          type: array
+        isDefault:
+          description: Whether this is the default template for its owner.
+          type: boolean
+        isEnabled:
+          description: Whether the template is enabled.
+          type: boolean
+        isLatest:
+          description: Whether this is the latest version of the template.
+          type: boolean
+        lastUsedAt:
+          description: The date the template was last used to create a case.
+          format: date-time
+          type: string
+        latestVersion:
+          description: The latest version number of this template.
+          type: integer
+        name:
+          description: The display name of the template.
+          maxLength: 100
+          type: string
+        owner:
+          description: The owning solution (e.g. cases, observability, securitySolution).
+          maxLength: 50
+          type: string
+        tags:
+          $ref: '#/components/schemas/Cases_template_tags'
+        templateId:
+          description: The unique identifier of the template, shared across all versions.
+          maxLength: 36
+          type: string
+        templateVersion:
+          description: The version number of this template revision.
+          type: integer
+        usageCount:
+          description: The number of times this template has been used to create a case.
+          type: integer
+      required:
+        - templateId
+        - name
+        - owner
+        - definition
+        - definitionString
+        - templateVersion
+        - deletedAt
+        - isLatest
+        - latestVersion
     Cases_templates:
       items:
         type: object
@@ -123037,21 +123361,56 @@ components:
             successful_generations:
               description: The number of successful generations for the same connector id, for the current user
               type: number
+        conversation_id:
+          description: Identifier of the persisted Agent Builder conversation for skill-based alert retrieval (optional; present only when the skill retrieval mode ran)
+          type: string
         discoveries:
           description: The number of new Attack discovery alerts (max kibana.alert.rule.execution.metrics.alert_counts.new) for this generation
           type: number
+        duplicates_dropped_count:
+          description: The number of attack discoveries dropped as duplicates during the persist step
+          type: integer
         end:
           description: When generation ended (max event.end)
+          type: string
+        error_category:
+          description: Structured error category from server classification (optional; absent for successful generations)
           type: string
         execution_uuid:
           description: The unique identifier (kibana.alert.rule.execution.uuid) for the generation
           type: string
+        failed_workflow_id:
+          description: Workflow ID that caused the failure (optional; absent for successful generations)
+          type: string
+        generated_count:
+          description: The number of attack discoveries generated before deduplication and hallucination filtering
+          type: integer
+        hallucinations_filtered_count:
+          description: The number of attack discoveries filtered as hallucinations during the validation step
+          type: integer
         loading_message:
           description: Generation loading message (kibana.alert.rule.execution.status)
           type: string
+        persisted_count:
+          description: The number of attack discoveries successfully persisted after deduplication and hallucination filtering
+          type: integer
         reason:
           description: Reason for failed generations (event.reason)
           type: string
+        source_metadata:
+          description: Source metadata for scheduled generations (rule_id, rule_name, action_execution_uuid)
+          nullable: true
+          type: object
+          properties:
+            action_execution_uuid:
+              description: The action execution UUID from the alerting framework
+              type: string
+            rule_id:
+              description: The ID of the alerting rule that triggered this generation
+              type: string
+            rule_name:
+              description: The name of the alerting rule that triggered this generation
+              type: string
         start:
           description: When generation started (min event.start)
           type: string
@@ -123064,11 +123423,24 @@ components:
             - started
             - succeeded
           type: string
+        step_event_actions:
+          description: Synthesized per-step lifecycle markers (e.g. step-start, step-complete, step-fail) derived from raw event.action values. The array is ordered by step sequence (alert retrieval, generation, validation), with each step contributing 0-2 tokens that indicate its execution status.
+          items:
+            type: string
+          type: array
+        workflow_executions:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionsTracking'
+          description: Workflow execution tracking for alert retrieval, generation, and validation workflows
+        workflow_id:
+          description: The workflow definition ID for deep linking
+          type: string
+        workflow_run_id:
+          description: The workflow execution ID for monitoring
+          type: string
       required:
         - connector_id
         - discoveries
         - execution_uuid
-        - loading_message
         - start
         - status
     Security_Attack_discovery_API_AttackDiscoveryGenerationConfig:
@@ -123279,6 +123651,43 @@ components:
           description: User name.
           example: John Doe
           type: string
+    Security_Attack_discovery_API_WorkflowExecutionReference:
+      type: object
+      properties:
+        workflowId:
+          description: The workflow definition ID
+          type: string
+        workflowName:
+          description: The human-readable workflow name (optional; used by the UI to display a label)
+          type: string
+        workflowRunId:
+          description: The workflow execution ID
+          type: string
+      required:
+        - workflowId
+        - workflowRunId
+    Security_Attack_discovery_API_WorkflowExecutionsTracking:
+      description: Workflow execution tracking for manual orchestration
+      type: object
+      properties:
+        alertRetrieval:
+          description: Alert retrieval workflow executions (one per workflow invoked)
+          items:
+            $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionReference'
+          nullable: true
+          type: array
+        gate:
+          description: Generation-phase gate (skill) executions, including any net-new alert re-fetch the skill triggers
+          items:
+            $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionReference'
+          nullable: true
+          type: array
+        generation:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionReference'
+          nullable: true
+        validation:
+          $ref: '#/components/schemas/Security_Attack_discovery_API_WorkflowExecutionReference'
+          nullable: true
     Security_Detections_API_AlertAssignees:
       type: object
       properties:
