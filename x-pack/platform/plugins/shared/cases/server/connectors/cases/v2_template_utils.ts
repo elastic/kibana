@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import type { Logger } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
@@ -21,12 +21,18 @@ export type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSc
 /**
  * Parse a raw YAML definition string into a validated ParsedTemplateDefinition.
  * Returns null if the YAML is invalid or fails schema validation.
+ *
+ * Uses the `yaml` package (not `js-yaml`) to match the parser used everywhere else
+ * templates are read (routes, `resolveTemplateFields`, the UI form sync). `js-yaml`
+ * defaults to YAML 1.1 scalar resolution (e.g. `no`/`yes`/`off`/`on`/octals parse as
+ * booleans or numbers rather than strings), which would silently diverge from the
+ * `extended_fields` the UI pre-fills for the same stored definition.
  */
 export const parseTemplateDefinition = (
   definitionYaml: string
 ): ParsedTemplateDefinition | null => {
   try {
-    const raw = yaml.load(definitionYaml);
+    const raw = parseYaml(definitionYaml);
     const result = ParsedTemplateDefinitionSchema.safeParse(raw);
     return result.success ? result.data : null;
   } catch {
