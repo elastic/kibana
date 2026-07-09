@@ -135,11 +135,16 @@ export const commands = ${generateCommandSectionDoc(data)};
 `;
 }
 
+const BACKSLASH_REGEX = /\\/g;
+const SINGLE_QUOTE_REGEX = /'/g;
+const BACKTICK_REGEX = /`/g;
+const TEMPLATE_EXPRESSION_REGEX = /\$\{/g;
+
 /**
  * Escapes a string for safe interpolation inside a single-quoted JS string literal.
  */
 function escapeSingleQuoted(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  return value.replace(BACKSLASH_REGEX, '\\\\').replace(SINGLE_QUOTE_REGEX, "\\'");
 }
 
 /**
@@ -148,7 +153,10 @@ function escapeSingleQuoted(value: string): string {
  * out of the generated template literal or inject expressions into it.
  */
 function escapeTemplateLiteral(value: string): string {
-  return value.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+  return value
+    .replace(BACKSLASH_REGEX, '\\\\')
+    .replace(BACKTICK_REGEX, '\\`')
+    .replace(TEMPLATE_EXPRESSION_REGEX, '\\${');
 }
 
 /**
