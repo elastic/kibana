@@ -225,8 +225,16 @@ const designExplorationChromeStyles = (euiTheme: UseEuiTheme) => {
       font-weight: 500 !important;
     }
 
-    ${scope} .echMetricText__title > span {
+    ${scope} .echMetricText__title > span,
+    ${scope} .echMetricText__subtitle {
       padding-left: 4px !important;
+    }
+
+    ${scope} .echMetricText__subtitle {
+      color: ${colors.textSubdued} !important;
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      padding-top: 2px !important;
     }
 
     ${scope} [data-test-subj='appHeader'] [class*='css-'][class*='-euiButtonDisplay'][class*='app_menu_action_button--buttonCss'] {
