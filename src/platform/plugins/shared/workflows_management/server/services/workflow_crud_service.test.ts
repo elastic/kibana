@@ -795,7 +795,6 @@ describe('WorkflowCrudService', () => {
       const searchArgs = client.search.mock.calls[0][0];
       expect(searchArgs.query).toEqual({ ids: { values: ['tombstoned-id', 'new-id'] } });
     });
-
   });
 
   describe('bulkCreateWorkflows', () => {
