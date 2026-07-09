@@ -30,3 +30,15 @@ export const RULES_DATA_INPUT_CHECK_RESOURCES_QRADAR_DESCRIPTION = i18n.translat
     defaultMessage: `For best translation results, we will review the data for reference sets. If found, we will ask you to upload them next.`,
   }
 );
+
+export const RULES_DATA_INPUT_CHECK_RESOURCES_SENTINEL_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.checkResources.sentinel.title',
+  { defaultMessage: 'Check for watchlists' }
+);
+
+export const RULES_DATA_INPUT_CHECK_RESOURCES_SENTINEL_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.checkResources.sentinel.description',
+  {
+    defaultMessage: `For best translation results, we will review the data for watchlists. If found, we will ask you to upload them next.`,
+  }
+);

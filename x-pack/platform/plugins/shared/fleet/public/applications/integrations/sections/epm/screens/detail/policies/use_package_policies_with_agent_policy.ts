@@ -15,8 +15,9 @@ import type {
   GetAgentPoliciesResponseItem,
   GetPackagePoliciesResponse,
 } from '../../../../../types';
-import { agentPolicyRouteService } from '../../../../../services';
-import { useGetPackagePolicies, useConditionalRequest } from '../../../../../hooks';
+import { agentPolicyRouteService, packagePolicyRouteService } from '../../../../../services';
+import { useConditionalRequest } from '../../../../../hooks';
+import type { useGetPackagePolicies } from '../../../../../hooks';
 import type { SendConditionalRequestConfig } from '../../../../../hooks';
 
 export interface PackagePolicyAndAgentPolicy {
@@ -35,19 +36,29 @@ type GetPackagePoliciesWithAgentPolicy = Omit<GetPackagePoliciesResponse, 'items
  * @param query
  */
 export const usePackagePoliciesWithAgentPolicy = (
-  query: Parameters<typeof useGetPackagePolicies>[0]
+  query: Parameters<typeof useGetPackagePolicies>[0],
+  // `enabled: false` skips both requests; the agentless deployments table uses this to keep the
+  // legacy source mounted-but-idle while the agentless policies API is the active source.
+  options: { enabled?: boolean } = {}
 ): {
   isLoading: boolean;
   error: Error | null;
   data?: GetPackagePoliciesWithAgentPolicy;
   resendRequest: () => void;
 } => {
+  const enabled = options.enabled ?? true;
   const {
     data: packagePoliciesData,
     error,
     isLoading: isLoadingPackagePolicies,
-    resendRequest,
-  } = useGetPackagePolicies(query);
+    sendRequest: resendRequest,
+  } = useConditionalRequest<GetPackagePoliciesResponse>({
+    method: 'get',
+    path: packagePolicyRouteService.getListPath(),
+    query,
+    version: API_VERSIONS.public.v1,
+    shouldSendRequest: enabled,
+  } as SendConditionalRequestConfig);
 
   const agentPoliciesIds = useMemo<string[]>(() => {
     if (!packagePoliciesData?.items.length) {
@@ -74,7 +85,7 @@ export const usePackagePoliciesWithAgentPolicy = (
         ignoreMissing: true,
       },
       version: API_VERSIONS.public.v1,
-      shouldSendRequest: agentPoliciesIds.length > 0,
+      shouldSendRequest: enabled && agentPoliciesIds.length > 0,
     } as SendConditionalRequestConfig);
 
   const [enrichedData, setEnrichedData] = useState<GetPackagePoliciesWithAgentPolicy | undefined>();

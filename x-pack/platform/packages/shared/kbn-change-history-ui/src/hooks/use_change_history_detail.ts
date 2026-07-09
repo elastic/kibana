@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@kbn/react-query';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryDetail } from '../types/change_history_detail';
+import { useChangeHistoryConfig } from '../provider/use_change_history_config';
+import { toChangeHistoryPendingDetail } from '../utils/merge_change_history_pending_change';
+import { resolveChangeHistoryPendingChange } from '../utils/resolve_change_history_pending_change';
+import { changeHistoryDetailQueryKey } from './change_history_list_query_key';
 
 export interface UseChangeHistoryDetailArgs {
   adapter: ChangeHistoryAdapter;
@@ -28,64 +32,39 @@ export const useChangeHistoryDetail = ({
   changeId,
   enabled = true,
 }: UseChangeHistoryDetailArgs): UseChangeHistoryDetailResult => {
-  const [change, setChange] = useState<ChangeHistoryDetail | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | undefined>();
-  const abortControllerRef = useRef<AbortController | undefined>();
+  const { scope, supports } = useChangeHistoryConfig();
+  const pendingChange = resolveChangeHistoryPendingChange(adapter, supports.unsavedChanges);
+  const isPendingSelection = Boolean(pendingChange && changeId === pendingChange.id);
 
-  useEffect(() => {
-    if (!enabled || !changeId || !objectId) {
-      setChange(undefined);
-      setError(undefined);
-      setIsLoading(false);
-      return;
+  const { data, error, isLoading } = useQuery<ChangeHistoryDetail, Error>(
+    changeHistoryDetailQueryKey({
+      objectId,
+      changeId: changeId ?? '__none__',
+      scope,
+    }),
+    ({ signal }) => {
+      if (!changeId) {
+        throw new Error('changeId is required');
+      }
+
+      return adapter.getChange({ objectId, changeId, signal });
+    },
+    {
+      enabled: enabled && Boolean(changeId) && Boolean(objectId) && !isPendingSelection,
+      keepPreviousData: true,
     }
+  );
 
-    abortControllerRef.current?.abort();
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
+  const change =
+    pendingChange && isPendingSelection
+      ? toChangeHistoryPendingDetail(pendingChange)
+      : changeId
+      ? data
+      : undefined;
 
-    const showLoadingTimer = setTimeout(() => {
-      if (!abortController.signal.aborted) {
-        setIsLoading(true);
-      }
-    }, 0);
-
-    adapter
-      .getChange({ objectId, changeId, signal: abortController.signal })
-      .then((detail) => {
-        if (abortController.signal.aborted) {
-          return;
-        }
-
-        setChange(detail);
-        setError(undefined);
-      })
-      .catch((fetchError) => {
-        if (abortController.signal.aborted) {
-          return;
-        }
-
-        setChange(undefined);
-        setError(fetchError instanceof Error ? fetchError : new Error(String(fetchError)));
-      })
-      .finally(() => {
-        if (showLoadingTimer) {
-          clearTimeout(showLoadingTimer);
-        }
-
-        if (!abortController.signal.aborted) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      if (showLoadingTimer) {
-        clearTimeout(showLoadingTimer);
-      }
-      abortController.abort();
-    };
-  }, [adapter, changeId, enabled, objectId]);
-
-  return { change, isLoading, error };
+  return {
+    change,
+    isLoading: isPendingSelection ? false : isLoading,
+    error: error ?? undefined,
+  };
 };

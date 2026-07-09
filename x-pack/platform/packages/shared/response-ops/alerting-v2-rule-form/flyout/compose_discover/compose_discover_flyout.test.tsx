@@ -68,6 +68,13 @@ jest.mock('./compose_discover_form', () => {
           >
             Make dirty
           </button>
+          <button
+            data-test-subj="mockMakeNotificationsDirty"
+            onClick={() => setValue('notifications', { workflows: [] }, { shouldDirty: true })}
+            type="button"
+          >
+            Make notifications dirty
+          </button>
         </div>
       );
     },
@@ -79,6 +86,8 @@ interface SandboxFlyoutMockProps {
   onQueryChange?: (query: RuleQuery) => void;
   onApply?: () => void;
   onClose: () => void;
+  helpText?: React.ReactNode;
+  headerActions?: React.ReactNode;
 }
 
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
@@ -89,6 +98,8 @@ jest.mock('./query_sandbox_flyout', () => ({
     sandboxFlyoutProps = props;
     return (
       <div data-test-subj="composeDiscoverChildMock">
+        <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
+        <div data-test-subj="mockSandboxHeaderActions">{props.headerActions}</div>
         {props.onApply ? (
           <button type="button" data-test-subj="mockSandboxApply" onClick={() => props.onApply?.()}>
             Apply
@@ -237,6 +248,7 @@ describe('ComposeDiscoverFlyout', () => {
     it('does not render the stepper in YAML mode', () => {
       renderFlyout();
 
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       expect(screen.queryByRole('group', { name: /Step \d+ of \d+/ })).not.toBeInTheDocument();
@@ -248,6 +260,7 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(screen.queryByTestId('composeDiscoverYamlQuerySandbox')).not.toBeInTheDocument();
 
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       expect(screen.getByTestId('composeDiscoverYamlQuerySandbox')).toBeInTheDocument();
@@ -260,9 +273,43 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.queryByTestId('composeDiscoverYamlQuerySandbox')).not.toBeInTheDocument();
     });
 
+    it('disables Form/YAML toggle while sandbox is open in form mode', () => {
+      renderFlyout();
+
+      // Sandbox is open in create mode — toggle must be disabled
+      const buttons = screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button');
+      buttons.forEach((btn) => expect(btn).toBeDisabled());
+
+      // Close sandbox — toggle re-enables
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
+
+      const buttonsAfter = screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button');
+      buttonsAfter.forEach((btn) => expect(btn).not.toBeDisabled());
+    });
+
+    it('keeps Form/YAML toggle enabled while sandbox is open in YAML mode', () => {
+      renderFlyout();
+
+      // Close sandbox, switch to YAML (SET_YAML_MODE reopens sandbox)
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
+      clickEditMode('yaml');
+
+      // Sandbox is now open in YAML mode — toggle must stay enabled
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+      const buttons = screen
+        .getByTestId('composeDiscoverEditModeToggle')
+        .querySelectorAll('button');
+      buttons.forEach((btn) => expect(btn).not.toBeDisabled());
+    });
+
     it('reopens Query sandbox after manual close in YAML mode', () => {
       renderFlyout();
 
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
@@ -345,14 +392,10 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
     });
 
-    it('closes immediately when the form is pristine and Cancel is clicked', () => {
-      const onClose = jest.fn();
-      renderFlyout({ onClose });
+    it('does not render a Cancel button in the footer', () => {
+      renderFlyout({});
 
-      fireEvent.click(screen.getByTestId('composeDiscoverCancel'));
-
-      expect(onClose).toHaveBeenCalledTimes(1);
-      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('composeDiscoverCancel')).not.toBeInTheDocument();
     });
 
     it('shows the confirmation modal when the form is dirty and the X button is clicked', () => {
@@ -361,17 +404,6 @@ describe('ComposeDiscoverFlyout', () => {
 
       fireEvent.click(screen.getByTestId('mockMakeDirty'));
       fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
-
-      expect(onClose).not.toHaveBeenCalled();
-      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
-    });
-
-    it('shows the confirmation modal when the form is dirty and Cancel is clicked', () => {
-      const onClose = jest.fn();
-      renderFlyout({ onClose });
-
-      fireEvent.click(screen.getByTestId('mockMakeDirty'));
-      fireEvent.click(screen.getByTestId('composeDiscoverCancel'));
 
       expect(onClose).not.toHaveBeenCalled();
       expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
@@ -405,6 +437,7 @@ describe('ComposeDiscoverFlyout', () => {
       const onClose = jest.fn();
       renderFlyout({ onClose });
 
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
@@ -443,6 +476,7 @@ describe('ComposeDiscoverFlyout', () => {
       const onClose = jest.fn();
       renderFlyout({ onClose });
 
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
@@ -458,6 +492,7 @@ describe('ComposeDiscoverFlyout', () => {
       const onClose = jest.fn();
       renderFlyout({ onClose });
 
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
       fireEvent.click(screen.getByTestId('mockMakeYamlDirty'));
       clickEditMode('form');
@@ -484,6 +519,7 @@ describe('ComposeDiscoverFlyout', () => {
       expect(callout).toHaveTextContent('?window');
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
 
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       expect(screen.getByTestId('composeDiscoverYamlSubmit')).toBeDisabled();
@@ -551,6 +587,82 @@ describe('ComposeDiscoverFlyout', () => {
     });
   });
 
+  describe('initialQuery in builder mode', () => {
+    it('seeds the form query when the Discover query is a parseable loose query', () => {
+      renderFlyout({
+        builderType: 'threshold',
+        initialQuery: 'FROM logs-* | WHERE status >= 500',
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query');
+      }
+      expect(committed.base).toContain('FROM logs-*');
+      expect(committed.breach.segment).toContain('WHERE');
+    });
+
+    it('seeds the form query when the Discover query is a full threshold query', () => {
+      renderFlyout({
+        builderType: 'threshold',
+        initialQuery: 'FROM logs-* | STATS count = COUNT(*) | WHERE count > 100',
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query');
+      }
+      expect(committed.base).toContain('FROM logs-*');
+      expect(committed.breach.segment).toContain('WHERE');
+    });
+
+    it('keeps the form query empty when the Discover query is unparseable', () => {
+      renderFlyout({
+        builderType: 'threshold',
+        initialQuery: 'ROW x = 1',
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query');
+      }
+      expect(committed.base).toBe('');
+      expect(committed.breach.segment).toBe('');
+    });
+
+    it('keeps the form query empty when the Discover query has syntax errors', () => {
+      renderFlyout({
+        builderType: 'threshold',
+        initialQuery: 'FROM logs-* | WERE status >= 500',
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query');
+      }
+      expect(committed.base).toBe('');
+      expect(committed.breach.segment).toBe('');
+    });
+
+    it('still seeds the form query for ES|QL mode (no builderType) with any valid query', () => {
+      renderFlyout({
+        initialQuery: 'FROM logs-* | WHERE status >= 500',
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query');
+      }
+      expect(committed.base).toContain('FROM logs-*');
+      expect(committed.breach.segment).toContain('WHERE');
+    });
+  });
+
   describe('YAML save submission', () => {
     const validComposedYamlValues: FormValues = {
       kind: 'alert',
@@ -586,6 +698,7 @@ describe('ComposeDiscoverFlyout', () => {
         initialQuery: 'FROM logs-* | WHERE count > 100',
       });
 
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
       mockParseYamlToFormValues = () => ({
         values: standaloneAlertYamlValues,
@@ -612,6 +725,7 @@ describe('ComposeDiscoverFlyout', () => {
         initialQuery: 'FROM logs-* | WHERE count > 100',
       });
 
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
       clickEditMode('yaml');
 
       await act(async () => {
@@ -649,7 +763,56 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
     });
 
-    it('does not re-split in edit mode and commits the sandbox structure as-is', () => {
+    it('runs heuristic split and commits the result in edit + alert unified editor', () => {
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: { segment: '| WHERE count > 100' },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      act(() => {
+        mockComposeDiscoverForm.mock.calls[
+          mockComposeDiscoverForm.mock.calls.length - 1
+        ][0].dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
+      });
+
+      expect(sandboxFlyoutProps).toBeDefined();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'composed',
+          base: 'FROM logs-* | WHERE count > 200',
+          breach: { segment: '' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('composed');
+      if (committed?.format !== 'composed') {
+        throw new Error('expected composed query after Apply');
+      }
+      expect(committed.base).toContain('FROM logs-*');
+      expect(committed.breach.segment).toContain('WHERE count > 200');
+    });
+
+    it('does not re-split in edit mode YAML and commits the sandbox structure as-is', () => {
       const editFormValues: FormValues = {
         kind: 'alert',
         metadata: { name: 'Edit rule', enabled: true, description: '', tags: [] },
@@ -711,6 +874,357 @@ describe('ComposeDiscoverFlyout', () => {
         base: 'FROM metrics-*',
         breach: { segment: '| WHERE count > 50' },
       });
+    });
+
+    it('commits manual split base/alert verbatim without running the heuristic', () => {
+      renderFlyout({ mode: 'create' });
+
+      expect(sandboxFlyoutProps).toBeDefined();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+
+      expect(sandboxFlyoutProps?.query).toMatchObject({
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      });
+
+      const manualSplitQuery: RuleQuery = {
+        format: 'composed',
+        base: 'FROM custom-base',
+        breach: { segment: '| WHERE custom > 1' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(manualSplitQuery);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
+    });
+
+    it('preserves custom recovery when applying manual split edits', () => {
+      const queryWithRecovery: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-* | WHERE count > 100',
+        breach: { segment: '' },
+        recovery: { segment: '| WHERE count < 50' },
+      };
+
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: { segment: '| WHERE count > 100' },
+            recovery: { segment: '| WHERE count < 50' },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      act(() => {
+        mockComposeDiscoverForm.mock.calls[
+          mockComposeDiscoverForm.mock.calls.length - 1
+        ][0].dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
+      });
+
+      expect(sandboxFlyoutProps).toBeDefined();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(queryWithRecovery);
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+
+      expect(sandboxFlyoutProps?.query).toMatchObject({
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+        recovery: { segment: '| WHERE count < 50' },
+      });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: '| WHERE count > 200' },
+          recovery: { segment: '| WHERE count < 50' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 200' },
+        recovery: { segment: '| WHERE count < 50' },
+      });
+    });
+
+    it('commits subsequent recovery edits when manualSplitEnabled is stale from alert condition', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: '| WHERE count > 100' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      fireEvent.click(screen.getByTestId('composeDiscoverNext'));
+
+      const getLatestFormProps = (): FormProps =>
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+      act(() => {
+        getLatestFormProps().onRecoveryTypeChange('custom');
+      });
+
+      const firstRecoveryEdit: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+        recovery: { segment: '| WHERE count < 50' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(firstRecoveryEdit);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+      expect(readCommittedQuery?.()).toEqual(firstRecoveryEdit);
+
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 1, isAlert: true });
+      });
+
+      const secondRecoveryEdit: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+        recovery: { segment: '| WHERE count < 10' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(secondRecoveryEdit);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readCommittedQuery?.()).toEqual(secondRecoveryEdit);
+    });
+  });
+
+  describe('manual split mode', () => {
+    const getLatestFormProps = (): FormProps =>
+      mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+    it('passes onManualSplit in create and edit modes', () => {
+      renderFlyout({ mode: 'create' });
+      expect(getLatestFormProps().onManualSplit).toBeDefined();
+
+      mockComposeDiscoverForm.mockClear();
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: { segment: '| WHERE count > 100' },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+      expect(getLatestFormProps().onManualSplit).toBeDefined();
+    });
+
+    it('shows the split button before any query is typed', () => {
+      renderFlyout({ mode: 'create' });
+
+      expect(screen.getByTestId('querySandboxSplitBaseAndAlert')).toBeInTheDocument();
+    });
+
+    it('shows split controls in edit mode when the sandbox is open', () => {
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: { segment: '| WHERE count > 100' },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
+      });
+
+      expect(screen.getByTestId('querySandboxSplitBaseAndAlert')).toBeInTheDocument();
+      expect(screen.getByTestId('querySandboxUnifiedHelper')).toBeInTheDocument();
+    });
+
+    it('resets manual split when the sandbox is closed without Apply', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
+
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(false);
+    });
+
+    it('keeps manual split enabled after Apply in manual split mode', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+
+      const manualSplitQuery: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(manualSplitQuery);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+    });
+
+    it('resets manual split when switching to YAML mode', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      fireEvent.click(screen.getByTestId('querySandboxSplitBaseAndAlert'));
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+
+      const manualSplitQuery: RuleQuery = {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE count > 100' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(manualSplitQuery);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+      expect(screen.queryByTestId('composeDiscoverChildMock')).not.toBeInTheDocument();
+
+      clickEditMode('yaml');
+      clickEditMode('form');
+
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(false);
+    });
+
+    it('shows split controls and unified helper on the alert condition step only', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+
+      expect(screen.getByTestId('querySandboxSplitBaseAndAlert')).toBeInTheDocument();
+      expect(screen.getByTestId('querySandboxUnifiedHelper')).toBeInTheDocument();
+    });
+
+    it('hides split controls and unified helper on the custom recovery step', () => {
+      renderFlyout({ mode: 'create' });
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      fireEvent.click(screen.getByTestId('composeDiscoverNext'));
+
+      act(() => {
+        getLatestFormProps().onRecoveryTypeChange('custom');
+      });
+
+      expect(screen.getByTestId('composeDiscoverChildMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxSplitBaseAndAlert')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxUseSingleEditor')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxUnifiedHelper')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxManualSplitHelper')).not.toBeInTheDocument();
     });
   });
 
@@ -827,6 +1341,60 @@ describe('ComposeDiscoverFlyout', () => {
       renderFlyout({ mode: 'edit', rule: rule as any });
 
       expect(screen.getByTestId('yamlRuleFormMock')).toBeInTheDocument();
+    });
+  });
+
+  describe('notifications dirty flag survives YAML reset', () => {
+    const editableRule = {
+      id: 'rule-1',
+      kind: 'alert' as const,
+      enabled: true,
+      metadata: { name: 'Composed alert', tags: [] },
+      time_field: '@timestamp',
+      schedule: { every: '5m', lookback: '1m' },
+      query: {
+        format: 'composed' as const,
+        base: 'FROM logs-*',
+        breach: { segment: 'WHERE count > 100' },
+      },
+      recovery_strategy: 'query' as const,
+    };
+
+    it('reports notifications as dirty on save even after a YAML round-trip clears RHF dirtyFields', async () => {
+      const onUpdateRule = jest.fn();
+      renderFlyout({ mode: 'edit', ruleId: 'rule-1', rule: editableRule as any, onUpdateRule });
+
+      // Edit a simple action in form view, marking notifications dirty.
+      fireEvent.click(screen.getByTestId('mockMakeNotificationsDirty'));
+
+      // Toggling to YAML runs methods.reset(), which clears formState.dirtyFields.
+      clickEditMode('yaml');
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('composeDiscoverYamlSubmit'));
+      });
+
+      await waitFor(() => {
+        expect(onUpdateRule).toHaveBeenCalledTimes(1);
+      });
+      // 4th arg is notificationsDirty — must stay true despite the reset.
+      expect(onUpdateRule.mock.calls[0][3]).toBe(true);
+    });
+
+    it('reports notifications as not dirty when the user never touched them', async () => {
+      const onUpdateRule = jest.fn();
+      renderFlyout({ mode: 'edit', ruleId: 'rule-1', rule: editableRule as any, onUpdateRule });
+
+      clickEditMode('yaml');
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('composeDiscoverYamlSubmit'));
+      });
+
+      await waitFor(() => {
+        expect(onUpdateRule).toHaveBeenCalledTimes(1);
+      });
+      expect(onUpdateRule.mock.calls[0][3]).toBe(false);
     });
   });
 });

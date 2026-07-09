@@ -15,7 +15,6 @@
     "@kbn/logging",
     "@kbn/cps-utils",
     "@kbn/es-query",
-    "@kbn/i18n-react",
     "@kbn/cps-common",
     "@kbn/core-security-server",
   ],

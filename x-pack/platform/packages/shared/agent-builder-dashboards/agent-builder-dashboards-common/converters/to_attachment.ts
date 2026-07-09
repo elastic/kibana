@@ -12,6 +12,11 @@ import type {
 } from '@kbn/dashboard-plugin/server';
 import { LensConfigBuilder, type LensAttributes } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import {
+  extractVegaSpecFromSavedVis,
+  VEGA_VIS_TYPE,
+} from '@kbn/agent-builder-visualizations-common';
 import type { AttachmentPanel, DashboardSection as DashboardAttachmentSection } from '../types';
 import type { DashboardAttachmentData } from '../types';
 
@@ -40,6 +45,21 @@ export const isLensAttributesPanel = (
  * For Lens panels with internal attributes format, converts to API format.
  */
 export const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel | undefined => {
+  // Normalize a by-value legacy-vis (`visualization`) Vega panel to the future
+  // native `vega` API shape (`config.spec`). Temporary bridge that pairs with the
+  // expansion in `from_attachment`; remove once the native vega API ships.
+  if (panel.type === VISUALIZE_EMBEDDABLE_TYPE) {
+    const vega = extractVegaSpecFromSavedVis(panel.config);
+    if (vega) {
+      return {
+        type: VEGA_VIS_TYPE,
+        id: panel.id ?? '',
+        config: { spec: vega.spec, title: vega.title, description: vega.description },
+        grid: panel.grid,
+      };
+    }
+  }
+
   if (isLensAttributesPanel(panel)) {
     const { attributes, ...restConfig } = panel.config;
     try {

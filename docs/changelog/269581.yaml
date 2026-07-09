@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/269581
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+areas:
+- Alerting and reporting
+title: Add cases analytics data view for analyzing cases in Discover and Lens
+description: "Adds a managed cases analytics data view that groups case data in one place for analysis in Discover and Lens, with space-aware fields mapped for easier exploration. Requires the `xpack.cases.analyticsV2.enabled` feature flag."

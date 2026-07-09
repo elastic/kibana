@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
-import { indexLifecyclePhaseRt } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { indexLifecyclePhaseSchema, environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt, probabilityRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema, probabilitySchema } from '../../default_api_types';
 
 export interface StorageDetailsResponse {
   processorEventStats: Array<{
@@ -30,10 +29,14 @@ export interface StorageDetailsResponse {
 
 export const storageExplorerServiceDetailsRoute = defineRoute<StorageDetailsResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/storage_details',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
+  params: z.object({
+    path: z.object({
+      serviceName: z.string(),
     }),
-    query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
+    query: indexLifecyclePhaseSchema
+      .merge(probabilitySchema)
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(rangeSchema),
   }),
 });

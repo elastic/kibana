@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowDetailDto } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 
 import { mapWorkflowHistoryItem } from './map_workflow_history_item';
 import { WorkflowChangeHistoryDisabledError } from './workflow_change_history_disabled_error';
+import {
+  ES_MAX_RESULT_WINDOW,
+  WorkflowHistoryPaginationError,
+} from './workflow_history_pagination_error';
 import type { WorkflowChangesHistoryResponse } from '../../common/lib/workflow_change_history/types';
 import type { IWorkflowChangeHistoryService } from '../services/workflow_change_history_types';
 
@@ -20,8 +24,7 @@ const DEFAULT_PER_PAGE = 20;
 
 export interface GetWorkflowChangeHistoryDeps {
   changeHistoryService: IWorkflowChangeHistoryService;
-  getWorkflow: (id: string, spaceId: string) => Promise<WorkflowDetailDto | null>;
-  workflowVersioningEnabled: boolean;
+  getWorkflowSource: (id: string, spaceId: string) => Promise<{ spaceId: string } | null>;
 }
 
 export interface GetHistoryForWorkflowParams {
@@ -32,15 +35,20 @@ export interface GetHistoryForWorkflowParams {
 }
 
 export const assertWorkflowChangeHistoryEnabled = (
-  changeHistoryService: IWorkflowChangeHistoryService,
-  workflowVersioningEnabled: boolean
+  changeHistoryService: IWorkflowChangeHistoryService
 ): void => {
   if (!changeHistoryService.isInitialized()) {
-    throw new WorkflowChangeHistoryDisabledError('Workflow version history is not available.');
-  }
-
-  if (!workflowVersioningEnabled) {
     throw new WorkflowChangeHistoryDisabledError();
+  }
+};
+
+export const assertWorkflowHistoryPaginationWithinWindow = (
+  page: number,
+  perPage: number
+): void => {
+  const from = (page - 1) * perPage;
+  if (from + perPage > ES_MAX_RESULT_WINDOW) {
+    throw new WorkflowHistoryPaginationError();
   }
 };
 
@@ -53,14 +61,18 @@ export const getHistoryForWorkflow = async (
     perPage = DEFAULT_PER_PAGE,
   }: GetHistoryForWorkflowParams
 ): Promise<WorkflowChangesHistoryResponse> => {
-  assertWorkflowChangeHistoryEnabled(deps.changeHistoryService, deps.workflowVersioningEnabled);
+  assertWorkflowChangeHistoryEnabled(deps.changeHistoryService);
+  assertWorkflowHistoryPaginationWithinWindow(page, perPage);
 
-  const workflow = await deps.getWorkflow(workflowId, spaceId);
+  const workflow = await deps.getWorkflowSource(workflowId, spaceId);
   if (!workflow) {
     throw new WorkflowNotFoundError(workflowId);
   }
 
-  const result = await deps.changeHistoryService.getHistory(spaceId, workflowId, {
+  const historySpaceId =
+    workflow.spaceId === GLOBAL_WORKFLOW_SPACE_ID ? GLOBAL_WORKFLOW_SPACE_ID : spaceId;
+
+  const result = await deps.changeHistoryService.getHistory(historySpaceId, workflowId, {
     from: (page - 1) * perPage,
     size: perPage,
   });

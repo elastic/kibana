@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS } from '@kbn/management-settings-ids';
+import { DEFAULT_INDEX_PATTERNS, parseIndexPatterns } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS } from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
 
 /**
@@ -17,17 +17,11 @@ export function useIndexPatternsConfig() {
   const { core } = useKibana();
 
   const rawValue = core.settings.client.get<string>(
-    OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
+    OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
     DEFAULT_INDEX_PATTERNS
   );
 
-  const indexPatterns = useMemo(() => {
-    const patterns = rawValue
-      .split(',')
-      .map((p) => p.trim())
-      .filter((p) => p.length > 0);
-    return patterns.length > 0 ? patterns : [DEFAULT_INDEX_PATTERNS];
-  }, [rawValue]);
+  const indexPatterns = useMemo(() => parseIndexPatterns(rawValue), [rawValue]);
 
   return {
     indexPatterns,

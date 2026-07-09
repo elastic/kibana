@@ -37,31 +37,17 @@ const baseParams = {
 };
 
 describe('buildWorkflowExecutionDocument', () => {
-  it('sets version when versioning is enabled and workflow has version', () => {
+  it('sets version when workflow has version', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,
       workflow: { ...baseWorkflow, version: 3 },
-      workflowVersioningEnabled: true,
     });
 
     expect(workflowExecution.version).toBe(3);
   });
 
-  it('omits version when versioning is disabled', () => {
-    const workflowExecution = buildWorkflowExecutionDocument({
-      ...baseParams,
-      workflow: { ...baseWorkflow, version: 3 },
-      workflowVersioningEnabled: false,
-    });
-
-    expect(workflowExecution.version).toBeUndefined();
-  });
-
   it('omits version when workflow has no version', () => {
-    const workflowExecution = buildWorkflowExecutionDocument({
-      ...baseParams,
-      workflowVersioningEnabled: true,
-    });
+    const workflowExecution = buildWorkflowExecutionDocument(baseParams);
 
     expect(workflowExecution.version).toBeUndefined();
   });
@@ -70,17 +56,13 @@ describe('buildWorkflowExecutionDocument', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,
       workflow: { ...baseWorkflow, version: Number.NaN },
-      workflowVersioningEnabled: true,
     });
 
     expect(workflowExecution.version).toBeUndefined();
   });
 
   it('builds core execution fields', () => {
-    const workflowExecution = buildWorkflowExecutionDocument({
-      ...baseParams,
-      workflowVersioningEnabled: false,
-    });
+    const workflowExecution = buildWorkflowExecutionDocument(baseParams);
 
     expect(workflowExecution).toMatchObject({
       spaceId: 'default',
@@ -91,5 +73,21 @@ describe('buildWorkflowExecutionDocument', () => {
       createdAt: '2024-06-01T12:00:00.000Z',
     });
     expect(workflowExecution.id).toBeDefined();
+  });
+
+  it('copies managed workflow billable metadata', () => {
+    const workflowExecution = buildWorkflowExecutionDocument({
+      ...baseParams,
+      workflow: {
+        ...baseWorkflow,
+        managed: true,
+        billable: true,
+      },
+    });
+
+    expect(workflowExecution).toMatchObject({
+      managed: true,
+      billable: true,
+    });
   });
 });

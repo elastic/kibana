@@ -10,10 +10,12 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { createSmlIndexer } from './sml_indexer';
 import { createSmlStorage, smlIndexName } from './sml_storage';
+import { SmlUnregisteredTypeError, SmlPermissionsConflictError } from './sml_errors';
 import type {
   SmlChunk,
   SmlIndexerContentParams,
   SmlIndexerOriginParams,
+  SmlPermissions,
   SmlTypeDefinition,
 } from './types';
 
@@ -96,6 +98,7 @@ const createContentIndexerParams = (overrides: {
   logger?: ReturnType<typeof createMockLogger>;
   action?: 'create' | 'update' | 'delete';
   content: SmlChunk[];
+  createdAt?: string;
 }): SmlIndexerContentParams => ({
   originId: overrides.originId ?? 'att-123',
   attachmentType: overrides.attachmentType ?? 'lens',
@@ -105,6 +108,7 @@ const createContentIndexerParams = (overrides: {
   logger: overrides.logger ?? createMockLogger(),
   action: overrides.action ?? 'create',
   content: overrides.content,
+  ...(overrides.createdAt !== undefined ? { createdAt: overrides.createdAt } : {}),
 });
 
 describe('createSmlIndexer', () => {
@@ -148,7 +152,7 @@ describe('createSmlIndexer', () => {
       expect(getSmlData).not.toHaveBeenCalled();
     });
 
-    it('create action: calls getSmlData, deletes existing chunks, bulk indexes new ones', async () => {
+    it('create action: calls getSmlData, deletes existing chunks, bulk indexes new ones with permissions from getPermissions hook', async () => {
       const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
       const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
       (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -159,15 +163,17 @@ describe('createSmlIndexer', () => {
             type: 'lens',
             title: 'My Viz',
             content: 'content',
-            permissions: {
-              kibana: { privileges: [{ name: 'perm1' }] },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       };
       const getSmlData = jest.fn().mockResolvedValue(smlData);
-      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlData }));
+      const getPermissions = jest.fn().mockReturnValue({
+        kibana: { privileges: [{ name: 'perm1' }] },
+        elasticsearch: { indices: [] },
+      });
+      const registry = createMockRegistry(
+        createMockSmlTypeDefinition({ id: 'lens', getSmlData, getPermissions })
+      );
       const logger = createMockLogger();
       const esClient = createMockEsClient();
       const contextLogger = createMockLogger();
@@ -186,6 +192,11 @@ describe('createSmlIndexer', () => {
 
       expect(getSmlData).toHaveBeenCalledTimes(1);
       expect(getSmlData).toHaveBeenCalledWith('att-2', {
+        esClient,
+        savedObjectsClient: {},
+        logger: contextLogger,
+      });
+      expect(getPermissions).toHaveBeenCalledWith('att-2', {
         esClient,
         savedObjectsClient: {},
         logger: contextLogger,
@@ -250,16 +261,16 @@ describe('createSmlIndexer', () => {
             },
             user_id: 'user-7',
             references: [{ uri: 'category://sales' }, { uri: 'dashboard://parent-1' }],
-            permissions: {
-              kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       };
       const getSmlData = jest.fn().mockResolvedValue(smlData);
+      const getPermissions = jest.fn().mockReturnValue({
+        kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+        elasticsearch: { indices: [] },
+      });
       const registry = createMockRegistry(
-        createMockSmlTypeDefinition({ id: 'dashboard', getSmlData })
+        createMockSmlTypeDefinition({ id: 'dashboard', getSmlData, getPermissions })
       );
       const logger = createMockLogger();
       const esClient = createMockEsClient();
@@ -336,26 +347,27 @@ describe('createSmlIndexer', () => {
       expect(bulkMock).toHaveBeenCalledTimes(1);
     });
 
-    it('unknown type: logs warning and returns without action', async () => {
+    it('unknown type in origin mode: throws SmlUnregisteredTypeError without touching ES', async () => {
       const registry = createMockRegistry(undefined);
       registry.list.mockReturnValue([]);
       const logger = createMockLogger();
       const esClient = createMockEsClient();
       const indexer = createSmlIndexer({ registry, logger });
 
-      await indexer.indexAttachment(
-        createIndexerParams({
-          originId: 'att-4',
-          attachmentType: 'unknown-type',
-          action: 'create',
-          esClient,
-          logger,
-        })
-      );
-
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining("type definition 'unknown-type' not found")
-      );
+      await expect(
+        indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-4',
+            attachmentType: 'unknown-type',
+            action: 'create',
+            esClient,
+            logger,
+          })
+        )
+      ).rejects.toBeInstanceOf(SmlUnregisteredTypeError);
+      // Origin-mode writes must surface the type-registration failure
+      // *before* touching ES so the data plane and the registry can't
+      // silently drift.
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
@@ -524,36 +536,6 @@ describe('createSmlIndexer', () => {
       );
     });
 
-    it('permissions default to fully-shaped empty object when not provided', async () => {
-      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
-      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
-      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
-
-      const smlData = {
-        chunks: [{ type: 'lens', title: 'No Perms', content: 'c' }],
-      };
-      const getSmlData = jest.fn().mockResolvedValue(smlData);
-      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlData }));
-      const logger = createMockLogger();
-      const esClient = createMockEsClient();
-      const indexer = createSmlIndexer({ registry, logger });
-
-      await indexer.indexAttachment(
-        createIndexerParams({
-          originId: 'att-11',
-          attachmentType: 'lens',
-          action: 'create',
-          esClient,
-        })
-      );
-
-      const bulkCall = bulkMock.mock.calls[0][0];
-      expect(bulkCall.operations[0].index.document.permissions).toEqual({
-        kibana: { privileges: [] },
-        elasticsearch: { indices: [] },
-      });
-    });
-
     describe('manual-entry protection (origin mode)', () => {
       it('skips getSmlData and write when a manual entry already exists', async () => {
         const bulkMock = jest.fn();
@@ -660,15 +642,14 @@ describe('createSmlIndexer', () => {
         expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       });
 
-      it('hasManualEntry treats lookup errors as no manual entry', async () => {
+      it('hasManualEntry treats unexpected ES errors as manual-entry-present (fail-closed)', async () => {
+        // Fail-closed: a transient ES error skips the crawl tick rather than risking
+        // destruction of admin-curated manual entries.
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
 
-        const smlData = {
-          chunks: [{ type: 'lens', title: 'T', content: 'c' }],
-        };
-        const getSmlData = jest.fn().mockResolvedValue(smlData);
+        const getSmlData = jest.fn();
         const registry = createMockRegistry(
           createMockSmlTypeDefinition({ id: 'lens', getSmlData })
         );
@@ -692,21 +673,65 @@ describe('createSmlIndexer', () => {
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringContaining('hasManualEntry check failed')
         );
-        // Should proceed (fail-open) and call getSmlData + bulk
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('fail-closed'));
+        expect(getSmlData).not.toHaveBeenCalled();
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+        expect(bulkMock).not.toHaveBeenCalled();
+      });
+
+      it('hasManualEntry index_not_found still treats origin as fresh (no fail-closed)', async () => {
+        // index_not_found is unambiguous — fail-closed here would block first-write crawls on new clusters.
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlData = {
+          chunks: [{ type: 'lens', title: 'T', content: 'c' }],
+        };
+        const getSmlData = jest.fn().mockResolvedValue(smlData);
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        (esClient.count as jest.Mock).mockRejectedValue(
+          Object.assign(new Error('index_not_found_exception'), {
+            statusCode: 404,
+            body: { error: { type: 'index_not_found_exception' } },
+          })
+        );
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-fresh',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+            logger,
+          })
+        );
+
         expect(getSmlData).toHaveBeenCalledTimes(1);
         expect(bulkMock).toHaveBeenCalledTimes(1);
       });
     });
 
     describe('content mode (manual)', () => {
-      it('writes provided chunks with unique bare-UUID ids and ingestion_method=manual', async () => {
+      it('writes provided chunks with unique bare-UUID ids and stamps permissions from getPermissions', async () => {
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
 
         const getSmlData = jest.fn();
+        // Content-mode writes must inherit the same permission gating as
+        // origin-mode — `getPermissions` is the single source of truth.
+        const getPermissions = jest.fn().mockReturnValue({
+          kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+          elasticsearch: { indices: [] },
+        });
         const registry = createMockRegistry(
-          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData, getPermissions })
         );
         const logger = createMockLogger();
         const esClient = createMockEsClient();
@@ -720,39 +745,25 @@ describe('createSmlIndexer', () => {
             spaces: ['default'],
             esClient,
             content: [
-              {
-                type: 'lens',
-                title: 'First',
-                content: 'one',
-                permissions: {
-                  kibana: { privileges: [{ name: 'p1' }] },
-                  elasticsearch: { indices: [] },
-                },
-              },
-              {
-                type: 'lens',
-                title: 'Second',
-                content: 'two',
-                permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
-              },
+              { type: 'lens', title: 'First', content: 'one' },
+              { type: 'lens', title: 'Second', content: 'two' },
             ],
           })
         );
 
-        // getSmlData must NOT be called in content mode
         expect(getSmlData).not.toHaveBeenCalled();
-        // Manual-protection check is also skipped in content mode
+        // Called once per indexAttachment — per-chunk calls would risk half-written origins on throw.
+        expect(getPermissions).toHaveBeenCalledTimes(1);
+        expect(getPermissions).toHaveBeenCalledWith(
+          'att-manual',
+          expect.objectContaining({ esClient })
+        );
         expect(esClient.count).not.toHaveBeenCalled();
-        // Existing chunks for this origin_id are still removed before write
         expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
 
         expect(bulkMock).toHaveBeenCalledTimes(1);
         const ops = bulkMock.mock.calls[0][0].operations;
         expect(ops).toHaveLength(2);
-        // Each chunk gets its own UUID (no `${type}:${origin}:manual:${index}`
-        // construction). Idempotency on repeat calls comes from the
-        // unconditional `deleteByQuery` for this `origin_id` above, not from
-        // deterministic ids.
         expect(ops[0].index._id).toBe('mock-uuid-1');
         expect(ops[1].index._id).toBe('mock-uuid-2');
         expect(ops[0].index._id).not.toBe(ops[1].index._id);
@@ -762,7 +773,7 @@ describe('createSmlIndexer', () => {
             title: 'First',
             content: 'one',
             permissions: {
-              kibana: { privileges: [{ name: 'p1' }] },
+              kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
               elasticsearch: { indices: [] },
             },
             ingestion_method: 'manual',
@@ -771,12 +782,78 @@ describe('createSmlIndexer', () => {
         expect(ops[1].index.document.id).toBe('mock-uuid-2');
         expect(ops[1].index.document.ingestion_method).toBe('manual');
         expect(ops[1].index.document.permissions).toEqual({
+          kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+          elasticsearch: { indices: [] },
+        });
+      });
+
+      it('content-mode getPermissions throw: propagates the throw and leaves existing chunks intact', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getPermissions = jest.fn().mockImplementation(() => {
+          throw new Error('upstream lookup failed');
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await expect(
+          indexer.indexAttachment(
+            createContentIndexerParams({
+              originId: 'att-content-throws',
+              attachmentType: 'lens',
+              action: 'create',
+              esClient,
+              content: [{ type: 'lens', title: 'T', content: 'c' }],
+            })
+          )
+        ).rejects.toThrow('upstream lookup failed');
+
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('aborting content-mode write')
+        );
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+        expect(bulkMock).not.toHaveBeenCalled();
+      });
+
+      it('stamps empty permissions when content-mode type has no getPermissions hook', async () => {
+        // Mirrors origin-mode behavior: a type without `getPermissions` opts
+        // its data into "publicly readable within the space" — the read-path
+        // filter treats `kibana.privileges: []` as no privileges required.
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens' /* no getPermissions */ })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-public',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+            content: [{ type: 'lens', title: 'Public', content: 'open' }],
+          })
+        );
+
+        const ops = bulkMock.mock.calls[0][0].operations;
+        expect(ops[0].index.document.permissions).toEqual({
           kibana: { privileges: [] },
           elasticsearch: { indices: [] },
         });
       });
 
-      it('content mode does not require a registered type definition', async () => {
+      it('content mode for an unregistered type writes chunks with empty permissions and warns once per type', async () => {
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -785,28 +862,76 @@ describe('createSmlIndexer', () => {
         registry.list.mockReturnValue([]);
         const logger = createMockLogger();
         const esClient = createMockEsClient();
+        const contextLogger = createMockLogger();
         const indexer = createSmlIndexer({ registry, logger });
 
+        // Content mode now accepts any `attachmentType` so workflow
+        // authors can write ad-hoc content without first registering a
+        // SmlTypeDefinition. The trade-off is intentionally surfaced:
+        // (a) the chunk has no permission gate (empty SmlPermissions),
+        // (b) the indexer logs a once-per-process warn naming the
+        // namespace so operators see when a new unregistered namespace
+        // starts being written.
         await indexer.indexAttachment(
           createContentIndexerParams({
             originId: 'att-no-type',
-            attachmentType: 'unregistered',
+            attachmentType: 'my_notes',
             action: 'create',
             esClient,
-            logger,
-            content: [
-              {
-                type: 'unregistered',
-                title: 'T',
-                content: 'c',
-                permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
-              },
-            ],
+            logger: contextLogger,
+            content: [{ type: 'my_notes', title: 'T', content: 'c' }],
           })
         );
 
-        expect(logger.warn).not.toHaveBeenCalled();
+        // First write of this namespace → warn fired with the type id.
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(`unregistered type 'my_notes'`)
+        );
+        const firstWarnCount = (logger.warn as jest.Mock).mock.calls.length;
+
+        // Existing chunks for the origin were wiped, then the new chunk
+        // was written with empty permissions.
+        expect(esClient.deleteByQuery).toHaveBeenCalled();
         expect(bulkMock).toHaveBeenCalledTimes(1);
+        const ops = bulkMock.mock.calls[0][0].operations;
+        expect(ops[0].index.document.permissions).toEqual({
+          kibana: { privileges: [] },
+          elasticsearch: { indices: [] },
+        });
+        // Document type is preserved on the stored chunk so reads can
+        // still filter by it via the existing `type` term query.
+        expect(ops[0].index.document.type).toBe('my_notes');
+        expect(ops[0].index.document.ingestion_method).toBe('manual');
+
+        // Second write of the *same* namespace → no additional warn
+        // (the once-per-process Set has the type recorded).
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-no-type-2',
+            attachmentType: 'my_notes',
+            action: 'create',
+            esClient,
+            logger: contextLogger,
+            content: [{ type: 'my_notes', title: 'T2', content: 'c2' }],
+          })
+        );
+        expect((logger.warn as jest.Mock).mock.calls.length).toBe(firstWarnCount);
+
+        // A *different* unregistered namespace fires a fresh warn —
+        // the dedup is per-type, not global.
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-other',
+            attachmentType: 'other_notes',
+            action: 'create',
+            esClient,
+            logger: contextLogger,
+            content: [{ type: 'other_notes', title: 'T3', content: 'c3' }],
+          })
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(`unregistered type 'other_notes'`)
+        );
       });
 
       it('content mode with empty chunks deletes existing and writes nothing', async () => {
@@ -833,6 +958,91 @@ describe('createSmlIndexer', () => {
         expect(bulkMock).not.toHaveBeenCalled();
       });
 
+      it('content mode preserves created_at from caller when provided (update path)', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        const originalCreatedAt = '2025-01-15T10:00:00.000Z';
+
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-preserve-ts',
+            attachmentType: 'lens',
+            action: 'update',
+            spaces: ['default'],
+            esClient,
+            content: [{ type: 'lens', title: 'Updated Title', content: 'new content' }],
+            createdAt: originalCreatedAt,
+          })
+        );
+
+        const bulkCall = bulkMock.mock.calls[0][0];
+        const doc = bulkCall.operations[0].index.document;
+        expect(doc.created_at).toBe(originalCreatedAt);
+        expect(doc.updated_at).not.toBe(originalCreatedAt);
+      });
+
+      it('content mode stamps created_at=now when createdAt is not provided (create path)', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        const before = new Date().toISOString();
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-new-ts',
+            attachmentType: 'lens',
+            action: 'create',
+            spaces: ['default'],
+            esClient,
+            content: [{ type: 'lens', title: 'New', content: 'content' }],
+          })
+        );
+        const after = new Date().toISOString();
+
+        const bulkCall = bulkMock.mock.calls[0][0];
+        const doc = bulkCall.operations[0].index.document;
+        expect(doc.created_at >= before && doc.created_at <= after).toBe(true);
+        expect(doc.updated_at).toBe(doc.created_at);
+      });
+
+      it('content mode scopes deleteByQuery to the caller space (chunks in other spaces preserved)', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-space-scoped',
+            attachmentType: 'lens',
+            action: 'create',
+            spaces: ['my-space'],
+            esClient,
+            content: [{ type: 'lens', title: 'T', content: 'c' }],
+          })
+        );
+
+        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+        const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+        expect(callArgs.query.bool.filter).toContainEqual({ terms: { spaces: ['my-space', '*'] } });
+      });
+
       it('delete action removes only crawled chunks (manual entries preserved)', async () => {
         // `indexAttachment({ action: 'delete' })` is a back-compat shape used
         // by the crawler and event-driven CRUD callers; it always defaults to
@@ -851,14 +1061,7 @@ describe('createSmlIndexer', () => {
             esClient,
             // `content` is ignored in delete mode — the early `action === 'delete'`
             // check fires before the content-mode branch.
-            content: [
-              {
-                type: 'lens',
-                title: 'ignored',
-                content: 'ignored',
-                permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
-              },
-            ],
+            content: [{ type: 'lens', title: 'ignored', content: 'ignored' }],
           })
         );
 
@@ -868,6 +1071,359 @@ describe('createSmlIndexer', () => {
           { term: { 'origin.uri': 'lens://att-delete-with-content' } },
           { term: { ingestion_method: 'crawled' } },
         ]);
+      });
+
+      it.each<{
+        name: string;
+        registered: boolean;
+        requestedPermissions?: SmlPermissions;
+        expectedPermissions: SmlPermissions;
+      }>([
+        {
+          name: 'registered, no getPermissions hook + requestedPermissions supplied → stamps the requested permissions',
+          registered: true,
+          requestedPermissions: {
+            kibana: { privileges: [] },
+            elasticsearch: { indices: [{ name: 'my-index' }, { name: 'my-data-stream' }] },
+          },
+          expectedPermissions: {
+            kibana: { privileges: [] },
+            elasticsearch: { indices: [{ name: 'my-index' }, { name: 'my-data-stream' }] },
+          },
+        },
+        {
+          name: 'registered, no getPermissions hook + requestedPermissions omitted → stamps empty permissions',
+          registered: true,
+          expectedPermissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
+        },
+        {
+          name: 'unregistered type + requestedPermissions supplied → stamps the requested permissions',
+          registered: false,
+          requestedPermissions: {
+            kibana: { privileges: [] },
+            elasticsearch: { indices: [{ name: 'my-index' }] },
+          },
+          expectedPermissions: {
+            kibana: { privileges: [] },
+            elasticsearch: { indices: [{ name: 'my-index' }] },
+          },
+        },
+      ])(
+        'content mode: $name',
+        async ({ registered, requestedPermissions, expectedPermissions }) => {
+          const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+          const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+          (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+          const registry = registered
+            ? createMockRegistry(createMockSmlTypeDefinition({ id: 'corpus_entry' }))
+            : createMockRegistry(undefined);
+          const logger = createMockLogger();
+          const esClient = createMockEsClient();
+          const indexer = createSmlIndexer({ registry, logger });
+
+          await indexer.indexAttachment({
+            ...createContentIndexerParams({
+              originId: 'att-1',
+              attachmentType: 'corpus_entry',
+              action: 'create',
+              esClient,
+              content: [{ type: 'corpus_entry', title: 'T', content: 'c' }],
+            }),
+            ...(requestedPermissions !== undefined ? { permissions: requestedPermissions } : {}),
+          });
+
+          const ops = bulkMock.mock.calls[0][0].operations;
+          expect(ops[0].index.document.permissions).toEqual(expectedPermissions);
+        }
+      );
+
+      it('content mode: getPermissions hook exists + requestedPermissions supplied → throws SmlPermissionsConflictError before any ES mutation', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getPermissions = jest.fn().mockReturnValue({
+          kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+          elasticsearch: { indices: [] },
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await expect(
+          indexer.indexAttachment({
+            ...createContentIndexerParams({
+              originId: 'att-conflict',
+              attachmentType: 'lens',
+              action: 'create',
+              esClient,
+              content: [{ type: 'lens', title: 'T', content: 'c' }],
+            }),
+            permissions: {
+              kibana: { privileges: [] },
+              elasticsearch: { indices: [{ name: 'spoofed-index' }] },
+            },
+          })
+        ).rejects.toBeInstanceOf(SmlPermissionsConflictError);
+
+        expect(getPermissions).not.toHaveBeenCalled();
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+        expect(bulkMock).not.toHaveBeenCalled();
+      });
+
+      it('content mode: getPermissions hook exists + requestedPermissions omitted → hook wins (unchanged behavior)', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getPermissions = jest.fn().mockReturnValue({
+          kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+          elasticsearch: { indices: [] },
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createContentIndexerParams({
+            originId: 'att-hook-wins',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+            content: [{ type: 'lens', title: 'T', content: 'c' }],
+          })
+        );
+
+        expect(getPermissions).toHaveBeenCalledTimes(1);
+        const ops = bulkMock.mock.calls[0][0].operations;
+        expect(ops[0].index.document.permissions).toEqual({
+          kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+          elasticsearch: { indices: [] },
+        });
+      });
+    });
+
+    describe('getPermissions hook', () => {
+      it('origin-mode: stamps fully-shaped empty permissions when type has no getPermissions hook', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlData = {
+          chunks: [{ type: 'lens', title: 'No Perms', content: 'c' }],
+        };
+        const getSmlData = jest.fn().mockResolvedValue(smlData);
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData /* no getPermissions */ })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-no-perms',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+          })
+        );
+
+        const bulkCall = bulkMock.mock.calls[0][0];
+        expect(bulkCall.operations[0].index.document.permissions).toEqual({
+          kibana: { privileges: [] },
+          elasticsearch: { indices: [] },
+        });
+      });
+
+      it('awaits async getPermissions and stamps the resolved value', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlData = {
+          chunks: [{ type: 'lens', title: 'T', content: 'c' }],
+        };
+        const getSmlData = jest.fn().mockResolvedValue(smlData);
+        const getPermissions = jest.fn().mockImplementation(
+          async () =>
+            new Promise<{
+              kibana: { privileges: Array<{ name: string }> };
+              elasticsearch: { indices: unknown[] };
+            }>((resolve) =>
+              setImmediate(() =>
+                resolve({
+                  kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+                  elasticsearch: { indices: [] },
+                })
+              )
+            )
+        );
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData, getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-async',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+          })
+        );
+
+        expect(getPermissions).toHaveBeenCalledTimes(1);
+        const bulkCall = bulkMock.mock.calls[0][0];
+        expect(bulkCall.operations[0].index.document.permissions).toEqual({
+          kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+          elasticsearch: { indices: [] },
+        });
+      });
+
+      it('getPermissions returning partial shape gets folded into fully-shaped permissions', async () => {
+        // Half-populated returns from a hand-written hook are common — the
+        // indexer normalises them so the document mapping always sees both
+        // sub-arrays.
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlData = {
+          chunks: [{ type: 'lens', title: 'T', content: 'c' }],
+        };
+        const getSmlData = jest.fn().mockResolvedValue(smlData);
+        const getPermissions = jest.fn().mockReturnValue({
+          kibana: { privileges: [{ name: 'p1' }] },
+          // intentionally missing elasticsearch
+        } as unknown);
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData, getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-partial',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+          })
+        );
+
+        const bulkCall = bulkMock.mock.calls[0][0];
+        expect(bulkCall.operations[0].index.document.permissions).toEqual({
+          kibana: { privileges: [{ name: 'p1' }] },
+          elasticsearch: { indices: [] },
+        });
+      });
+
+      it('getPermissions throw: propagates the throw and leaves existing chunks intact (fail-closed)', async () => {
+        // The throw propagates before any ES mutation: existing chunks
+        // stay intact and no un-gated chunk is written. Assert all three:
+        //  - the throw bubbles out
+        //  - deleteByQuery is never called (origin not wiped)
+        //  - bulk is never called (no new chunk written)
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlData = {
+          chunks: [{ type: 'lens', title: 'T', content: 'c' }],
+        };
+        const getSmlData = jest.fn().mockResolvedValue(smlData);
+        const getPermissions = jest.fn().mockImplementation(() => {
+          throw new Error('upstream lookup failed');
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData, getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await expect(
+          indexer.indexAttachment(
+            createIndexerParams({
+              originId: 'att-throws',
+              attachmentType: 'lens',
+              action: 'create',
+              esClient,
+            })
+          )
+        ).rejects.toThrow('upstream lookup failed');
+
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining("type 'lens' getPermissions threw for origin 'att-throws'")
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('aborting origin-mode write')
+        );
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+        expect(bulkMock).not.toHaveBeenCalled();
+      });
+
+      it('getPermissions is called once per origin (not once per chunk)', async () => {
+        // `getPermissions(originId, ctx)` doesn't take a chunk — its
+        // result is identical for every chunk produced by the same
+        // origin's `getSmlData`. The implementation now hoists the call
+        // out of the per-chunk loop both as a perf optimisation and as
+        // a precondition for fail-closed semantics (we need a single
+        // resolution point so a throw can abort the write atomically
+        // before any ES mutation).
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const smlData = {
+          chunks: [
+            { type: 'lens', title: 'A', content: 'a' },
+            { type: 'lens', title: 'B', content: 'b' },
+            { type: 'lens', title: 'C', content: 'c' },
+          ],
+        };
+        const getSmlData = jest.fn().mockResolvedValue(smlData);
+        const getPermissions = jest.fn().mockResolvedValue({
+          kibana: { privileges: [{ name: 'p1' }] },
+          elasticsearch: { indices: [] },
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData, getPermissions })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-multi',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+          })
+        );
+
+        expect(getPermissions).toHaveBeenCalledTimes(1);
+        // …and every chunk still got the same permissions stamped.
+        const ops = bulkMock.mock.calls[0][0].operations;
+        expect(ops).toHaveLength(3);
+        for (const op of ops) {
+          expect(op.index.document.permissions).toEqual({
+            kibana: { privileges: [{ name: 'p1' }] },
+            elasticsearch: { indices: [] },
+          });
+        }
       });
     });
   });
@@ -906,10 +1462,12 @@ describe('createSmlIndexer', () => {
 
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
-      // Filter must contain ONLY the origin_id term — no ingestion_method
-      // term means deleteByQuery removes manual + crawled.
+      // Space-scoped: only chunks visible in 'default' are deleted, including
+      // globally-scoped ('*') chunks. No ingestion_method term means both
+      // manual + crawled are removed.
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-wipe-all' } },
+        { terms: { spaces: ['default', '*'] } },
       ]);
     });
 
@@ -928,6 +1486,7 @@ describe('createSmlIndexer', () => {
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-wipe-manual' } },
         { term: { ingestion_method: 'manual' } },
+        { terms: { spaces: ['default', '*'] } },
       ]);
     });
 
@@ -937,9 +1496,6 @@ describe('createSmlIndexer', () => {
       const esClient = createMockEsClient();
       const indexer = createSmlIndexer({ registry, logger });
 
-      // No `ingestionMethod` passed — should behave exactly like the historical
-      // `action: 'delete'` call on `indexAttachment` (preserve manual entries,
-      // wipe crawled).
       await indexer.deleteAttachment(
         createDeleteParams({ originId: 'att-default-scope', esClient })
       );
@@ -949,7 +1505,30 @@ describe('createSmlIndexer', () => {
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-default-scope' } },
         { term: { ingestion_method: 'crawled' } },
+        { terms: { spaces: ['default', '*'] } },
       ]);
+    });
+
+    it('scopes delete to caller space — chunks in other spaces are preserved', async () => {
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.deleteAttachment(
+        createDeleteParams({
+          originId: 'att-space-a',
+          ingestionMethod: 'all',
+          spaces: ['space-a'],
+          esClient,
+        })
+      );
+
+      const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
+      expect(callArgs.query.bool.filter).toContainEqual({ terms: { spaces: ['space-a', '*'] } });
+      expect(callArgs.query.bool.filter).not.toContainEqual({
+        terms: { spaces: ['space-b', '*'] },
+      });
     });
   });
 });

@@ -462,6 +462,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
       configureAlertSuppression: `${ELASTIC_DOCS}solutions/security/detect-and-alert/alert-suppression#configure-alert-suppression`,
       attacksPage: `${ELASTIC_DOCS}solutions/security/ai/attacks-page`,
+      // TODO(MITRE-v19 docs): swap to the published page covering how to update outdated
+      // MITRE ATT&CK mappings on detection rules once it ships.
+      mitreCoverage: `${ELASTIC_DOCS}solutions/security/detect-and-alert/mitre-attack-coverage`,
     },
     server: {
       protocol: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-protocol`,
@@ -541,6 +544,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       queryDsl: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/querydsl`,
       queryESQL: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
       queryESQLExamples: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
+      queryESQLApproximateResults: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql-kibana#approximation-fast-mode`,
       queryESQLMultiValueControls: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql-kibana#esql-multi-values-controls`,
       queryESQLMvIntersects: `${ELASTIC_DOCS}reference/query-languages/esql/functions-operators/mv-functions/mv_intersects`,
     },
@@ -687,6 +691,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       teamsAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/teams-action-type#configuring-teams`,
       casesWebhookAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/cases-webhook-action-type`,
       connectors: `${ELASTIC_DOCS}reference/kibana/connectors-kibana`,
+      agentBuilderConnectors: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/data-context-sources-connectors`,
     },
     taskManager: {
       healthMonitoring: `${ELASTIC_DOCS}deploy-manage/monitor/kibana-task-manager-health-monitoring`,
@@ -892,6 +897,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       csvPipelines: `${ELASTIC_DOCS}reference/ecs/ecs-converting`,
       pipelineFailure: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/error-handling`,
       conditionalProcessor: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines#conditionally-run-processor`,
+      fieldAccessPattern: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines#access-source-pattern`,
       processors: `${ELASTIC_DOCS}reference/enrich-processor`,
       arrayOrJson: `${ELASTIC_DOCS}reference/enrich-processor#ingest-process-category-array-json-handling`,
       dataEnrichment: `${ELASTIC_DOCS}reference/enrich-processor#ingest-process-category-data-enrichment`,
