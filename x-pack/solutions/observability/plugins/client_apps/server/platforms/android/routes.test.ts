@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { IRouter } from '@kbn/core/server';
 import {
   ANDROID_CRASH_DOCUMENT_API_PATH,
+  ANDROID_CRASH_EVENT_NAMES,
   ANDROID_RETRACE_API_PATH,
   DEFAULT_CRASH_INDEX,
 } from '../../../common';
@@ -174,7 +175,7 @@ describe('registerAndroidRoutes', () => {
               { term: { 'session.id': 'session-1' } },
               { term: { '@timestamp': '2026-02-13T15:55:35.495Z' } },
               { term: { 'app.build_id': 'build-1' } },
-              { term: { event_name: 'device.crash' } },
+              { terms: { event_name: ANDROID_CRASH_EVENT_NAMES } },
             ],
           },
         },

@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import {
   ANDROID_CRASH_DOCUMENT_API_PATH,
+  ANDROID_CRASH_EVENT_NAMES,
   ANDROID_RETRACE_API_PATH,
   DEFAULT_CRASH_INDEX,
 } from '../../../common';
@@ -54,7 +55,7 @@ export function registerAndroidRoutes({ router, logger }: { router: IRouter; log
                 { term: { 'session.id': sessionId } },
                 { term: { '@timestamp': timestamp } },
                 { term: { 'app.build_id': appBuildId } },
-                { term: { event_name: 'device.crash' } },
+                { terms: { event_name: ANDROID_CRASH_EVENT_NAMES } },
               ],
             },
           },
