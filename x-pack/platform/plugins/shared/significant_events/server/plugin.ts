@@ -54,6 +54,10 @@ import {
   createContinuousKiOnboardingWorkflowService,
   type ContinuousKiOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
+import {
+  createSignificantEventsScheduledWorkflowsService,
+  type SignificantEventsScheduledWorkflowsService,
+} from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 import { isInvestigationEnabled } from './lib/investigations/is_investigation_enabled';
@@ -254,6 +258,9 @@ export class SignificantEventsPlugin
     }
 
     let continuousKiOnboardingWorkflowService: ContinuousKiOnboardingWorkflowService | undefined;
+    let significantEventsScheduledWorkflowsService:
+      | SignificantEventsScheduledWorkflowsService
+      | undefined;
 
     if (plugins.workflowsManagement && streamsKIsOnboardingClient) {
       continuousKiOnboardingWorkflowService = createContinuousKiOnboardingWorkflowService({
@@ -267,6 +274,24 @@ export class SignificantEventsPlugin
       SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
     );
 
+    if (plugins.workflowsManagement && plugins.workflowsExtensions) {
+      significantEventsScheduledWorkflowsService = createSignificantEventsScheduledWorkflowsService(
+        {
+          logger: this.logger,
+          managementApi: plugins.workflowsManagement.management,
+          getManagedWorkflowsClient: async () => {
+            const [, pluginsStart] = await core.getStartServices();
+            if (!pluginsStart.workflowsExtensions) {
+              throw new Error('Workflows extensions are not available');
+            }
+            return pluginsStart.workflowsExtensions.initManagedWorkflowsClient(
+              SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
+            );
+          },
+        }
+      );
+    }
+
     core.pricing.registerProductFeatures(SIGNIFICANT_EVENT_TIERED_FEATURES);
     registerFeatureFlags(core, this.logger, {
       isAlertingV2PluginAvailable: 'alertingVTwo' in plugins,
@@ -279,6 +304,7 @@ export class SignificantEventsPlugin
         telemetry: telemetryClient,
         getScopedClients: this.getScopedClients,
         continuousKiOnboardingWorkflowService,
+        significantEventsScheduledWorkflowsService,
         workflowClients,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
