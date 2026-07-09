@@ -326,7 +326,6 @@ export class AgentBuilderPlugin
         indexAttachment: smlServiceStart.indexAttachment,
         deleteAttachment: smlServiceStart.deleteAttachment,
         getDocuments: smlServiceStart.getDocuments,
-        listDocuments: smlServiceStart.listDocuments,
         findByOrigin: smlServiceStart.findByOrigin,
         findByOriginAcrossSpaces: smlServiceStart.findByOriginAcrossSpaces,
         getTypeDefinition: smlServiceStart.getTypeDefinition,

@@ -15,8 +15,6 @@ import { registerInternalUserPromptsRoutes } from './internal/user_prompts';
 import { registerInternalSmlRoutes } from './internal/sml';
 import { registerInternalSmlSearchRoute } from './internal/sml_search';
 import { registerInternalSmlAutocompleteRoute } from './internal/sml_autocomplete';
-import { registerInternalSmlGetRoute } from './internal/sml_get';
-import { registerInternalSmlListRoute } from './internal/sml_list';
 import { registerInternalInferenceEndpointsRoute } from './internal/inference_endpoints';
 import { registerAgentRoutes } from './agents';
 import { registerChatRoutes } from './chat';
@@ -40,8 +38,6 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerInternalSmlRoutes(dependencies);
   registerInternalSmlSearchRoute(dependencies);
   registerInternalSmlAutocompleteRoute(dependencies);
-  registerInternalSmlGetRoute(dependencies);
-  registerInternalSmlListRoute(dependencies);
   registerInternalInferenceEndpointsRoute(dependencies);
   registerAgentRoutes(dependencies);
   registerChatRoutes(dependencies);

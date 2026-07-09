@@ -283,15 +283,6 @@ export interface AgentBuilderSmlServiceStart {
     spaceId: string;
     esClient: IScopedClusterClient;
   }) => Promise<Map<string, SmlDocument>>;
-  listDocuments: (params: {
-    spaceId: string;
-    esClient: IScopedClusterClient;
-    page?: number;
-    perPage?: number;
-    type?: string;
-    originUri?: string;
-    tags?: string[];
-  }) => Promise<{ total: number; results: SmlDocument[] }>;
   findByOrigin: (params: {
     type: string;
     originId: string;
