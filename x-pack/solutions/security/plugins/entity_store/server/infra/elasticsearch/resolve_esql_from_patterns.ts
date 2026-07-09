@@ -101,9 +101,6 @@ const dropMissingConcreteIndices: PreflightCase = async ({ requested, resolved, 
   if (missingIncludes.length) {
     logger.warn(`Dropping index patterns that don't exist: ${missingIncludes.join(', ')}`);
   }
-  if (missingExcludes.length) {
-    logger.warn(`Dropping negated index patterns that don't exist: ${missingExcludes.join(', ')}`);
-  }
 
   return {
     drop: [...missingIncludes, ...missingExcludes],
