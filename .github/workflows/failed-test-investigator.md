@@ -208,7 +208,7 @@ Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 se
 
 Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
 
-The comment has different parts: a compact header that stays visible on the issue page (one `####` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a comment to label the issue to trigger the flaky test fixer workflow (it is only posted under certain conditions, more info below).
+The comment has different parts: a compact header that stays visible on the issue page (one `###` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a comment to label the issue to trigger the flaky test fixer workflow (it is only posted under certain conditions, more info below).
 
 **Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
 
@@ -223,10 +223,10 @@ If a fix PR is already up (in draft or in review) in the Kibana repository, ment
 
 ### 1. Visible header (required)
 
-A `####` heading followed by one summary sentence — nothing else, no standing metadata lines:
+A `###` heading followed by one summary sentence — nothing else, no standing metadata lines:
 
 ```
-#### {Verdict} — {very short reason}
+### {Verdict} — {very short reason}
 
 {One sentence pinpointing the exact failure point — the assertion, line, or error that fired.}
 ```
@@ -241,7 +241,7 @@ A `####` heading followed by one summary sentence — nothing else, no standing 
 | `ci-environment` | CI environment issue |
 | `inconclusive` | Inconclusive |
 
-Example: `#### Test needs an update — the case is too long for a 60s budget`. **Do not repeat the failing test's name** — the issue title already has it, so describe the *failure*, not the test.
+Example: `### Test needs an update — the case is too long for a 60s budget`. **Do not repeat the failing test's name** — the issue title already has it, so describe the *failure*, not the test.
 
 **Summary** — one sentence that *adds* precision beyond the heading (the exact error, line, or step); never a paraphrase of it. No `**Summary:**` label.
 
@@ -254,7 +254,7 @@ Wrap **everything after the summary** in a single `<details>` block so the issue
 
 ```
 <details>
-<summary>Investigation details</summary>
+<summary>Investigation</summary>
 
 #### Proposed fix
 
