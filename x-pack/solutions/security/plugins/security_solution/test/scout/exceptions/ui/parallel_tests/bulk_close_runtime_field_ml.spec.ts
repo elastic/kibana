@@ -7,6 +7,7 @@
 
 import { AddExceptionButtonType, spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
+import { BULK_CLOSE_TEST_ROLE } from '../fixtures/bulk_close_role';
 
 /**
  * Coverage for elastic/kibana#253666 — Machine Learning rule variant.
@@ -204,7 +205,10 @@ spaceTest.describe(
         retries: 0,
       });
 
-      await browserAuth.loginAsPlatformEngineer();
+      // No predefined role covers this flow end to end (ML admin capability
+      // for the flyout's job resolution + alerts backing-index write for the
+      // bulk close) — see the role file for the full breakdown.
+      await browserAuth.loginWithCustomRole(BULK_CLOSE_TEST_ROLE);
     });
 
     spaceTest.afterEach(async ({ apiServices, esClient }) => {
