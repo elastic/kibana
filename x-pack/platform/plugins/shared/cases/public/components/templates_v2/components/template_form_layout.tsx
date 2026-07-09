@@ -90,6 +90,12 @@ interface TemplateFormLayoutProps {
   initialValue: string;
   templateId?: string;
   initialIsEnabled?: boolean;
+  /**
+   * Default case settings for a NEW template whose definition carries no `settings` block (i.e.
+   * create). Ignored once the definition has its own settings (edit / imported). Lets the create
+   * page apply solution-aware defaults (e.g. sync alerts on only for Security).
+   */
+  initialSettings?: TemplateSettings;
 }
 
 // Full-height offset for the editor wrapper. Chrome that `--kbn-application--content-height` does
@@ -170,6 +176,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   initialValue,
   templateId,
   initialIsEnabled = true,
+  initialSettings,
 }) => {
   const styles = useMemoCss(componentStyles);
   const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
@@ -198,10 +205,14 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     [initialValue]
   );
   // The settings + connector lifted out of the loaded definition — the seed for the panel state.
-  const initialConfig = useMemo(
-    () => getTemplateSettingsAndConnectorFromYaml(normalizeTemplateDefinitionYaml(initialValue)),
-    [initialValue]
-  );
+  // When the definition carries no settings block (a new template), fall back to `initialSettings`
+  // so create can apply solution-aware defaults; an existing settings block always wins.
+  const initialConfig = useMemo(() => {
+    const extracted = getTemplateSettingsAndConnectorFromYaml(
+      normalizeTemplateDefinitionYaml(initialValue)
+    );
+    return { connector: extracted.connector, settings: extracted.settings ?? initialSettings };
+  }, [initialValue, initialSettings]);
   // Template metadata (name/description/tags) is edited in the "Template details" section and saved
   // on the template's attributes — it is NOT part of the YAML. It is drafted in local storage so a
   // refresh never drops unsaved identity changes.
