@@ -40,6 +40,8 @@ describe('MonacoEditorOutputActionsProvider', () => {
   let editor: jest.Mocked<monaco.editor.IStandaloneCodeEditor>;
   let setEditorActionsCss: jest.Mock<void, [CSSProperties]>;
   let triggerCursorPositionChange: () => Promise<void>;
+  let triggerCursorSelectionChange: () => Promise<void>;
+  let provider: MonacoEditorOutputActionsProvider;
 
   beforeEach(() => {
     setEditorActionsCss = jest.fn();
@@ -58,13 +60,23 @@ describe('MonacoEditorOutputActionsProvider', () => {
       onDidChangeCursorPosition: jest.fn((callback: () => Promise<void>) => {
         triggerCursorPositionChange = callback;
       }),
-      onDidChangeCursorSelection: jest.fn(),
+      onDidChangeCursorSelection: jest.fn((callback: () => Promise<void>) => {
+        triggerCursorSelectionChange = callback;
+      }),
       onDidContentSizeChange: jest.fn(),
       onDidScrollChange: jest.fn(),
       setSelection: jest.fn(),
     } as unknown as jest.Mocked<monaco.editor.IStandaloneCodeEditor>;
 
-    new MonacoEditorOutputActionsProvider(editor, setEditorActionsCss, 'highlighted-line');
+    provider = new MonacoEditorOutputActionsProvider(
+      editor,
+      setEditorActionsCss,
+      'highlighted-line'
+    );
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   const getLastActionsCss = (): CSSProperties =>
@@ -81,7 +93,7 @@ describe('MonacoEditorOutputActionsProvider', () => {
 
     const { top, visibility } = getLastActionsCss();
     expect(visibility).toBe('visible');
-    expect(top).toBeGreaterThanOrEqual(0);
+    expect(top).toBe(1);
   });
 
   it('positions the actions buttons using the raw offset when it is already non-negative', async () => {
@@ -94,5 +106,21 @@ describe('MonacoEditorOutputActionsProvider', () => {
     expect(visibility).toBe('visible');
     // offset (200 - 50) + OFFSET_EDITOR_ACTIONS (1)
     expect(top).toBe(151);
+  });
+
+  it('keeps the actions hidden when a queued highlight follows copy completion', async () => {
+    jest.useFakeTimers();
+
+    await triggerCursorSelectionChange();
+    await triggerCursorSelectionChange();
+    provider.clearEditorDecorations();
+
+    await jest.advanceTimersByTimeAsync(200);
+
+    expect(getLastActionsCss()).toEqual({ visibility: 'hidden' });
+
+    await triggerCursorSelectionChange();
+
+    expect(getLastActionsCss()).toEqual({ visibility: 'visible', top: 1 });
   });
 });

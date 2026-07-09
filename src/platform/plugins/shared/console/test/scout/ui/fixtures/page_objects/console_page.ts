@@ -25,11 +25,6 @@ export class ConsolePage {
     this.responseStatusBadge = this.page.testSubj.locator('consoleResponseStatusBadge');
   }
 
-  async goto() {
-    await this.page.gotoApp('dev_tools', { hash: 'console' });
-    await this.inputEditor.waitFor({ state: 'visible' });
-  }
-
   /**
    * Opens Console with the given request preloaded through the `load_from`
    * data-URI parameter (the "Open in Console" deep-link mechanism). This avoids
@@ -64,16 +59,7 @@ export class ConsolePage {
    * See https://github.com/elastic/kibana/issues/266698.
    */
   async slowClickCopyOutput(holdMs: number) {
-    const box = await this.copyOutputButton.boundingBox();
-    if (!box) {
-      throw new Error('Copy output button is not visible');
-    }
-    await this.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await this.page.mouse.down();
-    // Real-time hold is the test semantics here (human click duration), not a
-    // wait for app state, so a fixed sleep is intentional.
-    await new Promise((resolve) => setTimeout(resolve, holdMs));
-    await this.page.mouse.up();
+    await this.copyOutputButton.click({ delay: holdMs });
   }
 
   /**

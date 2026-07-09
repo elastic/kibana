@@ -16,12 +16,16 @@ import { test } from '../fixtures';
 const HUMAN_CLICK_HOLD_MS = 250;
 
 test.describe('Console output copy to clipboard', { tag: tags.deploymentAgnostic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
+  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+    await browserAuth.loginAsAdmin();
     await pageObjects.console.gotoWithRequestLoaded('GET /');
   });
 
-  test('copies the selected output on a human-speed (held) click', async ({ pageObjects }) => {
+  test('copies the selected output on a human-speed (held) click', async ({
+    page,
+    pageObjects,
+  }) => {
     await test.step('run a request and select its output', async () => {
       await pageObjects.console.sendRequest();
       await pageObjects.console.selectOutput();
@@ -36,9 +40,9 @@ test.describe('Console output copy to clipboard', { tag: tags.deploymentAgnostic
       expect(await pageObjects.toasts.getHeaderText()).toContain(
         'Selected output copied to clipboard'
       );
+      const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
+      expect(clipboardText).toContain('"cluster_name"');
+      await expect(pageObjects.console.copyOutputButton).toBeHidden();
     });
-    // Post-copy feedback (actions hiding again) is asserted in the component tests;
-    // here the clipboard mechanism differs per browser permissions (the document-copy
-    // fallback re-triggers Monaco selection events that re-show the actions).
   });
 });
