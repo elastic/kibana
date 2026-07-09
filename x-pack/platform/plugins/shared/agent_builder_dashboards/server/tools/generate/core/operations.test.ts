@@ -1886,3 +1886,254 @@ describe('executeDashboardOperations', () => {
     expect(result.success).toBe(false);
   });
 });
+
+describe('add_controls / remove_controls operations', () => {
+  const logger = {
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  } as unknown as import('@kbn/core/server').Logger;
+
+  const emptyDashboard: DashboardAttachmentData = { title: 'Test', panels: [] };
+
+  it('add_controls appends options_list_control with server-built esql_query', async () => {
+    const { dashboardData } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            {
+              type: 'options_list_control',
+              field_name: 'service.name',
+              index: 'logs-*',
+              title: 'Service',
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(1);
+    const control = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect(control.type).toBe('options_list_control');
+    expect(typeof control.id).toBe('string');
+    expect(control.width).toBe('medium');
+    expect(control.grow).toBe(true);
+    const config = control.config as Record<string, unknown>;
+    expect(config.values_source).toBe('esql');
+    expect(config.esql_query).toBe('FROM logs-* | STATS BY `service.name`');
+    expect(config.title).toBe('Service');
+  });
+
+  it('add_controls escapes ES|QL field identifiers in generated queries', async () => {
+    const { dashboardData } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            { type: 'options_list_control', field_name: 'labels.pod-name', index: 'logs-*' },
+            {
+              type: 'range_slider_control',
+              field_name: 'kubernetes.labels.app.kubernetes.io/name',
+              index: 'logs-*',
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    const controls = dashboardData.pinned_panels as Array<Record<string, unknown>>;
+    expect((controls[0].config as Record<string, unknown>).esql_query).toBe(
+      'FROM logs-* | STATS BY `labels.pod-name`'
+    );
+    expect((controls[1].config as Record<string, unknown>).esql_query).toBe(
+      'FROM logs-* | STATS BY `kubernetes.labels.app.kubernetes.io/name`'
+    );
+  });
+
+  it('add_controls appends range_slider_control', async () => {
+    const { dashboardData } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [{ type: 'range_slider_control', field_name: 'latency', index: 'metrics-*' }],
+        },
+      ],
+      logger,
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(1);
+    const control = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect(control.type).toBe('range_slider_control');
+    const config = control.config as Record<string, unknown>;
+    expect(config.values_source).toBe('esql');
+    expect(config.esql_query).toBe('FROM metrics-* | STATS BY latency');
+    expect(config.step).toBe(1);
+  });
+
+  it('add_controls appends time_slider_control without esql_query', async () => {
+    const { dashboardData } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [{ operation: 'add_controls', controls: [{ type: 'time_slider_control' }] }],
+      logger,
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(1);
+    const control = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect(control.type).toBe('time_slider_control');
+    const config = control.config as Record<string, unknown>;
+    expect(config).not.toHaveProperty('esql_query');
+    expect(config).not.toHaveProperty('title');
+    expect(config.start_percentage_of_time_range).toBe(0);
+    expect(config.end_percentage_of_time_range).toBe(1);
+  });
+
+  it('add_controls skips extra time_slider_control controls in one operation', async () => {
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            { type: 'time_slider_control' },
+            { type: 'time_slider_control' },
+            { type: 'options_list_control', field_name: 'service.name', index: 'logs-*' },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(2);
+    expect((dashboardData.pinned_panels as Array<Record<string, unknown>>)[0].type).toBe(
+      'time_slider_control'
+    );
+    expect((dashboardData.pinned_panels as Array<Record<string, unknown>>)[1].type).toBe(
+      'options_list_control'
+    );
+    expect(failures).toEqual([
+      {
+        type: 'add_controls',
+        identifier: 'controls[1]',
+        error: 'A dashboard can contain at most one time_slider_control.',
+      },
+    ]);
+  });
+
+  it('add_controls skips adding a second time_slider_control to an existing dashboard', async () => {
+    const { dashboardData: withTimeSlider } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [{ operation: 'add_controls', controls: [{ type: 'time_slider_control' }] }],
+      logger,
+    });
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: withTimeSlider,
+      operations: [{ operation: 'add_controls', controls: [{ type: 'time_slider_control' }] }],
+      logger,
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(1);
+    expect(failures).toEqual([
+      {
+        type: 'add_controls',
+        identifier: 'controls[0]',
+        error: 'A dashboard can contain at most one time_slider_control.',
+      },
+    ]);
+  });
+
+  it('add_controls appends to existing controls', async () => {
+    const { dashboardData: after1 } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [{ type: 'options_list_control', field_name: 'host.name', index: 'logs-*' }],
+        },
+      ],
+      logger,
+    });
+
+    const { dashboardData: after2 } = await executeDashboardOperations({
+      dashboardData: after1,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [{ type: 'options_list_control', field_name: 'env', index: 'logs-*' }],
+        },
+      ],
+      logger,
+    });
+
+    expect(after2.pinned_panels).toHaveLength(2);
+  });
+
+  it('remove_controls removes by id and leaves others intact', async () => {
+    const { dashboardData: withControls } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            {
+              type: 'options_list_control',
+              field_name: 'service.name',
+              index: 'logs-*',
+              title: 'Service',
+            },
+            {
+              type: 'options_list_control',
+              field_name: 'host.name',
+              index: 'logs-*',
+              title: 'Host',
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    const controls = withControls.pinned_panels as Array<Record<string, unknown>>;
+    expect(controls).toHaveLength(2);
+    const idToRemove = controls[0].id as string;
+
+    const { dashboardData: afterRemove } = await executeDashboardOperations({
+      dashboardData: withControls,
+      operations: [{ operation: 'remove_controls', control_ids: [idToRemove] }],
+      logger,
+    });
+
+    expect(afterRemove.pinned_panels).toHaveLength(1);
+    const remaining = (afterRemove.pinned_panels as Array<Record<string, unknown>>)[0];
+    expect(remaining.id).not.toBe(idToRemove);
+    expect((remaining.config as Record<string, unknown>).title).toBe('Host');
+  });
+
+  it('remove_controls with unknown id leaves controls unchanged', async () => {
+    const { dashboardData: withControl } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [{ type: 'options_list_control', field_name: 'env', index: 'logs-*' }],
+        },
+      ],
+      logger,
+    });
+
+    const { dashboardData: afterRemove } = await executeDashboardOperations({
+      dashboardData: withControl,
+      operations: [{ operation: 'remove_controls', control_ids: ['nonexistent-id'] }],
+      logger,
+    });
+
+    expect(afterRemove.pinned_panels).toHaveLength(1);
+  });
+});

@@ -15,10 +15,37 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const testSubjects = getService('testSubjects');
-  const toasts = getService('toasts');
   const retry = getService('retry');
 
   const TEST_DS_NAME = 'test-ds-1';
+
+  const INHERIT_CHECKBOX = 'dataLifecycleInheritCheckbox';
+  const DELETE_PHASE_CARD = 'dlmPhasesSelectorDeletePhaseCard';
+
+  const openLifecycleFlyout = async (dataStreamName: string) => {
+    await pageObjects.indexManagement.searchAndClickDataStreamNameLink(dataStreamName);
+    await testSubjects.click('manageDataStreamButton');
+    await testSubjects.click('editDataLifecycleButton');
+    await testSubjects.existOrFail('editDataLifecycleFlyoutApplyButton');
+  };
+
+  // Stops inheriting the lifecycle so explicit inputs become editable (only when currently
+  // inheriting). Safe to call when the current stream cannot inherit (no checkbox rendered).
+  const stopInheritingLifecycle = async () => {
+    if (
+      (await testSubjects.exists(INHERIT_CHECKBOX, { allowHidden: true })) &&
+      (await testSubjects.isChecked(INHERIT_CHECKBOX))
+    ) {
+      await testSubjects.click(INHERIT_CHECKBOX);
+    }
+  };
+
+  // Applies the lifecycle change and waits for the flyout to close. Applying persists through the
+  // API, closes the details panel and reloads the list, which can take a few seconds.
+  const applyLifecycleChange = async () => {
+    await testSubjects.click('editDataLifecycleFlyoutApplyButton');
+    await testSubjects.missingOrFail('editDataLifecycleFlyoutApplyButton', { timeout: 30000 });
+  };
 
   enum INDEX_MODE {
     STANDARD = 'Standard',
@@ -105,27 +132,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // failsOnMKI, see https://github.com/elastic/kibana/issues/181242
       this.tags(['failsOnMKI']);
       it('allows to update data retention', async () => {
-        // Open details flyout
+        await openLifecycleFlyout(TEST_DS_NAME);
+        await testSubjects.click('flyoutTab-successful_data');
+        await stopInheritingLifecycle();
+
+        // Ensure the delete phase is enabled so a retention period can be set.
+        if (!(await testSubjects.exists('deleteDurationValue'))) {
+          await testSubjects.click(DELETE_PHASE_CARD);
+        }
+        // Set the retention to 7 days.
+        await testSubjects.setValue('deleteDurationValue', '7');
+
+        await applyLifecycleChange();
+
+        // Applying closes the details panel and reloads the list; reopen to verify the summary.
         await pageObjects.indexManagement.searchAndClickDataStreamNameLink(TEST_DS_NAME);
-        // Open the edit retention dialog
-        await testSubjects.click('manageDataStreamButton');
-        await testSubjects.click('editDataRetentionButton');
-
-        // Disable infinite retention
-        await testSubjects.click('infiniteRetentionPeriod > input');
-        // Set the retention to 7 hours
-        await testSubjects.setValue('dataRetentionValue', '7');
-        await testSubjects.click('show-filters-button');
-        await testSubjects.click('filter-option-h');
-
-        // Submit the form
-        await testSubjects.click('saveButton');
-
-        // Expect to see a success toast
         await retry.try(async () => {
-          const successToast = await toasts.getElementByIndex(1);
-          expect(await successToast.getVisibleText()).to.contain('Data retention updated');
+          const detail = await testSubjects.getVisibleText('successfulIngestLifecycleDetail');
+          expect(detail).to.contain('7 days');
         });
+        await testSubjects.click('closeDetailsButton');
       });
 
       describe('Project level data retention checks - security solution', () => {
@@ -143,14 +169,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('disabling data retention in serverless is not allowed', async () => {
-        // Open details flyout
-        await pageObjects.indexManagement.searchAndClickDataStreamNameLink(TEST_DS_NAME);
-        // Open the edit retention dialog
-        await testSubjects.click('manageDataStreamButton');
-        await testSubjects.click('editDataRetentionButton');
+      it('does not offer ILM as a lifecycle method in serverless', async () => {
+        // ILM is not available in serverless, so the lifecycle flyout does not render the
+        // DLM/ILM method picker on the successful data tab.
+        await openLifecycleFlyout(TEST_DS_NAME);
+        await testSubjects.click('flyoutTab-successful_data');
 
-        expect(await testSubjects.exists('dataRetentionEnabledField')).to.be(false);
+        expect(await testSubjects.exists('editDataLifecycle-methodCard-ilm')).to.be(false);
+        expect(await testSubjects.exists('editDataLifecycle-methodCard-dlm')).to.be(false);
+
+        // Close the edit flyout (ESC closes the EuiFlyout). Close the details panel too if it is
+        // still open afterwards.
+        await browser.pressKeys(browser.keys.ESCAPE);
+        if (await testSubjects.exists('closeDetailsButton', { timeout: 3000 })) {
+          await testSubjects.click('closeDetailsButton');
+        }
       });
     });
 

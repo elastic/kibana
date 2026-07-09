@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
+import { assertFlyoutChartsRendered } from '../../fixtures/service_flyout_helpers';
 import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 const APM_DASHBOARD_DATA_VIEW_TITLE = 'traces-apm*,logs-apm*,metrics-apm*';
@@ -188,7 +189,7 @@ test.describe(
         });
         await expect(pageObjects.serviceFlyoutPage.title).toHaveText(SERVICE_MAP_TEST_SERVICE);
         await expect(pageObjects.serviceFlyoutPage.actions).toBeVisible();
-        await pageObjects.serviceFlyoutPage.expectChartsRendered([
+        await assertFlyoutChartsRendered(pageObjects.serviceFlyoutPage, [
           'latency',
           'throughput',
           'failedTransactionRate',

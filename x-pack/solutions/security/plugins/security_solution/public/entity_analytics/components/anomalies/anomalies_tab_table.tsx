@@ -55,6 +55,12 @@ import {
   AnomalyScoreBadge,
   AnomalyRowActionsMenu,
 } from './table';
+import {
+  ANOMALIES_TAB_TABLE_TEST_ID,
+  ANOMALIES_TAB_TABLE_GRID_TEST_ID,
+  ANOMALIES_TABLE_SCORE_COLUMN_TOOLTIP_TEST_ID,
+  ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID,
+} from './test_ids';
 
 export interface TableChangeEvent {
   page?: { index: number; size: number };
@@ -137,6 +143,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
           return (
             <EuiToolTip content={label} disableScreenReaderOutput>
               <EuiButtonIcon
+                data-test-subj={ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID}
                 aria-label={label}
                 aria-expanded={isExpanded}
                 iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
@@ -213,7 +220,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
                 type="question"
                 content={ENTITY_ANOMALY_TABLE_SCORE_COLUMN_TOOLTIP}
                 position="top"
-                data-test-subj="entity-anomalies-table-score-column-tooltip"
+                data-test-subj={ANOMALIES_TABLE_SCORE_COLUMN_TOOLTIP_TEST_ID}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -279,6 +286,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
     <div>
       <EuiAccordion
         id="entity-anomalies-tab-table-accordion"
+        data-test-subj={ANOMALIES_TAB_TABLE_TEST_ID}
         initialIsOpen
         buttonContent={
           <EuiTitle size="xs">
@@ -300,6 +308,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiBasicTable
+          data-test-subj={ANOMALIES_TAB_TABLE_GRID_TEST_ID}
           tableCaption={ENTITY_ANOMALY_TABLE_CAPTION}
           items={rows}
           itemId="id"

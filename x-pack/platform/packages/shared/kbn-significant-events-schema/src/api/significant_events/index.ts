@@ -13,6 +13,11 @@ import {
   queryTypeSchema,
   type StreamQuery,
 } from '../../queries';
+import {
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '../../significant_events/constants';
 import type { Discovery } from '../../significant_events/discoveries';
 import type { Detection } from '../../significant_events/detections';
 import type { SignificantEvent } from '../../significant_events/events';
@@ -41,7 +46,7 @@ interface SignificantEventOccurrence {
   count: number;
 }
 
-type SignificantEventsResponse = StreamQuery & {
+type QueryWithOccurrences = StreamQuery & {
   stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
@@ -50,19 +55,19 @@ type SignificantEventsResponse = StreamQuery & {
   rule_backed: boolean;
 };
 
-interface SignificantEventsGetResponse {
-  significant_events: SignificantEventsResponse[];
+interface QueryOccurrencesResponse {
+  queries: QueryWithOccurrences[];
   aggregated_occurrences: SignificantEventOccurrence[];
 }
 
 export const generatedSignificantEventQuerySchema = z.object({
   type: queryTypeSchema,
-  title: z.string(),
+  title: z.string().max(MAX_TITLE_LENGTH),
   esql: esqlQuerySchema,
   severity_score: z.number().min(0).max(100),
-  description: z.string(),
-  evidence: z.array(z.string()).optional(),
-  replaces: z.string().optional(),
+  description: z.string().max(MAX_TEXT_LENGTH),
+  evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
+  replaces: z.string().max(MAX_ID_LENGTH).optional(),
   features: z.array(queryFeatureSchema),
 });
 
@@ -89,8 +94,8 @@ interface EventLifecycleResponse {
 }
 
 export type {
-  SignificantEventsResponse,
-  SignificantEventsGetResponse,
+  QueryWithOccurrences,
+  QueryOccurrencesResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
   LifecycleDetection,

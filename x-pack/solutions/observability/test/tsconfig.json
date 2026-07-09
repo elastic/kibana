@@ -92,6 +92,7 @@
     "@kbn/observability-agent-builder-plugin",
     "@kbn/product-doc-common",
     "@kbn/kbn-client",
-    "@kbn/apm-types"
+    "@kbn/apm-types",
+    "@kbn/apm-api-shared"
   ]
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SIGEVENTS_JUDGE_AGENT_ID } from '@kbn/streams-plugin/server';
+import { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from '@kbn/significant-events-plugin/server';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { Discovery } from '@kbn/significant-events-schema';
@@ -38,7 +38,7 @@ import { buildDiscoveryJudgeInput } from '../../src/evaluators/discovery/judge/b
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 evaluate.describe(
-  'Significant Events Discovery - Judge',
+  'Significant Events Discovery - Judge Agent',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
@@ -250,7 +250,7 @@ evaluate.describe(
                     );
 
                     const converseResult = await agentBuilderClient.converse({
-                      agentId: SIGEVENTS_JUDGE_AGENT_ID,
+                      agentId: SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
                       input: agentInput,
                     });
 

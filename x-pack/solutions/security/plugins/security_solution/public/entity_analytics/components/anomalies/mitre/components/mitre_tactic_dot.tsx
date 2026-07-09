@@ -330,6 +330,7 @@ export const MitreTacticDot: React.FC<MitreTacticDotProps> = ({
   return (
     <div
       {...hoverHandlers}
+      data-test-subj={`mitreTacticDot-${tactic.replace(/\s+/g, '')}`}
       onClick={handleActivate}
       onKeyDown={handleActivate ? handleDotKeyDown : undefined}
       role={handleActivate ? 'button' : undefined}

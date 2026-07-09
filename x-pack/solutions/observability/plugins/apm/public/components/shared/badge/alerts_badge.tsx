@@ -29,7 +29,8 @@ const clickableBadgeStyles = css`
 
 function getClickableTooltip(count: number) {
   return i18n.translate('xpack.apm.alertsBadge.tooltip.clickable', {
-    defaultMessage: '{count, plural, one {# active alert} other {# active alerts}}. Click to view.',
+    defaultMessage:
+      '{count, plural, one {# active alert} other {# active alerts}}. Click to view more.',
     values: { count },
   });
 }

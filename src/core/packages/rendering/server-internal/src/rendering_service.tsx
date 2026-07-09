@@ -290,14 +290,12 @@ export class RenderingService {
     const configLocale = i18nLib.getLocale();
     const translationHashes = i18n.getTranslationHashes();
     const availableLocales = i18n.getAvailableLocales();
-    const isServerless = this.coreContext.env.packageInfo.buildFlavor === 'serverless';
     const { locale: effectiveLocale, setCookieHeader } = resolveLocale({
       request,
       userSettingLocale,
       configLocale,
       configuredLocales: availableLocales.map((entry) => entry.id),
       translationHashes,
-      isServerless,
       serverBasePath,
       allowLocaleCookie: i18n.allowLocaleCookie,
     });

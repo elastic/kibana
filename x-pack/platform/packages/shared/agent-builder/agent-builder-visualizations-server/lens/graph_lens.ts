@@ -38,7 +38,7 @@ const validateConfigForChartType = (
   config: unknown
 ): VisualizationConfig => chartTypeRegistry[chartType].schema.validate(config);
 
-interface EsqlDataSourceCarrier {
+export interface EsqlDataSourceCarrier {
   data_source?: { type?: string; query?: string };
 }
 
@@ -48,7 +48,7 @@ interface EsqlDataSourceCarrier {
  * (metric, gauge, tagcloud, ...) carries it on the config itself. Used both to
  * read existing queries (edits) and to inject the validated query (generation).
  */
-const getEsqlDataSourceCarriers = (config: unknown): EsqlDataSourceCarrier[] => {
+export const getEsqlDataSourceCarriers = (config: unknown): EsqlDataSourceCarrier[] => {
   if (!config || typeof config !== 'object') return [];
   const { layers } = config as { layers?: unknown };
   return Array.isArray(layers)

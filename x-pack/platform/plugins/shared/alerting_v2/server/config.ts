@@ -55,7 +55,7 @@ const rulesSchema = schema.object({
 });
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
   invalidateApiKeysTask: schema.object({
     interval: schema.string({ defaultValue: '5m', validate: validateDuration }),
     removalDelay: schema.string({ defaultValue: '1h', validate: validateDuration }),

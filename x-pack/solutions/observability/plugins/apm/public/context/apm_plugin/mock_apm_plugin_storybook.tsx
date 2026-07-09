@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { createCallApmApiV2 } from '@kbn/apm-api-shared';
 import type { CoreStart } from '@kbn/core/public';
+import { PerformanceContext } from '@kbn/ebt-tools';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
@@ -17,17 +20,16 @@ import { createMemoryHistory } from 'history';
 import { merge, noop } from 'lodash';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { PerformanceContext } from '@kbn/ebt-tools';
 import { Observable, of } from 'rxjs';
-import type { ITelemetryClient } from '../../services/telemetry/types';
+import { setApmInternalServices } from '../../plugin';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import { storybookMockHttp } from '../../services/rest/storybook_mock_http';
+import type { ITelemetryClient } from '../../services/telemetry/types';
 import type { APMServiceContextValue } from '../apm_service/apm_service_context';
 import { APMServiceContext } from '../apm_service/apm_service_context';
+import { ChartPointerEventContextProvider } from '../chart_pointer_event/chart_pointer_event_context';
 import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_range_metadata_context_provider';
 import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time_range_metadata_context';
-import { ChartPointerEventContextProvider } from '../chart_pointer_event/chart_pointer_event_context';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
 
@@ -217,6 +219,8 @@ export function MockApmPluginStorybook({
 }) {
   const contextMock = merge({}, mockApmPluginContext, apmContext);
   createCallApmApi(contextMock.core);
+  const callApmApi = createCallApmApiV2(contextMock.core, { cpsManager: undefined });
+  setApmInternalServices({ callApmApi });
   const KibanaReactContext = createKibanaReactContext(
     merge({}, contextMock.core, {
       telemetry: storybookTelemetry,
