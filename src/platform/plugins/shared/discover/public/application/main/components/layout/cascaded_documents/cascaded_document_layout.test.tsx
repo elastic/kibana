@@ -124,6 +124,7 @@ const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
     esqlQuery,
     esqlVariables: undefined,
     timeRange: undefined,
+    isApproximate: false,
     viewModeToggle: undefined,
     expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(undefined),
     expandedDocOwner$: new BehaviorSubject<string | undefined>(undefined),

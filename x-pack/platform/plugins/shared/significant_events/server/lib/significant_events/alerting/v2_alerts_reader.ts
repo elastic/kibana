@@ -39,12 +39,16 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
   readonly index = '.rule-events';
   readonly ruleIdColumn = 'rule_id' as const;
 
-  buildOccurrencesEsqlRequest({ ruleIds, value, esqlUnit, limit }: OccurrencesEsqlParams) {
+  buildOccurrencesEsqlRequest({ ruleIds, value, esqlUnit, limit, spaceId }: OccurrencesEsqlParams) {
     const ruleIdLiterals = ruleIds.map((id) => esql.str(id));
     const ruleIdCol = esql.col(['rule', 'id']);
+    const typeCol = esql.col('type');
+    const spaceIdCol = esql.col('space_id');
 
     return toEsqlRequest(
-      esql.from([this.index]).where`${ruleIdCol} IN (${ruleIdLiterals})`
+      esql.from([this.index]).where`${typeCol} == ${esql.str(
+        'signal'
+      )} AND ${spaceIdCol} == ${esql.str(spaceId)} AND ${ruleIdCol} IN (${ruleIdLiterals})`
         .pipe`STATS count = COUNT_DISTINCT(group_hash) BY rule_id = ${ruleIdCol}, bucket = BUCKET(@timestamp, ${esql.num(
         value
       )} ${esql.kwd(esqlUnit)})`.pipe`SORT bucket ASC`.pipe`LIMIT ${esql.num(limit)}`
