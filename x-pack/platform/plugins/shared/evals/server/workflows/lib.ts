@@ -23,6 +23,7 @@ import type {
 } from '@kbn/evals-common';
 import { buildScoreDocuments, mapWithConcurrency } from '@kbn/evals-runner';
 import type { EvaluatorResult, RunnerExample } from '@kbn/evals-runner';
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { BUILT_IN_TASK_PROVIDERS } from '../task_providers/types';
 import type {
   EvalsCallKibanaApi,
@@ -336,7 +337,17 @@ export interface EvaluateExampleResult {
 const MAX_ERROR_MESSAGE_LENGTH = 500;
 
 const toErrorMessage = (error: unknown): string => {
-  const message = error instanceof Error ? error.message : String(error);
+  let message: string;
+  if (error instanceof KibanaApiCallError) {
+    // `callKibanaApi` wraps non-2xx responses as `HTTP <status>: <json body>`. For the
+    // run-progress UI, surface the clean server-provided message (`body.message`) instead
+    // of the raw HTTP envelope; fall back to the wrapped message if the body has none.
+    const body = error.body as { message?: unknown } | undefined;
+    message =
+      typeof body?.message === 'string' && body.message.trim() ? body.message : error.message;
+  } else {
+    message = error instanceof Error ? error.message : String(error);
+  }
   return message.length > MAX_ERROR_MESSAGE_LENGTH
     ? `${message.slice(0, MAX_ERROR_MESSAGE_LENGTH)}…`
     : message;

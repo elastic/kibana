@@ -129,7 +129,9 @@ export const registerEvaluateRoute = ({
           try {
             await awaitTraceReady(traceAccessor, logger);
           } catch (error) {
-            return response.notFound({ body: { message: String(error) } });
+            return response.notFound({
+              body: { message: error instanceof Error ? error.message : String(error) },
+            });
           }
         }
 
@@ -205,7 +207,7 @@ export const registerEvaluateRoute = ({
                 version: definition.version,
                 kind: definition.kind,
               },
-              error: { message: String(error) },
+              error: { message: error instanceof Error ? error.message : String(error) },
             });
           }
         }

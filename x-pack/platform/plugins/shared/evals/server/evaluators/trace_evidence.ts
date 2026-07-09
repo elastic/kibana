@@ -45,11 +45,9 @@ export const extractTraceEvidence = async (
   }
 
   throw new Error(
-    `No gen_ai evidence found for trace ${traceAccessor.traceId}. ` +
-      `Trace-first evaluators reconstruct evidence from OTel Gen AI semantic conventions: ` +
-      `a conversation (gen_ai.user.message / gen_ai.choice in "logs-*") or a tool execution ` +
-      `(an execute_tool span's gen_ai.tool.call.arguments / gen_ai.tool.call.result in "traces-*"). ` +
-      `Ensure OpenTelemetry tracing with message-content capture is enabled for the evaluated ` +
-      `target and that traces are exported (e.g. via the EDOT collector).`
+    `No conversation or tool output was captured for this run's trace, so content-based ` +
+      `evaluators have nothing to grade. This usually means GenAI message-content capture ` +
+      `isn't enabled for the evaluated target, or the trace hasn't finished exporting yet — ` +
+      `enable message-content capture and try again. (trace ${traceAccessor.traceId})`
   );
 };

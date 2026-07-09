@@ -11,8 +11,8 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { EvalsWorkflowsManagementSetup } from './workflows/workflows_management_types';
 import type { DatasetService } from './storage/dataset_service';
 import type { EvaluationScoreService } from './storage/evaluation_score_service';
 import type { EvaluatorRegistry } from './evaluators/types';
@@ -29,6 +29,13 @@ export interface EvalsPluginStart {
   datasetService?: DatasetService;
   evaluationScoreService?: EvaluationScoreService;
 }
+
+/**
+ * The (optional) workflows-management setup contract, narrowed to what the evals
+ * experiment-execution routes actually use. Evals references the workflows
+ * management plugin directly to launch and track workflow-based experiment runs.
+ */
+export type EvalsWorkflowsManagementSetup = Pick<WorkflowsServerPluginSetup, 'management'>;
 
 export interface EvalsSetupDependencies {
   features: FeaturesPluginSetup;

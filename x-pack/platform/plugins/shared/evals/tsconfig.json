@@ -41,6 +41,7 @@
     "@kbn/evals-runner",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
+    "@kbn/workflows-management-plugin",
     "@kbn/workflows-yaml",
     "@kbn/spaces-plugin",
     "@kbn/core-spaces-common",

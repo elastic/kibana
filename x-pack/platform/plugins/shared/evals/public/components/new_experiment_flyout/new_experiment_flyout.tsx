@@ -100,7 +100,7 @@ const strings = {
   }),
   compareHelp: i18n.translate('xpack.evals.newExperiment.compareHelp', {
     defaultMessage:
-      'Appends an evals.compareExperiments step to the saved workflow (and preview) for cross-model runs. "Run now" compares from the run overview instead.',
+      'Adds a step to the saved workflow (shown in the YAML preview) that compares results across the selected models. "Run now" doesn\'t need this step — you can compare models from the run overview instead.',
   }),
   runNow: i18n.translate('xpack.evals.newExperiment.runNow', { defaultMessage: 'Run now' }),
   saveAsWorkflow: i18n.translate('xpack.evals.newExperiment.saveAsWorkflow', {

@@ -19,15 +19,6 @@ export type {
 } from './lib/workflow_filters';
 export type { WorkflowsApiRequestHandlerContext, WorkflowsClient } from './types';
 
-export type {
-  ExecuteWorkflowBaseParams,
-  ExecuteSavedWorkflowParams,
-  ExecuteInlineWorkflowParams,
-  ExecuteWorkflowParams,
-  ExecuteWorkflowResult,
-  WorkflowsManagementExecutionApi,
-} from './management_api';
-
 export {
   getStepExecutionsByIds,
   getStepExecutionsByWorkflowExecution,

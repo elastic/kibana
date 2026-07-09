@@ -61,7 +61,9 @@ describe('extractTraceEvidence', () => {
     extractToolEvidenceMock.mockResolvedValueOnce(null);
     extractConversationEvidenceMock.mockResolvedValueOnce(null);
 
-    await expect(extractTraceEvidence(traceAccessor)).rejects.toThrow(/No gen_ai evidence found/);
+    await expect(extractTraceEvidence(traceAccessor)).rejects.toThrow(
+      /No conversation or tool output was captured/
+    );
   });
 
   it('propagates tool extractor errors without falling back', async () => {
