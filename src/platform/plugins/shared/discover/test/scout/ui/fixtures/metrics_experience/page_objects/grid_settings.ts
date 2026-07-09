@@ -71,10 +71,7 @@ export function createGridSettings(page: ScoutPage): GridSettings {
     selectGaugeAggregation: (option) =>
       selectFromDropdown(gaugeSelect, `metricsExperienceGridSettingsGaugeOption-${option}`),
     selectHistogramPercentile: (option) =>
-      selectFromDropdown(
-        histogramSelect,
-        `metricsExperienceGridSettingsHistogramOption-${option}`
-      ),
+      selectFromDropdown(histogramSelect, `metricsExperienceGridSettingsHistogramOption-${option}`),
     apply: async () => {
       await applyButton.click();
       await flyout.waitFor({ state: 'hidden' });
