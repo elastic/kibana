@@ -21,7 +21,6 @@ import type {
   SmlSearchResult,
   SmlSearchFilters,
   SmlSearchConstraints,
-  SmlDocument,
   SmlIndexAction,
   SmlDeleteScope,
   SmlIndexAttachmentOriginMode,
@@ -61,21 +60,6 @@ export interface AgentBuilderSmlPluginStart {
     /** Agent-discoverable filters (`types[]`, `tags[]`). */
     filters?: SmlSearchFilters;
   }) => Promise<{ results: SmlSearchResult[] }>;
-
-  /**
-   * Fetch SML documents by their chunk IDs.
-   *
-   * The returned map only contains documents the user (identified by `request`) is
-   * authorized to access in the resolved space; unauthorized or missing IDs are
-   * simply absent from the result. Permission checks are performed internally —
-   * callers do not need to pre-authorize the IDs.
-   */
-  getDocuments: (params: {
-    ids: string[];
-    request: KibanaRequest;
-    /** Optional. Resolved from `request` via the spaces service when omitted. */
-    spaceId?: string;
-  }) => Promise<Map<string, SmlDocument>>;
 
   getTypeDefinition: (typeId: string) => SmlTypeDefinition | undefined;
 

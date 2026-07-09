@@ -79,66 +79,6 @@ export interface SmlSearchHttpResultItem {
 }
 
 /**
- * Wire representation of a single SML object.
- *
- * Mirrors the server-side `SmlDocument` shape used by the storage layer.
- */
-export interface SmlHttpItem {
-  id: string;
-  type: string;
-  title: string;
-  origin: { uri: string };
-  content: string;
-  created_at: string;
-  updated_at: string;
-  spaces: string[];
-  tags: string[];
-  /**
-   * Permissions required to access the underlying element. Always
-   * present; inner arrays may be empty.
-   */
-  permissions: {
-    kibana: { privileges: Array<{ name: string }> };
-    elasticsearch: { indices: Array<{ name: string }> };
-  };
-  /** How this chunk was produced. */
-  ingestion_method: 'manual' | 'crawled';
-}
-
-/**
- * Response body for `GET /internal/agent_context_layer/sml/{originId}`.
- *
- * Returns every chunk written under the origin (the workflow step's
- * content mode can write multiple chunks per origin, the crawler may
- * write one, etc.). Consumers iterate; ordering is not guaranteed.
- * `items` is empty (not 404) is impossible — when no chunks exist or
- * none are visible to the caller, the route returns 404 directly.
- */
-export interface SmlGetHttpResponse {
-  items: SmlHttpItem[];
-}
-
-/**
- * Default and maximum `per_page` values for the list endpoint.
- *
- * Deeper pagination is bounded at runtime by the index's
- * `index.max_result_window` setting (default 10000); requests that exceed it
- * are rejected with HTTP 400.
- */
-export const SML_HTTP_LIST_PER_PAGE_DEFAULT = 20;
-export const SML_HTTP_LIST_PER_PAGE_MAX = 1000;
-export const SML_HTTP_LIST_PAGE_DEFAULT = 1;
-
-/**
- * Response body for `GET /internal/agent_context_layer/sml`.
- */
-export interface SmlListHttpResponse {
-  page: number;
-  per_page: number;
-  items: SmlHttpItem[];
-}
-
-/**
  * Max length of `query` for POST `/internal/agent_context_layer/sml/_autocomplete`.
  * Autocomplete payloads are user-typed prefixes - shorter than full retrieval queries.
  */
