@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-const internalApiPath = '/internal/agent_context_layer';
+const internalApiPath = '/internal/agent_builder_sml';
 export const smlSearchPath = `${internalApiPath}/sml/_search`;
 export const smlAutocompletePath = `${internalApiPath}/sml/_autocomplete`;

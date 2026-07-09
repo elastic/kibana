@@ -17,10 +17,10 @@ export const registerUISettings = ({
 }): void => {
   uiSettings.register({
     [CONTEXT_ENGINE_ENABLED_SETTING_ID]: {
-      name: i18n.translate('xpack.agentContextLayer.uiSettings.contextEngine.name', {
+      name: i18n.translate('xpack.agentBuilderSml.uiSettings.contextEngine.name', {
         defaultMessage: 'Context Engine',
       }),
-      description: i18n.translate('xpack.agentContextLayer.uiSettings.contextEngine.description', {
+      description: i18n.translate('xpack.agentBuilderSml.uiSettings.contextEngine.description', {
         defaultMessage: 'Enables the Context Engine.',
       }),
       schema: schema.boolean(),
