@@ -16,6 +16,7 @@ import { createOrUpdateIndex } from '../../init/create_or_update_index';
 import type {
   BulkUpsertRequest,
   BulkUpsertResponse,
+  ExecutionsCountRequest,
   ExecutionsDataAccess,
   ExecutionsSearchRequest,
   GetExecutionsByIdsOptions,
@@ -51,6 +52,13 @@ export class PlainIndexExecutionsDataAccess<
     request: ExecutionsSearchRequest
   ): Promise<estypes.SearchResponse<TExecution>> {
     return this.deps.esClient.search<TExecution>({
+      index: this.deps.indexName,
+      ...request,
+    });
+  }
+
+  public async count(request: ExecutionsCountRequest): Promise<estypes.CountResponse> {
+    return this.deps.esClient.count({
       index: this.deps.indexName,
       ...request,
     });

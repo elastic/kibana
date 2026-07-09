@@ -24,6 +24,9 @@ export type ExecutionDataStreamClient = unknown;
 /** Search body without index — DAL resolves the target. */
 export type ExecutionsSearchRequest = Omit<estypes.SearchRequest, 'index'>;
 
+/** Count body without index — DAL resolves the target. */
+export type ExecutionsCountRequest = Omit<estypes.CountRequest, 'index'>;
+
 /** Partial document with required id — same for single- and multi-document upserts. */
 export type UpsertDocument<TDoc extends { id: string }> = Partial<TDoc> & { id: string };
 
@@ -91,6 +94,8 @@ export interface ExecutionsDataAccess<TExecution extends { id: string }> {
 
   search(request: ExecutionsSearchRequest): Promise<estypes.SearchResponse<TExecution>>;
 
+  count(request: ExecutionsCountRequest): Promise<estypes.CountResponse>;
+
   getByIds(ids: string[], options?: GetExecutionsByIdsOptions<TExecution>): Promise<TExecution[]>;
 
   /** @throws on any upsert failure */
@@ -102,6 +107,9 @@ export type StepExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowStepExecut
 
 export type WorkflowExecutionsSearchRequest = ExecutionsSearchRequest;
 export type StepExecutionsSearchRequest = ExecutionsSearchRequest;
+
+export type WorkflowExecutionsCountRequest = ExecutionsCountRequest;
+export type StepExecutionsCountRequest = ExecutionsCountRequest;
 
 export type WorkflowExecutionUpsertDocument = UpsertDocument<EsWorkflowExecution>;
 export type StepExecutionUpsertDocument = UpsertDocument<EsWorkflowStepExecution>;
