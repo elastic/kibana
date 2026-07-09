@@ -11,6 +11,7 @@ import { StreamDetailGeneralData } from '.';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import type { Streams } from '@kbn/streams-schema';
 import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
+import type { StreamLifecycleFlyoutId } from '../common/hooks/lifecycle_flyout_coordination';
 import {
   LifecycleFlyoutCoordinationProvider,
   STREAM_LIFECYCLE_FLYOUT_IDS,
@@ -247,7 +248,7 @@ describe('StreamDetailGeneralData unsaved changes prompt', () => {
   describe('delete phase flyout coordination', () => {
     // Registers an arbitrary flyout as open in the shared registry, the way a sibling lifecycle
     // flyout owner (e.g. the successful-lifecycle-method flyout) would.
-    const FlyoutRegistrant = ({ id, isOpen }: { id: string; isOpen: boolean }) => {
+    const FlyoutRegistrant = ({ id, isOpen }: { id: StreamLifecycleFlyoutId; isOpen: boolean }) => {
       useRegisterLifecycleFlyoutOpen(id, isOpen);
       return null;
     };

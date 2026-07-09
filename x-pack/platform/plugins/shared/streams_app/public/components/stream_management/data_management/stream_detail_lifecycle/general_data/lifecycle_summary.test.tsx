@@ -13,6 +13,7 @@ import { LifecycleSummary } from './lifecycle_summary';
 import { Streams, type IngestStreamLifecycle } from '@kbn/streams-schema';
 import { LifecycleAfterSaveProvider } from '../common/hooks/lifecycle_after_save';
 import { LifecyclePreviewProvider } from '../common/hooks/lifecycle_preview';
+import type { StreamLifecycleFlyoutId } from '../common/hooks/lifecycle_flyout_coordination';
 import {
   LifecycleFlyoutCoordinationProvider,
   STREAM_LIFECYCLE_FLYOUT_IDS,
@@ -95,7 +96,7 @@ const FlyoutCoordinationProbe = () => {
 // index.tsx) does for the "data phases" flyout it owns directly. `NonIlmLifecycleSummary` reads
 // that flyout's open state straight from the registry via `isFlyoutOpen`, so registering it here
 // is enough to drive its "navigate into that flyout" UI behavior in tests too.
-const FlyoutRegistrant = ({ id, isOpen }: { id: string; isOpen: boolean }) => {
+const FlyoutRegistrant = ({ id, isOpen }: { id: StreamLifecycleFlyoutId; isOpen: boolean }) => {
   useRegisterLifecycleFlyoutOpen(id, isOpen);
   return null;
 };

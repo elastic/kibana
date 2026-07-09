@@ -26,14 +26,14 @@ export interface LifecycleFlyoutCoordinationApi {
    * your own flyout; pass an array to also exclude "adjacent" flyouts that get their own special
    * handling instead of being treated as generically blocking (e.g. a timeline that navigates into
    * a sibling flyout rather than going fully inert while it's open). */
-  isAnyOtherFlyoutOpen: (id: string | string[]) => boolean;
+  isAnyOtherFlyoutOpen: (id: StreamLifecycleFlyoutId | StreamLifecycleFlyoutId[]) => boolean;
   /** True while the specific flyout `id` is open. Lets a component read another flyout's open
    * state directly from the registry (e.g. to switch into a "navigate into that flyout" UI mode)
    * instead of needing it threaded through as a separate prop from whoever owns that flyout. */
-  isFlyoutOpen: (id: string) => boolean;
+  isFlyoutOpen: (id: StreamLifecycleFlyoutId) => boolean;
   /** Registers or clears a single flyout's open state. Prefer {@link useRegisterLifecycleFlyoutOpen}
    * over calling this directly, so the flyout is always cleared on unmount. */
-  setFlyoutOpen: (id: string, isOpen: boolean) => void;
+  setFlyoutOpen: (id: StreamLifecycleFlyoutId, isOpen: boolean) => void;
 }
 
 const LifecycleFlyoutCoordinationContext = createContext<
@@ -45,9 +45,11 @@ export const LifecycleFlyoutCoordinationProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [openFlyoutIds, setOpenFlyoutIds] = useState<ReadonlySet<string>>(() => new Set());
+  const [openFlyoutIds, setOpenFlyoutIds] = useState<ReadonlySet<StreamLifecycleFlyoutId>>(
+    () => new Set()
+  );
 
-  const setFlyoutOpen = useCallback((id: string, isOpen: boolean) => {
+  const setFlyoutOpen = useCallback((id: StreamLifecycleFlyoutId, isOpen: boolean) => {
     setOpenFlyoutIds((prev) => {
       if (prev.has(id) === isOpen) return prev;
       const next = new Set(prev);
@@ -61,7 +63,7 @@ export const LifecycleFlyoutCoordinationProvider = ({
   }, []);
 
   const isAnyOtherFlyoutOpen = useCallback(
-    (id: string | string[]) => {
+    (id: StreamLifecycleFlyoutId | StreamLifecycleFlyoutId[]) => {
       const excludeIds = Array.isArray(id) ? id : [id];
       for (const openId of openFlyoutIds) {
         if (!excludeIds.includes(openId)) return true;
@@ -71,7 +73,10 @@ export const LifecycleFlyoutCoordinationProvider = ({
     [openFlyoutIds]
   );
 
-  const isFlyoutOpen = useCallback((id: string) => openFlyoutIds.has(id), [openFlyoutIds]);
+  const isFlyoutOpen = useCallback(
+    (id: StreamLifecycleFlyoutId) => openFlyoutIds.has(id),
+    [openFlyoutIds]
+  );
 
   const value = useMemo<LifecycleFlyoutCoordinationApi>(
     () => ({
@@ -108,7 +113,10 @@ export const useLifecycleFlyoutCoordination = (): LifecycleFlyoutCoordinationApi
  * of the calling component. Clears itself on unmount so a component that goes away while its
  * flyout is open doesn't leave the registry (and every trigger that reads it) permanently blocked.
  */
-export const useRegisterLifecycleFlyoutOpen = (id: string, isOpen: boolean): void => {
+export const useRegisterLifecycleFlyoutOpen = (
+  id: StreamLifecycleFlyoutId,
+  isOpen: boolean
+): void => {
   const { setFlyoutOpen } = useLifecycleFlyoutCoordination();
 
   useEffect(() => {
@@ -131,3 +139,6 @@ export const STREAM_LIFECYCLE_FLYOUT_IDS = {
   failedLifecycle: 'failed-lifecycle',
   failedDeletePhase: 'failed-delete-phase',
 } as const;
+
+export type StreamLifecycleFlyoutId =
+  (typeof STREAM_LIFECYCLE_FLYOUT_IDS)[keyof typeof STREAM_LIFECYCLE_FLYOUT_IDS];
