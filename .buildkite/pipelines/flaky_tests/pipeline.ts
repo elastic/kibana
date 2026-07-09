@@ -435,9 +435,6 @@ pipeline.steps.push({
   continue_on_failure: true,
 });
 
-// No `soft_fail`: a soft-failed terminal step after `continue_on_failure` masks
-// earlier hard failures and leaves the build green. `post_stats_on_pr.ts` is
-// best-effort (never exits non-zero) so it stays passed without hiding failures.
 pipeline.steps.push({
   command: 'ts-node .buildkite/pipelines/flaky_tests/post_stats_on_pr.ts',
   label: 'Post results on Github pull request',
