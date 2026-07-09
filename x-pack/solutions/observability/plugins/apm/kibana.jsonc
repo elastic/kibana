@@ -39,7 +39,8 @@
       "logsDataAccess",
       "savedSearch",
       "fieldsMetadata",
-      "discoverShared"
+      "discoverShared",
+      "apmUIComponents"
     ],
     "optionalPlugins": [
       "actions",

@@ -76,6 +76,11 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import {
+  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+  type ApmUIComponentsStart,
+} from '@kbn/apm-ui-components-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
@@ -106,10 +111,6 @@ import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_compo
 import { registerEmbeddables } from './embeddable/register_embeddables';
 import { registerServiceMapAttachment } from './agent_builder/attachment_types';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
-import {
-  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
-  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-} from '../common/cps_feature_flag';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -195,6 +196,7 @@ export interface ApmPluginStartDeps {
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   slo?: SLOPublicStart;
   cps?: CPSPluginStart;
+  apmUIComponents: ApmUIComponentsStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -532,20 +534,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
     );
 
-    // lazy proxy: APMClientV2 already returns a Promise, so this is type-compatible
-    let _api: APMClientV2 | undefined;
-    const callApmApi: APMClientV2 = ((endpoint: any, options: any) => {
-      if (_api) return _api(endpoint, options);
-      return import('@kbn/apm-api-shared').then(({ createCallApmApiV2 }) => {
-        _api = createCallApmApiV2(core, {
-          cpsManager: isCpsEnabled ? plugins.cps?.cpsManager : undefined,
-        });
-        return _api(endpoint, options);
-      });
-    }) as APMClientV2;
-
     const ApmInternalServices: ApmInternalServices = {
-      callApmApi,
+      callApmApi: plugins.apmUIComponents.callApmApi,
     };
 
     if (isCpsEnabled) {

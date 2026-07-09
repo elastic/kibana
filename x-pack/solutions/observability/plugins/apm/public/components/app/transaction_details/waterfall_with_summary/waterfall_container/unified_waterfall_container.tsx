@@ -6,15 +6,16 @@
  */
 
 import type { Error } from '@kbn/apm-types';
-import { TRACE_WATERFALL_EBT_ELEMENTS, TraceWaterfall } from '@kbn/apm-ui-shared';
+import { TRACE_WATERFALL_EBT_ELEMENTS } from '@kbn/apm-ui-shared';
 import type { History } from 'history';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 import { UnifiedWaterfallFlyout } from './unified_waterfall_flyout';
 import { useErrorClickHandler } from './use_error_click_handler';
 import { useGetServiceBadgeHrefFromRouter } from './use_get_service_badge_href_from_router';
+import { useKibana } from '../../../../../context/kibana_context/use_kibana';
 
 interface Props {
   traceItems: TraceItem[];
@@ -62,6 +63,13 @@ export function UnifiedWaterfallContainer({
   maxTraceItems,
   discoverHref,
 }: Props) {
+  const {
+    services: { apmUIComponents },
+  } = useKibana();
+  const TraceWaterfall = useMemo(
+    () => apmUIComponents.TraceWaterfall,
+    [apmUIComponents.TraceWaterfall]
+  );
   const history = useHistory();
   const handleErrorClick = useErrorClickHandler(traceItems);
   const getServiceBadgeHref = useGetServiceBadgeHrefFromRouter();

@@ -6,7 +6,7 @@ pageLoadAssetSize:
   agentBuilderPlatform: 26248
   agentBuilderVisualizations: 7356
   agentBuilderWorkflows: 24405
-  agentContextLayer: 10146
+  agentContextLayer: 2194
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
@@ -36,7 +36,7 @@ pageLoadAssetSize:
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8661
-  data: 2758999
+  data: 512023
   dataFederation: 7106
   dataQuality: 11469
   datasetQuality: 49315
@@ -219,3 +219,4 @@ pageLoadAssetSize:
   workflowsExtensions: 43032
   workflowsManagement: 39968
   workplaceAIApp: 6234
+  apmUIComponents: 5985

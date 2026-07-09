@@ -19,10 +19,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useDocViewerViewedEvent } from '@kbn/unified-doc-viewer';
 import { css } from '@emotion/react';
-import { TraceWaterfallWithFetching } from '@kbn/apm-ui-shared';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { useFlyoutHistoryKey } from '../../../../doc_viewer_flyout/flyout_history_key_context';
 import { useOriginDocType } from '../../../../doc_viewer_flyout/origin_doc_type_context';
@@ -73,10 +72,12 @@ export const FullScreenWaterfall = ({
 }: FullScreenWaterfallProps) => {
   const historyKey = useFlyoutHistoryKey();
   const originDocType = useOriginDocType();
-  const { analytics, callApmApi, core } = getUnifiedDocViewerServices();
-  // const FullTraceWaterfall = discoverShared.features.registry.getById(
-  //   'observability-full-trace-waterfall'
-  // )?.render;
+  const { analytics, apmUIComponents } = getUnifiedDocViewerServices();
+  const TraceWaterfallWithFetching = useMemo(
+    () => apmUIComponents.TraceWaterfallWithFetching,
+    [apmUIComponents.TraceWaterfallWithFetching]
+  );
+
   const { euiTheme } = useEuiTheme();
 
   useDocViewerViewedEvent({
@@ -139,8 +140,6 @@ export const FullScreenWaterfall = ({
           `}
         >
           <TraceWaterfallWithFetching
-            core={core}
-            callApmApi={callApmApi}
             traceId={traceId}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}

@@ -16,7 +16,6 @@ import { TRACE_ID_FIELD } from '@kbn/discover-utils';
 import { where } from '@kbn/esql-composer';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 import { getEbtProps } from '@kbn/ebt-click';
-import { FocusedTraceWaterfallWithFetching } from '@kbn/apm-ui-shared';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
@@ -72,7 +71,11 @@ function InternalTraceWaterfall({
   dataView,
   ebtDetail = TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
 }: Props) {
-  const { data, callApmApi, core } = getUnifiedDocViewerServices();
+  const { data, apmUIComponents } = getUnifiedDocViewerServices();
+  const FocusedTraceWaterfallWithFetching = useMemo(
+    () => apmUIComponents.FocusedTraceWaterfallWithFetching,
+    [apmUIComponents.FocusedTraceWaterfallWithFetching]
+  );
   const { indexes } = useDataSourcesContext();
 
   const [restoredTraceId, setRestoredTraceId] = useRestorableState('restoredTraceId', null);
@@ -303,8 +306,6 @@ function InternalTraceWaterfall({
           `}
         >
           <FocusedTraceWaterfallWithFetching
-            core={core}
-            callApmApi={callApmApi}
             traceId={traceId}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}

@@ -20,7 +20,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { IToasts } from '@kbn/core/public';
-import type { APMClientV2 } from '@kbn/apm-api-shared';
+import type { ApmUIComponentsStart } from '@kbn/apm-ui-components-plugin/public';
 import type { UnifiedDocViewerStart } from './plugin';
 
 export interface UnifiedDocViewerServices {
@@ -35,5 +35,5 @@ export interface UnifiedDocViewerServices {
   share: SharePluginStart;
   core: CoreStart;
   discoverShared: DiscoverSharedPublicStart;
-  callApmApi: APMClientV2;
+  apmUIComponents: ApmUIComponentsStart;
 }

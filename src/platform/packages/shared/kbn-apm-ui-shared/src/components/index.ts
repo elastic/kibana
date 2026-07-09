@@ -23,7 +23,7 @@ export { Legend } from './timeline/legend';
 export type { AgentMark } from './timeline/marker/agent_marker';
 export type { ErrorMark } from './timeline/marker/error_marker';
 export { getAgentMarks } from './timeline/marker/get_agent_marks';
-export { TraceWaterfall } from './trace_waterfall';
+export { TraceWaterfall, type TraceWaterfallProps } from './trace_waterfall';
 export {
   getTraceParentChildrenMap,
   getRootItemOrFallback,
