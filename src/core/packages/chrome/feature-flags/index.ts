@@ -27,6 +27,7 @@ export interface DesignExplorationVariantOption {
 export const DESIGN_EXPLORATION_VARIANT_OPTIONS: DesignExplorationVariantOption[] = [
   { id: 'verbana', label: 'Verbana' },
   { id: 'baseline', label: 'Baseline' },
+  { id: 'linbana', label: 'Linbana' },
 ];
 
 type FeatureFlagsBooleanReader = Pick<FeatureFlagsStart, 'getBooleanValue'>;

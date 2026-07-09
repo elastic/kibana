@@ -15,6 +15,7 @@ import {
   isDesignExplorationVariantId,
 } from '@kbn/core-chrome-feature-flags';
 import { BASELINE_VARIANT_ID, createBaselineStyles } from './variant_baseline';
+import { LINBANA_VARIANT_ID, createLinbanaStyles } from './variant_linbana';
 import { VERBANA_VARIANT_ID, createVerbanaStyles } from './variant_verbana';
 
 export interface DesignExplorationVariantDefinition {
@@ -33,6 +34,11 @@ export const DESIGN_EXPLORATION_VARIANTS: DesignExplorationVariantDefinition[] =
     id: BASELINE_VARIANT_ID,
     label: 'Baseline',
     createStyles: createBaselineStyles,
+  },
+  {
+    id: LINBANA_VARIANT_ID,
+    label: 'Linbana',
+    createStyles: createLinbanaStyles,
   },
 ];
 
