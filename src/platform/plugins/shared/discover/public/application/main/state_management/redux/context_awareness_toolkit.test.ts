@@ -176,6 +176,36 @@ describe('createContextAwarenessToolkit', () => {
     expect(stateAdapter.getState()).toEqual({ ...firstState, nestedValue: { count: 100 } });
   });
 
+  it('merges registered defaults when reading partial profile state', async () => {
+    const { internalState, profileStateRegistry, tabId } = await setup();
+    profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    const stateAdapter = createContextAwarenessToolkit({
+      internalState,
+      profileStateRegistry,
+      tabId,
+    }).getStateAdapter(TEST_PROFILE_STATE_DEF);
+    const tabState = selectTab(internalState.getState(), tabId);
+
+    internalState.dispatch(
+      internalStateActions.initializeTabState({
+        tabId,
+        initialAppState: tabState.appState,
+        initialProfileState: {
+          [TEST_PROFILE_STATE_DEF.key]: {
+            urlValue: 'fromUrl',
+            unknownValue: 'ignored',
+          },
+        },
+      })
+    );
+
+    expect(stateAdapter.getState()).toEqual({
+      ...TEST_PROFILE_STATE_DEF.defaultState,
+      urlValue: 'fromUrl',
+    });
+  });
+
   it('emits profile state updates', async () => {
     const { internalState, profileStateRegistry, tabId } = await setup();
     profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);

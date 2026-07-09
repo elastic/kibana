@@ -9,7 +9,6 @@
 
 import { ExistenceFetchStatus } from '@kbn/unified-field-list';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import {
   createTabItem,
   DEFAULT_EXPANDED_DOC_OWNER,
@@ -23,15 +22,10 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { selectDataSourceProfileId } from './runtime_state';
-import { PROFILE_STATE_URL_KEY } from '../../../../../common/constants';
-import { TEST_PROFILE_STATE_DEF } from '../../../../context_awareness/__mocks__/profile_state';
 
 describe('InternalStateStore', () => {
   const setup = async () => {
-    const services = createDiscoverServicesMock();
-    services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
     const toolkit = getDiscoverInternalStateMock({
-      services,
       persistedDataViews: [dataViewMock],
     });
     await toolkit.initializeTabs();
@@ -39,7 +33,6 @@ describe('InternalStateStore', () => {
     return {
       store: toolkit.internalState,
       runtimeStateManager: toolkit.runtimeStateManager,
-      urlStateStorage: toolkit.stateStorageContainer,
       initializeSingleTab: toolkit.initializeSingleTab,
     };
   };
@@ -53,38 +46,6 @@ describe('InternalStateStore', () => {
     store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
     expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value).toBe(
       dataViewMock
-    );
-  });
-
-  it('should write active profile URL state when profile state changes', async () => {
-    const { store, urlStateStorage, initializeSingleTab } = await setup();
-    const tabId = store.getState().tabs.unsafeCurrentId;
-    await initializeSingleTab({ tabId });
-
-    const setUrlStateSpy = jest.spyOn(urlStateStorage, 'set');
-
-    store.dispatch(
-      internalStateActions.setProfileState({
-        tabId,
-        profileStateDefinition: TEST_PROFILE_STATE_DEF,
-        profileState: {
-          uiValue: 'ui',
-          urlValue: 'nextUrl',
-          persistentValue: 'persistent',
-          nestedValue: { count: 1 },
-        },
-        historyMethod: 'replace',
-      })
-    );
-
-    expect(setUrlStateSpy).toHaveBeenCalledWith(
-      PROFILE_STATE_URL_KEY,
-      {
-        [TEST_PROFILE_STATE_DEF.key]: {
-          urlValue: 'nextUrl',
-        },
-      },
-      { replace: true }
     );
   });
 

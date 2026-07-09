@@ -140,7 +140,7 @@ describe('tab_state actions', () => {
   });
 
   describe('setProfileState', () => {
-    it('replaces profile state and synchronously writes active profile URL state', async () => {
+    it('updates profile state and lets URL sync push active profile URL state', async () => {
       const { internalState, stateStorageContainer, tabId } = await setup();
       const profileState = {
         ...TEST_PROFILE_STATE_DEF.defaultState,
@@ -167,11 +167,88 @@ describe('tab_state actions', () => {
       expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
         [TEST_PROFILE_STATE_DEF.key]: profileState,
       });
+      expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, expectedUrlState);
+      expect(flushSpy).not.toHaveBeenCalled();
+      expect(stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toEqual(expectedUrlState);
+    });
+
+    it('replaces active profile URL state and flushes the URL update when requested', async () => {
+      const { internalState, stateStorageContainer, tabId } = await setup();
+      const profileState = {
+        ...TEST_PROFILE_STATE_DEF.defaultState,
+        uiValue: 'ui',
+        urlValue: 'nextUrl',
+        persistentValue: 'persistent',
+      };
+      const expectedUrlState = {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'nextUrl',
+        },
+      };
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const flushSpy = jest.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
+
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState,
+          historyMethod: 'replace',
+        })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+        [TEST_PROFILE_STATE_DEF.key]: profileState,
+      });
       expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, expectedUrlState, {
-        replace: false,
+        replace: true,
       });
       expect(flushSpy).toHaveBeenCalledWith();
       expect(stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toEqual(expectedUrlState);
+    });
+
+    it('preserves active profile URL state in Redux when non-URL profile state changes', async () => {
+      const { internalState, stateStorageContainer, tabId } = await setup();
+      const profileState = {
+        ...TEST_PROFILE_STATE_DEF.defaultState,
+        uiValue: 'ui',
+        urlValue: 'nextUrl',
+        persistentValue: 'persistent',
+      };
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const flushSpy = jest.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
+
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState,
+        })
+      );
+      setUrlStateSpy.mockClear();
+      flushSpy.mockClear();
+
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState: {
+            ...profileState,
+            persistentValue: 'updatedPersistent',
+          },
+        })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+        [TEST_PROFILE_STATE_DEF.key]: {
+          ...profileState,
+          persistentValue: 'updatedPersistent',
+        },
+      });
+      expect(setUrlStateSpy.mock.calls.filter(([key]) => key === PROFILE_STATE_URL_KEY)).toEqual(
+        []
+      );
+      expect(flushSpy).not.toHaveBeenCalled();
     });
 
     it('does not dispatch or write URL state when profile state is unchanged', async () => {
@@ -327,8 +404,8 @@ describe('tab_state actions', () => {
       );
     });
 
-    it('should write the current active profile URL state to the URL even when state is unchanged', async () => {
-      const { internalState, stateStorageContainer, tabId } = await setup();
+    it('should write the current profile URL state to the URL even when state is unchanged', async () => {
+      const { internalState, runtimeStateManager, stateStorageContainer, tabId } = await setup();
       const profileState = {
         ...TEST_PROFILE_STATE_DEF.defaultState,
         urlValue: 'nextUrl',
@@ -346,6 +423,7 @@ describe('tab_state actions', () => {
           profileState,
         })
       );
+      clearActiveDataSourceProfileState({ runtimeStateManager, tabId });
       const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
 
       await internalState.dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId }));

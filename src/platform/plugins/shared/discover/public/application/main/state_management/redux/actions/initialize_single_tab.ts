@@ -30,7 +30,7 @@ import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
-import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 import { fetchData, updateAttributes } from './tab_state';
@@ -116,6 +116,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       ...(defaultUrlState ??
         cleanupUrlState(urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY), services.uiSettings)),
     };
+    const urlProfileState = urlStateStorage.get<TabState['profileState']>(PROFILE_STATE_URL_KEY);
 
     const discoverTabLoadTracker = scopedEbtManager$
       .getValue()
@@ -296,8 +297,19 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      * Update state containers
      */
 
-    // Make sure app state state is completely reset
-    dispatch(internalStateSlice.actions.resetAppState({ tabId, appState: initialAppState }));
+    // Initialize app and profile state together
+    const initialProfileState = services.profileStateRegistry.mergeState(
+      tabState.profileState,
+      urlProfileState
+    );
+
+    dispatch(
+      internalStateSlice.actions.initializeTabState({
+        tabId,
+        initialAppState,
+        initialProfileState,
+      })
+    );
 
     // Set runtime state
     customizationService$.next(customizationService);

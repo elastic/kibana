@@ -23,6 +23,7 @@ import {
 import { internalStateSlice } from '../redux/internal_state';
 import { selectUrlProfileStateDefinition } from '../redux/runtime_state';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
+import type { ProfileStateMap } from '../../../../context_awareness';
 import { ProfileStateType } from '../../../../context_awareness';
 
 const EMPTY_PROFILE_URL_STATE = {};
@@ -110,7 +111,7 @@ export const createUrlSyncObservables = ({
     const profileState = profileStateDefinition
       ? selectTab(getState(), tabId).profileState[profileStateDefinition.key]
       : undefined;
-    const pickedUrlState = profileStateDefinition
+    const filteredUrlState = profileStateDefinition
       ? services.profileStateRegistry.filterFieldsByType({
           profileState,
           stateKey: profileStateDefinition.key,
@@ -118,19 +119,19 @@ export const createUrlSyncObservables = ({
         })
       : undefined;
 
-    return profileStateDefinition && pickedUrlState
-      ? { [profileStateDefinition.key]: pickedUrlState }
+    return profileStateDefinition && filteredUrlState
+      ? { [profileStateDefinition.key]: filteredUrlState }
       : undefined;
   };
 
   const profileState$ = internalState$.pipe(
+    skip(1),
     map(() => getCurrentProfileUrlState()),
     filter((profileUrlState) => profileUrlState !== undefined),
-    distinctUntilChanged((a, b) => isEqual(a, b)),
-    skip(1)
+    distinctUntilChanged((a, b) => isEqual(a, b))
   );
 
-  const profileStateContainer: INullableBaseStateContainer<Record<string, object | undefined>> = {
+  const profileStateContainer: INullableBaseStateContainer<ProfileStateMap> = {
     get: () => getCurrentProfileUrlState() ?? EMPTY_PROFILE_URL_STATE,
     set: (profileUrlState) => {
       const profileStateDefinition = selectUrlProfileStateDefinition(runtimeStateManager, tabId);

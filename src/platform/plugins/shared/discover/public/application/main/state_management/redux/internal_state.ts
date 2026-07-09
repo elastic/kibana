@@ -344,12 +344,19 @@ export const internalStateSlice = createSlice({
       }),
 
     /**
-     * Set the tab app state and previous app state, overwriting existing state and pushing to URL history
+     * Set the initial tab state, overwriting existing state and pushing to URL history
      */
-    resetAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
+    initializeTabState: (
+      state,
+      action: TabAction<{
+        initialAppState: TabState['appState'];
+        initialProfileState: TabState['profileState'];
+      }>
+    ) =>
       withTab(state, action.payload, (tab) => {
-        tab.previousAppState = action.payload.appState;
-        tab.appState = action.payload.appState;
+        tab.previousAppState = action.payload.initialAppState;
+        tab.appState = action.payload.initialAppState;
+        tab.profileState = action.payload.initialProfileState;
       }),
 
     /**

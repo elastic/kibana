@@ -245,6 +245,7 @@ export const setProfileState = <TState extends object>(
     );
 
     if (
+      payload.historyMethod !== 'replace' ||
       currentState.tabs.unsafeCurrentId !== payload.tabId ||
       urlProfileStateDefinition?.key !== payload.profileStateDefinition.key
     ) {
@@ -257,35 +258,42 @@ export const setProfileState = <TState extends object>(
       );
     }
 
-    const profileStateForRedux = services.profileStateRegistry.filterFieldsByType({
+    const nonUrlProfileState = services.profileStateRegistry.filterFieldsByType({
       profileState: payload.profileState,
       stateKey: payload.profileStateDefinition.key,
       stateTypes: [ProfileStateType.Ui, ProfileStateType.Persistent],
     });
-
-    if (profileStateForRedux) {
-      dispatch(
-        internalStateSlice.actions.setProfileState({
-          tabId: payload.tabId,
-          key: payload.profileStateDefinition.key,
-          profileState: profileStateForRedux,
-        })
-      );
-    }
-
-    const filteredUrlState = services.profileStateRegistry.filterFieldsByType({
+    const currentUrlProfileState = services.profileStateRegistry.filterFieldsByType({
+      profileState: currentProfileState,
+      stateKey: payload.profileStateDefinition.key,
+      stateTypes: [ProfileStateType.Url],
+    });
+    const nextUrlProfileState = services.profileStateRegistry.filterFieldsByType({
       profileState: payload.profileState,
       stateKey: payload.profileStateDefinition.key,
       stateTypes: [ProfileStateType.Url],
     });
-    const profileStateForUrl = filteredUrlState
-      ? { [payload.profileStateDefinition.key]: filteredUrlState }
-      : undefined;
 
-    void urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, {
-      replace: payload.historyMethod === 'replace',
-    });
-    urlStateStorage.kbnUrlControls.flush();
+    dispatch(
+      internalStateSlice.actions.setProfileState({
+        tabId: payload.tabId,
+        key: payload.profileStateDefinition.key,
+        profileState: {
+          ...payload.profileStateDefinition.defaultState,
+          ...nonUrlProfileState,
+          ...currentUrlProfileState,
+        },
+      })
+    );
+
+    if (!isEqual(currentUrlProfileState, nextUrlProfileState)) {
+      const profileStateForUrl = nextUrlProfileState
+        ? { [payload.profileStateDefinition.key]: nextUrlProfileState }
+        : undefined;
+
+      void urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, { replace: true });
+      urlStateStorage.kbnUrlControls.flush();
+    }
   };
 
 /**
@@ -298,30 +306,22 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
   async function pushCurrentTabStateToUrlThunkFn(
     dispatch,
     getState,
-    { runtimeStateManager, services, urlStateStorage }
+    { services, urlStateStorage }
   ) {
     await Promise.all([
       dispatch(updateGlobalStateAndReplaceUrl({ tabId, globalState: {} })),
       dispatch(updateAppStateAndReplaceUrl({ tabId, appState: {} })),
       (async () => {
-        const profileStateDefinition = selectUrlProfileStateDefinition(runtimeStateManager, tabId);
-        const profileState = profileStateDefinition
-          ? selectTab(getState(), tabId).profileState[profileStateDefinition.key]
-          : undefined;
-        let profileStateForUrl: Record<string, object | undefined> | undefined;
+        const profileStateForUrl = services.profileStateRegistry.pickStateByType({
+          profileStateMap: selectTab(getState(), tabId).profileState,
+          stateTypes: [ProfileStateType.Url],
+        });
 
-        if (profileStateDefinition && profileState) {
-          const filteredUrlState = services.profileStateRegistry.filterFieldsByType({
-            profileState,
-            stateKey: profileStateDefinition.key,
-            stateTypes: [ProfileStateType.Url],
-          });
-          profileStateForUrl = filteredUrlState
-            ? { [profileStateDefinition.key]: filteredUrlState }
-            : undefined;
-        }
-
-        return urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, { replace: true });
+        return urlStateStorage.set(
+          PROFILE_STATE_URL_KEY,
+          Object.keys(profileStateForUrl).length > 0 ? profileStateForUrl : undefined,
+          { replace: true }
+        );
       })(),
     ]);
   };

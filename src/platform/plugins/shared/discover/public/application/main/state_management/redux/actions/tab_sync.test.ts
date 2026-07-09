@@ -292,6 +292,26 @@ describe('tab_sync actions', () => {
       });
     });
 
+    it('should preserve initial profile URL state from the URL during initialization', async () => {
+      const { tabId, initializeSingleTab, internalState, stateStorageContainer } = await setup();
+      const sharedProfileUrlState = {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'sharedUrl',
+        },
+      };
+
+      await stateStorageContainer.set(PROFILE_STATE_URL_KEY, sharedProfileUrlState);
+
+      await initializeSingleTab({ tabId });
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'sharedUrl',
+        },
+      });
+      expect(stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toEqual(sharedProfileUrlState);
+    });
+
     it('should unsubscribe from tabStateSubscription when stopSyncing is called', async () => {
       const mockTabState$: Subject<TabPersistableState> = new Subject();
       jest

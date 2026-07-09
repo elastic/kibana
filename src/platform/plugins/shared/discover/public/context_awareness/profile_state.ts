@@ -87,6 +87,11 @@ export interface ProfileStateDefinition<TState extends object> {
 }
 
 /**
+ * A map of profile state blobs keyed by their registered definition key.
+ */
+export type ProfileStateMap = Record<string, object | undefined>;
+
+/**
  * Registry of profile state definitions supported by Discover.
  */
 export class ProfileStateRegistry {
@@ -137,11 +142,11 @@ export class ProfileStateRegistry {
     stateTypes,
     shouldMergeDefaults = false,
   }: {
-    profileStateMap: Record<string, object | undefined> | undefined;
+    profileStateMap: ProfileStateMap | undefined;
     stateTypes: ProfileStateType[];
     shouldMergeDefaults?: boolean;
-  }): Record<string, object | undefined> {
-    const filteredStateMap: Record<string, object | undefined> = {};
+  }): ProfileStateMap {
+    const filteredStateMap: ProfileStateMap = {};
 
     if (!profileStateMap) {
       return filteredStateMap;
@@ -149,9 +154,9 @@ export class ProfileStateRegistry {
 
     const stateTypeSet = new Set(stateTypes);
 
-    for (const [stateKey, state] of Object.entries(profileStateMap)) {
+    for (const [stateKey, profileState] of Object.entries(profileStateMap)) {
       const filteredState = this.filterFieldsByType({
-        profileState: state,
+        profileState,
         stateKey,
         stateTypes: stateTypeSet,
         shouldMergeDefaults,
@@ -163,6 +168,44 @@ export class ProfileStateRegistry {
     }
 
     return filteredStateMap;
+  }
+
+  /**
+   * Merges registered profile state maps in argument order. Later maps override earlier fields for
+   * the same registered state key. Unregistered state keys and fields are omitted.
+   */
+  public mergeState(
+    ...profileStateMaps: Array<ProfileStateMap | null | undefined>
+  ): ProfileStateMap {
+    const mergedStateMap: Record<string, Record<string, unknown>> = {};
+
+    for (const profileStateMap of profileStateMaps) {
+      if (!profileStateMap) {
+        continue;
+      }
+
+      for (const [stateKey, profileState] of Object.entries(profileStateMap)) {
+        const definition = this.stateDefinitions.get(stateKey);
+
+        if (!definition || !profileState) {
+          continue;
+        }
+
+        const mergedProfileState = mergedStateMap[stateKey] ?? {};
+
+        for (const [field, value] of Object.entries(profileState)) {
+          if (definition.descriptor[field]?.type) {
+            mergedProfileState[field] = value;
+          }
+        }
+
+        if (Object.keys(mergedProfileState).length > 0) {
+          mergedStateMap[stateKey] = mergedProfileState;
+        }
+      }
+    }
+
+    return mergedStateMap;
   }
 
   /**

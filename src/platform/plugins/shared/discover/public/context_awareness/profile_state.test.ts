@@ -180,6 +180,78 @@ describe('ProfileStateRegistry', () => {
     ).toEqual({});
   });
 
+  it('merges registered profile state maps in order', () => {
+    const registry = new ProfileStateRegistry();
+    const secondaryProfileStateDef: ProfileStateDefinition<{
+      secondaryUiValue: string;
+      secondaryUrlValue: string;
+    }> = {
+      key: 'secondaryProfileState',
+      descriptor: {
+        secondaryUiValue: { type: ProfileStateType.Ui },
+        secondaryUrlValue: { type: ProfileStateType.Url },
+      },
+      defaultState: {
+        secondaryUiValue: 'defaultSecondaryUi',
+        secondaryUrlValue: 'defaultSecondaryUrl',
+      },
+    };
+
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+    registry.registerDefinition(secondaryProfileStateDef);
+
+    expect(
+      registry.mergeState(
+        {
+          testProfileState: {
+            uiValue: 'firstUi',
+            urlValue: 'firstUrl',
+            unregisteredValue: 'ignored',
+          },
+          secondaryProfileState: {
+            secondaryUrlValue: 'firstSecondaryUrl',
+          },
+          unregisteredProfileState: {
+            uiValue: 'ignored',
+          },
+        },
+        undefined,
+        {
+          testProfileState: {
+            uiValue: 'secondUi',
+            persistentValue: 'secondPersistent',
+          },
+          secondaryProfileState: {
+            secondaryUiValue: 'secondSecondaryUi',
+          },
+        }
+      )
+    ).toEqual({
+      testProfileState: {
+        uiValue: 'secondUi',
+        urlValue: 'firstUrl',
+        persistentValue: 'secondPersistent',
+      },
+      secondaryProfileState: {
+        secondaryUrlValue: 'firstSecondaryUrl',
+        secondaryUiValue: 'secondSecondaryUi',
+      },
+    });
+  });
+
+  it('returns an empty object when merging only undefined or unregistered state', () => {
+    const registry = new ProfileStateRegistry();
+    registry.registerDefinition(TEST_PROFILE_STATE_DEF);
+
+    expect(
+      registry.mergeState(undefined, {
+        unregisteredProfileState: {
+          uiValue: 'ignored',
+        },
+      })
+    ).toEqual({});
+  });
+
   it('picks fields by state type from a single profile state object', () => {
     const registry = new ProfileStateRegistry();
     registry.registerDefinition(TEST_PROFILE_STATE_DEF);

@@ -63,8 +63,11 @@ export const createContextAwarenessToolkit = ({
       ): ProfileStateAdapter<TState> => {
         const getState = () => {
           const tabState = selectTab(internalState.getState(), tabId);
+          const profileState = tabState.profileState[definition.key];
 
-          return (tabState.profileState[definition.key] ?? definition.defaultState) as TState;
+          return profileState
+            ? { ...definition.defaultState, ...profileState }
+            : definition.defaultState;
         };
 
         const state$ = from(internalState).pipe(

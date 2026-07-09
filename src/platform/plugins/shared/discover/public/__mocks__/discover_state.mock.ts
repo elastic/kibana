@@ -524,16 +524,18 @@ export function getDiscoverStateMock({
   );
 
   const currentTabId = internalState.getState().tabs.unsafeCurrentId;
+  const currentTab = selectTab(internalState.getState(), currentTabId);
 
   internalState.dispatch(
-    internalStateActions.resetAppState({
+    internalStateActions.initializeTabState({
       tabId: currentTabId,
-      appState: getInitialAppState({
+      initialAppState: getInitialAppState({
         initialUrlState: getCurrentUrlState(stateStorageContainer, services),
         persistedTab: persistedDiscoverSession?.tabs[0],
         dataView: finalSavedSearch?.searchSource.getField('index'),
         services,
       }),
+      initialProfileState: currentTab.profileState,
     })
   );
 
