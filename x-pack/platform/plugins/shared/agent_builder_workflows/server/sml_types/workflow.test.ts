@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SmlDocument } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlDocument } from '@kbn/agent-builder-sml-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createWorkflowSmlType } from './workflow';

@@ -234,9 +234,9 @@ export class SignificantEventsPlugin
     );
     const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
 
-    if (plugins.agentContextLayer && this.getScopedClients) {
+    if (plugins.agentBuilderSml && this.getScopedClients) {
       registerAgentBuilderSmlTypes({
-        agentContextLayer: plugins.agentContextLayer,
+        agentBuilderSml: plugins.agentBuilderSml,
         getScopedClients: this.getScopedClients,
       });
     }

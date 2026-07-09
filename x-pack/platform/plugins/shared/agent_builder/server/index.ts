@@ -34,12 +34,9 @@ export type {
   SmlListItem,
   SmlSearchResult,
   SmlIndexAttachmentParams,
-} from '@kbn/agent-context-layer-plugin/server';
+} from '@kbn/agent-builder-sml-plugin/server';
 
-export {
-  smlElasticsearchIndexMappings,
-  smlIndexName,
-} from '@kbn/agent-context-layer-plugin/server';
+export { smlElasticsearchIndexMappings, smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
 
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,

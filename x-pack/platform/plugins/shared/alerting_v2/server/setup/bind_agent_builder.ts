@@ -40,7 +40,7 @@ function getAgentBuilder(container: Container): AgentBuilderSetup | undefined {
  *
  * - SML types are registered during setup (synchronously) so the agent context
  *   layer can schedule their crawler tasks during its own start phase. Gated on
- *   the optional `agentContextLayer` plugin.
+ *   the optional `agentBuilderSml` plugin.
  * - Attachment types are bound to {@link AttachmentTypeToken} (deps resolved via
  *   DI) and registered during start. Skills are registered alongside them.
  *
@@ -71,21 +71,21 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
       return;
     }
 
-    const agentContextLayerToken =
-      PluginSetup<NonNullable<AlertingServerSetupDependencies['agentContextLayer']>>(
-        'agentContextLayer'
+    const agentBuilderSmlToken =
+      PluginSetup<NonNullable<AlertingServerSetupDependencies['agentBuilderSml']>>(
+        'agentBuilderSml'
       );
-    if (!container.isBound(agentContextLayerToken)) {
+    if (!container.isBound(agentBuilderSmlToken)) {
       return;
     }
 
-    const agentContextLayer = container.get(agentContextLayerToken);
+    const agentBuilderSml = container.get(agentBuilderSmlToken);
 
     // SML types are registered inline (not via a token registry like attachments):
     // registration happens at setup, but their clients/repositories must be
     // resolved lazily at crawl time (start phase), so deps cannot be eagerly
     // injected at bind/resolution time.
-    agentContextLayer.registerType(
+    agentBuilderSml.registerType(
       createRuleSmlType({
         getScopedRulesClient: (request) =>
           resolveRequestScoped(container.get(CoreStart('injection')), request, RulesClient),
@@ -95,7 +95,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
             .createInternalRepository([RULE_SAVED_OBJECT_TYPE]),
       })
     );
-    agentContextLayer.registerType(
+    agentBuilderSml.registerType(
       createActionPolicySmlType({
         getScopedActionPolicyClient: (request) =>
           resolveRequestScoped(container.get(CoreStart('injection')), request, ActionPolicyClient),
