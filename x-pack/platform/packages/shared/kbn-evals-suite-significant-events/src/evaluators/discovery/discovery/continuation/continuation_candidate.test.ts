@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { toContinuationCandidate, mergeContinuationCandidates } from './continuation_candidate';
+import { toSignificantEventSeed } from './continuation_candidate';
 
-describe('toContinuationCandidate', () => {
-  it('stamps the id and derives stream_names from detections', () => {
-    const candidate = toContinuationCandidate({
-      discoveryId: 'svc__cascade-aaaa1111-cycle-0',
+describe('toSignificantEventSeed', () => {
+  it('stamps event_id and derives rule_names and stream_names from detections', () => {
+    const seed = toSignificantEventSeed({
+      eventId: 'svc__cascade-aaaa1111-cycle-0',
       discovery: {
-        kind: 'discovery',
         discovery_slug: 'svc__cascade-aaaa1111',
         summary: 'cascade',
         root_cause: 'db down',
         title: 'Cascade',
-        confidence: 80,
+        confidence: 0.8,
         criticality: 90,
         detections: [
           { rule_name: 'r1', rule_uuid: 'u1', stream_name: 'logs-a', kind: 'detection' },
@@ -28,41 +27,32 @@ describe('toContinuationCandidate', () => {
       },
     });
 
-    expect(candidate.discovery_id).toBe('svc__cascade-aaaa1111-cycle-0');
-    expect(candidate.discovery_slug).toBe('svc__cascade-aaaa1111');
-    expect(candidate.stream_names).toEqual(['logs-a', 'logs-b']);
-    expect(candidate.detections).toHaveLength(3);
-    expect(candidate.confidence).toBe(80);
-    expect(candidate.criticality).toBe(90);
+    expect(seed.event_id).toBe('svc__cascade-aaaa1111-cycle-0');
+    expect(seed.discovery_slug).toBe('svc__cascade-aaaa1111');
+    expect(seed.status).toBe('promoted');
+    expect(seed.rule_names).toEqual(['r1', 'r2', 'r3']);
+    expect(seed.stream_names).toEqual(['logs-a', 'logs-b']);
+    expect(seed.confidence).toBe(0.8);
+    expect(seed.criticality).toBe(90);
   });
 
-  it('defaults kind to discovery and tolerates missing detections', () => {
-    const candidate = toContinuationCandidate({
-      discoveryId: 'svc__x-bbbb2222-cycle-0',
-      discovery: { discovery_slug: 'svc__x-bbbb2222' },
+  it('falls back to event_id as slug when discovery_slug is missing', () => {
+    const seed = toSignificantEventSeed({
+      eventId: 'fallback-id',
+      discovery: {},
     });
 
-    expect(candidate.kind).toBe('discovery');
-    expect(candidate.detections).toEqual([]);
-    expect(candidate.stream_names).toEqual([]);
-  });
-});
-
-describe('mergeContinuationCandidates', () => {
-  it('keeps the latest doc per slug (last write wins)', () => {
-    const merged = mergeContinuationCandidates([
-      { discovery_slug: 'a', confidence: 50 },
-      { discovery_slug: 'b', confidence: 60 },
-      { discovery_slug: 'a', confidence: 70 }, // newer for slug a
-    ]);
-
-    expect(merged).toHaveLength(2);
-    expect(merged.find((c) => c.discovery_slug === 'a')?.confidence).toBe(70);
-    expect(merged.find((c) => c.discovery_slug === 'b')?.confidence).toBe(60);
+    expect(seed.discovery_slug).toBe('fallback-id');
+    expect(seed.rule_names).toEqual([]);
+    expect(seed.stream_names).toEqual(['unknown']);
   });
 
-  it('skips discoveries without a slug', () => {
-    const merged = mergeContinuationCandidates([{ confidence: 10 }, { discovery_slug: 'a' }]);
-    expect(merged).toEqual([{ discovery_slug: 'a' }]);
+  it('always sets status to promoted', () => {
+    const seed = toSignificantEventSeed({
+      eventId: 'e1',
+      discovery: { discovery_slug: 'svc__x' },
+    });
+
+    expect(seed.status).toBe('promoted');
   });
 });
