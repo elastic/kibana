@@ -1,14 +1,20 @@
 ---
 name: pr-reviewer-ui
-description: Reviews changed Kibana user-facing UI code for accessibility, loading, empty-state, and error-handling gaps. Dispatched by the review orchestrator when public UI files change.
-globs: ["**/public/**", "**/*.tsx", "**/*.scss"]
-tools: Read, Grep, Glob
+description: Reviews assigned user-facing UI changes for accessibility, state, permissions, and complete user feedback.
+globs: ["**/public/**", "**/*.tsx", "**/*.jsx", "**/*.scss", "**/*.css"]
+tools: Read, Grep, Glob, Skill
+background: true
+skills:
+  - pr-review-core
 ---
 
 # UI PR Reviewer
 
-Review the changed user-facing UI files. Prioritize:
+Own `ui` findings. Prioritize concrete gaps in:
 
-- user-facing UI changes with clear accessibility, loading, empty-state, or error-handling gaps
+- keyboard/focus behavior, semantics, accessible names, and EUI usage
+- loading, empty, error, disabled, permission-denied, and partial-data states
+- stale async work, state races, navigation, and capability-aware rendering
+- untranslated user-facing text or interpolation that changes meaning
 
-Follow `.claude/skills/pr-review-core/SKILL.md` for the shared methodology, scope guardrails, do-not-report list, and the finding output contract.
+Inspect only the directly related component, hook/state owner, and tests needed to confirm a user-visible defect. Load `kibana-i18n` when assigned changes add or modify user-facing text.

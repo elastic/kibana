@@ -12,7 +12,9 @@ const path = require('path');
 
 const DEFAULT_AGENTS_DIR = '.claude/agents';
 const DEFAULT_PR_FILES_PATH = '/tmp/gh-aw/agent/pr-files.json';
+const DEFAULT_PR_DIFF_PATH = '/tmp/gh-aw/agent/pr-diff.txt';
 const DEFAULT_OUTPUT_PATH = '/tmp/gh-aw/agent/pr-reviewer-assignments.json';
+const DEFAULT_REVIEWER_DIFF_DIR = '/tmp/gh-aw/agent/reviewer-diffs';
 const REVIEWER_FILENAME = /^pr-reviewer-.*\.md$/;
 
 // `**/*` and `**` mean "every file" — path.matchesGlob otherwise skips dot-directories.
@@ -34,21 +36,30 @@ const matchFiles = (files, globs) => {
     return [...files];
   }
 
-  // path.matchesGlob skips dot-directories, so match against the path with leading segment dots stripped.
   return files.filter((file) => {
     const undotted = file.replace(/(^|\/)\./g, '$1');
-    return globs.some((glob) => path.matchesGlob(undotted, glob));
+    return globs.some((glob) => path.matchesGlob(file, glob) || path.matchesGlob(undotted, glob));
   });
 };
 
 const readReviewers = (agentsDir) => {
   const entries = fs.existsSync(agentsDir) ? fs.readdirSync(agentsDir) : [];
 
-  return entries
+  const reviewers = entries
     .filter((entry) => REVIEWER_FILENAME.test(entry))
     .sort()
     .map((entry) => parseFrontmatter(fs.readFileSync(path.join(agentsDir, entry), 'utf8')))
     .filter((reviewer) => reviewer.name && reviewer.globs.length > 0);
+
+  const names = new Set();
+  for (const reviewer of reviewers) {
+    if (names.has(reviewer.name)) {
+      throw new Error(`Duplicate reviewer name: ${reviewer.name}`);
+    }
+    names.add(reviewer.name);
+  }
+
+  return reviewers;
 };
 
 const computeAssignments = ({ files, reviewers }) => {
@@ -59,23 +70,68 @@ const computeAssignments = ({ files, reviewers }) => {
   return assignments;
 };
 
+const getDiffSection = ({ diffText, file }) => {
+  const previousFilename = file.previous_filename ?? file.filename;
+  const header = `diff --git a/${previousFilename} b/${file.filename}`;
+  const start = diffText.indexOf(header);
+  if (start === -1) {
+    return `${header}\n# Diff section was not found in the prefetched PR context.\n`;
+  }
+
+  const next = diffText.indexOf('\ndiff --git a/', start + header.length);
+  return diffText.slice(start, next === -1 ? undefined : next).trimEnd() + '\n';
+};
+
+const compactFileMetadata = (file) => ({
+  path: file.filename,
+  status: file.status,
+  ...(file.previous_filename ? { previousPath: file.previous_filename } : {}),
+});
+
+const writeReviewerContexts = ({ fileMetadata, diffText, assignments, reviewerDiffDir }) => {
+  fs.mkdirSync(reviewerDiffDir, { recursive: true });
+
+  const filesByPath = new Map(fileMetadata.map((file) => [file.filename, file]));
+  const contexts = {};
+
+  for (const [reviewer, matchedPaths] of Object.entries(assignments)) {
+    const matchedFiles = matchedPaths
+      .map((matchedPath) => filesByPath.get(matchedPath))
+      .filter(Boolean);
+    const diffPath = path.join(reviewerDiffDir, `${reviewer}.diff`);
+    const reviewerDiff = matchedFiles.map((file) => getDiffSection({ diffText, file })).join('');
+
+    fs.writeFileSync(diffPath, reviewerDiff);
+    contexts[reviewer] = {
+      files: matchedFiles.map(compactFileMetadata),
+      diffPath,
+    };
+  }
+
+  return contexts;
+};
+
 const assignReviewers = async ({
   core,
   agentsDir = DEFAULT_AGENTS_DIR,
   prFilesPath = DEFAULT_PR_FILES_PATH,
+  prDiffPath = DEFAULT_PR_DIFF_PATH,
   outputPath = DEFAULT_OUTPUT_PATH,
+  reviewerDiffDir = DEFAULT_REVIEWER_DIFF_DIR,
 } = {}) => {
   const log = core ?? console;
 
-  if (!fs.existsSync(prFilesPath)) {
-    const message = `Prefetched changed-files list not found at ${prFilesPath}`;
+  if (!fs.existsSync(prFilesPath) || !fs.existsSync(prDiffPath)) {
+    const message = `Prefetched PR files or diff not found at ${prFilesPath} and ${prDiffPath}`;
     core ? core.setFailed(message) : log.error(message);
     return;
   }
 
-  const files = JSON.parse(fs.readFileSync(prFilesPath, 'utf8'))
-    .map((file) => file.filename)
-    .filter(Boolean);
+  const fileMetadata = JSON.parse(fs.readFileSync(prFilesPath, 'utf8')).filter(
+    (file) => file.filename
+  );
+  const files = fileMetadata.map((file) => file.filename);
+  const diffText = fs.readFileSync(prDiffPath, 'utf8');
 
   const reviewers = readReviewers(agentsDir);
   if (reviewers.length === 0) {
@@ -85,8 +141,14 @@ const assignReviewers = async ({
   }
 
   const assignments = computeAssignments({ files, reviewers });
+  const reviewerContexts = writeReviewerContexts({
+    fileMetadata,
+    diffText,
+    assignments,
+    reviewerDiffDir,
+  });
 
-  fs.writeFileSync(outputPath, `${JSON.stringify(assignments, null, 2)}\n`);
+  fs.writeFileSync(outputPath, `${JSON.stringify(reviewerContexts, null, 2)}\n`);
 
   const summary = Object.entries(assignments)
     .map(([name, matched]) => `${name}=${matched.length}`)
@@ -99,5 +161,8 @@ module.exports = {
   matchFiles,
   readReviewers,
   computeAssignments,
+  getDiffSection,
+  compactFileMetadata,
+  writeReviewerContexts,
   assignReviewers,
 };

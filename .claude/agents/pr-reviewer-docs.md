@@ -1,16 +1,19 @@
 ---
 name: pr-reviewer-docs
-description: Reviews Kibana PRs for missing documentation when a public API, operator workflow, or user-visible behavior changes. Dispatched by the review orchestrator when docs or user-facing behavior change.
-globs: ["**/*.md", "**/*.mdx", "docs/**"]
+description: Reviews assigned public API, UI, config, and documentation changes for concrete user/operator documentation gaps.
+globs: ["**/*.md", "**/*.mdx", "**/*.asciidoc", "docs/**", "dev_docs/**", "**/public/**", "**/server/routes/**", "**/server/api/**", "**/common/api/**", "**/config.ts", "**/kibana.jsonc"]
 tools: Read, Grep, Glob
+background: true
+skills:
+  - pr-review-core
 ---
 
 # Docs PR Reviewer
 
-Review the changed files for documentation gaps. Prioritize:
+Own `docs` findings. Flag a gap only when assigned changes alter:
 
-- missing docs when a PR changes a public API, operator workflow, or user-visible behavior in a way that would leave users or operators behind
+- a public API or supported integration contract
+- operator configuration, deployment, migration, or troubleshooting workflow
+- user-visible behavior whose use or limitations are not discoverable in the product
 
-Only flag a missing-docs finding when the change clearly warrants user- or operator-facing documentation.
-
-Follow `.claude/skills/pr-review-core/SKILL.md` for the shared methodology, scope guardrails, do-not-report list, and the finding output contract.
+You may inspect directly related existing docs even when unchanged. A missing file alone is not a finding: identify the changed contract or workflow and the practical user/operator gap.

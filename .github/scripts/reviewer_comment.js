@@ -121,6 +121,12 @@ const commentBelongsToPr = ({ comment, commentType, pullNumber }) => {
   return comment.pull_request_url?.endsWith(`/pulls/${pullNumber}`);
 };
 
+const buildWorkflowDispatchInputs = ({ reviewerId, pullNumber, commentId, commentType }) => ({
+  pr_number: String(pullNumber),
+  comment_id: String(commentId),
+  ...(reviewerId === 'claude' ? { comment_type: commentType } : {}),
+});
+
 const validateReviewerAccess = async ({ github, core, owner, repo, actor }) => {
   const permission = await getCollaboratorPermission({ github, owner, repo, username: actor });
   if (!permission) {
@@ -254,10 +260,12 @@ const dispatchReviewerComment = async ({ github, context, core }) => {
     repo,
     workflow_id: reviewer.workflowId,
     ref: context.payload.repository.default_branch,
-    inputs: {
-      pr_number: String(pullNumber),
-      comment_id: String(commentId),
-    },
+    inputs: buildWorkflowDispatchInputs({
+      reviewerId: reviewer.id,
+      pullNumber,
+      commentId,
+      commentType: artifact.comment_type,
+    }),
   });
 
   core.info(`Dispatched ${reviewer.workflowId} for PR #${pullNumber} from comment ${commentId}.`);
@@ -265,6 +273,7 @@ const dispatchReviewerComment = async ({ github, context, core }) => {
 
 module.exports = {
   REVIEWERS,
+  buildWorkflowDispatchInputs,
   dispatchReviewerComment,
   findMentionedReviewers,
   routeReviewerComment,
