@@ -22,6 +22,7 @@ import { type DashboardBackupState } from '../services/dashboard_backup_service'
 import { getDashboardBackupService } from '../services/dashboard_api_services';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
+import type { initializeApproximationManager } from './approximation_manager';
 import type { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
 import type { PublishesOnSave } from './types';
@@ -37,6 +38,7 @@ export function initializeUnsavedChangesManager({
   storeUnsavedChanges,
   unifiedSearchManager,
   projectRoutingManager,
+  approximationManager,
   setState,
   onSave$,
 }: {
@@ -48,6 +50,7 @@ export function initializeUnsavedChangesManager({
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
+  approximationManager: ReturnType<typeof initializeApproximationManager>;
   setState: (state: DashboardState) => void;
   onSave$: PublishesOnSave['onSave$'];
 }): {
@@ -71,9 +74,10 @@ export function initializeUnsavedChangesManager({
     unifiedSearchManager.internalApi.startComparing(lastSavedState$),
     layoutManager.internalApi.startComparing(lastSavedState$),
     projectRoutingManager?.internalApi.startComparing(lastSavedState$) ?? of({}),
+    approximationManager.internalApi.startComparing(lastSavedState$),
   ]).pipe(
-    map(([settings, unifiedSearch, layout, projectRouting]) => {
-      return { ...settings, ...unifiedSearch, ...layout, ...projectRouting };
+    map(([settings, unifiedSearch, layout, projectRouting, approximation]) => {
+      return { ...settings, ...unifiedSearch, ...layout, ...projectRouting, ...approximation };
     })
   );
 

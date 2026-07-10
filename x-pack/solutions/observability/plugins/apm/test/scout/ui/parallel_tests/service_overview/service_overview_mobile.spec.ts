@@ -87,6 +87,32 @@ test.describe(
       });
     });
 
+    test('mobile service overview header renders the environment filter', async ({
+      page,
+      pageObjects: { serviceDetailsPage },
+    }) => {
+      await serviceDetailsPage.goToMobileServiceOverview(testData.SERVICE_MOBILE_ANDROID, {
+        rangeFrom: testData.START_DATE,
+        rangeTo: testData.END_DATE,
+      });
+
+      await test.step('Verify the environment filter is visible in the header', async () => {
+        await expect(serviceDetailsPage.overviewTab.getEnvironmentFilter()).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+      });
+
+      await test.step('Selecting an environment updates the environment query param', async () => {
+        await serviceDetailsPage.overviewTab.selectEnvironment(PRODUCTION_ENVIRONMENT);
+
+        await page.waitForURL(
+          (url) => url.searchParams.get('environment') === PRODUCTION_ENVIRONMENT,
+          { timeout: EXTENDED_TIMEOUT }
+        );
+        expect(page.url()).toContain(`environment=${PRODUCTION_ENVIRONMENT}`);
+      });
+    });
+
     test('accessing mobile service from apm route redirects to mobile route', async ({
       page,
       kbnUrl,

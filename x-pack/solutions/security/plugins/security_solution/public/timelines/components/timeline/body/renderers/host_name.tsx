@@ -18,8 +18,8 @@ import { HostDetailsLink } from '../../../../../common/components/links';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { Host } from '../../../../../flyout_v2/entity/host/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
@@ -49,7 +49,7 @@ const HostNameComponent: React.FC<Props> = ({
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const isInSecurityApp = useIsInSecurityApp();

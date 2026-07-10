@@ -29,6 +29,13 @@ export const METADATA_TAB_TITLE = i18n.translate(
   }
 );
 
+export const TIMELINE_TAB_TITLE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.mainTabTimeline',
+  {
+    defaultMessage: 'Timeline',
+  }
+);
+
 /** --- Duration (sidebar) --- */
 export const FORMAT_EPISODE_DURATION_MS = (ms: number): string => {
   if (ms < 1000) {
@@ -84,6 +91,91 @@ export const BACK_TO_ALERT_EPISODES = i18n.translate('xpack.alertingV2.episodes.
   defaultMessage: 'Back to alert episodes',
 });
 
+export const EPISODES_LIST_BACK_LABEL = i18n.translate(
+  'xpack.alertingV2.episodeDetails.episodesListBackLabel',
+  {
+    defaultMessage: 'Alert episodes',
+  }
+);
+
+/** --- App header badges --- */
+export const STATUS_BADGE_INACTIVE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.statusBadgeInactive',
+  {
+    defaultMessage: 'Inactive',
+  }
+);
+
+export const STATUS_BADGE_PENDING = i18n.translate(
+  'xpack.alertingV2.episodeDetails.statusBadgePending',
+  {
+    defaultMessage: 'Pending',
+  }
+);
+
+export const STATUS_BADGE_ACTIVE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.statusBadgeActive',
+  {
+    defaultMessage: 'Active',
+  }
+);
+
+export const STATUS_BADGE_RECOVERING = i18n.translate(
+  'xpack.alertingV2.episodeDetails.statusBadgeRecovering',
+  {
+    defaultMessage: 'Recovering',
+  }
+);
+
+export const STATUS_BADGE_UNKNOWN = i18n.translate(
+  'xpack.alertingV2.episodeDetails.statusBadgeUnknown',
+  {
+    defaultMessage: 'Unknown',
+  }
+);
+
+export const ACKNOWLEDGED_BADGE_LABEL = i18n.translate(
+  'xpack.alertingV2.episodeDetails.acknowledgedBadgeLabel',
+  {
+    defaultMessage: 'Acknowledged',
+  }
+);
+
+export const ACKNOWLEDGED_BADGE_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.episodeDetails.acknowledgedBadgeTooltip',
+  {
+    defaultMessage: 'This alert is acknowledged.',
+  }
+);
+
+export const SNOOZED_BADGE_LABEL = i18n.translate(
+  'xpack.alertingV2.episodeDetails.snoozedBadgeLabel',
+  {
+    defaultMessage: 'Snoozed',
+  }
+);
+
+export const SNOOZED_BADGE_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.episodeDetails.snoozedBadgeTooltip',
+  {
+    defaultMessage: 'Notifications are snoozed.',
+  }
+);
+
+export const getSnoozedUntilTooltip = (expiry: Date): string =>
+  i18n.translate('xpack.alertingV2.episodeDetails.snoozedUntilBadgeTooltip', {
+    defaultMessage: 'Notifications snoozed until {expiry}.',
+    values: {
+      expiry: expiry.toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      }),
+    },
+  });
+
 /** --- Page header --- */
 export const LOADING_RULE_TITLE = i18n.translate(
   'xpack.alertingV2.episodeDetails.loadingRuleTitle',
@@ -128,14 +220,6 @@ export const GROUPING_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.gr
 
 export const TAGS_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.tagsLabel', {
   defaultMessage: 'Tags',
-});
-
-export const TRIGGERED_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.triggeredLabel', {
-  defaultMessage: 'Triggered',
-});
-
-export const DURATION_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.durationLabel', {
-  defaultMessage: 'Duration',
 });
 
 export const ASSIGNEE_LABEL = i18n.translate('xpack.alertingV2.episodeDetails.assigneeLabel', {

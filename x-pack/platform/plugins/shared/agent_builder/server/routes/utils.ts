@@ -20,11 +20,9 @@ export const AGENT_SOCKET_TIMEOUT_MS = 15 * 60 * 1000;
 
 /**
  * Returns the headers needed for SSE streaming responses.
- * On cloud, uses `application/octet-stream` to avoid proxy compression breaking chunked encoding.
  */
-export const getSSEResponseHeaders = (isCloud: boolean): Record<string, string> => ({
-  // Cloud proxies compress text/* types, losing chunking capabilities needed for SSE
-  'Content-Type': isCloud ? 'application/octet-stream' : 'text/event-stream',
+export const getSSEResponseHeaders = (): Record<string, string> => ({
+  'Content-Type': 'text/event-stream',
   'Content-Encoding': 'identity',
   'Cache-Control': 'no-cache',
   Connection: 'keep-alive',
