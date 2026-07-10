@@ -15,10 +15,10 @@ import {
   type UpdateRuleBody,
 } from './rules/rules_management_client';
 import { TIMESTAMP } from '../fields';
+import { scheduleIntervalForQuery } from '../../significant_events/rules/schedule';
 
 const RULE_INSTALL_CONCURRENCY = 10;
 const RULE_TAG = 'streams';
-const RULE_SCHEDULE_INTERVAL = '1m';
 
 export function toCreateRuleBody(queryLink: QueryLink): CreateRuleBody {
   const { query } = queryLink;
@@ -34,7 +34,7 @@ export function toCreateRuleBody(queryLink: QueryLink): CreateRuleBody {
     enabled: true,
     tags: [RULE_TAG, queryLink.stream_name],
     schedule: {
-      interval: RULE_SCHEDULE_INTERVAL,
+      interval: scheduleIntervalForQuery(query),
     },
   };
 }
@@ -50,7 +50,7 @@ export function toUpdateRuleBody(queryLink: QueryLink): UpdateRuleBody {
     },
     tags: [RULE_TAG, queryLink.stream_name],
     schedule: {
-      interval: RULE_SCHEDULE_INTERVAL,
+      interval: scheduleIntervalForQuery(query),
     },
   };
 }
