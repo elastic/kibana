@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import { z } from '@kbn/zod/v4';
 import React from 'react';
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
+import { toBooleanFromString } from '../../../common/utils/to_boolean_from_string';
 import { Breadcrumb } from '../app/breadcrumb';
 import { TraceLink } from '../app/trace_link';
 import { TransactionLink } from '../app/transaction_link';
@@ -130,7 +130,7 @@ const apmRoutes = {
                 rangeFrom: z.string(),
                 rangeTo: z.string(),
                 kuery: z.string(),
-                comparisonEnabled: BooleanFromString.default(false),
+                comparisonEnabled: toBooleanFromString,
               })
             )
             .merge(

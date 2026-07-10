@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { Outlet } from '@kbn/typed-react-router-config';
 import { z } from '@kbn/zod/v4';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import qs from 'query-string';
+import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
 import { offsetSchema } from '../../../../common/comparison_rt';
 import { useApmParams } from '../../../hooks/use_apm_params';
 
@@ -34,7 +34,7 @@ export const legacyBackends = {
   '/backends/inventory': {
     element: <RedirectBackends to="/dependencies/inventory" />,
     params: z.object({
-      query: z.object({ comparisonEnabled: BooleanFromString }).merge(offsetSchema).optional(),
+      query: z.object({ comparisonEnabled: toBooleanFromString }).merge(offsetSchema).optional(),
     }),
   },
   '/backends/{dependencyName}/overview': {
@@ -46,7 +46,7 @@ export const legacyBackends = {
     params: z.object({
       query: z
         .object({
-          comparisonEnabled: BooleanFromString,
+          comparisonEnabled: toBooleanFromString,
           dependencyName: z.string(),
         })
         .merge(offsetSchema)

@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { Outlet } from '@kbn/typed-react-router-config';
 import { z } from '@kbn/zod/v4';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import qs from 'query-string';
+import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
 import {
   unifiedSearchBarPlaceholder,
   getSearchBarBoolFilter,
@@ -62,7 +62,7 @@ export const dependencies = {
     params: z.object({
       query: z
         .object({
-          comparisonEnabled: BooleanFromString,
+          comparisonEnabled: toBooleanFromString,
         })
         .merge(offsetSchema)
         .optional(),
@@ -77,7 +77,7 @@ export const dependencies = {
     params: z.object({
       query: z
         .object({
-          comparisonEnabled: BooleanFromString,
+          comparisonEnabled: toBooleanFromString,
           dependencyName: z.string(),
         })
         .merge(offsetSchema)
@@ -100,7 +100,7 @@ export const dependencies = {
                 z.literal(TransactionTab.metadata),
                 z.literal(TransactionTab.logs),
               ]),
-              showCriticalPath: BooleanFromString,
+              showCriticalPath: toBooleanFromString,
             })
             .merge(
               z.object({

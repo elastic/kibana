@@ -8,11 +8,11 @@ import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import { z } from '@kbn/zod/v4';
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import qs from 'query-string';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
 import { offsetSchema } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentSchema } from '../../../../common/environment_rt';
@@ -159,7 +159,7 @@ export const serviceDetailRoute = {
                 rangeTo: z.string(),
                 kuery: z.string(),
                 serviceGroup: z.string(),
-                comparisonEnabled: BooleanFromString.default(false),
+                comparisonEnabled: toBooleanFromString,
               })
             )
             .merge(
@@ -235,8 +235,8 @@ export const serviceDetailRoute = {
             params: z.object({
               query: z
                 .object({
-                  comparisonEnabled: BooleanFromString.default(false),
-                  showCriticalPath: BooleanFromString.default(false),
+                  comparisonEnabled: toBooleanFromString,
+                  showCriticalPath: toBooleanFromString,
                 })
                 .merge(z.object({ transactionName: z.string().optional() }))
                 .merge(

@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { Outlet } from '@kbn/typed-react-router-config';
 import { z } from '@kbn/zod/v4';
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
 import { offsetSchema } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentSchema } from '../../../../common/environment_rt';
@@ -121,7 +121,7 @@ export const homeRoute = {
             rangeFrom: z.string(),
             rangeTo: z.string(),
             kuery: z.string(),
-            comparisonEnabled: BooleanFromString.default(false),
+            comparisonEnabled: toBooleanFromString,
           })
         )
         .merge(
