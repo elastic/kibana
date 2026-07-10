@@ -491,12 +491,22 @@ export class MonacoEditorActionsProvider {
     }
   }
 
-  public async getDocumentationLink(docLinkVersion: string): Promise<string | null> {
+  public async getDocumentationLink(
+    docLinkVersion: string,
+    kibanaApiReferenceLink?: string
+  ): Promise<string | null> {
     const requests = await this.getRequests();
     if (requests.length < 1) {
       return null;
     }
     const request = requests[0];
+
+    // Kibana requests (kbn:) don't have per-endpoint documentation, so we
+    // fall back to the general Kibana API reference instead of showing
+    // "Documentation page is not yet available for this API".
+    if (request.url.startsWith(KIBANA_API_PREFIX)) {
+      return kibanaApiReferenceLink ?? null;
+    }
 
     return getDocumentationLinkFromAutocomplete(request, docLinkVersion);
   }

@@ -161,6 +161,46 @@ describe('Editor actions provider', () => {
       const link = await editorActionsProvider.getDocumentationLink(docLinkVersion);
       expect(link).toBe(docsLink);
     });
+
+    it('returns the kibana API reference link for a kbn: request', async () => {
+      editor.getModel.mockReturnValue({
+        getLineMaxColumn: () => 26,
+        getPositionAt: () => ({ lineNumber: 1 }),
+        getLineContent: () => 'GET kbn:/api/spaces/space',
+      } as unknown as monaco.editor.ITextModel);
+      mockGetParsedRequests.mockResolvedValue([
+        {
+          startOffset: 0,
+          endOffset: 26,
+          method: 'GET',
+          url: 'kbn:/api/spaces/space',
+        },
+      ]);
+      const kibanaApiReferenceLink = 'http://elastic.co/docs/api/doc/kibana/';
+      const link = await editorActionsProvider.getDocumentationLink(
+        docLinkVersion,
+        kibanaApiReferenceLink
+      );
+      expect(link).toBe(kibanaApiReferenceLink);
+    });
+
+    it('returns null for a kbn: request when no kibana API reference link is provided', async () => {
+      editor.getModel.mockReturnValue({
+        getLineMaxColumn: () => 26,
+        getPositionAt: () => ({ lineNumber: 1 }),
+        getLineContent: () => 'GET kbn:/api/spaces/space',
+      } as unknown as monaco.editor.ITextModel);
+      mockGetParsedRequests.mockResolvedValue([
+        {
+          startOffset: 0,
+          endOffset: 26,
+          method: 'GET',
+          url: 'kbn:/api/spaces/space',
+        },
+      ]);
+      const link = await editorActionsProvider.getDocumentationLink(docLinkVersion);
+      expect(link).toBe(null);
+    });
   });
 
   describe('provideCompletionItems', () => {
