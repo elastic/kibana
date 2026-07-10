@@ -3814,4 +3814,4 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # See https://github.com/elastic/kibana/pull/199404
 # Prevent backport assignments
-* @kibanamachine 
+* @kibanamachine
