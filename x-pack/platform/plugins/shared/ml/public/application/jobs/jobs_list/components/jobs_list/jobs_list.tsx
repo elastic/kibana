@@ -260,7 +260,7 @@ export const JobsList: FC<JobsListProps> = ({
         width: '105px',
       },
       {
-        field: 'jobAndDatafeedState',
+        field: 'datafeedState',
         'data-test-subj': 'mlJobListColumnJobAndDatafeedState',
         name: i18n.translate('xpack.ml.jobsList.jobAndDatafeedStateLabel', {
           defaultMessage: 'State',
