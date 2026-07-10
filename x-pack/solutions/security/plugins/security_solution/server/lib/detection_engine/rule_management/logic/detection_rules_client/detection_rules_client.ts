@@ -7,7 +7,7 @@
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ILicense } from '@kbn/licensing-types';
@@ -50,6 +50,16 @@ import { revertPrebuiltRule } from './methods/revert_prebuilt_rule';
 import { getHistoryForRule } from './methods/get_history_for_rule';
 import { restoreRuleFromHistory } from './methods/restore_rule_from_history';
 import { MINIMUM_RULE_CUSTOMIZATION_LICENSE } from '../../../../../../common/constants';
+import {
+  sendRuleRestoreTelemetryEvent,
+  sendRuleRestoreErrorTelemetryEvent,
+} from './restore_telemetry';
+import { sendRuleLifecycleTelemetryEvent } from './rule_lifecycle_telemetry';
+import {
+  DETECTION_RULE_IMPORT_EVENT,
+  DETECTION_RULE_REVERT_EVENT,
+  DETECTION_RULE_INSTALL_EVENT,
+} from '../../../../telemetry/event_based/events';
 
 interface DetectionRulesClientParams {
   actionsClient: ActionsClient;
@@ -59,6 +69,8 @@ interface DetectionRulesClientParams {
   rulesAuthz: DetectionRulesAuthz;
   productFeaturesService: ProductFeaturesService;
   license: ILicense;
+  analytics?: AnalyticsServiceSetup;
+  logger?: Logger;
 }
 
 export const createDetectionRulesClient = ({
@@ -69,6 +81,8 @@ export const createDetectionRulesClient = ({
   savedObjectsClient,
   productFeaturesService,
   license,
+  analytics,
+  logger,
 }: DetectionRulesClientParams): IDetectionRulesClient => {
   const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
 
@@ -112,7 +126,7 @@ export const createDetectionRulesClient = ({
 
     async createPrebuiltRule(args: CreatePrebuiltRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.createPrebuiltRule', async () => {
-        return createRule({
+        const rule = await createRule({
           actionsClient,
           rulesClient,
           rule: {
@@ -125,6 +139,12 @@ export const createDetectionRulesClient = ({
             ...args.changeTracking,
           },
         });
+
+        if (analytics) {
+          sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_INSTALL_EVENT, rule, logger);
+        }
+
+        return rule;
       });
     },
 
@@ -199,7 +219,7 @@ export const createDetectionRulesClient = ({
       changeTracking,
     }: RevertPrebuiltRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.revertPrebuiltRule', async () => {
-        return revertPrebuiltRule({
+        const rule = await revertPrebuiltRule({
           actionsClient,
           rulesClient,
           ruleAsset,
@@ -208,12 +228,18 @@ export const createDetectionRulesClient = ({
           existingRule,
           changeTracking,
         });
+
+        if (analytics) {
+          sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_REVERT_EVENT, rule, logger);
+        }
+
+        return rule;
       });
     },
 
     async importRule(args: ImportRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.importRule', async () => {
-        return importRule({
+        const rule = await importRule({
           actionsClient,
           rulesClient,
           importRulePayload: args,
@@ -221,6 +247,12 @@ export const createDetectionRulesClient = ({
           prebuiltRuleAssetClient,
           changeTracking: args.changeTracking,
         });
+
+        if (analytics) {
+          sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_IMPORT_EVENT, rule, logger);
+        }
+
+        return rule;
       });
     },
 
@@ -246,16 +278,41 @@ export const createDetectionRulesClient = ({
       currentRuleRevision,
     }: RestoreRuleFromHistoryArgs): Promise<RestoreRuleFromHistoryResponse> {
       return withSecuritySpan('DetectionRulesClient.restoreRuleFromHistory', async () => {
-        return restoreRuleFromHistory({
-          actionsClient,
-          rulesClient,
-          prebuiltRuleAssetClient,
-          mlAuthz,
-          rulesAuthz,
-          ruleId,
-          changeId,
-          currentRuleRevision,
-        });
+        try {
+          const { restoredRevisionTimestamp, ...response } = await restoreRuleFromHistory({
+            actionsClient,
+            rulesClient,
+            prebuiltRuleAssetClient,
+            mlAuthz,
+            rulesAuthz,
+            ruleId,
+            changeId,
+            currentRuleRevision,
+          });
+
+          if (analytics) {
+            sendRuleRestoreTelemetryEvent(
+              analytics,
+              { rule: response.rule, restoredRevisionTimestamp },
+              logger
+            );
+          }
+
+          return response;
+        } catch (err) {
+          if (analytics) {
+            const status =
+              (err as { statusCode?: number }).statusCode === 409 ? 'conflict' : 'error';
+
+            sendRuleRestoreErrorTelemetryEvent(
+              analytics,
+              { ruleId, changeId, status, errorMessage: (err as Error).message },
+              logger
+            );
+          }
+
+          throw err;
+        }
       });
     },
   };

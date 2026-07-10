@@ -6,10 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_ID_LENGTH } from '../constants';
+import { MAX_ID_LENGTH, MAX_RULE_NAME_LENGTH } from '../constants';
 
 const detectionEvidenceSchema = z.object({
-  change_point_type: z.string().optional(),
+  change_point_type: z.string().max(MAX_ID_LENGTH).optional(),
   p_value: z.number().optional(),
 });
 
@@ -18,17 +18,17 @@ export const detectionSchema = z.object({
   kind: z.enum(['detection', 'quiet', 'handled']),
   processed: z.boolean(),
   detection_id: z.string().max(MAX_ID_LENGTH),
-  rule_uuid: z.string(),
-  rule_name: z.string(),
-  stream_name: z.string().optional(),
+  rule_uuid: z.string().max(MAX_ID_LENGTH),
+  rule_name: z.string().max(MAX_RULE_NAME_LENGTH),
+  stream_name: z.string().max(MAX_ID_LENGTH).optional(),
   alert_count: z.number().optional(),
-  alert_index: z.string().optional(),
-  workflow_execution_id: z.string().optional(),
+  alert_index: z.string().max(MAX_ID_LENGTH).optional(),
+  workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
   resolution_lookback_minutes: z.number().optional(),
   peak_alert_count: z.number().optional(),
   detection_evidence: detectionEvidenceSchema.optional(),
-  alert_samples: z.array(z.record(z.string(), z.unknown())).optional(),
-  rules_activity: z.array(z.record(z.string(), z.unknown())).optional(),
+  alert_samples: z.array(z.record(z.string().max(MAX_ID_LENGTH), z.unknown())).optional(),
+  rules_activity: z.array(z.record(z.string().max(MAX_ID_LENGTH), z.unknown())).optional(),
 });
 
 export type Detection = z.infer<typeof detectionSchema>;

@@ -64,6 +64,14 @@ const ebtAction = {
     COPY_MCP_URL: 'copy_mcp_url',
     BULK_IMPORT_MCP: 'bulk_import_mcp',
     MANAGE_MCP_CLIENTS: 'manage_mcp_clients',
+    MCP_CLIENT_CREATE_OPEN: 'mcp_client_create_open',
+    MCP_CLIENT_CREATE_SUBMIT: 'mcp_client_create_submit',
+    MCP_CLIENT_CREATE_CANCEL: 'mcp_client_create_cancel',
+    MCP_CLIENT_VIEW_DETAILS: 'mcp_client_view_details',
+    MCP_CLIENT_COPY_SECRET: 'mcp_client_copy_secret',
+    MCP_CLIENT_REVOKE_OPEN: 'mcp_client_revoke_open',
+    MCP_CLIENT_REVOKE_CONFIRM: 'mcp_client_revoke_confirm',
+    MANAGE_APPLICATION_CONNECTIONS_LINK: 'manage_application_connections_link',
     MCP_DOCS: 'mcp_docs',
     ADD_REFERENCED_FILE: 'add_referenced_file',
     REMOVE_REFERENCED_FILE: 'remove_referenced_file',
@@ -222,6 +230,7 @@ const ebtEntity = {
   PLUGIN: 'plugin',
   SKILL: 'skill',
   AGENT: 'agent',
+  MCP_CLIENT: 'mcp_client',
 } as const;
 const ebtFormat = {} as const;
 

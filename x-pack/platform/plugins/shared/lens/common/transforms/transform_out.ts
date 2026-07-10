@@ -11,6 +11,7 @@ import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-com
 import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
 import { flow } from 'lodash';
 import { transformToV1LensItemAttributes } from '../content_management/v1';
 import { transformToV2LensItemAttributes } from '../content_management/v2';
@@ -23,6 +24,7 @@ import type {
 import { findLensReference } from './utils';
 import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
 import { stripInheritedContext } from './helpers';
+import { toLegacyDurationUnits } from './ga_schema_validator';
 
 /**
  * Transform from Lens Stored State to Lens API format
@@ -32,7 +34,13 @@ export const getTransformOut = (
   transformDrilldownsOut: DrilldownTransforms['transformOut'],
   isDashboardAppRequest: boolean
 ): LensTransformOut => {
-  return function transformOut(storedState, panelReferences) {
+  return function transformOut(
+    storedState,
+    panelReferences,
+    containerReferences,
+    id,
+    useGASchemas = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+  ) {
     const transformsFlow = flow(
       transformTitlesOut<LensSerializedState>,
       transformTimeRangeOut<LensSerializedState>,
@@ -105,12 +113,18 @@ export const getTransformOut = (
         ? { description: attributesDescription }
         : {};
 
-    return {
+    let apiPanelConfig = {
       ...titleFallback,
       ...descriptionFallback,
       ...state,
       ...apiConfig,
     } satisfies LensByValueTransformOutResult;
+
+    if (!useGASchemas) {
+      apiPanelConfig = toLegacyDurationUnits(apiPanelConfig);
+    }
+
+    return apiPanelConfig;
   };
 };
 

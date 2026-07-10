@@ -21,8 +21,8 @@ import endPointSvg from '../../../../../common/utils/logo_endpoint/64_color.svg'
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
-import { useKibana, useUiSetting } from '../../../../../common/lib/kibana';
-import { APP_UI_ID, ENABLE_NEW_FLYOUT_SETTING } from '../../../../../../common/constants';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../../../common/constants';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { GenericLinkButton } from '../../../../../common/components/links/helpers';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
@@ -31,6 +31,7 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { RuleDetails } from '../../../../../flyout_v2/rule/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
 interface RenderRuleNameProps {
   children?: React.ReactNode;
@@ -63,7 +64,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   const store = useStore();
   const history = useHistory();
   const eventContext = useContext(StatefulEventContext);
-  const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
+  const enableNewFlyout = useIsNewFlyoutEnabled();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const ruleName = `${value}`;

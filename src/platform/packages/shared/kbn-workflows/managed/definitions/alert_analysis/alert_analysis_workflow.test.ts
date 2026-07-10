@@ -49,6 +49,39 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     );
   });
 
+  it('reads the tag prefix from runtime config and does not bake it into consts', () => {
+    // The tag prefix is per-space and configurable via uiSettings, so it must be read at run time,
+    // not derived from a const namespace baked into the document.
+    expect(workflow.consts.workflow_tag_namespace).toBeUndefined();
+
+    const runtimeConfigStep = findStepByName(workflow.steps, 'set_runtime_config_variables') as {
+      with: { tag_prefix: string };
+    };
+    expect(runtimeConfigStep).toBeDefined();
+    expect(runtimeConfigStep.with.tag_prefix).toBe(
+      '{{ steps.fetch_runtime_config.output.tagPrefix }}'
+    );
+  });
+
+  it('writes short tag names derived from the configurable prefix', () => {
+    const setTagsStep = findStepByName(workflow.steps, 'set_tags') as {
+      with: { tags_to_add: string[] };
+    };
+    expect(setTagsStep).toBeDefined();
+    // The short tag names: `.classification.` and `.confidence.`, not the old longer
+    // `.output.classification.` / `.output.confidence_score.` segments. (The trailing
+    // `steps.onechat_runAgent_step.output.structured_output.*` is the agent step's output value that
+    // fills the tag, not part of the tag name.)
+    expect(setTagsStep.with.tags_to_add).toEqual([
+      '{{ variables.tag_prefix }}',
+      '{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}',
+      '{{ variables.tag_prefix }}.classification.{{ steps.onechat_runAgent_step.output.structured_output.classification | downcase }}',
+      '{{ variables.tag_prefix }}.confidence.{{ steps.onechat_runAgent_step.output.structured_output.confidence_score }}',
+    ]);
+    // The auto-close suffix is short too.
+    expect(workflow.consts.closed_tag_suffix).toBe('closed');
+  });
+
   it('does not bake connector/auto-close/create-conversation config into consts', () => {
     // These are per-space and read at run time; leaving stale literals here (e.g. a dev connector
     // id) would be misleading and unused.

@@ -64,4 +64,6 @@ export const getDashboardAttachmentType = () =>
     getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_DASHBOARD }),
     getAttachmentTabViewObject: () => ({ children: DashboardAttachmentsTab }),
     schema: DashboardAttachmentPayloadSchema,
+    // Exclude pesistable data from the workflow schema
+    workflowSchema: DashboardAttachmentPayloadSchema.omit({ data: true }),
   });
