@@ -50628,8 +50628,6 @@
     "xpack.streams.editIlmPhasesFlyout.downsamplePreviousIntervalWarmPhaseError": "ホットフェーズ値（{value}）より大きく、ホットフェーズ値の倍数でなければなりません",
     "xpack.streams.editIlmPhasesFlyout.downsamplingIntervalAriaLabel": "ダウンサンプリング間隔値",
     "xpack.streams.editIlmPhasesFlyout.downsamplingIntervalLabel": "間隔",
-    "xpack.streams.editIlmPhasesFlyout.downsamplingLearnMoreLink": "詳しくはこちら",
-    "xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedBody": "ダウンサンプリングは時系列データストリームでのみ機能します。これらの設定を行っても、このストリームのデータの保存方法には影響しません。{learnMoreLink}",
     "xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedTitle": "このストリームではダウンサンプリングは利用できません",
     "xpack.streams.editIlmPhasesFlyout.downsamplingTitle": "ダウンサンプリング",
     "xpack.streams.editIlmPhasesFlyout.downsamplingUnitAria": "ダウンサンプリング間隔単位",
