@@ -185,6 +185,7 @@ export const useAgentBuilderIntegration = ({
     bridge.start(agentBuilder.events.chat$, manager, editorRef, tracker, {
       attachmentId,
       workflowId,
+      getChatEvents$: agentBuilder.events.getChatEvents$?.bind(agentBuilder.events),
       onProposalReceived: ({ proposalId, toolId }) => {
         telemetry.reportAiProposalReceived({
           workflowId,
@@ -278,11 +279,9 @@ export const useAgentBuilderIntegration = ({
       }
       modelListener?.dispose();
       conversationIdSub.unsubscribe();
-      // NB: do NOT close the sidebar here. This cleanup runs on every deps
-      // change — including the workflowId flip from `/workflows/create` to
-      // `/workflows/${savedId}` after Save — and closing here would drop the
-      // user out of an in-progress conversation. The unmount-only effect
-      // below handles closing on true navigate-away.
+      // Don't close the sidebar here — this runs on every deps change
+      // (including the workflowId flip after Save). Close lives in the
+      // unmount-only effect below.
       agentBuilder.clearChatConfig();
       bridge.stop();
       attachmentBridgeRef.current = null;

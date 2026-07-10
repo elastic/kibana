@@ -10,6 +10,7 @@
 import type { Observable, Subscription } from 'rxjs';
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import { isToolUiEvent } from '@kbn/agent-builder-common';
+import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat/events';
 import type { monaco } from '@kbn/monaco';
 import { WORKFLOW_YAML_CHANGED_EVENT } from '@kbn/workflows/common/constants';
 import type { ProposalTracker } from './proposal_tracker';
@@ -57,12 +58,9 @@ export class AttachmentBridge {
     | undefined;
   private attachmentId: string | undefined;
   private workflowId: string | undefined;
-  // On a create-session bridge, the server mints a fresh `attachmentId` on the
-  // first generation that the client hasn't seen. We adopt it here so later
-  // events from a *different* create session (e.g. user visited /create,
-  // navigated away, came back to a fresh /create — old request still in
-  // flight on the shared chat$) can be distinguished from ours and dropped.
-  private adoptedServerAttachmentId: string | undefined;
+  private conversationId: string | undefined;
+  private broadSubscription: Subscription | null = null;
+  private getChatEvents$: ((conversationId: string) => Observable<BrowserChatEvent>) | undefined;
 
   start(
     chat$: Observable<BrowserChatEvent>,
@@ -72,13 +70,14 @@ export class AttachmentBridge {
     options?: {
       onError?: (err: unknown) => void;
       attachmentId?: string;
-      /**
-       * Saved workflow id this bridge is scoped to (undefined on the
-       * `/workflows/create` route). Used to distinguish saved-workflow
-       * bridges (strict attachment-id guard) from create-session bridges
-       * (only drop events explicitly targeting a different saved workflow).
-       */
+      /** Saved workflow id, or undefined on the `/workflows/create` route. */
       workflowId?: string;
+      /**
+       * Per-conversation stream factory. Once `conversation_id_set` arrives on
+       * the broad `chat$`, we switch to `getChatEvents$(id)` so events from
+       * other conversations can't leak in.
+       */
+      getChatEvents$?: (conversationId: string) => Observable<BrowserChatEvent>;
       onProposalReceived?: (params: {
         proposalId: string;
         toolId: string;
@@ -93,8 +92,31 @@ export class AttachmentBridge {
     this.onProposalReceived = options?.onProposalReceived;
     this.attachmentId = options?.attachmentId;
     this.workflowId = options?.workflowId;
+    this.getChatEvents$ = options?.getChatEvents$;
 
-    this.subscription = chat$.subscribe((event) => {
+    this.broadSubscription = chat$.subscribe((event) => {
+      if (isConversationIdSetEvent(event)) {
+        this.onConversationIdKnown(event.data.conversation_id);
+        return;
+      }
+      // Fallback for callers that don't wire `getChatEvents$` — legacy path.
+      if (!this.getChatEvents$ && isToolUiEvent(event, WORKFLOW_YAML_CHANGED_EVENT)) {
+        try {
+          this.handleYamlChanged(event.data.data as WorkflowYamlChangedPayload);
+        } catch (err) {
+          this.onError(err);
+        }
+      }
+    });
+  }
+
+  private onConversationIdKnown(conversationId: string): void {
+    if (this.conversationId === conversationId) return;
+    this.conversationId = conversationId;
+    if (!this.getChatEvents$) return;
+
+    this.subscription?.unsubscribe();
+    this.subscription = this.getChatEvents$(conversationId).subscribe((event) => {
       if (isToolUiEvent(event, WORKFLOW_YAML_CHANGED_EVENT)) {
         try {
           this.handleYamlChanged(event.data.data as WorkflowYamlChangedPayload);
@@ -126,13 +148,16 @@ export class AttachmentBridge {
   stop(): void {
     this.subscription?.unsubscribe();
     this.subscription = null;
+    this.broadSubscription?.unsubscribe();
+    this.broadSubscription = null;
     this.proposalManager = null;
     this.tracker = null;
     this.editorRef = null;
     this.processedProposals.clear();
     this.attachmentId = undefined;
     this.workflowId = undefined;
-    this.adoptedServerAttachmentId = undefined;
+    this.conversationId = undefined;
+    this.getChatEvents$ = undefined;
   }
 
   private handleYamlChanged(payload: WorkflowYamlChangedPayload): void {
@@ -141,25 +166,13 @@ export class AttachmentBridge {
 
     const { proposalId, beforeYaml, afterYaml, attachmentVersion, workflowId, toolId } = payload;
 
-    // Drop events that don't belong to this bridge's session.
-    // - Saved-workflow bridge: strict attachment-id match (fallback to
-    //   `workflowId` for legacy events without `attachmentId`).
-    // - Create-session bridge: drop events for a different saved workflow;
-    //   adopt the first server-minted `attachmentId` and match strictly after
-    //   that so late events from a previous create session don't leak in.
+    // Secondary guard on top of the per-conversation scope: even within one
+    // conversation, a payload for a different saved workflow must be dropped.
     if (this.workflowId) {
       const payloadAttachmentId = payload.attachmentId ?? workflowId;
       if (payloadAttachmentId && payloadAttachmentId !== this.attachmentId) return;
-    } else {
-      if (workflowId && workflowId !== this.attachmentId) return;
-      const payloadAttachmentId = payload.attachmentId;
-      if (payloadAttachmentId) {
-        if (this.adoptedServerAttachmentId) {
-          if (payloadAttachmentId !== this.adoptedServerAttachmentId) return;
-        } else {
-          this.adoptedServerAttachmentId = payloadAttachmentId;
-        }
-      }
+    } else if (workflowId && workflowId !== this.attachmentId) {
+      return;
     }
 
     if (this.processedProposals.has(proposalId)) return;

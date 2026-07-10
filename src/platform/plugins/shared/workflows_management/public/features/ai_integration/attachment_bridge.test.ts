@@ -300,13 +300,22 @@ describe('AttachmentBridge: onProposalReceived workflowId', () => {
     bridge.stop();
   });
 
-  it('adopts the first server-minted attachmentId and drops later events from a different create session', () => {
-    // Repro: user is on /workflows/create (session A), sends a prompt, then
-    // navigates away and back to a fresh /workflows/create (session B). B's
-    // bridge is new — server-A's late response lands on B's chat$. Payload
-    // carries a server-minted attachmentId (not B's) and no workflowId, so
-    // without adoption the guard would let it through and mutate B's editor.
+  it('scopes to its own conversation via getChatEvents$ and ignores broad-stream workflow events after conversation_id is known', () => {
+    // With per-conversation scoping (getChatEvents$), events from other
+    // conversations cannot reach this bridge — regardless of ordering. Covers
+    // both "B receives its own event first" and "B receives A's late event
+    // first" scenarios of the create→create leak the bot flagged.
     const chat$ = new Subject<BrowserChatEvent>();
+    const perConversation$ = new Map<string, Subject<BrowserChatEvent>>();
+    const getChatEvents$ = jest.fn((conversationId: string) => {
+      let s = perConversation$.get(conversationId);
+      if (!s) {
+        s = new Subject<BrowserChatEvent>();
+        perConversation$.set(conversationId, s);
+      }
+      return s.asObservable();
+    });
+
     const editor = createMockEditor('yaml: on-B');
     const editorRef = { current: editor };
     const tracker = new ProposalTracker();
@@ -315,22 +324,19 @@ describe('AttachmentBridge: onProposalReceived workflowId', () => {
     const bridge = new AttachmentBridge();
     bridge.start(chat$, manager, editorRef, tracker, {
       attachmentId: 'client-B-unsaved-uuid',
-      // create-session bridge — workflowId omitted
+      getChatEvents$,
     });
 
-    // B's own first-generation event arrives — bridge adopts server-B's id.
-    chat$.next(
-      makeYamlChangedEvent({
-        proposalId: 'B-first',
-        beforeYaml: 'yaml: on-B',
-        afterYaml: 'yaml: from-B-agent',
-        attachmentId: 'server-B-id',
-      })
-    );
+    // conversation_id_set for B lands on the broad chat$ → bridge switches to
+    // getChatEvents$('conv-B') for workflow events.
+    chat$.next({
+      type: ChatEventType.conversationIdSet,
+      data: { conversation_id: 'conv-B' },
+    } as unknown as BrowserChatEvent);
 
-    expect(manager.applyAfterYaml).toHaveBeenLastCalledWith('yaml: from-B-agent');
-
-    // Late event from previous session A carries server-A's id, no workflowId.
+    // A stale workflow event on the broad chat$ (from a previous session A)
+    // must NOT be picked up — the bridge no longer listens for workflow
+    // events on chat$ once scoped.
     chat$.next(
       makeYamlChangedEvent({
         proposalId: 'A-late',
@@ -339,10 +345,52 @@ describe('AttachmentBridge: onProposalReceived workflowId', () => {
         attachmentId: 'server-A-id',
       })
     );
+    expect(manager.applyAfterYaml).not.toHaveBeenCalled();
 
-    // Must NOT have applied A's late event to B's editor.
-    expect(manager.applyAfterYaml).toHaveBeenCalledTimes(1);
+    // B's own event on the scoped stream is applied.
+    perConversation$.get('conv-B')!.next(
+      makeYamlChangedEvent({
+        proposalId: 'B-first',
+        beforeYaml: 'yaml: on-B',
+        afterYaml: 'yaml: from-B-agent',
+        attachmentId: 'server-B-id',
+      })
+    );
     expect(manager.applyAfterYaml).toHaveBeenLastCalledWith('yaml: from-B-agent');
+
+    bridge.stop();
+  });
+
+  it('drops workflow events arriving on the broad chat$ before conversation_id_set (deterministic stale-event guard)', () => {
+    // Reverse ordering of the create→create repro: A's late event arrives on
+    // chat$ *before* our conversation_id_set. Since our conversation hasn't
+    // started yet, any workflow:yaml_changed must be stale — drop.
+    const chat$ = new Subject<BrowserChatEvent>();
+    const scoped$ = new Subject<BrowserChatEvent>();
+    const getChatEvents$ = jest.fn(() => scoped$.asObservable());
+    const editor = createMockEditor('yaml: on-B');
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker, {
+      attachmentId: 'client-B-unsaved-uuid',
+      getChatEvents$,
+    });
+
+    // A's late event arrives on the broad chat$ before we've seen our
+    // conversation_id_set — must be ignored.
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'A-late-first',
+        beforeYaml: 'yaml: on-A',
+        afterYaml: 'yaml: from-A-agent',
+        attachmentId: 'server-A-id',
+      })
+    );
+
+    expect(manager.applyAfterYaml).not.toHaveBeenCalled();
 
     bridge.stop();
   });
