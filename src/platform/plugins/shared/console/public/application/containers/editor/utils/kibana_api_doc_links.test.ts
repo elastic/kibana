@@ -51,9 +51,9 @@ describe('getKibanaApiOperationId', () => {
   });
 
   it('strips query strings before matching', () => {
-    expect(
-      getKibanaApiOperationId('GET', 'kbn:/api/spaces/space/default?foo=bar', docLinks)
-    ).toBe('get-spaces-space-id');
+    expect(getKibanaApiOperationId('GET', 'kbn:/api/spaces/space/default?foo=bar', docLinks)).toBe(
+      'get-spaces-space-id'
+    );
   });
 
   it('returns null when no template matches the path', () => {

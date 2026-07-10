@@ -21,7 +21,8 @@ const DEFAULT_SOURCE = Path.resolve(REPO_ROOT, 'oas_docs/output/kibana.yaml');
 export function runGenerateKibanaApiDocLinksCli() {
   run(
     ({ log, flags }) => {
-      const source = typeof flags.source === 'string' && flags.source ? flags.source : DEFAULT_SOURCE;
+      const source =
+        typeof flags.source === 'string' && flags.source ? flags.source : DEFAULT_SOURCE;
 
       if (!fs.existsSync(source)) {
         throw createFlagError(`Kibana OpenAPI bundle not found at ${source}`);
