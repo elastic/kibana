@@ -24,7 +24,7 @@ export const filterExpressionCodec = z.codec(
   }),
   {
     decode: (value) => {
-      const [operator, tagName, tagValue] = (value ?? '').match(filterExpressionPattern) ?? [];
+      const [, operator, tagName, tagValue] = (value ?? '').match(filterExpressionPattern) ?? [];
       return {
         operator,
         tagName,
