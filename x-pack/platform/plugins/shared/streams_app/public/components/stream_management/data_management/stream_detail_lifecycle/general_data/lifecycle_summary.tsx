@@ -34,6 +34,11 @@ import { useIlmLifecycleSummary } from '../hooks/use_ilm_lifecycle_summary';
 import { useDslLifecycleSummary } from '../hooks/use_dsl_lifecycle_summary';
 import { MAX_DOWNSAMPLE_STEPS } from '../data_phases/edit_dsl_steps_flyout/form';
 import { useLifecyclePreview } from '../common/hooks/lifecycle_preview';
+import {
+  STREAM_LIFECYCLE_FLYOUT_IDS,
+  useLifecycleFlyoutCoordination,
+  useRegisterLifecycleFlyoutOpen,
+} from '../common/hooks/lifecycle_flyout_coordination';
 import { useEditFlyoutPreviewSync } from '../common/hooks/use_edit_flyout_preview_sync';
 import { useOverrideSettingsConfirmation } from '../common/hooks/use_override_settings_confirmation';
 import { useKibana } from '../../../../../hooks/use_kibana';
@@ -133,9 +138,6 @@ interface LifecycleSummaryProps {
     onRefreshDefaultRepository?: () => void;
     isRefreshingDefaultRepository?: boolean;
   };
-  isExternalFlyoutOpen?: boolean;
-  isDataPhaseFlyoutOpen?: boolean;
-  onDataPhaseFlyoutOpenChange?: (isOpen: boolean) => void;
   previewHeader?: {
     inheritLifecycle: boolean;
     method: 'dlm' | 'ilm';
@@ -145,7 +147,9 @@ interface LifecycleSummaryProps {
 }
 
 interface InternalLifecycleSummaryProps extends LifecycleSummaryProps {
-  editLifecycleMethodButton?: React.ReactNode;
+  /** Hides the edit-lifecycle-method button entirely (serverless wired root streams can't change
+   * their lifecycle method), rather than just disabling it. */
+  isServerlessWiredRootStream?: boolean;
 }
 
 const dataStreamLifecycleTitle = i18n.translate('xpack.streams.dataLifecycleSummary.title.dlm', {
@@ -265,10 +269,9 @@ const IlmLifecycleSummary = ({
   isMetricsStream,
   stats,
   refreshDefinition,
-  isExternalFlyoutOpen = false,
-  onDataPhaseFlyoutOpenChange,
+  onEditSuccessfulLifecycle,
+  isServerlessWiredRootStream = false,
   previewHeader,
-  editLifecycleMethodButton,
 }: InternalLifecycleSummaryProps) => {
   const {
     isActive: isPreviewActive,
@@ -289,9 +292,33 @@ const IlmLifecycleSummary = ({
   const isEditLifecycleFlyoutOpen = ilmSummary.isEditLifecycleFlyoutOpen;
   const invalidPhases = ilmSummary.flyoutInvalidPhases;
 
+  // This flyout's open state is internal to this component (owned by useIlmLifecycleSummary), so
+  // register it directly with the shared registry instead of threading a bespoke prop up through
+  // the parent for cross-section blocking (e.g. disabling the failure store's own edit button).
+  useRegisterLifecycleFlyoutOpen(
+    STREAM_LIFECYCLE_FLYOUT_IDS.ilmEditPhases,
+    isEditLifecycleFlyoutOpen
+  );
+
+  const { isAnyFlyoutOpen, isAnyOtherFlyoutOpen } = useLifecycleFlyoutCoordination();
+  // True while some flyout other than this one's own edit-phases flyout is open. Excluding just
+  // this id (rather than the global flag) lets clicking a different phase while the flyout is
+  // already open navigate to it instead of being treated as blocked.
+  const isBlockedByOtherFlyout = isAnyOtherFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.ilmEditPhases);
+
+  // The edit-lifecycle-method button is disabled whenever any flyout is open, including this
+  // one's own — once the flyout is open there's nothing left for the trigger to do.
+  const editLifecycleMethodButton = isServerlessWiredRootStream
+    ? null
+    : getEditLifecycleMethodButton({
+        onEditSuccessfulLifecycle,
+        canManageLifecycle: Boolean(definition.privileges.lifecycle),
+        isDisabled: isAnyFlyoutOpen,
+      });
+
   useEditFlyoutPreviewSync({
     isFlyoutOpen: isEditLifecycleFlyoutOpen,
-    isExternalFlyoutOpen,
+    isExternalFlyoutOpen: isBlockedByOtherFlyout,
     phases: ilmSummary.phases,
     isMetricsStream,
     hasUnsavedChangesInFlyout: ilmSummary.hasUnsavedEditLifecycleFlyoutChanges,
@@ -305,7 +332,7 @@ const IlmLifecycleSummary = ({
         selectedPhases={ilmSummary.ilmSelectedPhasesForAdd}
         excludedPhases={ilmSummary.ilmExcludedPhasesForAdd}
         onSelect={(phase: IlmPhaseSelectOption) => ilmSummary.onAddIlmPhase?.(phase)}
-        disabled={isExternalFlyoutOpen}
+        disabled={isBlockedByOtherFlyout}
         data-test-subj="dataLifecycleSummaryAddPhase"
         anchorPosition="downRight"
         renderButton={renderAddPhaseButton(
@@ -327,7 +354,7 @@ const IlmLifecycleSummary = ({
     shouldShowInheritedBadge,
     previewHeader,
     isPreviewActive,
-    isExternalFlyoutOpen,
+    isExternalFlyoutOpen: isBlockedByOtherFlyout,
   });
 
   return (
@@ -365,7 +392,7 @@ const IlmLifecycleSummary = ({
           titleBadge={titleBadge}
           showDownsampling={isMetricsStream}
           capabilities={{
-            canManageLifecycle: definition.privileges.lifecycle && !isExternalFlyoutOpen,
+            canManageLifecycle: definition.privileges.lifecycle && !isBlockedByOtherFlyout,
           }}
           headerActions={headerActionsWithEditButton}
           phaseActions={{
@@ -383,7 +410,7 @@ const IlmLifecycleSummary = ({
             isEditLifecycleFlyoutOpen,
             // While an unrelated flyout (e.g. the successful lifecycle method switcher) is open,
             // phase/downsample clicks must not open ILM's own edit-phases flyout.
-            disableInteractions: isExternalFlyoutOpen,
+            disableInteractions: isBlockedByOtherFlyout,
             invalidPhases,
           }}
         />
@@ -399,17 +426,15 @@ const NonIlmLifecycleSummary = ({
   isMetricsStream,
   stats,
   refreshDefinition,
+  onEditSuccessfulLifecycle,
   onAddDeletePhase,
   onAddDataPhase,
   dataPhaseSelectedPhase,
   dataPhaseInvalidPhases,
   isEditingDeletePhase = false,
   frozenPhaseGating,
-  isExternalFlyoutOpen = false,
-  isDataPhaseFlyoutOpen = false,
-  onDataPhaseFlyoutOpenChange,
+  isServerlessWiredRootStream = false,
   previewHeader,
-  editLifecycleMethodButton,
 }: InternalLifecycleSummaryProps) => {
   const {
     core: { notifications },
@@ -419,7 +444,6 @@ const NonIlmLifecycleSummary = ({
   const dataPhaseFlowEnabled = !isServerless;
   const {
     isActive: isPreviewActive,
-    isDslDownsampleFlyoutOpen,
     timelineDownsampleSteps: previewTimelineDownsampleSteps,
     timelinePhases: previewTimelinePhases,
   } = useLifecyclePreview();
@@ -437,15 +461,43 @@ const NonIlmLifecycleSummary = ({
     updateStreamLifecycle,
   });
 
+  // This flyout's open state is internal to this component (owned by useDslLifecycleSummary), so
+  // register it directly with the shared registry instead of threading a bespoke prop up through
+  // the parent for cross-section blocking (e.g. disabling the failure store's own edit button).
+  useRegisterLifecycleFlyoutOpen(
+    STREAM_LIFECYCLE_FLYOUT_IDS.downsampleSteps,
+    dslSummary.isEditLifecycleFlyoutOpen
+  );
+
+  const { isAnyFlyoutOpen, isAnyOtherFlyoutOpen, isFlyoutOpen } = useLifecycleFlyoutCoordination();
+  // True while some flyout other than this component's own two (downsample-steps, and the
+  // adjacent data-phases flyout the parent owns) is open. Both get their own special "navigate
+  // into that flyout" handling below rather than being treated as generically blocking.
+  const ownFlyoutIds = [
+    STREAM_LIFECYCLE_FLYOUT_IDS.downsampleSteps,
+    STREAM_LIFECYCLE_FLYOUT_IDS.dataPhases,
+  ];
+  const isBlockedByOtherFlyout = isAnyOtherFlyoutOpen(ownFlyoutIds);
+
   useEditFlyoutPreviewSync({
     isFlyoutOpen: dslSummary.isEditLifecycleFlyoutOpen,
-    isExternalFlyoutOpen,
+    isExternalFlyoutOpen: isBlockedByOtherFlyout,
     phases: dslSummary.phases,
     downsampleSteps: dslSummary.downsampleSteps,
     isMetricsStream,
     includeDownsampleStepsInTimeline: isDsl,
     countDownsampleFromPhases: false,
   });
+
+  // The edit-lifecycle-method button is disabled whenever any flyout is open, including this
+  // one's own — once the flyout is open there's nothing left for the trigger to do.
+  const editLifecycleMethodButton = isServerlessWiredRootStream
+    ? null
+    : getEditLifecycleMethodButton({
+        onEditSuccessfulLifecycle,
+        canManageLifecycle: Boolean(definition.privileges.lifecycle),
+        isDisabled: isAnyFlyoutOpen,
+      });
 
   const currentDslStepsCount = dslSummary.downsampleSteps?.length ?? 0;
   const isAddDownsampleStepDisabled = currentDslStepsCount >= MAX_DOWNSAMPLE_STEPS;
@@ -456,13 +508,13 @@ const NonIlmLifecycleSummary = ({
   const hasFrozenPhase =
     isDslLifecycle(definition.effective_lifecycle) &&
     definition.effective_lifecycle.dsl.frozen_after !== undefined;
-  // The "Edit data phases" flyout is owned by the parent and surfaced here via isDataPhaseFlyoutOpen.
-  // While it's open the timeline acts as a navigation control into the flyout rather than showing
-  // per-phase popovers.
-  const isDataPhaseEditing = isDataPhaseFlyoutOpen;
-  const isDslDownsampleFlyoutBlocking =
-    isDslDownsampleFlyoutOpen || dslSummary.isEditLifecycleFlyoutOpen || isDataPhaseFlyoutOpen;
-  const isAddDeletePhaseDisabled = isExternalFlyoutOpen || isDslDownsampleFlyoutBlocking;
+  // The "Edit data phases" flyout is owned by the parent, so read its open state straight from the
+  // shared registry instead of the parent threading it through as a separate prop. While it's open
+  // the timeline acts as a navigation control into the flyout rather than showing per-phase popovers.
+  const isDataPhaseEditing = isFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.dataPhases);
+  // "Add delete/data phase" triggers disable whenever anything is open, including this
+  // component's own downsample-steps and data-phases flyouts.
+  const isAddDeletePhaseDisabled = isAnyFlyoutOpen;
   const isAddDeletePhaseAlreadyInUse = hasDeletePhase;
   const isAddDeletePhaseButtonDisabled = isAddDeletePhaseDisabled || isAddDeletePhaseAlreadyInUse;
 
@@ -472,7 +524,10 @@ const NonIlmLifecycleSummary = ({
       size="s"
       data-test-subj="dataLifecycleSummaryAddDownsampleStep"
       onClick={() => dslSummary.onAddDownsampleStep?.()}
-      disabled={isAddDownsampleStepDisabled || isExternalFlyoutOpen || isDataPhaseEditing}
+      disabled={
+        isAddDownsampleStepDisabled ||
+        isAnyOtherFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.downsampleSteps)
+      }
     >
       {addDownsampleStepButtonLabel}
     </EuiButton>
@@ -596,7 +651,7 @@ const NonIlmLifecycleSummary = ({
     shouldShowInheritedBadge,
     previewHeader,
     isPreviewActive,
-    isExternalFlyoutOpen,
+    isExternalFlyoutOpen: isBlockedByOtherFlyout,
   });
 
   const timelineModelPhases = (isPreviewActive && previewTimelinePhases) || dslSummary.phases;
@@ -635,7 +690,7 @@ const NonIlmLifecycleSummary = ({
               }
         }
         capabilities={{
-          canManageLifecycle: definition.privileges.lifecycle && !isExternalFlyoutOpen,
+          canManageLifecycle: definition.privileges.lifecycle && !isBlockedByOtherFlyout,
         }}
         headerActions={headerActionsWithEditButton}
         phaseActions={
@@ -665,7 +720,10 @@ const NonIlmLifecycleSummary = ({
                   onAddDataPhase?.(phaseName as IlmPhaseSelectOption);
                 },
                 onRemovePhase: (phaseName) => {
-                  if ((phaseName !== 'delete' && phaseName !== 'frozen') || isExternalFlyoutOpen) {
+                  if (
+                    (phaseName !== 'delete' && phaseName !== 'frozen') ||
+                    isBlockedByOtherFlyout
+                  ) {
                     return;
                   }
 
@@ -730,7 +788,7 @@ const NonIlmLifecycleSummary = ({
           isEditLifecycleFlyoutOpen: dslSummary.isEditLifecycleFlyoutOpen || isDataPhaseEditing,
           // While an unrelated flyout (e.g. the successful lifecycle method switcher or the
           // successful delete phase flyout) is open, phase/downsample clicks must be fully inert.
-          disableInteractions: isExternalFlyoutOpen,
+          disableInteractions: isBlockedByOtherFlyout,
           invalidStepIndices,
           invalidPhases: dataPhaseInvalidPhases,
         }}
@@ -747,22 +805,18 @@ export const LifecycleSummary = (props: LifecycleSummaryProps) => {
   const { isServerless } = useKibana();
   const isIlm = isIlmLifecycle(props.definition.effective_lifecycle);
 
+  // Serverless wired root streams can't change their lifecycle method, so the edit-lifecycle-
+  // method button should be hidden entirely rather than just disabled. Each variant below builds
+  // its own button locally (to account for its own internal blocking flyouts), so this gate is
+  // threaded through as a prop instead of being resolved into a button here.
   const isServerlessWiredRootStream =
     isServerless &&
     StreamsSchema.WiredStream.GetResponse.is(props.definition) &&
     isRoot(props.definition.stream.name);
 
-  const editLifecycleMethodButton = isServerlessWiredRootStream
-    ? null
-    : getEditLifecycleMethodButton({
-        onEditSuccessfulLifecycle: props.onEditSuccessfulLifecycle,
-        canManageLifecycle: Boolean(props.definition.privileges.lifecycle),
-        isDisabled: Boolean(props.isExternalFlyoutOpen) || Boolean(props.isDataPhaseFlyoutOpen),
-      });
-
   return isIlm ? (
-    <IlmLifecycleSummary {...props} editLifecycleMethodButton={editLifecycleMethodButton} />
+    <IlmLifecycleSummary {...props} isServerlessWiredRootStream={isServerlessWiredRootStream} />
   ) : (
-    <NonIlmLifecycleSummary {...props} editLifecycleMethodButton={editLifecycleMethodButton} />
+    <NonIlmLifecycleSummary {...props} isServerlessWiredRootStream={isServerlessWiredRootStream} />
   );
 };
