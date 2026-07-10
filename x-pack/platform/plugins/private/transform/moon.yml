@@ -98,6 +98,7 @@ dependsOn:
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/task-manager-plugin'
   - '@kbn/core-notifications-browser'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod
