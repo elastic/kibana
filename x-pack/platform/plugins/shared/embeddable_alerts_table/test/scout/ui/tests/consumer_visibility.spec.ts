@@ -10,13 +10,13 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 import type {
+  ConsumerVisibilityAlertsState,
   ConsumerVisibilityConsumer,
-  ConsumerVisibilityRulesState,
-} from '../lib/es_query_alert';
+} from '../lib/consumer_visibility_alerts_data';
 import {
-  setupConsumerVisibilityRules,
-  teardownConsumerVisibilityRules,
-} from '../lib/es_query_alert';
+  cleanConsumerVisibilityAlerts,
+  ingestConsumerVisibilityAlerts,
+} from '../lib/consumer_visibility_alerts_data';
 import {
   createConsumerVisibilityDashboard,
   deleteConsumerVisibilityDashboard,
@@ -40,13 +40,16 @@ test.describe(
   'Embeddable alerts table - alert consumer visibility',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let rulesState: ConsumerVisibilityRulesState;
+    let alertsState: ConsumerVisibilityAlertsState;
     const dashboardIdsByConsumer: Partial<Record<ConsumerVisibilityConsumer, string>> = {};
 
-    test.beforeAll(async ({ apiServices, kbnClient }) => {
-      rulesState = await setupConsumerVisibilityRules(apiServices, kbnClient);
+    test.beforeAll(async ({ esClient, kbnClient }) => {
+      alertsState = await ingestConsumerVisibilityAlerts({
+        esClient,
+        timestamp: new Date().toISOString(),
+      });
 
-      for (const { consumer, tag } of rulesState.rules) {
+      for (const { consumer, tag } of alertsState.alerts) {
         dashboardIdsByConsumer[consumer] = await createConsumerVisibilityDashboard(kbnClient, {
           solution: 'stack',
           tag,
@@ -54,13 +57,13 @@ test.describe(
       }
     });
 
-    test.afterAll(async ({ apiServices, kbnClient }) => {
+    test.afterAll(async ({ esClient, kbnClient }) => {
       await Promise.all(
         Object.values(dashboardIdsByConsumer).map((dashboardId) =>
           deleteConsumerVisibilityDashboard(kbnClient, dashboardId!)
         )
       );
-      await teardownConsumerVisibilityRules(apiServices, rulesState);
+      await cleanConsumerVisibilityAlerts({ esClient, alerts: alertsState.alerts });
     });
 
     for (const { title, role } of CASES) {

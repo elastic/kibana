@@ -16,13 +16,6 @@ import {
 import type { EmbeddableAlertsIngestResult } from '../../fixtures/embeddable_alerts_data';
 import { cleanEmbeddableAlert, ingestEmbeddableAlert } from '../../fixtures/embeddable_alerts_data';
 
-// Test subjects owned by the embeddable_alerts_table plugin (add-panel action
-// display name "Alerts") and the response-ops alerts table.
-const ADD_ALERTS_PANEL_ACTION_SUBJ = 'create-action-Alerts';
-const SAVE_CONFIG_BUTTON_SUBJ = 'saveConfigButton';
-const ALERTS_TABLE_LOADED_SUBJ = 'alertsTableIsLoaded';
-const ALERTS_ROW_CELL_SUBJ = 'dataGridRowCell';
-
 // The alerts-only user is the one that regressed before the `includeAlertAuthorized`
 // fix; the logs user exercises the pre-existing `rule` authorization path.
 const CASES: Array<{ title: string; role: KibanaRole }> = [
@@ -52,7 +45,6 @@ test.describe(
 
     for (const { title, role } of CASES) {
       test(`${title} can add an alerts panel and see alerts`, async ({
-        page,
         browserAuth,
         pageObjects,
       }) => {
@@ -64,24 +56,20 @@ test.describe(
         });
 
         await test.step('the alerts panel option is offered', async () => {
-          await expect(page.testSubj.locator(ADD_ALERTS_PANEL_ACTION_SUBJ)).toBeVisible();
+          await expect(pageObjects.embeddableAlertsTable.addAlertsPanelAction).toBeVisible();
         });
 
         await test.step('configure and save the alerts panel', async () => {
-          await page.testSubj.click(ADD_ALERTS_PANEL_ACTION_SUBJ);
-          const saveButton = page.testSubj.locator(SAVE_CONFIG_BUTTON_SUBJ);
-          await expect(saveButton).toBeVisible();
-          // The single available solution auto-selects once rule types load, enabling Save.
-          await saveButton.click();
-          await expect(saveButton).toBeHidden();
+          await pageObjects.embeddableAlertsTable.openConfigEditor();
+          await pageObjects.embeddableAlertsTable.saveConfig();
         });
 
         await test.step('the panel renders the authorized alerts', async () => {
-          await expect(page.testSubj.locator(ALERTS_TABLE_LOADED_SUBJ)).toBeVisible({
+          await expect(pageObjects.embeddableAlertsTable.alertsTableLoaded).toBeVisible({
             timeout: 60_000,
           });
           await expect
-            .poll(async () => page.testSubj.locator(ALERTS_ROW_CELL_SUBJ).count(), {
+            .poll(async () => pageObjects.embeddableAlertsTable.getAlertRowCount(), {
               timeout: 60_000,
             })
             .toBeGreaterThan(0);

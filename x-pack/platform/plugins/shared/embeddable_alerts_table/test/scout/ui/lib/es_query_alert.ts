@@ -6,15 +6,9 @@
  */
 
 import { setTimeout as delay } from 'timers/promises';
-import { v4 as uuidv4 } from 'uuid';
 import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
 
 export const ES_QUERY_RULE_TAG = 'scout-embeddable-alerts';
-
-const CONSUMER_VISIBILITY_TAG_PREFIX = 'scout-embeddable-consumer-vis';
-
-export const CONSUMER_VISIBILITY_CONSUMERS = ['alerts', 'stackAlerts', 'logs'] as const;
-export type ConsumerVisibilityConsumer = (typeof CONSUMER_VISIBILITY_CONSUMERS)[number];
 
 // Always fires: counts docs in the (never empty) Kibana event log and alerts when > 0.
 const ES_QUERY_RULE_PARAMS = {
@@ -102,55 +96,4 @@ export const teardownEsQueryAlert = async (
   state: EsQueryAlertState
 ): Promise<void> => {
   await apiServices.alerting.rules.delete(state.ruleId);
-};
-
-export interface ConsumerVisibilityRule {
-  ruleId: string;
-  consumer: ConsumerVisibilityConsumer;
-  tag: string;
-}
-
-export interface ConsumerVisibilityRulesState {
-  rules: ConsumerVisibilityRule[];
-}
-
-const createEsQueryRule = async (
-  apiServices: ApiServicesFixture,
-  consumer: ConsumerVisibilityConsumer,
-  tag: string
-): Promise<string> => {
-  const created = await apiServices.alerting.rules.create({
-    name: `Scout embeddable consumer visibility es-query (${consumer}) ${Date.now()}`,
-    ruleTypeId: '.es-query',
-    consumer,
-    params: ES_QUERY_RULE_PARAMS as unknown as Record<string, unknown>,
-    schedule: { interval: '1m' },
-    enabled: true,
-    tags: [tag],
-  });
-
-  return (created.data as { id: string }).id;
-};
-
-export const setupConsumerVisibilityRules = async (
-  apiServices: ApiServicesFixture,
-  kbnClient: KbnClient
-): Promise<ConsumerVisibilityRulesState> => {
-  const rules: ConsumerVisibilityRule[] = [];
-
-  for (const consumer of CONSUMER_VISIBILITY_CONSUMERS) {
-    const tag = `${CONSUMER_VISIBILITY_TAG_PREFIX}-${consumer}-${uuidv4()}`;
-    const ruleId = await createEsQueryRule(apiServices, consumer, tag);
-    await waitForActiveAlert(kbnClient, ruleId, consumer);
-    rules.push({ ruleId, consumer, tag });
-  }
-
-  return { rules };
-};
-
-export const teardownConsumerVisibilityRules = async (
-  apiServices: ApiServicesFixture,
-  state: ConsumerVisibilityRulesState
-): Promise<void> => {
-  await Promise.all(state.rules.map(({ ruleId }) => apiServices.alerting.rules.delete(ruleId)));
 };

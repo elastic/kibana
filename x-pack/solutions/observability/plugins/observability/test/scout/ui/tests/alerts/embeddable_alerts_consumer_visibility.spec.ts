@@ -26,10 +26,6 @@ import {
   deleteConsumerVisibilityDashboard,
 } from '../../fixtures/consumer_visibility_dashboard';
 
-const ALERTS_TABLE_LOADED_SUBJ = 'alertsTableIsLoaded';
-const ALERTS_TABLE_EMPTY_STATE_SUBJ = 'alertsTableEmptyState';
-const ALERTS_ROW_CELL_SUBJ = 'dataGridRowCell';
-
 const CASES: Array<{ title: string; role: KibanaRole }> = [
   {
     title: 'observability alerts-only user (observabilityAlerts)',
@@ -77,7 +73,6 @@ test.describe(
     for (const { title, role } of CASES) {
       for (const consumer of AUTHORIZED_CONSUMERS) {
         test(`${title} sees alerts with consumer ${consumer}`, async ({
-          page,
           browserAuth,
           pageObjects,
         }) => {
@@ -93,14 +88,14 @@ test.describe(
           });
 
           await test.step('the alerts table finishes loading', async () => {
-            await expect(page.testSubj.locator(ALERTS_TABLE_LOADED_SUBJ)).toBeVisible({
+            await expect(pageObjects.embeddableAlertsTable.alertsTableLoaded).toBeVisible({
               timeout: 60_000,
             });
           });
 
           await test.step('the authorized consumer alert is visible', async () => {
             await expect
-              .poll(async () => page.testSubj.locator(ALERTS_ROW_CELL_SUBJ).count(), {
+              .poll(async () => pageObjects.embeddableAlertsTable.getAlertRowCount(), {
                 timeout: 60_000,
               })
               .toBeGreaterThan(0);
@@ -110,7 +105,6 @@ test.describe(
 
       for (const consumer of UNAUTHORIZED_CONSUMERS) {
         test(`${title} does not see alerts with consumer ${consumer}`, async ({
-          page,
           browserAuth,
           pageObjects,
         }) => {
@@ -127,7 +121,7 @@ test.describe(
 
           await test.step('the alerts table finishes loading with no results', async () => {
             // Zero authorized alerts render the empty state, not alertsTableIsLoaded.
-            await expect(page.testSubj.locator(ALERTS_TABLE_EMPTY_STATE_SUBJ)).toBeVisible({
+            await expect(pageObjects.embeddableAlertsTable.alertsTableEmptyState).toBeVisible({
               timeout: 60_000,
             });
           });
