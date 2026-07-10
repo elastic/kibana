@@ -13,12 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { monaco } from '@kbn/monaco';
 import { MonacoEditorOutput } from './monaco_editor_output';
-import {
-  useEditorReadContext,
-  useOutputFilterReadContext,
-  useRequestReadContext,
-  useServicesContext,
-} from '../../contexts';
+import { useEditorReadContext, useRequestReadContext, useServicesContext } from '../../contexts';
 import { copyTextToClipboard } from '../../lib/copy_text_to_clipboard';
 import { useResizeCheckerUtils } from './hooks';
 
@@ -98,7 +93,6 @@ jest.mock('@kbn/code-editor', () => {
 
 jest.mock('../../contexts', () => ({
   useEditorReadContext: jest.fn(),
-  useOutputFilterReadContext: jest.fn(),
   useRequestReadContext: jest.fn(),
   useServicesContext: jest.fn(),
 }));
@@ -113,9 +107,6 @@ jest.mock('../../lib/copy_text_to_clipboard', () => ({
 
 const mockUseEditorReadContext = useEditorReadContext as jest.MockedFunction<
   typeof useEditorReadContext
->;
-const mockUseOutputFilterReadContext = useOutputFilterReadContext as jest.MockedFunction<
-  typeof useOutputFilterReadContext
 >;
 const mockUseRequestReadContext = useRequestReadContext as jest.MockedFunction<
   typeof useRequestReadContext
@@ -147,12 +138,6 @@ describe('WHEN rendering Console output', () => {
         wrapMode: false,
       },
     } as any);
-    mockUseOutputFilterReadContext.mockReturnValue({
-      expression: '',
-      invertMatch: false,
-      isExpanded: false,
-      mode: 'jq',
-    });
     mockUseRequestReadContext.mockReturnValue({
       lastResult: {
         data: [
