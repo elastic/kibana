@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { PropsWithChildren } from 'react';
 import {
   EntityFlyout,
@@ -15,6 +23,7 @@ import {
   isEntityTypeEnabled,
   resolveEntityTypeIdForName,
 } from '@kbn/entity-centric-lab-flyout';
+import type { EntitySelectionContext } from '@kbn/entity-centric-lab-flyout';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { ENTITY_CENTRIC_LAB_SETTING } from './constants';
 
@@ -37,23 +46,71 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
     [uiSettings]
   );
 
+  // Two flyout slots so the shared flyout's parent/child session can dock
+  // two entities side by side: `currentEntityName` is the parent (session
+  // `'start'`), `childEntityName` is the child (session `'inherit'`). The ref
+  // mirrors the parent so the stable `openEntity` callback can decide,
+  // without re-creating on every selection change, whether a click opens the
+  // parent (nothing open yet) or a child (parent already open).
   const [currentEntityName, setCurrentEntityName] = useState<string | null>(null);
+  const [childEntityName, setChildEntityName] = useState<string | null>(null);
+  // The child slot also tracks the health/type it was opened with so the
+  // child flyout renders coherent with what the parent's Dependencies
+  // table / topology map showed for that entity (rather than defaulting to
+  // the healthy template).
+  const [childEntityContext, setChildEntityContext] = useState<EntitySelectionContext | null>(null);
+  const currentEntityNameRef = useRef<string | null>(null);
+  useEffect(() => {
+    currentEntityNameRef.current = currentEntityName;
+  }, [currentEntityName]);
 
   // Honour the per-entity-type enablement switch from "Manage entity
-  // types" (Streams app). When the resolved type for `entityName` is
-  // disabled, the click silently no-ops — both for the initial click
-  // from the FakeLogRow and for subsequent Dependencies-row clicks
-  // inside an already-open flyout. The FakeLogRow already short-circuits
-  // its own click, but Dependencies clicks come through here so this is
-  // the canonical gate.
-  const openEntity = useCallback((entityName: string) => {
+  // types" (Streams app). When the resolved type is disabled, opening is
+  // silently declined.
+  const isEntityOpenable = useCallback((entityName: string) => {
     const entityTypeId = resolveEntityTypeIdForName(entityName);
-    if (!isEntityTypeEnabled(entityTypeId)) return;
-    setCurrentEntityName(entityName);
+    return isEntityTypeEnabled(entityTypeId);
   }, []);
 
+  // Opens the parent flyout when nothing is open yet; once a parent is open,
+  // selecting a *different* entity (a Dependencies row / a node in the
+  // in-flyout dependency map) docks it as a child flyout beside the parent
+  // instead of replacing the parent's content.
+  const openEntity = useCallback(
+    (entityName: string, context?: EntitySelectionContext) => {
+      if (!isEntityOpenable(entityName)) return;
+      const currentMain = currentEntityNameRef.current;
+      if (!currentMain) {
+        setCurrentEntityName(entityName);
+      } else if (currentMain !== entityName) {
+        setChildEntityName(entityName);
+        setChildEntityContext(context ?? null);
+      }
+    },
+    [isEntityOpenable]
+  );
+
+  // Selecting from *inside* a flyout always targets the child slot, so the
+  // parent stays pinned and the child opens or navigates to the new entity.
+  const openChildEntity = useCallback(
+    (entityName: string, context?: EntitySelectionContext) => {
+      if (!isEntityOpenable(entityName)) return;
+      setChildEntityName(entityName);
+      setChildEntityContext(context ?? null);
+    },
+    [isEntityOpenable]
+  );
+
+  // Closing the parent tears the whole session down (a child can't outlive
+  // its parent); closing the child leaves the parent open.
   const closeEntity = useCallback(() => {
     setCurrentEntityName(null);
+    setChildEntityName(null);
+    setChildEntityContext(null);
+  }, []);
+  const closeChildEntity = useCallback(() => {
+    setChildEntityName(null);
+    setChildEntityContext(null);
   }, []);
 
   const value = useMemo<EntityCentricLabContextValue>(
@@ -72,10 +129,24 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
       {enabled && currentEntityName !== null ? (
         <EntityFlyoutServicesProvider services={flyoutServices}>
           <EntityFlyout
+            session="start"
+            size="m"
             entityName={currentEntityName}
             onClose={closeEntity}
-            onSelectEntity={openEntity}
+            onSelectEntity={openChildEntity}
           />
+          {childEntityName !== null ? (
+            <EntityFlyout
+              session="inherit"
+              size="fill"
+              entityName={childEntityName}
+              entityType={childEntityContext?.entityType}
+              entityHealth={childEntityContext?.health}
+              region={childEntityContext?.region}
+              onClose={closeChildEntity}
+              onSelectEntity={openChildEntity}
+            />
+          ) : null}
         </EntityFlyoutServicesProvider>
       ) : null}
     </EntityCentricLabContext.Provider>

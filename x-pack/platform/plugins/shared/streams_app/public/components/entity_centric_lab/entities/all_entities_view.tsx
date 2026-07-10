@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -40,6 +40,7 @@ import {
   isEntityTypeEnabled,
   resolveEntityTypeIdForName,
   type EntityKind,
+  type EntitySelectionContext,
 } from '@kbn/entity-centric-lab-flyout';
 import { FAKE_ENTITY_TYPES } from '../fake_entity_types';
 
@@ -80,7 +81,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../../hooks/use_time_range_update';
 import { useTimefilter } from '../../../hooks/use_timefilter';
-import type { ActiveTagFilters, EntityCategoryId } from './fake_entities';
+import type { ActiveTagFilters, Entity, EntityCategoryId } from './fake_entities';
 import {
   EMPTY_TAG_FILTERS,
   buildFakeEntities,
@@ -90,9 +91,21 @@ import {
 } from './fake_entities';
 import { GroupedGridView } from './grouped_grid_view';
 import { EntitiesListView } from './entities_list_view';
+import { GeomapView } from './geomap_view';
+import { ServiceMapView } from './service_map_view';
 import { EntitiesTagFilters } from './entities_tag_filters';
+import { MonitoringAssetsView } from './monitoring_assets_view';
 
-type ViewMode = 'grid' | 'list';
+/**
+ * Tabs shown on the category-scoped pages. `inventory` is the existing
+ * search / filter / grid-list-geomap surface; `monitoring` swaps the body
+ * for the integration-driven Monitoring assets view. The cross-category
+ * `/entities` page has no tabs (monitoring assets are curated per
+ * integration, which only makes sense once scoped to one category).
+ */
+type CategoryTab = 'inventory' | 'monitoring';
+
+type ViewMode = 'grid' | 'list' | 'geomap' | 'servicemap';
 
 /**
  * localStorage key for the user's last-used Grouped grid / List choice.
@@ -101,7 +114,8 @@ type ViewMode = 'grid' | 'list';
  */
 const VIEW_MODE_STORAGE_KEY = 'entityCentricLab.entitiesViewMode.v1';
 
-const isViewMode = (value: unknown): value is ViewMode => value === 'grid' || value === 'list';
+const isViewMode = (value: unknown): value is ViewMode =>
+  value === 'grid' || value === 'list' || value === 'geomap' || value === 'servicemap';
 
 /**
  * View-mode state that survives navigation between the cross-category
@@ -150,6 +164,20 @@ const VIEW_MODE_OPTIONS = [
       defaultMessage: 'List',
     }),
     iconType: 'list',
+  },
+  {
+    id: 'servicemap' as const,
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.viewMode.serviceMap', {
+      defaultMessage: 'Service map',
+    }),
+    iconType: 'graphApp',
+  },
+  {
+    id: 'geomap' as const,
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.viewMode.geomap', {
+      defaultMessage: 'Geomap',
+    }),
+    iconType: 'visMapRegion',
   },
 ];
 
@@ -211,7 +239,30 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
   const [search, setSearch] = useState('');
   const [activeTagFilters, setActiveTagFilters] = useState<ActiveTagFilters>(EMPTY_TAG_FILTERS);
   const [viewMode, setViewMode] = useEntitiesViewMode();
+  // Two flyout slots so the shared flyout's parent/child session can dock two
+  // entities side by side: `selectedEntityName` is the parent (session
+  // `'start'`), `childEntityName` is the child (session `'inherit'`). The ref
+  // mirrors the parent so the stable `openEntity` callback can decide, without
+  // re-creating on every selection change, whether a click should open the
+  // parent (nothing open yet) or a child (parent already open).
   const [selectedEntityName, setSelectedEntityName] = useState<string | null>(null);
+  const [childEntityName, setChildEntityName] = useState<string | null>(null);
+  // The health/type the child was opened with when it comes from an in-flyout
+  // click (a Dependencies row / topology-map node). Those entities are
+  // fabricated by the shared package and rarely live in `dataset`, so the
+  // dataset lookup below can't resolve their health — the context carries
+  // exactly what the map/table showed so the child stays coherent with it.
+  const [childEntityContext, setChildEntityContext] = useState<EntitySelectionContext | null>(null);
+  const selectedEntityNameRef = useRef<string | null>(null);
+  useEffect(() => {
+    selectedEntityNameRef.current = selectedEntityName;
+  }, [selectedEntityName]);
+  // Category pages get an Inventory / Monitoring assets tab strip; the
+  // cross-category page stays single-surface. Reset to Inventory on every
+  // mount (each nav remounts this component) so a category page always
+  // opens on its entity list.
+  const [categoryTab, setCategoryTab] = useState<CategoryTab>('inventory');
+  const showMonitoringTab = Boolean(categoryScope) && categoryTab === 'monitoring';
 
   const filteredEntities = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -244,54 +295,112 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
   const selectedEntity = selectedEntityName ? entityByName.get(selectedEntityName) : undefined;
   const selectedEntityType = selectedEntity?.type;
   const selectedEntityHealth = selectedEntity?.health;
+  const selectedEntityRegion = selectedEntity?.tags.region;
 
-  /**
-   * Single funnel through which every entity-name click — grid tile,
-   * list row, Dependencies row inside an already-open flyout — has to
-   * go before the flyout is opened (or swapped). Honours the
-   * per-entity-type enablement switch in "Manage entity types": when
-   * the resolved type is disabled, the click silently no-ops instead of
-   * opening / replacing the flyout. We synchronously read
-   * `isEntityTypeEnabled` rather than the hook so the gate stays in
-   * sync without re-creating the callback on every store change.
-   */
-  const openEntity = useCallback(
+  // Prefer the click context (what the map/table showed) so an in-flyout
+  // selection opens coherent with it; fall back to the dataset lookup for
+  // page-surface clicks (grid / list / geomap / service map) that pass no
+  // context but do have a real dataset row.
+  const childEntity = childEntityName ? entityByName.get(childEntityName) : undefined;
+  const childEntityType = childEntityContext?.entityType ?? childEntity?.type;
+  const childEntityHealth = childEntityContext?.health ?? childEntity?.health;
+  const childEntityRegion = childEntityContext?.region ?? childEntity?.tags.region;
+
+  // Honours the per-entity-type enablement switch in "Manage entity types":
+  // when the resolved type is disabled, opening is silently declined. Read
+  // synchronously (not via the hook) so the gate stays in sync without
+  // re-creating callbacks on every store change.
+  const isEntityOpenable = useCallback(
     (entityName: string) => {
       const matched = entityByName.get(entityName);
       const entityTypeId = resolveEntityTypeIdForName(entityName, matched?.type);
-      if (!isEntityTypeEnabled(entityTypeId)) return;
-      setSelectedEntityName(entityName);
+      return isEntityTypeEnabled(entityTypeId);
     },
     [entityByName]
   );
 
-  const closeEntity = useCallback(() => setSelectedEntityName(null), []);
+  /**
+   * Single funnel for every entity-name click on the page surface (grid
+   * tile, list row, geomap donut, service-map node). Opens the parent
+   * flyout when nothing is open yet; once a parent is open, a click on a
+   * *different* entity opens it as a child flyout beside the parent —
+   * this is what lets a service-map node click dock a child flyout while
+   * the map stays visible behind the non-modal flyout.
+   */
+  const openEntity = useCallback(
+    (entityName: string, context?: EntitySelectionContext) => {
+      if (!isEntityOpenable(entityName)) return;
+      const currentMain = selectedEntityNameRef.current;
+      if (!currentMain) {
+        setSelectedEntityName(entityName);
+      } else if (currentMain !== entityName) {
+        setChildEntityName(entityName);
+        setChildEntityContext(context ?? null);
+      }
+    },
+    [isEntityOpenable]
+  );
 
-  // Resolve the canonical kind for the entity currently displayed in the
-  // flyout, then map that to the `FakeEntityType.id` of the corresponding
-  // row in "Manage entity types" so the cog can deep-link to its edit
-  // form. Falls back to the cross-category list when no mapping exists
-  // (e.g. an inferred-kind entity like `'middleware'` or `'llm'` that
-  // doesn't have a mock row yet) — the user still lands on the right
-  // page, just without a pre-opened flyout.
-  const selectedEntityKind: EntityKind | undefined = selectedEntity
-    ? entityTypeToKind(selectedEntity.type) ?? inferEntityKind(selectedEntity.name)
-    : undefined;
+  // Selecting an entity from *inside* a flyout (Dependencies row, etc.)
+  // always targets the child slot, so the parent stays pinned and the
+  // child either opens or navigates to the new entity.
+  const openChildEntity = useCallback(
+    (entityName: string, context?: EntitySelectionContext) => {
+      if (!isEntityOpenable(entityName)) return;
+      setChildEntityName(entityName);
+      setChildEntityContext(context ?? null);
+    },
+    [isEntityOpenable]
+  );
 
-  const handleManageEntityType = useCallback(() => {
-    // Prefer the exact row whose `name` matches the entity's `.type`
-    // (e.g. `Bare-metal` → `bare-metal-host`, `K8s namespace` →
-    // `k8s-namespace`). Fall back to the kind-level mapping for
-    // legacy / inferred-only kinds, and to the cross-category list
-    // when neither lookup yields a hit.
-    const editId =
-      findEntityTypeIdByName(selectedEntity?.type) ??
-      (selectedEntityKind ? KIND_TO_FALLBACK_ENTITY_TYPE_ID[selectedEntityKind] : undefined);
-    router.push('/manage-entity-types', {
-      path: {},
-      query: editId ? { edit: editId } : {},
+  // Closing the parent tears the whole session down (the child can't
+  // outlive its parent); closing the child leaves the parent open.
+  const closeEntity = useCallback(() => {
+    setSelectedEntityName(null);
+    setChildEntityName(null);
+    setChildEntityContext(null);
+  }, []);
+  const closeChildEntity = useCallback(() => {
+    setChildEntityName(null);
+    setChildEntityContext(null);
+  }, []);
+
+  // Clicking a region on the Geomap toggles that region into the shared
+  // `region` tag filter — same state the filter chips drive — so the
+  // whole page (map + list) narrows to it. Clicking the already-sole
+  // region clears the filter again.
+  const handleSelectRegion = useCallback((region: string) => {
+    setActiveTagFilters((prev) => {
+      const isSoleActive = prev.region.length === 1 && prev.region[0] === region;
+      return { ...prev, region: isSoleActive ? [] : [region] };
     });
-  }, [selectedEntity, selectedEntityKind, router]);
+  }, []);
+
+  // Resolve the canonical kind for an entity, then map that to the
+  // `FakeEntityType.id` of the corresponding row in "Manage entity types"
+  // so the cog can deep-link to its edit form. Prefer the exact row whose
+  // `name` matches the entity's `.type` (e.g. `Bare-metal` →
+  // `bare-metal-host`); fall back to the kind-level mapping for
+  // legacy / inferred-only kinds, and to the cross-category list when
+  // neither lookup yields a hit. Shared by the parent and child flyouts.
+  const manageEntityType = useCallback(
+    (entity: Entity | undefined) => {
+      if (!entity) {
+        router.push('/manage-entity-types', { path: {}, query: {} });
+        return;
+      }
+      const kind: EntityKind | undefined =
+        entityTypeToKind(entity.type) ?? inferEntityKind(entity.name);
+      const editId =
+        findEntityTypeIdByName(entity.type) ??
+        (kind ? KIND_TO_FALLBACK_ENTITY_TYPE_ID[kind] : undefined);
+      router.push('/manage-entity-types', {
+        path: {},
+        query: editId ? { edit: editId } : {},
+      });
+    },
+    [router]
+  );
 
   // `agentBuilder` is an *optional* start dep on Streams — when it's
   // available (most environments) the shared flyout's "Add to chat"
@@ -338,6 +447,30 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
             </EuiFlexItem>
           </EuiFlexGroup>
         }
+        tabs={
+          categoryScope
+            ? [
+                {
+                  label: i18n.translate('xpack.streams.entityCentricLab.entities.tabs.inventory', {
+                    defaultMessage: 'Inventory ({count})',
+                    values: { count: scopedEntities.length.toLocaleString() },
+                  }),
+                  isSelected: categoryTab === 'inventory',
+                  onClick: () => setCategoryTab('inventory'),
+                  'data-test-subj': 'entityCentricLabInventoryTab',
+                },
+                {
+                  label: i18n.translate(
+                    'xpack.streams.entityCentricLab.entities.tabs.monitoringAssets',
+                    { defaultMessage: 'Integrations' }
+                  ),
+                  isSelected: categoryTab === 'monitoring',
+                  onClick: () => setCategoryTab('monitoring'),
+                  'data-test-subj': 'entityCentricLabMonitoringAssetsTab',
+                },
+              ]
+            : undefined
+        }
         rightSideItems={[
           <EuiButton
             key="manage"
@@ -354,98 +487,133 @@ export const AllEntitiesView = ({ categoryScope }: AllEntitiesViewProps = {}) =>
         ]}
       />
       <StreamsAppPageTemplate.Body>
-        {/*
-          Search + time picker share one row to keep the page top compact.
-          `NO_GROW` is applied to the wrapper so the row stays at content
-          height when the body shrinks (same trick as the toolbar below —
-          see the `NO_GROW` definition for the rationale).
-        */}
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={NO_GROW}>
-          <EuiFlexItem>
-            <EuiFieldSearch
-              fullWidth
-              incremental
-              placeholder={i18n.translate(
-                'xpack.streams.entityCentricLab.entities.searchPlaceholder',
-                { defaultMessage: 'Filter entities by name' }
-              )}
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              data-test-subj="entityCentricLabEntitiesSearch"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSuperDatePicker
-              start={rangeFrom}
-              end={rangeTo}
-              onTimeChange={handleTimeChange}
-              onRefresh={handleTimeRefresh}
-              showUpdateButton="iconOnly"
-              data-test-subj="entityCentricLabEntitiesTimePicker"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EntitiesTagFilters
-          facets={tagFacets}
-          activeFilters={activeTagFilters}
-          onChange={setActiveTagFilters}
-        />
-        <EuiSpacer size="m" />
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap css={NO_GROW}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h3>
-                {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
-                  defaultMessage: '{entities} Entities · {groups} Groups',
-                  values: {
-                    entities: filteredEntities.length.toLocaleString(),
-                    // On the cross-category page the dataset-wide group
-                    // total is the right summary. When scoped to one
-                    // category the grid only ever renders that single
-                    // section, so collapse the count to 1 (or 0 if the
-                    // category is empty).
-                    groups: categoryScope
-                      ? filteredEntities.length > 0
-                        ? 1
-                        : 0
-                      : dataset.totalGroups,
-                  },
-                })}
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              legend={i18n.translate('xpack.streams.entityCentricLab.entities.viewMode.legend', {
-                defaultMessage: 'View mode',
-              })}
-              options={VIEW_MODE_OPTIONS}
-              idSelected={viewMode}
-              onChange={(id) => setViewMode(id as ViewMode)}
-              isIconOnly
-              data-test-subj="entityCentricLabEntitiesViewModeToggle"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiHorizontalRule margin="m" />
-        {viewMode === 'grid' ? (
-          <GroupedGridView entities={filteredEntities} onSelectEntity={openEntity} />
+        {showMonitoringTab && categoryScope ? (
+          <MonitoringAssetsView category={categoryScope} />
         ) : (
-          <EntitiesListView entities={filteredEntities} onSelectEntity={openEntity} />
+          <>
+            {/*
+          Search, tag filters and time picker share one row to keep the
+          page top compact. `NO_GROW` is applied to the wrapper so the row
+          stays at content height when the body shrinks (same trick as the
+          toolbar below — see the `NO_GROW` definition for the rationale).
+        */}
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={NO_GROW}>
+              <EuiFlexItem>
+                <EuiFieldSearch
+                  fullWidth
+                  incremental
+                  placeholder={i18n.translate(
+                    'xpack.streams.entityCentricLab.entities.searchPlaceholder',
+                    { defaultMessage: 'Filter entities by name' }
+                  )}
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  data-test-subj="entityCentricLabEntitiesSearch"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EntitiesTagFilters
+                  facets={tagFacets}
+                  activeFilters={activeTagFilters}
+                  onChange={setActiveTagFilters}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSuperDatePicker
+                  start={rangeFrom}
+                  end={rangeTo}
+                  onTimeChange={handleTimeChange}
+                  onRefresh={handleTimeRefresh}
+                  showUpdateButton="iconOnly"
+                  width="auto"
+                  data-test-subj="entityCentricLabEntitiesTimePicker"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap css={NO_GROW}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <h3>
+                    {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
+                      defaultMessage: '{entities} Entities · {groups} Groups',
+                      values: {
+                        entities: filteredEntities.length.toLocaleString(),
+                        // On the cross-category page the dataset-wide group
+                        // total is the right summary. When scoped to one
+                        // category the grid only ever renders that single
+                        // section, so collapse the count to 1 (or 0 if the
+                        // category is empty).
+                        groups: categoryScope
+                          ? filteredEntities.length > 0
+                            ? 1
+                            : 0
+                          : dataset.totalGroups,
+                      },
+                    })}
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem />
+              <EuiFlexItem grow={false}>
+                <EuiButtonGroup
+                  legend={i18n.translate(
+                    'xpack.streams.entityCentricLab.entities.viewMode.legend',
+                    {
+                      defaultMessage: 'View mode',
+                    }
+                  )}
+                  options={VIEW_MODE_OPTIONS}
+                  idSelected={viewMode}
+                  onChange={(id) => setViewMode(id as ViewMode)}
+                  isIconOnly
+                  data-test-subj="entityCentricLabEntitiesViewModeToggle"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiHorizontalRule margin="m" />
+            {viewMode === 'grid' ? (
+              <GroupedGridView entities={filteredEntities} onSelectEntity={openEntity} />
+            ) : viewMode === 'geomap' ? (
+              <GeomapView
+                entities={filteredEntities}
+                onSelectEntity={openEntity}
+                onSelectRegion={handleSelectRegion}
+              />
+            ) : viewMode === 'servicemap' ? (
+              <ServiceMapView entities={filteredEntities} onSelectEntity={openEntity} />
+            ) : (
+              <EntitiesListView entities={filteredEntities} onSelectEntity={openEntity} />
+            )}
+          </>
         )}
       </StreamsAppPageTemplate.Body>
       {selectedEntityName ? (
         <EntityFlyoutServicesProvider services={flyoutServices}>
           <EntityFlyout
+            session="start"
+            size="m"
             entityName={selectedEntityName}
             entityType={selectedEntityType}
             entityHealth={selectedEntityHealth}
+            region={selectedEntityRegion}
             onClose={closeEntity}
-            onSelectEntity={openEntity}
-            onManageEntityType={handleManageEntityType}
+            onSelectEntity={openChildEntity}
+            onManageEntityType={() => manageEntityType(selectedEntity)}
           />
+          {childEntityName ? (
+            <EntityFlyout
+              session="inherit"
+              size="fill"
+              entityName={childEntityName}
+              entityType={childEntityType}
+              entityHealth={childEntityHealth}
+              region={childEntityRegion}
+              onClose={closeChildEntity}
+              onSelectEntity={openChildEntity}
+              onManageEntityType={() => manageEntityType(childEntity)}
+            />
+          ) : null}
         </EntityFlyoutServicesProvider>
       ) : null}
     </>

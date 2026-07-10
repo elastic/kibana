@@ -1299,3 +1299,68 @@ export const resolveMetricReading = (
     rawValue: value,
   };
 };
+
+/**
+ * Number of points synthesised for a tooltip sparkline. Enough to read
+ * as a trend line, few enough to stay crisp at ~120px wide.
+ */
+const SPARKLINE_POINTS = 18;
+
+/**
+ * Deterministic mini time-series for a numeric metric, in the metric's
+ * own units, ending on the value {@link resolveMetricReading} shows for
+ * the same (entity, metric, stat). Used to draw the hover-card sparkline
+ * in the Grouped grid.
+ *
+ * Returns `null` for categorical metrics (Status, Phase, …) — a trend
+ * line over an enum has no meaning, so those tooltips omit the chart.
+ *
+ * The walk starts from a per-entity offset (some series trend up toward
+ * the current value, some down) and converges on the final value, with a
+ * small per-point wobble so the line looks organic. Fully seeded from
+ * `(entity, metric)` so it's stable across reloads.
+ */
+export const resolveMetricSparkline = (
+  entityName: string,
+  metric: MetricDescriptor,
+  statId: StatId,
+  entityHealth?: EntityHealthHint
+): number[] | null => {
+  if (metric.kind === 'categorical') return null;
+
+  const window = healthHintWindow(entityHealth);
+  const clampUnit = (value: number): number => Math.min(1, Math.max(0, value));
+  const sampleUnit = (rawHash: number): number => {
+    if (!window) return rawHash;
+    const shifted = window.centre - window.half + rawHash * (window.half * 2);
+    return clampUnit(shifted);
+  };
+
+  // Reproduce resolveMetricReading's final unit so the last point of the
+  // sparkline matches the number rendered next to it.
+  const baseUnit = sampleUnit(unitHash(entityName, metric.id, 'last'));
+  const noise = unitHash(entityName, metric.id, statId) * 0.14 - 0.07;
+  const statBias: Record<StatId, number> = { min: -0.18, avg: -0.06, last: 0.0, max: 0.18 };
+  const finalUnit = clampUnit(baseUnit + statBias[statId] + noise);
+
+  // Start offset: ±0.25 around the final value, direction seeded per
+  // entity, so half the fleet reads as "climbing into" its current
+  // value and half as "settling down".
+  const startSeed = stableHash(`spark-start::${metric.id}::${entityName}`) / 0x7fffffff;
+  const startUnit = clampUnit(finalUnit + (startSeed - 0.5) * 0.5);
+
+  const span = metric.range.max - metric.range.min;
+  const series: number[] = [];
+  for (let i = 0; i < SPARKLINE_POINTS; i += 1) {
+    const t = i / (SPARKLINE_POINTS - 1);
+    if (i === SPARKLINE_POINTS - 1) {
+      series.push(metric.range.min + finalUnit * span);
+      continue;
+    }
+    const trend = startUnit + (finalUnit - startUnit) * t;
+    const wobble =
+      (stableHash(`spark::${i}::${metric.id}::${entityName}`) / 0x7fffffff - 0.5) * 0.12;
+    series.push(metric.range.min + clampUnit(trend + wobble) * span);
+  }
+  return series;
+};

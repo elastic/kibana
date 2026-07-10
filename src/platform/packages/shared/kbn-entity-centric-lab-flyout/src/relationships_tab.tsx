@@ -26,18 +26,18 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
+  OnSelectEntity,
   RelatedEntity,
   RelatedEntityHealth,
   RelationshipsTabData,
   TopologyEdge,
   TopologyNode,
 } from './fake_entity_tabs';
-import { STORY_CLICKABLE_NAMES } from './payflow_story';
 import { useEntityDisplayName } from './entity_display_name';
 
 interface RelationshipsTabProps {
   readonly relationships: RelationshipsTabData;
-  readonly onSelectEntity?: (entityName: string) => void;
+  readonly onSelectEntity?: OnSelectEntity;
 }
 
 /**
@@ -98,7 +98,7 @@ const DependencyGroupPanel = ({
 }: {
   readonly group: string;
   readonly items: readonly RelatedEntity[];
-  readonly onSelectEntity?: (entityName: string) => void;
+  readonly onSelectEntity?: OnSelectEntity;
 }) => {
   const columns = useMemo<Array<EuiBasicTableColumn<RelatedEntity>>>(
     () => [
@@ -111,6 +111,7 @@ const DependencyGroupPanel = ({
           <DependencyEntityCell
             name={name}
             entityType={row.entityType}
+            health={row.health}
             onSelectEntity={onSelectEntity}
           />
         ),
@@ -183,20 +184,27 @@ const DependencyGroupPanel = ({
  * Per-row entity cell. Resolves the displayed label through the shared
  * `entity_display_config` store so dependency rows automatically pick
  * up the wizard's `displayField` choice (e.g. `kubernetes.pod.uid`
- * instead of `kubernetes.pod.name`). Navigation gating + the inert /
- * navigable styling stays exactly the same as before.
+ * instead of `kubernetes.pod.name`). Every row is navigable whenever the
+ * host supplies an `onSelectEntity` handler — the host decides whether the
+ * click resolves to an openable entity.
  */
 interface DependencyEntityCellProps {
   readonly name: string;
   readonly entityType: string;
-  readonly onSelectEntity?: (entityName: string) => void;
+  readonly health: RelatedEntityHealth;
+  readonly onSelectEntity?: OnSelectEntity;
 }
 
-const DependencyEntityCell = ({ name, entityType, onSelectEntity }: DependencyEntityCellProps) => {
+const DependencyEntityCell = ({
+  name,
+  entityType,
+  health,
+  onSelectEntity,
+}: DependencyEntityCellProps) => {
   // Pass the row's `entityType` so the resolver picks the right entity
   // type id for kinds that share a name pattern with another kind.
   const displayName = useEntityDisplayName(name, entityType);
-  const navigable = STORY_CLICKABLE_NAMES.has(name) && Boolean(onSelectEntity);
+  const navigable = Boolean(onSelectEntity);
   return (
     <EuiLink
       data-test-subj={
@@ -204,7 +212,9 @@ const DependencyEntityCell = ({ name, entityType, onSelectEntity }: DependencyEn
           ? 'entityCentricLabDependencyEntityLink'
           : 'entityCentricLabDependencyEntityLinkInert'
       }
-      onClick={navigable ? () => onSelectEntity!(name) : () => undefined}
+      // Forward the row's health + type so the opened flyout matches what the
+      // Dependencies table showed for this entity.
+      onClick={navigable ? () => onSelectEntity!(name, { entityType, health }) : () => undefined}
     >
       {displayName}
     </EuiLink>
@@ -250,16 +260,18 @@ const TopologyPanel = ({
 }: {
   readonly topology: RelationshipsTabData['topology'];
   readonly related: readonly RelatedEntity[];
-  readonly onSelectEntity?: (entityName: string) => void;
+  readonly onSelectEntity?: OnSelectEntity;
 }) => {
   const { euiTheme } = useEuiTheme();
   // Non-focal nodes inherit their colour from the matching dependency row, so
   // the map visually guides the user toward whatever is unhealthy without us
-  // having to repeat the health on every TopologyNode definition.
-  const healthByName = useMemo(() => {
-    const map = new Map<string, RelatedEntityHealth>();
+  // having to repeat the health on every TopologyNode definition. The type is
+  // tracked alongside so a node click can open the next flyout coherent with
+  // the health *and* kind the map showed.
+  const relatedByName = useMemo(() => {
+    const map = new Map<string, RelatedEntity>();
     for (const entity of related) {
-      map.set(entity.name, entity.health);
+      map.set(entity.name, entity);
     }
     return map;
   }, [related]);
@@ -294,20 +306,28 @@ const TopologyPanel = ({
             <TopologyEdgeLine key={`${edge.from}-${edge.to}`} edge={edge} euiTheme={euiTheme} />
           ))}
           {topology.nodes.map((node) => {
-            const health = node.focal ? topology.focalHealth : healthByName.get(node.label);
-            // Same gating as the dependency table: only the curated PayFlow
-            // entities expand into a real flyout, so the demo never reaches a
-            // dead end. The focal node is the entity already on screen — no
+            const relatedMatch = relatedByName.get(node.label);
+            const health = node.focal ? topology.focalHealth : relatedMatch?.health;
+            // Every non-focal node is clickable when the host supplies a
+            // selection handler; the host resolves whether the entity can be
+            // opened. The focal node is the entity already on screen — no
             // point re-opening its own flyout.
-            const isClickable =
-              !node.focal && STORY_CLICKABLE_NAMES.has(node.label) && Boolean(onSelectEntity);
+            const isClickable = !node.focal && Boolean(onSelectEntity);
             return (
               <TopologyNodeMark
                 key={node.id}
                 node={node}
                 health={health}
                 euiTheme={euiTheme}
-                onSelect={isClickable ? () => onSelectEntity!(node.label) : undefined}
+                onSelect={
+                  isClickable
+                    ? () =>
+                        onSelectEntity!(node.label, {
+                          entityType: relatedMatch?.entityType,
+                          health: relatedMatch?.health,
+                        })
+                    : undefined
+                }
               />
             );
           })}

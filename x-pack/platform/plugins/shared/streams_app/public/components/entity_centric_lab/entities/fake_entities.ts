@@ -234,7 +234,20 @@ const ENVIRONMENT_VALUES: readonly string[] = ['production', 'staging'];
 
 const TEAM_VALUES: readonly string[] = ['payments-team', 'platform-team', 'risk-team'];
 
-const REGION_VALUES: readonly string[] = ['eu-west-1', 'eu-central-1'];
+// Broadened from the original EU-only pair to a global spread so the
+// Geomap view has donuts scattered across continents (instead of two
+// markers stacked over Europe). Purely a demo-dataset concern — the
+// values still flow through the same tag facets / filters as before.
+const REGION_VALUES: readonly string[] = [
+  'us-east-1',
+  'us-west-2',
+  'eu-west-1',
+  'eu-central-1',
+  'ap-southeast-1',
+  'ap-northeast-1',
+  'sa-east-1',
+  'af-south-1',
+];
 
 const TAG_POOLS: Record<TagKey, readonly string[]> = {
   application: APPLICATION_VALUES,
@@ -266,6 +279,24 @@ const buildTags = (scope: string, index: number): EntityTags => ({
   team: pickTag(TEAM_VALUES, `${scope}-team`, index),
   region: pickTag(REGION_VALUES, `${scope}-region`, index),
 });
+
+// One region is deliberately "on fire" so the Geomap view tells a clear
+// story: a single all-red donut while every other region reads
+// green/yellow. Everything else in the app follows the same dataset, so
+// the ailing region stands out in the grid/list too.
+const AILING_REGION = 'sa-east-1';
+
+/**
+ * Bend an entity's rolled health to fit its region:
+ *   - anything in {@link AILING_REGION} is forced `unhealthy` (red), and
+ *   - every other region is clamped to green/yellow (a rolled `unhealthy`
+ *     is softened to `atRisk`),
+ * so the map shows exactly one red region and the rest healthy-ish.
+ */
+const regionAdjustedHealth = (base: EntityHealth, region: string): EntityHealth => {
+  if (region === AILING_REGION) return 'unhealthy';
+  return base === 'unhealthy' ? 'atRisk' : base;
+};
 
 interface SeedRow {
   readonly name: string;
@@ -504,16 +535,18 @@ const buildCategoryEntities = (spec: CategorySpec): Entity[] => {
     const seed = spec.seedRows[i];
     const name = seed?.name ?? spec.fallbackName(i);
     const type = seed?.type ?? spec.typeCycle[i % spec.typeCycle.length];
+    const tags = buildTags(spec.category, i);
+    const baseHealth = seed?.health ?? seededHealth(salt + i * 3, i);
     entities.push({
       id: `${spec.category}-${i + 1}`,
       name,
       category: spec.category,
       type,
-      health: seed?.health ?? seededHealth(salt + i * 3, i),
+      health: regionAdjustedHealth(baseHealth, tags.region),
       lastHealthChange: '2026-04-14 12:34',
       age: AGE_SAMPLES[i % AGE_SAMPLES.length],
       anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
-      tags: buildTags(spec.category, i),
+      tags,
     });
   }
   return sortByHealth(entities);
@@ -529,17 +562,19 @@ const buildKubernetesEntities = (): Entity[] => {
       const seed = sub.seedRows[i];
       const name = seed?.name ?? sub.fallbackName(i);
       const globalIndex = runningOffset + i;
+      const tags = buildTags(`kubernetes-${sub.label}`, globalIndex);
+      const baseHealth = seed?.health ?? seededHealth(salt + globalIndex * 3, globalIndex);
       subEntities.push({
         id: `kubernetes-${sub.label.toLowerCase()}-${i + 1}`,
         name,
         category: 'kubernetes',
         subType: sub.label,
         type: sub.type,
-        health: seed?.health ?? seededHealth(salt + globalIndex * 3, globalIndex),
+        health: regionAdjustedHealth(baseHealth, tags.region),
         lastHealthChange: '2026-04-14 12:34',
         age: AGE_SAMPLES[i % AGE_SAMPLES.length],
         anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
-        tags: buildTags(`kubernetes-${sub.label}`, globalIndex),
+        tags,
       });
     }
     entities.push(...sortByHealth(subEntities));

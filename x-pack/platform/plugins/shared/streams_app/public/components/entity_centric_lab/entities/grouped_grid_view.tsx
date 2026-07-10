@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiForm,
+  EuiFormRow,
   EuiIcon,
   EuiPanel,
   EuiSelect,
@@ -19,6 +28,7 @@ import {
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
   type EuiThemeComputed,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +49,7 @@ import {
   getMetricLegend,
   getStatLabel,
   resolveMetricReading,
+  resolveMetricSparkline,
   toneColor,
   type BucketKey,
   type MetricDescriptor,
@@ -46,7 +57,7 @@ import {
   type MetricTone,
   type StatId,
 } from './bucket_metrics';
-import { useBucketMetricSelection } from './use_bucket_metric_selection';
+import { useBucketMetricSelection, type BucketSelection } from './use_bucket_metric_selection';
 import {
   KUBERNETES_CLUSTER_FILTER_ALL,
   KUBERNETES_SUB_TYPE_ORDER,
@@ -84,6 +95,32 @@ const TONE_RANK: Record<MetricTone, number> = {
   good: 6,
 };
 
+/**
+ * Hover-card state for the tile grid. Position is in wrapper-local
+ * pixels; `placeLeft` / `placeAbove` flip the card away from the
+ * nearest edge so it never spills outside the bucket row.
+ */
+interface TileHover {
+  readonly entity: Entity;
+  readonly reading: MetricReading;
+  readonly x: number;
+  readonly y: number;
+  readonly placeLeft: boolean;
+  readonly placeAbove: boolean;
+}
+
+type TileHoverHandler = (
+  entity: Entity,
+  reading: MetricReading,
+  event: React.MouseEvent<HTMLButtonElement>
+) => void;
+
+type TileFocusHandler = (
+  entity: Entity,
+  reading: MetricReading,
+  event: React.FocusEvent<HTMLButtonElement>
+) => void;
+
 interface MetricTileProps {
   readonly entity: Entity;
   readonly metric: MetricDescriptor;
@@ -91,6 +128,9 @@ interface MetricTileProps {
   readonly reading: MetricReading;
   readonly euiTheme: EuiThemeComputed;
   readonly onSelectEntity: (entityName: string) => void;
+  readonly onHover: TileHoverHandler;
+  readonly onFocusHover: TileFocusHandler;
+  readonly onHoverEnd: () => void;
 }
 
 const MetricTile = ({
@@ -100,9 +140,12 @@ const MetricTile = ({
   reading,
   euiTheme,
   onSelectEntity,
+  onHover,
+  onFocusHover,
+  onHoverEnd,
 }: MetricTileProps) => {
   // Resolve through the shared store so a wizard `displayField` change
-  // re-labels the tooltip immediately. Stable hash-derived values keep
+  // re-labels the hover card immediately. Stable hash-derived values keep
   // every tile uniquely addressable even when the user picks something
   // like `kubernetes.pod.uid` for the entire kind.
   const displayName = useEntityDisplayName(entity.name, entity.type);
@@ -119,31 +162,160 @@ const MetricTile = ({
     `,
     [reading.tone, euiTheme]
   );
-  const tooltipContent = i18n.translate(
-    'xpack.streams.entityCentricLab.entities.metricTileTooltip',
-    {
-      defaultMessage: '{entityName} — {metricLabel} ({stat}): {value}',
-      values: {
-        entityName: displayName,
-        metricLabel: metric.label,
-        stat: getStatLabel(statId),
-        value: reading.displayValue,
-      },
-    }
-  );
+  // Accessible summary — the visual hover card is decorative, so the
+  // full reading still needs to be reachable by screen readers.
+  const ariaLabel = i18n.translate('xpack.streams.entityCentricLab.entities.metricTileTooltip', {
+    defaultMessage: '{entityName} — {metricLabel} ({stat}): {value}',
+    values: {
+      entityName: displayName,
+      metricLabel: metric.label,
+      stat: getStatLabel(statId),
+      value: reading.displayValue,
+    },
+  });
   return (
-    <EuiToolTip content={tooltipContent}>
-      <button
-        type="button"
-        className={tileClass}
-        aria-label={tooltipContent}
-        // Stable test-subj uses the canonical name so existing
-        // selectors keep working even when the user re-labels via the
-        // wizard or swaps the bucket metric.
-        data-test-subj={`entityCentricLabHealthTile-${entity.name}`}
-        onClick={() => onSelectEntity(entity.name)}
-      />
-    </EuiToolTip>
+    <button
+      type="button"
+      className={tileClass}
+      aria-label={ariaLabel}
+      // Stable test-subj uses the canonical name so existing
+      // selectors keep working even when the user re-labels via the
+      // wizard or swaps the bucket metric.
+      data-test-subj={`entityCentricLabHealthTile-${entity.name}`}
+      onClick={() => onSelectEntity(entity.name)}
+      onMouseEnter={(event) => onHover(entity, reading, event)}
+      onMouseMove={(event) => onHover(entity, reading, event)}
+      onMouseLeave={onHoverEnd}
+      onFocus={(event) => onFocusHover(entity, reading, event)}
+      onBlur={onHoverEnd}
+    />
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Tile hover card
+// ---------------------------------------------------------------------------
+
+/**
+ * Tiny inline sparkline for the numeric hover cards. Draws a faint filled
+ * area under a solid trend line; auto-scales to the series min/max.
+ */
+const TileSparkline = ({ values, color }: { values: readonly number[]; color: string }) => {
+  const width = 200;
+  const height = 40;
+  if (values.length < 2) return null;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const span = max - min || 1;
+  const stepX = width / (values.length - 1);
+  const points = values
+    .map((value, index) => {
+      const x = index * stepX;
+      const y = height - ((value - min) / span) * height;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(' ');
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="none"
+      style={{ display: 'block', width: '100%', height, marginTop: 8 }}
+      aria-hidden
+    >
+      <polygon points={`${points} ${width},${height} 0,${height}`} fill={color} opacity={0.18} />
+      <polyline points={points} fill="none" stroke={color} strokeWidth={1.5} />
+    </svg>
+  );
+};
+
+const sparklineColor = (reading: MetricReading, euiTheme: EuiThemeComputed): string => {
+  switch (reading.tone) {
+    case 'danger':
+      return euiTheme.colors.severity.danger;
+    case 'warning':
+      return euiTheme.colors.severity.warning;
+    default:
+      return euiTheme.colors.severity.success;
+  }
+};
+
+/**
+ * Styled dark hover card for a tile — consistent with the Geomap view's
+ * region card. Shows the entity name + type, the current Color-by value
+ * (with a tone swatch) and, for numeric metrics, a trend sparkline.
+ * Rendered once per bucket row and positioned over the hovered tile.
+ */
+const MetricTileTooltip = ({
+  hover,
+  metric,
+  statId,
+  euiTheme,
+}: {
+  hover: TileHover;
+  metric: MetricDescriptor;
+  statId: StatId;
+  euiTheme: EuiThemeComputed;
+}) => {
+  const { entity, reading, x, y, placeLeft, placeAbove } = hover;
+  const displayName = useEntityDisplayName(entity.name, entity.type);
+  // Categorical metrics (Status, Phase, …) get no sparkline — a trend
+  // line over an enum is meaningless.
+  const sparkline =
+    metric.kind === 'categorical'
+      ? null
+      : resolveMetricSparkline(entity.name, metric, statId, entity.health);
+  const OFFSET = 12;
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: x,
+        top: y,
+        transform: `translate(${placeLeft ? `calc(-100% - ${OFFSET}px)` : `${OFFSET}px`}, ${
+          placeAbove ? `calc(-100% - ${OFFSET}px)` : `${OFFSET}px`
+        })`,
+        pointerEvents: 'none',
+        zIndex: 3,
+        width: 224,
+        padding: '8px 12px',
+        borderRadius: euiTheme.border.radius.medium,
+        background: '#1d2a3a',
+        color: '#ffffff',
+        boxShadow: '0 4px 12px rgba(29, 42, 58, 0.4)',
+        fontSize: 12,
+        lineHeight: 1.4,
+      }}
+      data-test-subj="entityCentricLabHealthTileTooltip"
+    >
+      <div style={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {displayName}
+      </div>
+      <div style={{ opacity: 0.7, marginBottom: 6 }}>{entity.type}</div>
+      <div style={{ height: 1, background: 'rgba(255, 255, 255, 0.15)', margin: '0 0 6px' }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span
+          aria-hidden
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: 2,
+            backgroundColor: toneColor(reading.tone, euiTheme),
+            display: 'inline-block',
+            flexShrink: 0,
+          }}
+        />
+        <span style={{ flex: 1, opacity: 0.85 }}>
+          {i18n.translate('xpack.streams.entityCentricLab.entities.tileTooltip.metricLine', {
+            defaultMessage: '{metricLabel} ({stat})',
+            values: { metricLabel: metric.label, stat: getStatLabel(statId) },
+          })}
+        </span>
+        <span style={{ fontWeight: 600 }}>{reading.displayValue}</span>
+      </div>
+      {sparkline ? (
+        <TileSparkline values={sparkline} color={sparklineColor(reading, euiTheme)} />
+      ) : null}
+    </div>
   );
 };
 
@@ -190,15 +362,60 @@ const BucketTileRow = ({ entities, metric, statId, onSelectEntity }: BucketTileR
   // No truncation — every entity in the bucket renders as its own tile
   // so the grid view stays consistent with the count shown in the
   // header (and with the list-view count). The wrap+flex layout
-  // handles large pods/containers buckets gracefully.
+  // handles large pods/containers buckets gracefully. `position:
+  // relative` anchors the absolutely-positioned hover card.
   const containerClass = css`
+    position: relative;
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
     align-items: center;
   `;
+
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [hover, setHover] = useState<TileHover | null>(null);
+
+  // Enough vertical room above the pointer for the card (~1 title + type
+  // + metric line + sparkline); flip below when hovering near the top.
+  const CARD_FLIP_ABOVE_PX = 170;
+  const CARD_FLIP_LEFT_PX = 240;
+
+  const showFromEvent: TileHoverHandler = (entity, reading, event) => {
+    const rect = wrapperRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const localX = event.clientX - rect.left;
+    const localY = event.clientY - rect.top;
+    setHover({
+      entity,
+      reading,
+      x: localX,
+      y: localY,
+      placeLeft: localX > rect.width - CARD_FLIP_LEFT_PX,
+      placeAbove: localY > CARD_FLIP_ABOVE_PX,
+    });
+  };
+
+  // Keyboard focus has no pointer — anchor the card on the focused tile.
+  const showFromFocus: TileFocusHandler = (entity, reading, event) => {
+    const rect = wrapperRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const tileRect = event.currentTarget.getBoundingClientRect();
+    const localX = tileRect.left - rect.left + tileRect.width / 2;
+    const localY = tileRect.top - rect.top;
+    setHover({
+      entity,
+      reading,
+      x: localX,
+      y: localY,
+      placeLeft: localX > rect.width - CARD_FLIP_LEFT_PX,
+      placeAbove: localY > CARD_FLIP_ABOVE_PX,
+    });
+  };
+
+  const hideHover = () => setHover(null);
+
   return (
-    <div className={containerClass} role="list">
+    <div ref={wrapperRef} className={containerClass} role="list">
       {ordered.map(({ entity, reading }) => (
         <MetricTile
           key={entity.id}
@@ -208,8 +425,19 @@ const BucketTileRow = ({ entities, metric, statId, onSelectEntity }: BucketTileR
           reading={reading}
           euiTheme={euiTheme}
           onSelectEntity={onSelectEntity}
+          onHover={showFromEvent}
+          onFocusHover={showFromFocus}
+          onHoverEnd={hideHover}
         />
       ))}
+      {hover ? (
+        <MetricTileTooltip
+          hover={hover}
+          metric={metric}
+          statId={effectiveStat}
+          euiTheme={euiTheme}
+        />
+      ) : null}
     </div>
   );
 };
@@ -245,6 +473,19 @@ const BucketMetricLegend = ({ metric }: BucketMetricLegendProps) => {
       wrap
       data-test-subj="entityCentricLabBucketLegend"
     >
+      {/* Lead with the metric name so the swatches read as
+          "Status: Running / Degraded / …" — otherwise the colours are
+          ambiguous (is yellow "Degraded" or "60–85%"?). */}
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued">
+          <strong>
+            {i18n.translate('xpack.streams.entityCentricLab.entities.bucket.legend.metricPrefix', {
+              defaultMessage: '{metricLabel}:',
+              values: { metricLabel: metric.label },
+            })}
+          </strong>
+        </EuiText>
+      </EuiFlexItem>
       {entries.map((entry) => (
         <EuiFlexItem grow={false} key={`${entry.label}-${entry.tone}`}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -269,34 +510,77 @@ const BucketMetricLegend = ({ metric }: BucketMetricLegendProps) => {
 
 interface BucketMetricControlsProps {
   readonly bucketKey: BucketKey;
+  readonly label: string;
   readonly metric: MetricDescriptor;
   readonly statId: StatId;
-  readonly onMetricChange: (metricId: string) => void;
-  readonly onStatChange: (statId: StatId) => void;
+  readonly onApply: (next: BucketSelection) => void;
 }
 
-// Fixed widths so every bucket on the page shows the same "Color by"
-// and "Stat" controls regardless of the metric labels they expose.
-// `Color by` is wide enough for the longest catalogue entry
-// ("Memory limit utilization"); `Stat` only needs room for "Average".
-const COLOR_BY_WIDTH = 200;
-const STAT_WIDTH = 110;
-
 /**
- * Two compact dropdowns rendered next to a bucket header. Labels sit
- * inline to the left of each input — keeps the controls a single row
- * tall, matching the bucket header's height. Fixed input widths keep
- * the controls visually aligned across every bucket on the page so
- * the Kubernetes sub-rows and the cross-category cards all read as
- * one unified UI.
+ * Compact edit affordance rendered next to a bucket header. Rather
+ * than exposing the "Color by" / "Stat" dropdowns inline (two controls
+ * per bucket, several buckets per card — visually noisy), we surface a
+ * single pencil icon that opens a flyout holding the same options. The
+ * grid stays clean; the controls are one click away.
  */
 const BucketMetricControls = ({
   bucketKey,
+  label,
   metric,
   statId,
-  onMetricChange,
-  onStatChange,
+  onApply,
 }: BucketMetricControlsProps) => {
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const editLabel = i18n.translate(
+    'xpack.streams.entityCentricLab.entities.bucket.controls.editDisplay',
+    { defaultMessage: 'Edit display' }
+  );
+  return (
+    <>
+      <EuiToolTip content={editLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="pencil"
+          color="text"
+          display="base"
+          size="s"
+          aria-label={editLabel}
+          onClick={() => setIsFlyoutOpen(true)}
+          data-test-subj={`entityCentricLabBucketEdit-${bucketKey}`}
+        />
+      </EuiToolTip>
+      {isFlyoutOpen ? (
+        <BucketMetricControlsFlyout
+          bucketKey={bucketKey}
+          label={label}
+          metric={metric}
+          statId={statId}
+          onApply={onApply}
+          onClose={() => setIsFlyoutOpen(false)}
+        />
+      ) : null}
+    </>
+  );
+};
+
+interface BucketMetricControlsFlyoutProps extends BucketMetricControlsProps {
+  readonly onClose: () => void;
+}
+
+/**
+ * Flyout body for a single bucket's display options. Holds the
+ * "Color by" (metric) and "Stat" (aggregation) selectors as full-width
+ * form rows. Edits are staged in local draft state and only committed
+ * to the grid when the user hits "Apply" — "Cancel" discards them.
+ */
+const BucketMetricControlsFlyout = ({
+  bucketKey,
+  label,
+  metric,
+  statId,
+  onApply,
+  onClose,
+}: BucketMetricControlsFlyoutProps) => {
+  const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabBucketControlsFlyout' });
   const metrics = getBucketMetrics(bucketKey);
   const metricOptions = useMemo(
     () => metrics.map((descriptor) => ({ value: descriptor.id, text: descriptor.label })),
@@ -306,94 +590,127 @@ const BucketMetricControls = ({
     () => STAT_OPTIONS.map((option) => ({ value: option.id, text: option.label })),
     []
   );
+  // Draft state — the grid keeps rendering the committed selection until
+  // the user hits Apply, so opening the flyout and cancelling is a no-op.
+  const [draftMetricId, setDraftMetricId] = useState<string>(metric.id);
+  const [draftStatId, setDraftStatId] = useState<StatId>(statId);
+
+  const draftMetric = findMetric(bucketKey, draftMetricId) ?? metrics[0];
+  const isCategorical = draftMetric.kind === 'categorical';
+  const isDirty = draftMetricId !== metric.id || draftStatId !== statId;
+
+  const handleApply = () => {
+    onApply({ metricId: draftMetricId, statId: draftStatId });
+    onClose();
+  };
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.streams.entityCentricLab.entities.bucket.controls.colorBy', {
-                defaultMessage: 'Color by',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <div style={{ width: COLOR_BY_WIDTH }}>
-              <EuiSelect
-                compressed
-                options={metricOptions}
-                value={metric.id}
-                onChange={(event) => onMetricChange(event.target.value)}
-                aria-label={i18n.translate(
-                  'xpack.streams.entityCentricLab.entities.bucket.controls.colorByAriaLabel',
-                  { defaultMessage: 'Color by' }
-                )}
-                data-test-subj={`entityCentricLabBucketColorBy-${bucketKey}`}
-              />
-            </div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.streams.entityCentricLab.entities.bucket.controls.stat', {
-                defaultMessage: 'Stat',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <div style={{ width: STAT_WIDTH }}>
-              {/*
-                Categorical metrics (Phase, Status, Rollout, …) only
-                make sense as "Last" — avg/min/max of an enum is
-                meaningless. Force the display to `last` and disable
-                the dropdown; a tooltip explains the lock-in. The
-                stored numeric preference is preserved so switching
-                back to a numeric metric restores the user's last
-                choice.
-              */}
-              {metric.kind === 'categorical' ? (
-                <EuiToolTip
-                  position="top"
-                  content={i18n.translate(
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      size="s"
+      aria-labelledby={titleId}
+      data-test-subj={`entityCentricLabBucketControlsFlyout-${bucketKey}`}
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h2 id={titleId}>
+            {i18n.translate('xpack.streams.entityCentricLab.entities.bucket.controls.flyoutTitle', {
+              defaultMessage: 'Display options — {label}',
+              values: { label },
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiForm component="div">
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.streams.entityCentricLab.entities.bucket.controls.colorBy',
+              { defaultMessage: 'Color by' }
+            )}
+            fullWidth
+          >
+            <EuiSelect
+              fullWidth
+              options={metricOptions}
+              value={draftMetricId}
+              onChange={(event) => setDraftMetricId(event.target.value)}
+              aria-label={i18n.translate(
+                'xpack.streams.entityCentricLab.entities.bucket.controls.colorByAriaLabel',
+                { defaultMessage: 'Color by' }
+              )}
+              data-test-subj={`entityCentricLabBucketColorBy-${bucketKey}`}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate('xpack.streams.entityCentricLab.entities.bucket.controls.stat', {
+              defaultMessage: 'Stat',
+            })}
+            fullWidth
+            helpText={
+              isCategorical
+                ? i18n.translate(
                     'xpack.streams.entityCentricLab.entities.bucket.controls.statCategoricalTooltip',
                     {
                       defaultMessage: 'Categorical metrics are always shown using the last value.',
                     }
-                  )}
-                >
-                  <EuiSelect
-                    compressed
-                    disabled
-                    options={statOptions}
-                    value="last"
-                    aria-label={i18n.translate(
-                      'xpack.streams.entityCentricLab.entities.bucket.controls.statAriaLabel',
-                      { defaultMessage: 'Stat' }
-                    )}
-                    data-test-subj={`entityCentricLabBucketStat-${bucketKey}`}
-                  />
-                </EuiToolTip>
-              ) : (
-                <EuiSelect
-                  compressed
-                  options={statOptions}
-                  value={statId}
-                  onChange={(event) => onStatChange(event.target.value as StatId)}
-                  aria-label={i18n.translate(
-                    'xpack.streams.entityCentricLab.entities.bucket.controls.statAriaLabel',
-                    { defaultMessage: 'Stat' }
-                  )}
-                  data-test-subj={`entityCentricLabBucketStat-${bucketKey}`}
-                />
+                  )
+                : undefined
+            }
+          >
+            {/*
+              Categorical metrics (Phase, Status, Rollout, …) only make
+              sense as "Last" — avg/min/max of an enum is meaningless.
+              Force the display to `last` and disable the control; the
+              help text explains the lock-in. The stored numeric
+              preference is preserved so switching back to a numeric
+              metric restores the user's last choice.
+            */}
+            <EuiSelect
+              fullWidth
+              disabled={isCategorical}
+              options={statOptions}
+              value={isCategorical ? 'last' : draftStatId}
+              onChange={(event) => setDraftStatId(event.target.value as StatId)}
+              aria-label={i18n.translate(
+                'xpack.streams.entityCentricLab.entities.bucket.controls.statAriaLabel',
+                { defaultMessage: 'Stat' }
               )}
-            </div>
+              data-test-subj={`entityCentricLabBucketStat-${bucketKey}`}
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={onClose}
+              data-test-subj={`entityCentricLabBucketControlsFlyoutCancel-${bucketKey}`}
+            >
+              {i18n.translate(
+                'xpack.streams.entityCentricLab.entities.bucket.controls.flyoutCancel',
+                { defaultMessage: 'Cancel' }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              disabled={!isDirty}
+              onClick={handleApply}
+              data-test-subj={`entityCentricLabBucketControlsFlyoutApply-${bucketKey}`}
+            >
+              {i18n.translate(
+                'xpack.streams.entityCentricLab.entities.bucket.controls.flyoutApply',
+                { defaultMessage: 'Apply' }
+              )}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 };
 
@@ -448,7 +765,7 @@ interface SubTypeRowProps {
  * pixel-identical.
  */
 const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowProps) => {
-  const { selection, setMetricId, setStatId } = useBucketMetricSelection(bucketKey);
+  const { selection, setSelection } = useBucketMetricSelection(bucketKey);
   // Validate metric against the current catalog; if a persisted id is
   // unknown (catalog drift) the hook returns the bucket default — fall
   // back gracefully so the row still renders.
@@ -475,10 +792,10 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
         <EuiFlexItem grow={false}>
           <BucketMetricControls
             bucketKey={bucketKey}
+            label={label}
             metric={metric}
             statId={selection.statId}
-            onMetricChange={setMetricId}
-            onStatChange={setStatId}
+            onApply={setSelection}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -740,8 +1057,9 @@ const CategoryCardInner = ({
   entities,
   onSelectEntity,
 }: CategoryCardInnerProps) => {
-  const { selection, setMetricId, setStatId } = useBucketMetricSelection(bucketKey);
+  const { selection, setSelection } = useBucketMetricSelection(bucketKey);
   const metric = findMetric(bucketKey, selection.metricId) ?? getBucketMetrics(bucketKey)[0];
+  const categoryLabel = getCategoryDescriptor(category)?.label ?? category;
   return (
     <EuiPanel
       hasBorder
@@ -757,10 +1075,10 @@ const CategoryCardInner = ({
         <EuiFlexItem grow={false}>
           <BucketMetricControls
             bucketKey={bucketKey}
+            label={categoryLabel}
             metric={metric}
             statId={selection.statId}
-            onMetricChange={setMetricId}
-            onStatChange={setStatId}
+            onApply={setSelection}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

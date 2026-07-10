@@ -99,6 +99,28 @@ export interface AlertsTabData {
 
 export type RelatedEntityHealth = 'Unhealthy' | 'At risk' | 'Healthy';
 
+/**
+ * Optional context passed alongside an entity name when the user selects a
+ * related entity from inside the flyout (a Dependencies row or a node in the
+ * topology map). It lets the host open the next flyout with the *same* health
+ * and type the user just clicked, so the opened entity stays coherent with
+ * what the map showed instead of falling back to the healthy-by-default
+ * template. Health strings are normalised by `normalizeEntityHealth`, so any
+ * of the flavours it understands (`'Unhealthy'`, `'At risk'`, `'Healthy'`, …)
+ * are accepted.
+ */
+export interface EntitySelectionContext {
+  readonly entityType?: string;
+  readonly health?: string;
+  readonly region?: string;
+}
+
+/**
+ * Signature every "open this related entity" callback shares across the
+ * flyout and its hosts.
+ */
+export type OnSelectEntity = (entityName: string, context?: EntitySelectionContext) => void;
+
 export interface RelatedEntity {
   readonly id: string;
   readonly name: string;

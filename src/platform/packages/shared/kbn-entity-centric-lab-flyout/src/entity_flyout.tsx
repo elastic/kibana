@@ -39,6 +39,7 @@ import {
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
+  EuiFlyoutSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useEntityFlyoutServices } from './services_context';
@@ -51,6 +52,7 @@ import { SecurityTab } from './security_tab';
 import { TracesTab } from './traces_tab';
 import { buildFakeEntityOverview } from './fake_entity_overview';
 import { buildFakeEntityTabsData } from './fake_entity_tabs';
+import type { EntitySelectionContext, OnSelectEntity } from './fake_entity_tabs';
 import {
   ENTITY_CENTRIC_LAB_SESSION_TAG,
   buildEntityFlyoutAttachment,
@@ -85,12 +87,24 @@ interface EntityFlyoutProps {
    */
   readonly entityHealth?: string;
   /**
-   * Optional callback fired when the user clicks a related entity name from
-   * inside the flyout (e.g. a row in the Dependencies tab). When supplied,
-   * the host application is expected to swap the flyout content to the
-   * newly selected entity — see `Discover` and `streams_app` providers.
+   * Optional region (e.g. `eu-west-1`) supplied by callers that carry it
+   * on their dataset — the Streams entities page passes
+   * `entity.tags.region`. Surfaced as a header badge and a "Region" row
+   * in the Overview → Entity details grid so the flyout matches the
+   * list/grid/geomap region filter. Omitted by callers without the data
+   * (e.g. Discover), in which case no region is shown.
    */
-  readonly onSelectEntity?: (entityName: string) => void;
+  readonly region?: string;
+  /**
+   * Optional callback fired when the user clicks a related entity name from
+   * inside the flyout (e.g. a row in the Dependencies tab, or a node in the
+   * topology map). When supplied, the host application is expected to swap
+   * the flyout content to the newly selected entity — see `Discover` and
+   * `streams_app` providers. The optional `context` carries the health and
+   * type the user just clicked so the host can open the next flyout coherent
+   * with what the map/table showed.
+   */
+  readonly onSelectEntity?: OnSelectEntity;
   /**
    * Optional callback fired when the user clicks the cog icon in the
    * flyout header. Hosts wire it to navigate to their entity-type
@@ -99,6 +113,28 @@ interface EntityFlyoutProps {
    * is hidden — there is no neutral fallback to fall back to.
    */
   readonly onManageEntityType?: () => void;
+  /**
+   * Opt into EUI's managed flyout session so a host can stack a parent
+   * and child flyout side by side. Pass `'start'` for the primary
+   * (parent) flyout — it opens a session — and `'inherit'` for a
+   * secondary flyout that should dock next to it as the child. Left
+   * undefined (the default) the flyout renders as a plain, unmanaged
+   * flyout, which is what single-flyout hosts like Discover want.
+   */
+  readonly session?: 'start' | 'inherit' | 'never';
+  /**
+   * Flyout width. Defaults to `'l'` for the classic single-flyout use
+   * (Discover). Accepts EUI's named sizes (`'s' | 'm' | 'l' | 'fill'`) or,
+   * for the parent of a managed session, any CSS width (e.g. `'50%'`, `480`).
+   *
+   * When docking a parent + child session, EUI *requires the child to use a
+   * named size*, and the combined width must stay under ~95% of the reference
+   * or the manager stacks them. A `'m'` (50%) parent + `'fill'` child docks as
+   * 50% / 40% (a `fill` child renders as `90% − parentWidth` in side-by-side
+   * mode), which is the widest child that still docks beside a half-width
+   * parent.
+   */
+  readonly size?: EuiFlyoutSize | number | string;
 }
 
 type BuiltInTabId =
@@ -136,9 +172,12 @@ export const EntityFlyout = ({
   entityName,
   entityType,
   entityHealth,
+  region,
   onClose,
   onSelectEntity,
   onManageEntityType,
+  session,
+  size = 'l',
 }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
   // Default tab is the leftmost one in the (possibly reordered) tab list.
@@ -156,8 +195,17 @@ export const EntityFlyout = ({
   // lets the entityName-change effect distinguish "user clicked back/forward"
   // (skip — history already updated optimistically) from "external push"
   // (Dependencies-row click, or a fresh open from Discover / streams_app).
-  const [history, setHistory] = useState<{ entries: string[]; index: number }>(() => ({
-    entries: [entityName],
+  // Each history entry snapshots the entity name *and* the health/type/region
+  // it was opened with, so navigating back/forward re-opens each entity
+  // coherent with what was originally shown (rather than defaulting to the
+  // healthy template). The snapshot is taken from the current props on every
+  // external push — hosts set those props from the selection context.
+  interface HistoryEntry {
+    name: string;
+    context?: EntitySelectionContext;
+  }
+  const [history, setHistory] = useState<{ entries: HistoryEntry[]; index: number }>(() => ({
+    entries: [{ name: entityName, context: { entityType, health: entityHealth, region } }],
     index: 0,
   }));
   const isInternalNavRef = useRef(false);
@@ -168,16 +216,20 @@ export const EntityFlyout = ({
       return;
     }
     setHistory((prev) => {
-      if (prev.entries[prev.index] === entityName) {
+      if (prev.entries[prev.index]?.name === entityName) {
         // Initial mount, or a redundant re-render with the same entity — no-op.
         return prev;
       }
       // Standard browser-history semantics: navigating mid-history wipes the
       // forward stack so the path stays linear from the user's POV.
-      const entries = [...prev.entries.slice(0, prev.index + 1), entityName];
+      const entry: HistoryEntry = {
+        name: entityName,
+        context: { entityType, health: entityHealth, region },
+      };
+      const entries = [...prev.entries.slice(0, prev.index + 1), entry];
       return { entries, index: entries.length - 1 };
     });
-  }, [entityName]);
+  }, [entityName, entityType, entityHealth, region]);
 
   const canGoBack = history.index > 0 && Boolean(onSelectEntity);
   const canGoForward = history.index < history.entries.length - 1 && Boolean(onSelectEntity);
@@ -187,8 +239,9 @@ export const EntityFlyout = ({
     setHistory((prev) => {
       if (prev.index === 0) return prev;
       const nextIndex = prev.index - 1;
+      const entry = prev.entries[nextIndex];
       isInternalNavRef.current = true;
-      onSelectEntity(prev.entries[nextIndex]);
+      onSelectEntity(entry.name, entry.context);
       return { ...prev, index: nextIndex };
     });
   }, [onSelectEntity]);
@@ -198,8 +251,9 @@ export const EntityFlyout = ({
     setHistory((prev) => {
       if (prev.index === prev.entries.length - 1) return prev;
       const nextIndex = prev.index + 1;
+      const entry = prev.entries[nextIndex];
       isInternalNavRef.current = true;
-      onSelectEntity(prev.entries[nextIndex]);
+      onSelectEntity(entry.name, entry.context);
       return { ...prev, index: nextIndex };
     });
   }, [onSelectEntity]);
@@ -221,8 +275,8 @@ export const EntityFlyout = ({
     [entityName, entityHealth, chaosOn]
   );
   const overview = useMemo(
-    () => buildFakeEntityOverview(entityName, entityType, effectiveHealth),
-    [entityName, entityType, effectiveHealth]
+    () => buildFakeEntityOverview(entityName, entityType, effectiveHealth, region),
+    [entityName, entityType, effectiveHealth, region]
   );
   const tabsData = useMemo(
     () => buildFakeEntityTabsData(entityName, entityType, effectiveHealth),
@@ -535,9 +589,17 @@ export const EntityFlyout = ({
 
   return (
     <EuiFlyout
-      ownFocus
+      // No overlay mask: the flyout stays non-modal so the page behind it
+      // (e.g. the service map) remains visible and clickable — clicking
+      // another node opens a child flyout rather than being swallowed by a
+      // lightbox.
+      ownFocus={false}
+      // When the host opts into a session (`'start'` for the parent,
+      // `'inherit'` for the child) EUI's flyout manager docks the two
+      // side by side. Undefined keeps the classic single-flyout behaviour.
+      session={session}
       onClose={onClose}
-      size="l"
+      size={size}
       aria-labelledby={titleId}
       data-test-subj="entityCentricLabFlyout"
     >
@@ -558,7 +620,7 @@ export const EntityFlyout = ({
                             // displayField pick instead of always
                             // showing the raw entity name.
                             entityName: resolveEntityDisplayName(
-                              history.entries[history.index - 1]
+                              history.entries[history.index - 1].name
                             ),
                           },
                         })
@@ -587,7 +649,7 @@ export const EntityFlyout = ({
                           defaultMessage: 'Forward to {entityName}',
                           values: {
                             entityName: resolveEntityDisplayName(
-                              history.entries[history.index + 1]
+                              history.entries[history.index + 1].name
                             ),
                           },
                         })
@@ -770,7 +832,7 @@ const TabContent = ({
   readonly overview: ReturnType<typeof buildFakeEntityOverview>;
   readonly tabsData: ReturnType<typeof buildFakeEntityTabsData>;
   readonly customLinks?: readonly FlyoutCustomLink[];
-  readonly onSelectEntity?: (entityName: string) => void;
+  readonly onSelectEntity?: OnSelectEntity;
 }) => {
   // Shared fallback: rendered for the `default` branch (unknown tab id from
   // an override) and for the `traces` branch when the active entity has no

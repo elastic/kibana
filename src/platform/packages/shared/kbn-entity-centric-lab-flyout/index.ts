@@ -36,6 +36,8 @@ export type {
   AlertsTabData,
   RelatedEntity,
   RelatedEntityHealth,
+  EntitySelectionContext,
+  OnSelectEntity,
   RelationshipsTabData,
   TopologyEdge,
   TopologyNode,

@@ -131,6 +131,23 @@ export interface EntityOverview {
 export const buildFakeEntityOverview = (
   entityName: string,
   entityType?: string,
+  entityHealth?: string,
+  /**
+   * Region the entity lives in (e.g. `eu-west-1`), supplied by callers
+   * that have it on their dataset (the Streams entities page passes
+   * `entity.tags.region`). When present it's surfaced both as a header
+   * badge and as a "Region" row in the Overview → Entity details grid so
+   * the flyout stays consistent with the list/grid/geomap region filter.
+   */
+  region?: string
+): EntityOverview => {
+  const base = resolveEntityOverview(entityName, entityType, entityHealth);
+  return region ? withRegion(base, region) : base;
+};
+
+const resolveEntityOverview = (
+  entityName: string,
+  entityType?: string,
   entityHealth?: string
 ): EntityOverview => {
   const storyOverview = getStoryOverview(entityName);
@@ -155,6 +172,27 @@ export const buildFakeEntityOverview = (
     return kindTemplate.overview;
   }
   return buildGenericEntityOverview(entityName);
+};
+
+/**
+ * Overlay the caller-supplied region onto an overview: add a header
+ * badge (unless one already reads as that region) and set the "Region"
+ * row in the Entity details grid (replacing a template default like the
+ * cloud kinds' hard-coded region, or appending when absent).
+ */
+const withRegion = (overview: EntityOverview, region: string): EntityOverview => {
+  const hasRegionTag = overview.tags.some((tag) => tag.label === region);
+  const tags: EntityTag[] = hasRegionTag
+    ? [...overview.tags]
+    : [...overview.tags, { label: region, color: 'hollow' }];
+
+  const regionRow: EntityDetailRow = { id: 'region', label: 'Region', value: region };
+  const hasRegionRow = overview.details.some((row) => row.id === 'region');
+  const details: EntityDetailRow[] = hasRegionRow
+    ? overview.details.map((row) => (row.id === 'region' ? regionRow : row))
+    : [...overview.details, regionRow];
+
+  return { ...overview, tags, details };
 };
 
 const buildGenericEntityOverview = (entityName: string): EntityOverview => ({

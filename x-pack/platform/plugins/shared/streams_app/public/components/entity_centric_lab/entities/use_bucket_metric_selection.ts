@@ -100,12 +100,13 @@ export const useBucketMetricSelection = (
   readonly selection: BucketSelection;
   readonly setMetricId: (metricId: string) => void;
   readonly setStatId: (statId: StatId) => void;
+  readonly setSelection: (next: BucketSelection) => void;
 } => {
-  const [selection, setSelection] = useState<BucketSelection>(() => hydrate(bucketKey));
+  const [selection, setSelectionState] = useState<BucketSelection>(() => hydrate(bucketKey));
 
   const persist = useCallback(
     (next: BucketSelection) => {
-      setSelection(next);
+      setSelectionState(next);
       const current = readStorage();
       writeStorage({ ...current, [bucketKey]: next });
     },
@@ -122,5 +123,11 @@ export const useBucketMetricSelection = (
     [persist, selection]
   );
 
-  return { selection, setMetricId, setStatId };
+  // Commit both fields in one write. The per-field setters each close
+  // over the same `selection` snapshot, so calling them back-to-back in
+  // a single tick would clobber one another — the flyout's Apply button
+  // uses this to persist a metric + stat change atomically.
+  const setSelection = useCallback((next: BucketSelection) => persist(next), [persist]);
+
+  return { selection, setMetricId, setStatId, setSelection };
 };
