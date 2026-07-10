@@ -17,7 +17,7 @@ export const bulkUntrackBodySchema = schema.object(
     indices: schema.arrayOf(schema.string({ maxLength: MAX_INDEX_NAME_LENGTH }), {
       maxSize: MAX_BULK_UNTRACK_INDICES,
     }),
-    alert_uuids: schema.arrayOf(schema.string({ maxLength: 36 }), {
+    alert_uuids: schema.arrayOf(schema.string({ maxLength: 100 }), {
       maxSize: MAX_BULK_UNTRACK_ALERT_UUIDS,
     }),
   },

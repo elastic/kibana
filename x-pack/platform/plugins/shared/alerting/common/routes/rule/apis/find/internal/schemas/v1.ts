@@ -26,7 +26,7 @@ export const findRulesInternalRequestBodySchema = schema.object({
     defaultValue: 1,
     min: 1,
   }),
-  search: schema.maybe(schema.string({ maxLength: MAX_KQL_FILTER_LENGTH })),
+  search: schema.maybe(schema.string({ maxLength: MAX_SEARCH_LENGTH })),
   default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
   }),

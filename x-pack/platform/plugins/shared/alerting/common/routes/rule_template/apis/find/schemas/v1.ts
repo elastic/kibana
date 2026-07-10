@@ -31,7 +31,7 @@ export const findRuleTemplatesRequestQuerySchema = schema.object({
   }),
   search: schema.maybe(
     schema.string({
-      maxLength: MAX_KQL_FILTER_LENGTH,
+      maxLength: MAX_SEARCH_LENGTH,
       meta: {
         description:
           'An Elasticsearch simple_query_string query that filters the objects in the response.',
