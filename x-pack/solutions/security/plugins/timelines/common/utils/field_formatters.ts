@@ -30,7 +30,8 @@ export const getFieldCategory = (field: string): string => {
 };
 
 export const formatGeoLocation = (item: unknown[] | null | undefined) => {
-  const itemGeo = Array.isArray(item) && item.length > 0 ? (item[0] as { coordinates: number[] }) : null;
+  const itemGeo =
+    Array.isArray(item) && item.length > 0 ? (item[0] as { coordinates: number[] }) : null;
   if (itemGeo != null && !isEmpty(itemGeo.coordinates)) {
     try {
       return toStringArray({
