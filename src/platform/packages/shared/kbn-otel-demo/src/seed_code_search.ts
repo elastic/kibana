@@ -85,14 +85,9 @@ async function resolveScsRunner(log: ToolingLog): Promise<ScsRunner> {
   }
 
   log.info(`Using scs via Docker image ${SCS_DOCKER_IMAGE}`);
+  // The image reads/writes its config here (e.g. from its `setup` wizard);
+  // we always pass explicit args and env vars below, so the wizard never runs.
   fs.mkdirSync(SCS_CONFIG_DIR, { recursive: true });
-
-  // The scs image runs an interactive setup wizard on first use, writing its
-  // config to $HOME/.scs/.env. Once that exists, subsequent runs are non-interactive.
-  const isFirstRun = !fs.existsSync(path.join(SCS_CONFIG_DIR, '.env'));
-  if (isFirstRun) {
-    log.info('No scs config found — running the first-time setup wizard.');
-  }
 
   return {
     run: async (args, env) => {
@@ -100,7 +95,6 @@ async function resolveScsRunner(log: ToolingLog): Promise<ScsRunner> {
         'docker',
         [
           'run',
-          ...(isFirstRun ? ['-it'] : []),
           '--rm',
           '--add-host',
           'host.docker.internal:host-gateway',
