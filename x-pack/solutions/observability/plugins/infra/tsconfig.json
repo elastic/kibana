@@ -10,7 +10,7 @@
     "server/**/*",
     "types/**/*",
     "test/scenarios/**/*",
-    "test/scout/api/*"
+    "test/scout/api/**/*"
   ],
   "kbn_references": [
     "@kbn/synthtrace",
