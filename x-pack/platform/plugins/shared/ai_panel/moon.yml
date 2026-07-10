@@ -34,6 +34,13 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/ui-theme'
   - '@kbn/logging'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
+  - '@kbn/zod'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/code-editor-mock'
 tags:
   - plugin
   - prod
