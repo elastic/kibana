@@ -101,7 +101,7 @@ export const RULE_MIGRATION_VENDOR_COPY: Record<RuleMigrationVendor, RuleMigrati
         'xpack.securitySolution.siemMigrations.rules.vendorCopy.qradar.missingResourcesReadyDescription',
         {
           defaultMessage:
-            'You can also upload the missing reference sets and enhancements for more accurate results.',
+            'You can also upload the missing reference sets for more accurate results.',
         }
       ),
       uploadTitle: i18n.translate(
@@ -132,14 +132,14 @@ export const RULE_MIGRATION_VENDOR_COPY: Record<RuleMigrationVendor, RuleMigrati
       title: i18n.translate(
         'xpack.securitySolution.siemMigrations.rules.vendorCopy.sentinel.originalRuleTitle',
         {
-          defaultMessage: 'Microsoft Sentinel rule definition',
+          defaultMessage: 'Microsoft Sentinel KQL query',
         }
       ),
       tooltip: i18n.translate(
         'xpack.securitySolution.siemMigrations.rules.vendorCopy.sentinel.originalRuleTooltip',
         {
           defaultMessage:
-            'This is the original Microsoft Sentinel rule definition in ARM template JSON format as exported from Microsoft Sentinel',
+            'This is the original Microsoft Sentinel KQL query in ARM template JSON format as exported from Microsoft Sentinel',
         }
       ),
     },
