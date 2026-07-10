@@ -7,78 +7,64 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isBooleanLiteral, isStringLiteral, LeafPrinter } from '@elastic/esql';
+import { isBooleanLiteral, isStringLiteral } from '@elastic/esql';
 import type { ESQLAstUserAgentCommand, ESQLCommand } from '@elastic/esql/types';
-import type { SupportedDataType } from '../../definitions/types';
+import { Commands } from '../../definitions/keywords';
+import type { ElasticsearchCommandOutputVariant } from '../../definitions/types';
+import {
+  buildPrefixedColumns,
+  getColumnName,
+  getCommandOutputColumns,
+} from '../../definitions/utils/columns';
+import { getMapStringListValuesFromAst } from '../../definitions/utils/maps';
 import type { ESQLColumnData } from '../types';
-import { getPropertiesList } from './utils';
 
-type PropertyGroup = 'name' | 'version' | 'os' | 'device';
+const DEVICE_TYPE_PROPERTY = 'device.type';
 
-const DEFAULT_PROPERTIES: PropertyGroup[] = ['name', 'version', 'os', 'device'];
+const getPropertyGroup = (column: string): string => column.split('.')[0];
 
-const PROPERTY_COLUMNS: Record<
-  PropertyGroup,
-  Array<{ suffix: string; type: SupportedDataType }>
-> = {
-  name: [{ suffix: 'name', type: 'keyword' }],
-  version: [{ suffix: 'version', type: 'keyword' }],
-  os: [
-    { suffix: 'os.name', type: 'keyword' },
-    { suffix: 'os.version', type: 'keyword' },
-    { suffix: 'os.full', type: 'keyword' },
-  ],
-  device: [{ suffix: 'device.name', type: 'keyword' }],
+const isExtractDeviceTypeEnabled = (command: ESQLAstUserAgentCommand): boolean => {
+  const { namedParameters } = command;
+
+  if (!namedParameters || Array.isArray(namedParameters) || !('entries' in namedParameters)) {
+    return false;
+  }
+
+  const entry = namedParameters.entries.find(
+    ({ key }) => isStringLiteral(key) && key.valueUnquoted === 'extract_device_type'
+  );
+
+  return !!entry && isBooleanLiteral(entry.value) && entry.value.value === 'true';
 };
-
-const DEVICE_TYPE_COLUMN = { suffix: 'device.type', type: 'keyword' as SupportedDataType };
 
 export const columnsAfter = (
   command: ESQLCommand,
   previousColumns: ESQLColumnData[]
 ): ESQLColumnData[] => {
   const userAgentCommand = command as ESQLAstUserAgentCommand;
-  const { targetField, namedParameters } = userAgentCommand;
+  const { targetField } = userAgentCommand;
+  const output = getCommandOutputColumns(Commands.USER_AGENT);
 
-  if (!targetField) return previousColumns;
+  if (!targetField || !output) return previousColumns;
 
-  const prefix = LeafPrinter.column(targetField);
+  const selectedProperties = getMapStringListValuesFromAst(
+    userAgentCommand.namedParameters,
+    'properties'
+  );
 
-  // Determine which property groups are active
-  const propertiesList = getPropertiesList(userAgentCommand);
-  let activeProperties: PropertyGroup[];
-  if (propertiesList) {
-    activeProperties = propertiesList.values
-      .filter(isStringLiteral)
-      .map((v) => v.valueUnquoted as PropertyGroup)
-      .filter((v): v is PropertyGroup => DEFAULT_PROPERTIES.includes(v));
-  } else {
-    activeProperties = DEFAULT_PROPERTIES;
+  // `device.type` is excluded from the `properties` expansion and appended last only when enabled.
+  const selectedColumns: ElasticsearchCommandOutputVariant = Object.fromEntries(
+    Object.entries(output).filter(
+      ([column]) =>
+        column !== DEVICE_TYPE_PROPERTY &&
+        (!selectedProperties || selectedProperties.includes(getPropertyGroup(column)))
+    )
+  );
+
+  const deviceType = output[DEVICE_TYPE_PROPERTY];
+  if (deviceType && isExtractDeviceTypeEnabled(userAgentCommand)) {
+    selectedColumns[DEVICE_TYPE_PROPERTY] = deviceType;
   }
 
-  // Determine if device.type should be included
-  let extractDeviceType = false;
-  if (namedParameters && !Array.isArray(namedParameters) && 'entries' in namedParameters) {
-    const entry = namedParameters.entries.find(
-      (e) => isStringLiteral(e.key) && e.key.valueUnquoted === 'extract_device_type'
-    );
-    if (entry && isBooleanLiteral(entry.value) && entry.value.value === 'true') {
-      extractDeviceType = true;
-    }
-  }
-
-  const newColumns: ESQLColumnData[] = activeProperties
-    .flatMap((group) => PROPERTY_COLUMNS[group])
-    .map(({ suffix, type }) => ({ name: `${prefix}.${suffix}`, type, userDefined: false }));
-
-  // device.type is always added when extract_device_type: true, regardless of properties list
-  if (extractDeviceType) {
-    newColumns.push({
-      name: `${prefix}.${DEVICE_TYPE_COLUMN.suffix}`,
-      type: DEVICE_TYPE_COLUMN.type,
-      userDefined: false,
-    });
-  }
-
-  return [...previousColumns, ...newColumns];
+  return [...previousColumns, ...buildPrefixedColumns(getColumnName(targetField), selectedColumns)];
 };

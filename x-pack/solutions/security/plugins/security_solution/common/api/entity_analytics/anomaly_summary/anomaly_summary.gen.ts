@@ -226,6 +226,10 @@ export const AnomalyOverviewResponse = lazySchema(() =>
      * Effective end of the query time range as epoch milliseconds
      */
     to: z.number().int(),
+    /**
+     * True when at least one ML job contributing to this overview has no `custom_settings.threat_tactics` configured, meaning tactic counts may be incomplete
+     */
+    hasJobsMissingThreatTactics: z.boolean(),
   })
 );
 export type AnomalyOverviewResponse = z.infer<typeof AnomalyOverviewResponse>;
