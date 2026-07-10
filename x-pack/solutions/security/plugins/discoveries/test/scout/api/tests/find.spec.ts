@@ -117,31 +117,41 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
       })
       .toBe(5);
 
-    const page1 = await apis.findSchedules({ page: '1', per_page: '2' });
-    expect(page1.statusCode).toBe(200);
+    // The internal find API uses a 0-based `page` (matching EUI's `pageIndex`);
+    // the data client adds 1 before delegating to the 1-based `rulesClient`. So
+    // page 0/1/2 with per_page 2 over 5 schedules yields 2/2/1 rows.
+    //
+    // Also sort by the unique `name` field: the five schedules are created in a
+    // tight loop and share the same created_at/updated_at timestamp, so without
+    // a unique sort key Elasticsearch from/size pagination over tied keys could
+    // return a row on multiple pages (or skip one), making the counts flaky.
+    const sortByName = { sort_direction: 'asc', sort_field: 'name' } as const;
 
-    const page1Body = page1.body as {
+    const firstPage = await apis.findSchedules({ ...sortByName, page: '0', per_page: '2' });
+    expect(firstPage.statusCode).toBe(200);
+
+    const firstPageBody = firstPage.body as {
       data: unknown[];
       page: number;
       per_page: number;
       total: number;
     };
-    expect(page1Body.data).toHaveLength(2);
-    expect(page1Body.total).toBe(5);
-    expect(page1Body.page).toBe(1);
-    expect(page1Body.per_page).toBe(2);
+    expect(firstPageBody.data).toHaveLength(2);
+    expect(firstPageBody.total).toBe(5);
+    expect(firstPageBody.page).toBe(0);
+    expect(firstPageBody.per_page).toBe(2);
 
-    const page2 = await apis.findSchedules({ page: '2', per_page: '2' });
-    expect(page2.statusCode).toBe(200);
+    const secondPage = await apis.findSchedules({ ...sortByName, page: '1', per_page: '2' });
+    expect(secondPage.statusCode).toBe(200);
 
-    const page2Body = page2.body as { data: unknown[]; page: number };
-    expect(page2Body.data).toHaveLength(2);
-    expect(page2Body.page).toBe(2);
+    const secondPageBody = secondPage.body as { data: unknown[]; page: number };
+    expect(secondPageBody.data).toHaveLength(2);
+    expect(secondPageBody.page).toBe(1);
 
-    const page3 = await apis.findSchedules({ page: '3', per_page: '2' });
-    expect(page3.statusCode).toBe(200);
+    const thirdPage = await apis.findSchedules({ ...sortByName, page: '2', per_page: '2' });
+    expect(thirdPage.statusCode).toBe(200);
 
-    const page3Body = page3.body as { data: unknown[] };
-    expect(page3Body.data).toHaveLength(1);
+    const thirdPageBody = thirdPage.body as { data: unknown[] };
+    expect(thirdPageBody.data).toHaveLength(1);
   });
 });
