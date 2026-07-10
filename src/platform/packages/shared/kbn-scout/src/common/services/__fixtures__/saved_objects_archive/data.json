@@ -1,0 +1,53 @@
+{
+  "type": "_doc",
+  "value": {
+    "id": "space:space_1",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "Test space",
+        "disabledFeatures": [],
+        "name": "Space 1"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "references": []
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space_1:index-pattern:pattern_1",
+    "index": ".kibana",
+    "source": {
+      "index-pattern": {
+        "title": "logstash-*"
+      },
+      "namespace": "space_1",
+      "type": "index-pattern",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "references": []
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "legacy-url-alias:space_1:index-pattern:pattern_1",
+    "index": ".kibana",
+    "source": {
+      "legacy-url-alias": {
+        "sourceId": "pattern_1",
+        "targetId": "pattern_1_new",
+        "targetNamespace": "space_1",
+        "targetType": "index-pattern"
+      },
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "references": []
+    }
+  }
+}

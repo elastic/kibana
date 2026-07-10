@@ -1,0 +1,10 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "my-data-index",
+    "source": {
+      "message": "not a saved object"
+    }
+  }
+}

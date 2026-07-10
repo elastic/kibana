@@ -17,6 +17,8 @@ export type { SamlAuth, CoreWorkerFixtures } from './saml_auth';
 export { esArchiverFixture } from './es_archiver';
 export type { EsArchiverFixture } from './es_archiver';
 
+export { systemIndicesEsClientFixture } from './system_indices_es_client';
+
 export { linkedEsFixtures } from './linked_es_archiver';
 export type { LinkedProjectFixture } from './linked_es_archiver';
 

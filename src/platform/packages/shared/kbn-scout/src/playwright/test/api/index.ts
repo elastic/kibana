@@ -17,10 +17,12 @@ import {
   apiServicesFixture,
   defaultRolesFixture,
   requestAuthFixture,
+  systemIndicesEsClientFixture,
 } from '../../fixtures/scope/worker';
 import type {
   CoreWorkerFixtures,
   EsArchiverFixture,
+  EsClient,
   LinkedProjectFixture,
   RequestAuthFixture,
   ApiClientFixture,
@@ -38,6 +40,7 @@ export interface ApiWorkerFixtures extends CoreWorkerFixtures {
   requestAuth: RequestAuthFixture;
   esArchiver: EsArchiverFixture;
   linkedProject: LinkedProjectFixture;
+  systemIndicesEsClient: EsClient;
 }
 
 // This disables browser-related fixtures by overriding them with undefined
@@ -80,5 +83,6 @@ export const apiTest = mergeTests(
   defaultRolesFixture,
   requestAuthFixture,
   esArchiverFixture,
+  systemIndicesEsClientFixture,
   linkedEsFixtures
 ) as unknown as TestType<{}, ApiWorkerFixtures>;

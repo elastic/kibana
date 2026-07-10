@@ -15,7 +15,9 @@ import type { EsArchiverFixture } from './es_archiver';
 
 export interface LinkedProjectFixture {
   esClient: Client;
-  esArchiver: EsArchiverFixture;
+  // saved-objects archive helpers are not exposed for the linked cluster: it is a
+  // serverless-only concept and Kibana saved objects live in the main project
+  esArchiver: Pick<EsArchiverFixture, 'loadIfNeeded'>;
 }
 
 export const linkedEsFixtures = coreWorkerFixtures.extend<

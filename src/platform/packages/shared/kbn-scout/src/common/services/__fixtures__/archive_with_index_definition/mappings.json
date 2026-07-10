@@ -1,0 +1,13 @@
+{
+  "type": "index",
+  "value": {
+    "index": "my-data-index",
+    "mappings": {
+      "properties": {
+        "message": {
+          "type": "text"
+        }
+      }
+    }
+  }
+}

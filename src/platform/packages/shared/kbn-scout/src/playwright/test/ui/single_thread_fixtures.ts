@@ -13,6 +13,7 @@ import {
   coreWorkerFixtures,
   esArchiverFixture,
   linkedEsFixtures,
+  systemIndicesEsClientFixture,
   uiSettingsFixture,
   lighthouseFixture,
 } from '../../fixtures/scope/worker';
@@ -49,6 +50,7 @@ export const scoutFixtures = mergeTests(
   // worker scope fixtures
   coreWorkerFixtures,
   esArchiverFixture,
+  systemIndicesEsClientFixture,
   linkedEsFixtures,
   uiSettingsFixture,
   // api fixtures
@@ -77,6 +79,7 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   kbnClient: KbnClient;
   esClient: EsClient;
   esArchiver: EsArchiverFixture;
+  systemIndicesEsClient: EsClient;
   linkedProject: LinkedProjectFixture;
   uiSettings: UiSettingsFixture;
   apiServices: ApiServicesFixture;

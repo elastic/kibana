@@ -27,6 +27,8 @@
     "@kbn/scout-reporting",
     "@kbn/zod",
     "@kbn/core-http-common",
+    "@kbn/core-saved-objects-server",
+    "@kbn/utils",
     "@kbn/axe-config",
     "@kbn/peggy",
     "@kbn/test-docker-servers",
