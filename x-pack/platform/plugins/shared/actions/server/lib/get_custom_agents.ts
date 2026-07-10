@@ -10,6 +10,7 @@ import type { AgentOptions } from 'https';
 import { Agent as HttpsAgent } from 'https';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import type { HttpsProxyAgentOptions } from 'https-proxy-agent';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
@@ -21,6 +22,25 @@ import type { SSLSettings } from '../types';
 interface GetCustomAgentsResponse {
   httpAgent: HttpAgent | undefined;
   httpsAgent: HttpsAgent | undefined;
+}
+
+class TargetSslHttpsProxyAgent extends HttpsProxyAgent<string> {
+  constructor(
+    proxyUrl: string | URL,
+    proxyOpts: HttpsProxyAgentOptions<string>,
+    private readonly targetSSLOptions: AgentOptions
+  ) {
+    super(proxyUrl, proxyOpts);
+  }
+
+  connect(
+    req: Parameters<HttpsProxyAgent<string>['connect']>[0],
+    opts: Parameters<HttpsProxyAgent<string>['connect']>[1]
+  ) {
+    // HttpsProxyAgent constructor options configure the proxy connection. Target TLS
+    // options must be merged into the CONNECT-upgraded request options instead.
+    return super.connect(req, { ...opts, ...this.targetSSLOptions });
+  }
 }
 
 export function getCustomAgents(
@@ -127,19 +147,24 @@ export function getCustomAgents(
   // We will though, copy over the calculated ssl options from above, into
   // the https agent.
   const httpAgent = new HttpProxyAgent(proxySettings.proxyUrl) as unknown as HttpAgent;
-  const httpsAgent = new HttpsProxyAgent(proxySettings.proxyUrl, {
-    host: proxyUrl.hostname,
-    port: Number(proxyUrl.port),
-    headers: proxySettings.proxyHeaders,
-    // do not fail on invalid certs if value is false
-    ...proxyNodeSSLOptions,
-  });
+  const targetSSLOptions = agentOptions ?? agentSSLOptions;
+  const httpsAgent = new TargetSslHttpsProxyAgent(
+    proxySettings.proxyUrl,
+    {
+      host: proxyUrl.hostname,
+      port: Number(proxyUrl.port),
+      headers: proxySettings.proxyHeaders,
+      // do not fail on invalid certs if value is false
+      ...proxyNodeSSLOptions,
+    },
+    targetSSLOptions
+  );
   // vsCode wasn't convinced HttpsProxyAgent is an https.Agent, so we convinced it
 
-  if (agentOptions) {
+  if (targetSSLOptions) {
     httpsAgent.options = {
       ...httpsAgent.options,
-      ...agentOptions,
+      ...targetSSLOptions,
     };
   }
 
