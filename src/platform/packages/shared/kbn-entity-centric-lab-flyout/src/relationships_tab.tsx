@@ -30,9 +30,9 @@ import type {
   RelatedEntity,
   RelatedEntityHealth,
   RelationshipsTabData,
-  TopologyEdge,
-  TopologyNode,
 } from './fake_entity_tabs';
+import { buildTopologyLayout } from './topology_graph';
+import type { TopologyLayoutEdge, TopologyLayoutNode } from './topology_graph';
 import { useEntityDisplayName } from './entity_display_name';
 
 interface RelationshipsTabProps {
@@ -234,25 +234,6 @@ const healthBadgeColor = (
   }
 };
 
-// Schematic, non-interactive — the prototype's topology view is a static SVG.
-// Positions are tuned to roughly match the design (focal node on the left, the
-// other services fanned out to the right).
-const NODE_POSITIONS: Record<string, { readonly x: number; readonly y: number }> = {
-  focal: { x: 90, y: 165 },
-  ad: { x: 180, y: 65 },
-  cart: { x: 250, y: 95 },
-  recommendation: { x: 195, y: 175 },
-  'product-catalog': { x: 290, y: 200 },
-  currency: { x: 350, y: 220 },
-  redis: { x: 390, y: 95 },
-  payment: { x: 260, y: 240 },
-  flagd: { x: 400, y: 235 },
-  'frontend-proxy': { x: 110, y: 260 },
-  'load-generator': { x: 30, y: 235 },
-};
-
-const FALLBACK_POSITION = { x: 200, y: 140 };
-
 const TopologyPanel = ({
   topology,
   related,
@@ -263,24 +244,24 @@ const TopologyPanel = ({
   readonly onSelectEntity?: OnSelectEntity;
 }) => {
   const { euiTheme } = useEuiTheme();
-  // Non-focal nodes inherit their colour from the matching dependency row, so
-  // the map visually guides the user toward whatever is unhealthy without us
-  // having to repeat the health on every TopologyNode definition. The type is
-  // tracked alongside so a node click can open the next flyout coherent with
-  // the health *and* kind the map showed.
-  const relatedByName = useMemo(() => {
-    const map = new Map<string, RelatedEntity>();
-    for (const entity of related) {
-      map.set(entity.name, entity);
+  // Expand the authored one-hop topology into a deep dependency graph and lay
+  // it out by depth (focal on the left, descendants fanning right). Nodes
+  // carry their own health + type so hover colours and click navigation stay
+  // coherent with what's rendered.
+  const layout = useMemo(() => buildTopologyLayout(topology, related), [topology, related]);
+  const nodeById = useMemo(() => {
+    const map = new Map<string, TopologyLayoutNode>();
+    for (const node of layout.nodes) {
+      map.set(node.id, node);
     }
     return map;
-  }, [related]);
+  }, [layout]);
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="none">
       <div
         css={css`
           position: relative;
-          height: 320px;
+          height: 360px;
           background-color: ${euiTheme.colors.body};
           border-radius: ${euiTheme.border.radius.medium};
           overflow: hidden;
@@ -289,7 +270,8 @@ const TopologyPanel = ({
       >
         <TopologyDotsBackground euiTheme={euiTheme} />
         <svg
-          viewBox="0 0 440 320"
+          viewBox={`0 0 ${layout.width} ${layout.height}`}
+          preserveAspectRatio="xMidYMid meet"
           role="img"
           aria-label={i18n.translate(
             'entityCentricLabFlyout.flyout.relationships.topologyAriaLabel',
@@ -302,12 +284,21 @@ const TopologyPanel = ({
             height: 100%;
           `}
         >
-          {topology.edges.map((edge) => (
-            <TopologyEdgeLine key={`${edge.from}-${edge.to}`} edge={edge} euiTheme={euiTheme} />
-          ))}
-          {topology.nodes.map((node) => {
-            const relatedMatch = relatedByName.get(node.label);
-            const health = node.focal ? topology.focalHealth : relatedMatch?.health;
+          {layout.edges.map((edge) => {
+            const from = nodeById.get(edge.fromId);
+            const to = nodeById.get(edge.toId);
+            if (!from || !to) return null;
+            return (
+              <TopologyEdgeLine
+                key={`${edge.fromId}-${edge.toId}`}
+                from={from}
+                to={to}
+                edge={edge}
+                euiTheme={euiTheme}
+              />
+            );
+          })}
+          {layout.nodes.map((node) => {
             // Every non-focal node is clickable when the host supplies a
             // selection handler; the host resolves whether the entity can be
             // opened. The focal node is the entity already on screen — no
@@ -317,14 +308,13 @@ const TopologyPanel = ({
               <TopologyNodeMark
                 key={node.id}
                 node={node}
-                health={health}
                 euiTheme={euiTheme}
                 onSelect={
                   isClickable
                     ? () =>
                         onSelectEntity!(node.label, {
-                          entityType: relatedMatch?.entityType,
-                          health: relatedMatch?.health,
+                          entityType: node.entityType,
+                          health: node.health,
                         })
                     : undefined
                 }
@@ -489,14 +479,16 @@ const TopologyDotsBackground = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =>
 );
 
 const TopologyEdgeLine = ({
+  from,
+  to,
   edge,
   euiTheme,
 }: {
-  readonly edge: TopologyEdge;
+  readonly from: TopologyLayoutNode;
+  readonly to: TopologyLayoutNode;
+  readonly edge: TopologyLayoutEdge;
   readonly euiTheme: EuiThemeComputed;
 }) => {
-  const from = NODE_POSITIONS[edge.from] ?? FALLBACK_POSITION;
-  const to = NODE_POSITIONS[edge.to] ?? FALLBACK_POSITION;
   return (
     <line
       x1={from.x}
@@ -512,18 +504,17 @@ const TopologyEdgeLine = ({
 
 const TopologyNodeMark = ({
   node,
-  health,
   euiTheme,
   onSelect,
 }: {
-  readonly node: TopologyNode;
-  readonly health: RelatedEntityHealth | undefined;
+  readonly node: TopologyLayoutNode;
   readonly euiTheme: EuiThemeComputed;
   /** When set, the node renders as an interactive button (cursor + halo). */
   readonly onSelect?: () => void;
 }) => {
-  const pos = NODE_POSITIONS[node.id] ?? FALLBACK_POSITION;
-  const radius = node.focal ? 18 : 14;
+  const pos = { x: node.x, y: node.y };
+  const { health } = node;
+  const radius = node.focal ? 16 : 11;
   // Neutral fill across the board — the health is expressed by the stroke
   // ring around the node, so the unhealthy parts of the graph "pop" without
   // turning every entity into a saturated dot.
