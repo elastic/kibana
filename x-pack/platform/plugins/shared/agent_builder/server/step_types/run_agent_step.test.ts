@@ -12,7 +12,10 @@ import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
   ConfigSchema,
 } from '../../common/step_types/run_agent_step';
-import { CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW } from '../../common/resolve_connector_or_inference_id';
+import {
+  CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
+  CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
+} from '../../common/resolve_connector_or_inference_id';
 import { getRunAgentStepDefinition } from './run_agent_step';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 
@@ -391,6 +394,138 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         expect.objectContaining({
           params: expect.objectContaining({ connectorId: 'inf-1' }),
         })
+      );
+    });
+  });
+
+  describe('connector-id-by-feature', () => {
+    const createFeatureServicesMock = (
+      endpoints: Array<{ connectorId: string }> = [],
+      feature?: { taskType: string }
+    ) => ({
+      searchInferenceEndpoints: {
+        features: {
+          get: jest.fn().mockReturnValue(feature),
+        },
+        endpoints: {
+          getForFeature: jest
+            .fn()
+            .mockResolvedValue({ endpoints, warnings: [], soEntryFound: false }),
+        },
+      },
+    });
+
+    it('ConfigSchema rejects connector-id-by-feature combined with connector-id', () => {
+      const parsed = ConfigSchema.safeParse({
+        'connector-id': 'a',
+        'connector-id-by-feature': 'my_feature',
+      });
+      expect(parsed.success).toBe(false);
+    });
+
+    it('ConfigSchema rejects connector-id-by-feature combined with inference-id', () => {
+      const parsed = ConfigSchema.safeParse({
+        'inference-id': 'a',
+        'connector-id-by-feature': 'my_feature',
+      });
+      expect(parsed.success).toBe(false);
+    });
+
+    it('ConfigSchema accepts connector-id-by-feature alone', () => {
+      const parsed = ConfigSchema.safeParse({ 'connector-id-by-feature': 'my_feature' });
+      expect(parsed.success).toBe(true);
+    });
+
+    it('resolves the connector from the feature and passes it to executeAgent', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const featureServices = createFeatureServicesMock([{ connectorId: 'feature-connector' }]);
+      const serviceManager = { internalStart: { execution, ...featureServices } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: { 'connector-id-by-feature': 'significant_events_investigation' },
+        })
+      );
+
+      expect(featureServices.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
+        'significant_events_investigation',
+        expect.anything()
+      );
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ connectorId: 'feature-connector' }),
+        })
+      );
+    });
+
+    it('does not call executeAgent when connector-id-by-feature conflicts with connector-id at runtime', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const featureServices = createFeatureServicesMock();
+      const serviceManager = { internalStart: { execution, ...featureServices } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: {
+            'connector-id': 'a',
+            'connector-id-by-feature': 'my_feature',
+          },
+        })
+      );
+
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(res.error?.message).toBe(CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW);
+    });
+
+    it('surfaces an error when no connector can be resolved for the feature', async () => {
+      const execution = createExecutionMock(of());
+      const featureServices = createFeatureServicesMock([]);
+      const serviceManager = { internalStart: { execution, ...featureServices } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: { 'connector-id-by-feature': 'unknown_feature' },
+        })
+      );
+
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(res.error?.message).toBe('No connector available for feature "unknown_feature".');
+    });
+
+    it('surfaces an error when the feature is not a chat completion feature', async () => {
+      const execution = createExecutionMock(of());
+      const featureServices = createFeatureServicesMock([{ connectorId: 'feature-connector' }], {
+        taskType: 'text_embedding',
+      });
+      const serviceManager = { internalStart: { execution, ...featureServices } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: { 'connector-id-by-feature': 'knowledge_base_embeddings' },
+        })
+      );
+
+      expect(
+        featureServices.searchInferenceEndpoints.endpoints.getForFeature
+      ).not.toHaveBeenCalled();
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(res.error?.message).toBe(
+        'Feature "knowledge_base_embeddings" is not a chat completion feature (task type "text_embedding"). connector-id-by-feature requires a feature with task type "chat_completion".'
       );
     });
   });

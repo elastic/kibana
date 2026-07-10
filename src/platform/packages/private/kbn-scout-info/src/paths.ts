@@ -194,4 +194,6 @@ export const CRITICAL_FILES_SCOUT: readonly string[] = [
   '.buildkite/scripts/steps/test/scout/**/*',
   '.buildkite/pipeline-utils/affected-packages/**/*.{ts,js,sh}',
   '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
+  // Controls which directories Moon scans for projects.
+  '.moon/workspace.yml',
 ];
