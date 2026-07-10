@@ -120,6 +120,10 @@ export const validateUnifiedRegisteredAttachments = ({
     );
   }
 
+  if (!attachmentType.schema) {
+    throw Boom.badRequest(`Attachment type '${query.type}' does not define a schema.`);
+  }
+
   parseUnifiedAttachmentWithSchema(attachmentType.schema, query, query.type);
 };
 
