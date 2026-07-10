@@ -25,7 +25,7 @@ describe('config validation', () => {
             "resetTaskTimeoutMinutes": 60,
           },
           "attachments": Object {
-            "enabled": false,
+            "enabled": true,
           },
           "casesRedesign": Object {
             "details": false,
@@ -146,9 +146,9 @@ describe('config validation', () => {
       `);
     });
 
-    it('sets attachments.enabled default to false', () => {
+    it('sets attachments.enabled default to true', () => {
       const config = ConfigSchema.validate({});
-      expect(config.attachments.enabled).toBe(false);
+      expect(config.attachments.enabled).toBe(true);
     });
 
     it('allows attachments.enabled to be set to true', () => {
