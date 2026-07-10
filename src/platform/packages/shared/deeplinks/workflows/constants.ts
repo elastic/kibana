@@ -7,10 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const WorkflowsPageName = {
-  workflows: 'workflows',
-  library: 'library',
-  executions: 'executions',
-} as const;
-
-export type WorkflowsPageName = (typeof WorkflowsPageName)[keyof typeof WorkflowsPageName];
+export const WORKFLOWS_APP_ID = 'workflows';
