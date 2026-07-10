@@ -16,7 +16,6 @@ import { buildSiemResponse } from '../utils';
 import { searchAlerts } from '../common/operations/search_alerts';
 import { validateSearchAlertsParams } from '../common/validators/validate_search_alerts_params';
 import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts_index';
-import { buildSearchAttacksParams } from './build_search_attacks_params';
 import {
   buildAttacksSearchApiCallFields,
   reportAttacksApiCallError,
@@ -48,7 +47,7 @@ export const searchAttacksRoute = (
       },
       async (context, request, response) => {
         const telemetryFields = buildAttacksSearchApiCallFields(request.route.path, request.body);
-        const params = buildSearchAttacksParams(request.body);
+        const params = request.body;
         const validationError = validateSearchAlertsParams(params);
         if (validationError) {
           reportAttacksApiCallError(telemetrySender, telemetryFields, validationError);

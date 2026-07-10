@@ -36,9 +36,18 @@ export interface AttacksApiCallEventFields {
 }
 
 interface AttacksSearchRequestBodyForTelemetry {
-  ids?: string[];
+  query?: unknown;
   aggs?: unknown;
 }
+
+const hasIdsQueryFilter = (query: unknown): boolean => {
+  if (query == null || typeof query !== 'object') {
+    return false;
+  }
+
+  const ids = (query as { ids?: { values?: unknown } }).ids;
+  return ids != null && ids.values != null;
+};
 
 interface AttacksTagsRequestBodyForTelemetry {
   ids: string[];
@@ -72,7 +81,7 @@ export const buildAttacksSearchApiCallFields = (
   operation: 'search',
   has_aggregations:
     body.aggs != null && typeof body.aggs === 'object' && Object.keys(body.aggs).length > 0,
-  has_ids_filter: body.ids != null,
+  has_ids_filter: hasIdsQueryFilter(body.query),
 });
 
 export const buildAttacksTagsApiCallFields = (
