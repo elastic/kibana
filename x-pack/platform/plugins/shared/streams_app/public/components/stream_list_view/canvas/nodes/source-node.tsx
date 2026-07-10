@@ -25,6 +25,7 @@ import type { SourceFlowNode, SourceNodeData } from '../types';
 import {
   hiddenHandleClassName,
   inflateClassName,
+  restingShadowClassName,
   useAnchorHandleClassName,
   useRaiseOnHoverClassName,
 } from '../node-styles';
@@ -49,7 +50,7 @@ export function SourceNodeContents({
   return (
     <EuiPanel
       element={isClickable ? 'button' : 'div'}
-      hasShadow
+      hasShadow={false}
       paddingSize="none"
       onClick={
         isClickable
@@ -59,7 +60,7 @@ export function SourceNodeContents({
             }
           : undefined
       }
-      className={`${isClickable ? 'nodrag' : ''} ${css`
+      className={`${isClickable ? 'nodrag' : ''} ${restingShadowClassName} ${css`
         display: flex;
         flex-direction: column;
         gap: ${euiTheme.size.xs};
@@ -67,6 +68,7 @@ export function SourceNodeContents({
         padding: ${euiTheme.size.m};
         text-align: left;
         ${isClickable ? 'cursor: pointer;' : ''}
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
         border-radius: ${euiTheme.border.radius.medium};
       `} ${interactive ? raiseOnHoverClassName : ''}`}
     >

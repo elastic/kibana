@@ -23,6 +23,7 @@ import type { RoutingBranch, RoutingFlowNode, RoutingNodeData } from '../types';
 import {
   hiddenHandleClassName,
   inflateClassName,
+  restingShadowClassName,
   useAnchorHandleClassName,
   useRaiseOnHoverClassName,
 } from '../node-styles';
@@ -61,9 +62,9 @@ function RoutingNodeContents({
   const raiseOnHoverClassName = useRaiseOnHoverClassName();
   return (
     <EuiPanel
-      hasShadow
+      hasShadow={false}
       paddingSize="none"
-      className={`${css`
+      className={`${restingShadowClassName} ${css`
         display: flex;
         align-items: stretch;
         cursor: pointer;

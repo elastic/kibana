@@ -65,6 +65,14 @@ export function useAnchorHandleClassName() {
   `;
 }
 
+// The resting (unselected, unhovered) drop shadow for every node card on the
+// canvas. Swaps EUI's default panel shadow for the canvas' own custom depth —
+// EuiPanel's `hasShadow` should be `false` wherever this is applied.
+export const restingShadowClassName = css`
+  box-shadow: 0 var(--X-small-Level-2, 1px) 2px 0
+    color-mix(in srgb, var(--euiColorInk) 16%, transparent);
+`;
+
 const inflate = keyframes`
   from {
     opacity: 0;

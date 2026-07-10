@@ -14,7 +14,12 @@ import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { PipelineFlowNode, PipelineNodeData } from '../types';
-import { inflateClassName, useAnchorHandleClassName, useRaiseOnHoverClassName } from '../node-styles';
+import {
+  inflateClassName,
+  restingShadowClassName,
+  useAnchorHandleClassName,
+  useRaiseOnHoverClassName,
+} from '../node-styles';
 
 const statTextClassName = (color: string) => css`
   font-size: 10px;
@@ -39,16 +44,17 @@ function PipelineNodeContents({ data }: { data: PipelineNodeData }) {
       `} ${raiseOnHoverClassName}`}
     >
       <EuiPanel
-        hasShadow
+        hasShadow={false}
         paddingSize="none"
-        className={css`
+        className={`${restingShadowClassName} ${css`
           display: flex;
           gap: ${euiTheme.size.s};
           align-items: center;
           justify-content: center;
           padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+          border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
           border-radius: ${euiTheme.border.radius.small};
-        `}
+        `}`}
       >
         <EuiIcon type="processor" size="m" color={euiTheme.colors.textParagraph} />
         <div

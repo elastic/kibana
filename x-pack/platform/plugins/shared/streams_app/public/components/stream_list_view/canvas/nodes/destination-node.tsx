@@ -41,6 +41,7 @@ import type { DestinationFlowNode, DestinationNodeData, DestinationStorage } fro
 import {
   hiddenHandleClassName,
   inflateClassName,
+  restingShadowClassName,
   useAnchorHandleClassName,
   useRaiseOnHoverClassName,
 } from '../node-styles';
@@ -379,14 +380,15 @@ function ConfiguredDestinationContents({
   if (data.attachedRouting) {
     return (
       <EuiPanel
-        hasShadow
+        hasShadow={false}
         paddingSize="none"
-        className={`${css`
+        className={`${restingShadowClassName} ${css`
           display: flex;
           align-items: stretch;
           overflow: hidden;
           text-align: left;
           cursor: pointer;
+          border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
           border-radius: ${euiTheme.border.radius.medium};
         `} ${raiseOnHoverClassName}`}
       >
@@ -441,9 +443,9 @@ function ConfiguredDestinationContents({
 
   return (
     <EuiPanel
-      hasShadow
+      hasShadow={false}
       paddingSize="none"
-      className={`${css`
+      className={`${restingShadowClassName} ${css`
         display: flex;
         flex-direction: column;
         gap: ${euiTheme.size.s};
@@ -451,6 +453,7 @@ function ConfiguredDestinationContents({
         min-width: 211px;
         text-align: left;
         cursor: pointer;
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
         border-radius: ${euiTheme.border.radius.medium};
       `} ${raiseOnHoverClassName}`}
     >

@@ -31,10 +31,12 @@ import { buildOrthogonalPath, buildVerticalFirstPath } from './orthogonal-path';
 import { segmentsForEdge } from './edge-bridges';
 
 // A subtle "data flowing" animation: a dashed overlay stroke laid over the edge
-// whose dash pattern marches from the source toward the destination. The path is
-// drawn source-first (see buildOrthogonalPath), so animating stroke-dashoffset
-// down to 0 sends the dashes downstream. One full DASH_PERIOD of travel per
-// cycle keeps the motion seamless (the pattern lands exactly one repeat along).
+// whose dash pattern marches from the source toward the destination. Only
+// rendered while the edge is active (hovered, or its "Add step" popover is
+// open) — edges are static at rest. The path is drawn source-first (see
+// buildOrthogonalPath), so animating stroke-dashoffset down to 0 sends the
+// dashes downstream. One full DASH_PERIOD of travel per cycle keeps the motion
+// seamless (the pattern lands exactly one repeat along).
 const DASH = 4;
 const GAP = 8;
 const DASH_PERIOD = DASH + GAP;
@@ -148,7 +150,10 @@ function PipelineRoutingEdge({
     : buildOrthogonalPath(sourceX, sourceY, targetX, targetY, midX, 20, hops);
 
   const isActive = isHovered || isPopoverOpen;
-  const strokeColor = isActive ? euiTheme.colors.primary : euiTheme.colors.mediumShade;
+  // Active edges are carried entirely by the dashed overlay below — this base
+  // stroke goes transparent so hovering doesn't double up two lines on top of
+  // each other.
+  const strokeColor = isActive ? 'transparent' : euiTheme.colors.borderBaseProminent;
 
   // The connectors' grab anchors are the node handles themselves (small circles
   // at each connection point), so we don't draw anchors on a normal edge. The one
@@ -161,20 +166,22 @@ function PipelineRoutingEdge({
         id={id}
         path={edgePath}
         markerEnd={isDanglingRouting ? undefined : markerEnd}
-        style={{ ...style, stroke: strokeColor, strokeWidth: 1.5 }}
+        style={{ ...style, stroke: strokeColor, strokeWidth: 1 }}
         interactionWidth={24}
       />
       {/* Decorative "data flowing" overlay: marching dashes from source →
-          destination. Skipped for a dangling routing connector, which is a
-          temporary affordance with no live data flowing through it yet. */}
-      {!isDanglingRouting ? (
+          destination. Static otherwise; only animates while hovered (or its
+          "Add step" popover is open) so the canvas stays calm at rest. Skipped
+          for a dangling routing connector, which is a temporary affordance with
+          no live data flowing through it yet. */}
+      {!isDanglingRouting && isActive ? (
         <path
           d={edgePath}
           className={flowClassName}
-          stroke={isActive ? euiTheme.colors.primary : euiTheme.colors.borderBaseProminent}
+          stroke={euiTheme.colors.primary}
           strokeWidth={2.5}
           strokeLinecap="round"
-          style={{ opacity: isActive ? 0.85 : 0.7 }}
+          style={{ opacity: 0.85 }}
         />
       ) : null}
       {isDanglingRouting ? (

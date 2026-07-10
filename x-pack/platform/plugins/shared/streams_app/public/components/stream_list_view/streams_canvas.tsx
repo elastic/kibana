@@ -1285,8 +1285,7 @@ function StreamsCanvasInner() {
                       min-height: 0;
                       width: 100%;
                       background-color: ${euiTheme.colors.backgroundBaseSubdued};
-                      border: ${euiTheme.border.width.thin} solid
-                        ${euiTheme.colors.borderBaseSubdued};
+                      border: none;
                       border-radius: ${euiTheme.border.radius.small};
                       overflow: hidden;
                       ${placementType ? 'cursor: copy;' : ''}
@@ -1386,7 +1385,7 @@ function StreamsCanvasInner() {
                       panOnDrag={canvasMode === 'pan' ? true : [1]}
                       proOptions={{ hideAttribution: true }}
                     >
-                      <Background gap={GRID_SIZE} />
+                      <Background gap={GRID_SIZE} color={euiTheme.colors.borderBaseSubdued} />
                       {/* Minimap hidden for now — re-enable by uncommenting:
           <CanvasMinimap hoveredFlow={hoveredFlow} /> */}
                     </ReactFlow>

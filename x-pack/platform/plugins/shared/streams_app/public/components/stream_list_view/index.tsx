@@ -186,10 +186,6 @@ export function StreamListView() {
   const settingsLabel = i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
     defaultMessage: 'Settings',
   });
-  const createClassicStreamLabel = i18n.translate(
-    'xpack.streams.streamsListView.createClassicStreamButtonLabel',
-    { defaultMessage: 'Create classic stream' }
-  );
   const significantEventsLabel = i18n.translate(
     'xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel',
     { defaultMessage: 'Significant Events' }
@@ -267,20 +263,11 @@ export function StreamListView() {
     }
 
     return {
-      primaryActionItem: {
-        id: 'createClassicStream',
-        label: createClassicStreamLabel,
-        iconType: 'plus',
-        run: () => setIsClassicStreamCreationFlyoutOpen(true),
-        disableButton: !canCreateClassicStream,
-        testId: 'streamsAppCreateClassicStreamButton',
-      },
       items,
     };
   }, [
     canCreateClassicStream,
     classicStreamMenuItemLabel,
-    createClassicStreamLabel,
     createLabel,
     queryStreamMenuItemLabel,
     settingsLabel,
