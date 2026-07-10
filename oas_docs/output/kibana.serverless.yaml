@@ -108596,6 +108596,7 @@ components:
             - id
             - text
     Observability_AI_Assistant_API_Message:
+      title: Message
       type: object
       properties:
         '@timestamp':
