@@ -149,6 +149,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     },
     services,
     spaceId,
+    startedAt: new Date('2023-01-01T00:00:00.000Z'),
     state: {},
   };
   const mockReplacements = {
@@ -487,7 +488,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       context: {
         attack: expect.objectContaining({
           detailsUrl:
-            'http://fake-host.io/test/s/test-space/app/security/attack_discovery?id=fake-alert',
+            'http://fake-host.io/test/s/test-space/app/security/attack_discovery?id=fake-alert&timestamp=2023-01-01T00%3A00%3A00.000Z',
         }),
       },
     });
