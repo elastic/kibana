@@ -1,5 +1,5 @@
 {
-  "sha1": "82aeb661347bce5cb0d59c1f9cbf06feb0766e06",
+  "sha1": "c74a8db33a2e0fe2b67fd02cc7027270b9628394",
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -7504,58 +7504,6 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
         "line": 2283,
         "column": 10
-      }
-    },
-    {
-      "id": "a17e26be1496d44-2894fd582435c92",
-      "title": "Agent Builder — alerting V2 rule-management skill experimental gating does not list the rule-management skill when experimental features are disabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 30,
-        "column": 12
-      }
-    },
-    {
-      "id": "a17e26be1496d44-3b69fc53734c9a0",
-      "title": "Agent Builder — alerting V2 rule-management skill experimental gating lists the rule-management skill once experimental features are enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_management_skill_gating.spec.ts",
-        "line": 46,
-        "column": 12
       }
     },
     {
