@@ -58,18 +58,13 @@ If artifacts are not available (expired, not uploaded, no `read_artifacts` token
 
 ### Where the Kibana & Elasticsearch logs live
 
-Which artifact holds the server logs depends on the runner and deployment type. All are captured at **INFO level and above only** — `debug`/`trace` detail (e.g. the exact reason a session was invalidated) is never in CI artifacts and needs a re-run at higher verbosity.
+Some runs ship server logs, others don't — and they're **INFO+ only** (no `debug`/`trace`):
 
 | Test type | Kibana logs | Elasticsearch logs |
 | --- | --- | --- |
-| **FTR** | Interleaved in the test stdout — `target/test_failures/*.log`, the `proc [kibana]` lines. No standalone `kibana.log`. | Not uploaded. |
-| **Scout — stateful** | Dedicated **`.scout/server.log`** (full Kibana output; the richest of the three). | Partly present in `.scout/server.log` — ES runs from a snapshot tarball, so startup `[o.e.*]` lines are captured, but not the full runtime log. |
-| **Scout — serverless** | Dedicated **`.scout/server.log`** (full Kibana output). | Not captured — ES runs in Docker with `ES_LOG_STYLE=file`, so its logs stay inside the (discarded) container. |
-
-Notes:
-
-- A Scout **stateful** `server.log` is much larger than a **serverless** one for the same suite, and that is expected: stateful boots the full plugin set while `--serverless=es` disables ~30 plugins, so stateful emits far more WARN/ERROR chatter. It is not a verbosity difference — both run at INFO+.
-- If the log you need isn't in the expected artifact, say so as an open question rather than treating it as an un-fetched file to hunt down.
+| **FTR** | In the test stdout (`target/test_failures/*.log`, `proc [kibana]` lines) | None |
+| **Scout stateful** | `.scout/server.log` | Startup lines only in `.scout/server.log` |
+| **Scout serverless** | `.scout/server.log` | None (runs in Docker) |
 
 ### Understand the scope
 
