@@ -26,15 +26,12 @@ import {
   ENTITIES_TITLE,
   ENTITY_GRAPH_VIEW_TITLE,
   EVENT_TITLE,
-  formatFlyoutTitle,
-  NETWORK_TITLE,
 } from '../../../../shared/constants/flyout_titles';
 import { getAlertHistoryTitle } from '../../../../document/main/utils/get_header_title';
-import { DocumentFlyoutWrapper } from '../../../../document/main/document_flyout_wrapper';
+import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { GraphVisualization } from '../../../../document/tools/graph/components/graph_visualization';
-import { Network } from '../../../../network/main';
 
 const TITLE = ENTITY_GRAPH_VIEW_TITLE;
 
@@ -69,50 +66,23 @@ export const GraphView = memo(
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
 
     const onShowDocument = useCallback(
       (documentId: string, indexName?: string, isEvent?: boolean) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <DocumentFlyoutWrapper
-                documentId={documentId}
-                indexName={indexName}
-                renderCellActions={cellActionRenderer}
-                onAlertUpdated={noop}
-              />
-            ),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            historyKey,
-            session: 'inherit',
-            title: buildFlyoutNavTitle(isEvent ? EVENT_TITLE : getAlertHistoryTitle()),
-          }
-        ),
-      [overlays, services, store, history, defaultFlyoutProperties, historyKey]
+        openDocumentFlyoutFromIndexAsChild({
+          documentId,
+          indexName,
+          renderCellActions: cellActionRenderer,
+          onAlertUpdated: noop,
+          title: isEvent ? EVENT_TITLE : getAlertHistoryTitle(),
+        }),
+      [openDocumentFlyoutFromIndexAsChild]
     );
 
     const onShowNetwork = useCallback(
-      (ip: string) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: <Network ip={ip} flowTarget={FlowTargetSourceDest.source} />,
-          }),
-          {
-            ...defaultFlyoutProperties,
-            historyKey,
-            session: 'inherit',
-            title: buildFlyoutNavTitle(formatFlyoutTitle(NETWORK_TITLE, ip)),
-          }
-        ),
-      [overlays, services, store, history, defaultFlyoutProperties, historyKey]
+      (ip: string) => openNetworkFlyoutAsChild({ ip, flowTarget: FlowTargetSourceDest.source }),
+      [openNetworkFlyoutAsChild]
     );
 
     const onShowGrouped = useCallback(

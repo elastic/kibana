@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import pLimit from 'p-limit';
 import type {
   QueriesGetResponse,
   QueriesOccurrencesGetResponse,
@@ -34,6 +35,11 @@ import {
 import { searchModeSchema } from '../../../utils/search_mode';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
+import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
+
+const RECONCILE_STREAM_CONCURRENCY = 3;
+// Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
+const RECONCILE_MAX_STREAMS = 10;
 
 const dateFromString = z
   .string()
@@ -151,6 +157,7 @@ export const demoteBackedQueriesRoute = createServerRoute({
     const toDemote = await kiClient.getQueryLinks([], {
       ruleUnbacked: 'exclude',
       queryIds: params.body.queryIds,
+      includeExpired: true,
     });
 
     const byStream = toDemote.reduce<Record<string, string[]>>((acc, link) => {
@@ -217,11 +224,13 @@ export const bulkDeleteQueriesRoute = createServerRoute({
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
-    // Bulk delete must cover both backed and unbacked queries; the default
-    // 'exclude' filter would skip unbacked (draft) ones.
+    // Bulk delete must cover both backed and unbacked queries; the default 'exclude'
+    // filter would skip unbacked (draft) ones. includeExpired: explicit-id action, so
+    // an expired query must stay reachable.
     const queryLinks = await kiClient.getQueryLinks([], {
       queryIds: params.body.queryIds,
       ruleUnbacked: 'include',
+      includeExpired: true,
     });
 
     // Count requested IDs that getQueryLinks did not find — these are idempotent
@@ -258,7 +267,7 @@ export const bulkDeleteQueriesRoute = createServerRoute({
       }
     });
 
-    // syncQueries uninstalls rules before writing storage, so a mid-flight
+    // deleteQueries uninstalls rules before writing storage, so a mid-flight
     // throw can leave rules gone while stored links still reference them. Log
     // the backed rule IDs on failure so ops can reconcile manually.
     const sigEventsLogger = logger.get('significant_events');
@@ -274,10 +283,7 @@ export const bulkDeleteQueriesRoute = createServerRoute({
         continue;
       }
       try {
-        const deleteIds = new Set(queryIds);
-        await kiClient.replaceStreamQueries(definition, (currentLinks) =>
-          currentLinks.filter((l) => !deleteIds.has(l.query.id)).map((l) => l.query)
-        );
+        await kiClient.deleteQueries(definition, queryIds);
         succeeded += queryIds.length;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -292,6 +298,103 @@ export const bulkDeleteQueriesRoute = createServerRoute({
     }
 
     return { succeeded, failed, skipped };
+  },
+});
+
+const reconcileQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/queries/_reconcile',
+  options: {
+    access: 'internal',
+    summary: 'Reconcile rule-backed queries',
+    description:
+      'Re-syncs stored rule-backed queries through the current rule scheduling policy in the current space.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      streamNames: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(RECONCILE_MAX_STREAMS),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{
+    reconciled: number;
+    failed: number;
+    streams: Array<{
+      streamName: string;
+      status: 'reconciled' | 'failed';
+      queries: number;
+      error?: string;
+    }>;
+  }> => {
+    const authUser = server.core.security.authc.getCurrentUser(request);
+    const cloneApiKeysOnCreate = authUser?.authentication_type === 'api_key';
+    const scopedClients = await getScopedClients({
+      request,
+      rulesClientOptions: { cloneApiKeysOnCreate },
+    });
+    const { streamsClient, licensing, uiSettingsClient } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const { streamNames } = params.body;
+    const definitions = await Promise.allSettled(
+      streamNames.map((streamName) => streamsClient.getStream(streamName))
+    );
+    const limiter = pLimit(RECONCILE_STREAM_CONCURRENCY);
+
+    const streams = await Promise.all(
+      definitions.map((result, index) =>
+        limiter(async () => {
+          if (result.status === 'rejected') {
+            const streamName = streamNames[index];
+            const error =
+              result.reason instanceof Error ? result.reason.message : String(result.reason);
+            logger.warn(`Skipping query reconciliation for missing stream ${streamName}: ${error}`);
+            return { streamName, status: 'failed' as const, queries: 0, error };
+          }
+
+          let reconciledQueries = 0;
+          try {
+            await kiClient.replaceStreamQueries(result.value, (currentLinks) => {
+              reconciledQueries = currentLinks.filter((link) => link.rule_backed).length;
+              return currentLinks.map(queryFromLink);
+            });
+            return {
+              streamName: result.value.name,
+              status: 'reconciled' as const,
+              queries: reconciledQueries,
+            };
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logger.warn(
+              `Query reconciliation failed for stream ${result.value.name}: ${errorMessage}`
+            );
+            return {
+              streamName: result.value.name,
+              status: 'failed' as const,
+              queries: reconciledQueries,
+              error: errorMessage,
+            };
+          }
+        })
+      )
+    );
+
+    return {
+      reconciled: streams.filter((stream) => stream.status === 'reconciled').length,
+      failed: streams.filter((stream) => stream.status === 'failed').length,
+      streams,
+    };
   },
 });
 
@@ -574,6 +677,7 @@ export const internalKIQueriesRoutes = {
   ...promoteUnbackedQueriesRoute,
   ...demoteBackedQueriesRoute,
   ...bulkDeleteQueriesRoute,
+  ...reconcileQueriesRoute,
   ...getDiscoveryQueriesRoute,
   ...getDiscoveryQueriesOccurrencesRoute,
   ...generateQueriesRoute,

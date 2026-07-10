@@ -7,24 +7,14 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import { noop } from 'lodash/fp';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { RiskInputsTab } from '../../../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { flyoutProviders } from '../../../../shared/components/flyout_provider';
-import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
-import { buildFlyoutNavTitle } from '../../../../shared/utils/build_flyout_nav_title';
-import { DocumentFlyoutWrapper } from '../../../../document/main/document_flyout_wrapper';
+import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
-import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
 import { RISK_INPUTS_TITLE } from '../../../../shared/constants/flyout_titles';
-import { getAlertHistoryTitle } from '../../../../document/main/utils/get_header_title';
 import { RISK_INPUTS_TOOL_TEST_ID } from './test_ids';
 
 const TITLE = RISK_INPUTS_TITLE;
@@ -44,38 +34,18 @@ export interface RiskInputsProps {
 
 export const RiskInputs = memo(
   ({ entityType, entityName, entityId, onShowEntity }: RiskInputsProps) => {
-    const { services } = useKibana();
-    const store = useStore();
-    const history = useHistory();
-    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
 
     const onShowAlert = useCallback(
       (id: string, indexName: string) => {
-        services.overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <DocumentFlyoutWrapper
-                documentId={id}
-                indexName={indexName}
-                renderCellActions={cellActionRenderer}
-                onAlertUpdated={noop}
-              />
-            ),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            historyKey,
-            session: 'inherit',
-            title: buildFlyoutNavTitle(getAlertHistoryTitle()),
-          }
-        );
+        openDocumentFlyoutFromIndexAsChild({
+          documentId: id,
+          indexName,
+          renderCellActions: cellActionRenderer,
+          onAlertUpdated: noop,
+        });
       },
-      [services, store, history, defaultFlyoutProperties, historyKey]
+      [openDocumentFlyoutFromIndexAsChild]
     );
 
     return (

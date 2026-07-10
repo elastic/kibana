@@ -16,7 +16,7 @@ import { useStore } from 'react-redux';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import type { SessionViewConfig } from '../../../../../common/types/session_view';
-import { DocumentFlyoutWrapper } from '../../main/document_flyout_wrapper';
+import { useFlyoutApi } from '../../../use_flyout_api';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -29,7 +29,6 @@ import {
   SESSION_VIEW_DETAILS_TITLE,
   SESSION_VIEW_TITLE,
 } from '../../../shared/constants/flyout_titles';
-import { getAlertHistoryTitle } from '../../main/utils/get_header_title';
 import { SessionViewDetails } from './components/session_view_details';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
@@ -75,6 +74,7 @@ export const SessionView: FC<SessionViewProps> = memo(
     const store = useStore();
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
 
     const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
@@ -90,35 +90,13 @@ export const SessionView: FC<SessionViewProps> = memo(
 
     const openAlertDetails = useCallback(
       (alertId: string, alertIndex: string, onClose?: () => void) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <DocumentFlyoutWrapper
-                documentId={alertId}
-                indexName={alertIndex}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            session: 'inherit',
-            title: buildFlyoutNavTitle(getAlertHistoryTitle()),
-          }
-        ),
-      [
-        defaultFlyoutProperties,
-        history,
-        onAlertUpdated,
-        overlays,
-        renderCellActions,
-        services,
-        store,
-      ]
+        openDocumentFlyoutFromIndexAsChild({
+          documentId: alertId,
+          indexName: alertIndex,
+          renderCellActions,
+          onAlertUpdated,
+        }),
+      [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
 
     const handleJumpToEvent = useCallback(

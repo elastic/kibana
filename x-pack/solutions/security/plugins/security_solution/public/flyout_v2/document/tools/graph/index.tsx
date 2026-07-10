@@ -28,22 +28,15 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
-import { DocumentFlyoutWrapper } from '../../main/document_flyout_wrapper';
+import { useFlyoutApi } from '../../../use_flyout_api';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
-import { Network } from '../../../network/main';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import {
   getEntityFlyoutTitle,
   renderEntityDetails,
 } from '../../../entity/shared/render_entity_details';
 import { buildFlyoutNavTitle } from '../../../shared/utils/build_flyout_nav_title';
-import {
-  ENTITIES_TITLE,
-  EVENT_TITLE,
-  formatFlyoutTitle,
-  GRAPH_TITLE,
-  NETWORK_TITLE,
-} from '../../../shared/constants/flyout_titles';
+import { ENTITIES_TITLE, EVENT_TITLE, GRAPH_TITLE } from '../../../shared/constants/flyout_titles';
 import { getAlertHistoryTitle } from '../../main/utils/get_header_title';
 
 export const GRAPH_TOOLS_TEST_ID = `${PREFIX}GraphTools` as const;
@@ -68,59 +61,23 @@ export const GraphDetails = memo(
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
 
     const onShowDocument = useCallback(
       (documentId: string, indexName?: string, isEvent?: boolean) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <DocumentFlyoutWrapper
-                documentId={documentId}
-                indexName={indexName}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            historyKey,
-            session: 'inherit',
-            title: buildFlyoutNavTitle(isEvent ? EVENT_TITLE : getAlertHistoryTitle()),
-          }
-        ),
-      [
-        defaultFlyoutProperties,
-        history,
-        historyKey,
-        onAlertUpdated,
-        overlays,
-        renderCellActions,
-        services,
-        store,
-      ]
+        openDocumentFlyoutFromIndexAsChild({
+          documentId,
+          indexName,
+          renderCellActions,
+          onAlertUpdated,
+          title: isEvent ? EVENT_TITLE : getAlertHistoryTitle(),
+        }),
+      [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
 
     const onShowNetwork = useCallback(
-      (ip: string) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: <Network ip={ip} flowTarget={FlowTargetSourceDest.source} />,
-          }),
-          {
-            ...defaultFlyoutProperties,
-            historyKey,
-            session: 'inherit',
-            title: buildFlyoutNavTitle(formatFlyoutTitle(NETWORK_TITLE, ip)),
-          }
-        ),
-      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
+      (ip: string) => openNetworkFlyoutAsChild({ ip, flowTarget: FlowTargetSourceDest.source }),
+      [openNetworkFlyoutAsChild]
     );
 
     const onShowEntity = useCallback(

@@ -5,29 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
-import type { DataTableRecord } from '@kbn/discover-utils';
-import {
-  type Indicator,
-  RawIndicatorFieldId,
-} from '../../../../../../common/threat_intelligence/types/indicator';
+import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IOCRightPanelKey } from '../../../../../flyout/ioc_details/constants/panel_keys';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
-import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
-import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
-import { IOCDetails } from '../../../../../flyout_v2/ioc/main';
-import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
-import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
-import {
-  formatFlyoutTitle,
-  IOC_TITLE,
-} from '../../../../../flyout_v2/shared/constants/flyout_titles';
-import { getIndicatorFieldAndValue } from '../../utils/field_value';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { BUTTON_TEST_ID } from './test_ids';
 import { VIEW_DETAILS_BUTTON_LABEL } from './translations';
 
@@ -43,43 +27,12 @@ export interface OpenIndicatorFlyoutButtonProps {
  */
 export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyoutButtonProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
-  const { services } = useKibana();
-  const { overlays } = services;
   const enableNewFlyout = useIsNewFlyoutEnabled();
-  const store = useStore();
-  const history = useHistory();
-  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-
-  const hit = useMemo<DataTableRecord>(
-    () => ({
-      id: indicator._id as string,
-      raw: { _id: indicator._id as string, fields: indicator.fields },
-      flattened: indicator.fields as Record<string, unknown>,
-    }),
-    [indicator]
-  );
-
-  const name = useMemo(
-    () => getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Name).value,
-    [indicator]
-  );
+  const { openIocFlyout } = useFlyoutApi();
 
   const open = useCallback(() => {
     if (enableNewFlyout) {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <IOCDetails hit={hit} renderCellActions={cellActionRenderer} />,
-        }),
-        {
-          ...defaultFlyoutProperties,
-          historyKey: documentFlyoutHistoryKey,
-          session: 'start',
-          title: formatFlyoutTitle(IOC_TITLE, name),
-        }
-      );
+      openIocFlyout({ indicator });
     } else {
       openFlyout({
         right: {
@@ -90,18 +43,7 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
         },
       });
     }
-  }, [
-    enableNewFlyout,
-    overlays,
-    services,
-    store,
-    history,
-    hit,
-    indicator._id,
-    defaultFlyoutProperties,
-    openFlyout,
-    name,
-  ]);
+  }, [enableNewFlyout, openIocFlyout, indicator, openFlyout]);
 
   return (
     <EuiToolTip content={VIEW_DETAILS_BUTTON_LABEL} disableScreenReaderOutput>

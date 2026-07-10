@@ -1,5 +1,5 @@
 {
-  "sha1": "ebc396d0c378b6ae07c6fb42637326455c945498",
+  "sha1": "c74a8db33a2e0fe2b67fd02cc7027270b9628394",
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 10
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 10
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 135,
+        "line": 136,
         "column": 10
       }
     },
@@ -53,7 +53,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 198,
+        "line": 199,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-748690c3b1e4282",
+      "title": "Director holds an episode active across engine recoveries when the last lifecycle action is activate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 280,
         "column": 10
       }
     },
@@ -67,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 279,
+        "line": 405,
         "column": 10
       }
     },
@@ -81,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 337,
+        "line": 463,
         "column": 10
       }
     },
@@ -95,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 393,
+        "line": 519,
         "column": 10
       }
     },
@@ -109,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 481,
+        "line": 607,
         "column": 10
       }
     },
@@ -123,7 +137,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 532,
+        "line": 658,
         "column": 10
       }
     },
@@ -137,7 +151,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 593,
+        "line": 719,
         "column": 10
       }
     },
@@ -151,7 +165,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 648,
+        "line": 774,
         "column": 10
       }
     },
@@ -165,7 +179,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 696,
+        "line": 822,
         "column": 10
       }
     },
@@ -179,7 +193,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 802,
+        "line": 928,
         "column": 10
       }
     },
@@ -193,7 +207,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 859,
+        "line": 985,
         "column": 10
       }
     },
@@ -207,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 961,
+        "line": 1087,
         "column": 10
       }
     },
@@ -221,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1020,
+        "line": 1146,
         "column": 10
       }
     },
@@ -235,7 +249,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1087,
+        "line": 1213,
         "column": 10
       }
     },
@@ -249,7 +263,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1167,
+        "line": 1293,
         "column": 10
       }
     },
@@ -263,7 +277,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1237,
+        "line": 1363,
         "column": 10
       }
     },
@@ -277,7 +291,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1298,
+        "line": 1424,
         "column": 10
       }
     },
@@ -291,7 +305,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1358,
+        "line": 1484,
         "column": 10
       }
     },
