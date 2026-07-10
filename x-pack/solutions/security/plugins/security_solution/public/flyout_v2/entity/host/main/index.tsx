@@ -41,6 +41,9 @@ import { RiskInputs } from '../../shared/tools/risk_inputs';
 import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
 import { VulnerabilityInsights } from '../tools/vulnerability_insights';
 import { AlertsInsights } from '../../shared/tools/alerts_insights';
+import { GraphView } from '../../shared/tools/graph_view';
+import { Resolution } from '../../shared/tools/resolution';
+import { renderEntityDetails } from '../../shared/render_entity_details';
 import { AnomalyInsights } from '../../shared/tools/anomaly_insights';
 import { Header } from './header';
 import { Content } from './content';
@@ -291,6 +294,29 @@ export const Host: FC<HostProps> = memo(function Host({
     defaultDocumentFlyoutProperties,
   ]);
 
+  const onShowRelatedEntity = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) =>
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: renderEntityDetails({ ...params, scopeId }),
+        }),
+        {
+          ...defaultDocumentFlyoutProperties,
+          title: params.entityName ?? params.entityId,
+          historyKey,
+          session: 'inherit',
+        }
+      ),
+    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
+  );
+
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
       const common = {
@@ -350,6 +376,30 @@ export const Host: FC<HostProps> = memo(function Host({
                 />
               );
           }
+          return;
+        case EntityDetailsLeftPanelTab.GRAPH_VIEW:
+          if (!entityStoreEntityId) return;
+          return wrap(
+            <GraphView
+              entityId={entityStoreEntityId}
+              scopeId={scopeId}
+              entityName={hostName}
+              onShowEntity={onShowRelatedEntity}
+              onShowOriginatingEntity={onShowHost}
+            />
+          );
+        case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
+          if (!entityStoreEntityId) return;
+          return wrap(
+            <Resolution
+              entityId={entityStoreEntityId}
+              entityType="host"
+              entityName={hostName}
+              scopeId={scopeId}
+              onShowEntity={onShowHost}
+              onShowRelatedEntity={onShowRelatedEntity}
+            />
+          );
       }
     },
     [
@@ -359,9 +409,11 @@ export const Host: FC<HostProps> = memo(function Host({
       history,
       historyKey,
       hostName,
+      scopeId,
       panelDisplayEntityId,
       entityStoreEntityId,
       onShowHost,
+      onShowRelatedEntity,
     ]
   );
 
@@ -409,11 +461,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
-            // The v2 flyout does not yet wire up the graph view / resolution group tabs, so hide
-            // their navigation here. v1 HostPanel and the agent-builder canvas keep it (default).
-            // TODO: remove this prop (and `enableGraphAndResolutionNavigation` in content.tsx) once
-            // `openDetailsPanel` handles the GRAPH_VIEW and RESOLUTION_GROUP tabs in this flyout.
-            enableGraphAndResolutionNavigation={false}
+            onShowEntity={onShowRelatedEntity}
             hideHeaderIcons
           />
         )}

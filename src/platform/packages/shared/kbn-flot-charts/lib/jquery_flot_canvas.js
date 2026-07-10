@@ -27,8 +27,6 @@ browser, but needs to redraw with canvas text when exporting as an image.
 
 */
 
-import jQuery from 'jquery';
-
 (function($) {
 
 	var options = {
