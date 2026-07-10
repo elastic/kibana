@@ -44,7 +44,7 @@ export interface AppHeaderViewProps {
    */
   sticky?: boolean;
   /**
-   * Controls the horizontal inset. When omitted, the header owns the standard 16px page gutter.
+   * Controls the horizontal inset. `standard` (also the default when omitted) keeps the 16px page gutter.
    * Bleed modes are compatibility options for headers that cannot yet move outside a padded parent.
    */
   spacing?: AppHeaderSpacing;

@@ -76,8 +76,8 @@ so they should be treated as a transitional layout pattern rather than the targe
 
 Choose the value from the padding of the header's immediate parent:
 
-- Omit `spacing` when the parent does not add padding around the header. The header supplies the
-  standard 16px horizontal page gutter.
+- Use `'standard'` (or omit `spacing`) when the parent does not add padding around the header. The
+  header supplies the standard 16px horizontal page gutter.
 - Use `'compact'` for dense layouts that intentionally use an 8px horizontal gutter. Discover uses
   this mode. Do not use it only to make a header shorter; vertical sizing is independent.
 - Use `'flush'` when the parent or adjacent layout already owns the content inset. The header adds no

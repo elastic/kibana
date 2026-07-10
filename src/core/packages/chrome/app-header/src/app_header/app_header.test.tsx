@@ -281,6 +281,15 @@ describe('AppHeaderView', () => {
       expect(root).toHaveStyleRule('padding-inline', result.current.euiTheme.size.base);
     });
 
+    it('treats explicit standard spacing like the default', () => {
+      const { result } = renderHook(() => useEuiTheme());
+
+      renderAppHeader(<AppHeaderView title="Dashboard" sticky={false} spacing="standard" />);
+
+      const root = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
+      expect(root).toHaveStyleRule('padding-inline', result.current.euiTheme.size.base);
+    });
+
     it('supports compact and flush spacing', () => {
       const { result } = renderHook(() => useEuiTheme());
       const { rerender } = renderAppHeader(

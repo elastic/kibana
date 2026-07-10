@@ -26,7 +26,7 @@ import { AppHeaderView } from './app_header';
 interface ComposedHeaderStoryProps {
   title: string;
   editable: boolean;
-  spacing: 'standard' | AppHeaderSpacing;
+  spacing: AppHeaderSpacing;
   width: number;
   showBack: boolean;
   showTabs: boolean;
@@ -122,8 +122,6 @@ const ComposedHeader = ({
     },
   };
 
-  const spacingProp = spacing === 'standard' ? undefined : spacing;
-
   return (
     <ChromeServiceProvider value={{ chrome }}>
       <div
@@ -150,7 +148,7 @@ const ComposedHeader = ({
             ) : undefined
           }
           sticky={false}
-          spacing={spacingProp}
+          spacing={spacing}
         />
       </div>
     </ChromeServiceProvider>
