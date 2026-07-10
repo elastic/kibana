@@ -12,11 +12,8 @@ import { isBuiltinDefinition, isEnabledDefinition } from '../tool_types/definiti
 
 export interface GetToolTypeInfoOptions {
   /**
-   * Whether the current user can create workflow tools (i.e. holds
-   * `workflowsManagement:read`). When false, the workflow tool type is reported
-   * as non-creatable. Defaults to true.
-   *
-   * This is a UX hint only; creation and execution are enforced independently.
+   * Whether the current user can create workflow tools
+   * (i.e. holds `workflowsManagement:read`).
    */
   workflowToolsCreatable?: boolean;
 }

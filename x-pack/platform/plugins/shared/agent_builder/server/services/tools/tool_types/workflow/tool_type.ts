@@ -50,10 +50,6 @@ export const getWorkflowToolType = ({
             const workflowId = config.workflow_id;
             const agentId = getAgentFromRunContext(runContext)?.agentId;
 
-            // The workflow runs under the caller's identity, so require the same
-            // Workflows privileges the direct Workflows `run` API enforces. Without
-            // this, holding `agentBuilder` alone would let a caller execute any
-            // workflow in the space through this tool.
             const canExecute = await hasWorkflowExecutePrivilege({ security, request, spaceId });
             if (!canExecute) {
               return {
@@ -169,11 +165,6 @@ export const getWorkflowToolType = ({
   };
 };
 
-/**
- * Throws a 403 when the caller lacks `workflowsManagement:read` on the workflow
- * being wrapped. Referencing a workflow through a tool must not grant access the
- * caller does not otherwise hold through the Workflows feature.
- */
 const assertWorkflowReadPrivilege = async ({
   security,
   request,

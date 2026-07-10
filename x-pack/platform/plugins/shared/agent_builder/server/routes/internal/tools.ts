@@ -314,9 +314,7 @@ export function registerInternalToolsRoutes({
 
       const toolTypes = tools.getToolDefinitions();
 
-      // Only advertise the workflow tool type as creatable to users who can
-      // actually reference workflows. This is a UX hint on top of the privilege
-      // checks enforced when creating/executing a workflow tool.
+      // Only advertise the workflow tool type as creatable to users who can reference workflows.
       const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
       const workflowToolsCreatable = workflowsManagement
         ? await hasWorkflowReadPrivilege({
@@ -358,8 +356,7 @@ export function registerInternalToolsRoutes({
 
       const currentSpace = (await ctx.agentBuilder).spaces.getSpaceId();
 
-      // Listing workflows requires `workflowsManagement:read`; without it, return
-      // an empty set rather than leaking workflow ids/names to `agentBuilder`-only users.
+      // Listing workflows requires `workflowsManagement:read`; without it, return an empty set
       const canRead = await hasWorkflowReadPrivilege({
         security: await getSecurity(),
         request,
