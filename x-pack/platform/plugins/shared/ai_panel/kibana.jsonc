@@ -14,7 +14,8 @@
       "dashboard",
       "inference",
       "data",
-      "esql"
+      "esql",
+      "agentBuilder"
     ]
   }
 }

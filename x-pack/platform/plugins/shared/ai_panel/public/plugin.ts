@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { AI_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
 import { setServices } from './services';
 
@@ -17,6 +18,7 @@ interface SetupDeps {
 
 interface StartDeps {
   data: DataPublicPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
 }
 
 export class AiPanelPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
@@ -27,7 +29,7 @@ export class AiPanelPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
     });
   }
 
-  start(core: CoreStart, { data }: StartDeps) {
-    setServices(core, data.search.search);
+  start(core: CoreStart, { data, agentBuilder }: StartDeps) {
+    setServices(core, data.search.search, agentBuilder);
   }
 }

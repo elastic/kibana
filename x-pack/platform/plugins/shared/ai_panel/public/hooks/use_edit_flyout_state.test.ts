@@ -39,7 +39,6 @@ afterEach(() => {
 });
 
 const baseParams = {
-  prompt: 'Show KPI cards',
   esqlQuery: undefined,
   template: undefined,
   timeRange: undefined,
@@ -51,7 +50,6 @@ describe('useEditFlyoutState', () => {
       const { result } = renderHook(() =>
         useEditFlyoutState({ ...baseParams, esqlQuery: 'FROM logs', template: '<p>hi</p>' })
       );
-      expect(result.current.draftPrompt).toBe('Show KPI cards');
       expect(result.current.draftEsqlQuery).toBe('FROM logs');
       expect(result.current.draftTemplate).toBe('<p>hi</p>');
       expect(result.current.isAiAvailable).toBeUndefined();

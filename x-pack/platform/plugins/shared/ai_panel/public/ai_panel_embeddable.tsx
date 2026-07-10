@@ -28,6 +28,7 @@ import { AI_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
 export type AiPanelApi = DefaultEmbeddableApi<AiPanelEmbeddableState> & HasEditCapabilities;
 import { AiPanelComponent } from './components/ai_panel_component';
 import { EditAiPanelFlyout } from './components/edit_ai_panel_flyout';
+import type { UpdateAiPanelConfigParams } from './utils/agent_refine';
 
 export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
   AiPanelEmbeddableState,
@@ -47,6 +48,26 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
       esqlQuery: esqlQuery$.getValue(),
       template: template$.getValue(),
     });
+
+    // Shared by the Save button and the agent's tool call; clears the cached template
+    // whenever the prompt or query changes, since its schema may no longer match.
+    const applyConfigUpdate = (update: {
+      prompt?: string;
+      esqlQuery?: string;
+      template?: string;
+    }) => {
+      const promptChanged = update.prompt !== undefined && update.prompt !== prompt$.getValue();
+      const queryChanged = 'esqlQuery' in update && update.esqlQuery !== esqlQuery$.getValue();
+
+      if (update.prompt !== undefined) prompt$.next(update.prompt);
+      if ('esqlQuery' in update) esqlQuery$.next(update.esqlQuery);
+
+      if (promptChanged || queryChanged) {
+        template$.next(undefined);
+      } else if (update.template !== undefined) {
+        template$.next(update.template);
+      }
+    };
 
     const stateApi = initializeStateApi<AiPanelEmbeddableState>({
       uuid,
@@ -128,6 +149,19 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
           template$.next(t);
         }, []);
 
+        const onSave = useCallback(
+          (newEsqlQuery: string | undefined, newTemplate: string | undefined) => {
+            applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
+            setGenerationVersion((v) => v + 1);
+          },
+          []
+        );
+
+        const onAgentUpdate = useCallback((update: UpdateAiPanelConfigParams) => {
+          applyConfigUpdate(update);
+          setGenerationVersion((v) => v + 1);
+        }, []);
+
         return (
           <>
             <AiPanelComponent
@@ -141,21 +175,13 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
             />
             {isEditFlyoutOpen && (
               <EditAiPanelFlyout
+                embeddableId={uuid}
                 prompt={prompt}
                 esqlQuery={esqlQuery}
                 template={savedTemplate}
                 timeRange={timeRange}
-                onSave={(newPrompt, newEsqlQuery, newTemplate) => {
-                  const promptChanged = newPrompt !== prompt$.getValue();
-                  const queryChanged = newEsqlQuery !== esqlQuery$.getValue();
-                  prompt$.next(newPrompt);
-                  esqlQuery$.next(newEsqlQuery);
-                  // Prompt or query changed — the existing template may no longer match the
-                  // new column schema, so clear it and let the LLM regenerate. Takes priority
-                  // even if the template box was also hand-edited.
-                  template$.next(promptChanged || queryChanged ? undefined : newTemplate);
-                  setGenerationVersion((v) => v + 1);
-                }}
+                onSave={onSave}
+                onAgentUpdate={onAgentUpdate}
                 onClose={() => isEditFlyoutOpen$.next(false)}
               />
             )}

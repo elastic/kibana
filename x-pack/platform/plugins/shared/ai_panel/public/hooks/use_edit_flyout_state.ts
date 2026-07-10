@@ -12,8 +12,6 @@ import { fetchEsqlData } from '../utils/fetch_esql_data';
 import type { EsqlDataResult } from '../utils/fetch_esql_data';
 
 export interface EditFlyoutState {
-  draftPrompt: string;
-  setDraftPrompt: (v: string) => void;
   draftEsqlQuery: string;
   setDraftEsqlQuery: (v: string) => void;
   draftTemplate: string;
@@ -27,19 +25,16 @@ export interface EditFlyoutState {
 }
 
 interface UseEditFlyoutStateParams {
-  prompt: string;
   esqlQuery: string | undefined;
   template: string | undefined;
   timeRange: { from: string; to: string } | undefined;
 }
 
 export function useEditFlyoutState({
-  prompt,
   esqlQuery,
   template,
   timeRange,
 }: UseEditFlyoutStateParams): EditFlyoutState {
-  const [draftPrompt, setDraftPrompt] = useState(prompt);
   const [draftEsqlQuery, setDraftEsqlQueryRaw] = useState(esqlQuery ?? '');
   const [draftTemplate, setDraftTemplate] = useState(template ?? '');
   const [detectedTimeField, setDetectedTimeField] = useState<string | undefined>(undefined);
@@ -107,8 +102,6 @@ export function useEditFlyoutState({
   }, [draftEsqlQuery, timeRange]);
 
   return {
-    draftPrompt,
-    setDraftPrompt,
     draftEsqlQuery,
     setDraftEsqlQuery,
     draftTemplate,

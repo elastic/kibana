@@ -31,28 +31,34 @@ jest.mock('./components/ai_panel_component', () => ({
 
 jest.mock('./components/edit_ai_panel_flyout', () => ({
   EditAiPanelFlyout: (props: {
-    prompt: string;
     esqlQuery: string | undefined;
-    onSave: (prompt: string, esqlQuery: string | undefined, template: string | undefined) => void;
+    onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
+    onAgentUpdate: (update: { prompt?: string; esqlQuery?: string }) => void;
   }) => (
     <div data-test-subj="mockEditFlyout">
       <button
-        data-test-subj="saveSamePrompt"
-        onClick={() => props.onSave(props.prompt, props.esqlQuery, 'edited-template')}
+        data-test-subj="saveTemplateEdit"
+        onClick={() => props.onSave(props.esqlQuery, 'edited-template')}
       >
-        save-same-prompt
-      </button>
-      <button
-        data-test-subj="saveChangedPrompt"
-        onClick={() => props.onSave('a new prompt', props.esqlQuery, 'edited-template')}
-      >
-        save-changed-prompt
+        save-template-edit
       </button>
       <button
         data-test-subj="saveChangedQuery"
-        onClick={() => props.onSave(props.prompt, 'FROM a-different-index', 'edited-template')}
+        onClick={() => props.onSave('FROM a-different-index', 'edited-template')}
       >
         save-changed-query
+      </button>
+      <button
+        data-test-subj="agentUpdatePrompt"
+        onClick={() => props.onAgentUpdate({ prompt: 'a new prompt' })}
+      >
+        agent-update-prompt
+      </button>
+      <button
+        data-test-subj="agentUpdateQuery"
+        onClick={() => props.onAgentUpdate({ esqlQuery: 'FROM agent-chosen-index' })}
+      >
+        agent-update-query
       </button>
     </div>
   ),
@@ -123,35 +129,20 @@ describe('aiPanelEmbeddableFactory', () => {
     });
   });
 
-  describe('edit flyout onSave', () => {
-    it('clears the saved template when the prompt changes, even if a new template was also provided', async () => {
-      const { embeddable } = await buildEmbeddable(baseState);
-      await act(async () => render(<embeddable.Component />));
-
-      await act(async () => {
-        await embeddable.api.onEdit();
-      });
-      await waitFor(() => expect(screen.getByTestId('mockEditFlyout')).toBeInTheDocument());
-
-      await userEvent.click(screen.getByTestId('saveChangedPrompt'));
-
-      expect(embeddable.api.serializeState()).toEqual({
-        ...baseState,
-        prompt: 'a new prompt',
-        template: undefined,
-      });
+  const openEditFlyout = async (embeddable: { api: AiPanelApi }) => {
+    await act(async () => {
+      await embeddable.api.onEdit();
     });
+    await waitFor(() => expect(screen.getByTestId('mockEditFlyout')).toBeInTheDocument());
+  };
 
-    it('keeps the edited template when only the template itself changes (prompt and query unchanged)', async () => {
+  describe('edit flyout onSave (manual query/template edits)', () => {
+    it('keeps the edited template when only the template itself changes (query unchanged)', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
+      await openEditFlyout(embeddable);
 
-      await act(async () => {
-        await embeddable.api.onEdit();
-      });
-      await waitFor(() => expect(screen.getByTestId('mockEditFlyout')).toBeInTheDocument());
-
-      await userEvent.click(screen.getByTestId('saveSamePrompt'));
+      await userEvent.click(screen.getByTestId('saveTemplateEdit'));
 
       expect(embeddable.api.serializeState()).toEqual({
         ...baseState,
@@ -159,14 +150,10 @@ describe('aiPanelEmbeddableFactory', () => {
       });
     });
 
-    it('clears the saved template when the query changes, even though the prompt is unchanged', async () => {
+    it('clears the saved template when the query changes', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
-
-      await act(async () => {
-        await embeddable.api.onEdit();
-      });
-      await waitFor(() => expect(screen.getByTestId('mockEditFlyout')).toBeInTheDocument());
+      await openEditFlyout(embeddable);
 
       await userEvent.click(screen.getByTestId('saveChangedQuery'));
 
@@ -186,12 +173,53 @@ describe('aiPanelEmbeddableFactory', () => {
         '0'
       );
 
-      await act(async () => {
-        await embeddable.api.onEdit();
-      });
-      await waitFor(() => expect(screen.getByTestId('mockEditFlyout')).toBeInTheDocument());
+      await openEditFlyout(embeddable);
+      await userEvent.click(screen.getByTestId('saveTemplateEdit'));
 
-      await userEvent.click(screen.getByTestId('saveSamePrompt'));
+      await waitFor(() =>
+        expect(screen.getByTestId('mockAiPanelComponent')).toHaveAttribute(
+          'data-generation-version',
+          '1'
+        )
+      );
+    });
+  });
+
+  describe('onAgentUpdate (agent tool call from the refine chat)', () => {
+    it('clears the saved template when the agent changes the prompt', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+      await openEditFlyout(embeddable);
+
+      await userEvent.click(screen.getByTestId('agentUpdatePrompt'));
+
+      expect(embeddable.api.serializeState()).toEqual({
+        ...baseState,
+        prompt: 'a new prompt',
+        template: undefined,
+      });
+    });
+
+    it('clears the saved template when the agent changes the query', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+      await openEditFlyout(embeddable);
+
+      await userEvent.click(screen.getByTestId('agentUpdateQuery'));
+
+      expect(embeddable.api.serializeState()).toEqual({
+        ...baseState,
+        esqlQuery: 'FROM agent-chosen-index',
+        template: undefined,
+      });
+    });
+
+    it('bumps the generation version so the panel re-renders', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+      await openEditFlyout(embeddable);
+
+      await userEvent.click(screen.getByTestId('agentUpdatePrompt'));
 
       await waitFor(() =>
         expect(screen.getByTestId('mockAiPanelComponent')).toHaveAttribute(

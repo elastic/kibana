@@ -22,7 +22,10 @@ import type {
   ConversationRound,
 } from '@kbn/agent-builder-common';
 import { ChatEventType } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_OPERATION } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  ATTACHMENT_REF_OPERATION,
+} from '@kbn/agent-builder-common/attachments';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { registerDashboardAttachmentUiDefinition } from '.';
@@ -33,7 +36,7 @@ jest.mock('@kbn/dashboard-plugin/public', () => ({
 
 const createMockRoundCompleteEvent = (
   attachments: VersionedAttachment[],
-  attachmentRefs: { attachment_id: string; operation: string }[]
+  attachmentRefs: { attachment_id: string; operation: string; actor?: string }[]
 ): RoundCompleteEvent => ({
   type: ChatEventType.roundComplete,
   data: {
@@ -43,6 +46,9 @@ const createMockRoundCompleteEvent = (
           attachment_id: ref.attachment_id,
           version: 1,
           operation: ref.operation as typeof ATTACHMENT_REF_OPERATION.updated,
+          // Defaults to an agent-driven ref, since that's what these fixtures are meant to
+          // represent (a genuine LLM/tool dashboard edit) unless a test overrides it.
+          actor: (ref.actor ?? ATTACHMENT_REF_ACTOR.agent) as typeof ATTACHMENT_REF_ACTOR.agent,
         })),
       },
     } as ConversationRound,
@@ -651,6 +657,33 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         createMockRoundCompleteEvent(
           [createMockVersionedAttachment('attachment-1', undefined, false)],
           [{ attachment_id: 'attachment-1', operation: ATTACHMENT_REF_OPERATION.updated }]
+        )
+      );
+      expect(mockApi.setState).not.toHaveBeenCalled();
+
+      cleanup?.();
+    });
+
+    it("does not update state for a user-actor ref (the dashboard's own ambient self-sync)", async () => {
+      const { getAttachment } = createMockAttachment('attachment-1');
+      const mockApi = createMockDashboardApi();
+
+      const cleanup = await mountAttachment({
+        getAttachment,
+        api: mockApi as unknown as DashboardApi,
+      });
+
+      deps.emitChatEvent(
+        'conversation-1',
+        createMockRoundCompleteEvent(
+          [createMockVersionedAttachment('attachment-1')],
+          [
+            {
+              attachment_id: 'attachment-1',
+              operation: ATTACHMENT_REF_OPERATION.updated,
+              actor: ATTACHMENT_REF_ACTOR.user,
+            },
+          ]
         )
       );
       expect(mockApi.setState).not.toHaveBeenCalled();

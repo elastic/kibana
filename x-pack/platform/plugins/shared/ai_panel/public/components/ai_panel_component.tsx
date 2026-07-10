@@ -72,7 +72,6 @@ export const AiPanelComponent = ({
 
   return (
     <div css={wrapperCss}>
-      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
       {isAiUnavailable && (
         <EuiEmptyPrompt
           iconType="sparkles"
@@ -112,6 +111,7 @@ export const AiPanelComponent = ({
           <iframe css={iframeCss} srcDoc={html} sandbox="" title="AI panel" />
         </div>
       )}
+      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
     </div>
   );
 };
