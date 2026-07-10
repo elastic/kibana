@@ -14,7 +14,6 @@ import { KubernetesConnector } from './kubernetes';
 const API_URL = 'https://my-cluster.example.com:6443';
 
 interface TestResult {
-  ok: boolean;
   message?: string;
 }
 
@@ -479,19 +478,15 @@ describe('KubernetesConnector', () => {
       expect(mockRequest).toHaveBeenCalledWith(
         expect.objectContaining({ url: `${API_URL}/version` })
       );
-      expect(result.ok).toBe(true);
       expect(result.message).toContain('v1.29.0');
     });
 
-    it('reports failure with the normalized error message', async () => {
+    it('throws with the normalized error message on failure', async () => {
       mockRequest.mockRejectedValue({
         response: { data: { message: 'Unauthorized', code: 401 } },
       });
 
-      const result = await runTestHandler();
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Unauthorized');
+      await expect(runTestHandler()).rejects.toThrow('Unauthorized');
     });
   });
 });

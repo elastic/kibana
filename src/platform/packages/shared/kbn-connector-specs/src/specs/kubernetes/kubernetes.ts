@@ -599,16 +599,12 @@ export const KubernetesConnector: ConnectorSpec = {
       defaultMessage: 'Verifies connectivity by requesting the Kubernetes API server version',
     }),
     handler: async (ctx) => {
-      try {
-        const data = (await k8sRequest(ctx, { method: 'GET', path: '/version' })) as {
-          gitVersion?: string;
-        };
-        const version = data?.gitVersion ? ` (${data.gitVersion})` : '';
-        return { ok: true, message: `Successfully connected to the Kubernetes API${version}` };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
-      }
+      const data = (await k8sRequest(ctx, { method: 'GET', path: '/version' })) as {
+        gitVersion?: string;
+      };
+      const version = data?.gitVersion ? ` (${data.gitVersion})` : '';
+      return { message: `Successfully connected to the Kubernetes API${version}` };
     },
+    enabled: true,
   },
 };
