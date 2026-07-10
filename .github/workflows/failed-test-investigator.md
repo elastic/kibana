@@ -233,19 +233,19 @@ A `###` heading followed by one summary sentence — nothing else, no standing m
 
 **Heading** — a short natural-language phrase (~10 words max), not a full sentence. Start with the plain-English verdict for the classification, then an em dash, then a very short reason:
 
-| classification | verdict phrase |
-|---|---|
-| `test-needs-update` | Test needs an update |
-| `test-environment` | Test environment issue |
-| `application` | Application bug |
-| `ci-environment` | CI environment issue |
-| `inconclusive` | Inconclusive |
+| classification      | verdict phrase         |
+| ------------------- | ---------------------- |
+| `test-needs-update` | Test needs an update   |
+| `test-environment`  | Test environment issue |
+| `application`       | Application bug        |
+| `ci-environment`    | CI environment issue   |
+| `inconclusive`      | Inconclusive           |
 
-Example: `### Test needs an update — the case is too long for a 60s budget`. **Do not repeat the failing test's name** — the issue title already has it, so describe the *failure*, not the test.
+Example: `### Test needs an update — the case is too long for a 60s budget`. **Do not repeat the failing test's name** — the issue title already has it, so describe the _failure_, not the test.
 
-**Summary** — one sentence that *adds* precision beyond the heading (the exact error, line, or step); never a paraphrase of it. No `**Summary:**` label.
+**Summary** — one sentence that _adds_ precision beyond the heading (the exact error, line, or step); never a paraphrase of it. No `**Summary:**` label.
 
-- **Confidence:** do not print it by default. Surface it only when it is `low` or `inconclusive`, as a short parenthetical in the summary (e.g. "…*low confidence: no Playwright trace was uploaded*").
+- **Confidence:** do not print it by default. Surface it only when it is `low` or `inconclusive`, as a short parenthetical in the summary (e.g. "…_low confidence: no Playwright trace was uploaded_").
 - **Introduced by:** no standing line. Mention an implicated commit/PR only when evidence strongly points to it, as an inline link inside the summary.
 
 ### 2. Collapsible investigation (required)
@@ -273,14 +273,14 @@ Wrap **everything after the summary** in a single `<details>` block so the issue
 
 #### Proposed fix (required)
 
-State only *what to change* — the "why" belongs in Root cause & evidence, so do not restate the failure or the reasoning here.
+State only _what to change_ — the "why" belongs in Root cause & evidence, so do not restate the failure or the reasoning here.
 
-**Recommend one fix.** Pick the best option and commit to it — don't lay out competing options, and never use a table of alternatives (a table makes them look equally good). If a genuine alternative is worth noting, add it as a single sentence *after* the recommendation, clearly subordinate to it.
+**Recommend one fix.** Pick the best option and commit to it — don't lay out competing options, and never use a table of alternatives (a table makes them look equally good). If a genuine alternative is worth noting, add it as a single sentence _after_ the recommendation, clearly subordinate to it.
 
 **Anchor the fix to best practices.** Prefer the fix that brings the test in line with our best practices over a narrower patch that leaves the anti-pattern in place. When the fix maps to a best-practice rule, cite that rule as a section-scoped Markdown link (see below) so the developer learns the underlying guideline.
 
 - **Single file:** name the `file:line` and the change, as a single sentence or a short diff. Do not paste surrounding code that already exists — link to it.
-- **Multiple files (one fix spanning several):** a short table of `file:line` → change, one row per file. This lists the parts of the *one* recommended fix, not a menu of alternatives. No rationale column.
+- **Multiple files (one fix spanning several):** a short table of `file:line` → change, one row per file. This lists the parts of the _one_ recommended fix, not a menu of alternatives. No rationale column.
 - **No concrete fix:** in one or two sentences, name the evidence that would unblock one.
 
 ##### Linking to best practices
