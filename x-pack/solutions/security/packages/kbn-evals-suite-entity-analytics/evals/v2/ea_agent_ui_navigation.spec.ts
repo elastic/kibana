@@ -47,7 +47,7 @@ evaluate.describe(
       await installEntityStoreV2AndWait({ supertest, log });
 
       // Seed watchlists so the agent can resolve the watchlist name the user gives to a real id
-      // via `security.list_watchlists` before building the edit-flyout deep-link.
+      // via `security.get_watchlist_id` before building the edit-flyout deep-link.
       await deleteWatchlistsByName({ supertest, names: MANAGED_WATCHLIST_NAMES });
       await createWatchlist({
         supertest,
@@ -299,7 +299,7 @@ evaluate.describe(
           dataset: {
             name: 'entity-analytics-v2: UI navigation — watchlist edit flyout',
             description:
-              'Watchlist CSV upload and entity-source configuration live in the watchlist edit flyout. The agent resolves the watchlist name to an id via security.list_watchlists, then calls platform.core.redirect_user_to with the watchlists tab path and a flyout opening the watchlists-flyout in edit mode for that id. It must NOT call any mutating watchlist tool.',
+              'Watchlist CSV upload and entity-source configuration live in the watchlist edit flyout. The agent resolves the watchlist name to an id via security.get_watchlist_id, then calls platform.core.redirect_user_to with the watchlists tab path and a flyout opening the watchlists-flyout in edit mode for that id. It must NOT call any mutating watchlist tool.',
             examples: [
               {
                 input: {

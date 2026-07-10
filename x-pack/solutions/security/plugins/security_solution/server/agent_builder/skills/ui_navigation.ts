@@ -287,7 +287,7 @@ Both of these open the watchlist's **edit flyout**:
 ### Destination
 
 - **The user named a specific watchlist** (by name or id) → open that watchlist's edit flyout.
-  1. Resolve the watchlist **id**. If the user already gave an id, use it. Otherwise call \`security.list_watchlists\` with \`nameContains\` set to the user's wording to find the matching watchlist's \`id\`. If several match, pick the closest and call out the ambiguity; if none match, relay that and offer the bare Watchlists tab link (below) so the user can pick.
+  1. Resolve the watchlist **id**. If you already have the id, use it. Otherwise call \`security.get_watchlist_id\` with \`{ identifier: <the name the user gave> }\`. 
   2. Call \`platform.core.redirect_user_to\` with \`path: '${
     ENTITY_ANALYTICS_UI_PATHS.watchlists
   }'\` and this \`flyout\` (substitute \`${WATCHLIST_ID}\` with the resolved id):
@@ -303,7 +303,7 @@ ${asIndentedJson(buildWatchlistEditFlyoutTemplate())}
 
 User: "Upload a CSV of members to the Privileged Users watchlist."
 
-1. Call \`security.list_watchlists\` with \`{ nameContains: 'Privileged Users' }\` to resolve the id.
+1. Call \`security.get_watchlist_id\` with \`{ identifier: 'Privileged Users' }\` to resolve the id.
 2. Call \`platform.core.redirect_user_to\` with \`path: '${
   ENTITY_ANALYTICS_UI_PATHS.watchlists
 }'\` and \`flyout: { right: { id: '${WATCHLISTS_FLYOUT_KEY}', params: { mode: 'edit', watchlistId: '<id from step 1>' } } }\`.
@@ -312,7 +312,7 @@ User: "Upload a CSV of members to the Privileged Users watchlist."
 
 User: "Configure the entity source for the High Risk Hosts watchlist."
 
-1. Resolve the id via \`security.list_watchlists\` (\`nameContains: 'High Risk Hosts'\`), then call \`platform.core.redirect_user_to\` with the watchlists path and the edit \`flyout\` for that id, and explain the tools do one-time membership only:
+1. Resolve the id via \`security.get_watchlist_id\` (\`{ identifier: 'High Risk Hosts' }\`), then call \`platform.core.redirect_user_to\` with the watchlists path and the edit \`flyout\` for that id, and explain the tools do one-time membership only:
    > "I can't configure a watchlist's entity source from chat — my tools only do one-time add/remove. Open the editor to set up a persistent source: [Edit High Risk Hosts](<url from redirect_user_to>)."
 
 User: "Open the watchlists page so I can pick one to edit."

@@ -17,6 +17,7 @@ import {
   entityRiskScoreTool,
   getEntityTool,
   listWatchlistsTool,
+  getWatchlistIdTool,
   removeEntitiesFromWatchlistTool,
   searchEntitiesTool,
   updateWatchlistTool,
@@ -68,6 +69,7 @@ export const registerTools = (
     deleteWatchlistTool(core, logger, experimentalFeatures, hasEncryptionKey)
   );
   agentBuilder.tools.register(listWatchlistsTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(getWatchlistIdTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(removeEntitiesFromWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(

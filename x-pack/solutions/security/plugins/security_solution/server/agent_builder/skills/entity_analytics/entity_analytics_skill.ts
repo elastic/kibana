@@ -19,7 +19,7 @@ import {
 import {
   SECURITY_GET_ENTITY_TOOL_ID,
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
-  SECURITY_LIST_WATCHLISTS_TOOL_ID,
+  SECURITY_GET_WATCHLIST_ID_TOOL_ID,
   SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
 } from '../../tools';
 
@@ -200,13 +200,12 @@ Rules:
 - Render each \`security.entity\` attachment at most once per turn.
 - When \`security.get_entity\` resolves multiple candidates (fallback RLIKE match), no attachment is stored and the \`other\` result contains no \`renderTag\`. In that case, **do not emit a \`<render_attachment>\` tag** — write prose only.
 
-### List Watchlists Tool
-- \`security.list_watchlists\` - Discover the watchlists configured in this space. Returns each watchlist's \`id\`, \`name\`, \`description\`, \`riskModifier\`, \`managed\`, \`entitySourceIds\`, and timestamps. Pass an optional \`nameContains\` substring to narrow the result.
-    Use this tool when the user asks to enumerate or look up watchlists, for example: "what watchlists do we have", "list watchlists", "show me the watchlists", "is there a watchlist called X". The tool does not render a rich attachment — summarize the results in prose (small list) or a short markdown table (when 4+ watchlists are returned). Entity member counts are not included; use \`security.search_entities\` with \`watchlists: [<id>]\` to get the actual members.
-    **Resolving a watchlist name to its members (discover → filter chain).** When the user asks who is on a named watchlist ("who's on the Privileged Users watchlist", "list members of Compromised Accounts"):
-      1. Call \`security.list_watchlists\` (pass \`nameContains\` when the user spelled the name). Find the matching watchlist's \`id\`.
-      2. Call \`security.search_entities\` with \`watchlists: [<id>]\` to list the members; the aggregate \`security.entity\` attachment that tool emits is the user-facing answer.
-    **Do NOT** call \`security.list_watchlists\` to find out which watchlists a specific entity belongs to — that is already on the entity's profile from \`security.get_entity\` as \`entity.attributes.watchlists\`.
+### Get Watchlist Id Tool
+- \`security.get_watchlist_id\` - Resolve a watchlist reference (its **name** or its **id**) to the canonical watchlist \`id\`. Pass the user's wording as \`identifier\`; it returns \`watchlistId\` (and \`name\`), or an actionable error when the name is unknown or ambiguous. Use this whenever you have a single watchlist reference and need its id — e.g. before \`security.search_entities\` with \`watchlists: [<id>]\` — and you are not certain the reference already IS the id. It does not render a rich attachment and does not require confirmation.
+    **Resolving a watchlist name to its members.** When the user asks who is on a named watchlist ("who's on the Privileged Users watchlist", "list members of Compromised Accounts"):
+      1. Call \`security.get_watchlist_id\` with \`{ identifier: <the watchlist name> }\` to resolve the \`watchlistId\` (relay its error if the name is unknown/ambiguous).
+      2. Call \`security.search_entities\` with \`watchlists: [<watchlistId>]\` to list the members; the aggregate \`security.entity\` attachment that tool emits is the user-facing answer.
+    **Do NOT** use this tool to find out which watchlists a specific entity belongs to — that is already on the entity's profile from \`security.get_entity\` as \`entity.attributes.watchlists\`. To **enumerate** watchlists ("what watchlists do we have"), use the \`manage-watchlists\` skill (\`security.list_watchlists\`).
 
 ### Search Entities Tool
 - \`security.search_entities\` - Search the entity store for security entities (host, user, service, generic) matching specific criteria.
@@ -503,21 +502,13 @@ Steps:
 2. The tool presents a confirmation prompt — wait for the user to accept before calling follow-up tools.
 3. On success, inform the user the criticality has been cleared.
 
-### Example 13: List Watchlists
-
-User query: What watchlists do we have?
-
-Steps:
-1. Call \`security.list_watchlists\` (no arguments).
-2. Summarize the result in prose — name, risk modifier, and description per watchlist. Use a short markdown table when 4+ watchlists are returned. Do **not** emit a \`<render_attachment>\` tag; this tool does not produce a rich attachment.
-
-### Example 14: Members Of A Named Watchlist (discover → filter chain)
+### Example 13: Members Of A Named Watchlist (resolve → filter chain)
 
 User query: Who is on the Privileged Users watchlist?
 
 Steps:
-1. Call \`security.list_watchlists\` with \`nameContains: "Privileged Users"\` to resolve the name to a watchlist \`id\`. If multiple watchlists match, pick the one whose name best matches the user's phrasing and call out the ambiguity in prose. If no watchlists match, retry with a shorter distinctive token (e.g. \`nameContains: "privileged"\`).
-2. Call \`security.search_entities\` with \`watchlists: [<id from step 1>]\` (and any other filters the user gave) — the tool emits the aggregate \`security.entity\` attachment with the watchlist members.
+1. Call \`security.get_watchlist_id\` with \`{ identifier: "Privileged Users" }\` to resolve the name to a watchlist \`id\`. If it returns an error (name unknown or ambiguous), relay it and ask the user to confirm the exact watchlist name (enumerating watchlists lives in the \`manage-watchlists\` skill).
+2. Call \`security.search_entities\` with \`watchlists: [<watchlistId from step 1>]\` (and any other filters the user gave) — the tool emits the aggregate \`security.entity\` attachment with the watchlist members.
 3. Copy the \`renderTag\` string verbatim from the \`search_entities\` \`other\` result onto its own line — the renderer shows the entities table Canvas with the members.
 4. Write 2–4 prose bullets calling out the riskiest members on the watchlist, biggest criticality gaps, and recommended follow-ups.
 
@@ -641,7 +632,7 @@ export const getEntityAnalyticsSkill = (ctx: EntityAnalyticsSkillsContext) =>
     name: 'entity-analytics',
     basePath: 'skills/security/entities',
     description:
-      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, list watchlists (discover watchlist names/ids and find members), risk and criticality. ' +
+      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, resolve a watchlist name to its id (get_watchlist_id) to find its members, risk and criticality. ' +
       'Rich attachments: `security.entity` (emitted automatically by search_entities/get_entity — renders as a single-entity card for 1 entity and as an entities table for 2+ entities); `security.entity_analytics_dashboard` (explicit attachments.add — only when the user asks to show/open/view the Entity Analytics home/overview product page). After each tool result that emits a rich attachment, output `<render_attachment id=… version=… />` in markdown (required for Preview/Canvas UI). ' +
       'Risk history, alert contributions, watchlists, behaviors, discovering risky entities.',
     content: `
@@ -661,7 +652,7 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
             SECURITY_GET_ENTITY_TOOL_ID,
             SECURITY_SEARCH_ENTITIES_TOOL_ID,
             platformCoreTools.redirectUserTo,
-            SECURITY_LIST_WATCHLISTS_TOOL_ID,
+            SECURITY_GET_WATCHLIST_ID_TOOL_ID,
             SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
           ]
         : [],
