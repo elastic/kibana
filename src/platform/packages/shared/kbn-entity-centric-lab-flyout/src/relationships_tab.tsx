@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiPanel,
+  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -34,6 +35,7 @@ import type {
 import { buildTopologyLayout } from './topology_graph';
 import type { TopologyLayoutEdge, TopologyLayoutNode } from './topology_graph';
 import { useEntityDisplayName } from './entity_display_name';
+import { entityTypeToKind, inferEntityKind, type EntityKind } from './kind_templates';
 
 interface RelationshipsTabProps {
   readonly relationships: RelationshipsTabData;
@@ -366,19 +368,36 @@ const TopologyPanel = ({
 
   const resetView = useCallback(() => setView(IDENTITY_VIEWPORT), []);
 
-  return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="none">
-      <div
-        css={css`
-          position: relative;
-          height: 360px;
-          background-color: ${euiTheme.colors.body};
-          border-radius: ${euiTheme.border.radius.medium};
-          overflow: hidden;
-        `}
-        data-test-subj="entityCentricLabTopologyGraph"
-      >
-        <TopologyDotsBackground euiTheme={euiTheme} />
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const toggleFullScreen = useCallback(() => setIsFullScreen((current) => !current), []);
+
+  // Escape exits fullscreen; the listener only exists while expanded so it
+  // doesn't compete with the flyout's own Escape handling otherwise.
+  useEffect(() => {
+    if (!isFullScreen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        setIsFullScreen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => window.removeEventListener('keydown', onKeyDown, true);
+  }, [isFullScreen]);
+
+  const surface = (
+    <div
+      css={css`
+        position: ${isFullScreen ? 'fixed' : 'relative'};
+        ${isFullScreen
+          ? `inset: 0; height: 100vh; width: 100vw; z-index: ${euiTheme.levels.modal}; border-radius: 0;`
+          : `height: 360px; border-radius: ${euiTheme.border.radius.medium};`}
+        background-color: ${euiTheme.colors.body};
+        overflow: hidden;
+      `}
+      data-test-subj="entityCentricLabTopologyGraph"
+    >
+      <TopologyDotsBackground euiTheme={euiTheme} />
         <svg
           ref={svgRef}
           viewBox={`0 0 ${layout.width} ${layout.height}`}
@@ -451,13 +470,43 @@ const TopologyPanel = ({
           </g>
         </svg>
         {/* Controls last so they paint on top of the SVG without a z-index. */}
-        <TopologyControls
-          onZoomIn={() => zoomByButton(ZOOM_STEP)}
-          onZoomOut={() => zoomByButton(1 / ZOOM_STEP)}
-          onReset={resetView}
-        />
-        <TopologyHealthLegend />
-      </div>
+      <TopologyControls
+        onZoomIn={() => zoomByButton(ZOOM_STEP)}
+        onZoomOut={() => zoomByButton(1 / ZOOM_STEP)}
+        onReset={resetView}
+        isFullScreen={isFullScreen}
+        onToggleFullScreen={toggleFullScreen}
+      />
+      <TopologyHealthLegend />
+    </div>
+  );
+
+  return (
+    <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+      {/* When expanded the surface is portaled to <body> so `position: fixed`
+          covers the viewport even if an ancestor flyout has a CSS transform;
+          the inline box keeps its height so the tab layout doesn't collapse. */}
+      {isFullScreen ? (
+        <>
+          <div
+            css={css`
+              height: 360px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            `}
+          >
+            <EuiText size="s" color="subdued">
+              {i18n.translate('entityCentricLabFlyout.flyout.relationships.fullScreenPlaceholder', {
+                defaultMessage: 'Topology is shown in full screen. Press Esc to exit.',
+              })}
+            </EuiText>
+          </div>
+          <EuiPortal>{surface}</EuiPortal>
+        </>
+      ) : (
+        surface
+      )}
     </EuiPanel>
   );
 };
@@ -538,10 +587,14 @@ const TopologyControls = ({
   onZoomIn,
   onZoomOut,
   onReset,
+  isFullScreen,
+  onToggleFullScreen,
 }: {
   readonly onZoomIn: () => void;
   readonly onZoomOut: () => void;
   readonly onReset: () => void;
+  readonly isFullScreen: boolean;
+  readonly onToggleFullScreen: () => void;
 }) => (
   <div
     css={css`
@@ -589,6 +642,25 @@ const TopologyControls = ({
               { defaultMessage: 'Re-center' }
             )}
             data-test-subj="entityCentricLabTopologyRecenter"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
+            color="text"
+            onClick={onToggleFullScreen}
+            aria-label={
+              isFullScreen
+                ? i18n.translate(
+                    'entityCentricLabFlyout.flyout.relationships.exitFullScreenAriaLabel',
+                    { defaultMessage: 'Exit full screen' }
+                  )
+                : i18n.translate(
+                    'entityCentricLabFlyout.flyout.relationships.fullScreenAriaLabel',
+                    { defaultMessage: 'Full screen' }
+                  )
+            }
+            data-test-subj="entityCentricLabTopologyFullScreen"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -663,6 +735,7 @@ const TopologyNodeMark = ({
   // dependency table — the two views read as a single colour- AND
   // label-coded view of the same neighbourhood.
   const displayLabel = useEntityDisplayName(node.label);
+  const kindLabel = resolveKindLabel(node);
   const handleKeyDown = (event: React.KeyboardEvent<SVGGElement>) => {
     if (!onSelect) return;
     if (event.key === 'Enter' || event.key === ' ') {
@@ -727,6 +800,19 @@ const TopologyNodeMark = ({
       >
         {displayLabel}
       </text>
+      {kindLabel ? (
+        <text
+          x={pos.x}
+          y={pos.y + radius + 24}
+          fontSize="7.5"
+          textAnchor="middle"
+          fill={euiTheme.colors.textDisabled}
+          fontWeight={400}
+          style={{ fontFamily: 'inherit' }}
+        >
+          {kindLabel}
+        </text>
+      ) : null}
     </g>
   );
 };
@@ -745,4 +831,51 @@ const healthStroke = (health: RelatedEntityHealth, euiTheme: EuiThemeComputed): 
     case 'Healthy':
       return euiTheme.colors.success;
   }
+};
+
+// Human-readable label for the kind sub-line under each node's name (e.g. "APM
+// service", "Database"), so the topology reads what each dot *is*, not just its
+// name. Resolved from the entity type when known, else inferred from the name.
+const KIND_LABELS: Readonly<Record<EntityKind, string>> = {
+  service: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.service', {
+    defaultMessage: 'APM service',
+  }),
+  host: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.host', {
+    defaultMessage: 'Host',
+  }),
+  node: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.node', {
+    defaultMessage: 'Kubernetes node',
+  }),
+  pod: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.pod', {
+    defaultMessage: 'Kubernetes pod',
+  }),
+  container: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.container', {
+    defaultMessage: 'Kubernetes container',
+  }),
+  deployment: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.deployment', {
+    defaultMessage: 'Kubernetes deployment',
+  }),
+  cluster: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.cluster', {
+    defaultMessage: 'Kubernetes cluster',
+  }),
+  namespace: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.namespace', {
+    defaultMessage: 'Kubernetes namespace',
+  }),
+  database: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.database', {
+    defaultMessage: 'Database',
+  }),
+  cloud: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.cloud', {
+    defaultMessage: 'Cloud resource',
+  }),
+  middleware: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.middleware', {
+    defaultMessage: 'Middleware',
+  }),
+  llm: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.llm', {
+    defaultMessage: 'LLM',
+  }),
+};
+
+const resolveKindLabel = (node: TopologyLayoutNode): string | undefined => {
+  const kind = entityTypeToKind(node.entityType) ?? inferEntityKind(node.label);
+  return kind ? KIND_LABELS[kind] : undefined;
 };
