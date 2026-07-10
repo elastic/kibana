@@ -205,7 +205,7 @@ Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 se
 
 - State the **single** dominant cause. Do not enumerate every call, file, wait, or step you inspected — that reasoning is what got you to the answer, not the answer.
 - Cite evidence with an inline link to the code line or log instead of reproducing it. Never paste large blocks of existing code — link to the line range.
-- **Never hyperlink the failure screenshot.** It is a Buildkite artifact you download locally, so it has no public URL.
+- **If you link the failure screenshot, link it to its Buildkite step — never to a fabricated URL.** The screenshot is a Buildkite artifact with no standalone public URL, so point the link at the specific failing job/step on Buildkite (the build URL anchored to that job's UUID, e.g. `.../builds/<n>#<job-uuid>`), where the artifact lives. Never point a "failure screenshot" link at the issue itself or an invented link.
 - Cut anything that does not change what the reader does next. If a sentence only proves you were thorough, delete it.
 
 Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
