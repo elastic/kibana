@@ -35,6 +35,9 @@ export class LensApp {
   private readonly closeDimensionEditorButton;
   public readonly applyChangesButton;
   private readonly dimensionFieldComboBox;
+  private readonly goBackToAppButton;
+  private readonly discardChangesModal;
+  private readonly confirmModalConfirmButton;
 
   constructor(private readonly page: ScoutPage) {
     this.lensApp = this.page.testSubj.locator('lnsApp');
@@ -50,6 +53,9 @@ export class LensApp {
     );
     this.applyChangesButton = this.page.testSubj.locator('lnsApplyChanges__apply');
     this.dimensionFieldComboBox = new EuiComboBoxWrapper(this.page, 'indexPattern-dimension-field');
+    this.goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
+    this.discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');
+    this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
   }
 
   async waitForLensApp() {
@@ -84,6 +90,15 @@ export class LensApp {
     await this.saveAndReturnButton.click();
     await expect(this.lensApp).toBeHidden();
     await expect(this.page.testSubj.locator('dshDashboardViewport')).toBeVisible();
+  }
+
+  async goBackToPreviousApp() {
+    await this.goBackToAppButton.click();
+  }
+
+  async confirmDiscardChangesModal() {
+    await expect(this.discardChangesModal).toBeVisible();
+    await this.confirmModalConfirmButton.click();
   }
 
   /**
