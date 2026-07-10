@@ -82,7 +82,7 @@ export const PackagePoliciesPage = ({
     [getAgentlessStatusForPackage, packageInfo]
   );
   // Kill switch: when off, the agentless deployments table is sourced from the legacy
-  // package-policy LIST + bulk agent-policy reads instead of the agentless policies API.
+  // package-policy LIST + bulk agent-policy reads instead of the managed integrations API.
   const agentlessUIEnabled = isAgentlessPoliciesUIEnabled();
 
   // The agentless deployments table re-derives each policy's inputs from the package manifest

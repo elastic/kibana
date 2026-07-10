@@ -8,6 +8,7 @@
 import {
   significantEventSchema,
   significantEventInvestigationSchema,
+  significantEventStatusSchema,
   type Detection,
   type SignificantEvent,
   type Discovery,
@@ -17,6 +18,7 @@ import {
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
+import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
@@ -307,6 +309,40 @@ const eventsTriggerInvestigationRoute = createServerRoute({
   },
 });
 
+const eventsUpdateRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/events/{id}/update',
+  options: {
+    access: 'internal',
+    summary: 'Update a significant event',
+    description:
+      'Manually override attributes of a significant event, writing a new append-only version.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string().max(255),
+    }),
+    body: z.object({
+      status: significantEventStatusSchema,
+    }),
+  }),
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return updateSignificantEventStatus({
+      eventClient: getEventClient(),
+      eventId: params.path.id,
+      status: params.body.status,
+    });
+  },
+});
+
 export const internalEventsRoutes = {
   ...eventsSearchRoute,
   ...eventsHistoryRoute,
@@ -314,4 +350,5 @@ export const internalEventsRoutes = {
   ...eventsBulkCreateRoute,
   ...eventsAttachInvestigationRoute,
   ...eventsTriggerInvestigationRoute,
+  ...eventsUpdateRoute,
 };
