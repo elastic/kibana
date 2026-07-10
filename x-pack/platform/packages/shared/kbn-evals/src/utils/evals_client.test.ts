@@ -12,8 +12,10 @@ import {
   EVALS_DATASET_URL,
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_URL,
+  EVALS_EXPERIMENTS_URL,
   EVALS_SCORES_URL,
   MAX_SCORES_PER_QUERY,
+  type EvaluationExperimentSummary,
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
 } from '@kbn/evals-common';
@@ -255,6 +257,100 @@ describe('EvalsClient', () => {
         },
       ],
     });
+  });
+
+  it('getExperimentStats forwards execution_id (with suite_id + model_id) as query params', async () => {
+    const kbnClient = createMockKbnClient();
+    const log = createLog();
+    kbnClient.request.mockResolvedValue(
+      asKbnResponse({
+        experiment_id: 'experiment-123',
+        timestamp: '2026-05-01T11:00:00.000Z',
+        task_model: { id: 'gpt-4', family: 'gpt', provider: 'openai' },
+        evaluator_model: { id: 'gpt-4o-mini', family: 'gpt', provider: 'openai' },
+        total_repetitions: 1,
+        stats: [],
+      })
+    );
+    const client = new EvalsClient(kbnClient, log);
+
+    // The experiments listing returns `execution_id` as its grouping key; the
+    // detail route must filter by it, otherwise a bare experiment_id path 404s.
+    await client.getExperimentStats('suite-a::gpt-4', {
+      suiteId: 'suite-a',
+      taskModelId: 'gpt-4',
+      executionId: 'exec-42',
+    });
+
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: EVALS_EXPERIMENT_URL.replace('{experimentId}', encodeURIComponent('suite-a::gpt-4')),
+        method: 'GET',
+        query: expect.objectContaining({
+          suite_id: 'suite-a',
+          model_id: 'gpt-4',
+          execution_id: 'exec-42',
+        }),
+      })
+    );
+  });
+
+  it('listExperiments accumulates across pages and stops once total is reached', async () => {
+    const kbnClient = createMockKbnClient();
+    const log = createLog();
+    const experimentSummary = (id: string): EvaluationExperimentSummary => ({
+      experiment_id: id,
+      timestamp: '2026-06-10T00:00:00.000Z',
+    });
+    kbnClient.request
+      .mockResolvedValueOnce(
+        asKbnResponse({
+          experiments: [experimentSummary('e1'), experimentSummary('e2')],
+          total: 3,
+        })
+      )
+      .mockResolvedValueOnce(asKbnResponse({ experiments: [experimentSummary('e3')], total: 3 }));
+    const client = new EvalsClient(kbnClient, log);
+
+    const result = await client.listExperiments({ suiteId: 'suite-a' });
+
+    expect(result.map((experiment) => experiment.experiment_id)).toEqual(['e1', 'e2', 'e3']);
+    expect(kbnClient.request).toHaveBeenCalledTimes(2);
+    expect(kbnClient.request).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        path: EVALS_EXPERIMENTS_URL,
+        method: 'GET',
+        query: expect.objectContaining({ suite_id: 'suite-a', page: 1, per_page: 100 }),
+      })
+    );
+    expect(kbnClient.request).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ query: expect.objectContaining({ page: 2 }) })
+    );
+  });
+
+  it('listExperiments terminates on an empty page even when total claims more', async () => {
+    const kbnClient = createMockKbnClient();
+    const log = createLog();
+    const experimentSummary = (id: string): EvaluationExperimentSummary => ({
+      experiment_id: id,
+      timestamp: '2026-06-10T00:00:00.000Z',
+    });
+    kbnClient.request
+      .mockResolvedValueOnce(
+        asKbnResponse({
+          experiments: [experimentSummary('e1'), experimentSummary('e2')],
+          total: 100,
+        })
+      )
+      .mockResolvedValueOnce(asKbnResponse({ experiments: [], total: 100 }));
+    const client = new EvalsClient(kbnClient, log);
+
+    const result = await client.listExperiments();
+
+    expect(result.map((experiment) => experiment.experiment_id)).toEqual(['e1', 'e2']);
+    expect(kbnClient.request).toHaveBeenCalledTimes(2);
   });
 
   it('getExperimentScores returns parsed score documents', async () => {

@@ -256,78 +256,11 @@ EVAL_INCLUDE_EIS_MODELS=1
 EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 ```
 
----
-
-### 1.4 Generating the LLM performance matrix
-
-The `matrix` command turns already-exported evaluation results into a publishable
-**LLM performance matrix** (the table comparing models across capabilities in the
-docs). It **does not run any evals** -- it reads the latest experiment per
-(model, suite) from the evals plugin on the target Kibana (typically the golden
-cluster, where the weekly pipeline posts results), normalizes scores onto a 0-10
-scale via a config file, and writes markdown + CSV + JSON.
-
-```
-Weekly LLM evals  ->  golden cluster (.evaluation-scores via evals plugin)
-        |
-        v
-node scripts/evals matrix --config <matrix.config.json>   (kibana-evals-security-matrix pipeline)
-        |
-        v
-target/llm_matrix/{proprietary,open-source}-models.csv + matrix.{md,json}
-        |
-        v  (CI: upload to GCS gs://<bucket>/security/{latest|<version>}/)
-docs-content "Sync LLM performance matrix" workflow  ->  PR  ->  :::{csv-include} render
-```
-
-**Run it locally** against the golden cluster:
-
-```bash
-# Runtime Vault (requires `vault login --method oidc`)
-node scripts/evals matrix \
-  --config .buildkite/pipelines/evals/security_matrix.config.json \
-  --profile dev-vault
-
-# Or with explicit credentials
-EVALUATIONS_KBN_URL=https://<golden-cluster-kibana> EVALUATIONS_KBN_API_KEY=<key> \
-  node scripts/evals matrix --config .buildkite/pipelines/evals/security_matrix.config.json
-```
-
-Outputs land in `target/llm_matrix/` (override with `--out`). See
-[`CLI.md`](./CLI.md#matrix----generate-an-llm-performance-matrix-artifact) for all flags.
-
-**Configuration.** The matrix engine is domain-agnostic; the column taxonomy
-(columns -> suites/datasets/evaluators), model allowlist (display names +
-open-source classification), and normalization/thresholds live in a config file.
-The Security taxonomy is
-[`.buildkite/pipelines/evals/security_matrix.config.json`](../../../../../.buildkite/pipelines/evals/security_matrix.config.json).
-Other teams can add their own config + pipeline to opt in.
-
-The Security config follows the Agent Builder matrix shape from
-[security-team#17904](https://github.com/elastic/security-team/issues/17904): five
-data-backed **Agent Builder** sub-columns (Alert Triage, Detection Engineering,
-Investigation, Workflow Execution, Multi-step execution) sharing a `group`, two
-standalone feature columns (Attack Discovery, Automatic Migration), and two
-**composite** columns derived from them -- `Agent Builder Score` (mean of the five
-sub-columns) and `Overall Score` (mean of Agent Builder Score + the two standalone
-features). Composites are declared via `composites[]` (each averaging the cells of
-the base columns / earlier composites it lists in `from`), ordered explicitly via
-`layout`, and `showOverall: false` suppresses the legacy trailing Overall since the
-layout expresses Overall as a composite. Columns whose suites are not yet wired on
-the golden cluster (e.g. `attack-discovery`, the new multi-step suite) render as
-empty/`Not recommended` and are simply skipped by the composite means until data
-lands -- so the matrix shows the gaps without tanking every model's score. See
-[`CLI.md`](./CLI.md#config-structure) for the full field reference.
-
-**CI + publishing.** The [`kibana-evals-security-matrix`](../../../../../.buildkite/pipeline-resource-definitions/evals/kibana-evals-security-matrix.yml)
-Buildkite pipeline runs `matrix` weekly (after the weekly evals), uploads the
-artifacts as a Buildkite artifact, and (once a bucket is provisioned) to GCS under
-`security/latest/` -- or `security/<version>/` when `MATRIX_VERSION` is set for a
-Stack release. A keyless-WIF GitHub Action in `elastic/docs-content` then pulls the
-CSVs and opens a PR: scheduled weekly for serverless (`latest` -> `main`) and via
-manual `workflow_dispatch` with a version input for versioned releases. The
-docs-content side (page edit, sync workflow, provisioning steps) is staged as a
-separate PR bundle; see its `README.md` for the apply + provisioning checklist.
+> **Generating the LLM performance matrix.** The `matrix` command that turns
+> exported evaluation results into the publishable **LLM performance matrix** now
+> lives in `@kbn/evals-extensions` and is invoked via `node scripts/evals ext matrix`.
+> See [`@kbn/evals-extensions`](../kbn-evals-extensions/README.md#llm-performance-matrix)
+> for usage, config structure, and CI/publishing details.
 
 ---
 

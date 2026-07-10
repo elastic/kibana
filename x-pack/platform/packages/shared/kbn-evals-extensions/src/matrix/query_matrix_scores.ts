@@ -7,7 +7,7 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { EvaluationExperimentSummary } from '@kbn/evals-common';
-import type { EvalsClient, ExperimentStats } from '../evals_client';
+import type { EvalsClient, ExperimentStats } from '@kbn/evals';
 
 /** Aggregated evaluator score for a single dataset within a suite. */
 export interface AggregatedEvaluatorScore {

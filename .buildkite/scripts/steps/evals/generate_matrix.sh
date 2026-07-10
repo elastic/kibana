@@ -27,7 +27,7 @@ if [[ -z "${EVALUATIONS_KBN_URL:-}" ]]; then
 fi
 
 echo "--- Generating LLM performance matrix ($MATRIX_DOMAIN)"
-node scripts/evals matrix \
+node scripts/evals ext matrix \
   --config "$MATRIX_CONFIG" \
   --out "$MATRIX_OUT_DIR" \
   ${MATRIX_BRANCH:+--branch "$MATRIX_BRANCH"}

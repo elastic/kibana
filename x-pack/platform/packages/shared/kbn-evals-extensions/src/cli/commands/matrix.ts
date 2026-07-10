@@ -9,17 +9,17 @@ import Fs from 'fs';
 import Path from 'path';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
-import { KbnClient } from '@kbn/kbn-client';
-import { EvalsClient } from '../../utils/evals_client';
-import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
-import { loadMatrixConfig } from '../../utils/matrix/load_matrix_config';
-import { queryMatrixScores } from '../../utils/matrix/query_matrix_scores';
-import { buildMatrix } from '../../utils/matrix/build_matrix';
-import { renderMatrix } from '../../utils/matrix/render_matrix';
-import { envFromDatasetsProfile } from '../profiles';
+import {
+  createEvaluationsEvalsClient,
+  envFromDatasetsProfile,
+  DEFAULT_EVALUATIONS_KBN_URL,
+} from '@kbn/evals';
+import { loadMatrixConfig } from '../../matrix/load_matrix_config';
+import { queryMatrixScores } from '../../matrix/query_matrix_scores';
+import { buildMatrix } from '../../matrix/build_matrix';
+import { renderMatrix } from '../../matrix/render_matrix';
 
 const DEFAULT_OUT_DIR = 'target/llm_matrix';
-const DEFAULT_EVALUATIONS_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
 export const matrixCmd: Command<void> = {
   name: 'matrix',
@@ -35,7 +35,7 @@ export const matrixCmd: Command<void> = {
   cluster, or a config.<name>.json file).
 
   Example:
-    node scripts/evals matrix \\
+    node scripts/evals ext matrix \\
       --config .buildkite/pipelines/evals/security_matrix.config.json \\
       --profile dev-vault --branch main --out target/llm_matrix
   `,
@@ -87,14 +87,11 @@ export const matrixCmd: Command<void> = {
     const outDir = Path.resolve(repoRoot, flagsReader.string('out') ?? DEFAULT_OUT_DIR);
     const suiteIds = [...new Set(config.columns.flatMap((column) => column.suites))];
 
-    const defaultKbnClient = new KbnClient({ log, url: DEFAULT_EVALUATIONS_KBN_URL });
-    const kbnClient = getEvaluationsKbnClient({
-      kbnClient: defaultKbnClient,
+    const evalsClient = createEvaluationsEvalsClient({
       log,
-      evaluationsKbnUrl,
-      evaluationsKbnApiKey,
+      url: evaluationsKbnUrl,
+      apiKey: evaluationsKbnApiKey,
     });
-    const evalsClient = new EvalsClient(kbnClient, log);
 
     try {
       await evalsClient.assertPluginEnabled();

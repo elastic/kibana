@@ -6,7 +6,7 @@
  */
 
 import type { EvaluationExperimentSummary } from '@kbn/evals-common';
-import type { ExperimentStats } from '../evals_client';
+import type { ExperimentStats } from '@kbn/evals';
 import { pickLatestExperimentPerModel, experimentStatsToDatasets } from './query_matrix_scores';
 
 const experiment = (

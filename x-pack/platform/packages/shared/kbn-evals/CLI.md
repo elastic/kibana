@@ -200,60 +200,10 @@ node scripts/evals doctor --fix
 node scripts/evals compare <run-id-a> <run-id-b>
 ```
 
-### `matrix` -- Generate an LLM performance matrix artifact
-
-Reads the **latest experiment per (model, suite)** from the evals plugin on the
-target Kibana (it does **not** run any evals), maps suites/datasets/evaluators
-onto matrix columns via a config file, normalizes scores onto a 0-10 scale, and
-writes markdown + CSV + JSON artifacts. Point it at the golden cluster to turn the
-weekly pipeline's results into a publishable matrix.
-
-```bash
-# Against the golden cluster via runtime Vault (requires `vault login --method oidc`)
-node scripts/evals matrix \
-  --config .buildkite/pipelines/evals/security_matrix.config.json \
-  --profile dev-vault
-
-# Against any Kibana via explicit env/flags
-EVALUATIONS_KBN_URL=https://<golden-cluster-kibana> EVALUATIONS_KBN_API_KEY=<key> \
-  node scripts/evals matrix --config .buildkite/pipelines/evals/security_matrix.config.json
-```
-
-| Flag              | Description                                                                                  |
-| ----------------- | -------------------------------------------------------------------------------------------- |
-| `--config <path>` | Path to the matrix config JSON (required).                                                   |
-| `--out <dir>`     | Output directory for artifacts (default: `target/llm_matrix`).                               |
-| `--branch <name>` | Git branch filter override (default: `config.branch`).                                       |
-| `--lookback-days` | Only consider experiments newer than `now-<n>d` (default: `config.lookbackDays`).            |
-| `--profile`       | Golden-cluster config profile (`dev-vault` for runtime Vault, or a `config.<name>.json`).    |
-| `--kbn-url`       | Kibana URL override.                                                                         |
-| `--kbn-api-key`   | Kibana API key override.                                                                     |
-
-Outputs written to `--out` (default `target/llm_matrix/`): `proprietary-models.csv`,
-`open-source-models.csv`, `matrix.md`, `matrix.json`. The CSVs are what the
-docs-content page consumes via `:::{csv-include}`.
-
-The matrix config (columns -> suites/datasets/evaluators, model allowlist + display
-names + open-source classification, normalization/thresholds) is decoupled from this
-package. The Security taxonomy lives at
-`.buildkite/pipelines/evals/security_matrix.config.json`. In CI this command runs in
-the `kibana-evals-security-matrix` Buildkite pipeline, which uploads the artifacts to
-GCS for the docs-content sync workflow.
-
-#### Config structure
-
-| Field                                  | Purpose                                                                                              |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `columns[]`                            | **Base** (data-backed) columns. Each maps `suites`/`datasetIds`/`evaluators` -> a scaled 0-10 cell. |
-| `columns[].group`                      | Optional grouped-header label (e.g. `"Agent Builder"`) carried into the JSON artifact for the docs page. |
-| `composites[]`                         | **Derived** columns: `{ id, label, group?, from: [...] }`. Cell = equal-weighted mean of the `from` cells. |
-| `composites[].from`                    | Ids of base columns or **earlier** composites, so composites can be layered (e.g. an Overall Score that averages an Agent Builder Score composite alongside standalone feature columns). |
-| `layout`                               | Explicit left-to-right order of base + composite ids. Omit to render base columns then composites.   |
-| `showOverall`                          | Renders the legacy single weighted/mean "Overall" column at the far right. Set `false` when the layout already expresses Overall as a composite (avoids a duplicate trailing column). |
-| `notRecommendedCountsAsZeroInOverall`  | When set, `"Not recommended"` sources count as 0 in composites and the legacy Overall; missing sources are skipped so a composite reflects the data that exists. |
-
-Composite/legacy-Overall ranking: rows sort by the **final composite** (e.g. Overall
-Score) when composites exist, otherwise by the legacy Overall column.
+> **`matrix` moved.** The LLM performance matrix generator now lives in
+> `@kbn/evals-extensions` and runs via `node scripts/evals ext matrix`. See
+> [`@kbn/evals-extensions`](../kbn-evals-extensions/README.md#llm-performance-matrix)
+> for flags and config structure.
 
 ### `env` -- List environment variables
 
