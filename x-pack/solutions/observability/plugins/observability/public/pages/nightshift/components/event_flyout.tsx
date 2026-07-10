@@ -87,7 +87,8 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps) {
     <EuiFlyout
       onClose={onClose}
       size="m"
-      ownFocus={false}
+      session="start"
+      aria-label={event.title}
       data-test-subj="nightshiftEventFlyout"
     >
       <EuiFlyoutHeader hasBorder>

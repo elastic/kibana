@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import { EventFlyout } from './event_flyout';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 
@@ -55,8 +56,15 @@ const mockEvent: SignificantEvent = {
 };
 
 describe('EventFlyout', () => {
+  const renderFlyout = (props: Partial<React.ComponentProps<typeof EventFlyout>> = {}) =>
+    render(
+      <EuiProvider>
+        <EventFlyout event={mockEvent} onClose={jest.fn()} {...props} />
+      </EuiProvider>
+    );
+
   it('renders the event title and badges', () => {
-    render(<EventFlyout event={mockEvent} onClose={jest.fn()} />);
+    renderFlyout();
 
     expect(screen.getByText(mockEvent.title)).toBeInTheDocument();
     expect(screen.getByText('Significant event')).toBeInTheDocument();
@@ -64,13 +72,13 @@ describe('EventFlyout', () => {
   });
 
   it('renders the summary section', () => {
-    render(<EventFlyout event={mockEvent} onClose={jest.fn()} />);
+    renderFlyout();
 
     expect(screen.getByText('Summary')).toBeInTheDocument();
   });
 
   it('truncates long summaries and shows "Show more"', () => {
-    render(<EventFlyout event={mockEvent} onClose={jest.fn()} />);
+    renderFlyout();
 
     expect(screen.getByText('Show more')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Show more'));
@@ -78,7 +86,7 @@ describe('EventFlyout', () => {
   });
 
   it('renders the detections section', () => {
-    render(<EventFlyout event={mockEvent} onClose={jest.fn()} />);
+    renderFlyout();
 
     expect(screen.getByText('Detections')).toBeInTheDocument();
     expect(screen.getByText('latency-p95-spike')).toBeInTheDocument();
@@ -87,7 +95,7 @@ describe('EventFlyout', () => {
 
   it('calls onClose when flyout is closed', () => {
     const onClose = jest.fn();
-    render(<EventFlyout event={mockEvent} onClose={onClose} />);
+    renderFlyout({ onClose });
 
     fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(onClose).toHaveBeenCalled();

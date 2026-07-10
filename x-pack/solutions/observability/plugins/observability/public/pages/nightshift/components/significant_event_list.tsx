@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiPanel,
   EuiText,
@@ -57,7 +56,15 @@ export function SignificantEventList({
     <EuiPanel hasBorder hasShadow={false} paddingSize="none">
       {events.map((event, index) => (
         <React.Fragment key={event.event_id}>
-          {index > 0 && <EuiHorizontalRule margin="none" />}
+          {index > 0 && (
+            <hr
+              style={{
+                border: 'none',
+                borderTop: '1px solid #D3DAE6',
+                margin: 0,
+              }}
+            />
+          )}
           <SignificantEventItem event={event} onClick={onEventClick} />
         </React.Fragment>
       ))}
