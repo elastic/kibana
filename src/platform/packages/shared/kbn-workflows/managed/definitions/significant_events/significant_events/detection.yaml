@@ -320,7 +320,7 @@ steps:
                       rule_uuid: "{{ foreach.item.key }}"
                   - range:
                       "@timestamp":
-                        gte: "now-{{ consts.RECENT_ACTIVITY_MINUTES }}m"
+                        gte: "now-{{ foreach.item.rule_schedule.recent_activity_minutes | default: consts.RECENT_ACTIVITY_MINUTES }}m"
         on-failure:
           continue: true
 
@@ -402,8 +402,8 @@ steps:
                 x-elastic-internal-origin: "kibana"
               body:
                 ruleUuid: "{{ foreach.item.key }}"
-                lookback: '{{ inputs.quickRecoveryLookback }}'
-                bucketInterval: '{{ inputs.bucketInterval }}'
+                lookback: '{{ foreach.item.rule_schedule.quick_recovery_lookback | default: inputs.quickRecoveryLookback }}'
+                bucketInterval: '{{ foreach.item.rule_schedule.bucket_interval | default: inputs.bucketInterval }}'
             on-failure:
               continue: true
 
@@ -423,8 +423,8 @@ steps:
                 x-elastic-internal-origin: "kibana"
               body:
                 ruleUuid: "{{ foreach.item.key }}"
-                currentLookback: '{{ inputs.quickRecoveryLookback }}'
-                referenceLookbackGte: "now-1d{{ inputs.quickRecoveryLookback | remove: 'now' }}"
+                currentLookback: '{{ foreach.item.rule_schedule.quick_recovery_lookback | default: inputs.quickRecoveryLookback }}'
+                referenceLookbackGte: "now-1d{{ foreach.item.rule_schedule.quick_recovery_lookback | default: inputs.quickRecoveryLookback | remove: 'now' }}"
                 referenceLookbackLt: "now-1d"
             on-failure:
               continue: true
@@ -435,8 +435,8 @@ steps:
               quick_recovery_reference: "${{ steps.get_quick_recovery_day_over_day.output.aggregations.reference_window.doc_count }}"
               quick_recovery_current: "${{ steps.get_quick_recovery_day_over_day.output.aggregations.current_window.doc_count }}"
               quick_recovery_spike_threshold: "${{ steps.get_quick_recovery_day_over_day.output.aggregations.reference_window.doc_count | times: 2 }}"
-              current_rate_scaled: "${{ steps.get_quick_recovery_day_over_day.output.aggregations.current_window.doc_count | times: 60 }}"
-              detection_rate_scaled: "${{ steps.check_active_result.output.hits.hits[0]._source.peak_alert_count | times: 11 }}"
+              current_rate_scaled: "${{ steps.get_quick_recovery_day_over_day.output.aggregations.current_window.doc_count | times: consts.RESOLUTION_WINDOW_MINUTES }}"
+              detection_rate_scaled: "${{ steps.check_active_result.output.hits.hits[0]._source.peak_alert_count | times: foreach.item.rule_schedule.quick_recovery_lookback_minutes }}"
 
           - name: check_quick_recovery_rate
             type: data.set
@@ -499,7 +499,7 @@ steps:
             ${{ steps.compute_rule_state.output.latest_is_detection
             and foreach.item.last_5m.doc_count == 0
             and foreach.item.last_floor_window.doc_count == 0
-            and steps.check_active_result.output.hits.hits[0]._source.peak_alert_count >= consts.QUIET_STATIONARY_MIN_PEAK }}
+            and steps.check_active_result.output.hits.hits[0]._source.peak_alert_count >= foreach.item.rule_schedule.quiet_stationary_peak_min_alert_count }}
 
       - name: compute_write_ids
         # detection_id: carry over only while the episode is still open (latest doc is a detection);

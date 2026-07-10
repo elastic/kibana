@@ -11,7 +11,7 @@ import { createMemoryTools } from '../tools/memory';
 import { toInlineMemoryTools } from './memory/to_inline_tools';
 import content from './significant_events_onboarding.skill.md.text';
 
-export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
+export const createSignificantEventsOnboardingSkill = (options: MemoryToolsOptions) =>
   defineSkillType({
     id: 'significant-events-onboarding',
     name: 'significant-events-onboarding',

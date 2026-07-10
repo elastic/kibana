@@ -6,14 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
-import {
-  dependencyEdgeSchema,
-  infraComponentSchema,
-  causeKiSchema,
-  evidenceSchema,
-} from '../common_schemas';
-import { MAX_TEXT_LENGTH, MAX_ID_LENGTH, MAX_RULE_NAME_LENGTH } from '../constants';
+import { sigEventBaseSchema } from '../common_schemas';
+import { MAX_TEXT_LENGTH, MAX_ID_LENGTH } from '../constants';
 
 export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
   'promoted',
@@ -23,7 +17,12 @@ export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
   'closed',
 ] as const;
 
-export const significantEventStatusSchema = z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS);
+export const significantEventStatusSchema = z
+  .enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
+  .describe(
+    '"promoted" for actionable incidents, "acknowledged" for known and actively tracked events, ' +
+      '"demoted" for false positives, "resolved" for closed incidents.'
+  );
 export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema>;
 
 /**
@@ -41,28 +40,31 @@ export const significantEventInvestigationSchema = z.object({
 });
 export type SignificantEventInvestigation = z.infer<typeof significantEventInvestigationSchema>;
 
-export const significantEventSchema = z.object({
+export const significantEventSchema = sigEventBaseSchema.extend({
   '@timestamp': z.iso.datetime({ offset: true }),
   created_at: z.iso.datetime({ offset: true }),
   event_id: z.string().max(MAX_ID_LENGTH),
-  discovery_id: z.string().max(MAX_ID_LENGTH).optional(),
-  discovery_slug: z.string().max(MAX_ID_LENGTH),
+  discovery_id: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe('ID of the discovery episode this event was promoted from.'),
   previous_event_id: z.string().max(MAX_ID_LENGTH).optional(),
   status: significantEventStatusSchema,
-  workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
-  rule_names: z.array(z.string().max(MAX_RULE_NAME_LENGTH)).max(100).optional(),
-  stream_names: z.array(z.string().max(MAX_STREAM_NAME_LENGTH)).max(100),
-  title: z.string().max(500),
-  summary: z.string().max(4000),
-  root_cause: z.string().max(4000),
-  criticality: z.number(),
-  confidence: z.number(),
-  recommendations: z.array(z.string().max(1000)).max(50),
-  dependency_edges: z.array(dependencyEdgeSchema).optional(),
-  infra_components: z.array(infraComponentSchema).optional(),
-  cause_kis: z.array(causeKiSchema).optional(),
-  evidences: z.array(evidenceSchema).optional(),
-  assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
+  recommendations: z
+    .array(z.string().max(1000))
+    .max(50)
+    .describe(
+      '3 stop-the-bleeding actions ranked by likelihood of stopping user impact, most reversible first.'
+    ),
+  assessment_note: z
+    .string()
+    .max(MAX_TEXT_LENGTH)
+    .optional()
+    .describe(
+      'Free-text note from the analyst or agent that assessed this event. ' +
+        'Use to capture investigation rationale, ambiguities, or caveats not covered by other fields.'
+    ),
   investigations: z.array(significantEventInvestigationSchema).max(100).optional(),
 });
 
