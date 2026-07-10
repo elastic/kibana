@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaApiDocLinksMap } from '../../../../common/types/api_responses';
+import type { KibanaApiDocLinksMap } from '@kbn/console-plugin/common/types/api_responses';
 
 // operationIds are identical between the stateful and serverless Kibana OpenAPI
 // bundles for shared paths, so a single map (extracted from either bundle) is

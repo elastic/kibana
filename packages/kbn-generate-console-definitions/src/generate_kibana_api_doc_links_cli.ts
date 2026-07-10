@@ -14,7 +14,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KIBANA_API_DOC_LINKS_FILE } from '@kbn/console-plugin/common/constants';
-import { extractKibanaApiDocLinks } from '@kbn/console-plugin/server/lib/spec_definitions/kibana_api_doc_links/extract_kibana_api_doc_links';
+import { extractKibanaApiDocLinks } from './extract_kibana_api_doc_links';
 
 const DEFAULT_SOURCE = Path.resolve(REPO_ROOT, 'oas_docs/output/kibana.yaml');
 
