@@ -186,9 +186,7 @@ describe('buildRuntimeFieldEntry', () => {
     expect(entry).not.toBeNull();
     expect(entry!.fieldName).toBe('case.playbook_as_keyword');
     expect(entry!.spec.type).toBe('keyword');
-    expect(entry!.spec.script?.source).toContain(
-      "doc['case.extended_fields.playbook_as_keyword']"
-    );
+    expect(entry!.spec.script?.source).toContain("doc['case.extended_fields.playbook_as_keyword']");
     expect(entry!.spec.script?.source).toMatch(/emit\(v\)/);
   });
 

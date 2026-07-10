@@ -93,9 +93,9 @@ describe('buildCaseDoc', () => {
     expect(buildCaseDoc(fullCaseSO({ severity: CasePersistedSeverity.LOW })).case.severity).toBe(
       'low'
     );
-    expect(
-      buildCaseDoc(fullCaseSO({ severity: CasePersistedSeverity.MEDIUM })).case.severity
-    ).toBe('medium');
+    expect(buildCaseDoc(fullCaseSO({ severity: CasePersistedSeverity.MEDIUM })).case.severity).toBe(
+      'medium'
+    );
     expect(buildCaseDoc(fullCaseSO({ severity: CasePersistedSeverity.HIGH })).case.severity).toBe(
       'high'
     );
@@ -105,9 +105,7 @@ describe('buildCaseDoc', () => {
   });
 
   it('converts numeric status to a human-readable string', () => {
-    expect(buildCaseDoc(fullCaseSO({ status: CasePersistedStatus.OPEN })).case.status).toBe(
-      'open'
-    );
+    expect(buildCaseDoc(fullCaseSO({ status: CasePersistedStatus.OPEN })).case.status).toBe('open');
     expect(buildCaseDoc(fullCaseSO({ status: CasePersistedStatus.IN_PROGRESS })).case.status).toBe(
       'in-progress'
     );
