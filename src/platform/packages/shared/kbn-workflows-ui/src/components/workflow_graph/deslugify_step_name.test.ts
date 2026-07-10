@@ -38,4 +38,14 @@ describe('deslugifyStepName', () => {
   it('title-cases an already human-readable prose name', () => {
     expect(deslugifyStepName('Fetch national parks')).toBe('Fetch National Parks');
   });
+
+  it('keeps a letter glued to a trailing digit as one word', () => {
+    expect(deslugifyStepName('demo_amazon_s3')).toBe('Demo Amazon S3');
+    expect(deslugifyStepName('sha256_checksum')).toBe('Sha256 Checksum');
+  });
+
+  it('keeps an explicitly separated digit as its own word', () => {
+    expect(deslugifyStepName('fetch_5_items')).toBe('Fetch 5 Items');
+    expect(deslugifyStepName('demo_amazon_s_3')).toBe('Demo Amazon S 3');
+  });
 });

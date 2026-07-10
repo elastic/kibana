@@ -62,8 +62,20 @@ const TECH_ACRONYMS = new Set([
  * Display-only: never assign the result back to `step.name` or `data.label` —
  * the raw label is used to look up execution status by step name.
  */
-export const deslugifyStepName = (name: string): string =>
-  startCase(name)
+export const deslugifyStepName = (name: string): string => {
+  const lowerName = name.toLowerCase();
+
+  // `startCase` always splits a digit run into its own word, even when it's
+  // glued directly onto the preceding letters with no separator in the source
+  // (e.g. `s3` -> `S 3`). Rejoin such a pair only when that exact token is a
+  // contiguous substring of the original name; leave explicitly separated
+  // digits (e.g. `s_3`) alone.
+  const titled = startCase(name).replace(/([A-Za-z]+) (\d+)/g, (match, letters, digits) =>
+    lowerName.includes((letters + digits).toLowerCase()) ? letters + digits : match
+  );
+
+  return titled
     .split(' ')
     .map((word) => (TECH_ACRONYMS.has(word.toUpperCase()) ? word.toUpperCase() : word))
     .join(' ');
+};
