@@ -61,7 +61,7 @@ const ReferencedFileRow: React.FC<ReferencedFileRowProps> = ({ item, index }) =>
       css={css`
         border-radius: ${euiTheme.border.radius.medium};
         overflow: hidden;
-        padding-right: ${euiTheme.size.s};
+        padding: 0 ${euiTheme.size.s};
       `}
       borders="all"
       arrowDisplay="right"
