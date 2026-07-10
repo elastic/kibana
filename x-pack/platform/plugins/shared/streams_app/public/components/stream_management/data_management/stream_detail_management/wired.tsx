@@ -29,6 +29,10 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
 import { StreamDetailCanvas } from '../stream_detail_canvas';
+import {
+  ImportLifecycleFlyoutProvider,
+  useImportLifecycleFlyoutContext,
+} from '../stream_detail_lifecycle/import_from_stream';
 
 const wiredStreamManagementSubTabs = [
   'overview',
@@ -62,6 +66,23 @@ export function WiredStreamDetailManagement({
   definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  return (
+    <ImportLifecycleFlyoutProvider>
+      <WiredStreamDetailManagementContent
+        definition={definition}
+        refreshDefinition={refreshDefinition}
+      />
+    </ImportLifecycleFlyoutProvider>
+  );
+}
+
+function WiredStreamDetailManagementContent({
+  definition,
+  refreshDefinition,
+}: {
+  definition: Streams.WiredStream.GetResponse;
+  refreshDefinition: () => void;
+}) {
   const {
     core: { notifications },
     dependencies: {
@@ -73,6 +94,7 @@ export function WiredStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
@@ -202,6 +224,8 @@ export function WiredStreamDetailManagement({
               share,
               router,
               timeRange: { rangeFrom, rangeTo },
+              onImportFromStream: importLifecycleFlyout?.open,
+              isImportFromStreamDisabled: importLifecycleFlyout?.isDisabled,
             }),
           },
         }
