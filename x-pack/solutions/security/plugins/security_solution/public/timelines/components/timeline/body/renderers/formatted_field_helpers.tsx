@@ -28,7 +28,10 @@ import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
-import { formatFlyoutTitle, RULE_TITLE } from '../../../../../flyout_v2/shared/constants/flyout_titles';
+import {
+  formatFlyoutTitle,
+  RULE_TITLE,
+} from '../../../../../flyout_v2/shared/constants/flyout_titles';
 
 interface RenderRuleNameProps {
   children?: React.ReactNode;

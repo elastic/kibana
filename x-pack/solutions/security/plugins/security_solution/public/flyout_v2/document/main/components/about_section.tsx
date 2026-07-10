@@ -16,7 +16,11 @@ import { ExpandableSection } from '../../../shared/components/expandable_section
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { isEcsAllowedValue } from '../utils/event_utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
-import { ABOUT_SECTION_TITLE, formatFlyoutTitle, RULE_TITLE } from '../../../shared/constants/flyout_titles';
+import {
+  ABOUT_SECTION_TITLE,
+  formatFlyoutTitle,
+  RULE_TITLE,
+} from '../../../shared/constants/flyout_titles';
 import { AlertDescription } from './alert_description';
 import { AlertReason } from './alert_reason';
 import { AlertStatus } from './alert_status';

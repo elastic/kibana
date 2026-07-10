@@ -24,7 +24,22 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import {
+  ANALYZER_TITLE,
+  CORRELATIONS_TITLE,
+  ENTITIES_TITLE,
+  formatFlyoutTitle,
+  GRAPH_TITLE,
+  INVESTIGATION_GUIDE_TITLE,
+  NOTES_TITLE,
+  PREVALENCE_TITLE,
+  RESPONSE_TITLE,
+  SESSION_VIEW_TITLE,
+  THREAT_INTELLIGENCE_TITLE,
+} from '../shared/constants/flyout_titles';
+import { getAlertHistoryTitle, getDocumentTitle } from './main/utils/get_header_title';
 
 // Tools are lazy-loaded so consumers of this hook don't statically pull the whole document-flyout
 // tool graph into their bundle; the chunk only loads when a flyout is actually opened.
@@ -77,6 +92,13 @@ export interface OpenDocumentFlyoutParams {
   renderCellActions?: CellActionRenderer;
   /** Invoked after an alert is mutated inside the flyout, to let the caller refresh. Defaults to a no-op. */
   onAlertUpdated?: () => void;
+  /**
+   * Flyout-history title to use for this open, when already known synchronously by the caller
+   * (e.g. `getDocumentHistoryTitle(hit)`). For `openDocumentFlyoutFromIndex`, omitted means no
+   * title. For `openDocumentFlyoutFromIndexAsChild`, omitted falls back to the bare "Alert" title,
+   * since the full document isn't loaded yet at open time.
+   */
+  title?: string;
 }
 
 export interface OpenNotesParams {
@@ -246,6 +268,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session: 'start',
+        title: params.title,
       });
     },
     [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey]
@@ -257,6 +280,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session: 'inherit',
+        title: buildFlyoutNavTitle(params.title ?? getAlertHistoryTitle()),
       });
     },
     [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey]
@@ -284,7 +308,11 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
 
   const openNotes = useCallback(
     ({ hit }: OpenNotesParams) => {
-      open(<NotesDetails hit={hit} />, { ...defaultToolsFlyoutProperties, historyKey });
+      open(<NotesDetails hit={hit} />, {
+        ...defaultToolsFlyoutProperties,
+        historyKey,
+        title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
+      });
     },
     [open, historyKey]
   );
@@ -301,7 +329,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(ANALYZER_TITLE, getDocumentTitle(hit)),
+        }
       );
     },
     [open, historyKey]
@@ -323,7 +356,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(SESSION_VIEW_TITLE, getDocumentTitle(hit)),
+        }
       );
     },
     [open, historyKey]
@@ -335,6 +373,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
+        title: formatFlyoutTitle(ENTITIES_TITLE, getDocumentTitle(hit)),
       });
     },
     [open, historyKey]
@@ -356,7 +395,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onShowAlert={onShowAlert}
           onShowAttack={onShowAttack}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(CORRELATIONS_TITLE, getDocumentTitle(hit)),
+        }
       );
     },
     [open, historyKey]
@@ -368,6 +412,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
+        title: formatFlyoutTitle(RESPONSE_TITLE, getDocumentTitle(hit)),
       });
     },
     [open, historyKey]
@@ -379,6 +424,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
+        title: formatFlyoutTitle(THREAT_INTELLIGENCE_TITLE, getDocumentTitle(hit)),
       });
     },
     [open, historyKey]
@@ -393,7 +439,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           scopeId={scopeId}
           columns={columns}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(PREVALENCE_TITLE, getDocumentTitle(hit)),
+        }
       );
     },
     [open, historyKey]
@@ -405,6 +456,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
+        title: formatFlyoutTitle(INVESTIGATION_GUIDE_TITLE, getDocumentTitle(hit)),
       });
     },
     [open, historyKey]
@@ -422,7 +474,12 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(GRAPH_TITLE, getDocumentTitle(hit)),
+        }
       );
     },
     [open, historyKey]
