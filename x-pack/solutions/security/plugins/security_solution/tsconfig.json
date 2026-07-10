@@ -306,5 +306,6 @@
     "@kbn/date-range-picker",
     "@kbn/esql-types",
     "@kbn/discoveries-schemas",
+    "@kbn/chart-icons",
   ]
 }
