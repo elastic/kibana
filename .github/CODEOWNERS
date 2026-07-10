@@ -3142,6 +3142,9 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_attack_tags_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_attack_status_step @elastic/security-threat-hunting
 
+# Significant Events managed workflows
+src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/obs-sig-events-team
+
 # Alert analysis workflow
 src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analysis_workflow.ts @elastic/security-threat-hunting

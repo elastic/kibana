@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { type MobilePropertyType } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema } from '../../default_api_types';
 
 export type MobileFiltersResponse = Array<{
   key: MobilePropertyType;
@@ -21,17 +21,16 @@ export interface MobileFiltersRouteResponse {
 
 export const mobileFiltersRoute = defineRoute<MobileFiltersRouteResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
+  params: z.object({
+    path: z.object({
+      serviceName: z.string(),
     }),
-    query: t.intersection([
-      kueryRt,
-      rangeRt,
-      environmentRt,
-      t.partial({
-        transactionType: t.string,
-      }),
-    ]),
+    query: z
+      .object({
+        transactionType: z.string().optional(),
+      })
+      .merge(kuerySchema)
+      .merge(rangeSchema)
+      .merge(environmentSchema),
   }),
 });
