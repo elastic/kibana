@@ -180,6 +180,10 @@ const decodeUnifiedAttachment = (
 
   const attachmentType = unifiedRegistry.get(attachment.type);
 
+  if (!attachmentType.schema) {
+    throw badRequest(`Attachment type '${attachment.type}' does not define a schema.`);
+  }
+
   parseUnifiedAttachmentWithSchema(attachmentType.schema, attachment, attachment.type);
 };
 

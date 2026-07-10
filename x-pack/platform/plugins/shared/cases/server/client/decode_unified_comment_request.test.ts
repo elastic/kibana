@@ -25,6 +25,16 @@ describe('decodeUnifiedCommentRequest', () => {
     );
   });
 
+  it('throws a Boom badRequest when a registered type has no schema (runtime misuse)', () => {
+    const unifiedRegistry = new UnifiedAttachmentTypeRegistry();
+    // Simulate a type registered via `as any` that bypasses the required-schema type.
+    unifiedRegistry.register({ id: COMMENT_ATTACHMENT_TYPE } as never);
+
+    expect(() => decodeUnifiedCommentRequest({ ...validCommentPayload }, unifiedRegistry)).toThrow(
+      /Attachment type 'comment' does not define a schema/
+    );
+  });
+
   describe('when `schema` is set', () => {
     it('accepts a valid payload', () => {
       const unifiedRegistry = new UnifiedAttachmentTypeRegistry();

@@ -45,6 +45,19 @@ describe('validateUnifiedRegisteredAttachments', () => {
     ).toThrow(/is not registered in unified attachment type registry/);
   });
 
+  it('throws a Boom badRequest when a registered type has no schema (runtime misuse)', () => {
+    const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+    // Simulate a type registered via `as any` that bypasses the required-schema type.
+    unifiedAttachmentTypeRegistry.register({ id: COMMENT_ATTACHMENT_TYPE } as never);
+
+    expect(() =>
+      validateUnifiedRegisteredAttachments({
+        query: { ...validCommentPayload },
+        unifiedAttachmentTypeRegistry,
+      })
+    ).toThrow(/Attachment type 'comment' does not define a schema/);
+  });
+
   describe('when `schema` is set', () => {
     it('accepts a valid payload', () => {
       const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
