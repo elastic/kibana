@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ESQLAstAllCommands, ESQLAstUserAgentCommand } from '@elastic/esql/types';
+import type { ESQLAstAllCommands, ESQLAstIpLocationCommand } from '@elastic/esql/types';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import { getMapStringListValuesFromAst } from '../../definitions/utils/maps';
@@ -18,12 +18,13 @@ import {
   assignCompletionItem,
   buildAddValuePlaceholder,
   buildMapValueCompleteItem,
+  getNewUserDefinedColumnSuggestion,
   newLineAndPipeCompleteItems,
   withCompleteItem,
 } from '../complete_items';
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
 import { Location } from '../types';
-import { getPosition, UserAgentPosition } from './utils';
+import { getPosition, getPropertyNamesForDatabase, IpLocationPosition } from './utils';
 
 export async function autocomplete(
   query: string,
@@ -32,96 +33,81 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
-  if (!callbacks?.getByType) {
-    return [];
-  }
-
-  const userAgentCommand = command as ESQLAstUserAgentCommand;
-  const position = getPosition(userAgentCommand, cursorPosition);
+  const innerText = query.substring(0, cursorPosition);
+  const ipLocationCommand = command as ESQLAstIpLocationCommand;
+  const position = getPosition(ipLocationCommand, innerText);
 
   switch (position) {
-    case UserAgentPosition.AFTER_USER_AGENT_KEYWORD:
+    case IpLocationPosition.AFTER_IP_LOCATION_KEYWORD:
       return [
-        {
-          label: 'Columns prefix',
-          text: '${1:user_agent} = ',
-          asSnippet: true,
-          kind: 'Reference',
-          detail: 'The prefix for the columns being created.',
-        },
+        getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
       ];
 
-    case UserAgentPosition.AFTER_TARGET_FIELD:
+    case IpLocationPosition.AFTER_TARGET_FIELD:
       return [assignCompletionItem];
 
-    case UserAgentPosition.AFTER_ASSIGN: {
-      // Only pass expressionRoot when the cursor is inside an incomplete sub-expression.
-      // For empty / cursor-at-end-of-complete cases, treat as empty.
-      const expressionRoot = userAgentCommand.expression;
+    case IpLocationPosition.AFTER_ASSIGN: {
       const { suggestions } = await suggestForExpression({
         query,
-        expressionRoot,
+        expressionRoot: ipLocationCommand.expression,
         command,
         cursorPosition,
         location: Location.EVAL,
         context,
         callbacks,
         options: {
-          preferredExpressionType: [...ESQL_STRING_TYPES],
+          preferredExpressionType: ['ip', ...ESQL_STRING_TYPES],
         },
       });
       return suggestions;
     }
 
-    case UserAgentPosition.AFTER_EXPRESSION:
+    case IpLocationPosition.AFTER_EXPRESSION:
       return [withCompleteItem, ...newLineAndPipeCompleteItems];
 
-    case UserAgentPosition.AFTER_WITH_KEYWORD:
+    case IpLocationPosition.AFTER_WITH_KEYWORD:
       return [buildAddValuePlaceholder('config')];
 
-    case UserAgentPosition.WITHIN_OPTIONS: {
+    case IpLocationPosition.WITHIN_OPTIONS: {
       const availableParameters: MapParameters = {
-        regex_file: {
+        database_file: {
           type: 'string',
           description: i18n.translate(
-            'kbn-esql-language.commands.userAgent.autocomplete.regexFileDescription',
-            { defaultMessage: 'Parser configuration file name' }
+            'kbn-esql-language.commands.ipLocation.autocomplete.databaseFileDescription',
+            { defaultMessage: 'IP location database file name' }
           ),
-          suggestions: [buildMapValueCompleteItem('_default_')],
-        },
-        extract_device_type: {
-          type: 'boolean',
-          description: i18n.translate(
-            'kbn-esql-language.commands.userAgent.autocomplete.extractDeviceTypeDescription',
-            { defaultMessage: 'Extract device type (Desktop, Phone, Tablet)' }
-          ),
-          suggestions: [buildMapValueCompleteItem('true'), buildMapValueCompleteItem('false')],
         },
         properties: {
           type: 'array',
           description: i18n.translate(
-            'kbn-esql-language.commands.userAgent.autocomplete.propertiesDescription',
+            'kbn-esql-language.commands.ipLocation.autocomplete.propertiesDescription',
             { defaultMessage: 'List of properties to extract' }
           ),
           suggestions: [buildMapValueCompleteItem('[ $0 ]', '[]')],
         },
+        first_only: {
+          type: 'boolean',
+          description: i18n.translate(
+            'kbn-esql-language.commands.ipLocation.autocomplete.firstOnlyDescription',
+            { defaultMessage: 'Use only the first value from multi-value IP input' }
+          ),
+          suggestions: [buildMapValueCompleteItem('true'), buildMapValueCompleteItem('false')],
+        },
       };
-      return getCommandMapExpressionSuggestions(
-        query.substring(0, cursorPosition),
-        availableParameters
-      );
+      return getCommandMapExpressionSuggestions(innerText, availableParameters);
     }
 
-    case UserAgentPosition.WITHIN_PROPERTIES_ARRAY: {
+    case IpLocationPosition.WITHIN_PROPERTIES_ARRAY: {
       const usedValues = new Set(
-        getMapStringListValuesFromAst(userAgentCommand.namedParameters, 'properties') ?? []
+        getMapStringListValuesFromAst(ipLocationCommand.namedParameters, 'properties') ?? []
       );
-      return ['name', 'version', 'os', 'device']
-        .filter((v) => !usedValues.has(v))
-        .map((v) => buildMapValueCompleteItem(`"${v}"`));
+
+      return getPropertyNamesForDatabase(ipLocationCommand)
+        .filter((property) => !usedValues.has(property))
+        .map((property) => buildMapValueCompleteItem(`"${property}"`));
     }
 
-    case UserAgentPosition.AFTER_COMMAND:
+    case IpLocationPosition.AFTER_COMMAND:
       return newLineAndPipeCompleteItems;
 
     default:
