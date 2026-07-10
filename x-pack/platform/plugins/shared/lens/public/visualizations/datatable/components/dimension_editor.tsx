@@ -18,10 +18,11 @@ import {
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { KbnPalettes } from '@kbn/palettes';
-import type {
-  VisualizationDimensionEditorProps,
-  DatatableVisualizationState,
-  ColumnCellDecorationMode,
+import {
+  COLUMN_CELL_DECORATION_MODE,
+  type ColumnCellDecorationMode,
+  type VisualizationDimensionEditorProps,
+  type DatatableVisualizationState,
 } from '@kbn/lens-common';
 import { DatatableInspectorTables } from '../../../../common/expressions';
 
@@ -58,11 +59,11 @@ type ColumnType = DatatableVisualizationState['columns'][number];
 
 /** Decoration modes in editor display order. */
 const COLOR_MODE_ORDER: readonly ColumnCellDecorationMode[] = [
-  'none',
-  'cell',
-  'badge',
-  'text',
-  'progress',
+  COLUMN_CELL_DECORATION_MODE.NONE,
+  COLUMN_CELL_DECORATION_MODE.CELL,
+  COLUMN_CELL_DECORATION_MODE.BADGE,
+  COLUMN_CELL_DECORATION_MODE.TEXT,
+  COLUMN_CELL_DECORATION_MODE.PROGRESS,
 ];
 
 /**
@@ -166,9 +167,9 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   );
   const showColorByTerms = isBucketable;
   const showDynamicColoringFeature = isBucketable || isNumeric;
-  const currentColorMode = column?.colorMode || 'none';
-  const hasDynamicColoring = currentColorMode !== 'none';
-  const isProgressMode = currentColorMode === 'progress';
+  const currentColorMode = column?.colorMode || COLUMN_CELL_DECORATION_MODE.NONE;
+  const hasDynamicColoring = currentColorMode !== COLUMN_CELL_DECORATION_MODE.NONE;
+  const isProgressMode = currentColorMode === COLUMN_CELL_DECORATION_MODE.PROGRESS;
 
   // A terms-colored bucket is treated as bucketed; everything else offered here is numeric.
   const columnKind: ColumnKind = showColorByTerms ? 'bucketed' : 'numeric';
@@ -190,7 +191,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
 
   let activePalette: PaletteOutput<CustomPaletteParams>;
   const shouldUseDefaultProgressPalette =
-    currentColorMode === 'progress' &&
+    currentColorMode === COLUMN_CELL_DECORATION_MODE.PROGRESS &&
     column?.fillStyle != null &&
     isPaletteFillMode(column.fillStyle.fillMode) &&
     !column.palette;
@@ -278,7 +279,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                   colorMode: newMode,
                 };
 
-                if (newMode !== 'none') {
+                if (newMode !== COLUMN_CELL_DECORATION_MODE.NONE) {
                   if (showColorByTerms) {
                     if (!column?.colorMapping) {
                       params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
@@ -286,20 +287,22 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                   } else {
                     if (!column?.palette) {
                       params.palette =
-                        newMode === 'progress' ? getDefaultProgressPalette() : activePalette;
+                        newMode === COLUMN_CELL_DECORATION_MODE.PROGRESS
+                          ? getDefaultProgressPalette()
+                          : activePalette;
                     }
                   }
                 }
 
                 const nextDecoration = getCellDecorationCapabilities(newMode);
 
-                if (newMode === 'progress') {
+                if (newMode === COLUMN_CELL_DECORATION_MODE.PROGRESS) {
                   // Seed the fill config for new layers only; persisted configs
                   // are left untouched.
                   if (!column?.fillStyle) {
                     params.fillStyle = getDefaultFillConfig(newMode);
                   }
-                } else if (currentColorMode === 'progress') {
+                } else if (currentColorMode === COLUMN_CELL_DECORATION_MODE.PROGRESS) {
                   // Leaving progress mode: drop progress-only configuration.
                   params.fillStyle = undefined;
                 }
@@ -314,7 +317,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 }
 
                 // clear up when switching to no coloring
-                if (newMode === 'none') {
+                if (newMode === COLUMN_CELL_DECORATION_MODE.NONE) {
                   params.palette = undefined;
                   params.colorMapping = undefined;
                 }
@@ -327,7 +330,9 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
             (isProgressMode ? (
               <ProgressBarControls
                 column={column}
-                fillStyle={column.fillStyle ?? getDefaultFillConfig('progress')}
+                fillStyle={
+                  column.fillStyle ?? getDefaultFillConfig(COLUMN_CELL_DECORATION_MODE.PROGRESS)
+                }
                 dataBounds={currentMinMax}
                 palette={activePalette}
                 paletteService={props.paletteService}

@@ -78,7 +78,14 @@ export type DatatableColumnResult = DatatableColumnArgs & {
  *
  * The stored value `'cell'` is surfaced in the editor as "Background".
  */
-export type ColumnCellDecorationMode = 'none' | 'cell' | 'text' | 'badge' | 'progress';
+export const COLUMN_CELL_DECORATION_MODE = {
+  NONE: 'none',
+  CELL: 'cell',
+  BADGE: 'badge',
+  TEXT: 'text',
+  PROGRESS: 'progress',
+} as const;
+export type ColumnCellDecorationMode = $Values<typeof COLUMN_CELL_DECORATION_MODE>;
 
 /**
  * Fill style for a value-driven cell decoration.

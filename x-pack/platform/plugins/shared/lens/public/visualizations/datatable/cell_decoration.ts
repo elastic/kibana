@@ -7,10 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import type {
-  ColumnCellDecorationMode,
   CellDecorationFillMode,
   CellDecorationFillConfig,
+  ColumnCellDecorationMode,
 } from '@kbn/lens-common';
+import { COLUMN_CELL_DECORATION_MODE } from '@kbn/lens-common';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 /**
@@ -83,36 +84,36 @@ export const CELL_DECORATION_CAPABILITIES: Record<
   ColumnCellDecorationMode,
   CellDecorationCapabilities
 > = {
-  none: {
-    mode: 'none',
+  [COLUMN_CELL_DECORATION_MODE.NONE]: {
+    mode: COLUMN_CELL_DECORATION_MODE.NONE,
     getLabel: () =>
       i18n.translate('xpack.lens.table.dynamicColoring.none', { defaultMessage: 'None' }),
     supportedColumnKinds: [],
     supportedAlignments: ALL_ALIGNMENTS,
   },
-  cell: {
-    mode: 'cell',
+  [COLUMN_CELL_DECORATION_MODE.CELL]: {
+    mode: COLUMN_CELL_DECORATION_MODE.CELL,
     getLabel: () =>
       i18n.translate('xpack.lens.table.dynamicColoring.cell', { defaultMessage: 'Background' }), // `'cell'` is surfaced as "Background"
     supportedColumnKinds: ['numeric', 'bucketed'],
     supportedAlignments: ALL_ALIGNMENTS,
   },
-  badge: {
-    mode: 'badge',
+  [COLUMN_CELL_DECORATION_MODE.BADGE]: {
+    mode: COLUMN_CELL_DECORATION_MODE.BADGE,
     getLabel: () =>
       i18n.translate('xpack.lens.table.dynamicColoring.badge', { defaultMessage: 'Badge' }),
     supportedColumnKinds: ['numeric', 'bucketed'],
     supportedAlignments: ALL_ALIGNMENTS,
   },
-  text: {
-    mode: 'text',
+  [COLUMN_CELL_DECORATION_MODE.TEXT]: {
+    mode: COLUMN_CELL_DECORATION_MODE.TEXT,
     getLabel: () =>
       i18n.translate('xpack.lens.table.dynamicColoring.text', { defaultMessage: 'Text' }),
     supportedColumnKinds: ['numeric', 'bucketed'],
     supportedAlignments: ALL_ALIGNMENTS,
   },
-  progress: {
-    mode: 'progress',
+  [COLUMN_CELL_DECORATION_MODE.PROGRESS]: {
+    mode: COLUMN_CELL_DECORATION_MODE.PROGRESS,
     getLabel: () =>
       i18n.translate('xpack.lens.table.dynamicColoring.progress', {
         defaultMessage: 'Progress bar',
@@ -128,13 +129,15 @@ export const CELL_DECORATION_CAPABILITIES: Record<
 };
 
 export function getCellDecorationCapabilities(
-  mode: ColumnCellDecorationMode = 'none'
+  mode: ColumnCellDecorationMode = COLUMN_CELL_DECORATION_MODE.NONE
 ): CellDecorationCapabilities {
   return CELL_DECORATION_CAPABILITIES[mode];
 }
 
 /** Translated label for a decoration mode (single source for editor + tests). */
-export function getCellDecorationLabel(mode: ColumnCellDecorationMode = 'none'): string {
+export function getCellDecorationLabel(
+  mode: ColumnCellDecorationMode = COLUMN_CELL_DECORATION_MODE.NONE
+): string {
   return getCellDecorationCapabilities(mode).getLabel();
 }
 

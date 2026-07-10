@@ -22,11 +22,12 @@ import {
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type {
-  ColumnCellDecorationMode,
-  CellDecorationFillMode,
-  CellDecorationFillConfig,
-  CellDecorationValueRange,
+import {
+  COLUMN_CELL_DECORATION_MODE,
+  type CellDecorationFillConfig,
+  type CellDecorationFillMode,
+  type CellDecorationValueRange,
+  type ColumnCellDecorationMode,
 } from '@kbn/lens-common';
 import { defaultPaletteParams, findMinMaxByColumnId } from '../../shared_components';
 import { getCellDecorationCapabilities, isAlignmentSupported } from './cell_decoration';
@@ -56,7 +57,7 @@ export function getSupportedColumnAlignment<
   }
 >(column: C, isNumeric = false): 'left' | 'right' | 'center' {
   const currentAlignment = getColumnAlignment(column, isNumeric);
-  const colorMode = column.colorMode ?? 'none';
+  const colorMode = column.colorMode ?? COLUMN_CELL_DECORATION_MODE.NONE;
   const decoration = getCellDecorationCapabilities(colorMode);
 
   return isAlignmentSupported(colorMode, currentAlignment)
@@ -192,7 +193,7 @@ export { DEFAULT_PROGRESS_BAR_COLOR, getDecorationDefaultColor } from './cell_de
  * decoration dictates its own seed from a single source of truth.
  */
 export function getDefaultFillConfig(
-  colorMode: ColumnCellDecorationMode = 'progress'
+  colorMode: ColumnCellDecorationMode = COLUMN_CELL_DECORATION_MODE.PROGRESS
 ): CellDecorationFillConfig {
   const { defaultFillMode, defaultColor } = getCellDecorationCapabilities(colorMode);
   return {

@@ -46,6 +46,7 @@ import type {
   UserMessage,
 } from '@kbn/lens-common';
 import {
+  COLUMN_CELL_DECORATION_MODE,
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
@@ -96,10 +97,10 @@ function reconcileCategoricalColumn(column: ColumnState): ColumnState {
 
   // Progress bars are numeric-only; if the column became categorical, drop the
   // progress decoration and fall back to a categorical color mapping.
-  if (colorMode === 'progress' || fillStyle != null) {
+  if (colorMode === COLUMN_CELL_DECORATION_MODE.PROGRESS || fillStyle != null) {
     return {
       ...column,
-      colorMode: 'cell',
+      colorMode: COLUMN_CELL_DECORATION_MODE.CELL,
       fillStyle: undefined,
       palette: undefined,
       colorMapping: colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG,
@@ -404,11 +405,19 @@ export const getDatatableVisualization = ({
     const getColorIndicator = (
       accessor: string
     ): Pick<AccessorConfig, 'triggerIconType' | 'palette' | 'color'> => {
-      const { colorMode = 'none', hidden, fillStyle } = columnMap[accessor] ?? {};
+      const {
+        colorMode = COLUMN_CELL_DECORATION_MODE.NONE,
+        hidden,
+        fillStyle,
+      } = columnMap[accessor] ?? {};
 
       if (hidden) return { triggerIconType: 'invisible' };
 
-      if (colorMode === 'progress' && fillStyle && !isPaletteFillMode(fillStyle.fillMode)) {
+      if (
+        colorMode === COLUMN_CELL_DECORATION_MODE.PROGRESS &&
+        fillStyle &&
+        !isPaletteFillMode(fillStyle.fillMode)
+      ) {
         return {
           triggerIconType: 'color',
           color: fillStyle.color ?? DEFAULT_PROGRESS_BAR_COLOR,
@@ -416,7 +425,7 @@ export const getDatatableVisualization = ({
       }
 
       const stops = getResolvedDisplayColors(accessor);
-      const hasColoring = colorMode !== 'none' && stops.length > 0;
+      const hasColoring = colorMode !== COLUMN_CELL_DECORATION_MODE.NONE && stops.length > 0;
       return hasColoring
         ? { triggerIconType: 'colorBy', palette: stops }
         : { triggerIconType: undefined };
@@ -730,7 +739,9 @@ export const getDatatableVisualization = ({
               isTransposed: column.isTransposed,
               transposable: isTransposable,
               alignment: column.alignment,
-              colorMode: canColor ? column.colorMode ?? 'none' : 'none',
+              colorMode: canColor
+                ? column.colorMode ?? COLUMN_CELL_DECORATION_MODE.NONE
+                : COLUMN_CELL_DECORATION_MODE.NONE,
               palette:
                 !canColor || !column.palette
                   ? undefined
@@ -741,7 +752,9 @@ export const getDatatableVisualization = ({
               colorMapping:
                 canColor && column.colorMapping ? JSON.stringify(column.colorMapping) : undefined,
               fillStyle:
-                canColor && column.colorMode === 'progress' && column.fillStyle
+                canColor &&
+                column.colorMode === COLUMN_CELL_DECORATION_MODE.PROGRESS &&
+                column.fillStyle
                   ? JSON.stringify(column.fillStyle)
                   : undefined,
               summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,
@@ -938,7 +951,11 @@ export const getDatatableVisualization = ({
       // 'progress' owns its own palette/range lifecycle (the solid/gradient range
       // mirrors palette params), so it is excluded from the color-mismatch auto-fix
       // to avoid rewriting the palette out from under the bar domain.
-      if (!colorMode || colorMode === 'none' || colorMode === 'progress') {
+      if (
+        !colorMode ||
+        colorMode === COLUMN_CELL_DECORATION_MODE.NONE ||
+        colorMode === COLUMN_CELL_DECORATION_MODE.PROGRESS
+      ) {
         return column;
       }
 
@@ -1039,7 +1056,7 @@ export const getDatatableVisualization = ({
 
   getVisualizationInfo(state) {
     const visibleMetricColumns = state.columns.filter(
-      (c) => !c.hidden && c.colorMode && c.colorMode !== 'none'
+      (c) => !c.hidden && c.colorMode && c.colorMode !== COLUMN_CELL_DECORATION_MODE.NONE
     );
 
     return {
