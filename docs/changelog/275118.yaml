@@ -4,4 +4,4 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-07-07
-title: Adding click interactions on anomalies table in entity flyouts
+title: Add click interactions to anomalies table in entity flyouts

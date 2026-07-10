@@ -6,4 +6,4 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-07-07
-title: Added marginTop to Collapsable Section header
+title: Add spacing to collapsible section header

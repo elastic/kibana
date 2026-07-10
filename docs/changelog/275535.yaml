@@ -8,5 +8,5 @@ products:
   target: 2026-07-07
 areas:
 - Search and data
-title: Fix memoize ES|QL autocomplete sources
+title: Fix Console ES|QL autocomplete refetching sources on every keystroke
 description: Console ES|QL source autocomplete now reuses a fresh source list instead of refetching it on every keystroke.

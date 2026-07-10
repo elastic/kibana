@@ -6,4 +6,5 @@ products:
   target: 2026-07-07
 areas:
 - Alerting and reporting
-title: Cases analytics v2 - Activity Index (.cases-activity)
+title: Add Cases analytics activity index for user actions
+description: "Adds the `.cases-activity` index for Cases analytics, storing one document per case user action so activity can be joined back to cases in ES|QL."

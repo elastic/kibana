@@ -6,4 +6,4 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-07-07
-title: 'fix(apm): prevent key column from shrinking in metadata key-value tables'
+title: Fix key column shrinking in APM metadata key-value tables

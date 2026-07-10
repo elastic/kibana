@@ -4,5 +4,5 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-07-07
-title: Enable Results Export feature flag
-description: Osquery query results can now be exported as CSV, JSON, or NDJSON files directly from the query-results page (GA in 9.5).
+title: Add Osquery query results export
+description: "You can export Osquery query results as CSV, JSON, or NDJSON files directly from the query-results page."

@@ -5,4 +5,4 @@ products:
 - product: cloud-serverless
   target: 2026-07-07
 title: Fix orphaned migration on partial upload failure
-description: '> Fixes an issue where uploading invalid rules or dashboard migration files that could leave behind orphaned migration entries.'
+description: "Fixes orphaned migration entries left behind when uploading invalid rules or dashboard migration files."

@@ -8,4 +8,4 @@ products:
   target: 2026-07-07
 areas:
 - Alerting and reporting
-title: ES|QL query rule executor silently rewrites the saved query via parse+pretty-print
+title: Fix ES|QL query rules silently rewriting saved queries

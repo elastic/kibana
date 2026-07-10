@@ -6,4 +6,4 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-07-07
-title: Remove stray delimiter in attachment header
+title: Fix stray delimiter in Agent Builder attachment headers
