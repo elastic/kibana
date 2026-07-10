@@ -52,34 +52,34 @@ spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic 
   });
 
   spaceTest('should convert basic metric to Lens', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Metric - Basic'
     );
-    await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+    await lens.waitForVisualization('mtrVis');
     await expect(page.testSubj.locator('mtrVis').getByText('Count of records')).toBeVisible();
   });
 
   spaceTest('should convert static value', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Metric - Static value'
     );
-    await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+    await lens.waitForVisualization('mtrVis');
     const dimensions = page.testSubj.locator('lns-dimensionTrigger');
     await expect(dimensions).toHaveCount(1);
     await expect(dimensions.getByText('10')).toBeVisible();
   });
 
   spaceTest('should convert metric agg with params', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Metric - Agg with params'
     );
-    await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+    await lens.waitForVisualization('mtrVis');
     const dimensions = page.testSubj.locator('lns-dimensionTrigger');
     await expect(dimensions).toHaveCount(1);
     await expect(dimensions.getByText('Count of bytes')).toBeVisible();
@@ -91,7 +91,7 @@ spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic 
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Metric - Color ranges'
     );
-    await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+    await lens.waitForVisualization('mtrVis');
     const dimensions = page.testSubj.locator('lns-dimensionTrigger');
     await expect(dimensions).toHaveCount(1);
 
@@ -111,12 +111,12 @@ spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic 
   spaceTest(
     'should bring ignore global filters at series level over',
     async ({ page, pageObjects }) => {
-      const { dashboard } = pageObjects;
+      const { dashboard, lens } = pageObjects;
       await dashboard.clickPanelAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Metric - Ignore global filters series'
       );
-      await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+      await lens.waitForVisualization('mtrVis');
       await expect(page.testSubj.locator('lnsChangeIndexPatternIgnoringFilters')).toBeVisible();
     }
   );
@@ -124,12 +124,12 @@ spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic 
   spaceTest(
     'should bring ignore global filters at panel level over',
     async ({ page, pageObjects }) => {
-      const { dashboard } = pageObjects;
+      const { dashboard, lens } = pageObjects;
       await dashboard.clickPanelAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Metric - Ignore global filters panel'
       );
-      await expect(page.testSubj.locator('mtrVis')).toBeVisible();
+      await lens.waitForVisualization('mtrVis');
       await expect(page.testSubj.locator('lnsChangeIndexPatternIgnoringFilters')).toBeVisible();
     }
   );

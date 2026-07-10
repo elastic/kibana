@@ -95,12 +95,12 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
   spaceTest(
     'should convert last value mode to reduced time range',
     async ({ page, pageObjects }) => {
-      const { dashboard } = pageObjects;
+      const { dashboard, lens } = pageObjects;
       await dashboard.clickPanelAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Table - Last value mode'
       );
-      await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
+      await lens.waitForVisualization('lnsDataTable');
 
       const dimensions = page.testSubj
         .locator('lnsDatatable_metrics')
@@ -112,12 +112,12 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
   spaceTest(
     'should convert static value to the metric dimension',
     async ({ page, pageObjects }) => {
-      const { dashboard } = pageObjects;
+      const { dashboard, lens } = pageObjects;
       await dashboard.clickPanelAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Table - Static value'
       );
-      await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
+      await lens.waitForVisualization('lnsDataTable');
 
       const dimensions = page.testSubj
         .locator('lnsDatatable_metrics')
@@ -132,7 +132,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Table - Agg by'
     );
-    await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
+    await lens.waitForVisualization('lnsDataTable');
 
     const splitRows = page.testSubj
       .locator('lnsDatatable_rows')
@@ -147,12 +147,12 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
   });
 
   spaceTest('should convert group by field with custom label', async ({ page, pageObjects }) => {
-    const { dashboard } = pageObjects;
+    const { dashboard, lens } = pageObjects;
     await dashboard.clickPanelAction(
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Table - GroupBy label'
     );
-    await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
+    await lens.waitForVisualization('lnsDataTable');
 
     const splitRows = page.testSubj
       .locator('lnsDatatable_rows')
@@ -166,7 +166,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
       testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
       'Table - Color ranges'
     );
-    await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
+    await lens.waitForVisualization('lnsDataTable');
 
     const dimensions = page.testSubj
       .locator('lnsDatatable_metrics')
@@ -189,12 +189,12 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
   spaceTest(
     'should bring the ignore global filters configured at panel level over',
     async ({ page, pageObjects }) => {
-      const { dashboard } = pageObjects;
+      const { dashboard, lens } = pageObjects;
       await dashboard.clickPanelAction(
         testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
         'Table - Ignore global filters panel'
       );
-      await expect(page.testSubj.locator('lnsDataTable')).toBeVisible();
+      await lens.waitForVisualization('lnsDataTable');
       await expect(page.testSubj.locator('lnsChangeIndexPatternIgnoringFilters')).toBeVisible();
     }
   );
