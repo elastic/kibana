@@ -34,7 +34,7 @@ export const platformCoreTools = {
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
-  redirectUserTo: platformCoreTool('redirect_user_to'),
+  buildRedirectUrl: platformCoreTool('build_redirect_url'),
   // SML tools
   smlSearch: platformCoreTool('sml_search'),
   smlAttach: platformCoreTool('sml_attach'),

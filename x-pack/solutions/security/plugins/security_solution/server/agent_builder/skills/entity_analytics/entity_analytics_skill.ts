@@ -651,7 +651,7 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
         ? [
             SECURITY_GET_ENTITY_TOOL_ID,
             SECURITY_SEARCH_ENTITIES_TOOL_ID,
-            platformCoreTools.redirectUserTo,
+            platformCoreTools.buildRedirectUrl,
             SECURITY_GET_WATCHLIST_ID_TOOL_ID,
             SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
           ]

@@ -27,7 +27,7 @@ const flyoutPanelSchema = z.object({
     ),
 });
 
-export const redirectUserToSchema = z.object({
+export const buildRedirectUrlSchema = z.object({
   path: z
     .string()
     .describe(
@@ -69,10 +69,10 @@ const encodeFlyoutParam = (flyout: Record<string, unknown>): string =>
  * Generic navigation tool: turns an app-relative Kibana path (optionally with expandable-flyout
  * state) into a fully-qualified in-app URL, resolving the deployment base path and the active space segment
  */
-export const redirectUserToTool = (
+export const buildRedirectUrlTool = (
   coreSetup: CoreSetup
-): BuiltinToolDefinition<typeof redirectUserToSchema> => ({
-  id: platformCoreTools.redirectUserTo,
+): BuiltinToolDefinition<typeof buildRedirectUrlSchema> => ({
+  id: platformCoreTools.buildRedirectUrl,
   type: ToolType.builtin,
   description: `Build a clickable in-app link that redirects the user to a specific Kibana page — use it when an action can't (or shouldn't) be performed in chat and the user needs to complete it in the UI.
 
@@ -84,7 +84,7 @@ Returns a single \`url\`. Render it in your reply as a markdown link \`[title](u
 - \`flyout\` (optional): the \`left\` / \`right\` / \`preview\` panels to open on the target page. The tool encodes them into the URL.
 
 This tool only builds a link; it performs no action.`,
-  schema: redirectUserToSchema,
+  schema: buildRedirectUrlSchema,
   handler: async ({ path, flyout }, { spaceId, logger }) => {
     if (!path.startsWith('/') || path.startsWith('//')) {
       return {
@@ -108,7 +108,7 @@ This tool only builds a link; it performs no action.`,
     const [coreStart] = await coreSetup.getStartServices();
     const url = addSpaceIdToPath(coreStart.http.basePath.serverBasePath, spaceId, relativePath);
 
-    logger.debug(`${platformCoreTools.redirectUserTo} built redirect url for path '${path}'`);
+    logger.debug(`${platformCoreTools.buildRedirectUrl} built redirect url for path '${path}'`);
 
     return {
       results: [

@@ -21,7 +21,7 @@ import { indexExplorerTool } from './index_explorer';
 import { generateEsqlTool } from './generate_esql';
 import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
-import { redirectUserToTool } from './redirect_user_to';
+import { buildRedirectUrlTool } from './build_redirect_url';
 
 export const registerTools = ({
   coreSetup,
@@ -42,7 +42,7 @@ export const registerTools = ({
     indexExplorerTool(),
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
-    redirectUserToTool(coreSetup),
+    buildRedirectUrlTool(coreSetup),
   ];
 
   tools.forEach((tool) => {

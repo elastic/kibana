@@ -15,7 +15,7 @@ import {
  * Constants and content for "UI-guided navigation" skill sections.
  *
  * Some operations are intentionally not performed in chat but we want the agent to redirect
- * the user to the right page using the `platform.core.redirect_user_to` tool.
+ * the user to the right page using the `platform.core.build_redirect_url` tool.
  *
  * This module is the single source of truth for the app-relative paths and the expandable-flyout
  * panel keys that the skill content references. The values are mirrored from public-side constants
@@ -170,15 +170,15 @@ export const ENTITY_ANALYTICS_UI_NAVIGATION_CONTENT = `## UI-guided navigation �
 
 Some Entity Analytics operations are intentionally **not performed in chat**: destructive lifecycle changes, bulk / CSV uploads, and configuration that lives in dedicated UI flows. For these intents, **decline the action** and point the user to the right place in the UI with a link.
 
-**How to produce the link.** Call \`platform.core.redirect_user_to\` with the \`path\` for the destination (and, for the flyout destinations below, the \`flyout\` object). It returns a single \`url\` with the deployment base path and current space already applied. Render that \`url\` in your reply as a markdown link \`[title](url)\`. **Never** hand-write, guess, or edit the URL — always use the \`url\` the tool returns. Pass the \`path\` exactly as written below (app-relative, starting with \`/\`); do **not** prepend a base path or \`/s/<space>\` segment yourself.
+**How to produce the link.** Call \`platform.core.build_redirect_url\` with the \`path\` for the destination (and, for the flyout destinations below, the \`flyout\` object). It returns a single \`url\` with the deployment base path and current space already applied. Render that \`url\` in your reply as a markdown link \`[title](url)\`. **Never** hand-write, guess, or edit the URL — always use the \`url\` the tool returns. Pass the \`path\` exactly as written below (app-relative, starting with \`/\`); do **not** prepend a base path or \`/s/<space>\` segment yourself.
 
 **Output shape.** Three things, in one short reply:
 
 1. What you can't do in chat (one sentence).
 2. Why (one short clause — "lives in the management UI", "needs a CSV upload", "the editing flyout exposes the full configuration").
-3. **Where to go** — the markdown link built from the \`platform.core.redirect_user_to\` result.
+3. **Where to go** — the markdown link built from the \`platform.core.build_redirect_url\` result.
 
-Do **not** call any *mutating* tool, do **not** prompt for confirmation, and do **not** claim the operation succeeded. The user clicks the link and performs the action themselves. (\`platform.core.redirect_user_to\` is not a mutation — it only builds a link — and \`security.get_entity\` may be called first to resolve the entity for the resolution intent.)
+Do **not** call any *mutating* tool, do **not** prompt for confirmation, and do **not** claim the operation succeeded. The user clicks the link and performs the action themselves. (\`platform.core.build_redirect_url\` is not a mutation — it only builds a link — and \`security.get_entity\` may be called first to resolve the entity for the resolution intent.)
 
 ### Entity Analytics — enable / disable & clear all data
 
@@ -189,11 +189,11 @@ Redirect when the user asks to:
 
 These are the global controls at the **top of the Entity Analytics management page**.
 
-Call \`platform.core.redirect_user_to\` with \`path: '${
+Call \`platform.core.build_redirect_url\` with \`path: '${
   ENTITY_ANALYTICS_UI_PATHS.settings
 }'\` and render the returned \`url\`.
 
-Example reply: "I can't enable or disable Entity Analytics from chat — that's the switch at the top of the [Entity Analytics management page](<url from redirect_user_to>), where you can also clear all entity data."
+Example reply: "I can't enable or disable Entity Analytics from chat — that's the switch at the top of the [Entity Analytics management page](<url from build_redirect_url>), where you can also clear all entity data."
 
 ### Risk engine — scoring configuration & re-score
 
@@ -202,11 +202,11 @@ Redirect when the user asks to:
 - **configure** / **change settings** for risk scoring (alert filters, retainment, schedule, closed-alert handling, etc.)
 - **re-score now** / **force a re-score** / **run the risk engine** — the tab has a **Run** button that triggers the risk engine on demand
 
-Call \`platform.core.redirect_user_to\` with \`path: '${
+Call \`platform.core.build_redirect_url\` with \`path: '${
   ENTITY_ANALYTICS_UI_PATHS.riskScore
 }'\` and render the returned \`url\`.
 
-Example reply: "I can't change the risk scoring settings from chat — that's managed on the Risk Score page. Open the [Risk Score settings](<url from redirect_user_to>) to reconfigure scoring or trigger a re-score via the Run button."
+Example reply: "I can't change the risk scoring settings from chat — that's managed on the Risk Score page. Open the [Risk Score settings](<url from build_redirect_url>) to reconfigure scoring or trigger a re-score via the Run button."
 
 ### Asset criticality — bulk / CSV operations
 
@@ -215,11 +215,11 @@ Redirect when the user asks to:
 - **upload a CSV** of asset criticalities
 - **bulk-set** / **bulk-import** / **bulk-update** criticality across many entities
 
-Call \`platform.core.redirect_user_to\` with \`path: '${
+Call \`platform.core.build_redirect_url\` with \`path: '${
   ENTITY_ANALYTICS_UI_PATHS.assetCriticality
 }'\` and render the returned \`url\`.
 
-Example reply: "I can't import a criticality CSV from chat — that runs through the Asset Criticality page. Open the [Asset Criticality upload](<url from redirect_user_to>) to upload your file."
+Example reply: "I can't import a criticality CSV from chat — that runs through the Asset Criticality page. Open the [Asset Criticality upload](<url from build_redirect_url>) to upload your file."
 
 ### Entity resolution / merge
 
@@ -228,7 +228,7 @@ Resolution has **two** redirect paths — pick by whether the ask is about **one
 **Single entity** — "merge **this** entity", "add **this host/user** to a resolution group", "resolve **that** entity". This opens the entity's **Resolution** panel ("Add entities to resolution group") in its expandable flyout, so you need the entity first:
 
 1. If you don't already have the entity's \`entity.type\` and \`entity.id\` from a prior \`security.get_entity\` call, call \`security.get_entity\` now (do **not** call any mutating tool).
-2. Call \`platform.core.redirect_user_to\` with \`path: '${
+2. Call \`platform.core.build_redirect_url\` with \`path: '${
   ENTITY_ANALYTICS_UI_PATHS.entityResolutionHomePage
 }'\` and the \`flyout\` object for the entity's type below. Substitute \`${ENTITY_ID}\` with the entity's \`entity.id\` (EUID). The name fields only set the flyout's header title — include them (using \`entity.name\` in place of \`${ENTITY_NAME}\`) when you have it, and **omit those fields entirely** when you don't (the flyout still opens and resolves from the EUID). Copy every other field **exactly** as shown.
 
@@ -246,25 +246,25 @@ ${asIndentedJson(buildResolutionFlyoutTemplate('service'))}
 
 3. Render the returned \`url\` as a markdown link.
 
-Example reply (host entity named \`myserver\`): "I can't merge entities from chat — open the [Resolution panel for myserver](<url from redirect_user_to>) to add it to a resolution group."
+Example reply (host entity named \`myserver\`): "I can't merge entities from chat — open the [Resolution panel for myserver](<url from build_redirect_url>) to add it to a resolution group."
 
 **Bulk / CSV** — "**bulk**-link entities", "**import a CSV** of resolutions", "link **many** entities to resolution targets". This is the CSV import on the Entity Resolution management tab (no specific entity needed):
 
-- Call \`platform.core.redirect_user_to\` with \`path: '${
+- Call \`platform.core.build_redirect_url\` with \`path: '${
   ENTITY_ANALYTICS_UI_PATHS.entityResolutionBulk
 }'\` and render the returned \`url\`.
 
-Example reply: "I can't bulk-link entities from chat — that runs through a CSV import on the [Entity Resolution page](<url from redirect_user_to>)."
+Example reply: "I can't bulk-link entities from chat — that runs through a CSV import on the [Entity Resolution page](<url from build_redirect_url>)."
 
 ### Entity store / engine status
 
 Redirect when the user asks to **see the status** of the **entity store** / **entity engines** ("is the entity store running", "entity engine status", "show entity store health").
 
-Call \`platform.core.redirect_user_to\` with \`path: '${
+Call \`platform.core.build_redirect_url\` with \`path: '${
   ENTITY_ANALYTICS_UI_PATHS.status
 }'\` and render the returned \`url\`.
 
-Example reply: "You can check that on the [Entity Store status page](<url from redirect_user_to>)."`;
+Example reply: "You can check that on the [Entity Store status page](<url from build_redirect_url>)."`;
 
 /**
  * The "UI-only operations" section of the manage-watchlists skill
@@ -275,7 +275,7 @@ Two watchlist operations are intentionally **not** performed in chat because the
 
 For these intents, **decline the action** and point the user to the right place in the UI. Three things in one short reply: what you can't do in chat, why (one short clause — "the CSV upload lives in the editor", "entity-source configuration lives in the flyout"), and where to go — a clickable markdown link.
 
-**How to produce the link.** Call \`platform.core.redirect_user_to\` with the \`path\` below (and, for the edit flyout, the \`flyout\` object) and render the \`url\` it returns as \`[title](url)\`. The tool applies the deployment base path and current space for you — pass the \`path\` exactly as written (app-relative, starting with \`/\`) and **never** hand-write, guess, or edit the URL. \`platform.core.redirect_user_to\` is **not** a mutation, so calling it for a redirect is expected; do **not** call the mutating tools (\`create\` / \`update\` / \`delete\` / \`add_entities\` / \`remove_entities\`). Do **not** prompt for confirmation, and do **not** claim the operation succeeded.
+**How to produce the link.** Call \`platform.core.build_redirect_url\` with the \`path\` below (and, for the edit flyout, the \`flyout\` object) and render the \`url\` it returns as \`[title](url)\`. The tool applies the deployment base path and current space for you — pass the \`path\` exactly as written (app-relative, starting with \`/\`) and **never** hand-write, guess, or edit the URL. \`platform.core.build_redirect_url\` is **not** a mutation, so calling it for a redirect is expected; do **not** call the mutating tools (\`create\` / \`update\` / \`delete\` / \`add_entities\` / \`remove_entities\`). Do **not** prompt for confirmation, and do **not** claim the operation succeeded.
 
 ### Redirect intents
 
@@ -288,14 +288,14 @@ Both of these open the watchlist's **edit flyout**:
 
 - **The user named a specific watchlist** (by name or id) → open that watchlist's edit flyout.
   1. Resolve the watchlist **id**. If you already have the id, use it. Otherwise call \`security.get_watchlist_id\` with \`{ identifier: <the name the user gave> }\`. 
-  2. Call \`platform.core.redirect_user_to\` with \`path: '${
+  2. Call \`platform.core.build_redirect_url\` with \`path: '${
     ENTITY_ANALYTICS_UI_PATHS.watchlists
   }'\` and this \`flyout\` (substitute \`${WATCHLIST_ID}\` with the resolved id):
 
 ${asIndentedJson(buildWatchlistEditFlyoutTemplate())}
 
   3. Render the returned \`url\`.
-- **No specific watchlist** ("open the watchlists page") → call \`platform.core.redirect_user_to\` with \`path: '${
+- **No specific watchlist** ("open the watchlists page") → call \`platform.core.build_redirect_url\` with \`path: '${
   ENTITY_ANALYTICS_UI_PATHS.watchlists
 }'\` (no \`flyout\`) and render the returned \`url\` — the bare Watchlists tab.
 
@@ -304,19 +304,19 @@ ${asIndentedJson(buildWatchlistEditFlyoutTemplate())}
 User: "Upload a CSV of members to the Privileged Users watchlist."
 
 1. Call \`security.get_watchlist_id\` with \`{ identifier: 'Privileged Users' }\` to resolve the id.
-2. Call \`platform.core.redirect_user_to\` with \`path: '${
+2. Call \`platform.core.build_redirect_url\` with \`path: '${
   ENTITY_ANALYTICS_UI_PATHS.watchlists
 }'\` and \`flyout: { right: { id: '${WATCHLISTS_FLYOUT_KEY}', params: { mode: 'edit', watchlistId: '<id from step 1>' } } }\`.
 3. Render the returned \`url\` in a decline-and-redirect reply:
-   > "I can't upload a CSV to a watchlist from chat — that runs through the watchlist editor. Open the editor: [Edit Privileged Users](<url from redirect_user_to>)."
+   > "I can't upload a CSV to a watchlist from chat — that runs through the watchlist editor. Open the editor: [Edit Privileged Users](<url from build_redirect_url>)."
 
 User: "Configure the entity source for the High Risk Hosts watchlist."
 
-1. Resolve the id via \`security.get_watchlist_id\` (\`{ identifier: 'High Risk Hosts' }\`), then call \`platform.core.redirect_user_to\` with the watchlists path and the edit \`flyout\` for that id, and explain the tools do one-time membership only:
-   > "I can't configure a watchlist's entity source from chat — my tools only do one-time add/remove. Open the editor to set up a persistent source: [Edit High Risk Hosts](<url from redirect_user_to>)."
+1. Resolve the id via \`security.get_watchlist_id\` (\`{ identifier: 'High Risk Hosts' }\`), then call \`platform.core.build_redirect_url\` with the watchlists path and the edit \`flyout\` for that id, and explain the tools do one-time membership only:
+   > "I can't configure a watchlist's entity source from chat — my tools only do one-time add/remove. Open the editor to set up a persistent source: [Edit High Risk Hosts](<url from build_redirect_url>)."
 
 User: "Open the watchlists page so I can pick one to edit."
 
-1. Call \`platform.core.redirect_user_to\` with \`{ path: '${
+1. Call \`platform.core.build_redirect_url\` with \`{ path: '${
   ENTITY_ANALYTICS_UI_PATHS.watchlists
-}' }\` (no \`flyout\`) and render the returned \`url\`: [Watchlists](<url from redirect_user_to>).`;
+}' }\` (no \`flyout\`) and render the returned \`url\`: [Watchlists](<url from build_redirect_url>).`;

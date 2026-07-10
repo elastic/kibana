@@ -147,6 +147,6 @@ export const manageWatchlistsSkill = defineSkillType({
     SECURITY_DELETE_WATCHLIST_TOOL_ID,
     SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
     SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
-    platformCoreTools.redirectUserTo,
+    platformCoreTools.buildRedirectUrl,
   ],
 });

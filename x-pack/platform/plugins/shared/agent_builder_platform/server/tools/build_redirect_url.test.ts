@@ -10,7 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import { redirectUserToTool, redirectUserToSchema } from './redirect_user_to';
+import { buildRedirectUrlTool, buildRedirectUrlSchema } from './build_redirect_url';
 
 const SERVER_BASE_PATH = '/kbn';
 const SPACE_ID = 'space-a';
@@ -31,10 +31,10 @@ const decodeFlyout = (url: string) => {
   return decode(param) as { left?: unknown; right?: unknown; preview?: unknown };
 };
 
-describe('redirectUserToTool', () => {
+describe('buildRedirectUrlTool', () => {
   describe('base path + space prefixing', () => {
     it('prefixes an app-relative path with the base path and active space', async () => {
-      const { results } = (await redirectUserToTool(coreSetup).handler(
+      const { results } = (await buildRedirectUrlTool(coreSetup).handler(
         { path: '/app/security/entity_analytics_management/risk_score' },
         context
       )) as ToolHandlerStandardReturn;
@@ -44,7 +44,7 @@ describe('redirectUserToTool', () => {
     });
 
     it('preserves a query string already present on the path', async () => {
-      const { results } = (await redirectUserToTool(coreSetup).handler(
+      const { results } = (await buildRedirectUrlTool(coreSetup).handler(
         { path: '/app/security/alerts?query=foo' },
         context
       )) as ToolHandlerStandardReturn;
@@ -58,7 +58,7 @@ describe('redirectUserToTool', () => {
     it.each(['app/security', 'http://evil.com', 'https://evil.com', '//evil.com'])(
       'returns an error result for a non app-relative path: %s',
       async (path) => {
-        const { results } = (await redirectUserToTool(coreSetup).handler(
+        const { results } = (await buildRedirectUrlTool(coreSetup).handler(
           { path },
           context
         )) as ToolHandlerStandardReturn;
@@ -73,7 +73,7 @@ describe('redirectUserToTool', () => {
       const flyout = {
         right: { id: 'watchlists-flyout', params: { mode: 'edit', watchlistId: 'wl-123' } },
       };
-      const { results } = (await redirectUserToTool(coreSetup).handler(
+      const { results } = (await buildRedirectUrlTool(coreSetup).handler(
         { path: '/app/security/entity_analytics_management/watchlists', flyout },
         context
       )) as ToolHandlerStandardReturn;
@@ -85,7 +85,7 @@ describe('redirectUserToTool', () => {
     });
 
     it('joins the flyout param with "&" when the path already has a query string', async () => {
-      const { results } = (await redirectUserToTool(coreSetup).handler(
+      const { results } = (await buildRedirectUrlTool(coreSetup).handler(
         {
           path: '/app/security/entity_analytics_home_page?foo=bar',
           flyout: { right: { id: 'host-panel', params: { entityId: 'host:abc' } } },
@@ -98,7 +98,7 @@ describe('redirectUserToTool', () => {
     });
 
     it('does not append a flyout param when flyout has no panels', async () => {
-      const { results } = (await redirectUserToTool(coreSetup).handler(
+      const { results } = (await buildRedirectUrlTool(coreSetup).handler(
         { path: '/app/security', flyout: {} },
         context
       )) as ToolHandlerStandardReturn;
@@ -111,7 +111,7 @@ describe('redirectUserToTool', () => {
         right: { id: 'user-panel', params: { entityId: 'user:jsmith123' } },
         preview: [{ id: 'rule-preview', params: { ruleId: 'r-1' } }],
       };
-      const { results } = (await redirectUserToTool(coreSetup).handler(
+      const { results } = (await buildRedirectUrlTool(coreSetup).handler(
         { path: '/app/security', flyout },
         context
       )) as ToolHandlerStandardReturn;
@@ -121,7 +121,7 @@ describe('redirectUserToTool', () => {
     it('leaves no raw markdown-breaking chars in the url for a rison-quoted id', async () => {
       // `: @ .` force rison to single-quote the value → would emit ( ) ' unless we escape them.
       // The whole url is dropped inside a markdown link `[title](url)`, so it must carry none.
-      const { results } = (await redirectUserToTool(coreSetup).handler(
+      const { results } = (await buildRedirectUrlTool(coreSetup).handler(
         {
           path: '/app/security/entity_analytics_home_page',
           flyout: {
@@ -138,7 +138,7 @@ describe('redirectUserToTool', () => {
     });
 
     it('encodes a space as %20 (not "+") so it decodes back to a space', async () => {
-      const { results } = (await redirectUserToTool(coreSetup).handler(
+      const { results } = (await buildRedirectUrlTool(coreSetup).handler(
         {
           path: '/app/security',
           flyout: { right: { id: 'host-panel', params: { hostName: 'my server prod' } } },
@@ -155,18 +155,18 @@ describe('redirectUserToTool', () => {
   });
 });
 
-describe('redirectUserToSchema', () => {
+describe('buildRedirectUrlSchema', () => {
   it('requires a path', () => {
-    expect(redirectUserToSchema.safeParse({}).success).toBe(false);
+    expect(buildRedirectUrlSchema.safeParse({}).success).toBe(false);
   });
 
   it('accepts a bare path', () => {
-    expect(redirectUserToSchema.safeParse({ path: '/app/security' }).success).toBe(true);
+    expect(buildRedirectUrlSchema.safeParse({ path: '/app/security' }).success).toBe(true);
   });
 
   it('accepts a path with a flyout state', () => {
     expect(
-      redirectUserToSchema.safeParse({
+      buildRedirectUrlSchema.safeParse({
         path: '/app/security',
         flyout: { right: { id: 'watchlists-flyout', params: { watchlistId: 'wl-1' } } },
       }).success
@@ -175,7 +175,7 @@ describe('redirectUserToSchema', () => {
 
   it('rejects a flyout panel without an id', () => {
     expect(
-      redirectUserToSchema.safeParse({ path: '/app/security', flyout: { right: { params: {} } } })
+      buildRedirectUrlSchema.safeParse({ path: '/app/security', flyout: { right: { params: {} } } })
         .success
     ).toBe(false);
   });
