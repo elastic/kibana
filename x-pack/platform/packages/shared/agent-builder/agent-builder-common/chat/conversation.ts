@@ -24,7 +24,6 @@ import type {
 } from '../agents/prompts';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
-import type { ConversationSourceType } from './conversation_source/message';
 import type { RoundState } from './round_state';
 
 /**
@@ -376,6 +375,11 @@ export interface ConversationSourceUser {
   name?: string;
   /** Optional handle from the external source. */
   handle?: string;
+}
+
+/** External system the message comes from, for example Slack or GitHub. */
+export enum ConversationSourceType {
+  Slack = 'slack',
 }
 
 export interface ConversationRoundSource {

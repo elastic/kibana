@@ -13,6 +13,7 @@ export {
 export {
   ConversationRoundStatus,
   ConversationDisplayStatus,
+  ConversationSourceType,
   type ConversationAction,
   type RoundInput,
   type ConverseInput,
@@ -59,7 +60,6 @@ export {
   createAskUserQuestionStep,
   isAskUserQuestionStep,
 } from './conversation';
-export { ConversationSourceType } from './conversation_source';
 export {
   ChatEventType,
   type ChatEventBase,
