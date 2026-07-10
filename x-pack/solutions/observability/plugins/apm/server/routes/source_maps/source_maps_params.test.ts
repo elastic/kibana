@@ -68,4 +68,87 @@ describe('uploadSourceMapParams', () => {
       })
     );
   });
+
+  describe('max length validation', () => {
+    const overLimit = 'a'.repeat(1025);
+    const atLimit = 'a'.repeat(1024);
+
+    it('accepts service_name at exactly 1024 characters', () => {
+      expectParseSuccess(
+        uploadSourceMapParams.safeParse({
+          body: {
+            service_name: atLimit,
+            service_version: '1.0.0',
+            bundle_filepath: '/foo/bar.js',
+            sourcemap: JSON.stringify(validSourceMap),
+          },
+        })
+      );
+    });
+
+    it('rejects service_name longer than 1024 characters', () => {
+      expectParseError(
+        uploadSourceMapParams.safeParse({
+          body: {
+            service_name: overLimit,
+            service_version: '1.0.0',
+            bundle_filepath: '/foo/bar.js',
+            sourcemap: JSON.stringify(validSourceMap),
+          },
+        })
+      );
+    });
+
+    it('accepts service_version at exactly 1024 characters', () => {
+      expectParseSuccess(
+        uploadSourceMapParams.safeParse({
+          body: {
+            service_name: 'opbeans-java',
+            service_version: atLimit,
+            bundle_filepath: '/foo/bar.js',
+            sourcemap: JSON.stringify(validSourceMap),
+          },
+        })
+      );
+    });
+
+    it('rejects service_version longer than 1024 characters', () => {
+      expectParseError(
+        uploadSourceMapParams.safeParse({
+          body: {
+            service_name: 'opbeans-java',
+            service_version: overLimit,
+            bundle_filepath: '/foo/bar.js',
+            sourcemap: JSON.stringify(validSourceMap),
+          },
+        })
+      );
+    });
+
+    it('accepts bundle_filepath at exactly 1024 characters', () => {
+      expectParseSuccess(
+        uploadSourceMapParams.safeParse({
+          body: {
+            service_name: 'opbeans-java',
+            service_version: '1.0.0',
+            bundle_filepath: atLimit,
+            sourcemap: JSON.stringify(validSourceMap),
+          },
+        })
+      );
+    });
+
+    it('rejects bundle_filepath longer than 1024 characters', () => {
+      expectParseError(
+        uploadSourceMapParams.safeParse({
+          body: {
+            service_name: 'opbeans-java',
+            service_version: '1.0.0',
+            bundle_filepath: overLimit,
+            sourcemap: JSON.stringify(validSourceMap),
+          },
+        })
+      );
+    });
+  });
 });
