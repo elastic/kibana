@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { z } from '@kbn/zod/v4';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -26,28 +27,28 @@ const buildRegistry = () => {
     displayName: 'Comment',
     icon: 'editorComment',
     getAttachmentViewObject: () => ({ event: 'added a comment' }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   registry.register({
     id: 'security.alert',
     displayName: 'Alert',
     icon: 'bell',
     getAttachmentViewObject: () => ({ event: 'added an alert' }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   registry.register({
     id: 'security.event',
     displayName: 'Event',
     icon: 'bell',
     getAttachmentViewObject: () => ({ event: 'added an event' }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   registry.register({
     id: 'observability.alert',
     displayName: 'Alert',
     icon: 'bell',
     getAttachmentViewObject: () => ({ event: 'added an alert' }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   return registry;
 };
