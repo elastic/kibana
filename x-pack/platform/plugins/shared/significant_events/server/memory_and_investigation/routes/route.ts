@@ -19,19 +19,19 @@ import {
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
-import { createServerRoute } from '../../create_server_route';
+import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { createServerRoute } from '../../routes/create_server_route';
 import type {
   MemoryEntry,
   MemoryCategoryNode,
   MemorySearchResult,
   MemoryVersionRecord,
-} from '../../../lib/memory';
-import { MemoryServiceImpl } from '../../../lib/memory';
-import { triggerMemorySynthesisWorkflow } from '../../../lib/memory/trigger_memory_synthesis_workflow';
-import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
-import { isSignificantEventsMemoryEnabled } from '../../../lib/memory/is_significant_events_memory_enabled';
-import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
+} from '../lib/memory';
+import { MemoryServiceImpl } from '../lib/memory';
+import { triggerMemorySynthesisWorkflow } from '../lib/memory/trigger_memory_synthesis_workflow';
+import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
+import { isSignificantEventsMemoryEnabled } from '../lib/memory/is_significant_events_memory_enabled';
+import { FeatureNotEnabledError } from '../../lib/errors/feature_not_enabled_error';
 
 const assertMemoryEnabled = async ({
   server,

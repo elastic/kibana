@@ -18,7 +18,7 @@ import {
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_TRACES_TOOL_ID,
-} from '../discovery/constants';
+} from '../../../agent_builder/agents/discovery/constants';
 
 export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID = 'platform.sig_events.investigation';
 

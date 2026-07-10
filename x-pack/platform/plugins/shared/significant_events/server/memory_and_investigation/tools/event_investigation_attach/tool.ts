@@ -17,7 +17,7 @@ import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { createSignificantEventsAvailability } from '../../../agent_builder/tools/significant_events_availability';
 import { attachEventInvestigationToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =

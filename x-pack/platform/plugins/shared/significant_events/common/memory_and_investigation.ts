@@ -14,3 +14,8 @@ export const SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG = 'streams.significantEvents
  * Sigevents memory data stream backing MemoryServiceImpl.
  */
 export const MEMORIES_DATA_STREAM = '.significant_events-memories';
+
+/**
+ * Enables the Streams root cause investigation workflow and agent.
+ */
+export const SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG = 'streams.investigationEnabled';

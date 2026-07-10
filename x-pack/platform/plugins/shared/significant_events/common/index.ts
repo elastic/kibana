@@ -13,7 +13,7 @@ export {
   STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
 } from './feature_flags';
 
-export { SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from './memory';
+export { SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from './memory_and_investigation';
 
 export {
   SIGNIFICANT_EVENT_TIERED_FEATURES,

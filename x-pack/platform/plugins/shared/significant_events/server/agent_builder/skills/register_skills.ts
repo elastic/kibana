@@ -8,11 +8,14 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
-import type { MemoryToolsOptions } from '../tools/memory';
+import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
 import { sigEventsManagementSkill } from './significant_events_management';
-import { createSigEventsOnboardingSkill, createGapDetectionSkill } from './memory';
+import {
+  createSigEventsOnboardingSkill,
+  createGapDetectionSkill,
+} from '../../memory_and_investigation/skills/memory';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,

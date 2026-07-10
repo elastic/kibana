@@ -12,7 +12,7 @@ import { createMemorySearchTool } from '../../tools/memory/memory_search';
 import { createMemoryReadTool } from '../../tools/memory/memory_read';
 import { createMemoryWriteTool } from '../../tools/memory/memory_write';
 import { createMemoryListTool } from '../../tools/memory/memory_list';
-import { createSearchKnowledgeIndicatorsTool } from '../../tools/search_knowledge_indicators/tool';
+import { createSearchKnowledgeIndicatorsTool } from '../../../agent_builder/tools/search_knowledge_indicators/tool';
 import { toInlineMemoryTool, toInlineMemoryTools } from './to_inline_tools';
 import description from './memory_synthesis.description.text';
 import content from './memory_synthesis.skill.md.text';

@@ -6,7 +6,7 @@
  */
 
 import { INVESTIGATION_PROGRESS_UI_EVENT } from '@kbn/significant-events-schema';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
+import { createMockToolContext, invokeHandler } from '../../../agent_builder/utils/test_helpers';
 import {
   createInvestigationProgressReportTool,
   SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
