@@ -11,6 +11,25 @@ import type { Feature } from '../feature';
 import type { QueryWithOccurrences } from '../api/significant_events';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '../significant_events/constants';
 
+/**
+ * A knowledge indicator (feature or query link) is durable when it has no
+ * `expires_at` — it is never subject to expiry-based cleanup.
+ */
+export function isDurable(ki: Feature | QueryLink): boolean {
+  return !ki.expires_at;
+}
+
+export function isExpirable(
+  ki: Feature | QueryLink
+): ki is (Feature | QueryLink) & { expires_at: string } {
+  return !!ki.expires_at;
+}
+
+/** Whether an expiry timestamp has passed. Callers must exclude durable indicators (`isDurable`) first. */
+export function isExpired(expiresAt: string): boolean {
+  return new Date(expiresAt).getTime() <= Date.now();
+}
+
 export interface EsqlQuery {
   query: string;
 }
@@ -36,6 +55,12 @@ export type QueryType = typeof QUERY_TYPE_MATCH | typeof QUERY_TYPE_STATS;
  * High + Critical queries are eligible for automatic rule creation.
  */
 export const HIGH_SEVERITY_THRESHOLD = 60;
+
+/**
+ * Minimum severity score for the Critical band.
+ * Severity bands: Low < 40, Medium [40, 60), High [60, 80), Critical >= 80.
+ */
+export const CRITICAL_SEVERITY_THRESHOLD = 80;
 
 export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
 

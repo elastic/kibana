@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import type { YamlEditorFormValues } from '../../components/template_form';
@@ -16,8 +16,10 @@ import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../../../app/use_available_owners';
 import { getOwnerDefaultValue } from '../../../create/utils';
 import { useCasesTemplatesNavigation } from '../../../../common/navigation';
-import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
+import { LOCAL_STORAGE_KEYS, SECURITY_SOLUTION_OWNER } from '../../../../../common/constants';
 import { useCasesTemplatesBreadcrumbs } from '../../../use_breadcrumbs';
+import type { TemplateMetadata } from '../../utils/template_metadata';
+import type { TemplateSettings } from '../../../../../common/types/domain/template/v1';
 
 import * as i18n from '../../translations';
 
@@ -26,6 +28,11 @@ export interface CreateTemplatePageProps {}
 
 export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   useCasesTemplatesBreadcrumbs(i18n.ADD_TEMPLATE_TITLE);
+  const initialMetadata: TemplateMetadata = {
+    name: '',
+    description: '',
+    tags: [],
+  };
 
   const form = useForm<YamlEditorFormValues>({
     defaultValues: {
@@ -38,10 +45,23 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
+  // Defaults for a new template: extract observables on for every solution; sync alerts on only for
+  // Security (elsewhere the sync-alerts toggle is hidden and the value stays off).
+  const initialSettings = useMemo<TemplateSettings>(
+    () => ({
+      syncAlerts: defaultOwnerValue === SECURITY_SOLUTION_OWNER,
+      extractObservables: true,
+    }),
+    [defaultOwnerValue]
+  );
+
   const handleCreate = useCallback(
-    async (data: YamlEditorFormValues, isEnabled: boolean) => {
+    async (data: YamlEditorFormValues, metadata: TemplateMetadata, isEnabled: boolean) => {
       await mutateAsync({
         template: {
+          name: metadata.name,
+          description: metadata.description || undefined,
+          tags: metadata.tags.length > 0 ? metadata.tags : undefined,
           owner: defaultOwnerValue,
           definition: data.definition,
           isEnabled,
@@ -56,10 +76,12 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
     <TemplateFormLayout
       form={form}
       title={i18n.ADD_TEMPLATE_TITLE}
+      initialMetadata={initialMetadata}
       isSaving={isSaving}
       onCreate={handleCreate}
       storageKey={LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState}
       initialValue={exampleTemplateDefinition}
+      initialSettings={initialSettings}
     />
   );
 };
