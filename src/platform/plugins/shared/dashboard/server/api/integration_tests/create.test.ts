@@ -12,12 +12,12 @@ import supertest from 'supertest';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { type savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreFeatureFlagsMock, type savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { coreServices, taggingService, logger } from '../../kibana_services';
 import { setStubKibanaServices } from '../../mocks';
-import { registerDeleteRoute } from './register_delete_route';
+import { registerCreateRoute } from '../create/register_create_route';
 
 const input: DashboardSavedObjectAttributes = {
   pinned_panels: { panels: {} },
@@ -35,7 +35,7 @@ const input: DashboardSavedObjectAttributes = {
   title: 'title',
 };
 
-describe(`delete`, () => {
+describe(`create`, () => {
   let server: SetupServerReturn['server'];
   let createRouter: SetupServerReturn['createRouter'];
   let handlerContext: SetupServerReturn['handlerContext'];
@@ -49,7 +49,18 @@ describe(`delete`, () => {
     ({ server, createRouter, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
     const { versioned } = createRouter<RequestHandlerContext>('/');
-    registerDeleteRoute(versioned, undefined, logger);
+    registerCreateRoute(versioned, undefined, false, logger);
+
+    Object.assign(handlerContext, {
+      featureFlags: coreFeatureFlagsMock.createRequestHandlerContext(),
+    });
+    savedObjectsClient.create.mockResolvedValue({
+      id: 'test-dashboard',
+      type: 'dashboard',
+      attributes: input,
+      references: [],
+    });
+
     await server.start();
   });
 
@@ -58,46 +69,31 @@ describe(`delete`, () => {
     await server.stop();
   });
 
-  it('succesfully deletes a dashboard', async () => {
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: 'test-dashboard',
-      type: 'dashboard',
-      attributes: input,
-      references: [],
-    });
-    const result = await supertest(server.listener).delete(`/api/dashboards/test-dashboard`);
-    expect(result.status).toEqual(204);
+  it('succesfully creates a dashboard', async () => {
+    const result = await supertest(server.listener)
+      .post(`/api/dashboards`)
+      .send({ title: 'title' });
+    expect(result.status).toEqual(201);
   });
 
   it('silences error when thrown in tracking', async () => {
     coreServices.userActivity.trackUserAction = jest.fn().mockImplementationOnce(() => {
       throw new Error('there was a tracking error!');
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: 'test-dashboard',
-      type: 'dashboard',
-      attributes: input,
-      references: [],
-    });
-    const result = await supertest(server.listener).delete(`/api/dashboards/test-dashboard`);
-    expect(result.status).toEqual(204);
+    const result = await supertest(server.listener)
+      .post(`/api/dashboards`)
+      .send({ title: 'title' });
+    expect(result.status).toEqual(201);
   });
 
-  it('tracks delete action - no tags', async () => {
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: 'test-dashboard',
-      type: 'dashboard',
-      attributes: input,
-      references: [],
-    });
-
-    await supertest(server.listener).delete(`/api/dashboards/test-dashboard`);
+  it('tracks create action - no tags', async () => {
+    await supertest(server.listener).post(`/api/dashboards`).send({ title: 'title' });
     expect(coreServices.userActivity.trackUserAction).toBeCalledWith({
       event: {
-        action: 'dashboard_delete',
-        type: 'deletion',
+        action: 'dashboard_create',
+        type: 'creation',
       },
-      message: `User deleted dashboard "title" (id: test-dashboard).`,
+      message: `User created dashboard "title" (id: test-dashboard).`,
       object: {
         id: 'test-dashboard',
         name: 'title',
@@ -107,7 +103,7 @@ describe(`delete`, () => {
     });
   });
 
-  it('tracks delete action - with tags', async () => {
+  it('tracks create action - with tags', async () => {
     const references = [
       {
         type: 'tag',
@@ -120,7 +116,7 @@ describe(`delete`, () => {
         name: 'tag-ref-tag2',
       },
     ];
-    savedObjectsClient.get.mockResolvedValueOnce({
+    savedObjectsClient.create.mockResolvedValueOnce({
       id: 'test-dashboard',
       type: 'dashboard',
       attributes: input,
@@ -136,13 +132,13 @@ describe(`delete`, () => {
       ),
     });
 
-    await supertest(server.listener).delete(`/api/dashboards/test-dashboard`);
+    await supertest(server.listener).post(`/api/dashboards`).send({ title: 'title' });
     expect(coreServices.userActivity.trackUserAction).toBeCalledWith({
       event: {
-        action: 'dashboard_delete',
-        type: 'deletion',
+        action: 'dashboard_create',
+        type: 'creation',
       },
-      message: `User deleted dashboard "title" (id: test-dashboard).`,
+      message: `User created dashboard "title" (id: test-dashboard).`,
       object: {
         id: 'test-dashboard',
         name: 'title',
