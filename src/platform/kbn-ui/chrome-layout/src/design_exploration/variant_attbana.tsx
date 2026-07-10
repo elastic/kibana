@@ -136,15 +136,18 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope}
     .kbnChromeNav-root:has([data-test-subj='sideNavCollapseButton'][aria-pressed='true'])
     [data-test-subj='kbnChromeNav-primaryNavigation']
-    > [class*='wrapperStyles'],
-    ${scope}
-    .kbnChromeNav-root:has([data-test-subj='sideNavCollapseButton'][aria-pressed='true'])
-    [data-test-subj='kbnChromeNav-primaryNavigation']
-    [class*='popover--wrapperStyles'] {
+    > [class*='wrapperStyles'] {
       display: flex !important;
       flex-direction: row !important;
       align-items: flex-start !important;
       justify-content: flex-start !important;
+    }
+
+    ${scope}
+    .kbnChromeNav-root:has([data-test-subj='sideNavCollapseButton'][aria-pressed='true'])
+    [data-test-subj='kbnChromeNav-primaryNavigation']
+    > [class*='wrapperStyles']
+    > .euiPopover {
       width: 100% !important;
     }
 
@@ -180,6 +183,11 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     [data-menu-item='true']
     .kbnChromeNav-iconWrapper::before {
       display: none !important;
+    }
+
+    ${scope} [class*='css-'][class*='-new_item_indicator--styles'] {
+      right: auto !important;
+      left: 1px !important;
     }
 
     ${scope}
@@ -242,6 +250,168 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     [data-menu-item='true']:focus-visible
     .kbnChromeNav-iconWrapper {
       border: none !important;
+    }
+
+    /* ----- Attbana expanded nav — footer labels ----- */
+    /* Footer items are icon-only; label text comes from data-footer-label on the
+       item wrapper (see FooterItem) rendered here via ::after. */
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR}) [data-test-subj='kbnChromeNav-footer'] {
+      align-items: stretch !important;
+      gap: 2px !important;
+      padding-inline: ${DESIGN_EXPLORATION_GAP}px !important;
+    }
+
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      > div:not(.sideNavCollapseButtonWrapper),
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      .euiPopover,
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      .euiToolTipAnchor {
+      width: 100% !important;
+      justify-content: flex-start !important;
+    }
+
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      [data-footer-label] {
+      --menu-item-text-color: ${colors.textParagraph};
+      box-sizing: border-box !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      gap: ${DESIGN_EXPLORATION_GAP}px !important;
+      width: 100% !important;
+      min-height: 32px !important;
+      border-radius: ${LINEAR_RADIUS_CONTROL}px !important;
+    }
+
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      [data-footer-label]::after {
+      content: attr(data-footer-label) !important;
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      line-height: 1.2 !important;
+      text-align: start !important;
+      white-space: nowrap !important;
+      text-overflow: ellipsis !important;
+      overflow: hidden !important;
+      color: var(--menu-item-text-color) !important;
+    }
+
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      [data-footer-label]
+      [data-test-subj^='kbnChromeNav-footerItem-'] {
+      flex-shrink: 0 !important;
+      width: auto !important;
+      min-width: unset !important;
+      min-height: unset !important;
+      height: auto !important;
+      padding: 0 !important;
+      background-color: transparent !important;
+      overflow: visible !important;
+    }
+
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      [data-footer-label]
+      .euiButtonIcon__icon,
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      [data-footer-label]
+      [data-euiicon-type],
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      .sideNavCollapseButtonWrapper[data-footer-label]
+      .euiButtonIcon__icon,
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      .sideNavCollapseButtonWrapper[data-footer-label]
+      [data-euiicon-type] {
+      width: 16px !important;
+      height: 16px !important;
+    }
+
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      [data-footer-label]:has([data-highlighted='true']) {
+      background-color: color-mix(in srgb, ${colors.textParagraph} 8%, transparent) !important;
+    }
+
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      [data-footer-label]:has([data-highlighted='false']:hover) {
+      background-color: color-mix(in srgb, ${colors.textParagraph} 5%, transparent) !important;
+    }
+
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      [data-footer-label]:has([data-test-subj^='kbnChromeNav-footerItem-']:focus-visible) {
+      outline: 2px solid ${LINEAR_ACCENT} !important;
+      outline-offset: -2px !important;
+    }
+
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      .sideNavCollapseButtonWrapper[data-footer-label]
+      .euiToolTipAnchor {
+      width: auto !important;
+      flex-shrink: 0 !important;
+      padding-inline: ${DESIGN_EXPLORATION_GAP}px !important;
+    }
+
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      .sideNavCollapseButtonWrapper[data-footer-label]
+      [data-test-subj='sideNavCollapseButton'] {
+      flex-shrink: 0 !important;
+      width: auto !important;
+      min-width: unset !important;
+      min-height: unset !important;
+      height: auto !important;
+      padding: 0 !important;
+      background-color: transparent !important;
+    }
+
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      .sideNavCollapseButtonWrapper[data-footer-label]:has([data-test-subj='sideNavCollapseButton']:hover) {
+      background-color: color-mix(in srgb, ${colors.textParagraph} 5%, transparent) !important;
+    }
+
+    ${scope}:has(${ATTBANA_NAV_EXPANDED_SELECTOR})
+      [data-test-subj='kbnChromeNav-footer']
+      .sideNavCollapseButtonWrapper[data-footer-label]:has([data-test-subj='sideNavCollapseButton']:focus-visible) {
+      outline: 2px solid ${LINEAR_ACCENT} !important;
+      outline-offset: -2px !important;
+    }
+
+    /* Full-width footer hairline (default high-contrast separators are 32px centered). */
+    ${scope} [class*='css-'][class*='-footer--root']::before {
+      width: 100% !important;
+      left: 0 !important;
+      right: 0 !important;
+      margin: 0 !important;
+    }
+
+    ${scope} [class*='css-'][class*='-footer--collapseDivider'] {
+      display: none !important;
+    }
+
+    /* Header border replaces the nav top separator pseudo-element. */
+    ${scope} [data-test-subj='chromeNextGlobalHeader'] {
+      border-bottom: ${LINEAR_HAIRLINE} !important;
+    }
+
+    ${scope} [class*='css-'][class*='-navigation--topSeparatorStyles']::after {
+      display: none !important;
     }
 
     ${scope}
@@ -322,6 +492,19 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
       // border-block-end: ${LINEAR_HAIRLINE} !important;
       box-shadow: none !important;
       backdrop-filter: none !important;
+    }
+
+    ${scope} [class*='css-'][class*='-global_header_shell--logoSlot'] {
+      --logo-width: 56px !important;
+      width: 56px !important;
+    }
+
+    ${scope} [data-test-subj='chromeNextGlobalHeader'] > [class*='css-'][class*='-global_header_shell--leftGroup'] + [class*='css-'][class*='-global_header_shell--separator'] {
+      display: none !important;
+    }
+
+    ${scope} [data-test-subj='contextSwitcherTriggerButton'] svg:first-of-type {
+      margin-top: -2px !important;
     }
 
     ${scope} [class*='css-'][class*='-global_header_shell--rightGroup'] {
@@ -579,7 +762,9 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
       background-color: ${LINEAR_SURFACE} !important;
       box-shadow: none !important;
       outline: none !important;
-      margin-right: 8px !important;
+      margin: 8px !important;
+      margin-left: 0 !important;
+      height: calc(100vh - 64px) !important;
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
