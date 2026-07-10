@@ -11,6 +11,9 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import * as React from 'react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import RulesPage from './rules_page';
 import { hasShowActionsCapability } from '../../lib/capabilities';
@@ -27,29 +30,6 @@ jest.mock('../rules_list/components/rules_list', () => {
 jest.mock('../../components/rules_setting/rules_settings_flyout', () => ({
   RulesSettingsFlyout: () => (
     <div data-test-subj="rulesSettingsFlyout">{'Render Rules Settings Flyout component'}</div>
-  ),
-}));
-
-jest.mock('@kbn/app-header', () => ({
-  AppHeader: (props: any) => (
-    <div data-test-subj="mockAppHeader">
-      {props.tabs?.map((tab: any) => (
-        <button key={tab.id} role="tab" data-test-subj={tab.id}>
-          {tab.label}
-        </button>
-      ))}
-      {props.menu?.primaryActionItem && (
-        <button data-test-subj={props.menu.primaryActionItem.testId} />
-      )}
-      {props.menu?.items?.map((item: any) => (
-        <button key={item.id} data-test-subj={item.testId} />
-      ))}
-      {props.docLink && (
-        <a data-test-subj="documentationLink" href={props.docLink}>
-          {'Documentation'}
-        </a>
-      )}
-    </div>
   ),
 }));
 
@@ -75,7 +55,9 @@ const renderRulesPage = (history = createMemoryHistory({ initialEntries: ['/'] }
     <IntlProvider locale="en">
       <Router history={history}>
         <QueryClientProvider client={new QueryClient()}>
-          <RulesPage />
+          <MockAppHeaderProvider>
+            <RulesPage />
+          </MockAppHeaderProvider>
         </QueryClientProvider>
       </Router>
     </IntlProvider>
@@ -100,7 +82,7 @@ describe('rulesPage', () => {
     renderRulesPage(history);
 
     // Just rules and logs
-    expect(screen.getAllByRole('tab').length).toBe(2);
+    expect(await screen.findAllByRole('tab')).toHaveLength(2);
   });
 
   it('hides the logs tab if the read rules privilege is missing', async () => {
@@ -112,7 +94,7 @@ describe('rulesPage', () => {
     renderRulesPage(history);
 
     // Just rules
-    expect(screen.getAllByRole('tab').length).toBe(1);
+    expect(await screen.findAllByRole('tab')).toHaveLength(1);
   });
 
   describe('setHeaderActions', () => {
@@ -135,9 +117,16 @@ describe('rulesPage', () => {
       const history = createMemoryHistory({ initialEntries: ['/'] });
       renderRulesPage(history);
 
+      // The primary action renders directly in the header.
       expect(await screen.findByTestId('createRuleButton')).toBeInTheDocument();
+
+      // Secondary and static menu items collapse into the "More" overflow popover at the jsdom
+      // viewport width, so open it before asserting on them.
+      await openAppMenuOverflow();
       expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
-      expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
+      expect(
+        await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)
+      ).toBeInTheDocument();
     });
 
     it('should not render the create rule button when the user is not authorized to create rules', async () => {
@@ -148,8 +137,13 @@ describe('rulesPage', () => {
       const history = createMemoryHistory({ initialEntries: ['/'] });
       renderRulesPage(history);
 
+      await openAppMenuOverflow();
       expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
-      expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
+      expect(
+        await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)
+      ).toBeInTheDocument();
+      // The create rule button is the primary action and is never rendered when unauthorized, so it
+      // is genuinely absent (not merely hidden in the overflow popover).
       expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
     });
   });
