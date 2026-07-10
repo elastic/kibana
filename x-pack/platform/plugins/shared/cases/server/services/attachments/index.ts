@@ -616,7 +616,7 @@ export class AttachmentService {
 
     for (const so of res.saved_objects) {
       if (isSavedObjectErrorResult(so)) {
-        validatedAttachments.push(so as AttachmentSavedObjectTransformed);
+        validatedAttachments.push(so as unknown as AttachmentSavedObjectTransformed);
       } else if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
         successesToMirror.push(so);
         // Restore `attachmentId` for savedObject-backed unified rows; no-op
@@ -933,7 +933,9 @@ export class AttachmentService {
         // Forcing the type here even though it is an error. The client is responsible for
         // determining what to do with the errors
         // TODO: we should fix the return type of this function so that it can return errors
-        validatedAttachments.push(attachment as SavedObjectsUpdateResponse<AttachmentAttributesV2>);
+        validatedAttachments.push(
+          attachment as unknown as SavedObjectsUpdateResponse<AttachmentAttributesV2>
+        );
       } else if (attachment.type === CASE_ATTACHMENT_SAVED_OBJECT) {
         // Saved Objects bulkUpdate may return only the attributes that were sent in the request, not
         // the full merged document. Match single update(): return the validated patch from the request.

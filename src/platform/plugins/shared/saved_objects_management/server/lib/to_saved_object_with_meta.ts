@@ -31,7 +31,6 @@ export function toSavedObjectWithMeta(
     managed: so.managed,
     attributes: so.attributes,
     created_at: so.created_at,
-    error: so.error,
     meta: {},
   };
 }

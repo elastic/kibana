@@ -195,7 +195,10 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     partial: true
   ): Types['PartialItem'];
   protected savedObjectToItem(
-    savedObject: SavedObject<Types['Attributes']> | PartialSavedObject<Types['Attributes']>
+    savedObject:
+      | SavedObject<Types['Attributes']>
+      | PartialSavedObject<Types['Attributes']>
+      | SavedObjectsFindResult<Types['Attributes']>
   ): SOWithMetadata | SOWithMetadataPartial {
     const {
       id,
@@ -206,11 +209,11 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       created_by: createdBy,
       attributes,
       references,
-      error,
       namespaces,
       version,
       managed,
     } = savedObject;
+    const error = 'error' in savedObject ? savedObject.error : undefined;
 
     return {
       id,

@@ -31,6 +31,7 @@ import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_a
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { ConnectorAdapter } from '../../../../connector_adapters/types';
 import type { SavedObject } from '@kbn/core/server';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { bulkEditOperationsSchema } from './schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
@@ -3436,7 +3437,7 @@ describe('bulkEdit()', () => {
   });
 
   describe('change tracking', () => {
-    const updatedRuleSO = (id: string, error?: SavedObject<RawRule>['error']) =>
+    const updatedRuleSO = (id: string, error?: SavedObjectError) =>
       ({
         id,
         type: RULE_SAVED_OBJECT_TYPE,

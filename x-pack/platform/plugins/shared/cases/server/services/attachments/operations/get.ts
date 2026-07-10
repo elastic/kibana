@@ -139,7 +139,7 @@ export class AttachmentGetter {
 
     for (const so of merged) {
       if (isSOError(so)) {
-        validatedAttachments.push(so as AttachmentSavedObjectTransformed);
+        validatedAttachments.push(so as unknown as AttachmentSavedObjectTransformed);
       } else {
         const injectedSo = injectAttachmentAttributesAndHandleErrors(
           so as SavedObject<AttachmentPersistedAttributes>
@@ -175,7 +175,7 @@ export class AttachmentGetter {
 
     for (const so of merged) {
       if (isSOError(so)) {
-        validatedAttachments.push(so as AttachmentSavedObjectTransformedV2);
+        validatedAttachments.push(so as unknown as AttachmentSavedObjectTransformedV2);
       } else {
         const injectedSo = injectAttachmentAttributesAndHandleErrors(
           so as SavedObject<AttachmentPersistedAttributes>

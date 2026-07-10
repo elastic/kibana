@@ -36,23 +36,6 @@ export const getGapAutoFillSchedulerSO = async ({
     id
   );
 
-  // Check for errors in the savedObjectsClient result
-  if (schedulerSO.error) {
-    const err = new Error(schedulerSO.error.message);
-    context.auditLogger?.log(
-      gapAutoFillSchedulerAuditEvent({
-        action: GapAutoFillSchedulerAuditAction.GET,
-        savedObject: {
-          type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-          id,
-          name: id,
-        },
-        error: err,
-      })
-    );
-    throw err;
-  }
-
   const ruleTypeIdConsumersPairs = schedulerSO.attributes.ruleTypes.map((ruleType) => ({
     ruleTypeId: ruleType.type,
     consumers: [ruleType.consumer],
