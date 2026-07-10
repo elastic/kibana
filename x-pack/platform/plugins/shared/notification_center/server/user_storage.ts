@@ -26,7 +26,7 @@ export const READ_KEY = 'notificationCenter:read';
 /** userStorage doesn't allow null defaults for key values, so we use this default to represent an unset state. */
 export const READ_ALL_BEFORE_DEFAULT = '1970-01-01T00:00:00.000Z';
 
-/** Celing for the array of read ids */
+/** Ceiling for the array of read ids */
 const MAX_READ_IDS = 500;
 
 export const readAllBeforeSchema = z.iso.datetime();
