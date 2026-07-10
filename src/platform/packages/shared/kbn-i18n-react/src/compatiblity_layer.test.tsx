@@ -16,7 +16,7 @@ jest.mock('@formatjs/intl-utils', () => ({
   selectUnit: (...args: unknown[]) => mockSelectUnit(...args),
 }));
 
-const mockFormattedRelativeTime = jest.fn(() => null);
+const mockFormattedRelativeTime = jest.fn((_props: Record<string, unknown>) => null);
 jest.mock('react-intl', () => ({
   FormattedRelativeTime: (props: Record<string, unknown>) => {
     mockFormattedRelativeTime(props);
