@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHealth, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 
 export interface SignificantEventItemProps {
@@ -77,12 +77,10 @@ export function SignificantEventItem({ event, onClick }: SignificantEventItemPro
   const overflowCount = event.stream_names.length - MAX_VISIBLE_STREAMS;
 
   return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="m"
+    <div
       onClick={onClick ? () => onClick(event) : undefined}
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      style={{ cursor: onClick ? 'pointer' : 'default', padding: '12px 16px' }}
+      data-test-subj="nightshiftSignificantEventItem"
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -114,6 +112,6 @@ export function SignificantEventItem({ event, onClick }: SignificantEventItemPro
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </EuiPanel>
+    </div>
   );
 }

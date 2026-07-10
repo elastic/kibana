@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SignificantEventItem } from './significant_event_item';
@@ -47,12 +54,13 @@ export function SignificantEventList({
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      {events.map((event) => (
-        <EuiFlexItem key={event.event_id}>
+    <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+      {events.map((event, index) => (
+        <React.Fragment key={event.event_id}>
+          {index > 0 && <EuiHorizontalRule margin="none" />}
           <SignificantEventItem event={event} onClick={onEventClick} />
-        </EuiFlexItem>
+        </React.Fragment>
       ))}
-    </EuiFlexGroup>
+    </EuiPanel>
   );
 }

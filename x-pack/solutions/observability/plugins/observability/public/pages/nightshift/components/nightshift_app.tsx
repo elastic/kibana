@@ -87,111 +87,113 @@ export function NightshiftApp({ events, isLoading, onEventClick }: NightshiftApp
       )}
 
       <EuiFlexItem grow={false} style={{ width: '100%', maxWidth: 640 }}>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate('xpack.nightshift.summary.title', {
-                  defaultMessage: 'Significant events',
+        <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h3>
+                  {i18n.translate('xpack.nightshift.summary.title', {
+                    defaultMessage: 'Significant events',
+                  })}
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLink data-test-subj="o11yNightshiftAppShowAllLink">
+                {i18n.translate('xpack.nightshift.summary.showAll', {
+                  defaultMessage: 'Show all',
                 })}
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj="o11yNightshiftAppShowAllLink">
-              {i18n.translate('xpack.nightshift.summary.showAll', {
-                defaultMessage: 'Show all',
-              })}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="m" />
+
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem>
+              <EuiPanel
+                hasBorder
+                hasShadow={false}
+                paddingSize="m"
+                color={activeFilter === 'needsAction' ? 'plain' : 'subdued'}
+                onClick={() => setActiveFilter('needsAction')}
+                style={{ cursor: 'pointer' }}
+              >
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('xpack.nightshift.summary.needAction', {
+                    defaultMessage: 'Need action',
+                  })}
+                </EuiText>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiHealth color="danger" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="m">
+                      <span>{counts.needsAction}</span>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel
+                hasBorder
+                hasShadow={false}
+                paddingSize="m"
+                color={activeFilter === 'resolved' ? 'plain' : 'subdued'}
+                onClick={() => setActiveFilter('resolved')}
+                style={{ cursor: 'pointer' }}
+              >
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('xpack.nightshift.summary.resolved', {
+                    defaultMessage: 'Resolved',
+                  })}
+                </EuiText>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiHealth color="success" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="m">
+                      <span>{counts.resolved}</span>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          {blastRadius.length > 0 && (
+            <>
+              <EuiSpacer size="l" />
+              <EuiTitle size="xxs">
+                <h4>
+                  {i18n.translate('xpack.nightshift.blastRadius.title', {
+                    defaultMessage: 'Blast radius',
+                  })}
+                </h4>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                {blastRadius.slice(0, 6).map(({ name, count }) => (
+                  <EuiFlexItem grow={false} key={name}>
+                    <EuiBadge color="hollow">
+                      {name} {count}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ))}
+                {blastRadius.length > 6 && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">+{blastRadius.length - 6}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </>
+          )}
+        </EuiPanel>
 
         <EuiSpacer size="m" />
-
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem>
-            <EuiPanel
-              hasBorder
-              hasShadow={false}
-              paddingSize="m"
-              color={activeFilter === 'needsAction' ? 'plain' : 'subdued'}
-              onClick={() => setActiveFilter('needsAction')}
-              style={{ cursor: 'pointer' }}
-            >
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.nightshift.summary.needAction', {
-                  defaultMessage: 'Need action',
-                })}
-              </EuiText>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiHealth color="danger" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="m">
-                    <span>{counts.needsAction}</span>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiPanel
-              hasBorder
-              hasShadow={false}
-              paddingSize="m"
-              color={activeFilter === 'resolved' ? 'plain' : 'subdued'}
-              onClick={() => setActiveFilter('resolved')}
-              style={{ cursor: 'pointer' }}
-            >
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.nightshift.summary.resolved', {
-                  defaultMessage: 'Resolved',
-                })}
-              </EuiText>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiHealth color="success" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="m">
-                    <span>{counts.resolved}</span>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="l" />
-
-        {blastRadius.length > 0 && (
-          <>
-            <EuiTitle size="xxs">
-              <h4>
-                {i18n.translate('xpack.nightshift.blastRadius.title', {
-                  defaultMessage: 'Blast radius',
-                })}
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {blastRadius.slice(0, 6).map(({ name, count }) => (
-                <EuiFlexItem grow={false} key={name}>
-                  <EuiBadge color="hollow">
-                    {name} {count}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ))}
-              {blastRadius.length > 6 && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">+{blastRadius.length - 6}</EuiBadge>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-            <EuiSpacer size="l" />
-          </>
-        )}
 
         <SignificantEventList
           events={filteredEvents}
