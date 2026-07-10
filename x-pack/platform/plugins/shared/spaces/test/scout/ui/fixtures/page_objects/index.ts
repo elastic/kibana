@@ -8,12 +8,20 @@
 import type { KibanaUrl, PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 
+import { CopySavedObjectsToSpaceFlyout } from './copy_saved_objects_to_space_flyout';
 import { SavedObjectsManagementPage } from './saved_objects_management_page';
 import { SpacesPage } from './spaces';
+
+export { CopySavedObjectsToSpaceFlyout } from './copy_saved_objects_to_space_flyout';
+export type {
+  CopyToSpaceSetupOptions,
+  CopyToSpaceSummary,
+} from './copy_saved_objects_to_space_flyout';
 
 export interface SpacesPageObjects extends PageObjects {
   spaces: SpacesPage;
   savedObjectsManagement: SavedObjectsManagementPage;
+  copySavedObjectsToSpaceFlyout: CopySavedObjectsToSpaceFlyout;
 }
 
 export function extendPageObjects(
@@ -25,5 +33,6 @@ export function extendPageObjects(
     ...pageObjects,
     spaces: createLazyPageObject(SpacesPage, page),
     savedObjectsManagement: createLazyPageObject(SavedObjectsManagementPage, page, kbnUrl),
+    copySavedObjectsToSpaceFlyout: createLazyPageObject(CopySavedObjectsToSpaceFlyout, page),
   };
 }

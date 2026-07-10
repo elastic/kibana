@@ -9,11 +9,13 @@
 
 import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import { CopySavedObjectsToSpaceFlyout } from '@kbn/spaces-plugin/test/scout/ui/fixtures/page_objects';
 import { SavedObjectsManagementPage } from './page_objects';
 
 export interface SavedObjectsManagementTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     savedObjectsManagement: SavedObjectsManagementPage;
+    copySavedObjectsToSpaceFlyout: CopySavedObjectsToSpaceFlyout;
   };
 }
 
@@ -33,6 +35,7 @@ export const test = baseTest.extend<SavedObjectsManagementTestFixtures, ScoutWor
     await use({
       ...pageObjects,
       savedObjectsManagement: createLazyPageObject(SavedObjectsManagementPage, page, kbnUrl),
+      copySavedObjectsToSpaceFlyout: createLazyPageObject(CopySavedObjectsToSpaceFlyout, page),
     });
   },
 });
