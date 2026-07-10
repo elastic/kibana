@@ -64,7 +64,7 @@ export const AgentlessStepConfirmData = ({
           announceOnMount
           color="success"
           title={i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.confirmData.successText', {
-            defaultMessage: 'Incoming data received from agentless integration',
+            defaultMessage: 'Incoming data received from managed integration',
           })}
           iconType="check"
         />
@@ -79,7 +79,7 @@ export const AgentlessStepConfirmData = ({
           announceOnMount
           color="danger"
           title={i18n.translate('xpack.fleet.agentlessEnrollmentFlyout.confirmData.failureText', {
-            defaultMessage: 'No incoming data received from agentless integration',
+            defaultMessage: 'No incoming data received from managed integration',
           })}
           iconType="warning"
         />

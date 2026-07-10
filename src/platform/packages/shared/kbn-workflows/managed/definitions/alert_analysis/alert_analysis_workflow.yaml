@@ -12,7 +12,8 @@
 #   classified as false positives with high confidence.
 #
 # Flow:
-#   - Initialise workflow variables (tag prefix, version).
+#   - Initialise the workflow version, then read per-space runtime config (tag prefix,
+#     connector, thresholds, enabled) from the invoking space's uiSettings.
 #   - For each alert in the trigger batch:
 #     - Skip if already analyzed (unless override_previous is true).
 #     - Add an "execution started" note to the alert timeline.
@@ -54,21 +55,17 @@ settings:
 consts:
   workflow_version: "v0.0.1"
 
-  # Stable namespace for the alert tags this workflow writes and matches on
-  # (dedup gate + auto-close). Kept independent of the human-facing workflow
-  # name so renaming the workflow never shifts the tag taxonomy.
-  workflow_tag_namespace: "security.alert.analysis"
-
   # When false, the workflow exits early if the alert already carries the
   # workflow tag prefix. Set to true to re-evaluate previously analyzed alerts.
   override_previous: false
 
   # Tag suffix appended when an alert is auto-closed by this workflow
-  closed_tag_suffix: "closed-by-agent"
+  closed_tag_suffix: "closed"
 
-# NOTE: connector, auto-close, create-conversation, and enabled settings are NOT constants here.
-# They are per-space and read at run time from the invoking space's uiSettings (see the
-# fetch_runtime_config step below), so a single global install serves every space with live config.
+# NOTE: the tag prefix, connector, auto-close, create-conversation, and enabled settings are NOT
+# constants here. They are per-space and read at run time from the invoking space's uiSettings (see
+# the fetch_runtime_config step below), so a single global install serves every space with live
+# config.
 
 # =============================================================================
 # Steps
@@ -78,14 +75,13 @@ steps:
   # ---------------------------------------------------------------------------
   # Initialise workflow-scoped variables
   # ---------------------------------------------------------------------------
-  # Derive the normalised version and tag prefix used throughout the workflow
-  # to mark and identify alerts processed by this execution.
+  # Derive the normalised version used throughout the workflow. The tag prefix is per-space and set
+  # from runtime config below (set_runtime_config_variables), not here.
   - name: set_workflow_variables
     type: data.set
     with:
       running_note: false
       normalized_version: "{{ consts.workflow_version | downcase | replace: ' ', '_' }}"
-      tag_prefix: "workflow.{{ consts.workflow_tag_namespace }}"
 
   # ---------------------------------------------------------------------------
   # Read this space's configuration at run time
@@ -110,13 +106,16 @@ steps:
   - name: set_runtime_config_variables
     type: data.set
     with:
-      # `${{ }}` preserves booleans/numbers; `{{ }}` is used for the connector id string.
+      # `${{ }}` preserves booleans/numbers; `{{ }}` is used for the connector id, agent id, and tag prefix strings.
       workflow_enabled: "${{ steps.fetch_runtime_config.output.workflowEnabled }}"
       connector_id: "{{ steps.fetch_runtime_config.output.connectorId }}"
+      agent_id: "{{ steps.fetch_runtime_config.output.agentId }}"
       create_conversation: "${{ steps.fetch_runtime_config.output.createConversation }}"
       auto_close_enabled: "${{ steps.fetch_runtime_config.output.autoCloseEnabled }}"
       auto_close_confidence_score_min_threshold: "${{ steps.fetch_runtime_config.output.autoCloseConfidenceScoreMinThreshold }}"
       auto_close_confidence_score_max_threshold: "${{ steps.fetch_runtime_config.output.autoCloseConfidenceScoreMaxThreshold }}"
+      # Prefix for the tags written to and matched on each analyzed alert (dedup gate + auto-close).
+      tag_prefix: "{{ steps.fetch_runtime_config.output.tagPrefix }}"
 
   # ---------------------------------------------------------------------------
   # Iterate over each alert in the trigger batch
@@ -941,9 +940,9 @@ steps:
                 {%- endif %}
                 {%- endif %}
 
-          - name: onechat_runAgent_step
+          - name: runAgent_step
             type: ai.agent
-            agent-id: "elastic-ai-agent"
+            agent-id: "{{ variables.agent_id }}"
             connector-id: "{{ variables.connector_id }}"
             create-conversation: "${{ variables.create_conversation }}"
             on-failure:
@@ -995,7 +994,7 @@ steps:
           # and abort processing for this alert.
           - name: check_if_output_exists
             type: if
-            condition: "not steps.onechat_runAgent_step.output.structured_output.classification:*"
+            condition: "not steps.runAgent_step.output.structured_output.classification:*"
             steps:
               - name: add_no_data_note_to_alert
                 type: kibana.request
@@ -1040,24 +1039,38 @@ steps:
                         ---
                         ## Automated Alert Analysis
                         ### Classification
-                        **{{ steps.onechat_runAgent_step.output.structured_output.classification }}**
+                        **{{ steps.runAgent_step.output.structured_output.classification }}**
 
                         ### Confidence Score
-                        {{ steps.onechat_runAgent_step.output.structured_output.confidence_score }}
+                        {{ steps.runAgent_step.output.structured_output.confidence_score }}
 
                         ### Rationale
-                        {{ steps.onechat_runAgent_step.output.structured_output.rationale }}
+                        {{ steps.runAgent_step.output.structured_output.rationale }}
 
                         ### Contributing Factors
-                        {% for factor in steps.onechat_runAgent_step.output.structured_output.contributing_factors %}
+                        {% for factor in steps.runAgent_step.output.structured_output.contributing_factors %}
                         - {{ factor }}
                         {%- endfor %}
 
-                        ### Timestamp
-                        {{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S' }}
+                        ### Analysis Details
+                        - Workflow version: {{ variables.normalized_version }}
+                        - Tag prefix: {{ variables.tag_prefix }}
+                        - Connector: {{ steps.runAgent_step.output.metadata.usage.connectorId | default: variables.connector_id }}
+                        {% if variables.auto_close_enabled -%}
+                        - Auto-close confidence range: {{ variables.auto_close_confidence_score_min_threshold }} to {{ variables.auto_close_confidence_score_max_threshold }}
+                        {%- endif %}
 
-                        {% if steps.onechat_runAgent_step.output.conversation_id -%}
-                        [Continue conversation](/app/agent_builder/conversations/{{ steps.onechat_runAgent_step.output.conversation_id }})
+                        ### Token Usage
+                        - Input tokens: {{ steps.runAgent_step.output.metadata.usage.inputTokens | default: 0 }}
+                        - Output tokens: {{ steps.runAgent_step.output.metadata.usage.outputTokens | default: 0 }}
+                        - Cached tokens: {{ steps.runAgent_step.output.metadata.usage.cachedTokens | default: 0 }}
+                        - Total tokens: {{ steps.runAgent_step.output.metadata.usage.totalTokens | default: 0 }}
+
+                        ### Timestamp
+                        {{ execution.startedAt | date: '%B %d, %Y at %H:%M:%S UTC' }}
+
+                        {% if steps.runAgent_step.output.conversation_id -%}
+                        [Continue conversation](/app/agent_builder/conversations/{{ steps.runAgent_step.output.conversation_id }})
                         {%- endif %}
 
                       timelineId: ''
@@ -1068,10 +1081,11 @@ steps:
               # -------------------------------------------------------------------
               # Apply workflow tags to the seed alert
               # -------------------------------------------------------------------
-              # Tags follow the convention:
-              #   workflow.<name>                              — marks the alert as processed
-              #   workflow.<name>.version.<ver>                — tracks the workflow version
-              #   workflow.<name>.output.classification.<cls>  — records the verdict
+              # Tags follow the convention (<prefix> is the configurable tag prefix):
+              #   <prefix>                          - marks the alert as processed
+              #   <prefix>.version.<ver>            - tracks the workflow version
+              #   <prefix>.classification.<cls>     - records the verdict
+              #   <prefix>.confidence.<score>       - records the confidence score
 
               # Build a filter expression to find any existing workflow tags
               # (used for tag replacement on re-runs).
@@ -1086,8 +1100,8 @@ steps:
                   tags_to_add:
                     - "{{ variables.tag_prefix }}"
                     - "{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}"
-                    - "{{ variables.tag_prefix }}.output.classification.{{ steps.onechat_runAgent_step.output.structured_output.classification | downcase }}"
-                    - "{{ variables.tag_prefix }}.output.confidence_score.{{ steps.onechat_runAgent_step.output.structured_output.confidence_score }}"
+                    - "{{ variables.tag_prefix }}.classification.{{ steps.runAgent_step.output.structured_output.classification | downcase }}"
+                    - "{{ variables.tag_prefix }}.confidence.{{ steps.runAgent_step.output.structured_output.confidence_score }}"
                   tags_to_remove: "${{ foreach.item.kibana.alert.workflow_tags | where_exp: 'tag', variables.tags_filter_expr }}"
 
               # Remove stale tags first (if any) to avoid conflicts with the add.
@@ -1128,9 +1142,9 @@ steps:
                 type: if
                 condition: >-
                   variables.auto_close_enabled: true
-                  and steps.onechat_runAgent_step.output.structured_output.classification: "false_positive"
-                  and steps.onechat_runAgent_step.output.structured_output.confidence_score >= {{ variables.auto_close_confidence_score_min_threshold }}
-                  and steps.onechat_runAgent_step.output.structured_output.confidence_score <= {{ variables.auto_close_confidence_score_max_threshold }}
+                  and steps.runAgent_step.output.structured_output.classification: "false_positive"
+                  and steps.runAgent_step.output.structured_output.confidence_score >= {{ variables.auto_close_confidence_score_min_threshold }}
+                  and steps.runAgent_step.output.structured_output.confidence_score <= {{ variables.auto_close_confidence_score_max_threshold }}
                 steps:
                   # Tag the alert so it can be identified as auto-closed.
                   - name: set_close_tags

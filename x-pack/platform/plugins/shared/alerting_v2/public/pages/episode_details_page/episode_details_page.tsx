@@ -360,11 +360,15 @@ export function EpisodeDetailsPage() {
     </EuiSplitPanel.Inner>
   );
 
+  // AppHeaderMetadata bolds `label` (it's meant to be the key of a label/value pair) and renders
+  // `value` at a lighter weight, so the description is passed as `value` with an empty `label`
+  // to get the lighter weight without touching the shared app-header component.
   const metadata = ruleDescription
     ? ([
         {
           type: 'text',
-          label: ruleDescription,
+          label: '',
+          value: ruleDescription,
           'data-test-subj': 'alertingV2EpisodeDetailsHeaderDescription',
         },
       ] as AppHeaderMetadataItems)
@@ -394,7 +398,7 @@ export function EpisodeDetailsPage() {
         badges={headerBadges}
         menu={headerMenu}
         tabs={headerTabs}
-        padding={{ bleed: 'l' }}
+        padding={{ bleed: 'm' }}
       />
       <EuiSpacer size="m" />
       {isLoading ? (

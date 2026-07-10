@@ -299,6 +299,9 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/date-range-picker'
+  - '@kbn/esql-types'
+  - '@kbn/discoveries-schemas'
+  - '@kbn/chart-icons'
 tags:
   - plugin
   - prod
