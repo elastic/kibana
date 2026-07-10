@@ -273,6 +273,35 @@ export const buildConversationFeasibilitySearchRequests =
       },
     },
     {
+      name: 'indexed_all_values_text',
+      request: {
+        track_total_hits: true,
+        size: 20,
+        query: {
+          bool: {
+            filter: [
+              ...baseSearchFilters,
+              {
+                query_string: {
+                  default_field: 'extended_fields',
+                  query: '*investigation*',
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    { terms: { extended_fields: ['50', '60', '70'] } },
+                    { range: { 'extended_fields.risk_score_as_long': { gte: '40', lte: '90' } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+    {
       name: 'runtime_user_picker_name_wildcard',
       request: {
         track_total_hits: true,

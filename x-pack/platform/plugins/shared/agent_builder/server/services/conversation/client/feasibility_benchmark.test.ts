@@ -97,6 +97,7 @@ describe('conversation templating feasibility benchmark', () => {
       'exact_extended_field_exists',
       'runtime_numeric_range',
       'runtime_all_values_text',
+      'indexed_all_values_text',
       'runtime_user_picker_name_wildcard',
       'runtime_tags_membership_with_complex_bool',
       'runtime_multi_field_source_scan',
@@ -117,12 +118,36 @@ describe('conversation templating feasibility benchmark', () => {
         risk_score_runtime: expect.objectContaining({ type: 'long' }),
       })
     );
-    expect(requests[4].request.runtime_mappings).toEqual(
+    expect(requests[4].request.runtime_mappings).toEqual(undefined);
+    expect(requests[4].request.query).toEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          filter: expect.arrayContaining([
+            {
+              query_string: {
+                default_field: 'extended_fields',
+                query: '*investigation*',
+              },
+            },
+            {
+              bool: {
+                should: [
+                  { terms: { extended_fields: ['50', '60', '70'] } },
+                  { range: { 'extended_fields.risk_score_as_long': { gte: '40', lte: '90' } } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ]),
+        }),
+      })
+    );
+    expect(requests[5].request.runtime_mappings).toEqual(
       expect.objectContaining({
         assignee_name_runtime: expect.objectContaining({ type: 'keyword' }),
       })
     );
-    expect(requests[5].request.query).toEqual(
+    expect(requests[6].request.query).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({
           minimum_should_match: 1,
@@ -181,8 +206,8 @@ describe('conversation templating feasibility benchmark', () => {
       })
     );
     expect(client.bulk).toHaveBeenCalledTimes(2);
-    expect(client.search).toHaveBeenCalledTimes(14);
-    expect(results).toHaveLength(7);
+    expect(client.search).toHaveBeenCalledTimes(16);
+    expect(results).toHaveLength(8);
     expect(results[0].samplesMs).toHaveLength(2);
     expect(results[0].esTookMs).toEqual([1, 1]);
     expect(logger).toHaveBeenCalledWith('Seeding 50% complete (1/2 batches)');
