@@ -17,7 +17,6 @@ const buildDiscovery = (...ruleUuids: string[]): Partial<Discovery> => ({
 const evaluate = (discoveries: Array<Partial<Discovery>>, expectedGroups?: string[][]) =>
   groupingCorrectnessEvaluator.evaluate({
     input: {
-      episodeSuffix: 'test',
       detections: discoveries.flatMap((d) => d.detections ?? []) as Detection[],
     },
     output: { discoveries: discoveries as unknown as Discovery[], steps: [] },
