@@ -482,7 +482,7 @@ export const createNavigationTree = ({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:api_keys' },
-              { link: 'management:application_connections', badgeType: 'techPreview' },
+              { link: 'management:application_connections' },
               { link: 'management:roles' },
             ],
           },

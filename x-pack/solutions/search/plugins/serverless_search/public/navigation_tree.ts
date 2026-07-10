@@ -235,11 +235,7 @@ export function createNavigationTree({
             title: ACCESS_TITLE,
             children: [
               { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
-              {
-                link: 'management:application_connections',
-                breadcrumbStatus: 'hidden',
-                badgeType: 'techPreview',
-              },
+              { link: 'management:application_connections', breadcrumbStatus: 'hidden' },
               { link: 'management:roles', breadcrumbStatus: 'hidden' },
             ],
           },
