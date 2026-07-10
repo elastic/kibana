@@ -248,6 +248,35 @@ describe('useTemplateFormSync', () => {
     expect(mockSetFieldValue).not.toHaveBeenCalledWith('category', expect.anything());
   });
 
+  it('skips null case-default scalars so a "no default" template never pushes null into the form', () => {
+    // Case-default scalars are nullable and seeded as `null` in the editor, so a saved template can
+    // carry `severity: null` etc. Those must NOT be written to the create-case form (null is invalid
+    // for the severity enum).
+    const nullDefaultsTemplate = {
+      templateId: 'template-1',
+      templateVersion: 1,
+      definition: {
+        name: 'Null defaults',
+        description: null,
+        severity: null,
+        category: null,
+        tags: [],
+        assignees: [],
+        fields: [],
+      },
+    };
+
+    mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
+    mockUseGetTemplate.mockReturnValue({ data: nullDefaultsTemplate, isLoading: false });
+
+    renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+    expect(mockSetFieldValue).toHaveBeenCalledWith('title', 'Null defaults');
+    expect(mockSetFieldValue).not.toHaveBeenCalledWith('severity', null);
+    expect(mockSetFieldValue).not.toHaveBeenCalledWith('description', null);
+    expect(mockSetFieldValue).not.toHaveBeenCalledWith('category', null);
+  });
+
   it('does not apply when template.templateId does not match current templateId', () => {
     mockUseFormData.mockReturnValue([{ templateId: 'template-2' }]);
     mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });

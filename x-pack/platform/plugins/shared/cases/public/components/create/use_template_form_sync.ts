@@ -229,7 +229,11 @@ export const useTemplateFormSync = (
     ];
 
     for (const [fieldName, value] of fieldMappings) {
-      if (value !== undefined) {
+      // Skip `null` as well as `undefined`. Case-default scalars (severity/description/category) are
+      // nullable and seeded as `null` ("no default") in the editor, so a template can carry e.g.
+      // `severity: null`. A null default means "don't override" — pushing it into the create-case
+      // form would set an invalid `null` on the severity enum (which resets to `low` by default).
+      if (value != null) {
         setFieldValue(fieldName, value);
       }
     }
