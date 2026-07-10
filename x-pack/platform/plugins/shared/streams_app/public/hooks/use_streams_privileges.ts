@@ -14,7 +14,7 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_CANVAS,
 } from '@kbn/management-settings-ids';
-import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
+import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/significant-events-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';

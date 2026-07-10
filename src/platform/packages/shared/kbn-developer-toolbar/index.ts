@@ -13,4 +13,3 @@ export {
 } from './src/components/developer_toolbar_item';
 export { DeveloperToolbar, type DeveloperToolbarProps } from './src/components/developer_toolbar';
 export { LiveColorThemeToggle } from './src/toolbar_items/color_theme/color_theme_toggle';
-export { installLocalColorThemeOverride } from './src/toolbar_items/color_theme/local_color_theme';

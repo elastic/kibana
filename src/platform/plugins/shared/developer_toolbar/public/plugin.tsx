@@ -11,12 +11,10 @@ import React, { Suspense, lazy } from 'react';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
+import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal-types';
 
 import { BehaviorSubject } from 'rxjs';
-import {
-  installLocalColorThemeOverride,
-  type DeveloperToolbarItemProps,
-} from '@kbn/developer-toolbar';
+import { type DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
 
 import { NEXT_CHROME_FEATURE_FLAG_KEY } from '@kbn/core-chrome-feature-flags';
 
@@ -67,17 +65,11 @@ export class DeveloperToolbarPlugin
       </Suspense>
     );
 
-    /**
-     * Install the override eagerly so it takes effect globally (before the app
-     * root subscribes to `core.theme.theme$`).
-     */
-    const colorThemeController = installLocalColorThemeOverride(core.theme);
-
     this.registerItem({
       id: 'Color Theme',
       children: (
         <Suspense fallback={null}>
-          <LazyColorThemeToggle controller={colorThemeController} />
+          <LazyColorThemeToggle theme={core.theme as InternalThemeServiceStart} />
         </Suspense>
       ),
     });

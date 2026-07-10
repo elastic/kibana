@@ -127,6 +127,18 @@ describe('AgentDetailsPage', () => {
     expect(result.queryByText('Diagnostics')).not.toBeNull();
   });
 
+  it('should not show Settings tab for OPAMP collector', async () => {
+    setupMocks({ agent: mockAgent({ type: 'OPAMP' }), enableOtelUI: true });
+    const result = await render();
+    expect(result.queryByText('Settings')).toBeNull();
+  });
+
+  it('should show Settings tab for non-collector agents', async () => {
+    setupMocks({ agent: mockAgent({ type: 'PERMANENT' }), enableOtelUI: true });
+    const result = await render();
+    expect(result.queryByText('Settings')).not.toBeNull();
+  });
+
   it('should render AgentDetailsContent for non-OPAMP agent', async () => {
     setupMocks({ agent: mockAgent({ type: 'PERMANENT' }), enableOtelUI: true });
     const result = await render();

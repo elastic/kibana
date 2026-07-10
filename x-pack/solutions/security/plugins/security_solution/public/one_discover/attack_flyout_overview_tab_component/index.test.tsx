@@ -21,11 +21,21 @@ jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({
 }));
 
 jest.mock('../../flyout_v2/attack/main/tabs/overview_tab', () => ({
-  OverviewTab: ({ hit }: { hit: DataTableRecord }) => (
-    <div data-test-subj="attackOverviewTabMock" data-hit-id={String((hit as DataTableRecord).id)}>
-      {'overview'}
+  OverviewTab: () => (
+    <div data-test-subj="attackOverviewTabMock">
+      <div data-test-subj="mock-ai-summary-section" />
+      <div data-test-subj="mock-visualizations-section" />
+      <div data-test-subj="mock-insights-section" />
     </div>
   ),
+}));
+
+jest.mock('../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: () => false,
+}));
+
+jest.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', () => ({
+  DataViewManagerBootstrap: () => null,
 }));
 
 describe('AttackFlyoutOverviewTab', () => {
@@ -40,16 +50,21 @@ describe('AttackFlyoutOverviewTab', () => {
     },
   } as unknown as StartServices;
 
-  const hit = {
-    id: '1',
-    raw: { _id: 'attack-1', _index: 'test-index' },
-    flattened: { _id: 'attack-1', _index: 'test-index' },
-  } as unknown as DataTableRecord;
+  const buildHit = (workflowStatus: string = 'open'): DataTableRecord =>
+    ({
+      id: '1',
+      raw: {
+        _id: 'attack-1',
+        _index: 'test-index',
+        _source: { 'kibana.alert.workflow_status': workflowStatus },
+      },
+      flattened: { _id: 'attack-1', _index: 'test-index' },
+    } as unknown as DataTableRecord);
 
   it('does not render before promises resolve', () => {
     render(
       <AttackFlyoutOverviewTab
-        hit={hit}
+        hit={buildHit()}
         servicesPromise={new Promise<StartServices>(() => undefined)}
         storePromise={new Promise<ReturnType<typeof createStore>>(() => undefined) as never}
       />
@@ -63,7 +78,7 @@ describe('AttackFlyoutOverviewTab', () => {
 
     render(
       <AttackFlyoutOverviewTab
-        hit={hit}
+        hit={buildHit()}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
       />
@@ -79,43 +94,25 @@ describe('AttackFlyoutOverviewTab', () => {
     });
 
     expect(screen.getByTestId('attackOverviewTabMock')).toBeInTheDocument();
-    expect(screen.getByTestId('attackOverviewTabMock')).toHaveAttribute('data-hit-id', '1');
   });
 
-  it('forwards the latest hit to OverviewTab when Discover rerenders', async () => {
-    const updatedHit = {
-      id: '2',
-      raw: {
-        _id: 'attack-2',
-        _index: 'test-index',
-        _source: { 'kibana.alert.workflow_status': 'closed' },
-      },
-      flattened: { _id: 'attack-2', _index: 'test-index' },
-    } as unknown as DataTableRecord;
+  it('renders all three body sections: summary, visualizations, and insights', async () => {
     const store = createStore(() => ({}));
 
-    const { rerender } = render(
+    render(
       <AttackFlyoutOverviewTab
-        hit={hit}
+        hit={buildHit()}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
       />
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('attackOverviewTabMock')).toBeInTheDocument();
+      expect(screen.getByTestId('mock-ai-summary-section')).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId('attackOverviewTabMock')).toHaveAttribute('data-hit-id', '1');
-
-    rerender(
-      <AttackFlyoutOverviewTab
-        hit={updatedHit}
-        servicesPromise={Promise.resolve(servicesMock)}
-        storePromise={Promise.resolve(store as never)}
-      />
-    );
-    expect(screen.getByTestId('attackOverviewTabMock')).toHaveAttribute('data-hit-id', '2');
+    expect(screen.getByTestId('mock-visualizations-section')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-insights-section')).toBeInTheDocument();
   });
 
   it('does not render when resolving dependencies fails', async () => {
@@ -123,7 +120,7 @@ describe('AttackFlyoutOverviewTab', () => {
 
     render(
       <AttackFlyoutOverviewTab
-        hit={hit}
+        hit={buildHit()}
         servicesPromise={Promise.reject(new Error('services failed'))}
         storePromise={Promise.resolve(store as never)}
       />

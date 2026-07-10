@@ -1,0 +1,359 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FC } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
+import { css } from '@emotion/react';
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
+import type { ESQuery } from '../../../../../common/typed_json';
+import { buildEntityNameFilter, type RiskSeverity } from '../../../../../common/search_strategy';
+import { EntityType } from '../../../../../common/entity_analytics/types';
+import type { Refetch } from '../../../../common/types';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useQueryInspector } from '../../../../common/components/page/manage_query';
+import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
+import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
+import { ENTITY_ANALYTICS_TABLE_ID } from '../../../../entity_analytics/components/home/constants';
+import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
+import {
+  EntityDetailsLeftPanelTab,
+  type EntityDetailsPath,
+} from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { getRiskFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import {
+  useEntityPanelTabs,
+  TABLE_TAB_ID,
+} from '../../../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
+import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
+import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
+import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
+import { FlyoutBody } from '../../../../flyout/shared/components/flyout_body';
+import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '../../../../flyout/entity_details/service_right';
+import { ServicePanelContent } from '../../../../flyout/entity_details/service_right/content';
+import { ServicePanelHeader } from '../../../../flyout/entity_details/service_right/header';
+import { ServicePanelFooter } from '../../../../flyout/entity_details/service_right/footer';
+import { useObservedService } from '../../../../flyout/entity_details/service_right/hooks/use_observed_service';
+import { flyoutProviders } from '../../../shared/components/flyout_provider';
+import {
+  defaultToolsFlyoutProperties,
+  useDefaultDocumentFlyoutProperties,
+} from '../../../shared/hooks/use_default_flyout_properties';
+import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
+import { RiskInputs } from '../../shared/tools/risk_inputs';
+import { GraphView } from '../../shared/tools/graph_view';
+import { Resolution } from '../../shared/tools/resolution';
+import { renderEntityDetails } from '../../shared/render_entity_details';
+
+export interface ServiceProps {
+  /** Display name from the source row / document (typically `service.name`). */
+  serviceName: string;
+  /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
+  entityId?: string;
+  /** Scope id (timeline id, table id, etc.) — used for downstream containers and queries. */
+  scopeId?: string;
+  /** Stable identifier for the service panel context (defaults to `scopeId` or a static fallback). */
+  contextID?: string;
+}
+
+const FIRST_RECORD_PAGINATION = {
+  cursorStart: 0,
+  querySize: 1,
+};
+
+/**
+ * Standalone service details flyout content (for use with `overlays.openSystemFlyout`).
+ *
+ * Runs the same data hooks as the v1 `ServicePanel`, but without the expandable-flyout navigation
+ * or preview-mode handling. Detail panels (risk inputs, graph view, resolution) open as separate
+ * system flyouts via `overlays.openSystemFlyout`.
+ */
+export const Service: FC<ServiceProps> = memo(function Service({
+  serviceName,
+  entityId,
+  scopeId = '',
+  contextID,
+}) {
+  const { euiTheme } = useEuiTheme();
+  const { services } = useKibana();
+  const { overlays } = services;
+  const store = useStore();
+  const history = useHistory();
+  const isInSecurityApp = useIsInSecurityApp();
+  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+
+  const safeContextID = contextID ?? scopeId ?? 'service-panel';
+
+  const serviceStoreIdentityFields = useMemo(
+    () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
+    [entityId, serviceName]
+  );
+  const entityFromStoreResult = useEntityFromStore({
+    entityId,
+    identityFields: serviceStoreIdentityFields,
+    entityType: 'service',
+    skip: false,
+  });
+
+  const euidApi = useEntityStoreEuidApi();
+  const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
+    return (
+      euidApi?.euid?.getEntityIdentifiersFromDocument(
+        'service',
+        entityFromStoreResult.entityRecord ?? {}
+      ) ?? {}
+    );
+  }, [entityFromStoreResult.entityRecord, euidApi?.euid]);
+
+  const serviceNameFilterQuery = useMemo(
+    () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
+    [serviceName]
+  );
+  const riskScoreState = useRiskScore({
+    riskEntity: EntityType.service,
+    filterQuery: serviceNameFilterQuery as unknown as ESQuery | undefined,
+    onlyLatest: false,
+    pagination: FIRST_RECORD_PAGINATION,
+    skip: true,
+  });
+
+  const { inspect, loading } = riskScoreState;
+  const { setQuery, deleteQuery } = useGlobalTime();
+  const observedService = useObservedService(documentEntityIdentifiers, scopeId);
+
+  const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
+  const onRecalculation = useCallback(() => {
+    (refetchEntitiesTable as Refetch | null)?.();
+  }, [refetchEntitiesTable]);
+
+  const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
+    useEntityRiskScoreRecalculation({
+      entityType: EntityType.service,
+      identifier: serviceName,
+      entityId: entityFromStoreResult.entityRecord?.entity?.id,
+      entityStoreV2Enabled: true,
+      entityFromStoreResult,
+      riskScoreState,
+      onRecalculation,
+    });
+
+  const onAssetCriticalityChanged = useCallback(() => {
+    (refetchEntitiesTable as Refetch | null)?.();
+    calculateEntityRiskScore();
+  }, [calculateEntityRiskScore, refetchEntitiesTable]);
+
+  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
+    onSuccess: onAssetCriticalityChanged,
+  });
+
+  useQueryInspector({
+    deleteQuery,
+    inspect,
+    loading,
+    queryId: SERVICE_PANEL_RISK_SCORE_QUERY_ID,
+    refetch: riskScoreState.refetch,
+    setQuery,
+  });
+
+  const entityStoreEntityId = entityFromStoreResult.entityRecord?.entity?.id;
+
+  const onCriticalitySave = entityFromStoreResult.entityRecord
+    ? (level: CriticalityLevelWithUnassigned) =>
+        updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
+    : undefined;
+
+  const onShowService = useCallback(() => {
+    overlays.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <Service serviceName={serviceName} entityId={entityId} scopeId={scopeId} />,
+      }),
+      { ...defaultDocumentFlyoutProperties, title: serviceName, historyKey, session: 'inherit' }
+    );
+  }, [
+    overlays,
+    services,
+    store,
+    history,
+    serviceName,
+    entityId,
+    scopeId,
+    historyKey,
+    defaultDocumentFlyoutProperties,
+  ]);
+
+  const onShowRelatedEntity = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) =>
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: renderEntityDetails({ ...params, scopeId }),
+        }),
+        {
+          ...defaultDocumentFlyoutProperties,
+          title: params.entityName ?? params.entityId,
+          historyKey,
+          session: 'inherit',
+        }
+      ),
+    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
+  );
+
+  const openDetailsPanel = useCallback(
+    (path: EntityDetailsPath) => {
+      const common = {
+        ...defaultToolsFlyoutProperties,
+        title: serviceName,
+        historyKey,
+        session: 'start' as const,
+      };
+      const wrap = (children: React.ReactNode) =>
+        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), common);
+
+      switch (path.tab) {
+        case EntityDetailsLeftPanelTab.RISK_INPUTS:
+          return wrap(
+            <RiskInputs
+              entityType={EntityType.service}
+              entityName={serviceName}
+              entityId={entityStoreEntityId}
+              onShowEntity={onShowService}
+            />
+          );
+        case EntityDetailsLeftPanelTab.GRAPH_VIEW:
+          if (!entityStoreEntityId) return;
+          return wrap(
+            <GraphView
+              entityId={entityStoreEntityId}
+              scopeId={scopeId}
+              entityName={serviceName}
+              onShowEntity={onShowRelatedEntity}
+              onShowOriginatingEntity={onShowService}
+            />
+          );
+        case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
+          if (!entityStoreEntityId) return;
+          return wrap(
+            <Resolution
+              entityId={entityStoreEntityId}
+              entityType="service"
+              entityName={serviceName}
+              scopeId={scopeId}
+              onShowEntity={onShowService}
+              onShowRelatedEntity={onShowRelatedEntity}
+            />
+          );
+      }
+    },
+    [
+      overlays,
+      services,
+      store,
+      history,
+      serviceName,
+      scopeId,
+      entityStoreEntityId,
+      historyKey,
+      onShowService,
+      onShowRelatedEntity,
+    ]
+  );
+
+  const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
+    entityRecord: entityFromStoreResult.entityRecord ?? null,
+  });
+
+  const tabsNode = tabs ? (
+    <EntityPanelHeaderTabs
+      tabs={tabs}
+      selectedTabId={selectedTabId}
+      setSelectedTabId={setSelectedTabId}
+    />
+  ) : undefined;
+
+  return (
+    <>
+      <ServicePanelHeader
+        serviceName={serviceName}
+        observedService={observedService}
+        isEntityInStore={!!entityFromStoreResult.entityRecord}
+        flyoutHeaderProps={{
+          css: css`
+            padding-block: ${euiTheme.size.s} !important;
+          `,
+          panelProps: { paddingSize: 'none' },
+        }}
+        riskLevel={
+          entityFromStoreResult.entityRecord
+            ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
+                'Unknown') as RiskSeverity)
+            : undefined
+        }
+      />
+      <FlyoutBody panelProps={{ paddingSize: 'none' }}>
+        {entityFromStoreResult.entityRecord && (
+          <EntitySummaryGrid
+            entityRecord={entityFromStoreResult.entityRecord}
+            criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
+            onCriticalitySave={onCriticalitySave}
+          />
+        )}
+        {tabsNode}
+        {tabs && <EuiSpacer size="l" />}
+        {tabs && selectedTabId === TABLE_TAB_ID && entityFromStoreResult.entityRecord ? (
+          <EntityStoreTableTab entityRecord={entityFromStoreResult.entityRecord} />
+        ) : (
+          <ServicePanelContent
+            entityRecord={entityFromStoreResult.entityRecord ?? undefined}
+            serviceName={serviceName}
+            observedService={observedService}
+            riskScoreState={riskScoreState}
+            entityRiskScores={entityRiskScores}
+            recalculatingScore={recalculatingScore}
+            onAssetCriticalityChange={onAssetCriticalityChanged}
+            contextID={safeContextID}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+            isPreviewMode={false}
+            entityStoreEntityId={entityStoreEntityId}
+            onShowEntity={onShowRelatedEntity}
+          />
+        )}
+      </FlyoutBody>
+      <ServicePanelFooter
+        identityFields={documentEntityIdentifiers}
+        entity={entityFromStoreResult.entityRecord ?? undefined}
+        flyoutFooterProps={{
+          css: css`
+            padding-block: ${euiTheme.size.s} !important;
+          `,
+        }}
+        panelProps={{ paddingSize: 'none' }}
+      />
+    </>
+  );
+});
+
+Service.displayName = 'Service';

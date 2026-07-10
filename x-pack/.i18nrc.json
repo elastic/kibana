@@ -43,6 +43,7 @@
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "solutions/search/plugins/enterprise_search",
     "xpack.features": "platform/plugins/shared/features",
+    "xpack.dataFederation": "platform/plugins/private/data_federation",
     "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "solutions/observability/plugins/exploratory_view",
     "xpack.fileUpload": "platform/plugins/private/file_upload",
@@ -61,6 +62,7 @@
     "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
     "xpack.inference": "platform/plugins/shared/inference",
     "xpack.inferenceWorkflows": "platform/plugins/shared/inference_workflows",
+    "xpack.investigationOutput": "platform/packages/shared/kbn-investigation-output",
     "xpack.inventory": "solutions/observability/plugins/inventory",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
     "xpack.lens": "platform/plugins/shared/lens",
@@ -99,6 +101,7 @@
     "xpack.observabilityLogsOverview": ["platform/packages/shared/logs-overview/src/components"],
     "xpack.agentBuilder": [
       "platform/plugins/shared/agent_builder",
+      "platform/plugins/shared/agent_builder_visualizations",
       "platform/packages/shared/agent-builder"
     ],
     "xpack.agentBuilderPlatform": "platform/plugins/shared/agent_builder_platform",

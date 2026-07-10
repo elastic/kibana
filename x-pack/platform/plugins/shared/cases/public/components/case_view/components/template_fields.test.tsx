@@ -112,7 +112,7 @@ describe('TemplateFields', () => {
 
   it('renders nothing when template has no fields', () => {
     mockUseGetTemplate.mockReturnValue({
-      data: { ...mockTemplate, definition: { name: 'Empty', fields: [] } },
+      data: { ...mockTemplate, definition: { fields: [] } },
       isLoading: false,
     });
 
@@ -125,7 +125,7 @@ describe('TemplateFields', () => {
     const templateWithoutLabels: ParsedTemplate = {
       ...mockTemplate,
       definition: {
-        name: 'Test',
+        name: 'Test Template',
         fields: [{ name: 'hostname', control: FieldType.INPUT_TEXT, type: 'keyword' }],
       },
     };
@@ -140,7 +140,7 @@ describe('TemplateFields', () => {
     const templateWithUnknown: ParsedTemplate = {
       ...mockTemplate,
       definition: {
-        name: 'Test',
+        name: 'Test Template',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fields: [{ name: 'unknownField', control: 'UNKNOWN_TYPE' as any, type: 'keyword' }],
       },

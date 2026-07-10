@@ -33,17 +33,22 @@ import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { ANALYZER_PREVIEW_BANNER } from '../../../../resolver/view/resolver_without_providers';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
-jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+}));
 jest.mock('../../../../resolver/view/use_resolver_query_params_cleaner');
 jest.mock('../../shared/hooks/use_which_flyout');
 jest.mock('../../../../detections/hooks/use_is_analyzer_enabled');
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
+jest.mock('../../../../flyout_v2/use_flyout_api');
 
 const mockUiSettingsGet = jest.fn();
 let mockServerless: unknown;
@@ -63,6 +68,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 const mockUseWhichFlyout = useWhichFlyout as jest.Mock;
+const mockUseFlyoutApi = jest.mocked(useFlyoutApi);
 const FLYOUT_KEY = 'securitySolution';
 const mockExperimentalFeatureFlags = (flags: Record<string, boolean>) => {
   (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
@@ -115,10 +121,9 @@ describe('<AnalyzeGraph />', () => {
     mockServerless = undefined;
     mockUiSettingsGet.mockReturnValue(true);
     mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
+    mockUseFlyoutApi.mockReturnValue(createFlyoutApiMock());
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockExperimentalFeatureFlags({
-      newFlyoutSystemEnabled: false,
-    });
+    mockExperimentalFeatureFlags({});
     (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
     (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
     (useDataView as jest.Mock).mockReturnValue({

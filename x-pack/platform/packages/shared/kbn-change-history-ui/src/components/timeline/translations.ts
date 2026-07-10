@@ -91,3 +91,24 @@ export const PREVIEW_ERROR = i18n.translate('xpack.changeHistoryUi.modal.preview
 export const LIST_ERROR = i18n.translate('xpack.changeHistoryUi.modal.listError', {
   defaultMessage: 'Unable to load change history',
 });
+
+export const ROW_ACTIONS_COMPARE_TO_THIS_VERSION = i18n.translate(
+  'xpack.changeHistoryUi.timeline.rowActions.compareToThisVersion',
+  {
+    defaultMessage: 'Compare to this version',
+  }
+);
+
+export const ROW_ACTIONS_RESTORE_THIS_VERSION = i18n.translate(
+  'xpack.changeHistoryUi.timeline.rowActions.restoreThisVersion',
+  {
+    defaultMessage: 'Restore this version',
+  }
+);
+
+export const ROW_ACTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.changeHistoryUi.timeline.rowActions.ariaLabel',
+  {
+    defaultMessage: 'Version actions',
+  }
+);

@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import type { LocalColorThemeController } from './local_color_theme';
+import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal-types';
 
 interface Props {
   isDarkMode: boolean;
@@ -32,12 +32,15 @@ const ColorThemeToggle = ({ isDarkMode, onToggle }: Props) => (
 );
 
 /**
- * Toolbar item that reflects and toggles the color theme override. It subscribes
- * to the controller so the badge updates live when the theme flips. The
- * controller (which installs the global override) is created eagerly by the
- * plugin; only this presentational component is lazy-loaded.
+ * Toolbar item that reflects and toggles the color theme. It subscribes to the
+ * core theme contract so the badge updates live when the theme flips, and calls
+ * the dev-only `setDarkMode` to switch without a page reload. The change is
+ * session-only: a reload restores the server-resolved theme.
  */
-export const LiveColorThemeToggle = ({ controller }: { controller: LocalColorThemeController }) => {
-  const isDarkMode = useObservable(controller.isDark$, controller.isDark$.getValue());
-  return <ColorThemeToggle isDarkMode={isDarkMode} onToggle={controller.toggle} />;
+export const LiveColorThemeToggle = ({ theme }: { theme: InternalThemeServiceStart }) => {
+  const currentTheme = useObservable(theme.theme$, theme.getTheme());
+  const isDarkMode = currentTheme.darkMode;
+  return (
+    <ColorThemeToggle isDarkMode={isDarkMode} onToggle={() => theme.setDarkMode(!isDarkMode)} />
+  );
 };

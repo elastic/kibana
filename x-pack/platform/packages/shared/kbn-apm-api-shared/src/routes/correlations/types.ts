@@ -8,4 +8,9 @@ import * as t from 'io-ts';
 
 export const entityTypeRt = t.union([t.literal('transaction'), t.literal('exit_span')]);
 
-export const metricRt = t.union([t.literal('latency'), t.literal('failure_rate')]);
+export const metricRt = t.union([
+  t.literal('latency'),
+  t.literal('failure_rate'),
+  t.literal('throughput'),
+  t.literal('infra_metrics'),
+]);
