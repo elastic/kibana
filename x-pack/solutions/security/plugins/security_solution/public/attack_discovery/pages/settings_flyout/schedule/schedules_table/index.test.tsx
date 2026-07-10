@@ -404,11 +404,12 @@ describe('SchedulesTable', () => {
     });
 
     it('invokes the workflow delete mutation when the delete button is clicked', async () => {
-      const { getAllByTestId } = renderTable();
+      const { getAllByTestId, getByTestId } = renderTable();
 
       act(() => {
         fireEvent.click(getAllByTestId('deleteButton')[0]);
       });
+      confirmDeleteInModal(getByTestId);
 
       await waitFor(() => {
         expect(mockWorkflowDeleteMutateAsync).toHaveBeenCalledWith({
@@ -444,11 +445,12 @@ describe('SchedulesTable', () => {
     });
 
     it('refetches the schedules after the workflow delete mutation so the table updates', async () => {
-      const { getAllByTestId } = renderTable();
+      const { getAllByTestId, getByTestId } = renderTable();
 
       act(() => {
         fireEvent.click(getAllByTestId('deleteButton')[0]);
       });
+      confirmDeleteInModal(getByTestId);
 
       await waitFor(() => {
         expect(refetchSchedulesMock).toHaveBeenCalled();
