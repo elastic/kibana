@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useForm, useController, type Control } from 'react-hook-form';
 import { useProjectPickerActions } from '../../../../../state';
-import { filterExpressionCodec } from './utils/codec';
+import { filterExpressionCodec } from '../../../../../utils/codec';
 import { filterBoxStyles } from './filter_box.styles';
 
 interface ProjectPickerFilterBoxProps {
