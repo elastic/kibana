@@ -7,14 +7,12 @@
 
 import { useCallback } from 'react';
 import { ProjectRoutingAccess, useCpsPickerAccess } from '@kbn/cps-utils';
-import { SECTION_SLUG } from '../common/constants';
 import { useAppDependencies } from '../app_dependencies';
 
-export const getTransformCpsPickerAccess = (location: string): ProjectRoutingAccess => {
-  if (location.includes(`/${SECTION_SLUG.CREATE_TRANSFORM}`)) {
-    return ProjectRoutingAccess.READONLY;
-  }
-
+export const getTransformCpsPickerAccess = (_location: string): ProjectRoutingAccess => {
+  // TODO: Enable read-only access on create/clone routes once the create form has a
+  // project scope selector that can keep the CPS header, source searches, preview,
+  // and create payload in sync.
   return ProjectRoutingAccess.DISABLED;
 };
 

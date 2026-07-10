@@ -21,15 +21,15 @@ jest.mock('../app_dependencies', () => ({
 const mockUseAppDependencies = useAppDependencies as jest.Mock;
 
 describe('getTransformCpsPickerAccess', () => {
-  it('returns readonly access for create transform routes', () => {
+  it('returns disabled access for create transform routes', () => {
     expect(
       getTransformCpsPickerAccess('/app/management/data/transform/create_transform/data-view-id')
-    ).toBe(ProjectRoutingAccess.READONLY);
+    ).toBe(ProjectRoutingAccess.DISABLED);
   });
 
-  it('returns readonly access for create transform routes without a saved object id', () => {
+  it('returns disabled access for create transform routes without a saved object id', () => {
     expect(getTransformCpsPickerAccess('/app/management/data/transform/create_transform')).toBe(
-      ProjectRoutingAccess.READONLY
+      ProjectRoutingAccess.DISABLED
     );
   });
 
@@ -74,7 +74,7 @@ describe('useTransformCpsPickerAccess', () => {
 
     const resolver = registerAppAccess.mock.calls[0][1];
     expect(resolver('/app/management/data/transform/create_transform/data-view-id')).toBe(
-      ProjectRoutingAccess.READONLY
+      ProjectRoutingAccess.DISABLED
     );
     expect(resolver('/app/management/data/transform')).toBe(ProjectRoutingAccess.DISABLED);
   });
