@@ -30,6 +30,13 @@ export interface OpenNetworkFlyoutParams {
   ip: string;
   /** Whether the IP is the source or destination of the flow. */
   flowTarget: FlowTargetSourceDest;
+  /**
+   * For `openNetworkFlyoutAsChild` only: chain the history title from this session's own root title
+   * instead of whichever sibling child is currently open. Set this when the caller is a persistent
+   * anchor (a graph canvas, a table) that can open several different IPs one after another without
+   * navigating away in between.
+   */
+  resetNavToRoot?: boolean;
 }
 
 export interface NetworkFlyoutApi {
@@ -107,11 +114,11 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
   );
 
   const openNetworkFlyoutAsChild = useCallback(
-    ({ ip, flowTarget }: OpenNetworkFlyoutParams) => {
+    ({ ip, flowTarget, resetNavToRoot }: OpenNetworkFlyoutParams) => {
       open(
         <Network ip={ip} flowTarget={flowTarget} />,
         'inherit',
-        buildFlyoutNavTitle(formatFlyoutTitle(NETWORK_TITLE, ip))
+        buildFlyoutNavTitle(formatFlyoutTitle(NETWORK_TITLE, ip), { resetToRoot: resetNavToRoot })
       );
     },
     [open]

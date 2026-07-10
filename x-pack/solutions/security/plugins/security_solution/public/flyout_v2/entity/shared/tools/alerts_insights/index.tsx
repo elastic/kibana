@@ -56,6 +56,7 @@ export const AlertsInsights = memo(
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
+          resetNavToRoot: true,
         });
       },
       [openDocumentFlyoutFromIndexAsChild]

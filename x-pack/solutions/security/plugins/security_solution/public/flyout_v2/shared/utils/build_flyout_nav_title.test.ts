@@ -57,4 +57,32 @@ describe('buildFlyoutNavTitle', () => {
 
     expect(buildFlyoutNavTitle('Alert E')).toBe('Rule: prod -> staging -> Alert E');
   });
+
+  describe('resetToRoot', () => {
+    it('chains from the session title instead of a stale childTitle left by a previous sibling', () => {
+      mockGetState.mockReturnValue(withSession({ title: 'Graph: session-f', childTitle: 'Alert' }));
+
+      expect(buildFlyoutNavTitle('Host: my-host', { resetToRoot: true })).toBe(
+        'Graph: session-f -> Host: my-host'
+      );
+    });
+
+    it('still flattens a subsequent normal hop chained off a resetToRoot composition', () => {
+      mockGetState.mockReturnValue(withSession({ title: 'Graph: session-g', childTitle: 'Alert' }));
+      const anchoredHop = buildFlyoutNavTitle('Host: my-host', { resetToRoot: true });
+      expect(anchoredHop).toBe('Graph: session-g -> Host: my-host');
+
+      mockGetState.mockReturnValue(
+        withSession({ title: 'Graph: session-g', childTitle: anchoredHop })
+      );
+      const drillDownHop = buildFlyoutNavTitle('Rule: My Rule');
+      expect(drillDownHop).toBe('Host: my-host -> Rule: My Rule');
+    });
+
+    it('falls back to the child title as-is when no session is active', () => {
+      mockGetState.mockReturnValue({ sessions: [] });
+
+      expect(buildFlyoutNavTitle('Host: my-host', { resetToRoot: true })).toBe('Host: my-host');
+    });
+  });
 });

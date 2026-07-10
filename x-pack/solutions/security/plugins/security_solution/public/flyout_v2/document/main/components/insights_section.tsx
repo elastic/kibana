@@ -95,6 +95,7 @@ export const InsightsSection = memo(
           indexName,
           renderCellActions,
           onAlertUpdated,
+          resetNavToRoot: true,
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );

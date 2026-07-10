@@ -117,7 +117,7 @@ export const EntityDetails = memo(
           historyKey,
           session: 'inherit',
           outsideClickCloses: false,
-          title: buildFlyoutNavTitle(title),
+          title: buildFlyoutNavTitle(title, { resetToRoot: true }),
         });
       },
       [overlays, services, store, history, defaultDocumentFlyoutProperties, historyKey]

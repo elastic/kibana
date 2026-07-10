@@ -99,6 +99,13 @@ export interface OpenDocumentFlyoutParams {
    * since the full document isn't loaded yet at open time.
    */
   title?: string;
+  /**
+   * For `openDocumentFlyoutFromIndexAsChild` only: chain the history title from this session's own
+   * root title instead of whichever sibling child is currently open. Set this when the caller is a
+   * persistent anchor (a graph canvas, a table) that can open several different documents one after
+   * another without navigating away in between — see {@link BuildFlyoutNavTitleOptions.resetToRoot}.
+   */
+  resetNavToRoot?: boolean;
 }
 
 export interface OpenNotesParams {
@@ -280,7 +287,9 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session: 'inherit',
-        title: buildFlyoutNavTitle(params.title ?? getAlertHistoryTitle()),
+        title: buildFlyoutNavTitle(params.title ?? getAlertHistoryTitle(), {
+          resetToRoot: params.resetNavToRoot,
+        }),
       });
     },
     [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey]

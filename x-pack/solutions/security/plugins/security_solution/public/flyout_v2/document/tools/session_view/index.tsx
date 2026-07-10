@@ -95,6 +95,7 @@ export const SessionView: FC<SessionViewProps> = memo(
           indexName: alertIndex,
           renderCellActions,
           onAlertUpdated,
+          resetNavToRoot: true,
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
@@ -156,7 +157,9 @@ export const SessionView: FC<SessionViewProps> = memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
-            title: buildFlyoutNavTitle(formatFlyoutTitle(SESSION_VIEW_DETAILS_TITLE, processName)),
+            title: buildFlyoutNavTitle(formatFlyoutTitle(SESSION_VIEW_DETAILS_TITLE, processName), {
+              resetToRoot: true,
+            }),
           }
         );
       },

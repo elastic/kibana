@@ -76,12 +76,18 @@ export const GraphView = memo(
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
           title: isEvent ? EVENT_TITLE : getAlertHistoryTitle(),
+          resetNavToRoot: true,
         }),
       [openDocumentFlyoutFromIndexAsChild]
     );
 
     const onShowNetwork = useCallback(
-      (ip: string) => openNetworkFlyoutAsChild({ ip, flowTarget: FlowTargetSourceDest.source }),
+      (ip: string) =>
+        openNetworkFlyoutAsChild({
+          ip,
+          flowTarget: FlowTargetSourceDest.source,
+          resetNavToRoot: true,
+        }),
       [openNetworkFlyoutAsChild]
     );
 
@@ -111,7 +117,8 @@ export const GraphView = memo(
             historyKey,
             session: 'inherit',
             title: buildFlyoutNavTitle(
-              params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE
+              params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE,
+              { resetToRoot: true }
             ),
           }
         ),
