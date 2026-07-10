@@ -14,8 +14,6 @@ import { i18n } from '@kbn/i18n';
  *
  * Combine a label here with a dynamic value (document title, entity name, rule name, ...) using
  * {@link formatFlyoutTitle} so every flyout produces a consistent "{Type}: {value}" history entry.
- * If you're looking for what a given v2 flyout's history entry says, or need to change it, start
- * here.
  */
 
 /**
@@ -27,8 +25,9 @@ export const formatFlyoutTitle = (canonicalName: string, value?: string | null):
   value ? `${canonicalName}: ${value}` : canonicalName;
 
 // ── Entry flyouts (documents & entities) ────────────────────────────────────────
-// Top-level flyouts opened as a new history/session entry (`session: 'start'`) or as the
-// initial panel of a session.
+// Titles for documents, rules, hosts/users/services/entities, network, indicators, and attacks —
+// opened either as a new top-level session (`session: 'start'`) or chained as a child onto an
+// existing one (`session: 'inherit'`), depending on the caller.
 
 /**
  * History fallback for an alert (signal) document with no resolved rule name. Deliberately
@@ -83,8 +82,11 @@ export const ATTACK_TITLE = i18n.translate('xpack.securitySolution.flyoutV2.titl
 });
 
 // ── Document tools ───────────────────────────────────────────────────────────────
-// Secondary panels opened from within the document flyout (`session: 'start'`, or `'inherit'`
-// for panels that open the source document itself as a child).
+// Secondary panels opened from within the document flyout. Most start their own new session
+// (`session: 'start'`); a few — {@link ANALYZER_PREVIEW_TITLE}, {@link SESSION_VIEW_DETAILS_TITLE},
+// and {@link ENTITIES_TITLE} when reused for a grouped-entities preview — are opened as a child
+// (`session: 'inherit'`) of whichever tool triggered them. {@link NOTES_TITLE} is also opened
+// standalone, outside any flyout (e.g. the note button on an alerts-table row).
 
 export const ANALYZER_TITLE = i18n.translate('xpack.securitySolution.flyout.analyzer.title', {
   defaultMessage: 'Analyzer',
@@ -215,9 +217,9 @@ export const OKTA_INSIGHTS_TITLE = i18n.translate(
 );
 
 // ── Document overview section titles ─────────────────────────────────────────────
-// Internal section labels within the document flyout overview tab. Not flyout history entries,
-// but centralized here too since they were previously exported from (and re-imported into the
-// legacy flyout from) several different component files.
+// Internal section labels within the document flyout overview tab, not flyout history entries.
+// Centralized here since most (e.g. {@link ABOUT_SECTION_TITLE}) are also reused by the legacy
+// expandable flyout's equivalent section components.
 
 export const ABOUT_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.document.about.sectionTitle',
