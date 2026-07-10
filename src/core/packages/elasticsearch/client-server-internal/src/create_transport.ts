@@ -57,6 +57,29 @@ export type OnRequestHandler = (
   logger: Logger
 ) => void;
 
+/**
+ * Options for Kibana's extended `asStream` flag.
+ * Pass as `asStream: { retryOn401: true }` to opt in to automatic
+ * 401 retry handling for streamed responses. KibanaTransport normalizes
+ * the value to `asStream: true` before forwarding to `@elastic/transport`.
+ */
+export interface KibanaAsStreamOptions {
+  /**
+   * When true, the transport will intercept streamed 401 responses,
+   * read the error body, refresh auth tokens via the unauthorized error handler,
+   * and retry the request with updated credentials.
+   * Without this flag, streamed 401 responses are returned as-is to the caller.
+   */
+  retryOn401?: boolean;
+}
+
+/**
+ * Extended `asStream` type accepted by {@link KibanaTransport}.
+ * - `true` / `false`: standard `@elastic/transport` behavior (no Kibana-level 401 retry for streams).
+ * - `KibanaAsStreamOptions`: enables streaming **and** opt-in Kibana behaviors.
+ */
+export type KibanaAsStream = boolean | KibanaAsStreamOptions;
+
 const noop = () => undefined;
 
 const isStreamBody = (body: unknown): body is NodeJS.ReadableStream => {
@@ -143,6 +166,14 @@ export const createTransport = ({
 
     async request(params: TransportRequestParams, options?: TransportRequestOptions) {
       const opts: TransportRequestOptions = options ? { ...options } : {};
+
+      // Extract retryOn401 from object-shaped asStream before normalizing
+      let retryOn401 = false;
+      if (opts.asStream != null && typeof opts.asStream === 'object') {
+        retryOn401 = (opts.asStream as KibanaAsStreamOptions).retryOn401 === true;
+        opts.asStream = true;
+      }
+
       // sync override of maxResponseSize and maxCompressedResponseSize
       if (options) {
         if (
@@ -214,7 +245,7 @@ export const createTransport = ({
         throw e;
       }
 
-      if (isUnauthorizedStreamResponse(response)) {
+      if (retryOn401 && isUnauthorizedStreamResponse(response)) {
         logger.debug(
           `Received streamed 401 response for [${params.method} ${params.path}]${
             opts.opaqueId ? ` (opaqueId: ${opts.opaqueId})` : ''

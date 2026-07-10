@@ -8,6 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import { catchError, tap } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
@@ -64,7 +65,9 @@ export const esqlAsyncSearchStrategyProvider = (
         ...options.transport,
         signal: options.abortSignal,
         meta: true,
-        asStream: options.stream,
+        asStream: (options.stream
+          ? { retryOn401: true }
+          : undefined) as unknown as TransportRequestOptions['asStream'],
       }
     );
   }
@@ -93,7 +96,9 @@ export const esqlAsyncSearchStrategyProvider = (
         ...options.transport,
         signal: options.abortSignal,
         meta: true,
-        asStream: options.stream,
+        asStream: (options.stream
+          ? { retryOn401: true }
+          : undefined) as unknown as TransportRequestOptions['asStream'],
         requestTimeout: 600_000, // 10 minutes, making this huge enough that it should never interfere with the `wait_for_completion_timeout` param, which is what should be controlling the timeout of the search request.
       }
     );
@@ -122,7 +127,9 @@ export const esqlAsyncSearchStrategyProvider = (
         ...options.transport,
         signal: options.abortSignal,
         meta: true,
-        asStream: options.stream,
+        asStream: (options.stream
+          ? { retryOn401: true }
+          : undefined) as unknown as TransportRequestOptions['asStream'],
       }
     );
   }

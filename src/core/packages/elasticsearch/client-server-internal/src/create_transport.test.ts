@@ -10,7 +10,7 @@
 import { transportConstructorMock, transportRequestMock } from './create_transport.test.mocks';
 
 import { errors } from '@elastic/elasticsearch';
-import type { BaseConnectionPool } from '@elastic/elasticsearch';
+import type { BaseConnectionPool, TransportRequestOptions } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Readable } from 'stream';
@@ -564,7 +564,28 @@ describe('createTransport', () => {
       );
     });
 
-    it('calls the handler for streamed unauthorized responses', async () => {
+    it('does not retry streamed unauthorized responses when asStream is plain true', async () => {
+      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      handler.mockReturnValue({ type: 'retry', authHeaders: { authorization: 'retry' } });
+
+      getUnauthorizedErrorHandler.mockReturnValue(handler);
+
+      const streamResponse = createUnauthorizedStreamResponse();
+      transportRequestMock.mockResolvedValueOnce(streamResponse);
+
+      const transportClass = createTransportClass();
+      const transport = new transportClass(baseConstructorParams);
+      const requestParams = { method: 'GET', path: '/' };
+
+      await expect(transport.request(requestParams, { asStream: true })).resolves.toBe(
+        streamResponse
+      );
+
+      expect(transportRequestMock).toHaveBeenCalledTimes(1);
+      expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('calls the handler for streamed unauthorized responses with retryOn401', async () => {
       const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
       handler.mockReturnValue({ type: 'notHandled' });
 
@@ -576,9 +597,11 @@ describe('createTransport', () => {
       const transport = new transportClass(baseConstructorParams);
       const requestParams = { method: 'GET', path: '/' };
 
-      await expect(transport.request(requestParams, { asStream: true })).rejects.toThrowError(
-        /token expired/
-      );
+      await expect(
+        transport.request(requestParams, {
+          asStream: { retryOn401: true } as unknown as TransportRequestOptions['asStream'],
+        })
+      ).rejects.toThrowError(/token expired/);
 
       expect(transportRequestMock).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledTimes(1);
@@ -586,7 +609,7 @@ describe('createTransport', () => {
       expect(handler.mock.calls[0][0].body).toEqual({ error: { reason: 'token expired' } });
     });
 
-    it('retries streamed unauthorized responses when the handler returns `retry`', async () => {
+    it('retries streamed unauthorized responses when retryOn401 is set and handler returns `retry`', async () => {
       const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
       handler.mockReturnValue({ type: 'retry', authHeaders: { authorization: 'retry' } });
 
@@ -603,9 +626,11 @@ describe('createTransport', () => {
       const transport = new transportClass({ ...baseConstructorParams, headers: initialHeaders });
       const requestParams = { method: 'GET', path: '/' };
 
-      await expect(transport.request(requestParams, { asStream: true })).resolves.toEqual(
-        retryResult
-      );
+      await expect(
+        transport.request(requestParams, {
+          asStream: { retryOn401: true } as unknown as TransportRequestOptions['asStream'],
+        })
+      ).resolves.toEqual(retryResult);
 
       expect(transportRequestMock).toHaveBeenCalledTimes(2);
       expect(transportRequestMock).toHaveBeenNthCalledWith(
@@ -618,7 +643,7 @@ describe('createTransport', () => {
       );
     });
 
-    it('does not retry streamed unauthorized responses more than once', async () => {
+    it('does not retry streamed unauthorized responses more than once with retryOn401', async () => {
       const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
       handler.mockReturnValue({ type: 'retry', authHeaders: { authorization: 'retry' } });
 
@@ -632,9 +657,11 @@ describe('createTransport', () => {
       const transport = new transportClass(baseConstructorParams);
       const requestParams = { method: 'GET', path: '/' };
 
-      await expect(transport.request(requestParams, { asStream: true })).rejects.toThrowError(
-        /token expired/
-      );
+      await expect(
+        transport.request(requestParams, {
+          asStream: { retryOn401: true } as unknown as TransportRequestOptions['asStream'],
+        })
+      ).rejects.toThrowError(/token expired/);
 
       expect(transportRequestMock).toHaveBeenCalledTimes(2);
     });
