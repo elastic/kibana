@@ -14,6 +14,7 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
@@ -33,6 +34,18 @@ const DISCOVERY_RECOMMENDED_MODELS = [
   defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_OPUS,
   defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
   defaultInferenceEndpoints.OPENAI_GPT_5_2,
+];
+
+const INVESTIGATION_RECOMMENDED_MODELS = [
+  defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
+  defaultInferenceEndpoints.OPENAI_GPT_5_4,
+];
+
+// Background memory upkeep is low-stakes curation, not deep reasoning — a
+// smaller/cheaper model keeps latency and cost down.
+const MEMORY_RECOMMENDED_MODELS = [
+  '.anthropic-claude-4.5-haiku-chat_completion',
+  '.openai-gpt-5.4-mini-chat_completion',
 ];
 
 /**
@@ -141,7 +154,22 @@ export function registerSignificantEventsInferenceFeatures(
           defaultMessage: 'Model used during root cause investigation.',
         }
       ),
-      recommendedEndpoints: DISCOVERY_RECOMMENDED_MODELS,
+      recommendedEndpoints: INVESTIGATION_RECOMMENDED_MODELS,
+      ignoreGlobalDefault: true,
+    },
+    {
+      featureId: SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
+      featureName: i18n.translate('xpack.significantEvents.inferenceFeature.memoryName', {
+        defaultMessage: 'Memory',
+      }),
+      featureDescription: i18n.translate(
+        'xpack.significantEvents.inferenceFeature.memoryDescription',
+        {
+          defaultMessage:
+            'Model used for background memory upkeep: scraping durable knowledge out of chat conversations, synthesizing knowledge indicators into wiki pages, consolidating the wiki, and reconciling knowledge gaps.',
+        }
+      ),
+      recommendedEndpoints: MEMORY_RECOMMENDED_MODELS,
       ignoreGlobalDefault: true,
     },
   ];

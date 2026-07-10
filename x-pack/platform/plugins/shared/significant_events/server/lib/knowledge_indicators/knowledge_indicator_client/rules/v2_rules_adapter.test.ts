@@ -17,6 +17,7 @@ function makeRulesClientMock() {
     createRule: jest.fn(),
     updateRule: jest.fn(),
     bulkDeleteRules: jest.fn(),
+    findRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, perPage: 500 }),
   };
 }
 
@@ -372,11 +373,59 @@ describe('RulesAdapterV2', () => {
       );
     });
   });
+
+  describe('findOwnedRuleIds', () => {
+    it('returns rule ids for the given stream filtered by structured tag', async () => {
+      const mock = makeRulesClientMock();
+      mock.findRules.mockResolvedValueOnce({
+        items: [{ id: 'r-1' }, { id: 'r-2' }],
+        total: 2,
+        page: 1,
+        perPage: 500,
+      });
+      const adapter = makeAdapter(mock);
+
+      const ids = await adapter.findOwnedRuleIds('my-stream');
+
+      expect(ids).toEqual(['r-1', 'r-2']);
+      expect(mock.findRules).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: 'metadata.tags: "sigevents:stream:my-stream"' })
+      );
+    });
+
+    it('pages through results until all ids are collected', async () => {
+      const mock = makeRulesClientMock();
+      mock.findRules
+        .mockResolvedValueOnce({ items: [{ id: 'r-1' }], total: 2, page: 1, perPage: 500 })
+        .mockResolvedValueOnce({ items: [{ id: 'r-2' }], total: 2, page: 2, perPage: 500 });
+      const adapter = makeAdapter(mock);
+
+      const ids = await adapter.findOwnedRuleIds('my-stream');
+
+      expect(ids).toEqual(['r-1', 'r-2']);
+      expect(mock.findRules).toHaveBeenCalledTimes(2);
+    });
+
+    it('returns empty array when no rules exist', async () => {
+      const mock = makeRulesClientMock();
+      mock.findRules.mockResolvedValueOnce({ items: [], total: 0, page: 1, perPage: 500 });
+      const adapter = makeAdapter(mock);
+
+      const ids = await adapter.findOwnedRuleIds('my-stream');
+
+      expect(ids).toEqual([]);
+    });
+  });
 });
 
 describe('RulesNotInstalledAdapterV2', () => {
   it('bulkDeleteRules is a no-op', async () => {
     const adapter = new RulesNotInstalledAdapterV2(loggerMock.create());
     await expect(adapter.bulkDeleteRules(['a'])).resolves.toBeUndefined();
+  });
+
+  it('findOwnedRuleIds returns empty array', async () => {
+    const adapter = new RulesNotInstalledAdapterV2(loggerMock.create());
+    await expect(adapter.findOwnedRuleIds('any-stream')).resolves.toEqual([]);
   });
 });

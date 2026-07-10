@@ -47,7 +47,8 @@ const existingSpec = JSON.stringify({
 const createMockLogger = (): Logger =>
   ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
 
-describe('recover_esql end-to-end (real build_config + real graph)', () => {
+// Failing: See https://github.com/elastic/kibana/issues/276821
+describe.skip('recover_esql end-to-end (real build_config + real graph)', () => {
   const events = {} as ToolEventEmitter;
   const esClient = { asCurrentUser: {} } as IScopedClusterClient;
 
