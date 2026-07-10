@@ -42,8 +42,8 @@ const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT = {
 
 export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
-  pluginId: 'streams',
-  version: 1,
+  pluginId: 'significant_events',
+  version: 2,
   billable: false,
   yaml: FEATURES_IDENTIFICATION_YAML,
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
@@ -51,8 +51,8 @@ export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-  pluginId: 'streams',
-  version: 1,
+  pluginId: 'significant_events',
+  version: 2,
   billable: false,
   yaml: QUERIES_GENERATION_YAML,
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
@@ -60,8 +60,8 @@ export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-  pluginId: 'streams',
-  version: 3,
+  pluginId: 'significant_events',
+  version: 4,
   billable: false,
   yaml: ONBOARDING_YAML,
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
@@ -69,8 +69,8 @@ export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  pluginId: 'streams',
-  version: 1,
+  pluginId: 'significant_events',
+  version: 2,
   billable: false,
   yaml: CONTINUOUS_ONBOARDING_YAML,
   management: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT,

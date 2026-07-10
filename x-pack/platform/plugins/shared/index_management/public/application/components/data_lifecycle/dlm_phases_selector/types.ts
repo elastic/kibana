@@ -43,6 +43,7 @@ export interface DlmPhasesSelectorProps {
   }>;
   isDisabled?: boolean;
   defaultSnapshotRepository?: string;
+  maximumRetentionPeriod?: string;
   /**
    * When true, only the Delete phase is shown (no Hot, no Frozen).
    * Use this on Serverless deployments where the Frozen phase is not available.

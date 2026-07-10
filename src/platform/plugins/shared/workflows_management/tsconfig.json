@@ -53,9 +53,7 @@
     "@kbn/cell-actions",
     "@kbn/ui-actions-plugin",
     "@kbn/storybook",
-    "@kbn/react-kibana-context-theme",
     "@kbn/ui-chrome-layout",
-    "@kbn/react-kibana-context-theme",
     "@kbn/react-field",
     "@kbn/storage-adapter",
     "@kbn/occ",
@@ -118,6 +116,8 @@
     "@kbn/datemath",
     "@kbn/controls-plugin",
     "@kbn/controls-schemas",
+    "@kbn/app-header",
+    "@kbn/core-chrome-app-menu-components",
   ],
   "exclude": ["target/**/*"]
 }

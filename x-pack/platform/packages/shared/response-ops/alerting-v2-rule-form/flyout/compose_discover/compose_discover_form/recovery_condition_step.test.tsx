@@ -18,11 +18,6 @@ import type { FormValues, RuleQuery } from '../../../form/types';
 import { RecoveryConditionStep } from './recovery_condition_step';
 import { EsqlRecoveryContent } from './esql_recovery_content';
 
-jest.mock('@kbn/code-editor', () => ({
-  ...jest.requireActual('@kbn/code-editor'),
-  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="codeEditorMock">{value}</pre>,
-}));
-
 const BASE_QUERY = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
 const ALERT_SEGMENT = 'WHERE count > 100';
 const RECOVERY_SEGMENT = 'WHERE count < 100';
