@@ -56,6 +56,12 @@ export type QueryType = typeof QUERY_TYPE_MATCH | typeof QUERY_TYPE_STATS;
  */
 export const HIGH_SEVERITY_THRESHOLD = 60;
 
+/**
+ * Minimum severity score for the Critical band.
+ * Severity bands: Low < 40, Medium [40, 60), High [60, 80), Critical >= 80.
+ */
+export const CRITICAL_SEVERITY_THRESHOLD = 80;
+
 export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
 
 export const queryFeatureSchema = z.object({
