@@ -464,7 +464,7 @@ describe('date_histogram', () => {
           target: { checked: true },
         });
       expect(updateLayerSpy).toHaveBeenCalled();
-      const newLayer = updateLayerSpy.mock.calls[0][0];
+      const newLayer = updateLayerSpy.mock.calls[0][0](thirdLayer);
       expect(newLayer).toHaveProperty('columns.col1.params.interval', '30d');
     });
 
@@ -506,7 +506,7 @@ describe('date_histogram', () => {
           target: { checked: false },
         });
       expect(updateLayerSpy).toHaveBeenCalled();
-      const newLayer = updateLayerSpy.mock.calls[0][0];
+      const newLayer = updateLayerSpy.mock.calls[0][0](thirdLayer);
       expect(newLayer).toHaveProperty('columns.col1.params.ignoreTimeRange', true);
     });
 
@@ -548,7 +548,7 @@ describe('date_histogram', () => {
           .prop('onChange') as unknown as (v: Array<{ key: string }>) => void
       )([{ key: 'auto' }]);
       expect(updateLayerSpy).toHaveBeenCalled();
-      const newLayer = updateLayerSpy.mock.calls[0][0];
+      const newLayer = updateLayerSpy.mock.calls[0][0](thirdLayer);
       expect(newLayer).toHaveProperty('columns.col1.params.ignoreTimeRange', false);
     });
 
@@ -751,6 +751,89 @@ describe('date_histogram', () => {
       );
 
       expect(updateLayerSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not re-commit equivalent shorthand intervals', () => {
+      const updateLayerSpy = jest.fn();
+      const testLayer = layerWithInterval('1w');
+
+      const instance = mount(
+        <InlineOptions
+          {...defaultOptions}
+          layer={testLayer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col1"
+          currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
+        />
+      );
+
+      act(() => {
+        (
+          instance
+            .find('[data-test-subj="lensDateHistogramInterval"]')
+            .at(0)
+            .prop('onCreateOption') as (s: string) => void
+        )('w');
+      });
+      instance.update();
+
+      expect(updateLayerSpy).not.toHaveBeenCalled();
+    });
+
+    it('toggles include empty rows against the latest layer state', () => {
+      const updateLayerSpy = jest.fn();
+      const staleLayer = {
+        indexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            ...(layer.columns.col1 as DateHistogramIndexPatternColumn),
+            params: {
+              interval: 'w',
+              includeEmptyRows: true,
+            },
+          } as DateHistogramIndexPatternColumn,
+        },
+      } as FormBasedLayer;
+      const currentColumn = {
+        ...(staleLayer.columns.col1 as DateHistogramIndexPatternColumn),
+        params: {
+          ...(staleLayer.columns.col1 as DateHistogramIndexPatternColumn).params,
+          interval: '1w',
+        },
+      } as DateHistogramIndexPatternColumn;
+
+      const instance = shallow(
+        <InlineOptions
+          {...defaultOptions}
+          layer={staleLayer}
+          paramEditorUpdater={updateLayerSpy}
+          columnId="col1"
+          currentColumn={currentColumn}
+        />
+      );
+
+      instance.find('[data-test-subj="indexPattern-include-empty-rows"]').simulate('change');
+
+      expect(updateLayerSpy).toHaveBeenCalled();
+
+      const latestLayer = {
+        indexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            ...(layer.columns.col1 as DateHistogramIndexPatternColumn),
+            params: {
+              interval: '1w',
+              includeEmptyRows: true,
+            },
+          } as DateHistogramIndexPatternColumn,
+        },
+      } as FormBasedLayer;
+
+      const newLayer = updateLayerSpy.mock.calls[0][0](latestLayer);
+      expect(newLayer).toHaveProperty('columns.col1.params.interval', '1w');
+      expect(newLayer).toHaveProperty('columns.col1.params.includeEmptyRows', false);
     });
 
     it('should not render options if they are restricted', () => {

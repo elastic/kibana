@@ -117,6 +117,11 @@ const getIntervalParamValue = (
   return `${isCalendarInterval ? '1' : intervalValue.value}${intervalValue.unit || 'd'}`;
 };
 
+const normalizeIntervalParamValue = (intervalValue: string) =>
+  intervalValue === AUTO_INTERVAL
+    ? AUTO_INTERVAL
+    : getIntervalParamValue(parseInterval(intervalValue));
+
 export const dateHistogramOperation: OperationDefinition<
   DateHistogramIndexPatternColumn,
   'field',
@@ -317,6 +322,11 @@ export const dateHistogramOperation: OperationDefinition<
     const previousColumnInterval = useRef(currentColumn.params.interval);
     const hasExternalIntervalChange =
       previousColumnInterval.current !== currentColumn.params.interval;
+    const nextIntervalValue =
+      interval === AUTO_INTERVAL ? AUTO_INTERVAL : getIntervalParamValue(interval);
+    const normalizedCurrentColumnInterval = normalizeIntervalParamValue(
+      currentColumn.params.interval
+    );
 
     useEffect(() => {
       previousColumnInterval.current = currentColumn.params.interval;
@@ -363,9 +373,7 @@ export const dateHistogramOperation: OperationDefinition<
         return;
       }
 
-      // Compare against the persisted interval string so shorthand saved values
-      // stay stable until the user explicitly edits the control.
-      if (isValid && intervalInput !== currentColumn.params.interval) {
+      if (isValid && nextIntervalValue !== normalizedCurrentColumnInterval) {
         commitInterval(interval);
       }
     }, [
@@ -373,6 +381,8 @@ export const dateHistogramOperation: OperationDefinition<
       hasExternalIntervalChange,
       intervalInput,
       isValid,
+      nextIntervalValue,
+      normalizedCurrentColumnInterval,
       currentColumn.params.interval,
       commitInterval,
     ]);
@@ -395,9 +405,9 @@ export const dateHistogramOperation: OperationDefinition<
             checked={Boolean(currentColumn.params.includeEmptyRows)}
             data-test-subj="indexPattern-include-empty-rows"
             onChange={() => {
-              paramEditorUpdater(
+              paramEditorUpdater((newLayer) =>
                 updateColumnParam({
-                  layer,
+                  layer: newLayer,
                   columnId,
                   paramName: 'includeEmptyRows',
                   value: !currentColumn.params.includeEmptyRows,
@@ -441,30 +451,38 @@ export const dateHistogramOperation: OperationDefinition<
                 disabled={indexPattern.timeFieldName === field?.name}
                 checked={bindToGlobalTimePickerValue}
                 onChange={() => {
-                  let newLayer = updateColumnParam({
-                    layer,
-                    columnId,
-                    paramName: 'ignoreTimeRange',
-                    value: !currentColumn.params.ignoreTimeRange,
-                  });
-                  if (
+                  const newFixedInterval =
                     !currentColumn.params.ignoreTimeRange &&
                     currentColumn.params.interval === AUTO_INTERVAL
-                  ) {
-                    const newFixedInterval =
-                      data.search.aggs.calculateAutoTimeExpression({
-                        from: dateRange.fromDate,
-                        to: dateRange.toDate,
-                      }) || '1h';
-                    newLayer = updateColumnParam({
-                      layer: newLayer,
-                      columnId,
-                      paramName: 'interval',
-                      value: newFixedInterval,
-                    });
+                      ? data.search.aggs.calculateAutoTimeExpression({
+                          from: dateRange.fromDate,
+                          to: dateRange.toDate,
+                        }) || '1h'
+                      : undefined;
+
+                  if (newFixedInterval) {
                     setIntervalInput(newFixedInterval);
                   }
-                  paramEditorUpdater(newLayer);
+
+                  paramEditorUpdater((newLayer) => {
+                    let updatedLayer = updateColumnParam({
+                      layer: newLayer,
+                      columnId,
+                      paramName: 'ignoreTimeRange',
+                      value: !currentColumn.params.ignoreTimeRange,
+                    });
+
+                    if (newFixedInterval) {
+                      updatedLayer = updateColumnParam({
+                        layer: updatedLayer,
+                        columnId,
+                        paramName: 'interval',
+                        value: newFixedInterval,
+                      });
+                    }
+
+                    return updatedLayer;
+                  });
                 }}
                 compressed
               />
@@ -518,9 +536,9 @@ export const dateHistogramOperation: OperationDefinition<
                 const newValue = opts.length ? opts[0].key! : '';
                 setIntervalInput(newValue);
                 if (newValue === AUTO_INTERVAL && currentColumn.params.ignoreTimeRange) {
-                  paramEditorUpdater(
+                  paramEditorUpdater((newLayer) =>
                     updateColumnParam({
-                      layer,
+                      layer: newLayer,
                       columnId,
                       paramName: 'ignoreTimeRange',
                       value: false,
