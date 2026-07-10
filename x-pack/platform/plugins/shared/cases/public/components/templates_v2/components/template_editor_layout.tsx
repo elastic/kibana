@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiLoadingSpinner,
@@ -89,6 +89,17 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
 }) => {
   const styles = useMemoCss(componentStyles);
   const [activeTab, setActiveTab] = useState<ActiveTab>('fields');
+  // A tab body is mounted on its FIRST activation and then kept mounted (toggled with `hidden`).
+  // Mounting on first visit — rather than eagerly — means each body mounts while VISIBLE: Monaco
+  // editors (the Fields YAML editor and the connector's additional-fields JSON editor) don't
+  // initialize their content inside a `display:none` container. Keeping it mounted afterwards
+  // avoids remounting/re-fetching the connector picker on every subsequent tab switch.
+  const [mountedTabs, setMountedTabs] = useState<ReadonlySet<ActiveTab>>(() => new Set(['fields']));
+
+  const selectTab = useCallback((tab: ActiveTab) => {
+    setActiveTab(tab);
+    setMountedTabs((prev) => (prev.has(tab) ? prev : new Set(prev).add(tab)));
+  }, []);
 
   if (isLoading) {
     return (
@@ -108,14 +119,14 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
     >
       <EuiTab
         isSelected={activeTab === 'fields'}
-        onClick={() => setActiveTab('fields')}
+        onClick={() => selectTab('fields')}
         data-test-subj="templateTabFields"
       >
         {i18n.FIELDS_TAB_LABEL}
       </EuiTab>
       <EuiTab
         isSelected={activeTab === 'configuration'}
-        onClick={() => setActiveTab('configuration')}
+        onClick={() => selectTab('configuration')}
         append={
           nameNeedsAttention ? (
             <EuiToolTip content={i18n.CONFIGURATION_TAB_NAME_REQUIRED}>
@@ -174,11 +185,10 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
     />
   );
 
-  // Both tab bodies stay mounted and are toggled with the `hidden` attribute rather than
-  // conditionally rendered. Swapping them with a ternary remounted the Configuration tab on every
-  // switch, which re-ran the connector picker's async fetch (the one the error boundary guards) and
-  // reset its local state — a visible flicker. The Fields tab's Monaco editor uses
-  // `automaticLayout`, so it re-lays-out correctly when shown again.
+  // Each tab body mounts on its first activation and is then toggled with the `hidden` attribute
+  // (see mountedTabs). Swapping them with a plain ternary remounted the Configuration tab on every
+  // switch — re-running the connector picker's async fetch and resetting its state — while eagerly
+  // mounting both would initialize the Configuration tab's Monaco editors inside a hidden container.
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={css({ height: '100%', minHeight: 0 })}>
       <div>{tabs}</div>
@@ -189,7 +199,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
           css={css({ height: '100%', minHeight: 0 })}
           data-test-subj="templateFieldsTabBody"
         >
-          {fieldsTab}
+          {mountedTabs.has('fields') ? fieldsTab : null}
         </div>
         <div
           role="tabpanel"
@@ -197,16 +207,18 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
           css={css({ height: '100%', minHeight: 0 })}
           data-test-subj="templateConfigurationTabBody"
         >
-          <TemplateConfigurationTab
-            metadata={metadata}
-            metadataErrors={metadataErrors}
-            onMetadataChange={onMetadataChange}
-            settings={settings}
-            connector={connector}
-            onSettingsChange={onSettingsChange}
-            onConnectorChange={onConnectorChange}
-            formResetKey={formResetKey}
-          />
+          {mountedTabs.has('configuration') ? (
+            <TemplateConfigurationTab
+              metadata={metadata}
+              metadataErrors={metadataErrors}
+              onMetadataChange={onMetadataChange}
+              settings={settings}
+              connector={connector}
+              onSettingsChange={onSettingsChange}
+              onConnectorChange={onConnectorChange}
+              formResetKey={formResetKey}
+            />
+          ) : null}
         </div>
       </div>
     </EuiFlexGroup>

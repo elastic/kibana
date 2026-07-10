@@ -72,14 +72,14 @@ describe('TemplateEditorLayout', () => {
     expect(screen.queryByTestId('mockYamlEditor')).not.toBeInTheDocument();
   });
 
-  it('defaults to the Fields tab, showing the editor + preview and hiding configuration', () => {
+  it('defaults to the Fields tab, showing the editor + preview and not mounting configuration', () => {
     renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} />);
 
-    // Both tab bodies stay mounted (so the connector picker doesn't refetch on switch); the
-    // inactive one is hidden rather than unmounted.
     expect(screen.getByTestId('mockYamlEditor')).toBeVisible();
     expect(screen.getByTestId('mockTemplatePreview')).toBeVisible();
-    expect(screen.getByTestId('mockConfigurationTab')).not.toBeVisible();
+    // Configuration is lazy-mounted on first visit (so its Monaco editors never initialize while
+    // hidden), so it is not in the DOM until the tab is opened.
+    expect(screen.queryByTestId('mockConfigurationTab')).not.toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Fields/ })).toHaveAttribute('aria-selected', 'true');
   });
 
@@ -91,6 +91,17 @@ describe('TemplateEditorLayout', () => {
     expect(screen.getByTestId('mockConfigurationTab')).toBeVisible();
     // The YAML editor stays mounted but hidden — never shown beside the (unbound) configuration.
     expect(screen.getByTestId('mockYamlEditor')).not.toBeVisible();
+  });
+
+  it('keeps the Configuration tab mounted (hidden) after switching away, so it does not refetch', async () => {
+    renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} />);
+
+    await user.click(screen.getByRole('tab', { name: /Configuration/ }));
+    await user.click(screen.getByRole('tab', { name: /Fields/ }));
+
+    // Once visited, the Configuration body stays in the DOM (just hidden) rather than remounting.
+    expect(screen.getByTestId('mockConfigurationTab')).toBeInTheDocument();
+    expect(screen.getByTestId('mockConfigurationTab')).not.toBeVisible();
   });
 
   it('renders resizable layout on the Fields tab', () => {
