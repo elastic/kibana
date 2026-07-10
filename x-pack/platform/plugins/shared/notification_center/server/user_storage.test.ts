@@ -35,7 +35,7 @@ describe('notification center user storage', () => {
       }
     });
 
-    it('defaults the marker to the epoch sentinel and the delta list to empty', () => {
+    it('defaults the marker to the epoch default and the read list to empty', () => {
       const registrations = collectRegistrations();
       expect(registrations[READ_ALL_BEFORE_KEY].defaultValue).toBe(READ_ALL_BEFORE_DEFAULT);
       expect(registrations[READ_KEY].defaultValue).toEqual([]);
@@ -65,7 +65,7 @@ describe('notification center user storage', () => {
       expect(readAllBeforeSchema.safeParse('2026-07-09T12:00:00.000Z').success).toBe(true);
     });
 
-    it('accepts the epoch sentinel', () => {
+    it('accepts the epoch default', () => {
       expect(readAllBeforeSchema.safeParse(READ_ALL_BEFORE_DEFAULT).success).toBe(true);
     });
 
@@ -79,7 +79,7 @@ describe('notification center user storage', () => {
     });
   });
 
-  describe('read delta-list schema', () => {
+  describe('read notification ids schema', () => {
     it('accepts an array of notification ids', () => {
       expect(readSchema.safeParse([]).success).toBe(true);
       expect(readSchema.safeParse(['inference:model-a:eol']).success).toBe(true);
