@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRole } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 import type {
@@ -37,7 +38,7 @@ const UNAUTHORIZED_CONSUMERS: ConsumerVisibilityConsumer[] = ['logs'];
 
 test.describe(
   'Embeddable alerts table - alert consumer visibility',
-  { tag: testData.DEPLOYMENT_AGNOSTIC_WITHOUT_SERVERLESS_OBS },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let rulesState: ConsumerVisibilityRulesState;
     const dashboardIdsByConsumer: Partial<Record<ConsumerVisibilityConsumer, string>> = {};

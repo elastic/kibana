@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRole } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 import type { EsQueryAlertState } from '../lib/es_query_alert';
@@ -26,7 +27,7 @@ const CASES: Array<{ title: string; role: KibanaRole }> = [
 
 test.describe(
   'Embeddable alerts table - add panel authorization',
-  { tag: testData.DEPLOYMENT_AGNOSTIC_WITHOUT_SERVERLESS_OBS },
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let alertState: EsQueryAlertState;
 
