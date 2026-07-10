@@ -32,7 +32,6 @@ import {
   useWorkflowEventsOnDecorations,
   useWorkflowIdDecorations,
 } from './decorations';
-import { DocumentationLink } from './documentation_link';
 import { EditorSettingsPopover } from './editor_settings_popover';
 import type { ExtraAction } from './extra_actions_bar';
 import { ExtraActionsBar } from './extra_actions_bar';
@@ -816,11 +815,6 @@ export const WorkflowYAMLEditor = ({
 
   const extraActions = useMemo<ExtraAction[]>(
     () => [
-      {
-        id: 'documentation',
-        content: <DocumentationLink />,
-        showInReadOnly: true,
-      },
       {
         id: 'actions-menu',
         content: <ActionsMenuButton onClick={openActionsPopover} />,
