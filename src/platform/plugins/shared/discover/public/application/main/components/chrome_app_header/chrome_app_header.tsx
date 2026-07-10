@@ -52,15 +52,26 @@ export const ChromeAppHeader = ({
     return {
       ...menu,
       isCollapsed,
-      items: menu?.items?.map(
-        (item) =>
-          ({
-            ...item,
-            // We need more space for the tabs as the title is now in the same row. Move all items to the overflow menu.
-            // (Except switch language)
-            overflow: item.id !== AppMenuActionId.switchLanguageMode,
-          } as AppMenuItemType)
-      ),
+      items: menu?.items?.map((item) => {
+        const next: AppMenuItemType = {
+          ...item,
+          // We need more space for the tabs as the title is now in the same row. Move all items to the overflow menu.
+          // (Except switch language)
+          overflow: item.id !== AppMenuActionId.switchLanguageMode,
+        } as AppMenuItemType;
+
+        // Share is surfaced as the title-row action, but we also keep it in the overflow menu just
+        // above export, inside the same (tab-scoped) section. Move the section's leading separator
+        // onto share and drop the one `use_top_nav_links` puts above export.
+        if (next.id === AppMenuActionId.share) {
+          return { ...next, order: 7, separator: 'above' } as AppMenuItemType;
+        }
+        if (next.id === AppMenuActionId.export) {
+          return { ...next, separator: undefined } as AppMenuItemType;
+        }
+
+        return next;
+      }),
     };
   }, [isCollapsed, menu]);
 
