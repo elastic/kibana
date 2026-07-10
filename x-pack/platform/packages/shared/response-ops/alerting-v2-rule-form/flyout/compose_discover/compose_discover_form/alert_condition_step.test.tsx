@@ -18,11 +18,6 @@ import type { FormValues, RuleQuery } from '../../../form/types';
 import { AlertConditionStep } from './alert_condition_step';
 import { ComposeDiscoverTimeFieldContextProvider } from '../compose_discover_time_field_context';
 
-jest.mock('@kbn/code-editor', () => ({
-  ...jest.requireActual('@kbn/code-editor'),
-  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="codeEditorMock">{value}</pre>,
-}));
-
 jest.mock('@kbn/esql-utils', () => ({
   getEsqlColumns: jest.fn(async () => []),
 }));
