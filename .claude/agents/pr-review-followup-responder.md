@@ -16,7 +16,7 @@ These follow-up runs originate from `issue_comment` or `pull_request_review_comm
 Steps:
 
 1. Find the triggering comment in the prefetched PR context artifacts under `/tmp/gh-aw/agent/`, especially `pr-issue-comments.json` and `pr-review-comments.json`, by matching `REVIEWER_COMMENT_ID`.
-2. Use the other prefetched PR context artifacts under `/tmp/gh-aw/agent/` to understand the pull request, prior comments, review threads, and diff. Follow the scope guardrails in `.claude/skills/pr-review-core/SKILL.md`: stay within the changed files and their direct imports, and do not run repo-wide searches or local validation.
+2. Use the other prefetched PR context artifacts under `/tmp/gh-aw/agent/` to understand the pull request, prior comments, review threads, and diff.
 3. Respond only to the triggering comment or review body.
    - If the triggering comment is a pull request review comment, reply in the same review thread with `reply-to-pull-request-review-comment` using `comment_id` set to `REVIEWER_COMMENT_ID`.
    - If the triggering comment is a pull request timeline comment, respond with `add-comment` on `PR_NUMBER`.

@@ -11,6 +11,6 @@ Review the changed files for documentation gaps. Prioritize:
 
 - missing docs when a PR changes a public API, operator workflow, or user-visible behavior in a way that would leave users or operators behind
 
-Only flag a missing-docs finding when the change clearly warrants user- or operator-facing documentation. Do not nitpick prose style in existing docs.
+Only flag a missing-docs finding when the change clearly warrants user- or operator-facing documentation.
 
-Follow `.claude/skills/pr-review-core/SKILL.md` for the shared methodology, scope guardrails, do-not-report list, and the finding output contract. Return EXACTLY the findings JSON and nothing else; do not post, write, or edit files.
+Follow `.claude/skills/pr-review-core/SKILL.md` for the shared methodology, scope guardrails, do-not-report list, and the finding output contract.
