@@ -14,11 +14,13 @@ import {
   EuiPanel,
   EuiText,
   EuiToolTip,
+  euiTextBreakWord,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { useKibana } from '../../../hooks/use_kibana';
+import { ROUNDED_BORDER_RADIUS_LARGE } from '../../../../common.styles';
 
 interface MessageQueueProps {
   queue: readonly string[];
@@ -29,12 +31,6 @@ const removeLabel = i18n.translate('xpack.agentBuilder.conversationInput.message
   defaultMessage: 'Remove queued message',
 });
 
-const moreLabel = (count: number) =>
-  i18n.translate('xpack.agentBuilder.conversationInput.messageQueue.more', {
-    defaultMessage: '+{count} more queued',
-    values: { count },
-  });
-
 export const MessageQueue: React.FC<MessageQueueProps> = ({ queue, onRemove }) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -42,8 +38,6 @@ export const MessageQueue: React.FC<MessageQueueProps> = ({ queue, onRemove }) =
   } = useKibana();
 
   if (queue.length === 0) return null;
-
-  const [head, ...rest] = queue;
 
   const handleRemoveClick = (index: number) => {
     analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
@@ -55,66 +49,71 @@ export const MessageQueue: React.FC<MessageQueueProps> = ({ queue, onRemove }) =
   };
 
   const containerStyles = css`
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(100% + ${euiTheme.size.base});
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: ${euiTheme.size.xs};
-    margin-bottom: ${euiTheme.size.l};
+    pointer-events: none;
   `;
 
+  // Matches the RoundInput user-bubble shape (padding, radius, max-inline-size, wrap).
+  // Uses a subdued neutral background so the bubble sits visually distinct from a sentuser message
   const bubbleStyles = css`
+    align-self: flex-end;
     max-inline-size: 90%;
-    background: ${euiTheme.colors.backgroundBasePlain};
-    border: ${euiTheme.border.thin};
-    border-radius: ${euiTheme.border.radius.medium};
-    padding: ${euiTheme.size.m} ${euiTheme.size.m} ${euiTheme.size.m} ${euiTheme.size.l};
-  `;
+    background: ${euiTheme.colors.backgroundBaseSubdued};
+    ${euiTextBreakWord()}
+    white-space: pre-wrap;
+    border-radius: ${`${ROUNDED_BORDER_RADIUS_LARGE} ${ROUNDED_BORDER_RADIUS_LARGE} 0 ${ROUNDED_BORDER_RADIUS_LARGE}`};
+    pointer-events: auto;
 
-  const messageTextStyles = css`
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    color: ${euiTheme.colors.textParagraph};
-  `;
+    .agentBuilderMessageQueueRemove {
+      opacity: 0;
+      transition: opacity 150ms ease;
+    }
 
-  const moreTextStyles = css`
-    color: ${euiTheme.colors.textSubdued};
+    &:hover .agentBuilderMessageQueueRemove,
+    &:focus-within .agentBuilderMessageQueueRemove {
+      opacity: 1;
+    }
   `;
 
   return (
     <div css={containerStyles} data-test-subj="agentBuilderMessageQueue">
-      <EuiPanel
-        hasShadow={false}
-        hasBorder={false}
-        paddingSize="none"
-        css={bubbleStyles}
-        data-test-subj="agentBuilderMessageQueueItem"
-      >
-        <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false} responsive={false}>
-          <EuiFlexItem>
-            <EuiText size="s" css={messageTextStyles}>
-              {head}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={removeLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="cross"
-                size="s"
-                color="text"
-                aria-label={removeLabel}
-                onClick={() => handleRemoveClick(0)}
-                data-test-subj="agentBuilderMessageQueueRemove"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      {rest.length > 0 && (
-        <EuiText size="xs" css={moreTextStyles} data-test-subj="agentBuilderMessageQueueMore">
-          {moreLabel(rest.length)}
-        </EuiText>
-      )}
+      {queue.map((message, index) => (
+        <EuiPanel
+          key={index}
+          css={bubbleStyles}
+          paddingSize="m"
+          hasShadow={false}
+          hasBorder={false}
+          aria-label={message}
+          data-test-subj="agentBuilderMessageQueueItem"
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false} responsive={false}>
+            <EuiFlexItem>
+              <EuiText size="m">{message}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={removeLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  className="agentBuilderMessageQueueRemove"
+                  iconType="cross"
+                  size="xs"
+                  color="text"
+                  aria-label={removeLabel}
+                  onClick={() => handleRemoveClick(index)}
+                  data-test-subj="agentBuilderMessageQueueRemove"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      ))}
     </div>
   );
 };

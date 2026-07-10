@@ -247,8 +247,15 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     onSubmit?.();
   };
 
+  // Positioning ancestor for <MessageQueue> — the queue floats above the input rather than
+  // sitting in the layout flow, so growing the queue never reshapes the conversation
+  // scroll area above it.
+  const inputWithQueueStyles = css`
+    position: relative;
+  `;
+
   return (
-    <>
+    <div css={inputWithQueueStyles}>
       {canQueueMessage && (
         <MessageQueue queue={messageQueue} onRemove={(i) => remove(conversationId!, i)} />
       )}
@@ -281,6 +288,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           />
         )}
       </InputContainer>
-    </>
+    </div>
   );
 };
