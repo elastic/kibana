@@ -40,7 +40,7 @@ For every failure, try to retrieve:
 
 - **Screenshot at the failure point.** What is actually on the page? Is the awaited element present but the selector wrong? Is a loading indicator still visible? Is there an error toast or unexpected modal? Is the page blank (app crash) or on a different route than expected?
 - **DOM / HTML snapshot at the failure point.** Confirms whether the element the test was looking for actually existed in the DOM (selector issue vs. rendering issue vs. product missing the element entirely).
-- **Server logs** (`kibana.log`, `elasticsearch.log` when present). Cross-reference the failure timestamp with any errors in the logs — a server-side 500 or unexpected warning is strong evidence the failure is a product bug, not a test bug.
+- **Server logs.** Cross-reference the failure timestamp with any server errors — a 500 or unexpected warning is strong evidence of a product bug, not a test bug. Where these logs live depends on the runner (see **Where the Kibana & Elasticsearch logs live** below), and they are captured at **INFO level and above only**.
 - **Full session trace** when the framework supports it (Scout / Playwright). Lets you scrub through every step, locator query, network call, and DOM snapshot.
 
 Things to specifically check in the artifacts before forming a root-cause hypothesis:
@@ -55,6 +55,21 @@ If artifacts are not available (expired, not uploaded, no `read_artifacts` token
 ### List failure artifacts
 
 `bk artifacts list <build> -p <pipeline> --job-uuid <jobId> --json` returns a JSON listing of every artifact uploaded for the failing job. Pass `--job-uuid <jobId>` for the failed attempt (without it, `bk` only returns the latest attempt and hides retried failures). If a build retried to green, failure artifacts only live on the failed job's listing; don't conclude "no screenshot" until you've scoped to the right job UUID.
+
+### Where the Kibana & Elasticsearch logs live
+
+Which artifact holds the server logs depends on the runner and deployment type. All are captured at **INFO level and above only** — `debug`/`trace` detail (e.g. the exact reason a session was invalidated) is never in CI artifacts and needs a re-run at higher verbosity.
+
+| Test type | Kibana logs | Elasticsearch logs |
+| --- | --- | --- |
+| **FTR** | Interleaved in the test stdout — `target/test_failures/*.log`, the `proc [kibana]` lines. No standalone `kibana.log`. | Not uploaded. |
+| **Scout — stateful** | Dedicated **`.scout/server.log`** (full Kibana output; the richest of the three). | Partly present in `.scout/server.log` — ES runs from a snapshot tarball, so startup `[o.e.*]` lines are captured, but not the full runtime log. |
+| **Scout — serverless** | Dedicated **`.scout/server.log`** (full Kibana output). | Not captured — ES runs in Docker with `ES_LOG_STYLE=file`, so its logs stay inside the (discarded) container. |
+
+Notes:
+
+- A Scout **stateful** `server.log` is much larger than a **serverless** one for the same suite, and that is expected: stateful boots the full plugin set while `--serverless=es` disables ~30 plugins, so stateful emits far more WARN/ERROR chatter. It is not a verbosity difference — both run at INFO+.
+- If the log you need isn't in the expected artifact, say so as an open question rather than treating it as an un-fetched file to hunt down.
 
 ### Understand the scope
 
