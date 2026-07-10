@@ -26,10 +26,22 @@ async function casesLoader() {
 
 const feedbackRegistry: FeedbackRegistry = new Map([
   [DEFAULT_REGISTRY_ID, () => import('./questions/default').then((m) => m.questions)],
-  ['cases', casesLoader],
-  ['cases_create', casesLoader],
-  ['cases_configure', casesLoader],
-  ['cases_templates', casesLoader],
+  // Cases has no standalone chrome app of its own — its deep links are embedded in the
+  // Security Solution app, the Observability app, and the Stack Management "Insights and
+  // Alerting" section, so the app id seen at runtime is always `<hostAppId>:<casesDeepLinkId>`
+  // (see `toNavDeepLinks` in
+  // src/core/packages/chrome/browser-internal/src/services/nav_links/nav_links_service.ts).
+  // Stack Management only registers a single "cases" management app (no separate
+  // create/configure/templates deep links), so `management:cases` is the only variant there.
+  ['management:cases', casesLoader],
+  ['securitySolutionUI:cases', casesLoader],
+  ['securitySolutionUI:cases_create', casesLoader],
+  ['securitySolutionUI:cases_configure', casesLoader],
+  ['securitySolutionUI:cases_templates', casesLoader],
+  ['observability-overview:cases', casesLoader],
+  ['observability-overview:cases_create', casesLoader],
+  ['observability-overview:cases_configure', casesLoader],
+  ['observability-overview:cases_templates', casesLoader],
   [
     'ml:anomalyExplorer',
     () => import('./questions/machine_learning').then((m) => m.anomalyExplorerQuestions),
