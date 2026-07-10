@@ -112,7 +112,8 @@ safe-outputs:
       - failure:application
       - failure:ci-environment
       - failure:inconclusive
-    max: 2
+      - failure:insufficient-data
+    max: 3
     target: *issue_number
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
@@ -187,9 +188,17 @@ Add exactly one classification label to the issue that matches the chosen `class
 
 Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
 
+### "Insufficient data" label
+
+Add `failure:insufficient-data` (in addition to the classification label) when you could **not** reach a strong, confident conclusion because the data needed to diagnose the failure was missing — server logs, a Playwright trace, the failure screenshot, or build logs were absent, expired, or never uploaded. The signal is "the failure is real but under-diagnosed for lack of data", not "the evidence conflicts". Concretely:
+
+- Pair it with `failure:inconclusive` (or a `low`-confidence verdict); it is the reason the verdict is weak.
+- Do **not** add it alongside `failure:ai-fixable` — if a fix is confidently available, missing data was not the blocker.
+- When you set it, the comment's `#### Additional context` → "Open questions" bullet (or the `#### Data collection issues` section, if a fetch failed) must name exactly which logs or artifacts were missing and what re-run or added logging would unblock a firm conclusion.
+
 ### Refresh stale labels on re-investigation
 
-This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification and `failure:ai-fixable` only if a fix is still available, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
+This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, and `failure:insufficient-data` only if data is still the blocker, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
 
 ## Attribution
 
