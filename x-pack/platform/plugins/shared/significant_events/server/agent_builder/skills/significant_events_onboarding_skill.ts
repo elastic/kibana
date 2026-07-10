@@ -16,7 +16,6 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
     id: 'significant-events-onboarding',
     name: 'significant-events-onboarding',
     basePath: 'skills/platform/streams',
-    excludeFromElasticCapabilities: true,
     description:
       'Interview the user to build a mental model of their system for significant events analysis. Use when the user wants to describe their architecture, deployment infrastructure, observability setup, or any operational context that should be remembered for RCA and remediation.',
     content,

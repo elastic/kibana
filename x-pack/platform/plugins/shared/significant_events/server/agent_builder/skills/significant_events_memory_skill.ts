@@ -16,7 +16,6 @@ export const createSignificantEventsMemorySkill = (options: MemoryToolsOptions) 
     id: 'significant-events-memory',
     name: 'significant-events-memory',
     basePath: 'skills/platform/streams',
-    excludeFromElasticCapabilities: true,
     description,
     content,
     getInlineTools: () =>
