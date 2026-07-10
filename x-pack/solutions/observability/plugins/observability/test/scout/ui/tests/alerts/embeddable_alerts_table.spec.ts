@@ -51,8 +51,12 @@ test.describe(
         await browserAuth.loginWithCustomRole(role);
 
         await test.step('open a new dashboard and the add-panel flyout', async () => {
-          await pageObjects.dashboard.openNewDashboard();
-          await pageObjects.dashboard.openAddPanelFlyout();
+          // The first dashboard load after logging in with a freshly created custom
+          // role resolves capabilities/security server-side, which is slow on cold CI
+          // agents and can push the add-panel toolbar past the page object's default
+          // 20s/10s waits (see flaky Scout Lane #10 in build 467427). Give it headroom.
+          await pageObjects.dashboard.openNewDashboard({ timeout: 60_000 });
+          await pageObjects.dashboard.openAddPanelFlyout({ timeout: 30_000 });
         });
 
         await test.step('the alerts panel option is offered', async () => {
