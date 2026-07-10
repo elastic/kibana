@@ -9,9 +9,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstUserAgentCommand } from '@elastic/esql/types';
-import { isStringLiteral } from '@elastic/esql';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
+import { getMapStringListValuesFromAst } from '../../definitions/utils/maps';
 import { suggestForExpression } from '../../definitions/utils';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import {
@@ -23,7 +23,7 @@ import {
 } from '../complete_items';
 import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../types';
 import { Location } from '../types';
-import { getPosition, getPropertiesList, UserAgentPosition } from './utils';
+import { getPosition, UserAgentPosition } from './utils';
 
 export async function autocomplete(
   query: string,
@@ -113,9 +113,8 @@ export async function autocomplete(
     }
 
     case UserAgentPosition.WITHIN_PROPERTIES_ARRAY: {
-      const propertiesList = getPropertiesList(userAgentCommand);
       const usedValues = new Set(
-        propertiesList?.values.filter(isStringLiteral).map((v) => v.valueUnquoted) ?? []
+        getMapStringListValuesFromAst(userAgentCommand.namedParameters, 'properties') ?? []
       );
       return ['name', 'version', 'os', 'device']
         .filter((v) => !usedValues.has(v))
