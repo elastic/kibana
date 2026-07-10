@@ -5,7 +5,6 @@ Load Elasticsearch snapshots for testing environments. Provides these operations
 - **create** - Create a snapshot in a writable Elasticsearch repository (`gcs` or `fs`)
 - **restore** - Basic snapshot restore directly to Elasticsearch
 - **replay** - Restore with timestamp transformation for data streams, making historical data appear fresh
-- **capture-incident** - Remote-reindex a curated incident's logs from a source cluster (e.g. Overview) into local ES and snapshot them to GCS with self-describing incident metadata (see [Capturing incident snapshots](#capturing-incident-snapshots))
 
 ## Repository Types
 
@@ -389,10 +388,11 @@ await repository.register({ esClient, log, repoName, verify: true });
 
 ## Capturing incident snapshots
 
-The `capture-incident` command copies a curated slice of a source cluster's logs
-(e.g. "Overview") into a local Elasticsearch via a **remote `_reindex`**, then
-snapshots it to the `nightshift-incident-snapshots` GCS bucket with self-describing
-incident metadata.
+Capturing a curated incident slice from a source cluster (e.g. "Overview") into a
+local Elasticsearch and snapshotting it to GCS is handled by the standalone
+`capture_incident` tool, which is built on top of this package's GCS repository and
+`restore`/`replay` commands. It now lives in the `@kbn/evals-suite-significant-events`
+package:
 
-See the [capture_incident README](scripts/capture_incident/README.md) for the full
-guide: prerequisites, config-file schema, usage, and troubleshooting.
+See the [capture_incident README](../kbn-evals-suite-significant-events/scripts/capture_incident/README.md)
+for the full guide: prerequisites, config-file schema, usage, and troubleshooting.

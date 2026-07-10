@@ -2,7 +2,7 @@
 name: capture-incident-snapshot
 description: >-
   Author an incident capture config from incident documentation for the
-  @kbn/es-snapshot-loader capture-incident command. Reads all incident docs
+  capture-incident command (node scripts/capture_incident_snapshot.js). Reads all incident docs
   (rootly_incidents entry, RCA doc, Slack channel), probes the source (Overview)
   logs to locate the affected entity and all log datasets it spans, derives a
   narrow "symptom" query and a broad entity-scoped "snapshot" query (both plain
@@ -21,7 +21,7 @@ Turn incident documentation into a `<id>.incident.yml` config for the
 real-world log slice that can be replayed to reproduce and analyze what happened.
 
 Read this first for context on the command the config feeds:
-`x-pack/platform/packages/shared/kbn-es-snapshot-loader/scripts/capture_incident/README.md`.
+`x-pack/platform/packages/shared/kbn-evals-suite-significant-events/scripts/capture_incident/README.md`.
 
 ## Two queries, all log datasets
 
@@ -227,7 +227,7 @@ safe.
 ### Step 5: Dry-run
 
 ```bash
-node scripts/es_snapshot_loader capture-incident \
+node scripts/capture_incident_snapshot.js \
   --config <path-to-<id>.incident.yml> \
   --es-url "$LOCAL_ES_URL" \
   --dry-run
@@ -242,7 +242,7 @@ Once the dry-run looks right, run it for real to reindex the broad slice and
 snapshot it to GCS:
 
 ```bash
-node scripts/es_snapshot_loader capture-incident \
+node scripts/capture_incident_snapshot.js \
   --config <path-to-<id>.incident.yml> \
   --es-url "$LOCAL_ES_URL"
 ```

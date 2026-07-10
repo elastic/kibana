@@ -392,9 +392,10 @@ async function remoteReindex({
         host: config.source.host,
         headers: { Authorization: `ApiKey ${config.resolvedApiKey}` },
         // The remote source defaults to a 30s socket timeout per scroll batch,
-        // which frozen (`partial-`) tier CCS reads routinely exceed. Raise both so
-        // slow batches don't abort the reindex with a socket_timeout_exception.
-        socket_timeout: '5m',
+        // which frozen (`partial-`) tier CCS reads routinely exceed (a single batch
+        // can take minutes to thaw from blob storage). Raise both generously so slow
+        // batches don't abort the reindex with a socket_timeout_exception.
+        socket_timeout: '10m',
         connect_timeout: '2m',
       },
       index: config.sourceIndex,

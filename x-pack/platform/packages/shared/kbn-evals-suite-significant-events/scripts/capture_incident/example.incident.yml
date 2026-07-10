@@ -1,4 +1,4 @@
-# Example incident config for `node scripts/es_snapshot_loader capture-incident`.
+# Example incident config for `node scripts/capture_incident_snapshot.js`.
 # Copy this file, fill it in per incident, and pass it via --config.
 # One config file == one incident. YAML comments are ignored by the loader.
 #

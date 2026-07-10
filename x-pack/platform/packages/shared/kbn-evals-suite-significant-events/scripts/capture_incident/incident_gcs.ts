@@ -12,7 +12,7 @@ import execa from 'execa';
 import type { Client } from '@elastic/elasticsearch';
 import type { Metadata } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { createGcsRepository } from '../../src/repository';
+import { createGcsRepository } from '@kbn/es-snapshot-loader';
 import { NIGHTSHIFT_INCIDENT_BUCKET } from './constants';
 
 // The ES snapshot repository is just a local handle over the GCS bucket, so it

@@ -2,12 +2,14 @@
 
 Capture a single incident's curated logs into a GCS snapshot.
 
-`capture-incident` is a subcommand of the `@kbn/es-snapshot-loader` CLI. It copies
-a scoped slice of a source cluster's logs (e.g. "Overview") into a local
-Elasticsearch via a **remote `_reindex`**, then snapshots it to the
-`nightshift-incident-snapshots` GCS bucket. Each snapshot carries native,
-immutable metadata (queryable via the ES snapshot API) plus a bucket-local
-`manifest.json`, so any snapshot is self-describing without an external catalog.
+`capture-incident` is a standalone dev script (run via
+`node scripts/capture_incident_snapshot.js`) built on top of the
+`@kbn/es-snapshot-loader` GCS repository. It copies a scoped slice of a source
+cluster's logs (e.g. "Overview") into a local Elasticsearch via a **remote
+`_reindex`**, then snapshots it to the `nightshift-incident-snapshots` GCS bucket.
+Each snapshot carries native, immutable metadata (queryable via the ES snapshot
+API) plus a bucket-local `manifest.json`, so any snapshot is self-describing
+without an external catalog.
 
 One config file == one incident. Run the command once per incident.
 
@@ -68,20 +70,21 @@ the exact command to re-run.
 
 ```bash
 # Dry run: validate config + prerequisites, print request bodies, no mutations.
-node scripts/es_snapshot_loader capture-incident \
-  --config x-pack/platform/packages/shared/kbn-es-snapshot-loader/scripts/capture_incident/example.incident.yml \
+node scripts/capture_incident_snapshot.js \
+  --config x-pack/platform/packages/shared/kbn-evals-suite-significant-events/scripts/capture_incident/example.incident.yml \
   --es-url http://elastic:changeme@localhost:9200 \
   --dry-run
 
 # Real run.
-node scripts/es_snapshot_loader capture-incident \
+node scripts/capture_incident_snapshot.js \
   --config ./my-incident.yml \
   --es-url http://elastic:changeme@localhost:9200
 ```
 
-`--config` is required. Connection flags (`--es-url`, `--es-api-key`,
-`--kibana-url`) are shared with the other `es_snapshot_loader` commands. The source
-API key comes from `OVERVIEW_API_KEY` (preferred) or `source.apiKey` in the config.
+`--config` is required. The connection flags (`--es-url`, `--es-api-key`,
+`--kibana-url`) mirror the `es_snapshot_loader` commands used to restore/replay the
+result. The source API key comes from `OVERVIEW_API_KEY` (preferred) or
+`source.apiKey` in the config.
 
 ### Flags
 
@@ -94,7 +97,7 @@ API key comes from `OVERVIEW_API_KEY` (preferred) or `source.apiKey` in the conf
 | `--kibana-url` | no\*     | Kibana URL (ES requests proxied through Kibana)                  |
 
 \* Provide `--es-url` (or `--kibana-url`) to point at your local ES. See
-`node scripts/es_snapshot_loader capture-incident --help`.
+`node scripts/capture_incident_snapshot.js --help`.
 
 ## Config file
 
@@ -246,9 +249,12 @@ against the restored indices.
 | [`incident_config.ts`](./incident_config.ts)     | Config schema (zod), JSON/YAML loader, `buildIncidentQuery`      |
 | [`incident_gcs.ts`](./incident_gcs.ts)           | GCS repo registration, snapshot-with-metadata, manifest upload   |
 | [`incident_snapshot.ts`](./incident_snapshot.ts) | Orchestration (prereq → reindex → verify → snapshot → manifest)  |
+| [`index.ts`](./index.ts)                         | CLI entry (flags + ES client) for the command                    |
 | [`example.incident.yml`](./example.incident.yml) | Copy-paste config template                                       |
 
-The subcommand is wired into the CLI in [`../cli.ts`](../cli.ts).
+The command runs through the root launcher
+[`scripts/capture_incident_snapshot.js`](../../../../../../../scripts/capture_incident_snapshot.js),
+which loads [`index.ts`](./index.ts).
 
 ## Troubleshooting
 

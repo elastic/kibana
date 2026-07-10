@@ -18,7 +18,6 @@ import {
 import { createSnapshot } from '../src/create';
 import { restoreSnapshot } from '../src/restore';
 import { replaySnapshot } from '../src/replay';
-import { captureIncidentSnapshot } from './capture_incident/incident_snapshot';
 
 interface CommonFlags {
   'snapshot-url'?: string;
@@ -185,8 +184,6 @@ Commands:
                    Supports index renaming (--rename-pattern/--rename-replacement)
                    and graceful no-match handling (--allow-no-matches)
   replay           Restore a snapshot with timestamp transformation for data streams
-  capture-incident Remote-reindex a curated incident's logs from a source cluster
-                   into local ES and snapshot them to GCS with incident metadata
 
 Run 'node scripts/es_snapshot_loader <command> --help' for more information.
 `;
@@ -200,8 +197,6 @@ export function runCli(): void {
     runRestoreCli();
   } else if (subcommand === 'replay') {
     runReplayCli();
-  } else if (subcommand === 'capture-incident') {
-    runCaptureIncidentCli();
   } else {
     process.stdout.write(USAGE_HELP);
     process.exit(subcommand === '--help' || subcommand === '-h' ? 0 : 1);
@@ -466,64 +461,6 @@ function runReplayCli(): void {
 
       --concurrency       Number of indices to reindex in parallel
                           Default: all indices at once (no limit)
-        `,
-        allowUnexpected: false,
-      },
-    }
-  );
-}
-
-function runCaptureIncidentCli(): void {
-  process.argv = [process.argv[0], process.argv[1], ...process.argv.slice(3)];
-
-  run(
-    async ({ log, flags }) => {
-      const { config: configPath, 'dry-run': dryRun } = flags as CommonFlags & {
-        config?: string;
-        'dry-run'?: boolean;
-      };
-
-      if (!configPath) {
-        throw new Error('--config is required');
-      }
-
-      const esClient = await getEsClient(flags as CommonFlags, log);
-
-      log.info(`Capture Incident Snapshot`);
-      log.info(`=========================`);
-
-      await captureIncidentSnapshot({
-        esClient,
-        log,
-        configPath,
-        dryRun: Boolean(dryRun),
-      });
-    },
-    {
-      description:
-        'Remote-reindex a curated incident from a source cluster into local ES and snapshot to GCS',
-      flags: {
-        string: ['config', 'kibana-url', 'es-url', 'es-api-key'],
-        boolean: ['dry-run'],
-        help: `
-      Usage: node scripts/es_snapshot_loader capture-incident --config <path> [options]
-
-      --config            (required) Path to the incident config file (.yml/.yaml/.json)
-
-      --dry-run           Validate config + prerequisites and print the reindex/snapshot
-                          request bodies without mutating anything
-
-      --es-url            Local Elasticsearch URL with credentials
-                          Example: http://elastic:changeme@localhost:9200
-
-      --es-api-key        Local Elasticsearch API key (base64 encoded)
-                          When provided, overrides credentials in --es-url
-
-      --kibana-url        Kibana URL (ES requests proxied through Kibana)
-                          Example: http://localhost:5601
-
-      The source (Overview) API key is read from the OVERVIEW_API_KEY environment
-      variable (preferred) or the config's "source.apiKey".
         `,
         allowUnexpected: false,
       },
