@@ -45,6 +45,7 @@ export const getLifecycleStatusLabel = (status: LifecycleDisplayStatus): string 
     case 'acknowledged':
     case 'demoted':
     case 'resolved':
+    case 'closed':
       return SIGNIFICANT_EVENT_STATUS_LABELS[status];
     default:
       return status;
@@ -63,6 +64,7 @@ export const getLifecycleStatusColor = (status: LifecycleDisplayStatus): string 
     case 'acknowledged':
     case 'demoted':
     case 'resolved':
+    case 'closed':
       return SIGNIFICANT_EVENT_STATUS_COLORS[status];
     default:
       return 'hollow';

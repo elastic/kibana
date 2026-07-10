@@ -87,7 +87,7 @@ export class WorkflowEditorPage {
   /**
    * Switch to the graph view by clicking the bottom bar toggle.
    * Waits for the graph canvas to become visible.
-   * Requires the `workflows:ui:visualEditor:enabled` UI setting to be true.
+   * Requires the `workflows:experimentalFeatures` UI setting to be true.
    */
   async switchToGraphView(): Promise<void> {
     await this.page.testSubj.click('workflowEditorViewToggle-graph');
@@ -303,7 +303,7 @@ export class WorkflowEditorPage {
    * Run the workflow and confirm if there are unsaved changes
    */
   async runWorkflowWithUnsavedChanges() {
-    await this.runButton.click();
+    await this.clickRunButton();
     await this.page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal', {
       state: 'visible',
     });

@@ -61,7 +61,7 @@ describe('buildModifiedVisAttributes', () => {
     }
   );
 
-  it('does not set yConfig color when a breakdown field other than effective_status is set', () => {
+  it('does not set yConfig color when a breakdown field other than episode.status is set', () => {
     const result = buildModifiedVisAttributes(
       mockLensAttributes,
       'rule.id',
@@ -73,13 +73,8 @@ describe('buildModifiedVisAttributes', () => {
     expect(layer.yConfig).toEqual([]);
   });
 
-  it('applies per-status colorMapping when breakdown is effective_status', () => {
-    const result = buildModifiedVisAttributes(
-      mockLensAttributes,
-      'effective_status',
-      {},
-      mockColors
-    );
+  it('applies per-status colorMapping when breakdown is episode.status', () => {
+    const result = buildModifiedVisAttributes(mockLensAttributes, 'episode.status', {}, mockColors);
     const layer = (result.state?.visualization as any).layers[0];
     expect(layer.colorMapping?.assignments).toHaveLength(4);
     const patterns = layer.colorMapping?.assignments.map(

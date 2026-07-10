@@ -240,6 +240,7 @@ const noopProductDocBase = {
     getStatus: () => Promise.resolve({}),
     install: () => Promise.resolve(),
     uninstall: () => Promise.resolve(),
+    getDefaultInferenceId: () => Promise.resolve('.elser-2-elasticsearch'),
   },
 };
 

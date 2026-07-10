@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 
 import { INTERNAL_TEMPLATES_URL, CASE_EXTENDED_FIELDS } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           name: 'Incident Template',
           owner: 'securitySolutionFixture',
-          definition: yaml.dump({
+          definition: stringify({
             name: 'Incident Template',
             fields: [
               {
