@@ -94,7 +94,7 @@ export const useDocumentFlyoutTitle = ({
         ...defaultFlyoutProperties,
         historyKey,
         session: 'inherit',
-        title: buildFlyoutNavTitle(sessionTitle),
+        title: buildFlyoutNavTitle(sessionTitle, { resetToRoot: true }),
       }
     );
   }, [

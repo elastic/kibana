@@ -294,7 +294,7 @@ export const Host: FC<HostProps> = memo(function Host({
       }),
       {
         ...defaultDocumentFlyoutProperties,
-        title: buildFlyoutNavTitle(formatFlyoutTitle(HOST_TITLE, hostName)),
+        title: buildFlyoutNavTitle(formatFlyoutTitle(HOST_TITLE, hostName), { resetToRoot: true }),
         historyKey,
         session: 'inherit',
       }

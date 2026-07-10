@@ -145,7 +145,9 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session: 'inherit',
-        title: buildFlyoutNavTitle(formatFlyoutTitle(GENERIC_ENTITY_TITLE, genericInsightsValue)),
+        title: buildFlyoutNavTitle(formatFlyoutTitle(GENERIC_ENTITY_TITLE, genericInsightsValue), {
+          resetToRoot: true,
+        }),
       }
     );
   }, [

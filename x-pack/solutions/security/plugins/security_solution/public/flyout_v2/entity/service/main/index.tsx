@@ -194,7 +194,9 @@ export const Service: FC<ServiceProps> = memo(function Service({
       }),
       {
         ...defaultDocumentFlyoutProperties,
-        title: buildFlyoutNavTitle(formatFlyoutTitle(SERVICE_TITLE, serviceName)),
+        title: buildFlyoutNavTitle(formatFlyoutTitle(SERVICE_TITLE, serviceName), {
+          resetToRoot: true,
+        }),
         historyKey,
         session: 'inherit',
       }

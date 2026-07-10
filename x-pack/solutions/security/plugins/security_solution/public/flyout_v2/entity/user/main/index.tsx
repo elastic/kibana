@@ -297,7 +297,7 @@ export const User: FC<UserProps> = memo(function User({
       }),
       {
         ...defaultDocumentFlyoutProperties,
-        title: buildFlyoutNavTitle(formatFlyoutTitle(USER_TITLE, userName)),
+        title: buildFlyoutNavTitle(formatFlyoutTitle(USER_TITLE, userName), { resetToRoot: true }),
         historyKey,
         session: 'inherit',
       }
