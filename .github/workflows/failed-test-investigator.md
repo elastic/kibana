@@ -118,11 +118,13 @@ safe-outputs:
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
   # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
+  # max=4 covers a full stale verdict: up to three investigator labels (a classification,
+  # `failure:ai-fixable`, and `failure:insufficient-data`) plus a lingering `ai:fix-flaky`.
   remove-labels:
     allowed:
       - failure:*
       - ai:fix-flaky
-    max: 3
+    max: 4
     target: *issue_number
 
 strict: false
