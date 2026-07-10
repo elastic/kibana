@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { EuiDescriptionList, useEuiTheme } from '@elastic/eui';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
@@ -20,6 +21,8 @@ import * as i18n from './translations';
 export interface AlertEpisodeOverviewListProps {
   groupingFields: string[];
   groupingData: Record<string, unknown>;
+  /** Source data view used to format grouping values with their field's `fieldFormats` formatter. */
+  groupingDataView?: DataView;
   triggeredAt: string | undefined;
   durationMs: number | undefined;
   assigneeUid: string | undefined;
@@ -32,6 +35,7 @@ export interface AlertEpisodeOverviewListProps {
 export const AlertEpisodeOverviewList = ({
   groupingFields,
   groupingData,
+  groupingDataView,
   triggeredAt,
   durationMs,
   assigneeUid,
@@ -65,6 +69,7 @@ export const AlertEpisodeOverviewList = ({
             <AlertingEpisodeGroupingTags
               fields={groupingFields}
               data={groupingData}
+              dataView={groupingDataView}
               data-test-subj="alertingV2EpisodeDetailsOverviewListGroupingTags"
             />
           ),
