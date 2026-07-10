@@ -93444,6 +93444,7 @@ components:
                   required:
                     - id
                     - type
+                maxItems: 10000
                 type: array
               target_version:
                 type: string
