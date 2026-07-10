@@ -11,6 +11,7 @@ import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
   enableWorkflowsFeatureFlag,
+  getScheduleAdminRoleDescriptor,
   getSimpleWorkflowSchedule,
   getWorkflowSchedulesApis,
 } from '../fixtures/helpers';
@@ -21,7 +22,7 @@ apiTest.describe('Workflow schedule API - update', { tag: SCHEDULE_TAGS }, () =>
   apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
     await enableWorkflowsFeatureFlag(apiServices);
 
-    const credentials = await samlAuth.asInteractiveUser('admin');
+    const credentials = await samlAuth.asInteractiveUser(getScheduleAdminRoleDescriptor());
     defaultHeaders = { ...credentials.cookieHeader };
   });
 
@@ -74,7 +75,7 @@ apiTest.describe('Workflow schedule API - update', { tag: SCHEDULE_TAGS }, () =>
     expect(createResult.statusCode).toBe(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
-    const { statusCode } = await apis.updateSchedule(createdId, {
+    const response = await apis.updateSchedule(createdId, {
       actions: [],
       params: {
         alerts_index_pattern: '.alerts-security.alerts-default',
@@ -86,14 +87,17 @@ apiTest.describe('Workflow schedule API - update', { tag: SCHEDULE_TAGS }, () =>
       },
       schedule: { interval: '24h' },
     });
+    const body = response.body as { error?: string; message?: string };
 
-    expect(statusCode).toBe(400);
+    expect(response).toHaveStatusCode(400);
+    expect(body.error).toBe('Bad Request');
+    expect(body.message).toContain('name');
   });
 
   apiTest('should return 404 when updating non-existent schedule', async ({ apiClient }) => {
     const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
 
-    const { statusCode } = await apis.updateSchedule('non-existent-id-12345', {
+    const response = await apis.updateSchedule('non-existent-id-12345', {
       actions: [],
       name: 'Does not exist',
       params: {
@@ -106,8 +110,10 @@ apiTest.describe('Workflow schedule API - update', { tag: SCHEDULE_TAGS }, () =>
       },
       schedule: { interval: '24h' },
     });
+    const body = response.body as { message?: string };
 
-    expect(statusCode).toBe(404);
+    expect(response).toHaveStatusCode(404);
+    expect(body.message).toBeDefined();
   });
 
   apiTest('should update workflow_config fields', async ({ apiClient }) => {

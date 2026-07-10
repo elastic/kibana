@@ -71,9 +71,11 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
   apiTest('should return 403 when unauthorized user creates a schedule', async ({ apiClient }) => {
     const apis = getWorkflowSchedulesApis(apiClient, viewerHeaders);
 
-    const { statusCode } = await apis.createSchedule(getSimpleWorkflowSchedule());
+    const response = await apis.createSchedule(getSimpleWorkflowSchedule());
+    const body = response.body as { error?: string; message?: string };
 
-    expect(statusCode).toBe(403);
+    expect(response).toHaveStatusCode(403);
+    expect(body.error).toBe('Forbidden');
   });
 
   apiTest('should return 403 when unauthorized user updates a schedule', async ({ apiClient }) => {
@@ -84,7 +86,7 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
     expect(createResult.statusCode).toBe(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
-    const { statusCode } = await viewerApis.updateSchedule(createdId, {
+    const response = await viewerApis.updateSchedule(createdId, {
       actions: [],
       name: 'Hacked name',
       params: {
@@ -97,8 +99,10 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
       },
       schedule: { interval: '24h' },
     });
+    const body = response.body as { error?: string; message?: string };
 
-    expect(statusCode).toBe(403);
+    expect(response).toHaveStatusCode(403);
+    expect(body.error).toBe('Forbidden');
   });
 
   apiTest('should return 403 when unauthorized user deletes a schedule', async ({ apiClient }) => {
@@ -109,9 +113,11 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
     expect(createResult.statusCode).toBe(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
-    const { statusCode } = await viewerApis.deleteSchedule(createdId);
+    const response = await viewerApis.deleteSchedule(createdId);
+    const body = response.body as { error?: string; message?: string };
 
-    expect(statusCode).toBe(403);
+    expect(response).toHaveStatusCode(403);
+    expect(body.error).toBe('Forbidden');
   });
 
   apiTest('should return 403 when unauthorized user enables a schedule', async ({ apiClient }) => {
@@ -124,9 +130,11 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
     expect(createResult.statusCode).toBe(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
-    const { statusCode } = await viewerApis.enableSchedule(createdId);
+    const response = await viewerApis.enableSchedule(createdId);
+    const body = response.body as { error?: string; message?: string };
 
-    expect(statusCode).toBe(403);
+    expect(response).toHaveStatusCode(403);
+    expect(body.error).toBe('Forbidden');
   });
 
   apiTest('should return 403 when unauthorized user disables a schedule', async ({ apiClient }) => {
@@ -139,9 +147,11 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
     expect(createResult.statusCode).toBe(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
-    const { statusCode } = await viewerApis.disableSchedule(createdId);
+    const response = await viewerApis.disableSchedule(createdId);
+    const body = response.body as { error?: string; message?: string };
 
-    expect(statusCode).toBe(403);
+    expect(response).toHaveStatusCode(403);
+    expect(body.error).toBe('Forbidden');
   });
 
   // Run-triggering route (least-privilege matrix, bead kibana-5wd6.1): the
@@ -154,9 +164,11 @@ apiTest.describe('Workflow schedule API - RBAC', { tag: SCHEDULE_TAGS }, () => {
     async ({ apiClient }) => {
       const viewerApi = getGenerateApi(apiClient, viewerHeaders);
 
-      const { statusCode } = await viewerApi.generate(getSimpleGenerateBody());
+      const response = await viewerApi.generate(getSimpleGenerateBody());
+      const body = response.body as { error?: string; message?: string };
 
-      expect(statusCode).toBe(403);
+      expect(response).toHaveStatusCode(403);
+      expect(body.error).toBe('Forbidden');
     }
   );
 

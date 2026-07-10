@@ -11,6 +11,7 @@ import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
   enableWorkflowsFeatureFlag,
+  getScheduleAdminRoleDescriptor,
   getSimpleWorkflowSchedule,
   getWorkflowSchedulesApis,
 } from '../fixtures/helpers';
@@ -21,7 +22,7 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
   apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
     await enableWorkflowsFeatureFlag(apiServices);
 
-    const credentials = await samlAuth.asInteractiveUser('admin');
+    const credentials = await samlAuth.asInteractiveUser(getScheduleAdminRoleDescriptor());
     defaultHeaders = { ...credentials.cookieHeader };
   });
 

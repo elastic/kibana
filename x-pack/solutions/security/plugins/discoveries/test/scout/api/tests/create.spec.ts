@@ -11,6 +11,7 @@ import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
   enableWorkflowsFeatureFlag,
+  getScheduleAdminRoleDescriptor,
   getSimpleWorkflowSchedule,
   getWorkflowSchedulesApis,
 } from '../fixtures/helpers';
@@ -21,7 +22,7 @@ apiTest.describe('Workflow schedule API - create', { tag: SCHEDULE_TAGS }, () =>
   apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
     await enableWorkflowsFeatureFlag(apiServices);
 
-    const credentials = await samlAuth.asInteractiveUser('admin');
+    const credentials = await samlAuth.asInteractiveUser(getScheduleAdminRoleDescriptor());
     defaultHeaders = { ...credentials.cookieHeader };
   });
 
@@ -81,27 +82,36 @@ apiTest.describe('Workflow schedule API - create', { tag: SCHEDULE_TAGS }, () =>
     const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
     const { name: _, ...scheduleWithoutName } = getSimpleWorkflowSchedule();
 
-    const { statusCode } = await apis.createSchedule(scheduleWithoutName);
+    const response = await apis.createSchedule(scheduleWithoutName);
+    const body = response.body as { error?: string; message?: string };
 
-    expect(statusCode).toBe(400);
+    expect(response).toHaveStatusCode(400);
+    expect(body.error).toBe('Bad Request');
+    expect(body.message).toContain('name');
   });
 
   apiTest('should return 400 when params is missing', async ({ apiClient }) => {
     const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
     const { params: _, ...scheduleWithoutParams } = getSimpleWorkflowSchedule();
 
-    const { statusCode } = await apis.createSchedule(scheduleWithoutParams);
+    const response = await apis.createSchedule(scheduleWithoutParams);
+    const body = response.body as { error?: string; message?: string };
 
-    expect(statusCode).toBe(400);
+    expect(response).toHaveStatusCode(400);
+    expect(body.error).toBe('Bad Request');
+    expect(body.message).toContain('params');
   });
 
   apiTest('should return 400 when schedule is missing', async ({ apiClient }) => {
     const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
     const { schedule: _, ...scheduleWithoutSchedule } = getSimpleWorkflowSchedule();
 
-    const { statusCode } = await apis.createSchedule(scheduleWithoutSchedule);
+    const response = await apis.createSchedule(scheduleWithoutSchedule);
+    const body = response.body as { error?: string; message?: string };
 
-    expect(statusCode).toBe(400);
+    expect(response).toHaveStatusCode(400);
+    expect(body.error).toBe('Bad Request');
+    expect(body.message).toContain('schedule');
   });
 
   apiTest('should persist workflow_config params', async ({ apiClient }) => {

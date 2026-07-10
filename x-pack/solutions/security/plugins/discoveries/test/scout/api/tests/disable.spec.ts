@@ -11,6 +11,7 @@ import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
   enableWorkflowsFeatureFlag,
+  getScheduleAdminRoleDescriptor,
   getSimpleWorkflowSchedule,
   getWorkflowSchedulesApis,
 } from '../fixtures/helpers';
@@ -21,7 +22,7 @@ apiTest.describe('Workflow schedule API - disable', { tag: SCHEDULE_TAGS }, () =
   apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
     await enableWorkflowsFeatureFlag(apiServices);
 
-    const credentials = await samlAuth.asInteractiveUser('admin');
+    const credentials = await samlAuth.asInteractiveUser(getScheduleAdminRoleDescriptor());
     defaultHeaders = { ...credentials.cookieHeader };
   });
 
@@ -49,8 +50,10 @@ apiTest.describe('Workflow schedule API - disable', { tag: SCHEDULE_TAGS }, () =
   apiTest('should return 404 for non-existent schedule', async ({ apiClient }) => {
     const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
 
-    const { statusCode } = await apis.disableSchedule('non-existent-id-12345');
+    const response = await apis.disableSchedule('non-existent-id-12345');
+    const body = response.body as { message?: string };
 
-    expect(statusCode).toBe(404);
+    expect(response).toHaveStatusCode(404);
+    expect(body.message).toBeDefined();
   });
 });
