@@ -224,10 +224,20 @@ describe('useEpisodesTableConfig', () => {
 
   it('resetToDefaults restores default config and writes to both stores', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
-    const mockStorage = createMockStorage({
-      ...DEFAULT_EPISODES_TABLE_CONFIG,
-      rowHeight: -1,
-    });
+    // Stateful, unlike createMockStorage: the reset triggers a URL write (via history.replace),
+    // which re-triggers the hook's location.search re-sync effect and re-reads storage — a static
+    // mock would then hand back the stale pre-reset value.
+    let stored: unknown = { ...DEFAULT_EPISODES_TABLE_CONFIG, rowHeight: -1 };
+    const mockStorage = {
+      get: jest.fn(() => stored),
+      set: jest.fn((_, v) => {
+        stored = v;
+      }),
+      remove: jest.fn(() => {
+        stored = null;
+      }),
+      clear: jest.fn(),
+    };
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <Router history={history}>{children}</Router>

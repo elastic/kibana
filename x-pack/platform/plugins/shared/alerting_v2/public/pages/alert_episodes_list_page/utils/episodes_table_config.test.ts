@@ -102,7 +102,10 @@ describe('episodes_table_config', () => {
 
     it('writes only non-default fields to localStorage at the expected key', () => {
       const storage = createMockStorage();
-      writeEpisodesTableConfigToStorage(storage as any, { rowHeight: -1 });
+      writeEpisodesTableConfigToStorage(storage as any, {
+        ...DEFAULT_EPISODES_TABLE_CONFIG,
+        rowHeight: -1,
+      });
       expect(storage.set).toHaveBeenCalledWith(EPISODES_TABLE_CONFIG_STORAGE_KEY, {
         rowHeight: -1,
       });
@@ -131,7 +134,12 @@ describe('episodes_table_config', () => {
         sort: { sortField: 'tags', sortDirection: 'asc' as const },
       };
       writeEpisodesTableConfigToStorage(storage as any, config);
-      expect(readEpisodesTableConfigFromStorage(storage as any)).toEqual(config);
+      // Only the fields that diverge from the default are persisted (and read back); the caller
+      // is expected to re-merge with defaults via mergeEpisodesTableConfig.
+      expect(readEpisodesTableConfigFromStorage(storage as any)).toEqual({
+        rowHeight: -1,
+        sort: { sortField: 'tags', sortDirection: 'asc' },
+      });
     });
 
     it('ignores invalid storage values gracefully', () => {
