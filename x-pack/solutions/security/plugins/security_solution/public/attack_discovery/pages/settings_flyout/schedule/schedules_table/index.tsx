@@ -21,9 +21,6 @@ import * as i18n from './translations';
 
 import { useColumns } from './use_columns';
 import { useScheduleApi } from '../logic/use_schedule_api';
-import { useBulkEnableAttackDiscoverySchedules } from '../logic/use_bulk_enable_schedules';
-import { useBulkDisableAttackDiscoverySchedules } from '../logic/use_bulk_disable_schedules';
-import { useBulkDeleteAttackDiscoverySchedules } from '../logic/use_bulk_delete_schedules';
 import { DetailsFlyout } from '../details_flyout';
 import { WithMissingPrivileges } from '../missing_privileges';
 import {
@@ -47,8 +44,15 @@ export const SchedulesTable: React.FC = React.memo(() => {
   const [sortField, setSortField] = useState<keyof AttackDiscoverySchedule>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
 
-  const { useDeleteSchedule, useDisableSchedule, useEnableSchedule, useFindSchedules } =
-    useScheduleApi();
+  const {
+    useBulkDeleteSchedules,
+    useBulkDisableSchedules,
+    useBulkEnableSchedules,
+    useDeleteSchedule,
+    useDisableSchedule,
+    useEnableSchedule,
+    useFindSchedules,
+  } = useScheduleApi();
 
   const {
     data: { schedules, total } = { schedules: [], total: 0 },
@@ -104,12 +108,9 @@ export const SchedulesTable: React.FC = React.memo(() => {
   const { mutateAsync: enableAttackDiscoverySchedule } = useEnableSchedule();
   const { mutateAsync: disableAttackDiscoverySchedule } = useDisableSchedule();
   const { mutateAsync: deleteAttackDiscoverySchedule } = useDeleteSchedule();
-  const { mutateAsync: bulkEnableAttackDiscoverySchedules } =
-    useBulkEnableAttackDiscoverySchedules();
-  const { mutateAsync: bulkDisableAttackDiscoverySchedules } =
-    useBulkDisableAttackDiscoverySchedules();
-  const { mutateAsync: bulkDeleteAttackDiscoverySchedules } =
-    useBulkDeleteAttackDiscoverySchedules();
+  const { mutateAsync: bulkEnableAttackDiscoverySchedules } = useBulkEnableSchedules();
+  const { mutateAsync: bulkDisableAttackDiscoverySchedules } = useBulkDisableSchedules();
+  const { mutateAsync: bulkDeleteAttackDiscoverySchedules } = useBulkDeleteSchedules();
 
   const openScheduleDetails = useCallback((scheduleId: string) => {
     setScheduleDetailsId(scheduleId);

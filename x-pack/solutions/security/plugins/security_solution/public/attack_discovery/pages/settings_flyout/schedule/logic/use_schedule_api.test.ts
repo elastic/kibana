@@ -16,6 +16,9 @@ import { useEnableAttackDiscoverySchedule } from './use_enable_schedule';
 import { useFindAttackDiscoverySchedules } from './use_find_schedules';
 import { useGetAttackDiscoverySchedule } from './use_get_schedule';
 import { useUpdateAttackDiscoverySchedule } from './use_update_schedule';
+import { useBulkEnableAttackDiscoverySchedules } from './use_bulk_enable_schedules';
+import { useBulkDisableAttackDiscoverySchedules } from './use_bulk_disable_schedules';
+import { useBulkDeleteAttackDiscoverySchedules } from './use_bulk_delete_schedules';
 import { useCreateWorkflowSchedule } from './use_create_workflow_schedule';
 import { useDeleteWorkflowSchedule } from './use_delete_workflow_schedule';
 import { useDisableWorkflowSchedule } from './use_disable_workflow_schedule';
@@ -23,6 +26,9 @@ import { useEnableWorkflowSchedule } from './use_enable_workflow_schedule';
 import { useFindWorkflowSchedules } from './use_find_workflow_schedules';
 import { useGetWorkflowSchedule } from './use_get_workflow_schedule';
 import { useUpdateWorkflowSchedule } from './use_update_workflow_schedule';
+import { useBulkEnableWorkflowSchedules } from './use_bulk_enable_workflow_schedules';
+import { useBulkDisableWorkflowSchedules } from './use_bulk_disable_workflow_schedules';
+import { useBulkDeleteWorkflowSchedules } from './use_bulk_delete_workflow_schedules';
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -90,6 +96,24 @@ describe('useScheduleApi', () => {
       const { result } = renderHook(() => useScheduleApi());
 
       expect(result.current.useUpdateSchedule).toBe(useUpdateWorkflowSchedule);
+    });
+
+    it('returns workflow bulk enable hook', () => {
+      const { result } = renderHook(() => useScheduleApi());
+
+      expect(result.current.useBulkEnableSchedules).toBe(useBulkEnableWorkflowSchedules);
+    });
+
+    it('returns workflow bulk disable hook', () => {
+      const { result } = renderHook(() => useScheduleApi());
+
+      expect(result.current.useBulkDisableSchedules).toBe(useBulkDisableWorkflowSchedules);
+    });
+
+    it('returns workflow bulk delete hook', () => {
+      const { result } = renderHook(() => useScheduleApi());
+
+      expect(result.current.useBulkDeleteSchedules).toBe(useBulkDeleteWorkflowSchedules);
     });
 
     it('returns the workflow hook set on the first render (no post-mount hook swap)', () => {
@@ -162,6 +186,24 @@ describe('useScheduleApi', () => {
       expect(result.current.useUpdateSchedule).toBe(useUpdateAttackDiscoverySchedule);
     });
 
+    it('returns public API bulk enable hook', () => {
+      const { result } = renderHook(() => useScheduleApi());
+
+      expect(result.current.useBulkEnableSchedules).toBe(useBulkEnableAttackDiscoverySchedules);
+    });
+
+    it('returns public API bulk disable hook', () => {
+      const { result } = renderHook(() => useScheduleApi());
+
+      expect(result.current.useBulkDisableSchedules).toBe(useBulkDisableAttackDiscoverySchedules);
+    });
+
+    it('returns public API bulk delete hook', () => {
+      const { result } = renderHook(() => useScheduleApi());
+
+      expect(result.current.useBulkDeleteSchedules).toBe(useBulkDeleteAttackDiscoverySchedules);
+    });
+
     it('does NOT return any workflow hooks', () => {
       const { result } = renderHook(() => useScheduleApi());
 
@@ -172,6 +214,9 @@ describe('useScheduleApi', () => {
       expect(result.current.useFindSchedules).not.toBe(useFindWorkflowSchedules);
       expect(result.current.useGetSchedule).not.toBe(useGetWorkflowSchedule);
       expect(result.current.useUpdateSchedule).not.toBe(useUpdateWorkflowSchedule);
+      expect(result.current.useBulkEnableSchedules).not.toBe(useBulkEnableWorkflowSchedules);
+      expect(result.current.useBulkDisableSchedules).not.toBe(useBulkDisableWorkflowSchedules);
+      expect(result.current.useBulkDeleteSchedules).not.toBe(useBulkDeleteWorkflowSchedules);
     });
 
     it('reads the feature flag with the correct key and default', () => {
