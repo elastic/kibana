@@ -21,38 +21,11 @@ const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits
 type SamplingStrategy = 'entity-filtered' | 'diverse' | 'random';
 
 /**
- * Compose multiple AbortSignals into one. Native `AbortSignal.any` is available
- * in Node 20+, but jsdom (used by Kibana's default jest preset, incl. this
- * plugin's) ships an older `AbortSignal` polyfill without it, so we fall back
- * manually for test parity.
- */
-const anySignal = (signals: AbortSignal[]): AbortSignal => {
-  if (typeof AbortSignal.any === 'function') return AbortSignal.any(signals);
-  const controller = new AbortController();
-  for (const s of signals) {
-    if (s.aborted) {
-      controller.abort(s.reason);
-      return controller.signal;
-    }
-    s.addEventListener('abort', () => controller.abort(s.reason), { once: true });
-  }
-  return controller.signal;
-};
-
-/** Same jsdom gap as `anySignal`: `AbortSignal.timeout` is also missing there. */
-const timeoutSignal = (ms: number): AbortSignal => {
-  if (typeof AbortSignal.timeout === 'function') return AbortSignal.timeout(ms);
-  const controller = new AbortController();
-  setTimeout(() => controller.abort(new Error(`Timed out after ${ms}ms`)), ms);
-  return controller.signal;
-};
-
-/**
  * Each sampling arm gets its own deadline, but arms run concurrently via
  * `Promise.all`, so `samplingTimeoutMs` is not additive across them.
  */
 const armDeadline = (signal: AbortSignal, samplingTimeoutMs: number): AbortSignal =>
-  anySignal([signal, timeoutSignal(samplingTimeoutMs)]);
+  AbortSignal.any([signal, AbortSignal.timeout(samplingTimeoutMs)]);
 
 export async function fetchSampleDocuments({
   esClient,
