@@ -315,7 +315,7 @@ Omit this section unless it changes what the reader does next. When present, kee
 
 #### Data collection issues (only when a screenshot fetch failed)
 
-FTR and UI (Scout/Playwright) failures ship a screenshot. Include this section **only** if you tried to fetch that screenshot and the fetch errored; otherwise omit it entirely. When you do include it, document the failure so the workflow can be debugged:
+UI failures (FTR and Scout/Playwright) ship a screenshot. Include this section **only** if you tried to fetch that screenshot and the fetch errored; otherwise omit it entirely. When you do include it, document the failure so the workflow can be debugged:
 
 - the command you ran
 - the URL (if applicable)
