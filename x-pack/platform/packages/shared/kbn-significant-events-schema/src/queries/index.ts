@@ -11,6 +11,25 @@ import type { Feature } from '../feature';
 import type { QueryWithOccurrences } from '../api/significant_events';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '../significant_events/constants';
 
+/**
+ * A knowledge indicator (feature or query link) is durable when it has no
+ * `expires_at` — it is never subject to expiry-based cleanup.
+ */
+export function isDurable(ki: Feature | QueryLink): boolean {
+  return !ki.expires_at;
+}
+
+export function isExpirable(
+  ki: Feature | QueryLink
+): ki is (Feature | QueryLink) & { expires_at: string } {
+  return !!ki.expires_at;
+}
+
+/** Whether an expiry timestamp has passed. Callers must exclude durable indicators (`isDurable`) first. */
+export function isExpired(expiresAt: string): boolean {
+  return new Date(expiresAt).getTime() <= Date.now();
+}
+
 export interface EsqlQuery {
   query: string;
 }
