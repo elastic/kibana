@@ -13,11 +13,14 @@ import { DefaultSnapshotRepositoryRequiredModal } from './default_snapshot_repos
 
 describe('DefaultSnapshotRepositoryRequiredModal', () => {
   const createDefaultRepositoryUrl = '/app/management/data/snapshot_restore/add_repository';
+  const manageRepositoriesUrl = '/app/management/data/snapshot_restore/repositories';
 
-  it('links to create a default snapshot repository in a new tab', () => {
+  it('links to create a default snapshot repository in a new tab when there are no existing repositories', () => {
     renderWithI18n(
       <DefaultSnapshotRepositoryRequiredModal
         createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+        manageRepositoriesUrl={manageRepositoriesUrl}
+        hasExistingRepositories={false}
         onCancel={() => {}}
         onRefresh={() => {}}
       />
@@ -29,6 +32,46 @@ describe('DefaultSnapshotRepositoryRequiredModal', () => {
     expect(
       screen.getByTestId('defaultSnapshotRepositoryRequiredModalCreateDefaultRepositoryButton')
     ).toHaveAttribute('target', '_blank');
+    expect(
+      screen.queryByTestId('defaultSnapshotRepositoryRequiredModalManageRepositoriesButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('links to the repositories list when the user already has repositories', () => {
+    renderWithI18n(
+      <DefaultSnapshotRepositoryRequiredModal
+        createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+        manageRepositoriesUrl={manageRepositoriesUrl}
+        hasExistingRepositories={true}
+        onCancel={() => {}}
+        onRefresh={() => {}}
+      />
+    );
+
+    expect(
+      screen.getByTestId('defaultSnapshotRepositoryRequiredModalManageRepositoriesButton')
+    ).toHaveAttribute('href', manageRepositoriesUrl);
+    expect(
+      screen.getByTestId('defaultSnapshotRepositoryRequiredModalManageRepositoriesButton')
+    ).toHaveAttribute('target', '_blank');
+    expect(
+      screen.queryByTestId('defaultSnapshotRepositoryRequiredModalCreateDefaultRepositoryButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('links to create a default repository when there are existing repositories but no manage URL', () => {
+    renderWithI18n(
+      <DefaultSnapshotRepositoryRequiredModal
+        createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+        hasExistingRepositories={true}
+        onCancel={() => {}}
+        onRefresh={() => {}}
+      />
+    );
+
+    expect(
+      screen.getByTestId('defaultSnapshotRepositoryRequiredModalCreateDefaultRepositoryButton')
+    ).toHaveAttribute('href', createDefaultRepositoryUrl);
   });
 
   it('calls onCancel when cancel is clicked', () => {

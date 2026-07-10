@@ -7,8 +7,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { type Streams, isRoot, isDraftStream, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
+import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { RedirectTo } from '../../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
@@ -24,7 +26,7 @@ import { WiredStreamBadge } from '../../../stream_badges';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
-import { LifecycleTabLabel } from './lifecycle_tab_label_with_actions';
+import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
 import { StreamDetailCanvas } from '../stream_detail_canvas';
 
 const wiredStreamManagementSubTabs = [
@@ -68,6 +70,8 @@ export function WiredStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+  const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
@@ -186,15 +190,21 @@ export function WiredStreamDetailManagement({
                 refreshDefinition={refreshDefinition}
               />
             ),
-            label: (
-              <LifecycleTabLabel
-                definition={definition}
-                showActions={tab === 'lifecycle'}
-                indexTemplateName={`${definition.stream.name}@stream`}
-                notifications={notifications}
-                share={share}
-              />
-            ),
+            label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+              defaultMessage: 'Data lifecycle',
+            }),
+            toolTipContent: i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+              defaultMessage:
+                'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+            }),
+            'data-test-subj': 'retentionTab',
+            actions: buildLifecycleTabActions({
+              definition,
+              notifications,
+              share,
+              router,
+              timeRange: { rangeFrom, rangeTo },
+            }),
           },
         }
       : {}),
@@ -224,19 +234,16 @@ export function WiredStreamDetailManagement({
                 refreshDefinition={refreshDefinition}
               />
             ),
-            label: (
-              <EuiToolTip
-                content={i18n.translate('xpack.streams.managementTab.dataQuality.wired.tooltip', {
-                  defaultMessage: "View details about this stream's data quality",
-                })}
-              >
-                <span data-test-subj="dataQualityTab" tabIndex={0}>
-                  {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
-                    defaultMessage: 'Data quality',
-                  })}
-                </span>
-              </EuiToolTip>
+            label: i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+              defaultMessage: 'Data quality',
+            }),
+            toolTipContent: i18n.translate(
+              'xpack.streams.managementTab.dataQuality.wired.tooltip',
+              {
+                defaultMessage: "View details about this stream's data quality",
+              }
             ),
+            'data-test-subj': 'dataQualityTab',
           },
         }
       : {}),

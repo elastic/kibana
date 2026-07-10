@@ -74,6 +74,7 @@ interface AnomalyOverview {
   totalAnomaliesCount: number;
   from: number;
   to: number;
+  hasJobsMissingThreatTactics: boolean;
 }
 
 export const getEntityAnomalyOverview = async ({
@@ -99,6 +100,7 @@ export const getEntityAnomalyOverview = async ({
     totalAnomaliesCount: 0,
     from: effectiveFromMs,
     to: effectiveToMs,
+    hasJobsMissingThreatTactics: false,
   };
 
   const mlSystem = ml.mlSystemProvider(request, soClient);
@@ -194,6 +196,10 @@ export const getEntityAnomalyOverview = async ({
     presentJobIds.map((id) => [id, allJobConfigs.get(id)?.threatTactics ?? []])
   );
 
+  const hasJobsMissingThreatTactics = presentJobIds.some(
+    (id) => !allJobConfigs.get(id)?.hasThreatTactics
+  );
+
   const anomalyByTimeBucket: AnomalyOverviewEntry[] = (aggs?.by_time?.buckets ?? [])
     .filter((b) => b.doc_count > 0 && b.max_score.value !== null)
     .map((b) => {
@@ -240,5 +246,6 @@ export const getEntityAnomalyOverview = async ({
     totalAnomaliesCount,
     from: effectiveFromMs,
     to: effectiveToMs,
+    hasJobsMissingThreatTactics,
   };
 };

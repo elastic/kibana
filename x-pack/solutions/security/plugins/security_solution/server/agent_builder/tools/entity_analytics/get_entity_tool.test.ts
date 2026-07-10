@@ -28,6 +28,7 @@ import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
 import { buildRenderAttachmentTag, buildSingleEntityAttachmentId } from './entity_attachment_utils';
 import { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
+import { fetchRiskScoreGrounding } from './risk_score_grounding';
 import type { SharedServices } from '@kbn/ml-plugin/server/shared_services';
 
 jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
@@ -42,7 +43,16 @@ jest.mock('../../../lib/entity_analytics/enriched_entity', () => ({
   EnrichEntityService: jest.fn(),
 }));
 
+jest.mock('./risk_score_grounding', () => {
+  const actual = jest.requireActual('./risk_score_grounding');
+  return {
+    ...actual,
+    fetchRiskScoreGrounding: jest.fn().mockResolvedValue(undefined),
+  };
+});
+
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
+const mockFetchRiskScoreGrounding = fetchRiskScoreGrounding as jest.Mock;
 
 const mockExperimentalFeatures = {
   entityAnalyticsEntityStoreV2: true,
@@ -79,6 +89,7 @@ describe('getEntityTool', () => {
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
     });
+    mockFetchRiskScoreGrounding.mockResolvedValue(null);
     // Default to an empty risk index so existing tests that don't care
     // about the attachment payload's risk enrichment still pass. The
     // risk enrichment path issues `esClient.asCurrentUser.search` against
@@ -870,7 +881,7 @@ describe('getEntityTool', () => {
     });
 
     describe('telemetry', () => {
-      it('reports success=true and entitiesReturned=1 when an entity is found', async () => {
+      it('reports success=true and resultCount=1 when an entity is found', async () => {
         (executeEsql as jest.Mock).mockResolvedValueOnce({
           columns: [{ name: 'entity.id', type: 'keyword' }],
           values: [['host:server1']],
@@ -885,16 +896,18 @@ describe('getEntityTool', () => {
           ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
           {
             toolId: SECURITY_GET_ENTITY_TOOL_ID,
+            actionType: 'read',
             entityTypes: ['host'],
             spaceId: 'default',
             success: true,
-            entitiesReturned: 1,
+            resultCount: 1,
             errorMessage: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
 
-      it('reports success=true and entitiesReturned=0 when no entity is found', async () => {
+      it('reports success=true and resultCount=0 when no entity is found', async () => {
         (executeEsql as jest.Mock)
           .mockResolvedValueOnce({ columns: [], values: [] })
           .mockResolvedValueOnce({ columns: [], values: [] })
@@ -910,11 +923,13 @@ describe('getEntityTool', () => {
           ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
           {
             toolId: SECURITY_GET_ENTITY_TOOL_ID,
+            actionType: 'read',
             entityTypes: ['host'],
             spaceId: 'default',
             success: true,
-            entitiesReturned: 0,
+            resultCount: 0,
             errorMessage: undefined,
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -931,11 +946,13 @@ describe('getEntityTool', () => {
           ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
           {
             toolId: SECURITY_GET_ENTITY_TOOL_ID,
+            actionType: 'read',
             entityTypes: ['host'],
             spaceId: 'default',
             success: false,
-            entitiesReturned: 0,
+            resultCount: 0,
             errorMessage: 'ES|QL failure',
+            userConfirmationOutcome: undefined,
           }
         );
       });
@@ -956,6 +973,58 @@ describe('getEntityTool', () => {
           expect.objectContaining({ entityTypes: [] })
         );
       });
+    });
+  });
+
+  describe('risk score grounding', () => {
+    const groundingOtherResult: OtherResult = {
+      tool_result_id: 'grounding-result-id',
+      type: ToolResultType.other,
+      data: {
+        riskScoreGrounding: { status: 'stopped', lastScoreTimeAgo: '2 days ago' },
+      },
+    };
+
+    const setupSuccessfulEntityLookup = () => {
+      (executeEsql as jest.Mock).mockResolvedValueOnce({
+        columns: [{ name: 'entity.id', type: 'keyword' }],
+        values: [['host:server1']],
+      });
+    };
+
+    it('omits the grounding result when the lookup fails', async () => {
+      mockFetchRiskScoreGrounding.mockResolvedValueOnce(undefined);
+      setupSuccessfulEntityLookup();
+
+      const result = (await tool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results.some((r) => r.type === ToolResultType.other)).toBe(false);
+      // The main esql result is still present — grounding failure must never block the answer.
+      expect(result.results.some((r) => r.type === ToolResultType.esqlResults)).toBe(true);
+    });
+
+    it('still appends grounding when the entity lookup returns no rows so the agent can explain why', async () => {
+      mockFetchRiskScoreGrounding.mockResolvedValueOnce(groundingOtherResult);
+      // Every fallback query resolves empty so we hit the "No entity found" branch.
+      (executeEsql as jest.Mock)
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      const result = (await tool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const errorResult = result.results.find(
+        (r): r is ErrorResult => r.type === ToolResultType.error
+      );
+      expect(errorResult).toBeDefined();
+      expect(result.results).toContainEqual(groundingOtherResult);
     });
   });
 

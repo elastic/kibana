@@ -12,11 +12,10 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiLoadingChart,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import moment from 'moment';
 import {
   ML_PAGES,
@@ -47,6 +46,13 @@ import {
   ENTITY_ANOMALY_DATE_RANGE_LAST_1_YEAR,
 } from './translations';
 import { useAnomalySummary } from '../../api/hooks/use_anomaly_summary';
+import {
+  ANOMALIES_TAB_TEST_ID,
+  ANOMALIES_TAB_ATTACK_CHAIN_TEST_ID,
+  ANOMALIES_TAB_MANAGE_JOBS_BUTTON_TEST_ID,
+  ANOMALIES_TAB_DATE_RANGE_ERROR_TEST_ID,
+  ANOMALIES_TAB_ERROR_TEST_ID,
+} from './test_ids';
 import { MitreAttackChain } from './mitre/components/mitre_attack_chain';
 import { AnomalyTabTimelineSection } from './anomalies_tab_timeline';
 import type { TableChangeEvent } from './anomalies_tab_table';
@@ -57,6 +63,9 @@ import {
   DEFAULT_SORT_FIELD,
   DEFAULT_TABLE_PAGE_SIZE,
 } from './table/constants';
+import { AnomaliesBorderedVisPanel } from './anomalies_bordered_vis_panel';
+import { MitreAttackChainPlaceholder } from './mitre/components/mitre_attack_chain_placeholder';
+import { AnomaliesErrorPrompt } from './anomalies_error_prompt';
 
 const TIME_RANGE_PRESETS: TimeRangeBoundsOption[] = [
   { start: 'now-15m', end: 'now', label: ENTITY_ANOMALY_DATE_RANGE_LAST_15_MINUTES },
@@ -88,7 +97,6 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
   const [datePickerSettings, setDatePickerSettings] = useState<DateRangePickerSettings>(
     DEFAULT_DATE_PICKER_SETTINGS
   );
-
   const [recentTimeRanges, setRecentTimeRanges] = useState<TimeRangeBoundsOption[]>([]);
 
   const handleDatePickerChange = useCallback((args: DateRangePickerOnChangeProps) => {
@@ -175,6 +183,12 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     () => Object.keys(anomalyOverview.data?.tacticCounts ?? {}),
     [anomalyOverview]
   );
+  const anomalyByTimeBucket = useMemo(
+    () => anomalyOverview.data?.anomalyByTimeBucket ?? [],
+    [anomalyOverview.data?.anomalyByTimeBucket]
+  );
+  const isLoading = anomalyOverview.isLoading;
+  const isEmpty = anomalyOverview.data?.totalAnomaliesCount === 0;
 
   const anomalySummary = useAnomalySummary({
     entityId,
@@ -190,6 +204,10 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
       sort: [{ field: tableSortField, order: tableSortDirection }],
     },
   });
+  const anomalySummaryAnomalies = useMemo(
+    () => anomalySummary.data?.anomalies ?? [],
+    [anomalySummary.data?.anomalies]
+  );
 
   useEffect(() => {
     if (anomalyOverview.isFetching) return;
@@ -216,6 +234,10 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     anomalySummary.error,
   ]);
 
+  // The date-range-too-old case gets its own actionable warning above, so it
+  // takes precedence over the generic error prompt.
+  const hasError = (anomalyOverview.isError || anomalySummary.isError) && !isDateRangeTooOld;
+
   const {
     services: { ml },
   } = useKibana();
@@ -224,7 +246,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
   });
 
   return (
-    <>
+    <div data-test-subj={ANOMALIES_TAB_TEST_ID}>
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceBetween"
@@ -256,6 +278,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj={ANOMALIES_TAB_MANAGE_JOBS_BUTTON_TEST_ID}
             color="primary"
             size="s"
             iconType="external"
@@ -272,6 +295,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
       {isDateRangeTooOld && (
         <>
           <EuiCallOut
+            data-test-subj={ANOMALIES_TAB_DATE_RANGE_ERROR_TEST_ID}
             announceOnMount
             color="warning"
             iconType="warning"
@@ -280,53 +304,63 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
           <EuiSpacer size="m" />
         </>
       )}
-      <>
-        <EuiAccordion
-          id="entity-anomalies-tab-attack-chain-accordion"
-          initialIsOpen
-          buttonContent={
-            <EuiTitle size="xs">
-              <h3>{ENTITY_ANOMALIES_TAB_ATTACK_CHAIN_TITLE}</h3>
-            </EuiTitle>
-          }
-        >
-          <EuiSpacer size="m" />
-          <EuiPanel
-            color="plain"
-            hasBorder
-            paddingSize="none"
-            css={css`
-              padding: 16px 24px;
-            `}
-          >
-            <MitreAttackChain
-              anomalyCountByTactic={anomalyOverview?.data?.tacticCounts ?? {}}
-              onSelectTactic={handleSelectTactic}
-              selectedTactic={selectedTactic}
-              triggeredTactics={uniqueTactics}
-              showLabels
-            />
-          </EuiPanel>
-        </EuiAccordion>
-      </>
-      <EuiSpacer size="l" />
-      <AnomalyTabTimelineSection
-        anomalies={anomalyOverview.data?.anomalyByTimeBucket ?? []}
-        selectedTactic={selectedTactic}
-        timeRangeMs={timeRangeMs}
-      />
-      <EuiSpacer size="l" />
-      <AnomalyTabTableSection
-        anomalies={anomalySummary.data?.anomalies ?? []}
-        entityType={entityType}
-        onTableChange={handleTableChange}
-        page={anomalySummary.data?.page ?? tablePageIndex + 1}
-        pageSize={anomalySummary.data?.page_size ?? tablePageSize}
-        sortField={tableSortField}
-        sortDirection={tableSortDirection}
-        timeRange={{ from: start, to: end }}
-        total={anomalySummary.data?.total ?? 0}
-      />
-    </>
+      {hasError ? (
+        <AnomaliesErrorPrompt variant="leftTab" data-test-subj={ANOMALIES_TAB_ERROR_TEST_ID} />
+      ) : (
+        <>
+          {(isLoading || uniqueTactics.length > 0) && (
+            <EuiAccordion
+              id="entity-anomalies-tab-attack-chain-accordion"
+              data-test-subj={ANOMALIES_TAB_ATTACK_CHAIN_TEST_ID}
+              initialIsOpen
+              buttonContent={
+                <EuiTitle size="xs">
+                  <h3>{ENTITY_ANOMALIES_TAB_ATTACK_CHAIN_TITLE}</h3>
+                </EuiTitle>
+              }
+            >
+              <EuiSpacer size="m" />
+              <AnomaliesBorderedVisPanel>
+                {isLoading ? (
+                  <MitreAttackChainPlaceholder>
+                    <EuiLoadingChart size="l" />
+                  </MitreAttackChainPlaceholder>
+                ) : (
+                  <MitreAttackChain
+                    anomalyCountByTactic={anomalyOverview?.data?.tacticCounts ?? {}}
+                    onSelectTactic={isEmpty ? undefined : handleSelectTactic}
+                    selectedTactic={isEmpty ? null : selectedTactic}
+                    triggeredTactics={uniqueTactics}
+                    showLabels
+                    showPersistentFirstTacticBadge={isEmpty}
+                  />
+                )}
+              </AnomaliesBorderedVisPanel>
+            </EuiAccordion>
+          )}
+          <EuiSpacer size="l" />
+          <AnomalyTabTimelineSection
+            anomalies={anomalyByTimeBucket}
+            selectedTactic={selectedTactic}
+            timeRangeMs={timeRangeMs}
+            isLoading={anomalyOverview.isLoading}
+            isEmpty={anomalyByTimeBucket.length === 0}
+          />
+          <EuiSpacer size="l" />
+          <AnomalyTabTableSection
+            anomalies={anomalySummaryAnomalies}
+            entityType={entityType}
+            onTableChange={handleTableChange}
+            page={anomalySummary.data?.page ?? tablePageIndex + 1}
+            pageSize={anomalySummary.data?.page_size ?? tablePageSize}
+            sortField={tableSortField}
+            sortDirection={tableSortDirection}
+            timeRange={{ from: start, to: end }}
+            total={anomalySummary.data?.total ?? 0}
+            isLoading={anomalySummary.isLoading}
+          />
+        </>
+      )}
+    </div>
   );
 };

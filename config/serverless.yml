@@ -303,3 +303,6 @@ xpack.genAiSettings:
   showAiBreadcrumb: false
   showSpacesIntegration: false
   showAiAssistantsVisibilitySetting: false
+
+# Alerting v2
+xpack.alerting_v2.enabled: false 

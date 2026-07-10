@@ -16,6 +16,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
 import { createEntitySourcesService } from '../../../../lib/entity_analytics/watchlists/entity_sources/entity_sources_service';
 import { watchlistEntitySourceTypeName } from '../../../../lib/entity_analytics/watchlists/entity_sources/infra';
+import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
 import { getWatchlistToolAvailability } from './watchlist_availability';
@@ -57,6 +58,13 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
         `${SECURITY_DELETE_WATCHLIST_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
 
+      const telemetryTracker = createToolTelemetryTracker({
+        core,
+        toolId: SECURITY_DELETE_WATCHLIST_TOOL_ID,
+        spaceId,
+        actionType: 'mutation',
+      });
+
       try {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { security } = startPlugins;
@@ -69,6 +77,7 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
           action: 'delete watchlists',
         });
         if (!accessResult.allowed) {
+          telemetryTracker.recordFailure(accessResult.result.data.message);
           return { results: [accessResult.result] };
         }
 
@@ -89,18 +98,21 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
 
         const promptId = `watchlists.delete_watchlist.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
+        telemetryTracker.recordConfirmationStatus(status);
 
         if (status === ConfirmationStatus.unprompted) {
           const existing = await client.get(params.watchlistId);
 
           if (existing.managed) {
+            const errorMessage = `Cannot delete watchlist "${existing.name}" — it is system-managed and protected from deletion.`;
+            telemetryTracker.recordFailure(errorMessage);
             return {
               results: [
                 {
                   tool_result_id: getToolResultId(),
                   type: ToolResultType.error,
                   data: {
-                    message: `Cannot delete watchlist "${existing.name}" — it is system-managed and protected from deletion.`,
+                    message: errorMessage,
                   },
                 },
               ],
@@ -108,6 +120,7 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
           }
 
           const entitySourceCount = existing.entitySourceIds?.length ?? 0;
+          telemetryTracker.recordAwaitingConfirmation();
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Delete watchlist',
@@ -159,8 +172,8 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
         try {
           await entitySourcesService.deleteWatchlistEntities(params.watchlistId);
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          warning = `The watchlist was deleted but entity source cleanup failed: ${errorMessage}. Some entities may still reference this watchlist.`;
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+          warning = `The watchlist was deleted but entity source cleanup failed: ${errorMsg}. Some entities may still reference this watchlist.`;
         }
 
         await client.delete(params.watchlistId);
@@ -180,6 +193,7 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        telemetryTracker.recordFailure(errorMessage);
         return {
           results: [
             {
@@ -189,6 +203,8 @@ Managed (system-controlled) watchlists cannot be deleted via this tool. Deleting
             },
           ],
         };
+      } finally {
+        await telemetryTracker.report();
       }
     },
   };

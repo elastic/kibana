@@ -196,6 +196,29 @@ evaluate.describe(
               },
               metadata: { query_intent: 'Factual' },
             },
+            {
+              input: {
+                question:
+                  'Are there any critical-risk hosts right now, and is that risk data current?',
+              },
+              output: {
+                criteria: [
+                  'Return critical-risk hosts, or clearly state that none were found.',
+                  'If the risk score grounding signal reports the risk-score maintainer as stopped or never_started, explain that clearly instead of concluding the environment is safe, and note how stale or unavailable the risk data is.',
+                  'If the risk score grounding signal reports started, do not add an unnecessary "scoring is current" caveat.',
+                  'Do not fabricate entity or risk data.',
+                ],
+                toolCalls: [
+                  {
+                    id: 'security.search_entities',
+                    criteria: [
+                      'The tool is called with entityTypes containing "host" and a riskLevels filter containing "Critical" (or equivalent).',
+                    ],
+                  },
+                ],
+              },
+              metadata: { query_intent: 'Factual' },
+            },
           ],
         },
       });

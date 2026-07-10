@@ -6,14 +6,18 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { agentBuilderTracesSkill } from './agent_builder_traces/agent_builder_traces_skill';
 import { graphCreationSkill } from './graph_creation_skill';
-import { skillAuthoringSkill } from './skill_authoring';
+import { skillManagementSkill } from './skill_management';
 import { connectorAuthoringSkill } from './connector_authoring';
 
-export const registerSkills = (agentBuilder: AgentBuilderPluginSetup) => {
+export const registerSkills = (
+  agentBuilder: AgentBuilderPluginSetup,
+  getActionsStart: () => Promise<ActionsPluginStart>
+) => {
   agentBuilder.skills.register(graphCreationSkill);
-  agentBuilder.skills.register(skillAuthoringSkill);
+  agentBuilder.skills.register(skillManagementSkill);
   agentBuilder.skills.register(agentBuilderTracesSkill);
-  agentBuilder.skills.register(connectorAuthoringSkill);
+  agentBuilder.skills.register(connectorAuthoringSkill({ getActionsStart }));
 };
