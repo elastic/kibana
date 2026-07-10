@@ -27,8 +27,8 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
  *     implicit-privileges DLS, matching the cases surface (see
  *     `mappings/case.ts`). `space_id` is singular — a user action belongs
  *     to exactly one case in one space.
- *   - `cases.id` — denormalized from the SO `references[case]` so
- *     ES|QL `LOOKUP JOIN .cases ON cases.id` works without an
+ *   - `case.id` — denormalized from the SO `references[case]` so
+ *     ES|QL `LOOKUP JOIN .cases ON case.id` works without an
  *     intermediate aggregation.
  *   - `actor.*` — flattened `created_by` so `actor.username` etc. are
  *     first-class analytics dimensions.
@@ -68,7 +68,7 @@ export const ACTIVITY_INDEX_MAPPING: MappingTypeMapping = {
     space_id: { type: 'keyword' },
     owner: { type: 'keyword' },
 
-    cases: {
+    case: {
       properties: {
         // Denormalized from the user-action SO's `references[case]`.
         // Single value per doc — a user action belongs to exactly one
