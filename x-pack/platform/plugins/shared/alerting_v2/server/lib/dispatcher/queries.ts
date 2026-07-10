@@ -108,7 +108,7 @@ export const getAlertEpisodeSuppressionsQueries = (
         | EVAL _pair_key = CONCAT(rule_id, ${PAIR_SEPARATOR}, group_hash)
         | WHERE _pair_key IN (${pairValues})
         | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
-        | WHERE action_type != "snooze" OR expiry > ${minLastEventTimestamp}::datetime
+        | WHERE action_type != "snooze" OR expiry IS NULL OR expiry > ${minLastEventTimestamp}::datetime
         | INLINE STATS
             last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
             BY rule_id, group_hash

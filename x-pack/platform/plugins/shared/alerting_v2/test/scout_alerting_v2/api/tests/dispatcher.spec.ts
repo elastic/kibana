@@ -632,7 +632,10 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       // User actions:
       //  - rule-001 ack then unack → suppression cancelled → fire
       //  - rule-002 ack only → suppress
-      //  - rule-004 series-1+2 snoozed → suppress (no episode_id, expires far in future)
+      //  - rule-004 series-1 snoozed with a future expiry, series-2 snoozed
+      //    indefinitely (no expiry) → both suppress (no episode_id). The
+      //    indefinite snooze guards against the suppression query dropping
+      //    null-expiry rows (ES|QL null comparison).
       //  - rule-005 series-1 deactivated → suppress; series-2 unaffected → fire
       const futureExpiry = new Date(baseTime + 24 * 60 * 60 * 1000).toISOString();
       const userActions: AlertAction[] = [
@@ -674,7 +677,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           actionType: 'snooze',
           lastSeriesEventTimestamp: eventTs(180),
           timestamp: actionTs(178),
-          expiry: futureExpiry,
+          // No expiry: an indefinite snooze. Must still suppress.
         }),
         buildAlertAction({
           ruleId: 'rule-005',
@@ -745,9 +748,11 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       const rule003Fires = fireActions.filter((action) => action.rule_id === 'rule-003');
       expect(rule003Fires).toHaveLength(3);
 
-      // rule-004: both series suppress (snoozed with null episode_id and
-      // expiry far in the future). Snoozes are series-scoped, so both series
-      // are suppressed with `reason: 'snooze'`.
+      // rule-004: both series suppress (snoozed with null episode_id).
+      // series-1 has a future expiry; series-2 has no expiry (indefinite
+      // snooze) — a regression guard, since the suppression query previously
+      // dropped null-expiry rows and let indefinite snoozes fire. Snoozes are
+      // series-scoped, so both series are suppressed with `reason: 'snooze'`.
       expect(dispatched).toStrictEqual(
         expect.arrayContaining([
           expect.objectContaining({

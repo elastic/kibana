@@ -243,6 +243,14 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     expect(requests[0].query).toContain('expiry > "2026-01-22T08:00:00.000Z"::DATETIME');
   });
 
+  it('retains indefinite snoozes (no expiry) through the expiry filter', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    // `expiry > <ts>` alone drops rows where expiry is NULL (ES|QL null comparison), which would
+    // silently ignore indefinite snoozes. `expiry IS NULL` keeps them.
+    expect(requests[0].query).toContain('action_type != "snooze" OR expiry IS NULL OR expiry > ');
+  });
+
   it('falls back to epoch when all timestamps are invalid', () => {
     const episodes = [createAlertEpisode({ last_event_timestamp: 'not-a-date' })];
 
