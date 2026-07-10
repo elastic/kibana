@@ -19,6 +19,11 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
   };
 }
 
+// Serverless always runs chrome-next, where global search opens in an overlay modal toggled
+// by a header button. Input and result handling are inherited from the base page object.
+const CHROME_NEXT_SEARCH_BUTTON = 'chromeNextGlobalHeaderSearchButton';
+const CHROME_NEXT_SEARCH_MODAL = 'chromeNextSearchModal';
+
 class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
   constructor(ctx: FtrProviderContext) {
     // @ts-expect-error -- this expects FtrProviderContext from x-pack/platform/test/functional/ftr_provider_context.ts
@@ -26,9 +31,18 @@ class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
   }
 
   async showSearch() {
-    await this.ctx.getService('testSubjects').click('nav-search-reveal');
+    const testSubjects = this.ctx.getService('testSubjects');
+    if (await testSubjects.exists(CHROME_NEXT_SEARCH_MODAL, { timeout: 0 })) return;
+    await testSubjects.click(CHROME_NEXT_SEARCH_BUTTON);
+    await testSubjects.existOrFail(CHROME_NEXT_SEARCH_MODAL);
   }
+
   async hideSearch() {
-    await this.ctx.getService('testSubjects').click('nav-search-conceal');
+    const testSubjects = this.ctx.getService('testSubjects');
+    // Selecting a result already closes the modal, so only toggle it shut if still open.
+    if (await testSubjects.exists(CHROME_NEXT_SEARCH_MODAL, { timeout: 0 })) {
+      await testSubjects.click(CHROME_NEXT_SEARCH_BUTTON);
+      await testSubjects.missingOrFail(CHROME_NEXT_SEARCH_MODAL);
+    }
   }
 }

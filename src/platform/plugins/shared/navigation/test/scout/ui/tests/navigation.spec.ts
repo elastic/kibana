@@ -36,12 +36,12 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.navigation.goToSecurity();
 
-    await page.testSubj.click('nav-search-reveal');
+    await page.testSubj.click('chromeNextGlobalHeaderSearchButton');
     await page.testSubj.fill('nav-search-input', 'security dashboards');
     await page
       .locator('[data-test-subj="nav-search-option"][url="/app/security/dashboards"]')
       .click();
-    await page.testSubj.click('nav-search-conceal');
+    // selecting a result closes the search modal and navigates
 
     await page.waitForURL(/app\/security\/dashboards/);
     expect(page.url()).toContain('app/security/dashboards');
