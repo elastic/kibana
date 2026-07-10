@@ -110743,7 +110743,7 @@ components:
             - id
             - text
     Observability_AI_Assistant_API_Message:
-      name: Message
+      title: Message
       type: object
       properties:
         '@timestamp':
