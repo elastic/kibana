@@ -11,12 +11,13 @@ import {
   EuiButton,
   EuiCallOut,
   EuiFieldSearch,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
@@ -52,6 +53,24 @@ CenteredMessage.displayName = 'CenteredMessage';
  * services (http via `useWorkflowsApi`, chrome via `useActiveSolution`).
  */
 export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => {
+  const { euiTheme } = useEuiTheme();
+
+  // Fluid card grid: tracks are at least 260px wide and grow to fill the full
+  // row, but each track becomes at least one sixth of the row on wide screens so
+  // the grid never creates a seventh column.
+  const gridCss = useMemo(
+    () => css`
+      display: grid;
+      gap: ${euiTheme.size.base};
+      grid-template-columns: repeat(
+        auto-fill,
+        minmax(max(min(100%, 260px), calc((100% - (${euiTheme.size.base} * 5)) / 6)), 1fr)
+      );
+      width: 100%;
+    `,
+    [euiTheme.size.base]
+  );
+
   const [search, setSearch] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [manualSolution, setManualSolution] = useState<string | undefined>(undefined);
@@ -124,13 +143,11 @@ export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => 
     );
   } else {
     content = (
-      <EuiFlexGrid columns={3} gutterSize="l" data-test-subj="workflowLibraryCatalogGrid">
+      <div css={gridCss} data-test-subj="workflowLibraryCatalogGrid">
         {templates.map((template) => (
-          <EuiFlexItem key={template.slug}>
-            <TemplateCard template={template} onSelect={onSelect} />
-          </EuiFlexItem>
+          <TemplateCard key={template.slug} template={template} onSelect={onSelect} />
         ))}
-      </EuiFlexGrid>
+      </div>
     );
   }
 
@@ -163,16 +180,16 @@ export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => 
         <EuiFlexGroup
           data-test-subj="workflowLibraryCatalogBrowser"
           alignItems="flexStart"
-          gutterSize="xl"
+          gutterSize="l"
         >
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem grow={false} css={{ width: 220 }}>
             <CategoryFacets
               templates={facetScopedTemplates}
               selectedCategories={selectedCategories}
               onChange={setSelectedCategories}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={4}>{content}</EuiFlexItem>
+          <EuiFlexItem grow={1}>{content}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

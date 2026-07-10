@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -19,18 +19,25 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
 import { cellActionRenderer } from '../../shared/components/cell_actions';
+import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { NotesDetails } from '../../shared/tools/notes';
 import { useKibana } from '../../../common/lib/kibana';
+import { useTabs } from '../../shared/hooks/use_tabs';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
+import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
 import { Footer } from './footer';
 
 type AttackFlyoutTabId = 'overview' | 'table' | 'json';
+
+const VALID_TAB_IDS: AttackFlyoutTabId[] = ['overview', 'table', 'json'];
 
 export const OVERVIEW_TAB_TEST_ID = 'attack-flyout-overview-tab-button';
 export const TABLE_TAB_TEST_ID = 'attack-flyout-table-tab-button';
@@ -76,8 +83,15 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
+  const isInSecurityApp = useIsInSecurityApp();
+  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
-  const [selectedTabId, setSelectedTabId] = useState<AttackFlyoutTabId>('overview');
+  // The selected tab is persisted to localStorage, sharing the key with the legacy
+  // attack flyout so the user's preference carries across both implementations.
+  const { selectedTabId, setSelectedTabId } = useTabs<AttackFlyoutTabId>({
+    validTabIds: VALID_TAB_IDS,
+    storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
+  });
 
   const onShowNotes = useCallback(() => {
     overlays.openSystemFlyout(
@@ -87,9 +101,9 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
         history,
         children: <NotesDetails hit={hit} />,
       }),
-      defaultToolsFlyoutProperties
+      { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
     );
-  }, [history, hit, overlays, services, store]);
+  }, [history, historyKey, hit, overlays, services, store]);
 
   return (
     <>
@@ -130,7 +144,7 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
             data-test-subj={JSON_TAB_CONTENT_TEST_ID}
           />
         ) : (
-          <OverviewTab hit={hit} />
+          <OverviewTab hit={hit} onAttackUpdated={onAttackUpdated} />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter data-test-subj="attack-flyout-footer">

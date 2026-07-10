@@ -9,7 +9,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { TableFieldValueCell } from './table_field_value_cell';
 import { TestProviders } from '../../../../common/mock';
@@ -20,7 +19,7 @@ jest.mock('../../../../timelines/components/timeline/body/renderers/formatted_fi
   ),
 }));
 
-jest.mock('../../../../flyout/document_details/right/utils/get_field_format', () => ({
+jest.mock('../../../shared/utils/get_field_format', () => ({
   getFieldFormat: jest.fn(),
 }));
 

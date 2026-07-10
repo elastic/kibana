@@ -11,6 +11,7 @@ import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { stringify } from '../../utils/stringify';
 import type {
   HostInfo,
   HostMetadata,
@@ -362,6 +363,9 @@ export class EndpointMetadataService {
   async getHostMetadataList(
     queryOptions: GetMetadataListRequestQuery
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
+    const logger = this.logger.get('getHostMetadataList()');
+    logger.debug(() => `Retrieving host metadata list using: ${stringify(queryOptions)}`);
+
     const ccsEnabled = await this.endpointContext.isCcsEnabled();
     const endpointPolicies = await this.getAllEndpointPackagePolicies();
     const endpointPolicyIds = uniq(endpointPolicies.flatMap((policy) => policy.policy_ids));
@@ -373,6 +377,8 @@ export class EndpointMetadataService {
     );
 
     let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadataPersistedData>;
+
+    logger.debug(() => `Executing query: ${stringify(unitedIndexQuery)}`);
 
     try {
       unitedMetadataQueryResponse = await this.esClient.search<UnitedAgentMetadataPersistedData>(
@@ -391,7 +397,7 @@ export class EndpointMetadataService {
       }
 
       const err = wrapErrorIfNeeded(error);
-      this.logger.error(err);
+      logger.error(err);
       throw err;
     }
 
@@ -461,6 +467,9 @@ export class EndpointMetadataService {
   async getMetadataForEndpoints(endpointIDs: string[]): Promise<HostMetadata[]> {
     const ccsEnabled = await this.endpointContext.isCcsEnabled();
     const query = getESQueryHostMetadataByIDs(endpointIDs, ccsEnabled);
+
+    this.logger.get('getMetadataForEndpoints').debug(() => `with query: ${stringify(query)}`);
+
     const searchResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
 
     await this.ensureDataValidForSpace(searchResult);

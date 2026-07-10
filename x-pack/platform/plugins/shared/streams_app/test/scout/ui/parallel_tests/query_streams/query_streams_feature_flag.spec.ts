@@ -40,6 +40,7 @@ test.describe('Query streams - feature flag gating', { tag: tags.stateful.classi
   }) => {
     await enableQueryStreams(kbnClient);
     await page.reload();
+    await pageObjects.streams.openCreateStreamPopover();
     await expect(pageObjects.streams.createQueryStreamButton).toBeVisible();
 
     await pageObjects.streams.gotoPartitioningTab('logs.ecs');

@@ -8,95 +8,17 @@
  */
 
 import { type IconType } from '@elastic/eui';
-import React from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
-import { getConnectorSpecIcon, HardcodedIcons } from '@kbn/workflows-ui';
+import {
+  getConnectorSpecIcon,
+  getDataUrlFromReactComponent,
+  HardcodedIcons,
+  resolveIconToDataUrl,
+} from '@kbn/workflows-ui';
 
 import { ElasticsearchLogo } from './icons/elasticsearch.svg';
 import { KibanaLogo } from './icons/kibana.svg';
 
-type LazyImageComponent = React.LazyExoticComponent<
-  React.ComponentType<{ width: number; height: number }>
-> & {
-  _payload: {
-    _result:
-      | (() => Promise<{ default: React.ComponentType<{ width: number; height: number }> }>)
-      | Promise<{ default: React.ComponentType<{ width: number; height: number }> }>
-      | { default: React.ComponentType<{ width: number; height: number }> };
-  };
-};
-
-function isLazyExoticComponent(component: unknown): component is LazyImageComponent {
-  const comp = component as unknown as LazyImageComponent;
-  return comp?.$$typeof === Symbol.for('react.lazy') && comp?._payload?._result !== undefined;
-}
-
-async function resolveLazyComponent(
-  lazyComponent: LazyImageComponent
-): Promise<React.ComponentType<{ width: number; height: number }>> {
-  const result = lazyComponent._payload._result;
-  const module = typeof result === 'function' ? await result() : await result;
-  return module.default;
-}
-
-/**
- * Convert a React component (e.g. SVG) to a data URL.
- * @param component - React component that accepts width/height
- * @param fallbackUrl - Data URL or base64 string to return on error or unsupported output
- */
-export function getDataUrlFromReactComponent(
-  component: React.ComponentType<{ width: number; height: number }>,
-  fallbackUrl: string
-): string {
-  try {
-    const logoElement = React.createElement(component, { width: 16, height: 16 });
-    let htmlString = renderToStaticMarkup(logoElement);
-    const isImgTag = htmlString.includes('<img');
-    if (isImgTag) {
-      const srcMatch = htmlString.match(/src="([^"]+)"/);
-      if (srcMatch?.[1]?.startsWith('data:')) {
-        return srcMatch[1];
-      }
-      return fallbackUrl;
-    }
-    const hasFillNone = /fill="none"/i.test(htmlString);
-    if (hasFillNone) {
-      htmlString = htmlString
-        .replaceAll(/fill="none"/gi, '')
-        .replace(/<svg([^>]*?)>/, '<svg$1 fill="currentColor">');
-    }
-    return `data:image/svg+xml;base64,${btoa(htmlString)}`;
-  } catch {
-    return fallbackUrl;
-  }
-}
-
-/**
- * Resolve an IconType (data URL string, lazy component, or function component) to a data URL.
- * Returns fallbackUrl when icon is undefined, unsupported, or resolution fails.
- */
-export async function resolveIconToDataUrl(
-  icon: IconType | undefined,
-  fallbackUrl: string
-): Promise<string> {
-  if (!icon) {
-    return fallbackUrl;
-  }
-  if (typeof icon === 'string' && icon.startsWith('data:')) {
-    return icon;
-  }
-  if (isLazyExoticComponent(icon)) {
-    const IconComponent = await resolveLazyComponent(icon);
-    return getDataUrlFromReactComponent(IconComponent, fallbackUrl);
-  }
-  if (typeof icon === 'function') {
-    return getDataUrlFromReactComponent(
-      icon as React.ComponentType<{ width: number; height: number }>,
-      fallbackUrl
-    );
-  }
-  return fallbackUrl;
-}
+export { getDataUrlFromReactComponent, resolveIconToDataUrl } from '@kbn/workflows-ui';
 
 /** Params for resolving a workflow icon (trigger or step) to a data URL. */
 export interface GetIconBase64Params {

@@ -18,7 +18,7 @@ import {
   resolveUserNameForEntityInsightsWithFallback,
   type IdentityFields,
 } from '../../../document_details/shared/utils';
-import type { AttackEntityListEntry } from '../../hooks/use_attack_entities_lists';
+import type { AttackEntityListEntry } from '../../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists';
 
 const resolveUserDisplayForEntities = (
   identityFields: IdentityFields | undefined,
@@ -38,6 +38,12 @@ const resolveHostDisplayForEntities = (
 export interface AttackInsightsRowBaseProps extends AttackEntityListEntry {
   timestamp: string;
   scopeId: string;
+  /**
+   * Optional renderer for the host.ip value shown in the entity overview. Forwarded to
+   * `HostDetails`/`UserDetails` so the attack Entities tool can open the network flyout as a
+   * child via the new flyout system, instead of the (unavailable) expandable-flyout API.
+   */
+  renderIpLink?: (ip: string) => React.ReactNode;
 }
 
 /**
@@ -45,7 +51,7 @@ export interface AttackInsightsRowBaseProps extends AttackEntityListEntry {
  * (document fields + entity store) so headers use host.name, not raw EUID / entity.id.
  */
 export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
-  ({ identityFields, sampleSource, timestamp, scopeId }) => {
+  ({ identityFields, sampleSource, timestamp, scopeId, renderIpLink }) => {
     const euidApi = useEntityStoreEuidApi();
 
     const getFieldsData = useMemo(
@@ -87,6 +93,7 @@ export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
         scopeId={scopeId}
         expandedOnFirstRender={false}
         isAttackDetails={true}
+        renderIpLink={renderIpLink}
         hostEntityFromStoreResult={hostEntityFromStore}
       />
     );
@@ -99,7 +106,7 @@ AttackHostInsightsRow.displayName = 'AttackHostInsightsRow';
  * One user row for Attack Details entities tab: mirrors {@link EntitiesDetails} user resolution.
  */
 export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
-  ({ identityFields, sampleSource, timestamp, scopeId }) => {
+  ({ identityFields, sampleSource, timestamp, scopeId, renderIpLink }) => {
     const euidApi = useEntityStoreEuidApi();
 
     const getFieldsData = useMemo(
@@ -137,6 +144,7 @@ export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
         scopeId={scopeId}
         expandedOnFirstRender={false}
         isAttackDetails={true}
+        renderIpLink={renderIpLink}
       />
     );
   }

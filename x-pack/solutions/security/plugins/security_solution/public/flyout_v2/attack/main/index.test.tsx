@@ -9,9 +9,14 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { AttackFlyout, JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from '.';
 import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+
+jest.mock('../../../common/hooks/is_in_security_app');
 
 jest.mock('./footer', () => ({
   Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
@@ -42,7 +47,12 @@ jest.mock('./header', () => ({
 }));
 
 jest.mock('./tabs/overview_tab', () => ({
-  OverviewTab: () => <div data-test-subj="mock-overview-tab" />,
+  OverviewTab: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
+    <div
+      data-test-subj="mock-overview-tab"
+      data-has-on-attack-updated={String(onAttackUpdated != null)}
+    />
+  ),
 }));
 jest.mock('./tabs/table_tab', () => ({
   TableTab: () => <div data-test-subj="mock-table-tab" />,
@@ -76,6 +86,7 @@ describe('<AttackFlyout />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useIsInSecurityApp).mockReturnValue(true);
   });
 
   it('renders the header, body, and footer', () => {
@@ -161,6 +172,33 @@ describe('<AttackFlyout />', () => {
         ownFocus: false,
         resizable: true,
         size: 'm',
+        session: 'start',
+        historyKey: documentFlyoutHistoryKey,
+      })
+    );
+  });
+
+  it('uses the discover history key when outside the security app', () => {
+    jest.mocked(useIsInSecurityApp).mockReturnValue(false);
+    const openSystemFlyout = jest.fn();
+    startServices.overlays = {
+      ...startServices.overlays,
+      openSystemFlyout,
+    };
+
+    const { getByTestId } = render(
+      <TestProviders startServices={startServices}>
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('mock-header'));
+
+    expect(openSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        session: 'start',
+        historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
       })
     );
   });
