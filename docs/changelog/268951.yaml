@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/268951
+issues:
+- https://github.com/elastic/kibana/issues/267607
+type: breaking-change
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+areas:
+- Dashboards and visualizations
+title: Align search endpoint schema with As Code schemas

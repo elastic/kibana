@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/275647
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+title: fix cases nav in external apps
+description: Fixes a bug where alert details case link would route users to an internal route instead of externally to cases (particularly SLO)
