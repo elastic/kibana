@@ -78,57 +78,39 @@ export const CustomizablePalette = ({
   });
   // Preserve the latest callback without rearming the unmount cleanup on each render.
   const setPaletteRef = useRef(setPalette);
-  const latestPaletteStateRef = useRef({
-    activePalette,
-    colorRangesToShow,
-    localState,
-  });
+  const pendingPalette = useMemo(
+    () =>
+      shouldSyncPaletteState(localState, activePalette, colorRangesToShow)
+        ? localState.activePalette
+        : undefined,
+    [activePalette, colorRangesToShow, localState]
+  );
+  const pendingPaletteRef = useRef<PaletteOutput<CustomPaletteParams> | undefined>(pendingPalette);
 
   useEffect(() => {
     setPaletteRef.current = setPalette;
   }, [setPalette]);
 
   useEffect(() => {
-    latestPaletteStateRef.current = {
-      activePalette,
-      colorRangesToShow,
-      localState,
-    };
-  }, [activePalette, colorRangesToShow, localState]);
+    pendingPaletteRef.current = pendingPalette;
+  }, [pendingPalette]);
 
   useDebounce(
     () => {
-      const latestPaletteState = latestPaletteStateRef.current;
-
-      // Parent rerenders should not restart the debounce; compare against the latest
-      // external palette state when the local edit window actually elapses.
-      if (
-        shouldSyncPaletteState(
-          latestPaletteState.localState,
-          latestPaletteState.activePalette,
-          latestPaletteState.colorRangesToShow
-        )
-      ) {
-        setPaletteRef.current(latestPaletteState.localState.activePalette);
+      if (pendingPalette) {
+        pendingPaletteRef.current = undefined;
+        setPaletteRef.current(pendingPalette);
       }
     },
     250,
-    [localState]
+    [pendingPalette]
   );
 
   useEffect(() => {
     return () => {
-      const latestPaletteState = latestPaletteStateRef.current;
-
       // Closing the flyout should not drop local palette edits that have not debounced yet.
-      if (
-        shouldSyncPaletteState(
-          latestPaletteState.localState,
-          latestPaletteState.activePalette,
-          latestPaletteState.colorRangesToShow
-        )
-      ) {
-        setPaletteRef.current(latestPaletteState.localState.activePalette);
+      if (pendingPaletteRef.current) {
+        setPaletteRef.current(pendingPaletteRef.current);
       }
     };
   }, []);
