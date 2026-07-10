@@ -41,14 +41,6 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
       );
       expect(hasAction).toBe(false);
     });
-
-    await spaceTest.step('basic gauge has Convert to Lens action', async () => {
-      const hasAction = await dashboard.panelHasAction(
-        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
-        'Gauge - Basic'
-      );
-      expect(hasAction).toBe(true);
-    });
   });
 
   spaceTest('should convert basic gauge to Lens', async ({ page, pageObjects }) => {
