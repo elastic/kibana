@@ -10,9 +10,10 @@ import type { RulesClientContext } from '../../../../rules_client/types';
 import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 import type { ReadOperations, WriteOperations } from '../../../../authorization';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
+import type {
+  GapAutoFillSchedulerAuditAction} from '../../../../rules_client/common/audit_events';
 import {
-  gapAutoFillSchedulerAuditEvent,
-  GapAutoFillSchedulerAuditAction,
+  gapAutoFillSchedulerAuditEvent
 } from '../../../../rules_client/common/audit_events';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { SchedulerContext } from '../../methods/utils';
