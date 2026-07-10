@@ -21,6 +21,10 @@ import { replaceParams } from '@kbn/openapi-common/shared';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
 import type {
+  BulkDeleteExceptionListsRequestBodyInput,
+  BulkDeleteExceptionListsResponse,
+} from './bulk_delete_exception_list/bulk_delete_exception_list.gen';
+import type {
   CreateExceptionListItemRequestBodyInput,
   CreateExceptionListItemResponse,
 } from './create_exception_list_item/create_exception_list_item.gen';
@@ -95,6 +99,25 @@ export class Client {
   constructor(options: ClientOptions) {
     this.kbnClient = options.kbnClient;
     this.log = options.log;
+  }
+  /**
+    * Delete multiple exception lists using either their `id` or `list_id` field. Provide
+exactly one of `ids` or `list_ids`, each containing at least one entry; mixing both in
+the same request is not supported.
+
+    */
+  async bulkDeleteExceptionLists(props: BulkDeleteExceptionListsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API BulkDeleteExceptionLists`);
+    return this.kbnClient
+      .request<BulkDeleteExceptionListsResponse>({
+        path: '/api/exception_lists/_bulk_delete',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
     * An exception list groups exception items and can be associated with detection rules. You can assign exception lists to multiple detection rules.
@@ -373,6 +396,9 @@ export class Client {
   }
 }
 
+export interface BulkDeleteExceptionListsProps {
+  body: BulkDeleteExceptionListsRequestBodyInput;
+}
 export interface CreateExceptionListProps {
   body: CreateExceptionListRequestBodyInput;
 }

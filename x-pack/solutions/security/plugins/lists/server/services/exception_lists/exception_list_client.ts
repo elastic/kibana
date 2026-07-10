@@ -34,6 +34,7 @@ import type {
 
 import type {
   BulkDeleteExceptionListItemsOptions,
+  BulkDeleteExceptionListOptions,
   ClosePointInTimeOptions,
   ConstructorOptions,
   CreateEndpointListItemOptions,
@@ -75,6 +76,8 @@ import { createExceptionListItem } from './create_exception_list_item';
 import { updateExceptionList } from './update_exception_list';
 import { updateExceptionListItem } from './update_exception_list_item';
 import { deleteExceptionList } from './delete_exception_list';
+import type { BulkDeleteExceptionListResult } from './bulk_delete_exception_list';
+import { bulkDeleteExceptionList } from './bulk_delete_exception_list';
 import { deleteExceptionListItem, deleteExceptionListItemById } from './delete_exception_list_item';
 import { findExceptionListItem } from './find_exception_list_item';
 import { findExceptionList } from './find_exception_list';
@@ -553,6 +556,28 @@ export class ExceptionListClient {
     return deleteExceptionList({
       id,
       listId,
+      namespaceType,
+      savedObjectsClient,
+    });
+  };
+
+  /**
+   * Bulk delete exception list containers by id and/or list_id
+   * @param options
+   * @param options.ids the "id" of an exception list (Either this or listIds has to be defined)
+   * @param options.listIds the "list_id" of an exception list (Either this or ids has to be defined)
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @returns the deleted exception lists and any per-list errors
+   */
+  public bulkDeleteExceptionList = async ({
+    ids,
+    listIds,
+    namespaceType,
+  }: BulkDeleteExceptionListOptions): Promise<BulkDeleteExceptionListResult> => {
+    const { savedObjectsClient } = this;
+    return bulkDeleteExceptionList({
+      ids,
+      listIds,
       namespaceType,
       savedObjectsClient,
     });

@@ -23,6 +23,7 @@ import {
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
+import type { BulkDeleteExceptionListsRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/bulk_delete_exception_list/bulk_delete_exception_list.gen';
 import type { CreateExceptionListRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/create_exception_list/create_exception_list.gen';
 import type { CreateExceptionListItemRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/create_exception_list_item/create_exception_list_item.gen';
 import type {
@@ -47,6 +48,20 @@ import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
+  /**
+      * Delete multiple exception lists using either their `id` or `list_id` field. Provide
+exactly one of `ids` or `list_ids`, each containing at least one entry; mixing both in
+the same request is not supported.
+
+      */
+  bulkDeleteExceptionLists(props: BulkDeleteExceptionListsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/exception_lists/_bulk_delete', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
   /**
       * An exception list groups exception items and can be associated with detection rules. You can assign exception lists to multiple detection rules.
 > info
@@ -261,6 +276,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
   };
 }
 
+export interface BulkDeleteExceptionListsProps {
+  body: BulkDeleteExceptionListsRequestBodyInput;
+}
 export interface CreateExceptionListProps {
   body: CreateExceptionListRequestBodyInput;
 }

@@ -179,6 +179,19 @@ export interface DeleteExceptionListOptions {
 }
 
 /**
+ * ExceptionListClient.bulkDeleteExceptionList
+ * {@link ExceptionListClient.bulkDeleteExceptionList}
+ */
+export interface BulkDeleteExceptionListOptions {
+  /** the "id" of the exception lists to delete */
+  ids: Id[];
+  /** the "list_id" pairs of the exception lists to delete */
+  listIds: ListId[];
+  /** saved object namespace (single | agnostic) */
+  namespaceType: NamespaceType;
+}
+
+/**
  * ExceptionListClient.deleteExceptionListItem
  * {@link ExceptionListClient.deleteExceptionListItem}
  */
