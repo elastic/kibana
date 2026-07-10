@@ -802,7 +802,7 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<boolean> {
     try {
-      const response = await this.deps.esClient.update({
+      const response = await this.deps.esClient.bulk({
         index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         id: stepExecutionId,
         // `respondedAt` is the first-writer-wins guard. Retrying conflicts

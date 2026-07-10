@@ -115,8 +115,11 @@ export class StepExecutionRepository {
       }
     });
 
-    await this.stepExecutionsDal.bulkUpsert({
-      documents: stepExecutions as Array<Partial<EsWorkflowStepExecution> & { id: string }>,
+    await this.stepExecutionsDal.bulk({
+      items: stepExecutions.map((stepExecution) => ({
+        operation: 'upsert',
+        document: stepExecution as Partial<EsWorkflowStepExecution> & { id: string },
+      })),
       refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
     });
   }

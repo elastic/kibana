@@ -62,8 +62,13 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for creation');
     }
 
-    await this.workflowExecutionsDal.bulkCreate({
-      documents: workflowExecution as Partial<EsWorkflowExecution> & { id: string },
+    await this.workflowExecutionsDal.bulk({
+      items: [
+        {
+          operation: 'create',
+          document: workflowExecution as Partial<EsWorkflowExecution> & { id: string },
+        },
+      ],
       refresh: options.refresh ?? false,
     });
   }
@@ -91,12 +96,15 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    const bulkResponse = await this.workflowExecutionsDal.bulkCreate({
-      refresh: options.refresh ?? false,
-      documents: executions as Array<Partial<EsWorkflowExecution> & { id: string }>,
+    const bulkResponse = await this.workflowExecutionsDal.bulk({
+      items: executions.map((execution) => ({
+        operation: 'create',
+        document: execution as Partial<EsWorkflowExecution> & { id: string },
+      })),
+      refresh: options.refresh,
     });
 
-    return bulkResponse.items.map((item, idx) => {
+    return bulkResponse.items.map((item, idx: number) => {
       const id = executions[idx].id as string;
       if (item.error) {
         return { id, error: item.error.reason ?? JSON.stringify(item.error) };
@@ -125,8 +133,13 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for update');
     }
 
-    await this.workflowExecutionsDal.bulkUpsert({
-      documents: workflowExecution as Partial<EsWorkflowExecution> & { id: string },
+    await this.workflowExecutionsDal.bulk({
+      items: [
+        {
+          operation: 'update',
+          document: workflowExecution as Partial<EsWorkflowExecution> & { id: string },
+        },
+      ],
       refresh: options.refresh ?? false,
     });
   }
@@ -152,8 +165,11 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    await this.workflowExecutionsDal.bulkUpsert({
-      documents: updates as Array<Partial<EsWorkflowExecution> & { id: string }>,
+    await this.workflowExecutionsDal.bulk({
+      items: updates.map((update) => ({
+        operation: 'update',
+        document: update as Partial<EsWorkflowExecution> & { id: string },
+      })),
       refresh: true,
     });
   }
@@ -418,10 +434,13 @@ export class WorkflowExecutionRepository {
       return false;
     }
 
-    await this.workflowExecutionsDal.bulkUpsert({
-      documents: queuedWorkflowExecutions.map((workflowExecution) => ({
-        id: workflowExecution.id,
-        status: ExecutionStatus.PENDING,
+    await this.workflowExecutionsDal.bulk({
+      items: queuedWorkflowExecutions.map((workflowExecution) => ({
+        operation: 'upsert',
+        document: {
+          id: workflowExecution.id,
+          status: ExecutionStatus.PENDING,
+        },
       })),
       refresh: 'wait_for',
     });

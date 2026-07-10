@@ -11,15 +11,11 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { executeIndexBulkCreate } from './execute_index_bulk_create';
-import { executeIndexBulkUpdate } from './execute_index_bulk_update';
-import { executeIndexBulkUpsert } from './execute_index_bulk_upsert';
-import { createOrUpdateIndex } from '../../init/create_or_update_index';
 import type {
-  BulkCreateRequest,
-  BulkUpdateRequest,
-  BulkUpsertRequest,
-  BulkUpsertResponse,
+  BulkItem,
+  BulkItemResponse,
+  BulkRequestOptions,
+  BulkResponse,
   ExecutionsCountRequest,
   ExecutionsDataAccess,
   ExecutionsDeleteByQueryRequest,
@@ -42,15 +38,6 @@ export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
   implements ExecutionsDataAccess<TExecution>
 {
   constructor(private readonly deps: PlainIndexExecutionsDataAccessDeps<TExecution>) {}
-
-  public async init(): Promise<void> {
-    await createOrUpdateIndex({
-      esClient: this.deps.esClient,
-      indexName: this.deps.indexName,
-      mappings: this.deps.mappings,
-      logger: this.deps.logger,
-    });
-  }
 
   public async search(
     request: ExecutionsSearchRequest
@@ -99,28 +86,89 @@ export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
     return executionDocs;
   }
 
-  public async bulkUpsert(request: BulkUpsertRequest<TExecution>): Promise<BulkUpsertResponse> {
-    return executeIndexBulkUpsert({
-      esClient: this.deps.esClient,
-      indexName: this.deps.indexName,
-      request,
-    });
-  }
+  public async bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
+    if (request.items.length === 0) {
+      return {
+        items: [],
+        errors: false,
+      };
+    }
 
-  public async bulkCreate(request: BulkCreateRequest<TExecution>): Promise<BulkUpsertResponse> {
-    return executeIndexBulkCreate({
-      esClient: this.deps.esClient,
-      indexName: this.deps.indexName,
-      request,
-    });
-  }
+    type BulkOperation = NonNullable<
+      estypes.BulkRequest<TExecution, Partial<TExecution> & { id: string }>['operations']
+    >[number];
 
-  public async bulkUpdate(request: BulkUpdateRequest<TExecution>): Promise<BulkUpsertResponse> {
-    return executeIndexBulkUpdate({
-      esClient: this.deps.esClient,
-      indexName: this.deps.indexName,
-      request,
+    const operations: BulkOperation[] = request.items.flatMap((item): BulkOperation[] => {
+      const actionMeta = {
+        _id: item.document.id,
+        ...(item.seqNo !== undefined ? { if_seq_no: item.seqNo } : {}),
+        ...(item.primaryTerm !== undefined ? { if_primary_term: item.primaryTerm } : {}),
+      };
+
+      switch (item.operation) {
+        case 'create':
+          return [{ create: actionMeta }, item.document as BulkOperation];
+
+        case 'update':
+          return [
+            {
+              update: {
+                ...actionMeta,
+                ...(item.retryOnConflict !== undefined
+                  ? { retry_on_conflict: item.retryOnConflict }
+                  : {}),
+              },
+            },
+            { doc: item.document },
+          ];
+
+        case 'upsert':
+          return [
+            {
+              update: {
+                ...actionMeta,
+                ...(item.retryOnConflict !== undefined
+                  ? { retry_on_conflict: item.retryOnConflict }
+                  : {}),
+              },
+            },
+            { doc: item.document, doc_as_upsert: true },
+          ];
+
+        default:
+          throw new Error(`Invalid operation: ${(item as BulkItem<TExecution>).operation}`);
+      }
     });
+
+    const response = await this.deps.esClient.bulk<
+      TExecution,
+      Partial<TExecution> & { id: string }
+    >({
+      index: this.deps.indexName,
+      refresh: request.refresh,
+      operations,
+    });
+
+    const items: BulkItemResponse[] = [];
+
+    response.items.forEach((item) => {
+      const result = item.create ?? item.update;
+      if (!result?._id) {
+        return;
+      }
+
+      items.push({
+        id: result?._id,
+        error: result?.error,
+        _seq_no: result?._seq_no,
+        _primary_term: result?._primary_term,
+      });
+    });
+
+    return {
+      items,
+      errors: response.errors,
+    };
   }
 
   public async deleteByQuery(

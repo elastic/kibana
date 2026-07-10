@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '../../types/v1';
 
@@ -30,69 +30,14 @@ export type ExecutionsCountRequest = Omit<estypes.CountRequest, 'index'>;
 /** Delete-by-query body without index — DAL resolves the target. */
 export type ExecutionsDeleteByQueryRequest = Omit<estypes.DeleteByQueryRequest, 'index'>;
 
-/** Partial document with required id — same for single- and multi-document upserts. */
+/** Partial document with required id. */
 export type UpsertDocument<TDoc extends { id: string }> = Partial<TDoc> & { id: string };
-
-/** Bulk-level options from ES Bulk API (index/operations omitted — DAL builds those). */
-export type BulkUpsertRequestOptions = Pick<
-  estypes.BulkRequest,
-  'refresh' | 'pipeline' | 'require_alias' | 'wait_for_active_shards'
->;
-
-/** Unified upsert request: one or many documents, same contract. */
-export type BulkUpsertRequest<TDoc extends { id: string }> = BulkUpsertRequestOptions & {
-  documents:
-    | UpsertDocument<Partial<TDoc> & { id: string }>
-    | UpsertDocument<Partial<TDoc> & { id: string }>[];
-};
-
-/** Bulk ES `create` request (fails on existing id; does not upsert). */
-export type BulkCreateRequest<TDoc extends { id: string }> = BulkUpsertRequestOptions & {
-  documents:
-    | UpsertDocument<Partial<TDoc> & { id: string }>
-    | UpsertDocument<Partial<TDoc> & { id: string }>[];
-};
-
-/** Bulk ES `update` request (partial doc merge; no doc_as_upsert). */
-export type BulkUpdateRequest<TDoc extends { id: string }> = BulkUpsertRequestOptions & {
-  documents:
-    | UpsertDocument<Partial<TDoc> & { id: string }>
-    | UpsertDocument<Partial<TDoc> & { id: string }>[];
-};
-
-/** Static index name or per-document resolver for multi-index bulk upserts. */
-export type BulkUpsertIndexResolver<TDoc extends { id: string }> =
-  | string
-  | ((document: UpsertDocument<TDoc>) => string);
-
-/** Per-document outcome aligned with ES bulk item fields (update/index/create). */
-export interface BulkUpsertItemResponse {
-  id: string;
-  status: number;
-  result?: estypes.Result;
-  error?: estypes.ErrorCause;
-  _shards?: estypes.ShardStatistics;
-  _seq_no?: number;
-  _primary_term?: number;
-  _version?: estypes.VersionNumber;
-}
-
-/** Always bulk-shaped: `items.length ===` normalized document count, input order preserved. */
-export type BulkUpsertResponse = Pick<estypes.BulkResponse, 'took' | 'errors' | 'ingest_took'> & {
-  items: BulkUpsertItemResponse[];
-};
 
 export interface CreateExecutionsDataAccessDeps {
   source: ExecutionStorageSource;
   coreSetup: CoreSetup;
   logger: Logger;
 }
-
-/** @deprecated Use {@link CreateExecutionsDataAccessDeps} */
-export type CreateWorkflowExecutionsDataAccessDeps = CreateExecutionsDataAccessDeps;
-
-/** @deprecated Use {@link CreateExecutionsDataAccessDeps} */
-export type CreateStepExecutionsDataAccessDeps = CreateExecutionsDataAccessDeps;
 
 export type ExecutionSourceProjectionField<TExecution extends { id: string }> = Extract<
   keyof TExecution,
@@ -111,9 +56,7 @@ export interface ReadonlyExecutionsDataAccess<TExecution extends { id: string }>
 }
 
 export interface WritableExecutionsDataAccess<TExecution extends { id: string }> {
-  bulkUpsert(request: BulkUpsertRequest<TExecution & { id: string }>): Promise<BulkUpsertResponse>;
-  bulkCreate(request: BulkCreateRequest<TExecution & { id: string }>): Promise<BulkUpsertResponse>;
-  bulkUpdate(request: BulkUpdateRequest<TExecution & { id: string }>): Promise<BulkUpsertResponse>;
+  bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse>;
   deleteByQuery(request: ExecutionsDeleteByQueryRequest): Promise<estypes.DeleteByQueryResponse>;
 }
 
@@ -143,15 +86,6 @@ export type StepExecutionsDeleteByQueryRequest = ExecutionsDeleteByQueryRequest;
 export type WorkflowExecutionUpsertDocument = UpsertDocument<EsWorkflowExecution>;
 export type StepExecutionUpsertDocument = UpsertDocument<EsWorkflowStepExecution>;
 
-export type WorkflowExecutionsBulkUpsertRequest = BulkUpsertRequest<EsWorkflowExecution>;
-export type StepExecutionsBulkUpsertRequest = BulkUpsertRequest<EsWorkflowStepExecution>;
-
-export type WorkflowExecutionsBulkCreateRequest = BulkCreateRequest<EsWorkflowExecution>;
-export type StepExecutionsBulkCreateRequest = BulkCreateRequest<EsWorkflowStepExecution>;
-
-export type WorkflowExecutionsBulkUpdateRequest = BulkUpdateRequest<EsWorkflowExecution>;
-export type StepExecutionsBulkUpdateRequest = BulkUpdateRequest<EsWorkflowStepExecution>;
-
 export type WorkflowExecutionSourceProjectionField =
   ExecutionSourceProjectionField<EsWorkflowExecution>;
 export type StepExecutionSourceProjectionField =
@@ -159,3 +93,30 @@ export type StepExecutionSourceProjectionField =
 
 export type GetWorkflowExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflowExecution>;
 export type GetStepExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflowStepExecution>;
+
+export interface BulkItem<TDocument extends { id: string }> {
+  operation: 'create' | 'update' | 'upsert';
+  document: Partial<TDocument> & { id: string };
+  seqNo?: number;
+  primaryTerm?: number;
+  retryOnConflict?: number;
+}
+
+export interface BulkRequestOptions<TDocument extends { id: string }> {
+  refresh?: boolean | 'wait_for';
+  items: BulkItem<TDocument>[];
+}
+
+/** Per-document outcome aligned with ES bulk item fields (update/index/create). */
+export interface BulkItemResponse {
+  id: string;
+  error?: estypes.ErrorCause;
+  _seq_no?: number;
+  _primary_term?: number;
+}
+
+/** Always bulk-shaped: `items.length ===` normalized document count, input order preserved. */
+export interface BulkResponse {
+  items: BulkItemResponse[];
+  errors: boolean;
+}

@@ -18,33 +18,7 @@ export { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from './mappings/workflow_executi
 export { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from './mappings/step_executions_mappings';
 export { TOKEN_USAGE_MAPPING } from './mappings/token_usage_mapping';
 
-export { executeIndexBulkUpsert } from './implementations/plain_index/execute_index_bulk_upsert';
-export { executeIndexBulkCreate } from './implementations/plain_index/execute_index_bulk_create';
-export { executeIndexBulkUpdate } from './implementations/plain_index/execute_index_bulk_update';
-export {
-  EMPTY_BULK_UPSERT_RESPONSE,
-  assertBulkUpdateSuccess,
-  assertBulkUpsertSuccess,
-  throwBulkUpdateError,
-  throwBulkUpsertError,
-  throwBulkWriteError,
-} from './lib/bulk_upsert_error';
-export {
-  toBulkUpsertResponseFromBulk,
-  toBulkUpsertResponseFromCreate,
-  toBulkUpsertResponseFromCreateError,
-  toBulkUpsertResponseFromUpdate,
-} from './lib/bulk_upsert_response';
-export {
-  assertUpsertDocumentsHaveIds,
-  normalizeUpsertDocuments,
-} from './lib/normalize_upsert_documents';
-export {
-  createUnsupportedStorageSourceError,
-  validateCreateExecutionsDataAccessParams,
-  validateCreateStepExecutionsDataAccessParams,
-  validateCreateWorkflowExecutionsDataAccessParams,
-} from './lib/validate_factory_params';
+export { createUnsupportedStorageSourceError } from './lib/validate_factory_params';
 export { getStepExecutionsByWorkflowExecution } from './lib/get_step_executions_by_workflow_execution';
 export type { GetStepExecutionsByWorkflowExecutionParams } from './lib/get_step_executions_by_workflow_execution';
 
@@ -56,23 +30,14 @@ export type {
 export type { PlainIndexExecutionsDataAccessDeps } from './implementations/plain_index/plain_index_executions_data_access';
 export { PlainIndexExecutionsDataAccess } from './implementations/plain_index/plain_index_executions_data_access';
 export { normalizeStepExecutionOnGet } from './implementations/plain_index/normalize_step_execution_on_get';
-export {
-  createExecutionsDal,
-  createStepExecutionsDataAccess,
-  createWorkflowExecutionsDataAccess,
-} from './implementations/create_executions_dal';
+export { createExecutionsDal } from './implementations/create_executions_dal';
 
 export type {
-  BulkCreateRequest,
-  BulkUpdateRequest,
-  BulkUpsertIndexResolver,
-  BulkUpsertItemResponse,
-  BulkUpsertRequest,
-  BulkUpsertRequestOptions,
-  BulkUpsertResponse,
+  BulkItem,
+  BulkItemResponse,
+  BulkRequestOptions,
+  BulkResponse,
   CreateExecutionsDataAccessDeps,
-  CreateStepExecutionsDataAccessDeps,
-  CreateWorkflowExecutionsDataAccessDeps,
   ExecutionDataStreamClient,
   ExecutionSourceProjectionField,
   ExecutionStorageSource,
@@ -85,18 +50,12 @@ export type {
   GetWorkflowExecutionsByIdsOptions,
   StepExecutionSourceProjectionField,
   StepExecutionUpsertDocument,
-  StepExecutionsBulkCreateRequest,
-  StepExecutionsBulkUpdateRequest,
-  StepExecutionsBulkUpsertRequest,
   StepExecutionsCountRequest,
   StepExecutionsDeleteByQueryRequest,
   StepExecutionsSearchRequest,
   UpsertDocument,
   WorkflowExecutionSourceProjectionField,
   WorkflowExecutionUpsertDocument,
-  WorkflowExecutionsBulkCreateRequest,
-  WorkflowExecutionsBulkUpdateRequest,
-  WorkflowExecutionsBulkUpsertRequest,
   WorkflowExecutionsCountRequest,
   WorkflowExecutionsDeleteByQueryRequest,
   WorkflowExecutionsSearchRequest,
