@@ -17,6 +17,8 @@ import { createSearchEventsTool } from './event_search/tool';
 import { createEventTool } from './event_create/tool';
 import { createEventStatusUpdateTool } from './event_status_update/tool';
 import { createEventInvestigationAttachTool } from './event_investigation_attach/tool';
+import { createDiscoveryWriteTool } from './discovery_write/tool';
+import { createEventsWriteTool } from './event_write/tool';
 import {
   createInvestigationProgressReportTool,
   SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
@@ -72,6 +74,7 @@ export function registerAgentBuilderTools({
       getScopedClients,
       server,
       logger: logger.get('event_search_tool'),
+      telemetry,
     }),
     createEventTool({
       getScopedClients,
@@ -89,6 +92,18 @@ export function registerAgentBuilderTools({
       getScopedClients,
       server,
       logger: logger.get('event_investigation_attach_tool'),
+      telemetry,
+    }),
+    createDiscoveryWriteTool({
+      getScopedClients,
+      server,
+      logger: logger.get('discovery_write_tool'),
+      telemetry,
+    }),
+    createEventsWriteTool({
+      getScopedClients,
+      server,
+      logger: logger.get('events_write_tool'),
       telemetry,
     }),
     createInvestigationProgressReportTool(),

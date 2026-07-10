@@ -11,24 +11,16 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { defaultToolsFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useFlyoutApi } from '../../../use_flyout_api';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { InvestigationGuide } from './investigation_guide';
-import { InvestigationGuide as InvestigationGuideToolsFlyout } from '../../tools/investigation_guide';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { HighlightedFields } from './highlighted_fields';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
 import {
@@ -67,12 +59,7 @@ export interface InvestigationSectionProps {
  */
 export const InvestigationSection = memo(
   ({ hit, renderCellActions }: InvestigationSectionProps) => {
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
-    const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const { openDocumentInvestigationGuide } = useFlyoutApi();
 
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -106,20 +93,8 @@ export const InvestigationSection = memo(
     });
 
     const onShowInvestigationGuide = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <InvestigationGuideToolsFlyout hit={hit} />,
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
-    }, [history, historyKey, hit, overlays, services, store]);
+      openDocumentInvestigationGuide({ hit });
+    }, [openDocumentInvestigationGuide, hit]);
 
     const renderFlyoutLink = useCallback(
       (props: OpenFlyoutLinkProps) => {
