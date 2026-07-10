@@ -266,4 +266,23 @@ describe('useServiceFlyoutTransactionDetailedStatistics', () => {
 
     expect(result.current.isLoading).toBe(true);
   });
+
+  it('clamps bucketSizeInSeconds to the rollup interval when the rollup is coarser than the computed bucket size', async () => {
+    // For a 1-hour range with 20 buckets, the raw bucket size is 180s.
+    // A '1h' rollup (3600s) is coarser, so the request must use 3600s to avoid
+    // querying ES with a sub-rollup interval that produces empty buckets.
+    mockedUsePreferredTransactionDataSource.mockReturnValue({
+      dataSource: { documentType: 'transactionMetric', rollupInterval: '1h' },
+      isLoading: false,
+    });
+
+    const http = makeHttp(EMPTY_RESPONSE);
+
+    renderHook(() => useServiceFlyoutTransactionDetailedStatistics({ http, ...BASE_PARAMS }));
+
+    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(1));
+
+    const query = (http.get as jest.Mock).mock.calls[0][1].query;
+    expect(query.bucketSizeInSeconds).toBe(3600);
+  });
 });

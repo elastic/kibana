@@ -11,7 +11,10 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { LatencyAggregationType } from '@kbn/apm-types';
 import type { Coordinate } from '@kbn/apm-types';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { usePreferredTransactionDataSource } from './use_preferred_transaction_data_source';
+import {
+  parseIntervalSeconds,
+  usePreferredTransactionDataSource,
+} from './use_preferred_transaction_data_source';
 
 // Matches the numBuckets value used by APM's transactions table.
 const NUM_BUCKETS = 20;
@@ -63,8 +66,12 @@ export function useServiceFlyoutTransactionDetailedStatistics({
     async ({ signal }) => {
       if (!enabled || !dataSource) return undefined;
 
-      const bucketSizeInSeconds = Math.ceil(
+      const rawBucketSize = Math.ceil(
         (new Date(end).getTime() - new Date(start).getTime()) / 1000 / NUM_BUCKETS
+      );
+      const bucketSizeInSeconds = Math.max(
+        rawBucketSize,
+        parseIntervalSeconds(dataSource.rollupInterval)
       );
 
       return http.get<DetailedStatisticsResponse>(
