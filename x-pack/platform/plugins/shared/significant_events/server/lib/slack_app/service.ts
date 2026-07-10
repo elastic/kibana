@@ -119,13 +119,15 @@ export class SlackAppService {
     // is granted on behalf of the connecting user but survives their deletion (ES keys
     // outlive their owner). The connecting user must hold `agentBuilder:read`, otherwise
     // the granted key is under-privileged (grant intersects with the owner's privileges).
+    // `monitor_inference` and the `actions` feature are required for converse to list
+    // inference endpoints and stack connectors (see getConnectorList).
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
       metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
       kibana_role_descriptors: {
         nightshift_relay_agent_builder: {
-          elasticsearch: { cluster: [], indices: [], run_as: [] },
-          kibana: [{ spaces: ['*'], feature: { agentBuilder: ['read'] } }],
+          elasticsearch: { cluster: ['monitor_inference'], indices: [], run_as: [] },
+          kibana: [{ spaces: ['*'], feature: { agentBuilder: ['read'], actions: ['read'] } }],
         },
       },
     });
