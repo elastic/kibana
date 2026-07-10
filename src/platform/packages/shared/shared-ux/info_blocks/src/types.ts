@@ -27,30 +27,31 @@ export interface InfoBlockItem {
 }
 
 /**
- * A spacer that fills the remainder of its current row, adapting to the live
- * column count, so the next real block starts on a fresh row. It renders no
- * content and no dividers. Use the {@link EMPTY_INFO_BLOCK} sentinel to add one.
+ * A "leading spacer": fills the remainder of its current row, adapting to the
+ * live column count, so the following block leads a fresh row. It renders no
+ * content. Use the {@link LEADING_SPACER} sentinel to add one.
  */
-export interface EmptyInfoBlockItem {
-  empty: true;
+export interface LeadingSpacerItem {
+  leadingSpacer: true;
 }
 
-/** An entry in {@link InfoBlocksProps.items}: a real block or an empty spacer. */
-export type InfoBlocksItem = InfoBlockItem | EmptyInfoBlockItem;
+/** An entry in {@link InfoBlocksProps.items}: a real block or a leading spacer. */
+export type InfoBlocksItem = InfoBlockItem | LeadingSpacerItem;
 
 /**
- * Sentinel spacer that fills the rest of its row (see {@link EmptyInfoBlockItem}).
+ * Sentinel that fills the rest of its row so the following block leads a fresh
+ * row (see {@link LeadingSpacerItem}).
  */
-export const EMPTY_INFO_BLOCK: EmptyInfoBlockItem = { empty: true };
+export const LEADING_SPACER: LeadingSpacerItem = { leadingSpacer: true };
 
-/** Narrows an {@link InfoBlocksItem} to the empty spacer variant. */
-export const isEmptyInfoBlock = (item: InfoBlocksItem): item is EmptyInfoBlockItem =>
-  'empty' in item && item.empty === true;
+/** Narrows an {@link InfoBlocksItem} to the leading-spacer variant. */
+export const isLeadingSpacer = (item: InfoBlocksItem): item is LeadingSpacerItem =>
+  'leadingSpacer' in item && item.leadingSpacer === true;
 
 export interface InfoBlocksProps {
   /**
    * The blocks to render. Up to 6 are supported; passing more is a consumer
-   * bug and is not validated or guarded at runtime. Use {@link EMPTY_INFO_BLOCK}
+   * bug and is not validated or guarded at runtime. Use {@link LEADING_SPACER}
    * for an entry that fills the rest of its row.
    */
   items: readonly InfoBlocksItem[];

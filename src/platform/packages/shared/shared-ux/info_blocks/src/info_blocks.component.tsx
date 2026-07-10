@@ -11,7 +11,7 @@ import React, { useState, type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import { EuiPanel, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { InfoBlock } from './info_block.component';
-import { isEmptyInfoBlock } from './types';
+import { isLeadingSpacer } from './types';
 import type { InfoBlocksItem, InfoBlocksProps } from './types';
 
 /** Maximum number of columns */
@@ -44,18 +44,18 @@ export interface InfoBlockCellLayout {
   /**
    * True when the cell reaches the last grid column (the container's right
    * edge); such a cell draws no inline-end (vertical) divider. A real block
-   * followed by an empty spacer is NOT last-column, so it keeps its divider.
+   * followed by a leading spacer is NOT last-column, so it keeps its divider.
    */
   isLastColumn: boolean;
   /** True when a real block exists in a later row (drives the horizontal divider). */
   hasRowBelow: boolean;
-  /** True for an empty spacer: renders no content and no dividers. */
-  isEmpty: boolean;
+  /** True for a leading spacer: renders no content and no vertical divider. */
+  isSpacer: boolean;
 }
 
 /**
  * Single layout pass over the items for a given column count. A real block
- * spans one column; an empty spacer spans the rest of its row and pushes the
+ * spans one column; a leading spacer spans the rest of its row and pushes the
  * next block onto a fresh row. Divider hints are derived here so placement and
  * dividers stay in sync (see the pseudo-element notes in {@link InfoBlocks}).
  */
@@ -64,30 +64,30 @@ export const getInfoBlocksLayout = (
   columns: number
 ): InfoBlockCellLayout[] => {
   const cols = Math.max(1, columns);
-  const placed: Array<{ columnStart: number; span: number; row: number; isEmpty: boolean }> = [];
+  const placed: Array<{ columnStart: number; span: number; row: number; isSpacer: boolean }> = [];
   let col = 0;
   let row = 0;
   for (const item of items) {
-    const isEmpty = isEmptyInfoBlock(item);
+    const isSpacer = isLeadingSpacer(item);
     const columnStart = col;
-    const span = isEmpty ? Math.max(1, cols - col) : 1;
-    placed.push({ columnStart, span, row, isEmpty });
+    const span = isSpacer ? Math.max(1, cols - col) : 1;
+    placed.push({ columnStart, span, row, isSpacer });
     col += span;
     if (col >= cols) {
       col = 0;
       row += 1;
     }
   }
-  // Highest row index that holds a real block; a trailing empty row never draws
+  // Highest row index that holds a real block; a trailing spacer row never draws
   // a horizontal divider above it.
   const lastContentRow = placed.reduce(
-    (last, cell) => (cell.isEmpty ? last : Math.max(last, cell.row)),
+    (last, cell) => (cell.isSpacer ? last : Math.max(last, cell.row)),
     -1
   );
   return placed.map((cell) => ({
     columnStart: cell.columnStart,
     span: cell.span,
-    isEmpty: cell.isEmpty,
+    isSpacer: cell.isSpacer,
     isLastColumn: cell.columnStart + cell.span >= cols,
     hasRowBelow: cell.row < lastContentRow,
   }));
@@ -103,9 +103,9 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const { width } = useResizeObserver(container);
 
-  // Empty spacers only exist to shape the full layout; the compressed layout
+  // Leading spacers only exist to shape the full layout; the compressed layout
   // drops them so it stays dense.
-  const visibleItems = compressed ? items.filter((item) => !isEmptyInfoBlock(item)) : items;
+  const visibleItems = compressed ? items.filter((item) => !isLeadingSpacer(item)) : items;
   const columns = getInfoBlocksColumnCount(width, visibleItems.length);
   const layout = getInfoBlocksLayout(visibleItems, columns);
   const cellPadding = compressed ? euiTheme.size.s : euiTheme.size.m;
@@ -129,16 +129,16 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
     >
       {visibleItems.map((item, index) => {
         // Placement + divider hints come from the single layout pass so they
-        // stay correct across empty spacers and the live column count.
+        // stay correct across leading spacers and the live column count.
         const cell = layout[index];
 
-        // An empty spacer renders no content and no vertical divider, but it
+        // A leading spacer renders no content and no vertical divider, but it
         // still carries the horizontal divider so that line stays continuous
         // across the whole container.
-        if (isEmptyInfoBlock(item)) {
+        if (isLeadingSpacer(item)) {
           return (
             <div
-              key={`empty-${index}`}
+              key={`spacer-${index}`}
               aria-hidden="true"
               css={css`
                 position: relative;
@@ -164,11 +164,11 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
         // Dividers are drawn as pseudo-elements.
         //  - ::before = vertical divider on the inline-END of a cell that is
         //    not the last column, inset from top/bottom by dividerCornerGap so
-        //    it stops short of the corners. A real block followed by an empty
+        //    it stops short of the corners. A real block followed by a leading
         //    spacer keeps this divider (it is not the last column), and a
         //    partial trailing row keeps the divider beside its last filled block.
         //  - ::after = horizontal divider between rows, drawn on the block-END
-        //    of every cell (including empty spacers) that has a row below it, so
+        //    of every cell (including leading spacers) that has a row below it, so
         //    the line spans the whole container width and stays SOLID through
         //    the interior column intersections — only the outer ends inset by
         //    the gap.

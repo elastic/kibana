@@ -9,10 +9,10 @@
 
 export { InfoBlocks } from './src/info_blocks.component';
 export { InfoBlock } from './src/info_block.component';
-export { EMPTY_INFO_BLOCK, isEmptyInfoBlock } from './src/types';
+export { LEADING_SPACER, isLeadingSpacer } from './src/types';
 export type {
   InfoBlockItem,
-  EmptyInfoBlockItem,
+  LeadingSpacerItem,
   InfoBlocksItem,
   InfoBlocksProps,
 } from './src/types';

@@ -26,7 +26,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { InfoBlocks } from './info_blocks.component';
-import { EMPTY_INFO_BLOCK } from './types';
+import { LEADING_SPACER } from './types';
 import type { InfoBlockItem, InfoBlocksItem } from './types';
 
 const meta: Meta<typeof InfoBlocks> = {
@@ -132,9 +132,9 @@ const CompressedDemo: React.FC = () => {
 
       <EuiSpacer size="xl" />
       <EuiTitle size="l">
-        <h2>Empty blocks</h2>
+        <h2>Leading spacer</h2>
       </EuiTitle>
-      <InfoBlocks items={EMPTY_BLOCK_ITEMS} compressed={useCompressed} />
+      <InfoBlocks items={LEADING_SPACER_ITEMS} compressed={useCompressed} />
     </div>
   );
 };
@@ -162,29 +162,29 @@ export const BigNumber: Story = {
   },
 };
 
-// A leading "big number" block followed by an empty spacer, so the rest of row
-// 1 stays blank and real content resumes on row 2. The empty block adapts to
+// A leading "big number" block followed by a leading spacer, so the rest of row
+// 1 stays blank and real content resumes on row 2. The spacer adapts to
 // the live column count: at 2 columns it fills 1 remaining cell, at 3 columns
 // it fills 2. Drive the width (or the 3 -> 2 -> 1 collapse) to see it adapt.
-const EMPTY_BLOCK_ITEMS: InfoBlocksItem[] = [
+const LEADING_SPACER_ITEMS: InfoBlocksItem[] = [
   { title: 'Risk score', value: '90', size: 'xl' },
-  EMPTY_INFO_BLOCK,
+  LEADING_SPACER,
   ...SAMPLE_ITEMS.slice(0, 4),
 ];
 
-export const EmptyBlocks: StoryObj<DefaultArgs> = {
+export const LeadingSpacer: StoryObj<DefaultArgs> = {
   argTypes: {
     numberOfItems: {
-      description: 'Number of info blocks to render (includes the empty spacer)',
-      control: { type: 'range', min: 2, max: EMPTY_BLOCK_ITEMS.length, step: 1 },
+      description: 'Number of info blocks to render (includes the leading spacer)',
+      control: { type: 'range', min: 2, max: LEADING_SPACER_ITEMS.length, step: 1 },
     },
   },
   args: {
-    numberOfItems: EMPTY_BLOCK_ITEMS.length,
+    numberOfItems: LEADING_SPACER_ITEMS.length,
     compressed: false,
   },
   render: ({ numberOfItems, compressed }) => (
-    <InfoBlocks items={EMPTY_BLOCK_ITEMS.slice(0, numberOfItems)} compressed={compressed} />
+    <InfoBlocks items={LEADING_SPACER_ITEMS.slice(0, numberOfItems)} compressed={compressed} />
   ),
 };
 

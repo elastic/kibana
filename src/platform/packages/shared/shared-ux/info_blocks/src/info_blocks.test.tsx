@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { InfoBlocks, getInfoBlocksColumnCount, getInfoBlocksLayout } from './info_blocks.component';
-import { EMPTY_INFO_BLOCK } from './types';
+import { LEADING_SPACER } from './types';
 import type { InfoBlocksItem } from './types';
 
 describe('InfoBlocks', () => {
@@ -49,12 +49,12 @@ describe('InfoBlocks', () => {
     expect(screen.getByTestId('myBlocks')).toBeInTheDocument();
   });
 
-  it('renders no InfoBlock for an empty spacer', () => {
+  it('renders no InfoBlock for a leading spacer', () => {
     render(
       <InfoBlocks
         items={[
           { title: 'Risk score', value: '90', size: 'xl' },
-          EMPTY_INFO_BLOCK,
+          LEADING_SPACER,
           { title: 'Vendor', value: 'Elastic' },
           { title: 'Result', value: 'Success' },
         ]}
@@ -67,42 +67,42 @@ describe('InfoBlocks', () => {
   });
 });
 
-describe('getInfoBlocksLayout (empty-block placement + divider hints)', () => {
+describe('getInfoBlocksLayout (leading-spacer placement + divider hints)', () => {
   const RISK: InfoBlocksItem = { title: 'Risk score', value: '90', size: 'xl' };
   const withEmpty: InfoBlocksItem[] = [
     RISK,
-    EMPTY_INFO_BLOCK,
+    LEADING_SPACER,
     { title: 'Vendor', value: 'Elastic' },
     { title: 'Result', value: 'Success' },
   ];
 
-  it('spans the empty block over the single remaining cell at 2 columns', () => {
+  it('spans the leading spacer over the single remaining cell at 2 columns', () => {
     const layout = getInfoBlocksLayout(withEmpty, 2);
     // Risk score occupies cell 1; the spacer fills the rest of row 1 (1 cell).
-    expect(layout[0]).toMatchObject({ columnStart: 0, span: 1, isEmpty: false });
-    expect(layout[1]).toMatchObject({ columnStart: 1, span: 1, isEmpty: true });
+    expect(layout[0]).toMatchObject({ columnStart: 0, span: 1, isSpacer: false });
+    expect(layout[1]).toMatchObject({ columnStart: 1, span: 1, isSpacer: true });
     // The next real block therefore starts on row 2, in column 1.
-    expect(layout[2]).toMatchObject({ columnStart: 0, span: 1, isEmpty: false });
-    expect(layout[3]).toMatchObject({ columnStart: 1, span: 1, isEmpty: false });
+    expect(layout[2]).toMatchObject({ columnStart: 0, span: 1, isSpacer: false });
+    expect(layout[3]).toMatchObject({ columnStart: 1, span: 1, isSpacer: false });
   });
 
-  it('spans the empty block over both remaining cells at 3 columns', () => {
+  it('spans the leading spacer over both remaining cells at 3 columns', () => {
     const layout = getInfoBlocksLayout(withEmpty, 3);
     // Risk score occupies cell 1; the spacer fills the rest of row 1 (2 cells).
-    expect(layout[0]).toMatchObject({ columnStart: 0, span: 1, isEmpty: false });
-    expect(layout[1]).toMatchObject({ columnStart: 1, span: 2, isEmpty: true });
+    expect(layout[0]).toMatchObject({ columnStart: 0, span: 1, isSpacer: false });
+    expect(layout[1]).toMatchObject({ columnStart: 1, span: 2, isSpacer: true });
     // Real content still resumes on row 2.
-    expect(layout[2]).toMatchObject({ columnStart: 0, span: 1, isEmpty: false });
-    expect(layout[3]).toMatchObject({ columnStart: 1, span: 1, isEmpty: false });
+    expect(layout[2]).toMatchObject({ columnStart: 0, span: 1, isSpacer: false });
+    expect(layout[3]).toMatchObject({ columnStart: 1, span: 1, isSpacer: false });
   });
 
-  it('keeps the divider on the block before an empty spacer, and marks the spacer last-column', () => {
+  it('keeps the divider on the block before a leading spacer, and marks the spacer last-column', () => {
     const layout = getInfoBlocksLayout(withEmpty, 3);
     // The block before the spacer is NOT the last column, so it keeps its
     // inline-end (right-hand) vertical divider.
     expect(layout[0].isLastColumn).toBe(false);
     // The spacer fills the rest of the row, reaching the last column.
-    expect(layout[1]).toMatchObject({ isEmpty: true, isLastColumn: true });
+    expect(layout[1]).toMatchObject({ isSpacer: true, isLastColumn: true });
   });
 
   it('marks a row that has real content below it', () => {
@@ -113,7 +113,7 @@ describe('getInfoBlocksLayout (empty-block placement + divider hints)', () => {
     expect(layout[3].hasRowBelow).toBe(false);
   });
 
-  it('leaves single-column, no-empty layout unchanged (one span-1 cell per row)', () => {
+  it('leaves single-column, no-spacer layout unchanged (one span-1 cell per row)', () => {
     const items: InfoBlocksItem[] = [
       { title: 'A', value: '1' },
       { title: 'B', value: '2' },
@@ -124,9 +124,9 @@ describe('getInfoBlocksLayout (empty-block placement + divider hints)', () => {
     expect(layout[1]).toMatchObject({ isLastColumn: true, hasRowBelow: false });
   });
 
-  it('preserves the vertical divider beside a partial trailing row (no empty item)', () => {
+  it('preserves the vertical divider beside a partial trailing row (no spacer item)', () => {
     // 3 columns, 5 items: row 2 is [D | E | (absent)]. E is not the last column,
-    // so it keeps its inline-end divider even though the trailing cell is empty.
+    // so it keeps its inline-end divider even though the trailing cell is absent.
     const items: InfoBlocksItem[] = ['A', 'B', 'C', 'D', 'E'].map((t) => ({
       title: t,
       value: t,
@@ -135,15 +135,15 @@ describe('getInfoBlocksLayout (empty-block placement + divider hints)', () => {
     expect(layout[4]).toMatchObject({ columnStart: 1, span: 1, isLastColumn: false });
   });
 
-  it('fills a whole row when the empty block starts a row, and reports no content below a trailing empty row', () => {
+  it('fills a whole row when the leading spacer starts a row, and reports no content below a trailing spacer row', () => {
     const items: InfoBlocksItem[] = [
       { title: 'A', value: '1' },
       { title: 'B', value: '2' },
-      EMPTY_INFO_BLOCK,
+      LEADING_SPACER,
     ];
     const layout = getInfoBlocksLayout(items, 2);
     // A | B fill row 1; the spacer starts row 2 and fills both cells.
-    expect(layout[2]).toMatchObject({ columnStart: 0, span: 2, isEmpty: true });
+    expect(layout[2]).toMatchObject({ columnStart: 0, span: 2, isSpacer: true });
     // No horizontal divider under row 1 since the only row below holds no content.
     expect(layout[0].hasRowBelow).toBe(false);
     expect(layout[1].hasRowBelow).toBe(false);
