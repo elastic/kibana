@@ -7,6 +7,7 @@
 
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { Logger } from '@kbn/core/server';
+import { safeJsonStringify } from '@kbn/std';
 import { pipe } from 'fp-ts/pipeable';
 import { getOrElse, map } from 'fp-ts/Option';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
@@ -160,8 +161,16 @@ export async function executor(
         status,
         statusText,
         headers: responseHeaders,
-        data: { message: responseMessage },
+        data: { message: rawResponseMessage },
       } = error.response;
+      // The response body's `message` can be a non-string at runtime, which would
+      // otherwise serialize to `[object Object]`.
+      const responseMessage =
+        typeof rawResponseMessage === 'string'
+          ? rawResponseMessage
+          : rawResponseMessage != null
+          ? safeJsonStringify(rawResponseMessage)
+          : undefined;
       const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
       const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);
