@@ -164,7 +164,8 @@ export const InstallationInfoSchema = schema.object(
               schema.object({
                 id: schema.string(),
                 type: schema.string(),
-              })
+              }),
+              { maxSize: 10000 }
             )
           ),
         }),
