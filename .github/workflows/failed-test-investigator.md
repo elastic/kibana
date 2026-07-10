@@ -193,7 +193,12 @@ Add `failure:ai-fixable` to the issue if we are confident that a fix is availabl
 
 ### "Insufficient data" label
 
-Add `failure:insufficient-data` (in addition to the other label(s)) when you could **not** reach a strong, confident conclusion because the data needed to diagnose the failure was missing — server logs, a Playwright trace, the failure screenshot, or build logs were absent, expired, or never uploaded. Missing data on its own is not enough to warrant the label: add it only when that data would have changed the conclusion or substantially raised the confidence of the analysis. When you set it, the comment's `#### Additional context` → "Open questions" bullet (or the `#### Data collection issues` section, if a fetch failed) must name exactly which logs or artifacts were missing and what re-run or added logging would unblock a firm conclusion.
+Add `failure:insufficient-data` (in addition to the other label(s)) when you could **not** reach a strong, confident conclusion because the data needed to diagnose the failure was missing — server logs, a Playwright trace, the failure screenshot, or build logs were absent, expired, or never uploaded. Missing data on its own is not enough to warrant the label: add it only when that data would have changed the conclusion or substantially raised the confidence of the analysis.
+
+When you set it, the comment's `#### Additional context` → "Open questions" bullet (or the `#### Data collection issues` section, if a fetch failed) must name exactly what was missing and how to obtain it. When the gap is **logs** specifically, be concrete and actionable instead of asking for "more logs":
+
+- **Name the logs you needed:** the logger/context, level, and the event or time window (e.g. `plugins.security.authentication` at `debug` around the failure), and why they would be decisive.
+- **Propose how to capture them on the next run:** the specific logger to raise and where — a `logging.loggers` entry (`{ name, level: 'debug' | 'all', appenders: ['default'] }`) in the failing test config's Kibana server args, or a targeted log statement to add at a named `file:line`. Aim for a plan precise enough that a single re-run would produce the evidence needed to firm up the classification.
 
 ### Refresh stale labels on re-investigation
 
