@@ -23,7 +23,9 @@ const mockedGenerateEsql = jest.mocked(generateEsql);
 
 const logger = { debug: jest.fn(), warn: jest.fn(), error: jest.fn() } as unknown as Logger;
 const events = {} as ToolEventEmitter;
-const modelProvider = {} as ModelProvider;
+const modelProvider = {
+  getDefaultModel: jest.fn().mockResolvedValue({}),
+} as unknown as ModelProvider;
 const asCurrentUser = { name: 'current-user-client' };
 const esClient = { asCurrentUser } as unknown as IScopedClusterClient;
 

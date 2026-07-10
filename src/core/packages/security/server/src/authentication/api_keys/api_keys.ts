@@ -143,6 +143,7 @@ export interface CreateCrossClusterAPIKeyParams {
   expiration?: string;
   name: string;
   metadata?: { [key: string]: any };
+  certificate_identity?: string;
   access: {
     search?: Array<{
       names: string[];
@@ -264,6 +265,7 @@ export interface UpdateCrossClusterAPIKeyParams {
   type: 'cross_cluster';
   expiration?: string;
   metadata?: { [key: string]: any };
+  certificate_identity?: string | null;
   access: {
     search?: Array<{
       names: string[];

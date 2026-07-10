@@ -11,7 +11,15 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
+import { getConnectorSpec } from '@kbn/connector-specs';
 import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
+
+jest.mock('@kbn/connector-specs', () => ({
+  connectorsSpecs: {},
+  getConnectorSpec: jest.fn(),
+}));
+
+const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
 
 const createMockUiSettingsClient = (contextEngineEnabled = true, experimentalEnabled = true) => ({
   get: jest.fn().mockImplementation(async (key: string) => {
@@ -61,6 +69,10 @@ describe('createConnectorLifecycleHandler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    getConnectorSpecMock.mockReturnValue({
+      metadata: { id: '.test', displayName: 'Test', description: '', minimumLicense: 'basic' },
+      actions: {},
+    } as never);
   });
 
   describe('onPostCreate', () => {
@@ -77,6 +89,40 @@ describe('createConnectorLifecycleHandler', () => {
       await handler.onPostCreate(createBaseParams({ wasSuccessful: false }) as any);
 
       expect(agentContextLayer.indexAttachment).not.toHaveBeenCalled();
+    });
+
+    it('skips connector types with no way to be called from chat (no spec, not MCP)', async () => {
+      getConnectorSpecMock.mockReturnValue(undefined);
+      const agentContextLayer = createMockAgentContextLayer();
+      const handler = createConnectorLifecycleHandler({
+        logger,
+        getStartServices: createMockGetStartServices(
+          createMockUiSettingsClient(),
+          agentContextLayer
+        ),
+      });
+
+      await handler.onPostCreate(createBaseParams({ connectorType: '.jira' }) as any);
+
+      expect(agentContextLayer.indexAttachment).not.toHaveBeenCalled();
+    });
+
+    it('indexes the MCP connector even though it has no connector-specs entry', async () => {
+      getConnectorSpecMock.mockReturnValue(undefined);
+      const agentContextLayer = createMockAgentContextLayer();
+      const handler = createConnectorLifecycleHandler({
+        logger,
+        getStartServices: createMockGetStartServices(
+          createMockUiSettingsClient(),
+          agentContextLayer
+        ),
+      });
+
+      await handler.onPostCreate(createBaseParams({ connectorType: '.mcp' }) as any);
+
+      expect(agentContextLayer.indexAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ originId: 'connector-abc', action: 'create' })
+      );
     });
 
     it('skips when the Context Engine is disabled', async () => {
