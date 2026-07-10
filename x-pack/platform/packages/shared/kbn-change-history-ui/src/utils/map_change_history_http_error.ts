@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { ChangeHistoryErrorCode } from '@kbn/change-history-ui';
-import {
-  getChangeHistoryErrorCodeFromBody,
-  isChangeHistoryErrorCode,
-} from '@kbn/change-history-ui';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import type { ChangeHistoryErrorCode } from '../types/change_history_error';
+import { isChangeHistoryErrorCode } from './change_history_error_codes';
+import { getChangeHistoryErrorCodeFromBody } from './get_change_history_error_code';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
+
+const isHttpLikeError = (
+  error: unknown
+): error is { response?: { status?: number }; body?: unknown; message?: string } =>
+  isRecord(error) && ('response' in error || 'body' in error);
 
 const getMessage = (error: unknown): string => {
   if (isHttpFetchError(error)) {
@@ -66,11 +67,6 @@ const mapStatusToCode = (
   }
 };
 
-const isHttpLikeError = (
-  error: unknown
-): error is { response?: { status?: number }; body?: unknown; message?: string } =>
-  isRecord(error) && ('response' in error || 'body' in error);
-
 const getHttpStatus = (error: unknown): number | undefined => {
   if (isHttpFetchError(error)) {
     return error.response?.status;
@@ -95,7 +91,11 @@ const getHttpBody = (error: unknown): Record<string, unknown> | undefined => {
   return undefined;
 };
 
-export const mapWorkflowRestoreHttpError = (error: unknown): Error => {
+/**
+ * Maps Kibana HTTP fetch errors to `Error` instances with structured
+ * `{ body: { code, message } }` for {@link parseChangeHistoryError}.
+ */
+export const mapChangeHistoryHttpError = (error: unknown): Error => {
   if (!isHttpFetchError(error) && !isHttpLikeError(error)) {
     return error instanceof Error ? error : new Error(String(error));
   }
