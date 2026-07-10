@@ -238,26 +238,35 @@ export class AttackDiscoveryScheduleDataClient {
     await this.options.rulesClient.disableRule(ruleToDisable);
   };
 
+  private transformBulkActionResult = ({
+    errors,
+    rules,
+    total,
+  }: {
+    errors: BulkActionAttackDiscoverySchedulesResponse['errors'];
+    rules: Array<{ id: string }>;
+    total: number;
+  }): BulkActionAttackDiscoverySchedulesResponse => ({
+    errors,
+    ids: rules.map(({ id }) => id),
+    total,
+  });
+
+  /**
+   * Bulk methods delegate to the Alerting `RulesClient` bulk APIs (query-based),
+   * matching the public Attack Discovery schedules contract from
+   * https://github.com/elastic/kibana/issues/266760: ids that do not resolve to
+   * an existing rule are silently excluded, so `total` reflects the rules
+   * actually matched and `errors` only carries genuine per-rule failures. Unlike
+   * the by-id single methods, these do NOT apply `filterTags` visibility.
+   */
   public bulkDeleteSchedules = async ({
     ids,
   }: {
     ids: string[];
   }): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
-    const successIds: string[] = [];
-    const errors: BulkActionAttackDiscoverySchedulesResponse['errors'] = [];
-
-    await Promise.all(
-      ids.map(async (id) => {
-        try {
-          await this.deleteSchedule({ id });
-          successIds.push(id);
-        } catch (err) {
-          errors.push({ message: String(err?.message ?? err), rule: { id, name: id } });
-        }
-      })
-    );
-
-    return { errors, ids: successIds, total: ids.length };
+    const result = await this.options.rulesClient.bulkDeleteRules({ ids });
+    return this.transformBulkActionResult(result);
   };
 
   public bulkEnableSchedules = async ({
@@ -265,21 +274,8 @@ export class AttackDiscoveryScheduleDataClient {
   }: {
     ids: string[];
   }): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
-    const successIds: string[] = [];
-    const errors: BulkActionAttackDiscoverySchedulesResponse['errors'] = [];
-
-    await Promise.all(
-      ids.map(async (id) => {
-        try {
-          await this.enableSchedule({ id });
-          successIds.push(id);
-        } catch (err) {
-          errors.push({ message: String(err?.message ?? err), rule: { id, name: id } });
-        }
-      })
-    );
-
-    return { errors, ids: successIds, total: ids.length };
+    const result = await this.options.rulesClient.bulkEnableRules({ ids });
+    return this.transformBulkActionResult(result);
   };
 
   public bulkDisableSchedules = async ({
@@ -287,20 +283,7 @@ export class AttackDiscoveryScheduleDataClient {
   }: {
     ids: string[];
   }): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
-    const successIds: string[] = [];
-    const errors: BulkActionAttackDiscoverySchedulesResponse['errors'] = [];
-
-    await Promise.all(
-      ids.map(async (id) => {
-        try {
-          await this.disableSchedule({ id });
-          successIds.push(id);
-        } catch (err) {
-          errors.push({ message: String(err?.message ?? err), rule: { id, name: id } });
-        }
-      })
-    );
-
-    return { errors, ids: successIds, total: ids.length };
+    const result = await this.options.rulesClient.bulkDisableRules({ ids });
+    return this.transformBulkActionResult(result);
   };
 }

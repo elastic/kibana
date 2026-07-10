@@ -506,6 +506,94 @@ describe('AttackDiscoveryScheduleDataClient', () => {
     });
   });
 
+  describe('bulk actions', () => {
+    it('`bulkDeleteSchedules` delegates to `rulesClient.bulkDeleteRules` and transforms the result', async () => {
+      (scheduleDataClientParams.rulesClient.bulkDeleteRules as jest.Mock).mockResolvedValue({
+        errors: [],
+        rules: [{ id: 'schedule-1' }, { id: 'schedule-2' }],
+        total: 2,
+      });
+      const client = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+
+      // A non-existent id is included in the request but silently excluded from
+      // the result (query-based RulesClient semantics, per issue #266760).
+      const result = await client.bulkDeleteSchedules({
+        ids: ['schedule-1', 'schedule-2', 'missing'],
+      });
+
+      expect(scheduleDataClientParams.rulesClient.bulkDeleteRules).toHaveBeenCalledWith({
+        ids: ['schedule-1', 'schedule-2', 'missing'],
+      });
+      expect(result).toEqual({ errors: [], ids: ['schedule-1', 'schedule-2'], total: 2 });
+    });
+
+    it('`bulkEnableSchedules` delegates to `rulesClient.bulkEnableRules` and transforms the result', async () => {
+      (scheduleDataClientParams.rulesClient.bulkEnableRules as jest.Mock).mockResolvedValue({
+        errors: [],
+        rules: [{ id: 'schedule-1' }],
+        total: 1,
+      });
+      const client = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+
+      const result = await client.bulkEnableSchedules({ ids: ['schedule-1'] });
+
+      expect(scheduleDataClientParams.rulesClient.bulkEnableRules).toHaveBeenCalledWith({
+        ids: ['schedule-1'],
+      });
+      expect(result).toEqual({ errors: [], ids: ['schedule-1'], total: 1 });
+    });
+
+    it('`bulkDisableSchedules` delegates to `rulesClient.bulkDisableRules` and transforms the result', async () => {
+      (scheduleDataClientParams.rulesClient.bulkDisableRules as jest.Mock).mockResolvedValue({
+        errors: [],
+        rules: [{ id: 'schedule-1' }],
+        total: 1,
+      });
+      const client = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+
+      const result = await client.bulkDisableSchedules({ ids: ['schedule-1'] });
+
+      expect(scheduleDataClientParams.rulesClient.bulkDisableRules).toHaveBeenCalledWith({
+        ids: ['schedule-1'],
+      });
+      expect(result).toEqual({ errors: [], ids: ['schedule-1'], total: 1 });
+    });
+
+    it('passes through genuine per-rule errors from the `rulesClient`', async () => {
+      const ruleErrors = [{ message: 'boom', rule: { id: 'schedule-2', name: 'schedule-2' } }];
+      (scheduleDataClientParams.rulesClient.bulkDeleteRules as jest.Mock).mockResolvedValue({
+        errors: ruleErrors,
+        rules: [{ id: 'schedule-1' }],
+        total: 1,
+      });
+      const client = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+
+      const result = await client.bulkDeleteSchedules({ ids: ['schedule-1', 'schedule-2'] });
+
+      expect(result).toEqual({ errors: ruleErrors, ids: ['schedule-1'], total: 1 });
+    });
+
+    it('does NOT apply `filterTags` visibility to bulk actions (native RulesClient semantics)', async () => {
+      (scheduleDataClientParams.rulesClient.bulkDeleteRules as jest.Mock).mockResolvedValue({
+        errors: [],
+        rules: [{ id: 'schedule-1' }],
+        total: 1,
+      });
+      const client = new AttackDiscoveryScheduleDataClient({
+        ...scheduleDataClientParams,
+        filterTags: { excludeTags: ['attack-discovery-schedule', 'attack-discovery-workflow'] },
+      });
+
+      await client.bulkDeleteSchedules({ ids: ['schedule-1'] });
+
+      // Bulk delegates straight to the native API without the per-id visibility read.
+      expect(scheduleDataClientParams.rulesClient.get).not.toHaveBeenCalled();
+      expect(scheduleDataClientParams.rulesClient.bulkDeleteRules).toHaveBeenCalledWith({
+        ids: ['schedule-1'],
+      });
+    });
+  });
+
   describe('by-ID isolation guard (filterTags)', () => {
     const publicFilterTags = {
       excludeTags: ['attack-discovery-schedule', 'attack-discovery-workflow'],
