@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { KibanaUrl, PageObjects, ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import type {
+  KibanaUrl,
+  PageObjects,
+  ScoutPage,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+} from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
 import type { MlUiPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
