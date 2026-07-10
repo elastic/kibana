@@ -1,0 +1,188 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { spaceTest, tags, KibanaCodeEditorWrapper, EuiComboBoxWrapper } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
+import { applyLensInlineEditorAndWaitClosed, testData } from '../fixtures';
+
+// Maximum number of initial ESQL columns loaded
+// This is a temporary limit to avoid overwhelming the UI with too many columns
+// Should be syncronized with MAX_NUM_OF_COLUMNS
+const MAX_NUM_OF_INITIAL_ESQL_COLUMNS = 10;
+
+const setQueryAndRun = async (
+  page: ScoutPage,
+  codeEditor: KibanaCodeEditorWrapper,
+  query: string
+) => {
+  await codeEditor.setCodeEditorValue(query);
+  await page.testSubj.click('ESQLEditor-run-query-button');
+};
+
+const openNewDashboardWithEsqlEditor = async (pageObjects: PageObjects, page: ScoutPage) => {
+  const { dashboard, lens } = pageObjects;
+  await dashboard.openNewDashboard();
+  await dashboard.addNewESQLPanel();
+  await expect(lens.getInlineEditor()).toBeVisible();
+  await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+};
+
+spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.classic }, () => {
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
+    await scoutSpace.uiSettings.set({
+      'dateFormat:tz': 'UTC',
+      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
+    });
+  });
+
+  spaceTest.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsPrivilegedUser();
+  });
+
+  spaceTest.afterAll(async ({ scoutSpace }) => {
+    await scoutSpace.uiSettings.unset('dateFormat:tz', 'timepicker:timeDefaults');
+    await scoutSpace.savedObjects.cleanStandardList();
+  });
+
+  spaceTest(
+    'should keep the table type when the user adds a limit via Try ES|QL',
+    async ({ pageObjects, page }) => {
+      const { dashboard, lens } = pageObjects;
+      const codeEditor = new KibanaCodeEditorWrapper(page);
+
+      await spaceTest.step('navigate to dashboard and click Try ES|QL', async () => {
+        await dashboard.goto();
+        await expect(page.testSubj.locator('noDataViewsPrompt')).toBeVisible();
+        await page.testSubj.click('tryESQLLink');
+        await dashboard.waitForRenderComplete();
+      });
+
+      await spaceTest.step('open inline editor and run query', async () => {
+        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+        await expect(lens.getInlineEditor()).toBeVisible();
+        // Verify ES|QL editor IS visible in Dashboard inline edit mode
+        await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+
+        await setQueryAndRun(page, codeEditor, 'from logstash-*');
+        await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Table');
+      });
+
+      await spaceTest.step('remove all auto-loaded columns and add bytes', async () => {
+        // Remove all columns
+        let count = MAX_NUM_OF_INITIAL_ESQL_COLUMNS;
+        while (count-- > 0) {
+          await lens.removeDimension('lnsDatatable_metrics');
+        }
+
+        await page.testSubj
+          .locator('lnsDatatable_metrics')
+          .getByTestId('lns-empty-dimension')
+          .click();
+        await expect(
+          page.testSubj.locator('lns-indexPattern-dimensionContainerClose')
+        ).toBeVisible();
+
+        const fieldCombo = new EuiComboBoxWrapper(page, 'text-based-dimension-field');
+        await fieldCombo.selectSingleOption('bytes');
+        await lens.closeDimensionEditor();
+      });
+
+      await spaceTest.step(
+        'add limit to query and verify table type and bytes column persist',
+        async () => {
+          await setQueryAndRun(page, codeEditor, 'from logstash-* | limit 100');
+          await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Table');
+
+          const bytesDimension = page.testSubj
+            .locator('lnsDatatable_metrics > lns-dimensionTrigger-textBased')
+            .filter({ hasText: 'bytes' });
+          await expect(bytesDimension).toBeVisible();
+
+          await applyLensInlineEditorAndWaitClosed({ lens });
+        }
+      );
+    }
+  );
+
+  spaceTest(
+    'should remain table if the user edits an existing table panel',
+    async ({ pageObjects, page }) => {
+      const { dashboard, lens } = pageObjects;
+      const codeEditor = new KibanaCodeEditorWrapper(page);
+
+      await spaceTest.step('create a dashboard with an ES|QL table panel', async () => {
+        await openNewDashboardWithEsqlEditor(pageObjects, page);
+        await setQueryAndRun(page, codeEditor, 'from logstash-*');
+        await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Table');
+        await applyLensInlineEditorAndWaitClosed({ lens });
+      });
+
+      await spaceTest.step(
+        'rewrite the query entirely and verify table type persists',
+        async () => {
+          await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+          await expect(lens.getInlineEditor()).toBeVisible();
+
+          await setQueryAndRun(page, codeEditor, 'from logstash-* | STATS COUNT(*) BY geo.dest');
+          await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Table');
+
+          await applyLensInlineEditorAndWaitClosed({ lens });
+        }
+      );
+    }
+  );
+
+  spaceTest(
+    'should add a limit without changing the chart type or the color',
+    async ({ pageObjects, page }) => {
+      const { dashboard, lens } = pageObjects;
+      const codeEditor = new KibanaCodeEditorWrapper(page);
+
+      await spaceTest.step('create a line chart panel with a red Y-axis color', async () => {
+        await openNewDashboardWithEsqlEditor(pageObjects, page);
+        await setQueryAndRun(
+          page,
+          codeEditor,
+          'from logstash-* | stats maxB = max(bytes) by geo.dest'
+        );
+
+        await lens.switchToVisualization('line');
+
+        await page.testSubj.click('lnsXY_yDimensionPanel');
+        const colorPickerInput = page.getByTestId(/indexPattern-dimension-colorPicker/);
+        await colorPickerInput.fill('');
+        await colorPickerInput.fill('#ff0000');
+        await expect(colorPickerInput).toHaveValue('#ff0000');
+
+        await lens.closeDimensionEditor();
+        await applyLensInlineEditorAndWaitClosed({ lens });
+        await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+      });
+
+      await spaceTest.step(
+        'add limit and verify line chart type and red color persist',
+        async () => {
+          await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+          await expect(lens.getInlineEditor()).toBeVisible();
+
+          await setQueryAndRun(
+            page,
+            codeEditor,
+            'from logstash-* | stats maxB = max(bytes) by geo.dest | limit 10'
+          );
+
+          await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Line');
+
+          await page.testSubj.click('lnsXY_yDimensionPanel');
+          const colorPickerInput = page.getByTestId(/indexPattern-dimension-colorPicker/);
+          await expect(colorPickerInput).toHaveValue('#FF0000');
+        }
+      );
+    }
+  );
+});

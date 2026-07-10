@@ -185,6 +185,19 @@ export class LensApp {
     await this.closeDimensionEditorButton.waitFor({ state: 'hidden' });
   }
 
+  /** Removes the first dimension from the given dimension panel (hover to reveal, then click trash). */
+  async removeDimension(dimensionTestSubj: string) {
+    const removeLocator = this.page.testSubj.locator(
+      `${dimensionTestSubj} > indexPattern-dimension-remove`
+    );
+    const buttons = await removeLocator.all();
+    if (buttons.length === 0) {
+      return;
+    }
+    await buttons[0].hover();
+    await buttons[0].click();
+  }
+
   /**
    * Activates the layer tab at `index`. Requires the tabs row to be visible (multi-layer charts).
    * Tab `data-test-subj` values use layer ids (not numeric indices), so tabs are resolved by order.
