@@ -300,6 +300,53 @@ describe('AttachmentBridge: onProposalReceived workflowId', () => {
     bridge.stop();
   });
 
+  it('adopts the first server-minted attachmentId and drops later events from a different create session', () => {
+    // Repro: user is on /workflows/create (session A), sends a prompt, then
+    // navigates away and back to a fresh /workflows/create (session B). B's
+    // bridge is new — server-A's late response lands on B's chat$. Payload
+    // carries a server-minted attachmentId (not B's) and no workflowId, so
+    // without adoption the guard would let it through and mutate B's editor.
+    const chat$ = new Subject<BrowserChatEvent>();
+    const editor = createMockEditor('yaml: on-B');
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker, {
+      attachmentId: 'client-B-unsaved-uuid',
+      // create-session bridge — workflowId omitted
+    });
+
+    // B's own first-generation event arrives — bridge adopts server-B's id.
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'B-first',
+        beforeYaml: 'yaml: on-B',
+        afterYaml: 'yaml: from-B-agent',
+        attachmentId: 'server-B-id',
+      })
+    );
+
+    expect(manager.applyAfterYaml).toHaveBeenLastCalledWith('yaml: from-B-agent');
+
+    // Late event from previous session A carries server-A's id, no workflowId.
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'A-late',
+        beforeYaml: 'yaml: on-A',
+        afterYaml: 'yaml: from-A-agent',
+        attachmentId: 'server-A-id',
+      })
+    );
+
+    // Must NOT have applied A's late event to B's editor.
+    expect(manager.applyAfterYaml).toHaveBeenCalledTimes(1);
+    expect(manager.applyAfterYaml).toHaveBeenLastCalledWith('yaml: from-B-agent');
+
+    bridge.stop();
+  });
+
   it('drops a late event from a previous saved workflow when the user has moved to /create', () => {
     // User was on saved workflow A, opened a conversation, navigated to
     // /workflows/create. Late event from A lands on the new create-session

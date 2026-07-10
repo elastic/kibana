@@ -57,6 +57,12 @@ export class AttachmentBridge {
     | undefined;
   private attachmentId: string | undefined;
   private workflowId: string | undefined;
+  // On a create-session bridge, the server mints a fresh `attachmentId` on the
+  // first generation that the client hasn't seen. We adopt it here so later
+  // events from a *different* create session (e.g. user visited /create,
+  // navigated away, came back to a fresh /create — old request still in
+  // flight on the shared chat$) can be distinguished from ours and dropped.
+  private adoptedServerAttachmentId: string | undefined;
 
   start(
     chat$: Observable<BrowserChatEvent>,
@@ -126,6 +132,7 @@ export class AttachmentBridge {
     this.processedProposals.clear();
     this.attachmentId = undefined;
     this.workflowId = undefined;
+    this.adoptedServerAttachmentId = undefined;
   }
 
   private handleYamlChanged(payload: WorkflowYamlChangedPayload): void {
@@ -137,15 +144,22 @@ export class AttachmentBridge {
     // Drop events that don't belong to this bridge's session.
     // - Saved-workflow bridge: strict attachment-id match (fallback to
     //   `workflowId` for legacy events without `attachmentId`).
-    // - Create-session bridge: only drop events explicitly targeting a
-    //   different saved workflow. On the very first generation, the server
-    //   mints a fresh `attachmentId` that the client hasn't seen yet, so
-    //   matching strictly here would drop the legitimate first proposal.
+    // - Create-session bridge: drop events for a different saved workflow;
+    //   adopt the first server-minted `attachmentId` and match strictly after
+    //   that so late events from a previous create session don't leak in.
     if (this.workflowId) {
       const payloadAttachmentId = payload.attachmentId ?? workflowId;
       if (payloadAttachmentId && payloadAttachmentId !== this.attachmentId) return;
-    } else if (workflowId && workflowId !== this.attachmentId) {
-      return;
+    } else {
+      if (workflowId && workflowId !== this.attachmentId) return;
+      const payloadAttachmentId = payload.attachmentId;
+      if (payloadAttachmentId) {
+        if (this.adoptedServerAttachmentId) {
+          if (payloadAttachmentId !== this.adoptedServerAttachmentId) return;
+        } else {
+          this.adoptedServerAttachmentId = payloadAttachmentId;
+        }
+      }
     }
 
     if (this.processedProposals.has(proposalId)) return;
