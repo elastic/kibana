@@ -14,6 +14,8 @@ import { type INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/publi
 import type { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
 import {
   internalStateActions,
+  selectUrlProfileStateDefinition,
+  selectCurrentProfileUrlState,
   selectTab,
   selectTabAppState,
   type DiscoverAppState,
@@ -21,7 +23,6 @@ import {
   type InternalStateDependencies,
 } from '../redux';
 import { internalStateSlice } from '../redux/internal_state';
-import { selectUrlProfileStateDefinition } from '../redux/runtime_state';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
 import type { ProfileStateMap } from '../../../../context_awareness';
 import { ProfileStateType } from '../../../../context_awareness';
@@ -106,23 +107,13 @@ export const createUrlSyncObservables = ({
     state$: globalState$,
   };
 
-  const getCurrentProfileUrlState = () => {
-    const profileStateDefinition = selectUrlProfileStateDefinition(runtimeStateManager, tabId);
-    const profileState = profileStateDefinition
-      ? selectTab(getState(), tabId).profileState[profileStateDefinition.key]
-      : undefined;
-    const filteredUrlState = profileStateDefinition
-      ? services.profileStateRegistry.filterFieldsByType({
-          profileState,
-          stateKey: profileStateDefinition.key,
-          stateTypes: [ProfileStateType.Url],
-        })
-      : undefined;
-
-    return profileStateDefinition && filteredUrlState
-      ? { [profileStateDefinition.key]: filteredUrlState }
-      : undefined;
-  };
+  const getCurrentProfileUrlState = () =>
+    selectCurrentProfileUrlState({
+      runtimeStateManager,
+      tabId,
+      profileStateMap: selectTab(getState(), tabId).profileState,
+      profileStateRegistry: services.profileStateRegistry,
+    });
 
   const profileState$ = internalState$.pipe(
     skip(1),

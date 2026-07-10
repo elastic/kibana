@@ -15,7 +15,13 @@ import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram'
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { ConnectedCustomizationService } from '../../../../customizations';
-import type { ContextAwarenessToolkit, ScopedProfilesManager } from '../../../../context_awareness';
+import {
+  ProfileStateType,
+  type ContextAwarenessToolkit,
+  type ProfileStateMap,
+  type ProfileStateRegistry,
+  type ScopedProfilesManager,
+} from '../../../../context_awareness';
 import type { TabState } from './types';
 import type { ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
@@ -137,6 +143,32 @@ export const selectUrlProfileStateDefinition = (
   return selectTabRuntimeState(runtimeStateManager, tabId)
     .scopedProfilesManager$.getValue()
     .getContexts().dataSourceContext.profileState;
+};
+
+export const selectCurrentProfileUrlState = ({
+  runtimeStateManager,
+  tabId,
+  profileStateMap,
+  profileStateRegistry,
+}: {
+  runtimeStateManager: RuntimeStateManager;
+  tabId: string;
+  profileStateMap: ProfileStateMap;
+  profileStateRegistry: ProfileStateRegistry;
+}): ProfileStateMap | undefined => {
+  const profileStateDefinition = selectUrlProfileStateDefinition(runtimeStateManager, tabId);
+
+  if (!profileStateDefinition) {
+    return undefined;
+  }
+
+  const filteredUrlState = profileStateRegistry.filterFieldsByType({
+    profileState: profileStateMap[profileStateDefinition.key],
+    stateKey: profileStateDefinition.key,
+    stateTypes: [ProfileStateType.Url],
+  });
+
+  return filteredUrlState ? { [profileStateDefinition.key]: filteredUrlState } : undefined;
 };
 
 export const selectIsDataViewUsedInMultipleRuntimeTabStates = (

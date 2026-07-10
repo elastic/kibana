@@ -21,6 +21,8 @@ import {
 } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
 import { internalStateActions, selectDataSourceProfileId, selectTabRuntimeState } from './redux';
+import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
+import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -103,6 +105,48 @@ describe('test getDataStateContainer', () => {
     ).toHaveBeenCalled();
 
     unsubscribe();
+  });
+
+  test('refetch$ clears stale profile URL state when the resolved profile has no URL state', async () => {
+    const services = createDiscoverServicesMock();
+    services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMock],
+    });
+
+    await toolkit.initializeTabs();
+
+    const tabId = toolkit.getCurrentTab().id;
+
+    await toolkit.stateStorageContainer.set(PROFILE_STATE_URL_KEY, {
+      [TEST_PROFILE_STATE_DEF.key]: {
+        urlValue: 'staleUrl',
+      },
+    });
+
+    const scopedProfilesManager = selectTabRuntimeState(
+      toolkit.runtimeStateManager,
+      tabId
+    ).scopedProfilesManager$.getValue();
+    const contexts = scopedProfilesManager.getContexts();
+
+    jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+      ...contexts,
+      dataSourceContext: {
+        ...contexts.dataSourceContext,
+        profileState: undefined,
+      },
+    });
+
+    const setUrlStateSpy = jest.spyOn(toolkit.stateStorageContainer, 'set');
+
+    await toolkit.initializeSingleTab({ tabId });
+
+    expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, undefined, {
+      replace: true,
+    });
+    expect(toolkit.stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toBeNull();
   });
 
   test('reset sets back to initial state', async () => {

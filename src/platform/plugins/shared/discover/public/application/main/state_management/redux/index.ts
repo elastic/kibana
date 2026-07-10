@@ -91,6 +91,8 @@ export {
   useRuntimeState,
   selectTabRuntimeState,
   selectDataSourceProfileId,
+  selectUrlProfileStateDefinition,
+  selectCurrentProfileUrlState,
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,

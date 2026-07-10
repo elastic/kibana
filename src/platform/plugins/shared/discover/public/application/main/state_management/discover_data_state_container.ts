@@ -20,6 +20,7 @@ import {
   tap,
 } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
@@ -46,9 +47,10 @@ import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState } from './utils/default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
-import { internalStateActions, selectTabRuntimeState } from './redux';
+import { internalStateActions, selectCurrentProfileUrlState, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import { createSearchSource } from './utils/create_search_source';
+import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -162,6 +164,7 @@ export function getDataStateContainer({
   searchSessionManager,
   internalState,
   runtimeStateManager,
+  urlStateStorage,
   injectCurrentTab,
   getCurrentTab,
 }: {
@@ -169,6 +172,7 @@ export function getDataStateContainer({
   searchSessionManager: DiscoverSearchSessionManager;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
+  urlStateStorage: IKbnUrlStateStorage;
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
@@ -374,6 +378,22 @@ export function getDataStateContainer({
               },
               resetFetchChart$
             );
+
+          const currentProfileUrlState = urlStateStorage.get(PROFILE_STATE_URL_KEY) ?? undefined;
+          const nextProfileUrlState = selectCurrentProfileUrlState({
+            runtimeStateManager,
+            tabId: currentTabId,
+            profileStateMap: getCurrentTab().profileState,
+            profileStateRegistry: services.profileStateRegistry,
+          });
+
+          if (!isEqual(currentProfileUrlState, nextProfileUrlState)) {
+            await withSkipNextFetch(async () => {
+              await urlStateStorage.set(PROFILE_STATE_URL_KEY, nextProfileUrlState, {
+                replace: true,
+              });
+            });
+          }
 
           let shouldApplyDefaultProfileState = true;
           let appliedDefaultProfileState = defaultProfileState;

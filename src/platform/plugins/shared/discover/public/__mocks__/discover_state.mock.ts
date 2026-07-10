@@ -284,6 +284,7 @@ export function getDiscoverInternalStateMock({
           searchSessionManager,
           internalState,
           runtimeStateManager,
+          urlStateStorage: stateStorageContainer,
           injectCurrentTab,
           getCurrentTab,
         });
@@ -600,6 +601,7 @@ export function createDataStateContainer(
     services,
     searchSessionManager: stateContainer.searchSessionManager,
     runtimeStateManager: stateContainer.runtimeStateManager,
+    urlStateStorage: stateContainer.stateStorage,
     injectCurrentTab: stateContainer.injectCurrentTab,
     getCurrentTab: stateContainer.getCurrentTab,
   });
