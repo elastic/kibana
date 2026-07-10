@@ -149,27 +149,30 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       }
     };
 
+    const getAgentMethod = agentClient.getAgent.bind(agentClient);
+    const getByIdsMethod = agentClient.getByIds.bind(agentClient);
+    const listAgentsMethod = agentClient.listAgents.bind(agentClient);
+
     interface AgentClientTrapHandlers {
       getAgentInterceptor: AgentClient['getAgent'];
       getByIdsInterceptor: AgentClient['getByIds'];
       listAgentsInterceptor: AgentClient['listAgents'];
     }
     const trapHandlers: AgentClientTrapHandlers = {
-      getAgentInterceptor: async (agentId) => {
-        const agent = await agentClient.getAgent(agentId);
+      getAgentInterceptor: async (...props) => {
+        const agent = await getAgentMethod(...props);
         adjustAgentData(agent, 'getAgent');
         return agent;
       },
 
-      getByIdsInterceptor: async (agentIds, options) => {
-        const agents = await agentClient.getByIds(agentIds, options);
+      getByIdsInterceptor: async (...props) => {
+        const agents = await getByIdsMethod(...props);
         adjustAgentData(agents, 'getByIds');
         return agents;
       },
 
-      listAgentsInterceptor: async (options) => {
-        // debugger;
-        const agents = await agentClient.listAgents(options);
+      listAgentsInterceptor: async (...props) => {
+        const agents = await listAgentsMethod(...props);
         adjustAgentData(agents.agents, 'listAgents');
         return agents;
       },
