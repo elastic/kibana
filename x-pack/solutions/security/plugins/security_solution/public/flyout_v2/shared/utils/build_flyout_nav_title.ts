@@ -9,36 +9,28 @@ import { getFlyoutManagerStore } from '@elastic/eui';
 
 const NAV_TITLE_SEPARATOR = ' -> ';
 
-// Maps a composed title back to its own trailing label, so the next hop can recover it without
-// re-parsing the rendered string — parsing would misread a raw title that happens to contain the
-// literal separator as if it were itself a multi-hop chain.
+// Recovers a composed title's own trailing label without re-parsing the string — parsing would
+// misread a raw title containing the literal separator as an existing chain.
 const flatLabelByComposedTitle = new Map<string, string>();
 
 export interface BuildFlyoutNavTitleOptions {
   /**
-   * Chain from this session's own root title (the title it was opened with) instead of whichever
-   * sibling child happens to currently be open. Pass `true` when the caller is a persistent anchor
-   * — a graph canvas, a table — that can open several different children one after another without
-   * navigating away in between (e.g. clicking a different node/row while a previous node/row's
-   * child flyout is still open). EUI's flyout-manager session only ever tracks a single "current
-   * child" slot, so without this the title would incorrectly chain off the previous sibling's title
-   * (e.g. "Alert -> Host: my-host") instead of the anchor's own title (e.g.
-   * "Graph: My Rule -> Host: my-host"). Leave this unset for genuine drill-downs — a link rendered
-   * inside the currently-displayed child's own content — where chaining off that child is correct.
+   * Chain from the session's root title instead of its current child. EUI's flyout-manager
+   * session tracks only one "current child" slot, so a caller whose trigger stays clickable
+   * after opening a child (a graph node, a table row, a header) would otherwise chain off
+   * whichever child opened last — e.g. "Alert -> Host: x" instead of the anchor's own title.
+   * Leave unset for a genuine drill-down (a link inside the currently displayed child's content).
    */
   resetToRoot?: boolean;
 }
 
 /**
- * Builds a flat `"<last> -> <childTitle>"` history title for a child flyout opened with
- * `session: 'inherit'` (just `childTitle` if no session is active). Never accumulates past one
- * hop — document -> graph -> entity -> entity reads "Entity -> Entity" at each step, not the
- * full chain.
+ * Builds a flat `"<last> -> <childTitle>"` title for a child flyout (`session: 'inherit'`).
+ * Never accumulates past one hop.
  *
  * A plain function, not a hook: `openSystemFlyout` mounts each flyout into its own React root, so
- * a hook-computed callback passed as a prop into a different flyout's tool would freeze with
- * whatever session was active when the prop was handed off. Reading the store fresh at call time
- * avoids that.
+ * a hook-computed callback handed off as a prop would freeze with a stale session. Reading the
+ * store fresh at call time avoids that.
  */
 export const buildFlyoutNavTitle = (
   childTitle: string,
