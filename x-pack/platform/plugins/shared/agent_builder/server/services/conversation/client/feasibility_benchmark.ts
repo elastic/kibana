@@ -433,6 +433,41 @@ export const buildConversationFeasibilitySearchRequests =
         },
       },
     },
+    {
+      name: 'indexed_multi_field_flattened_scan',
+      request: {
+        track_total_hits: true,
+        size: 20,
+        query: {
+          bool: {
+            filter: [
+              ...baseSearchFilters,
+              {
+                bool: {
+                  should: [
+                    {
+                      query_string: {
+                        default_field: 'extended_fields.summary_as_text',
+                        query: '*investigation*',
+                      },
+                    },
+                    { term: { 'extended_fields.priority_as_keyword': 'high' } },
+                    { term: { 'extended_fields.region_as_keyword': 'emea' } },
+                    {
+                      query_string: {
+                        default_field: 'extended_fields.assignee_as_user',
+                        query: '*User\\ 1*',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 2,
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
   ];
 
 export const summarizeConversationFeasibilityTimings = (

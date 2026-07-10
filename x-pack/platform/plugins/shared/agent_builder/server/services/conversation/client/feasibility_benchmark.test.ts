@@ -101,6 +101,7 @@ describe('conversation templating feasibility benchmark', () => {
       'runtime_user_picker_name_wildcard',
       'runtime_tags_membership_with_complex_bool',
       'runtime_multi_field_source_scan',
+      'indexed_multi_field_flattened_scan',
     ]);
     expect(requests[0].request.query).toEqual(
       expect.objectContaining({
@@ -155,6 +156,36 @@ describe('conversation templating feasibility benchmark', () => {
         }),
       })
     );
+    expect(requests[8].request.runtime_mappings).toEqual(undefined);
+    expect(requests[8].request.query).toEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          filter: expect.arrayContaining([
+            {
+              bool: {
+                should: [
+                  {
+                    query_string: {
+                      default_field: 'extended_fields.summary_as_text',
+                      query: '*investigation*',
+                    },
+                  },
+                  { term: { 'extended_fields.priority_as_keyword': 'high' } },
+                  { term: { 'extended_fields.region_as_keyword': 'emea' } },
+                  {
+                    query_string: {
+                      default_field: 'extended_fields.assignee_as_user',
+                      query: '*User\\ 1*',
+                    },
+                  },
+                ],
+                minimum_should_match: 2,
+              },
+            },
+          ]),
+        }),
+      })
+    );
   });
 
   it('summarizes p95 against the 1000ms gate plus 10% tolerance', () => {
@@ -206,8 +237,8 @@ describe('conversation templating feasibility benchmark', () => {
       })
     );
     expect(client.bulk).toHaveBeenCalledTimes(2);
-    expect(client.search).toHaveBeenCalledTimes(16);
-    expect(results).toHaveLength(8);
+    expect(client.search).toHaveBeenCalledTimes(18);
+    expect(results).toHaveLength(9);
     expect(results[0].samplesMs).toHaveLength(2);
     expect(results[0].esTookMs).toEqual([1, 1]);
     expect(logger).toHaveBeenCalledWith('Seeding 50% complete (1/2 batches)');
