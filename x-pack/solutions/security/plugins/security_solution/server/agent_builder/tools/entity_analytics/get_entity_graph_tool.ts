@@ -10,9 +10,11 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ExperimentalFeatures } from '../../../../common';
 import { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
+import type { ProductFeaturesService } from '../../../lib/product_features_service';
 import { securityTool } from '../constants';
 import { buildRenderAttachmentTag } from './attachment_utils';
 import { getEntityStoreV2ToolAvailability } from './entity_store_v2_availability';
@@ -45,7 +47,8 @@ export const SECURITY_GET_ENTITY_GRAPH_TOOL_ID = securityTool('get_entity_graph'
 export const getEntityGraphTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  productFeaturesService: ProductFeaturesService
 ): BuiltinToolDefinition<typeof schema> => {
   return {
     id: SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
@@ -59,8 +62,45 @@ When the id/name resolves to multiple candidate entities, no attachment is store
     tags: ['security', 'entity-store', 'entity-analytics', 'graph'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request, spaceId }: ToolAvailabilityContext) =>
-        getEntityStoreV2ToolAvailability({ core, request, spaceId, experimentalFeatures, logger }),
+      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
+        const entityStoreAvailability = await getEntityStoreV2ToolAvailability({
+          core,
+          request,
+          spaceId,
+          experimentalFeatures,
+          logger,
+        });
+        if (entityStoreAvailability.status !== 'available') {
+          return entityStoreAvailability;
+        }
+
+        try {
+          if (!productFeaturesService.isEnabled(ProductFeatureKey.graphVisualization)) {
+            return {
+              status: 'unavailable',
+              reason: 'The entity relationship graph is not enabled for this project tier.',
+            };
+          }
+
+          const [, startPlugins] = await core.getStartServices();
+          const license = await startPlugins.licensing.getLicense();
+          if (!license.hasAtLeast('platinum')) {
+            return {
+              status: 'unavailable',
+              reason: 'The entity relationship graph requires a Platinum license or above.',
+            };
+          }
+        } catch (error) {
+          return {
+            status: 'unavailable',
+            reason: `Failed to check graph availability: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }`,
+          };
+        }
+
+        return { status: 'available' };
+      },
     },
     handler: async (params, { spaceId, esClient, attachments }) => {
       logger.debug(

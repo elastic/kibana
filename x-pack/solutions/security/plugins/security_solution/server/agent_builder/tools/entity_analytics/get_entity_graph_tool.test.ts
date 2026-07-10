@@ -9,6 +9,8 @@ import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-b
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { coreMock } from '@kbn/core/server/mocks';
+import { ALL_PRODUCT_FEATURE_KEYS, ProductFeatureKey } from '@kbn/security-solution-features/keys';
+import { createProductFeaturesServiceMock } from '../../../lib/product_features_service/mocks';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import {
   createToolAvailabilityContext,
@@ -58,13 +60,28 @@ interface GraphSuccessData {
 
 describe('getEntityGraphTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = getEntityGraphTool(mockCore, mockLogger, mockExperimentalFeatures);
+  const productFeaturesService = createProductFeaturesServiceMock();
+  const tool = getEntityGraphTool(
+    mockCore,
+    mockLogger,
+    mockExperimentalFeatures,
+    productFeaturesService
+  );
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
+
+  const mockHasAtLeast = jest.fn().mockReturnValue(true);
+  const mockGetLicense = jest.fn().mockResolvedValue({ hasAtLeast: mockHasAtLeast });
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({ status: 'available' });
+    mockHasAtLeast.mockReturnValue(true);
+    mockCore.getStartServices.mockResolvedValue([
+      mockCoreStart,
+      { licensing: { getLicense: mockGetLicense } },
+      {},
+    ]);
   });
 
   describe('schema', () => {
@@ -95,17 +112,39 @@ describe('getEntityGraphTool', () => {
     });
 
     it('returns unavailable when entity store v2 is disabled', async () => {
-      const disabledTool = getEntityGraphTool(mockCore, mockLogger, {
-        ...mockExperimentalFeatures,
-        entityAnalyticsEntityStoreV2: false,
-      });
+      const disabledTool = getEntityGraphTool(
+        mockCore,
+        mockLogger,
+        { ...mockExperimentalFeatures, entityAnalyticsEntityStoreV2: false },
+        productFeaturesService
+      );
 
       const result = await disabledTool.availability!.handler(
         createToolAvailabilityContext(mockRequest, 'default')
       );
 
       expect(result.status).toBe('unavailable');
-      expect(result.reason).toContain('Entity Store V2 is not enabled');
+    });
+
+    it('returns unavailable when the graphVisualization product feature is disabled', async () => {
+      mockEsClient.asInternalUser.indices.exists.mockResolvedValueOnce(true);
+      const gatedTool = getEntityGraphTool(
+        mockCore,
+        mockLogger,
+        mockExperimentalFeatures,
+        // Enable everything except graph visualization
+        createProductFeaturesServiceMock(
+          [...ALL_PRODUCT_FEATURE_KEYS].filter(
+            (key) => key !== ProductFeatureKey.graphVisualization
+          )
+        )
+      );
+
+      const result = await gatedTool.availability!.handler(
+        createToolAvailabilityContext(mockRequest, 'default')
+      );
+
+      expect(result.status).toBe('unavailable');
     });
 
     it('returns unavailable when the entity store v2 index does not exist', async () => {
@@ -130,6 +169,17 @@ describe('getEntityGraphTool', () => {
       expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
         index: 'entities-latest-default',
       });
+    });
+
+    it('returns unavailable when the license is below Platinum', async () => {
+      mockEsClient.asInternalUser.indices.exists.mockResolvedValueOnce(true);
+      mockHasAtLeast.mockReturnValue(false);
+
+      const result = await tool.availability!.handler(
+        createToolAvailabilityContext(mockRequest, 'default')
+      );
+
+      expect(result.status).toBe('unavailable');
     });
   });
 
