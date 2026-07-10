@@ -110743,8 +110743,6 @@ components:
             - id
             - text
     Observability_AI_Assistant_API_Message:
-      title: Message
-      type: object
       properties:
         '@timestamp':
           description: The timestamp when the message was created.
@@ -110774,6 +110772,8 @@ components:
       required:
         - '@timestamp'
         - message
+      title: Message
+      type: object
     Observability_AI_Assistant_API_MessageRoleEnum:
       description: The role of the message sender.
       enum:
