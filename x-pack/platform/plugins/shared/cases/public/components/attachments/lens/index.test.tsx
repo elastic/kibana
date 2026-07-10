@@ -62,6 +62,43 @@ describe('getVisualizationAttachmentType', () => {
     });
   });
 
+  describe('workflowSchema', () => {
+    const getWorkflowSchema = () => {
+      const { workflowSchema } = getVisualizationAttachmentType();
+      if (!workflowSchema) {
+        throw new Error('expected lens to expose a workflow schema');
+      }
+      return workflowSchema;
+    };
+
+    const referencePayload = {
+      type: LENS_ATTACHMENT_TYPE,
+      owner: 'securitySolution',
+      attachmentId: 'lens-so-id',
+      metadata: { title: 'My visualization', soType: 'lens' },
+    };
+
+    it('accepts a by-reference payload', () => {
+      expect(getWorkflowSchema().safeParse(referencePayload).success).toBe(true);
+    });
+
+    it('rejects a by-reference payload carrying an inline data snapshot', () => {
+      expect(
+        getWorkflowSchema().safeParse({ ...referencePayload, data: { attributes: {} } }).success
+      ).toBe(false);
+    });
+
+    it('rejects the by-value persistable-state arm', () => {
+      expect(
+        getWorkflowSchema().safeParse({
+          type: LENS_ATTACHMENT_TYPE,
+          owner: 'securitySolution',
+          data: { state: {} },
+        }).success
+      ).toBe(false);
+    });
+  });
+
   describe('getAttachmentViewObject', () => {
     it('renders the event correctly', () => {
       const lensType = getVisualizationAttachmentType();
