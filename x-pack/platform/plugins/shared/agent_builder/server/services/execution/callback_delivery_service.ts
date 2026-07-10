@@ -6,12 +6,13 @@
  */
 
 import pRetry, { AbortError } from 'p-retry';
-import { ExecutionStatus, type ChatEvent } from '@kbn/agent-builder-common';
+import { ExecutionStatus, isRoundCompleteEvent, type ChatEvent } from '@kbn/agent-builder-common';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import type {
   CallbackPayload,
   ChatCallbackFailurePayload,
 } from '../../../common/http_api/chat_callback';
+import { sourceAdapters } from './conversation_source';
 import { buildChatResponseFromEvents } from './utils/chat_response';
 
 const callbackRetryOptions = {
@@ -53,12 +54,29 @@ export class CallbackDeliveryService {
       return;
     }
 
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+    const round = roundCompleteEvent?.data.round;
+    const sourceAdapter = round?.source ? sourceAdapters[round.source.type] : undefined;
+    const structuredOutput = round?.response.structured_output;
+    const sourceText =
+      structuredOutput && 'text' in structuredOutput ? structuredOutput.text : undefined;
+
+    if (!round || !sourceAdapter || typeof sourceText !== 'string') {
+      throw new Error('No source structured output found for callback delivery');
+    }
+
     await this.makeCallbackRequest({
       callbackUrl,
       payload: {
         execution_id: executionId,
         status: ExecutionStatus.completed,
-        response: buildChatResponseFromEvents(events),
+        response: {
+          ...buildChatResponseFromEvents(events),
+          response: {
+            ...round.response,
+            structured_output: sourceAdapter.toSourcePayload(round),
+          },
+        },
       },
     });
   }

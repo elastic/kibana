@@ -24,13 +24,18 @@ import type {
 } from '../agents/prompts';
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
-import type { ConversationSourceType } from './conversation_source/message';
+import type {
+  ConversationSourceInputMessage,
+  ConversationSourceType,
+} from './conversation_source/message';
 import type { RoundState } from './round_state';
 
 /**
  * Source metadata attached to the user input that initiated a round.
  */
 export interface RoundInputSource {
+  /** Source message that was normalized into the round input. */
+  input?: ConversationSourceInputMessage;
   /** User attribution from the external source. */
   user?: ConversationSourceUser;
 }

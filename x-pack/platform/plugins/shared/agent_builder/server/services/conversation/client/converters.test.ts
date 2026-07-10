@@ -504,9 +504,16 @@ describe('conversation model converters', () => {
       });
     });
 
-    it('deserializes round source authorship', () => {
+    it('deserializes round source provenance', () => {
       const serialized = documentBase();
       serialized._source!.conversation_rounds[0].input.source = {
+        input: {
+          channel: 'C123',
+          text: '@agent what is our error rate?',
+          ts: '1712345678.000100',
+          thread_ts: '1712345678.000000',
+          user: 'U123',
+        },
         user: {
           id: 'U123',
           name: 'Jane Doe',
@@ -523,6 +530,13 @@ describe('conversation model converters', () => {
         type: 'slack',
       });
       expect(deserialized.rounds[0].input.source).toEqual({
+        input: {
+          channel: 'C123',
+          text: '@agent what is our error rate?',
+          ts: '1712345678.000100',
+          thread_ts: '1712345678.000000',
+          user: 'U123',
+        },
         user: {
           id: 'U123',
           name: 'Jane Doe',
@@ -730,9 +744,16 @@ describe('conversation model converters', () => {
       });
     });
 
-    it('serializes round source authorship', () => {
+    it('serializes round source provenance', () => {
       const conversation = conversationBase();
       conversation.rounds[0].input.source = {
+        input: {
+          channel: 'C123',
+          text: '@agent what is our error rate?',
+          ts: '1712345678.000100',
+          thread_ts: '1712345678.000000',
+          user: 'U123',
+        },
         user: {
           id: 'U123',
           name: 'Jane Doe',
@@ -749,6 +770,13 @@ describe('conversation model converters', () => {
         type: 'slack',
       });
       expect(serialized.conversation_rounds[0].input.source).toEqual({
+        input: {
+          channel: 'C123',
+          text: '@agent what is our error rate?',
+          ts: '1712345678.000100',
+          thread_ts: '1712345678.000000',
+          user: 'U123',
+        },
         user: {
           id: 'U123',
           name: 'Jane Doe',

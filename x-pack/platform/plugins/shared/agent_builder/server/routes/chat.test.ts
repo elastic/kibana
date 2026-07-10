@@ -93,7 +93,13 @@ describe('conversePayloadSchema', () => {
 describe('callbackConversePayloadSchema', () => {
   const basePayload = {
     agent_id: 'agent-1',
-    input: '@agent hello',
+    input: {
+      channel: 'C123',
+      text: '@agent hello',
+      ts: '1712345678.000100',
+      thread_ts: '1712345678.000000',
+      user: 'U123',
+    },
     source: {
       type: ConversationSourceType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -151,7 +157,7 @@ describe('callbackConversePayloadSchema', () => {
     ).toThrow(/id/);
   });
 
-  it('rejects raw source message input', () => {
+  it('accepts a raw source message as input', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
@@ -163,10 +169,32 @@ describe('callbackConversePayloadSchema', () => {
           user: 'U123',
         },
       })
+    ).not.toThrow();
+  });
+
+  it('does not validate the raw source message shape', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        input: {
+          raw: {
+            vendor_specific: true,
+          },
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects plain string input', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        input: 'Hello',
+      })
     ).toThrow(/input/);
   });
 
-  it('requires an input message', () => {
+  it('requires a raw source message input', () => {
     const { input, ...payloadWithoutInput } = basePayload;
 
     expect(() => callbackConversePayloadSchema.validate(payloadWithoutInput)).toThrow(/input/);
@@ -403,7 +431,11 @@ describe('registerChatRoutes', () => {
       {
         body: {
           agent_id: 'agent-1',
-          input: 'Hello',
+          input: {
+            channel: 'C123',
+            text: 'Hello',
+            ts: '1712345678.000100',
+          },
           source: callbackSource,
           callback: {
             url: 'https://relay.example.com/events?token=abc',
@@ -429,6 +461,19 @@ describe('registerChatRoutes', () => {
           source: {
             external_conversation_id: callbackSource.external_conversation_id,
           },
+          structuredOutput: true,
+          outputSchema: {
+            type: 'object',
+            properties: {
+              text: {
+                type: 'string',
+                description:
+                  'Slack mrkdwn text to post back to the conversation. Use *bold* (single asterisks), _italic_ (underscores), ~strikethrough~, `inline code`, triple-backtick code blocks without language tags, links as <https://example.com|label>, and "-" bullet lists. Do not use GitHub markdown links, headings, tables, or horizontal rules. Keep it concise and conversational.',
+              },
+            },
+            required: ['text'],
+            additionalProperties: false,
+          },
           roundSourceInput: {
             source: {
               type: ConversationSourceType.Slack,
@@ -437,10 +482,129 @@ describe('registerChatRoutes', () => {
           nextInput: {
             message: 'Hello',
             source: {
+              input: {
+                channel: 'C123',
+                text: 'Hello',
+                ts: '1712345678.000100',
+              },
               user: callbackSource.user,
             },
           },
         }),
+      })
+    );
+  });
+
+  it('normalizes callback source input before executing the agent', async () => {
+    const callbackPath = `${internalApiPath}/converse/callback`;
+    let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    const validateCallbackUrl = jest.fn();
+    const executeAgent = jest.fn().mockResolvedValue({
+      executionId: 'execution-1',
+      events$: of(),
+    });
+    const callbackSource = {
+      type: ConversationSourceType.Slack,
+      external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+    };
+    const slackMessage = {
+      channel: 'C123',
+      text: '@agent what is our error rate?',
+      ts: '1712345678.000100',
+      thread_ts: '1712345678.000000',
+      user: 'U123',
+    };
+
+    const router = {
+      versioned: {
+        post: jest.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: jest
+            .fn()
+            .mockImplementation(
+              (
+                _versionConfig: unknown,
+                handler: (ctx: any, req: any, res: any) => Promise<any>
+              ) => {
+                if (config.path === callbackPath) {
+                  callbackHandler = handler;
+                }
+              }
+            ),
+        })),
+      },
+    };
+
+    registerChatRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        callbackDeliveryService: { validateCallbackUrl },
+      }),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = {
+      accepted: jest.fn(({ body }) => ({ status: 202, payload: body })),
+      forbidden: jest.fn(),
+      customError: jest.fn(),
+      notFound: jest.fn(),
+    };
+    await callbackHandler!(
+      {
+        core: Promise.resolve({}),
+        licensing: Promise.resolve({
+          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+        }),
+        agentBuilder: Promise.resolve({
+          spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+        }),
+      },
+      {
+        body: {
+          agent_id: 'agent-1',
+          input: slackMessage,
+          source: callbackSource,
+          callback: {
+            url: 'https://relay.example.com/events?token=abc',
+          },
+        },
+      },
+      response
+    );
+
+    const params = executeAgent.mock.calls[0][0].params;
+
+    expect(params).toEqual(
+      expect.objectContaining({
+        source: {
+          external_conversation_id: callbackSource.external_conversation_id,
+        },
+        structuredOutput: true,
+        outputSchema: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description:
+                'Slack mrkdwn text to post back to the conversation. Use *bold* (single asterisks), _italic_ (underscores), ~strikethrough~, `inline code`, triple-backtick code blocks without language tags, links as <https://example.com|label>, and "-" bullet lists. Do not use GitHub markdown links, headings, tables, or horizontal rules. Keep it concise and conversational.',
+            },
+          },
+          required: ['text'],
+          additionalProperties: false,
+        },
+        roundSourceInput: {
+          source: {
+            type: ConversationSourceType.Slack,
+          },
+        },
+        nextInput: {
+          message: '@agent what is our error rate?',
+          source: {
+            input: slackMessage,
+          },
+        },
       })
     );
   });

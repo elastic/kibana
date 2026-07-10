@@ -31,7 +31,14 @@ describe('addRoundCompleteEvent', () => {
     } as unknown as AttachmentStateManager,
   });
 
-  it('persists round source authorship on the completed round', async () => {
+  it('persists round source provenance on the completed round', async () => {
+    const sourceInput = {
+      channel: 'C123',
+      text: '@agent summarize this',
+      ts: '1712345678.000100',
+      thread_ts: '1712345678.000000',
+      user: 'U123',
+    };
     const sourceUser = {
       id: 'U123',
       name: 'Jane Doe',
@@ -45,6 +52,7 @@ describe('addRoundCompleteEvent', () => {
     const userInput = {
       message: '@agent summarize this',
       source: {
+        input: sourceInput,
         user: sourceUser,
       },
     };
@@ -78,6 +86,13 @@ describe('addRoundCompleteEvent', () => {
       type: ConversationSourceType.Slack,
     });
     expect(roundCompleteEvent?.data.round.input.source).toEqual({
+      input: {
+        channel: 'C123',
+        text: '@agent summarize this',
+        ts: '1712345678.000100',
+        thread_ts: '1712345678.000000',
+        user: 'U123',
+      },
       user: {
         id: 'U123',
         name: 'Jane Doe',

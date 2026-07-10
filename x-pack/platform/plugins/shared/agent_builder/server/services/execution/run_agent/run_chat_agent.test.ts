@@ -6,7 +6,7 @@
  */
 
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import { ToolOrigin } from '@kbn/agent-builder-common';
+import { ConversationSourceType, ToolOrigin } from '@kbn/agent-builder-common';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 
@@ -17,6 +17,20 @@ import { createMockedExecutableTool } from '../../../test_utils/tools';
 import { runDefaultAgentMode } from './run_chat_agent';
 import { prepareConversation, selectTools, extractRound, getPendingRound } from './utils';
 import { createAgentGraph } from './graph';
+import { createPromptFactory } from './prompts';
+
+const mockSlackOutputSchema = {
+  type: 'object',
+  properties: {
+    text: {
+      type: 'string',
+      description:
+        'Slack mrkdwn text to post back to the conversation. Use *bold* (single asterisks), _italic_ (underscores), ~strikethrough~, `inline code`, triple-backtick code blocks without language tags, links as <https://example.com|label>, and "-" bullet lists. Do not use GitHub markdown links, headings, tables, or horizontal rules. Keep it concise and conversational.',
+    },
+  },
+  required: ['text'],
+  additionalProperties: false,
+};
 
 jest.mock('./utils', () => ({
   prepareConversation: jest.fn(),
@@ -54,6 +68,7 @@ const selectToolsMock = selectTools as jest.MockedFn<typeof selectTools>;
 const extractRoundMock = extractRound as jest.MockedFn<typeof extractRound>;
 const getPendingRoundMock = getPendingRound as jest.MockedFn<typeof getPendingRound>;
 const createAgentGraphMock = createAgentGraph as jest.MockedFn<typeof createAgentGraph>;
+const createPromptFactoryMock = createPromptFactory as jest.MockedFn<typeof createPromptFactory>;
 
 describe('runDefaultAgentMode', () => {
   beforeEach(() => {
@@ -145,7 +160,7 @@ describe('runDefaultAgentMode', () => {
     );
   });
 
-  it('configures the tool-result length guardrail budget on the toolManager', async () => {
+  it('configures sourced runs with the source output schema', async () => {
     const context = createAgentHandlerContextMock();
 
     jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
@@ -183,12 +198,62 @@ describe('runDefaultAgentMode', () => {
 
     await runDefaultAgentMode(
       {
-        nextInput: { message: 'hello' },
+        nextInput: {
+          message: 'hello',
+          source: {
+            input: {
+              channel: 'C123',
+              text: 'hello',
+              ts: '1712345678.000100',
+            },
+          },
+        },
+        roundSourceInput: {
+          source: {
+            type: ConversationSourceType.Slack,
+          },
+        },
+        structuredOutput: true,
+        outputSchema: mockSlackOutputSchema,
+        conversation: {
+          id: 'conversation-1',
+          agent_id: 'agent-1',
+          title: 'Test conversation',
+          created_at: '2026-07-09T00:00:00.000Z',
+          updated_at: '2026-07-09T00:00:00.000Z',
+          user: { id: 'user-1', username: 'test-user' },
+          rounds: [],
+          source: {
+            external_conversation_id: 'T1:C1:123',
+          },
+        } as any,
         agentConfiguration: { tools: [] } as any,
       },
       context
     );
 
     expect(context.toolManager.setMaxToolResultTokens).toHaveBeenCalledWith(20_000);
+    expect(createPromptFactoryMock).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        sourceAdapter: expect.anything(),
+      })
+    );
+    expect(createAgentGraphMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        structuredOutput: true,
+        outputSchema: {
+          type: 'object',
+          properties: {
+            text: {
+              type: 'string',
+              description:
+                'Slack mrkdwn text to post back to the conversation. Use *bold* (single asterisks), _italic_ (underscores), ~strikethrough~, `inline code`, triple-backtick code blocks without language tags, links as <https://example.com|label>, and "-" bullet lists. Do not use GitHub markdown links, headings, tables, or horizontal rules. Keep it concise and conversational.',
+            },
+          },
+          required: ['text'],
+          additionalProperties: false,
+        },
+      })
+    );
   });
 });

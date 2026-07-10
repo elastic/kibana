@@ -248,7 +248,13 @@ export {
   createUserQuestionAnsweredEvent,
   type ConversationListOptions,
 } from './chat';
-export { ConversationSourceType } from './chat/conversation_source';
+export {
+  ConversationSourceType,
+  type SlackConversationSourceInputMessage,
+  type SlackConversationSourceOutputMessage,
+  type ConversationSourceInputMessage,
+  type ConversationSourceOutputMessage,
+} from './chat/conversation_source';
 export {
   type PublicSkillDefinition,
   type PublicSkillSummary,

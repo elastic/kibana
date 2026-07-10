@@ -36,6 +36,7 @@ import type {
   ChatCallbackAcceptedResponse,
   ChatCallbackRequestBodyPayload,
 } from '../../common/http_api/chat_callback';
+import { sourceAdapters } from '../services/execution/conversation_source';
 import { internalApiPath, publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
@@ -51,6 +52,8 @@ interface ExecuteAgentOptions {
   source?: ConversationSource;
   roundSourceInput?: ConversationRoundSourceInput;
   nextInputSource?: RoundInputSource;
+  structuredOutput?: boolean;
+  outputSchema?: Record<string, unknown>;
 }
 
 export const promptResponseEntrySchema = schema.oneOf([
@@ -313,9 +316,19 @@ export const sourceUserSchema = schema.object({
 });
 
 export const callbackConversePayloadSchema = conversePayloadSchema.extends({
-  input: schema.string({
-    minLength: 1,
-    meta: { description: 'The user input message to send to the agent.' },
+  input: schema.any({
+    validate: (value) => {
+      if (value === undefined) {
+        return 'input is required';
+      }
+
+      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+        return 'input must be a raw source message object';
+      }
+    },
+    meta: {
+      description: 'Raw source message (e.g. a Slack message).',
+    },
   }),
   source: schema.object({
     type: schema.literal(ConversationSourceType.Slack),
@@ -453,6 +466,10 @@ export function registerChatRoutes({
         ...(executionOptions?.roundSourceInput
           ? { roundSourceInput: executionOptions.roundSourceInput }
           : {}),
+        ...(executionOptions?.structuredOutput !== undefined
+          ? { structuredOutput: executionOptions.structuredOutput }
+          : {}),
+        ...(executionOptions?.outputSchema ? { outputSchema: executionOptions.outputSchema } : {}),
         capabilities,
         browserApiTools,
         configurationOverrides,
@@ -614,17 +631,23 @@ export function registerChatRoutes({
           throw createBadRequestError(error instanceof Error ? error.message : String(error));
         }
 
+        const sourceAdapter = sourceAdapters[payload.source.type];
         const roundSourceInput: ConversationRoundSourceInput = {
           source: {
             type: payload.source.type,
           },
         };
+        const normalizedInput = sourceAdapter.toRoundInput(payload.input);
+        const normalizedPayload: ChatRequestBodyPayload = {
+          ...payload,
+          input: normalizedInput.message,
+        };
 
-        await validateConfigurationOverrides({ payload, request });
-        validateAction(payload);
+        await validateConfigurationOverrides({ payload: normalizedPayload, request });
+        validateAction(normalizedPayload);
 
         const { executionId } = await executeAgent({
-          payload,
+          payload: normalizedPayload,
           request,
           executionService,
           executionOptions: {
@@ -636,7 +659,12 @@ export function registerChatRoutes({
               external_conversation_id: payload.source.external_conversation_id,
             },
             roundSourceInput,
-            ...(payload.source.user ? { nextInputSource: { user: payload.source.user } } : {}),
+            nextInputSource: {
+              input: payload.input,
+              ...(payload.source.user ? { user: payload.source.user } : {}),
+            },
+            structuredOutput: true,
+            outputSchema: sourceAdapter.getOutputSchema(),
           },
         });
 

@@ -7,6 +7,7 @@
 
 import type {
   ConversationSource,
+  ConversationSourceInputMessage,
   ConversationSourceUser,
   ConversationSourceType,
   ExecutionStatus,
@@ -14,7 +15,8 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { ChatRequestBodyPayload, ChatResponse } from './chat';
 
-export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
+export interface ChatCallbackRequestBodyPayload extends Omit<ChatRequestBodyPayload, 'input'> {
+  input: ConversationSourceInputMessage;
   source: ConversationSource & {
     type: ConversationSourceType;
     user?: ConversationSourceUser;

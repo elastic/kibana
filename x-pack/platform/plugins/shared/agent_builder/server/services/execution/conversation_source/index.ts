@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-export {
-  ConversationSourceType,
-  type ConversationSourceInputMessage,
-  type ConversationSourceOutputMessage,
-} from './message';
-export type {
-  SlackConversationSourceInputMessage,
-  SlackConversationSourceOutputMessage,
-} from './slack';
+export type { ConversationSourceAdapter } from './adapter';
+export { SlackSourceAdapter } from './slack/slack';
+export { sourceAdapters } from './registry';

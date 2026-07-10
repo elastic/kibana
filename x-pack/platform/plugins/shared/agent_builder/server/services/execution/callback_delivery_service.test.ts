@@ -10,6 +10,7 @@ import {
   ChatEventType,
   ConversationAccessControlMode,
   ConversationRoundStatus,
+  ConversationSourceType,
   ExecutionStatus,
   type ChatEvent,
   type SerializedExecutionError,
@@ -208,9 +209,28 @@ describe('makeSuccessCallbackRequestIfConfigured', () => {
         round: {
           id: 'round-1',
           status: ConversationRoundStatus.completed,
-          input: { message: 'hello' },
+          input: {
+            message: 'hello',
+            source: {
+              input: {
+                channel: 'C123',
+                text: 'hello',
+                ts: '1712345678.000100',
+                thread_ts: '1712345678.000000',
+                user: 'U123',
+              },
+            },
+          },
+          source: {
+            type: ConversationSourceType.Slack,
+          },
           steps: [],
-          response: { message: 'world' },
+          response: {
+            message: 'world',
+            structured_output: {
+              text: '*Slack* world',
+            },
+          },
           started_at: '2026-01-01T00:00:00.000Z',
           time_to_first_token: 1,
           time_to_last_token: 2,
@@ -241,7 +261,7 @@ describe('makeSuccessCallbackRequestIfConfigured', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('delivers the completed response payload when configured', async () => {
+  it('delivers the completed chat response with source routing in structured output', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
 
     await createCallbackDeliveryService().makeSuccessCallbackRequestIfConfigured({
@@ -255,8 +275,49 @@ describe('makeSuccessCallbackRequestIfConfigured', () => {
     expect(JSON.parse(body)).toEqual({
       execution_id: 'execution-1',
       status: ExecutionStatus.completed,
-      response: buildChatResponseFromEvents(events),
+      response: {
+        ...buildChatResponseFromEvents(events),
+        response: {
+          message: 'world',
+          structured_output: {
+            channel: 'C123',
+            thread_ts: '1712345678.000000',
+            text: '*Slack* world',
+          },
+        },
+      },
     });
+  });
+
+  it('throws when callback delivery is configured without source structured output', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch');
+    const roundCompleteEvent = events.find((event) => event.type === ChatEventType.roundComplete)!;
+    const eventsWithoutSourceOutput: ChatEvent[] = [
+      events[0],
+      {
+        type: ChatEventType.roundComplete,
+        data: {
+          ...roundCompleteEvent.data,
+          round: {
+            ...roundCompleteEvent.data.round,
+            source: undefined,
+            response: {
+              message: 'world',
+            },
+          },
+        },
+      },
+    ];
+
+    await expect(
+      createCallbackDeliveryService().makeSuccessCallbackRequestIfConfigured({
+        callbackUrl,
+        executionId: 'execution-1',
+        events: eventsWithoutSourceOutput,
+      })
+    ).rejects.toThrow('No source structured output found for callback delivery');
+
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
 

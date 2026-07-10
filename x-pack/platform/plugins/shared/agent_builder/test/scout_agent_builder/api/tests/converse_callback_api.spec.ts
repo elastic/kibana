@@ -13,7 +13,7 @@ import {
   ConversationSourceType,
   ExecutionStatus,
 } from '@kbn/agent-builder-common';
-import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
+import { createLlmProxy, createToolCallMessage, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type {
   ChatCallbackAcceptedResponse,
   ChatCallbackFailurePayload,
@@ -34,6 +34,23 @@ import { COMMON_HEADERS, INTERNAL_AGENT_BUILDER, API_AGENT_BUILDER } from '../fi
 import { getConversation } from '../fixtures/converse_http';
 
 const INTERNAL_API_VERSION = '1';
+
+const mockStructuredAnswer = (llmProxy: LlmProxy, text: string) => {
+  void llmProxy
+    .intercept({
+      name: 'structured_answer',
+      when: (body) => {
+        return (
+          typeof body.tool_choice === 'object' &&
+          body.tool_choice !== null &&
+          'function' in body.tool_choice &&
+          body.tool_choice.function?.name === 'structured_answer'
+        );
+      },
+      responseMock: createToolCallMessage('structured_answer', { text }),
+    })
+    .completeAfterIntercept();
+};
 
 apiTest.describe(
   'Agent Builder - converse callback API',
@@ -78,23 +95,39 @@ apiTest.describe(
       'elastic-api-version': INTERNAL_API_VERSION,
     });
 
+    const slackInput = (text: string, ts: string) => ({
+      channel: 'C123',
+      text,
+      ts,
+      thread_ts: ts,
+      user: 'U123',
+    });
+
     apiTest('delivers completed response to callback URL', async ({ apiClient }) => {
       const mockedLlmResponse = 'Callback LLM response';
       const mockedLlmTitle = 'Callback Conversation Title';
+      const externalConversationId = 'team:T123/channel:C123/thread:callback-success';
+      const sourceUser = {
+        id: 'U123',
+        name: 'Jane Doe',
+        handle: 'jane',
+      };
       await setupAgentDirectAnswer({
         proxy: llmProxy,
         title: mockedLlmTitle,
         response: mockedLlmResponse,
       });
+      mockStructuredAnswer(llmProxy, mockedLlmResponse);
 
       const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
         headers: internalHeaders(),
         body: {
-          input: 'Hello callback Agent Builder',
+          input: slackInput('Hello callback Agent Builder', '1712345678.000100'),
           connector_id: connectorId,
           source: {
             type: ConversationSourceType.Slack,
-            external_conversation_id: 'team:T123/channel:C123/thread:callback-success',
+            external_conversation_id: externalConversationId,
+            user: sourceUser,
           },
           callback: {
             url: `${callbackServerUrl}/callback?token=success`,
@@ -121,10 +154,33 @@ apiTest.describe(
       expect(callbackPayload.execution_id).toBe(accepted.execution_id);
       expect(callbackPayload.status).toBe(ExecutionStatus.completed);
       expect(callbackPayload.response.response.message).toBe(mockedLlmResponse);
+      expect(callbackPayload.response.response.structured_output).toStrictEqual({
+        channel: 'C123',
+        thread_ts: '1712345678.000100',
+        text: mockedLlmResponse,
+      });
+      expect(callbackPayload.response.source).toStrictEqual({
+        type: ConversationSourceType.Slack,
+      });
       expect(typeof callbackPayload.response.conversation_id).toBe('string');
       expect(callbackPayload.response.conversation_id.length).toBeGreaterThan(0);
 
       conversationIds.add(callbackPayload.response.conversation_id);
+
+      const conversation = await getConversation(
+        apiClient,
+        adminCredentials.apiKeyHeader,
+        callbackPayload.response.conversation_id
+      );
+      const [round] = conversation.rounds;
+
+      expect(round.source).toStrictEqual({
+        type: ConversationSourceType.Slack,
+      });
+      expect(round.input.source?.user).toStrictEqual(sourceUser);
+      expect(round.input.source?.input).toStrictEqual(
+        slackInput('Hello callback Agent Builder', '1712345678.000100')
+      );
     });
 
     apiTest('delivers failed response to callback URL', async ({ apiClient }) => {
@@ -136,7 +192,7 @@ apiTest.describe(
       const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
         headers: internalHeaders(),
         body: {
-          input: 'Hello callback failure',
+          input: slackInput('Hello callback failure', '1712345678.000200'),
           connector_id: connectorId,
           source: {
             type: ConversationSourceType.Slack,
@@ -177,7 +233,7 @@ apiTest.describe(
       const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
         headers: internalHeaders(),
         body: {
-          input: 'Hello callback abort',
+          input: slackInput('Hello callback abort', '1712345678.000300'),
           connector_id: connectorId,
           source: {
             type: ConversationSourceType.Slack,
@@ -236,11 +292,12 @@ apiTest.describe(
           title: 'Callback Continuation Title',
           response: 'First callback response',
         });
+        mockStructuredAnswer(llmProxy, 'First callback response');
 
         const first = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
           headers: internalHeaders(),
           body: {
-            input: 'Start callback thread',
+            input: slackInput('Start callback thread', '1712345678.000400'),
             connector_id: connectorId,
             source,
             callback: {
@@ -260,6 +317,11 @@ apiTest.describe(
 
         expect(firstCallback.execution_id).toBe(firstAccepted.execution_id);
         expect(firstCallback.status).toBe(ExecutionStatus.completed);
+        expect(firstCallback.response.response.structured_output).toStrictEqual({
+          channel: 'C123',
+          thread_ts: '1712345678.000400',
+          text: 'First callback response',
+        });
 
         conversationId = firstCallback.response.conversation_id;
         conversationIds.add(conversationId);
@@ -271,11 +333,12 @@ apiTest.describe(
           continueConversation: true,
           response: 'Second callback response',
         });
+        mockStructuredAnswer(llmProxy, 'Second callback response');
 
         const second = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
           headers: internalHeaders(),
           body: {
-            input: 'Continue callback thread',
+            input: slackInput('Continue callback thread', '1712345678.000500'),
             connector_id: connectorId,
             source,
             callback: {
@@ -297,6 +360,11 @@ apiTest.describe(
         expect(secondCallback.status).toBe(ExecutionStatus.completed);
         expect(secondCallback.response.conversation_id).toBe(conversationId);
         expect(secondCallback.response.response.message).toBe('Second callback response');
+        expect(secondCallback.response.response.structured_output).toStrictEqual({
+          channel: 'C123',
+          thread_ts: '1712345678.000500',
+          text: 'Second callback response',
+        });
 
         const conversation = await getConversation(
           apiClient,
@@ -307,6 +375,12 @@ apiTest.describe(
         expect(conversation.rounds).toHaveLength(2);
         expect(conversation.rounds[0].response.message).toBe('First callback response');
         expect(conversation.rounds[1].response.message).toBe('Second callback response');
+        expect(conversation.rounds[0].source).toStrictEqual({
+          type: ConversationSourceType.Slack,
+        });
+        expect(conversation.rounds[1].source).toStrictEqual({
+          type: ConversationSourceType.Slack,
+        });
       });
     });
   }

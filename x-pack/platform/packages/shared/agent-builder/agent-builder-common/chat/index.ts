@@ -60,7 +60,13 @@ export {
   createAskUserQuestionStep,
   isAskUserQuestionStep,
 } from './conversation';
-export { ConversationSourceType } from './conversation_source';
+export {
+  ConversationSourceType,
+  type SlackConversationSourceInputMessage,
+  type SlackConversationSourceOutputMessage,
+  type ConversationSourceInputMessage,
+  type ConversationSourceOutputMessage,
+} from './conversation_source';
 export {
   ChatEventType,
   type ChatEventBase,

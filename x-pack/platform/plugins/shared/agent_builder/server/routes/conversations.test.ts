@@ -14,8 +14,15 @@ import { registerConversationRoutes } from './conversations';
 const GET_CONVERSATION_PATH = `${publicApiPath}/conversations/{conversation_id}`;
 
 describe('registerConversationRoutes', () => {
-  it('returns stored source authorship details when getting a conversation', async () => {
+  it('returns stored source details without sanitizing round input source payloads', async () => {
     let getConversationHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    const sourceInput = {
+      channel: 'C123',
+      text: '@agent hello',
+      ts: '1712345678.000100',
+      thread_ts: '1712345678.000000',
+      user: 'U123',
+    };
     const conversation = {
       id: 'conversation-1',
       agent_id: 'agent-1',
@@ -37,6 +44,7 @@ describe('registerConversationRoutes', () => {
           input: {
             message: 'hello',
             source: {
+              input: sourceInput,
               user: {
                 id: 'U123',
                 name: 'Bruno',
@@ -130,6 +138,7 @@ describe('registerConversationRoutes', () => {
       id: 'U123',
       name: 'Bruno',
     });
+    expect(result.payload.rounds[0].input.source.input).toBe(sourceInput);
   });
 
   it('returns stored source details when listing conversations', async () => {
