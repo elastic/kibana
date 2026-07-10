@@ -49,6 +49,16 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Schedule B' }));
     await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Schedule C' }));
 
+    // Schedules are Alerting rules backed by saved objects, so a create is not
+    // guaranteed to be searchable immediately (index refresh lag). Wait until
+    // all three are retrievable before asserting (see the pagination test).
+    await expect
+      .poll(async () => {
+        const found = await apis.findSchedules({ per_page: '100' });
+        return (found.body as { data: unknown[] }).data.length;
+      })
+      .toBe(3);
+
     const { body, statusCode } = await apis.findSchedules();
 
     expect(statusCode).toBe(200);
@@ -68,6 +78,15 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Alpha' }));
     await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Bravo' }));
 
+    // Wait until all three are searchable before asserting order (index refresh
+    // lag; see the pagination test).
+    await expect
+      .poll(async () => {
+        const found = await apis.findSchedules({ per_page: '100' });
+        return (found.body as { data: unknown[] }).data.length;
+      })
+      .toBe(3);
+
     const { body, statusCode } = await apis.findSchedules({
       sort_field: 'name',
       sort_direction: 'asc',
@@ -86,6 +105,15 @@ apiTest.describe('Workflow schedule API - find', { tag: SCHEDULE_TAGS }, () => {
     await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Charlie' }));
     await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Alpha' }));
     await apis.createSchedule(getSimpleWorkflowSchedule({ name: 'Bravo' }));
+
+    // Wait until all three are searchable before asserting order (index refresh
+    // lag; see the pagination test).
+    await expect
+      .poll(async () => {
+        const found = await apis.findSchedules({ per_page: '100' });
+        return (found.body as { data: unknown[] }).data.length;
+      })
+      .toBe(3);
 
     const { body, statusCode } = await apis.findSchedules({
       sort_field: 'name',
