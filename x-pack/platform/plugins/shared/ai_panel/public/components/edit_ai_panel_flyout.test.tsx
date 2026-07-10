@@ -173,6 +173,26 @@ describe('EditAiPanelFlyout', () => {
   });
 
   describe('save / cancel', () => {
+    it('disables Apply and close when nothing has been edited', () => {
+      render(<EditAiPanelFlyout {...defaultProps} esqlQuery="FROM logs" template="<p>hi</p>" />);
+      expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
+    });
+
+    it('enables Apply and close once the query differs from the saved one', () => {
+      mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftEsqlQuery: 'FROM other' });
+      render(<EditAiPanelFlyout {...defaultProps} esqlQuery="FROM logs" />);
+      expect(screen.getByRole('button', { name: 'Apply and close' })).not.toBeDisabled();
+    });
+
+    it('enables Apply and close once the template differs from the saved one', () => {
+      mockUseEditFlyoutState.mockReturnValue({
+        ...baseFlyoutState,
+        draftTemplate: '<p>edited</p>',
+      });
+      render(<EditAiPanelFlyout {...defaultProps} template="<p>hi</p>" />);
+      expect(screen.getByRole('button', { name: 'Apply and close' })).not.toBeDisabled();
+    });
+
     it('calls onSave with the trimmed query and template, then closes', async () => {
       const onSave = jest.fn();
       const onClose = jest.fn();
