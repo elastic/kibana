@@ -23,7 +23,9 @@ import { userSelectedNotesForDeletion } from '../../../../notes';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import type { TimelineResultNote } from '../types';
 import { defaultToEmptyTag, getEmptyValue } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
@@ -56,23 +58,38 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
 
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openDocumentFlyoutFromPattern } = useFlyoutApi();
 
   const handleClick = useCallback(() => {
-    openFlyout({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: eventId,
-          indexName: selectedPatterns.join(','),
-          scopeId: timelineId,
+    const indexName = selectedPatterns.join(',');
+    if (enableNewFlyout) {
+      openDocumentFlyoutFromPattern({ documentId: eventId, indexName });
+    } else {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: timelineId,
+          },
         },
-      },
-    });
+      });
+    }
     telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: timelineId,
       panel: 'right',
     });
-  }, [eventId, openFlyout, selectedPatterns, telemetry, timelineId]);
+  }, [
+    eventId,
+    openFlyout,
+    selectedPatterns,
+    telemetry,
+    timelineId,
+    enableNewFlyout,
+    openDocumentFlyoutFromPattern,
+  ]);
 
   return (
     <EuiToolTip content={i18n.TOGGLE_EXPAND_EVENT_DETAILS} disableScreenReaderOutput>

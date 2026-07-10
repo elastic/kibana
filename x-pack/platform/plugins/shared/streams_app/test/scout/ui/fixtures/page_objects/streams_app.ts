@@ -1386,8 +1386,8 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamButton() {
-    await this.page.getByTestId('streamsAppStreamDetailActionsButton').click();
-    await this.page.getByTestId('deleteQueryStreamButton').click();
+    await this.page.testSubj.click('app-menu-overflow-button');
+    await this.page.testSubj.click('streamsDeleteStreamButton');
   }
 
   async fillDeleteQueryStreamModalInput(value: string) {

@@ -24,6 +24,10 @@ import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app'
 import { HighlightedFields } from './highlighted_fields';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
+import {
+  HOST_NAME_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
+} from '../../../../timelines/components/timeline/body/renderers/constants';
 
 jest.mock('../../../shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -230,6 +234,86 @@ describe('InvestigationSection', () => {
       expect.objectContaining({ renderCellActions: localMockRenderCellActions }),
       expect.anything()
     );
+  });
+
+  it('renders a rule link keyed by the rule UUID and opening as a new parent flyout', () => {
+    mockUseExpandSection.mockReturnValue(true);
+    const ruleUuid = '28f4bc3f-5795-46e3-b5ca-d73cd4ab3e5c';
+    const ruleHit = createMockHit({
+      'event.kind': 'signal',
+      'kibana.alert.rule.uuid': ruleUuid,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={ruleHit} renderCellActions={mockRenderCellActions} />
+          </Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    const renderFlyoutLink = mockHighlightedFields.mock.calls[0][0].renderFlyoutLink;
+    const element = renderFlyoutLink!({
+      field: SIGNAL_RULE_NAME_FIELD_NAME,
+      value: 'Match All',
+      children: <span />,
+    }) as React.ReactElement;
+
+    // The link target is the UUID (not the displayed name), and it opens as a new main flyout.
+    expect(element.props.value).toBe(ruleUuid);
+    expect(element.props.asParent).toBe(true);
+  });
+
+  it('falls back to plain children for a rule field when the rule UUID is unavailable', () => {
+    mockUseExpandSection.mockReturnValue(true);
+
+    render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} renderCellActions={mockRenderCellActions} />
+          </Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    const renderFlyoutLink = mockHighlightedFields.mock.calls[0][0].renderFlyoutLink;
+    const element = renderFlyoutLink!({
+      field: SIGNAL_RULE_NAME_FIELD_NAME,
+      value: 'Match All',
+      children: <span data-test-subj="ruleChild" />,
+    }) as React.ReactElement;
+
+    // No UUID on the hit → no OpenFlyoutLink, just the passthrough children.
+    expect(element.props.value).toBeUndefined();
+    expect(element.props.children).toBeDefined();
+  });
+
+  it('opens a non-rule entity field (host) as a new parent flyout', () => {
+    mockUseExpandSection.mockReturnValue(true);
+
+    render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection hit={mockHit} renderCellActions={mockRenderCellActions} />
+          </Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    const renderFlyoutLink = mockHighlightedFields.mock.calls[0][0].renderFlyoutLink;
+    const element = renderFlyoutLink!({
+      field: HOST_NAME_FIELD_NAME,
+      value: 'host-1',
+      children: <span />,
+    }) as React.ReactElement;
+
+    // Host keeps its value as-is and opens as a parent.
+    expect(element.props.value).toBe('host-1');
+    expect(element.props.asParent).toBe(true);
   });
 
   it('uses Security history key when opening flyout inside Security app', () => {
