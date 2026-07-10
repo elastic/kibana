@@ -60,12 +60,16 @@ export const getNamedParams = (
 };
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
-  return columns.map(({ name, type }) => {
+  return columns.map(({ name, type, _meta }) => {
     const kibanaType = esFieldTypeToKibanaFieldType(type);
     return {
       id: name,
       name,
-      meta: { type: kibanaType, esType: type },
+      meta: {
+        type: kibanaType,
+        esType: type,
+        ...(_meta !== undefined && { esMeta: _meta }),
+      },
     } as DatatableColumn;
   });
 }

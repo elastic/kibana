@@ -58,8 +58,6 @@ The plugin also adds four public methods:
     Free the crosshair to move again after locking it.
 */
 
-import jQuery from 'jquery';
-
 (function ($) {
     var options = {
         crosshair: {

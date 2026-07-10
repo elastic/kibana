@@ -12,11 +12,40 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { i18n } from '@kbn/i18n';
 import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import { ParallelIcon } from '@kbn/workflows-ui';
 import { buildBuiltInTriggerOptions, buildRegisteredTriggerOptions } from './build_trigger_options';
 import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionConnectorGroup, ActionGroup, ActionOptionData } from '../types';
 import { isActionGroup } from '../types';
+
+function getBuiltInNestedFlowControlStepOptions(
+  euiTheme: UseEuiTheme['euiTheme']
+): ActionOptionData[] {
+  return (['waitForApproval', 'workflow.execute', 'workflow.executeAsync'] as const)
+    .map((stepId) => getBuiltInStepDefinition(stepId))
+    .filter((def): def is NonNullable<typeof def> => def !== undefined)
+    .map((def) => ({
+      id: def.id,
+      label: def.label,
+      description: def.description,
+      iconType: 'nested' as const,
+      iconColor: euiTheme.colors.vis.euiColorVis0,
+      stability: def.stability,
+    }));
+}
+
+function mergeNestedStepGroups(stepGroups: Record<StepCategory, ActionGroup>): void {
+  for (const group of Object.values(stepGroups)) {
+    if (group.nestedGroups) {
+      for (const nestedGroup of group.nestedGroups) {
+        if (nestedGroup.options.length > 0) {
+          group.options.unshift(nestedGroup);
+        }
+      }
+    }
+  }
+}
 
 export function getActionOptions(
   euiTheme: UseEuiTheme['euiTheme'],
@@ -198,7 +227,7 @@ export function getActionOptions(
         description: i18n.translate('workflows.actionsMenu.parallelDescription', {
           defaultMessage: 'Run branches concurrently and collect their results',
         }),
-        iconType: 'branch',
+        iconType: ParallelIcon,
         iconColor: euiTheme.colors.vis.euiColorVis0,
         stability: getBuiltInStepDefinition('parallel')?.stability,
       },
@@ -223,18 +252,9 @@ export function getActionOptions(
         }),
         iconType: 'user',
         iconColor: euiTheme.colors.vis.euiColorVis0,
+        stability: getBuiltInStepDefinition('waitForInput')?.stability,
       },
-      ...(['workflow.execute', 'workflow.executeAsync'] as const)
-        .map((stepId) => getBuiltInStepDefinition(stepId))
-        .filter((def): def is NonNullable<typeof def> => def !== undefined)
-        .map((def) => ({
-          id: def.id,
-          label: def.label,
-          description: def.description,
-          iconType: 'nested' as const,
-          iconColor: euiTheme.colors.vis.euiColorVis0,
-          stability: def.stability,
-        })),
+      ...getBuiltInNestedFlowControlStepOptions(euiTheme),
     ],
   };
   const elasticSearchGroup: ActionOptionData = {
@@ -334,15 +354,7 @@ export function getActionOptions(
     }
   }
 
-  for (const group of Object.values(stepGroups)) {
-    if (group.nestedGroups) {
-      for (const nestedGroup of group.nestedGroups) {
-        if (nestedGroup.options.length > 0) {
-          group.options.unshift(nestedGroup);
-        }
-      }
-    }
-  }
+  mergeNestedStepGroups(stepGroups);
 
   const topLevelOptions: ActionOptionData[] = [
     triggersGroup,

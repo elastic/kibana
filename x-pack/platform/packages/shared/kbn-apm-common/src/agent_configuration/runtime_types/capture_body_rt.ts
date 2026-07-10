@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
 export const captureBodyRt = t.union([
   t.literal('off'),
@@ -13,3 +14,6 @@ export const captureBodyRt = t.union([
   t.literal('transactions'),
   t.literal('all'),
 ]);
+
+// zod equivalent, additive (io-ts -> zod migration, elastic/kibana#243355).
+export const captureBodySchema = z.enum(['off', 'errors', 'transactions', 'all']);

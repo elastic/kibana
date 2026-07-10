@@ -39,9 +39,11 @@ jest.mock('../../hooks/use_bulk_delete_rules', () => ({
 
 const mockBulkEnableMutate = jest.fn();
 const mockBulkDisableMutate = jest.fn();
+const mockUseBulkEnableRules = jest.fn();
+const mockUseBulkDisableRules = jest.fn();
 jest.mock('../../hooks/use_bulk_enable_disable_rules', () => ({
-  useBulkEnableRules: () => ({ mutate: mockBulkEnableMutate, isLoading: false }),
-  useBulkDisableRules: () => ({ mutate: mockBulkDisableMutate, isLoading: false }),
+  useBulkEnableRules: () => mockUseBulkEnableRules(),
+  useBulkDisableRules: () => mockUseBulkDisableRules(),
 }));
 
 const mockToggleEnabledMutate = jest.fn();
@@ -102,6 +104,14 @@ describe('RulesListTableContainer', () => {
     });
     mockUseToggleRuleEnabled.mockReturnValue({
       mutate: mockToggleEnabledMutate,
+      isLoading: false,
+    });
+    mockUseBulkEnableRules.mockReturnValue({
+      mutate: mockBulkEnableMutate,
+      isLoading: false,
+    });
+    mockUseBulkDisableRules.mockReturnValue({
+      mutate: mockBulkDisableMutate,
       isLoading: false,
     });
   });
@@ -212,15 +222,59 @@ describe('RulesListTableContainer', () => {
     it('calls toggleEnabled mutation with inverted enabled state', async () => {
       renderContainer();
 
-      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('toggleEnabledRule-rule-1')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('toggleEnabledRule-rule-1'));
+      fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
 
       expect(mockToggleEnabledMutate).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
+    });
+
+    it('shows a spinner in place of the switch for the rule being toggled', () => {
+      mockUseToggleRuleEnabled.mockReturnValue({
+        mutate: mockToggleEnabledMutate,
+        isLoading: true,
+        variables: { id: 'rule-1', enabled: false },
+      });
+
+      renderContainer();
+
+      expect(screen.getByTestId('ruleEnabledSpinner-rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeInTheDocument();
+    });
+
+    it('disables the other switches while a toggle is in flight, preventing a second toggle from being dispatched', () => {
+      mockUseToggleRuleEnabled.mockReturnValue({
+        mutate: mockToggleEnabledMutate,
+        isLoading: true,
+        variables: { id: 'rule-1', enabled: false },
+      });
+
+      renderContainer();
+
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
+    });
+
+    it('disables all switches while a bulk enable mutation is in flight', () => {
+      mockUseBulkEnableRules.mockReturnValue({
+        mutate: mockBulkEnableMutate,
+        isLoading: true,
+      });
+
+      renderContainer();
+
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeDisabled();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
+    });
+
+    it('disables all switches while a bulk disable mutation is in flight', () => {
+      mockUseBulkDisableRules.mockReturnValue({
+        mutate: mockBulkDisableMutate,
+        isLoading: true,
+      });
+
+      renderContainer();
+
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toBeDisabled();
+      expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toBeDisabled();
     });
   });
 
