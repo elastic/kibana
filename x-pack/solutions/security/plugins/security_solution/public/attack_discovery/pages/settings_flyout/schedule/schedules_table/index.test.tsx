@@ -13,9 +13,7 @@ import { useFindAttackDiscoverySchedules } from '../logic/use_find_schedules';
 import { useEnableAttackDiscoverySchedule } from '../logic/use_enable_schedule';
 import { useDisableAttackDiscoverySchedule } from '../logic/use_disable_schedule';
 import { useDeleteAttackDiscoverySchedule } from '../logic/use_delete_schedule';
-import { useBulkEnableAttackDiscoverySchedules } from '../logic/use_bulk_enable_schedules';
-import { useBulkDisableAttackDiscoverySchedules } from '../logic/use_bulk_disable_schedules';
-import { useBulkDeleteAttackDiscoverySchedules } from '../logic/use_bulk_delete_schedules';
+import { useScheduleApi } from '../logic/use_schedule_api';
 import { mockFindAttackDiscoverySchedules } from '../../../mock/mock_find_attack_discovery_schedules';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
@@ -26,13 +24,12 @@ jest.mock('../logic/use_find_schedules');
 jest.mock('../logic/use_enable_schedule');
 jest.mock('../logic/use_disable_schedule');
 jest.mock('../logic/use_delete_schedule');
-jest.mock('../logic/use_bulk_enable_schedules');
-jest.mock('../logic/use_bulk_disable_schedules');
-jest.mock('../logic/use_bulk_delete_schedules');
+jest.mock('../logic/use_schedule_api');
 
 const mockUseFindAttackDiscoverySchedules = useFindAttackDiscoverySchedules as jest.MockedFunction<
   typeof useFindAttackDiscoverySchedules
 >;
+const mockUseScheduleApi = useScheduleApi as jest.MockedFunction<typeof useScheduleApi>;
 
 const enableAttackDiscoveryScheduleMock = jest.fn();
 const mockUseEnableAttackDiscoverySchedule =
@@ -47,20 +44,8 @@ const mockUseDeleteAttackDiscoverySchedule =
   useDeleteAttackDiscoverySchedule as jest.MockedFunction<typeof useDeleteAttackDiscoverySchedule>;
 const refetchSchedulesMock = jest.fn();
 const bulkEnableAttackDiscoverySchedulesMock = jest.fn();
-const mockUseBulkEnableAttackDiscoverySchedules =
-  useBulkEnableAttackDiscoverySchedules as jest.MockedFunction<
-    typeof useBulkEnableAttackDiscoverySchedules
-  >;
 const bulkDisableAttackDiscoverySchedulesMock = jest.fn();
-const mockUseBulkDisableAttackDiscoverySchedules =
-  useBulkDisableAttackDiscoverySchedules as jest.MockedFunction<
-    typeof useBulkDisableAttackDiscoverySchedules
-  >;
 const bulkDeleteAttackDiscoverySchedulesMock = jest.fn();
-const mockUseBulkDeleteAttackDiscoverySchedules =
-  useBulkDeleteAttackDiscoverySchedules as jest.MockedFunction<
-    typeof useBulkDeleteAttackDiscoverySchedules
-  >;
 
 describe('SchedulesTable', () => {
   beforeEach(() => {
@@ -74,6 +59,9 @@ describe('SchedulesTable', () => {
               updateAttackDiscoverySchedule: true,
             },
           },
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(false),
         },
       },
     });
@@ -93,15 +81,32 @@ describe('SchedulesTable', () => {
     mockUseDeleteAttackDiscoverySchedule.mockReturnValue({
       mutateAsync: deleteAttackDiscoveryScheduleMock,
     } as unknown as jest.Mocked<ReturnType<typeof useDeleteAttackDiscoverySchedule>>);
-    mockUseBulkEnableAttackDiscoverySchedules.mockReturnValue({
-      mutateAsync: bulkEnableAttackDiscoverySchedulesMock,
-    } as unknown as jest.Mocked<ReturnType<typeof useBulkEnableAttackDiscoverySchedules>>);
-    mockUseBulkDisableAttackDiscoverySchedules.mockReturnValue({
-      mutateAsync: bulkDisableAttackDiscoverySchedulesMock,
-    } as unknown as jest.Mocked<ReturnType<typeof useBulkDisableAttackDiscoverySchedules>>);
-    mockUseBulkDeleteAttackDiscoverySchedules.mockReturnValue({
-      mutateAsync: bulkDeleteAttackDiscoverySchedulesMock,
-    } as unknown as jest.Mocked<ReturnType<typeof useBulkDeleteAttackDiscoverySchedules>>);
+
+    mockUseScheduleApi.mockReturnValue({
+      isWorkflowsEnabled: false,
+      useBulkDeleteSchedules: jest
+        .fn()
+        .mockReturnValue({ mutateAsync: bulkDeleteAttackDiscoverySchedulesMock }),
+      useBulkDisableSchedules: jest
+        .fn()
+        .mockReturnValue({ mutateAsync: bulkDisableAttackDiscoverySchedulesMock }),
+      useBulkEnableSchedules: jest
+        .fn()
+        .mockReturnValue({ mutateAsync: bulkEnableAttackDiscoverySchedulesMock }),
+      useCreateSchedule: jest.fn(),
+      useDeleteSchedule: jest
+        .fn()
+        .mockReturnValue({ mutateAsync: deleteAttackDiscoveryScheduleMock }),
+      useDisableSchedule: jest
+        .fn()
+        .mockReturnValue({ mutateAsync: disableAttackDiscoveryScheduleMock }),
+      useEnableSchedule: jest
+        .fn()
+        .mockReturnValue({ mutateAsync: enableAttackDiscoveryScheduleMock }),
+      useFindSchedules: mockUseFindAttackDiscoverySchedules,
+      useGetSchedule: jest.fn(),
+      useUpdateSchedule: jest.fn(),
+    } as unknown as ReturnType<typeof useScheduleApi>);
   });
 
   const selectSchedule = (container: HTMLElement, scheduleId: string) => {
@@ -300,6 +305,185 @@ describe('SchedulesTable', () => {
       expect(bulkDeleteAttackDiscoverySchedulesMock).toHaveBeenCalledWith({
         ids: [mockFindAttackDiscoverySchedules.schedules[0].id],
       });
+    });
+  });
+
+  describe('when workflows feature flag is enabled', () => {
+    const mockWorkflowDeleteMutateAsync = jest.fn();
+    const mockWorkflowDisableMutateAsync = jest.fn();
+    const mockWorkflowEnableMutateAsync = jest.fn();
+    const mockWorkflowBulkDeleteMutateAsync = jest.fn();
+    const mockWorkflowBulkDisableMutateAsync = jest.fn();
+    const mockWorkflowBulkEnableMutateAsync = jest.fn();
+    const mockUseFindWorkflowSchedules = jest.fn();
+
+    beforeEach(() => {
+      // Simulate the public API having no schedules (different storage from the internal API)
+      mockUseFindAttackDiscoverySchedules.mockReturnValue({
+        data: { schedules: [], total: 0 },
+        isLoading: false,
+        refetch: refetchSchedulesMock,
+      } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
+
+      // The internal (workflow) find hook returns the schedules
+      mockUseFindWorkflowSchedules.mockReturnValue({
+        data: mockFindAttackDiscoverySchedules,
+        isLoading: false,
+        refetch: refetchSchedulesMock,
+      });
+
+      mockUseScheduleApi.mockReturnValue({
+        isWorkflowsEnabled: true,
+        useBulkDeleteSchedules: jest
+          .fn()
+          .mockReturnValue({ mutateAsync: mockWorkflowBulkDeleteMutateAsync }),
+        useBulkDisableSchedules: jest
+          .fn()
+          .mockReturnValue({ mutateAsync: mockWorkflowBulkDisableMutateAsync }),
+        useBulkEnableSchedules: jest
+          .fn()
+          .mockReturnValue({ mutateAsync: mockWorkflowBulkEnableMutateAsync }),
+        useCreateSchedule: jest.fn(),
+        useDeleteSchedule: jest
+          .fn()
+          .mockReturnValue({ mutateAsync: mockWorkflowDeleteMutateAsync }),
+        useDisableSchedule: jest
+          .fn()
+          .mockReturnValue({ mutateAsync: mockWorkflowDisableMutateAsync }),
+        useEnableSchedule: jest
+          .fn()
+          .mockReturnValue({ mutateAsync: mockWorkflowEnableMutateAsync }),
+        useFindSchedules: mockUseFindWorkflowSchedules,
+        useGetSchedule: jest.fn(),
+        useUpdateSchedule: jest.fn(),
+      } as unknown as ReturnType<typeof useScheduleApi>);
+    });
+
+    it('renders schedule rows sourced from the internal (workflow) API, not the public API', () => {
+      const { getAllByRole } = renderTable();
+
+      // 1 header row + schedule rows from the workflow find hook
+      expect(getAllByRole('row').length).toBe(
+        1 + mockFindAttackDiscoverySchedules.schedules.length
+      );
+    });
+
+    it('invokes the workflow delete mutation when the delete button is clicked', async () => {
+      const { getAllByTestId } = renderTable();
+
+      act(() => {
+        fireEvent.click(getAllByTestId('deleteButton')[0]);
+      });
+
+      await waitFor(() => {
+        expect(mockWorkflowDeleteMutateAsync).toHaveBeenCalledWith({
+          id: mockFindAttackDiscoverySchedules.schedules[0].id,
+        });
+      });
+    });
+
+    it('invokes the workflow disable mutation when the enabled switch is clicked', async () => {
+      const { getAllByTestId } = renderTable();
+
+      act(() => {
+        fireEvent.click(getAllByTestId('scheduleSwitch')[0]);
+      });
+
+      await waitFor(() => {
+        expect(mockWorkflowDisableMutateAsync).toHaveBeenCalledWith({
+          id: mockFindAttackDiscoverySchedules.schedules[0].id,
+        });
+      });
+    });
+
+    it('refetches the schedules after the workflow disable mutation so the table updates', async () => {
+      const { getAllByTestId } = renderTable();
+
+      act(() => {
+        fireEvent.click(getAllByTestId('scheduleSwitch')[0]);
+      });
+
+      await waitFor(() => {
+        expect(refetchSchedulesMock).toHaveBeenCalled();
+      });
+    });
+
+    it('refetches the schedules after the workflow delete mutation so the table updates', async () => {
+      const { getAllByTestId } = renderTable();
+
+      act(() => {
+        fireEvent.click(getAllByTestId('deleteButton')[0]);
+      });
+
+      await waitFor(() => {
+        expect(refetchSchedulesMock).toHaveBeenCalled();
+      });
+    });
+
+    it('routes bulk enable through the workflow bulk hook, not the public API', async () => {
+      const { container, getByTestId } = renderTable();
+
+      const disabledSchedule = mockFindAttackDiscoverySchedules.schedules.find(
+        ({ enabled }) => !enabled
+      );
+      selectSchedule(container, disabledSchedule?.id ?? '');
+      act(() => {
+        fireEvent.click(getByTestId('schedulesTableBulkActions-popover'));
+      });
+      act(() => {
+        fireEvent.click(getByTestId('schedulesTableBulkEnableButton'));
+      });
+
+      await waitFor(() => {
+        expect(mockWorkflowBulkEnableMutateAsync).toHaveBeenCalledWith({
+          ids: [disabledSchedule?.id],
+        });
+      });
+      expect(bulkEnableAttackDiscoverySchedulesMock).not.toHaveBeenCalled();
+    });
+
+    it('routes bulk disable through the workflow bulk hook, not the public API', async () => {
+      const { container, getByTestId } = renderTable();
+
+      const enabledSchedule = mockFindAttackDiscoverySchedules.schedules.find(
+        ({ enabled }) => enabled
+      );
+      selectSchedule(container, enabledSchedule?.id ?? '');
+      act(() => {
+        fireEvent.click(getByTestId('schedulesTableBulkActions-popover'));
+      });
+      act(() => {
+        fireEvent.click(getByTestId('schedulesTableBulkDisableButton'));
+      });
+
+      await waitFor(() => {
+        expect(mockWorkflowBulkDisableMutateAsync).toHaveBeenCalledWith({
+          ids: [enabledSchedule?.id],
+        });
+      });
+      expect(bulkDisableAttackDiscoverySchedulesMock).not.toHaveBeenCalled();
+    });
+
+    it('routes bulk delete through the workflow bulk hook, not the public API', async () => {
+      const { container, getByTestId, getAllByText } = renderTable();
+
+      selectSchedule(container, mockFindAttackDiscoverySchedules.schedules[0].id);
+      act(() => {
+        fireEvent.click(getByTestId('schedulesTableBulkActions-popover'));
+      });
+      act(() => {
+        fireEvent.click(getByTestId('schedulesTableBulkDeleteButton'));
+      });
+      act(() => {
+        fireEvent.click(getAllByText('Delete')[1]);
+      });
+
+      await waitFor(() => {
+        expect(mockWorkflowBulkDeleteMutateAsync).toHaveBeenCalledWith({
+          ids: [mockFindAttackDiscoverySchedules.schedules[0].id],
+        });
+      });
+      expect(bulkDeleteAttackDiscoverySchedulesMock).not.toHaveBeenCalled();
     });
   });
 });

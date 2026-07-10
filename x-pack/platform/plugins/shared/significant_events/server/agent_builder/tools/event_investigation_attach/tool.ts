@@ -10,10 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
-  MAX_ID_LENGTH,
-  significantEventInvestigationStatusSchema,
-} from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
@@ -50,15 +47,6 @@ const eventInvestigationAttachSchema = z.object({
         }
       )
     ),
-  status: significantEventInvestigationStatusSchema.describe(
-    i18n.translate(
-      'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.status',
-      {
-        defaultMessage:
-          'Status of the investigation: "pending" while running, "success" or "failed" when done.',
-      }
-    )
-  ),
   started_at: z.iso.datetime({ offset: true }).describe(
     i18n.translate(
       'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.startedAt',
@@ -76,7 +64,7 @@ const eventInvestigationAttachSchema = z.object({
         'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.schema.completedAt',
         {
           defaultMessage:
-            'ISO-8601 datetime when the investigation completed. Only set for terminal statuses (success or failed).',
+            'ISO-8601 datetime when the investigation completed. Omit while the investigation is still running.',
         }
       )
     ),
@@ -101,7 +89,7 @@ export const createEventInvestigationAttachTool = ({
         'xpack.significantEvents.agentBuilder.tools.eventInvestigationAttach.description',
         {
           defaultMessage:
-            'Record an investigation run on a significant event. Call this when an investigation starts (status: pending) and again when it finishes (status: success or failed) to keep the event up to date.',
+            'Record an investigation run on a significant event. Call this when an investigation starts (omit completed_at) and again when it finishes (set completed_at) to keep the event up to date. The event does not track investigation status — the full investigation state (hypotheses, conclusion) lives on the workflow execution itself.',
         }
       )}
     `,
@@ -118,7 +106,6 @@ export const createEventInvestigationAttachTool = ({
           eventClient: getEventClient(),
           eventId: toolParams.event_id,
           workflowExecutionId: toolParams.workflow_execution_id,
-          status: toolParams.status,
           startedAt: toolParams.started_at,
           completedAt: toolParams.completed_at,
         });

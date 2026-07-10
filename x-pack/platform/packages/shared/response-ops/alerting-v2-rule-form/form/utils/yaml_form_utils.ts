@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/alerting-v2-schemas';
+import { noDataStrategy as noDataStrategyEnum } from '@kbn/alerting-v2-schemas';
 import { dump, load } from 'js-yaml';
 import type {
   FormValues,
@@ -102,7 +103,9 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
     },
     query: ruleQueryToApiQuery(values.query),
     ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
-    ...(values.noDataStrategy ? { no_data_strategy: values.noDataStrategy } : {}),
+    ...(values.kind === 'alert' && values.noDataStrategy
+      ? { no_data_strategy: values.noDataStrategy }
+      : {}),
     ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
     ...(st && { state_transition: st }),
     ...(allArtifacts?.length && { artifacts: allArtifacts }),
@@ -231,18 +234,19 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
       ? (rawRecoveryStrategy as RecoveryStrategy)
       : undefined;
 
+  const resolvedKind = (kind as 'alert' | 'signal') ?? 'alert';
+
   const rawNoDataStrategy = obj.no_data_strategy;
-  const noDataStrategy =
-    rawNoDataStrategy === 'last_known_status' ||
-    rawNoDataStrategy === 'emit' ||
-    rawNoDataStrategy === 'recover' ||
-    rawNoDataStrategy === 'none'
+  const validStrategies = Object.values(noDataStrategyEnum) as string[];
+  const parsedNoDataStrategy =
+    typeof rawNoDataStrategy === 'string' && validStrategies.includes(rawNoDataStrategy)
       ? (rawNoDataStrategy as NoDataStrategy)
       : undefined;
+  const noDataStrategy = parsedNoDataStrategy ?? (resolvedKind === 'alert' ? 'none' : undefined);
 
   return {
     values: {
-      kind: (kind as 'alert' | 'signal') ?? 'alert',
+      kind: resolvedKind,
       metadata: {
         name: typeof name === 'string' ? name.trim() : '',
         enabled: metadata?.enabled !== false,
