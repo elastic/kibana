@@ -6,8 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { useStore } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { isNonLocalIndexName } from '@kbn/es-query';
@@ -23,13 +21,10 @@ import { useDataTableFilters } from '../../../../common/hooks/use_data_table_fil
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
-import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
-import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../../common/constants';
-import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
-import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
-import { AttackFlyoutWrapper } from '../../../../flyout_v2/attack/main/attack_flyout_wrapper';
-import { documentFlyoutHistoryKey } from '../../../../flyout_v2/shared/constants/flyout_history';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
@@ -133,12 +128,9 @@ export const TableSection = React.memo(
 
     const { to, from } = useGlobalTime();
 
-    const { services } = useKibana();
-    const { telemetry, overlays } = services;
-    const enableNewFlyout = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
-    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const store = useStore();
-    const history = useHistory();
+    const { telemetry } = useKibana().services;
+    const enableNewFlyout = useIsNewFlyoutEnabled();
+    const { openAttackFlyout } = useFlyoutApi();
 
     const [{ loading: userInfoLoading }] = useUserData();
 
@@ -177,25 +169,7 @@ export const TableSection = React.memo(
         const attack = getAttack(selectedGroup, bucket);
         if (attack) {
           if (enableNewFlyout) {
-            overlays.openSystemFlyout(
-              flyoutProviders({
-                services,
-                store,
-                history,
-                children: (
-                  <AttackFlyoutWrapper
-                    attackId={attack.id}
-                    indexName={dataView.getIndexPattern()}
-                    onAttackUpdated={() => {}}
-                  />
-                ),
-              }),
-              {
-                ...defaultFlyoutProperties,
-                historyKey: documentFlyoutHistoryKey,
-                session: 'start',
-              }
-            );
+            openAttackFlyout({ attackId: attack.id, indexName: dataView.getIndexPattern() });
           } else {
             openFlyout({
               right: {
@@ -213,18 +187,7 @@ export const TableSection = React.memo(
           });
         }
       },
-      [
-        dataView,
-        defaultFlyoutProperties,
-        enableNewFlyout,
-        getAttack,
-        history,
-        openFlyout,
-        overlays,
-        services,
-        store,
-        telemetry,
-      ]
+      [dataView, enableNewFlyout, getAttack, openAttackFlyout, openFlyout, telemetry]
     );
 
     const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({

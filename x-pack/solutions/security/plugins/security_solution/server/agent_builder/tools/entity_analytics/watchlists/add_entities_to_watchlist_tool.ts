@@ -17,6 +17,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import { getIndexForWatchlist } from '../../../../lib/entity_analytics/watchlists/entities/utils';
 import { createManualEntityService } from '../../../../lib/entity_analytics/watchlists/entity_sources/manual/service';
 import { WatchlistConfigClient } from '../../../../lib/entity_analytics/watchlists/management/watchlist_config';
+import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { securityTool } from '../../constants';
 import { checkWatchlistAccess } from './check_watchlist_access';
 import { formatEntityIdsForPrompt } from './entity_ids_preview';
@@ -78,6 +79,14 @@ Entities not present in the entity store are reported as \`not_found\` in the re
         )}`
       );
 
+      const telemetryTracker = createToolTelemetryTracker({
+        core,
+        toolId: SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
+        spaceId,
+        actionType: 'mutation',
+      });
+      telemetryTracker.recordResultCount(0);
+
       try {
         const [, startPlugins] = await core.getStartServices();
         const { security } = startPlugins;
@@ -90,6 +99,7 @@ Entities not present in the entity store are reported as \`not_found\` in the re
           action: 'modify watchlist membership',
         });
         if (!accessResult.allowed) {
+          telemetryTracker.recordFailure(accessResult.result.data.message);
           return { results: [accessResult.result] };
         }
 
@@ -103,9 +113,11 @@ Entities not present in the entity store are reported as \`not_found\` in the re
 
         const promptId = `watchlists.add_entities_to_watchlist.${callContext.toolCallId}`;
         const { status } = prompts.checkConfirmationStatus(promptId);
+        telemetryTracker.recordConfirmationStatus(status);
 
         if (status === ConfirmationStatus.unprompted) {
           const noun = params.entityIds.length === 1 ? 'entity' : 'entities';
+          telemetryTracker.recordAwaitingConfirmation();
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Add entities to watchlist',
@@ -149,6 +161,7 @@ Entities not present in the entity store are reported as \`not_found\` in the re
 
         const result = await service.assign(params.entityIds);
 
+        telemetryTracker.recordResultCount(result.successful);
         return {
           results: [
             {
@@ -164,6 +177,7 @@ Entities not present in the entity store are reported as \`not_found\` in the re
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        telemetryTracker.recordFailure(errorMessage);
         return {
           results: [
             {
@@ -173,6 +187,8 @@ Entities not present in the entity store are reported as \`not_found\` in the re
             },
           ],
         };
+      } finally {
+        await telemetryTracker.report();
       }
     },
   };
