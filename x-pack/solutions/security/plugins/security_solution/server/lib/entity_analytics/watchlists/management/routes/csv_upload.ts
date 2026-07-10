@@ -11,7 +11,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger, StartServicesAccessor } from '@kbn/core/server';
 import { APP_ID } from '@kbn/security-solution-features/constants';
 
-import { CRUDClient } from '@kbn/entity-store/server/domain/crud';
 import { WATCHLISTS_CSV_UPLOAD_URL, API_VERSIONS } from '../../../../../../common/constants';
 import {
   UploadWatchlistCsvRequestParams,
@@ -20,7 +19,6 @@ import {
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../watchlist_config';
-import { getRequestSavedObjectClient } from '../../shared/utils';
 import type { HapiReadableStream } from '../../../../../types';
 import type { StartPlugins } from '../../../../../plugin';
 import { csvUpload } from '../../entity_sources/csv/csv_upload';
@@ -78,9 +76,9 @@ export const csvUploadRoute = ({
             const namespace = secSol.getSpaceId();
 
             const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-            const entityStoreClient = new CRUDClient({ logger, esClient, namespace });
+            const entityStoreClient = secSol.getEntityStoreUpdateClient();
 
-            const soClient = getRequestSavedObjectClient(await context.core);
+            const soClient = (await context.core).savedObjects.client;
             const watchlistClient = new WatchlistConfigClient({
               esClient,
               soClient,

@@ -7,6 +7,7 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { fetchGraph } from './fetch_graph';
 import type { EsQuery, EntityId, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
@@ -27,6 +28,7 @@ export interface GetGraphParams {
     esQuery?: EsQuery;
     entityIds?: EntityId[];
     pinnedIds?: string[];
+    projectRouting?: ProjectRouting;
   };
   showUnknownTarget: boolean;
   nodesLimit?: number;
@@ -43,6 +45,7 @@ export const getGraph = async ({
     esQuery,
     entityIds,
     pinnedIds,
+    projectRouting,
   },
   showUnknownTarget,
   nodesLimit,
@@ -52,7 +55,9 @@ export const getGraph = async ({
   logger.trace(
     `Fetching graph for [originEventIds: ${
       originEventIds?.map((e) => e.id).join(', ') ?? 'none'
-    }] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
+    }] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}] [projectRouting: ${
+      projectRouting ?? 'default'
+    }]`
   );
 
   const { events, relationships, entities } = await fetchGraph({
@@ -67,6 +72,7 @@ export const getGraph = async ({
     esQuery,
     pinnedIds,
     entityIds,
+    projectRouting,
   });
 
   return parseRecords(logger, events, relationships, entities, nodesLimit);

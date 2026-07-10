@@ -9,10 +9,10 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   createAgentNotFoundError,
+  createAgentUnavailableError,
   createBadRequestError,
-  type AgentAcl,
+  type AgentAccessControl,
 } from '@kbn/agent-builder-common';
-import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import type {
   AgentAvailabilityContext,
@@ -21,14 +21,15 @@ import type {
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type {
-  AgentAclUpdateRequest,
+  AgentAccessControlUpdateRequest,
   AgentCreateRequest,
   AgentListOptions,
   AgentDeleteRequest,
   AgentUpdateRequest,
 } from '../../../common/agents';
+import type { AgentDefinitionWithPermissions } from '../../../common/http_api/agents';
 import type {
-  AgentAclResult,
+  AgentAccessControlResult,
   GetAgentOptions,
   WritableAgentProvider,
   ReadonlyAgentProvider,
@@ -36,7 +37,7 @@ import type {
 import { isReadonlyProvider } from './agent_source';
 
 // internal definition for our agents
-export type InternalAgentDefinition = AgentDefinition & {
+export type InternalAgentDefinition = AgentDefinitionWithPermissions & {
   isAvailable: InternalAgentDefinitionAvailabilityHandler;
 };
 
@@ -52,11 +53,15 @@ export interface AgentRegistry {
    */
   get(agentId: string, opts?: GetAgentOptions): Promise<InternalAgentDefinition>;
   list(opts?: AgentListOptions): Promise<InternalAgentDefinition[]>;
+  getIds(opts?: AgentListOptions): Promise<string[]>;
   create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition>;
   delete(args: AgentDeleteRequest): Promise<boolean>;
-  getAcl(agentId: string): Promise<AgentAclResult>;
-  updateAcl(agentId: string, update: AgentAclUpdateRequest): Promise<AgentAcl>;
+  getAccessControl(agentId: string): Promise<AgentAccessControlResult>;
+  updateAccessControl(
+    agentId: string,
+    update: AgentAccessControlUpdateRequest
+  ): Promise<AgentAccessControl>;
 }
 
 interface CreateAgentRegistryOpts {
@@ -114,7 +119,7 @@ class AgentRegistryImpl implements AgentRegistry {
       if (await provider.has(agentId)) {
         const agent = await provider.get(agentId, opts);
         if (!(await this.isAvailable(agent))) {
-          throw createBadRequestError(`Agent ${agentId} is not available`);
+          throw createAgentUnavailableError({ agentId });
         }
         return agent;
       }
@@ -122,17 +127,21 @@ class AgentRegistryImpl implements AgentRegistry {
     throw createAgentNotFoundError({ agentId });
   }
 
-  async list(opts: AgentListOptions): Promise<InternalAgentDefinition[]> {
+  async list(opts: AgentListOptions = {}): Promise<InternalAgentDefinition[]> {
     const allAgents: InternalAgentDefinition[] = [];
+
     for (const provider of this.orderedProviders) {
-      const providerAgents = await provider.list(opts);
-      for (const agent of providerAgents) {
-        if (await this.isAvailable(agent)) {
-          allAgents.push(agent);
-        }
-      }
+      allAgents.push(...(await this.getAvailableAgents(provider, opts)));
     }
+
     return allAgents;
+  }
+
+  async getIds(opts: AgentListOptions = {}): Promise<string[]> {
+    const builtinAgents = await this.getAvailableAgents(this.builtinProvider, opts);
+    const persistedAgentIds = await this.persistedProvider.getIds(opts);
+
+    return [...builtinAgents.map(({ id }) => id), ...persistedAgentIds];
   }
 
   async create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition> {
@@ -176,7 +185,7 @@ class AgentRegistryImpl implements AgentRegistry {
     throw createAgentNotFoundError({ agentId });
   }
 
-  async getAcl(agentId: string): Promise<AgentAclResult> {
+  async getAccessControl(agentId: string): Promise<AgentAccessControlResult> {
     for (const provider of this.orderedProviders) {
       if (await provider.has(agentId)) {
         if (isReadonlyProvider(provider)) {
@@ -184,13 +193,16 @@ class AgentRegistryImpl implements AgentRegistry {
             `Agent ${agentId} is read-only and does not support access control lists`
           );
         }
-        return provider.getAcl(agentId);
+        return provider.getAccessControl(agentId);
       }
     }
     throw createAgentNotFoundError({ agentId });
   }
 
-  async updateAcl(agentId: string, update: AgentAclUpdateRequest): Promise<AgentAcl> {
+  async updateAccessControl(
+    agentId: string,
+    update: AgentAccessControlUpdateRequest
+  ): Promise<AgentAccessControl> {
     for (const provider of this.orderedProviders) {
       if (await provider.has(agentId)) {
         if (isReadonlyProvider(provider)) {
@@ -198,7 +210,7 @@ class AgentRegistryImpl implements AgentRegistry {
             `Agent ${agentId} is read-only and does not support access control lists`
           );
         }
-        return provider.updateAcl(agentId, update);
+        return provider.updateAccessControl(agentId, update);
       }
     }
     throw createAgentNotFoundError({ agentId });
@@ -216,5 +228,21 @@ class AgentRegistryImpl implements AgentRegistry {
 
     const status = await agent.isAvailable(context);
     return status.status === 'available';
+  }
+
+  private async getAvailableAgents(
+    provider: ReadonlyAgentProvider | WritableAgentProvider,
+    opts: AgentListOptions
+  ): Promise<InternalAgentDefinition[]> {
+    const availableAgents: InternalAgentDefinition[] = [];
+    const providerAgents = await provider.list(opts);
+
+    for (const agent of providerAgents) {
+      if (await this.isAvailable(agent)) {
+        availableAgents.push(agent);
+      }
+    }
+
+    return availableAgents;
   }
 }

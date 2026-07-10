@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiConfirmModal, EuiIcon, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
@@ -17,7 +17,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { SearchSessionsMgmtAPI } from '../../../lib/api';
 import type { IClickActionDescriptor } from './types';
 import type { OnActionDismiss } from './types';
-import extendSessionIcon from './icons/extend_session.svg';
+import { ExtendSessionSvg } from './icons/extend_session.svg';
 import type { UISession } from '../../../types';
 interface ExtendButtonProps {
   searchSession: UISession;
@@ -80,7 +80,7 @@ export const createExtendActionDescriptor = (
   uiSession: UISession,
   core: CoreStart
 ): IClickActionDescriptor => ({
-  iconType: extendSessionIcon,
+  icon: <EuiIcon type={ExtendSessionSvg} size="m" color="inherit" aria-hidden={true} />,
   label: <FormattedMessage id="data.mgmt.searchSessions.actionExtend" defaultMessage="Extend" />,
   onClick: async () => {
     const ref = core.overlays.openModal(

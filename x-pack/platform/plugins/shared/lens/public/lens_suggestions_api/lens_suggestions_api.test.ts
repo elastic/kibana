@@ -81,6 +81,38 @@ describe('suggestionsApi', () => {
     expect(suggestions?.length).toEqual(0);
   });
 
+  test('filters out approximation columns from textBasedColumns before passing to datasource', async () => {
+    const dataView = { id: 'index1' } as unknown as DataView;
+    const visualizationMap = {
+      testVis: { ...mockVis },
+    };
+    datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+      generateSuggestion(),
+    ]);
+    const approxColumn: DatatableColumn = {
+      id: '_approx_col',
+      name: '_approx_col',
+      meta: {
+        type: 'number',
+        esMeta: { approximation: { type: 'count_distinct', column: '@timestamp' } },
+      },
+    };
+    const context = {
+      dataViewSpec: { id: 'index1', title: 'index1', name: 'DataView' },
+      fieldName: '',
+      textBasedColumns: [...textBasedQueryColumns, approxColumn],
+      query: { esql: 'FROM "index1" | STATS COUNT(DISTINCT @timestamp)' },
+    };
+    suggestionsApi({ context, dataView, datasourceMap, visualizationMap });
+    const calledContext = (
+      datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mock.calls[0][0] as {
+        initialContext: typeof context;
+      }
+    ).initialContext;
+    expect(calledContext.textBasedColumns).toEqual(textBasedQueryColumns);
+    expect(calledContext.textBasedColumns).not.toContainEqual(approxColumn);
+  });
+
   test('returns the visualizations suggestions', async () => {
     const dataView = { id: 'index1' } as unknown as DataView;
     const visualizationMap = {

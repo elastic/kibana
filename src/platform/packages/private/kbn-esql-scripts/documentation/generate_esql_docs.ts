@@ -27,33 +27,38 @@ interface DocsSectionContent {
 }
 
 (function () {
-  const pathToElasticsearch = process.argv[2];
-  if (!pathToElasticsearch) {
-    throw new Error('Path to Elasticsearch must be provided as the first argument.');
-  }
+  try {
+    const pathToElasticsearch = process.argv[2];
+    if (!pathToElasticsearch) {
+      throw new Error('Path to Elasticsearch must be provided as the first argument.');
+    }
 
-  // Define function types and their corresponding output files
-  const functionTypes = [
-    { fnType: 'scalar', outputFile: 'scalar_functions.tsx' },
-    { fnType: 'agg', outputFile: 'aggregation_functions.tsx' },
-    {
-      fnType: 'time_series_agg',
-      outputFile: 'timeseries_aggregation_functions.tsx',
-    },
-    { fnType: 'grouping', outputFile: 'grouping_functions.tsx' },
-    { fnType: 'operator', outputFile: 'operators.tsx' },
-  ];
+    // Define function types and their corresponding output files
+    const functionTypes = [
+      { fnType: 'scalar', outputFile: 'scalar_functions.tsx' },
+      { fnType: 'agg', outputFile: 'aggregation_functions.tsx' },
+      {
+        fnType: 'time_series_agg',
+        outputFile: 'timeseries_aggregation_functions.tsx',
+      },
+      { fnType: 'grouping', outputFile: 'grouping_functions.tsx' },
+      { fnType: 'operator', outputFile: 'operators.tsx' },
+    ];
 
-  // Process each function type
-  functionTypes.forEach(({ fnType, outputFile }) => {
-    const functionDocs = loadFunctionDocs({
-      pathToElasticsearch,
-      fnType,
-      keywordType: fnType === 'operator' ? 'operators' : 'functions',
+    // Process each function type
+    functionTypes.forEach(({ fnType, outputFile }) => {
+      const functionDocs = loadFunctionDocs({
+        pathToElasticsearch,
+        fnType,
+        keywordType: fnType === 'operator' ? 'operators' : 'functions',
+      });
+
+      writeFunctionDocs(functionDocs, path.join(OUTPUT_DIR, outputFile));
     });
-
-    writeFunctionDocs(functionDocs, path.join(OUTPUT_DIR, outputFile));
-  });
+  } catch (error) {
+    process.stderr.write(`${error.stack ?? error.message}\n`);
+    process.exit(1);
+  }
 })();
 
 function loadFunctionDocs({

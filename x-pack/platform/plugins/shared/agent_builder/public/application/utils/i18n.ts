@@ -1604,6 +1604,54 @@ export const labels = {
       'xpack.agentBuilder.agentConnectors.detail.removeCancelButton',
       { defaultMessage: 'Cancel' }
     ),
+    subActionsSectionTitle: (count: number) =>
+      i18n.translate('xpack.agentBuilder.agentConnectors.detail.subActionsSectionTitle', {
+        defaultMessage: 'Sub-actions ({count} available)',
+        values: { count },
+      }),
+    connectionSectionTitle: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.connectionSectionTitle',
+      { defaultMessage: 'Connection' }
+    ),
+    oauthConnectedStatus: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.oauthConnectedStatus',
+      { defaultMessage: 'OAuth connected' }
+    ),
+    oauthDisconnectedStatus: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.oauthDisconnectedStatus',
+      { defaultMessage: 'OAuth disconnected' }
+    ),
+    missingSecretsStatus: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.missingSecretsStatus',
+      { defaultMessage: 'Missing credentials' }
+    ),
+    sharedCredentialsStatus: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.sharedCredentialsStatus',
+      { defaultMessage: 'Shared credentials' }
+    ),
+    authenticateLink: i18n.translate('xpack.agentBuilder.agentConnectors.detail.authenticateLink', {
+      defaultMessage: 'Authenticate',
+    }),
+    reauthenticateLink: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.reauthenticateLink',
+      { defaultMessage: 'Re-authenticate' }
+    ),
+    usedBySectionTitle: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.usedBySectionTitle',
+      { defaultMessage: 'Used by' }
+    ),
+    usedByAgentsMessage: (count: number) =>
+      i18n.translate('xpack.agentBuilder.agentConnectors.detail.usedByAgentsMessage', {
+        defaultMessage: '{count} other {count, plural, one {agent} other {agents}}',
+        values: { count },
+      }),
+    notUsedByOtherAgents: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.notUsedByOtherAgents',
+      { defaultMessage: 'Not used by other agents' }
+    ),
+    usedByLoadError: i18n.translate('xpack.agentBuilder.agentConnectors.detail.usedByLoadError', {
+      defaultMessage: 'Failed to load agents',
+    }),
   },
   agentTools: {
     pageDescription: i18n.translate('xpack.agentBuilder.agentTools.pageDescription', {
@@ -1613,12 +1661,37 @@ export const labels = {
     addToolButton: i18n.translate('xpack.agentBuilder.agentTools.addToolButton', {
       defaultMessage: 'Add tool',
     }),
-    fromLibraryMenuItem: i18n.translate('xpack.agentBuilder.agentTools.fromLibraryMenuItem', {
-      defaultMessage: 'From library',
+    importFromLibraryMenuItem: i18n.translate(
+      'xpack.agentBuilder.agentTools.importFromLibraryMenuItem',
+      {
+        defaultMessage: 'Import from tool library',
+      }
+    ),
+    createToolMenuItem: i18n.translate('xpack.agentBuilder.agentTools.createToolMenuItem', {
+      defaultMessage: 'Create a tool',
     }),
-    createNewToolMenuItem: i18n.translate('xpack.agentBuilder.agentTools.createNewToolMenuItem', {
+    createToolFlyoutTitle: i18n.translate('xpack.agentBuilder.agentTools.createToolFlyoutTitle', {
       defaultMessage: 'Create new tool',
     }),
+    createToolFlyoutSubtitle: i18n.translate(
+      'xpack.agentBuilder.agentTools.createToolFlyoutSubtitle',
+      {
+        defaultMessage: 'This tool is saved to your tool library and attached to this agent.',
+      }
+    ),
+    createToolFlyoutCallout: i18n.translate(
+      'xpack.agentBuilder.agentTools.createToolFlyoutCallout',
+      {
+        defaultMessage:
+          'On save, this tool is added to this agent automatically. You can edit or remove it later from the Tools tab.',
+      }
+    ),
+    saveAndAttachButtonLabel: i18n.translate(
+      'xpack.agentBuilder.agentTools.saveAndAttachButtonLabel',
+      {
+        defaultMessage: 'Save and attach',
+      }
+    ),
     searchActiveToolsPlaceholder: i18n.translate(
       'xpack.agentBuilder.agentTools.searchActiveToolsPlaceholder',
       {
@@ -2643,22 +2716,27 @@ export const labels = {
         { defaultMessage: 'Enter a color hex code' }
       ),
       accessTitle: i18n.translate('xpack.agentBuilder.overview.editDetails.accessTitle', {
-        defaultMessage: 'Access',
+        defaultMessage: 'Access control',
       }),
       accessDescription: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.accessDescription',
         { defaultMessage: 'Control who can view and edit this agent.' }
       ),
-      visibilityLabel: i18n.translate('xpack.agentBuilder.overview.editDetails.visibilityLabel', {
-        defaultMessage: 'Visibility',
-      }),
-      visibilityDisabledReason: i18n.translate(
-        'xpack.agentBuilder.overview.editDetails.visibilityDisabledReason',
-        { defaultMessage: 'Only the owner or an administrator can change visibility.' }
+      accessControlModeLabel: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.accessControlModeLabel',
+        {
+          defaultMessage: 'Access control',
+        }
       ),
-      visibilityAriaLabel: i18n.translate(
-        'xpack.agentBuilder.overview.editDetails.visibilityAriaLabel',
-        { defaultMessage: 'Agent visibility' }
+      accessControlModeDisabledReason: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.accessControlModeDisabledReason',
+        {
+          defaultMessage: 'Only the owner or an administrator can change the access control mode.',
+        }
+      ),
+      accessControlModeAriaLabel: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.accessControlModeAriaLabel',
+        { defaultMessage: 'Agent access control mode' }
       ),
       customizationTitle: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.customizationTitle',

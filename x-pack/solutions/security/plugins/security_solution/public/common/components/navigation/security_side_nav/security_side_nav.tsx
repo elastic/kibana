@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import {
@@ -21,7 +22,7 @@ import {
 } from '@kbn/security-solution-side-nav';
 import useObservable from 'react-use/lib/useObservable';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '../../../../../common/constants';
+import { useIsAlertsAndAttacksAlignmentEnabled } from '../../../hooks/use_is_alerts_and_attacks_alignment_enabled';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { type GetSecuritySolutionLinkProps, useGetSecuritySolutionLinkProps } from '../../links';
 import { useNavLinks } from '../../../links/nav_links';
@@ -312,8 +313,8 @@ const usePanelBottomOffset = (): string | undefined => {
  */
 export const SecuritySideNav: React.FC = () => {
   const {
-    uiSettings,
     settings: { client },
+    featureFlags: { getBooleanValue },
   } = useKibana().services;
 
   const chatExperience = useObservable(client.get$(AI_CHAT_EXPERIENCE_TYPE));
@@ -323,23 +324,28 @@ export const SecuritySideNav: React.FC = () => {
   const isClassicNavExternalLinksEnabled = useIsExperimentalFeatureEnabled(
     'securityClassicNavExternalLinks'
   );
+  const enableAlertsAndAttacksAlignment = useIsAlertsAndAttacksAlignmentEnabled();
+  const isAgentBuilderNavAtTop = getBooleanValue(AGENT_BUILDER_NAV_AT_TOP_FLAG, false);
   const items = useSolutionSideNavItems(chatExperience, isClassicNavExternalLinksEnabled);
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();
   const panelBottomOffset = usePanelBottomOffset();
 
   const categories = useMemo(() => {
-    const enableAlertsAndAttacksAlignment = uiSettings.get(
-      ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-      false
-    );
     return getNavCategories(
       chatExperience,
       enableAlertsAndAttacksAlignment,
       isNewEAHomePageEnabled,
-      isClassicNavExternalLinksEnabled
+      isClassicNavExternalLinksEnabled,
+      isAgentBuilderNavAtTop
     );
-  }, [uiSettings, isNewEAHomePageEnabled, chatExperience, isClassicNavExternalLinksEnabled]);
+  }, [
+    enableAlertsAndAttacksAlignment,
+    isNewEAHomePageEnabled,
+    chatExperience,
+    isAgentBuilderNavAtTop,
+    isClassicNavExternalLinksEnabled,
+  ]);
 
   if (!items) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;

@@ -1,4 +1,11 @@
-'use strict';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
 
 const fs = require('fs');
 const path = require('path');
@@ -12,13 +19,22 @@ const REVIEWERS = Object.freeze({
     id: 'codex',
     command: '@codex',
     label: 'reviewer:codex',
+    requiresLabel: true,
     workflowId: 'reviewer-codex.lock.yml',
   }),
   claude: Object.freeze({
     id: 'claude',
     command: '@claude',
     label: 'reviewer:claude',
+    requiresLabel: false,
     workflowId: 'reviewer-claude.lock.yml',
+  }),
+  scout: Object.freeze({
+    id: 'scout',
+    command: '@scout',
+    label: 'reviewer:scout',
+    requiresLabel: true,
+    workflowId: 'reviewer-scout.lock.yml',
   }),
 });
 
@@ -32,14 +48,18 @@ const findMentionedReviewers = (body = '') => {
   return reviewers.filter((reviewer) => body.includes(reviewer.command));
 };
 
-// Picks the reviewer that is BOTH mentioned in the comment AND has its label
-// on the PR. A comment may mention multiple reviewers (e.g. quoting an earlier
-// `@codex` thread while asking `@claude`); without this filter the dispatcher
-// would pick the first mention regardless of labels and silently drop the
-// actually-labeled reviewer.
+const hasRequiredLabel = ({ reviewer, labelNames }) =>
+  !reviewer.requiresLabel || labelNames.includes(reviewer.label);
+
+// Claude is available on every non-skipped PR, so an explicit @claude mention
+// should not be blocked by another actionable reviewer label on the PR.
 const selectActionableReviewer = ({ body, labelNames }) => {
   const mentioned = findMentionedReviewers(body);
-  return mentioned.find((reviewer) => labelNames.includes(reviewer.label));
+  if (mentioned.includes(REVIEWERS.claude)) {
+    return REVIEWERS.claude;
+  }
+
+  return mentioned.find((reviewer) => hasRequiredLabel({ reviewer, labelNames }));
 };
 
 const isAllowedPermission = (permission) =>
@@ -128,7 +148,7 @@ const validatePullRequest = ({ core, pullRequest, reviewer }) => {
     return false;
   }
 
-  if (!labelNames.includes(reviewer.label)) {
+  if (!hasRequiredLabel({ reviewer, labelNames })) {
     core.info(`PR #${pullRequest.number} does not have ${reviewer.label}.`);
     return false;
   }
@@ -145,7 +165,7 @@ const routeReviewerComment = async ({ context, core }) => {
 
   const reviewer = selectActionableReviewer({ body, labelNames });
   if (!reviewer) {
-    core.info(`Comment ${commentId} on PR #${pullNumber} did not mention a reviewer that is also labeled on the PR.`);
+    core.info(`Comment ${commentId} on PR #${pullNumber} did not mention an actionable reviewer.`);
     return;
   }
 
@@ -184,7 +204,9 @@ const dispatchReviewerComment = async ({ github, context, core }) => {
 
   const reviewer = REVIEWERS[artifact.reviewer_id];
   if (!reviewer) {
-    core.setFailed(`Reviewer comment artifact contained unknown reviewer id: ${artifact.reviewer_id}.`);
+    core.setFailed(
+      `Reviewer comment artifact contained unknown reviewer id: ${artifact.reviewer_id}.`
+    );
     return;
   }
 
@@ -205,7 +227,9 @@ const dispatchReviewerComment = async ({ github, context, core }) => {
     commentId,
   });
 
-  if (!commentBelongsToPr({ comment: liveComment, commentType: artifact.comment_type, pullNumber })) {
+  if (
+    !commentBelongsToPr({ comment: liveComment, commentType: artifact.comment_type, pullNumber })
+  ) {
     core.setFailed(`Comment ${commentId} does not belong to PR #${pullNumber}.`);
     return;
   }
@@ -219,7 +243,9 @@ const dispatchReviewerComment = async ({ github, context, core }) => {
     return;
   }
 
-  if (!(await validateReviewerAccess({ github, core, owner, repo, actor: liveComment.user?.login }))) {
+  if (
+    !(await validateReviewerAccess({ github, core, owner, repo, actor: liveComment.user?.login }))
+  ) {
     return;
   }
 

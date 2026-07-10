@@ -182,6 +182,58 @@ describe('getTemplateDefinitionJsonSchema', () => {
     expect(typeProp?.const ?? typeProp?.enum).toEqual('date');
   });
 
+  it('exposes required_on_close as a boolean property on the validation object of every inline field branch', () => {
+    const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+    const branches = getFieldsOneOfBranches(schema);
+
+    const inlineBranches = branches.filter(({ controlConst }) => controlConst != null);
+    expect(inlineBranches.length).toBeGreaterThan(0);
+
+    for (const { branch, controlConst } of inlineBranches) {
+      // Validation may be nested directly in branch.properties or inside an allOf entry
+      let validationProp: JsonSchemaObject | undefined;
+
+      const directProps = branch.properties as JsonSchemaObject | undefined;
+      if (directProps?.validation) {
+        validationProp = directProps.validation as JsonSchemaObject;
+      } else if (Array.isArray(branch.allOf)) {
+        for (const entry of branch.allOf as JsonSchemaObject[]) {
+          const p = (entry.properties as JsonSchemaObject | undefined)?.validation as
+            | JsonSchemaObject
+            | undefined;
+          if (p) {
+            validationProp = p;
+            break;
+          }
+        }
+      }
+
+      if (!validationProp) {
+        // Top-level shared properties might carry it
+        const fieldsSchema = (schema.properties as JsonSchemaObject)?.fields as JsonSchemaObject;
+        const itemsSchema = fieldsSchema.items as JsonSchemaObject;
+        const sharedProps = itemsSchema.properties as JsonSchemaObject | undefined;
+        validationProp = sharedProps?.validation as JsonSchemaObject | undefined;
+      }
+
+      expect(validationProp).toBeDefined();
+
+      const validationProps = (validationProp!.properties ??
+        (validationProp!.allOf as JsonSchemaObject[] | undefined)?.[0]?.properties) as
+        | JsonSchemaObject
+        | undefined;
+
+      expect(validationProps?.required_on_close).toBeDefined();
+      expect((validationProps?.required_on_close as JsonSchemaObject)?.type).toBe('boolean');
+
+      // Sanity check: `required` is also present (unchanged)
+      expect(validationProps?.required).toBeDefined();
+
+      // suppress unused controlConst lint
+      void controlConst;
+    }
+  });
+
   it('uses if/then structure keyed on control for better error messages', () => {
     const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
     const fieldsSchema = (schema.properties as JsonSchemaObject)?.fields as JsonSchemaObject;
@@ -202,5 +254,61 @@ describe('getTemplateDefinitionJsonSchema', () => {
       return props?.const === 'INPUT_NUMBER';
     });
     expect(inputNumberEntry).toBeDefined();
+  });
+
+  describe('connector and settings', () => {
+    it('omits connector and settings from the editor schema (panel-owned, not in the buffer)', () => {
+      // They are edited on the Configuration tab and merged into the definition on save, so the
+      // editor must not suggest them — otherwise a value typed in the Fields YAML would be silently
+      // overwritten by the panel state on save.
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const props = schema.properties as JsonSchemaObject;
+
+      expect(props.connector).toBeUndefined();
+      expect(props.settings).toBeUndefined();
+    });
+
+    it('exposes the editable case-default and fields properties but no template_* identity keys', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const props = schema.properties as JsonSchemaObject;
+
+      // Template identity is not part of the YAML anymore.
+      expect(props.template_name).toBeUndefined();
+      expect(props.template_description).toBeUndefined();
+      expect(props.template_tags).toBeUndefined();
+
+      expect(props.name).toBeDefined();
+      expect(props.description).toBeDefined();
+      expect(props.tags).toBeDefined();
+      expect(props.severity).toBeDefined();
+      expect(props.category).toBeDefined();
+      expect(props.assignees).toBeDefined();
+      expect(props.fields).toBeDefined();
+    });
+
+    it('marks the always-present blocks as required so Monaco flags their removal', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const required = schema.required as string[];
+
+      expect(required).toEqual(
+        expect.arrayContaining([
+          'name',
+          'description',
+          'severity',
+          'category',
+          'tags',
+          'assignees',
+          'fields',
+        ])
+      );
+    });
+
+    it('does not mark the renderer-managed connector/settings blocks as required', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const required = (schema.required as string[]) ?? [];
+
+      expect(required).not.toContain('settings');
+      expect(required).not.toContain('connector');
+    });
   });
 });

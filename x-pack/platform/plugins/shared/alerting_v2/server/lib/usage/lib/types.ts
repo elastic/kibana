@@ -36,12 +36,14 @@ export interface ActionPolicyStatsAggregations {
   count_with_group_by: { doc_count: number };
   avg_group_by_fields_count: { value: number | null };
   count_with_matcher: { doc_count: number };
+  count_agent_builder_assisted: { doc_count: number };
 }
 export type ActionPolicyStatsResults = Pick<
   LatestTaskStateSchema,
   | 'action_policies_count'
   | 'action_policies_unique_workflow_count'
   | 'action_policies_count_with_matcher'
+  | 'action_policies_count_agent_builder_assisted'
   | 'action_policies_count_with_group_by'
   | 'action_policies_avg_group_by_fields_count'
   | 'action_policies_count_by_throttle_interval'
@@ -64,39 +66,31 @@ export type ExecutionStatsResults = Pick<
 
 export interface RuleStatsAggregations {
   count_enabled: { doc_count: number };
+  count_agent_builder_assisted: { doc_count: number };
   count_by_kind: { buckets: TermsBucket[] };
   count_by_schedule: { buckets: TermsBucket[] };
   count_by_lookback: { buckets: TermsBucket[] };
-  count_with_recovery_policy: { doc_count: number };
-  count_by_recovery_policy_type: { buckets: TermsBucket[] };
   avg_pending_count: { value: number | null };
   avg_recovering_count: { value: number | null };
   count_by_pending_timeframe: { buckets: TermsBucket[] };
   count_by_recovering_timeframe: { buckets: TermsBucket[] };
   count_with_grouping: { doc_count: number };
   avg_grouping_fields_count: { value: number | null };
-  count_with_no_data: { doc_count: number };
-  count_by_no_data_behavior: { buckets: TermsBucket[] };
-  count_by_no_data_timeframe: { buckets: TermsBucket[] };
   min_created_at: { value: number | null; value_as_string?: string };
 }
 export type RuleStatsResults = Pick<
   LatestTaskStateSchema,
   | 'count_total'
   | 'count_enabled'
+  | 'count_agent_builder_assisted'
   | 'count_by_kind'
   | 'count_by_schedule'
   | 'count_by_lookback'
-  | 'count_with_recovery_policy'
-  | 'count_by_recovery_policy_type'
   | 'avg_pending_count'
   | 'avg_recovering_count'
   | 'count_by_pending_timeframe'
   | 'count_by_recovering_timeframe'
   | 'count_with_grouping'
   | 'avg_grouping_fields_count'
-  | 'count_with_no_data'
-  | 'count_by_no_data_behavior'
-  | 'count_by_no_data_timeframe'
   | 'min_created_at'
 >;
