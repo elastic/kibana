@@ -35,7 +35,7 @@ describe('RULE_MIGRATION_VENDOR_COPY', () => {
         },
         missingResources: {
           readyDescription:
-            'You can also upload the missing reference sets and enhancements for more accurate results.',
+            'You can also upload the missing reference sets for more accurate results.',
           uploadTitle: 'Upload missing reference sets and rule enhancements',
         },
         checkResources: {
@@ -46,9 +46,9 @@ describe('RULE_MIGRATION_VENDOR_COPY', () => {
       },
       [MigrationSource.SENTINEL]: {
         originalRule: {
-          title: 'Microsoft Sentinel rule definition',
+          title: 'Microsoft Sentinel KQL query',
           tooltip:
-            'This is the original Microsoft Sentinel rule definition in ARM template JSON format as exported from Microsoft Sentinel',
+            'This is the original Microsoft Sentinel KQL query in ARM template JSON format as exported from Microsoft Sentinel',
         },
         missingResources: {
           readyDescription: 'You can also upload the missing watchlists for more accurate results.',
