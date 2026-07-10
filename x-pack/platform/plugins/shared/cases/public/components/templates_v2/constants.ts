@@ -37,6 +37,24 @@ export const TEMPLATE_PREVIEW_WIDTH_KEY = 'CASES_TEMPLATE_PREVIEW_WIDTH';
 export const MIN_PREVIEW_WIDTH = 250;
 export const MIN_EDITOR_WIDTH = 400;
 
+/**
+ * Root keys that must always be present in the editor "blueprint" YAML: the case defaults plus
+ * `fields`. This single list drives both the programmatic completeness check
+ * (validate_template_definition) and the Monaco schema's `required` hint (template_json_schema), so
+ * the two never drift. `settings`/`connector` are intentionally excluded — they are panel-owned
+ * (edited on the Configuration tab, merged into the definition on save) and are never part of the
+ * editor buffer, so they must not gate the YAML.
+ */
+export const REQUIRED_TEMPLATE_ROOT_KEYS = [
+  'name',
+  'description',
+  'severity',
+  'category',
+  'tags',
+  'assignees',
+  'fields',
+] as const;
+
 export const YAML_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
   scrollBeyondLastLine: false,

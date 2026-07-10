@@ -10,6 +10,8 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 
+import { AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE } from '@kbn/discoveries-schemas';
+
 import { assertWorkflowsEnabled } from '../../lib/assert_workflows_enabled';
 import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../constants';
 import { registerGenerateRoute } from './post_generate';
@@ -395,7 +397,7 @@ describe('registerGenerateRoute', () => {
   });
 
   describe('workflow_config validation', () => {
-    it('returns bad request when no alert retrieval toggle is enabled', async () => {
+    it('returns bad request when no retrieval toggle is enabled', async () => {
       mockRequest.body = {
         alerts_index_pattern: '.alerts-security.alerts-default',
         api_config: {
@@ -404,11 +406,9 @@ describe('registerGenerateRoute', () => {
         },
         type: 'attack_discovery',
         workflow_config: {
-          alert_retrieval_workflow_ids: [],
           alert_retrieval_workflows_enabled: false,
           default_retrieval_enabled: false,
           skill_enabled: false,
-          validation_workflow_id: 'default',
         },
       };
 
@@ -444,8 +444,7 @@ describe('registerGenerateRoute', () => {
 
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: {
-          message:
-            'At least one alert retrieval method must be enabled: set skill_enabled, default_retrieval_enabled, or alert_retrieval_workflows_enabled to true',
+          message: AT_LEAST_ONE_RETRIEVAL_TOGGLE_MESSAGE,
         },
       });
     });
@@ -513,6 +512,8 @@ describe('registerGenerateRoute', () => {
         workflow_config: {
           alert_retrieval_workflow_ids: ['workflow-1', 'workflow-2'],
           alert_retrieval_workflows_enabled: true,
+          default_retrieval_enabled: false,
+          skill_enabled: false,
           validation_workflow_id: 'custom-validation',
         },
       };
