@@ -197,8 +197,8 @@ export const runCli = (): void => {
   --concurrency <n>       Parallel browser pages. (default: 4)
   --headless <bool>       Run Chromium headless. Pass false to watch the browser. (default: true)
   --serve                 Keep the local server running after capture for manual browsing.
-  --chrome-executable <path>  Path to a Chrome/Chromium executable. Auto-detected by default
-                          (tries puppeteer's bundled Chrome, then common system locations).
+  --chrome-executable <path>  Path to a Chrome/Chromium executable. Defaults to Playwright's
+                          managed Chromium (installed via \`yarn kbn bootstrap\`).
         `,
       },
     }

@@ -33,11 +33,17 @@ const isYamlValid = parsed.success;
 // synchronously on first render (no extra render cycle needed).
 const transformed = transformWorkflowToGraph(workflow);
 
+// Exposed so the Node-side driver can detect the "syntactically valid YAML,
+// but not a workflow" case (e.g. missing/misnamed `steps`/`triggers`), which
+// parses successfully yet transforms to a graph with no nodes at all.
+(window as unknown as { __GRAPH_NODE_COUNT__: number }).__GRAPH_NODE_COUNT__ =
+  transformed.nodes.length;
+
 const NO_OP = () => {};
 
 const GraphApp = () => {
   const handleReady = useCallback(() => {
-    // Signal puppeteer that the graph is fully laid out and ready to capture.
+    // Signal Playwright that the graph is fully laid out and ready to capture.
     (window as unknown as { __GRAPH_READY__: boolean }).__GRAPH_READY__ = true;
   }, []);
 

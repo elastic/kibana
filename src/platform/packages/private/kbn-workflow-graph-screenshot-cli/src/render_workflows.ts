@@ -13,18 +13,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { buildBrowserBundle } from './build_browser_bundle';
 import { startDevServer } from './dev_server';
 
-// Common system Chrome/Chromium paths, checked in order when puppeteer's
-// bundled Chrome isn't installed.
-const SYSTEM_CHROME_PATHS: readonly string[] = [
-  // macOS
-  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  '/Applications/Chromium.app/Contents/MacOS/Chromium',
-  // Linux
-  '/usr/bin/google-chrome',
-  '/usr/bin/chromium-browser',
-  '/usr/bin/chromium',
-];
-
 export interface RenderOptions {
   readonly files: readonly string[];
   readonly outputDir: string;
@@ -108,7 +96,7 @@ export const computeScreenshotFilenames = (
 };
 
 /**
- * Full pipeline: build bundle → start server → drive puppeteer → write PNGs.
+ * Full pipeline: build bundle → start server → drive Playwright → write PNGs.
  * Each YAML file gets its own page and PNG; pages are processed concurrently up
  * to `options.concurrency` at a time via a simple worker-pool pattern.
  */
@@ -150,82 +138,32 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
   const base = `http://127.0.0.1:${server.port}`;
   log.info(`Dev server listening at ${base}/`);
 
+  let captureError: unknown;
   try {
-    if (serve && files.length === 0) {
-      log.info('--serve mode: no input files, keeping server alive. Press Ctrl+C to stop.');
-      await new Promise(() => {}); // wait forever
-      return;
-    }
-
-    // ── 3. Launch puppeteer ─────────────────────────────────────────────────
-    let puppeteer: typeof import('puppeteer');
+    // ── 3. Launch Playwright ────────────────────────────────────────────────
+    let playwright: typeof import('playwright');
     try {
-      puppeteer = await import('puppeteer');
+      // eslint-disable-next-line import/no-extraneous-dependencies
+      playwright = await import('playwright');
     } catch {
       throw new Error(
-        "Unable to import 'puppeteer'. Make sure dependencies are bootstrapped (`yarn kbn bootstrap`)."
+        "Unable to import 'playwright'. Make sure dependencies are bootstrapped (`yarn kbn bootstrap`)."
       );
     }
 
-    // Redirect HOME so Chromium can always write its crash/profile dirs
-    const chromeHome = path.join(outputDir, '.chrome_home');
-    await fs.mkdir(chromeHome, { recursive: true });
+    // With no --chrome-executable override, Playwright launches the managed
+    // Chromium build it downloads during `yarn kbn bootstrap` (no system Chrome
+    // detection needed). If that download is missing, Playwright's own launch
+    // error already explains how to fetch it (`npx playwright install chromium`).
+    log.debug(
+      chromeExecutable
+        ? `Using Chrome at: ${chromeExecutable}`
+        : "Using Playwright's managed Chromium."
+    );
 
-    // Resolve which Chrome executable to use:
-    //   1. --chrome-executable flag (explicit override)
-    //   2. puppeteer's bundled Chrome (if installed)
-    //   3. system Chrome / Chromium (common locations)
-    let resolvedExecutable: string | undefined = chromeExecutable;
-    if (!resolvedExecutable) {
-      const puppeteerPath = await puppeteer.executablePath().catch(() => undefined);
-      if (puppeteerPath) {
-        // executablePath() resolves even if the binary isn't installed; verify it exists.
-        const exists = await fs
-          .access(puppeteerPath)
-          .then(() => true)
-          .catch(() => false);
-        if (exists) {
-          resolvedExecutable = puppeteerPath;
-        }
-      }
-    }
-    if (!resolvedExecutable) {
-      for (const candidate of SYSTEM_CHROME_PATHS) {
-        const exists = await fs
-          .access(candidate)
-          .then(() => true)
-          .catch(() => false);
-        if (exists) {
-          resolvedExecutable = candidate;
-          break;
-        }
-      }
-    }
-    if (!resolvedExecutable) {
-      throw new Error(
-        'No Chrome/Chromium executable found.\n\n' +
-          'Options:\n' +
-          '  1. Install puppeteer Chrome: npx puppeteer browsers install chrome\n' +
-          '  2. Pass the path explicitly: --chrome-executable "/path/to/chrome"\n'
-      );
-    }
-    log.debug(`Using Chrome at: ${resolvedExecutable}`);
-
-    const browser = await puppeteer.launch({
+    const browser = await playwright.chromium.launch({
       headless,
-      executablePath: resolvedExecutable,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-crashpad',
-        '--disable-crash-reporter',
-        '--no-crash-upload',
-      ],
-      env: {
-        ...process.env,
-        HOME: chromeHome,
-        XDG_CACHE_HOME: path.join(chromeHome, '.cache'),
-      },
+      executablePath: chromeExecutable,
     });
 
     const results: ManifestEntry[] = new Array(files.length);
@@ -238,15 +176,15 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
     try {
       // Open concurrency-many pages upfront; each worker drains a shared queue.
       const pages = await Promise.all(
-        Array.from({ length: Math.min(concurrency, files.length) }, () => browser.newPage())
+        Array.from({ length: Math.min(concurrency, files.length) }, () =>
+          browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 })
+        )
       );
 
       const queue = files.map((_, i) => i);
 
       await Promise.all(
         pages.map(async (page) => {
-          await page.setViewport({ width, height, deviceScaleFactor: 1 });
-
           while (queue.length > 0) {
             const idx = queue.shift();
             if (idx === undefined) break;
@@ -261,14 +199,28 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
               // Wait for React Flow to initialise and the onReady callback to fire
               await page.waitForFunction(
                 () => (window as unknown as Record<string, unknown>).__GRAPH_READY__ === true,
-                {
-                  timeout: 30_000,
-                }
+                undefined,
+                { timeout: 30_000 }
               );
 
               // Extra settle for EUI icon lazy-loading — see README for details
               if (settleMs > 0) {
                 await new Promise((r) => setTimeout(r, settleMs));
+              }
+
+              // The YAML can be syntactically valid yet not resemble a workflow at all
+              // (e.g. missing/misnamed `steps`/`triggers`) — parsing succeeds but the
+              // graph has no nodes, so the screenshot below would be a blank canvas.
+              // See README Caveats for details.
+              const nodeCount = await page.evaluate(
+                () => (window as unknown as Record<string, unknown>).__GRAPH_NODE_COUNT__ as number
+              );
+              if (nodeCount === 0) {
+                log.warning(
+                  `[${idx + 1}/${
+                    files.length
+                  }] ${name}: YAML parsed but produced an empty graph (0 nodes) — check for missing or misnamed "steps"/"triggers". The screenshot will be blank.`
+                );
               }
 
               const screenshotDir = screenshotDirs[idx];
@@ -317,14 +269,25 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
         outputInPlace ? 'alongside their YAML files' : `to ${outputDir}`
       }${failed > 0 ? `, ${failed} error(s) — check manifest.json` : ''}`
     );
+  } catch (err: unknown) {
+    captureError = err;
+  }
 
-    if (serve) {
-      log.info(`--serve: keeping server alive at ${base}/. Press Ctrl+C to stop.`);
-      await new Promise(() => {}); // wait forever
-    }
-  } finally {
-    if (!serve) {
-      await server.close();
-    }
+  // The dev server serves files from the bundle directory (and injects raw YAML
+  // into HTML) on 127.0.0.1 — it must never outlive an unsuccessful run. Only
+  // keep it open when --serve was requested AND capture completed cleanly;
+  // any failure always tears it down, regardless of --serve, instead of relying
+  // on the CLI runner's outer process.exit() to reclaim the port for us.
+  if (captureError || !serve) {
+    await server.close();
+  }
+
+  if (captureError) {
+    throw captureError;
+  }
+
+  if (serve) {
+    log.info(`--serve: keeping server alive at ${base}/. Press Ctrl+C to stop.`);
+    await new Promise(() => {}); // wait forever
   }
 };

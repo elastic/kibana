@@ -14,7 +14,7 @@ export interface GraphConfig {
 }
 
 /**
- * Builds the HTML page served to puppeteer for each workflow. Injects the YAML
+ * Builds the HTML page served to Playwright for each workflow. Injects the YAML
  * and config as HTML-attribute-escaped `data` attributes on custom elements so
  * the browser entry can read them safely with `getAttribute('data')` + JSON.parse.
  * Using an attribute (rather than an inline `<script>` body) means a `</script>`
