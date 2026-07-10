@@ -94,6 +94,8 @@ dependsOn:
   - '@kbn/rrule'
   - '@kbn/cps-utils'
   - '@kbn/cps'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-server'
 tags:
   - plugin
   - prod
