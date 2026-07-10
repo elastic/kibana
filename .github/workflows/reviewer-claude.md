@@ -122,6 +122,7 @@ safe-outputs:
   footer: true
   report-failure-as-issue: false
   noop:
+    max: 2
     report-as-issue: false
   create-pull-request-review-comment:
     max: 10

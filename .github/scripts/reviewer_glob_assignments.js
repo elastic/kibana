@@ -15,9 +15,7 @@ const DEFAULT_PR_FILES_PATH = '/tmp/gh-aw/agent/pr-files.json';
 const DEFAULT_OUTPUT_PATH = '/tmp/gh-aw/agent/pr-reviewer-assignments.json';
 const REVIEWER_FILENAME = /^pr-reviewer-.*\.md$/;
 
-// `path.matchesGlob` has no `dot:true` option and its `*`/`**` never match files
-// under dot-directories (e.g. `.github/**`), so a `**/*` or `**` glob is treated
-// as "every changed file" to keep the catch-all reviewer truly comprehensive.
+// `**/*` and `**` mean "every file" — path.matchesGlob otherwise skips dot-directories.
 const CATCH_ALL_GLOBS = new Set(['**/*', '**']);
 
 const parseFrontmatter = (text) => {
@@ -36,7 +34,11 @@ const matchFiles = (files, globs) => {
     return [...files];
   }
 
-  return files.filter((file) => globs.some((glob) => path.matchesGlob(file, glob)));
+  // path.matchesGlob skips dot-directories, so match against the path with leading segment dots stripped.
+  return files.filter((file) => {
+    const undotted = file.replace(/(^|\/)\./g, '$1');
+    return globs.some((glob) => path.matchesGlob(undotted, glob));
+  });
 };
 
 const readReviewers = (agentsDir) => {
