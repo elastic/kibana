@@ -11,64 +11,71 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { postCaseReq } from '../../../common/lib/mock';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { postCaseReq } from '../../../../common/lib/mock';
 import {
   createCase,
   deleteAllCaseItems,
   bulkCreateAttachments,
   getComment,
   deleteComment,
+  deleteAllComments,
   getCase,
-} from '../../../common/lib/api';
+} from '../../../../common/lib/api';
+
+const getCommentContent = (comment: Record<string, unknown>): string | undefined => {
+  const data = comment.data as { content?: string } | undefined;
+  return data?.content ?? (comment.comment as string | undefined);
+};
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('Unified Events — CRUD, aggregation, stats', () => {
+  describe('Unified Comments — CRUD with flag ON', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
 
     describe('create', () => {
-      it('creates a unified event attachment via v2 payload', async () => {
+      it('creates a unified comment via v2 payload', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
           params: [
             {
-              type: 'security.event' as const,
-              attachmentId: 'event-doc-1',
-              metadata: { index: 'test-events-index' },
+              type: 'comment' as const,
+              data: { content: 'unified comment content' },
               owner: 'securitySolutionFixture',
             },
           ],
         });
 
         expect(updatedCase.comments?.length).to.be(1);
+        expect(updatedCase.totalComment).to.be(1);
 
-        const event = updatedCase.comments![0];
-        expect(['security.event', 'event']).to.contain(event.type);
+        const comment = updatedCase.comments![0] as Record<string, unknown>;
+        expect(['comment', 'user']).to.contain(comment.type);
+        expect(getCommentContent(comment)).to.be('unified comment content');
+        expect(comment.owner).to.be('securitySolutionFixture');
       });
 
-      it('writes event to cases-attachments SO when flag is ON', async () => {
+      it('writes to cases-attachments SO (not cases-comments) when flag is ON', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
           params: [
             {
-              type: 'security.event' as const,
-              attachmentId: 'event-so-check',
-              metadata: { index: 'test-events-index' },
+              type: 'comment' as const,
+              data: { content: 'SO type check' },
               owner: 'securitySolutionFixture',
             },
           ],
         });
 
-        const eventId = updatedCase.comments![0].id;
+        const commentId = updatedCase.comments![0].id;
 
         const unifiedSOs = await es.search({
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
@@ -76,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
             bool: {
               must: [
                 { term: { type: CASE_ATTACHMENT_SAVED_OBJECT } },
-                { term: { _id: `${CASE_ATTACHMENT_SAVED_OBJECT}:${eventId}` } },
+                { term: { _id: `${CASE_ATTACHMENT_SAVED_OBJECT}:${commentId}` } },
               ],
             },
           },
@@ -90,7 +97,7 @@ export default ({ getService }: FtrProviderContext): void => {
             bool: {
               must: [
                 { term: { type: CASE_COMMENT_SAVED_OBJECT } },
-                { term: { _id: `${CASE_COMMENT_SAVED_OBJECT}:${eventId}` } },
+                { term: { _id: `${CASE_COMMENT_SAVED_OBJECT}:${commentId}` } },
               ],
             },
           },
@@ -99,116 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(legacySOs.hits.hits.length).to.be(0);
       });
 
-      it('creates event with array attachmentId', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const updatedCase = await bulkCreateAttachments({
-          supertest,
-          caseId: postedCase.id,
-          params: [
-            {
-              type: 'security.event' as const,
-              attachmentId: ['event-1', 'event-2', 'event-3'],
-              metadata: { index: 'test-events-index' },
-              owner: 'securitySolutionFixture',
-            },
-          ],
-        });
-
-        expect(updatedCase.comments?.length).to.be(1);
-        expect(updatedCase.totalEvents).to.be(3);
-      });
-    });
-
-    describe('read', () => {
-      it('retrieves a unified event by id', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const updatedCase = await bulkCreateAttachments({
-          supertest,
-          caseId: postedCase.id,
-          params: [
-            {
-              type: 'security.event' as const,
-              attachmentId: 'event-read-1',
-              metadata: { index: 'test-events-index' },
-              owner: 'securitySolutionFixture',
-            },
-          ],
-        });
-
-        const eventId = updatedCase.comments![0].id;
-        const fetched = await getComment({
-          supertest,
-          caseId: postedCase.id,
-          commentId: eventId,
-        });
-
-        expect(fetched.id).to.be(eventId);
-        expect(['security.event', 'event']).to.contain(fetched.type);
-      });
-
-      it('reflects unified events in case totalEvents count', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        await bulkCreateAttachments({
-          supertest,
-          caseId: postedCase.id,
-          params: [
-            {
-              type: 'security.event' as const,
-              attachmentId: 'event-find-1',
-              metadata: { index: 'test-events-index' },
-              owner: 'securitySolutionFixture',
-            },
-            {
-              type: 'security.event' as const,
-              attachmentId: 'event-find-2',
-              metadata: { index: 'test-events-index' },
-              owner: 'securitySolutionFixture',
-            },
-          ],
-        });
-
-        const refreshedCase = await getCase({
-          supertest,
-          caseId: postedCase.id,
-        });
-
-        expect(refreshedCase.totalEvents).to.be(2);
-      });
-    });
-
-    describe('stats and aggregation', () => {
-      it('totalEvents reflects unified event count on the case', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const updatedCase = await bulkCreateAttachments({
-          supertest,
-          caseId: postedCase.id,
-          params: [
-            {
-              type: 'security.event' as const,
-              attachmentId: 'stats-event-1',
-              metadata: { index: 'test-events-index' },
-              owner: 'securitySolutionFixture',
-            },
-            {
-              type: 'security.event' as const,
-              attachmentId: 'stats-event-2',
-              metadata: { index: 'test-events-index' },
-              owner: 'securitySolutionFixture',
-            },
-          ],
-        });
-
-        expect(updatedCase.totalEvents).to.be(2);
-
-        const refreshedCase = await getCase({
-          supertest,
-          caseId: postedCase.id,
-        });
-
-        expect(refreshedCase.totalEvents).to.be(2);
-      });
-
-      it('counts comments and events in case totals', async () => {
+      it('creates multiple comments via bulk create', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,
@@ -216,45 +114,61 @@ export default ({ getService }: FtrProviderContext): void => {
           params: [
             {
               type: 'comment' as const,
-              data: { content: 'a comment' },
+              data: { content: 'first comment' },
               owner: 'securitySolutionFixture',
             },
             {
-              type: 'security.event' as const,
-              attachmentId: 'mixed-event-1',
-              metadata: { index: 'test-events-index' },
+              type: 'comment' as const,
+              data: { content: 'second comment' },
               owner: 'securitySolutionFixture',
             },
           ],
         });
 
         expect(updatedCase.comments?.length).to.be(2);
-        const totalAttachments = (updatedCase.totalComment ?? 0) + (updatedCase.totalEvents ?? 0);
-        expect(totalAttachments).to.be.greaterThan(0);
+        expect(updatedCase.totalComment).to.be(2);
       });
     });
 
-    describe('delete', () => {
-      it('deletes a unified event', async () => {
+    describe('read', () => {
+      it('gets a single unified comment by id', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
           params: [
             {
-              type: 'security.event' as const,
-              attachmentId: 'event-delete-1',
-              metadata: { index: 'test-events-index' },
+              type: 'comment' as const,
+              data: { content: 'get by id' },
               owner: 'securitySolutionFixture',
             },
           ],
         });
 
-        const eventId = updatedCase.comments![0].id;
-        await deleteComment({
+        const commentId = updatedCase.comments![0].id;
+        const fetched = await getComment({
           supertest,
           caseId: postedCase.id,
-          commentId: eventId,
+          commentId,
+        });
+
+        expect(fetched.id).to.be(commentId);
+        expect(['comment', 'user']).to.contain(fetched.type);
+        expect(getCommentContent(fetched as unknown as Record<string, unknown>)).to.be('get by id');
+      });
+
+      it('reflects unified comment in case totalComment count', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              type: 'comment' as const,
+              data: { content: 'findable comment' },
+              owner: 'securitySolutionFixture',
+            },
+          ],
         });
 
         const refreshedCase = await getCase({
@@ -262,7 +176,104 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
         });
 
-        expect(refreshedCase.totalEvents).to.be(0);
+        expect(refreshedCase.totalComment).to.be(1);
+      });
+    });
+
+    describe('delete', () => {
+      it('deletes a single unified comment', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const updatedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              type: 'comment' as const,
+              data: { content: 'to be deleted' },
+              owner: 'securitySolutionFixture',
+            },
+          ],
+        });
+
+        const commentId = updatedCase.comments![0].id;
+        await deleteComment({
+          supertest,
+          caseId: postedCase.id,
+          commentId,
+        });
+
+        const refreshedCase = await getCase({
+          supertest,
+          caseId: postedCase.id,
+        });
+
+        expect(refreshedCase.totalComment).to.be(0);
+      });
+
+      it('deletes all comments (including unified) for a case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              type: 'comment' as const,
+              data: { content: 'comment 1' },
+              owner: 'securitySolutionFixture',
+            },
+            {
+              type: 'comment' as const,
+              data: { content: 'comment 2' },
+              owner: 'securitySolutionFixture',
+            },
+          ],
+        });
+
+        await deleteAllComments({
+          supertest,
+          caseId: postedCase.id,
+        });
+
+        const refreshedCase = await getCase({
+          supertest,
+          caseId: postedCase.id,
+        });
+
+        expect(refreshedCase.totalComment).to.be(0);
+      });
+    });
+
+    describe('schema validation', () => {
+      it('rejects comment with missing content field in data', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              type: 'comment' as const,
+              data: {} as { content: string },
+              owner: 'securitySolutionFixture',
+            },
+          ],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('rejects comment with non-string content', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            {
+              type: 'comment' as const,
+              data: { content: 123 } as unknown as { content: string },
+              owner: 'securitySolutionFixture',
+            },
+          ],
+          expectedHttpCode: 400,
+        });
       });
     });
   });

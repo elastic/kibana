@@ -11,8 +11,8 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { getPostCaseRequest, postCommentAlertReq } from '../../../common/lib/mock';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/mock';
 import {
   createCase,
   createComment,
@@ -23,8 +23,8 @@ import {
   getCase,
   getAlertsAttachedToCase,
   getCasesByAlert,
-} from '../../../common/lib/api';
-import { validateCasesFromAlertIDResponse } from '../../../common/lib/validation';
+} from '../../../../common/lib/api';
+import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
 
 const OWNER = 'securitySolution';
 const postCaseReq = getPostCaseRequest({ owner: OWNER });

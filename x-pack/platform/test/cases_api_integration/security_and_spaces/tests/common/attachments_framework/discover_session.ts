@@ -7,31 +7,31 @@
 
 import expect from '@kbn/expect';
 import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  DASHBOARD_SO_TYPE,
+  DISCOVER_SESSION_ATTACHMENT_TYPE,
+  DISCOVER_SESSION_SO_TYPE,
 } from '@kbn/cases-plugin/common/constants/attachments';
 import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api';
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { postCaseReq, postCommentUserReq } from '../../../common/lib/mock';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   bulkCreateAttachments,
   createCase,
   deleteAllCaseItems,
   findCaseUserActions,
-} from '../../../common/lib/api';
+} from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('Dashboard saved-object attachments', () => {
-    const dashboardPayload = {
-      type: DASHBOARD_ATTACHMENT_TYPE,
+  describe('Discover session saved-object attachments', () => {
+    const discoverSessionPayload = {
+      type: DISCOVER_SESSION_ATTACHMENT_TYPE,
       owner: 'securitySolutionFixture',
-      attachmentId: 'dashboard-1',
+      attachmentId: 'search-1',
       metadata: {
-        title: 'My dashboard',
-        soType: DASHBOARD_SO_TYPE,
+        title: 'My Discover session',
+        soType: DISCOVER_SESSION_SO_TYPE,
       },
     };
 
@@ -39,12 +39,12 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    it('returns a unified-shaped response when the batch contains a dashboard attachment', async () => {
+    it('returns a unified-shaped response when the batch contains a Discover session attachment', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       const updatedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [dashboardPayload] as unknown as BulkCreateAttachmentsRequestV2,
+        params: [discoverSessionPayload] as unknown as BulkCreateAttachmentsRequestV2,
       });
 
       expect(updatedCase.comments?.length).to.be(1);
@@ -54,21 +54,21 @@ export default ({ getService }: FtrProviderContext): void => {
         metadata: { title: string; soType: string };
         owner: string;
       };
-      expect(attachment.type).to.eql(DASHBOARD_ATTACHMENT_TYPE);
-      expect(attachment.attachmentId).to.eql('dashboard-1');
+      expect(attachment.type).to.eql(DISCOVER_SESSION_ATTACHMENT_TYPE);
+      expect(attachment.attachmentId).to.eql('search-1');
       expect(attachment.metadata).to.eql({
-        title: 'My dashboard',
-        soType: DASHBOARD_SO_TYPE,
+        title: 'My Discover session',
+        soType: DISCOVER_SESSION_SO_TYPE,
       });
       expect(attachment.owner).to.eql('securitySolutionFixture');
     });
 
-    it('records a comment user-action when a dashboard attachment is created', async () => {
+    it('records a comment user-action when a Discover session attachment is created', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [dashboardPayload] as unknown as BulkCreateAttachmentsRequestV2,
+        params: [discoverSessionPayload] as unknown as BulkCreateAttachmentsRequestV2,
       });
 
       const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
@@ -78,20 +78,23 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(attachmentUserAction.action).to.eql('create');
     });
 
-    it('returns a unified-shaped response for a mixed batch (user comment + dashboard)', async () => {
+    it('returns a unified-shaped response for a mixed batch (user comment + Discover session)', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       const updatedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [postCommentUserReq, dashboardPayload] as unknown as BulkCreateAttachmentsRequestV2,
+        params: [
+          postCommentUserReq,
+          discoverSessionPayload,
+        ] as unknown as BulkCreateAttachmentsRequestV2,
       });
 
       expect(updatedCase.comments?.length).to.be(2);
-      const dashboardAttachment = updatedCase.comments!.find(
-        (comment) => comment.type === DASHBOARD_ATTACHMENT_TYPE
+      const discoverSessionAttachment = updatedCase.comments!.find(
+        (comment) => comment.type === DISCOVER_SESSION_ATTACHMENT_TYPE
       ) as unknown as { attachmentId: string };
-      expect(dashboardAttachment).to.be.ok();
-      expect(dashboardAttachment.attachmentId).to.eql('dashboard-1');
+      expect(discoverSessionAttachment).to.be.ok();
+      expect(discoverSessionAttachment.attachmentId).to.eql('search-1');
 
       const userPartner = updatedCase.comments!.find(
         (comment) => comment.type === 'user' || comment.type === 'comment'

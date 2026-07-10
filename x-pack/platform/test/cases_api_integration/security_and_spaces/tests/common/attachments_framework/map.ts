@@ -6,32 +6,29 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  DISCOVER_SESSION_ATTACHMENT_TYPE,
-  DISCOVER_SESSION_SO_TYPE,
-} from '@kbn/cases-plugin/common/constants/attachments';
+import { MAP_ATTACHMENT_TYPE, MAP_SO_TYPE } from '@kbn/cases-plugin/common/constants/attachments';
 import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api';
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { postCaseReq, postCommentUserReq } from '../../../common/lib/mock';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   bulkCreateAttachments,
   createCase,
   deleteAllCaseItems,
   findCaseUserActions,
-} from '../../../common/lib/api';
+} from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('Discover session saved-object attachments', () => {
-    const discoverSessionPayload = {
-      type: DISCOVER_SESSION_ATTACHMENT_TYPE,
+  describe('Map saved-object attachments', () => {
+    const mapPayload = {
+      type: MAP_ATTACHMENT_TYPE,
       owner: 'securitySolutionFixture',
-      attachmentId: 'search-1',
+      attachmentId: 'map-1',
       metadata: {
-        title: 'My Discover session',
-        soType: DISCOVER_SESSION_SO_TYPE,
+        title: 'My map',
+        soType: MAP_SO_TYPE,
       },
     };
 
@@ -39,12 +36,12 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    it('returns a unified-shaped response when the batch contains a Discover session attachment', async () => {
+    it('returns a unified-shaped response when the batch contains a map attachment', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       const updatedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [discoverSessionPayload] as unknown as BulkCreateAttachmentsRequestV2,
+        params: [mapPayload] as unknown as BulkCreateAttachmentsRequestV2,
       });
 
       expect(updatedCase.comments?.length).to.be(1);
@@ -54,21 +51,21 @@ export default ({ getService }: FtrProviderContext): void => {
         metadata: { title: string; soType: string };
         owner: string;
       };
-      expect(attachment.type).to.eql(DISCOVER_SESSION_ATTACHMENT_TYPE);
-      expect(attachment.attachmentId).to.eql('search-1');
+      expect(attachment.type).to.eql(MAP_ATTACHMENT_TYPE);
+      expect(attachment.attachmentId).to.eql('map-1');
       expect(attachment.metadata).to.eql({
-        title: 'My Discover session',
-        soType: DISCOVER_SESSION_SO_TYPE,
+        title: 'My map',
+        soType: MAP_SO_TYPE,
       });
       expect(attachment.owner).to.eql('securitySolutionFixture');
     });
 
-    it('records a comment user-action when a Discover session attachment is created', async () => {
+    it('records a comment user-action when a map attachment is created', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [discoverSessionPayload] as unknown as BulkCreateAttachmentsRequestV2,
+        params: [mapPayload] as unknown as BulkCreateAttachmentsRequestV2,
       });
 
       const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
@@ -78,23 +75,20 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(attachmentUserAction.action).to.eql('create');
     });
 
-    it('returns a unified-shaped response for a mixed batch (user comment + Discover session)', async () => {
+    it('returns a unified-shaped response for a mixed batch (user comment + map)', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
       const updatedCase = await bulkCreateAttachments({
         supertest,
         caseId: postedCase.id,
-        params: [
-          postCommentUserReq,
-          discoverSessionPayload,
-        ] as unknown as BulkCreateAttachmentsRequestV2,
+        params: [postCommentUserReq, mapPayload] as unknown as BulkCreateAttachmentsRequestV2,
       });
 
       expect(updatedCase.comments?.length).to.be(2);
-      const discoverSessionAttachment = updatedCase.comments!.find(
-        (comment) => comment.type === DISCOVER_SESSION_ATTACHMENT_TYPE
+      const mapAttachment = updatedCase.comments!.find(
+        (comment) => comment.type === MAP_ATTACHMENT_TYPE
       ) as unknown as { attachmentId: string };
-      expect(discoverSessionAttachment).to.be.ok();
-      expect(discoverSessionAttachment.attachmentId).to.eql('search-1');
+      expect(mapAttachment).to.be.ok();
+      expect(mapAttachment.attachmentId).to.eql('map-1');
 
       const userPartner = updatedCase.comments!.find(
         (comment) => comment.type === 'user' || comment.type === 'comment'

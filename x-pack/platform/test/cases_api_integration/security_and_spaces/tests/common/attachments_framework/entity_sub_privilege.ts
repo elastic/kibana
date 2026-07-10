@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 
 import type { UnifiedReferenceAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { getPostCaseRequest, postCommentEntityReq } from '../../../common/lib/mock';
-import { deleteAllCaseItems, createCase, createComment } from '../../../common/lib/api';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getPostCaseRequest, postCommentEntityReq } from '../../../../common/lib/mock';
+import { deleteAllCaseItems, createCase, createComment } from '../../../../common/lib/api';
 import {
   superUser,
   secOnly,
@@ -19,7 +19,7 @@ import {
   secOnlyNoCreateComment,
   secOnlyReadCreateComment,
   secOnlyCreateComment,
-} from '../../../common/lib/authentication/users';
+} from '../../../../common/lib/authentication/users';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');

@@ -14,8 +14,12 @@ import {
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { postCaseReq, postCommentActionsReq, postCommentUserReq } from '../../../common/lib/mock';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  postCaseReq,
+  postCommentActionsReq,
+  postCommentUserReq,
+} from '../../../../common/lib/mock';
 import {
   createCase,
   createComment,
@@ -23,7 +27,7 @@ import {
   bulkCreateAttachments,
   bulkGetAttachments,
   getCase,
-} from '../../../common/lib/api';
+} from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

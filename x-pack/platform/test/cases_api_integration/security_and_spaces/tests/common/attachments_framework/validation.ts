@@ -9,9 +9,9 @@ import type {
   UnifiedReferenceAttachmentPayload,
   UnifiedValueAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { postCaseReq } from '../../../common/lib/mock';
-import { createCase, deleteAllCaseItems, bulkCreateAttachments } from '../../../common/lib/api';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { postCaseReq } from '../../../../common/lib/mock';
+import { createCase, deleteAllCaseItems, bulkCreateAttachments } from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
