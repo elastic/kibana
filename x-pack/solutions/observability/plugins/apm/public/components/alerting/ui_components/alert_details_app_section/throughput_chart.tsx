@@ -10,7 +10,7 @@ import React from 'react';
 import type { Theme } from '@elastic/charts';
 import type { BoolQuery } from '@kbn/es-query';
 import type { RecursivePartial } from '@elastic/eui';
-import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -27,6 +27,8 @@ import { TransactionTypeSelect } from './transaction_type_select';
 import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
 import { RedMetricsChartActions } from './red_metrics_chart_actions';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
+import { AnomalyChartPanel } from './anomaly_chart_panel';
+import { AnomalySeverityBadge, type AnomalyChartInfo } from './anomaly_severity_badge';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -51,6 +53,7 @@ export function ThroughputChart({
   filters,
   customAlertEvaluationThreshold,
   threshold,
+  anomaly,
   ruleTypeId,
   compact,
   showAlertAnnotations,
@@ -72,6 +75,7 @@ export function ThroughputChart({
   filters?: BoolQuery;
   customAlertEvaluationThreshold?: number;
   threshold?: ReactElement;
+  anomaly?: AnomalyChartInfo;
   ruleTypeId?: ApmRuleType;
   /** When true, hide the threshold side panel even if `threshold` is provided. */
   compact?: boolean;
@@ -167,7 +171,7 @@ export function ThroughputChart({
 
   return (
     <EuiFlexItem>
-      <EuiPanel hasBorder={true}>
+      <AnomalyChartPanel anomalyScore={anomaly?.score}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
@@ -178,6 +182,11 @@ export function ThroughputChart({
               </h2>
             </EuiTitle>
           </EuiFlexItem>
+          {anomaly && (
+            <EuiFlexItem grow={false}>
+              <AnomalySeverityBadge severity={anomaly.severity} score={anomaly.score} />
+            </EuiFlexItem>
+          )}
 
           <EuiFlexItem grow={false}>
             <EuiIconTip
@@ -237,7 +246,7 @@ export function ThroughputChart({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </AnomalyChartPanel>
     </EuiFlexItem>
   );
 }

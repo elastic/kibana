@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Detection, Discovery, SignificantEventStatus } from '@kbn/streams-schema';
-import { SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/streams-schema';
+import type { Detection, Discovery, SignificantEventStatus } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/significant-events-schema';
 import {
   DETECTION_KIND_COLORS,
   DISCOVERY_KIND_COLORS,
@@ -45,6 +45,7 @@ export const getLifecycleStatusLabel = (status: LifecycleDisplayStatus): string 
     case 'acknowledged':
     case 'demoted':
     case 'resolved':
+    case 'closed':
       return SIGNIFICANT_EVENT_STATUS_LABELS[status];
     default:
       return status;
@@ -63,6 +64,7 @@ export const getLifecycleStatusColor = (status: LifecycleDisplayStatus): string 
     case 'acknowledged':
     case 'demoted':
     case 'resolved':
+    case 'closed':
       return SIGNIFICANT_EVENT_STATUS_COLORS[status];
     default:
       return 'hollow';

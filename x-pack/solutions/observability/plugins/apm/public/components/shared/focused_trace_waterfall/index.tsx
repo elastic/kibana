@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { TraceWaterfall } from '../trace_waterfall';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import type { WaterfallGetServiceBadgeHref } from '../../../../common/waterfall/typings';

@@ -9,6 +9,11 @@
 
 import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
+import { GraphBuildError } from './graph_build_error';
+import {
+  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+  isHitlWaitStepType,
+} from '../../common/wait_for_approval';
 import { DEFAULT_LOOP_MAX_ITERATIONS } from '../../spec/schema';
 import type {
   BaseStep,
@@ -21,11 +26,13 @@ import type {
   LoopContinueStep,
   LoopStepProps,
   MaxIterations,
+  ParallelStep,
   StepWithForeach,
   StepWithIfCondition,
   StepWithOnFailure,
   SwitchStep,
   TimeoutProp,
+  WaitForApprovalStep,
   WaitForInputStep,
   WaitStep,
   WhileStep,
@@ -65,21 +72,24 @@ import type {
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
   ExitWhileNode,
-  GraphNodeUnion,
   LoopBreakNode,
   LoopContinueNode,
   LoopEnterNode,
+  WaitForApprovalGraphNode,
   WaitForInputGraphNode,
   WorkflowGraphType,
   WorkflowOutputGraphNode,
 } from '../types';
 import { isLoopEnterNode } from '../types';
+import type { EnterParallelNode, ExitParallelNode } from '../types/nodes/parallel_nodes';
+import type { GraphNodeUnion } from '../types/nodes/union';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
 
 const flowControlStepTypes = new Set([
   'if',
   'foreach',
   'while',
+  'parallel',
   'loop.break',
   'loop.continue',
   'switch',
@@ -116,7 +126,8 @@ function getStepId(node: BaseStep, context: GraphBuildContext): string {
   return parts.join('_');
 }
 
-function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): WorkflowGraphType {
+function visitAbstractStep(originalStep: BaseStep, context: GraphBuildContext): WorkflowGraphType {
+  const currentStep = originalStep;
   if ((currentStep as StepWithOnFailure)['on-failure']) {
     const stepLevelOnFailureGraph = handleStepLevelOnFailure(currentStep, context);
 
@@ -133,6 +144,28 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     }
   }
 
+  return visitTypedAbstractStep(currentStep, context);
+}
+
+function tryVisitHitlWaitStep(
+  currentStep: BaseStep,
+  context: GraphBuildContext
+): WorkflowGraphType | undefined {
+  if (currentStep.type === 'waitForInput') {
+    return visitWaitForInputStep(currentStep as WaitForInputStep, context);
+  }
+
+  if (currentStep.type === 'waitForApproval') {
+    return visitWaitForApprovalStep(currentStep as WaitForApprovalStep, context);
+  }
+
+  return undefined;
+}
+
+function visitTypedAbstractStep(
+  currentStep: BaseStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
   if ((currentStep as StepWithIfCondition).if) {
     return createIfGraphForIfStepLevel(currentStep as StepWithIfCondition, context);
   }
@@ -151,6 +184,13 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if (currentStep.type === 'loop.continue') {
     return visitLoopContinueStep(currentStep as LoopContinueStep, context);
+  }
+
+  // HITL wait steps are not wrapped in enter-timeout-zone nodes. waitForApproval and
+  // waitForInput schedule their idle deadlines via handleExecutionDelay.
+  const hitlWaitGraph = tryVisitHitlWaitStep(currentStep, context);
+  if (hitlWaitGraph) {
+    return hitlWaitGraph;
   }
 
   if ((currentStep as TimeoutProp).timeout) {
@@ -172,16 +212,20 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return createWhileGraph(getStepId(currentStep, context), currentStep as WhileStep, context);
   }
 
+  if (currentStep.type === 'parallel') {
+    return createParallelGraph(
+      getStepId(currentStep, context),
+      currentStep as ParallelStep,
+      context
+    );
+  }
+
   if ((currentStep as StepWithForeach).foreach) {
     return createForeachGraphForStepWithForeach(currentStep as StepWithForeach, context);
   }
 
   if (currentStep.type === 'wait') {
     return visitWaitStep(currentStep as WaitStep, context);
-  }
-
-  if (currentStep.type === 'waitForInput') {
-    return visitWaitForInputStep(currentStep as WaitForInputStep, context);
   }
 
   if (currentStep.type === 'data.set') {
@@ -270,6 +314,27 @@ export function visitWaitForInputStep(
     },
   };
   graph.setNode(waitForInputNode.id, waitForInputNode);
+
+  return graph;
+}
+
+export function visitWaitForApprovalStep(
+  currentStep: WaitForApprovalStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const waitForApprovalNode: WaitForApprovalGraphNode = {
+    id: stepId,
+    type: 'waitForApproval',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+      timeout: currentStep.timeout ?? DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+    },
+  };
+  graph.setNode(waitForApprovalNode.id, waitForApprovalNode);
 
   return graph;
 }
@@ -1006,6 +1071,141 @@ function createForeachGraphForStepWithForeach(
     steps: [omit(stepWithForeach, ['foreach'])],
   } as ForEachStep;
   return createForeachGraph(generatedStepId, foreachStep, context);
+}
+
+// Compiles a parallel branch body into a real subgraph and enforces the v1
+// branch-body constraints (straight-line only; no `waitForInput`). Returns the
+// subgraph plus its single start node.
+function buildParallelBranchBody(
+  stepId: string,
+  steps: BaseStep[],
+  context: GraphBuildContext
+): { bodyGraph: WorkflowGraphType; startNodeId: string } {
+  // The branch body is compiled into a real subgraph so that adding nested
+  // flow-control inside a branch later is an executor change, not a graph one.
+  // v1 supports a straight-line body (one or more atomic/wait steps); nested
+  // flow-control (if/switch/foreach/while) inside a branch is not yet supported
+  // by the parallel executor and is rejected here so it fails loudly at compile
+  // time rather than silently running only one path at runtime.
+  const bodyGraph = createStepsSequence(steps || [], context);
+
+  const branchingNode = bodyGraph
+    .nodes()
+    .find((nodeId) => (bodyGraph.outEdges(nodeId)?.length ?? 0) > 1);
+  if (branchingNode) {
+    throw new GraphBuildError(
+      `Parallel step "${stepId}" has a branch body with nested flow-control, which is not supported yet. ` +
+        `A parallel branch body must be a straight-line sequence of steps (no if/switch/foreach/while inside the branch).`,
+      stepId
+    );
+  }
+
+  // A straight-line body of atomic/connector/wait steps compiles to leaf nodes
+  // only. Any `enter-*`/`exit-*` node means the body was wrapped in flow-control
+  // (if/switch/foreach/while), an `on-failure` handler (retry/continue/fallback),
+  // or a step-level `timeout` zone. The parallel executor walks branch bodies as
+  // a straight line and cannot drive these wrapper nodes, so a branch would hang
+  // at runtime. Reject at compile time with an actionable message instead.
+  const flowControlNode = bodyGraph
+    .nodes()
+    .map((nodeId) => bodyGraph.node(nodeId))
+    .find((bodyNode) => {
+      const type = bodyNode?.type as string | undefined;
+      return type !== undefined && (type.startsWith('enter-') || type.startsWith('exit-'));
+    });
+  if (flowControlNode) {
+    throw new GraphBuildError(
+      `Parallel step "${stepId}" has a branch body containing unsupported flow-control ` +
+        `("${flowControlNode.type}"). A parallel branch body must be a straight-line sequence of ` +
+        `atomic steps with no nested flow-control (if/switch/foreach/while), no step-level ` +
+        `"on-failure" handler, and no step-level "timeout".`,
+      stepId
+    );
+  }
+
+  // The parallel executor drives each branch in-process. Timer-based `wait`
+  // steps are supported: a waiting branch parks across ticks and the parallel
+  // re-ticks at the earliest branch `resumeAt`. HITL waits, however, are
+  // indefinite, externally-resumed waits that have no per-branch resume signal,
+  // so they cannot run inside a branch yet — reject them at compile time instead
+  // of hanging or self-resuming the branch at runtime.
+  const unsupportedNode = bodyGraph
+    .nodes()
+    .map((nodeId) => bodyGraph.node(nodeId))
+    .find((bodyNode) => isHitlWaitStepType(bodyNode?.type));
+  if (unsupportedNode) {
+    throw new GraphBuildError(
+      `Parallel step "${stepId}" has a branch body containing an unsupported HITL wait step "${unsupportedNode.stepType}". ` +
+        `HITL wait steps are not supported inside a parallel branch yet.`,
+      stepId
+    );
+  }
+
+  const startNodeId = bodyGraph
+    .nodes()
+    .filter((nodeId) => bodyGraph.inEdges(nodeId)?.length === 0)[0];
+
+  return { bodyGraph, startNodeId };
+}
+
+function createParallelGraph(
+  stepId: string,
+  parallelStep: ParallelStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
+  const enterNodeId = `enterParallel_${stepId}`;
+  const exitNodeId = `exitParallel_${stepId}`;
+  const staticBranches = parallelStep.branches;
+
+  // Build one body subgraph per branch. Dynamic mode has a single shared body
+  // (`steps`); static mode has one heterogeneous body per named branch.
+  const branchBodies: Array<{ name?: string; bodyGraph: WorkflowGraphType; startNodeId: string }> =
+    staticBranches
+      ? staticBranches.map((branch) => ({
+          name: branch.name,
+          ...buildParallelBranchBody(stepId, branch.steps, context),
+        }))
+      : [buildParallelBranchBody(stepId, parallelStep.steps || [], context)];
+
+  const enterParallelNode: EnterParallelNode = {
+    id: enterNodeId,
+    type: 'enter-parallel',
+    stepId,
+    stepType: parallelStep.type,
+    exitNodeId,
+    // Dynamic: the single shared body start node. Static: one descriptor per branch.
+    ...(staticBranches
+      ? {
+          branches: branchBodies.map(({ name, startNodeId }) => ({
+            name: name as string,
+            startNodeId,
+          })),
+        }
+      : { branchStartNodeId: branchBodies[0].startNodeId }),
+    configuration: {
+      ...omit(parallelStep, ['steps', 'branches']), // bodies are represented in the graph
+    },
+  };
+  context.stack.push(enterParallelNode);
+  graph.setNode(enterNodeId, enterParallelNode as GraphNodeUnion);
+
+  const exitParallelNode: ExitParallelNode = {
+    id: exitNodeId,
+    type: 'exit-parallel',
+    stepId,
+    stepType: parallelStep.type,
+    startNodeId: enterNodeId,
+  };
+  graph.setNode(exitNodeId, exitParallelNode as GraphNodeUnion);
+
+  // Wire every branch body between enter and exit. Each body's start node gets an
+  // edge from enter; each body's end node(s) get an edge to exit.
+  for (const { bodyGraph } of branchBodies) {
+    insertGraphBetweenNodes(graph, bodyGraph, enterNodeId, exitNodeId);
+  }
+  context.stack.pop();
+  return graph;
 }
 
 function createWhileGraph(

@@ -102,13 +102,11 @@ enabled:
   - src/platform/test/functional/apps/discover/query_mode/config.ts
   - src/platform/test/functional/apps/discover/query_mode_esql_default/config.ts
   - src/platform/test/functional/apps/discover/tabs2/config.ts
-  - src/platform/test/functional/apps/discover/tabs3/config.ts
   - src/platform/test/functional/apps/discover/tabs4/config.ts
   - src/platform/test/functional/apps/discover/tabs/config.ts
   - src/platform/test/functional/apps/discover/tabs5/config.ts
   - src/platform/test/functional/apps/discover/tabs6/config.ts
   - src/platform/test/functional/apps/discover/tabs7/config.ts
-  - src/platform/test/functional/apps/discover/tabs8/config.ts
   - src/platform/test/functional/apps/discover/cascade_layout/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/management/group1/config.ts
@@ -195,15 +193,19 @@ enabled:
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_unified_attachments.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/platform/test/cases_api_integration/spaces_only/config.ts
+  - x-pack/platform/test/cases_api_integration/spaces_only/config_analytics_v2.ts
+  - x-pack/platform/test/cases_api_integration/spaces_only/config_analytics_v2_admin_routes_off.ts
   - x-pack/platform/test/disable_ems/config.ts
   - x-pack/platform/test/examples/config.ts
   - x-pack/platform/test/fleet_api_integration/config.agent.ts
   - x-pack/platform/test/fleet_api_integration/config.agentless.ts
+  - x-pack/platform/test/fleet_api_integration/config.agentless_legacy_disabled.ts
   - x-pack/platform/test/fleet_api_integration/config.agent_policy.ts
   - x-pack/platform/test/fleet_api_integration/config.epm.ts
   - x-pack/platform/test/fleet_api_integration/config.event_ingested.ts
   - x-pack/platform/test/fleet_api_integration/config.fleet.ts
   - x-pack/platform/test/fleet_api_integration/config.package_policy.ts
+  - x-pack/platform/test/fleet_api_integration/config.preconfiguration_updates.ts
   - x-pack/platform/test/fleet_api_integration/config.space_awareness.ts
   - x-pack/platform/test/fleet_api_integration/config.cloud_connector.ts
   - x-pack/platform/test/fleet_functional/config.ts
@@ -255,13 +257,6 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/group13/config.ts
   - x-pack/platform/test/functional/apps/lens/group14/config.ts
   - x-pack/platform/test/functional/apps/lens/group15/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_1/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_2/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_3/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_4/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based_1/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based_2/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based_3/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based_4/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts
   - x-pack/platform/test/functional/apps/license_management/config.ts

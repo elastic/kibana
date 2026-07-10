@@ -54,7 +54,8 @@ Open only the docs relevant to the test type(s) under review.
 - **[api]** **Fixture boundaries**: `apiClient` for the endpoint under test; `apiServices`/`kbnClient` for setup/teardown only; correct auth + common headers.
 - **[api]** **Correctness**: guardrail assertions before dereferencing response fields; validate contract + side effects; stable error assertions.
 - **[ui]** **UI scope**: UI tests should focus on user interactions and rendering; avoid “data correctness” assertions (for example exact API response shapes or exact table cell values) unless the UI behavior depends on them. Prefer Scout API tests (or unit/integration) for data correctness coverage.
-- **[general]** **Isolation**: parallel-safe data and resilient cleanup in hooks; no reliance on file ordering or shared mutable state.
+- **[ui]** **Page objects**: Encapsulate multi-step interactions and reused sequences in page objects — specs should primarily hold assertions (`expect`), test flow (`test.step`), and page-object method calls. Short inline locator calls for simple one-off assertions (e.g. a single label or nav-link check) are acceptable. Flag raw locators when the interaction is complex enough to benefit from abstraction or is duplicated across specs. Extract all locators as `readonly` properties in the constructor; no inline locator creation inside methods.
+- **[general]** **Isolation**: parallel-safe data; resilient cleanup in `afterAll`/`afterEach`; defensive cleanup in `beforeAll` for failed-run leftovers; `scoutSpace.savedObjects.cleanStandardList()` as catch-all after domain-specific cleanup; no reliance on file ordering or shared mutable state.
 - **[general]** **RBAC / realism**: minimal permissions (avoid `admin` unless required); space-aware behavior covered or explicitly out of scope.
 - **[ui]** **Flake traps**: avoid `waitForTimeout()` and time-based assertions/retries; rely on auto-waiting + explicit readiness signals. Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`).
 - **[general]** **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
@@ -96,6 +97,16 @@ When in doubt, prefer a lower severity. Optimization suggestions (efficiency imp
   - Verify suite wiring/discovery (new specs are picked up by Scout/Playwright config; no orphaned `loadTestFile()`).
   - Ensure any intentional de-scopes are explicit, and that tags/permissions remain equivalent and cloud/serverless compatible where applicable.
 - **Output**: include the “Migration parity” section only when action is required; otherwise omit it.
+
+### Kibana / EUI component patterns (UI)
+
+These EUI/Kibana component behaviours are non-obvious and cannot be inferred from documentation alone.
+
+- **`QueryStringInput`**: `fill()` races with React prop sync; use `pressSequentially()` instead.
+- **`EuiBasicTable` empty state**: always renders a phantom "no items found" row — assert `toContainText('No items found')`, never `toHaveCount(0)`.
+- **EUI disabled button tooltip**: hover the `span:has([data-test-subj="..."])` wrapper, not the button itself.
+- **EUI CSS class selectors** (`.euiTableRow`, `.euiToolTipAnchor`, etc.): internal to EUI, change between versions — use `data-test-subj` or ARIA roles.
+- **DOM instability from app bugs**: use `dispatchEvent('click')` over `{ force: true }`; document the bug location in a comment.
 
 ## Output
 

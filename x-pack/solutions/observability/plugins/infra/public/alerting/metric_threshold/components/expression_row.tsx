@@ -15,12 +15,12 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { omit } from 'lodash';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from '@emotion/styled';
 import type { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   OfExpression,
@@ -59,6 +59,11 @@ const StyledExpression = styled.div`
 
 const StyledHealth = styled(EuiHealth)`
   margin-left: 4px;
+`;
+
+const StyledSeverityLabel = styled.span`
+  font-size: 0.8em;
+  opacity: 0.65;
 `;
 
 export const ExpressionRow = ({
@@ -297,10 +302,18 @@ export const ExpressionRow = ({
               <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
                 {criticalThresholdExpression}
                 <StyledHealth color="danger">
-                  <FormattedMessage
-                    id="xpack.infra.metrics.alertFlyout.criticalThreshold"
-                    defaultMessage="Alert"
-                  />
+                  <span>
+                    <FormattedMessage
+                      id="xpack.infra.metrics.alertFlyout.criticalThreshold"
+                      defaultMessage="Alert"
+                    />{' '}
+                    <StyledSeverityLabel>
+                      <FormattedMessage
+                        id="xpack.infra.metrics.alertFlyout.criticalThresholdSeverityLabel"
+                        defaultMessage="(severity: critical)"
+                      />
+                    </StyledSeverityLabel>
+                  </span>
                 </StyledHealth>
               </EuiFlexGroup>
               <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">

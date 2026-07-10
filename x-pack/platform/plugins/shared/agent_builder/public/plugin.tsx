@@ -20,6 +20,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { registerLocators } from './locator/register_locators';
 import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
@@ -33,6 +34,7 @@ import {
   AgentBuilderAccessChecker,
   AgentService,
   AttachmentsService,
+  RenderersService,
   ChatService,
   ConversationsService,
   DocLinksService,
@@ -46,6 +48,7 @@ import {
   type AgentBuilderInternalService,
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
+import { createPublicRenderersContract } from './services/renderers';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
@@ -70,8 +73,8 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
-import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
 import { storageKeys } from './application/storage_keys';
+import { AGENTBUILDER_APP_ID } from '../common/features';
 
 export class AgentBuilderPlugin
   implements
@@ -151,13 +154,14 @@ export class AgentBuilderPlugin
     const { http } = core;
     const { licensing, inference } = startDependencies;
 
+    startDependencies.cps?.cpsManager?.registerAppAccess(
+      AGENTBUILDER_APP_ID,
+      () => ProjectRoutingAccess.READONLY
+    );
+
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });
-
-    attachmentsService.addAttachmentType(
-      'visualization',
-      createVisualizationAttachmentDefinition({ startDependencies })
-    );
+    const renderersService = new RenderersService();
 
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
@@ -226,6 +230,7 @@ export class AgentBuilderPlugin
     const internalServices: AgentBuilderInternalService = {
       agentService,
       attachmentsService,
+      renderersService,
       chatService,
       conversationsService,
       docLinksService,
@@ -311,6 +316,7 @@ export class AgentBuilderPlugin
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
+      renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
       addAttachment: (attachment: AttachmentInput) => {

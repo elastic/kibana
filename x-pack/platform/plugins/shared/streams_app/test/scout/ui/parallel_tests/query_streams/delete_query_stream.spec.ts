@@ -21,7 +21,8 @@ const QUERY_STREAM_NAME = 'logs.ecs.test';
 const ESQL_VIEW_NAME = `$.${QUERY_STREAM_NAME}`;
 const INITIAL_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
 
-test.describe('Query streams - Delete query stream', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/268484
+test.describe.skip('Query streams - Delete query stream', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
     await browserAuth.loginAsAdmin();
     await enableQueryStreams(kbnClient);
@@ -56,6 +57,6 @@ test.describe('Query streams - Delete query stream', { tag: tags.stateful.classi
         method: 'GET',
         path: `/_query/view/${encodeURIComponent(ESQL_VIEW_NAME)}`,
       })
-    ).rejects.toThrow(/index_not_found_exception/);
+    ).rejects.toThrow(/resource_not_found_exception/);
   });
 });

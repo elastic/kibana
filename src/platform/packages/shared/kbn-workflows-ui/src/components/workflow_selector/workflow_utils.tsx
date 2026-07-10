@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import type { WorkflowListDto } from '@kbn/workflows';
+import type {
+  ManagedWorkflowSelector,
+  ManagedWorkflowSolution,
+  WorkflowListDto,
+} from '@kbn/workflows';
 import { TagsBadge } from './tags_badge';
 import * as i18n from './translations';
 
@@ -31,6 +36,11 @@ export interface WorkflowOption {
     secondaryContent?: string;
   };
   [key: string]: unknown; // Allow additional properties for EuiSelectable
+}
+
+export interface WorkflowSelectorVisibility {
+  selectors?: ManagedWorkflowSelector[];
+  solutions?: ManagedWorkflowSolution[];
 }
 
 export interface WorkflowSelectorConfig {
@@ -56,6 +66,7 @@ export interface WorkflowSelectorConfig {
   hideViewWorkflowLink?: boolean;
   // When true (default), the selected workflow's name is displayed in the search input.
   showSelectedInSearch?: boolean;
+  visibility?: WorkflowSelectorVisibility;
 
   // Error Messages
   errorMessages?: {
@@ -91,7 +102,18 @@ export function processWorkflowsToOptions(
       searchableLabel: workflow.name,
       disabled: !workflow.enabled,
       checked: workflow.id === selectedWorkflowId ? 'on' : undefined,
-      append: <TagsBadge tags={workflow.definition?.tags || []} />,
+      append: (
+        <>
+          {workflow.managed ? (
+            <EuiToolTip content={i18n.MANAGED_BADGE_TOOLTIP} position="bottom">
+              <EuiBadge color="hollow" title={i18n.MANAGED_BADGE_LABEL} tabIndex={0}>
+                {i18n.MANAGED_BADGE_LABEL}
+              </EuiBadge>
+            </EuiToolTip>
+          ) : null}
+          <TagsBadge tags={workflow.definition?.tags || []} />
+        </>
+      ),
       validationResult,
       data: {
         secondaryContent: workflow.description || i18n.WORKFLOW_EMPTY_DESCRIPTION,

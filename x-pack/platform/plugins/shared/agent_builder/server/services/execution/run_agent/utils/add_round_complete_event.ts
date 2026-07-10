@@ -490,9 +490,15 @@ const createToolCallStep = ({
 const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
   let inputTokens = 0;
   let outputTokens = 0;
+  let cachedInputTokens = 0;
+  let hasCachedInputTokens = false;
   for (const call of stats.calls) {
     inputTokens += call.tokens?.prompt ?? 0;
     outputTokens += call.tokens?.completion ?? 0;
+    if (call.tokens?.cached !== undefined) {
+      cachedInputTokens += call.tokens.cached;
+      hasCachedInputTokens = true;
+    }
   }
   const modelFromResponse = stats.calls.find((call) => call.model)?.model;
 
@@ -502,6 +508,7 @@ const getModelUsage = (stats: ModelProviderStats): RoundModelUsageStats => {
     llm_calls: stats.calls.length,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
+    ...(hasCachedInputTokens ? { cached_input_tokens: cachedInputTokens } : {}),
     ...(modelFromResponse ? { model: modelFromResponse } : {}),
   };
 };
@@ -571,6 +578,9 @@ const mergeModelUsage = (
     llm_calls: a.llm_calls + b.llm_calls,
     input_tokens: a.input_tokens + b.input_tokens,
     output_tokens: a.output_tokens + b.output_tokens,
+    ...(a.cached_input_tokens !== undefined || b.cached_input_tokens !== undefined
+      ? { cached_input_tokens: (a.cached_input_tokens ?? 0) + (b.cached_input_tokens ?? 0) }
+      : {}),
     model: a.model ?? b.model,
   };
 };

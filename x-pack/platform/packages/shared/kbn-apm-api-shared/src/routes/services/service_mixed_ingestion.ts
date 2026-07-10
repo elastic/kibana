@@ -18,7 +18,9 @@ export interface ServiceMixedIngestionResponse {
 export const serviceMixedIngestionRoute = defineRoute<ServiceMixedIngestionResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/mixed_ingestion',
   params: t.type({
-    path: t.type({ serviceName: t.string }),
+    path: t.type({
+      serviceName: t.string,
+    }),
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
 });

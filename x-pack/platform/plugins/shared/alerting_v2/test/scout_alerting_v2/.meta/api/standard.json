@@ -1,5 +1,5 @@
 {
-  "sha1": "6ef480d67b914c6c12fc8a67da266a1010f48602",
+  "sha1": "c74a8db33a2e0fe2b67fd02cc7027270b9628394",
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 10
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 10
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 135,
+        "line": 136,
         "column": 10
       }
     },
@@ -53,7 +53,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 198,
+        "line": 199,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-748690c3b1e4282",
+      "title": "Director holds an episode active across engine recoveries when the last lifecycle action is activate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 280,
         "column": 10
       }
     },
@@ -67,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 279,
+        "line": 405,
         "column": 10
       }
     },
@@ -81,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 337,
+        "line": 463,
         "column": 10
       }
     },
@@ -95,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 393,
+        "line": 519,
         "column": 10
       }
     },
@@ -109,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 481,
+        "line": 607,
         "column": 10
       }
     },
@@ -123,7 +137,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 532,
+        "line": 658,
         "column": 10
       }
     },
@@ -137,7 +151,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 593,
+        "line": 719,
         "column": 10
       }
     },
@@ -151,7 +165,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 648,
+        "line": 774,
         "column": 10
       }
     },
@@ -165,7 +179,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 696,
+        "line": 822,
         "column": 10
       }
     },
@@ -179,7 +193,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 802,
+        "line": 928,
         "column": 10
       }
     },
@@ -193,7 +207,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 859,
+        "line": 985,
         "column": 10
       }
     },
@@ -207,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 961,
+        "line": 1087,
         "column": 10
       }
     },
@@ -221,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1020,
+        "line": 1146,
         "column": 10
       }
     },
@@ -235,7 +249,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1087,
+        "line": 1213,
         "column": 10
       }
     },
@@ -249,7 +263,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1167,
+        "line": 1293,
         "column": 10
       }
     },
@@ -263,7 +277,35 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1237,
+        "line": 1363,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-9085e2d8ed11df7",
+      "title": "Director no_data_strategy 'last_known_status' preserves the prior episode status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 1424,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-f671f4e4f7de76d",
+      "title": "Director no_data_strategy 'recover' transitions the episode toward recovery via a no_data event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 1484,
         "column": 10
       }
     },
@@ -3034,8 +3076,8 @@
       }
     },
     {
-      "id": "7f265c4c979f2ab-5fc3e1026b2bfac",
-      "title": "Bulk create alert actions API bulk: processes mixed action types and persists each side effect",
+      "id": "7f265c4c979f2ab-1cee0bc023cdbc2",
+      "title": "Bulk create alert actions API bulk: processes mixed (non-lifecycle) action types and persists each side effect",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -3073,6 +3115,58 @@
       }
     },
     {
+      "id": "7f265c4c979f2ab-605da2258a1772e",
+      "title": "Bulk create alert actions API lifecycle: bulk deactivate writes the synthetic .rule-events doc and flips episode.status to inactive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 208,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-4fd23b6f5bb61d7",
+      "title": "Bulk create alert actions API lifecycle: bulk activate writes the synthetic .rule-events doc and flips episode.status to active + breached",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 264,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-91a49e4b8781a2a",
+      "title": "Bulk create alert actions API lifecycle: silently skips a bulk deactivate item whose episode is already inactive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 317,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-9a233f228a6590a",
+      "title": "Bulk create alert actions API lifecycle: silently skips a bulk activate item whose episode is still active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 371,
+        "column": 10
+      }
+    },
+    {
       "id": "7f265c4c979f2ab-c55706ee9bd2e93",
       "title": "Bulk create alert actions API schema: rejects an empty array with 400",
       "expectedStatus": "passed",
@@ -3081,7 +3175,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 208,
+        "line": 412,
         "column": 10
       }
     },
@@ -3094,7 +3188,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 217,
+        "line": 421,
         "column": 10
       }
     },
@@ -3107,7 +3201,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 232,
+        "line": 436,
         "column": 10
       }
     },
@@ -3120,7 +3214,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 241,
+        "line": 445,
         "column": 10
       }
     },
@@ -3133,7 +3227,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 250,
+        "line": 454,
         "column": 10
       }
     },
@@ -3146,7 +3240,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 264,
+        "line": 468,
         "column": 10
       }
     },
@@ -3159,7 +3253,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 273,
+        "line": 477,
         "column": 10
       }
     },
@@ -3172,7 +3266,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 285,
+        "line": 489,
         "column": 10
       }
     },
@@ -3185,7 +3279,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 294,
+        "line": 498,
         "column": 10
       }
     },
@@ -3198,7 +3292,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
-        "line": 316,
+        "line": 520,
         "column": 10
       }
     },
@@ -3346,6 +3440,19 @@
       }
     },
     {
+      "id": "01393b66d46e76a-fbc270f956a66b1",
+      "title": "Create activate alert action API activate: writes a synthetic .rule-events doc that flips the episode back to active + breached",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 78,
+        "column": 10
+      }
+    },
+    {
       "id": "01393b66d46e76a-f761fefd7afc051",
       "title": "Create activate alert action API schema: rejects body missing reason with 400",
       "expectedStatus": "passed",
@@ -3354,7 +3461,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 72,
+        "line": 131,
         "column": 10
       }
     },
@@ -3367,7 +3474,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 80,
+        "line": 139,
         "column": 10
       }
     },
@@ -3380,7 +3487,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 88,
+        "line": 147,
         "column": 10
       }
     },
@@ -3393,7 +3500,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 96,
+        "line": 155,
         "column": 10
       }
     },
@@ -3406,7 +3513,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 104,
+        "line": 163,
         "column": 10
       }
     },
@@ -3419,7 +3526,59 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 112,
+        "line": 171,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-269eb6a0af52c8f",
+      "title": "Create activate alert action API precondition: rejects activate when the episode is already active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 179,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-6165a3f45c82dc6",
+      "title": "Create activate alert action API activate: allows a recovering episode to be reopened (cancel the wind-down)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 214,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-e67ad6d28fe9cbf",
+      "title": "Create activate alert action API activate: allows a pending episode to be forced past the activation counter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 246,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-841c7e2e739604d",
+      "title": "Create activate alert action API activate: allows reopen of a naturally-recovered (never user-deactivated) episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 278,
         "column": 10
       }
     },
@@ -3432,7 +3591,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 120,
+        "line": 326,
         "column": 10
       }
     },
@@ -3445,7 +3604,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
-        "line": 137,
+        "line": 343,
         "column": 10
       }
     },
@@ -3645,6 +3804,19 @@
       }
     },
     {
+      "id": "a7e7965b0f2cbf1-2edcb1c95a530e0",
+      "title": "Create deactivate alert action API deactivate: writes a synthetic recovered/inactive rule event carrying the prior event data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
       "id": "a7e7965b0f2cbf1-487e1bf243ad021",
       "title": "Create deactivate alert action API schema: rejects body missing reason with 400",
       "expectedStatus": "passed",
@@ -3653,7 +3825,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 76,
+        "line": 128,
         "column": 10
       }
     },
@@ -3666,7 +3838,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 85,
+        "line": 137,
         "column": 10
       }
     },
@@ -3679,7 +3851,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 94,
+        "line": 146,
         "column": 10
       }
     },
@@ -3692,7 +3864,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 103,
+        "line": 155,
         "column": 10
       }
     },
@@ -3705,7 +3877,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 112,
+        "line": 164,
         "column": 10
       }
     },
@@ -3718,7 +3890,46 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 121,
+        "line": 173,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-359c682ca921e0c",
+      "title": "Create deactivate alert action API precondition: rejects deactivate of an already-inactive episode with INVALID_EPISODE_STATE_TRANSITION (400)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 182,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-cd5d4a474d3646f",
+      "title": "Create deactivate alert action API precondition: allows deactivate of a pending episode (forces it closed before activation)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 216,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-e7c8b4f02c36693",
+      "title": "Create deactivate alert action API precondition: allows deactivate of a recovering episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 248,
         "column": 10
       }
     },
@@ -3731,7 +3942,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 130,
+        "line": 279,
         "column": 10
       }
     },
@@ -3744,7 +3955,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
-        "line": 149,
+        "line": 298,
         "column": 10
       }
     },
@@ -4282,6 +4493,136 @@
       }
     },
     {
+      "id": "dcdb7b9643217d3-e7c46255bb0b177",
+      "title": "Get rule executions API happy path: returns at least one execution record after the rule executor runs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
+        "line": 45,
+        "column": 10
+      }
+    },
+    {
+      "id": "dcdb7b9643217d3-b26b1557e1acb5c",
+      "title": "Get rule executions API space scoping: does not return executions from another space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
+        "line": 79,
+        "column": 10
+      }
+    },
+    {
+      "id": "dcdb7b9643217d3-4a97685f2d24f0f",
+      "title": "Get rule executions API validation: rejects page=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
+        "line": 127,
+        "column": 10
+      }
+    },
+    {
+      "id": "dcdb7b9643217d3-bbb37e34c6eed53",
+      "title": "Get rule executions API validation: rejects perPage=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
+        "line": 134,
+        "column": 10
+      }
+    },
+    {
+      "id": "dcdb7b9643217d3-1d569c8e3d39e5a",
+      "title": "Get rule executions API validation: rejects perPage above the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
+        "line": 141,
+        "column": 10
+      }
+    },
+    {
+      "id": "dcdb7b9643217d3-527497dd36a8817",
+      "title": "Get rule executions API validation: rejects unknown outcome values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
+        "line": 148,
+        "column": 10
+      }
+    },
+    {
+      "id": "dcdb7b9643217d3-c5d7412a0cad57f",
+      "title": "Get rule executions API validation: rejects malformed datetimes for from",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
+        "line": 155,
+        "column": 10
+      }
+    },
+    {
+      "id": "dcdb7b9643217d3-ec7e5df9cdee069",
+      "title": "Get rule executions API authorization: 200 with alerting_v2_execution_history read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
+        "line": 162,
+        "column": 10
+      }
+    },
+    {
+      "id": "dcdb7b9643217d3-a1c5b7876ca7cb9",
+      "title": "Get rule executions API authorization: 200 with alerting_v2_execution_history all privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
+        "line": 170,
+        "column": 10
+      }
+    },
+    {
+      "id": "dcdb7b9643217d3-9ad31784ffaf791",
+      "title": "Get rule executions API authorization: 403 without any alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
+        "line": 183,
+        "column": 10
+      }
+    },
+    {
       "id": "4922743ba5f5535-aaee8a03285479c",
       "title": "List execution history — tolerates missing rule ids resolves names for surviving rules and falls back to id for deleted ones",
       "expectedStatus": "passed",
@@ -4290,7 +4631,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history_rule_lookup.spec.ts",
-        "line": 85,
+        "line": 82,
         "column": 12
       }
     },
@@ -6928,6 +7269,62 @@
       }
     },
     {
+      "id": "2438f1e77f2c56f-33a7f656846de1b",
+      "title": "Rule executor recovery_strategy 'query' keeps breaching when data is present but neither breach nor recovery matches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1211,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-889c074e882fcac",
+      "title": "Rule executor recovery_strategy 'no_breach' recovers absent groups with data and emits no_data for absent groups without data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1308,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-aaab4e7cfe3503b",
+      "title": "Rule executor recovery_strategy 'query' emits no_data for an absent group that has no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1407,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-947ff96f9216405",
+      "title": "Rule executor recovery_strategy 'query' keeps a group breached when the breach and recovery queries both match it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1476,
+        "column": 10
+      }
+    },
+    {
       "id": "2438f1e77f2c56f-2c933d29b3535e0",
       "title": "Rule executor emits recovery events only for groups that stop breaching when others keep breaching",
       "expectedStatus": "passed",
@@ -6937,7 +7334,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1211,
+        "line": 1545,
         "column": 10
       }
     },
@@ -6951,7 +7348,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1317,
+        "line": 1651,
         "column": 10
       }
     },
@@ -6965,7 +7362,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1405,
+        "line": 1739,
         "column": 10
       }
     },
@@ -6979,7 +7376,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1456,
+        "line": 1790,
         "column": 10
       }
     },
@@ -6993,7 +7390,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1521,
+        "line": 1855,
         "column": 10
       }
     },
@@ -7007,7 +7404,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1564,
+        "line": 1898,
         "column": 10
       }
     },
@@ -7021,7 +7418,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1586,
+        "line": 1920,
         "column": 10
       }
     },
@@ -7035,7 +7432,49 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1644,
+        "line": 1978,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-f8c52c5af75599c",
+      "title": "Rule executor no_data_strategy 'last_known_status' writes a no_data rule event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 2055,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-0e4bc48e7b132d8",
+      "title": "Rule executor no_data_strategy 'recover' writes a no_data rule event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 2113,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-2b1caf2ae7578fe",
+      "title": "Rule executor no_data_strategy 'none' does not write no_data events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 2178,
         "column": 10
       }
     },
@@ -7049,7 +7488,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1721,
+        "line": 2226,
         "column": 10
       }
     },
@@ -7063,7 +7502,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1778,
+        "line": 2283,
         "column": 10
       }
     },
@@ -7077,7 +7516,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/telemetry.spec.ts",
-        "line": 103,
+        "line": 113,
         "column": 10
       }
     }
