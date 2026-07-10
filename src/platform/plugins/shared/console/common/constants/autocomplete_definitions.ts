@@ -24,5 +24,5 @@ export const API_DOCS_LINK = 'https://www.elastic.co/docs/api';
 // see `server/lib/spec_definitions/kibana_api_doc_links`.
 export const KIBANA_API_DOC_LINKS_FILE = resolve(
   __dirname,
-  '../../server/lib/spec_definitions/kibana_api_doc_links/kibana_api_doc_links.json'
+  '../../server/lib/spec_definitions/kibana_api_doc_links/generated_kibana_api_doc_links.json'
 );

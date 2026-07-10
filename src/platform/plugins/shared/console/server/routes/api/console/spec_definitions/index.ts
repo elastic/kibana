@@ -10,7 +10,7 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { RouteDependencies } from '../../..';
 import type { KibanaApiDocLinksMap } from '../../../../../common/types/api_responses';
-import kibanaApiDocLinks from '../../../../lib/spec_definitions/kibana_api_doc_links/kibana_api_doc_links.json';
+import kibanaApiDocLinks from '../../../../lib/spec_definitions/kibana_api_doc_links/generated_kibana_api_doc_links.json';
 
 interface SpecDefinitionsRouteResponse {
   es: {
