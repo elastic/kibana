@@ -73,6 +73,7 @@ interface GetAuthorizedRuleTypesWithAuthorizedConsumersParams {
   ruleTypeIds?: string[];
   operations: Array<ReadOperations | WriteOperations>;
   authorizationEntity: AlertingAuthorizationEntity;
+  namespaces?: Array<string | undefined>;
 }
 
 interface GetAllAuthorizedRuleTypesFindOperationParams {
@@ -339,15 +340,20 @@ export class AlertingAuthorization {
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
   }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
+      const { namespaces } = params.filterOpts;
       const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers({
         operations: [params.operation],
         authorizationEntity: params.authorizationEntity,
+        namespaces,
       });
 
       if (!authorizedRuleTypes.size) {
-        throw Boom.forbidden(
-          `Unauthorized to ${params.operation} ${params.authorizationEntity}s for any rule types`
-        );
+        const baseMessage = `Unauthorized to ${params.operation} ${params.authorizationEntity}s for any rule types.`;
+        const errorMessage =
+          (namespaces ?? []).length > 0
+            ? `${baseMessage} Validate that you have permissions to access spaces: ${namespaces}`
+            : baseMessage;
+        throw Boom.forbidden(errorMessage);
       }
 
       return {
@@ -481,7 +487,7 @@ export class AlertingAuthorization {
     hasAllRequested: boolean;
     authorizedRuleTypes: Map<string, { authorizedConsumers: AuthorizedConsumers }>;
   }> {
-    const { operations, authorizationEntity } = params;
+    const { operations, authorizationEntity, namespaces } = params;
     const ruleTypeIds = params.ruleTypeIds
       ? new Set(params.ruleTypeIds)
       : new Set(this.ruleTypeRegistry.getAllTypes());
@@ -493,10 +499,6 @@ export class AlertingAuthorization {
 
     if (this.authorization && this.shouldCheckAuthorization()) {
       const authorizedRuleTypes = new Map<string, { authorizedConsumers: AuthorizedConsumers }>();
-
-      const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
-        this.request
-      );
 
       for (const ruleTypeId of ruleTypeIds) {
         /**
@@ -529,9 +531,17 @@ export class AlertingAuthorization {
         }
       }
 
-      const { username, hasAllRequested, privileges } = await checkPrivileges({
-        kibana: [...requiredPrivileges.keys()],
-      });
+      const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
+      const spaces = (namespaces ? [...namespaces] : [this.spaceId]).filter(
+        (space): space is string => !!space
+      );
+
+      const { username, hasAllRequested, privileges } =
+        spaces.length > 0
+          ? await checkPrivileges.atSpaces(spaces, {
+              kibana: [...requiredPrivileges.keys()],
+            })
+          : await checkPrivileges.globally({ kibana: [...requiredPrivileges.keys()] });
 
       for (const { authorized, privilege } of privileges.kibana) {
         if (authorized && requiredPrivileges.has(privilege)) {

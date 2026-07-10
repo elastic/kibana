@@ -137,18 +137,46 @@ type CheckPrivilegesResponseWithoutES = Omit<CheckPrivilegesResponse, 'privilege
 };
 
 describe('AlertingAuthorization', () => {
+  const spaceId = 'space1';
   const getSpace = jest.fn();
-  const getSpaceId = () => 'space1';
+  const getSpaceId = () => spaceId;
   const allRegisteredConsumers = new Set<string>();
   const ruleTypesConsumersMap = new Map<string, Set<string>>();
 
-  const checkPrivileges = jest.fn<Promise<CheckPrivilegesResponseWithoutES>, []>(async () => ({
+  const checkPrivileges = jest.fn<
+    Promise<CheckPrivilegesResponseWithoutES>,
+    [{ kibana: string[] }]
+  >(async () => ({
     username: 'elastic',
     hasAllRequested: true,
     privileges: { kibana: [] },
   }));
+  const atSpacesMock = jest.fn((_spaces: string[], privileges: { kibana: string[] }) =>
+    checkPrivileges(privileges)
+  );
+  const globallyMock = jest.fn((privileges: { kibana: string[] }) => checkPrivileges(privileges));
 
   const ruleTypeIds = ['rule-type-id-1', 'rule-type-id-2', 'rule-type-id-3', 'rule-type-id-4'];
+  const requiredPrivileges = {
+    kibana: [
+      'rule-type-id-1/alerts/rule/get',
+      'rule-type-id-1/alerts/rule/create',
+      'rule-type-id-1/consumer-a/rule/get',
+      'rule-type-id-1/consumer-a/rule/create',
+      'rule-type-id-1/consumer-b/rule/get',
+      'rule-type-id-1/consumer-b/rule/create',
+      'rule-type-id-2/alerts/rule/get',
+      'rule-type-id-2/alerts/rule/create',
+      'rule-type-id-2/consumer-b/rule/get',
+      'rule-type-id-2/consumer-b/rule/create',
+      'rule-type-id-3/alerts/rule/get',
+      'rule-type-id-3/alerts/rule/create',
+      'rule-type-id-3/consumer-c/rule/get',
+      'rule-type-id-3/consumer-c/rule/create',
+      'rule-type-id-4/consumer-d/rule/get',
+      'rule-type-id-4/consumer-d/rule/create',
+    ],
+  };
 
   let request: KibanaRequest;
   let ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -164,6 +192,10 @@ describe('AlertingAuthorization', () => {
     securityStart = securityMock.createStart();
     securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
     securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    securityStart.authz.checkPrivilegesWithRequest.mockReturnValue({
+      atSpaces: atSpacesMock,
+      globally: globallyMock,
+    });
     request = httpServerMock.createKibanaRequest();
     getSpace.mockResolvedValue(undefined);
 
@@ -838,23 +870,19 @@ describe('AlertingAuthorization', () => {
         })
       ).filter;
 
-      expect(checkPrivileges).toBeCalledTimes(1);
-      expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "kibana": Array [
-              "rule-type-id-1/alerts/rule/find",
-              "rule-type-id-1/consumer-a/rule/find",
-              "rule-type-id-1/consumer-b/rule/find",
-              "rule-type-id-2/alerts/rule/find",
-              "rule-type-id-2/consumer-b/rule/find",
-              "rule-type-id-3/alerts/rule/find",
-              "rule-type-id-3/consumer-c/rule/find",
-              "rule-type-id-4/consumer-d/rule/find",
-            ],
-          },
-        ]
-      `);
+      expect(securityStart.authz.checkPrivilegesWithRequest).toBeCalledTimes(1);
+      expect(atSpacesMock).toHaveBeenCalledWith([spaceId], {
+        kibana: [
+          'rule-type-id-1/alerts/rule/find',
+          'rule-type-id-1/consumer-a/rule/find',
+          'rule-type-id-1/consumer-b/rule/find',
+          'rule-type-id-2/alerts/rule/find',
+          'rule-type-id-2/consumer-b/rule/find',
+          'rule-type-id-3/alerts/rule/find',
+          'rule-type-id-3/consumer-c/rule/find',
+          'rule-type-id-4/consumer-d/rule/find',
+        ],
+      });
 
       expect(toKqlExpression(filter as KueryNode)).toMatchInlineSnapshot(
         `"((path.to.rule_type_id: rule-type-id-1 AND (consumer-field: alerts OR consumer-field: consumer-a OR consumer-field: consumer-b)) OR (path.to.rule_type_id: rule-type-id-2 AND (consumer-field: alerts OR consumer-field: consumer-b)) OR (path.to.rule_type_id: rule-type-id-3 AND (consumer-field: consumer-c OR consumer-field: alerts)))"`
@@ -961,7 +989,7 @@ describe('AlertingAuthorization', () => {
         });
 
         expect(toKqlExpression(filter as KueryNode)).toMatchInlineSnapshot(
-          `"path.to.space.id: space1"`
+          `"path.to.space.id: ${spaceId}"`
         );
       });
 
@@ -1079,7 +1107,7 @@ describe('AlertingAuthorization', () => {
             operation: ReadOperations.Get,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Unauthorized to get rules for any rule types"`
+          `"Unauthorized to get rules for any rule types."`
         );
       });
     });
@@ -1431,30 +1459,8 @@ describe('AlertingAuthorization', () => {
       });
 
       expect(checkPrivileges).toBeCalledTimes(1);
-      expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "kibana": Array [
-              "rule-type-id-1/alerts/rule/get",
-              "rule-type-id-1/alerts/rule/create",
-              "rule-type-id-1/consumer-a/rule/get",
-              "rule-type-id-1/consumer-a/rule/create",
-              "rule-type-id-1/consumer-b/rule/get",
-              "rule-type-id-1/consumer-b/rule/create",
-              "rule-type-id-2/alerts/rule/get",
-              "rule-type-id-2/alerts/rule/create",
-              "rule-type-id-2/consumer-b/rule/get",
-              "rule-type-id-2/consumer-b/rule/create",
-              "rule-type-id-3/alerts/rule/get",
-              "rule-type-id-3/alerts/rule/create",
-              "rule-type-id-3/consumer-c/rule/get",
-              "rule-type-id-3/consumer-c/rule/create",
-              "rule-type-id-4/consumer-d/rule/get",
-              "rule-type-id-4/consumer-d/rule/create",
-            ],
-          },
-        ]
-      `);
+      expect(checkPrivileges).toHaveBeenCalledWith(requiredPrivileges);
+      expect(atSpacesMock).toHaveBeenCalledWith([spaceId], requiredPrivileges);
     });
   });
 
@@ -2284,30 +2290,8 @@ describe('AlertingAuthorization', () => {
       });
 
       expect(checkPrivileges).toBeCalledTimes(1);
-      expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "kibana": Array [
-              "rule-type-id-1/alerts/rule/get",
-              "rule-type-id-1/alerts/rule/create",
-              "rule-type-id-1/consumer-a/rule/get",
-              "rule-type-id-1/consumer-a/rule/create",
-              "rule-type-id-1/consumer-b/rule/get",
-              "rule-type-id-1/consumer-b/rule/create",
-              "rule-type-id-2/alerts/rule/get",
-              "rule-type-id-2/alerts/rule/create",
-              "rule-type-id-2/consumer-b/rule/get",
-              "rule-type-id-2/consumer-b/rule/create",
-              "rule-type-id-3/alerts/rule/get",
-              "rule-type-id-3/alerts/rule/create",
-              "rule-type-id-3/consumer-c/rule/get",
-              "rule-type-id-3/consumer-c/rule/create",
-              "rule-type-id-4/consumer-d/rule/get",
-              "rule-type-id-4/consumer-d/rule/create",
-            ],
-          },
-        ]
-      `);
+      expect(checkPrivileges).toHaveBeenCalledWith(requiredPrivileges);
+      expect(atSpacesMock).toHaveBeenLastCalledWith([spaceId], requiredPrivileges);
     });
 
     it('call checkPrivileges with the correct actions when the rule type does not exist in the registry', async () => {
@@ -2330,13 +2314,7 @@ describe('AlertingAuthorization', () => {
       });
 
       expect(checkPrivileges).toBeCalledTimes(1);
-      expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "kibana": Array [],
-          },
-        ]
-      `);
+      expect(checkPrivileges).toHaveBeenCalledWith({ kibana: [] });
     });
 
     it('call checkPrivileges with the correct actions when the rule type does not exist in the feature', async () => {
@@ -2359,13 +2337,51 @@ describe('AlertingAuthorization', () => {
       });
 
       expect(checkPrivileges).toBeCalledTimes(1);
-      expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "kibana": Array [],
-          },
-        ]
-      `);
+      expect(atSpacesMock).toHaveBeenCalledWith([spaceId], { kibana: [] });
+    });
+
+    it('calls checkPrivileges with the correct spaces when namespaces are defined', async () => {
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      // @ts-expect-error: need to test the private method
+      await auth._getAuthorizedRuleTypesWithAuthorizedConsumers({
+        ruleTypeIds: [...ruleTypeIds, 'rule-type-not-exist'],
+        operations: [ReadOperations.Get, WriteOperations.Create],
+        authorizationEntity: AlertingAuthorizationEntity.Rule,
+        namespaces: ['a-random-space'],
+      });
+
+      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toBeCalledWith(requiredPrivileges);
+      expect(atSpacesMock).toHaveBeenCalledWith(['a-random-space'], requiredPrivileges);
+    });
+
+    it('calls checkPrivileges globally when in the default space', async () => {
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId: () => undefined,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      // @ts-expect-error: need to test the private method
+      await auth._getAuthorizedRuleTypesWithAuthorizedConsumers({
+        ruleTypeIds: [...ruleTypeIds, 'rule-type-not-exist'],
+        operations: [ReadOperations.Get, WriteOperations.Create],
+        authorizationEntity: AlertingAuthorizationEntity.Rule,
+      });
+
+      expect(atSpacesMock).not.toHaveBeenCalled();
+      expect(globallyMock).toHaveBeenCalledWith(requiredPrivileges);
     });
   });
 
@@ -2564,7 +2580,7 @@ describe('AlertingAuthorization', () => {
       const result = await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
       const kql = toKqlExpression(result.filter as KueryNode);
 
-      expect(kql).toMatchInlineSnapshot(`"alert.attributes.spaceIds: space1"`);
+      expect(kql).toMatchInlineSnapshot(`"alert.attributes.spaceIds: ${spaceId}"`);
       expect(() => result.ensureRuleTypeIsAuthorized('any-type', 'rule')).not.toThrow();
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
@@ -2584,7 +2600,7 @@ describe('AlertingAuthorization', () => {
       const result = await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
       const kql = toKqlExpression(result.filter as KueryNode);
 
-      expect(kql).toMatchInlineSnapshot(`"alert.attributes.spaceIds: space1"`);
+      expect(kql).toMatchInlineSnapshot(`"alert.attributes.spaceIds: ${spaceId}"`);
 
       expect(() => result.ensureRuleTypeIsAuthorized('any-type', 'rule')).not.toThrow();
       expect(checkPrivileges).not.toHaveBeenCalled();
@@ -2621,7 +2637,7 @@ describe('AlertingAuthorization', () => {
       const kql = toKqlExpression(result.filter as KueryNode);
 
       expect(kql).toMatchInlineSnapshot(
-        `"((alert.attributes.ruleTypeId: rule-type-id-1 AND alert.attributes.spaceIds: space1) OR (alert.attributes.ruleTypeId: rule-type-id-2 AND alert.attributes.spaceIds: space1))"`
+        `"((alert.attributes.ruleTypeId: rule-type-id-1 AND alert.attributes.spaceIds: ${spaceId}) OR (alert.attributes.ruleTypeId: rule-type-id-2 AND alert.attributes.spaceIds: ${spaceId}))"`
       );
     });
 
