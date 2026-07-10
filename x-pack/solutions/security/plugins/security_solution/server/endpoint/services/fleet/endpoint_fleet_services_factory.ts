@@ -109,7 +109,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
   ) {}
 
   /**
-   * Wraps the Fleet Agent client in order to handle recently introduced backwards incopatible
+   * Wraps the Fleet Agent client to handle recently introduced backwards incompatible
    * changes to the `policy_id` value of the agent record.
    * @param agentClient
    */
@@ -119,6 +119,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     // Exit if client is already wrapped
     // @ts-expect-error due to `PROXY_TRAP_HANDLERS` not being a property of `agentClient`
     if (agentClient[PROXY_TRAP_HANDLERS]) {
+      logger.debug(`returning Agent Client provided on input: client already wrapped`);
       return agentClient;
     }
 
@@ -167,6 +168,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       },
 
       listAgentsInterceptor: async (options) => {
+        // debugger;
         const agents = await agentClient.listAgents(options);
         adjustAgentData(agents.agents, 'listAgents');
         return agents;
@@ -175,7 +177,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
 
     let hasJestSpyMocks = false;
 
-    return new Proxy(agentClient, {
+    const proxiedAgentClient = new Proxy(agentClient, {
       get: (target, prop, receiver) => {
         switch (prop) {
           case 'getAgent':
@@ -217,6 +219,15 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
         return Reflect.defineProperty(target, property, descriptor);
       },
     });
+
+    // FIXME:PT remove prior to commit
+    logger.info(
+      `wrapped client proxy_trap_handlers: ${JSON.stringify(
+        proxiedAgentClient[PROXY_TRAP_HANDLERS]
+      )}`
+    );
+
+    return proxiedAgentClient;
   };
 
   asInternalUser(
