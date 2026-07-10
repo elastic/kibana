@@ -57,7 +57,7 @@ export const CpsProjectRoutingCallout: FC<CpsProjectRoutingCalloutProps> = ({
         body: JSON.stringify({
           projectRouting: DEFAULT_ML_PROJECT_ROUTING,
           simulate: true,
-          auto: true,
+          auto: options?.filterJobGroups === undefined || options?.filterJobGroups.length === 0,
           jobGroups: options?.filterJobGroups,
         }),
         version: '1',
