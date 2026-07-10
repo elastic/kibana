@@ -65,6 +65,7 @@ steps:
           EVAL_SUITE_ID: 'agent-builder'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_SERVER_CONFIG_SET: 'evals_agent_builder'
           # Weekly pipeline model allowlist (per-suite):
           # - Core tier: default for most suites (one flagship per provider).
           # - Extended tier: includes additional model sizes for suites that benefit from them.

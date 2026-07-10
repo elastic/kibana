@@ -328,6 +328,28 @@ export const ADD_EVENTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
+export const ADD_ATTACHMENTS_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.addAttachments.label',
+  {
+    defaultMessage: 'Cases - Add attachments to case',
+  }
+);
+
+export const ADD_ATTACHMENTS_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.addAttachments.description',
+  {
+    defaultMessage: 'Adds one or more attachments of any registered type to a case in one request',
+  }
+);
+
+export const ADD_ATTACHMENTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.addAttachments.documentation.details',
+  {
+    defaultMessage:
+      'This step adds one or more attachments to an existing case in a single bulk request. Each `attachments` entry is a per-type payload whose shape is chosen by its `type` discriminator (`comment`, `stack.alert`, `security.event`, etc.); the YAML editor narrows the available fields once a type is picked.',
+  }
+);
+
 export const FIND_SIMILAR_CASES_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.findSimilarCases.label',
   {

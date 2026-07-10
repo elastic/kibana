@@ -10,11 +10,16 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql, executeEsql } from '@kbn/agent-builder-genai-utils';
 import { VEGA_LITE_SCHEMA } from './normalize_spec';
+import { validateVegaSpec } from './vega_validator';
 import { createVegaGraph } from './graph';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
   executeEsql: jest.fn(),
+}));
+
+jest.mock('./vega_validator', () => ({
+  validateVegaSpec: jest.fn(),
 }));
 
 jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => ({
@@ -31,6 +36,7 @@ jest.mock('../shared/esql_instructions', () => ({
 
 const mockedGenerateEsql = jest.mocked(generateEsql);
 const mockedExecuteEsql = jest.mocked(executeEsql);
+const mockedValidateVegaSpec = jest.mocked(validateVegaSpec);
 
 const createMockLogger = (): Logger =>
   ({ debug: jest.fn(), error: jest.fn(), info: jest.fn(), warn: jest.fn() } as unknown as Logger);
@@ -46,14 +52,23 @@ describe('createVegaGraph', () => {
 
   let logger: Logger;
   let invoke: jest.Mock;
+  /** Structured-output selector used by the reference-example selection node. */
+  let selectInvoke: jest.Mock;
+  let withStructuredOutput: jest.Mock;
   let modelProvider: ModelProvider;
 
   beforeEach(() => {
     jest.clearAllMocks();
     logger = createMockLogger();
     invoke = jest.fn();
+    // Default: the model selects no reference example, so authoring proceeds
+    // without a REFERENCE EXAMPLES block. Individual tests override this.
+    selectInvoke = jest.fn().mockResolvedValue({ exampleIds: [] });
+    withStructuredOutput = jest.fn(() => ({ invoke: selectInvoke }));
     modelProvider = {
-      getDefaultModel: jest.fn().mockResolvedValue({ chatModel: { invoke } }),
+      getDefaultModel: jest.fn().mockResolvedValue({
+        chatModel: { invoke, withStructuredOutput },
+      }),
     } as unknown as ModelProvider;
     mockedGenerateEsql.mockResolvedValue({ query: GENERATED_ESQL } as Awaited<
       ReturnType<typeof generateEsql>
@@ -61,6 +76,7 @@ describe('createVegaGraph', () => {
     mockedExecuteEsql.mockResolvedValue({ columns: [], values: [] } as Awaited<
       ReturnType<typeof executeEsql>
     >);
+    mockedValidateVegaSpec.mockResolvedValue({ warnings: [] });
   });
 
   const run = async (
@@ -89,9 +105,57 @@ describe('createVegaGraph', () => {
     expect(state.error).toBeNull();
     const spec = JSON.parse(state.spec!);
     expect(spec.$schema).toBe(VEGA_LITE_SCHEMA);
-    expect(spec.data).toEqual({ url: { '%type%': 'esql', query: GENERATED_ESQL } });
+    expect(spec.data).toEqual({
+      url: { '%type%': 'esql', '%context%': true, query: GENERATED_ESQL },
+    });
     expect(spec.mark).toBe('bar');
     expect(state.esqlQuery).toBe(GENERATED_ESQL);
+  });
+
+  it('injects the model-selected reference example into the authoring prompt', async () => {
+    // The selection node picks an example; its structural block must reach the
+    // author prompt (bodies loaded only for the selected id).
+    selectInvoke.mockResolvedValue({ exampleIds: ['scatter_bubble'] });
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'point' }));
+
+    await run();
+
+    const authorPrompt = JSON.stringify(invoke.mock.calls[0][0]);
+    expect(authorPrompt).toContain('REFERENCE EXAMPLES');
+    expect(authorPrompt).toContain('Scatter / bubble plot (encoded size)');
+  });
+
+  it('selects reference examples once and reuses them across authoring retries', async () => {
+    selectInvoke.mockResolvedValue({ exampleIds: ['heatmap'] });
+    invoke
+      .mockResolvedValueOnce('not json at all')
+      .mockResolvedValueOnce(asCodeBlock({ mark: 'rect' }));
+
+    await run();
+
+    // Two authoring attempts, but selection ran exactly once before the loop.
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(selectInvoke).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not author a spec when ES|QL resolution fails, despite selecting examples in parallel', async () => {
+    mockedGenerateEsql.mockResolvedValue({
+      query: 'FROM logs-*',
+      error: 'verification_exception: boom',
+    } as Awaited<ReturnType<typeof generateEsql>>);
+
+    await run();
+
+    expect(selectInvoke).toHaveBeenCalledTimes(1);
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it('authors without a reference block when selection returns none', async () => {
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+
+    await run();
+
+    expect(JSON.stringify(invoke.mock.calls[0][0])).not.toContain('REFERENCE EXAMPLES');
   });
 
   it('seeds ES|QL generation with the existing query as context when editing', async () => {
@@ -176,6 +240,46 @@ describe('createVegaGraph', () => {
     expect(JSON.parse(state.spec!).mark).toBe('arc');
   });
 
+  it('retries authoring when the spec fails to compile/render, then succeeds', async () => {
+    invoke
+      .mockResolvedValueOnce(asCodeBlock({ mark: 'bar', encoding: { x: { field: 'nope' } } }))
+      .mockResolvedValueOnce(asCodeBlock({ mark: 'line' }));
+    mockedValidateVegaSpec
+      .mockResolvedValueOnce({ error: 'Unrecognized encoding channel', warnings: [] })
+      .mockResolvedValueOnce({ warnings: [] });
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(state.error).toBeNull();
+    expect(JSON.parse(state.spec!).mark).toBe('line');
+  });
+
+  it('feeds the render error into the next authoring attempt', async () => {
+    invoke
+      .mockResolvedValueOnce(asCodeBlock({ mark: 'bar' }))
+      .mockResolvedValueOnce(asCodeBlock({ mark: 'line' }));
+    mockedValidateVegaSpec
+      .mockResolvedValueOnce({ error: 'Unknown transform op: bogus', warnings: [] })
+      .mockResolvedValueOnce({ warnings: [] });
+
+    await run({ esqlQuery: PROVIDED_ESQL });
+
+    const secondPrompt = JSON.stringify(invoke.mock.calls[1][0]);
+    expect(secondPrompt).toContain('Unknown transform op: bogus');
+  });
+
+  it('gives up when the spec never renders within the retry budget', async () => {
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+    mockedValidateVegaSpec.mockResolvedValue({ error: 'Infinite extent', warnings: [] });
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.spec).toBeNull();
+    expect(state.error).toContain('Infinite extent');
+    expect(invoke).toHaveBeenCalledTimes(3);
+  });
+
   it('regenerates a corrected query when the provided ES|QL fails to execute', async () => {
     invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
     // The provided query throws (an invalid, agent-invented query); the
@@ -234,5 +338,48 @@ describe('createVegaGraph', () => {
     expect(state.spec).toBeNull();
     expect(state.error).toEqual(expect.any(String));
     expect(invoke).toHaveBeenCalledTimes(3);
+  });
+
+  describe('render warnings', () => {
+    it('hands every warning to the agent for one review pass, then finalizes its result', async () => {
+      invoke
+        .mockResolvedValueOnce(asCodeBlock({ mark: 'text', encoding: { x2: { value: 1 } } }))
+        .mockResolvedValueOnce(asCodeBlock({ mark: 'text', encoding: { x: { value: 1 } } }));
+      mockedValidateVegaSpec
+        .mockResolvedValueOnce({
+          warnings: [
+            'x2 dropped as it is incompatible with "text".',
+            'Infinite extent for field "count": [Infinity, -Infinity]',
+          ],
+        })
+        .mockResolvedValueOnce({ warnings: [] });
+
+      const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+      expect(invoke).toHaveBeenCalledTimes(2);
+      expect(state.error).toBeNull();
+      // Every warning — not a pre-filtered subset — is fed back, and the model is
+      // told to judge each one for itself.
+      const secondPrompt = JSON.stringify(invoke.mock.calls[1][0]);
+      expect(secondPrompt).toContain('x2 dropped as it is incompatible');
+      expect(secondPrompt).toContain('Infinite extent for field');
+      expect(secondPrompt).toContain('decide for yourself');
+    });
+
+    it('makes a single review pass and accepts the spec when the agent keeps its warnings', async () => {
+      // The model returns the same warning-bearing spec every time (it judged the
+      // warnings harmless / unavoidable). We must not loop the whole budget.
+      invoke.mockResolvedValue(asCodeBlock({ mark: 'text', encoding: { x2: { value: 1 } } }));
+      mockedValidateVegaSpec.mockResolvedValue({
+        warnings: ['Infinite extent for field "count": [Infinity, -Infinity]'],
+      });
+
+      const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+      // One initial authoring pass + one warning-review pass, then we accept.
+      expect(invoke).toHaveBeenCalledTimes(2);
+      expect(state.error).toBeNull();
+      expect(state.spec).not.toBeNull();
+    });
   });
 });

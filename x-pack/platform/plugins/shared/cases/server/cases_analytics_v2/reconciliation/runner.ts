@@ -11,33 +11,17 @@ import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
+import {
+  RECONCILIATION_NAMESPACES_ALL,
+  RECONCILIATION_PAGE_SIZE,
+  RECONCILIATION_SUMMARY_TOP_N_SPACES,
+} from './constants';
 
-/**
- * Number of case SOs fetched per ES round-trip. Small enough that Task
- * Manager's task-runtime budget stays comfortable even on cases with heavy
- * `extended_fields` payloads.
- */
-const PAGE_SIZE = 100;
-
-/**
- * SO-namespaces value meaning "every namespace". The runner's SO client is
- * the unscoped internal client (no spaces extension), so without this the
- * default `find` / `openPointInTimeForType` behaviour is to look only in
- * the `default` namespace — silently skipping every case in every other
- * space. The SO repository's search DSL builder treats `'*'` as
- * `ALL_NAMESPACES_STRING` and lifts the namespace filter. The same value
- * feeds both the PIT open call and every paged find so snapshot and page
- * reads agree on scope.
- */
-const NAMESPACES_ALL: string[] = ['*'];
-
-/**
- * Cap on the per-space breakdown reported in the summary log line.
- * Tenants with thousands of spaces would otherwise emit a log line large
- * enough to disrupt ingest; this keeps the line readable while still
- * surfacing the top contributors to a noisy tick.
- */
-const SUMMARY_TOP_N_SPACES = 25;
+// `PAGE_SIZE` / `NAMESPACES_ALL` / `SUMMARY_TOP_N_SPACES` are shared across
+// all three reconciliation runners — see `./constants` for the rationale.
+const PAGE_SIZE = RECONCILIATION_PAGE_SIZE;
+const NAMESPACES_ALL = RECONCILIATION_NAMESPACES_ALL as string[];
+const SUMMARY_TOP_N_SPACES = RECONCILIATION_SUMMARY_TOP_N_SPACES;
 
 export interface RunReconciliationDeps {
   /** Internal SO client (no request scope). Used to walk every case across every space. */

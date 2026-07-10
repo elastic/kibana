@@ -104,3 +104,6 @@ export const jsonTab: RightPanelTabType = {
   ),
   content: <JsonTabContent />,
 };
+
+export const allThreeTabs: RightPanelTabType[] = [overviewTab, tableTab, jsonTab];
+export const twoTabs: RightPanelTabType[] = [tableTab, jsonTab];
