@@ -19,17 +19,17 @@ import { InfoBlocks } from '@kbn/shared-ux-info-blocks';
 
 - Designed for small sets, typically up to 6 blocks.
 - Responsive column collapse (3 → 2 → 1): blocks lay out in up to 3 columns; when a block would fall below 140px wide, the column count steps down so blocks never shrink past that width (they wrap to more rows).
-- Leading spacer: include the exported `LEADING_SPACER` sentinel in `items` to fill the rest of the current row (no content) so the following block leads a fresh row. It adapts to the live column count — at 2 columns it fills the 1 remaining cell, at 3 columns the 2 remaining cells. The block before the spacer keeps its inline-end divider, and the horizontal row divider stays continuous across the whole container.
+- Leading spacer: set `hasLeadingSpacer` to fill the rest of the first row (no content) after the first block, so the next block leads a fresh row. It adapts to the live column count — at 2 columns it fills the 1 remaining cell, at 3 columns the 2 remaining cells. The block before the spacer keeps its inline-end divider, and the horizontal row divider stays continuous across the whole container.
 - Plain text values (and titles) truncate to a single line with an ellipsis, so a long string never overflows its column. Node values (badges, links, images) manage their own layout — see the "Resource" story for a truncating link with a trailing copy action.
-- `compressed` tightens spacing; it is intended to be driven by the flyout header's collapse state. In compressed mode, leading spacers are ignored and custom value sizes are suppressed so the layout stays dense.
+- `compressed` tightens spacing; it is intended to be driven by the flyout header's collapse state. In compressed mode, `hasLeadingSpacer` is ignored and custom value sizes are suppressed so the layout stays dense.
 
 ```tsx
-import { InfoBlocks, LEADING_SPACER } from '@kbn/shared-ux-info-blocks';
+import { InfoBlocks } from '@kbn/shared-ux-info-blocks';
 
 <InfoBlocks
+  hasLeadingSpacer
   items={[
     { title: 'Risk score', value: '90', size: 'xl' },
-    LEADING_SPACER,
     { title: 'Vendor', value: 'Elastic' },
   ]}
 />

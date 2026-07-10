@@ -10,8 +10,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { InfoBlocks, getInfoBlocksColumnCount, getInfoBlocksLayout } from './info_blocks.component';
-import { LEADING_SPACER } from './types';
-import type { InfoBlocksItem } from './types';
 
 describe('InfoBlocks', () => {
   it('renders each block title and node value', () => {
@@ -60,9 +58,9 @@ describe('InfoBlocks', () => {
   it('renders no InfoBlock for a leading spacer', () => {
     render(
       <InfoBlocks
+        hasLeadingSpacer
         items={[
           { title: 'Risk score', value: '90', size: 'xl' },
-          LEADING_SPACER,
           { title: 'Vendor', value: 'Elastic' },
           { title: 'Result', value: 'Success' },
         ]}
@@ -74,14 +72,14 @@ describe('InfoBlocks', () => {
     expect(screen.getByText('Vendor')).toBeInTheDocument();
   });
 
-  it('drops leading spacers when compressed', () => {
+  it('drops the leading spacer when compressed', () => {
     render(
       <InfoBlocks
         data-test-subj="compressedBlocks"
         compressed
+        hasLeadingSpacer
         items={[
           { title: 'Risk score', value: '90', size: 'xl' },
-          LEADING_SPACER,
           { title: 'Vendor', value: 'Elastic' },
           { title: 'Result', value: 'Success' },
         ]}
@@ -94,16 +92,10 @@ describe('InfoBlocks', () => {
 });
 
 describe('getInfoBlocksLayout (leading-spacer placement + divider hints)', () => {
-  const RISK: InfoBlocksItem = { title: 'Risk score', value: '90', size: 'xl' };
-  const withEmpty: InfoBlocksItem[] = [
-    RISK,
-    LEADING_SPACER,
-    { title: 'Vendor', value: 'Elastic' },
-    { title: 'Result', value: 'Success' },
-  ];
+  const itemCountWithSpacer = 3; // Risk score, Vendor, Result
 
   it('spans the leading spacer over the single remaining cell at 2 columns', () => {
-    const layout = getInfoBlocksLayout(withEmpty, 2);
+    const layout = getInfoBlocksLayout(itemCountWithSpacer, 2, true);
     // Risk score occupies cell 1; the spacer fills the rest of row 1 (1 cell).
     expect(layout[0]).toMatchObject({ columnStart: 0, span: 1, isSpacer: false });
     expect(layout[1]).toMatchObject({ columnStart: 1, span: 1, isSpacer: true });
@@ -113,7 +105,7 @@ describe('getInfoBlocksLayout (leading-spacer placement + divider hints)', () =>
   });
 
   it('spans the leading spacer over both remaining cells at 3 columns', () => {
-    const layout = getInfoBlocksLayout(withEmpty, 3);
+    const layout = getInfoBlocksLayout(itemCountWithSpacer, 3, true);
     // Risk score occupies cell 1; the spacer fills the rest of row 1 (2 cells).
     expect(layout[0]).toMatchObject({ columnStart: 0, span: 1, isSpacer: false });
     expect(layout[1]).toMatchObject({ columnStart: 1, span: 2, isSpacer: true });
@@ -123,7 +115,7 @@ describe('getInfoBlocksLayout (leading-spacer placement + divider hints)', () =>
   });
 
   it('keeps the divider on the block before a leading spacer, and marks the spacer last-column', () => {
-    const layout = getInfoBlocksLayout(withEmpty, 3);
+    const layout = getInfoBlocksLayout(itemCountWithSpacer, 3, true);
     // The block before the spacer is NOT the last column, so it keeps its
     // inline-end (right-hand) vertical divider.
     expect(layout[0].isLastColumn).toBe(false);
@@ -132,7 +124,7 @@ describe('getInfoBlocksLayout (leading-spacer placement + divider hints)', () =>
   });
 
   it('marks a row that has real content below it', () => {
-    const layout = getInfoBlocksLayout(withEmpty, 3);
+    const layout = getInfoBlocksLayout(itemCountWithSpacer, 3, true);
     expect(layout[0].hasRowBelow).toBe(true); // Risk score, row 1 -> row 2 below
     expect(layout[1].hasRowBelow).toBe(true); // spacer shares row 1
     expect(layout[2].hasRowBelow).toBe(false); // last content row
@@ -140,39 +132,25 @@ describe('getInfoBlocksLayout (leading-spacer placement + divider hints)', () =>
   });
 
   it('leaves single-column, no-spacer layout unchanged (one span-1 cell per row)', () => {
-    const items: InfoBlocksItem[] = [
-      { title: 'A', value: '1' },
-      { title: 'B', value: '2' },
-    ];
-    const layout = getInfoBlocksLayout(items, 1);
+    const layout = getInfoBlocksLayout(2, 1);
     expect(layout.every((cell) => cell.span === 1 && cell.columnStart === 0)).toBe(true);
     expect(layout[0]).toMatchObject({ isLastColumn: true, hasRowBelow: true });
     expect(layout[1]).toMatchObject({ isLastColumn: true, hasRowBelow: false });
   });
 
+  it('leaves no room for a leading spacer at a single column', () => {
+    // The first item already fills the only column, so there's nothing left to
+    // reserve for the spacer -- every item still gets its own row.
+    const layout = getInfoBlocksLayout(2, 1, true);
+    expect(layout).toHaveLength(2);
+    expect(layout.every((cell) => !cell.isSpacer)).toBe(true);
+  });
+
   it('preserves the vertical divider beside a partial trailing row (no spacer item)', () => {
     // 3 columns, 5 items: row 2 is [D | E | (absent)]. E is not the last column,
     // so it keeps its inline-end divider even though the trailing cell is absent.
-    const items: InfoBlocksItem[] = ['A', 'B', 'C', 'D', 'E'].map((t) => ({
-      title: t,
-      value: t,
-    }));
-    const layout = getInfoBlocksLayout(items, 3);
+    const layout = getInfoBlocksLayout(5, 3);
     expect(layout[4]).toMatchObject({ columnStart: 1, span: 1, isLastColumn: false });
-  });
-
-  it('fills a whole row when the leading spacer starts a row, and reports no content below a trailing spacer row', () => {
-    const items: InfoBlocksItem[] = [
-      { title: 'A', value: '1' },
-      { title: 'B', value: '2' },
-      LEADING_SPACER,
-    ];
-    const layout = getInfoBlocksLayout(items, 2);
-    // A | B fill row 1; the spacer starts row 2 and fills both cells.
-    expect(layout[2]).toMatchObject({ columnStart: 0, span: 2, isSpacer: true });
-    // No horizontal divider under row 1 since the only row below holds no content.
-    expect(layout[0].hasRowBelow).toBe(false);
-    expect(layout[1].hasRowBelow).toBe(false);
   });
 });
 

@@ -11,8 +11,7 @@ import React, { useState, type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import { EuiPanel, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { InfoBlock } from './info_block.component';
-import { isLeadingSpacer } from './types';
-import type { InfoBlocksItem, InfoBlocksProps } from './types';
+import type { InfoBlocksProps } from './types';
 
 /** Maximum number of columns */
 const MAX_COLUMNS = 3;
@@ -39,21 +38,27 @@ export interface InfoBlockCellLayout {
   isSpacer: boolean;
 }
 
-/** Places items in grid order and derives divider flags. */
+/** Places items in grid order, optionally reserving a leading spacer after the first item. */
 export const getInfoBlocksLayout = (
-  items: readonly InfoBlocksItem[],
-  columns: number
+  itemCount: number,
+  columns: number,
+  hasLeadingSpacer = false
 ): InfoBlockCellLayout[] => {
   const cols = Math.max(1, columns);
   const placed: Array<{ columnStart: number; span: number; row: number; isSpacer: boolean }> = [];
   let col = 0;
   let row = 0;
-  for (const item of items) {
-    const isSpacer = isLeadingSpacer(item);
-    const columnStart = col;
-    const span = isSpacer ? Math.max(1, cols - col) : 1;
-    placed.push({ columnStart, span, row, isSpacer });
-    col += span;
+  for (let index = 0; index < itemCount; index++) {
+    placed.push({ columnStart: col, span: 1, row, isSpacer: false });
+    col += 1;
+
+    // The spacer only ever follows the first item, and only if there's room left in its row.
+    if (index === 0 && hasLeadingSpacer && col < cols) {
+      const spacerSpan = cols - col;
+      placed.push({ columnStart: col, span: spacerSpan, row, isSpacer: true });
+      col += spacerSpan;
+    }
+
     if (col >= cols) {
       col = 0;
       row += 1;
@@ -74,20 +79,33 @@ export const getInfoBlocksLayout = (
 };
 
 /** Responsive card for a small set of labeled values. */
-export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compressed, ...rest }) => {
+export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
+  items,
+  hasLeadingSpacer,
+  compressed,
+  ...rest
+}) => {
   const { euiTheme } = useEuiTheme();
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const { width } = useResizeObserver(container);
 
-  // Compressed mode drops row-shaping spacers.
-  const visibleItems = compressed ? items.filter((item) => !isLeadingSpacer(item)) : items;
-  const columns = getInfoBlocksColumnCount(width, visibleItems.length);
-  const layout = getInfoBlocksLayout(visibleItems, columns);
+  // Compressed mode drops the row-shaping spacer.
+  const effectiveHasLeadingSpacer = Boolean(hasLeadingSpacer) && !compressed;
+  const columns = getInfoBlocksColumnCount(width, items.length);
+  const layout = getInfoBlocksLayout(items.length, columns, effectiveHasLeadingSpacer);
   const cellPadding = compressed ? euiTheme.size.s : euiTheme.size.m;
   const dividerColor = euiTheme.border.color;
   const dividerThickness = euiTheme.border.width.thin;
   // Keep divider ends off the card corners.
   const dividerCornerGap = euiTheme.size.base;
+
+  // The spacer (if any) is synthesized into `layout`, so pair each non-spacer
+  // cell with its real item by walking both in lockstep.
+  let nextItemIndex = 0;
+  const cells = layout.map((cell) => ({
+    cell,
+    item: cell.isSpacer ? null : items[nextItemIndex++],
+  }));
 
   return (
     <EuiPanel
@@ -101,13 +119,11 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
         grid-template-columns: repeat(${columns}, minmax(0, 1fr));
       `}
     >
-      {visibleItems.map((item, index) => {
-        const cell = layout[index];
-
-        if (isLeadingSpacer(item)) {
+      {cells.map(({ cell, item }, cellIndex) => {
+        if (cell.isSpacer) {
           return (
             <div
-              key={`spacer-${index}`}
+              key="leading-spacer"
               aria-hidden="true"
               css={css`
                 position: relative;
@@ -131,10 +147,12 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
         }
 
         // Cell dividers are pseudo-elements so content layout stays simple.
+        // `item` is non-null here: `cells` only pairs `null` with spacer cells.
         const isFirstColumn = cell.columnStart === 0;
+        const infoBlockItem = item!;
         return (
           <div
-            key={item['data-test-subj'] ?? index}
+            key={infoBlockItem['data-test-subj'] ?? cellIndex}
             css={css`
               position: relative;
               min-width: 0;
@@ -167,7 +185,7 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
                 : ''}
             `}
           >
-            <InfoBlock {...item} compressed={compressed} />
+            <InfoBlock {...infoBlockItem} compressed={compressed} />
           </div>
         );
       })}

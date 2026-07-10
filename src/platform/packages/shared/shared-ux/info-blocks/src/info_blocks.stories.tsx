@@ -26,8 +26,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { InfoBlocks } from './info_blocks.component';
-import { LEADING_SPACER } from './types';
-import type { InfoBlockItem, InfoBlocksItem } from './types';
+import type { InfoBlockItem } from './types';
 
 const meta: Meta<typeof InfoBlocks> = {
   title: 'Info Blocks/InfoBlocks',
@@ -134,7 +133,7 @@ const CompressedDemo: React.FC = () => {
       <EuiTitle size="l">
         <h2>Leading spacer</h2>
       </EuiTitle>
-      <InfoBlocks items={LEADING_SPACER_ITEMS} compressed={useCompressed} />
+      <InfoBlocks items={LEADING_SPACER_ITEMS} hasLeadingSpacer compressed={useCompressed} />
     </div>
   );
 };
@@ -161,18 +160,17 @@ export const BigNumber: Story = {
   },
 };
 
-// Starts regular content on the next row.
-const LEADING_SPACER_ITEMS: InfoBlocksItem[] = [
+// The first block starts its own row; the rest resume on the next row.
+const LEADING_SPACER_ITEMS: InfoBlockItem[] = [
   { title: 'Risk score', value: '90', size: 'xl' },
-  LEADING_SPACER,
   ...SAMPLE_ITEMS.slice(0, 4),
 ];
 
 export const LeadingSpacer: StoryObj<DefaultArgs> = {
   argTypes: {
     numberOfItems: {
-      description: 'Number of info blocks to render (includes the leading spacer)',
-      control: { type: 'range', min: 2, max: LEADING_SPACER_ITEMS.length, step: 1 },
+      description: 'Number of info blocks to render',
+      control: { type: 'range', min: 1, max: LEADING_SPACER_ITEMS.length, step: 1 },
     },
   },
   args: {
@@ -180,7 +178,11 @@ export const LeadingSpacer: StoryObj<DefaultArgs> = {
     compressed: false,
   },
   render: ({ numberOfItems, compressed }) => (
-    <InfoBlocks items={LEADING_SPACER_ITEMS.slice(0, numberOfItems)} compressed={compressed} />
+    <InfoBlocks
+      items={LEADING_SPACER_ITEMS.slice(0, numberOfItems)}
+      hasLeadingSpacer
+      compressed={compressed}
+    />
   ),
 };
 

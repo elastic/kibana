@@ -22,27 +22,14 @@ export interface InfoBlockItem {
   'data-test-subj'?: string;
 }
 
-/** Empty item that fills the rest of the row before the next block. */
-export interface LeadingSpacerItem {
-  leadingSpacer: true;
-}
-
-/** An entry in {@link InfoBlocksProps.items}: a real block or a leading spacer. */
-export type InfoBlocksItem = InfoBlockItem | LeadingSpacerItem;
-
-/** Row-fill sentinel for {@link InfoBlocksProps.items}. */
-export const LEADING_SPACER: LeadingSpacerItem = { leadingSpacer: true };
-
-/** Narrows an {@link InfoBlocksItem} to the leading-spacer variant. */
-export const isLeadingSpacer = (item: InfoBlocksItem): item is LeadingSpacerItem =>
-  'leadingSpacer' in item && item.leadingSpacer === true;
-
 export interface InfoBlocksProps {
+  /** The blocks to render. Designed for small sets, typically up to 6 blocks. */
+  items: readonly InfoBlockItem[];
   /**
-   * The blocks to render. Designed for small sets, typically up to 6 blocks.
-   * Use {@link LEADING_SPACER} for an entry that fills the rest of its row.
+   * When true, the first block fills its row alone and the rest start on the
+   * next row. Ignored when `compressed`.
    */
-  items: readonly InfoBlocksItem[];
+  hasLeadingSpacer?: boolean;
   /**
    * Compact spacing/sizing. Intended to be driven by the flyout header's
    * collapsed state.
