@@ -83,47 +83,45 @@ describe('buildCaseDoc', () => {
     expect(doc.space_id).toBe('security-1');
   });
 
-  it('emits owner at the document root (DLS field) and mirrors it under cases.*', () => {
+  it('emits owner at the document root (DLS field) and mirrors it under case.*', () => {
     const doc = buildCaseDoc(fullCaseSO());
     expect(doc.owner).toBe('securitySolution');
-    expect(doc.cases.owner).toBe('securitySolution');
+    expect(doc.case.owner).toBe('securitySolution');
   });
 
   it('converts numeric severity to a human-readable string', () => {
-    expect(buildCaseDoc(fullCaseSO({ severity: CasePersistedSeverity.LOW })).cases.severity).toBe(
+    expect(buildCaseDoc(fullCaseSO({ severity: CasePersistedSeverity.LOW })).case.severity).toBe(
       'low'
     );
-    expect(
-      buildCaseDoc(fullCaseSO({ severity: CasePersistedSeverity.MEDIUM })).cases.severity
-    ).toBe('medium');
-    expect(buildCaseDoc(fullCaseSO({ severity: CasePersistedSeverity.HIGH })).cases.severity).toBe(
+    expect(buildCaseDoc(fullCaseSO({ severity: CasePersistedSeverity.MEDIUM })).case.severity).toBe(
+      'medium'
+    );
+    expect(buildCaseDoc(fullCaseSO({ severity: CasePersistedSeverity.HIGH })).case.severity).toBe(
       'high'
     );
     expect(
-      buildCaseDoc(fullCaseSO({ severity: CasePersistedSeverity.CRITICAL })).cases.severity
+      buildCaseDoc(fullCaseSO({ severity: CasePersistedSeverity.CRITICAL })).case.severity
     ).toBe('critical');
   });
 
   it('converts numeric status to a human-readable string', () => {
-    expect(buildCaseDoc(fullCaseSO({ status: CasePersistedStatus.OPEN })).cases.status).toBe(
-      'open'
-    );
-    expect(buildCaseDoc(fullCaseSO({ status: CasePersistedStatus.IN_PROGRESS })).cases.status).toBe(
+    expect(buildCaseDoc(fullCaseSO({ status: CasePersistedStatus.OPEN })).case.status).toBe('open');
+    expect(buildCaseDoc(fullCaseSO({ status: CasePersistedStatus.IN_PROGRESS })).case.status).toBe(
       'in-progress'
     );
-    expect(buildCaseDoc(fullCaseSO({ status: CasePersistedStatus.CLOSED })).cases.status).toBe(
+    expect(buildCaseDoc(fullCaseSO({ status: CasePersistedStatus.CLOSED })).case.status).toBe(
       'closed'
     );
   });
 
   it('passes customFields through as-is (matches SO shape)', () => {
     const doc = buildCaseDoc(fullCaseSO());
-    expect(doc.cases.customFields).toEqual([{ key: 'cf', type: 'text', value: 'x' }]);
+    expect(doc.case.customFields).toEqual([{ key: 'cf', type: 'text', value: 'x' }]);
   });
 
   it('denormalizes observables into per-typeKey keyword arrays', () => {
     const doc = buildCaseDoc(fullCaseSO());
-    expect(doc.cases.observables).toEqual({
+    expect(doc.case.observables).toEqual({
       url: ['http://example.com', 'http://other.com'],
       ipv4: ['1.2.3.4'],
     });
@@ -133,13 +131,13 @@ describe('buildCaseDoc', () => {
     const doc = buildCaseDoc(fullCaseSO());
     // No `description` anywhere in the observables tree — they're collapsed
     // into per-type keyword arrays. The full triple is still on the SO.
-    expect(JSON.stringify(doc.cases.observables)).not.toContain('description');
-    expect(JSON.stringify(doc.cases.observables)).not.toContain('site');
+    expect(JSON.stringify(doc.case.observables)).not.toContain('description');
+    expect(JSON.stringify(doc.case.observables)).not.toContain('site');
   });
 
   it('returns undefined observables when the SO has none', () => {
     const doc = buildCaseDoc(fullCaseSO({ observables: [] }));
-    expect(doc.cases.observables).toBeUndefined();
+    expect(doc.case.observables).toBeUndefined();
   });
 
   it('skips observables without typeKey or value', () => {
@@ -152,14 +150,14 @@ describe('buildCaseDoc', () => {
         ] as never,
       })
     );
-    expect(doc.cases.observables).toEqual({ url: ['http://good'] });
+    expect(doc.case.observables).toEqual({ url: ['http://good'] });
   });
 
   it('passes connector and external_service through (fully indexed per mapping)', () => {
     const doc = buildCaseDoc(fullCaseSO());
     // The none connector has no reference entry, so id is absent.
-    expect(doc.cases.connector).toEqual({ name: 'none', type: '.none', fields: null });
-    expect(doc.cases.external_service).toBeNull();
+    expect(doc.case.connector).toEqual({ name: 'none', type: '.none', fields: null });
+    expect(doc.case.external_service).toBeNull();
   });
 
   it('rehydrates connector.id from so.references', () => {
@@ -177,7 +175,7 @@ describe('buildCaseDoc', () => {
       fields: { issueType: '10006', priority: 'High', parent: null },
     };
     const doc = buildCaseDoc(so);
-    expect(doc.cases.connector).toEqual({
+    expect(doc.case.connector).toEqual({
       id: 'connector-1',
       name: 'jira',
       type: '.jira',
@@ -188,22 +186,22 @@ describe('buildCaseDoc', () => {
   it('omits connector.id when no matching reference exists', () => {
     // None connector — id is a sentinel not stored in references.
     const doc = buildCaseDoc(fullCaseSO());
-    expect((doc.cases.connector as Record<string, unknown>)?.id).toBeUndefined();
+    expect((doc.case.connector as Record<string, unknown>)?.id).toBeUndefined();
   });
 
-  it('preserves the case id under cases.id', () => {
+  it('preserves the case id under case.id', () => {
     const doc = buildCaseDoc(fullCaseSO());
-    expect(doc.cases.id).toBe('case-1');
+    expect(doc.case.id).toBe('case-1');
   });
 
   it('passes extended_fields through as a plain object', () => {
     const doc = buildCaseDoc(fullCaseSO());
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    expect(doc.cases.extended_fields).toEqual({ riskScore_as_long: '42' });
+    expect(doc.case.extended_fields).toEqual({ riskScore_as_long: '42' });
   });
 
   it('emits extended_fields as undefined when absent (keeps the doc small)', () => {
     const doc = buildCaseDoc(fullCaseSO({ extended_fields: undefined }));
-    expect(doc.cases.extended_fields).toBeUndefined();
+    expect(doc.case.extended_fields).toBeUndefined();
   });
 });

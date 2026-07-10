@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
 import type { Coordinate } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt, offsetRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
 
 export interface ErrorDistributionResponse {
   currentPeriod: Array<{ x: number; y: number }>;
@@ -19,18 +18,17 @@ export interface ErrorDistributionResponse {
 
 export const errorDistributionRoute = defineRoute<ErrorDistributionResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/errors/distribution',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      t.partial({
-        groupId: t.string,
-        transactionName: t.string,
-        bucketSizeInSeconds: toNumberRt,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      offsetRt,
-    ]),
+  params: z.object({
+    path: z.object({ serviceName: z.string() }),
+    query: z
+      .object({
+        groupId: z.string().optional(),
+        transactionName: z.string().optional(),
+        bucketSizeInSeconds: z.coerce.number().optional(),
+      })
+      .merge(environmentSchema)
+      .merge(kuerySchema)
+      .merge(rangeSchema)
+      .merge(offsetSchema),
   }),
 });
