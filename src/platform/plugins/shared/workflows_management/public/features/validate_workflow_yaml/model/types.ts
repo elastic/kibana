@@ -234,3 +234,15 @@ export type YamlValidationResult =
 export function validationResultFingerprint(r: YamlValidationResult): string {
   return `${r.owner}\0${r.severity}\0${r.startLineNumber}:${r.startColumn}\0${r.endLineNumber}:${r.endColumn}\0${r.message}`;
 }
+
+export function validationResultsFingerprint(results: YamlValidationResult[]): string {
+  return results.map(validationResultFingerprint).sort().join('\n');
+}
+
+export function filterHighlightableValidationResults(
+  validationResults: YamlValidationResult[]
+): YamlValidationResult[] {
+  return validationResults.filter(
+    (result) => result.severity === 'error' || result.severity === 'warning'
+  );
+}

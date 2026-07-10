@@ -86,9 +86,10 @@ export const EditDeletePhaseFlyout = ({
 
   const { errors, isSubmitting, isDirty } = useFormState({ control: methods.control });
   useEffect(() => {
-    // Ensure invalid initial values (e.g. unparseable retention strings) surface immediately.
+    // Surface invalid initial values immediately, and re-validate when the maximum retention
+    // resolves after mount (e.g. a stream configured above the max outside Streams).
     void methods.trigger();
-  }, [methods]);
+  }, [methods, maximumRetentionPeriod]);
   const initialMappedValue = useMemo(
     () => mapFormValuesToDeletePhase(defaultValues),
     [defaultValues]

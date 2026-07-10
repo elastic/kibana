@@ -139,6 +139,10 @@ export interface DataRetention {
 export interface DataStreamOptions {
   failure_store?: {
     enabled: boolean;
+    lifecycle?: {
+      enabled?: boolean;
+      data_retention?: string | -1;
+    };
   };
   [key: string]: unknown;
 }

@@ -35,6 +35,7 @@ import type { ProcessedConversation, ProcessedConversationRound } from './prepar
 import type { ToolCallResultTransformer } from './tool_summarization';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
+import { formatDate } from '../prompts/utils/helpers';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -54,6 +55,13 @@ export interface ConversationToLangchainOptions {
    * user/assistant message pair representing the compacted history.
    */
   compactionSummary?: CompactionSummary;
+  /**
+   * Timestamp of the current (in-progress) round. When provided, it is
+   * prefixed onto the next-input user message. Previous rounds always use
+   * their own `started_at`. Kept out of the system prompt so the system+tools
+   * prefix stays stable across rounds (prompt-cache friendly).
+   */
+  conversationTimestamp?: string;
 }
 
 /**
@@ -67,11 +75,13 @@ export const convertPreviousRounds = async ({
   resultTransformer,
   ignoreSteps = false,
   compactionSummary,
+  conversationTimestamp,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
   let rounds = conversation.previousRounds;
   let input = conversation.nextInput;
+  let inputTimestamp = conversationTimestamp;
 
   // need to ignore the last round if it's awaiting a prompt, the graph handles resuming the actions
   // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
@@ -79,6 +89,7 @@ export const convertPreviousRounds = async ({
   if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
     rounds = rounds.slice(0, rounds.length - 1);
     input = lastRound.input;
+    inputTimestamp = lastRound.started_at;
   }
 
   // Inject compaction summary as a user/assistant exchange before remaining rounds
@@ -92,7 +103,7 @@ export const convertPreviousRounds = async ({
     messages.push(...(await roundToLangchain(round, { resultTransformer, ignoreSteps })));
   }
 
-  messages.push(formatRoundInput({ input }));
+  messages.push(formatRoundInput({ input, timestamp: inputTimestamp }));
 
   return messages;
 };
@@ -107,7 +118,7 @@ export const roundToLangchain = async (
   const messages: BaseMessage[] = [];
 
   // user message
-  messages.push(formatRoundInput({ input: round.input }));
+  messages.push(formatRoundInput({ input: round.input, timestamp: round.started_at }));
 
   // steps
   if (!ignoreSteps) {
@@ -152,7 +163,13 @@ export const roundToLangchain = async (
   return messages;
 };
 
-const formatRoundInput = ({ input }: { input: ProcessedRoundInput }): HumanMessage => {
+const formatRoundInput = ({
+  input,
+  timestamp,
+}: {
+  input: ProcessedRoundInput;
+  timestamp?: string;
+}): HumanMessage => {
   const { message, attachments } = input;
 
   let content = message;
@@ -167,6 +184,10 @@ const formatRoundInput = ({ input }: { input: ProcessedRoundInput }): HumanMessa
     );
 
     content += `\n\n${attachmentsXml}\n`;
+  }
+
+  if (timestamp && timestamp !== new Date(0).toISOString()) {
+    content = `[Sent: ${formatDate(timestamp)}]\n\n${content}`;
   }
 
   return createUserMessage(content);
