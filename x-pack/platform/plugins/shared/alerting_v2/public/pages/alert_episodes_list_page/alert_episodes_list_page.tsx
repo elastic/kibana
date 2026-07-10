@@ -24,7 +24,6 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import type { RenderDocumentViewCallback, SortOrder } from '@kbn/unified-data-table';
 import {
   DataLoadingState,
-  ROWS_HEIGHT_OPTIONS,
   UnifiedDataTable,
   getRenderCustomToolbarWithElements,
   type CustomCellRenderer,
@@ -66,6 +65,7 @@ import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
+import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 
 const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
@@ -167,7 +167,7 @@ export const AlertEpisodesListPage = () => {
     'tags',
     'assignees',
   ]);
-  const [rowHeight, setRowHeight] = useState<number>(ROWS_HEIGHT_OPTIONS.default);
+  const { rowHeight, setRowHeight } = useEpisodesTableConfig(services.storage);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
 
