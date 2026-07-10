@@ -60,7 +60,7 @@ describe('AutomaticClosureSwitch', () => {
     expect(onChangeClosureType).toHaveBeenCalledWith('close-by-pushing');
   });
 
-  it('calls onChangeClosureType with close-by-user when disabled', async () => {
+  it('calls onChangeClosureType with close-by-user when unchecked', async () => {
     renderWithTestingProviders(
       <AutomaticClosureSwitch {...props} closureTypeSelected="close-by-pushing" />
     );

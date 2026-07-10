@@ -52,10 +52,10 @@ describe('ObservableTypes', () => {
       expect(await screen.findByTestId('observable-types-panel')).toBeInTheDocument();
     });
 
-    it('does not render the subdued panel when isRedesign is true', async () => {
+    it('does not render the subdued panel when useLineSeparators is true', async () => {
       renderWithTestingProviders(
         <ObservableTypes
-          {...{ ...props, observableTypes: observableTypesMock, isRedesign: true }}
+          {...{ ...props, observableTypes: observableTypesMock, useLineSeparators: true }}
         />
       );
 

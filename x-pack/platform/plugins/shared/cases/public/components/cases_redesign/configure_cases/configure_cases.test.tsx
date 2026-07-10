@@ -10,6 +10,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
+import { ConnectorTypes } from '../../../../common/types/domain';
 import { ConfigureCasesRedesign } from './configure_cases';
 import {
   customFieldsConfigurationMock,
@@ -162,6 +163,35 @@ describe('ConfigureCasesRedesign', () => {
 
     expect(row.className).not.toContain('euiPanel');
     expect(screen.queryByTestId('observable-types-panel')).not.toBeInTheDocument();
+  });
+
+  it('shows the connector-invalid warning callout when the selected connector is missing', async () => {
+    useGetCaseConfigurationMock.mockImplementation(() => ({
+      ...useCaseConfigureResponse,
+      data: {
+        ...useCaseConfigureResponse.data,
+        customFields: customFieldsConfigurationMock,
+        templates: templatesConfigurationMock,
+        connector: {
+          id: 'not-exists',
+          name: 'unchanged',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+      },
+    }));
+    useGetConnectorsMock.mockImplementation(() => ({
+      ...useConnectorsResponse,
+      data: [],
+      isLoading: false,
+    }));
+
+    renderWithTestingProviders(<ConfigureCasesRedesign />);
+
+    expect(await screen.findByTestId('configure-cases-warning-callout')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('case-configure-update-selected-connector-button')
+    ).not.toBeInTheDocument();
   });
 
   it('does not render observable types when the observables feature is disabled', async () => {

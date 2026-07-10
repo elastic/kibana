@@ -8,9 +8,8 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { AppHeader } from '@kbn/app-header';
-import { PAGE_TITLE } from '../../../../common/translations';
-import { useAllCasesNavigation } from '../../../../common/navigation/hooks';
-import { CASE_SETTINGS_TITLE } from '../../translations';
+import { useAllCasesNavigation } from '../../../common/navigation/hooks';
+import { BACK_TO_CASES, CASE_SETTINGS_TITLE } from '../translations';
 
 export const ConfigureCasesAppHeader: FC = () => {
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
@@ -18,7 +17,7 @@ export const ConfigureCasesAppHeader: FC = () => {
   const back = useMemo(
     () => ({
       href: getAllCasesUrl(),
-      label: PAGE_TITLE,
+      label: BACK_TO_CASES,
       // AppHeader's back button keeps its `href` on the rendered anchor, so the default
       // navigation must be prevented here to avoid a full page reload alongside the SPA one.
       onClick: (event: React.MouseEvent) => {

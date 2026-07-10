@@ -142,22 +142,21 @@ const ConnectorsComponent: React.FC<Props> = ({
     </>
   );
 
-  if (hideTitle) {
-    return <div data-test-subj="case-connectors-form-group">{connectorContent}</div>;
-  }
-
-  return (
-    <>
-      <EuiDescribedFormGroup
-        fullWidth
-        title={<h2>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h2>}
-        description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
-        data-test-subj="case-connectors-form-group"
-      >
-        {connectorContent}
-      </EuiDescribedFormGroup>
-    </>
+  // Always render the same outer `<div>` for `case-connectors-form-group` regardless of
+  // `hideTitle`, so the container element's structure doesn't depend on the caller.
+  const content = hideTitle ? (
+    connectorContent
+  ) : (
+    <EuiDescribedFormGroup
+      fullWidth
+      title={<h2>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h2>}
+      description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
+    >
+      {connectorContent}
+    </EuiDescribedFormGroup>
   );
+
+  return <div data-test-subj="case-connectors-form-group">{content}</div>;
 };
 ConnectorsComponent.displayName = 'Connectors';
 

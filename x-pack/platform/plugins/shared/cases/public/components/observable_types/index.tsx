@@ -34,7 +34,7 @@ export interface ObservableTypesProps {
    * Renders the list without the surrounding subdued panel, as line-separated
    * rows. Only used by the cases redesign settings page.
    */
-  isRedesign?: boolean;
+  useLineSeparators?: boolean;
 }
 const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   disabled,
@@ -44,7 +44,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
   handleDeleteObservableType,
   handleEditObservableType,
   observableTypes,
-  isRedesign = false,
+  useLineSeparators = false,
 }) => {
   const { permissions } = useCasesContext();
   const canModifyObservableTypes = !disabled && permissions.settings;
@@ -72,7 +72,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
           observableTypes={observableTypes}
           onDeleteObservableType={handleDeleteObservableType}
           onEditObservableType={onEditObservableType}
-          isRedesign={isRedesign}
+          useLineSeparators={useLineSeparators}
         />
       ) : null}
       <EuiSpacer size="s" />
@@ -109,7 +109,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
     </>
   );
 
-  const observableTypesContent = isRedesign ? (
+  const observableTypesContent = useLineSeparators ? (
     listAndFooter
   ) : (
     <EuiPanel
@@ -124,11 +124,11 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
     </EuiPanel>
   );
 
-  if (hideTitle) {
-    return <div data-test-subj="observable-types-form-group">{observableTypesContent}</div>;
-  }
-
-  return (
+  // Always render the same outer `<div>` for `observable-types-form-group` regardless of
+  // `hideTitle`, so the container element's structure doesn't depend on the caller.
+  const content = hideTitle ? (
+    observableTypesContent
+  ) : (
     <EuiDescribedFormGroup
       fullWidth
       title={
@@ -139,12 +139,13 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
         </EuiFlexGroup>
       }
       description={<p>{i18n.DESCRIPTION}</p>}
-      data-test-subj="observable-types-form-group"
     >
       {observableTypesContent}
     </EuiDescribedFormGroup>
   );
+
+  return <div data-test-subj="observable-types-form-group">{content}</div>;
 };
-ObservableTypesComponent.displayName = 'CustomFields';
+ObservableTypesComponent.displayName = 'ObservableTypesComponent';
 
 export const ObservableTypes = React.memo(ObservableTypesComponent);

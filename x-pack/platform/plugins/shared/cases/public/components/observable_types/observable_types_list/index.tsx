@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -31,20 +31,24 @@ export interface ObservableTypesListProps {
    * Renders the list as line-separated rows instead of individual panels.
    * Only used by the cases redesign settings page.
    */
-  isRedesign?: boolean;
+  useLineSeparators?: boolean;
 }
 
 const ObservableTypesListComponent: React.FC<ObservableTypesListProps> = (props) => {
-  const { observableTypes, onDeleteObservableType, onEditObservableType, isRedesign } = props;
+  const { observableTypes, onDeleteObservableType, onEditObservableType, useLineSeparators } =
+    props;
   const { euiTheme } = useEuiTheme();
   const [selectedItem, setSelectedItem] = useState<ObservableTypesConfiguration[number] | null>(
     null
   );
 
-  const redesignRowCss = css`
-    padding: ${euiTheme.size.s} 0;
-    border-bottom: ${euiTheme.border.thin};
-  `;
+  const redesignRowCss = useMemo(
+    () => css`
+      padding: ${euiTheme.size.s} 0;
+      border-bottom: ${euiTheme.border.thin};
+    `,
+    [euiTheme]
+  );
 
   const onConfirm = useCallback(() => {
     if (selectedItem) {
@@ -180,7 +184,7 @@ const ObservableTypesListComponent: React.FC<ObservableTypesListProps> = (props)
     </>
   );
 
-  return observableTypes.length ? (isRedesign ? redesignList : legacyList) : null;
+  return observableTypes.length ? (useLineSeparators ? redesignList : legacyList) : null;
 };
 
 ObservableTypesListComponent.displayName = 'ObservableTypesListComponent';

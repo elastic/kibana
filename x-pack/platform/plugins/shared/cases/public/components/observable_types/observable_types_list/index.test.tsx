@@ -127,7 +127,7 @@ describe('ObservableTypesList', () => {
     });
   });
 
-  describe('isRedesign', () => {
+  describe('useLineSeparators', () => {
     it('renders each item inside a panel by default', async () => {
       renderWithTestingProviders(<ObservableTypesList {...props} />);
 
@@ -136,8 +136,8 @@ describe('ObservableTypesList', () => {
       expect(item.className).toContain('euiPanel');
     });
 
-    it('renders line-separated rows without panels when isRedesign is true', async () => {
-      renderWithTestingProviders(<ObservableTypesList {...props} isRedesign />);
+    it('renders line-separated rows without panels when useLineSeparators is true', async () => {
+      renderWithTestingProviders(<ObservableTypesList {...props} useLineSeparators />);
 
       const item = await screen.findByTestId(`observable-type-${observableTypes[0].key}`);
 
@@ -145,8 +145,8 @@ describe('ObservableTypesList', () => {
       expect(await screen.findByText('Test Observable Type')).toBeInTheDocument();
     });
 
-    it('still supports edit and delete actions when isRedesign is true', async () => {
-      renderWithTestingProviders(<ObservableTypesList {...props} isRedesign />);
+    it('still supports edit and delete actions when useLineSeparators is true', async () => {
+      renderWithTestingProviders(<ObservableTypesList {...props} useLineSeparators />);
 
       const list = await screen.findByTestId('observable-types-list');
 

@@ -23,8 +23,6 @@ const AutomaticClosureSwitchComponent: React.FC<AutomaticClosureSwitchProps> = (
   disabled,
   onChangeClosureType,
 }) => {
-  const isAutomaticClosureEnabled = closureTypeSelected === 'close-by-pushing';
-
   const onChange = useCallback(
     (event: EuiSwitchEvent) => {
       onChangeClosureType(event.target.checked ? 'close-by-pushing' : 'close-by-user');
@@ -34,7 +32,7 @@ const AutomaticClosureSwitchComponent: React.FC<AutomaticClosureSwitchProps> = (
 
   return (
     <EuiSwitch
-      checked={isAutomaticClosureEnabled}
+      checked={closureTypeSelected === 'close-by-pushing'}
       disabled={disabled}
       label={i18n.CASE_CLOSURE_OPTIONS_NEW_INCIDENT}
       onChange={onChange}

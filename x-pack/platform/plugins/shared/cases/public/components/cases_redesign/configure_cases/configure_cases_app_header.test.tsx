@@ -9,12 +9,12 @@ import React from 'react';
 import { createEvent, fireEvent, screen } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
-import { renderWithTestingProviders } from '../../../../common/mock';
-import { CASE_SETTINGS_TITLE } from '../../translations';
-import { useAllCasesNavigation } from '../../../../common/navigation/hooks';
+import { renderWithTestingProviders } from '../../../common/mock';
+import { CASE_SETTINGS_TITLE } from '../translations';
+import { useAllCasesNavigation } from '../../../common/navigation/hooks';
 import { ConfigureCasesAppHeader } from './configure_cases_app_header';
 
-jest.mock('../../../../common/navigation/hooks');
+jest.mock('../../../common/navigation/hooks');
 
 describe('ConfigureCasesAppHeader', () => {
   it('renders the app header with the settings title', () => {
