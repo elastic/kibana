@@ -112,6 +112,10 @@ interface DetectionScanProps {
   duration_ms: number;
   /** Number of distinct rules covered by the change-point scan. */
   rules_scanned: number;
+  /** Rule-backed query count using the critical 1m cadence. */
+  critical_rule_count: number;
+  /** Rule-backed query count using the default 5m cadence. */
+  default_rule_count: number;
   /** Resolved alerting engine backing the read: `v2` reads `.rule-events`, `v1` reads `.alerts-*`. */
   alerting_engine: 'v1' | 'v2';
   /** The alerts-source index that was read (e.g. `.rule-events`). */
