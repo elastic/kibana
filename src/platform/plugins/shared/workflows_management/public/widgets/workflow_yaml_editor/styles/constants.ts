@@ -37,6 +37,9 @@ export const MINIMAP_WIDTH_PX = 184;
 export const MINIMAP_PADDING_LEFT_PX = 16;
 export const MINIMAP_PADDING_RIGHT_PX = 16;
 
+/** Gap between the minimap panel and the editor's scrollable content area. */
+export const MINIMAP_GAP_PX = 8;
+
 /** Total right-side reserve: minimap + both side paddings + gap. Scrollbar is hidden. */
 export const MINIMAP_RESERVE_PX =
-  MINIMAP_WIDTH_PX + MINIMAP_PADDING_LEFT_PX + MINIMAP_PADDING_RIGHT_PX + 8;
+  MINIMAP_WIDTH_PX + MINIMAP_PADDING_LEFT_PX + MINIMAP_PADDING_RIGHT_PX + MINIMAP_GAP_PX;
