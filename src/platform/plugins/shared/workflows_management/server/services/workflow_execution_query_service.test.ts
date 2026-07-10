@@ -15,15 +15,23 @@ import type {
   StepExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
 } from '@kbn/workflows/server/data_access_layer';
+import {
+  createMockStepExecutionsDal,
+  createMockWorkflowExecutionsDal,
+} from '@kbn/workflows/server/data_access_layer';
 import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
 
 import { WorkflowExecutionQueryService } from './workflow_execution_query_service';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import {
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+} from '../../common';
 
 describe('WorkflowExecutionQueryService', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockWorkflowExecutionsDal: jest.Mocked<Pick<WorkflowExecutionsDataAccess, 'search'>>;
-  let mockStepExecutionsDal: jest.Mocked<Pick<StepExecutionsDataAccess, 'search'>>;
+  let mockWorkflowExecutionsDal: jest.Mocked<WorkflowExecutionsDataAccess>;
+  let mockStepExecutionsDal: jest.Mocked<StepExecutionsDataAccess>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockEventLoggerService: jest.Mocked<IWorkflowEventLoggerService>;
   let service: WorkflowExecutionQueryService;
@@ -36,11 +44,13 @@ describe('WorkflowExecutionQueryService', () => {
       update: jest.fn(),
     } as any;
     mockWorkflowExecutionsDal = {
+      ...createMockWorkflowExecutionsDal(),
       search: jest.fn((request) =>
         mockEsClient.search({ index: WORKFLOWS_EXECUTIONS_INDEX, ...request })
       ),
     };
     mockStepExecutionsDal = {
+      ...createMockStepExecutionsDal(),
       search: jest.fn((request) =>
         mockEsClient.search({ index: WORKFLOWS_STEP_EXECUTIONS_INDEX, ...request })
       ),

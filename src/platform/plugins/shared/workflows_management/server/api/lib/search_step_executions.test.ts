@@ -9,10 +9,11 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { StepExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import { createMockStepExecutionsDal } from '@kbn/workflows/server/data_access_layer';
 import { searchStepExecutions } from './search_step_executions';
 
 describe('searchStepExecutions', () => {
-  let mockStepExecutionsDal: jest.Mocked<Pick<StepExecutionsDataAccess, 'search'>>;
+  let mockStepExecutionsDal: jest.Mocked<StepExecutionsDataAccess>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
 
   const baseParams = {
@@ -22,9 +23,7 @@ describe('searchStepExecutions', () => {
   };
 
   beforeEach(() => {
-    mockStepExecutionsDal = {
-      search: jest.fn(),
-    };
+    mockStepExecutionsDal = createMockStepExecutionsDal();
     mockLogger = loggerMock.create();
     jest.clearAllMocks();
   });

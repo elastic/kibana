@@ -119,7 +119,7 @@ export const searchStepExecutions = async ({
     const pageSize = size ?? (isPaginated ? 100 : 1000);
     const from = isPaginated && page !== undefined ? (page - 1) * pageSize : 0;
 
-    const response = await stepExecutionsDal.search<EsWorkflowStepExecution>({
+    const response = await stepExecutionsDal.search({
       query: { bool: { must: mustQueries } },
       ...(sourceExcludes?.length ? { _source: { excludes: sourceExcludes } } : {}),
       sort: 'startedAt:desc',

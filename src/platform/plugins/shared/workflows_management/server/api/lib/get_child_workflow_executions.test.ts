@@ -11,11 +11,15 @@ import type {
   StepExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
 } from '@kbn/workflows/server/data_access_layer';
+import {
+  createMockStepExecutionsDal,
+  createMockWorkflowExecutionsDal,
+} from '@kbn/workflows/server/data_access_layer';
 import { getChildWorkflowExecutions } from './get_child_workflow_executions';
 
 describe('getChildWorkflowExecutions', () => {
-  let mockWorkflowExecutionsDal: jest.Mocked<Pick<WorkflowExecutionsDataAccess, 'getByIds'>>;
-  let mockStepExecutionsDal: jest.Mocked<Pick<StepExecutionsDataAccess, 'getByIds' | 'search'>>;
+  let mockWorkflowExecutionsDal: jest.Mocked<WorkflowExecutionsDataAccess>;
+  let mockStepExecutionsDal: jest.Mocked<StepExecutionsDataAccess>;
 
   const baseParams = {
     parentExecutionId: 'parent-exec-1',
@@ -61,13 +65,8 @@ describe('getChildWorkflowExecutions', () => {
   });
 
   beforeEach(() => {
-    mockWorkflowExecutionsDal = {
-      getByIds: jest.fn(),
-    };
-    mockStepExecutionsDal = {
-      getByIds: jest.fn(),
-      search: jest.fn(),
-    };
+    mockWorkflowExecutionsDal = createMockWorkflowExecutionsDal();
+    mockStepExecutionsDal = createMockStepExecutionsDal();
     jest.clearAllMocks();
   });
 

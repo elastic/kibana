@@ -13,9 +13,14 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
-jest.mock('../common', () => ({
-  createIndexes: jest.fn().mockResolvedValue(undefined),
-}));
+jest.mock('@kbn/workflows/server/data_access_layer', () => {
+  const actual = jest.requireActual('@kbn/workflows/server/data_access_layer');
+  const { createExecutionsDalJestMock } = jest.requireActual('./test_utils/executions_dal_jest_mock');
+  return {
+    ...actual,
+    createExecutionsDal: jest.fn(() => createExecutionsDalJestMock()),
+  };
+});
 jest.mock('./lib/check_license', () => ({
   checkLicense: jest.fn().mockResolvedValue(undefined),
 }));

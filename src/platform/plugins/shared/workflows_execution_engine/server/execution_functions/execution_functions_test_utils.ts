@@ -13,6 +13,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 
 import type { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 
 export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEngineConfig => ({
@@ -63,6 +64,12 @@ export const createMockWorkflowExecutionRepository = (): MockWorkflowExecutionRe
   getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
   updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
 });
+
+export const createMockStepExecutionRepository = (): jest.Mocked<StepExecutionRepository> =>
+  ({
+    bulkUpsert: jest.fn().mockResolvedValue(undefined),
+    markNonTerminalStepsFailed: jest.fn().mockResolvedValue(undefined),
+  } as unknown as jest.Mocked<StepExecutionRepository>);
 
 export interface MockTelemetryClient {
   reportEventDrivenExecutionSuppressed: jest.Mock;

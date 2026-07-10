@@ -250,7 +250,6 @@ export class WorkflowsExecutionEnginePlugin
                 await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
-              await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
                 coreStart,
@@ -375,7 +374,6 @@ export class WorkflowsExecutionEnginePlugin
                 await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
-              await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
                 coreStart,
@@ -505,7 +503,6 @@ export class WorkflowsExecutionEnginePlugin
               const [coreStart, pluginsStart] = await core.getStartServices();
               await checkLicense(pluginsStart.licensing);
 
-              await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
                 coreStart,
@@ -765,7 +762,6 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
     }> => {
-      await this.initialize(coreStart);
       const { workflowExecutionRepository } = await this.createScopedRepositories();
 
       await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
@@ -995,7 +991,6 @@ export class WorkflowsExecutionEnginePlugin
 
       await checkLicense(plugins.licensing);
       const { workflowExecutionRepository } = await this.createScopedRepositories();
-      await this.initialize(coreStart);
 
       const authenticatedUser = await getAuthenticatedUser(
         request,
@@ -1174,7 +1169,6 @@ export class WorkflowsExecutionEnginePlugin
       await checkLicense(plugins.licensing);
       const { workflowExecutionRepository } = await this.createScopedRepositories();
 
-      await this.initialize(coreStart);
       await ensureWorkflowEnabled(workflow, workflow.spaceId || 'default');
 
       const spaceId = workflow.spaceId || 'default';
@@ -1235,7 +1229,6 @@ export class WorkflowsExecutionEnginePlugin
       schedulingRequest
     ) => {
       await checkLicense(plugins.licensing);
-      await this.initialize(coreStart);
       const { workflowExecutionRepository } = await this.createScopedRepositories();
 
       await cancelWorkflow({
@@ -1255,7 +1248,6 @@ export class WorkflowsExecutionEnginePlugin
     }) => {
       await checkLicense(plugins.licensing);
       const { workflowExecutionRepository } = await this.createScopedRepositories();
-      await this.initialize(coreStart);
 
       let searchAfter: estypes.SortResults | undefined;
 
@@ -1299,7 +1291,6 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       await checkLicense(plugins.licensing);
       const { workflowExecutionRepository } = await this.createScopedRepositories();
-      await this.initialize(coreStart);
       const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
         executionId,
         spaceId
@@ -1445,28 +1436,6 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   public stop() {}
-
-  private async initialize(coreStart: CoreStart): Promise<void> {
-    this.initializePromise = Promise.resolve();
-    // if (!this.initializePromise) {
-    //   // Clear the cached promise on rejection so a transient failure (e.g. an ES
-    //   // circuit_breaking_exception) doesn't poison every subsequent call. In-flight
-    //   // callers still share the same attempt; only the *next* call after rejection
-    //   // gets a fresh execution-index init invocation.
-    //   const esClient = coreStart.elasticsearch.client.asInternalUser;
-    //   const { workflowExecutionsDal, stepExecutionsDal } = this.createExecutionsDal(esClient);
-    //   const attempt = Promise.all([workflowExecutionsDal.init(), stepExecutionsDal.init()]).then(
-    //     (): void => undefined
-    //   );
-    //   this.initializePromise = attempt;
-    //   attempt.catch(() => {
-    //     if (this.initializePromise === attempt) {
-    //       this.initializePromise = undefined;
-    //     }
-    //   });
-    // }
-    // await this.initializePromise;
-  }
 
   /**
    * Reused local wrapper for evaluating the concurrency group key for a workflow execution.

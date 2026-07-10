@@ -9,7 +9,7 @@
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
 import type { CoreStart } from '@kbn/core/server';
-import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { UpdatedWorkflowResponseDto } from '@kbn/workflows';
 import { InvalidYamlSchemaError } from '@kbn/workflows-yaml';

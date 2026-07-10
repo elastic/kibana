@@ -10,19 +10,18 @@
 import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import { createMockWorkflowExecutionsDal } from '@kbn/workflows/server/data_access_layer';
 import {
   searchWorkflowExecutions,
   WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES,
 } from './search_workflow_executions';
 
 describe('searchWorkflowExecutions', () => {
-  let mockWorkflowExecutionsDal: jest.Mocked<Pick<WorkflowExecutionsDataAccess, 'search'>>;
+  let mockWorkflowExecutionsDal: jest.Mocked<WorkflowExecutionsDataAccess>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
 
   beforeEach(() => {
-    mockWorkflowExecutionsDal = {
-      search: jest.fn(),
-    };
+    mockWorkflowExecutionsDal = createMockWorkflowExecutionsDal();
 
     mockLogger = loggerMock.create();
     mockLogger.error = jest.fn();
