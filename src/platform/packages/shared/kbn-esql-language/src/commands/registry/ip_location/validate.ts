@@ -8,22 +8,22 @@
  */
 
 import { isMap } from '@elastic/esql';
-import type { ESQLAstAllCommands, ESQLAstUserAgentCommand, ESQLCommand } from '@elastic/esql/types';
+import type {
+  ESQLAstAllCommands,
+  ESQLAstIpLocationCommand,
+  ESQLCommand,
+} from '@elastic/esql/types';
 import { validatePrefixAssignmentExpression } from '../../definitions/utils/validation/column';
 import { validateMap, validateMapListParameter } from '../../definitions/utils/validation/map';
 import type { ICommandCallbacks, ICommandContext } from '../types';
 import type { ESQLMessage } from '../../definitions/types';
 
-// `properties` uses type=[keyword] so validateMap doesn't false-error on valid list values
-// (getExpressionType delegates list type to its first element, which is keyword for string literals).
-// The list constraint is enforced separately with validateMapListParameter.
-const USER_AGENT_MAP_DEFINITION =
-  "{name='regex_file', description='Parser configuration file name', type=[keyword]}" +
-  "{name='extract_device_type', description='Extract device type', type=[boolean]}" +
-  "{name='properties', values=[name, version, os, device], description='List of properties to extract', type=[keyword]}";
+const IP_LOCATION_MAP_DEFINITION =
+  "{name='database_file', description='IP location database file name', type=[keyword]}" +
+  "{name='first_only', description='Use only the first value from multi-value IP input', type=[boolean]}" +
+  "{name='properties', description='List of properties to extract', type=[keyword]}";
 
-const ACCEPTED_EXPRESSION_TYPES = ['keyword', 'text', 'param', 'unknown'] as const;
-const PROPERTIES_PARAMETER = 'properties';
+const ACCEPTED_EXPRESSION_TYPES = ['ip', 'keyword', 'text', 'param', 'unknown'] as const;
 
 export const validate = (
   command: ESQLAstAllCommands,
@@ -32,23 +32,23 @@ export const validate = (
   _callbacks?: ICommandCallbacks
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
-  const userAgentCommand = command as ESQLAstUserAgentCommand;
-  const { expression, namedParameters } = userAgentCommand;
+  const ipLocationCommand = command as ESQLAstIpLocationCommand;
+  const { expression, namedParameters } = ipLocationCommand;
 
   messages.push(
     ...validatePrefixAssignmentExpression({
       expression,
       commandName: command.name,
       acceptedTypes: ACCEPTED_EXPRESSION_TYPES,
-      typeLabel: 'keyword, text',
+      typeLabel: 'ip, keyword, text',
       context,
     })
   );
 
-  if (namedParameters && !Array.isArray(namedParameters) && isMap(namedParameters)) {
+  if (isMap(namedParameters)) {
     const listParameterError = validateMapListParameter(
       namedParameters,
-      PROPERTIES_PARAMETER,
+      'properties',
       context?.columns,
       context?.unmappedFieldsStrategy
     );
@@ -56,7 +56,7 @@ export const validate = (
     if (listParameterError) {
       messages.push(listParameterError);
     } else {
-      const mapError = validateMap(namedParameters, USER_AGENT_MAP_DEFINITION);
+      const mapError = validateMap(namedParameters, IP_LOCATION_MAP_DEFINITION);
       if (mapError) {
         messages.push(mapError);
       }
