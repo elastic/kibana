@@ -18,7 +18,7 @@ describe('OriginalRuleQuery', () => {
   it.each([
     [MigrationSource.SPLUNK, 'Splunk query'],
     [MigrationSource.QRADAR, 'QRadar rule definition'],
-    [MigrationSource.SENTINEL, 'Microsoft Sentinel rule definition'],
+    [MigrationSource.SENTINEL, 'Microsoft Sentinel KQL query'],
   ])('renders the QueryHeader title for %s rules', (vendor, expectedTitle) => {
     const { getByTestId } = render(
       <TestProviders>

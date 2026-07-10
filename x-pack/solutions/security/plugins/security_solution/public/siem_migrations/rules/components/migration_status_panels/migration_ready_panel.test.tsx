@@ -193,7 +193,7 @@ describe('MigrationReadyPanel', () => {
       ],
       [
         MigrationSource.QRADAR,
-        'Migration of 6 rules is created and ready to start. You can also upload the missing reference sets and enhancements for more accurate results.',
+        'Migration of 6 rules is created and ready to start. You can also upload the missing reference sets for more accurate results.',
       ],
       [
         MigrationSource.SENTINEL,
