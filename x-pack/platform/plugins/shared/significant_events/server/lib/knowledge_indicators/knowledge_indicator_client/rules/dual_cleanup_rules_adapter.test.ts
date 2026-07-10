@@ -20,6 +20,7 @@ function makeMockClient(): jest.Mocked<IRulesManagementClient> {
     createRule: jest.fn().mockResolvedValue(undefined),
     updateRule: jest.fn().mockResolvedValue(undefined),
     bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+    findOwnedRuleIds: jest.fn().mockResolvedValue([]),
   };
 }
 
@@ -153,6 +154,45 @@ describe('DualCleanupRulesAdapter', () => {
       const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
 
       await expect(adapter.bulkDeleteRules(['id-1'])).rejects.toThrow('primary failed');
+    });
+  });
+
+  describe('findOwnedRuleIds', () => {
+    it('unions ids from primary and legacy', async () => {
+      const primary = makeMockClient();
+      const legacy = makeMockClient();
+      primary.findOwnedRuleIds.mockResolvedValueOnce(['r-1', 'r-2']);
+      legacy.findOwnedRuleIds.mockResolvedValueOnce(['r-3']);
+      const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
+
+      const ids = await adapter.findOwnedRuleIds('my-stream');
+
+      expect(ids.sort()).toEqual(['r-1', 'r-2', 'r-3']);
+      expect(primary.findOwnedRuleIds).toHaveBeenCalledWith('my-stream');
+      expect(legacy.findOwnedRuleIds).toHaveBeenCalledWith('my-stream');
+    });
+
+    it('dedupes ids that appear on both sides', async () => {
+      const primary = makeMockClient();
+      const legacy = makeMockClient();
+      primary.findOwnedRuleIds.mockResolvedValueOnce(['r-1']);
+      legacy.findOwnedRuleIds.mockResolvedValueOnce(['r-1']);
+      const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
+
+      const ids = await adapter.findOwnedRuleIds('my-stream');
+
+      expect(ids).toEqual(['r-1']);
+    });
+
+    it('propagates errors from the legacy client instead of silently returning a partial union', async () => {
+      // Unlike bulkDeleteRules/cleanupLegacyRule, this must not degrade on legacy failure.
+      const primary = makeMockClient();
+      const legacy = makeMockClient();
+      primary.findOwnedRuleIds.mockResolvedValueOnce(['r-1']);
+      legacy.findOwnedRuleIds.mockRejectedValueOnce(new Error('legacy gone'));
+      const adapter = new DualCleanupRulesAdapter(primary, legacy, logger);
+
+      await expect(adapter.findOwnedRuleIds('my-stream')).rejects.toThrow('legacy gone');
     });
   });
 });
