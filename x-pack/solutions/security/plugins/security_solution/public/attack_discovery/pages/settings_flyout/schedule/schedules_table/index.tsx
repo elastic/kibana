@@ -100,9 +100,12 @@ export const SchedulesTable: React.FC = React.memo(() => {
   const [isTableLoading, setTableLoading] = useState(false);
   const [scheduleDetailsId, setScheduleDetailsId] = useState<string | undefined>(undefined);
   const [selectedSchedules, setSelectedSchedules] = useState<AttackDiscoverySchedule[]>([]);
-  const [isDeleteConfirmationVisible, setIsDeleteConfirmationVisible] = useState(false);
-  const bulkDeleteModalTitleId = useGeneratedHtmlId({
-    prefix: 'bulkDeleteAttackDiscoverySchedulesModalTitle',
+  const [pendingDelete, setPendingDelete] = useState<{
+    ids: string[];
+    isBulk: boolean;
+  } | null>(null);
+  const deleteModalTitleId = useGeneratedHtmlId({
+    prefix: 'deleteAttackDiscoverySchedulesModalTitle',
   });
 
   const { mutateAsync: enableAttackDiscoverySchedule } = useEnableSchedule();
@@ -143,19 +146,9 @@ export const SchedulesTable: React.FC = React.memo(() => {
     },
     [disableAttackDiscoverySchedule, refetch]
   );
-  const deleteSchedule = useCallback(
-    async (id: string) => {
-      try {
-        setTableLoading(true);
-        await deleteAttackDiscoverySchedule({ id });
-        await refetch();
-      } catch (err) {
-        // Error is handled by the mutation's onError callback, so no need to do anything here
-      } finally {
-        setTableLoading(false);
-      }
-    },
-    [deleteAttackDiscoverySchedule, refetch]
+  const requestDeleteSchedule = useCallback(
+    (id: string) => setPendingDelete({ ids: [id], isBulk: false }),
+    []
   );
 
   const selection: EuiTableSelectionType<AttackDiscoverySchedule> = useMemo(
@@ -208,32 +201,36 @@ export const SchedulesTable: React.FC = React.memo(() => {
     }
   }, [bulkDisableAttackDiscoverySchedules, clearSelection, refetch, selectedSchedules]);
 
-  const bulkDeleteSchedules = useCallback(async () => {
-    const ids = selectedSchedules.map(({ id }) => id);
-    if (!ids.length) {
-      setIsDeleteConfirmationVisible(false);
+  const confirmDeleteSchedules = useCallback(async () => {
+    if (!pendingDelete?.ids.length) {
       return;
     }
 
     try {
       setTableLoading(true);
-      await bulkDeleteAttackDiscoverySchedules({ ids });
+      if (pendingDelete.isBulk) {
+        await bulkDeleteAttackDiscoverySchedules({ ids: pendingDelete.ids });
+        clearSelection();
+      } else {
+        await deleteAttackDiscoverySchedule({ id: pendingDelete.ids[0] });
+      }
       await refetch();
-      clearSelection();
-      setIsDeleteConfirmationVisible(false);
+      setPendingDelete(null);
     } catch (err) {
       // Error is handled by the mutation's onError callback, so no need to do anything here
     } finally {
       setTableLoading(false);
     }
-  }, [bulkDeleteAttackDiscoverySchedules, clearSelection, refetch, selectedSchedules]);
+  }, [
+    bulkDeleteAttackDiscoverySchedules,
+    clearSelection,
+    deleteAttackDiscoverySchedule,
+    pendingDelete,
+    refetch,
+  ]);
 
   const closeDeleteConfirmation = useCallback(() => {
-    setIsDeleteConfirmationVisible(false);
-  }, []);
-
-  const showDeleteConfirmation = useCallback(() => {
-    setIsDeleteConfirmationVisible(true);
+    setPendingDelete(null);
   }, []);
 
   const refreshSchedules = useCallback(() => {
@@ -271,7 +268,10 @@ export const SchedulesTable: React.FC = React.memo(() => {
             key="delete"
             onClick={() => {
               closePopover();
-              showDeleteConfirmation();
+              setPendingDelete({
+                ids: selectedSchedules.map(({ id }) => id),
+                isBulk: true,
+              });
             }}
           >
             {i18n.BULK_DELETE_ACTION}
@@ -279,7 +279,7 @@ export const SchedulesTable: React.FC = React.memo(() => {
         ]}
       />
     ),
-    [bulkDisableSchedules, bulkEnableSchedules, selectedSchedules, showDeleteConfirmation]
+    [bulkDisableSchedules, bulkEnableSchedules, selectedSchedules]
   );
 
   const rulesColumns = useColumns({
@@ -288,7 +288,7 @@ export const SchedulesTable: React.FC = React.memo(() => {
     openScheduleDetails,
     enableSchedule,
     disableSchedule,
-    deleteSchedule,
+    requestDeleteSchedule,
   });
 
   return (
@@ -347,20 +347,26 @@ export const SchedulesTable: React.FC = React.memo(() => {
         data-test-subj={'schedulesTable'}
         columns={rulesColumns}
       />
-      {isDeleteConfirmationVisible && (
+      {pendingDelete && (
         <EuiConfirmModal
-          aria-labelledby={bulkDeleteModalTitleId}
-          title={i18n.BULK_DELETE_CONFIRMATION_TITLE}
-          titleProps={{ id: bulkDeleteModalTitleId }}
+          aria-labelledby={deleteModalTitleId}
+          title={
+            pendingDelete.isBulk
+              ? i18n.BULK_DELETE_CONFIRMATION_TITLE
+              : i18n.DELETE_CONFIRMATION_TITLE
+          }
+          titleProps={{ id: deleteModalTitleId }}
           onCancel={closeDeleteConfirmation}
-          onConfirm={bulkDeleteSchedules}
+          onConfirm={confirmDeleteSchedules}
           cancelButtonText={i18n.BULK_DELETE_CONFIRMATION_CANCEL}
           confirmButtonText={i18n.BULK_DELETE_CONFIRMATION_CONFIRM}
           buttonColor="danger"
           defaultFocusedButton="confirm"
           data-test-subj="schedulesTableBulkDeleteConfirmationModal"
         >
-          {i18n.BULK_DELETE_CONFIRMATION_BODY(selectedSchedules.length)}
+          {pendingDelete.isBulk
+            ? i18n.BULK_DELETE_CONFIRMATION_BODY(pendingDelete.ids.length)
+            : i18n.DELETE_CONFIRMATION_BODY}
         </EuiConfirmModal>
       )}
       {scheduleDetailsId && (
