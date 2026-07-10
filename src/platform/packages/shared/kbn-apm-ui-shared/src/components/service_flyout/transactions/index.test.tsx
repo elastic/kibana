@@ -292,6 +292,47 @@ describe('ServiceFlyoutTransactionsSection', () => {
     });
   });
 
+  describe('sparkline loading state', () => {
+    let capturedIsSparklineLoading: boolean | undefined;
+    let tableSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      capturedIsSparklineLoading = undefined;
+      tableSpy = jest
+        .spyOn(TransactionsTableModule, 'TransactionsTable')
+        .mockImplementation(({ isSparklineLoading }) => {
+          capturedIsSparklineLoading = isSparklineLoading;
+          return null;
+        });
+    });
+
+    afterEach(() => {
+      tableSpy.mockRestore();
+    });
+
+    it('passes isSparklineLoading={true} to TransactionsTable while detailed stats are loading', () => {
+      mockedUseDetailedStatistics.mockReturnValue({
+        ...EMPTY_DETAILED,
+        isLoading: true,
+      });
+
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      expect(capturedIsSparklineLoading).toBe(true);
+    });
+
+    it('passes isSparklineLoading={false} to TransactionsTable once detailed stats have loaded', () => {
+      mockedUseDetailedStatistics.mockReturnValue({
+        ...EMPTY_DETAILED,
+        isLoading: false,
+      });
+
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      expect(capturedIsSparklineLoading).toBe(false);
+    });
+  });
+
   describe('error state', () => {
     it('renders the error callout when the hook returns an error', () => {
       mockedUseServiceFlyoutTransactions.mockReturnValue({

@@ -98,7 +98,11 @@ export function ServiceFlyoutTransactionsSection({
 
   const transactionNames = useMemo(() => items.map(({ name }) => name), [items]);
 
-  const { currentPeriod, previousPeriod } = useServiceFlyoutTransactionDetailedStatistics({
+  const {
+    currentPeriod,
+    previousPeriod,
+    isLoading: isDetailedLoading,
+  } = useServiceFlyoutTransactionDetailedStatistics({
     http,
     serviceName,
     environment,
@@ -197,6 +201,7 @@ export function ServiceFlyoutTransactionsSection({
       }
       items={itemsWithSparklines}
       isLoading={isLoading}
+      isSparklineLoading={isDetailedLoading}
       maxCountExceeded={maxCountExceeded}
       latencyAggregationType={latencyAggregationType}
       columns={[
