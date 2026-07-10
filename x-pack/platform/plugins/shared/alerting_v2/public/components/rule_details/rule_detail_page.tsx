@@ -221,7 +221,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         }}
         badges={badges}
         menu={menu}
-        padding="none"
+        spacing="flush"
         sticky={false}
         metadata={metadata}
       />

@@ -86,7 +86,6 @@ const HeaderWithTitle = ({
             </EuiToolTip>
           }
           sticky={false}
-          padding="m"
         />
       </div>
     </ChromeServiceProvider>

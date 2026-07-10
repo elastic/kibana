@@ -15,7 +15,7 @@ import type {
   AppHeaderBack,
   AppHeaderBadge,
   AppHeaderMetadataItems,
-  AppHeaderPadding,
+  AppHeaderSpacing,
   AppHeaderTab,
   AppHeaderTitle,
 } from '../types';
@@ -38,8 +38,16 @@ export interface AppHeaderViewProps {
   favorite?: ReactNode;
   titleAppend?: ReactNode;
   metadata?: AppHeaderMetadataItems;
+  /**
+   * Defaults to `true`. Set to `false` only when the surrounding full-page layout provides its own
+   * sticky-header mechanism for the correct scrolling container.
+   */
   sticky?: boolean;
-  padding?: AppHeaderPadding;
+  /**
+   * Controls the horizontal inset. When omitted, the header owns the standard 16px page gutter.
+   * Bleed modes are compatibility options for headers that cannot yet move outside a padded parent.
+   */
+  spacing?: AppHeaderSpacing;
   docLink?: string;
   showAddIntegrations?: boolean;
   /**
@@ -60,7 +68,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     titleAppend,
     metadata,
     sticky,
-    padding,
+    spacing,
     borderless,
     docLink,
     showAddIntegrations,
@@ -104,7 +112,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
         metadata={metadata?.length ? <AppHeaderMetadata metadata={metadata} /> : undefined}
         tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}
         sticky={sticky}
-        padding={padding}
+        spacing={spacing}
         borderless={borderless}
       />
     );

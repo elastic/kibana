@@ -46,22 +46,10 @@ export type AppHeaderTabIconBadge = CoreAppHeaderTabIconBadge;
 export type AppHeaderTitle = CoreAppHeaderTitle;
 export type AppHeaderTitleSaveResult = CoreAppHeaderTitleSaveResult;
 
-// Controls the header's outer spacing. The scalar values (`'none' | 's' | 'm'`) only add symmetric
-// horizontal padding; the `bleed` variant additionally breaks the header out of a surrounding
-// padded container (see below). The header's INTERNAL vertical padding is standardized regardless of
-// this value, so the header keeps a consistent height.
-export type AppHeaderPadding =
-  | 'none' // no horizontal padding, no bleed
-  | 's' // symmetric horizontal padding (compact)
-  | 'm' // symmetric horizontal padding
-  | {
-      /**
-       * Set this to the SYMMETRIC padding of the surrounding section (e.g. an `EuiPageSection`'s
-       * `paddingSize`). The header breaks out to that section's top/left/right edges via negative
-       * margin so it spans full width and sits flush at the top, and its content is auto re-inset by
-       * the same amount to stay aligned with the page gutter. `'m'` matches EUI `paddingSize: 'm'`
-       * (16px); `'l'` matches EUI `paddingSize: 'l'` (24px). The header's internal vertical padding
-       * is unaffected.
-       */
-      bleed: 'm' | 'l';
-    };
+/**
+ * Outer header spacing. Omit for the standard 16px inset, use `compact` for an 8px inset, and use
+ * `flush` when the surrounding layout owns the inset. `bleed` and `largeBleed` must match a direct
+ * parent's 16px or 24px symmetric padding respectively. Bleed modes are compatibility options for
+ * headers that cannot yet move outside the padded content section.
+ */
+export type AppHeaderSpacing = 'compact' | 'flush' | 'bleed' | 'largeBleed';

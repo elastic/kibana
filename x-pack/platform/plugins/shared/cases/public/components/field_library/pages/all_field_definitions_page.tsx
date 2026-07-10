@@ -199,6 +199,7 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
         back={fieldLibraryBack}
         menu={fieldLibraryMenu}
         sticky={false}
+        spacing="flush"
       />
       <EuiText size="s" color="subdued">
         <p>{i18n.FIELD_LIBRARY_DESCRIPTION}</p>

@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import type { AppHeaderPadding } from '../types';
+import type { AppHeaderSpacing } from '../types';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 // Single-row bar height, applied to every header (title, tabbed, or back-button-only) so the bar
@@ -28,38 +28,39 @@ export interface AppHeaderShellProps {
   metadata?: ReactNode;
   tabs?: ReactNode;
   sticky?: boolean;
-  padding?: AppHeaderPadding;
+  spacing?: AppHeaderSpacing;
   borderless?: boolean;
 }
 
-// Resolves the outer spacing contract: horizontal padding for the scalar values, and the breakout
-// margin for the `bleed` variant. The header's internal vertical padding is standardized separately
-// (see `useHeaderStyles`) so the header keeps a consistent height regardless of this prop.
-const resolvePadding = (
-  sticky: boolean,
-  padding: AppHeaderPadding | undefined,
+// Bleed uses the same token for the negative top/inline margin and the content inset. It must match
+// the direct parent's symmetric padding so the header reaches the parent's edges without moving its
+// content off the page grid. Bottom padding is intentionally left to the parent.
+const resolveSpacing = (
+  spacing: AppHeaderSpacing | undefined,
   euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']
 ) => {
-  const resolved = padding ?? (sticky ? 'm' : 'none');
-
-  if (resolved === 'none') {
+  if (spacing === 'flush') {
     return { paddingInline: undefined, bleedMargin: undefined };
   }
 
-  if (resolved === 's' || resolved === 'm') {
-    return { paddingInline: euiTheme.size[resolved], bleedMargin: undefined };
+  if (spacing === 'compact') {
+    return { paddingInline: euiTheme.size.s, bleedMargin: undefined };
   }
 
-  // `{ bleed }`: pull the header out to its padded container's top/left/right edges (negative margin)
-  // and re-inset the content by the same amount so it stays aligned with the page gutter. The value
-  // mirrors the container's symmetric EUI `paddingSize`: `'m'` → 16px (`size.base`), `'l'` → 24px.
-  const value = { m: euiTheme.size.base, l: euiTheme.size.l }[resolved.bleed];
-  return { paddingInline: value, bleedMargin: value };
+  if (spacing === 'largeBleed') {
+    return { paddingInline: euiTheme.size.l, bleedMargin: euiTheme.size.l };
+  }
+
+  const paddingInline = euiTheme.size.base;
+  return {
+    paddingInline,
+    bleedMargin: spacing === 'bleed' ? paddingInline : undefined,
+  };
 };
 
 const useHeaderStyles = (
   sticky: boolean,
-  padding: AppHeaderPadding | undefined,
+  spacing: AppHeaderSpacing | undefined,
   hasTabs: boolean,
   hasTitleAppend: boolean,
   hasMetadata: boolean,
@@ -68,9 +69,9 @@ const useHeaderStyles = (
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
-    const { paddingInline, bleedMargin } = resolvePadding(sticky, padding, euiTheme);
+    const { paddingInline, bleedMargin } = resolveSpacing(spacing, euiTheme);
 
-    // Vertical padding is internal (independent of the `padding` prop). The primary row floors at a
+    // Vertical padding is internal (independent of `spacing`). The primary row floors at a
     // consistent 48px regardless of title size; content is centered within it.
     const paddingBlock = euiTheme.size.s;
     // A row followed by another collapses its bottom gap so the next row sits close (and tabs stay
@@ -118,6 +119,7 @@ const useHeaderStyles = (
       align-items: center;
       gap: ${euiTheme.size.m};
       min-width: 0;
+      box-sizing: border-box;
       min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
       ${!hasTitleAppend &&
       css`
@@ -199,7 +201,7 @@ const useHeaderStyles = (
       metadataRow,
       tabsRow,
     };
-  }, [sticky, padding, euiTheme, hasTabs, hasTitleAppend, hasMetadata, borderless]);
+  }, [sticky, spacing, euiTheme, hasTabs, hasTitleAppend, hasMetadata, borderless]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
@@ -212,11 +214,11 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
     trailing,
     tabs,
     sticky = true,
-    padding,
+    spacing,
     borderless = false,
   }) => {
     const hasTitleAppend = titleAppend != null;
-    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend, !!metadata, borderless);
+    const styles = useHeaderStyles(sticky, spacing, !!tabs, hasTitleAppend, !!metadata, borderless);
 
     return (
       <div css={styles.root} data-test-subj={APP_HEADER_TEST_SUBJECTS.root}>

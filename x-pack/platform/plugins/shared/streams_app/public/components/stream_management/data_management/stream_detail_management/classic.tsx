@@ -108,7 +108,6 @@ export function ClassicStreamDetailManagement({
           title={key}
           back={{ href: router.link('/'), label: backToStreamsLabel }}
           badges={classicErrorBadges}
-          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <MissingDataStreamCallout

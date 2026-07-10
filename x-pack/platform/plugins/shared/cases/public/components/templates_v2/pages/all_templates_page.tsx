@@ -153,6 +153,7 @@ export const AllTemplatesPage: React.FC = () => {
         back={templatesListBack}
         menu={templatesListMenu}
         sticky={false}
+        spacing="flush"
       />
       <TemplatesInfoPanel />
       <TemplatesTableFilters

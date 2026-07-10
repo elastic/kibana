@@ -586,7 +586,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             // Breaks the header out to the surrounding EuiPageSection's edges (top/left/right)
             // and re-insets its content by the same amount, so it runs edge-to-edge while the
             // title/menu stay aligned with the page gutter.
-            padding={{ bleed: 'l' }}
+            spacing="largeBleed"
           />
         </EuiFlexItem>
 

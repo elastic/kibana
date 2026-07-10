@@ -101,7 +101,6 @@ export function WiredStreamDetailManagement({
           title={key}
           back={{ href: router.link('/'), label: backToStreamsLabel }}
           badges={wiredBadges}
-          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <EuiCallOut
@@ -136,7 +135,6 @@ export function WiredStreamDetailManagement({
           title={key}
           back={{ href: router.link('/'), label: backToStreamsLabel }}
           badges={wiredBadges}
-          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <MissingDataStreamCallout
@@ -159,7 +157,6 @@ export function WiredStreamDetailManagement({
           title={key}
           back={{ href: router.link('/'), label: backToStreamsLabel }}
           badges={wiredBadges}
-          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <PendingRootDataStreamCallout

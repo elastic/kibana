@@ -153,7 +153,6 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
           favorite={config?.favorite}
           metadata={config?.metadata}
           sticky={false}
-          padding="m"
         />
       </Suspense>
     </div>

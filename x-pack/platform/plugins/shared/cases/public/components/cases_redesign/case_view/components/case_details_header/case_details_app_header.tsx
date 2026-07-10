@@ -65,6 +65,7 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
         menu={menu}
         metadata={metadata}
         sticky={false}
+        spacing="flush"
       />
       {closeCaseModal}
       {isDeleteModalVisible && (

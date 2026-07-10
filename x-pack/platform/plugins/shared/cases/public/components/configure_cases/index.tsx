@@ -646,7 +646,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
   return (
     <EuiPageSection paddingSize="none">
       {isSettingsRedesignEnabled ? (
-        <AppHeader title={i18n.CONFIGURE_CASES_PAGE_TITLE} back={settingsBack} sticky={false} />
+        <AppHeader
+          title={i18n.CONFIGURE_CASES_PAGE_TITLE}
+          back={settingsBack}
+          sticky={false}
+          spacing="flush"
+        />
       ) : (
         <>
           {isTemplatesEnabled && (

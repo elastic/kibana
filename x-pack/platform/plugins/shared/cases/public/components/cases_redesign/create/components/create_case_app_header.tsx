@@ -28,7 +28,7 @@ export const CreateCaseAppHeader: FC = () => {
     [getAllCasesUrl, navigateToAllCases]
   );
 
-  return <AppHeader title={CREATE_CASE_TITLE} back={back} sticky={false} />;
+  return <AppHeader title={CREATE_CASE_TITLE} back={back} sticky={false} spacing="flush" />;
 };
 
 CreateCaseAppHeader.displayName = 'CreateCaseAppHeader';

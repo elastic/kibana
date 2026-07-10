@@ -20,13 +20,13 @@ import type {
   AppHeaderTab,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { AppHeaderPadding } from '../types';
+import type { AppHeaderSpacing } from '../types';
 import { AppHeaderView } from './app_header';
 
 interface ComposedHeaderStoryProps {
   title: string;
   editable: boolean;
-  padding: 'none' | 's' | 'm' | 'bleed-l';
+  spacing: 'standard' | AppHeaderSpacing;
   width: number;
   showBack: boolean;
   showTabs: boolean;
@@ -102,7 +102,7 @@ const menu: AppMenuConfig = {
 const ComposedHeader = ({
   title: initialTitle,
   editable,
-  padding,
+  spacing,
   width,
   showBack,
   showTabs,
@@ -122,7 +122,7 @@ const ComposedHeader = ({
     },
   };
 
-  const paddingProp: AppHeaderPadding = padding === 'bleed-l' ? { bleed: 'l' } : padding;
+  const spacingProp = spacing === 'standard' ? undefined : spacing;
 
   return (
     <ChromeServiceProvider value={{ chrome }}>
@@ -150,7 +150,7 @@ const ComposedHeader = ({
             ) : undefined
           }
           sticky={false}
-          padding={paddingProp}
+          spacing={spacingProp}
         />
       </div>
     </ChromeServiceProvider>
@@ -178,16 +178,17 @@ const meta: Meta<ComposedHeaderStoryProps> = {
     },
   },
   argTypes: {
-    padding: {
+    spacing: {
       control: 'inline-radio',
-      options: ['none', 's', 'm', 'bleed-l'],
-      description: "Horizontal padding. `bleed-l` cancels a padded container (`{ bleed: 'l' }`).",
+      options: ['standard', 'compact', 'flush', 'bleed', 'largeBleed'],
+      description:
+        'Outer spacing. Standard and bleed use the 16px page gutter; largeBleed supports legacy 24px containers.',
     },
   },
   args: {
     title: 'System Shells via Services',
     editable: true,
-    padding: 'm',
+    spacing: 'standard',
     width: 900,
     showBack: true,
     showTabs: true,
