@@ -18,8 +18,6 @@ export {
   getConversationAttachmentsSection,
   getConversationAttachmentsSystemMessages,
   type AttachmentPresentation,
-  type AttachmentPresentationMode,
-  type AttachmentPresentationConfig,
 } from './attachment_presentation';
 export {
   createResultTransformer,

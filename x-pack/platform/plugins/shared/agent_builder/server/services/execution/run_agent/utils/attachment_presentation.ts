@@ -11,18 +11,12 @@ import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/to
 import type { BaseMessageLike } from '@langchain/core/messages';
 
 /**
- * Presentation mode for attachments in the LLM context.
- * - 'inline': Full content shown directly (for few attachments)
- * - 'summary': Only metadata shown, LLM must use tools to access content (for many attachments)
- */
-export type AttachmentPresentationMode = 'inline' | 'summary';
-
-/**
  * Result of preparing attachment presentation for the LLM.
+ * Attachments are always presented in summary mode: only metadata is shown,
+ * and the LLM must use attachment tools (attachment_read, attachment_list, ...)
+ * to access content.
  */
 export interface AttachmentPresentation {
-  /** The chosen presentation mode */
-  mode: AttachmentPresentationMode;
   /** Formatted content to include in the LLM context */
   content: string;
   /** Number of active attachments */
@@ -30,116 +24,27 @@ export interface AttachmentPresentation {
 }
 
 /**
- * Configuration for attachment presentation.
- */
-export interface AttachmentPresentationConfig {
-  /** Number of attachments at which to switch from inline to summary mode (default: 5) */
-  threshold?: number;
-  /**
-   * Per-attachment content length limit before truncation. Return `undefined` to use the
-   * default (10000 characters).
-   */
-  resolveMaxContentLength?: (attachment: VersionedAttachment) => number | undefined;
-}
-
-export type AttachmentContentFormatter = (
-  attachment: VersionedAttachment,
-  data: unknown
-) => Promise<string | undefined>;
-
-const DEFAULT_THRESHOLD = 5;
-const DEFAULT_MAX_CONTENT_LENGTH = 10000;
-
-/**
  * Prepares the attachment presentation for the LLM context.
- * Chooses between inline (full content) and summary (metadata only) modes
- * based on the number of active attachments.
+ * Attachments are always presented in summary mode (metadata only); the LLM
+ * must use attachment tools to access content.
  */
 export const prepareAttachmentPresentation = async (
-  attachments: VersionedAttachment[],
-  config?: AttachmentPresentationConfig,
-  formatContent?: AttachmentContentFormatter
+  attachments: VersionedAttachment[]
 ): Promise<AttachmentPresentation> => {
-  const threshold = config?.threshold ?? DEFAULT_THRESHOLD;
-
   const activeAttachments = attachments.filter(isAttachmentActive);
   const activeCount = activeAttachments.length;
 
   if (activeCount === 0) {
     return {
-      mode: 'inline',
       content: '',
       activeCount: 0,
     };
   }
 
-  if (activeCount <= threshold) {
-    return {
-      mode: 'inline',
-      content: await formatInlineAttachments(
-        activeAttachments,
-        formatContent,
-        config?.resolveMaxContentLength
-      ),
-      activeCount,
-    };
-  }
-
   return {
-    mode: 'summary',
     content: formatSummaryAttachments(activeAttachments),
     activeCount,
   };
-};
-
-/**
- * Formats attachments for inline mode with full content.
- */
-const formatInlineAttachments = async (
-  attachments: VersionedAttachment[],
-  formatContent?: AttachmentContentFormatter,
-  resolveMaxContentLength?: (attachment: VersionedAttachment) => number | undefined
-): Promise<string> => {
-  const attachmentElements: XmlNode[] = [];
-  for (const attachment of attachments) {
-    const latest = getLatestVersion(attachment);
-    if (!latest) {
-      continue;
-    }
-
-    let contentStr =
-      (formatContent ? await formatContent(attachment, latest.data) : undefined) ??
-      formatAttachmentContent(attachment, latest.data);
-
-    const effectiveMax = resolveMaxContentLength?.(attachment) ?? DEFAULT_MAX_CONTENT_LENGTH;
-    if (contentStr.length > effectiveMax) {
-      contentStr =
-        contentStr.substring(0, effectiveMax) +
-        '\n... [content truncated, use attachment_read for full content]';
-    }
-
-    const contentLines = contentStr.split('\n');
-
-    attachmentElements.push({
-      tagName: 'attachment',
-      attributes: {
-        attachment_id: attachment.id,
-        type: attachment.type,
-        version: latest.version,
-        description: attachment.description,
-      },
-      children: contentLines,
-    } satisfies XmlNode);
-  }
-
-  return generateXmlTree(
-    {
-      tagName: 'conversation-attachments',
-      attributes: { count: attachments.length, mode: 'inline' },
-      children: attachmentElements,
-    },
-    { escapeContent: false }
-  );
 };
 
 /**
@@ -169,29 +74,17 @@ const formatSummaryAttachments = (attachments: VersionedAttachment[]): string =>
   return generateXmlTree(
     {
       tagName: 'conversation-attachments',
-      attributes: { count: attachments.length, mode: 'summary' },
+      attributes: { count: attachments.length },
       children: [
         {
           tagName: 'note',
-          children: [
-            'Too many attachments to show inline. Use attachment_read(attachment_id) to access content.',
-          ],
+          children: ['Use attachment_read(attachment_id) to access content.'],
         },
         ...attachmentElements,
       ],
     },
     { escapeContent: false }
   );
-};
-
-/**
- * Formats attachment content based on type.
- */
-const formatAttachmentContent = (attachment: VersionedAttachment, data: unknown): string => {
-  if (typeof data === 'string') {
-    return data;
-  }
-  return JSON.stringify(data, null, 2);
 };
 
 /**
@@ -205,20 +98,9 @@ export const getConversationAttachmentsSection = (
     return '';
   }
 
-  const preamble =
-    presentation.mode === 'inline'
-      ? `## Conversation Attachments\n\nThe user has ${presentation.activeCount} attachment(s) in this conversation. The content is shown below in XML format.`
-      : `## Conversation Attachments\n\nThe user has ${presentation.activeCount} attachment(s) in this conversation. Only metadata is shown below due to the large number.`;
+  const preamble = `## Conversation Attachments\n\nThe user has ${presentation.activeCount} attachment(s) in this conversation. Only metadata is shown below.`;
 
-  const instructions =
-    presentation.mode === 'inline'
-      ? `You can:
-- Read attachments using attachment_read(attachment_id) to get full content if truncated
-- Update attachments using attachment_update(id, data) to modify content
-- Add new attachments using attachment_add(type, data) to store information
-
-If you see "[content truncated, use attachment_read for full content]", you MUST call attachment_read(attachment_id) to get the complete content before analyzing or referencing that attachment.`
-      : `You MUST use attachment tools to access content:
+  const instructions = `You MUST use attachment tools to access content:
 - Read attachments using attachment_read(attachment_id) to see the content
 - Update attachments using attachment_update(id, data) to modify content
 - Add new attachments using attachment_add(type, data) to store information

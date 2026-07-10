@@ -251,40 +251,7 @@ export const prepareConversation = async ({
   const allVersionedAttachments = attachmentStateManager.getAll();
 
   const versionedAttachmentPresentation = await prepareAttachmentPresentation(
-    allVersionedAttachments,
-    {
-      resolveMaxContentLength: (attachment) =>
-        attachmentsService.getTypeDefinition(attachment.type)?.maxContentLength,
-    },
-    async (attachment, data) => {
-      const definition = attachmentsService.getTypeDefinition(attachment.type);
-      if (!definition) {
-        return undefined;
-      }
-
-      try {
-        const typeReadonly = definition.isReadonly ?? false;
-        const isReadonly = typeReadonly || attachment.readonly === true;
-        if (!isReadonly) {
-          return undefined;
-        }
-        const formatted = await definition.format(
-          {
-            id: attachment.id,
-            type: attachment.type,
-            data,
-          },
-          formatContext
-        );
-        if (!formatted?.getRepresentation) {
-          return undefined;
-        }
-        const representation = await formatted.getRepresentation();
-        return representation?.type === 'text' ? representation.value : undefined;
-      } catch {
-        return undefined;
-      }
-    }
+    allVersionedAttachments
   );
 
   return {

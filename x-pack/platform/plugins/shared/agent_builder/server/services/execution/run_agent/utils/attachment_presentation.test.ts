@@ -39,51 +39,47 @@ describe('attachment_presentation', () => {
     it('should return empty content for no attachments', async () => {
       const result = await prepareAttachmentPresentation([]);
 
-      expect(result.mode).toBe('inline');
       expect(result.content).toBe('');
       expect(result.activeCount).toBe(0);
     });
 
-    it('should choose inline mode for few attachments (<=5)', async () => {
+    it('should return summary-only metadata for a single attachment', async () => {
       const attachments = [
-        createMockAttachment('1', 'text', 'Hello world', { description: 'Test' }),
-        createMockAttachment('2', 'json', { key: 'value' }),
-        createMockAttachment('3', 'text', 'Another text'),
+        createMockAttachment('1', 'text', 'Hello world', {
+          description: 'Test',
+          estimatedTokens: 42,
+        }),
       ];
 
       const result = await prepareAttachmentPresentation(attachments);
 
-      expect(result.mode).toBe('inline');
-      expect(result.activeCount).toBe(3);
-      expect(result.content).toContain('mode="inline"');
-      expect(result.content).toContain('count="3"');
-      expect(result.content).toContain('Hello world');
+      expect(result.activeCount).toBe(1);
+      expect(result.content).toContain('count="1"');
+      expect(result.content).toContain('attachment_id="1"');
+      expect(result.content).toContain('version="1"');
+      expect(result.content).toContain('estimated_tokens="42"');
+      expect(result.content).toContain('description="Test"');
+      // Content is never inlined, regardless of count.
+      expect(result.content).not.toContain('Hello world');
     });
 
-    it('should choose summary mode for many attachments (>5)', async () => {
-      const attachments = Array.from({ length: 6 }, (_, i) =>
-        createMockAttachment(`${i}`, 'text', `Content ${i}`)
-      );
-
-      const result = await prepareAttachmentPresentation(attachments);
-
-      expect(result.mode).toBe('summary');
-      expect(result.activeCount).toBe(6);
-      expect(result.content).toContain('mode="summary"');
-      expect(result.content).toContain('Too many attachments');
-      expect(result.content).not.toContain('Content 0'); // Data not shown in summary
-    });
-
-    it('should allow configurable threshold', async () => {
-      const attachments = [
+    it('should always present as summary metadata regardless of attachment count (no threshold)', async () => {
+      const few = [
         createMockAttachment('1', 'text', 'Content 1'),
         createMockAttachment('2', 'text', 'Content 2'),
         createMockAttachment('3', 'text', 'Content 3'),
       ];
+      const many = Array.from({ length: 6 }, (_, i) =>
+        createMockAttachment(`${i}`, 'text', `Content ${i}`)
+      );
 
-      const result = await prepareAttachmentPresentation(attachments, { threshold: 2 });
+      const fewResult = await prepareAttachmentPresentation(few);
+      const manyResult = await prepareAttachmentPresentation(many);
 
-      expect(result.mode).toBe('summary'); // 3 > 2 threshold
+      expect(fewResult.content).not.toContain('Content 1');
+      expect(fewResult.activeCount).toBe(3);
+      expect(manyResult.content).not.toContain('Content 0');
+      expect(manyResult.activeCount).toBe(6);
     });
 
     it('should exclude deleted attachments from count', async () => {
@@ -97,72 +93,6 @@ describe('attachment_presentation', () => {
 
       expect(result.activeCount).toBe(2);
       expect(result.content).toContain('count="2"');
-    });
-
-    it('should truncate large content in inline mode', async () => {
-      const largeContent = 'x'.repeat(15000);
-      const attachments = [createMockAttachment('1', 'text', largeContent)];
-
-      const result = await prepareAttachmentPresentation(attachments);
-
-      expect(result.content).toContain('[content truncated');
-      expect(result.content.length).toBeLessThan(largeContent.length);
-    });
-
-    it('should apply per-attachment max via resolveMaxContentLength', async () => {
-      const largeContent = 'x'.repeat(15000);
-      const attachments = [createMockAttachment('1', 'text', largeContent)];
-
-      const result = await prepareAttachmentPresentation(attachments, {
-        resolveMaxContentLength: () => 500,
-      });
-
-      expect(result.content).toContain('[content truncated');
-      // 500 char limit is tighter than the 10000 default
-      expect(result.content.length).toBeLessThan(10000);
-    });
-
-    it('should fall back to default when resolveMaxContentLength returns undefined', async () => {
-      const largeContent = 'x'.repeat(15000);
-      const attachments = [createMockAttachment('1', 'text', largeContent)];
-
-      const result = await prepareAttachmentPresentation(attachments, {
-        resolveMaxContentLength: () => undefined,
-      });
-
-      // Falls back to DEFAULT_MAX_CONTENT_LENGTH (10000), so content is truncated
-      expect(result.content).toContain('[content truncated');
-      // But longer than the 500-char case above — truncation is at 10000, not 500
-      expect(result.content.length).toBeGreaterThan(500);
-    });
-
-    it('should propagate when resolveMaxContentLength throws', async () => {
-      const largeContent = 'x'.repeat(15000);
-      const attachments = [createMockAttachment('1', 'text', largeContent)];
-
-      await expect(
-        prepareAttachmentPresentation(attachments, {
-          resolveMaxContentLength: () => {
-            throw new Error('resolver error');
-          },
-        })
-      ).rejects.toThrow('resolver error');
-    });
-
-    it('should handle visualization type as JSON', async () => {
-      const attachments = [
-        createMockAttachment('1', 'visualization', {
-          query: 'My Chart',
-          visualization: { layers: [] },
-          chart_type: 'bar',
-          esql: 'FROM index',
-        }),
-      ];
-
-      const result = await prepareAttachmentPresentation(attachments);
-
-      expect(result.content).toContain('My Chart');
-      expect(result.content).toContain('"chart_type"'); // Full JSON stringified content shown
     });
 
     it('should include description in XML attributes', async () => {
@@ -186,16 +116,6 @@ describe('attachment_presentation', () => {
       expect(result.content).toContain('&gt;');
       expect(result.content).toContain('&amp;');
     });
-
-    it('should prefer formatted content when formatter is provided', async () => {
-      const attachments = [createMockAttachment('1', 'text', 'raw')];
-      const formatter = jest.fn(async () => 'formatted content');
-
-      const result = await prepareAttachmentPresentation(attachments, undefined, formatter);
-
-      expect(formatter).toHaveBeenCalledTimes(1);
-      expect(result.content).toContain('formatted content');
-    });
   });
 
   describe('getConversationAttachmentsSection', () => {
@@ -208,18 +128,19 @@ describe('attachment_presentation', () => {
       expect(getConversationAttachmentsSection(presentation)).toBe('');
     });
 
-    it('should return inline mode instructions for few attachments', async () => {
+    it('should always return the summary instructions', async () => {
       const attachments = [createMockAttachment('1', 'text', 'Content')];
       const presentation = await prepareAttachmentPresentation(attachments);
       const section = getConversationAttachmentsSection(presentation);
 
       expect(section).toContain('1 attachment');
+      expect(section).toContain('MUST use attachment tools');
       expect(section).toContain('attachment_read');
-      expect(section).toContain('content truncated');
-      expect(section).not.toContain('MUST use attachment tools');
+      expect(section).toContain('attachment_list');
+      expect(section).toContain('Always read an attachment before referencing');
     });
 
-    it('should return summary mode instructions for many attachments', async () => {
+    it('should return the summary instructions for many attachments too', async () => {
       const attachments = Array.from({ length: 6 }, (_, i) =>
         createMockAttachment(`${i}`, 'text', `Content ${i}`)
       );
@@ -231,6 +152,15 @@ describe('attachment_presentation', () => {
       expect(section).toContain('attachment_read');
     });
 
+    it('should never emit the old inline-only text', async () => {
+      const attachments = [createMockAttachment('1', 'text', 'Content')];
+      const presentation = await prepareAttachmentPresentation(attachments);
+      const section = getConversationAttachmentsSection(presentation);
+
+      expect(section).not.toContain('content is shown below in XML format');
+      expect(section).not.toContain('content truncated');
+    });
+
     it('should place the XML content between preamble and instructions', async () => {
       const attachments = [createMockAttachment('1', 'text', 'Hello world')];
       const presentation = await prepareAttachmentPresentation(attachments);
@@ -238,7 +168,7 @@ describe('attachment_presentation', () => {
 
       const titleIndex = section.indexOf('## Conversation Attachments');
       const xmlIndex = section.indexOf('<conversation-attachments');
-      const instructionsIndex = section.indexOf('You can:');
+      const instructionsIndex = section.indexOf('You MUST use attachment tools');
 
       expect(titleIndex).toBeGreaterThanOrEqual(0);
       expect(xmlIndex).toBeGreaterThan(titleIndex);
@@ -252,7 +182,7 @@ describe('attachment_presentation', () => {
       expect(getConversationAttachmentsSystemMessages(presentation)).toEqual([]);
     });
 
-    it('should wrap the section content as a system message', async () => {
+    it('should wrap the summary section content as a system message', async () => {
       const attachments = [createMockAttachment('1', 'text', 'Content')];
       const presentation = await prepareAttachmentPresentation(attachments);
       const messages = getConversationAttachmentsSystemMessages(presentation);
@@ -261,6 +191,20 @@ describe('attachment_presentation', () => {
       const [role, content] = messages[0] as [string, string];
       expect(role).toBe('system');
       expect(content).toBe(getConversationAttachmentsSection(presentation));
+      expect(content).toContain('MUST use attachment tools');
+    });
+
+    it('should wrap the summary section for many attachments as a system message', async () => {
+      const attachments = Array.from({ length: 6 }, (_, i) =>
+        createMockAttachment(`${i}`, 'text', `Content ${i}`)
+      );
+      const presentation = await prepareAttachmentPresentation(attachments);
+      const messages = getConversationAttachmentsSystemMessages(presentation);
+
+      expect(messages).toHaveLength(1);
+      const [role, content] = messages[0] as [string, string];
+      expect(role).toBe('system');
+      expect(content).toContain('count="6"');
     });
   });
 });
