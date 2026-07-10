@@ -108,7 +108,6 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
     'saves a background search from a dashboard, verifies it in management',
     async ({ page, pageObjects }) => {
       spaceTest.setTimeout(180_000);
-      const searchName = `Background search - ${uuidv4()}`;
 
       await spaceTest.step('open the Delayed 5s dashboard', async () => {
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
@@ -138,21 +137,22 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
       );
 
       await spaceTest.step('rename the background search and verify details', async () => {
+        const searchName = `Background search - ${uuidv4()}`;
         await pageObjects.backgroundSearchManagement.renameRow(searchName);
         await page.testSubj.click('sessionManagementRefreshBtn');
         await pageObjects.backgroundSearchManagement.expectRowCount(1);
-        await expect(page.testSubj.locator('sessionManagementNameCol')).toHaveText(searchName, {
-          timeout: 15_000,
-        });
+        await expect(page.testSubj.locator('sessionManagementNameCol')).toHaveText(searchName);
         const expires = await pageObjects.backgroundSearchManagement.getRowExpires();
-        expect(expires).not.toBe('--');
+        // The expiration date is time-dependent, so only verify that a value is present.
+        expect(expires.trim()).toMatch(/^\d/);
       });
 
       await spaceTest.step('navigate back to the dashboard via the management link', async () => {
         await pageObjects.backgroundSearchManagement.viewRow();
         await pageObjects.dashboard.waitForRenderComplete();
-        const viz = page.testSubj
-          .locator('embeddablePanelHeading-SumofBytesbyExtension(Delayed5s)')
+        const viz = page.testSubj.locator(
+          'embeddablePanelHeading-SumofBytesbyExtension(Delayed5s)'
+        );
         await expect(viz).toBeVisible();
       });
     }
