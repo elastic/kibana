@@ -50,7 +50,7 @@ describe('getData', () => {
     jest.clearAllMocks();
     mockedGetElasticsearchMetricQuery.mockReturnValue({
       track_total_hits: true,
-      query: { bool: { must: [], must_not: [], filter: [], should: [] } },
+      query: { bool: { filter: [] } },
       size: 0,
       aggs: {},
     });
