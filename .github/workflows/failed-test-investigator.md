@@ -71,6 +71,7 @@ network:
     - github.com
     - api.github.com
     - elastic.litellm-prod.ai
+    - elastic.co
 sandbox:
   agent: awf # Migrated from deprecated network setting
 steps:
@@ -203,7 +204,8 @@ Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 se
 **Write tight.** Use bullet points, not paragraphs; every sentence must be earned. Concretely:
 
 - State the **single** dominant cause. Do not enumerate every call, file, wait, or step you inspected — that reasoning is what got you to the answer, not the answer.
-- Cite evidence with an inline link to the code line, log, or screenshot instead of reproducing it. Never paste large blocks of existing code — link to the line range.
+- Cite evidence with an inline link to the code line or log instead of reproducing it. Never paste large blocks of existing code — link to the line range.
+- **If you link the failure screenshot, link it to its Buildkite step — never to a fabricated URL.** The screenshot has no standalone public URL, so point the link at the specific failing job/step on Buildkite (the build URL anchored to that job's UUID, e.g. `.../builds/<n>#<job-uuid>`) and tell the reader to open its Artifacts → HTML report to view the screenshot. Never point a "failure screenshot" link at the issue itself or an invented link.
 - Cut anything that does not change what the reader does next. If a sentence only proves you were thorough, delete it.
 
 Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
@@ -299,7 +301,7 @@ Only link a section that genuinely matches; if none fits, omit the link rather t
 
 #### Root cause & evidence (required)
 
-Explain _why_ it failed in a few tight sentences or bullets, each anchored to a specific piece of evidence (inline link to a code line, commit, log, or screenshot). Lead with the decisive evidence.
+Explain _why_ it failed in a few tight sentences or bullets, each anchored to a specific piece of evidence (inline link to a code line, commit, or log; you can mention screenshot contents if helpful). Lead with the decisive evidence.
 
 - State the single root cause; don't re-walk the investigation or list every call in the test.
 - Use an ASCII timeline **only** for a genuine race condition, cascade, or multi-component state leak — never for a linear explanation.

@@ -13,6 +13,7 @@ export {
   type QueryLink,
   type QueryType,
   type StreamQuery,
+  CRITICAL_SEVERITY_THRESHOLD,
   HIGH_SEVERITY_THRESHOLD,
   QUERY_TYPE_MATCH,
   QUERY_TYPE_STATS,
