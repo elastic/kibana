@@ -272,6 +272,5 @@ describe('getBackfill()', () => {
           'Failed attempt to get ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
       });
     });
-
   });
 });
