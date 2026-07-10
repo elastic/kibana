@@ -79,6 +79,48 @@ describe('useEpisodesTableConfig', () => {
     expect(result.current.rowHeight).toBe(1);
   });
 
+  it('re-syncs rowHeight from the URL on browser Back/Forward', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    const urlStateStorage = createKbnUrlStateStorage({
+      history,
+      useHash: false,
+      useHashQuery: false,
+    });
+    const mockStorage = createMockStorage(null);
+
+    await act(async () => {
+      await urlStateStorage.set(
+        '_a',
+        { [EPISODES_TABLE_APP_STATE_KEY]: { rowHeight: -1 } },
+        { replace: true }
+      );
+    });
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <Router history={history}>{children}</Router>
+    );
+
+    const { result } = renderHook(() => useEpisodesTableConfig(mockStorage as any), { wrapper });
+    expect(result.current.rowHeight).toBe(-1);
+
+    // Simulate a later navigation (e.g. a filter change) pushing a new history entry with a
+    // different rowHeight snapshotted in the same `_a` blob.
+    await act(async () => {
+      await urlStateStorage.set(
+        '_a',
+        { [EPISODES_TABLE_APP_STATE_KEY]: { rowHeight: 5 } },
+        { replace: false }
+      );
+    });
+    expect(result.current.rowHeight).toBe(5);
+
+    await act(async () => {
+      history.goBack();
+    });
+
+    expect(result.current.rowHeight).toBe(-1);
+  });
+
   it('setRowHeight updates state and writes to both stores', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     const mockStorage = createMockStorage(null);
