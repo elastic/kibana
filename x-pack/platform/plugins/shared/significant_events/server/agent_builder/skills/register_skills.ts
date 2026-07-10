@@ -11,9 +11,10 @@ import type { SignificantEventsKIsOnboardingClient } from '../../lib/workflows/o
 import type { MemoryToolsOptions } from '../../memory_and_investigation/tools/memory';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
-import { sigEventsManagementSkill } from './significant_events_management';
+import { significantEventsManagementSkill } from './significant_events_management';
+import { significantEventsKIGroundingSkill } from './significant_events_ki_grounding';
 import {
-  createSigEventsOnboardingSkill,
+  createSignificantEventsOnboardingSkill,
   createGapDetectionSkill,
 } from '../../memory_and_investigation/skills/memory';
 
@@ -34,11 +35,12 @@ export const registerAgentBuilderSkills = ({
 
   const streamsSkills = [
     knowledgeIndicatorsManagementSkill,
-    sigEventsManagementSkill,
+    significantEventsKIGroundingSkill,
+    significantEventsManagementSkill,
     ...(streamsKIsOnboardingClient
       ? [createKiIdentificationManagementSkill({ telemetry, streamsKIsOnboardingClient })]
       : []),
-    createSigEventsOnboardingSkill(memoryToolsOptions),
+    createSignificantEventsOnboardingSkill(memoryToolsOptions),
     createGapDetectionSkill(memoryToolsOptions),
   ];
 
