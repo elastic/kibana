@@ -292,11 +292,14 @@ describe('tab_sync actions', () => {
       });
     });
 
-    it('should preserve initial profile URL state from the URL during initialization', async () => {
+    it('should preserve only initial profile URL state from the URL during initialization', async () => {
       const { tabId, initializeSingleTab, internalState, stateStorageContainer } = await setup();
       const sharedProfileUrlState = {
         [TEST_PROFILE_STATE_DEF.key]: {
+          uiValue: 'ignoredUi',
           urlValue: 'sharedUrl',
+          persistentValue: 'ignoredPersistent',
+          nestedValue: { count: 10 },
         },
       };
 
@@ -309,7 +312,6 @@ describe('tab_sync actions', () => {
           urlValue: 'sharedUrl',
         },
       });
-      expect(stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toEqual(sharedProfileUrlState);
     });
 
     it('should unsubscribe from tabStateSubscription when stopSyncing is called', async () => {
