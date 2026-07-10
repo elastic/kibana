@@ -834,6 +834,25 @@ describe('XY', () => {
       validator.xy.fromApi(apiXYWithNoTitleAndCustomOutsideLegend);
     });
 
+    it('should round-trip area fill styling', () => {
+      validator.xy.fromApi({
+        type: 'xy',
+        title: 'Area fill test',
+        styling: {
+          areas: { fill: 'gradient', fill_opacity: 0.5 },
+        },
+        layers: [
+          {
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+            type: 'area',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count', empty_as_null: false }],
+          },
+        ],
+      });
+    });
+
     it('should convert API with by-reference annotation layer', () => {
       validator.xy.fromApi({
         type: 'xy',

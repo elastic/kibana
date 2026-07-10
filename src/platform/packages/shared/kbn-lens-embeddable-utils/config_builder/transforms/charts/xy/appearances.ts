@@ -14,6 +14,7 @@ import type { XYConfig } from '../../../schema/charts/xy';
 import type { XYApiLineInterpolation } from '../../../schema/charts/xy';
 import { getReversibleMappings, stripUndefined } from '../utils';
 import {
+  DEFAULT_AREAS_FILL,
   DEFAULT_AREAS_FILL_OPACITY,
   DEFAULT_BARS_MINIMUM_HEIGHT,
   DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
@@ -110,6 +111,7 @@ export function convertStylingToAPIFormat(
     areas: layerPresence.hasAreas
       ? {
           fill_opacity: config.fillOpacity ?? DEFAULT_AREAS_FILL_OPACITY,
+          fill: config.areaFill ?? DEFAULT_AREAS_FILL,
         }
       : undefined,
     bars: layerPresence.hasBars
@@ -159,6 +161,7 @@ export function convertStylingToStateFormat(config: XYStyling): XYLensAppearance
     curveType: curveTypeCompat.toState(config.interpolation),
     minBarHeight: config.bars?.minimum_height,
     fillOpacity: config.areas?.fill_opacity,
+    areaFill: config.areas?.fill,
     fittingFunction: fittingFunctionCompat.toState(config.fitting?.type),
     emphasizeFitting: config.fitting?.emphasize,
     endValue: extendCompat.toState(config.fitting?.extend),

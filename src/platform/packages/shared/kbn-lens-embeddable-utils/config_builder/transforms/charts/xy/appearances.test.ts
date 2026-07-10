@@ -14,6 +14,7 @@ import {
   type LayerPresence,
 } from './appearances';
 import {
+  DEFAULT_AREAS_FILL,
   DEFAULT_AREAS_FILL_OPACITY,
   DEFAULT_BARS_MINIMUM_HEIGHT,
   DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
@@ -36,6 +37,7 @@ describe('XY Appearances Transforms', () => {
     const result = convertStylingToAPIFormat({}, allLayersPresent);
     expect(result.bars?.minimum_height).toBe(DEFAULT_BARS_MINIMUM_HEIGHT);
     expect(result.areas?.fill_opacity).toBe(DEFAULT_AREAS_FILL_OPACITY);
+    expect(result.areas?.fill).toBe(DEFAULT_AREAS_FILL);
     expect(result.points?.visibility).toBe(DEFAULT_POINTS_VISIBILITY);
     expect(result.interpolation).toBe(DEFAULT_LINES_INTERPOLATION);
     expect(result.overlays?.partial_buckets?.visible).toBe(DEFAULT_PARTIAL_BUCKETS_VISIBLE);
@@ -176,7 +178,7 @@ describe('XY Appearances Transforms', () => {
       points: { visibility: 'auto' },
       interpolation: 'smooth',
       bars: { minimum_height: 3, data_labels: { visible: true } },
-      areas: { fill_opacity: 0.5 },
+      areas: { fill_opacity: 0.5, fill: 'gradient' },
       fitting: { type: 'linear', emphasize: true, extend: 'zero' },
     };
     const state = convertStylingToStateFormat(original);
@@ -189,14 +191,16 @@ describe('XY Appearances Transforms', () => {
     expect(result.interpolation).toBe(original.interpolation);
     expect(result.bars?.minimum_height).toBe(original.bars?.minimum_height);
     expect(result.areas?.fill_opacity).toBe(original.areas?.fill_opacity);
+    expect(result.areas?.fill).toBe(original.areas?.fill);
     expect(result.fitting).toEqual(original.fitting);
   });
 
   it('should preserve complex config through State -> API -> State', () => {
-    const original = {
+    const original: Partial<XYLensAppearanceState> = {
       valueLabels: 'show' as const,
       curveType: 'CURVE_STEP_AFTER' as const,
       fillOpacity: 0.8,
+      areaFill: 'gradient' as const,
       minBarHeight: 2,
       hideEndzones: false,
       showCurrentTimeMarker: true,
@@ -205,12 +209,14 @@ describe('XY Appearances Transforms', () => {
       emphasizeFitting: true,
       endValue: 'Zero' as const,
     };
+
     const api = convertStylingToAPIFormat(original, allLayersPresent);
     const result = convertStylingToStateFormat(api);
 
     expect(result.valueLabels).toBe(original.valueLabels);
     expect(result.curveType).toBe(original.curveType);
     expect(result.fillOpacity).toBe(original.fillOpacity);
+    expect(result.areaFill).toBe(original.areaFill);
     expect(result.minBarHeight).toBe(original.minBarHeight);
     expect(result.hideEndzones).toBe(original.hideEndzones);
     expect(result.showCurrentTimeMarker).toBe(original.showCurrentTimeMarker);

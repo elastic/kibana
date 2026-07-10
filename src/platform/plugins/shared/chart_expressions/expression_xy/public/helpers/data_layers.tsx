@@ -17,7 +17,6 @@ import type {
   XYChartSeriesIdentifier,
   SeriesColorAccessorFn,
   LinearGradient,
-  ColorVariant,
 } from '@elastic/charts';
 import { ColorVariant, ScaleType } from '@elastic/charts';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -544,7 +543,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
           type: 'linear',
           stops: [
             { offset: 0, opacity: 0, color: ColorVariant.Series },
-            { offset: 0.5, opacity: 0.9, color: ColorVariant.Series },
+            { offset: 0.7, opacity: 0.9, color: ColorVariant.Series },
             { offset: 1, opacity: 1, color: ColorVariant.Series },
           ],
         };
