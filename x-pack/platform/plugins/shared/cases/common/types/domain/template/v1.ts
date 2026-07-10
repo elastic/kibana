@@ -14,11 +14,11 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../../constants';
 import { FieldSchema, isRefField } from './fields';
+import { CaseConnectorWithoutNameSchema } from '../../domain_zod/connector/v1';
+import { CaseAssigneesSchema } from '../../domain_zod/user/v1';
 
 /** Template tag: non-empty and length-bounded, mirroring the client-side metadata validation. */
 const TemplateTagSchema = z.string().min(1).max(MAX_TEMPLATE_TAG_LENGTH);
-import { CaseConnectorWithoutNameSchema } from '../../domain_zod/connector/v1';
-import { CaseAssigneesSchema } from '../../domain_zod/user/v1';
 
 /** Default case settings a template applies when creating a case; both optional and independent. */
 export const TemplateSettingsSchema = z.object({

@@ -174,13 +174,29 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
     />
   );
 
+  // Both tab bodies stay mounted and are toggled with the `hidden` attribute rather than
+  // conditionally rendered. Swapping them with a ternary remounted the Configuration tab on every
+  // switch, which re-ran the connector picker's async fetch (the one the error boundary guards) and
+  // reset its local state — a visible flicker. The Fields tab's Monaco editor uses
+  // `automaticLayout`, so it re-lays-out correctly when shown again.
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={css({ height: '100%', minHeight: 0 })}>
       <div>{tabs}</div>
       <div css={css({ flexGrow: 1, minHeight: 0 })}>
-        {activeTab === 'fields' ? (
-          fieldsTab
-        ) : (
+        <div
+          role="tabpanel"
+          hidden={activeTab !== 'fields'}
+          css={css({ height: '100%', minHeight: 0 })}
+          data-test-subj="templateFieldsTabBody"
+        >
+          {fieldsTab}
+        </div>
+        <div
+          role="tabpanel"
+          hidden={activeTab !== 'configuration'}
+          css={css({ height: '100%', minHeight: 0 })}
+          data-test-subj="templateConfigurationTabBody"
+        >
           <TemplateConfigurationTab
             metadata={metadata}
             metadataErrors={metadataErrors}
@@ -191,7 +207,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
             onConnectorChange={onConnectorChange}
             formResetKey={formResetKey}
           />
-        )}
+        </div>
       </div>
     </EuiFlexGroup>
   );

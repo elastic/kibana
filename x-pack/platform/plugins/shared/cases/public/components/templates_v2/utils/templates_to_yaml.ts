@@ -51,18 +51,16 @@ const toExportObject = (template: ParsedTemplate): Record<string, unknown> => {
   if (typeof def.description === 'string') {
     out.description = def.description;
   }
-  if (def.tags !== undefined) {
-    out.tags = def.tags;
-  }
   if (def.severity) {
     out.severity = def.severity;
   }
   if (def.category != null) {
     out.category = def.category;
   }
-  if (def.assignees && def.assignees.length > 0) {
-    out.assignees = def.assignees;
-  }
+  // Case defaults are forced-present: always write `tags` and `assignees` (empty arrays when unset)
+  // so import and export round-trip them identically instead of dropping empty values.
+  out.tags = def.tags ?? [];
+  out.assignees = def.assignees ?? [];
   if (def.connector) {
     out.connector = def.connector;
   }

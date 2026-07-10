@@ -75,9 +75,11 @@ describe('TemplateEditorLayout', () => {
   it('defaults to the Fields tab, showing the editor + preview and hiding configuration', () => {
     renderWithTestingProviders(<TemplateEditorLayout {...defaultProps} />);
 
-    expect(screen.getByTestId('mockYamlEditor')).toBeInTheDocument();
-    expect(screen.getByTestId('mockTemplatePreview')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockConfigurationTab')).not.toBeInTheDocument();
+    // Both tab bodies stay mounted (so the connector picker doesn't refetch on switch); the
+    // inactive one is hidden rather than unmounted.
+    expect(screen.getByTestId('mockYamlEditor')).toBeVisible();
+    expect(screen.getByTestId('mockTemplatePreview')).toBeVisible();
+    expect(screen.getByTestId('mockConfigurationTab')).not.toBeVisible();
     expect(screen.getByRole('tab', { name: /Fields/ })).toHaveAttribute('aria-selected', 'true');
   });
 
@@ -86,9 +88,9 @@ describe('TemplateEditorLayout', () => {
 
     await user.click(screen.getByRole('tab', { name: /Configuration/ }));
 
-    expect(screen.getByTestId('mockConfigurationTab')).toBeInTheDocument();
-    // The YAML editor must not be rendered beside the (unbound) configuration content.
-    expect(screen.queryByTestId('mockYamlEditor')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockConfigurationTab')).toBeVisible();
+    // The YAML editor stays mounted but hidden — never shown beside the (unbound) configuration.
+    expect(screen.getByTestId('mockYamlEditor')).not.toBeVisible();
   });
 
   it('renders resizable layout on the Fields tab', () => {

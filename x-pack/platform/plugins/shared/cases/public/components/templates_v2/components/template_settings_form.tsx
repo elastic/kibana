@@ -50,8 +50,8 @@ export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
 
   const setSetting = useCallback(
     (key: keyof TemplateSettings, value: boolean) => {
-      // Keep both settings keys explicit in YAML so "off" values are visible as `false`
-      // instead of disappearing when a key becomes undefined.
+      // Keep both settings keys explicit in the panel state so an "off" toggle is a real `false`
+      // (and is written as such into the definition merged on save) rather than a dropped key.
       onSettingsChange({
         syncAlerts: settings?.syncAlerts ?? false,
         extractObservables: settings?.extractObservables ?? false,

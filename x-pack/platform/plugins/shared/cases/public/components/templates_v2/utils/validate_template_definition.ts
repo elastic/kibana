@@ -13,6 +13,7 @@ import {
   INVALID_YAML_DEFINITION,
   TEMPLATE_MISSING_REQUIRED_KEYS,
 } from '../translations';
+import { REQUIRED_TEMPLATE_ROOT_KEYS } from '../constants';
 import { normalizeTemplateCaseDefaultsForValidation } from './normalize_template_case_defaults';
 
 export type TemplateDefinitionValidationResult =
@@ -20,44 +21,15 @@ export type TemplateDefinitionValidationResult =
   | { success: false; message: string };
 
 /**
- * Case-default keys that must always be present in the YAML (values may be empty). Keeping them
- * visible means a template author never mistakes an absent key for "this field won't be on the
- * case". `name` is validated as required-with-value by the schema; the rest may be empty.
- *
- * `settings` and `connector` are intentionally NOT required here: they are renderer-managed (the
- * connector fetches its data asynchronously and must never be able to fail the render panel), so
- * their presence/shape is not allowed to gate the YAML preview. `fields` stays required.
- */
-const REQUIRED_CASE_DEFAULT_KEYS = [
-  'name',
-  'description',
-  'severity',
-  'category',
-  'tags',
-  'assignees',
-] as const;
-
-/**
  * Editor-only completeness check: the YAML must always contain the case-default keys plus the
- * `fields` block, so the YAML stays a complete representation of the render panel's YAML-backed
- * sections. Removing any of them surfaces here as an error. This is intentionally NOT enforced by
- * the runtime schema, which stays lenient for back-compat.
+ * `fields` block (the shared REQUIRED_TEMPLATE_ROOT_KEYS), so the YAML stays a complete
+ * representation of the render panel's YAML-backed sections. Removing any of them surfaces here as
+ * an error. This is intentionally NOT enforced by the runtime schema, which stays lenient for
+ * back-compat. `settings`/`connector` are excluded — they are panel-owned and must never gate the
+ * preview (see REQUIRED_TEMPLATE_ROOT_KEYS).
  */
-export const getMissingRequiredKeys = (definition: Record<string, unknown>): string[] => {
-  const missing: string[] = [];
-
-  for (const key of REQUIRED_CASE_DEFAULT_KEYS) {
-    if (!(key in definition)) {
-      missing.push(key);
-    }
-  }
-
-  if (!('fields' in definition)) {
-    missing.push('fields');
-  }
-
-  return missing;
-};
+export const getMissingRequiredKeys = (definition: Record<string, unknown>): string[] =>
+  REQUIRED_TEMPLATE_ROOT_KEYS.filter((key) => !(key in definition));
 
 export const validateTemplateDefinitionYaml = (
   definition: string

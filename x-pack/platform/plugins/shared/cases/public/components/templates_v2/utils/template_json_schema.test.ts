@@ -257,12 +257,15 @@ describe('getTemplateDefinitionJsonSchema', () => {
   });
 
   describe('connector and settings', () => {
-    it('includes connector and settings in the editor schema', () => {
+    it('omits connector and settings from the editor schema (panel-owned, not in the buffer)', () => {
+      // They are edited on the Configuration tab and merged into the definition on save, so the
+      // editor must not suggest them — otherwise a value typed in the Fields YAML would be silently
+      // overwritten by the panel state on save.
       const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
       const props = schema.properties as JsonSchemaObject;
 
-      expect(props.connector).toBeDefined();
-      expect(props.settings).toBeDefined();
+      expect(props.connector).toBeUndefined();
+      expect(props.settings).toBeUndefined();
     });
 
     it('exposes the editable case-default and fields properties but no template_* identity keys', () => {

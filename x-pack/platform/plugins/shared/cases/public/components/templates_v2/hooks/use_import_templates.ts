@@ -36,18 +36,16 @@ const buildDefinitionYaml = (template: ParsedTemplateEntry): string => {
     if (template.caseDefaults.description) {
       definition.description = template.caseDefaults.description;
     }
-    if (template.caseDefaults.tags && template.caseDefaults.tags.length > 0) {
-      definition.tags = template.caseDefaults.tags;
-    }
     if (template.caseDefaults.severity) {
       definition.severity = template.caseDefaults.severity;
     }
     if (template.caseDefaults.category !== undefined) {
       definition.category = template.caseDefaults.category;
     }
-    if (template.caseDefaults.assignees !== undefined) {
-      definition.assignees = template.caseDefaults.assignees;
-    }
+    // Case defaults are forced-present: always write `tags` and `assignees` (empty arrays when
+    // unset) so import/export round-trip them identically instead of dropping empty values.
+    definition.tags = template.caseDefaults.tags ?? [];
+    definition.assignees = template.caseDefaults.assignees ?? [];
   }
   if (template.connector) {
     definition.connector = template.connector;

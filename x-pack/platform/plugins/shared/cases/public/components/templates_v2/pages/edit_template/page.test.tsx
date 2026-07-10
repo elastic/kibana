@@ -156,4 +156,47 @@ describe('EditTemplatePage', () => {
       });
     });
   });
+
+  it('sends undefined description/tags on a no-op save of a template that never had them', async () => {
+    mockUseTemplateViewParams.mockReturnValue({ templateId: 'template-123' });
+    mockUseGetTemplate.mockReturnValue({
+      data: {
+        templateId: 'template-123',
+        name: 'Test Template',
+        // No description / tags on the stored template.
+        owner: 'cases',
+        definition: { name: 'Test Template', fields: [] },
+        definitionString: 'name: Test Template\nfields: []',
+        templateVersion: 2,
+        deletedAt: null,
+        isLatest: true,
+        latestVersion: 2,
+        isEnabled: true,
+      },
+      isLoading: false,
+    });
+
+    render(<EditTemplatePage />);
+
+    // The metadata form folds undefined identity fields to '' / []. A no-op Save must NOT coerce
+    // those into a persisted '' / [] via the PATCH `?? existing` fallback.
+    await capturedTemplateFormLayoutProps.onCreate?.(
+      { definition: 'name: Test Template\nfields: []' },
+      { name: 'Test Template', description: '', tags: [] },
+      true
+    );
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        templateId: 'template-123',
+        template: {
+          name: 'Test Template',
+          description: undefined,
+          tags: undefined,
+          definition: 'name: Test Template\nfields: []',
+          isEnabled: true,
+        },
+      });
+    });
+  });
 });

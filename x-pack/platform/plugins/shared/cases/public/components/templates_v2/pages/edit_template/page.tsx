@@ -59,15 +59,25 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
         templateId,
         template: {
           name: metadata.name,
-          description: metadata.description,
-          tags: metadata.tags,
+          // Send `undefined` (not '' / []) ONLY when the field is empty AND was empty on the stored
+          // template — so a no-op Save on a template with no description/tags doesn't coerce them
+          // into a persisted '' / [] via the PATCH `?? existing` fallback. When the user clears a
+          // value that DID exist, send '' / [] so the clear is actually persisted.
+          description:
+            metadata.description === '' && !template?.description
+              ? undefined
+              : metadata.description,
+          tags:
+            metadata.tags.length === 0 && !(template?.tags && template.tags.length > 0)
+              ? undefined
+              : metadata.tags,
           definition: data.definition,
           isEnabled,
         },
       });
       navigateToCasesTemplates();
     },
-    [mutateAsync, navigateToCasesTemplates, templateId]
+    [mutateAsync, navigateToCasesTemplates, templateId, template?.description, template?.tags]
   );
 
   if (!template) {
