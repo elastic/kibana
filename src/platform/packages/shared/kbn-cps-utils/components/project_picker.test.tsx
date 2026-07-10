@@ -261,4 +261,25 @@ describe('ProjectPickerContent', () => {
     expect(screen.getByText('Origin CPSProject')).toBeInTheDocument();
     expect(screen.getByText('Linked CPSProject 1')).toBeInTheDocument();
   });
+
+  it('can render a linked-only project list', async () => {
+    await act(async () => {
+      render(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <ProjectPickerContent
+              projects={{
+                ...mockProjects,
+                originProject: null,
+              }}
+              onProjectRoutingChange={jest.fn()}
+              showProjectRoutingControls={false}
+            />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+    });
+
+    expect(screen.getByText('Linked CPSProject 1')).toBeInTheDocument();
+  });
 });

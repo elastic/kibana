@@ -59,11 +59,11 @@ export const ProjectPickerContent = ({
   const styles = useMemoCss(projectPickerContentStyles);
   const { originProject, linkedProjects, error, isLoading } = projects;
 
-  if (!originProject) {
+  if (!originProject && linkedProjects.length === 0) {
     return null;
   }
 
-  const projectsList = [originProject, ...linkedProjects];
+  const projectsList = originProject ? [originProject, ...linkedProjects] : linkedProjects;
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column" responsive={false} css={styles.container}>
@@ -118,7 +118,7 @@ export const ProjectPickerContent = ({
                 key={project._id}
                 project={project}
                 index={index}
-                isOriginProject={project._id === originProject._id}
+                isOriginProject={project._id === originProject?._id}
               />
             ))
           )}
