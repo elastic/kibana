@@ -73,13 +73,6 @@ export interface KibanaAsStreamOptions {
   retryOn401?: boolean;
 }
 
-/**
- * Extended `asStream` type accepted by {@link KibanaTransport}.
- * - `true` / `false`: standard `@elastic/transport` behavior (no Kibana-level 401 retry for streams).
- * - `KibanaAsStreamOptions`: enables streaming **and** opt-in Kibana behaviors.
- */
-export type KibanaAsStream = boolean | KibanaAsStreamOptions;
-
 const noop = () => undefined;
 
 const isStreamBody = (body: unknown): body is NodeJS.ReadableStream => {
