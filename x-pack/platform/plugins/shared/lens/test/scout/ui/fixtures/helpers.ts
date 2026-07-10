@@ -41,6 +41,22 @@ export async function cancelLensInlineEditorAndWaitClosed({ lens }: Pick<PageObj
   await expect(lens.getInlineEditor()).toBeHidden();
 }
 
+export async function openNewEsqlDashboardWithInlineEditor(
+  { dashboard, lens }: DashboardAndLens,
+  page: ScoutPage
+) {
+  // navigate to dashboard and click Try ES|QL
+  await dashboard.goto();
+  await expect(page.testSubj.locator('noDataViewsPrompt')).toBeVisible();
+  await page.testSubj.click('tryESQLLink');
+  await dashboard.waitForRenderComplete();
+
+  // open inline editor
+  await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+  await expect(lens.getInlineEditor()).toBeVisible();
+  await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+}
+
 export async function convertToEsqlViaModal({
   pageObjects,
   page,

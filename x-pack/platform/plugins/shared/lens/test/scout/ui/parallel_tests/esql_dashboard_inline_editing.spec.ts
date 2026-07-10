@@ -8,7 +8,11 @@
 import { spaceTest, tags, KibanaCodeEditorWrapper, EuiComboBoxWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { ScoutPage } from '@kbn/scout';
-import { applyLensInlineEditorAndWaitClosed, testData } from '../fixtures';
+import {
+  applyLensInlineEditorAndWaitClosed,
+  openNewEsqlDashboardWithInlineEditor,
+  testData,
+} from '../fixtures';
 
 // Maximum number of initial ESQL columns loaded
 // This is a temporary limit to avoid overwhelming the UI with too many columns
@@ -47,18 +51,8 @@ spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.c
       const { dashboard, lens } = pageObjects;
       const codeEditor = new KibanaCodeEditorWrapper(page);
 
-      await spaceTest.step('navigate to dashboard and click Try ES|QL', async () => {
-        await dashboard.goto();
-        await expect(page.testSubj.locator('noDataViewsPrompt')).toBeVisible();
-        await page.testSubj.click('tryESQLLink');
-        await dashboard.waitForRenderComplete();
-      });
-
-      await spaceTest.step('open inline editor and run query', async () => {
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-        await expect(lens.getInlineEditor()).toBeVisible();
-        // Verify ES|QL editor IS visible in Dashboard inline edit mode
-        await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+      await spaceTest.step('open new ES|QL dashboard with inline editor', async () => {
+        await openNewEsqlDashboardWithInlineEditor({ dashboard, lens }, page);
 
         await setQueryAndRun(page, codeEditor, 'from logstash-*');
         await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Table');
@@ -107,18 +101,8 @@ spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.c
       const { dashboard, lens } = pageObjects;
       const codeEditor = new KibanaCodeEditorWrapper(page);
 
-      await spaceTest.step('navigate to dashboard and click Try ES|QL', async () => {
-        await dashboard.goto();
-        await expect(page.testSubj.locator('noDataViewsPrompt')).toBeVisible();
-        await page.testSubj.click('tryESQLLink');
-        await dashboard.waitForRenderComplete();
-      });
-
       await spaceTest.step('create a dashboard with an ES|QL table panel', async () => {
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-        await expect(lens.getInlineEditor()).toBeVisible();
-        // Verify ES|QL editor IS visible in Dashboard inline edit mode
-        await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+        await openNewEsqlDashboardWithInlineEditor({ dashboard, lens }, page);
 
         await setQueryAndRun(page, codeEditor, 'from logstash-*');
         await dashboard.waitForRenderComplete();
@@ -147,20 +131,9 @@ spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.c
       const { dashboard, lens } = pageObjects;
       const codeEditor = new KibanaCodeEditorWrapper(page);
 
-      await spaceTest.step('navigate to dashboard and click Try ES|QL', async () => {
-        await dashboard.goto();
-        await expect(page.testSubj.locator('noDataViewsPrompt')).toBeVisible();
-        await page.testSubj.click('tryESQLLink');
-        await dashboard.waitForRenderComplete();
-      });
-
       await spaceTest.step('create a line chart panel with a red Y-axis color', async () => {
-        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-        await expect(lens.getInlineEditor()).toBeVisible();
-        // Verify ES|QL editor IS visible in Dashboard inline edit mode
-        await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+        await openNewEsqlDashboardWithInlineEditor({ dashboard, lens }, page);
 
-        // await openNewDashboardWithEsqlEditor(pageObjects, page);
         await setQueryAndRun(
           page,
           codeEditor,
