@@ -78,7 +78,10 @@ describe('FullScreenWaterfall', () => {
         ...mockUnifiedDocViewerServices.apmUIComponents,
         TraceWaterfallWithFetching: (props: FullTraceWaterfallProps) => {
           capturedWaterfallProps = props;
-          return mockUnifiedDocViewerServices.apmUIComponents.TraceWaterfallWithFetching(props);
+          return React.createElement(
+            mockUnifiedDocViewerServices.apmUIComponents.TraceWaterfallWithFetching,
+            props
+          );
         },
       },
     } as unknown as UnifiedDocViewerServices);
