@@ -268,7 +268,8 @@ describe('useScheduleView', () => {
     });
   });
 
-  describe('refetching schedules after flyout closes', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/277278
+  describe.skip('refetching schedules after flyout closes', () => {
     const TestScheduleView: React.FC = () => {
       const { scheduleView } = useScheduleView();
 
