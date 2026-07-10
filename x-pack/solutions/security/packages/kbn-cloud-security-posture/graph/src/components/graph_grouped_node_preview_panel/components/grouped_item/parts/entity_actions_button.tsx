@@ -34,7 +34,6 @@ import {
   emitPinnedEuidToggle,
 } from '../../../../filters/filter_store';
 import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../../../common/constants';
-import { useOpenEntityPreviewPanel } from '../../../hooks/use_open_entity_preview_panel';
 
 const actionsButtonAriaLabel = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.actionsButton.ariaLabel',
@@ -55,24 +54,30 @@ export interface EntityActionsButtonProps {
    * relationships are always shown and cannot be hidden from the grouped panel.
    */
   isInitialEntity?: boolean;
+  /** Invoked to open the entity details preview for the clicked item. */
+  onShowEntity: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 }
 
 /**
  * Actions button for entity items in the grouped node preview panel.
  * Shows a popover with filter toggle actions and entity details option.
  * Uses FilterStore (scoped by scopeId) for filter state management.
- * Uses useExpandableFlyoutApi to open entity details preview panel.
+ * Delegates opening the entity details preview to the consumer via `onShowEntity`.
  */
 export const EntityActionsButton = ({
   item,
   scopeId,
   isInitialEntity = false,
+  onShowEntity,
 }: EntityActionsButtonProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
 
-  const openEntityPreviewPanel = useOpenEntityPreviewPanel();
   const sourceFields = (item.entity.sourceFields ?? {}) as Record<string, string | string[]>;
   const engineType = item.entity.engine_type;
 
@@ -151,7 +156,8 @@ export const EntityActionsButton = ({
   const items = getEntityExpandItems({
     nodeId: item.id,
     entityFilterActions,
-    onShowEntityDetails: () => openEntityPreviewPanel(item.id, scopeId, item.entity),
+    onShowEntityDetails: () =>
+      onShowEntity({ engineType, entityId: item.id, entityName: item.entity.name }),
     onClose: closePopover,
     shouldRender: {
       showEntityRelationships: true,

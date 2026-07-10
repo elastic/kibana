@@ -28,6 +28,7 @@ import type {
   WorkflowStatsDto,
   WorkflowStepExecutionListDto,
 } from '@kbn/workflows';
+import type { TemplateBody } from '@kbn/workflows-library';
 
 import type { z } from '@kbn/zod/v4';
 import type {
@@ -36,8 +37,11 @@ import type {
   ExportWorkflowsParams,
   ExportWorkflowsResponse,
   GetAggsParams,
+  GetCatalogParams,
+  GetCatalogResponse,
   GetExecutionLogsParams,
   GetExecutionParams,
+  GetLibraryHealthResponse,
   GetSchemaParams,
   GetWorkflowExecutionsParams,
   GetWorkflowStepExecutionsParams,
@@ -302,6 +306,29 @@ export class WorkflowApi {
   ): Promise<SearchTriggerEventLogResult> {
     return this.http.post(`${INTERNAL_BASE}/trigger_events/_search`, {
       body: JSON.stringify(params),
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Workflow Template Library
+  // ---------------------------------------------------------------------------
+
+  async getCatalog(params: GetCatalogParams = {}): Promise<GetCatalogResponse> {
+    return this.http.get(`${INTERNAL_BASE}/library/templates`, {
+      query: params as HttpFetchQuery,
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
+  async getTemplate(slug: string): Promise<TemplateBody> {
+    return this.http.get(`${INTERNAL_BASE}/library/templates/${encodeURIComponent(slug)}`, {
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
+  async getLibraryHealth(): Promise<GetLibraryHealthResponse> {
+    return this.http.get(`${INTERNAL_BASE}/library/health`, {
       version: INTERNAL_API_VERSION,
     });
   }

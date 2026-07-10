@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, transparentize, useEuiTheme } from '@elastic/eui';
 import type { Node, NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
-import React, { memo, useState } from 'react';
+import React, { memo } from 'react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
@@ -22,32 +22,12 @@ interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly stepExecution?: WorkflowStepExecutionDto;
 }
 
-// Figma "foreach" container (node 10791:11140).
-const FIGMA_FOREACH_BORDER = '#bfdbff';
-const FIGMA_FOREACH_HEADER_BG = '#f1f6ff';
-const FIGMA_FOREACH_ICON_COLOR = '#61a2ff';
-const FIGMA_FOREACH_LABEL_COLOR = '#111c2c';
-
-// Figma "foreach" executed variant (node 11130:5900).
-const FIGMA_FOREACH_EXECUTED_BORDER = '#a2e8e6';
-const FIGMA_FOREACH_EXECUTED_HEADER_BG = '#e7f9f9';
-const FIGMA_FOREACH_EXECUTED_ICON_COLOR = '#16c5c0';
-
-// Figma "foreach" failed variant — reusing the danger palette already used by
-// status icons on regular step rows so the two visuals read as one family.
-const FIGMA_FOREACH_FAILED_BORDER = '#ffb3b3';
-const FIGMA_FOREACH_FAILED_HEADER_BG = '#ffe5e5';
-const FIGMA_FOREACH_FAILED_ICON_COLOR = '#bd271e';
-
-// Figma Shadow/X-small composite — matches the hover variant (node 11130:5821).
-const FOREACH_HOVER_SHADOW =
-  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)';
-
 function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNodeData>>) {
   const { label, stepExecution } = node.data;
+  const { euiTheme } = useEuiTheme();
+  const { colors } = euiTheme;
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
-  const [isHovered, setIsHovered] = useState(false);
 
   const execStatus = stepExecution?.status;
   const isSuccess = execStatus === ExecutionStatus.COMPLETED;
@@ -56,36 +36,32 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
     execStatus === ExecutionStatus.TIMED_OUT ||
     execStatus === ExecutionStatus.CANCELLED;
 
+  // Match the regular step card (workflow_graph_node.tsx): the same Borealis
+  // tokens for the tinted border + header pane, `primary` icon, and flat look.
   const borderColor = isSuccess
-    ? FIGMA_FOREACH_EXECUTED_BORDER
+    ? colors.success
     : isFailed
-    ? FIGMA_FOREACH_FAILED_BORDER
-    : FIGMA_FOREACH_BORDER;
+    ? colors.danger
+    : colors.backgroundLightPrimary;
   const headerBg = isSuccess
-    ? FIGMA_FOREACH_EXECUTED_HEADER_BG
+    ? colors.backgroundBaseSuccess
     : isFailed
-    ? FIGMA_FOREACH_FAILED_HEADER_BG
-    : FIGMA_FOREACH_HEADER_BG;
-  const iconColor = isSuccess
-    ? FIGMA_FOREACH_EXECUTED_ICON_COLOR
-    : isFailed
-    ? FIGMA_FOREACH_FAILED_ICON_COLOR
-    : FIGMA_FOREACH_ICON_COLOR;
+    ? colors.backgroundBaseDanger
+    : colors.backgroundLightPrimary;
+  const iconColor = isSuccess ? colors.success : isFailed ? colors.danger : colors.primary;
 
   return (
     <>
       <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />
       <div
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
         css={{
           width: '100%',
           height: '100%',
-          // ~10% white so the canvas's dot pattern shows through and the
-          // container body reads as a soft outline rather than a solid panel.
-          background: 'rgba(255, 255, 255, 0.1)',
+          // Semi-transparent white body (50%) so the canvas dot pattern shows
+          // through softly; token-based so it adapts to dark mode.
+          background: transparentize(colors.backgroundBasePlain, 0.5),
           border: `1px solid ${borderColor}`,
-          borderRadius: 8,
+          borderRadius: 10,
           position: 'relative',
           transition: 'border-color 120ms ease',
         }}
@@ -100,19 +76,15 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
             gap: 16,
             padding: '8px 16px',
             background: headerBg,
-            borderTopLeftRadius: 8,
-            borderTopRightRadius: 8,
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
             borderBottom: `1px solid ${borderColor}`,
-            fontFamily:
-              '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            fontFamily: euiTheme.font.family,
             fontSize: 12,
             fontWeight: 500,
-            color: FIGMA_FOREACH_LABEL_COLOR,
+            color: colors.textHeading,
             lineHeight: '24px',
-            // Hover lifts the header chip; Figma applies the shadow to the
-            // header strip only, not the entire container body.
-            boxShadow: isHovered ? FOREACH_HOVER_SHADOW : 'none',
-            transition: 'box-shadow 120ms ease, background 120ms ease',
+            transition: 'background 120ms ease',
           }}
         >
           <EuiIcon type="refresh" size="m" color={iconColor} aria-hidden />

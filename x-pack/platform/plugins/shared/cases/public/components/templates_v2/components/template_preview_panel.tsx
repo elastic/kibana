@@ -79,11 +79,14 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
       return null;
     }
     return {
-      name: template.name,
-      description: template.description,
-      tags: template.tags ?? undefined,
-      severity: template.severity as 'low' | 'medium' | 'high' | 'critical' | undefined,
-      category: template.category ?? undefined,
+      // Case-default title, falling back to the template name for this preview object (the field
+      // renderer below only reads `fields`, but `name` is a required case default).
+      name: template.caseDefaults?.title ?? template.name,
+      description: template.caseDefaults?.description,
+      tags: template.caseDefaults?.tags,
+      severity: template.caseDefaults?.severity,
+      category: template.caseDefaults?.category,
+      assignees: template.caseDefaults?.assignees,
       fields: template.definition.fields,
     };
   }, [template]);

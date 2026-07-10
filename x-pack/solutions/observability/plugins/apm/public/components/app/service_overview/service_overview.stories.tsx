@@ -37,6 +37,16 @@ const stories: Meta<{}> = {
       mockApmApiCallResponse(`GET /internal/apm/services/{serviceName}/dependencies`, () => ({
         serviceDependencies: [],
       }));
+      mockApmApiCallResponse(`GET /internal/apm/service-map`, () => ({
+        spans: [],
+        servicesData: [],
+        anomalies: { mlJobIds: [], serviceAnomalies: [] },
+        tracesCount: 0,
+      }));
+      mockApmApiCallResponse(`POST /internal/apm/service-map/service_badges`, () => ({
+        alerts: [],
+        slos: [],
+      }));
 
       return <StoryComponent />;
     },

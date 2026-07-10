@@ -15,7 +15,7 @@ import type { DashboardState } from '../../common';
 export function initializeApproximationManager(initialState: DashboardState) {
   const isApproximate$ = new BehaviorSubject<boolean>(initialState.esql_approximation ?? false);
 
-  function setIsApproximate(value: boolean) {
+  function setEsqlApproximation(value: boolean) {
     if (value !== isApproximate$.value) {
       isApproximate$.next(value);
     }
@@ -37,7 +37,7 @@ export function initializeApproximationManager(initialState: DashboardState) {
   return {
     api: {
       isApproximate$,
-      setIsApproximate,
+      setEsqlApproximation,
     },
     internalApi: {
       anyStateChange$,
@@ -59,7 +59,7 @@ export function initializeApproximationManager(initialState: DashboardState) {
       comparators,
       getState,
       reset: (lastSavedState: DashboardState) => {
-        setIsApproximate(lastSavedState.esql_approximation ?? false);
+        setEsqlApproximation(lastSavedState.esql_approximation ?? false);
       },
     },
   };
