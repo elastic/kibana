@@ -617,6 +617,15 @@ export async function captureIncidentSnapshot({
   const after = await listUserIndices(esClient);
   const captured = [...after].filter((name) => !before.has(name)).sort();
 
+  // The capture indices now exist with their mappings, so the template's job is
+  // done. Remove it immediately: at priority 500 over `logs-*` it would otherwise
+  // hijack later restore/replay of these indices (forcing plain indices instead of
+  // data streams). A future capture re-creates it in `ensureCaptureIndexTemplate`.
+  await esClient.indices.deleteIndexTemplate(
+    { name: `incident-capture-${config.incident.id}` },
+    { ignore: [404] }
+  );
+
   if (captured.includes(config.unroutedIndex)) {
     log.warning(
       `Some docs did not route to an original name and landed in "${config.unroutedIndex}". ` +
