@@ -60,17 +60,16 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { AttackDiscoveryExecutorOptions } from '@kbn/attack-discovery-schedules-common';
+import type {
+  AttackDiscoveryExecutorOptions,
+  AttackDiscoveryScheduleDataClient,
+} from '@kbn/attack-discovery-schedules-common';
 import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type {
-  AttackDiscoveryExecutorOptions,
-  AttackDiscoveryScheduleDataClient,
-} from '@kbn/attack-discovery-schedules-common';
 import type {
   GetAIAssistantKnowledgeBaseDataClientParams,
   AIAssistantKnowledgeBaseDataClient,
