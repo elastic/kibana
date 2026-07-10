@@ -29,9 +29,8 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
-import { DocumentFlyoutWrapper } from '../../main/document_flyout_wrapper';
-import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { useFlyoutApi } from '../../../use_flyout_api';
+import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { renderEntityDetails } from '../../../entity/shared/render_entity_details';
 
@@ -61,40 +60,17 @@ export const GraphDetails = memo(
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const { openNetworkFlyoutAsChild } = useFlyoutApi();
+    const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
 
     const onShowDocument = useCallback(
       (documentId: string, indexName?: string) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <DocumentFlyoutWrapper
-                documentId={documentId}
-                indexName={indexName}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            historyKey,
-            session: 'inherit',
-          }
-        ),
-      [
-        defaultFlyoutProperties,
-        history,
-        historyKey,
-        onAlertUpdated,
-        overlays,
-        renderCellActions,
-        services,
-        store,
-      ]
+        openDocumentFlyoutFromIndexAsChild({
+          documentId,
+          indexName,
+          renderCellActions,
+          onAlertUpdated,
+        }),
+      [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
 
     const onShowNetwork = useCallback(
