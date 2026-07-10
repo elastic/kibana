@@ -36,5 +36,7 @@
     "@kbn/logging-mocks",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/agent-builder-plugin",
+    "@kbn/rison",
+    "@kbn/core-spaces-common",
   ]
 }
