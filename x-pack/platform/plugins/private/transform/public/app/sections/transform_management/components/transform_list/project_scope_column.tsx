@@ -83,11 +83,17 @@ const CustomProjectScopeLabel = ({ cpsManager, projectRouting }: ProjectScopeCol
     return projectRouting;
   }
 
-  if (error || !originProject) {
+  if (error) {
     return projectRouting;
   }
 
-  return `${linkedProjects.length + 1}/${cpsManager.getTotalProjectCount()}`;
+  const projectCount = (originProject ? 1 : 0) + linkedProjects.length;
+
+  if (projectCount === 0) {
+    return projectRouting;
+  }
+
+  return `${projectCount}/${cpsManager.getTotalProjectCount()}`;
 };
 
 const ProjectScopeLabel = ({ cpsManager, projectRouting }: ProjectScopeColumnProps) => {

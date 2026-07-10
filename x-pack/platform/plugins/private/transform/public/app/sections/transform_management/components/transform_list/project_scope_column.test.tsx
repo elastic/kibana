@@ -111,4 +111,23 @@ describe('ProjectScopeColumn', () => {
 
     expect(fetchProjects).toHaveBeenCalledWith('custom-project-routing');
   });
+
+  it('displays selected project count and opens popover for linked-only project routing', async () => {
+    fetchProjects.mockResolvedValue({
+      origin: null,
+      linkedProjects: [linkedProject],
+    });
+
+    renderProjectScopeColumn(cpsManager, '_alias:linked_local_project');
+
+    const button = await screen.findByTestId('transformListProjectScopeButton');
+    await waitFor(() => {
+      expect(button).toHaveTextContent('1/2');
+    });
+
+    await userEvent.click(button);
+
+    expect(await screen.findByText('Linked project')).toBeInTheDocument();
+    expect(screen.queryByText('_alias:linked_local_project')).not.toBeInTheDocument();
+  });
 });
