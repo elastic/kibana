@@ -76,8 +76,6 @@ describe('useMessageEditor handleCommandSelect', () => {
     const badge = div.querySelector('[data-command-badge]');
     expect(badge).not.toBeNull();
     expect(badge!.textContent).toBe('@connector/workday');
-    // Nothing left over: the full query was consumed, so a fresh
-    // non-breaking space is appended so typing can continue after the badge.
     expect(stripZeroWidthSpaces(div.textContent ?? '')).toBe(`@connector/workday${NBSP}`);
   });
 });

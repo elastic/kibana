@@ -146,8 +146,6 @@ describe('CommandMenuPopover', () => {
         />
       );
 
-      // Hidden visually, but NOT unmounted — see the mount-persistence test
-      // below for why that distinction matters.
       expect(screen.getByTestId('testPopover-content')).not.toBeVisible();
     });
 
@@ -165,9 +163,6 @@ describe('CommandMenuPopover', () => {
     });
 
     it('keeps the menu component mounted while hidden, so it can keep re-evaluating and recover on its own', () => {
-      // This is the fix for the "stuck closed" regression: if the menu
-      // unmounted while hasVisibleContent was false, it would never get a
-      // chance to notice the query changed and report back in.
       const mountSpy = jest.fn();
       const MockMountTrackingMenuComponent = React.forwardRef<
         CommandMenuHandle,
@@ -217,7 +212,6 @@ describe('CommandMenuPopover', () => {
         />
       );
 
-      // Still only mounted once — it was hidden, not unmounted/remounted.
       expect(mountSpy).toHaveBeenCalledTimes(1);
       expect(screen.getByTestId('mockMenu')).not.toBeVisible();
     });

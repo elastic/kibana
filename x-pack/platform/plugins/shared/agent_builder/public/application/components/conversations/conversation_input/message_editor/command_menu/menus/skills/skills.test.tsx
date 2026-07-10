@@ -98,9 +98,6 @@ describe('Skills', () => {
     });
 
     it('keeps reporting content across every word of a multi-word skill name', () => {
-      // The original "gives up after the first space" bug report: a skill
-      // literally named with spaces must keep reporting content as the
-      // query grows to match more of it, not just its first word.
       const useAgentSkillsMock = jest.requireMock(
         '../../../../../../../hooks/skills/use_agent_skills'
       ) as {

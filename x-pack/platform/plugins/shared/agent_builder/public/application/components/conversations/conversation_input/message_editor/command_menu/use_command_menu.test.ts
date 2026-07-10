@@ -119,8 +119,6 @@ describe('useCommandMenuCommand', () => {
       });
       expect(result.current.match.activeCommand?.command.id).toBe('sml');
 
-      // No reportContent() call at all — unlike before, nothing needs to
-      // "confirm this dead" first. The closer "/" just wins on its own.
       mockGetTextBeforeCursor.mockReturnValue('@connector/no_match and more /skill');
       act(() => {
         result.current.checkInputForCommand(mockElement);
@@ -198,8 +196,6 @@ describe('useCommandMenuCommand', () => {
         result.current.checkInputForCommand(mockElement);
       });
 
-      // A late confirmation for the OLD query ("Skill With") arrives after
-      // the user already typed more — it must not affect the current one.
       act(() => {
         result.current.reportContent(true, 'Skill With');
       });
@@ -213,9 +209,6 @@ describe('useCommandMenuCommand', () => {
     });
 
     it('keeps showing choices across every word of a multi-word skill name, as long as each is confirmed', () => {
-      // The original "gives up after the first space" complaint: as long
-      // as the mounted menu keeps confirming matches for the CURRENT
-      // query, visibility should track it continuously, word after word.
       const { result } = renderHook(() => useCommandMenu());
       const steps = ['/Skill', '/Skill With', '/Skill With Spaces'];
       for (const text of steps) {
@@ -232,8 +225,6 @@ describe('useCommandMenuCommand', () => {
     });
 
     it('stays hidden across a whole sentence typed after a mention that never gets confirmed', () => {
-      // The original bug report: "@connector/no-match this is not a match"
-      // must not keep showing "No matching results" once you've moved on.
       const { result } = renderHook(() => useCommandMenu());
       mockGetTextBeforeCursor.mockReturnValue('@connector/no-match');
       act(() => {
@@ -249,9 +240,6 @@ describe('useCommandMenuCommand', () => {
         act(() => {
           result.current.checkInputForCommand(mockElement);
         });
-        // No reportContent() call for any of these — nothing ever confirms
-        // them, so they must all default to hidden, not just carry a stale
-        // "false" forward.
         expect(result.current.match.hasVisibleContent).toBe(false);
       }
     });

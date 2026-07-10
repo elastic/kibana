@@ -207,9 +207,6 @@ describe('Sml', () => {
     });
 
     it('does not claim Space for a partial name with no exact match yet, so it types through normally', () => {
-      // Otherwise every Space keystroke while still narrowing down a search
-      // (or after a typo that never resolves) would be silently swallowed
-      // instead of typed, joining the rest of the sentence into one word.
       const ref = createRef<CommandMenuHandle>();
       renderWithProvider(<Sml ref={ref} query="visualization/Pac" onSelect={jest.fn()} />);
 
@@ -217,9 +214,6 @@ describe('Sml', () => {
     });
 
     it('does not claim Space when there are zero candidates at all — it types through and the mention just ends', () => {
-      // matchCommand ends the mention as soon as its query contains a space
-      // (an SML "type/name" can never contain one), so there's no longer any
-      // need to intercept Space here for the no-match case.
       mockUseSmlAutocompleteReturn = {
         results: [],
         total: 0,

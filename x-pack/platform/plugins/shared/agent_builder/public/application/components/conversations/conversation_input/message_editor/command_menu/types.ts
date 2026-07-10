@@ -22,14 +22,6 @@ export enum CommandId {
 export interface CommandMenuComponentProps {
   readonly query: string;
   readonly onSelect: (selection: CommandBadgeData) => void;
-  /**
-   * Reports whether this menu currently has anything worth showing (loading,
-   * or at least one option) for the given query — lets the popover stay
-   * closed instead of displaying an empty "No matching results" panel while
-   * the user keeps typing past a mention that will never resolve. `forQuery`
-   * lets the caller ignore a stale report that no longer matches the
-   * current query (e.g. it resolved after the user typed more).
-   */
   readonly onContentChange?: (hasContent: boolean, forQuery: string) => void;
 }
 
@@ -80,8 +72,7 @@ export interface ActiveCommand {
 }
 
 /**
- * Result of evaluating the current input text for command matches — purely
- * text-derived, with no notion of whether a menu has anything to show.
+ * Result of evaluating the current input text for command matches
  */
 export interface TextMatch {
   /** Whether a command is currently active */
@@ -91,9 +82,7 @@ export interface TextMatch {
 }
 
 /**
- * `TextMatch` plus whether the active command's menu currently has
- * anything worth showing — combines the text match with the mounted menu's
- * own live content confirmation.
+ * Combines the text match with the mounted menu's own live content confirmation.
  */
 export interface CommandMatchResult extends TextMatch {
   readonly hasVisibleContent: boolean;

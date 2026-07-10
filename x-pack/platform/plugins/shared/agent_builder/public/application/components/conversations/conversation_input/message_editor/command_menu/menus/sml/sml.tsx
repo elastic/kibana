@@ -53,9 +53,8 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
     const { results, isLoading } = useSmlAutocomplete(query, { constraints });
     const { type, title } = useMemo(() => getSmlMenuHighlightSearchStrings(query), [query]);
     const canSelectOnSpace = query.includes('/') && title.length > 0;
-    // Only commit on Space once there's a confirmed exact name match — not
-    // just "some results exist" or "more might arrive" — so Space is free to
-    // be typed normally the rest of the time instead of being swallowed.
+
+    // Only commit on Space once there's a confirmed exact name match
     const { results: orderedResults, hasExactMatch } = useMemo(
       () =>
         canSelectOnSpace
@@ -65,9 +64,6 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
     );
     const spaceSelection = hasExactMatch;
 
-    // Lets the popover stay closed once it's clear there's nothing to show,
-    // instead of leaving a "No matching results" panel open indefinitely as
-    // the user keeps typing past an unresolved mention.
     const hasVisibleContent = isLoading || orderedResults.length > 0;
     useEffect(() => {
       onContentChange?.(hasVisibleContent, query);

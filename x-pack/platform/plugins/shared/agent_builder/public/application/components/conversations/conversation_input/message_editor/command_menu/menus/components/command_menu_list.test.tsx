@@ -142,10 +142,6 @@ describe('CommandMenuList', () => {
     });
 
     it('resets the highlight when options reorder, even at the same length', () => {
-      // Without this, navigating to index 1 and then having a same-length
-      // reorder land underneath it (e.g. an exact match moving to the
-      // front) would silently select whatever is now at index 1 instead of
-      // the item the user actually navigated to.
       const ref = createRef<CommandMenuHandle>();
       const onSelect = jest.fn();
       const { rerender } = renderWithProvider(

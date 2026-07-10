@@ -92,6 +92,7 @@ describe('connectorSmlType', () => {
             type: 'connector',
             title: 'My MCP Connector',
             content: 'My MCP Connector\nMCP\nModel Context Protocol connector',
+            discovery_labels: [{ kind: 'shortcut', value: 'connector/My MCP Connector' }],
           },
         ],
       });
@@ -189,6 +190,7 @@ describe('connectorSmlType', () => {
         type: 'connector',
         title: 'Basic Connector',
         content: 'Basic Connector\n.unknown',
+        discovery_labels: [{ kind: 'shortcut', value: 'connector/Basic Connector' }],
       });
     });
   });

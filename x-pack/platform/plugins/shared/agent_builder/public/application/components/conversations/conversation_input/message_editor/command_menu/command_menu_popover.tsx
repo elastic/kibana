@@ -38,6 +38,10 @@ const anchorStyles = css`
   height: 0;
 `;
 
+const hiddenContentStyles = css`
+  display: none;
+`;
+
 export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
   commandMatch,
   anchorPosition,
@@ -48,13 +52,7 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
 }) => {
   const { activeCommand, isActive, hasVisibleContent } = commandMatch;
 
-  // Keep the menu component mounted whenever there's an active, positioned
-  // mention — regardless of whether it currently has anything to show. It
-  // needs to stay alive to keep re-evaluating as the query changes; if it
-  // unmounted while hidden, it could never report back in to reopen.
   const isMounted = isActive && activeCommand !== null && anchorPosition !== null;
-  // What's actually visible to the user — hides the panel via CSS (not by
-  // unmounting) once the mounted menu confirms there's nothing to show.
   const isOpen = isMounted && hasVisibleContent;
   let announcementText = '';
   let panelAriaLabel = '';
@@ -98,7 +96,7 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
         {activeCommand && (
           <div
             data-test-subj={`${dataTestSubj}-content`}
-            style={hasVisibleContent ? undefined : { display: 'none' }}
+            css={hasVisibleContent ? undefined : hiddenContentStyles}
           >
             <activeCommand.command.menuComponent
               ref={commandMenuRef}
