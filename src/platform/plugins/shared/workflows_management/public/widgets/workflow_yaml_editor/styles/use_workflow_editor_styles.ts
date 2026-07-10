@@ -214,13 +214,6 @@ const editorStyleMap = {
     }px)`, // twice decoration inset (outside and inside); no scrollbar offset since scrollbar is hidden
   }),
 
-  agentBuilderSectionCss: (euiThemeContext: UseEuiTheme) =>
-    css({
-      position: 'absolute',
-      top: euiThemeContext.euiTheme.size.xxs,
-      right: euiThemeContext.euiTheme.size.m,
-      zIndex: 10,
-    }),
   editorAreaWrapper: css({
     flex: '1 1 0',
     minHeight: 0,

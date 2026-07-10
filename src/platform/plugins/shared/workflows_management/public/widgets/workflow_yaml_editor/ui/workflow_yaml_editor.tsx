@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import throttle from 'lodash/throttle';
@@ -17,7 +17,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import type YAML from 'yaml';
 import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { isTriggerType, WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsMonacoTheme, WORKFLOW_MONACO_LAYOUT_OPTIONS } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
@@ -280,9 +279,6 @@ export const WorkflowYAMLEditor = ({
 
   useWorkflowsMonacoTheme();
   useDynamicTypeIcons(connectorsData);
-
-  // Only show debug features in development
-  const isDevelopment = process.env.NODE_ENV !== 'production';
 
   // Lifecycle
   const [isEditorMounted, setIsEditorMounted] = useState(false);
@@ -805,28 +801,6 @@ export const WorkflowYAMLEditor = ({
     };
   }, []);
 
-  // Debug
-  const downloadSchema = useCallback(() => {
-    try {
-      const blob = new Blob([JSON.stringify(workflowJsonSchemaStrict, null, 2)], {
-        type: 'application/json',
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'workflow-schema.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      // to download schema:', error);
-      notifications?.toasts.addError(error as Error, {
-        title: 'Failed to download schema',
-      });
-    }
-  }, [workflowJsonSchemaStrict, notifications]);
-
   const extraActions = useMemo<ExtraAction[]>(
     () => [
       {
@@ -903,16 +877,6 @@ export const WorkflowYAMLEditor = ({
           <StepActions onStepRun={onStepRun} />
         </div>
       )}
-      {(isAgentBuilderAvailable || isDevelopment) && !isReadOnlyYaml ? (
-        <div css={styles.agentBuilderSectionCss} style={isActive ? undefined : { display: 'none' }}>
-          <WorkflowYamlEditorAssistActions
-            workflowJsonSchema={
-              (workflowJsonSchemaStrict ?? null) as SchemasSettings['schema'] | null
-            }
-            onDownloadSchema={downloadSchema}
-          />
-        </div>
-      ) : null}
       <div css={styles.editorAreaWrapper}>
         {/* Step minimap — experimental; hidden with the editor body in graph view. */}
         {isStepMinimapEnabled && isActive ? (
@@ -961,38 +925,3 @@ export const WorkflowYAMLEditor = ({
     </EuiFlexGroup>
   );
 };
-
-const WorkflowYamlEditorAssistActions = React.memo(function WorkflowYamlEditorAssistActions({
-  workflowJsonSchema,
-  onDownloadSchema,
-}: {
-  workflowJsonSchema: SchemasSettings['schema'] | null;
-  onDownloadSchema: () => void;
-}) {
-  const styles = useWorkflowEditorStyles();
-  return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          css={styles.downloadSchemaButton}
-          iconType={workflowJsonSchema === null ? 'warning' : 'download'}
-          size="xs"
-          aria-label="Download JSON schema for debugging"
-          onClick={onDownloadSchema}
-          tabIndex={0}
-          disabled={workflowJsonSchema === null}
-          onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.currentTarget.click();
-            }
-          }}
-        >
-          <FormattedMessage
-            id="workflows.yamlEditor.downloadSchemaButtonLabel"
-            defaultMessage="JSON Schema"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
