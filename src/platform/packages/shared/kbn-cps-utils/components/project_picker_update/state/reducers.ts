@@ -7,24 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CPSProject } from '../../../types';
+
 export interface ProjectPickerState {
   selectedProjects: string[];
-  availableProjects: string[];
+  availableProjects: Map<CPSProject['_id'], CPSProject>;
+  filterExpression: string[];
 }
 
 export function createStoreReducers() {
   return {
+    /**
+     * Includes the provided project ids in the selected projects list.
+     */
     setSelectedProjects: (state: ProjectPickerState, payload: { projects: string[] }) => ({
       ...state,
-      selectedProjects: payload.projects,
+      selectedProjects: state.selectedProjects.concat(payload.projects),
     }),
-    setAvailableProjects: (state: ProjectPickerState, payload: { projects: string[] }) => ({
+    /**
+     * Excludes the provided project ids from the selected projects list.
+     */
+    excludeSelectedProjects: (state: ProjectPickerState, payload: { projects: string[] }) => ({
       ...state,
-      availableProjects: payload.projects,
+      selectedProjects: state.selectedProjects.filter((p) => !payload.projects.includes(p)),
+    }),
+    /**
+     * Sets the available projects map.
+     */
+    setAvailableProjects: (state: ProjectPickerState, payload: { projects: CPSProject[] }) => ({
+      ...state,
+      availableProjects: new Map(payload.projects.map((project) => [project._id, project])),
     }),
     revertToSpaceDefaults: (state: ProjectPickerState) => ({
       ...state,
-      selectedProjects: state.availableProjects,
+      selectedProjects: Array.from(state.availableProjects.keys()),
     }),
     clearProjectFilters: (state: ProjectPickerState) => ({
       ...state,
@@ -32,7 +48,15 @@ export function createStoreReducers() {
     }),
     includeAllVisibleProjects: (state: ProjectPickerState) => ({
       ...state,
-      selectedProjects: state.availableProjects,
+      selectedProjects: Array.from(state.availableProjects.keys()),
+    }),
+    excludeAllVisibleProjects: (state: ProjectPickerState) => ({
+      ...state,
+      selectedProjects: state.selectedProjects.filter((p) => !state.availableProjects.has(p)),
+    }),
+    setFilterExpression: (state: ProjectPickerState, payload: { filterExpression: string }) => ({
+      ...state,
+      filterExpression: payload.filterExpression,
     }),
   } as const;
 }

@@ -11,17 +11,19 @@ import React, { type ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { faker } from '@faker-js/faker';
 import { ProjectPickerList } from './list';
-import { ProjectPickerProvider } from '../../state';
+import { ProjectPickerProvider, type ProjectPickerProviderProps } from '../../state';
 
 export default {
   title: 'Project Picker/Blocks/List',
   component: ProjectPickerList,
 } satisfies Meta<typeof ProjectPickerList>;
 
-export const ProjectPickerListItemStory: StoryObj<ComponentProps<typeof ProjectPickerList>> = {
+export const ProjectPickerListItemStory: StoryObj<
+  Pick<ProjectPickerProviderProps, 'availableProjects'> & ComponentProps<typeof ProjectPickerList>
+> = {
   name: 'ProjectPickerListItem',
   args: {
-    projects: Array.from({ length: 10 }, () => ({
+    availableProjects: Array.from({ length: 10 }, () => ({
       _id: faker.string.uuid(),
       _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
       _alias: faker.company.name(),
@@ -30,8 +32,8 @@ export const ProjectPickerListItemStory: StoryObj<ComponentProps<typeof ProjectP
       _provider: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
     })),
   },
-  render: (props) => (
-    <ProjectPickerProvider>
+  render: ({ availableProjects, ...props }) => (
+    <ProjectPickerProvider availableProjects={availableProjects}>
       <ProjectPickerList {...props} />
     </ProjectPickerProvider>
   ),

@@ -7,21 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PropsWithChildren } from 'react';
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 
-interface ProjectPickerFrameBodyProps {
-  children: React.ReactNode;
-  maxHeight?: number;
-}
-
-export function ProjectPickerFrameBody({
-  children,
-}: PropsWithChildren<ProjectPickerFrameBodyProps>) {
-  return (
-    <EuiFlexGroup>
-      <EuiFlexItem>{children}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
+export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
+  filterBoxWrapper: css({
+    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+  }),
+});

@@ -7,16 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { ProjectPickerFrame, ProjectPickerList } from './blocks';
-import { ProjectPickerProvider, type ProjectPickerProviderProps } from './state';
-
-export function ProjectPicker({ availableProjects }: ProjectPickerProviderProps) {
-  return (
-    <ProjectPickerProvider availableProjects={availableProjects}>
-      <ProjectPickerFrame>
-        <ProjectPickerList />
-      </ProjectPickerFrame>
-    </ProjectPickerProvider>
-  );
-}
+export { ProjectPickerFilterBox } from './filter_box';

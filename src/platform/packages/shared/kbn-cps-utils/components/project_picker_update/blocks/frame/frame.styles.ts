@@ -10,10 +10,13 @@
 import { css } from '@emotion/react';
 import { type UseEuiTheme } from '@elastic/eui';
 
-export const projectPickerFrameStyles = ({ euiTheme }: UseEuiTheme) => ({
+export const projectPickerFrameStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
   container: css({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+  }),
+  headerWrapper: css({
+    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
   }),
 });

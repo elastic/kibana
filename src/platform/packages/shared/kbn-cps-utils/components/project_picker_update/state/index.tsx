@@ -12,14 +12,16 @@ import React, { useMemo, useContext, createContext, type PropsWithChildren } fro
 import { useCreateStore, type ActionsFromReducers } from './store';
 import { createStoreReducers } from './reducers';
 import { type ProjectPickerState } from './reducers';
+import { type CPSProject } from '../../../types';
 
 interface ProjectPickerContext {
   state: ProjectPickerState;
   actions: ActionsFromReducers<ReturnType<typeof createStoreReducers>>;
 }
 
-interface ProjectPickerProviderProps {
+export interface ProjectPickerProviderProps {
   children: React.ReactNode;
+  availableProjects: Array<CPSProject>;
 }
 
 export const createProjectPickerContext = once(() =>
@@ -46,6 +48,7 @@ export const useProjectPickerState = () => {
 
 export const ProjectPickerProvider = ({
   children,
+  availableProjects,
 }: PropsWithChildren<ProjectPickerProviderProps>) => {
   const ProjectPickerContext = useMemo(() => createProjectPickerContext(), []);
   const projectPickerReducers = useMemo(() => createStoreReducers(), []);
@@ -53,7 +56,7 @@ export const ProjectPickerProvider = ({
   const store = useCreateStore<ProjectPickerState, typeof projectPickerReducers>({
     initialState: {
       selectedProjects: [],
-      availableProjects: [],
+      availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
     },
     reducers: projectPickerReducers,
   });

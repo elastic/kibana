@@ -45,7 +45,7 @@ const getProjectPickerListContextMenuConfig = (
   ];
 };
 
-export function ProjectPickerList({ projects }: ProjectPickerListProps) {
+export function ProjectPickerList() {
   const projectContextMenuButtonRef = useRef<HTMLElement | null>(null);
   const [activeProject, setActiveProject] = useState<CPSProject | null>(null);
   const actions = useProjectPickerActions();
@@ -106,7 +106,7 @@ export function ProjectPickerList({ projects }: ProjectPickerListProps) {
         </EuiWrappingPopover>
       ) : null}
       <EuiFlexGroup direction="column" gutterSize="none">
-        {projects.map((project) => (
+        {Array.from(state.availableProjects.values()).map((project) => (
           <EuiFlexItem key={project._id} css={styles.listItemContainer}>
             <ProjectPickerListItem
               isSelected={state.selectedProjects.includes(project._id)}

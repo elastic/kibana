@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProjectPickerFrameHeader } from './header';
-export { ProjectPickerFrameBody } from './body';
+export { ProjectPickerFrameHeader } from './header/header';
+export { ProjectPickerFrameBody } from './body/body';
 export { ProjectPickerFrameFooter } from './footer';

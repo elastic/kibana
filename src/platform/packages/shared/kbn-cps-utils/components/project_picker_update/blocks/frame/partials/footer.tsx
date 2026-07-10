@@ -36,7 +36,7 @@ export function ProjectPickerFrameFooter() {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          disabled={state.selectedProjects.length === state.availableProjects.length}
+          disabled={state.selectedProjects.length === state.availableProjects.size}
           onClick={includeAllVisibleProjects}
           flush="right"
           size="xs"

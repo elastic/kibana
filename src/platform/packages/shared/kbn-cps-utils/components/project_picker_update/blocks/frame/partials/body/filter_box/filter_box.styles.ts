@@ -7,16 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { ProjectPickerFrame, ProjectPickerList } from './blocks';
-import { ProjectPickerProvider, type ProjectPickerProviderProps } from './state';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 
-export function ProjectPicker({ availableProjects }: ProjectPickerProviderProps) {
-  return (
-    <ProjectPickerProvider availableProjects={availableProjects}>
-      <ProjectPickerFrame>
-        <ProjectPickerList />
-      </ProjectPickerFrame>
-    </ProjectPickerProvider>
-  );
-}
+export const filterBoxStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
+  filterFormWrapper: css({
+    padding: euiTheme.size.base,
+  }),
+});

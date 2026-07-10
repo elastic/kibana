@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
 import {
+  EuiBadge,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiContextMenuPanel,
-  EuiButtonIcon,
-  EuiToolTip,
-  EuiPopover,
-  EuiBadge,
-  EuiContextMenuItem,
   EuiHorizontalRule,
-  type EuiContextMenuItemProps,
-  useGeneratedHtmlId,
+  EuiPopover,
   EuiTitle,
+  EuiToolTip,
+  useGeneratedHtmlId,
+  type EuiContextMenuItemProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useProjectPickerActions } from '../../../state';
+import React, { useMemo, useCallback, useState } from 'react';
+import { useProjectPickerActions } from '../../../../state';
 
 const getContextMenuItems = (
   actions: ReturnType<typeof useProjectPickerActions>
@@ -74,7 +74,7 @@ export function ProjectPickerFrameHeader() {
   const contextMenuConfig = useMemo(() => getContextMenuItems(actions), [actions]);
 
   return (
-    <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem grow>
         <EuiTitle size="xxs">
           <h3>
@@ -85,7 +85,7 @@ export function ProjectPickerFrameHeader() {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup>
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem>
             <EuiBadge color="primary">
               {i18n.translate('kbn.cps.projectPickerFrameHeader.addProject', {

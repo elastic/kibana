@@ -8,21 +8,24 @@
  */
 
 import React, { type PropsWithChildren } from 'react';
-import { EuiSplitPanel } from '@elastic/eui';
-
+import { EuiSplitPanel, useEuiTheme } from '@elastic/eui';
 import {
   ProjectPickerFrameHeader,
   ProjectPickerFrameBody,
   ProjectPickerFrameFooter,
 } from './partials';
+import { projectPickerFrameStyles } from './frame.styles';
 
 export function ProjectPickerFrame({ children }: PropsWithChildren) {
+  const { euiTheme } = useEuiTheme();
+  const styles = projectPickerFrameStyles({ euiTheme });
+
   return (
     <EuiSplitPanel.Outer>
-      <EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner css={styles.headerWrapper}>
         <ProjectPickerFrameHeader />
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner paddingSize="none">
         <ProjectPickerFrameBody>{children}</ProjectPickerFrameBody>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner color="subdued">

@@ -37,7 +37,7 @@ export function ProjectPickerListItem({
   const id = useGeneratedHtmlId();
 
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon
           type={`logo${project._type.replace(/^[a-z]/i, (char) => char.toUpperCase())}`}
@@ -65,7 +65,7 @@ export function ProjectPickerListItem({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup>
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiSwitch
               showLabel={false}
