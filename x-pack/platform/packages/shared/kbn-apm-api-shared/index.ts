@@ -57,4 +57,11 @@ export {
   serviceTransactionDataSourceRt,
   transactionDataSourceRt,
   filtersRt,
+  rangeSchema,
+  kuerySchema,
+  probabilitySchema,
+  offsetSchema,
+  serviceTransactionDataSourceSchema,
+  transactionDataSourceSchema,
+  filtersSchema,
 } from './src/default_api_types';
