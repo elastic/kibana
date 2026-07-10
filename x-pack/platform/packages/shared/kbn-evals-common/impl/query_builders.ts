@@ -13,6 +13,8 @@ interface ExperimentFilterOptions {
   suiteId?: string;
   modelId?: string;
   filterField?: 'experiment_id' | 'metadata.execution_id';
+  /** Active space to scope results to. Omit to skip space filtering. */
+  spaceId?: string;
 }
 
 interface ExperimentsListingFilterOptions {
@@ -22,6 +24,8 @@ interface ExperimentsListingFilterOptions {
   datasetId?: string;
   datasetName?: string;
   buildId?: string;
+  /** Active space to scope results to. Omit to skip space filtering. */
+  spaceId?: string;
 }
 
 interface ExperimentsListingPaginationOptions {
@@ -81,6 +85,30 @@ export interface ExperimentsListingResult {
 }
 
 // ---------------------------------------------------------------------------
+// Space filtering
+// ---------------------------------------------------------------------------
+
+// Mirror of the Kibana space conventions (kept local to avoid a cross-package
+// dependency from this schema/query package).
+const DEFAULT_SPACE_ID = 'default';
+const ALL_SPACES_ID = '*';
+
+/**
+ * Builds a filter that matches score documents visible in the given space: those
+ * assigned to the space (or to all spaces via `*`), plus — only in the default
+ * space — legacy documents that predate `space_ids` and therefore have none.
+ */
+export const buildSpaceFilter = (spaceId: string): Record<string, unknown> => {
+  const should: Array<Record<string, unknown>> = [
+    { terms: { space_ids: [spaceId, ALL_SPACES_ID] } },
+  ];
+  if (spaceId === DEFAULT_SPACE_ID) {
+    should.push({ bool: { must_not: { exists: { field: 'space_ids' } } } });
+  }
+  return { bool: { should, minimum_should_match: 1 } };
+};
+
+// ---------------------------------------------------------------------------
 // Single-experiment filter query
 // ---------------------------------------------------------------------------
 
@@ -100,6 +128,9 @@ export const buildExperimentFilterQuery = (
   if (options?.modelId) {
     must.push({ term: { 'task.model.id': options.modelId } });
   }
+  if (options?.spaceId) {
+    must.push(buildSpaceFilter(options.spaceId));
+  }
   return { bool: { must } };
 };
 
@@ -107,12 +138,15 @@ export const buildExperimentFilterQuery = (
  * Builds a bool/must query that filters evaluation score documents by example ID.
  */
 export const buildExampleScoresQuery = (
-  exampleId: string
-): { bool: { must: Array<Record<string, unknown>> } } => ({
-  bool: {
-    must: [{ term: { 'example.id': exampleId } }],
-  },
-});
+  exampleId: string,
+  options?: { spaceId?: string }
+): { bool: { must: Array<Record<string, unknown>> } } => {
+  const must: Array<Record<string, unknown>> = [{ term: { 'example.id': exampleId } }];
+  if (options?.spaceId) {
+    must.push(buildSpaceFilter(options.spaceId));
+  }
+  return { bool: { must } };
+};
 
 /**
  * Builds a bool/must query that filters evaluation score documents by
@@ -121,14 +155,17 @@ export const buildExampleScoresQuery = (
 export const buildDatasetExampleScoresQuery = (
   datasetId: string,
   experimentId: string,
-  options?: { filterField?: 'experiment_id' | 'metadata.execution_id' }
+  options?: { filterField?: 'experiment_id' | 'metadata.execution_id'; spaceId?: string }
 ): { bool: { must: Array<Record<string, unknown>> } } => {
   const field = options?.filterField ?? 'experiment_id';
-  return {
-    bool: {
-      must: [{ term: { 'example.dataset.id': datasetId } }, { term: { [field]: experimentId } }],
-    },
-  };
+  const must: Array<Record<string, unknown>> = [
+    { term: { 'example.dataset.id': datasetId } },
+    { term: { [field]: experimentId } },
+  ];
+  if (options?.spaceId) {
+    must.push(buildSpaceFilter(options.spaceId));
+  }
+  return { bool: { must } };
 };
 
 // ---------------------------------------------------------------------------
@@ -209,6 +246,9 @@ export const buildExperimentsListingFilterQuery = (
   }
   if (options?.buildId) {
     filters.push({ term: { 'metadata.ci.build_id': options.buildId } });
+  }
+  if (options?.spaceId) {
+    filters.push(buildSpaceFilter(options.spaceId));
   }
   return {
     bool: {

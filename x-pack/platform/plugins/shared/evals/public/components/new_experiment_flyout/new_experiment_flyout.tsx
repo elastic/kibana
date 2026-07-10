@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -46,6 +46,7 @@ import {
   useSaveExperimentWorkflow,
   usePreviewExperiment,
 } from '../../hooks/use_experiments_api';
+import { useAccessibleSpaces } from '../../hooks/use_spaces';
 import { YamlPreview } from '../yaml_preview';
 
 const BUILT_IN_TARGETS = ['inference', 'agentBuilder.converse', 'agentBuilder.tool'] as const;
@@ -93,6 +94,13 @@ const strings = {
   }),
   concurrencyLabel: i18n.translate('xpack.evals.newExperiment.concurrencyLabel', {
     defaultMessage: 'Concurrency',
+  }),
+  spacesLabel: i18n.translate('xpack.evals.newExperiment.spacesLabel', {
+    defaultMessage: 'Spaces',
+  }),
+  spacesHelp: i18n.translate('xpack.evals.newExperiment.spacesHelp', {
+    defaultMessage:
+      'Spaces this experiment is visible in. Defaults to the current space, but you can add others to share the results with them.',
   }),
   showYaml: i18n.translate('xpack.evals.newExperiment.showYaml', {
     defaultMessage: 'Show workflow YAML',
@@ -170,6 +178,24 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const [concurrency, setConcurrency] = useState<number | undefined>(5);
   const [compare, setCompare] = useState(false);
   const [showYaml, setShowYaml] = useState(false);
+  const [spaceIds, setSpaceIds] = useState<string[]>([]);
+
+  const {
+    isEnabled: spacesEnabled,
+    isLoading: spacesLoading,
+    activeSpaceId,
+    spaces,
+  } = useAccessibleSpaces();
+  // Default the picker to the current space once it resolves. A ref (not the
+  // selection itself) guards the one-time default so the user can later clear the
+  // field without it snapping back.
+  const spacesInitialized = useRef(false);
+  useEffect(() => {
+    if (!spacesInitialized.current && activeSpaceId) {
+      setSpaceIds([activeSpaceId]);
+      spacesInitialized.current = true;
+    }
+  }, [activeSpaceId]);
 
   const isCrossModel = connectorIds.length >= 2;
   // A bare tool run is a single `execute_tool` span, so evaluators that only make
@@ -225,6 +251,21 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     [agentsData]
   );
 
+  const spaceOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
+    () =>
+      spaces.map((space) => ({
+        value: space.id,
+        label:
+          space.id === activeSpaceId
+            ? i18n.translate('xpack.evals.newExperiment.currentSpaceOption', {
+                defaultMessage: '{name} (current)',
+                values: { name: space.name },
+              })
+            : space.name,
+      })),
+    [spaces, activeSpaceId]
+  );
+
   const taskTargetOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
     const options: Array<EuiComboBoxOptionOption<string>> = [
       {
@@ -254,6 +295,12 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     return options;
   }, [templatesData?.templates]);
 
+  // Only send `space_ids` when the user targets spaces beyond the current one.
+  // Leaving the default (just the current space, or nothing) omits it so saved
+  // workflows stay portable and stamp whichever space they run in.
+  const isDefaultSpaceSelection =
+    spaceIds.length === 0 || (spaceIds.length === 1 && spaceIds[0] === activeSpaceId);
+
   const buildRequestBody = useCallback((): RunExperimentRequest => {
     return {
       name: name.trim() || undefined,
@@ -270,6 +317,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
       repetitions,
       concurrency,
       compare: compare || undefined,
+      space_ids: spacesEnabled && !isDefaultSpaceSelection ? spaceIds : undefined,
     };
   }, [
     name,
@@ -282,6 +330,9 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     repetitions,
     concurrency,
     compare,
+    spacesEnabled,
+    isDefaultSpaceSelection,
+    spaceIds,
   ]);
 
   const labelsFor = useCallback(
@@ -488,6 +539,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const selectedAgentOptions = agentId
     ? [agentOptions.find((o) => o.value === agentId) ?? { label: agentId, value: agentId }]
     : [];
+  const selectedSpaceOptions = spaceOptions.filter((o) => spaceIds.includes(o.value as string));
 
   // Deep-link to the saved workflow's detail page in the Workflows app, where it
   // can be run, scheduled, edited, and its execution history reviewed.
@@ -723,6 +775,22 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
+
+          {spacesEnabled && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFormRow label={strings.spacesLabel} helpText={strings.spacesHelp} fullWidth>
+                <EuiComboBox<string>
+                  fullWidth
+                  isLoading={spacesLoading}
+                  options={spaceOptions}
+                  selectedOptions={selectedSpaceOptions}
+                  onChange={(selected) => setSpaceIds(selected.map((o) => o.value as string))}
+                  data-test-subj="evalsSpacesCombo"
+                />
+              </EuiFormRow>
+            </>
+          )}
 
           {isCrossModel && (
             <>

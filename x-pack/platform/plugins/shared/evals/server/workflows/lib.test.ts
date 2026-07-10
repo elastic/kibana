@@ -39,7 +39,7 @@ const createRegistry = (
   };
 };
 
-const createRuntime = (recorded: RecordedCall[]): StepRuntime => {
+const createRuntime = (recorded: RecordedCall[], spaceId = 'default'): StepRuntime => {
   const callKibanaApi = (async ({ path, body }: { path: string; body?: unknown }) => {
     recorded.push({ path, body });
     if (path === EVALS_EVALUATE_URL) {
@@ -56,6 +56,7 @@ const createRuntime = (recorded: RecordedCall[]): StepRuntime => {
     abortSignal: new AbortController().signal,
     getInferenceClient: jest.fn() as unknown as StepRuntime['getInferenceClient'],
     callKibanaApi,
+    spaceId,
     resolveModel: (async (connectorId: string) => ({
       id: connectorId,
     })) as StepRuntime['resolveModel'],
@@ -79,6 +80,10 @@ const evaluatedTrace = (recorded: RecordedCall[]) => {
   const call = recorded.find((c) => c.path === EVALS_EVALUATE_URL);
   return call?.body?.subject?.traces?.[0];
 };
+
+/** Returns the body sent to the `/scores` (ingest) endpoint. */
+const ingestedScoresBody = (recorded: RecordedCall[]) =>
+  recorded.find((c) => c.path === EVALS_SCORES_URL)?.body;
 
 describe('normalizeReferenceData', () => {
   it('passes plain objects through unchanged', () => {
@@ -166,6 +171,7 @@ describe('runExampleEvaluation failure capture', () => {
       logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
       abortSignal: new AbortController().signal,
       getInferenceClient: jest.fn() as unknown as StepRuntime['getInferenceClient'],
+      spaceId: 'default',
       resolveModel: (async (connectorId: string) => ({
         id: connectorId,
       })) as StepRuntime['resolveModel'],
@@ -238,6 +244,33 @@ describe('evaluateWorkBatch reference data', () => {
 
     expect(result.failed).toBe(0);
     expect(evaluatedTrace(recorded).reference_data).toEqual({ expected: 'Paris' });
+  });
+
+  it("stamps ingested scores with the workflow's space so in-tool runs stay space-scoped", async () => {
+    const recorded: RecordedCall[] = [];
+
+    const result = await runExampleEvaluation(
+      createRegistry(),
+      createRuntime(recorded, 'marketing'),
+      baseParams()
+    );
+
+    expect(result.failed).toBe(0);
+    expect(ingestedScoresBody(recorded)?.space_ids).toEqual(['marketing']);
+  });
+
+  it('assigns explicit space_ids from the config, overriding the workflow space', async () => {
+    const recorded: RecordedCall[] = [];
+
+    const result = await runExampleEvaluation(
+      createRegistry(),
+      createRuntime(recorded, 'marketing'),
+      baseParams({ spaceIds: ['sales', 'support'] })
+    );
+
+    expect(result.failed).toBe(0);
+    // An experiment that explicitly targets spaces wins over the execution space.
+    expect(ingestedScoresBody(recorded)?.space_ids).toEqual(['sales', 'support']);
   });
 
   it('aggregates failure messages across the batch', async () => {

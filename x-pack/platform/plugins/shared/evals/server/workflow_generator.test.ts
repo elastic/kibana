@@ -178,6 +178,31 @@ describe('workflow_generator', () => {
       expect(run.executions).toHaveLength(1);
     });
 
+    it('inlines space_ids on every evaluate step and omits it when not provided', () => {
+      const withSpaces = generateExperimentRun({
+        connectorIds: ['gpt-4o', 'claude'],
+        datasetIds: ['ds-1'],
+        evaluators,
+        spaceIds: ['marketing', 'sales'],
+      });
+      for (const execution of withSpaces.executions) {
+        const evaluate = parseYaml(execution.yaml).steps.find(
+          (s) => s.type === 'evals.evaluateDataset'
+        );
+        expect(evaluate?.with?.space_ids).toEqual(['marketing', 'sales']);
+      }
+
+      const withoutSpaces = generateExperimentRun({
+        connectorIds: ['gpt-4o'],
+        datasetIds: ['ds-1'],
+        evaluators,
+      });
+      const evaluate = parseYaml(withoutSpaces.executions[0].yaml).steps.find(
+        (s) => s.type === 'evals.evaluateDataset'
+      );
+      expect(evaluate?.with).not.toHaveProperty('space_ids');
+    });
+
     it('throws when no connector or dataset is provided', () => {
       expect(() =>
         generateExperimentRun({ connectorIds: [], datasetIds: ['ds-1'], evaluators })
@@ -205,6 +230,17 @@ describe('workflow_generator', () => {
       // The (static) workflow name is persisted as the experiment name on every run.
       const evaluate = def.steps.find((s) => s.type === 'evals.evaluateDataset');
       expect(evaluate?.with?.experiment_name).toBe(name);
+    });
+
+    it('inlines space_ids on the evaluate step so scheduled runs keep the assignment', () => {
+      const { yaml } = generateSavedWorkflowYaml({
+        connectorIds: ['gpt-4o'],
+        datasetIds: ['ds-1'],
+        evaluators,
+        spaceIds: ['marketing'],
+      });
+      const evaluate = parseYaml(yaml).steps.find((s) => s.type === 'evals.evaluateDataset');
+      expect(evaluate?.with?.space_ids).toEqual(['marketing']);
     });
 
     it('runs models sequentially and ends with a compare step for cross-model when requested', () => {

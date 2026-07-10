@@ -74,6 +74,7 @@ export const experimentRequestToParams = (
   repetitions: body.repetitions,
   concurrency: body.concurrency,
   compare: body.compare,
+  spaceIds: body.space_ids,
 });
 
 export interface GenerateExperimentParams {
@@ -95,6 +96,12 @@ export interface GenerateExperimentParams {
   concurrency?: number;
   /** Append an `evals.compareExperiments` step to cross-model saved workflows. */
   compare?: boolean;
+  /**
+   * Spaces the produced scores are assigned to. Inlined into the evaluate step so
+   * every (possibly scheduled) run of a saved workflow keeps the same assignment.
+   * When omitted, the ingest step falls back to the workflow's execution space.
+   */
+  spaceIds?: string[];
 }
 
 export type ExperimentRunMode = 'single' | 'dataset-fanout' | 'cross-model';
@@ -138,6 +145,7 @@ interface EvaluateStepValues extends TaskTargetValues {
   evaluators: WorkflowEvaluatorInput[];
   repetitions: number;
   concurrency: number;
+  spaceIds?: string[];
 }
 
 const omitUndefined = <T extends Record<string, unknown>>(value: T): T => {
@@ -184,6 +192,7 @@ const buildEvaluateStep = (name: string, startStepName: string, values: Evaluate
     evaluators: values.evaluators,
     repetitions: values.repetitions,
     concurrency: values.concurrency,
+    space_ids: values.spaceIds,
   }),
 });
 
@@ -243,6 +252,7 @@ export const generateExperimentRun = (params: GenerateExperimentParams): Generat
     params: params.params,
     evaluators: params.evaluators,
     repetitions,
+    spaceIds: params.spaceIds,
   };
 
   if (connectorIds.length >= 2) {
@@ -391,6 +401,7 @@ export const generateSavedWorkflowYaml = (
     repetitions,
     concurrency,
     datasetIds: params.datasetIds,
+    spaceIds: params.spaceIds,
   };
 
   if (connectorIds.length < 2) {

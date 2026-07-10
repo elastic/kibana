@@ -70,6 +70,13 @@ export const evaluatorResultSchema = z.object({
   ),
 });
 
+/**
+ * Spaces the ingested scores are assigned to. When omitted, the ingest step
+ * stamps the workflow's execution space, so a workflow stays scoped to the space
+ * it runs in unless an experiment explicitly targets other spaces.
+ */
+const spaceIdsSchema = z.array(z.string().min(1)).min(1).optional();
+
 /** Fields that describe "the thing being evaluated" (a task). */
 const taskTargetShape = {
   /** Connector id of the model under evaluation. */
@@ -184,6 +191,7 @@ export const ingestScoresInputSchema = z.object({
     output: recordSchema.optional(),
   }),
   evaluator_results: z.array(evaluatorResultSchema),
+  space_ids: spaceIdsSchema,
 });
 export const ingestScoresOutputSchema = z.object({
   ingested: z.number().int(),
@@ -221,6 +229,7 @@ export const evaluateExampleInputSchema = z.object({
   evaluators: z.array(evaluatorConfigSchema).min(1),
   reference_data: recordSchema.optional(),
   repetitions: z.number().int().min(1).optional(),
+  space_ids: spaceIdsSchema,
 });
 export const evaluateExampleOutputSchema = z.object({
   scores_ingested: z.number().int(),
@@ -255,6 +264,7 @@ export const evaluateDatasetInputSchema = z.object({
   repetitions: z.number().int().min(1).optional(),
   /** Max examples evaluated in parallel within this step. */
   concurrency: z.number().int().min(1).optional(),
+  space_ids: spaceIdsSchema,
 });
 export const evaluateDatasetOutputSchema = z.object({
   experiment_id: z.string(),

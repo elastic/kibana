@@ -7,6 +7,7 @@
 
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 export type EvalsPublicSetup = Record<string, never>;
 
@@ -94,4 +95,7 @@ export interface EvalsSetupDependencies {
   workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
-export type EvalsStartDependencies = Record<string, never>;
+export interface EvalsStartDependencies {
+  /** Optional: lists accessible spaces so an experiment can target other spaces. */
+  spaces?: SpacesPluginStart;
+}

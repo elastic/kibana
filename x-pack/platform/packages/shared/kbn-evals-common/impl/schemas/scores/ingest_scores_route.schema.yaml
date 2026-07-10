@@ -25,6 +25,15 @@ paths:
                 experiment_name:
                   type: string
                   maxLength: 256
+                space_ids:
+                  type: array
+                  maxItems: 100
+                  items:
+                    type: string
+                    maxLength: 256
+                  description: >-
+                    Spaces to assign these scores to. When omitted, the caller's
+                    active space is used (falling back to the default space).
                 task_model:
                   $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
                 evaluator_model:

@@ -20,6 +20,9 @@ import {
 import { experimentRequestToParams, generateSavedWorkflowYaml } from '../../workflow_generator';
 import type { RouteDependencies } from '../register_routes';
 
+/** Wildcard sentinel for "all spaces"; deferred to a later phase (see ingest route). */
+const ALL_SPACES_ID = '*';
+
 /**
  * Persists an experiment as a re-runnable, version-controllable workflow
  * ("Save as workflow"). Unlike "Run now", ids are minted fresh on every run so
@@ -65,6 +68,13 @@ export const registerSaveExperimentWorkflowRoute = ({
         if (body.agent_id && body.tool_id) {
           return response.badRequest({
             body: { message: 'Provide only one of agent_id or tool_id, not both.' },
+          });
+        }
+        if (body.space_ids?.includes(ALL_SPACES_ID)) {
+          return response.badRequest({
+            body: {
+              message: `Assigning an experiment to all spaces ("${ALL_SPACES_ID}") is not supported yet; provide explicit space ids.`,
+            },
           });
         }
 

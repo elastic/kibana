@@ -98,6 +98,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     logger: context.logger,
     abortSignal: context.abortSignal,
     callKibanaApi: (params) => context.contextManager.callKibanaApi(params),
+    spaceId: context.contextManager.getContext().workflow.spaceId,
     getInferenceClient: async (connectorId: string) => {
       const inference = await deps.getInferenceStart();
       const request = context.contextManager.getFakeRequest();
@@ -189,6 +190,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
           output: input.task.output,
         },
         evaluatorResults: toRunnerEvaluatorResults(input.evaluator_results),
+        spaceIds: input.space_ids,
       });
       const response = await ingestScores(makeRuntime(context), body);
       return {
@@ -234,6 +236,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
         evaluators: input.evaluators,
         referenceData: input.reference_data,
         repetitions: input.repetitions ?? DEFAULT_REPETITIONS,
+        spaceIds: input.space_ids,
       });
       return {
         output: {
@@ -258,6 +261,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       params?: Record<string, unknown>;
       evaluators: Array<{ name: string; version?: string; connector_id?: string }>;
       repetitions?: number;
+      space_ids?: string[];
     },
     models: { taskModel: Model; evaluatorModel: Model }
   ): DatasetEvaluationConfig => ({
@@ -276,6 +280,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     },
     evaluators: input.evaluators,
     repetitions: input.repetitions ?? DEFAULT_REPETITIONS,
+    spaceIds: input.space_ids,
   });
 
   const evaluateDatasetStep = createPollServerStepDefinition({

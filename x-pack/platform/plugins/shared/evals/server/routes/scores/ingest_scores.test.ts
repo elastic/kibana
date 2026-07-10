@@ -72,7 +72,7 @@ const getBasePayload = (): IngestScoresRequestBodyInput => ({
 });
 
 describe('POST /internal/evals/scores', () => {
-  const setup = () => {
+  const setup = (options?: { getSpaceId?: jest.Mock }) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
     registerIngestScoresRoute({
@@ -83,6 +83,7 @@ describe('POST /internal/evals/scores', () => {
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getSpaceId: options?.getSpaceId,
     });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
@@ -124,9 +125,39 @@ describe('POST /internal/evals/scores', () => {
 
     const response = await handler(context as any, makeRequest(payload), kibanaResponseFactory);
 
-    expect(evaluationScoreService.write).toHaveBeenCalledWith(payload);
+    expect(evaluationScoreService.write).toHaveBeenCalledWith(payload, ['default']);
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ ingested: 1, conflicted: 0, failed: [] });
+  });
+
+  it('stamps scores with the active space when no space_ids are provided', async () => {
+    const getSpaceId = jest.fn().mockResolvedValue('marketing');
+    const { handler, context, evaluationScoreService } = setup({ getSpaceId });
+    const payload = getBasePayload();
+
+    await handler(context as any, makeRequest(payload), kibanaResponseFactory);
+
+    expect(evaluationScoreService.write).toHaveBeenCalledWith(payload, ['marketing']);
+  });
+
+  it('honors explicit space_ids over the active space (offline assignment)', async () => {
+    const getSpaceId = jest.fn().mockResolvedValue('marketing');
+    const { handler, context, evaluationScoreService } = setup({ getSpaceId });
+    const payload = { ...getBasePayload(), space_ids: ['sales', 'ops'] };
+
+    await handler(context as any, makeRequest(payload), kibanaResponseFactory);
+
+    expect(evaluationScoreService.write).toHaveBeenCalledWith(payload, ['sales', 'ops']);
+  });
+
+  it('rejects assigning scores to all spaces (*) with 400', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    const payload = { ...getBasePayload(), space_ids: ['*'] };
+
+    const response = await handler(context as any, makeRequest(payload), kibanaResponseFactory);
+
+    expect(response.status).toBe(400);
+    expect(evaluationScoreService.write).not.toHaveBeenCalled();
   });
 
   it('returns 200 with conflicted count when payload is fully idempotent', async () => {

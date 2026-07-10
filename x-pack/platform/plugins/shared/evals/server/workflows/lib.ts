@@ -44,6 +44,7 @@ export interface StepRuntime {
   callKibanaApi: EvalsCallKibanaApi;
   getInferenceClient: (connectorId: string) => Promise<BoundInferenceClient>;
   resolveModel: (connectorId: string) => Promise<Model>;
+  spaceId: string;
 }
 
 export interface TaskTarget {
@@ -187,7 +188,7 @@ export const evaluateTrace = async (
   return { results, errors };
 };
 
-/** Persists a batch of score documents via `POST /scores`. */
+/** Persists a batch of score documents via `POST /scores`, stamped with the workflow's space. */
 export const ingestScores = async (
   runtime: StepRuntime,
   body: IngestScoresRequestBody
@@ -196,7 +197,9 @@ export const ingestScores = async (
     method: 'POST',
     path: EVALS_SCORES_URL,
     headers: INTERNAL_API_HEADERS,
-    body,
+    // The internal ingest call is not space-prefixed, so stamp the workflow's space
+    // explicitly; otherwise the ingest route would resolve it to the default space.
+    body: { ...body, space_ids: body.space_ids ?? [runtime.spaceId] },
   });
   return response;
 };
@@ -244,13 +247,15 @@ export interface BuildExampleScoreBodyParams {
   };
   task: { traceId?: string; repetitionIndex: number; output?: Record<string, unknown> };
   evaluatorResults: EvaluatorResult[];
+  /** Spaces to assign the scores to; falls back to the workflow space at ingest. */
+  spaceIds?: string[];
 }
 
 /** Builds the `POST /scores` request body for a single (example, repetition). */
 export const buildExampleScoreBody = (
   params: BuildExampleScoreBodyParams
-): IngestScoresRequestBody =>
-  buildScoreDocuments({
+): IngestScoresRequestBody => {
+  const body = buildScoreDocuments({
     experimentId: params.experimentId,
     experimentName: params.experimentName,
     taskModel: params.taskModel,
@@ -265,6 +270,10 @@ export const buildExampleScoreBody = (
     task: params.task,
     evaluatorResults: params.evaluatorResults,
   });
+  return params.spaceIds && params.spaceIds.length > 0
+    ? { ...body, space_ids: params.spaceIds }
+    : body;
+};
 
 export interface ResolvedDataset {
   id: string;
@@ -345,6 +354,8 @@ export interface EvaluateExampleParams {
   evaluators: EvaluatorConfig[];
   referenceData?: Record<string, unknown>;
   repetitions: number;
+  /** Spaces to assign the scores to; falls back to the workflow space at ingest. */
+  spaceIds?: string[];
 }
 
 export interface EvaluateExampleResult {
@@ -452,6 +463,7 @@ export const runExampleEvaluation = async (
           output: taskResult.output,
         },
         evaluatorResults,
+        spaceIds: params.spaceIds,
       });
 
       const response = await ingestScores(runtime, scoreBody);
@@ -480,6 +492,8 @@ export interface DatasetEvaluationConfig {
   target: TaskTarget;
   evaluators: EvaluatorConfig[];
   repetitions: number;
+  /** Spaces to assign the scores to; falls back to the workflow space at ingest. */
+  spaceIds?: string[];
 }
 
 export interface BatchEvaluationResult {

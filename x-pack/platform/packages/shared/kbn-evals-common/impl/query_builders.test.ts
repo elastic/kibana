@@ -9,6 +9,7 @@ import {
   buildExperimentFilterQuery,
   buildExampleScoresQuery,
   buildDatasetExampleScoresQuery,
+  buildSpaceFilter,
   buildStatsAggregation,
   parseStatsAggregationResponse,
   SCORES_SORT_ORDER,
@@ -19,12 +20,41 @@ import {
 } from './query_builders';
 
 describe('query_builders', () => {
+  describe('buildSpaceFilter', () => {
+    it('matches the space or all-spaces, plus legacy (missing) docs in the default space', () => {
+      expect(buildSpaceFilter('default')).toEqual({
+        bool: {
+          should: [
+            { terms: { space_ids: ['default', '*'] } },
+            { bool: { must_not: { exists: { field: 'space_ids' } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    it('matches only the space or all-spaces for a non-default space (no legacy fallback)', () => {
+      expect(buildSpaceFilter('marketing')).toEqual({
+        bool: {
+          should: [{ terms: { space_ids: ['marketing', '*'] } }],
+          minimum_should_match: 1,
+        },
+      });
+    });
+  });
+
   describe('buildExampleScoresQuery', () => {
     it('filters by example.id', () => {
       const query = buildExampleScoresQuery('example-123');
       expect(query).toEqual({
         bool: { must: [{ term: { 'example.id': 'example-123' } }] },
       });
+    });
+
+    it('adds a space filter when spaceId is provided', () => {
+      const query = buildExampleScoresQuery('example-123', { spaceId: 'marketing' });
+      expect(query.bool.must).toHaveLength(2);
+      expect(query.bool.must[1]).toEqual(buildSpaceFilter('marketing'));
     });
   });
 
@@ -53,6 +83,14 @@ describe('query_builders', () => {
           ],
         },
       });
+    });
+
+    it('adds a space filter when spaceId is provided', () => {
+      const query = buildDatasetExampleScoresQuery('dataset-123', 'experiment-123', {
+        spaceId: 'default',
+      });
+      expect(query.bool.must).toHaveLength(3);
+      expect(query.bool.must[2]).toEqual(buildSpaceFilter('default'));
     });
   });
 
@@ -94,6 +132,12 @@ describe('query_builders', () => {
       expect(query).toEqual({
         bool: { must: [{ term: { 'metadata.execution_id': 'run-abc' } }] },
       });
+    });
+
+    it('adds a space filter when spaceId is provided', () => {
+      const query = buildExperimentFilterQuery('experiment-123', { spaceId: 'marketing' });
+      expect(query.bool.must).toHaveLength(2);
+      expect(query.bool.must[1]).toEqual(buildSpaceFilter('marketing'));
     });
   });
 
@@ -205,6 +249,16 @@ describe('query_builders', () => {
         bool: {
           must_not: [preflightExclusion],
           filter: [{ term: { 'metadata.ci.build_id': 'bk-abc123' } }],
+        },
+      });
+    });
+
+    it('filters by spaceId', () => {
+      const query = buildExperimentsListingFilterQuery({ spaceId: 'marketing' });
+      expect(query).toEqual({
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [buildSpaceFilter('marketing')],
         },
       });
     });

@@ -29,6 +29,8 @@ interface BuildIngestRequestArgs {
   suiteId?: string;
   executionId?: string;
   buildkiteMetadata?: BuildkiteCiMetadata;
+  /** Spaces to assign the experiment to. When omitted, the target Kibana's active/default space is used. */
+  spaceIds?: string[];
   log?: Pick<SomeDevLog, 'warning'>;
   source: BuildIngestRequestSource;
 }
@@ -139,6 +141,7 @@ export function buildIngestRequest({
   suiteId,
   executionId,
   buildkiteMetadata,
+  spaceIds,
   log,
   source,
 }: BuildIngestRequestArgs): IngestScoresRequestBodyInput[] {
@@ -177,6 +180,7 @@ export function buildIngestRequest({
       requests.push({
         experiment_id: experimentId,
         ...(experimentName != null && { experiment_name: experimentName }),
+        ...(spaceIds != null && spaceIds.length > 0 && { space_ids: spaceIds }),
         task_model: taskModelPayload,
         evaluator_model: evaluatorModelPayload,
         metadata: {

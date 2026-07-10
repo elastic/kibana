@@ -22,6 +22,10 @@ export const IngestScoresRequestBody = lazySchema(() =>
   z.object({
     experiment_id: z.string().max(1024),
     experiment_name: z.string().max(256).optional(),
+    /**
+     * Spaces to assign these scores to. When omitted, the caller's active space is used (falling back to the default space).
+     */
+    space_ids: z.array(z.string().max(256)).max(100).optional(),
     task_model: Model,
     evaluator_model: Model,
     metadata: z.object({

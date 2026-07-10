@@ -14,6 +14,10 @@ const evaluationsDataStreamMappings = {
     '@timestamp': { type: 'date' },
     experiment_id: { type: 'keyword' },
     experiment_name: { type: 'keyword' },
+    // Spaces this score belongs to. A keyword field is natively multi-valued, so a
+    // single doc can be assigned to several spaces (and `*` for all spaces). Absent
+    // on documents created before space-awareness (treated as the default space).
+    space_ids: { type: 'keyword' },
     metadata: {
       type: 'object',
       properties: {
@@ -97,7 +101,7 @@ const evaluationsDataStreamMappings = {
 
 export const evaluationsDataStreamDefinition: DataStreamDefinition<MappingsDefinition> = {
   name: EvaluationIndices.SCORES,
-  version: 1,
+  version: 2,
   hidden: true,
   template: {
     lifecycle: {

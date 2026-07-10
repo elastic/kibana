@@ -42,6 +42,7 @@ export const runExperimentRequestSchema = z.object({
   concurrency: z.number().int().min(1).optional(),
   compare: z.boolean().optional(),
   workflow_id: z.string().optional(),
+  space_ids: z.array(z.string().min(1)).min(1).optional(),
 });
 export type RunExperimentRequest = z.infer<typeof runExperimentRequestSchema>;
 

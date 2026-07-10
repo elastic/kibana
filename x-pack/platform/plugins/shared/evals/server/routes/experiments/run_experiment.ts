@@ -16,6 +16,9 @@ import {
 import { experimentRequestToParams, generateExperimentRun } from '../../workflow_generator';
 import type { RouteDependencies } from '../register_routes';
 
+/** Wildcard sentinel for "all spaces"; deferred to a later phase (see ingest route). */
+const ALL_SPACES_ID = '*';
+
 /**
  * Launches an experiment as one or more workflow executions ("Run now").
  *
@@ -65,6 +68,13 @@ export const registerRunExperimentRoute = ({
             body: { message: 'Provide only one of agent_id or tool_id, not both.' },
           });
         }
+        if (body.space_ids?.includes(ALL_SPACES_ID)) {
+          return response.badRequest({
+            body: {
+              message: `Assigning an experiment to all spaces ("${ALL_SPACES_ID}") is not supported yet; provide explicit space ids.`,
+            },
+          });
+        }
 
         let run: ReturnType<typeof generateExperimentRun>;
         try {
@@ -83,9 +93,6 @@ export const registerRunExperimentRoute = ({
           for (const execution of run.executions) {
             const result = await workflowsManagement.management.executeWorkflow({
               yaml: execution.yaml,
-              // Correlate the (ephemeral) execution with a saved workflow when the
-              // caller launched one, so it appears under that workflow and updates
-              // its "Last run". Omitted for ad-hoc runs, which stay detached.
               ...(body.workflow_id ? { workflowId: body.workflow_id } : {}),
               request,
               spaceId,
