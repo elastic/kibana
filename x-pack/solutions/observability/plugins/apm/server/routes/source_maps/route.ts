@@ -63,29 +63,30 @@ const listSourceMapRoute = createApmServerRoute({
   },
 });
 
+export const uploadSourceMapParams = z.object({
+  body: z.object({
+    service_name: z.string(),
+    service_version: z.string(),
+    bundle_filepath: z.string(),
+    sourcemap: z
+      .union([z.string(), z.instanceof(Buffer).transform((buf): string => buf.toString('utf-8'))])
+      .pipe(
+        z.string().transform((value, ctx): unknown => {
+          try {
+            return JSON.parse(value);
+          } catch (err) {
+            ctx.addIssue({ code: 'custom', message: err.message });
+            return z.NEVER;
+          }
+        })
+      )
+      .pipe(sourceMapSchema),
+  }),
+});
 // Can not migrate to apm-api-shared, it depends on Fleet
 const uploadSourceMapRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
-  params: z.object({
-    body: z.object({
-      service_name: z.string(),
-      service_version: z.string(),
-      bundle_filepath: z.string(),
-      sourcemap: z
-        .union([z.string(), z.instanceof(Buffer).transform((buf) => buf.toString('utf-8'))])
-        .pipe(
-          z.string().transform((value, ctx) => {
-            try {
-              return JSON.parse(value);
-            } catch (err) {
-              ctx.addIssue({ code: 'custom', message: err.message });
-              return z.NEVER;
-            }
-          })
-        )
-        .pipe(sourceMapSchema),
-    }),
-  }),
+  params: uploadSourceMapParams,
   options: {
     body: { accepts: ['multipart/form-data'] },
   },
