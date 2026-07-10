@@ -176,7 +176,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(ruleType).to.be(`Always Firing`);
 
         const owner = await pageObjects.ruleDetailsUI.getAPIKeyOwner();
-        expect(owner).to.be('elastic');
+        expect(owner).to.be('API key owner elastic');
       });
 
       it('renders toast when schedule is less than configured minimum', async () => {
