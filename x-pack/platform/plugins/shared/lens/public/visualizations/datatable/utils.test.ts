@@ -12,6 +12,7 @@ import {
   getProgressBarDomain,
   getDecorationCustomRange,
   getProgressBarPaletteStops,
+  getSolidProgressBarPaletteState,
 } from './utils';
 
 describe('datatable progress bar utils', () => {
@@ -250,6 +251,54 @@ describe('datatable progress bar utils', () => {
         expect(typeof stop.color).toBe('string');
         expect(stop.color.length).toBeGreaterThan(0);
         expect(stop.stop).toBe(bounds.min + expectedStep * index);
+      });
+    });
+  });
+
+  describe('getSolidProgressBarPaletteState', () => {
+    const paletteService = chartPluginMock.createPaletteRegistry();
+
+    it('converts lower-bound meter stops into upper-bound palette stops', () => {
+      expect(
+        getSolidProgressBarPaletteState(
+          paletteService,
+          { min: 0, max: 100 },
+          {
+            type: 'palette',
+            name: 'custom',
+            params: { continuity: 'above', rangeType: 'number' },
+          },
+          ['#aaa', '#bbb', '#ccc'],
+          [20, 50, 80]
+        )
+      ).toEqual({
+        colors: ['#aaa', '#bbb', '#ccc'],
+        gradient: false,
+        stops: [20, 50],
+        range: 'number',
+        rangeMin: 0,
+        rangeMax: 100,
+        continuity: 'above',
+      });
+    });
+
+    it('drops the leading domain anchor when colors are distributed evenly across the range', () => {
+      expect(
+        getSolidProgressBarPaletteState(
+          paletteService,
+          { min: 0, max: 100 },
+          undefined,
+          ['#111', '#222', '#333', '#444'],
+          []
+        )
+      ).toEqual({
+        colors: ['#111', '#222', '#333', '#444'],
+        gradient: false,
+        stops: [25, 50, 75],
+        range: 'number',
+        rangeMin: 0,
+        rangeMax: 100,
+        continuity: undefined,
       });
     });
   });

@@ -789,12 +789,13 @@ describe('datatable cell renderer', () => {
       expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '123');
     });
 
-    it('resolves solid progress-bar fills through the shared cell color lookup', () => {
-      innerCellColorFnMock.mockReturnValueOnce('#663399');
+    it('resolves solid progress-bar fills through a stepped palette over the active bar domain', () => {
+      const getColorForValueSpy = jest.spyOn(paletteServiceMock.get('custom'), 'getColorForValue');
+      getColorForValueSpy.mockReturnValueOnce('#663399');
 
       const columnConfig = progressColumnConfig({
         fillMode: 'solid',
-        valueRange: { mode: 'auto' },
+        valueRange: { mode: 'custom', min: 0, max: 100 },
       });
       columnConfig.columns[0].palette = {
         type: 'palette',
@@ -802,7 +803,7 @@ describe('datatable cell renderer', () => {
         params: {
           colors: ['#24c292', '#f6726a'],
           gradient: true,
-          stops: [0, 100],
+          stops: [50, 100],
           range: 'number',
           rangeMin: 0,
           rangeMax: 100,
@@ -824,20 +825,24 @@ describe('datatable cell renderer', () => {
         </EuiThemeProvider>,
         {
           wrapper: DataContextProviderWrapper({
-            table: baseTable,
-            minMaxByColumnId: defaultMinMaxByColumnId,
+            table: makeTable([{ a: 75 }]),
+            minMaxByColumnId: new Map([['a', { min: 70, max: 90 }]]),
           }),
         }
       );
 
-      expect(cellColorFnMock).toHaveBeenCalledWith(
-        'a',
+      expect(getColorForValueSpy).toHaveBeenCalledWith(
+        75,
         expect.objectContaining({
-          params: expect.objectContaining({ gradient: false }),
+          colors: ['#24c292', '#f6726a'],
+          gradient: false,
+          stops: [50],
+          range: 'number',
+          rangeMin: 0,
+          rangeMax: 100,
         }),
-        undefined
+        { min: 0, max: 100 }
       );
-      expect(innerCellColorFnMock).toHaveBeenCalledWith(123);
       expect(document.querySelector('.echMeterFillPaint')).toHaveStyle({
         backgroundColor: '#663399',
       });

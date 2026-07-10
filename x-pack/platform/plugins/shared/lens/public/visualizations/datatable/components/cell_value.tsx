@@ -23,6 +23,7 @@ import type { CellColorFn } from '../../../shared_components/coloring/get_cell_c
 import {
   getProgressBarDomain,
   getProgressBarPaletteStops,
+  getSolidProgressBarPaletteState,
   DEFAULT_PROGRESS_BAR_COLOR,
 } from '../utils';
 import { parseCellDecorationFillConfig } from '../cell_decoration';
@@ -119,8 +120,8 @@ export const createGridCell = (
       }
       const dataBounds = minMaxByColumnId?.get(getOriginalId(columnId)) ?? getFallbackDataBounds();
       const { min, max } = getProgressBarDomain({ fillStyle, palette }, dataBounds);
-      const gradientStops =
-        fillStyle.fillMode === 'gradient'
+      const resolvedPaletteStops =
+        fillStyle.fillMode !== 'single'
           ? getProgressBarPaletteStops(
               paletteService,
               { min, max },
@@ -129,26 +130,28 @@ export const createGridCell = (
               palette?.params?.stops
             )
           : [];
-      const solidPalette =
-        fillStyle.fillMode === 'solid' && palette?.params
-          ? {
-              ...palette,
-              params: {
-                ...palette.params,
-                gradient: false,
-              },
-            }
-          : palette;
+      const solidPaletteState =
+        fillStyle.fillMode === 'solid'
+          ? getSolidProgressBarPaletteState(
+              paletteService,
+              { min, max },
+              palette,
+              palette?.params?.colors,
+              palette?.params?.stops
+            )
+          : undefined;
       const solidProgressColor =
         fillStyle.fillMode === 'solid'
-          ? getCellColor(columnId, solidPalette, colorMapping)(rawValue) ??
+          ? paletteService
+              .get('custom')
+              .getColorForValue?.(rawValue, solidPaletteState, { min, max }) ??
             DEFAULT_PROGRESS_BAR_COLOR
           : undefined;
       const fill: MeterFill =
         fillStyle.fillMode === 'solid'
           ? {
-              // Solid progress bars should reuse the same by-value color lookup as the
-              // other datatable decoration modes instead of interpolating inside Meter.
+              // Solid progress bars should reuse the stepped palette lookup used by
+              // the other by-value decorations, but against the active bar domain.
               type: MeterFillStyle.Single,
               color: solidProgressColor ?? DEFAULT_PROGRESS_BAR_COLOR,
             }
@@ -157,8 +160,8 @@ export const createGridCell = (
               toMeterColorStops(
                 // Recompute default-palette stops when the serialized palette omits them,
                 // so gradient bars preserve the selected palette rather than falling back.
-                gradientStops.map(({ color }) => color),
-                gradientStops.map(({ stop }) => stop)
+                resolvedPaletteStops.map(({ color }) => color),
+                resolvedPaletteStops.map(({ stop }) => stop)
               ),
               DEFAULT_PROGRESS_BAR_COLOR
             );
@@ -172,16 +175,7 @@ export const createGridCell = (
         labelWidthCh,
         baseline: fillStyle.baseline,
       };
-    }, [
-      renderMode,
-      fillStyle,
-      rawValue,
-      minMaxByColumnId,
-      columnId,
-      palette,
-      formatter,
-      colorMapping,
-    ]);
+    }, [renderMode, fillStyle, rawValue, minMaxByColumnId, columnId, palette, formatter]);
 
     const badgeColor = useMemo(() => {
       if (renderMode !== 'badge') return null;

@@ -33,8 +33,8 @@ import { defaultPaletteParams, findMinMaxByColumnId } from '../../shared_compone
 import { getCellDecorationCapabilities, isAlignmentSupported } from './cell_decoration';
 
 type ProgressBarPaletteParams =
-  | Pick<CustomPaletteParams, 'rangeType' | 'steps' | 'stops'>
-  | Pick<CustomPaletteState, 'range' | 'colors' | 'stops'>;
+  | Pick<CustomPaletteParams, 'continuity' | 'rangeType' | 'steps' | 'stops'>
+  | Pick<CustomPaletteState, 'continuity' | 'range' | 'colors' | 'stops'>;
 
 type ProgressBarPalette = PaletteOutput<ProgressBarPaletteParams>;
 type ProgressBarPaletteStopInput =
@@ -338,6 +338,40 @@ export function getProgressBarPaletteStops(
     getDefaultProgressPalette()
   );
   return fallbackColors ? distributeColorsAcrossDomain(fallbackColors, dataBounds) : [];
+}
+
+/**
+ * Builds a stepped custom-palette state for solid progress-bar fills.
+ *
+ * `Meter` consumes lower-bound stop starts, but `getColorForValue` expects
+ * upper bounds where each color stops applying. The first lower-bound stop
+ * always anchors at the active domain start, so solid lookups drop that anchor
+ * and keep the remaining stop values as the palette's upper bounds.
+ */
+export function getSolidProgressBarPaletteState(
+  paletteService: PaletteRegistry,
+  dataBounds: DataBounds,
+  palette?: ProgressBarPalette,
+  colors?: string[],
+  stops?: ProgressBarPaletteStopInput[]
+): CustomPaletteState {
+  const lowerBoundStops = getProgressBarPaletteStops(
+    paletteService,
+    dataBounds,
+    palette,
+    colors,
+    stops
+  );
+
+  return {
+    colors: lowerBoundStops.map(({ color }) => color),
+    gradient: false,
+    stops: lowerBoundStops.slice(1).map(({ stop }) => stop),
+    range: 'number',
+    rangeMin: dataBounds.min,
+    rangeMax: dataBounds.max,
+    continuity: palette?.params?.continuity,
+  };
 }
 
 /**
