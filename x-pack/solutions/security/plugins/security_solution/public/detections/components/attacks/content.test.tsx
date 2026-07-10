@@ -93,6 +93,11 @@ describe('AttacksPageContent', () => {
             getUpdate$: jest.fn().mockReturnValue(of()),
           },
         },
+        notifications: {
+          tours: {
+            isEnabled: jest.fn().mockReturnValue(false),
+          },
+        },
         telemetry: {
           reportEvent,
         },

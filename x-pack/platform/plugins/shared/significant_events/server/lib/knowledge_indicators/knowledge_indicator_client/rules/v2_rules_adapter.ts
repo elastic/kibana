@@ -12,10 +12,8 @@ import type { Logger } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { stripMetadata, deriveQueryType } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import {
-  MATCH_LOOKBACK_MINUTES,
-  MAX_ALERTS_PER_EXECUTION,
-} from '../../../significant_events/rules/esql/common';
+import { MAX_ALERTS_PER_EXECUTION } from '../../../significant_events/rules/esql/common';
+import { getRuleLookbackInterval } from '../../../significant_events/rules/schedule';
 import {
   STREAMS_RULE_CONSUMER,
   STREAMS_ESQL_RULE_TYPE_ID,
@@ -26,8 +24,6 @@ import {
 } from './rules_management_client';
 
 const FIND_PAGE_SIZE = 500;
-
-const V2_MATCH_LOOKBACK = `${MATCH_LOOKBACK_MINUTES}m` as const;
 
 /**
  * Wraps alerting_v2 `RulesClientApi` to implement IRulesManagementClient.
@@ -148,8 +144,8 @@ function toV2Tags(v1Tags: string[]): string[] {
  * v2 grouping fields for SigEvents MATCH queries.
  *
  * Each MATCH row corresponds to one source document; using `_id` makes the group hash
- * stable across overlapping evaluation windows (with `lookback: 2m` and `every: 1m`,
- * adjacent runs see the same documents). v1 additionally dedupes re-emissions via
+ * stable across overlapping evaluation windows (`lookback` is 2x `every`, so adjacent
+ * runs see the same documents). v1 additionally dedupes re-emissions via
  * executor state; v2 may index the same breached row on each run until recovery.
  * Without an explicit grouping, v2 falls
  * back to a per-row hash that includes the execution UUID, producing a fresh group on
@@ -190,7 +186,10 @@ function toV2CreateBody(body: CreateRuleBody) {
       tags: toV2Tags(body.tags),
     },
     time_field: body.params.timestampField,
-    schedule: { every: body.schedule.interval, lookback: V2_MATCH_LOOKBACK },
+    schedule: {
+      every: body.schedule.interval,
+      lookback: getRuleLookbackInterval(body.schedule.interval),
+    },
     grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
     query: {
       format: 'standalone' as const,
@@ -207,7 +206,10 @@ function toV2UpdateBody(body: UpdateRuleBody) {
       tags: toV2Tags(body.tags),
     },
     time_field: body.params.timestampField,
-    schedule: { every: body.schedule.interval, lookback: V2_MATCH_LOOKBACK },
+    schedule: {
+      every: body.schedule.interval,
+      lookback: getRuleLookbackInterval(body.schedule.interval),
+    },
     grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
     query: {
       format: 'standalone' as const,
