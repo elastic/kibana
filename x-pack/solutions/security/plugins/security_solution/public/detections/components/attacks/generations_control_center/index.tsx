@@ -122,7 +122,7 @@ const GenerationsControlCenterFlyoutComponent: React.FC<Props> = ({
             http={http}
             onClose={onClose}
           />
-        ) : nonDismissedCount === 0 ? (
+        ) : generationsData != null && nonDismissedCount === 0 ? (
           <EuiEmptyPrompt
             data-test-subj={GENERATIONS_CONTROL_CENTER_EMPTY_STATE_TEST_ID}
             title={<h2>{i18n.NO_GENERATIONS_TITLE}</h2>}

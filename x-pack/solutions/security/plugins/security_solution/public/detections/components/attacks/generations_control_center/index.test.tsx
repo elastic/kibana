@@ -120,6 +120,24 @@ describe('GenerationsControlCenterFlyout', () => {
     expect(screen.getByTestId(GENERATIONS_CONTROL_CENTER_EMPTY_STATE_TEST_ID)).toBeInTheDocument();
   });
 
+  it('does NOT render the empty state before the generations request resolves', () => {
+    mockUseGetAttackDiscoveryGenerations.mockReturnValue({
+      cancelRequest: jest.fn(),
+      data: undefined,
+      refetch: jest.fn(),
+    });
+
+    render(
+      <TestProviders>
+        <GenerationsControlCenterFlyout {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(
+      screen.queryByTestId(GENERATIONS_CONTROL_CENTER_EMPTY_STATE_TEST_ID)
+    ).not.toBeInTheDocument();
+  });
+
   it('switches to the detail view when "View details" is triggered', async () => {
     render(
       <TestProviders>
