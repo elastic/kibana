@@ -85,6 +85,7 @@ export {
   getFromSources,
   getStatsQueryHints,
   hasStatsCommand,
+  insertSampleAfterFrom,
   MS_PER_UNIT,
   normalizeEsqlQuery,
   normalizeEsqlSafe,

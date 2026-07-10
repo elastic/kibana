@@ -8,14 +8,7 @@
 import objectHash from 'object-hash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { getSampleDocumentsEsql } from './get_sample_documents';
 import { getDiverseSampleDocuments } from './get_diverse_sample_documents';
-
-jest.mock('./get_sample_documents', () => ({
-  getSampleDocumentsEsql: jest.fn(),
-}));
-
-const getSampleDocumentsEsqlMock = jest.mocked(getSampleDocumentsEsql);
 
 const createEsClient = () => {
   const query = jest.fn();
@@ -30,8 +23,6 @@ const logger = {
   warn: jest.fn(),
   debug: jest.fn(),
 } as unknown as Logger;
-
-const signal = new AbortController().signal;
 
 const countResponse = (total: number) => ({
   columns: [{ name: 'total', type: 'long' }],
@@ -120,7 +111,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      signal,
+      requestTimeout: 30_000,
       index: ['logs-a', 'logs-b'],
       start: 100,
       end: 200,
@@ -158,7 +149,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      signal,
+      requestTimeout: 30_000,
       index: '$.query',
       start: 100,
       end: 200,
@@ -187,7 +178,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      signal,
+      requestTimeout: 30_000,
       index: 'logs.otel.android',
       start: 100,
       end: 200,
@@ -214,7 +205,7 @@ describe('getDiverseSampleDocuments', () => {
 
     await getDiverseSampleDocuments({
       esClient,
-      signal,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -232,7 +223,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      signal,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -245,19 +236,15 @@ describe('getDiverseSampleDocuments', () => {
     expect(result).toEqual({ hits: [] });
   });
 
-  it('falls back to random ES|QL sampling when no message field exists', async () => {
+  it('returns no hits when no message field exists (backfilled by the caller\'s random arm)', async () => {
     const { esClient, query } = createEsClient();
     query
       .mockResolvedValueOnce(schemaResponse([{ name: 'host.name', type: 'keyword' }]))
       .mockResolvedValueOnce(countResponse(10));
-    getSampleDocumentsEsqlMock.mockResolvedValueOnce({
-      hits: [{ _index: 'logs-a', _id: 'doc-1', _source: { event: 'one' } }],
-      total: 1,
-    });
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      signal,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -266,16 +253,8 @@ describe('getDiverseSampleDocuments', () => {
       logger,
     });
 
-    expect(getSampleDocumentsEsqlMock).toHaveBeenCalledWith({
-      esClient,
-      signal,
-      index: 'logs-*',
-      start: 100,
-      end: 200,
-      sampleSize: 1,
-    });
     expect(query).toHaveBeenCalledTimes(2);
-    expect(result.hits).toEqual([{ _index: 'logs-a', _id: 'doc-1', _source: { event: 'one' } }]);
+    expect(result).toEqual({ hits: [] });
   });
 
   it('uses body.text when it is the first available text field candidate', async () => {
@@ -293,7 +272,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      signal,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -324,7 +303,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      signal,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -351,7 +330,7 @@ describe('getDiverseSampleDocuments', () => {
 
     const result = await getDiverseSampleDocuments({
       esClient,
-      signal,
+      requestTimeout: 30_000,
       index: ['logs-a', 'logs-b'],
       start: 100,
       end: 200,

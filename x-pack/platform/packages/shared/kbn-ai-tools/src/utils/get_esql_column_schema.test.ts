@@ -8,6 +8,8 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getEsqlColumnSchema } from './get_esql_column_schema';
 
+const signal = new AbortController().signal;
+
 const createEsClient = () => {
   const query = jest.fn();
   return {
@@ -15,8 +17,6 @@ const createEsClient = () => {
     query,
   };
 };
-
-const signal = new AbortController().signal;
 
 describe('getEsqlColumnSchema', () => {
   beforeEach(() => {

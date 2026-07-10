@@ -21,11 +21,27 @@ const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits
 type SamplingStrategy = 'entity-filtered' | 'diverse' | 'random';
 
 /**
- * Each sampling arm gets its own deadline, but arms run concurrently via
- * `Promise.all`, so `samplingTimeoutMs` is not additive across them.
+ * The random arm is intentionally not caught (see call sites): unlike
+ * diverse/entity-filtered, it's a simple query that is not expected to fail,
+ * and it's the backfill bucket the other arms fall back to, so a failure
+ * here should hard-fail the call rather than degrade silently. Wrap it so
+ * whatever does fail is reported with the sampling context instead of a
+ * bare "Request timed out".
  */
-const armDeadline = (signal: AbortSignal, samplingTimeoutMs: number): AbortSignal =>
-  AbortSignal.any([signal, AbortSignal.timeout(samplingTimeoutMs)]);
+const withRandomSamplingErrorContext = async <T>(
+  promise: Promise<T>,
+  samplingTimeoutMs: number
+): Promise<T> => {
+  try {
+    return await promise;
+  } catch (err) {
+    throw new Error(
+      `Random sampling query failed (samplingTimeoutMs=${samplingTimeoutMs}ms): ${
+        parseError(err).message
+      }`
+    );
+  }
+};
 
 export async function fetchSampleDocuments({
   esClient,
@@ -39,7 +55,6 @@ export async function fetchSampleDocuments({
   diverseRatio,
   maxEntityFilters,
   diverseOffset = 0,
-  signal,
   samplingTimeoutMs,
 }: {
   esClient: ElasticsearchClient;
@@ -53,7 +68,6 @@ export async function fetchSampleDocuments({
   diverseRatio: number;
   diverseOffset?: number;
   maxEntityFilters: number;
-  signal: AbortSignal;
   samplingTimeoutMs: number;
 }) {
   if (entityFilteredRatio < 0 || diverseRatio < 0) {
@@ -88,31 +102,31 @@ export async function fetchSampleDocuments({
                 size: diverseSize,
                 offset: diverseOffset,
                 logger,
-                signal: armDeadline(signal, samplingTimeoutMs),
+                requestTimeout: samplingTimeoutMs,
               })
           ).catch((err) => {
             logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
             return EMPTY_SAMPLE;
           })
         : Promise.resolve(EMPTY_SAMPLE),
-      withSpan(
-        {
-          name: 'sample_documents_random',
-          labels: { stream: index, strategy: 'random', sampleSize: String(size) },
-        },
-        () =>
-          getSampleDocumentsEsql({
-            esClient,
-            index,
-            start,
-            end,
-            sampleSize: size,
-            signal: armDeadline(signal, samplingTimeoutMs),
-          })
-      ).catch((err) => {
-        logger.warn(`Random sampling query failed: ${parseError(err).message}`);
-        return EMPTY_SAMPLE;
-      }),
+      withRandomSamplingErrorContext(
+        withSpan(
+          {
+            name: 'sample_documents_random',
+            labels: { stream: index, strategy: 'random', sampleSize: String(size) },
+          },
+          () =>
+            getSampleDocumentsEsql({
+              esClient,
+              index,
+              start,
+              end,
+              sampleSize: size,
+              requestTimeout: samplingTimeoutMs,
+            })
+        ),
+        samplingTimeoutMs
+      ),
     ]);
 
     const { documents, bucketCounts } = mergeDocuments(
@@ -163,7 +177,7 @@ export async function fetchSampleDocuments({
             sampleSize: entityFilteredSize,
             whereCondition,
             unmappedFields: 'LOAD',
-            signal: armDeadline(signal, samplingTimeoutMs),
+            requestTimeout: samplingTimeoutMs,
           })
       ).catch((err) => {
         logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
@@ -188,31 +202,31 @@ export async function fetchSampleDocuments({
                 size: diverseSize + entityFilteredSize,
                 offset: diverseOffset,
                 logger,
-                signal: armDeadline(signal, samplingTimeoutMs),
+                requestTimeout: samplingTimeoutMs,
               })
           ).catch((err) => {
             logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
             return EMPTY_SAMPLE;
           })
         : Promise.resolve(EMPTY_SAMPLE),
-      withSpan(
-        {
-          name: 'sample_documents_random',
-          labels: { stream: index, strategy: 'random', sampleSize: String(size) },
-        },
-        () =>
-          getSampleDocumentsEsql({
-            esClient,
-            index,
-            start,
-            end,
-            sampleSize: size,
-            signal: armDeadline(signal, samplingTimeoutMs),
-          })
-      ).catch((err) => {
-        logger.warn(`Random sampling query failed: ${parseError(err).message}`);
-        return EMPTY_SAMPLE;
-      }),
+      withRandomSamplingErrorContext(
+        withSpan(
+          {
+            name: 'sample_documents_random',
+            labels: { stream: index, strategy: 'random', sampleSize: String(size) },
+          },
+          () =>
+            getSampleDocumentsEsql({
+              esClient,
+              index,
+              start,
+              end,
+              sampleSize: size,
+              requestTimeout: samplingTimeoutMs,
+            })
+        ),
+        samplingTimeoutMs
+      ),
     ]);
 
   const { documents, bucketCounts } = mergeDocuments(

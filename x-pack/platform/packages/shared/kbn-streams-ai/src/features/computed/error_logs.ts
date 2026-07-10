@@ -63,7 +63,7 @@ This is useful for understanding error patterns, identifying recurring issues, a
       sampleSize: SAMPLE_SIZE,
       whereCondition: ERROR_WHERE_CONDITION,
       unmappedFields: 'NULLIFY',
-      signal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
+      requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
     });
 
     return {

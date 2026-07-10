@@ -27,16 +27,21 @@ export async function describeDataset({
   index: string | string[];
   kql?: string;
 }) {
-  const signal = AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
   const [columns, sampleDocs, total] = await Promise.all([
-    getEsqlColumnSchema({ esClient, index, start, end, signal }),
+    getEsqlColumnSchema({
+      esClient,
+      index,
+      start,
+      end,
+      signal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
+    }),
     getSampleDocumentsEsql({
       esClient,
       index,
       start,
       end,
       kql,
-      signal,
+      requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
     }),
     runEsqlPopulationCount({ esClient, index, start, end, kql }),
   ]);

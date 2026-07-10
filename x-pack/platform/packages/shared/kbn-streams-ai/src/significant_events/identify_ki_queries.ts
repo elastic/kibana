@@ -13,6 +13,7 @@ import {
   ensureMetadata,
   getSourcesForStream,
   getStatsQueryHints,
+  insertSampleAfterFrom,
   normalizeEsqlSafe,
   replaceFromSources,
 } from '@kbn/streams-schema';
@@ -43,6 +44,49 @@ import {
 
 export const DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
 
+export const DEFAULT_QUERY_VALIDATION_TIMEOUT_MS = 10_000;
+
+export const MAX_VALIDATION_SAMPLE_DOCS = 100_000;
+
+const VALIDATION_SAMPLE_COUNT_TIMEOUT_MS = 5_000;
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+async function computeValidationSampleProbability({
+  esClient,
+  index,
+  signal,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  index: string[];
+  signal: AbortSignal;
+  logger: Logger;
+}): Promise<number> {
+  if (index.length === 0) return 1;
+  try {
+    const { count } = await esClient.count(
+      { index, allow_no_indices: true, ignore_unavailable: true },
+      {
+        signal: AbortSignal.any([signal, AbortSignal.timeout(VALIDATION_SAMPLE_COUNT_TIMEOUT_MS)]),
+      }
+    );
+    if (count <= 0) return 1;
+    const probability = MAX_VALIDATION_SAMPLE_DOCS / count;
+    return probability < 0.5 ? probability : 1;
+  } catch (error) {
+    logger.debug(
+      () =>
+        `Failed to compute validation sample probability for [${index.join(
+          ', '
+        )}]; falling back to no SAMPLE: ${getErrorMessage(error)}`
+    );
+    return 1;
+  }
+}
+
 export interface ExistingQuerySummary {
   id: string;
   title: string;
@@ -69,10 +113,6 @@ interface ParsedToolQuery {
   features: QueryFeature[];
 }
 
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
 /**
  * Generate KI queries using a reasoning agent that fetches
  * stream features (including computed dataset analysis) via tool calls.
@@ -90,6 +130,7 @@ export async function identifyKIQueries({
   existingQueries,
   maxExistingQueriesForContext = DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   maxSteps,
+  queryValidationTimeoutMs = DEFAULT_QUERY_VALIDATION_TIMEOUT_MS,
 }: {
   stream: Streams.all.Definition;
   esClient: ElasticsearchClient;
@@ -112,6 +153,7 @@ export async function identifyKIQueries({
    * tools (e.g. code grounding) add round-trips.
    */
   maxSteps?: number;
+  queryValidationTimeoutMs?: number;
 }): Promise<{
   queries: ParsedToolQuery[];
   tokensUsed: ChatCompletionTokenCount;
@@ -123,6 +165,21 @@ export async function identifyKIQueries({
 
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt, additionalTools });
   const targetSources = getSourcesForStream(stream);
+
+  const validationSampleProbability = await computeValidationSampleProbability({
+    esClient,
+    index: targetSources,
+    signal,
+    logger,
+  });
+  if (validationSampleProbability < 1) {
+    logger.debug(
+      () =>
+        `Using SAMPLE ${validationSampleProbability} for query validation on [${targetSources.join(
+          ', '
+        )}]`
+    );
+  }
 
   const existingQueriesList = existingQueries ?? [];
 
@@ -276,12 +333,22 @@ export async function identifyKIQueries({
 
                 const hints = getStatsQueryHints(rewritten);
 
+                const validationQuery = insertSampleAfterFrom(
+                  rewritten,
+                  validationSampleProbability
+                );
+
                 await esClient.esql.query(
                   {
-                    query: `${rewritten}\n| LIMIT 0`,
+                    query: `${validationQuery}\n| LIMIT 0`,
                     format: 'json',
                   },
-                  { signal, requestTimeout: '10s' }
+                  {
+                    signal: AbortSignal.any([
+                      signal,
+                      AbortSignal.timeout(queryValidationTimeoutMs),
+                    ]),
+                  }
                 );
 
                 validatedQueries.push({
@@ -310,6 +377,10 @@ export async function identifyKIQueries({
                 };
               } catch (error) {
                 hasFailures = true;
+                logger.debug(
+                  () =>
+                    `ES|QL validation for query "${query.title}" failed: ${getErrorMessage(error)}`
+                );
                 return {
                   query,
                   valid: false,

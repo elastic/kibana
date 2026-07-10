@@ -30,7 +30,7 @@ This is useful for understanding the format of logs, identifying patterns, and s
       start,
       end,
       sampleSize: SAMPLE_SIZE,
-      signal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
+      requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
     });
 
     return {

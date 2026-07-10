@@ -197,6 +197,39 @@ export function ensureMetadata(esql: string): string {
 }
 
 /**
+ * Injects `| SAMPLE <probability>` immediately after the FROM command.
+ *
+ * Returns the input unchanged when `probability` is not in the open interval
+ * `(0, 1)`, when there is no FROM clause, or when parsing fails.
+ */
+export function insertSampleAfterFrom(esql: string, probability: number): string {
+  if (!Number.isFinite(probability) || probability <= 0 || probability >= 1) {
+    return esql;
+  }
+
+  let parsed: ReturnType<typeof parseFromCommand>;
+  try {
+    parsed = parseFromCommand(esql);
+  } catch {
+    return esql;
+  }
+  const { root, fromCmd } = parsed;
+  if (!fromCmd) return esql;
+
+  const fromIdx = root.commands.indexOf(fromCmd);
+  const sampleCmd = Builder.command({
+    name: 'sample',
+    args: [Builder.expression.literal.decimal(probability)],
+  });
+  const updatedCommands = [
+    ...root.commands.slice(0, fromIdx + 1),
+    sampleCmd,
+    ...root.commands.slice(fromIdx + 1),
+  ] as ESQLCommand[];
+  return BasicPrettyPrinter.print(Builder.expression.query(updatedCommands));
+}
+
+/**
  * Removes METADATA columns from the FROM clause.
  *
  * - `stripMetadata(esql)` — drops the entire METADATA option (inverse of

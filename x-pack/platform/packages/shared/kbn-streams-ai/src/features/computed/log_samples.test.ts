@@ -55,7 +55,7 @@ describe('logSamplesGenerator', () => {
       start: 100,
       end: 200,
       sampleSize: 5,
-      signal: expect.any(AbortSignal),
+      requestTimeout: expect.any(Number),
     });
     expect(result).toEqual({
       samples: [{ 'service.name': 'checkout', message: 'checkout succeeded' }],

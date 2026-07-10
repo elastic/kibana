@@ -265,7 +265,6 @@ async function runInferredIteration({
     diverseRatio,
     maxEntityFilters,
     diverseOffset,
-    signal,
     samplingTimeoutMs,
   });
 

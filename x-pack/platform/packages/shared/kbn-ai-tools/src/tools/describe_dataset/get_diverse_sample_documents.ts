@@ -22,7 +22,6 @@ import {
   getEsqlDocumentId,
   parseEsqlSourceDocuments,
 } from '../../utils/parse_esql_source_documents';
-import { getSampleDocumentsEsql } from './get_sample_documents';
 
 const MESSAGE_FIELD_CANDIDATES = ['message', 'body.text'];
 const MAX_DOCS_TO_SAMPLE = 100_000;
@@ -39,7 +38,7 @@ interface GetDiverseSampleDocumentsOptions {
   offset: number;
   size?: number;
   logger: Logger;
-  signal: AbortSignal;
+  requestTimeout: number;
 }
 
 export async function getDiverseSampleDocuments({
@@ -50,34 +49,29 @@ export async function getDiverseSampleDocuments({
   size = 100,
   offset,
   logger,
-  signal,
+  requestTimeout,
 }: GetDiverseSampleDocumentsOptions): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
   const timeRangeFilter = dateRangeQuery(start, end);
   const filter = { bool: { filter: timeRangeFilter } };
   const indices = Array.isArray(index) ? index : [index];
+
+  // One deadline for the whole call: this can issue several sequential
+  // requests (schema/count, categorize, one or more source-fetch rounds), and
+  // a fresh per-request timeout would let `requestTimeout` be exceeded many
+  // times over. Sharing one signal means later requests only get whatever
+  // time earlier ones left.
+  const signal = AbortSignal.timeout(requestTimeout);
 
   const [messageField, totalDocs] = await Promise.all([
     detectMessageField({ esClient, index, start, end, signal }),
     runEsqlCount({ esClient, indices, filter, signal }),
   ]);
 
-  if (totalDocs === 0) {
+  if (totalDocs === 0 || !messageField) {
+    // No message-like text field to categorize by: the caller's own random
+    // sampling arm already covers this case as a backfill, so there's nothing
+    // useful for this arm to contribute.
     return { hits: [] };
-  }
-
-  if (!messageField) {
-    // The old DSL path fell back to plain random sampling when no log-message
-    // text field was available. Keep that behavior, but use the ES|QL sampler so
-    // this retrieval path no longer depends on search hits/fields.
-    const { hits } = await getSampleDocumentsEsql({
-      esClient,
-      index,
-      start,
-      end,
-      sampleSize: size,
-      signal,
-    });
-    return { hits };
   }
 
   // The SAMPLE probability mirrors the previous DSL random_sampler cap:

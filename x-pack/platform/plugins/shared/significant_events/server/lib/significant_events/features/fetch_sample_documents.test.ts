@@ -54,8 +54,6 @@ const logger = {
   warn: jest.fn(),
 } as unknown as Logger;
 
-const signal = new AbortController().signal;
-
 describe('fetchSampleDocuments', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -71,7 +69,6 @@ describe('fetchSampleDocuments', () => {
       logger,
       size: 5,
       maxEntityFilters: 10,
-      signal,
       samplingTimeoutMs: 30_000,
     };
 
@@ -110,7 +107,6 @@ describe('fetchSampleDocuments', () => {
       entityFilteredRatio: 0.4,
       diverseRatio: 0,
       maxEntityFilters: 10,
-      signal,
       samplingTimeoutMs: 30_000,
     });
 
@@ -120,7 +116,7 @@ describe('fetchSampleDocuments', () => {
       start: 100,
       end: 200,
       sampleSize: 5,
-      signal: expect.any(AbortSignal),
+      requestTimeout: 30_000,
     });
     expect(getDiverseSampleDocumentsMock).not.toHaveBeenCalled();
     expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
@@ -160,7 +156,6 @@ describe('fetchSampleDocuments', () => {
       entityFilteredRatio: 0.4,
       diverseRatio: 0.2,
       maxEntityFilters: 1,
-      signal,
       samplingTimeoutMs: 30_000,
     });
 
@@ -173,7 +168,7 @@ describe('fetchSampleDocuments', () => {
         end: 200,
         sampleSize: 4,
         unmappedFields: 'LOAD',
-        signal: expect.any(AbortSignal),
+        requestTimeout: 30_000,
       })
     );
     expect(BasicPrettyPrinter.print(entityFilteredCall.whereCondition!)).toBe(
@@ -188,7 +183,7 @@ describe('fetchSampleDocuments', () => {
       size: 6,
       offset: 0,
       logger,
-      signal: expect.any(AbortSignal),
+      requestTimeout: 30_000,
     });
     expect(getSampleDocumentsEsqlMock.mock.calls[1][0]).toEqual({
       esClient,
@@ -196,7 +191,7 @@ describe('fetchSampleDocuments', () => {
       start: 100,
       end: 200,
       sampleSize: 10,
-      signal: expect.any(AbortSignal),
+      requestTimeout: 30_000,
     });
     expect(esClient.fieldCaps).not.toHaveBeenCalled();
     expect(result.documents.map((document) => document._id)).toEqual([
@@ -234,7 +229,6 @@ describe('fetchSampleDocuments', () => {
       entityFilteredRatio: 0.4,
       diverseRatio: 0,
       maxEntityFilters: 10,
-      signal,
       samplingTimeoutMs: 30_000,
     });
 
