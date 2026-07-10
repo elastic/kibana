@@ -108,10 +108,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
                 <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>
                   <span>{migrationPanelDescription}</span>
                   {!isLoadingMissingResources && missingResourceCount > 0 && (
-                    <span>
-                      {' '}
-                      {missingResourcesCopy.readyDescription}
-                    </span>
+                    <span> {missingResourcesCopy.readyDescription}</span>
                   )}
                 </PanelText>
               </EuiFlexItem>
