@@ -80,15 +80,23 @@ export const registerSaveExperimentWorkflowRoute = ({
         const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
         try {
-          const created = await workflowsManagement.management.createWorkflow(
-            { yaml: workflow.yaml },
-            spaceId,
-            request
-          );
-          const responseBody: SaveAsWorkflowResponse = {
-            workflow_id: created.id,
-            name: created.name,
-          };
+          let responseBody: SaveAsWorkflowResponse;
+          if (body.workflow_id) {
+            await workflowsManagement.management.updateWorkflow(
+              body.workflow_id,
+              { yaml: workflow.yaml },
+              spaceId,
+              request
+            );
+            responseBody = { workflow_id: body.workflow_id, name: workflow.name };
+          } else {
+            const created = await workflowsManagement.management.createWorkflow(
+              { yaml: workflow.yaml },
+              spaceId,
+              request
+            );
+            responseBody = { workflow_id: created.id, name: created.name };
+          }
           return response.ok({ body: responseBody });
         } catch (error) {
           logger.error(

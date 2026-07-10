@@ -72,7 +72,6 @@ interface DatasetStatsAccordionProps {
   selectedExampleId?: string | null;
   onTraceClick: (traceId: string, exampleId: string) => void;
   onDatasetToggle: (datasetId: string, isOpen: boolean) => void;
-  onExampleClick: (exampleId: string) => void;
 }
 
 const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
@@ -86,7 +85,6 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
   selectedExampleId,
   onTraceClick,
   onDatasetToggle,
-  onExampleClick,
 }) => {
   const history = useHistory();
   const {
@@ -150,7 +148,6 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
           <ExampleScoresTable
             examples={datasetExamples?.examples ?? []}
             selectedExampleId={selectedExampleId}
-            onExampleClick={onExampleClick}
             onTraceClick={onTraceClick}
           />
         )}
@@ -286,19 +283,6 @@ export const ExperimentDetailPage: React.FC = () => {
           params.delete('dataset_id');
           params.delete('example_id');
           params.delete('trace_id');
-        }
-      });
-    },
-    [updateSearchParams]
-  );
-
-  const setSelectedExample = useCallback(
-    (exampleId: string | null) => {
-      updateSearchParams((params) => {
-        if (exampleId) {
-          params.set('example_id', exampleId);
-        } else {
-          params.delete('example_id');
         }
       });
     },
@@ -618,7 +602,6 @@ export const ExperimentDetailPage: React.FC = () => {
                   onDatasetToggle={(targetDatasetId, nextIsOpen) =>
                     setOpenDatasetId(nextIsOpen ? targetDatasetId : null)
                   }
-                  onExampleClick={(exampleId) => setSelectedExample(exampleId)}
                 />
               ))}
             </>

@@ -24,34 +24,46 @@ export const SaveAsWorkflowButton: React.FC<SaveAsWorkflowButtonProps> = ({
   const { services } = useKibana();
   const toasts = services.notifications?.toasts;
   const saveWorkflow = useSaveExperimentWorkflow();
-  const [isSaved, setIsSaved] = useState(false);
+  const [savedWorkflowId, setSavedWorkflowId] = useState<string | undefined>(request.workflow_id);
 
   const onSave = useCallback(() => {
-    saveWorkflow.mutate(request, {
-      onSuccess: (result) => {
-        setIsSaved(true);
-        toasts?.addSuccess(
-          i18n.translate('xpack.evals.saveAsWorkflowButton.success', {
-            defaultMessage: 'Saved workflow "{name}".',
-            values: { name: result.name },
-          })
-        );
-      },
-      onError: (error) => {
-        toasts?.addError(error as Error, {
-          title: i18n.translate('xpack.evals.saveAsWorkflowButton.error', {
-            defaultMessage: 'Failed to save workflow',
-          }),
-        });
-      },
-    });
-  }, [request, saveWorkflow, toasts]);
+    saveWorkflow.mutate(
+      { ...request, workflow_id: savedWorkflowId },
+      {
+        onSuccess: (result) => {
+          setSavedWorkflowId(result.workflow_id);
+          toasts?.addSuccess(
+            i18n.translate('xpack.evals.saveAsWorkflowButton.success', {
+              defaultMessage: 'Saved workflow "{name}".',
+              values: { name: result.name },
+            })
+          );
+        },
+        onError: (error) => {
+          toasts?.addError(error as Error, {
+            title: i18n.translate('xpack.evals.saveAsWorkflowButton.error', {
+              defaultMessage: 'Failed to save workflow',
+            }),
+          });
+        },
+      }
+    );
+  }, [request, savedWorkflowId, saveWorkflow, toasts]);
 
-  if (isSaved) {
+  if (savedWorkflowId) {
+    const href = services.http?.basePath.prepend(
+      `/app/workflows/${encodeURIComponent(savedWorkflowId)}`
+    );
     return (
-      <EuiButton size={size} iconType="check" isDisabled data-test-subj="evalsSaveAsWorkflowSaved">
-        {i18n.translate('xpack.evals.saveAsWorkflowButton.saved', {
-          defaultMessage: 'Saved as workflow',
+      <EuiButton
+        size={size}
+        iconType="popout"
+        href={href}
+        target="_blank"
+        data-test-subj="evalsSaveAsWorkflowSaved"
+      >
+        {i18n.translate('xpack.evals.saveAsWorkflowButton.openSaved', {
+          defaultMessage: 'Open saved workflow',
         })}
       </EuiButton>
     );
