@@ -131,6 +131,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Cases
   'cases-management',
+  'cases-analytics',
 
   // Platform – Alerting
   'rule-management',
