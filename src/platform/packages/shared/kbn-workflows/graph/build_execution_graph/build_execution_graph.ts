@@ -10,7 +10,10 @@
 import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import { GraphBuildError } from './graph_build_error';
-import { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT } from '../../common/wait_for_approval';
+import {
+  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
+  isHitlWaitStepType,
+} from '../../common/wait_for_approval';
 import { DEFAULT_LOOP_MAX_ITERATIONS } from '../../spec/schema';
 import type {
   BaseStep,
@@ -1122,19 +1125,18 @@ function buildParallelBranchBody(
 
   // The parallel executor drives each branch in-process. Timer-based `wait`
   // steps are supported: a waiting branch parks across ticks and the parallel
-  // re-ticks at the earliest branch `resumeAt`. `waitForInput`, however, is an
-  // indefinite, externally-resumed wait that has no per-branch resume signal,
-  // so it cannot run inside a branch yet — reject it at compile time instead of
-  // hanging the branch at runtime.
-  const UNSUPPORTED_BRANCH_NODE_TYPES = new Set(['waitForInput']);
+  // re-ticks at the earliest branch `resumeAt`. HITL waits, however, are
+  // indefinite, externally-resumed waits that have no per-branch resume signal,
+  // so they cannot run inside a branch yet — reject them at compile time instead
+  // of hanging or self-resuming the branch at runtime.
   const unsupportedNode = bodyGraph
     .nodes()
     .map((nodeId) => bodyGraph.node(nodeId))
-    .find((bodyNode) => UNSUPPORTED_BRANCH_NODE_TYPES.has(bodyNode?.type as string));
+    .find((bodyNode) => isHitlWaitStepType(bodyNode?.type));
   if (unsupportedNode) {
     throw new GraphBuildError(
-      `Parallel step "${stepId}" has a branch body containing an unsupported step type "${unsupportedNode.stepType}". ` +
-        `"waitForInput" steps are not supported inside a parallel branch yet.`,
+      `Parallel step "${stepId}" has a branch body containing an unsupported HITL wait step "${unsupportedNode.stepType}". ` +
+        `HITL wait steps are not supported inside a parallel branch yet.`,
       stepId
     );
   }

@@ -30,7 +30,7 @@ import type { UserActionPersistedAttributes } from '../../common/types/user_acti
  *   - `attributes.created_by` → `actor.*`. The SO calls every "who did
  *     this" field `created_by`, but for a user action the relevant
  *     person is the actor.
- *   - `references[case]` → `cases.id`, denormalized for ES|QL
+ *   - `references[case]` → `case.id`, denormalized for ES|QL
  *     `LOOKUP JOIN`.
  *   - `attributes.created_at` → `@timestamp` so Discover/Lens time UX
  *     works without an extra transform.
@@ -44,7 +44,7 @@ export interface ActivityAnalyticsDoc {
   // `mappings/activity.ts`.
   space_id: string;
   owner: string;
-  cases: {
+  case: {
     id: string;
   };
   actor: ActivityActorDoc;
@@ -85,7 +85,7 @@ interface ActivityActorDoc {
  * `references[]` with `name === 'associated-cases'` and
  * `type === 'cases'` (see `services/user_actions/transform.ts`).
  * `pickCaseId` reads the `id` off that reference; if it's missing
- * (malformed SO, not expected in practice) `cases.id` is set to the
+ * (malformed SO, not expected in practice) `case.id` is set to the
  * empty string so the strict mapping still accepts the doc and
  * reconciliation can re-emit a corrected version once upstream is fixed.
  */
@@ -108,7 +108,7 @@ export function buildActivityDoc(
     // `space_id` is the singular scalar the DLS convention expects.
     space_id: so.namespaces?.[0] ?? 'default',
     owner: a.owner,
-    cases: {
+    case: {
       id: caseId,
     },
     actor: toActor(a.created_by),

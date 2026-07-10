@@ -13,8 +13,7 @@ import type { OnUpdateFields } from '../../../../case_view/types';
 import { PAGE_TITLE } from '../../../../../common/translations';
 import { useCasesContext } from '../../../../cases_context/use_cases_context';
 import { ConfirmDeleteCaseModal } from '../../../../confirm_delete_case';
-import { CaseSettingsPopover } from '../case_settings_popover';
-
+import { CaseSettingsPopover } from './case_settings_popover';
 import { useCaseViewHeader } from './hooks/use_case_view_header';
 import { useCloseCaseFlow } from './hooks/use_close_case_flow';
 
@@ -77,7 +76,6 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
       )}
       {settingsAnchor && permissions.update && (
         <CaseSettingsPopover
-          caseData={caseData}
           syncAlerts={caseData.settings.syncAlerts}
           onSyncAlertsChange={onSyncAlertsChanged}
           showMetrics={showMetrics}
