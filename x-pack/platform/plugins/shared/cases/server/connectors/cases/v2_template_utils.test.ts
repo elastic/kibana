@@ -67,6 +67,25 @@ describe('parseTemplateDefinition', () => {
     const result = parseTemplateDefinition('description: "no name"\nfields: []');
     expect(result).toBeNull();
   });
+
+  it('parses a YAML 1.1 legacy boolean-like scalar as a plain string, matching the UI parser', () => {
+    // js-yaml (YAML 1.1) resolves `no` as a boolean; the `yaml` package (YAML 1.2, used by
+    // the UI/routes) resolves it as the string "no". Both parsers must agree here, otherwise
+    // the connector's `extended_fields` diverge from what the template form pre-fills.
+    const yamlWithLegacyScalarDefault = `
+name: "Legacy scalar"
+fields:
+  - name: field_a
+    type: keyword
+    control: INPUT_TEXT
+    label: Field A
+    metadata:
+      default: no
+`;
+    const result = parseTemplateDefinition(yamlWithLegacyScalarDefault);
+    expect(result).not.toBeNull();
+    expect(result?.fields[0]).toMatchObject({ metadata: { default: 'no' } });
+  });
 });
 
 describe('resolveV2Template', () => {
