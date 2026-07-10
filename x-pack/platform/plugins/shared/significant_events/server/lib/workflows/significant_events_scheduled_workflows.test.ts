@@ -201,7 +201,6 @@ describe('scheduled Significant Events managed workflows', () => {
     const yaml = JSON.stringify(parsed);
 
     expect(yaml).toContain('foreach.item.rule_schedule.recent_activity_minutes');
-    expect(yaml).toContain('foreach.item.rule_schedule.bootstrap_min_alert_count');
     expect(yaml).toContain('foreach.item.rule_schedule.quick_recovery_lookback');
     expect(yaml).toContain('foreach.item.rule_schedule.quick_recovery_lookback_minutes');
     expect(yaml).toContain('foreach.item.rule_schedule.quiet_stationary_peak_min_alert_count');

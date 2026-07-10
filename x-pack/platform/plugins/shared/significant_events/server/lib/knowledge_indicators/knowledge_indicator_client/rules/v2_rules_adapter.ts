@@ -17,10 +17,13 @@ import { getRuleLookbackInterval } from '../../../significant_events/rules/sched
 import {
   STREAMS_RULE_CONSUMER,
   STREAMS_ESQL_RULE_TYPE_ID,
+  toStreamTag,
   type CreateRuleBody,
   type IRulesManagementClient,
   type UpdateRuleBody,
 } from './rules_management_client';
+
+const FIND_PAGE_SIZE = 500;
 
 /**
  * Wraps alerting_v2 `RulesClientApi` to implement IRulesManagementClient.
@@ -64,6 +67,24 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     }
   }
 
+  async findOwnedRuleIds(streamName: string): Promise<string[]> {
+    const ids: string[] = [];
+    let page = 1;
+    while (true) {
+      const result = await this.rulesClient.findRules({
+        filter: `metadata.tags: "${toStreamTag(streamName)}"`,
+        perPage: FIND_PAGE_SIZE,
+        page,
+      });
+      for (const rule of result.items) {
+        ids.push(rule.id);
+      }
+      if (ids.length >= result.total) break;
+      page++;
+    }
+    return ids;
+  }
+
   /**
    * Create variant used by `updateRule`'s 404 branch. A 409 here means a concurrent
    * writer (re)created the rule between our `updateRule` 404 and this create — that's
@@ -103,6 +124,10 @@ export class RulesNotInstalledAdapterV2 implements IRulesManagementClient {
       `Skipping v2 rule cleanup for ${ids.length} id(s): alerting v2 plugin is not available.`
     );
   }
+
+  async findOwnedRuleIds(streamName: string): Promise<string[]> {
+    return [];
+  }
 }
 
 /**
@@ -112,7 +137,7 @@ export class RulesNotInstalledAdapterV2 implements IRulesManagementClient {
  */
 function toV2Tags(v1Tags: string[]): string[] {
   const streamName = v1Tags.find((t) => t !== 'streams');
-  return streamName ? [`sigevents:stream:${streamName}`] : v1Tags;
+  return streamName ? [toStreamTag(streamName)] : v1Tags;
 }
 
 /**

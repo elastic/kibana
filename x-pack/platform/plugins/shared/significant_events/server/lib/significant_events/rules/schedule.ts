@@ -19,7 +19,6 @@ const DEFAULT_CHANGE_POINT_LOOKBACK_MINUTES = 30;
 const DEFAULT_QUICK_RECOVERY_LOOKBACK_MINUTES = 11;
 const CHANGE_POINT_BUCKET_FLOOR = 22;
 const RECENT_ACTIVITY_MINUTES_FLOOR = 5;
-const BOOTSTRAP_MIN_ALERT_COUNT = 20;
 const QUIET_STATIONARY_PEAK_ALERT_COUNT = 30;
 
 export interface RuleDetectionSchedule {
@@ -30,7 +29,6 @@ export interface RuleDetectionSchedule {
   lookback_minutes: number;
   quick_recovery_lookback: string;
   quick_recovery_lookback_minutes: number;
-  bootstrap_min_alert_count: number;
   quiet_stationary_peak_min_alert_count: number;
 }
 
@@ -90,7 +88,6 @@ export function getRuleDetectionSchedule(
     lookback_minutes: lookbackMinutes,
     quick_recovery_lookback: `now-${quickRecoveryLookbackMinutes}m`,
     quick_recovery_lookback_minutes: quickRecoveryLookbackMinutes,
-    bootstrap_min_alert_count: Math.max(1, Math.ceil(BOOTSTRAP_MIN_ALERT_COUNT / intervalMinutes)),
     quiet_stationary_peak_min_alert_count: Math.max(
       1,
       Math.ceil(QUIET_STATIONARY_PEAK_ALERT_COUNT / intervalMinutes)
