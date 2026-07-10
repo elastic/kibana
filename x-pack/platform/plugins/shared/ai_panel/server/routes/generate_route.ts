@@ -34,16 +34,16 @@ function colorSection(colorMode: ColorMode): string {
     return `VISUAL DESIGN — DARK MODE (apply these colors exactly, do not substitute):
 - IMPORTANT: body background MUST be ${theme.euiColorEmptyShade}. Text color: ${theme.euiColorTextParagraph}.
 - Required body reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: ${theme.euiColorTextParagraph}; background: ${theme.euiColorEmptyShade}; }
-- Card/surface backgrounds: ${theme.euiColorLightestShade}. Borders: ${theme.euiColorBorderBasePlain}.
+- Card/surface backgrounds: ${theme.euiColorLightestShade}.
 - Accent colors: ${accents}.
-- Clean, modern design. Comfortable padding. No harsh borders.`;
+- Clean, modern design. Comfortable padding. Do NOT add a border around cards, containers, or the panel by default — separate elements using background-color contrast and spacing only. Only add a border (e.g. ${theme.euiColorBorderBasePlain}) if the user explicitly asks for one.`;
   }
   return `VISUAL DESIGN — LIGHT MODE (apply these colors exactly, do not substitute):
 - IMPORTANT: body background MUST be transparent — do NOT set background on <html> or <body>. Text color: ${theme.euiColorTextParagraph}.
 - Required body reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: ${theme.euiColorTextParagraph}; }
 - Accent colors: ${accents}.
-- Card/surface backgrounds: ${theme.euiColorEmptyShade}. Borders: ${theme.euiColorBorderBasePlain}.
-- Clean, modern design. Comfortable padding. No harsh borders.`;
+- Card/surface backgrounds: ${theme.euiColorEmptyShade}.
+- Clean, modern design. Comfortable padding. Do NOT add a border around cards, containers, or the panel by default — separate elements using background-color contrast and spacing only. Only add a border (e.g. ${theme.euiColorBorderBasePlain}) if the user explicitly asks for one.`;
 }
 
 function buildSystemPromptStatic(colorMode: ColorMode): string {
