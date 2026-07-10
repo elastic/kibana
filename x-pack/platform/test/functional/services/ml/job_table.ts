@@ -111,7 +111,7 @@ export function MachineLearningJobTableProvider(
           jobGroups: string[];
           recordCount: string;
           memoryStatus: string;
-          datafeedState: string;
+          jobAndDatafeedState: string;
           latestTimestamp?: string;
           spaces?: string[];
         } = {
@@ -132,8 +132,8 @@ export function MachineLearningJobTableProvider(
             .find('.euiTableCellContent')
             .text()
             .trim(),
-          datafeedState: $tr
-            .findTestSubject('mlJobListColumnDatafeedState')
+          jobAndDatafeedState: $tr
+            .findTestSubject('mlJobListColumnJobAndDatafeedState')
             .find('.euiTableCellContent')
             .text()
             .trim(),

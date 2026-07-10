@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
       jobGroups: [],
       recordCount: '0',
       memoryStatus: 'ok',
-      datafeedState: 'stopped',
+      jobAndDatafeedState: 'closed stopped',
       latestTimestamp: '',
     };
   }

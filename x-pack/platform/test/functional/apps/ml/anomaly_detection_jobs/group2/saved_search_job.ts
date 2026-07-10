@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         row: {
           recordCount: '5,675',
           memoryStatus: 'ok',
-          datafeedState: 'stopped',
+          jobAndDatafeedState: 'closed stopped',
           latestTimestamp: '2016-02-11 23:59:54',
         },
         counts: {
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         row: {
           recordCount: '34,416',
           memoryStatus: 'ok',
-          datafeedState: 'stopped',
+          jobAndDatafeedState: 'closed stopped',
           latestTimestamp: '2016-02-11 23:59:54',
         },
         counts: {
@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
         row: {
           recordCount: '34,415',
           memoryStatus: 'ok',
-          datafeedState: 'stopped',
+          jobAndDatafeedState: 'closed stopped',
           latestTimestamp: '2016-02-11 23:59:54',
         },
         counts: {
@@ -178,7 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
         row: {
           recordCount: '5,673',
           memoryStatus: 'ok',
-          datafeedState: 'stopped',
+          jobAndDatafeedState: 'closed stopped',
           latestTimestamp: '2016-02-11 23:59:54',
         },
         counts: {
@@ -227,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
         row: {
           recordCount: '5,674',
           memoryStatus: 'ok',
-          datafeedState: 'stopped',
+          jobAndDatafeedState: 'closed stopped',
           latestTimestamp: '2016-02-11 23:59:54',
         },
         counts: {
