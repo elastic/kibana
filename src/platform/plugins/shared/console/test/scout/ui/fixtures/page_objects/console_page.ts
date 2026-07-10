@@ -16,6 +16,7 @@ export class ConsolePage {
   public readonly sendRequestButton: Locator;
   public readonly copyOutputButton: Locator;
   public readonly responseStatusBadge: Locator;
+  private readonly skipTourButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.inputEditor = this.page.testSubj.locator('consoleMonacoEditor');
@@ -23,13 +24,14 @@ export class ConsolePage {
     this.sendRequestButton = this.page.testSubj.locator('sendRequestButton');
     this.copyOutputButton = this.page.testSubj.locator('copyOutputButton');
     this.responseStatusBadge = this.page.testSubj.locator('consoleResponseStatusBadge');
+    this.skipTourButton = this.page.testSubj.locator('consoleSkipTourButton');
   }
 
   /**
    * Opens Console with the given request preloaded through the `load_from`
    * data-URI parameter (the "Open in Console" deep-link mechanism). This avoids
-   * typing into Monaco, which is flaky under autocomplete. The appended request
-   * receives the cursor, so the send button becomes available.
+   * typing into Monaco, which is flaky under autocomplete. The 8.19 onboarding
+   * tour steals focus, so dismiss it before focusing the appended request.
    */
   async gotoWithRequestLoaded(request: string) {
     const encoded = compressToEncodedURIComponent(request);
@@ -37,6 +39,8 @@ export class ConsolePage {
       hash: `console?load_from=data:text/plain,${encoded}`,
     });
     await this.inputEditor.waitFor({ state: 'visible' });
+    await this.skipTourButton.click();
+    await this.focusEditor(this.inputEditor);
     await this.sendRequestButton.waitFor({ state: 'visible' });
   }
 
