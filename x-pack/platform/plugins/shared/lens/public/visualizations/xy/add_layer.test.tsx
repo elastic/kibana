@@ -12,7 +12,6 @@ import type { XYVisualizationState } from './types';
 import { Position } from '@elastic/charts';
 import { LENS_LAYER_TYPES as LayerTypes } from '@kbn/lens-common';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
-import { IconChartBarAnnotations } from '@kbn/chart-icons';
 
 describe('AddLayerButton', () => {
   const addLayer = jest.fn();
@@ -33,20 +32,12 @@ describe('AddLayerButton', () => {
         },
       ],
     };
+    // Just add the layers needed to satisfy the tests here instead
+    // of mocking the entire eventAnnotationService.
     const supportedLayers = [
       {
         type: LayerTypes.DATA,
         label: 'Visualization',
-      },
-      {
-        type: LayerTypes.REFERENCELINE,
-        label: LayerTypes.REFERENCELINE,
-      },
-      {
-        type: LayerTypes.ANNOTATIONS,
-        label: 'Annotations',
-        icon: IconChartBarAnnotations,
-        disabled: true,
       },
     ];
 
