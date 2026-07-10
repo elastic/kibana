@@ -194,9 +194,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
       }),
       {
         ...defaultDocumentFlyoutProperties,
-        title: buildFlyoutNavTitle(formatFlyoutTitle(SERVICE_TITLE, serviceName), {
-          resetToRoot: true,
-        }),
+        title: buildFlyoutNavTitle(formatFlyoutTitle(SERVICE_TITLE, serviceName)),
         historyKey,
         session: 'inherit',
       }
@@ -228,7 +226,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
         }),
         {
           ...defaultDocumentFlyoutProperties,
-          title: buildFlyoutNavTitle(getEntityFlyoutTitle(params), { resetToRoot: true }),
+          title: buildFlyoutNavTitle(getEntityFlyoutTitle(params)),
           historyKey,
           session: 'inherit',
         }

@@ -77,7 +77,6 @@ export const SessionViewDetails = memo(
           indexName: alertIndex,
           renderCellActions,
           onAlertUpdated,
-          resetNavToRoot: true,
         });
       },
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]

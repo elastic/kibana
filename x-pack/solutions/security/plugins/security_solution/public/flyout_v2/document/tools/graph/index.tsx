@@ -71,18 +71,12 @@ export const GraphDetails = memo(
           renderCellActions,
           onAlertUpdated,
           title: isEvent ? EVENT_TITLE : getAlertHistoryTitle(),
-          resetNavToRoot: true,
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
 
     const onShowNetwork = useCallback(
-      (ip: string) =>
-        openNetworkFlyoutAsChild({
-          ip,
-          flowTarget: FlowTargetSourceDest.source,
-          resetNavToRoot: true,
-        }),
+      (ip: string) => openNetworkFlyoutAsChild({ ip, flowTarget: FlowTargetSourceDest.source }),
       [openNetworkFlyoutAsChild]
     );
 
@@ -112,9 +106,7 @@ export const GraphDetails = memo(
             ...defaultFlyoutProperties,
             historyKey,
             session: 'inherit',
-            title: buildFlyoutNavTitle(getEntityFlyoutTitle({ engineType, entityId, entityName }), {
-              resetToRoot: true,
-            }),
+            title: buildFlyoutNavTitle(getEntityFlyoutTitle({ engineType, entityId, entityName })),
           }
         );
       },
@@ -147,8 +139,7 @@ export const GraphDetails = memo(
             historyKey,
             session: 'inherit',
             title: buildFlyoutNavTitle(
-              params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE,
-              { resetToRoot: true }
+              params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE
             ),
           }
         ),

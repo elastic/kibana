@@ -9,45 +9,22 @@ import { getFlyoutManagerStore } from '@elastic/eui';
 
 const NAV_TITLE_SEPARATOR = ' -> ';
 
-// Recovers a composed title's own trailing label without re-parsing the string — parsing would
-// misread a raw title containing the literal separator as an existing chain.
-const flatLabelByComposedTitle = new Map<string, string>();
-
-export interface BuildFlyoutNavTitleOptions {
-  /**
-   * Chain from the session's root title instead of its current child. EUI's flyout-manager
-   * session tracks only one "current child" slot, so a caller whose trigger stays clickable
-   * after opening a child (a graph node, a table row, a header) would otherwise chain off
-   * whichever child opened last — e.g. "Alert -> Host: x" instead of the anchor's own title.
-   * Leave unset for a genuine drill-down (a link inside the currently displayed child's content).
-   */
-  resetToRoot?: boolean;
-}
-
 /**
- * Builds a flat `"<last> -> <childTitle>"` title for a child flyout (`session: 'inherit'`).
- * Never accumulates past one hop.
+ * Builds a `"<session root title> -> <childTitle>"` title for a child flyout opened with
+ * `session: 'inherit'` (just `childTitle` if no session is active). Always chains from the
+ * session's root rather than whatever child currently happens to be open: EUI's flyout-manager
+ * session tracks only one "current child" slot, and callers in this app always render their
+ * trigger (a graph node, a table row, a header) inside content that stays clickable after opening
+ * a child, so chaining off that child would compose onto whichever one opened last instead of the
+ * anchor's own title.
  *
  * A plain function, not a hook: `openSystemFlyout` mounts each flyout into its own React root, so
  * a hook-computed callback handed off as a prop would freeze with a stale session. Reading the
  * store fresh at call time avoids that.
  */
-export const buildFlyoutNavTitle = (
-  childTitle: string,
-  { resetToRoot = false }: BuildFlyoutNavTitleOptions = {}
-): string => {
+export const buildFlyoutNavTitle = (childTitle: string): string => {
   const { sessions } = getFlyoutManagerStore().getState();
-  const currentSession = sessions.length > 0 ? sessions[sessions.length - 1] : null;
-  const currentTitle = resetToRoot
-    ? currentSession?.title
-    : currentSession?.childTitle ?? currentSession?.title;
+  const rootTitle = sessions.length > 0 ? sessions[sessions.length - 1].title : undefined;
 
-  if (!currentTitle) {
-    return childTitle;
-  }
-
-  const currentLabel = flatLabelByComposedTitle.get(currentTitle) ?? currentTitle;
-  const composedTitle = `${currentLabel}${NAV_TITLE_SEPARATOR}${childTitle}`;
-  flatLabelByComposedTitle.set(composedTitle, childTitle);
-  return composedTitle;
+  return rootTitle ? `${rootTitle}${NAV_TITLE_SEPARATOR}${childTitle}` : childTitle;
 };

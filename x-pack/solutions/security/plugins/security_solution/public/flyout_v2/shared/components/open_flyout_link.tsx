@@ -113,7 +113,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
           historyKey,
           session: asParent ? 'start' : 'inherit',
           outsideClickCloses: asParent,
-          title: asParent ? flyoutTitle : buildFlyoutNavTitle(flyoutTitle, { resetToRoot: true }),
+          title: asParent ? flyoutTitle : buildFlyoutNavTitle(flyoutTitle),
         }
       );
     }

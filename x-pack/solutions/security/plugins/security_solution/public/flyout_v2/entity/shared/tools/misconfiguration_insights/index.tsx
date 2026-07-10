@@ -88,9 +88,7 @@ export const MisconfigurationInsights = memo(
           }),
           {
             ...defaultDocumentFlyoutProperties,
-            title: buildFlyoutNavTitle(formatFlyoutTitle(ENTITY_TITLE[entityType], value), {
-              resetToRoot: true,
-            }),
+            title: buildFlyoutNavTitle(formatFlyoutTitle(ENTITY_TITLE[entityType], value)),
             historyKey,
             session: 'inherit',
           }

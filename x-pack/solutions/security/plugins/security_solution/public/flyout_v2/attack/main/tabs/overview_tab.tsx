@@ -45,7 +45,6 @@ export const OverviewTab = memo(({ hit, onAttackUpdated }: OverviewTabProps) => 
         indexName,
         renderCellActions: noopCellActionRenderer,
         onAlertUpdated: onAttackUpdated,
-        resetNavToRoot: true,
       }),
     [openDocumentFlyoutFromIndexAsChild, onAttackUpdated]
   );

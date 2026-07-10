@@ -177,7 +177,7 @@ export const ResolverWithoutProviders = React.memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
-            title: buildFlyoutNavTitle(ANALYZER_PREVIEW_TITLE, { resetToRoot: true }),
+            title: buildFlyoutNavTitle(ANALYZER_PREVIEW_TITLE),
           }
         );
       } else {
