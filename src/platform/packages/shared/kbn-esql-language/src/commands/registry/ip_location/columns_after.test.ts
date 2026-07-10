@@ -84,6 +84,21 @@ describe('IP_LOCATION > columnsAfter', () => {
     ]);
   });
 
+  it('stores raw (unescaped) column names when the target is a reserved keyword', () => {
+    const result = columnsAfter(command('IP_LOCATION ip_location = ipField'), previousColumns);
+
+    const names = result.slice(previousColumns.length).map(({ name }) => name);
+    expect(names).toEqual([
+      'ip_location.city_name',
+      'ip_location.continent_name',
+      'ip_location.country_iso_code',
+      'ip_location.country_name',
+      'ip_location.location',
+      'ip_location.region_iso_code',
+      'ip_location.region_name',
+    ]);
+  });
+
   it('returns previous columns unchanged when targetField is absent', () => {
     const result = columnsAfter(
       { type: 'command', name: 'ip_location', args: [] } as unknown as ESQLAstIpLocationCommand,

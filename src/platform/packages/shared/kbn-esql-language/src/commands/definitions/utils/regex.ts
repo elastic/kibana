@@ -33,6 +33,8 @@ const REGEX_SPECIAL_CHARS = /[.*+?^${}()|[\]\\]/g;
 const WHITESPACE_NORMALIZE_REGEX = /\s+/g;
 // Extracts an ES|QL identifier followed only by optional trailing whitespace.
 const TRAILING_IDENTIFIER_REGEX = new RegExp(`(${ESQL_IDENTIFIER_PATTERN})\\s*$`);
+// Matches escaped wildcard asterisks produced by escapeRegExp for conversion to ".*".
+const ESCAPED_WILDCARD_ASTERISK_REGEX = /\\\*/g;
 
 export function endsWithComma(text: string): boolean {
   return TRAILING_COMMA_REGEX.test(text);
@@ -71,7 +73,9 @@ export function escapeRegExp(text: string): string {
 }
 
 export function matchesWildcardPattern(pattern: string, value: string): boolean {
-  const regex = new RegExp(`^${escapeRegExp(pattern).replace(/\\\*/g, '.*')}$`);
+  const regex = new RegExp(
+    `^${escapeRegExp(pattern).replace(ESCAPED_WILDCARD_ASTERISK_REGEX, '.*')}$`
+  );
 
   return regex.test(value);
 }

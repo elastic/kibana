@@ -7,22 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isAssignment, isMap, isStringLiteral, LeafPrinter } from '@elastic/esql';
+import { isAssignment, isMap, isStringLiteral } from '@elastic/esql';
 import type { ESQLAstIpLocationCommand } from '@elastic/esql/types';
-import { commandsMetadata } from '../../definitions/generated/commands/commands';
 import { Commands } from '../../definitions/keywords';
+import { getColumnName, getCommandOutput } from '../../definitions/utils/columns';
 import { getMapEntryByStringKeyFromAst } from '../../definitions/utils/maps';
 import {
   endsWithAssignment,
   endsWithWhitespace,
   matchesWildcardPattern,
 } from '../../definitions/utils/regex';
-import type {
-  ElasticsearchCommandDefinition,
-  ElasticsearchCommandOutputDefinition,
-  ElasticsearchCommandOutputVariant,
-  SupportedDataType,
-} from '../../definitions/types';
+import type { ElasticsearchCommandOutputVariant, SupportedDataType } from '../../definitions/types';
 
 export enum IpLocationPosition {
   AFTER_IP_LOCATION_KEYWORD = 'after_ip_location_keyword',
@@ -109,7 +104,7 @@ export const getIpLocationTargetPrefix = (
     return undefined;
   }
 
-  return LeafPrinter.column(targetField);
+  return getColumnName(targetField);
 };
 
 /** Maps the cursor location to the autocomplete state for IP_LOCATION syntax. */
@@ -171,13 +166,8 @@ export function getPosition(
   return IpLocationPosition.AFTER_IP_LOCATION_KEYWORD;
 }
 
-/** Reads IP_LOCATION metadata from the generated command definitions. */
-const getIpLocationDefinition = (): ElasticsearchCommandDefinition | undefined =>
-  (commandsMetadata as Record<string, ElasticsearchCommandDefinition>)[Commands.IP_LOCATION];
-
 /** Returns the generated output schema used to infer new columns. */
-const getIpLocationOutputDefinition = (): ElasticsearchCommandOutputDefinition | undefined =>
-  getIpLocationDefinition()?.output;
+const getIpLocationOutputDefinition = () => getCommandOutput(Commands.IP_LOCATION);
 
 /** Builds the property list used when the selected database file is unknown. */
 const getAllKnownProperties = (): string[] => {
