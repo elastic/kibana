@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import type { ApmUIComponentsStart } from './types';
+import type { ApmUIComponentsPluginStart } from './types';
 
-export type Start = jest.Mocked<ApmUIComponentsStart>;
+export type Start = jest.Mocked<ApmUIComponentsPluginStart>;
 
 const createStartContract = (): Start => {
   return {

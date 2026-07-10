@@ -20,7 +20,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import type { ApmUIComponentsStart } from '@kbn/apm-ui-components-plugin/public';
+import type { ApmUIComponentsPluginStart } from '@kbn/apm-ui-components-plugin/public';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
@@ -49,7 +49,7 @@ export interface UnifiedDocViewerStartDeps {
   fieldsMetadata: FieldsMetadataPublicStart;
   share: SharePluginStart;
   discoverShared: DiscoverSharedPublicStart;
-  apmUIComponents: ApmUIComponentsStart;
+  apmUIComponents: ApmUIComponentsPluginStart;
 }
 
 export class UnifiedDocViewerPublicPlugin

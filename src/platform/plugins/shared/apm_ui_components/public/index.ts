@@ -12,7 +12,7 @@ import { ApmUIComponentsPlugin } from './plugin';
 
 export const plugin = (_initContext: PluginInitializerContext) => new ApmUIComponentsPlugin();
 
-export type { ApmUIComponentsSetup, ApmUIComponentsStart } from './types';
+export type { ApmUIComponentsPluginSetup, ApmUIComponentsPluginStart } from './types';
 
 /** Use with `feature_flags.overrides` in kibana.yml to toggle CPS integration for APM. */
 export const OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG = 'observability.apm.cpsEnabled' as const;

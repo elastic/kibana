@@ -79,7 +79,7 @@ import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/
 import {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-  type ApmUIComponentsStart,
+  type ApmUIComponentsPluginStart,
 } from '@kbn/apm-ui-components-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
@@ -196,7 +196,7 @@ export interface ApmPluginStartDeps {
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   slo?: SLOPublicStart;
   cps?: CPSPluginStart;
-  apmUIComponents: ApmUIComponentsStart;
+  apmUIComponents: ApmUIComponentsPluginStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {

@@ -22,7 +22,7 @@ Without a shared owner, every plugin that wants to render an APM component must 
 ## Start contract
 
 ```typescript
-interface ApmUIComponentsStart {
+interface ApmUIComponentsPluginStart {
   /** Pre-configured APM API client — use this instead of creating your own. */
   callApmApi: APMClientV2;
 
@@ -53,10 +53,10 @@ interface ApmUIComponentsStart {
 ### 2. Add the type to your start deps
 
 ```typescript
-import type { ApmUIComponentsStart } from '@kbn/apm-ui-components-plugin/public';
+import type { ApmUIComponentsPluginStart } from '@kbn/apm-ui-components-plugin/public';
 
 interface MyPluginStartDeps {
-  apmUIComponents: ApmUIComponentsStart;
+  apmUIComponents: ApmUIComponentsPluginStart;
 }
 ```
 
@@ -81,11 +81,11 @@ const result = await callApmApi('GET /internal/apm/...', { signal, params: { ...
 
 ## Dependencies
 
-| Dependency | Role |
-|---|---|
-| `@kbn/apm-api-shared` | `createCallApmApiV2`, `APMClientV2` type |
-| `@kbn/apm-ui-shared` | Source components being wrapped |
-| `@kbn/apm-types` | Prop types for the exposed components |
+| Dependency              | Role                                               |
+| ----------------------- | -------------------------------------------------- |
+| `@kbn/apm-api-shared`   | `createCallApmApiV2`, `APMClientV2` type           |
+| `@kbn/apm-ui-shared`    | Source components being wrapped                    |
+| `@kbn/apm-types`        | Prop types for the exposed components              |
 | `cps` (optional plugin) | CPS manager for Content Preview System integration |
 
 ## Adding new components
@@ -94,5 +94,5 @@ To expose a new data-fetching component from `@kbn/apm-ui-shared`:
 
 1. Add a `dynamic(() => import('@kbn/apm-ui-shared').then(...))` lazy loader in `plugin.tsx`
 2. Create a wrapper that injects `core` and/or `callApmApi` as needed
-3. Add the component type to `ApmUIComponentsStart` in `types.ts`
+3. Add the component type to `ApmUIComponentsPluginStart` in `types.ts`
 4. Re-export the prop type from `index.ts` if consumers need it
