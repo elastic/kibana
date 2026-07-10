@@ -16,8 +16,26 @@ import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
+import { getActionDetailsById } from '../../../../../endpoint/services/actions';
 import { RUNNING_PROCESSES_TOOL_ID } from '../..';
 import { getRunningProcessesTool } from '.';
+
+jest.mock('../../../../../endpoint/services/actions', () => {
+  const original = jest.requireActual('../../../../../endpoint/services/actions');
+  return {
+    ...original,
+    getActionDetailsById: jest.fn(),
+  };
+});
+
+const mockGetActionDetailsById = getActionDetailsById as jest.Mock;
+
+// waitForActionCompletion polls getActionDetailsById; tests below mock it to
+// resolve as already-completed (isCompleted: true) so the poll returns on the
+// first attempt instead of retrying for real and timing out the test.
+function mockActionCompletion(actionDetails: Record<string, unknown>) {
+  mockGetActionDetailsById.mockResolvedValue({ ...actionDetails, isCompleted: true });
+}
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = {
@@ -36,6 +54,12 @@ function assertStandardReturn(result: unknown) {
 }
 
 describe('getRunningProcessesTool', () => {
+  // waitForActionCompletion mocks resolve on the first poll attempt, but the
+  // extra promise hop through p-retry has been observed to push these tests
+  // past Jest's default 5s budget under heavy CI parallelism (500+ concurrent
+  // jobs). Raise the per-suite timeout rather than masking a real regression.
+  jest.setTimeout(20000);
+
   let service: EndpointAppContextService;
 
   beforeEach(() => {
@@ -108,6 +132,13 @@ describe('getRunningProcessesTool', () => {
     service.getInternalResponseActionsClient = jest.fn(
       () => mockResponseActionsClient
     ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+    mockActionCompletion({
+      id: 'action-999',
+      status: 'successful',
+      wasSuccessful: true,
+      hosts: { 'agent-123': { name: 'my-host' } },
+      outputs: {},
+    });
 
     const tool = getRunningProcessesTool(service);
     const result = await tool.handler({ hostName: 'my-host' }, mockContext);
@@ -151,6 +182,13 @@ describe('getRunningProcessesTool', () => {
     service.getInternalResponseActionsClient = jest.fn(
       () => mockResponseActionsClient
     ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+    mockActionCompletion({
+      id: 'action-999',
+      status: 'successful',
+      wasSuccessful: true,
+      hosts: { 'agent-s1-1': { name: 's1-host' } },
+      outputs: {},
+    });
 
     const tool = getRunningProcessesTool(service);
     await tool.handler({ hostName: 's1-host' }, mockContext);
