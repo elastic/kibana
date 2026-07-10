@@ -14,6 +14,7 @@ import {
   MAX_NAME_LENGTH,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
   MAX_ARRAY_FIELDS,
+  MAX_SEARCH_LENGTH,
 } from '../../../../../../constants';
 
 export const findRulesInternalRequestBodySchema = schema.object({
