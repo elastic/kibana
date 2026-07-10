@@ -18,6 +18,7 @@ import { EuiButtonGroupTestHarness, EuiComboBoxTestHarness } from '@kbn/test-eui
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type {
   FramePublicAPI,
+  ColumnState,
   DatasourcePublicAPI,
   OperationDescriptor,
   DataType,
@@ -27,7 +28,6 @@ import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import type { TableDimensionEditorProps } from './dimension_editor';
 import { TableDimensionEditor } from './dimension_editor';
 import { getCellDecorationLabel } from '../cell_decoration';
-import type { ColumnState } from '../../../../common/expressions';
 import { getKbnPalettes } from '@kbn/palettes';
 import { renderWithProviders } from '../../../test_utils/test_utils';
 

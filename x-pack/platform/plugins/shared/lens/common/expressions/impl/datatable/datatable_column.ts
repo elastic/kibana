@@ -18,7 +18,6 @@ export interface DatatableColumnConfig {
   sortingColumnId: string | undefined;
   sortingDirection: LensGridDirection;
 }
-export type { ColumnState, DatatableColumnArgs, DatatableColumnResult } from '@kbn/lens-common';
 
 export type DatatableColumnFn = ExpressionFunctionDefinition<
   typeof LENS_DATATABLE_COLUMN,

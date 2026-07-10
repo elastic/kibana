@@ -35,6 +35,7 @@ import { getSortingCriteria } from '@kbn/sort-predicates';
 import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {
+  ColumnState,
   DatasourceLayers,
   FormBasedPersistedState,
   Suggestion,
@@ -55,7 +56,6 @@ import { getDatatableColumn } from '../../../common/expressions/impl/datatable/u
 import type { FormatFactory } from '../../../common/types';
 import { getDefaultSummaryLabel } from '../../../common/expressions/impl/datatable/summary';
 import {
-  type ColumnState,
   type CollapseExpressionFunction,
   type DatatableColumnFn,
   type DatatableExpressionFunction,

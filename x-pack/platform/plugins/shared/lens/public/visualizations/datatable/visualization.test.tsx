@@ -14,6 +14,7 @@ import type { DatasourceMock } from '../../mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { getDatatableVisualization } from './visualization';
 import {
+  type ColumnState,
   type Operation,
   type DataType,
   type OperationDescriptor,
@@ -39,11 +40,7 @@ import type {
 import { CUSTOM_PALETTE, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DATATABLE_COLOR_MISMATCH } from '../../user_messages_ids';
-import type {
-  ColumnState,
-  DatatableColumnFn,
-  DatatableExpressionFunction,
-} from '../../../common/expressions';
+import type { DatatableColumnFn, DatatableExpressionFunction } from '../../../common/expressions';
 import { getPaletteDisplayColors } from '../../shared_components/coloring';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 
