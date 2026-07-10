@@ -7,7 +7,7 @@
 
 import { spaceTest, tags, KibanaCodeEditorWrapper, EuiComboBoxWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { PageObjects, ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { applyLensInlineEditorAndWaitClosed, testData } from '../fixtures';
 
 // Maximum number of initial ESQL columns loaded
@@ -22,14 +22,6 @@ const setQueryAndRun = async (
 ) => {
   await codeEditor.setCodeEditorValue(query);
   await page.testSubj.click('ESQLEditor-run-query-button');
-};
-
-const openNewDashboardWithEsqlEditor = async (pageObjects: PageObjects, page: ScoutPage) => {
-  const { dashboard, lens } = pageObjects;
-  await dashboard.openNewDashboard();
-  await dashboard.addNewESQLPanel();
-  await expect(lens.getInlineEditor()).toBeVisible();
-  await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
 };
 
 spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.classic }, () => {
@@ -115,9 +107,21 @@ spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.c
       const { dashboard, lens } = pageObjects;
       const codeEditor = new KibanaCodeEditorWrapper(page);
 
+      await spaceTest.step('navigate to dashboard and click Try ES|QL', async () => {
+        await dashboard.goto();
+        await expect(page.testSubj.locator('noDataViewsPrompt')).toBeVisible();
+        await page.testSubj.click('tryESQLLink');
+        await dashboard.waitForRenderComplete();
+      });
+
       await spaceTest.step('create a dashboard with an ES|QL table panel', async () => {
-        await openNewDashboardWithEsqlEditor(pageObjects, page);
+        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+        await expect(lens.getInlineEditor()).toBeVisible();
+        // Verify ES|QL editor IS visible in Dashboard inline edit mode
+        await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+
         await setQueryAndRun(page, codeEditor, 'from logstash-*');
+        await dashboard.waitForRenderComplete();
         await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Table');
         await applyLensInlineEditorAndWaitClosed({ lens });
       });
@@ -143,13 +147,26 @@ spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.c
       const { dashboard, lens } = pageObjects;
       const codeEditor = new KibanaCodeEditorWrapper(page);
 
+      await spaceTest.step('navigate to dashboard and click Try ES|QL', async () => {
+        await dashboard.goto();
+        await expect(page.testSubj.locator('noDataViewsPrompt')).toBeVisible();
+        await page.testSubj.click('tryESQLLink');
+        await dashboard.waitForRenderComplete();
+      });
+
       await spaceTest.step('create a line chart panel with a red Y-axis color', async () => {
-        await openNewDashboardWithEsqlEditor(pageObjects, page);
+        await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+        await expect(lens.getInlineEditor()).toBeVisible();
+        // Verify ES|QL editor IS visible in Dashboard inline edit mode
+        await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+
+        // await openNewDashboardWithEsqlEditor(pageObjects, page);
         await setQueryAndRun(
           page,
           codeEditor,
           'from logstash-* | stats maxB = max(bytes) by geo.dest'
         );
+        await dashboard.waitForRenderComplete();
 
         await lens.switchToVisualization('line');
 
@@ -157,7 +174,7 @@ spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.c
         const colorPickerInput = page.getByTestId(/indexPattern-dimension-colorPicker/);
         await colorPickerInput.fill('');
         await colorPickerInput.fill('#ff0000');
-        await expect(colorPickerInput).toHaveValue('#ff0000');
+        await expect(colorPickerInput).toHaveValue('#FF0000');
 
         await lens.closeDimensionEditor();
         await applyLensInlineEditorAndWaitClosed({ lens });
