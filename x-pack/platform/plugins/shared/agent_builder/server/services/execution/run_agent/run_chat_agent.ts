@@ -325,6 +325,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const processedInput: RoundInput = {
     message: processedConversation.nextInput.message,
+    ...(processedConversation.nextInput.source
+      ? { source: processedConversation.nextInput.source }
+      : {}),
     attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
   };
 
