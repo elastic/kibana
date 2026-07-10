@@ -46010,7 +46010,7 @@ paths:
           lang: Console
           source: |
             GET kbn:/api/links?query=welcome&per_page=10
-      x-state: Experimental; added in 9.5.0
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -46229,7 +46229,7 @@ paths:
                 "layout": "horizontal"
               }
             }
-      x-state: Experimental; added in 9.5.0
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -46282,7 +46282,7 @@ paths:
           lang: Console
           source: |
             DELETE kbn:/api/links/0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
-      x-state: Experimental; added in 9.5.0
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -46406,7 +46406,7 @@ paths:
           lang: Console
           source: |
             GET kbn:/api/links/0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3
-      x-state: Experimental; added in 9.5.0
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -46643,7 +46643,7 @@ paths:
               ],
               "layout": "vertical"
             }
-      x-state: Experimental; added in 9.5.0
+      x-state: Experimental; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
