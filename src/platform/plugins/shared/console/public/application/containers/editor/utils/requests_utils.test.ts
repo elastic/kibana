@@ -668,6 +668,18 @@ describe('requests_utils', () => {
       expect(containsComments('')).toBe(false);
     });
 
+    it('should reset token scanning between calls', () => {
+      const requestDataWithComment = `{
+      // This is a comment
+      "query": { "match_all": {} }
+    }`;
+      const requestDataWithoutComment = '{ "query": { "match_all": {} } }';
+
+      expect(containsComments(requestDataWithComment)).toBe(true);
+      expect(containsComments(requestDataWithoutComment)).toBe(false);
+      expect(containsComments(requestDataWithComment)).toBe(true);
+    });
+
     it('should correctly handle escaped quotes within strings', () => {
       const requestData = `{
       "field": \"value with \\\"escaped quotes\\\"\"

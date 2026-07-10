@@ -285,8 +285,19 @@ const requestDataTokensRegex = new RegExp(
 const isSlashCommentToken = (token: string) => token.startsWith('//') || token.startsWith('/*');
 const isCommentToken = (token: string) => isSlashCommentToken(token) || token.startsWith('#');
 
-export const containsComments = (requestData: string) =>
-  requestData.match(requestDataTokensRegex)?.some(isCommentToken) ?? false;
+export const containsComments = (requestData: string) => {
+  requestDataTokensRegex.lastIndex = 0;
+  let match = requestDataTokensRegex.exec(requestData);
+  while (match) {
+    if (isCommentToken(match[0])) {
+      requestDataTokensRegex.lastIndex = 0;
+      return true;
+    }
+    match = requestDataTokensRegex.exec(requestData);
+  }
+  requestDataTokensRegex.lastIndex = 0;
+  return false;
+};
 
 export const indentData = (dataString: string): string => {
   try {
