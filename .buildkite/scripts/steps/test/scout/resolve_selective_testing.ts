@@ -29,12 +29,17 @@
  *     "changedFiles": ["src/...", ...],
  *     "affectedModules": ["@kbn/foo", ...]
  *   }
+ *
+ * Shadow mode: also computes the same result via Moon and writes it to
+ * `<outPath>.moon_shadow.json` for comparison only — never affects the
+ * actual decision. See affected-packages/README.md.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { expandWithImplicitConsumers } from './scout_implicit_consumers';
+import { computeMoonShadow } from './moon_shadow';
 import { getAffectedPackages, listChangedFiles } from '#pipeline-utils';
 
 const log = new ToolingLog({ level: 'info', writeTo: process.stderr });
@@ -72,4 +77,18 @@ if (!mergeBase || !outPath) {
   const resolvedOutPath = path.resolve(outPath);
   fs.mkdirSync(path.dirname(resolvedOutPath), { recursive: true });
   fs.writeFileSync(resolvedOutPath, JSON.stringify(codeChanges, null, 2));
+
+  const moonShadow = computeMoonShadow({
+    mergeBase,
+    gitChangedFiles: changedFiles,
+    gitAffectedModules: affectedPackages,
+    log,
+  });
+  if (moonShadow) {
+    const shadowOutPath = path.join(
+      path.dirname(resolvedOutPath),
+      `${path.basename(resolvedOutPath, path.extname(resolvedOutPath))}.moon_shadow.json`
+    );
+    fs.writeFileSync(shadowOutPath, JSON.stringify(moonShadow, null, 2));
+  }
 })();

@@ -459,6 +459,18 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
       description: 'Number of distinct rules covered by the change-point scan',
     },
   },
+  critical_rule_count: {
+    type: 'long',
+    _meta: {
+      description: 'Rule-backed query count using the critical 1m cadence',
+    },
+  },
+  default_rule_count: {
+    type: 'long',
+    _meta: {
+      description: 'Rule-backed query count using the default 5m cadence',
+    },
+  },
   alerting_engine: {
     type: 'keyword',
     _meta: {
