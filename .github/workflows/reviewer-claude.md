@@ -2,7 +2,7 @@
 name: Claude Reviewer
 on:
   pull_request_target:
-    types: [synchronize, reopened, labeled]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -37,8 +37,10 @@ engine:
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 # Activation rules:
 # - Manual runs always activate.
-# - Reviewer label events activate, including labels added while creating a PR.
-# - Synchronize/reopened PR events activate when the reviewer label is already present.
+# - Non-draft PR events (opened/synchronize/reopened) activate unless reviewer:skip-ai is present.
+# - Draft PR events activate only when the ci:draft-checks label is present.
+# - ready_for_review activates the first review when a draft is marked ready.
+# - Adding the ci:draft-checks label activates a review; other label events are ignored.
 # - Comment follow-up runs are dispatched by Reviewer Comment Dispatcher after fork-safe validation.
 if: >-
   !github.event.repository.fork &&
@@ -51,11 +53,14 @@ if: >-
       (
         (
           github.event.action == 'labeled' &&
-          github.event.label.name == 'reviewer:claude'
+          github.event.label.name == 'ci:draft-checks'
         ) ||
         (
           github.event.action != 'labeled' &&
-          contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
+          (
+            !github.event.pull_request.draft ||
+            contains(github.event.pull_request.labels.*.name, 'ci:draft-checks')
+          )
         )
       )
     )
@@ -67,7 +72,7 @@ concurrency:
       github.event.inputs.comment_id ||
       (
         github.event.action == 'labeled' &&
-        github.event.label.name != 'reviewer:claude' &&
+        github.event.label.name != 'ci:draft-checks' &&
         github.event.label.name != 'reviewer:skip-ai' &&
         github.event.label.name
       ) ||

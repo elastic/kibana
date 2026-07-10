@@ -15,6 +15,7 @@ import type {
 import { mergeTests, test as base, createLazyPageObject } from '@kbn/scout-oblt';
 import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
 import { synthtraceFixture } from '@kbn/scout-synthtrace';
+import { ServiceFlyoutPage } from './page_objects/service_flyout';
 import { ServiceMapPage } from './page_objects/service_map';
 import { ServiceInventoryPage } from './page_objects/service_inventory';
 import { StorageExplorerPage } from './page_objects/storage_explorer';
@@ -44,6 +45,7 @@ export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
+    serviceFlyoutPage: ServiceFlyoutPage;
     serviceMapPage: ServiceMapPage;
     serviceInventoryPage: ServiceInventoryPage;
     storageExplorerPage: StorageExplorerPage;
@@ -87,6 +89,7 @@ export const test = baseWithSynthtrace.extend<
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
+      serviceFlyoutPage: createLazyPageObject(ServiceFlyoutPage, page),
       serviceMapPage: createLazyPageObject(ServiceMapPage, page, kbnUrl),
       serviceInventoryPage: createLazyPageObject(ServiceInventoryPage, page, kbnUrl),
       storageExplorerPage: createLazyPageObject(StorageExplorerPage, page, kbnUrl),

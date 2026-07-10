@@ -14,6 +14,7 @@ import type { AttacksListAgg, AttacksListBucket, AttacksListItem } from './types
 import type { SeverityCount } from '../../../../../entity_analytics/components/severity/types';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { getAttacksListAggregations } from './aggregations';
+import { buildAttacksOnlyFilter } from '../../table/filtering_configs';
 
 /** The default page size */
 const DEFAULT_PAGE_SIZE = 5;
@@ -60,13 +61,17 @@ export const useAttacksListData = ({
     [pageIndex, pageSize]
   );
 
+  const combinedFilters = useMemo(() => {
+    return [...(filters ?? []), ...buildAttacksOnlyFilter()];
+  }, [filters]);
+
   // Get the attack IDs
   const {
     data: aggData,
     loading: isAggLoading,
     refetch: refetchAgg,
   } = useAlertsAggregation<AttacksListAgg>({
-    filters,
+    filters: combinedFilters,
     query,
     aggs,
     queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
@@ -95,7 +100,7 @@ export const useAttacksListData = ({
 
   // Get the attack titles
   const {
-    attackTitles,
+    attackDetails,
     isLoading: isAttacksLoading,
     refetch: refetchDetails,
   } = useAttackTitles({
@@ -105,14 +110,15 @@ export const useAttacksListData = ({
   // Get the items
   const items = useMemo<AttacksListItem[]>(() => {
     return attackIds.map((attackId, index) => {
-      const attackTitle = attackTitles[attackId];
+      const attackDetail = attackDetails[attackId];
       const item = pageItems[index];
       return {
         ...item,
-        name: attackTitle || attackId,
+        alertsCount: attackDetail?.count ?? item.alertsCount,
+        name: attackDetail?.title || attackId,
       };
     });
-  }, [attackIds, pageItems, attackTitles]);
+  }, [attackIds, pageItems, attackDetails]);
 
   // Refetch the attack IDs and titles
   const refetch = () => {

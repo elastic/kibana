@@ -66,6 +66,9 @@ jest.mock('../../../../common/lib/kibana', () => ({
         },
         ui: { getCasesContext: mockCasesContext },
       },
+      featureFlags: {
+        getBooleanValue: jest.fn().mockResolvedValue(false),
+      },
       theme: {
         getTheme: jest.fn().mockReturnValue({ darkMode: false }),
       },
@@ -80,8 +83,23 @@ jest.mock('../../../../common/lib/kibana', () => ({
   })),
 }));
 
+jest.mock(
+  '../attack_discovery_markdown_formatter/field_markdown_renderer/use_entity_euid_from_alerts',
+  () => ({
+    useEntityEuidFromAlerts: jest.fn(() => ({ euid: undefined, isLoading: false })),
+    ENTITY_TYPE_BY_FIELD: jest.requireActual(
+      '../attack_discovery_markdown_formatter/field_markdown_renderer/helpers'
+    ).ENTITY_TYPE_BY_FIELD,
+  })
+);
+
 (mockUseKibana as jest.Mock).mockReturnValue({
   services: {
+    data: {
+      search: {
+        search: jest.fn().mockReturnValue({ toPromise: jest.fn().mockResolvedValue({}) }),
+      },
+    },
     application: {
       capabilities: {
         [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true, configurations: true },
@@ -107,6 +125,9 @@ jest.mock('../../../../common/lib/kibana', () => ({
         useCasesAddToNewCaseFlyout: jest.fn(),
       },
       ui: { getCasesContext: mockCasesContext },
+    },
+    featureFlags: {
+      getBooleanValue: jest.fn().mockResolvedValue(false),
     },
     theme: {
       getTheme: jest.fn().mockReturnValue({ darkMode: false }),

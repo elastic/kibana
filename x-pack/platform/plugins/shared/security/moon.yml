@@ -111,6 +111,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
   - '@kbn/core-user-profile-common'
+  - '@kbn/core-chrome-browser-components'
 tags:
   - plugin
   - prod

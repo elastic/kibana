@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/269407
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Dashboards and visualizations
+title: Update empty state for dashboards
+description: Updates the empty state UI shown when no dashboard panels are present.

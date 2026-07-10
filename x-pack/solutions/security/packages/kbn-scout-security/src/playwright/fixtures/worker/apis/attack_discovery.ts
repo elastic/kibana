@@ -114,6 +114,14 @@ export const getAttackDiscoveryApiService = ({
               (doc as { title?: unknown }).title === `${SEEDED_ATTACK_TITLE} (Manual)`
           ) as { id?: string; index?: string } | undefined;
 
+          const scheduledDoc = createdDocs.find(
+            (doc) =>
+              typeof doc === 'object' &&
+              doc !== null &&
+              'title' in doc &&
+              (doc as { title?: unknown }).title === SEEDED_ATTACK_TITLE
+          ) as { id?: string; index?: string } | undefined;
+
           if (manualDoc && manualDoc.id && manualDoc.index) {
             // The `_create` API uses a temporary rule to generate the attacks, which overwrites the
             // `alertRuleUuid` with the temporary rule's UUID. To properly simulate a manually generated
@@ -125,8 +133,22 @@ export const getAttackDiscoveryApiService = ({
               refresh: true,
               doc: {
                 'kibana.alert.rule.uuid': 'attack_discovery_ad_hoc_rule_id',
+                'kibana.alert.rule.rule_type_id': 'attack_discovery_ad_hoc_rule_type_id',
                 'attack_discovery.user.name': 'scout_user',
                 'attack_discovery.user.id': 'scout_user_id',
+              },
+            });
+          }
+
+          if (scheduledDoc && scheduledDoc.id && scheduledDoc.index) {
+            // Similarly, update the scheduled doc to have the correct rule type ID
+            // so that it is properly recognized as a scheduled attack.
+            await esClient.update({
+              index: scheduledDoc.index,
+              id: scheduledDoc.id,
+              refresh: true,
+              doc: {
+                'kibana.alert.rule.rule_type_id': 'attack-discovery',
               },
             });
           }

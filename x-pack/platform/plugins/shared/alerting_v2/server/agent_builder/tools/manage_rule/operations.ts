@@ -13,14 +13,37 @@ import {
   metadataSchema,
   ruleKindSchema,
   scheduleSchema,
-  evaluationQuerySchema,
+  querySchema,
+  recoveryStrategySchema,
+  noDataStrategySchema,
+  getRootEsqlQuery,
   groupingSchema,
   stateTransitionSchema,
-  recoveryPolicySchema,
   isStateTransitionAllowed,
-  isRecoveryPolicyQueryProvided,
+  isSignalUsingStandaloneFormat,
+  isSignalQueryBreachOnly,
+  isRecoveryQueryConsistentWithStrategy,
+  isRecoveryQueryProvidedForStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
+import { AGENT_BUILDER_TAG } from '../../common/constants';
+
+// Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept
+// local to avoid forcing an export purely for this guard.
+const MAX_RULE_TAGS = 20;
+
+/**
+ * Ensures the agent-builder provenance tag is present without clobbering any
+ * tags the user or LLM already set. Skips silently if the tag cap is already
+ * reached, so we never push a payload that fails schema validation.
+ */
+const withAgentBuilderTag = (tags: string[] | undefined): string[] => {
+  const existing = tags ?? [];
+  if (existing.includes(AGENT_BUILDER_TAG) || existing.length >= MAX_RULE_TAGS) {
+    return existing;
+  }
+  return [...existing, AGENT_BUILDER_TAG];
+};
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
 // Every field-level schema is derived from the shared alerting-v2-schemas
@@ -41,8 +64,11 @@ export const setScheduleOperationSchema = scheduleSchema
   .partial()
   .extend({ operation: z.literal('set_schedule') });
 
-export const setQueryOperationSchema = evaluationQuerySchema.extend({
+export const setQueryOperationSchema = z.object({
   operation: z.literal('set_query'),
+  query: querySchema,
+  recovery_strategy: recoveryStrategySchema.optional(),
+  no_data_strategy: noDataStrategySchema.optional(),
 });
 
 export const setGroupingOperationSchema = groupingSchema.extend({
@@ -54,10 +80,6 @@ export const setStateTransitionOperationSchema = stateTransitionSchema
   .unwrap()
   .omit({ pending_operator: true, recovering_operator: true })
   .extend({ operation: z.literal('set_state_transition') });
-
-export const setRecoveryPolicyOperationSchema = recoveryPolicySchema.extend({
-  operation: z.literal('set_recovery_policy'),
-});
 
 export const validateOperationSchema = z.object({
   operation: z.literal('validate'),
@@ -72,7 +94,6 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setQueryOperationSchema,
   setGroupingOperationSchema,
   setStateTransitionOperationSchema,
-  setRecoveryPolicyOperationSchema,
   validateOperationSchema,
 ]);
 
@@ -170,18 +191,32 @@ export const executeRuleOperations = async (
         break;
       }
 
-      case 'set_query':
+      case 'set_query': {
         if (esClient) {
-          lastQueryColumns = await validateEsqlQuery(esClient, op.base);
+          lastQueryColumns = await validateEsqlQuery(esClient, getRootEsqlQuery(op.query));
         }
         next = {
           ...next,
-          evaluation: {
-            ...next.evaluation,
-            query: { base: op.base },
-          },
+          query: op.query,
+          ...(op.recovery_strategy !== undefined
+            ? { recovery_strategy: op.recovery_strategy }
+            : {}),
+          ...(op.no_data_strategy !== undefined ? { no_data_strategy: op.no_data_strategy } : {}),
         };
+
+        if (!isRecoveryQueryConsistentWithStrategy(next)) {
+          throw new RuleOperationValidationError(
+            'query.recovery is only allowed when recovery_strategy is "query".'
+          );
+        }
+        if (!isRecoveryQueryProvidedForStrategy(next)) {
+          throw new RuleOperationValidationError(
+            'recovery_strategy "query" requires a recovery block in the query ' +
+              '(recovery: { segment } for composed, recovery: { query } for standalone).'
+          );
+        }
         break;
+      }
 
       case 'set_grouping': {
         if (lastQueryColumns && lastQueryColumns.length > 0) {
@@ -218,16 +253,6 @@ export const executeRuleOperations = async (
         };
         break;
 
-      case 'set_recovery_policy':
-        next = {
-          ...next,
-          recovery_policy: {
-            type: op.type,
-            ...(op.query ? { query: op.query } : {}),
-          },
-        };
-        break;
-
       case 'validate': {
         const payload = buildRulePayload(next);
         const result = createRuleDataSchema.safeParse(payload);
@@ -248,15 +273,34 @@ export const executeRuleOperations = async (
     );
   }
 
+  // Stamp the agent-builder provenance tag on every rule created or edited via
+  // Agent Builder so they can be measured (telemetry) and filtered in the Rules
+  // list. Merged after all operations so it never overwrites user/LLM-provided
+  // tags. Applied on edits too, so a rule that loses the tag regains it whenever
+  // the agent touches it.
+  if (next.metadata) {
+    next = {
+      ...next,
+      metadata: {
+        ...next.metadata,
+        tags: withAgentBuilderTag(next.metadata.tags),
+      },
+    };
+  }
+
   if (!isStateTransitionAllowed(next)) {
     throw new RuleOperationValidationError(
       'state_transition is only allowed when kind is "alert".'
     );
   }
 
-  if (!isRecoveryPolicyQueryProvided(next)) {
+  if (!isSignalUsingStandaloneFormat(next)) {
+    throw new RuleOperationValidationError('kind "signal" requires query.format "standalone".');
+  }
+
+  if (!isSignalQueryBreachOnly(next)) {
     throw new RuleOperationValidationError(
-      'recovery_policy.query.base is required when recovery_policy.type is "query".'
+      'Signal rules cannot set recovery_strategy or no_data_strategy.'
     );
   }
 

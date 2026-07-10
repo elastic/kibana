@@ -10,12 +10,13 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
-import { getFieldMarkdownRenderer } from '.';
+import { FieldMarkdownRenderer } from '.';
+import { MarkdownFormatterContext } from '../context';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 
 jest.mock('@kbn/expandable-flyout');
 
-describe('getFieldMarkdownRenderer', () => {
+describe('FieldMarkdownRenderer', () => {
   const mockOpenRightPanel = jest.fn();
   const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.MockedFunction<
     typeof useExpandableFlyoutApi
@@ -31,14 +32,15 @@ describe('getFieldMarkdownRenderer', () => {
   });
 
   it('renders the field value', () => {
-    const FieldMarkdownRenderer = getFieldMarkdownRenderer(false);
     const icon = '';
     const name = 'some.field';
     const value = 'some.value';
 
     render(
       <TestProviders>
-        <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+        <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
+          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+        </MarkdownFormatterContext.Provider>
       </TestProviders>
     );
 
@@ -48,14 +50,15 @@ describe('getFieldMarkdownRenderer', () => {
   });
 
   it('opens the right panel when the entity button is clicked', () => {
-    const FieldMarkdownRenderer = getFieldMarkdownRenderer(false);
     const icon = 'user';
     const name = 'user.name';
     const value = 'some.user';
 
     render(
       <TestProviders>
-        <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+        <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
+          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+        </MarkdownFormatterContext.Provider>
       </TestProviders>
     );
 
@@ -67,14 +70,15 @@ describe('getFieldMarkdownRenderer', () => {
   });
 
   it('does NOT render the entity button when flyoutPanelProps is null', () => {
-    const FieldMarkdownRenderer = getFieldMarkdownRenderer(false);
     const icon = '';
     const name = 'some.field';
     const value = 'some.value';
 
     render(
       <TestProviders>
-        <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+        <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
+          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+        </MarkdownFormatterContext.Provider>
       </TestProviders>
     );
 
@@ -84,19 +88,60 @@ describe('getFieldMarkdownRenderer', () => {
   });
 
   it('renders disabled actions badge when disableActions is true', () => {
-    const FieldMarkdownRenderer = getFieldMarkdownRenderer(true); // disable actions
     const icon = 'user';
     const name = 'user.name';
     const value = 'some.user';
 
     render(
       <TestProviders>
-        <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+        <MarkdownFormatterContext.Provider value={{ disableActions: true }}>
+          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+        </MarkdownFormatterContext.Provider>
       </TestProviders>
     );
 
     const disabledActionsBadge = screen.getByTestId('disabledActionsBadge');
 
     expect(disabledActionsBadge).toBeInTheDocument();
+  });
+
+  it('renders the field tooltip on the badge when disableActions is true', () => {
+    const icon = 'user';
+    const name = 'user.name';
+    const value = 'some.user';
+
+    render(
+      <TestProviders>
+        <MarkdownFormatterContext.Provider value={{ disableActions: true }}>
+          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+        </MarkdownFormatterContext.Provider>
+      </TestProviders>
+    );
+
+    const disabledActionsBadge = screen.getByTestId('disabledActionsBadge');
+
+    expect(disabledActionsBadge.closest('.euiToolTipAnchor')).toBeInTheDocument();
+    expect(screen.queryByTestId(`render-content-${name}`)).not.toBeInTheDocument();
+  });
+
+  it('renders the field tooltip via cell actions when disableActions is false', () => {
+    const icon = '';
+    const name = 'process.name';
+    const value = 'explorer.exe';
+
+    render(
+      <TestProviders>
+        <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
+          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+        </MarkdownFormatterContext.Provider>
+      </TestProviders>
+    );
+
+    const cellActionsContent = screen.getByTestId(`render-content-${name}`);
+
+    expect(screen.queryByTestId('fieldMarkdownRendererToolTip')).not.toBeInTheDocument();
+    expect(cellActionsContent.querySelector('.euiToolTipAnchor')).toBeInTheDocument();
+    expect(screen.queryByTestId('disabledActionsBadge')).not.toBeInTheDocument();
+    expect(screen.getByTestId('fieldMarkdownRendererInlineWrapper')).toBeInTheDocument();
   });
 });

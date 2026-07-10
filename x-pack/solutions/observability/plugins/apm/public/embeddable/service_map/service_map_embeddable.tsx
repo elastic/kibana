@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
@@ -27,6 +27,13 @@ import { TimeoutPrompt } from '../../components/app/service_map/timeout_prompt';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
 import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
 import { ServiceMapGraph } from '../../components/app/service_map/graph';
+import { ContextualServiceMapGraph } from '../../components/app/service_map/contextual_map/contextual_service_map_graph';
+import {
+  CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
+  CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES,
+} from '../../components/app/service_map/contextual_map/constants';
+import { SERVICE_FLYOUT_SOURCES } from '../../components/shared/service_flyout/constants';
+import type { ServiceFlyoutOptions } from '../../components/shared/service_flyout/types';
 import { ServiceMapSloFlyoutProvider } from '../../components/shared/service_map/service_map_slo_flyout_context';
 import {
   SloOverviewFlyout,
@@ -47,39 +54,44 @@ export interface ServiceMapEmbeddableProps {
   serviceGroupId?: string;
   core: CoreStart;
   onBlockingError?: (error: Error | undefined) => void;
-  /** Separate range for the badges query. Defaults to `[rangeFrom, rangeTo]`. */
   badgesRangeFrom?: string;
   badgesRangeTo?: string;
-  /** KQL for the badges query only. Defaults to `kuery`. Pass `""` to aggregate across all nodes. */
   badgesKuery?: string;
-  /** Show the popover's "Focus map" button in embedded contexts. Defaults to `!isEmbedded`. */
   showFocusMapInPopover?: boolean;
-  /** Strip `kuery` from popover-built URLs ("Service Details" / "Focus map"); env still flows through. */
   clearKueryOnPopoverNavigation?: boolean;
-  /** Focus button always navigates to standalone APM, even for the currently focused service. */
   alwaysNavigateOnPopoverFocus?: boolean;
-  /** Drop cross-env spans before rendering when env is set. */
   strictEnvironmentScope?: boolean;
-  /** Fires when the topology is definitively empty (`SUCCESS && nodes.length === 0`). */
   onEmptyStateChange?: (isEmpty: boolean) => void;
-  /** Field-value pairs to pass as filter bar pills in the "View full map" link instead of kuery. */
   filterPills?: Array<{ field: string; value: string }>;
-  /** Initial layout orientation; if `onMapOrientationChange` is also provided, becomes controlled. */
   mapOrientation?: ServiceMapOrientation;
-  /** Called when the user (or the host) changes orientation. */
   onMapOrientationChange?: (next: ServiceMapOrientation) => void;
-  /** Parent dashboard filters when the panel opts in to sync. Excludes `service.environment` (handled server-side). */
+  /** Parent dashboard filters/query forwarded when sync_with_dashboard_filters is on. */
   parentFilters?: Filter[];
-  /** Parent dashboard query when the panel opts in to sync. */
   parentQuery?: Query | AggregateQuery;
-  /** Persisted view filters (alerts / SLOs / connection / anomaly severity) captured at "Copy to dashboard" time. */
   viewFilters?: ServiceMapViewFilters;
-  /** Push in-panel filter edits back to the state manager so the embeddable's controlled value updates. */
   onViewFiltersChange?: (next: ServiceMapViewFilters) => void;
-  /** Persisted find-in-page query captured at "Copy to dashboard" time. */
-  searchQuery?: string;
-  /** Push in-panel search edits back to the state manager. */
-  onSearchQueryChange?: (next: string) => void;
+  /**
+   * When true, shows the quick-filters toggle/menu and minimap even though this is an embed.
+   * Set by the dashboard embeddable factory when the panel is maximized in view mode.
+   */
+  showEmbeddedControls?: boolean;
+  /** Collapse distant dependencies with expand affordances (requires serviceName). */
+  enableContextualMap?: boolean;
+  /** Contextual map settings (e.g. service overview header controls). */
+  contextualMapBaseMaxHops?: number;
+  contextualMapMaxVisibleNodes?: number;
+  onContextualMapBaseMaxHopsChange?: (value: number) => void;
+  onContextualMapMaxVisibleNodesChange?: (value: number) => void;
+  /** Hide max visible / hops controls inside the map. */
+  hideContextControls?: boolean;
+  /** Expand/collapse state for contextual map (e.g. service overview). */
+  contextualMapExpandedNodeIds?: ReadonlySet<string>;
+  onContextualMapExpand?: (nodeId: string) => void;
+  onContextualMapCollapse?: (nodeId: string) => void;
+  /** Override default min-height (400px) for compact inline embeds. */
+  embeddableMinHeight?: number;
+  /** Optional overrides for the service flyout opened from this map. */
+  flyoutOptions?: ServiceFlyoutOptions;
 }
 
 function LoadingSpinner() {
@@ -115,8 +127,18 @@ export function ServiceMapEmbeddable({
   parentQuery,
   viewFilters,
   onViewFiltersChange,
-  searchQuery,
-  onSearchQueryChange,
+  showEmbeddedControls,
+  enableContextualMap = false,
+  contextualMapBaseMaxHops: contextualMapBaseMaxHopsProp,
+  contextualMapMaxVisibleNodes: contextualMapMaxVisibleNodesProp,
+  onContextualMapBaseMaxHopsChange,
+  onContextualMapMaxVisibleNodesChange,
+  hideContextControls = false,
+  contextualMapExpandedNodeIds: contextualMapExpandedNodeIdsProp,
+  onContextualMapExpand,
+  onContextualMapCollapse,
+  embeddableMinHeight = EMBEDDABLE_MIN_HEIGHT,
+  flyoutOptions,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -159,30 +181,68 @@ export function ServiceMapEmbeddable({
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();
 
-  // Build an ES query from dashboard-level filters/query when the panel opts in to
-  // sync_with_dashboard_filters. Environment is excluded — it's still passed via the
-  // dedicated server param, mirroring service_map_search_bar.tsx.
+  const [internalBaseMaxHops, setInternalBaseMaxHops] = useState(
+    CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS
+  );
+  const [internalMaxVisibleNodes, setInternalMaxVisibleNodes] = useState(
+    CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES
+  );
+  const baseMaxHops = contextualMapBaseMaxHopsProp ?? internalBaseMaxHops;
+  const maxVisibleNodes = contextualMapMaxVisibleNodesProp ?? internalMaxVisibleNodes;
+  const setBaseMaxHops = onContextualMapBaseMaxHopsChange ?? setInternalBaseMaxHops;
+  const setMaxVisibleNodes = onContextualMapMaxVisibleNodesChange ?? setInternalMaxVisibleNodes;
+  const [internalExpandedNodeIds, setInternalExpandedNodeIds] = useState<Set<string>>(
+    () => new Set()
+  );
+  const isExpandedNodeIdsControlled = contextualMapExpandedNodeIdsProp !== undefined;
+  const expandedNodeIds = contextualMapExpandedNodeIdsProp ?? internalExpandedNodeIds;
+
+  const internalOnExpand = useCallback((nodeId: string) => {
+    setInternalExpandedNodeIds((prev) => new Set(prev).add(nodeId));
+  }, []);
+
+  const internalOnCollapse = useCallback((nodeId: string) => {
+    setInternalExpandedNodeIds((prev) => {
+      const next = new Set(prev);
+      next.delete(nodeId);
+      return next;
+    });
+  }, []);
+
+  const onExpand = onContextualMapExpand ?? internalOnExpand;
+  const onCollapse = onContextualMapCollapse ?? internalOnCollapse;
+
+  const useContextualMap = Boolean(enableContextualMap && serviceName);
+
+  useEffect(() => {
+    if (!isExpandedNodeIdsControlled) {
+      setInternalExpandedNodeIds(new Set());
+    }
+  }, [serviceName, isExpandedNodeIdsControlled]);
+
   const { dataView } = useAdHocApmDataView();
   const kibanaQuerySettings = useKibanaQuerySettings();
   const esQuery = useMemo(() => {
-    const hasParentFilters = Boolean(parentFilters && parentFilters.length > 0);
-    const parentQueryText =
-      parentQuery && 'query' in parentQuery && typeof parentQuery.query === 'string'
-        ? parentQuery.query.trim()
-        : undefined;
-    const hasParentQuery =
-      parentQueryText !== undefined ? parentQueryText.length > 0 : Boolean(parentQuery);
-    const hasParentSearchState = hasParentFilters || hasParentQuery;
-    if (!dataView || !hasParentSearchState) {
-      return undefined;
-    }
+    // Environment is applied via the dedicated server param, so skip it here.
     const filtersWithoutEnv = (parentFilters ?? []).filter(
       (f) => f.meta?.key !== 'service.environment'
     );
-    const queries: Query[] =
-      parentQuery && 'query' in parentQuery
-        ? [{ query: String(parentQuery.query ?? ''), language: parentQuery.language ?? 'kuery' }]
-        : [{ query: '', language: 'kuery' }];
+    const hasParentFilters = filtersWithoutEnv.length > 0;
+    const parentQueryText =
+      parentQuery && 'query' in parentQuery && typeof parentQuery.query === 'string'
+        ? parentQuery.query.trim()
+        : '';
+    const hasParentQuery = parentQueryText.length > 0;
+    if (!dataView || (!hasParentFilters && !hasParentQuery)) {
+      return undefined;
+    }
+    const parentQueryLanguage =
+      parentQuery && 'language' in parentQuery && typeof parentQuery.language === 'string'
+        ? parentQuery.language
+        : 'kuery';
+    const queries: Query[] = hasParentQuery
+      ? [{ query: parentQueryText, language: parentQueryLanguage }]
+      : [];
     return buildEsQuery(dataView, queries, filtersWithoutEnv, kibanaQuerySettings);
   }, [dataView, parentFilters, parentQuery, kibanaQuerySettings]);
 
@@ -197,7 +257,6 @@ export function ServiceMapEmbeddable({
     esQuery,
   });
 
-  // Only fire on SUCCESS — loading/error states carry no emptiness signal.
   useEffect(() => {
     if (!onEmptyStateChange) return;
     if (status !== FETCH_STATUS.SUCCESS) return;
@@ -213,12 +272,8 @@ export function ServiceMapEmbeddable({
     nodesStatus: status,
   });
 
-  // The alert / SLO / anomaly-severity filters depend on badge data. Until badges arrive,
-  // node fields like `alertsCount` / `sloStatus` are undefined and the visibility helper
-  // would hide every service — producing a flash of empty map on dashboard load whenever
-  // a persisted filter is set. Strip those filters until badges resolve; the connection
-  // filter stays since it only needs topology. On a badges failure we deliberately stay
-  // stripped (fail open: show all services rather than nothing).
+  // Strip badge-dependent filters (alert/SLO/anomaly) until badge data resolves. On failure,
+  // keep showing all services but warn that those filters couldn't be applied.
   const viewFiltersForGraph = useMemo<ServiceMapViewFilters | undefined>(() => {
     if (!viewFilters) return viewFilters;
     if (badgesStatus === FETCH_STATUS.SUCCESS) return viewFilters;
@@ -229,6 +284,21 @@ export function ServiceMapEmbeddable({
       anomalySeverityFilter: [],
     };
   }, [viewFilters, badgesStatus]);
+
+  const flyoutOptionsForGraph = useMemo<ServiceFlyoutOptions>(
+    () => ({
+      source: SERVICE_FLYOUT_SOURCES.dashboardEmbeddable,
+      ...flyoutOptions,
+    }),
+    [flyoutOptions]
+  );
+
+  const badgeDependentFiltersActive =
+    (viewFilters?.alertStatusFilter?.length ?? 0) > 0 ||
+    (viewFilters?.sloStatusFilter?.length ?? 0) > 0 ||
+    (viewFilters?.anomalySeverityFilter?.length ?? 0) > 0;
+  const showBadgesFailedWarning =
+    badgeDependentFiltersActive && badgesStatus === FETCH_STATUS.FAILURE;
 
   if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
     return (
@@ -323,35 +393,76 @@ export function ServiceMapEmbeddable({
           width: '100%',
           height: '100%',
           minWidth: EMBEDDABLE_MIN_WIDTH,
-          minHeight: EMBEDDABLE_MIN_HEIGHT,
+          minHeight: embeddableMinHeight,
           position: 'relative' as const,
           boxSizing: 'border-box',
         }}
       >
         {isLoading && <LoadingSpinner />}
-        <ServiceMapGraph
-          height="100%"
-          nodes={isLoading ? [] : nodesForGraph}
-          edges={isLoading ? [] : data.edges}
-          serviceName={serviceName}
-          highlightedServiceName={serviceName}
-          environment={environment}
-          kuery={kuery}
-          start={start}
-          end={end}
-          isFullscreen={false}
-          fullMapHref={fullMapHref}
-          isEmbedded
-          showFocusMap={showFocusMapInPopover}
-          alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
-          clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
-          mapOrientation={mapOrientation}
-          onMapOrientationChange={onMapOrientationChange}
-          viewFilters={viewFiltersForGraph}
-          onViewFiltersChange={onViewFiltersChange}
-          searchQuery={searchQuery}
-          onSearchQueryChange={onSearchQueryChange}
-        />
+        {showBadgesFailedWarning && (
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="warning"
+            iconType="warning"
+            title={i18n.translate('xpack.apm.serviceMapEmbeddable.badgesFailedWarning', {
+              defaultMessage:
+                "Alert, SLO and anomaly filters couldn't be applied because their data failed to load. Showing all services.",
+            })}
+            data-test-subj="apmServiceMapEmbeddableBadgesFailedWarning"
+            css={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1 }}
+          />
+        )}
+        {useContextualMap ? (
+          <ContextualServiceMapGraph
+            height="100%"
+            nodes={isLoading ? [] : nodesForGraph}
+            edges={isLoading ? [] : data.edges}
+            focalServiceId={serviceName!}
+            baseMaxHops={baseMaxHops}
+            maxVisibleNodes={maxVisibleNodes}
+            expandedNodeIds={expandedNodeIds}
+            onExpand={onExpand}
+            onCollapse={onCollapse}
+            onBaseMaxHopsChange={setBaseMaxHops}
+            onMaxVisibleNodesChange={setMaxVisibleNodes}
+            highlightedServiceName={serviceName}
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
+            fullMapHref={fullMapHref}
+            showFocusMap={showFocusMapInPopover}
+            alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
+            clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
+            showContextControls={!hideContextControls}
+            flyoutOptions={flyoutOptionsForGraph}
+          />
+        ) : (
+          <ServiceMapGraph
+            height="100%"
+            nodes={isLoading ? [] : nodesForGraph}
+            edges={isLoading ? [] : data.edges}
+            serviceName={serviceName}
+            highlightedServiceName={serviceName}
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
+            isFullscreen={false}
+            fullMapHref={fullMapHref}
+            isEmbedded
+            showEmbeddedControls={showEmbeddedControls}
+            showFocusMap={showFocusMapInPopover}
+            alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
+            clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
+            mapOrientation={mapOrientation}
+            onMapOrientationChange={onMapOrientationChange}
+            viewFilters={viewFiltersForGraph}
+            onViewFiltersChange={onViewFiltersChange}
+            flyoutOptions={flyoutOptionsForGraph}
+          />
+        )}
       </div>
       {sloOverviewFlyout && (
         <SloOverviewFlyout

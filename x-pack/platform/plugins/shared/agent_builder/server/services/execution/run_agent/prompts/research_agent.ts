@@ -13,17 +13,24 @@ import { convertPreviousRounds } from '../utils/to_langchain_messages';
 import { attachmentTypeInstructions, renderAttachmentPrompt } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
-import { formatDate } from './utils/helpers';
 import { getFileSystemInstructions } from './utils/filestore';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
+import { renderRenderersPrompt } from './utils/renderers';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
 export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { actions, cycleLimit, processedConversation, resultTransformer } = params;
+  const {
+    actions,
+    cycleLimit,
+    processedConversation,
+    resultTransformer,
+    toolManager,
+    conversationTimestamp,
+  } = params;
 
   // Generate messages from the conversation's rounds, optionally
   // injecting a compaction summary for older compacted rounds.
@@ -33,25 +40,29 @@ export const getResearchAgentPrompt = async (
     conversation: processedConversation,
     resultTransformer,
     compactionSummary: processedConversation.compactionSummary,
+    conversationTimestamp,
   });
 
   return [
     ['system', await getAgentSystemMessage(params)],
     ...previousRoundsAsMessages,
-    ...formatResearcherActionHistory({ actions, cycleLimit }),
+    ...(await formatResearcherActionHistory({
+      actions,
+      cycleLimit,
+      resultTransformer,
+      toolManager,
+    })),
   ];
 };
 
 const getAgentSystemMessage = async ({
-  configuration: {
-    research: { instructions: customInstructions },
-  },
-  conversationTimestamp,
+  configuration: { instructions: customInstructions },
   processedConversation: { attachmentTypes, versionedAttachmentPresentation },
   outputSchema,
-  filestore,
+  skills,
   experimentalFeatures,
   capabilities,
+  renderers,
 }: ResearchAgentPromptParams): Promise<string> => {
   const visEnabled = capabilities.visualizations;
 
@@ -109,9 +120,9 @@ Assume users can't see most tool calls or thinking - only your text output.
 - Use custom rendering when appropriate.
 - Use minimal Markdown for readability (short bullets; code blocks for queries/JSON when helpful).
 
-${experimentalFeatures.filestore ? await getFileSystemInstructions() : ''}
+${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash })}
 
-${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
+${experimentalFeatures.skills ? getSkillsInstructions({ skills }) : ''}
 
 ## INSTRUCTIONS
 
@@ -135,6 +146,5 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ${renderAttachmentPrompt()}
 
-## ADDITIONAL INFO
-- Current date: ${formatDate(conversationTimestamp)}`);
+${renderRenderersPrompt(renderers, { bashEnabled: experimentalFeatures.bash })}`);
 };

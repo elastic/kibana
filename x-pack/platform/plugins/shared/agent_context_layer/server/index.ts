@@ -29,6 +29,9 @@ export type {
   SmlContext,
   SmlToAttachmentContext,
   SmlListItem,
+  SmlPermissions,
+  SmlKibanaPrivilege,
+  SmlElasticsearchIndex,
   SmlSearchResult,
   SmlSearchConstraints,
   SmlSearchFilters,
@@ -39,6 +42,8 @@ export type {
   SmlIndexAttachmentOriginMode,
   SmlIndexAttachmentContentMode,
 } from './services/sml/types';
+
+export { kibanaSavedObjectPermissions } from './services/sml/permissions/kibana_saved_object';
 
 export type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';

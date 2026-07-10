@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { stringify as yamlStringify } from 'yaml';
 import type { Template } from '../../../../common/types/domain/template/v1';
 import { parseTemplate } from './parse_template';
 
-const buildDefinition = (name: string) =>
-  yaml.dump({
-    name,
+const buildDefinition = (title: string) =>
+  yamlStringify({
+    name: title,
     fields: [
       {
         control: 'INPUT_TEXT',
@@ -97,8 +97,8 @@ describe('parseTemplate', () => {
     expect(result.latestVersion).toBe(1);
   });
 
-  it('parses severity and category from the definition', () => {
-    const definition = yaml.dump({
+  it('parses case defaults from the definition', () => {
+    const definition = yamlStringify({
       name: 'Template with severity',
       severity: 'high',
       category: 'security',
@@ -111,12 +111,21 @@ describe('parseTemplate', () => {
     expect(result.definition.category).toBe('security');
   });
 
-  it('omits severity and category when not present in the definition', () => {
-    const template = createTemplate();
+  it('omits optional top-level defaults when not present in the definition', () => {
+    const template = createTemplate({
+      definition: yamlStringify({
+        // `name` is the required case-default title; the rest are optional.
+        name: 'Case default title',
+        fields: [],
+      }),
+    });
     const result = parseTemplate(template);
 
+    expect(result.definition.name).toBe('Case default title');
     expect(result.definition.severity).toBeUndefined();
     expect(result.definition.category).toBeUndefined();
+    expect(result.definition.description).toBeUndefined();
+    expect(result.definition.tags).toBeUndefined();
   });
 
   it('includes definitionString with the original YAML', () => {
