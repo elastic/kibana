@@ -1400,6 +1400,37 @@ describe('ComposeDiscoverFlyout', () => {
       expect(readRecoveryStrategy?.()).toBeUndefined();
     });
 
+    it('clears recoveryStrategy when kind changes to signal, so it is never sent for signal rules', () => {
+      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
+
+      const getLatestFormProps = () =>
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+      expect(readRecoveryStrategy?.()).toBe('no_breach');
+
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+
+      expect(readRecoveryStrategy?.()).toBeUndefined();
+    });
+
+    it('resets recoveryStrategy to no_breach when kind changes back to alert', () => {
+      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
+
+      const getLatestFormProps = () =>
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+      act(() => {
+        getLatestFormProps().onKindChange('alert');
+      });
+
+      expect(readRecoveryStrategy?.()).toBe('no_breach');
+    });
+
     it('opens in YAML mode for no_data_strategy: emit', () => {
       const rule = {
         ...ruleWithRecoveryStrategy,

@@ -164,6 +164,16 @@ describe('composeFormToCreateRequest', () => {
     expect(result.no_data_strategy).toBeUndefined();
   });
 
+  it('omits recovery_strategy for signal rules even when set', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      kind: 'signal',
+      recoveryStrategy: 'no_breach',
+    };
+    const result = composeFormToCreateRequest(values);
+    expect(result.recovery_strategy).toBeUndefined();
+  });
+
   it('returns undefined state_transition for signal rules', () => {
     const values: FormValues = { ...baseFormValues, kind: 'signal' };
     const result = composeFormToCreateRequest(values);
