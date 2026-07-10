@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { AddLayerButton } from './add_layer';
 import type { XYVisualizationState } from './types';
 import { Position } from '@elastic/charts';
@@ -71,9 +71,7 @@ describe('AddLayerButton', () => {
         fireEvent.click(lineOption);
       },
       waitForSeriesOptions: async () => {
-        await waitFor(() => {
-          expect(screen.queryByTestId('lnsXY_seriesType-area')).toBeInTheDocument();
-        });
+        await screen.findByTestId('lnsXY_seriesType-area', {}, { timeout: 1000 });
       },
       getSeriesTypeOptions: () => {
         return screen.getAllByTestId('lnsChartSwitch-option-label').map((el) => el.textContent);
