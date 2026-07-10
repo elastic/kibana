@@ -313,28 +313,20 @@ export const closeTimeline = () => {
 export const createNewTimeline = () => {
   recurse(
     () => {
-      return cy.get(TIMELINE_WRAPPER).then(($wrapper) => {
-        if ($wrapper.hasClass('timeline-portal-overlay-mask--hidden')) {
-          cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
-          cy.get(CREATE_NEW_TIMELINE).should('be.visible').click();
-        }
-        return cy.get(TIMELINE_WRAPPER);
-      });
+      cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
+      return cy.get(CREATE_NEW_TIMELINE);
     },
-    ($wrapper) => !$wrapper.hasClass('timeline-portal-overlay-mask--hidden')
+    ($createNewTimeline) => $createNewTimeline.is(':visible')
   );
+  cy.get(CREATE_NEW_TIMELINE).click();
 };
 
 export const createTimelineFromBottomBar = () => {
   recurse(
     () => {
-      return cy.get(TIMELINE_WRAPPER).then(($wrapper) => {
-        if ($wrapper.hasClass('timeline-portal-overlay-mask--hidden')) {
-          cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-          cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).should('be.visible').click();
-        }
-        return cy.get(TIMELINE_WRAPPER);
-      });
+      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+      cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).should('be.visible').click();
+      return cy.get(TIMELINE_WRAPPER);
     },
     ($wrapper) => !$wrapper.hasClass('timeline-portal-overlay-mask--hidden')
   );
@@ -343,13 +335,9 @@ export const createTimelineFromBottomBar = () => {
 export const createTimelineTemplateFromBottomBar = () => {
   recurse(
     () => {
-      return cy.get(TIMELINE_WRAPPER).then(($wrapper) => {
-        if ($wrapper.hasClass('timeline-portal-overlay-mask--hidden')) {
-          cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-          cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).should('be.visible').click();
-        }
-        return cy.get(TIMELINE_WRAPPER);
-      });
+      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+      cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).should('be.visible').click();
+      return cy.get(TIMELINE_WRAPPER);
     },
     ($wrapper) => !$wrapper.hasClass('timeline-portal-overlay-mask--hidden')
   );
