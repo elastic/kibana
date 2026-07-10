@@ -113,7 +113,10 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       title={
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.flyoutTitle"
-          defaultMessage="Assign new agent policy"
+          defaultMessage="Assign new policy to {count, plural, one {agent} other {# agents}}"
+          values={{
+            count: agentCount,
+          }}
         />
       }
       onCancel={onClose}
@@ -132,7 +135,10 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       confirmButtonText={
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.continueButtonLabel"
-          defaultMessage="Assign policy"
+          defaultMessage="Assign policy to {count, plural, one {agent} other {# agents}}"
+          values={{
+            count: agentCount,
+          }}
         />
       }
       buttonColor="primary"
