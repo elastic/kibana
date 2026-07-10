@@ -9253,7 +9253,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-info-blocks@link:src/platform/packages/shared/shared-ux/info_blocks":
+"@kbn/shared-ux-info-blocks@link:src/platform/packages/shared/shared-ux/info-blocks":
   version "0.0.0"
   uid ""
 

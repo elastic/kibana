@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/shared-ux-info-blocks
   channel: ''
   owner: '@elastic/appex-sharedux'
-  sourceRoot: src/platform/packages/shared/shared-ux/info_blocks
+  sourceRoot: src/platform/packages/shared/shared-ux/info-blocks
 dependsOn: []
 tags:
   - shared-browser
