@@ -7,9 +7,12 @@
 
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { RunContext } from '@kbn/agent-builder-server';
-import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import {
+  isToolHandlerStandardReturn,
+  type ToolHandlerContext,
+} from '@kbn/agent-builder-server/tools';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { ToolType, isForbiddenError } from '@kbn/agent-builder-common';
+import { ToolType, ToolResultType, isForbiddenError } from '@kbn/agent-builder-common';
 import { getWorkflowToolType } from './tool_type';
 import { isEnabledDefinition, isDisabledDefinition } from '../definitions';
 import {
@@ -94,7 +97,10 @@ describe('workflow tool type', () => {
       const result = await handler({}, { request, runContext } as unknown as ToolHandlerContext);
 
       expect(executeWorkflowMock).not.toHaveBeenCalled();
-      expect(result.results[0]).toEqual(expect.objectContaining({ type: 'error' }));
+      if (!isToolHandlerStandardReturn(result)) {
+        throw new Error('Expected a standard tool result');
+      }
+      expect(result.results[0].type).toBe(ToolResultType.error);
     });
 
     it('executes the workflow when the caller holds execute privilege', async () => {
