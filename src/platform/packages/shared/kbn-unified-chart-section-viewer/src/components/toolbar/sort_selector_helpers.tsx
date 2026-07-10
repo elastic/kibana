@@ -31,6 +31,7 @@ const directionOptions = [
   {
     id: METRICS_SORT_DIRECTION.asc,
     iconType: 'sortAscending',
+    'data-test-subj': 'metricsExperienceSortDirectionAsc',
     label: i18n.translate('metricsExperience.sortSelector.ascending', {
       defaultMessage: 'Ascending',
     }),
@@ -38,6 +39,7 @@ const directionOptions = [
   {
     id: METRICS_SORT_DIRECTION.desc,
     iconType: 'sortDescending',
+    'data-test-subj': 'metricsExperienceSortDirectionDesc',
     label: i18n.translate('metricsExperience.sortSelector.descending', {
       defaultMessage: 'Descending',
     }),
