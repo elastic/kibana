@@ -22,7 +22,9 @@ jest.mock('./use_preferred_transaction_data_source', () => ({
 
 const START = '2024-01-01T00:00:00.000Z';
 const END = '2024-01-01T01:00:00.000Z';
-const BUCKET_SIZE_IN_SECONDS = (new Date(END).getTime() - new Date(START).getTime()) / 1000 / 20;
+const BUCKET_SIZE_IN_SECONDS = Math.ceil(
+  (new Date(END).getTime() - new Date(START).getTime()) / 1000 / 20
+);
 
 const BASE_PARAMS = {
   serviceName: 'my-service',

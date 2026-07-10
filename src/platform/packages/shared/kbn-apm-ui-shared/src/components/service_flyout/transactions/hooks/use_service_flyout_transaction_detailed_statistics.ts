@@ -63,8 +63,9 @@ export function useServiceFlyoutTransactionDetailedStatistics({
     async ({ signal }) => {
       if (!enabled || !dataSource) return undefined;
 
-      const bucketSizeInSeconds =
-        (new Date(end).getTime() - new Date(start).getTime()) / 1000 / NUM_BUCKETS;
+      const bucketSizeInSeconds = Math.ceil(
+        (new Date(end).getTime() - new Date(start).getTime()) / 1000 / NUM_BUCKETS
+      );
 
       return http.get<DetailedStatisticsResponse>(
         `/internal/apm/services/${encodeURIComponent(
