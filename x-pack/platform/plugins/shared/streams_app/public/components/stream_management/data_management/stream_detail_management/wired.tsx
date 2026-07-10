@@ -7,7 +7,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { type Streams, isRoot, isDraftStream, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -21,7 +22,7 @@ import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { PendingRootDataStreamCallout } from './pending_root_data_stream_callout';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
-import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
+import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { WiredStreamBadge } from '../../../stream_badges';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -81,19 +82,26 @@ export function WiredStreamDetailManagement({
     features: { canvas },
   } = useStreamsPrivileges();
 
+  const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
+    defaultMessage: 'Streams',
+  });
+  const wiredBadges: AppHeaderBadge[] = [
+    {
+      label: i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
+        defaultMessage: 'Wired',
+      }),
+      renderCustomBadge: () => <WiredStreamBadge />,
+    },
+  ];
+
   if (!definition.privileges.view_index_metadata) {
     return (
       <>
-        <StreamsAppPageTemplate.Header
-          bottomBorder="extended"
-          pageTitle={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {key}
-              <EuiBadgeGroup gutterSize="s">
-                <WiredStreamBadge />
-              </EuiBadgeGroup>
-            </EuiFlexGroup>
-          }
+        <StreamsAppHeader
+          title={key}
+          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          badges={wiredBadges}
+          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <EuiCallOut
@@ -124,16 +132,11 @@ export function WiredStreamDetailManagement({
   if (!definition.data_stream_exists && !isNewRootStream && !isDraft) {
     return (
       <>
-        <StreamsAppPageTemplate.Header
-          bottomBorder="extended"
-          pageTitle={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {key}
-              <EuiBadgeGroup gutterSize="s">
-                <WiredStreamBadge />
-              </EuiBadgeGroup>
-            </EuiFlexGroup>
-          }
+        <StreamsAppHeader
+          title={key}
+          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          badges={wiredBadges}
+          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <MissingDataStreamCallout
@@ -152,16 +155,11 @@ export function WiredStreamDetailManagement({
   if (!definition.data_stream_exists && isNewRootStream) {
     return (
       <>
-        <StreamsAppPageTemplate.Header
-          bottomBorder="extended"
-          pageTitle={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {key}
-              <EuiBadgeGroup gutterSize="s">
-                <WiredStreamBadge />
-              </EuiBadgeGroup>
-            </EuiFlexGroup>
-          }
+        <StreamsAppHeader
+          title={key}
+          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          badges={wiredBadges}
+          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <PendingRootDataStreamCallout
