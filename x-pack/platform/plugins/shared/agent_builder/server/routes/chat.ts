@@ -36,6 +36,7 @@ import type {
   ChatCallbackAcceptedResponse,
   ChatCallbackRequestBodyPayload,
 } from '../../common/http_api/chat_callback';
+import { isChatCallbackRequestBodyPayload } from '../../common/http_api/chat_callback';
 import { internalApiPath, publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
@@ -44,14 +45,6 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import converseAsyncDescription from './oas/converse_async.text';
 import { buildChatResponseFromEvents } from '../services/execution/utils/chat_response';
-
-interface ExecuteAgentOptions {
-  useTaskManager?: boolean;
-  metadata?: Record<string, string>;
-  source?: ConversationSource;
-  roundSourceInput?: ConversationRoundSourceInput;
-  nextInputSource?: RoundInputSource;
-}
 
 export const promptResponseEntrySchema = schema.oneOf([
   schema.object({ allow: schema.boolean() }),
@@ -306,22 +299,20 @@ export const conversePayloadSchema = schema.object({
   ),
 });
 
-export const sourceUserSchema = schema.object({
-  id: schema.string({ minLength: 1, maxLength: 1024 }),
-  name: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
-  handle: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
-});
-
 export const callbackConversePayloadSchema = conversePayloadSchema.extends({
-  input: schema.string({
-    minLength: 1,
-    meta: { description: 'The user input message to send to the agent.' },
-  }),
-  source: schema.object({
-    type: schema.literal(ConversationSourceType.Slack),
-    external_conversation_id: schema.string({ minLength: 1, maxLength: 1024 }),
-    user: schema.maybe(sourceUserSchema),
-  }),
+  source: schema.maybe(
+    schema.object({
+      type: schema.literal(ConversationSourceType.Slack),
+      external_conversation_id: schema.string({ minLength: 1, maxLength: 1024 }),
+      user: schema.maybe(
+        schema.object({
+          id: schema.string({ minLength: 1, maxLength: 1024 }),
+          name: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
+          handle: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
+        })
+      ),
+    })
+  ),
   callback: schema.object({
     url: schema.string({
       minLength: 1,
@@ -392,20 +383,47 @@ export function registerChatRoutes({
 
   /**
    * Derives execution options shared by all converse routes.
-   * Public requests may opt into local or Task Manager execution with _execution_mode.
+   * Public requests may opt into local or Task Manager execution with _execution_mode,
+   * while callback requests always use Task Manager and carry callback metadata/source.
    */
   const resolveExecutionOptions = (
-    payload: ChatRequestBodyPayload
+    payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload
   ): {
     useTaskManager: boolean | undefined;
     metadata: Record<string, string> | undefined;
+    source: ConversationSource | undefined;
+    roundSourceInput: ConversationRoundSourceInput | undefined;
+    nextInputSource: RoundInputSource | undefined;
   } => {
+    if (isChatCallbackRequestBodyPayload(payload)) {
+      return {
+        useTaskManager: true,
+        metadata: {
+          callback_url: payload.callback.url,
+        },
+        source: payload.source
+          ? { external_conversation_id: payload.source.external_conversation_id }
+          : undefined,
+        roundSourceInput: payload.source
+          ? {
+              source: {
+                type: payload.source.type,
+              },
+            }
+          : undefined,
+        nextInputSource: payload.source?.user ? { user: payload.source.user } : undefined,
+      };
+    }
+
     const { _execution_mode: executionMode } = payload;
 
     return {
       useTaskManager:
         executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined,
       metadata: undefined,
+      source: undefined,
+      roundSourceInput: undefined,
+      nextInputSource: undefined,
     };
   };
 
@@ -413,12 +431,10 @@ export function registerChatRoutes({
     payload,
     request,
     executionService,
-    executionOptions,
   }: {
-    payload: ChatRequestBodyPayload;
+    payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload;
     request: KibanaRequest;
     executionService: AgentExecutionService;
-    executionOptions?: ExecuteAgentOptions;
   }) => {
     const {
       agent_id: agentId,
@@ -435,33 +451,30 @@ export function registerChatRoutes({
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
-    const { useTaskManager, metadata } = resolveExecutionOptions(payload);
+    const { useTaskManager, metadata, source, roundSourceInput, nextInputSource } =
+      resolveExecutionOptions(payload);
 
     return executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
       request,
       executionId,
-      useTaskManager: executionOptions?.useTaskManager ?? useTaskManager,
-      metadata: executionOptions?.metadata ?? metadata,
+      useTaskManager,
+      metadata,
       params: {
         agentId,
         connectorId,
         conversationId,
         autoCreateConversationWithId: true,
         accessControl,
-        ...(executionOptions?.source ? { source: executionOptions.source } : {}),
-        ...(executionOptions?.roundSourceInput
-          ? { roundSourceInput: executionOptions.roundSourceInput }
-          : {}),
+        source,
+        roundSourceInput,
         capabilities,
         browserApiTools,
         configurationOverrides,
         action,
         nextInput: {
           message: input,
-          ...(executionOptions?.nextInputSource
-            ? { source: executionOptions.nextInputSource }
-            : {}),
+          ...(nextInputSource ? { source: nextInputSource } : {}),
           prompts,
           attachments,
         },
@@ -614,12 +627,6 @@ export function registerChatRoutes({
           throw createBadRequestError(error instanceof Error ? error.message : String(error));
         }
 
-        const roundSourceInput: ConversationRoundSourceInput = {
-          source: {
-            type: payload.source.type,
-          },
-        };
-
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
@@ -627,17 +634,6 @@ export function registerChatRoutes({
           payload,
           request,
           executionService,
-          executionOptions: {
-            useTaskManager: true,
-            metadata: {
-              callback_url: payload.callback.url,
-            },
-            source: {
-              external_conversation_id: payload.source.external_conversation_id,
-            },
-            roundSourceInput,
-            ...(payload.source.user ? { nextInputSource: { user: payload.source.user } } : {}),
-          },
         });
 
         return response.accepted<ChatCallbackAcceptedResponse>({
