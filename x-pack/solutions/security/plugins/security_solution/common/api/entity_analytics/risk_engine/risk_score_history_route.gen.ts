@@ -53,6 +53,10 @@ export const RiskScoreHistoryResponse = lazySchema(() =>
   z.object({
     entity_id: z.string().max(1000),
     entity_type: IdentifierType,
+    /**
+     * The effective Elasticsearch date_histogram interval expression the entries were aggregated into (for example `3h`, `1d`, `1w`), derived from the requested time range.
+     */
+    interval: z.string().max(10),
     entries: z.array(RiskScoreHistoryEntry),
   })
 );
@@ -81,7 +85,7 @@ export const GetRiskScoreHistoryRequestQuery = lazySchema(() =>
      */
     score_type: z.enum(['base', 'propagated', 'resolution']).optional(),
     /**
-     * Maximum number of history entries to return per request.
+     * Deprecated and ignored. Results are now aggregated server-side into a fixed number of buckets derived from the requested time range, so this parameter no longer affects the response. Retained for backward compatibility.
      */
     page_size: z.coerce.number().int().min(1).max(1000).optional().default(100),
     /**
