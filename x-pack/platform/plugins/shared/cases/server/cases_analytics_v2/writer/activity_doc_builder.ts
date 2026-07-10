@@ -8,6 +8,7 @@
 import type { SavedObject } from '@kbn/core/server';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import { findCommentReferenceId } from '../../common/references';
 import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
 
 /**
@@ -61,6 +62,15 @@ export interface ActivityAnalyticsDoc {
     assignees_changed?: string[];
     tags_changed?: string[];
     connector_id_new?: string;
+    // The id of the attachment *record* this action targets — the
+    // `cases-comments` (legacy) or `cases-attachments` (unified) SO id,
+    // resolved source-agnostically. Equals `.cases-attachments._id`, so it
+    // correlates an activity row to the specific attachment it created /
+    // edited. NOTE: this is the attachment record id, NOT the
+    // referenced-entity ids the attachments surface stores under
+    // `attachment.attachment_id` (alert / event / external-reference ids) —
+    // hence the distinct name. Present only on `comment` user actions.
+    attachment_reference_id?: string;
   };
 }
 
@@ -101,6 +111,13 @@ export function buildActivityDoc(
   // cases doc-builder does (`case_doc_builder.ts`).
   const connectorId = so.references?.find((ref) => ref.name === CONNECTOR_ID_REFERENCE_NAME)?.id;
 
+  // The attachment record this action targets. A `comment` user action
+  // references exactly one attachment SO — legacy `cases-comments` or unified
+  // `cases-attachments`; `findCommentReferenceId` resolves either source type
+  // to that SO's id, which equals `.cases-attachments._id`. Absent on
+  // non-comment actions, which carry no such reference.
+  const attachmentReferenceId = findCommentReferenceId(so.references);
+
   return {
     '@timestamp': a.created_at,
     // Top-level scoping fields for implicit-privileges DLS. `namespaces` is a
@@ -117,6 +134,11 @@ export function buildActivityDoc(
       verb: a.action,
       payload_json: stringifyPayload(a.payload),
       ...extractCuratedFields(a.type, a.payload, connectorId),
+      // Omit when absent so the strict mapping stays sparse (a no-op under
+      // `dynamic: 'strict'`), consistent with the curated extracts above.
+      ...(attachmentReferenceId != null
+        ? { attachment_reference_id: attachmentReferenceId }
+        : {}),
     },
   };
 }
