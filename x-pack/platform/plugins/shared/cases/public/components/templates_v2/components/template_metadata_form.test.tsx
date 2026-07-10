@@ -61,9 +61,7 @@ describe('TemplateMetadataForm', () => {
     fireEvent.change(input, { target: { value: 'Renamed template' } });
     fireEvent.blur(input);
 
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Renamed template' })
-    );
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ name: 'Renamed template' }));
   });
 
   it('adds a newly created tag to the metadata', async () => {
@@ -74,8 +72,6 @@ describe('TemplateMetadataForm', () => {
     await userEvent.type(tagsInput, 'new-tag');
     await userEvent.keyboard('{enter}');
 
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ tags: ['t1', 'new-tag'] })
-    );
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ tags: ['t1', 'new-tag'] }));
   });
 });

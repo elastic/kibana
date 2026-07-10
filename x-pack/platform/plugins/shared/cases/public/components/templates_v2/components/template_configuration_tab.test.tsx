@@ -10,12 +10,8 @@ import { screen } from '@testing-library/react';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { TemplateConfigurationTab } from './template_configuration_tab';
 
-const mockMetadataForm = jest.fn((_props?: unknown) => (
-  <div data-test-subj="mockMetadataForm" />
-));
-const mockSettingsForm = jest.fn((_props?: unknown) => (
-  <div data-test-subj="mockSettingsForm" />
-));
+const mockMetadataForm = jest.fn((_props?: unknown) => <div data-test-subj="mockMetadataForm" />);
+const mockSettingsForm = jest.fn((_props?: unknown) => <div data-test-subj="mockSettingsForm" />);
 
 jest.mock('./template_metadata_form', () => ({
   TemplateMetadataForm: (props: unknown) => mockMetadataForm(props),
