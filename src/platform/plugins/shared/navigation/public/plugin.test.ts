@@ -146,6 +146,56 @@ describe('Navigation Plugin', () => {
     });
   });
 
+  describe('initNavigation()', () => {
+    it('forwards to chrome.project.initNavigation', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockResolvedValue({
+        username: 'test-user',
+      });
+
+      const navigationTree$ = of({ body: [] });
+      const { initNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      await new Promise((resolve) => setTimeout(resolve));
+
+      initNavigation('es', navigationTree$);
+
+      expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('es', navigationTree$);
+    });
+
+    it('calls enableUi with the solution id when authenticated', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockResolvedValue({
+        username: 'test-user',
+      });
+
+      const enableUiSpy = jest.spyOn((plugin as any).customizationService, 'enableUi');
+      const { initNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      await new Promise((resolve) => setTimeout(resolve));
+      enableUiSpy.mockClear();
+
+      initNavigation('security', of({ body: [] }));
+
+      expect(enableUiSpy).toHaveBeenCalledWith(expect.objectContaining({ solution: 'security' }));
+    });
+
+    it('skips enableUi when unauthenticated', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+
+      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+
+      const enableUiSpy = jest.spyOn((plugin as any).customizationService, 'enableUi');
+      const { initNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      await new Promise((resolve) => setTimeout(resolve));
+      enableUiSpy.mockClear();
+
+      initNavigation('security', of({ body: [] }));
+
+      expect(enableUiSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('set Chrome style', () => {
     it('should set the Chrome style to "classic" when spaces plugin is not available', async () => {
       const { plugin, coreStart, unifiedSearch, cloud } = setup();

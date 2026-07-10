@@ -92,8 +92,8 @@ export class NavigationCustomizationService {
    *
    * - User-menu link: added the first time `security` is provided. In
    *   stateful mode this happens after the active space has confirmed a
-   *   project-nav solution; in serverless mode both capabilities are enabled
-   *   together inside the `getNavigation$` subscription.
+   *   project-nav solution; in serverless mode it happens inside
+   *   `navigation.initNavigation()`, once the solution ID is known.
    */
   enableUi({ core, chrome, security, solution }: NavigationCustomizationServiceUiDeps): void {
     if (!this.handlerRegistered) {

@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/scout-oblt'
   - '@kbn/workflows-management-plugin'
   - '@kbn/significant-events-plugin'
+  - '@kbn/navigation-plugin'
 tags:
   - plugin
   - prod

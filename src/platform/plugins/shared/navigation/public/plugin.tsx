@@ -134,19 +134,6 @@ export class NavigationPublicPlugin
     // (preload: true on the server), keeping startup ordering safe.
     this.customizationService.start({ core, chrome, isUnauthenticated });
 
-    if (isServerless && !isUnauthenticated) {
-      // In serverless, the serverless plugin initializes project navigation directly,
-      // bypassing this plugin's addSolutionNavigation flow. Listen for the navigation
-      // to become available, then enable customization support.
-      chrome.project
-        .getNavigation$()
-        .pipe(take(1))
-        .subscribe(({ solutionId }) => {
-          this.activeSolutionId = solutionId;
-          this.customizationService.enableUi({ core, chrome, security, solution: solutionId });
-        });
-    }
-
     return {
       ui: {
         /**
@@ -165,6 +152,13 @@ export class NavigationPublicPlugin
       addSolutionNavigation: (solutionNavigation) => {
         if (!this.isSolutionNavEnabled) return;
         this.addSolutionNavigation(solutionNavigation);
+      },
+      initNavigation: (id, navigationTree$) => {
+        this.activeSolutionId = id;
+        chrome.project.initNavigation(id, navigationTree$);
+        if (!isUnauthenticated) {
+          this.customizationService.enableUi({ core, chrome, security, solution: id });
+        }
       },
       isSolutionNavEnabled$: of(isUnauthenticated).pipe(
         switchMap((unauth) => {
