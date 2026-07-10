@@ -17,10 +17,21 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
+import { normalizeEvidence } from '../../evaluators/evidence/evidence_service';
+import {
+  EvidenceMappingResolutionError,
+  resolveEvidenceMapping,
+} from '../../evaluators/evidence/resolve_mapping';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import { awaitTraceReady } from '../../evaluators/trace_readiness';
 import type { EvaluatorDefinition } from '../../evaluators/types';
 import type { RouteDependencies } from '../register_routes';
+
+const getIssuePath = (path: PropertyKey[]): string =>
+  path.map((segment) => String(segment)).join('.') || '<root>';
+
+const formatEvidenceSchemaIssues = (error: z.ZodError): string =>
+  error.issues.map((issue) => `${getIssuePath(issue.path)}: ${issue.message}`).join('; ');
 
 export const registerEvaluateRoute = ({
   router,
@@ -122,6 +133,22 @@ export const registerEvaluateRoute = ({
           return response.notFound({ body: { message: String(error) } });
         }
 
+        let resolvedMapping;
+        try {
+          resolvedMapping = resolveEvidenceMapping(
+            subject.evidence_mapping ?? {
+              profile: 'elastic-inference',
+            }
+          );
+        } catch (error) {
+          if (error instanceof EvidenceMappingResolutionError) {
+            return response.badRequest({ body: { message: error.message } });
+          }
+          throw error;
+        }
+
+        const round = await normalizeEvidence(traceAccessor, resolvedMapping);
+
         let inferenceStartPromise: ReturnType<RouteDependencies['getInferenceStart']> | undefined;
         const inferenceClientByConnectorId = new Map<string, BoundInferenceClient>();
         const getInferenceClient = async (
@@ -153,6 +180,27 @@ export const registerEvaluateRoute = ({
 
         const results: EvaluateResponse['results'] = [];
         for (const { config, definition, parsedReferenceData } of resolvedEvaluators) {
+          if (definition.evidenceSchema) {
+            const evidenceParsed = definition.evidenceSchema.safeParse(round);
+            if (!evidenceParsed.success) {
+              results.push({
+                status: 'error',
+                evaluator: {
+                  name: definition.name,
+                  version: definition.version,
+                  kind: definition.kind,
+                },
+                error: {
+                  code: 'evidence_unmet',
+                  message: `Evaluator evidence requirements not met: ${formatEvidenceSchemaIssues(
+                    evidenceParsed.error
+                  )}`,
+                },
+              });
+              continue;
+            }
+          }
+
           try {
             const inferenceClient =
               definition.kind === 'llm' && config.connector_id
@@ -161,6 +209,7 @@ export const registerEvaluateRoute = ({
 
             const result = await definition.evaluate({
               trace: traceAccessor,
+              round,
               referenceData: parsedReferenceData,
               inferenceClient,
               log: logger,
