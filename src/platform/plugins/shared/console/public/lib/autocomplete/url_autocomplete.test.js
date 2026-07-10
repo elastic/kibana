@@ -424,7 +424,7 @@ describe('Url autocomplete', () => {
     // When a concrete path segment (e.g. `_sync_job`) also matches a sibling
     // parameter pattern (e.g. `{connector_id}`), the endpoint whose pattern
     // matches literally must win, regardless of endpoint registration order.
-    const paramFirst: EndpointsById = {
+    const paramFirst = {
       'connector.get': {
         patterns: ['_connector/{connector_id}'],
         methods: ['GET'],
@@ -441,7 +441,7 @@ describe('Url autocomplete', () => {
       { method: 'GET', endpoint: 'connector.sync_job_list' }
     );
 
-    const literalFirst: EndpointsById = {
+    const literalFirst = {
       'connector.sync_job_list': {
         patterns: ['_connector/_sync_job'],
         methods: ['GET'],
@@ -468,7 +468,7 @@ describe('Url autocomplete', () => {
 
     // Explicit priority remains the primary key: it wins even when the
     // literal-segment specificity would favor the other endpoint.
-    const paramWithPriority: EndpointsById = {
+    const paramWithPriority = {
       'connector.get': {
         patterns: ['_connector/{connector_id}'],
         methods: ['GET'],
