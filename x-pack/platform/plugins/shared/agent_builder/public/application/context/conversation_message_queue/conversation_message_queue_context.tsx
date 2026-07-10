@@ -13,6 +13,7 @@ export interface ConversationMessageQueueContextValue {
   queues: ReadonlyMap<string, readonly string[]>;
   enqueue: (conversationId: string, message: string) => void;
   remove: (conversationId: string, index: number) => void;
+  clear: (conversationId: string) => void;
   isMessageQueueFull: (conversationId: string) => boolean;
 }
 
@@ -50,6 +51,15 @@ export const ConversationMessageQueueProvider: React.FC<{ children: React.ReactN
     });
   }, []);
 
+  const clear = useCallback((conversationId: string) => {
+    setQueues((prev) => {
+      if (!prev.has(conversationId)) return prev;
+      const next = new Map(prev);
+      next.delete(conversationId);
+      return next;
+    });
+  }, []);
+
   const isMessageQueueFull = useCallback(
     (conversationId: string): boolean => {
       const current = queues.get(conversationId);
@@ -59,8 +69,8 @@ export const ConversationMessageQueueProvider: React.FC<{ children: React.ReactN
   );
 
   const value = useMemo<ConversationMessageQueueContextValue>(
-    () => ({ queues, enqueue, remove, isMessageQueueFull }),
-    [queues, enqueue, remove, isMessageQueueFull]
+    () => ({ queues, enqueue, remove, clear, isMessageQueueFull }),
+    [queues, enqueue, remove, clear, isMessageQueueFull]
   );
 
   return (

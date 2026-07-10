@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { useKibana } from '../../../hooks/use_kibana';
-import { ROUNDED_BORDER_RADIUS_LARGE } from '../../../../common.styles';
+import { ROUNDED_BORDER_RADIUS_LARGE, lineClampStyles } from '../../../../common.styles';
 
 interface MessageQueueProps {
   queue: readonly string[];
@@ -60,26 +60,20 @@ export const MessageQueue: React.FC<MessageQueueProps> = ({ queue, onRemove }) =
     pointer-events: none;
   `;
 
-  // Matches the RoundInput user-bubble shape (padding, radius, max-inline-size, wrap).
-  // Uses a subdued neutral background so the bubble sits visually distinct from a sentuser message
+  // Matches the RoundInput user-bubble shape
   const bubbleStyles = css`
     align-self: flex-end;
+    inline-size: fit-content;
     max-inline-size: 90%;
     background: ${euiTheme.colors.backgroundBaseSubdued};
     ${euiTextBreakWord()}
     white-space: pre-wrap;
     border-radius: ${`${ROUNDED_BORDER_RADIUS_LARGE} ${ROUNDED_BORDER_RADIUS_LARGE} 0 ${ROUNDED_BORDER_RADIUS_LARGE}`};
     pointer-events: auto;
+  `;
 
-    .agentBuilderMessageQueueRemove {
-      opacity: 0;
-      transition: opacity 150ms ease;
-    }
-
-    &:hover .agentBuilderMessageQueueRemove,
-    &:focus-within .agentBuilderMessageQueueRemove {
-      opacity: 1;
-    }
+  const messageTextStyles = css`
+    ${lineClampStyles(2)}
   `;
 
   return (
@@ -96,12 +90,13 @@ export const MessageQueue: React.FC<MessageQueueProps> = ({ queue, onRemove }) =
         >
           <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false} responsive={false}>
             <EuiFlexItem>
-              <EuiText size="m">{message}</EuiText>
+              <EuiText size="m" css={messageTextStyles}>
+                {message}
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={removeLabel} disableScreenReaderOutput>
+              <EuiToolTip content={removeLabel} position="right" disableScreenReaderOutput>
                 <EuiButtonIcon
-                  className="agentBuilderMessageQueueRemove"
                   iconType="cross"
                   size="xs"
                   color="text"

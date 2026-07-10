@@ -175,4 +175,49 @@ describe('ConversationMessageQueueContext', () => {
       expect(result.current.queues.has(CONVO_A)).toBe(false);
     });
   });
+
+  describe('clear', () => {
+    it('removes every message for the given conversation', () => {
+      const { result } = renderHook(() => useConversationMessageQueue(), { wrapper });
+
+      act(() => {
+        result.current.enqueue(CONVO_A, 'a');
+        result.current.enqueue(CONVO_A, 'b');
+        result.current.enqueue(CONVO_A, 'c');
+      });
+
+      act(() => {
+        result.current.clear(CONVO_A);
+      });
+
+      expect(result.current.queues.has(CONVO_A)).toBe(false);
+    });
+
+    it('does not affect other conversations', () => {
+      const { result } = renderHook(() => useConversationMessageQueue(), { wrapper });
+
+      act(() => {
+        result.current.enqueue(CONVO_A, 'a1');
+        result.current.enqueue(CONVO_B, 'b1');
+      });
+
+      act(() => {
+        result.current.clear(CONVO_A);
+      });
+
+      expect(result.current.queues.has(CONVO_A)).toBe(false);
+      expect(result.current.queues.get(CONVO_B)).toEqual(['b1']);
+    });
+
+    it('is a no-op when the conversation has no queue', () => {
+      const { result } = renderHook(() => useConversationMessageQueue(), { wrapper });
+      const before = result.current.queues;
+
+      act(() => {
+        result.current.clear(CONVO_A);
+      });
+
+      expect(result.current.queues).toBe(before);
+    });
+  });
 });

@@ -124,7 +124,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const submitMessage = useSubmitMessage();
 
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
-  const { queues, enqueue, remove, isMessageQueueFull } = useConversationMessageQueue();
+  const { queues, enqueue, remove, clear, isMessageQueueFull } = useConversationMessageQueue();
 
   const messageQueue: readonly string[] = conversationId
     ? queues.get(conversationId) ?? EMPTY_QUEUE
@@ -205,20 +205,20 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   useEffect(() => {
     if (!canDrainQueue) return;
-    const next = messageQueue[0];
-    if (next === undefined) return;
 
-    // Delay sending the message by 1 second so the user always sees the queue in the UI before sending the message
+    // Delay flushing the queue by 1 second so the user always sees the pending bubbles before they merge into a single outgoing message
     const timeoutId = setTimeout(() => {
-      remove(conversationId!, 0);
-      submitMessage(next);
+      // Flush every queued message as one send, separated by a blank line
+      const flushed = messageQueue.join('\n\n');
+      clear(conversationId!);
+      submitMessage(flushed);
       onSubmit?.();
     }, 1000);
 
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [canDrainQueue, conversationId, remove, submitMessage, onSubmit, messageQueue]);
+  }, [canDrainQueue, conversationId, clear, submitMessage, onSubmit, messageQueue]);
 
   const handleSubmit = () => {
     if (isSubmitDisabled) {

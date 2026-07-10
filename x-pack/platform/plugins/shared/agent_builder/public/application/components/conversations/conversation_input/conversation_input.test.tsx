@@ -140,6 +140,7 @@ describe('ConversationInput', () => {
       queues: new Map(),
       enqueue: jest.fn(),
       remove: jest.fn(),
+      clear: jest.fn(),
       isMessageQueueFull: jest.fn().mockReturnValue(false),
     });
   });
