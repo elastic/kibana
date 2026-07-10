@@ -42,7 +42,10 @@ export const useToolbarActions = ({
     useMetricsExperienceState();
   const onDimensionsSelectionChange = onDimensionsChangeProp ?? onDimensionsChange;
 
-  const isEditGridEnabled = useFeatureFlag(METRICS_FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS, false);
+  const isEditGridEnabled = useFeatureFlag(
+    METRICS_FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED,
+    false
+  );
 
   const isSmallScreen = useIsWithinMaxBreakpoint(isFullscreen ? 'm' : 'l');
 
