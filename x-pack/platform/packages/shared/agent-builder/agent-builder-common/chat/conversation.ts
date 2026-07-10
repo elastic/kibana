@@ -383,11 +383,6 @@ export interface ConversationRoundSource {
   type: ConversationSourceType;
 }
 
-export interface ConversationRoundSourceInput {
-  /** Source metadata to persist on the completed round. */
-  source: ConversationRoundSource;
-}
-
 export interface RoundModelUsageStats {
   /**
    * Id of the connector used for this round

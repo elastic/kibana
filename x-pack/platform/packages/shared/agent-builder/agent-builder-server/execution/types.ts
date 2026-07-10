@@ -15,7 +15,7 @@ import type {
   BrowserApiToolMetadata,
   ConversationAction,
   ConversationAccessControl,
-  ConversationRoundSourceInput,
+  ConversationRoundSource,
   ConversationSource,
   ExecutionStatus,
   SerializedExecutionError,
@@ -66,7 +66,7 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   /** External source used to resolve the conversation. */
   source?: ConversationSource;
   /** Source metadata for the input that will be persisted on the completed round. */
-  roundSourceInput?: ConversationRoundSourceInput;
+  roundSource?: ConversationRoundSource;
   /** Browser API tools to make available to the agent. */
   browserApiTools?: BrowserApiToolMetadata[];
   /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */

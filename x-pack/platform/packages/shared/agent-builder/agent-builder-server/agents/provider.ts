@@ -19,7 +19,7 @@ import type {
   ChatEvent,
   ExecutionStatus,
   SerializedExecutionError,
-  ConversationRoundSourceInput,
+  ConversationRoundSource,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -272,7 +272,7 @@ export interface AgentParams {
    * Source metadata for the input triggering this round. Used as a scheduled-execution
    * handoff until the round can persist it.
    */
-  roundSourceInput?: ConversationRoundSourceInput;
+  roundSource?: ConversationRoundSource;
   /**
    * Agent capabilities to enable.
    */

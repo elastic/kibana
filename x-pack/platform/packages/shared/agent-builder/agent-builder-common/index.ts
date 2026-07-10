@@ -152,7 +152,6 @@ export {
   type ConversationSourceUser,
   type RoundInputSource,
   type ConversationRoundSource,
-  type ConversationRoundSourceInput,
   type ConversationWithoutRounds,
   type ToolCallStep,
   type ConversationRoundStep,

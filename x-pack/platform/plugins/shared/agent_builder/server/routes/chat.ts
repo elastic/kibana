@@ -14,7 +14,7 @@ import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
-  ConversationRoundSourceInput,
+  ConversationRoundSource,
   ConversationSource,
   RoundInputSource,
 } from '@kbn/agent-builder-common';
@@ -392,7 +392,7 @@ export function registerChatRoutes({
     useTaskManager: boolean | undefined;
     metadata: Record<string, string> | undefined;
     source: ConversationSource | undefined;
-    roundSourceInput: ConversationRoundSourceInput | undefined;
+    roundSource: ConversationRoundSource | undefined;
     nextInputSource: RoundInputSource | undefined;
   } => {
     if (isChatCallbackRequestBodyPayload(payload)) {
@@ -404,13 +404,7 @@ export function registerChatRoutes({
         source: payload.source
           ? { external_conversation_id: payload.source.external_conversation_id }
           : undefined,
-        roundSourceInput: payload.source
-          ? {
-              source: {
-                type: payload.source.type,
-              },
-            }
-          : undefined,
+        roundSource: payload.source ? { type: payload.source.type } : undefined,
         nextInputSource: payload.source?.user ? { user: payload.source.user } : undefined,
       };
     }
@@ -422,7 +416,7 @@ export function registerChatRoutes({
         executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined,
       metadata: undefined,
       source: undefined,
-      roundSourceInput: undefined,
+      roundSource: undefined,
       nextInputSource: undefined,
     };
   };
@@ -451,7 +445,7 @@ export function registerChatRoutes({
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
-    const { useTaskManager, metadata, source, roundSourceInput, nextInputSource } =
+    const { useTaskManager, metadata, source, roundSource, nextInputSource } =
       resolveExecutionOptions(payload);
 
     return executionService.executeAgent({
@@ -467,7 +461,7 @@ export function registerChatRoutes({
         autoCreateConversationWithId: true,
         accessControl,
         source,
-        roundSourceInput,
+        roundSource,
         capabilities,
         browserApiTools,
         configurationOverrides,

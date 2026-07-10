@@ -25,7 +25,7 @@ import type {
   BackgroundAgentCompleteStep,
   TodosStep,
   UserQuestionAskedEvent,
-  ConversationRoundSourceInput,
+  ConversationRoundSource,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
@@ -100,7 +100,7 @@ export const addRoundCompleteEvent = ({
   roundId: providedRoundId,
   initialTodos,
   getWorkspaceId,
-  roundSourceInput,
+  roundSource,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -120,7 +120,7 @@ export const addRoundCompleteEvent = ({
   /** Returns the workspace_id used in this round, if any */
   getWorkspaceId?: () => string | undefined;
   /** Source metadata for the input triggering this round. */
-  roundSourceInput?: ConversationRoundSourceInput;
+  roundSource?: ConversationRoundSource;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(shareReplay());
@@ -141,6 +141,7 @@ export const addRoundCompleteEvent = ({
                 attachmentRefs,
                 configurationOverrides,
                 compactionResult,
+                roundSource,
               })
             : createRound({
                 roundId: providedRoundId,
@@ -153,11 +154,8 @@ export const addRoundCompleteEvent = ({
                 configurationOverrides,
                 compactionResult,
                 initialTodos,
+                roundSource,
               });
-
-          if (roundSourceInput) {
-            round.source = roundSourceInput.source;
-          }
 
           round.state = buildRoundState({ round, events, stateManager });
 
@@ -190,6 +188,7 @@ const resumeRound = ({
   attachmentRefs,
   configurationOverrides,
   compactionResult,
+  roundSource,
 }: {
   pendingRound: ConversationRound;
   events: SourceEvents[];
@@ -200,6 +199,7 @@ const resumeRound = ({
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
+  roundSource?: ConversationRoundSource;
 }): ConversationRound => {
   // Replay tool events for all pending steps (those with empty results)
   const pendingSteps = pendingRound.steps
@@ -242,6 +242,7 @@ const resumeRound = ({
     attachmentRefs,
     configurationOverrides,
     compactionResult,
+    roundSource,
   });
 
   return mergeRounds(pendingRound, followUp);
@@ -273,7 +274,7 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
-    source: next.source ?? previous.source,
+    source: previous.source,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
   };
 
@@ -322,6 +323,7 @@ const createRound = ({
   configurationOverrides,
   compactionResult,
   initialTodos,
+  roundSource,
 }: {
   roundId?: string;
   events: SourceEvents[];
@@ -333,6 +335,7 @@ const createRound = ({
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
   initialTodos?: TodoItem[];
+  roundSource?: ConversationRoundSource;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -436,6 +439,7 @@ const createRound = ({
       ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
     },
     steps,
+    source: roundSource,
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,

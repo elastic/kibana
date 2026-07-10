@@ -37,10 +37,8 @@ describe('addRoundCompleteEvent', () => {
       name: 'Jane Doe',
       handle: 'jane',
     };
-    const roundSourceInput = {
-      source: {
-        type: ConversationSourceType.Slack,
-      },
+    const roundSource = {
+      type: ConversationSourceType.Slack,
     };
     const userInput = {
       message: '@agent summarize this',
@@ -66,7 +64,7 @@ describe('addRoundCompleteEvent', () => {
           pendingRound: undefined,
           userInput,
           startTime: new Date('2026-01-01T00:00:00.000Z'),
-          roundSourceInput,
+          roundSource,
         }),
         toArray()
       )

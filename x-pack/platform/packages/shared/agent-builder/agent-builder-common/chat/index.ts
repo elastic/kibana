@@ -24,7 +24,6 @@ export {
   type ConversationSourceUser,
   type RoundInputSource,
   type ConversationRoundSource,
-  type ConversationRoundSourceInput,
   type ConversationInternalState,
   type TodoItem,
   type TodoStatus,
