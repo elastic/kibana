@@ -11,7 +11,10 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-import { isValidExperimentalValue } from '../common/experimental_features';
+import {
+  isValidExperimentalValue,
+  parseExperimentalConfigValue,
+} from '../common/experimental_features';
 
 import {
   PreconfiguredPackagesSchema,
@@ -177,6 +180,31 @@ export const config: PluginConfigDescriptor = {
             level: 'warning',
           });
         }
+      }
+    },
+
+    // Warn on the conflicting combination of disabling the agentless policies UI (which makes the
+    // UI call the legacy package-policy/agent-policy APIs for agentless policies) while blocking
+    // those legacy APIs for agentless via disableAgentlessLegacyAPI.
+    (fullConfig, fromPath, addDeprecation) => {
+      const experimentalFeatures = parseExperimentalConfigValue(
+        fullConfig?.xpack?.fleet?.enableExperimental ?? [],
+        fullConfig?.xpack?.fleet?.experimentalFeatures ?? {}
+      );
+      if (
+        !experimentalFeatures.enableAgentlessPoliciesUI &&
+        experimentalFeatures.disableAgentlessLegacyAPI
+      ) {
+        addDeprecation({
+          configPath: 'xpack.fleet.experimentalFeatures.enableAgentlessPoliciesUI',
+          message: `When [enableAgentlessPoliciesUI] is disabled and [disableAgentlessLegacyAPI] is enabled, the server rejects agentless policy operations from the Fleet UI.`,
+          correctiveActions: {
+            manualSteps: [
+              `Re-enable [xpack.fleet.experimentalFeatures.enableAgentlessPoliciesUI] or disable [xpack.fleet.experimentalFeatures.disableAgentlessLegacyAPI].`,
+            ],
+          },
+          level: 'warning',
+        });
       }
     },
   ],

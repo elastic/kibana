@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -46,6 +47,12 @@ export default function ({ getService }: FtrProviderContext) {
         const features = Object.fromEntries(
           Object.entries(body.features).filter(([key]) => compositeFeatureIds.includes(key))
         );
+
+        // Stack Rules (stackAlerts) and Stack Alerts (stackAlertsOnly) are hidden
+        // in the serverless observability project, so they must not be exposed by
+        // the security privileges API.
+        expect(body.features).to.not.have.property('stackAlerts');
+        expect(body.features).to.not.have.property('stackAlertsOnly');
 
         expectSnapshot(features).toMatchInline(`
           Object {
@@ -1987,6 +1994,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:dashboard/delete",
                 "saved_object:dashboard/bulk_delete",
                 "saved_object:dashboard/share_to_space",
+                "saved_object:links/bulk_get",
+                "saved_object:links/get",
+                "saved_object:links/find",
+                "saved_object:links/open_point_in_time",
+                "saved_object:links/close_point_in_time",
+                "saved_object:links/create",
+                "saved_object:links/bulk_create",
+                "saved_object:links/update",
+                "saved_object:links/bulk_update",
+                "saved_object:links/delete",
+                "saved_object:links/bulk_delete",
+                "saved_object:links/share_to_space",
                 "saved_object:markdown/bulk_get",
                 "saved_object:markdown/get",
                 "saved_object:markdown/find",
@@ -2113,11 +2132,6 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:lens/find",
                 "saved_object:lens/open_point_in_time",
                 "saved_object:lens/close_point_in_time",
-                "saved_object:links/bulk_get",
-                "saved_object:links/get",
-                "saved_object:links/find",
-                "saved_object:links/open_point_in_time",
-                "saved_object:links/close_point_in_time",
                 "saved_object:map/bulk_get",
                 "saved_object:map/get",
                 "saved_object:map/find",
@@ -2267,6 +2281,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:dashboard/delete",
                 "saved_object:dashboard/bulk_delete",
                 "saved_object:dashboard/share_to_space",
+                "saved_object:links/bulk_get",
+                "saved_object:links/get",
+                "saved_object:links/find",
+                "saved_object:links/open_point_in_time",
+                "saved_object:links/close_point_in_time",
+                "saved_object:links/create",
+                "saved_object:links/bulk_create",
+                "saved_object:links/update",
+                "saved_object:links/bulk_update",
+                "saved_object:links/delete",
+                "saved_object:links/bulk_delete",
+                "saved_object:links/share_to_space",
                 "saved_object:markdown/bulk_get",
                 "saved_object:markdown/get",
                 "saved_object:markdown/find",
@@ -2357,11 +2383,6 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:lens/find",
                 "saved_object:lens/open_point_in_time",
                 "saved_object:lens/close_point_in_time",
-                "saved_object:links/bulk_get",
-                "saved_object:links/get",
-                "saved_object:links/find",
-                "saved_object:links/open_point_in_time",
-                "saved_object:links/close_point_in_time",
                 "saved_object:map/bulk_get",
                 "saved_object:map/get",
                 "saved_object:map/find",
@@ -2822,6 +2843,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:dashboard/delete",
                 "saved_object:dashboard/bulk_delete",
                 "saved_object:dashboard/share_to_space",
+                "saved_object:links/bulk_get",
+                "saved_object:links/get",
+                "saved_object:links/find",
+                "saved_object:links/open_point_in_time",
+                "saved_object:links/close_point_in_time",
+                "saved_object:links/create",
+                "saved_object:links/bulk_create",
+                "saved_object:links/update",
+                "saved_object:links/bulk_update",
+                "saved_object:links/delete",
+                "saved_object:links/bulk_delete",
+                "saved_object:links/share_to_space",
                 "saved_object:markdown/bulk_get",
                 "saved_object:markdown/get",
                 "saved_object:markdown/find",
@@ -2936,11 +2969,6 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:lens/find",
                 "saved_object:lens/open_point_in_time",
                 "saved_object:lens/close_point_in_time",
-                "saved_object:links/bulk_get",
-                "saved_object:links/get",
-                "saved_object:links/find",
-                "saved_object:links/open_point_in_time",
-                "saved_object:links/close_point_in_time",
                 "saved_object:map/bulk_get",
                 "saved_object:map/get",
                 "saved_object:map/find",
@@ -3067,6 +3095,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:dashboard/delete",
                 "saved_object:dashboard/bulk_delete",
                 "saved_object:dashboard/share_to_space",
+                "saved_object:links/bulk_get",
+                "saved_object:links/get",
+                "saved_object:links/find",
+                "saved_object:links/open_point_in_time",
+                "saved_object:links/close_point_in_time",
+                "saved_object:links/create",
+                "saved_object:links/bulk_create",
+                "saved_object:links/update",
+                "saved_object:links/bulk_update",
+                "saved_object:links/delete",
+                "saved_object:links/bulk_delete",
+                "saved_object:links/share_to_space",
                 "saved_object:markdown/bulk_get",
                 "saved_object:markdown/get",
                 "saved_object:markdown/find",
@@ -3145,11 +3185,6 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:lens/find",
                 "saved_object:lens/open_point_in_time",
                 "saved_object:lens/close_point_in_time",
-                "saved_object:links/bulk_get",
-                "saved_object:links/get",
-                "saved_object:links/find",
-                "saved_object:links/open_point_in_time",
-                "saved_object:links/close_point_in_time",
                 "saved_object:map/bulk_get",
                 "saved_object:map/get",
                 "saved_object:map/find",

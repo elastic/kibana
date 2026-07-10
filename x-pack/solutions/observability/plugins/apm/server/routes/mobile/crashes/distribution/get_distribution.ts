@@ -5,24 +5,15 @@
  * 2.0.
  */
 
+import type { CrashDistributionResponse } from '@kbn/apm-api-shared';
 import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/offset_previous_period_coordinate';
 import { BUCKET_TARGET_COUNT } from '../../../transactions/constants';
 import { getBuckets } from './get_buckets';
 import { getOffsetInMs } from '../../../../../common/utils/get_offset_in_ms';
 import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
-import type { Maybe } from '../../../../../typings/common';
 
 function getBucketSize({ start, end }: { start: number; end: number }) {
   return Math.floor((end - start) / BUCKET_TARGET_COUNT);
-}
-
-export interface CrashDistributionResponse {
-  currentPeriod: Array<{ x: number; y: number }>;
-  previousPeriod: Array<{
-    x: number;
-    y: Maybe<number>;
-  }>;
-  bucketSize: number;
 }
 
 export async function getCrashDistribution({

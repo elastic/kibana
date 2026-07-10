@@ -14,7 +14,6 @@ export * from './src/annotations';
 export * from './src/anomaly_detector_type';
 export type * from './src/apm_event';
 export type * from './src/apm_ml_job';
-export type * from './src/apm_telemetry';
 export * from './src/apm_timeseries';
 export * from './src/connections';
 export type * from './src/container_type';
