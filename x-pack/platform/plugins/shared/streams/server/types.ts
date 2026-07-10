@@ -48,6 +48,7 @@ import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
+import type { RelayClientContract } from '@kbn/significant-events-schema';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -66,6 +67,12 @@ export interface StreamsServer {
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder?: AgentBuilderPluginStart;
   spaces?: SpacesPluginStart;
+  /**
+   * Singleton client for the Relay service. Built and populated by the
+   * significant_events plugin (see `RelayClientContract`'s doc); `streams` only
+   * holds the type-only reference so the shared server context compiles.
+   */
+  relayClient?: RelayClientContract;
 }
 
 export interface ElasticsearchAccessorOptions {

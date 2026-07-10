@@ -23,3 +23,9 @@ export const SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG =
  * Enables the Streams root cause investigation workflow and agent.
  */
 export const SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG = 'streams.investigationEnabled';
+
+/**
+ * Enables the Apps section under Significant Events settings, where third-party
+ * integrations (e.g. the Elastic Slack App) can be connected via the Relay service.
+ */
+export const STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG = 'streams.significantEventsAppsEnabled';
