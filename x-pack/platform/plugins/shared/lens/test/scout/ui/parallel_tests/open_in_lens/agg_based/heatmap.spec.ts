@@ -10,45 +10,56 @@ import { expect } from '@kbn/scout/ui';
 import {
   testData,
   convertToLensByTitle,
-  enableElasticChartDebug,
+  createOpenInLensSuiteSetup,
   getChartDebugData,
-  getImportedDashboardId,
 } from '../../../fixtures';
 
-spaceTest.describe(
-  'Lens open in Lens — agg-based Heatmap',
-  { tag: tags.deploymentAgnostic },
-  () => {
-    let heatmapDashboardId: string;
+spaceTest.describe('Lens open in Lens — agg-based Heatmap', { tag: tags.deploymentAgnostic }, () => {
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.HEATMAP,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.HEATMAP,
+    enableChartDebug: true,
+  });
 
-    spaceTest.beforeAll(async ({ scoutSpace }) => {
-      const imported = await scoutSpace.savedObjects.load(
-        testData.KBN_ARCHIVES.OPEN_IN_LENS_AGG_BASED.HEATMAP
-      );
-      heatmapDashboardId = getImportedDashboardId(
-        imported,
-        testData.OPEN_IN_LENS_DASHBOARDS.HEATMAP
-      );
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
 
-      await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-      await scoutSpace.uiSettings.set({
-        'dateFormat:tz': 'UTC',
-        'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
-      });
-    });
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
 
-    spaceTest.beforeEach(async ({ browserAuth, context, pageObjects }) => {
-      await enableElasticChartDebug(context);
-      await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.dashboard.openDashboardWithIdInEditMode(heatmapDashboardId);
-    });
+  spaceTest.afterAll(openInLensSuite.afterAll);
 
-    spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-      await scoutSpace.savedObjects.cleanStandardList();
-    });
+  spaceTest('should convert to Lens', async ({ page, pageObjects }) => {
+    const { dashboard, lens } = pageObjects;
 
-    spaceTest('should convert to Lens', async ({ page, pageObjects }) => {
+    await convertToLensByTitle({ dashboard }, 'Heatmap - With X-Axis only');
+    await lens.waitForVisualization('heatmapChart');
+
+    const debugState = await getChartDebugData(page, 'heatmapChart');
+    expect(debugState.axes?.x[0].labels).toStrictEqual(['win 8', 'win xp', 'win 7', 'ios', 'osx']);
+    expect(debugState.axes?.y[0].labels).toStrictEqual(['']);
+    expect(debugState.heatmap?.cells).toHaveLength(5);
+    expect(debugState.legend?.items).toStrictEqual([
+      {
+        color: '#006837',
+        key: '1,322 - 1,717.5',
+        name: '1,322 - 1,717.5',
+      },
+      { color: '#86cb66', key: '1,717.5 - 2,113', name: '1,717.5 - 2,113' },
+      {
+        color: '#fefebd',
+        key: '2,113 - 2,508.5',
+        name: '2,113 - 2,508.5',
+      },
+      {
+        color: '#f88d52',
+        key: '2,508.5 - 2,904',
+        name: '2,508.5 - 2,904',
+      },
+    ]);
+  });
+
+  spaceTest(
+    'should convert to Lens if Y-axis is defined, but X-axis is not',
+    async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
 
       await convertToLensByTitle({ dashboard }, 'Heatmap - With X-Axis only');

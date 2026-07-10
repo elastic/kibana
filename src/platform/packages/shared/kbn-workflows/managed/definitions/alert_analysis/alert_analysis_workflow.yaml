@@ -940,7 +940,7 @@ steps:
                 {%- endif %}
                 {%- endif %}
 
-          - name: onechat_runAgent_step
+          - name: runAgent_step
             type: ai.agent
             agent-id: "{{ variables.agent_id }}"
             connector-id: "{{ variables.connector_id }}"
@@ -994,7 +994,7 @@ steps:
           # and abort processing for this alert.
           - name: check_if_output_exists
             type: if
-            condition: "not steps.onechat_runAgent_step.output.structured_output.classification:*"
+            condition: "not steps.runAgent_step.output.structured_output.classification:*"
             steps:
               - name: add_no_data_note_to_alert
                 type: kibana.request
@@ -1039,24 +1039,38 @@ steps:
                         ---
                         ## Automated Alert Analysis
                         ### Classification
-                        **{{ steps.onechat_runAgent_step.output.structured_output.classification }}**
+                        **{{ steps.runAgent_step.output.structured_output.classification }}**
 
                         ### Confidence Score
-                        {{ steps.onechat_runAgent_step.output.structured_output.confidence_score }}
+                        {{ steps.runAgent_step.output.structured_output.confidence_score }}
 
                         ### Rationale
-                        {{ steps.onechat_runAgent_step.output.structured_output.rationale }}
+                        {{ steps.runAgent_step.output.structured_output.rationale }}
 
                         ### Contributing Factors
-                        {% for factor in steps.onechat_runAgent_step.output.structured_output.contributing_factors %}
+                        {% for factor in steps.runAgent_step.output.structured_output.contributing_factors %}
                         - {{ factor }}
                         {%- endfor %}
 
-                        ### Timestamp
-                        {{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S' }}
+                        ### Analysis Details
+                        - Workflow version: {{ variables.normalized_version }}
+                        - Tag prefix: {{ variables.tag_prefix }}
+                        - Connector: {{ steps.runAgent_step.output.metadata.usage.connectorId | default: variables.connector_id }}
+                        {% if variables.auto_close_enabled -%}
+                        - Auto-close confidence range: {{ variables.auto_close_confidence_score_min_threshold }} to {{ variables.auto_close_confidence_score_max_threshold }}
+                        {%- endif %}
 
-                        {% if steps.onechat_runAgent_step.output.conversation_id -%}
-                        [Continue conversation](/app/agent_builder/conversations/{{ steps.onechat_runAgent_step.output.conversation_id }})
+                        ### Token Usage
+                        - Input tokens: {{ steps.runAgent_step.output.metadata.usage.inputTokens | default: 0 }}
+                        - Output tokens: {{ steps.runAgent_step.output.metadata.usage.outputTokens | default: 0 }}
+                        - Cached tokens: {{ steps.runAgent_step.output.metadata.usage.cachedTokens | default: 0 }}
+                        - Total tokens: {{ steps.runAgent_step.output.metadata.usage.totalTokens | default: 0 }}
+
+                        ### Timestamp
+                        {{ execution.startedAt | date: '%B %d, %Y at %H:%M:%S UTC' }}
+
+                        {% if steps.runAgent_step.output.conversation_id -%}
+                        [Continue conversation](/app/agent_builder/conversations/{{ steps.runAgent_step.output.conversation_id }})
                         {%- endif %}
 
                       timelineId: ''
@@ -1086,8 +1100,8 @@ steps:
                   tags_to_add:
                     - "{{ variables.tag_prefix }}"
                     - "{{ variables.tag_prefix }}.version.{{ variables.normalized_version }}"
-                    - "{{ variables.tag_prefix }}.classification.{{ steps.onechat_runAgent_step.output.structured_output.classification | downcase }}"
-                    - "{{ variables.tag_prefix }}.confidence.{{ steps.onechat_runAgent_step.output.structured_output.confidence_score }}"
+                    - "{{ variables.tag_prefix }}.classification.{{ steps.runAgent_step.output.structured_output.classification | downcase }}"
+                    - "{{ variables.tag_prefix }}.confidence.{{ steps.runAgent_step.output.structured_output.confidence_score }}"
                   tags_to_remove: "${{ foreach.item.kibana.alert.workflow_tags | where_exp: 'tag', variables.tags_filter_expr }}"
 
               # Remove stale tags first (if any) to avoid conflicts with the add.
@@ -1128,9 +1142,9 @@ steps:
                 type: if
                 condition: >-
                   variables.auto_close_enabled: true
-                  and steps.onechat_runAgent_step.output.structured_output.classification: "false_positive"
-                  and steps.onechat_runAgent_step.output.structured_output.confidence_score >= {{ variables.auto_close_confidence_score_min_threshold }}
-                  and steps.onechat_runAgent_step.output.structured_output.confidence_score <= {{ variables.auto_close_confidence_score_max_threshold }}
+                  and steps.runAgent_step.output.structured_output.classification: "false_positive"
+                  and steps.runAgent_step.output.structured_output.confidence_score >= {{ variables.auto_close_confidence_score_min_threshold }}
+                  and steps.runAgent_step.output.structured_output.confidence_score <= {{ variables.auto_close_confidence_score_max_threshold }}
                 steps:
                   # Tag the alert so it can be identified as auto-closed.
                   - name: set_close_tags
