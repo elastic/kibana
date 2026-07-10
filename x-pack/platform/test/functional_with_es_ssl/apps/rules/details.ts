@@ -371,7 +371,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // click on first rule
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(ruleName);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -408,7 +408,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // click on first rule
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(updatedRuleName);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -423,7 +423,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.waitForDeletedByCssSelector('[data-test-subj="rulePageFooterCancelButton"]');
 
         await actionsButton.click();
-        await editButton.click();
+        await testSubjects.click('openEditRuleFlyoutButton');
 
         const nameInputAfterCancel = await testSubjects.find('ruleDetailsNameInput');
         const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
@@ -489,7 +489,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -556,7 +556,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -938,7 +938,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Verify we're on the rule details page by checking for rule-specific elements
         await testSubjects.existOrFail('statusDropdown');
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
       });
@@ -965,7 +965,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Verify we're on the rule details page by checking for rule-specific elements
         await testSubjects.existOrFail('statusDropdown');
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
 
