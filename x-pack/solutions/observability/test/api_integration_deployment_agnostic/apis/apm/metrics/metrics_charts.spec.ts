@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { first } from 'lodash';
-import type { GenericMetricsChart } from '@kbn/apm-plugin/server/routes/metrics/fetch_and_transform_metrics';
+import type { GenericMetricsChart } from '@kbn/apm-api-shared';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { ARCHIVER_ROUTES } from '../constants/archiver';
 import type { SupertestReturnType } from '../../../services/apm_api';

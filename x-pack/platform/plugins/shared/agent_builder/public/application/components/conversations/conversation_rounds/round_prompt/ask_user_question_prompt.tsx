@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCheckableCard,
   EuiFieldText,
   EuiFlexGroup,
@@ -17,7 +17,8 @@ import {
   EuiIcon,
   EuiText,
   EuiTitle,
-  useGeneratedHtmlId,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,149 +27,33 @@ import {
   containerStyles,
   optionCardStyles,
   customRowStyles,
-  draftToAnswer,
-  isDraftAnswerable,
-  isCustomTextMissing,
 } from './ask_user_question_prompt_utils';
-import type { AnswerDraft, AskUserQuestionPromptProps } from './ask_user_question_prompt_utils';
+import type { AskUserQuestionPromptProps } from './ask_user_question_prompt_utils';
+import { useAskUserQuestionPrompt } from './use_ask_user_question_prompt';
 
 export type { AskUserQuestionPromptProps } from './ask_user_question_prompt_utils';
 
-export const AskUserQuestionPrompt = ({
-  promptId,
-  questions,
-  onSubmit,
-  isLoading = false,
-  isDisabled = false,
-}: AskUserQuestionPromptProps) => {
-  const totalQuestions = questions.length;
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [drafts, setDrafts] = useState<AnswerDraft[]>(() => questions.map(() => ({})));
-  const [showCustomError, setShowCustomError] = useState(false);
-  const baseId = useGeneratedHtmlId({ prefix: 'askUserQuestionPrompt' });
-
-  const currentQuestion = questions[currentIndex];
-  const currentDraft = drafts[currentIndex];
-  const isFinalQuestion = currentIndex === totalQuestions - 1;
-  const canConfirm = !currentDraft.skipped && isDraftAnswerable(currentDraft);
-  const questionGroupName = `${baseId}-q${currentIndex}`;
-
-  const updateDraft = useCallback(
-    (next: AnswerDraft) => {
-      setShowCustomError(false);
-      setDrafts((prev) => {
-        const copy = prev.slice();
-        copy[currentIndex] = next;
-        return copy;
-      });
-    },
-    [currentIndex]
-  );
-
-  const handleSubmit = useCallback(
-    (overrideLast?: AnswerDraft) => {
-      const finalDrafts = overrideLast
-        ? drafts.map((draft, i) => (i === currentIndex ? overrideLast : draft))
-        : drafts;
-      onSubmit({ answers: finalDrafts.map(draftToAnswer) });
-    },
-    [drafts, currentIndex, onSubmit]
-  );
-
-  const handleConfirm = useCallback(() => {
-    if (!canConfirm) return;
-    if (isCustomTextMissing(currentDraft)) {
-      setShowCustomError(true);
-      return;
-    }
-    if (isFinalQuestion) {
-      handleSubmit();
-      return;
-    }
-    setShowCustomError(false);
-    setCurrentIndex((idx) => idx + 1);
-  }, [canConfirm, currentDraft, handleSubmit, isFinalQuestion]);
-
-  const handleSkip = useCallback(() => {
-    const skippedDraft: AnswerDraft = { skipped: true };
-    if (isFinalQuestion) {
-      handleSubmit(skippedDraft);
-      return;
-    }
-    updateDraft(skippedDraft);
-    setCurrentIndex((idx) => idx + 1);
-  }, [handleSubmit, isFinalQuestion, updateDraft]);
-
-  const handleBack = useCallback(() => {
-    setShowCustomError(false);
-    setCurrentIndex((idx) => Math.max(0, idx - 1));
-  }, []);
-
-  const handleSkipAll = useCallback(() => {
-    onSubmit({ answers: questions.map(() => ({ skipped: true })) });
-  }, [onSubmit, questions]);
-
-  const handleOptionPick = useCallback(
-    (optionIndex: number, checked: boolean) => {
-      if (currentQuestion.multi_select) {
-        const prevChoice = currentDraft.choice ?? [];
-        const nextChoice = checked
-          ? Array.from(new Set([...prevChoice, optionIndex])).sort((a, b) => a - b)
-          : prevChoice.filter((c) => c !== optionIndex);
-        updateDraft({
-          ...currentDraft,
-          skipped: false,
-          choice: nextChoice.length > 0 ? nextChoice : undefined,
-        });
-        return;
-      }
-      updateDraft({
-        skipped: false,
-        choice: [optionIndex],
-        custom: currentDraft.custom,
-        customSelected: false,
-      });
-    },
-    [currentQuestion.multi_select, currentDraft, updateDraft]
-  );
-
-  const handleCustomChange = useCallback(
-    (value: string) => {
-      const custom = value.length > 0 ? value : undefined;
-      if (currentQuestion.multi_select) {
-        updateDraft({ ...currentDraft, skipped: false, custom, customSelected: true });
-        return;
-      }
-      updateDraft({ skipped: false, custom, customSelected: true, choice: undefined });
-    },
-    [currentQuestion.multi_select, currentDraft, updateDraft]
-  );
-
-  const handleCustomToggle = useCallback(
-    (selected: boolean) => {
-      if (currentQuestion.multi_select) {
-        updateDraft({ ...currentDraft, skipped: false, customSelected: selected });
-        return;
-      }
-      updateDraft({
-        skipped: false,
-        customSelected: selected,
-        custom: currentDraft.custom,
-        choice: undefined,
-      });
-    },
-    [currentQuestion.multi_select, currentDraft, updateDraft]
-  );
-
-  const isCustomActive = !!currentDraft.customSelected;
-
-  const isInteractionDisabled = isDisabled || isLoading;
+export const AskUserQuestionPrompt = (props: AskUserQuestionPromptProps) => {
+  const { euiTheme } = useEuiTheme();
+  const { refs, question, ui, handlers } = useAskUserQuestionPrompt(props);
+  const {
+    baseId,
+    currentQuestion,
+    currentIndex,
+    totalQuestions,
+    currentDraft,
+    isFinalQuestion,
+    canConfirm,
+    customRowIndex,
+    questionGroupName,
+    isCustomActive,
+  } = question;
 
   return (
     <EuiFlexGroup
       direction="column"
       responsive={false}
-      gutterSize="m"
+      gutterSize="none"
       css={containerStyles}
       data-test-subj="agentBuilderAskUserQuestionPrompt"
     >
@@ -208,25 +93,39 @@ export const AskUserQuestionPrompt = ({
       </EuiFlexItem>
 
       {/* Options */}
-      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="xs"
+        responsive={false}
+        css={css`
+          margin-top: ${euiTheme.size.s};
+        `}
+      >
         {currentQuestion.options.map((option, optionIndex) => {
           const inputId = `${baseId}-q${currentIndex}-opt${optionIndex}`;
           const checked = (currentDraft.choice ?? []).includes(optionIndex);
           return (
-            <EuiFlexItem key={`${currentIndex}-${optionIndex}`} grow={false}>
+            <EuiFlexItem
+              key={`${currentIndex}-${optionIndex}`}
+              grow={false}
+              ref={refs.setOptionRef(optionIndex)}
+            >
               <EuiCheckableCard
                 id={inputId}
                 label={option.label}
                 checkableType={currentQuestion.multi_select ? 'checkbox' : 'radio'}
                 name={questionGroupName}
                 checked={checked}
-                disabled={isInteractionDisabled}
+                disabled={ui.isInteractionDisabled}
                 css={optionCardStyles}
                 onChange={(e) =>
-                  handleOptionPick(
+                  handlers.handleOptionPick(
                     optionIndex,
                     currentQuestion.multi_select ? e.target.checked : true
                   )
+                }
+                onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) =>
+                  handlers.handleOptionKeyDown(e, optionIndex)
                 }
               >
                 {option.description && (
@@ -240,7 +139,7 @@ export const AskUserQuestionPrompt = ({
         })}
 
         {/* Custom / "Be more specific" row */}
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} ref={refs.customRowRef}>
           <EuiCheckableCard
             id={`${baseId}-q${currentIndex}-custom`}
             label=""
@@ -248,9 +147,12 @@ export const AskUserQuestionPrompt = ({
             checkableType={currentQuestion.multi_select ? 'checkbox' : 'radio'}
             name={questionGroupName}
             checked={isCustomActive}
-            disabled={isInteractionDisabled}
+            disabled={ui.isInteractionDisabled}
             onChange={(e) =>
-              handleCustomToggle(currentQuestion.multi_select ? e.target.checked : true)
+              handlers.handleCustomToggle(currentQuestion.multi_select ? e.target.checked : true)
+            }
+            onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) =>
+              handlers.handleOptionKeyDown(e, customRowIndex)
             }
             data-test-subj="agentBuilderAskUserQuestionPromptCustomRow"
           >
@@ -259,12 +161,18 @@ export const AskUserQuestionPrompt = ({
                 <EuiIcon type="pencil" size="m" color="subdued" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
+                {/* Intentional: this field is only ever reached by selecting the custom
+                    option above (or restored on Back) — it must not be a stray Tab stop. */}
+                {/* eslint-disable-next-line @elastic/eui/accessible-interactive-element */}
                 <EuiFieldText
+                  inputRef={refs.customInputRef}
+                  tabIndex={-1}
                   value={currentDraft.custom ?? ''}
                   placeholder={labels.customPlaceholder}
-                  onChange={(e) => handleCustomChange(e.target.value)}
-                  disabled={isInteractionDisabled}
-                  isInvalid={showCustomError}
+                  onChange={(e) => handlers.handleCustomChange(e.target.value)}
+                  onKeyDown={handlers.handleCustomFieldKeyDown}
+                  disabled={ui.isInteractionDisabled}
+                  isInvalid={ui.showCustomError}
                   compressed
                   css={css`
                     box-shadow: none;
@@ -284,7 +192,7 @@ export const AskUserQuestionPrompt = ({
         </EuiFlexItem>
 
         {/* Validation error */}
-        {showCustomError && (
+        {ui.showCustomError && (
           <EuiFlexItem grow={false}>
             <EuiFormErrorText>{labels.customError}</EuiFormErrorText>
           </EuiFlexItem>
@@ -297,47 +205,48 @@ export const AskUserQuestionPrompt = ({
         justifyContent="spaceBetween"
         alignItems="center"
         responsive={false}
+        css={css`
+          margin-top: ${euiTheme.size.base};
+        `}
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {totalQuestions > 1 && currentIndex === 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={handleSkipAll}
-                  disabled={isInteractionDisabled}
-                  size="s"
-                  color="text"
-                >
-                  {labels.skipAllButton}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-            {currentIndex > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={handleBack}
-                  disabled={isInteractionDisabled}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={labels.backButton} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  onClick={handlers.handleBack}
+                  disabled={ui.isInteractionDisabled || currentIndex === 0}
                   size="s"
                   color="text"
                   iconType="sortLeft"
-                >
-                  {labels.backButton}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
+                  iconSize="m"
+                  aria-label={labels.backButton}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={handleSkip} disabled={isInteractionDisabled} size="s" color="text">
+            <EuiButton
+              buttonRef={refs.skipButtonRef}
+              onClick={handlers.handleSkip}
+              disabled={ui.isInteractionDisabled}
+              size="s"
+              color="text"
+              iconType="sortRight"
+              iconSize="m"
+              iconSide="right"
+            >
               {labels.skipButton}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={handleConfirm}
-              isLoading={isLoading && isFinalQuestion}
-              disabled={isInteractionDisabled || !canConfirm}
+              buttonRef={refs.confirmButtonRef}
+              onClick={handlers.handleConfirm}
+              isLoading={ui.isLoading && isFinalQuestion}
+              disabled={ui.isInteractionDisabled || !canConfirm}
               fill
               size="s"
               color="primary"

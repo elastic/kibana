@@ -7,8 +7,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
+import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { RedirectTo } from '../../../redirect_to';
@@ -16,7 +18,7 @@ import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
-import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
+import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../../stream_badges';
 import { StreamOverview } from '../../../stream_detail_overview';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
@@ -24,7 +26,8 @@ import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { ClassicStreamPartitioning } from '../stream_detail_routing/classic_stream_partitioning';
-import { LifecycleTabLabel } from './lifecycle_tab_label_with_actions';
+import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
+import { StreamDetailCanvas } from '../stream_detail_canvas';
 
 const classicStreamManagementSubTabs = [
   'overview',
@@ -36,6 +39,7 @@ const classicStreamManagementSubTabs = [
   'schemaEditor',
   'schema',
   'attachments',
+  'canvas',
 ] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
@@ -67,9 +71,11 @@ export function ClassicStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
+  const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
 
   const {
-    features: { queryStreams },
+    features: { canvas, queryStreams },
   } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
@@ -77,20 +83,32 @@ export function ClassicStreamDetailManagement({
     refreshDefinition,
   });
 
+  const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
+    defaultMessage: 'Streams',
+  });
+
   if (!definition.data_stream_exists) {
+    const classicErrorBadges: AppHeaderBadge[] = [
+      {
+        label: i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
+          defaultMessage: 'Classic',
+        }),
+        renderCustomBadge: () => <ClassicStreamBadge />,
+      },
+      {
+        label: i18n.translate('xpack.streams.badges.lifecycle.title', {
+          defaultMessage: 'Data Retention',
+        }),
+        renderCustomBadge: () => <LifecycleBadge lifecycle={definition.effective_lifecycle} />,
+      },
+    ];
     return (
       <>
-        <StreamsAppPageTemplate.Header
-          bottomBorder="extended"
-          pageTitle={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {key}
-              <EuiBadgeGroup gutterSize="s">
-                <ClassicStreamBadge />
-                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
-              </EuiBadgeGroup>
-            </EuiFlexGroup>
-          }
+        <StreamsAppHeader
+          title={key}
+          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          badges={classicErrorBadges}
+          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <MissingDataStreamCallout
@@ -117,15 +135,21 @@ export function ClassicStreamDetailManagement({
     content: (
       <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
     ),
-    label: (
-      <LifecycleTabLabel
-        definition={definition}
-        showActions={tab === 'lifecycle'}
-        indexTemplateName={definition.elasticsearch_assets?.indexTemplate}
-        notifications={notifications}
-        share={share}
-      />
-    ),
+    label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+      defaultMessage: 'Data lifecycle',
+    }),
+    toolTipContent: i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+      defaultMessage:
+        'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+    }),
+    'data-test-subj': 'retentionTab',
+    actions: buildLifecycleTabActions({
+      definition,
+      notifications,
+      share,
+      router,
+      timeRange: { rangeFrom, rangeTo },
+    }),
   };
 
   if (queryStreams.enabled) {
@@ -156,19 +180,13 @@ export function ClassicStreamDetailManagement({
     content: (
       <StreamDetailDataQuality definition={definition} refreshDefinition={refreshDefinition} />
     ),
-    label: (
-      <EuiToolTip
-        content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
-          defaultMessage: 'View details about this classic stream’s data quality',
-        })}
-      >
-        <span data-test-subj="dataQualityTab" tabIndex={0}>
-          {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
-            defaultMessage: 'Data quality',
-          })}
-        </span>
-      </EuiToolTip>
-    ),
+    label: i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+      defaultMessage: 'Data quality',
+    }),
+    toolTipContent: i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
+      defaultMessage: 'View details about this classic stream’s data quality',
+    }),
+    'data-test-subj': 'dataQualityTab',
   };
 
   tabs.attachments = {
@@ -178,6 +196,15 @@ export function ClassicStreamDetailManagement({
     }),
   };
 
+  if (canvas.enabled) {
+    tabs.canvas = {
+      content: <StreamDetailCanvas streamName={definition.stream.name} />,
+      label: i18n.translate('xpack.streams.streamDetailView.canvasTab', {
+        defaultMessage: 'Canvas',
+      }),
+    };
+  }
+
   if (otherTabs.significantEvents) {
     tabs.significantEvents = otherTabs.significantEvents;
   }
@@ -185,6 +212,12 @@ export function ClassicStreamDetailManagement({
   if (tab === 'partitioning' && !queryStreams.enabled) {
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'lifecycle' } }} />
+    );
+  }
+
+  if (tab === 'canvas' && !canvas.enabled) {
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
     );
   }
 

@@ -120,7 +120,9 @@ const createUserActionPersisterServiceMock = (): CaseUserActionPersisterServiceM
 const createUserActionFinderServiceMock = (): CaseUserActionFinderServiceMock => {
   const service: PublicMethodsOf<UserActionFinder> = {
     find: jest.fn(),
+    findAll: jest.fn(),
     findStatusChanges: jest.fn(),
+    decodeUserActions: jest.fn((userActions) => userActions),
   };
 
   return service as unknown as CaseUserActionFinderServiceMock;
@@ -241,7 +243,7 @@ export const createTemplatesServiceMock = (): TemplatesServiceMock => {
 
 export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock => {
   const service: PublicMethodsOf<FieldDefinitionsService> = lazyObject({
-    getFieldDefinitions: jest.fn(),
+    getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [], total: 0 }),
     getFieldDefinition: jest.fn(),
     createFieldDefinition: jest.fn(),
     updateFieldDefinition: jest.fn(),

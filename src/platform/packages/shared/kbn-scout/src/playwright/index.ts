@@ -44,6 +44,9 @@ export type { EsArchiverFixture } from './fixtures/scope/worker';
 export { apiServicesFixture } from './fixtures/scope/worker/apis';
 export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
 
+// Raw HTTP client fixture, for UI suites that need to call Kibana routes directly
+export { apiClientFixture } from './fixtures/scope/worker';
+
 // Other worker types
 export type {
   LinkedProjectFixture,

@@ -10,6 +10,7 @@
 import { once } from 'lodash';
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { logRequest } from '@kbn/as-code-utils';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
@@ -18,7 +19,6 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getRouteConfig } from '../get_route_config';
 import { trackDeleteDashboardAction } from '../../user_activity';
 import { deleteDashboard } from './delete';
-import { logRequest } from '../log_request';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function registerDeleteRoute(
@@ -98,8 +98,10 @@ export function registerDeleteRoute(
             return res.forbidden({ body: { message: e.message } });
           }
 
-          logRequest(logger, req, 'error', e.message);
-          return res.customError({ statusCode: 500, body: { message: e.message } });
+          const message = e.stack ?? e.message;
+          logRequest(logger, req, 'error', message);
+          // Throw so Kibana returns a 500 HTTP response on any uncaught errors.
+          throw e;
         }
 
         return res.noContent();

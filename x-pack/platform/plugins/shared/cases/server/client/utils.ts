@@ -167,8 +167,7 @@ const decodeExternalReferenceAttachment = (
   }
 };
 
-/** Validates a unified attachment via the registered `schema`
- * (preferred) or legacy `schemaValidator`. */
+/** Validates a unified attachment via the registered `schema`. */
 const decodeUnifiedAttachment = (
   attachment: UnifiedAttachmentPayload,
   unifiedRegistry: UnifiedAttachmentTypeRegistry
@@ -181,20 +180,11 @@ const decodeUnifiedAttachment = (
 
   const attachmentType = unifiedRegistry.get(attachment.type);
 
-  if (attachmentType.schema) {
-    parseUnifiedAttachmentWithSchema(attachmentType.schema, attachment, attachment.type);
-    return;
+  if (!attachmentType.schema) {
+    throw badRequest(`Attachment type '${attachment.type}' does not define a schema.`);
   }
 
-  if (!attachmentType.schemaValidator) {
-    return;
-  }
-
-  if (isUnifiedValueAttachmentRequest(attachment)) {
-    attachmentType.schemaValidator(attachment.data);
-  } else if (isUnifiedReferenceAttachmentRequest(attachment)) {
-    attachmentType.schemaValidator(attachment.metadata ?? null);
-  }
+  parseUnifiedAttachmentWithSchema(attachmentType.schema, attachment, attachment.type);
 };
 
 export const decodeUnifiedCommentRequest = (

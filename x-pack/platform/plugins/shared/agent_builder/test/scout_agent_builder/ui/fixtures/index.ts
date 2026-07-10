@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import type {
+  ApiClientFixture,
+  PageObjects,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+} from '@kbn/scout';
+import { test as baseTest, apiClientFixture, createLazyPageObject, mergeTests } from '@kbn/scout';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import {
   createGenAiConnectorForProxy,
@@ -15,6 +20,7 @@ import {
 import { AgentBuilderApp } from './page_objects';
 
 interface AgentBuilderWorkerFixtures extends ScoutWorkerFixtures {
+  apiClient: ApiClientFixture;
   llmProxy: LlmProxy;
 }
 
@@ -24,7 +30,10 @@ export interface AgentBuilderUiFixtures extends ScoutTestFixtures {
   };
 }
 
-export const test = baseTest.extend<AgentBuilderUiFixtures, AgentBuilderWorkerFixtures>({
+export const test = mergeTests(baseTest, apiClientFixture).extend<
+  AgentBuilderUiFixtures,
+  AgentBuilderWorkerFixtures
+>({
   llmProxy: [
     async ({ log, kbnClient }, use) => {
       const proxy = await createLlmProxy(log);

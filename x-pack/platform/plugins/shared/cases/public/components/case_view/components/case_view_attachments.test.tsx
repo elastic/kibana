@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { z } from '@kbn/zod/v4';
 import {
   basicCase,
   alertComment,
@@ -21,11 +22,15 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
 import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import userEvent from '@testing-library/user-event';
+import { KibanaServices } from '../../../common/lib/kibana';
 
 jest.mock('../../../containers/use_get_case_file_stats');
 jest.mock('../../../common/navigation/hooks');
 jest.mock('../use_case_observables', () => ({
   useCaseObservables: jest.fn(() => ({ observables: [], isLoading: false })),
+}));
+jest.mock('../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button', () => ({
+  SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
 }));
 
 const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
@@ -36,33 +41,33 @@ const buildRegistry = () => {
   const registry = new UnifiedAttachmentTypeRegistry();
   registry.register({
     id: 'security.alert',
-    displayName: 'Alert',
+    displayName: 'Alerts',
     icon: 'bell',
     getAttachmentViewObject: () => ({ event: 'added an alert' }),
     getAttachmentTabViewObject: () => ({
       children: () => <div data-test-subj="test-alerts-table">{'Alerts table'}</div>,
     }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   registry.register({
     id: 'security.event',
-    displayName: 'Event',
+    displayName: 'Events',
     icon: 'bell',
     getAttachmentViewObject: () => ({ event: 'added an event' }),
     getAttachmentTabViewObject: () => ({
       children: () => <div data-test-subj="test-events-table">{'Events table'}</div>,
     }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   registry.register({
     id: 'file',
-    displayName: 'File',
+    displayName: 'Files',
     icon: 'document',
     getAttachmentViewObject: () => ({ event: 'added a file' }),
     getAttachmentTabViewObject: () => ({
       children: () => <div data-test-subj="test-files-table">{'Files table'}</div>,
     }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   // Comment is intentionally registered without `getAttachmentTabViewObject`
   // to mirror production: comments live in the activity tab, not here.
@@ -71,7 +76,7 @@ const buildRegistry = () => {
     displayName: 'Comment',
     icon: 'editorComment',
     getAttachmentViewObject: () => ({ event: 'added a comment' }),
-    schemaValidator: () => {},
+    schema: z.object({}),
   });
   return registry;
 };
@@ -97,7 +102,7 @@ describe('Case View Attachments tab', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the tabs and the search field', async () => {
+  it('renders the search field', async () => {
     renderWithTestingProviders(
       <CaseViewAttachments
         caseData={caseData}
@@ -106,7 +111,6 @@ describe('Case View Attachments tab', () => {
       />
     );
 
-    expect(screen.getByTestId('case-view-tabs')).toBeInTheDocument();
     expect(screen.getByTestId('cases-files-search')).toBeInTheDocument();
   });
 
@@ -657,5 +661,41 @@ describe('Case View Attachments tab', () => {
       'case-view-attachment-accordion-security.event', // Event
       'case-view-attachment-accordion-file', // File
     ]);
+  });
+
+  describe('sidebar toggle button', () => {
+    it('does not render the sidebar toggle button when redesign is disabled', () => {
+      renderWithTestingProviders(
+        <CaseViewAttachments
+          caseData={caseData}
+          onSearch={onSearchMock}
+          onUpdateField={onUpdateFieldMock}
+        />
+      );
+
+      expect(screen.queryByTestId('case-view-sidebar-toggle')).not.toBeInTheDocument();
+    });
+
+    it('renders the sidebar toggle button when redesign is enabled', () => {
+      const spy = jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ casesRedesign: { details: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+      try {
+        renderWithTestingProviders(
+          <CaseViewAttachments
+            caseData={caseData}
+            onSearch={onSearchMock}
+            onUpdateField={onUpdateFieldMock}
+          />
+        );
+
+        expect(screen.getByTestId('case-view-sidebar-toggle')).toBeInTheDocument();
+      } finally {
+        spy.mockRestore();
+      }
+    });
   });
 });

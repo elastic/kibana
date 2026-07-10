@@ -19,6 +19,11 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
+  - '@kbn/zod'
+  - '@kbn/std'
+  - '@kbn/core-data-streams-server'
+  - '@kbn/core-data-streams-server-mocks'
+  - '@kbn/es-mappings'
 tags:
   - plugin
   - prod
