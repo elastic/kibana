@@ -67,3 +67,17 @@ export const createFarequoteKuerySavedSearch = async (
     ],
   });
 };
+
+/** Saved-object attributes for the shared 'ML Test' dashboard created in every DFA spec's beforeAll. */
+export const ML_TEST_DASHBOARD_ATTRIBUTES = {
+  title: 'ML Test',
+  hits: 0,
+  description: '',
+  panelsJSON: '[]',
+  optionsJSON: '{"hidePanelTitles":false,"useMargins":true}',
+  version: 1,
+  timeRestore: false,
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
+  },
+} as const;

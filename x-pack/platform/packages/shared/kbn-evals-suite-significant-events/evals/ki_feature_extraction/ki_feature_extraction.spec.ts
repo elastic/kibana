@@ -154,7 +154,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
               evaluators.traceBasedEvaluators.inputTokens,
               evaluators.traceBasedEvaluators.outputTokens,
               evaluators.traceBasedEvaluators.cachedTokens,
-              createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+              createSpanLatencyEvaluator({ traceEsClient, log, operationName: 'chat' }),
             ]
           );
         }
