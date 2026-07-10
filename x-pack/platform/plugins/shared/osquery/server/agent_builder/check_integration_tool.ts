@@ -125,21 +125,18 @@ export const checkIntegrationTool = (
       };
     }
 
+    // policyIds are the osquery *package* policy ids; agents are enrolled under the parent
+    // *agent* policy that references them, so resolve those before listing agents.
     let enrolledCount = 0;
     if (agentService) {
       try {
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
         if (packagePolicyService) {
-          const policyPackages = await packagePolicyService.list(spaceScopedClient, {
-            kuery: `package_policy.package.name:${OSQUERY_INTEGRATION_NAME}`,
-            perPage: 10000,
-            page: 1,
-          });
+          const policyPackages = await packagePolicyService.getByIDs(spaceScopedClient, policyIds);
 
           const agentPolicyIds = [
             ...new Set(
-              policyPackages?.items.flatMap((p: { policy_ids?: string[] }) => p.policy_ids ?? []) ??
-                []
+              policyPackages?.flatMap((p: { policy_ids?: string[] }) => p.policy_ids ?? []) ?? []
             ),
           ];
 
