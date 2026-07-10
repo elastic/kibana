@@ -274,7 +274,7 @@ export class MonacoEditorActionsProvider {
         requestTextFromEditor.data = requestTextFromEditor.data.map((dataString) => {
           if (containsComments(dataString)) {
             // Comments must be removed before the request is sent since the body is
-            // flattened into a single line and a `//` comment would otherwise
+            // flattened into a single line and a line comment would otherwise
             // comment out the rest of the body (see https://github.com/elastic/kibana/issues/277160)
             dataString = removeCommentsFromData(dataString);
           }

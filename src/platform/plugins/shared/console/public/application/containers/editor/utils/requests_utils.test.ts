@@ -605,7 +605,7 @@ describe('requests_utils', () => {
   });
 
   describe('containsComments', () => {
-    it('should return false for JSON with // and /* inside strings', () => {
+    it('should return false for JSON with comment markers inside strings', () => {
       const requestData = `{
       "docs": [
         {
@@ -622,7 +622,7 @@ describe('requests_utils', () => {
           "_source": {
             "vulnerability": {
               "reference": [
-                "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-15778"
+                "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-15778#details"
               ]
             }
           }
@@ -645,6 +645,14 @@ describe('requests_utils', () => {
       /* Bulk insert */
       "index": { "_index": "test" },
       "field1": "value1"
+    }`;
+      expect(containsComments(requestData)).toBe(true);
+    });
+
+    it('should return true for text with actual hash comment', () => {
+      const requestData = `{
+      # This is a comment
+      "query": { "match_all": {} }
     }`;
       expect(containsComments(requestData)).toBe(true);
     });
@@ -676,7 +684,7 @@ describe('requests_utils', () => {
 
     it('should ignore comment-like sequences inside triple-quote strings', () => {
       const requestData = `{
-      "script": """def quote = '"'; // painless comment"""
+      "script": """def quote = '"'; // painless comment # still script"""
     }`;
       expect(containsComments(requestData)).toBe(false);
     });

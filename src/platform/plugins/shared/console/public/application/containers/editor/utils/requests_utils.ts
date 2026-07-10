@@ -286,7 +286,7 @@ const isSlashCommentToken = (token: string) => token.startsWith('//') || token.s
 const isCommentToken = (token: string) => isSlashCommentToken(token) || token.startsWith('#');
 
 export const containsComments = (requestData: string) =>
-  requestData.match(requestDataTokensRegex)?.some(isSlashCommentToken) ?? false;
+  requestData.match(requestDataTokensRegex)?.some(isCommentToken) ?? false;
 
 export const indentData = (dataString: string): string => {
   try {
