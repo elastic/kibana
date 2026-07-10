@@ -6,7 +6,7 @@
  */
 
 import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
-import type { AppHeaderMenu } from '@kbn/app-header';
+import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
@@ -21,7 +21,9 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useStreamsViewMode } from '../../hooks/use_streams_view_mode';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../streams_app_page_template';
+import { SecondaryNavPlaceholder } from './secondary_nav_placeholder';
 import { WelcomeTourCallout } from '../streams_tour';
+import { ClassicStreamCreationFlyout } from './classic_stream_creation_flyout';
 import { PipelinesTable } from './pipelines_table';
 import { SourcesTable } from './sources_table';
 import { StreamsCanvas } from './streams_canvas';
@@ -63,11 +65,12 @@ export function StreamListView() {
   const {
     dependencies: {
       start: {
-        streams: { streamsRepositoryClient, getWiredStatus },
+        streams: { streamsRepositoryClient, getClassicStatus, getWiredStatus },
       },
     },
     core,
   } = context;
+  const streamsDocsLink = core.docLinks.links.observability.logsStreams;
   const { onPageReady } = usePerformanceContext();
   const router = useStreamsAppRouter();
   const { viewMode } = useStreamsViewMode();
@@ -93,12 +96,31 @@ export function StreamListView() {
   );
 
   const {
+    ui: { manage: canManageStreamsKibana },
     features: { significantEventsDiscovery, queryStreams },
   } = useStreamsPrivileges();
 
+  const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
+    useState<boolean>(false);
   const [wiredStreamsStatus, setWiredStreamsStatus] = useState<WiredStreamsStatus | undefined>(
     undefined
   );
+
+  useEffect(() => {
+    const fetchClassicStatus = async () => {
+      try {
+        const status = await getClassicStatus();
+        setCanManageClassicElasticsearch(Boolean(status.can_manage));
+      } catch (error) {
+        core.notifications.toasts.addError(getFormattedError(error), {
+          title: i18n.translate('xpack.streams.streamsListView.fetchClassicStatusErrorToastTitle', {
+            defaultMessage: 'Error fetching classic streams status',
+          }),
+        });
+      }
+    };
+    fetchClassicStatus();
+  }, [getClassicStatus, core.notifications.toasts]);
 
   const refreshWiredStatus = React.useCallback(async () => {
     try {
@@ -268,28 +290,51 @@ export function StreamListView() {
     significantEventsLabel,
   ]);
 
+  // Canvas / Sources / Pipelines / Destinations — the prototype's own tabs,
+  // surfaced through the new AppHeader's native `tabs` slot.
+  const tabs: AppHeaderTab[] = STREAMS_LIST_TABS.map((tab) => ({
+    id: tab,
+    label: STREAMS_LIST_TAB_LABELS[tab],
+    href: buildListTabHref(router.link('/'), { ...restQuery, tab }),
+    isSelected: tab === activeTab,
+    'data-test-subj': `streamsListTab-${tab}`,
+  }));
+
+  if (viewMode === 'secondaryNav') {
+    return (
+      <>
+        <StreamsAppHeader title={pageTitle} />
+        <StreamsAppPageTemplate.Body grow noPadding>
+          <SecondaryNavPlaceholder />
+        </StreamsAppPageTemplate.Body>
+      </>
+    );
+  }
+
   return (
     <>
-      <StreamsAppHeader title={pageTitle} menu={menu} docLink={streamsDocsLink} padding="m" />
+      <StreamsAppHeader
+        title={pageTitle}
+        tabs={tabs}
+        menu={menu}
+        docLink={streamsDocsLink}
+        padding="m"
+      />
       <StreamsAppPageTemplate.Body grow paddingSize="m">
-        {streamsListFetch.loading && streamsListFetch.value === undefined ? (
-          <EuiEmptyPrompt
-            icon={<EuiLoadingElastic size="xl" />}
-            title={
-              <h2>
-                {i18n.translate('xpack.streams.streamsListView.loadingStreams', {
-                  defaultMessage: 'Loading Streams',
-                })}
-              </h2>
-            }
-          />
-        ) : !streamsListFetch.loading && isEmpty(streamsListFetch.value?.streams) ? (
-          <StreamsListEmptyPrompt />
-        ) : (
-          <>
-            <WelcomeTourCallout
-              hasClassicStreams={hasClassicStreams}
-              firstClassicStreamName={firstClassicStreamName}
+        {activeTab === 'canvas' && <StreamsCanvas />}
+        {activeTab === 'sources' && <SourcesTable />}
+        {activeTab === 'pipelines' && <PipelinesTable />}
+        {activeTab === 'destinations' &&
+          (streamsListFetch.loading && streamsListFetch.value === undefined ? (
+            <EuiEmptyPrompt
+              icon={<EuiLoadingElastic size="xl" />}
+              title={
+                <h2>
+                  {i18n.translate('xpack.streams.streamsListView.loadingStreams', {
+                    defaultMessage: 'Loading Streams',
+                  })}
+                </h2>
+              }
             />
           ) : !streamsListFetch.loading && isEmpty(streamsListFetch.value?.streams) ? (
             <StreamsListEmptyPrompt />
