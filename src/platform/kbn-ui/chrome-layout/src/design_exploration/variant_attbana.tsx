@@ -95,6 +95,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .kbnChromeLayoutNavigation {
       background-color: ${LINEAR_SURFACE_NAV} !important;
       border-inline-end: none !important;
+      height: calc(100vh - 48px) !important;
     }
 
     /* ----- Attbana expanded nav — layout width + grid column sync ----- */
@@ -187,7 +188,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [class*='css-'][class*='-new_item_indicator--styles'] {
       right: auto !important;
-      left: 1px !important;
+      left: 16px !important;
     }
 
     ${scope}
