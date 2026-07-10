@@ -1,15 +1,15 @@
 pageLoadAssetSize:
   actions: 20500
-  advancedSettings: 6196
+  advancedSettings: 6119
   agentBuilder: 51190
   agentBuilderDashboards: 7786
   agentBuilderPlatform: 26248
   agentBuilderVisualizations: 7356
   agentBuilderWorkflows: 4955
-  agentContextLayer: 10146
+  agentContextLayer: 2194
   aiAssistantManagementSelection: 11569
   aiops: 15227
-  aiPanel: 5151
+  aiPanel: 6074
   alerting: 22371
   alertingVTwo: 56591
   apm: 57201
@@ -124,7 +124,7 @@ pageLoadAssetSize:
   mapsEms: 6734
   metricsDataAccess: 44950
   ml: 99842
-  mockIdpPlugin: 7463
+  mockIdpPlugin: 7421
   monitoring: 28983
   navigation: 18600
   newsfeed: 11110
@@ -180,7 +180,7 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64059
-  significant_events: 1813
+  significant_events: 3806
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
