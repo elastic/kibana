@@ -49,6 +49,14 @@ describe('InfoBlocks', () => {
     expect(screen.getByTestId('myBlocks')).toBeInTheDocument();
   });
 
+  it('honors a custom data-test-subj on an item', () => {
+    render(
+      <InfoBlocks items={[{ title: 'Owner', value: 'Platform', 'data-test-subj': 'ownerBlock' }]} />
+    );
+
+    expect(screen.getByTestId('ownerBlock')).toBeInTheDocument();
+  });
+
   it('renders no InfoBlock for a leading spacer', () => {
     render(
       <InfoBlocks
@@ -64,6 +72,24 @@ describe('InfoBlocks', () => {
     expect(screen.getAllByTestId('infoBlock')).toHaveLength(3);
     expect(screen.getByText('Risk score')).toBeInTheDocument();
     expect(screen.getByText('Vendor')).toBeInTheDocument();
+  });
+
+  it('drops leading spacers when compressed', () => {
+    render(
+      <InfoBlocks
+        data-test-subj="compressedBlocks"
+        compressed
+        items={[
+          { title: 'Risk score', value: '90', size: 'xl' },
+          LEADING_SPACER,
+          { title: 'Vendor', value: 'Elastic' },
+          { title: 'Result', value: 'Success' },
+        ]}
+      />
+    );
+
+    expect(screen.getAllByTestId('infoBlock')).toHaveLength(3);
+    expect(screen.getByTestId('compressedBlocks').children).toHaveLength(3);
   });
 });
 
