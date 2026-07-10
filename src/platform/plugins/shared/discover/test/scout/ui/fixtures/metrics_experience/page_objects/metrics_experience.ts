@@ -20,6 +20,8 @@ import type { BreakdownSelector } from './breakdown_selector';
 import { createBreakdownSelector } from './breakdown_selector';
 import type { ShareHelper } from './share_helper';
 import { createShareHelper } from './share_helper';
+import type { GridSettings } from './grid_settings';
+import { createGridSettings } from './grid_settings';
 
 export class MetricsExperiencePage {
   public readonly container: Locator;
@@ -37,6 +39,7 @@ export class MetricsExperiencePage {
   public readonly chartInteractions: ChartInteractions;
   public readonly breakdownSelector: BreakdownSelector;
   public readonly share: ShareHelper;
+  public readonly gridSettings: GridSettings;
   public readonly fullscreenButton: Locator;
   public readonly chromeHeader: Locator;
 
@@ -60,6 +63,7 @@ export class MetricsExperiencePage {
     this.sortDirectionAsc = page.testSubj.locator('metricsExperienceSortDirectionAsc');
     this.sortDirectionDesc = page.testSubj.locator('metricsExperienceSortDirectionDesc');
     this.share = createShareHelper(page);
+    this.gridSettings = createGridSettings(page);
     this.fullscreenButton = page.testSubj.locator('metricsExperienceToolbarFullScreen');
     this.chromeHeader = page.testSubj.locator('kbnChromeLayoutHeader');
   }

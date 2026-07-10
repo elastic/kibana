@@ -6,8 +6,12 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
+import type { SignificantEventsConfig } from '../common/config';
+import { config } from './config';
 
-export const plugin = async (ctx: PluginInitializerContext) => {
+export { config };
+
+export const plugin = async (ctx: PluginInitializerContext<SignificantEventsConfig>) => {
   const { SignificantEventsPlugin } = await import('./plugin');
   return new SignificantEventsPlugin(ctx);
 };

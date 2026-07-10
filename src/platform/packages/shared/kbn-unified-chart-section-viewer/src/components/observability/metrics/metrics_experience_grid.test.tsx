@@ -30,9 +30,15 @@ import {
   ExternalServicesProvider,
   type ExternalServices,
 } from '../../../context/external_services';
-import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
+import type {
+  ParsedMetricItem,
+  Dimension,
+  UnifiedMetricsGridProps,
+  MetricsGridSettings,
+} from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../flyout/metrics_grid_settings_flyout/constants';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('@kbn/ebt-tools', () => ({
@@ -55,6 +61,28 @@ jest.mock('./metrics_experience_grid_content', () => ({
     <div data-test-subj="metricsExperienceGridContent" />
   )),
 }));
+
+jest.mock('../../flyout', () => {
+  const actual = jest.requireActual('../../flyout');
+  return {
+    ...actual,
+    GridSettingsFlyout: ({
+      onGridSettingsChange,
+      onClose,
+    }: {
+      onGridSettingsChange: (update: Partial<MetricsGridSettings>) => void;
+      onClose: () => void;
+    }) => (
+      <div data-test-subj="metricsExperienceGridSettingsFlyout">
+        <button
+          data-test-subj="metricsExperienceGridSettingsFlyoutMockApply"
+          onClick={() => onGridSettingsChange({ counterAggregation: 'max' })}
+        />
+        <button data-test-subj="metricsExperienceGridSettingsFlyoutMockClose" onClick={onClose} />
+      </div>
+    ),
+  };
+});
 
 // Simplified ToolbarSelector so dimension options are clickable in JSDOM without
 // needing EUI portals or keyboard simulation.
@@ -261,6 +289,8 @@ describe('MetricsExperienceGrid', () => {
       metricsSort: DEFAULT_METRICS_SORT,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
+      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      onGridSettingsChange: jest.fn(),
     });
 
     useFetchMetricsDataMock.mockReturnValue({
@@ -438,6 +468,8 @@ describe('MetricsExperienceGrid', () => {
       metricsSort: DEFAULT_METRICS_SORT,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
+      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      onGridSettingsChange: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -486,6 +518,8 @@ describe('MetricsExperienceGrid', () => {
       metricsSort: DEFAULT_METRICS_SORT,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
+      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      onGridSettingsChange: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -529,6 +563,8 @@ describe('MetricsExperienceGrid', () => {
         metricsSort: DEFAULT_METRICS_SORT,
         onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        onGridSettingsChange: jest.fn(),
       });
 
       // Stream's universe only has `host.name`; `environment` is mapped but
@@ -571,6 +607,8 @@ describe('MetricsExperienceGrid', () => {
         metricsSort: DEFAULT_METRICS_SORT,
         onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        onGridSettingsChange: jest.fn(),
       });
 
       useFetchMetricsDataMock.mockReturnValue({
@@ -618,6 +656,8 @@ describe('MetricsExperienceGrid', () => {
         metricsSort: DEFAULT_METRICS_SORT,
         onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        onGridSettingsChange: jest.fn(),
       });
 
       const { getByTestId } = render(
@@ -634,6 +674,53 @@ describe('MetricsExperienceGrid', () => {
       // to the breakdownField prop change — not by the toolbar handler directly.
       expect(onPageChange).not.toHaveBeenCalled();
       expect(onBreakdownFieldChange).toHaveBeenCalledWith(dimensions[0].name);
+    });
+  });
+
+  describe('grid settings flyout', () => {
+    it('opens the flyout when the edit button is clicked and forwards its callbacks to state', () => {
+      const onGridSettingsChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 0,
+        selectedDimensions: [],
+        onDimensionsChange: jest.fn(),
+        onPageChange: jest.fn(),
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutSelectedTabChange: jest.fn(),
+        profileId: 'test-profile-id',
+        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+        onGridSettingsChange,
+      });
+
+      const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+        wrapper: IntlProvider,
+      });
+
+      expect(queryByTestId('metricsExperienceGridSettingsFlyout')).not.toBeInTheDocument();
+
+      act(() => {
+        getByTestId('metricsExperienceEditGridButton').click();
+      });
+
+      expect(getByTestId('metricsExperienceGridSettingsFlyout')).toBeInTheDocument();
+
+      act(() => {
+        getByTestId('metricsExperienceGridSettingsFlyoutMockApply').click();
+      });
+
+      expect(onGridSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
+
+      act(() => {
+        getByTestId('metricsExperienceGridSettingsFlyoutMockClose').click();
+      });
+
+      expect(queryByTestId('metricsExperienceGridSettingsFlyout')).not.toBeInTheDocument();
     });
   });
 });

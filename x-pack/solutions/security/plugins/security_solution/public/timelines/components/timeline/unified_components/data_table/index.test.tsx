@@ -200,7 +200,7 @@ describe('unified data table', () => {
   );
 
   it(
-    'opens DocumentFlyoutWrapper via system flyout when enableNewFlyout setting is enabled and row is not an attack',
+    'opens the new document flyout (from index) when enableNewFlyout setting is enabled and row is not an attack',
     async () => {
       jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
@@ -210,13 +210,16 @@ describe('unified data table', () => {
       fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
 
       await waitFor(() => {
-        expect(mockOpenSystemFlyout).toHaveBeenCalled();
+        expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+          expect.objectContaining({
+            documentId: mockTimelineData[0]._id,
+            indexName: mockTimelineData[0].ecs._index,
+          })
+        );
       });
 
-      const flyoutElement = mockOpenSystemFlyout.mock.calls[0][0];
-      expect(flyoutElement.props.documentId).toBe(mockTimelineData[0]._id);
-      expect(flyoutElement.props.indexName).toBe(mockTimelineData[0].ecs._index);
-      expect(flyoutElement.props.onAlertUpdated).toBe(refetchMock);
+      // the document (non-attack) new flyout no longer goes through the inline system flyout
+      expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
     },
     SPECIAL_TEST_TIMEOUT
   );
