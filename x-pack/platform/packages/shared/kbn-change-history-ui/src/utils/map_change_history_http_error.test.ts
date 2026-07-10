@@ -1,17 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { mapWorkflowRestoreHttpError } from './map_workflow_restore_http_error';
+import { mapChangeHistoryHttpError } from './map_change_history_http_error';
 
-describe('mapWorkflowRestoreHttpError', () => {
+describe('mapChangeHistoryHttpError', () => {
   it('maps HISTORY_DISABLED from Kibana attributes.code', () => {
-    const error = mapWorkflowRestoreHttpError({
+    const error = mapChangeHistoryHttpError({
       response: { status: 400 },
       body: {
         message: 'Change history is disabled.',
@@ -27,7 +25,7 @@ describe('mapWorkflowRestoreHttpError', () => {
   });
 
   it('maps a top-level structured code', () => {
-    const error = mapWorkflowRestoreHttpError({
+    const error = mapChangeHistoryHttpError({
       response: { status: 409 },
       body: {
         code: 'RESTORE_CONFLICT',
@@ -39,7 +37,7 @@ describe('mapWorkflowRestoreHttpError', () => {
   });
 
   it('maps validation failures from validationErrors on 400 responses', () => {
-    const error = mapWorkflowRestoreHttpError({
+    const error = mapChangeHistoryHttpError({
       response: { status: 400 },
       body: {
         message: 'YAML validation failed.',
@@ -51,7 +49,7 @@ describe('mapWorkflowRestoreHttpError', () => {
   });
 
   it('uses UNKNOWN for unlabeled 400 responses instead of RESTORE_VALIDATION', () => {
-    const error = mapWorkflowRestoreHttpError({
+    const error = mapChangeHistoryHttpError({
       response: { status: 400 },
       body: {
         message: 'Change history is disabled.',
@@ -62,7 +60,7 @@ describe('mapWorkflowRestoreHttpError', () => {
   });
 
   it('falls back to HTTP status when no structured code is present', () => {
-    const error = mapWorkflowRestoreHttpError({
+    const error = mapChangeHistoryHttpError({
       response: { status: 403 },
       body: { message: 'Forbidden' },
     });
@@ -72,6 +70,6 @@ describe('mapWorkflowRestoreHttpError', () => {
 
   it('returns non-http errors unchanged', () => {
     const original = new Error('local failure');
-    expect(mapWorkflowRestoreHttpError(original)).toBe(original);
+    expect(mapChangeHistoryHttpError(original)).toBe(original);
   });
 });

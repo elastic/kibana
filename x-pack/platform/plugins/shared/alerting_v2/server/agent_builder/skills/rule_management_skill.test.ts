@@ -29,6 +29,12 @@ describe('createRuleManagementSkill', () => {
     expect(skill.experimental).toBe(true);
   });
 
+  it('gates the skill on the alerting:v2:enabled advanced setting', () => {
+    const skill = createRuleManagementSkill(createDeps());
+
+    expect(skill.uiSettingRequired).toBe('alerting:v2:enabled');
+  });
+
   it('exposes the manage rule and manage action policy inline tools', async () => {
     const skill = createRuleManagementSkill(createDeps());
 
