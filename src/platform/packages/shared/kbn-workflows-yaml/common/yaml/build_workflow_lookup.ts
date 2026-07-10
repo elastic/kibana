@@ -44,6 +44,8 @@ export function getValueFromValueNode(
 export interface WorkflowLookup {
   steps: Record<string, StepInfo>;
   triggersLineStart?: number;
+  /** Line where the first recognised step starts; undefined when there are no steps. */
+  stepsLineStart?: number;
 }
 
 export function buildWorkflowLookup(
@@ -69,9 +71,13 @@ export function buildWorkflowLookup(
     triggersLineStart = lineCounter.linePos(triggersNode.range[0]).line;
   }
 
+  const stepLineStarts = Object.values(steps).map((s) => s.lineStart);
+  const stepsLineStart = stepLineStarts.length > 0 ? Math.min(...stepLineStarts) : undefined;
+
   return {
     steps,
     triggersLineStart,
+    stepsLineStart,
   };
 }
 

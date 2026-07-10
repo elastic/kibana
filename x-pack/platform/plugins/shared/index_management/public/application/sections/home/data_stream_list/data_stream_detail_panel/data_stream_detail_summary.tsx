@@ -42,6 +42,8 @@ import {
   getDlmDataPhasesLabel,
   getDlmDownsamplingStepsLabel,
 } from '../../../../lib/data_streams';
+import { buildFailureStoreRetentionSummary } from '../../../../lib/failure_store_retention_summary';
+import { getInfiniteRetentionLabel } from '../../../../lib/infinite_retention_label';
 import { DataHealth } from '../../../../components';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
 import { formatByteSizeString } from '../../../../lib/format_bytes';
@@ -388,12 +390,7 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
             const hasRetention = typeof retentionRaw === 'string' && retentionRaw.length > 0;
             const retentionLabel = hasRetention
               ? getRetentionPeriod(retentionRaw)
-              : i18n.translate(
-                  'xpack.idxMgmt.dataStreamDetailPanel.successfulIngestLifecycleIlmInfinite',
-                  {
-                    defaultMessage: '∞',
-                  }
-                );
+              : getInfiniteRetentionLabel();
 
             const shouldShowPhaseCounts = !isServerless;
             const phasesLabel = shouldShowPhaseCounts
@@ -521,22 +518,20 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
           streamsRetention ??
           dataStream.failureStoreRetention?.customRetentionPeriod ??
           dataStream.failureStoreRetention?.defaultRetentionPeriod;
-        const hasFiniteRetention = typeof retention === 'string' && retention.length > 0;
-        // When the failure store is enabled but the retention lifecycle is disabled (no delete
-        // phase), documents are kept indefinitely
-        const retentionLabel =
-          !isRetentionDisabled && hasFiniteRetention
-            ? getRetentionPeriod(retention)
-            : i18n.translate(
-                'xpack.idxMgmt.dataStreamDetailPanel.failedIngestLifecycleRetentionInfinite',
-                {
-                  defaultMessage: '∞',
-                }
-              );
-
-        const shouldShowPhaseCounts = !isServerless;
-        const phaseCount = !isRetentionDisabled && hasFiniteRetention ? 2 : 1;
-        const phasesLabel = shouldShowPhaseCounts ? getDlmDataPhasesLabel(phaseCount) : undefined;
+        const retentionValue = typeof retention === 'string' ? retention : undefined;
+        const summary = buildFailureStoreRetentionSummary(
+          {
+            enabled: failureStoreEnabled,
+            retention: retentionValue,
+            retentionDisabled: isRetentionDisabled,
+          },
+          'data_stream',
+          {
+            disabledLabel,
+            infiniteLabel: getInfiniteRetentionLabel(),
+          },
+          { showPhaseCounts: !isServerless }
+        );
 
         return (
           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
@@ -558,9 +553,7 @@ export const DataStreamDetailSummary: React.FunctionComponent<DataStreamDetailSu
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                {failureStoreEnabled
-                  ? [retentionLabel, phasesLabel].filter(Boolean).join(' · ')
-                  : retentionLabel}
+                {summary}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>

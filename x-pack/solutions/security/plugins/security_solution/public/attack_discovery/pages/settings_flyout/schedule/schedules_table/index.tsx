@@ -20,13 +20,7 @@ import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 
 import { useColumns } from './use_columns';
-import { useFindAttackDiscoverySchedules } from '../logic/use_find_schedules';
-import { useEnableAttackDiscoverySchedule } from '../logic/use_enable_schedule';
-import { useDisableAttackDiscoverySchedule } from '../logic/use_disable_schedule';
-import { useDeleteAttackDiscoverySchedule } from '../logic/use_delete_schedule';
-import { useBulkEnableAttackDiscoverySchedules } from '../logic/use_bulk_enable_schedules';
-import { useBulkDisableAttackDiscoverySchedules } from '../logic/use_bulk_disable_schedules';
-import { useBulkDeleteAttackDiscoverySchedules } from '../logic/use_bulk_delete_schedules';
+import { useScheduleApi } from '../logic/use_schedule_api';
 import { DetailsFlyout } from '../details_flyout';
 import { WithMissingPrivileges } from '../missing_privileges';
 import {
@@ -51,10 +45,20 @@ export const SchedulesTable: React.FC = React.memo(() => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
 
   const {
+    useBulkDeleteSchedules,
+    useBulkDisableSchedules,
+    useBulkEnableSchedules,
+    useDeleteSchedule,
+    useDisableSchedule,
+    useEnableSchedule,
+    useFindSchedules,
+  } = useScheduleApi();
+
+  const {
     data: { schedules, total } = { schedules: [], total: 0 },
     isLoading: isDataLoading,
     refetch,
-  } = useFindAttackDiscoverySchedules({
+  } = useFindSchedules({
     page: pageIndex,
     perPage: pageSize,
     sortField,
@@ -104,15 +108,12 @@ export const SchedulesTable: React.FC = React.memo(() => {
     prefix: 'deleteAttackDiscoverySchedulesModalTitle',
   });
 
-  const { mutateAsync: enableAttackDiscoverySchedule } = useEnableAttackDiscoverySchedule();
-  const { mutateAsync: disableAttackDiscoverySchedule } = useDisableAttackDiscoverySchedule();
-  const { mutateAsync: deleteAttackDiscoverySchedule } = useDeleteAttackDiscoverySchedule();
-  const { mutateAsync: bulkEnableAttackDiscoverySchedules } =
-    useBulkEnableAttackDiscoverySchedules();
-  const { mutateAsync: bulkDisableAttackDiscoverySchedules } =
-    useBulkDisableAttackDiscoverySchedules();
-  const { mutateAsync: bulkDeleteAttackDiscoverySchedules } =
-    useBulkDeleteAttackDiscoverySchedules();
+  const { mutateAsync: enableAttackDiscoverySchedule } = useEnableSchedule();
+  const { mutateAsync: disableAttackDiscoverySchedule } = useDisableSchedule();
+  const { mutateAsync: deleteAttackDiscoverySchedule } = useDeleteSchedule();
+  const { mutateAsync: bulkEnableAttackDiscoverySchedules } = useBulkEnableSchedules();
+  const { mutateAsync: bulkDisableAttackDiscoverySchedules } = useBulkDisableSchedules();
+  const { mutateAsync: bulkDeleteAttackDiscoverySchedules } = useBulkDeleteSchedules();
 
   const openScheduleDetails = useCallback((scheduleId: string) => {
     setScheduleDetailsId(scheduleId);
@@ -122,26 +123,28 @@ export const SchedulesTable: React.FC = React.memo(() => {
       try {
         setTableLoading(true);
         await enableAttackDiscoverySchedule({ id });
+        await refetch();
       } catch (err) {
         // Error is handled by the mutation's onError callback, so no need to do anything here
       } finally {
         setTableLoading(false);
       }
     },
-    [enableAttackDiscoverySchedule]
+    [enableAttackDiscoverySchedule, refetch]
   );
   const disableSchedule = useCallback(
     async (id: string) => {
       try {
         setTableLoading(true);
         await disableAttackDiscoverySchedule({ id });
+        await refetch();
       } catch (err) {
         // Error is handled by the mutation's onError callback, so no need to do anything here
       } finally {
         setTableLoading(false);
       }
     },
-    [disableAttackDiscoverySchedule]
+    [disableAttackDiscoverySchedule, refetch]
   );
   const requestDeleteSchedule = useCallback(
     (id: string) => setPendingDelete({ ids: [id], isBulk: false }),
@@ -170,13 +173,14 @@ export const SchedulesTable: React.FC = React.memo(() => {
     try {
       setTableLoading(true);
       await bulkEnableAttackDiscoverySchedules({ ids });
+      await refetch();
       clearSelection();
     } catch (err) {
       // Error is handled by the mutation's onError callback, so no need to do anything here
     } finally {
       setTableLoading(false);
     }
-  }, [bulkEnableAttackDiscoverySchedules, clearSelection, selectedSchedules]);
+  }, [bulkEnableAttackDiscoverySchedules, clearSelection, refetch, selectedSchedules]);
 
   const bulkDisableSchedules = useCallback(async () => {
     const ids = selectedSchedules.filter(({ enabled }) => enabled).map(({ id }) => id);
@@ -188,13 +192,14 @@ export const SchedulesTable: React.FC = React.memo(() => {
     try {
       setTableLoading(true);
       await bulkDisableAttackDiscoverySchedules({ ids });
+      await refetch();
       clearSelection();
     } catch (err) {
       // Error is handled by the mutation's onError callback, so no need to do anything here
     } finally {
       setTableLoading(false);
     }
-  }, [bulkDisableAttackDiscoverySchedules, clearSelection, selectedSchedules]);
+  }, [bulkDisableAttackDiscoverySchedules, clearSelection, refetch, selectedSchedules]);
 
   const confirmDeleteSchedules = useCallback(async () => {
     if (!pendingDelete?.ids.length) {
@@ -209,6 +214,7 @@ export const SchedulesTable: React.FC = React.memo(() => {
       } else {
         await deleteAttackDiscoverySchedule({ id: pendingDelete.ids[0] });
       }
+      await refetch();
       setPendingDelete(null);
     } catch (err) {
       // Error is handled by the mutation's onError callback, so no need to do anything here
@@ -220,6 +226,7 @@ export const SchedulesTable: React.FC = React.memo(() => {
     clearSelection,
     deleteAttackDiscoverySchedule,
     pendingDelete,
+    refetch,
   ]);
 
   const closeDeleteConfirmation = useCallback(() => {
