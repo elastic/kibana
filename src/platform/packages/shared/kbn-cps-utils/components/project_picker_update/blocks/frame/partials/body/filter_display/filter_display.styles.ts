@@ -7,4 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProjectPickerFilterBox } from './filter_box';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+
+export const filterDisplayStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
+  container: css({
+    padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
+  }),
+  filterCreateButton: css({
+    width: 'fit-content',
+  }),
+});

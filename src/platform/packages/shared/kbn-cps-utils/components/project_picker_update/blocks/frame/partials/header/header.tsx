@@ -23,11 +23,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState } from 'react';
-import { useProjectPickerActions } from '../../../../state';
+import { useProjectPickerActions, useProjectPickerState } from '../../../../state';
 
 const getContextMenuItems = (
-  actions: ReturnType<typeof useProjectPickerActions>
-): Array<Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'external'> & { label: string }>[] => [
+  actions: ReturnType<typeof useProjectPickerActions>,
+  isUsingSpaceDefaults: boolean
+): Array<
+  Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'external' | 'disabled'> & { label: string }
+>[] => [
   [
     {
       icon: 'eraser',
@@ -37,6 +40,7 @@ const getContextMenuItems = (
       onClick: () => {
         actions.clearProjectFilters();
       },
+      disabled: !isUsingSpaceDefaults,
     },
     {
       icon: 'clockCounter',
@@ -46,6 +50,7 @@ const getContextMenuItems = (
       onClick: () => {
         actions.revertToSpaceDefaults();
       },
+      disabled: isUsingSpaceDefaults,
     },
   ],
   [
@@ -68,10 +73,21 @@ const getContextMenuItems = (
 export function ProjectPickerFrameHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const actions = useProjectPickerActions();
+  const state = useProjectPickerState();
   const contextMenuTooltipId = useGeneratedHtmlId();
 
+  // TODO: this definition of space defaults is not correct but suffices for now,
+  // it should be based on the space defaults set in the space picker
+  const isUsingSpaceDefaults = useMemo(
+    () => state.filterExpression.length === 0,
+    [state.filterExpression]
+  );
+
   const closePopover = useCallback(() => setIsOpen(false), []);
-  const contextMenuConfig = useMemo(() => getContextMenuItems(actions), [actions]);
+  const contextMenuConfig = useMemo(
+    () => getContextMenuItems(actions, isUsingSpaceDefaults),
+    [actions, isUsingSpaceDefaults]
+  );
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
@@ -86,13 +102,15 @@ export function ProjectPickerFrameHeader() {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup responsive={false}>
-          <EuiFlexItem>
-            <EuiBadge color="primary">
-              {i18n.translate('cpsUtils.projectPicker.frameHeader.addProject', {
-                defaultMessage: 'Using space defaults',
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
+          {isUsingSpaceDefaults && (
+            <EuiFlexItem>
+              <EuiBadge color="primary">
+                {i18n.translate('cpsUtils.projectPicker.frameHeader.addProject', {
+                  defaultMessage: 'Using space defaults',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiPopover
               panelPaddingSize="none"
@@ -119,7 +137,12 @@ export function ProjectPickerFrameHeader() {
                 items={contextMenuConfig.reduce((acc, section, index) => {
                   acc = acc.concat(
                     section.map((item) => (
-                      <EuiContextMenuItem key={item.label} icon={item.icon} onClick={item.onClick}>
+                      <EuiContextMenuItem
+                        key={item.label}
+                        icon={item.icon}
+                        onClick={item.onClick}
+                        disabled={item.disabled}
+                      >
                         {item.label}
                       </EuiContextMenuItem>
                     ))

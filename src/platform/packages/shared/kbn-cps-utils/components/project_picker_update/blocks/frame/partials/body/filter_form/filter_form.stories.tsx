@@ -10,17 +10,15 @@
 import type { ComponentProps } from 'react';
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { ProjectPickerFilterBox } from './filter_box';
+import { ProjectPickerFilterForm } from './filter_form';
 
 export default {
   title: 'Project Picker/Blocks/Filter Box',
-  component: ProjectPickerFilterBox,
-} satisfies Meta<typeof ProjectPickerFilterBox>;
+  component: ProjectPickerFilterForm,
+} satisfies Meta<typeof ProjectPickerFilterForm>;
 
-export const ProjectPickerFilterBoxStory: StoryObj<ComponentProps<typeof ProjectPickerFilterBox>> =
+export const ProjectPickerFilterBoxStory: StoryObj<ComponentProps<typeof ProjectPickerFilterForm>> =
   {
     name: 'ProjectPickerFilterBox',
-    render: () => (
-      <ProjectPickerFilterBox filteringDimensions={['_region', '_id', '_alias', '_type']} />
-    ),
+    render: () => <ProjectPickerFilterForm defaultFilterExpression={null} />,
   };

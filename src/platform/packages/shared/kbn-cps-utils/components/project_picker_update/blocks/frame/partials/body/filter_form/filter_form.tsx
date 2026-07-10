@@ -21,23 +21,26 @@ import {
   EuiForm,
   EuiPopover,
   EuiSelectable,
-  EuiPopoverTitle,
+  type EuiSelectableOption,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useForm, useController, type Control } from 'react-hook-form';
-import { useProjectPickerActions } from '../../../../../state';
+import { useForm, useController, type Control, useWatch } from 'react-hook-form';
+import { useProjectPickerActions, useProjectPickerState } from '../../../../../state';
 import { filterExpressionCodec } from '../../../../../utils/codec';
-import { filterBoxStyles } from './filter_box.styles';
+import { filterFormStyles } from './filter_form.styles';
 
-interface ProjectPickerFilterBoxProps {
+interface ProjectPickerFilterFormProps {
   /**
    * Filter expression are created similar to the elasticsearch filter syntax
    * in the format of "tagName:tagValue", or "-tagName:tagValue"
    */
-  defaultFilterExpression?: string;
-  filteringDimensions: string[];
+  defaultFilterExpression?: string | null;
+  /**
+   * Callback to be called when the filter form should be closed.
+   */
+  onCloseFilterFormRequested?: () => void;
 }
 
 enum FilterOperator {
@@ -54,14 +57,41 @@ interface FilterSelectProps {
 
 function FilterSelect({ options, control, name, disabled }: FilterSelectProps) {
   const filterPopoverId = useGeneratedHtmlId();
-
+  const [isOpen, setIsOpen] = useState(false);
   const { field } = useController({
     name,
     control,
     rules: { required: true },
   });
 
-  const [isOpen, setIsOpen] = useState(false);
+  // Reflect the stored form value (a plain string) back onto the EuiSelectable
+  // option list by marking the matching option as checked.
+  const selectableOptions = useMemo<Array<EuiSelectableOption<{ value: string }>>>(
+    () =>
+      toSelectableOptions(
+        options.map((option) => option.value),
+        field.value
+      ),
+    [options, field.value]
+  );
+
+  const selectedLabel = useMemo(
+    () => options.find((option) => option.value === field.value)?.label,
+    [options, field.value]
+  );
+
+  // This is the `setValueAs` equivalent for a controlled field: EuiSelectable
+  // hands us the full options array, so we collapse it down to the single
+  // selected value before writing it into form state.
+  const handleChange = useCallback(
+    (newOptions: Array<EuiSelectableOption<{ value: string }>>) => {
+      const selected = newOptions.find((option) => option.checked === 'on');
+      field.onChange(selected?.value);
+      field.onBlur();
+      setIsOpen(false);
+    },
+    [field]
+  );
 
   return (
     <EuiPopover
@@ -73,7 +103,7 @@ function FilterSelect({ options, control, name, disabled }: FilterSelectProps) {
           onClick={() => setIsOpen(true)}
         >
           <EuiText>
-            {field.value ??
+            {selectedLabel ??
               i18n.translate('cpsUtils.projectPicker.filterBox.selectDimension', {
                 defaultMessage: 'Select dimension',
               })}
@@ -82,30 +112,38 @@ function FilterSelect({ options, control, name, disabled }: FilterSelectProps) {
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
+      panelPaddingSize="none"
     >
-      <EuiSelectable searchable={false} options={options} {...field}>
-        {(list, search) => (
-          <div style={{ width: 300 }}>
-            <EuiPopoverTitle id={filterPopoverId} paddingSize="s">
-              {search}
-            </EuiPopoverTitle>
-            {list}
-          </div>
-        )}
+      <EuiSelectable
+        searchable={false}
+        options={selectableOptions}
+        onChange={handleChange}
+        singleSelection
+      >
+        {(list) => <div style={{ width: 300 }}>{list}</div>}
       </EuiSelectable>
     </EuiPopover>
   );
 }
 
-export function ProjectPickerFilterBox({
-  filteringDimensions,
-  defaultFilterExpression,
-}: ProjectPickerFilterBoxProps) {
-  const { euiTheme } = useEuiTheme();
-  const styles = filterBoxStyles({ euiTheme });
-  const actions = useProjectPickerActions();
+function toSelectableOptions(values: string[], selectedValue: string | undefined) {
+  return values.map((value) => ({
+    label: value,
+    value,
+    checked: value === selectedValue ? 'on' : undefined,
+  }));
+}
 
-  const parsedFilterExpression = useMemo(() => {
+export function ProjectPickerFilterForm({
+  defaultFilterExpression,
+  onCloseFilterFormRequested,
+}: ProjectPickerFilterFormProps) {
+  const { euiTheme } = useEuiTheme();
+  const styles = filterFormStyles({ euiTheme });
+  const actions = useProjectPickerActions();
+  const state = useProjectPickerState();
+
+  const parsedDefaultFilterExpression = useMemo(() => {
     return filterExpressionCodec.decode(defaultFilterExpression ?? '');
   }, [defaultFilterExpression]);
 
@@ -114,45 +152,43 @@ export function ProjectPickerFilterBox({
     operator: FilterOperator;
     tagValue: string;
   }>({
+    progressive: true,
     defaultValues: {
       tagName:
-        filteringDimensions.indexOf(parsedFilterExpression.tagName ?? '') !== -1
-          ? parsedFilterExpression.tagName
+        state.filteringDimensions.indexOf(parsedDefaultFilterExpression.tagName ?? '') !== -1
+          ? parsedDefaultFilterExpression.tagName
           : undefined,
-      operator: parsedFilterExpression.operator,
-      tagValue: parsedFilterExpression.tagValue,
+      operator: parsedDefaultFilterExpression.operator,
+      tagValue: parsedDefaultFilterExpression.tagValue,
     },
   });
 
+  const anchoringFilteringTagName = useWatch({ control: form.control, name: 'tagName' });
+  const filteringOperator = useWatch({ control: form.control, name: 'operator' });
+  const filteringTagValue = useWatch({ control: form.control, name: 'tagValue' });
+
   const filteringDimensionsOptions = useMemo(
-    () =>
-      filteringDimensions.map((dimension) => ({
-        label: dimension,
-        value: dimension,
-        text: dimension,
-      })),
-    [filteringDimensions]
+    () => toSelectableOptions(state.filteringDimensions, anchoringFilteringTagName),
+    [anchoringFilteringTagName, state.filteringDimensions]
   );
 
   const filterOperators = useMemo(
-    () =>
-      Object.values(FilterOperator).map((operator) => ({
-        label: operator,
-        value: operator,
-        text: operator,
-      })),
-    []
+    () => toSelectableOptions(Object.values(FilterOperator), filteringOperator),
+    [filteringOperator]
   );
 
-  const filterValues = useMemo(
-    () =>
-      Object.values(FilterOperator).map((operator) => ({
-        label: operator,
-        value: operator,
-        text: operator,
-      })),
-    []
-  );
+  const filterValues = useMemo(() => {
+    if (!anchoringFilteringTagName) return [];
+    const values = state.selectedProjects
+      .map((projectId) => state.availableProjects.get(projectId)?.[anchoringFilteringTagName])
+      .filter((value): value is string => value != null);
+    return toSelectableOptions([...new Set(values)], filteringTagValue);
+  }, [
+    anchoringFilteringTagName,
+    filteringTagValue,
+    state.availableProjects,
+    state.selectedProjects,
+  ]);
 
   const handleCreateFilter = useCallback(async () => {
     try {
@@ -164,10 +200,11 @@ export function ProjectPickerFilterBox({
         return;
       }
       actions.setFilterExpression({ filterExpression });
+      onCloseFilterFormRequested?.();
     } catch (error) {
       // TODO: handle error
     }
-  }, [form, actions]);
+  }, [form, actions, onCloseFilterFormRequested]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
@@ -201,14 +238,24 @@ export function ProjectPickerFilterBox({
           >
             <EuiFlexGroup alignItems="center" responsive={false}>
               <EuiFlexItem>
-                <EuiFilterGroup fullWidth>
+                <EuiFilterGroup css={styles.filterFormSelectGroup} fullWidth>
                   <FilterSelect
                     options={filteringDimensionsOptions}
                     control={form.control}
                     name="tagName"
                   />
-                  <FilterSelect options={filterOperators} control={form.control} name="operator" />
-                  <FilterSelect options={filterValues} control={form.control} name="tagValue" />
+                  <FilterSelect
+                    options={filterOperators}
+                    control={form.control}
+                    name="operator"
+                    disabled={!anchoringFilteringTagName}
+                  />
+                  <FilterSelect
+                    options={filterValues}
+                    control={form.control}
+                    name="tagValue"
+                    disabled={!anchoringFilteringTagName}
+                  />
                 </EuiFilterGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -227,6 +274,9 @@ export function ProjectPickerFilterBox({
                         color="success"
                         aria-labelledby=""
                         onClick={handleCreateFilter}
+                        disabled={
+                          !anchoringFilteringTagName || !filteringOperator || !filteringTagValue
+                        }
                       />
                     </EuiToolTip>
                   </EuiFlexItem>
@@ -243,6 +293,7 @@ export function ProjectPickerFilterBox({
                         display="base"
                         color="danger"
                         aria-labelledby=""
+                        onClick={onCloseFilterFormRequested}
                       />
                     </EuiToolTip>
                   </EuiFlexItem>

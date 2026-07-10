@@ -10,8 +10,13 @@
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
-export const filterBoxStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
+export const filterFormStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
   filterFormWrapper: css({
     padding: euiTheme.size.base,
+  }),
+  filterFormSelectGroup: css({
+    '& > *': {
+      flexBasis: 'calc(100% / 3) !important',
+    },
   }),
 });

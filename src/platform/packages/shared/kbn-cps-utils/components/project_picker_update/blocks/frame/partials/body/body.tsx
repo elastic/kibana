@@ -8,14 +8,19 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { ProjectPickerFilterBox } from './filter_box';
+import { ProjectPickerFilterForm } from './filter_form';
+import { ProjectPickerFilterDisplay } from './filter_display';
 import { bodyStyles } from './body.styles';
 
 interface ProjectPickerFrameBodyProps {
   children: React.ReactNode;
-  maxHeight?: number;
+}
+
+enum FilterViewMode {
+  EDIT = 'edit',
+  VIEW = 'view',
 }
 
 export function ProjectPickerFrameBody({
@@ -23,11 +28,30 @@ export function ProjectPickerFrameBody({
 }: PropsWithChildren<ProjectPickerFrameBodyProps>) {
   const { euiTheme } = useEuiTheme();
   const styles = bodyStyles({ euiTheme });
+  const [filterViewMode, setFilterViewMode] = useState<FilterViewMode>(FilterViewMode.VIEW);
+  const [filterExpression, setFilterExpression] = useState<string | null>(null);
+  const handleEditFilterRequest = useCallback((filter: string) => {
+    setFilterViewMode(FilterViewMode.EDIT);
+    setFilterExpression(filter);
+  }, []);
+
+  const handleCloseFilterFormRequested = useCallback(() => {
+    setFilterViewMode(FilterViewMode.VIEW);
+    setFilterExpression(null);
+  }, []);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem css={styles.filterBoxWrapper}>
-        <ProjectPickerFilterBox filteringDimensions={[]} />
+        {filterViewMode === FilterViewMode.VIEW ? (
+          <ProjectPickerFilterDisplay onEditFilter={handleEditFilterRequest} />
+        ) : null}
+        {filterViewMode === FilterViewMode.EDIT ? (
+          <ProjectPickerFilterForm
+            defaultFilterExpression={filterExpression}
+            onCloseFilterFormRequested={handleCloseFilterFormRequested}
+          />
+        ) : null}
       </EuiFlexItem>
       <EuiFlexItem>{children}</EuiFlexItem>
     </EuiFlexGroup>
