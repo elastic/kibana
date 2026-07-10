@@ -83,6 +83,18 @@ export const normalizeVegaConfig = (input: unknown): VegaConfig | undefined => {
   return config;
 };
 
+export const prettyPrintVegaSpec = (spec: string): string => {
+  try {
+    const parsed = JSON.parse(spec);
+    if (parsed && typeof parsed === 'object') {
+      return JSON.stringify(parsed, null, 2);
+    }
+  } catch {
+    // fall through
+  }
+  return spec;
+};
+
 /**
  * Read the serialized Vega spec out of a legacy-vis (`visualization`) panel's
  * by-value `config`, i.e. `config.savedVis.params.spec`. Returns `undefined` when
@@ -102,7 +114,7 @@ export const extractVegaSpecFromSavedVis = (
     return undefined;
   }
   return {
-    spec,
+    spec: prettyPrintVegaSpec(spec),
     title: typeof savedVis.title === 'string' ? savedVis.title : '',
     description: typeof savedVis.description === 'string' ? savedVis.description : '',
   };
