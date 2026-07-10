@@ -19,8 +19,18 @@ import {
   type Classification,
 } from './constants';
 
-/** The `ai.agent` step id in alert_analysis_workflow.yaml whose structured output we grade. */
-const AGENT_STEP_ID = 'onechat_runAgent_step';
+/**
+ * The `ai.agent` step in alert_analysis_workflow.yaml whose structured output we grade. We match on
+ * `stepType` rather than the step's name so the harness survives step renames in the workflow
+ * definition (the step has been called both `onechat_runAgent_step` and `runAgent_step`). The name
+ * list is a fallback for execution records that omit `stepType`.
+ */
+const AGENT_STEP_TYPE = 'ai.agent';
+const AGENT_STEP_ID_FALLBACKS = ['runAgent_step', 'onechat_runAgent_step'];
+
+const isAgentStep = (step: WorkflowStepExecutionDto): boolean =>
+  step.stepType === AGENT_STEP_TYPE ||
+  (step.stepType === undefined && AGENT_STEP_ID_FALLBACKS.includes(step.stepId));
 
 /** Structured output the workflow's `ai.agent` step is schema-constrained to return. */
 interface StructuredOutput {
@@ -53,13 +63,13 @@ const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatus
  * Reads the agent step's structured output. Each step yields multiple execution records (an
  * enter record whose `output` is null and the record that carries the result), and both report
  * status `completed`, so we cannot key off status alone. We seed one alert per run, so there is a
- * single logical agent step: scan every `onechat_runAgent_step` record and return the first
+ * single logical agent step: scan every agent-step record and return the first
  * `structured_output` payload we find.
  */
 const readAgentStructuredOutput = (
   stepExecutions: WorkflowStepExecutionDto[]
 ): StructuredOutput | undefined => {
-  const agentSteps = stepExecutions.filter((step) => step.stepId === AGENT_STEP_ID);
+  const agentSteps = stepExecutions.filter(isAgentStep);
   for (const step of agentSteps) {
     const output = step.output as { structured_output?: StructuredOutput } | null | undefined;
     if (output?.structured_output) {
