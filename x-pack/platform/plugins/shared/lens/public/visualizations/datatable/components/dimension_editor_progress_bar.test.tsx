@@ -22,7 +22,10 @@ import { getKbnPalettes } from '@kbn/palettes';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import type { TableDimensionEditorProps } from './dimension_editor';
 import { TableDimensionEditor } from './dimension_editor';
-import { getAdjustedRangeForInputChange } from './progress_bar_controls';
+import {
+  getAdjustedRangeForInputChange,
+  getDecimalPlacesFromInputText,
+} from './progress_bar_controls';
 import { renderWithProviders } from '../../../test_utils/test_utils';
 
 type MockPalette = PaletteOutput<CustomPaletteParams>;
@@ -326,6 +329,11 @@ describe('data table progress bar regressions', () => {
     expect(maxInput).not.toHaveAttribute('aria-invalid', 'true');
     expect(slider).toHaveAttribute('min', '0');
     expect(slider).toHaveAttribute('max', '2100');
+  });
+
+  it('preserves raw-input precision when counting decimal places', () => {
+    expect(getDecimalPlacesFromInputText('1.2300')).toBe(4);
+    expect(getDecimalPlacesFromInputText('1e-4')).toBe(4);
   });
 
   it('seeds Custom from the current Auto domain after reopening with stale auto-mode bounds', async () => {

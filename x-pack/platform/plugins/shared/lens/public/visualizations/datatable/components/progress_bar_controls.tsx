@@ -161,7 +161,10 @@ const valueRangeAppendCss = css`
 function getDecimalPlaces(value: number): number {
   if (!Number.isFinite(value)) return 0;
 
-  const valueText = String(value).toLowerCase();
+  return getDecimalPlacesFromNormalizedText(String(value).toLowerCase());
+}
+
+function getDecimalPlacesFromNormalizedText(valueText: string): number {
   const scientificMatch = valueText.match(/e-(\d+)$/);
 
   if (scientificMatch) {
@@ -174,19 +177,11 @@ function getDecimalPlaces(value: number): number {
   return valueText.split('.')[1]?.length ?? 0;
 }
 
-function getDecimalPlacesFromInputText(value: string): number {
+export function getDecimalPlacesFromInputText(value: string): number {
   const trimmedValue = value.trim().toLowerCase();
   if (trimmedValue === '' || !Number.isFinite(Number(trimmedValue))) return 0;
 
-  const scientificMatch = trimmedValue.match(/e-(\d+)$/);
-  if (scientificMatch) {
-    const exponent = Number(scientificMatch[1]);
-    const mantissa = trimmedValue.split('e-')[0] ?? '';
-    const mantissaDecimals = mantissa.split('.')[1]?.length ?? 0;
-    return exponent + mantissaDecimals;
-  }
-
-  return trimmedValue.split('.')[1]?.length ?? 0;
+  return getDecimalPlacesFromNormalizedText(trimmedValue);
 }
 
 function getPrecisionUnit(decimalPlaces: number): number {
