@@ -236,7 +236,7 @@ describe('getDiverseSampleDocuments', () => {
     expect(result).toEqual({ hits: [] });
   });
 
-  it('returns no hits when no message field exists (backfilled by the caller\'s random arm)', async () => {
+  it("returns no hits when no message field exists (backfilled by the caller's random arm)", async () => {
     const { esClient, query } = createEsClient();
     query
       .mockResolvedValueOnce(schemaResponse([{ name: 'host.name', type: 'keyword' }]))
