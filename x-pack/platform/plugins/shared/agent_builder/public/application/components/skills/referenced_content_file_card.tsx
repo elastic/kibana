@@ -24,7 +24,10 @@ import { css } from '@emotion/react';
 import { estimateTokens } from '@kbn/agent-builder-common/attachments';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { labels } from '../../utils/i18n';
-import { buildReferencedContentFullPathPreview } from './referenced_content_path_utils';
+import {
+  buildReferencedContentFullPathPreview,
+  getReferencedFileDisplayName,
+} from './referenced_content_path_utils';
 
 export interface ReferencedContentFileCardProps {
   skillName: string;
@@ -70,9 +73,7 @@ export const ReferencedContentFileCard: React.FC<ReferencedContentFileCardProps>
     [skillSegment, relativePath, fileName]
   );
 
-  const displayName = fileName
-    ? `${fileName}.md`
-    : labels.skills.referencedFileSection.unnamedFilePlaceholder;
+  const displayName = getReferencedFileDisplayName(fileName);
 
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 

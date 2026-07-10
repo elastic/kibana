@@ -21,13 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  useController,
-  useFieldArray,
-  useFormContext,
-  useWatch,
-  type Control,
-} from 'react-hook-form';
+import { useController, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { maxReferencedContentItems, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { estimateTokens } from '@kbn/agent-builder-common/attachments';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -36,6 +30,7 @@ import { labels } from '../../utils/i18n';
 import type { ReferencedContentItem, SkillFormData } from './skill_form_validation';
 import { ReferencedContentFileCard } from './referenced_content_file_card';
 import { SkillReferencedContentReadOnly } from './skill_referenced_content_read_only';
+import { getReferencedFileDisplayName } from './referenced_content_path_utils';
 
 const addFileEbtProps = getEbtProps({
   element: AGENT_BUILDER_UI_EBT.element.pageContent,
@@ -111,7 +106,6 @@ const DEFAULT_REFERENCED_FILE: ReferencedContentItem = {
 
 interface ReferencedContentFileRowProps {
   index: number;
-  control: Control<SkillFormData>;
   skillName: string;
   onRemove: () => void;
   isEditing: boolean;
@@ -122,7 +116,6 @@ interface ReferencedContentFileRowProps {
 
 const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
   index,
-  control,
   skillName,
   onRemove,
   isEditing,
@@ -133,9 +126,9 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
   const snapshotRef = useRef<ReferencedContentItem>({ ...DEFAULT_REFERENCED_FILE });
   const { trigger, clearErrors } = useFormContext<SkillFormData>();
 
-  const nameField = useController({ control, name: `referenced_content.${index}.name` });
-  const pathField = useController({ control, name: `referenced_content.${index}.relativePath` });
-  const contentField = useController({ control, name: `referenced_content.${index}.content` });
+  const nameField = useController({ name: `referenced_content.${index}.name` });
+  const pathField = useController({ name: `referenced_content.${index}.relativePath` });
+  const contentField = useController({ name: `referenced_content.${index}.content` });
 
   const debouncedContent = useDebouncedValue(contentField.field.value, 300);
   const tokenCount = useMemo(() => estimateTokens(debouncedContent), [debouncedContent]);
@@ -166,9 +159,7 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
     onStopEdit();
   };
 
-  const displayName = nameField.field.value
-    ? `${nameField.field.value}.md`
-    : labels.skills.referencedFileSection.unnamedFilePlaceholder;
+  const displayName = getReferencedFileDisplayName(nameField.field.value);
 
   if (!isEditing) {
     return (
@@ -278,10 +269,8 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
   );
 };
 
-const SkillReferencedContentReadOnlySection: React.FC<{ control: Control<SkillFormData> }> = ({
-  control,
-}) => {
-  const items: ReferencedContentItem[] = useWatch({ control, name: 'referenced_content' }) ?? [];
+const SkillReferencedContentReadOnlySection: React.FC = () => {
+  const items: ReferencedContentItem[] = useWatch({ name: 'referenced_content' }) ?? [];
 
   return (
     <div data-test-subj="agentBuilderSkillReferencedContentSection">
@@ -290,16 +279,11 @@ const SkillReferencedContentReadOnlySection: React.FC<{ control: Control<SkillFo
   );
 };
 
-const SkillReferencedContentFieldArrayEdit: React.FC<{ control: Control<SkillFormData> }> = ({
-  control,
-}) => {
-  const skillName = useWatch({ control, name: 'name' }) ?? '';
+const SkillReferencedContentFieldArrayEdit: React.FC = () => {
+  const skillName = useWatch({ name: 'name' }) ?? '';
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'referenced_content',
-  });
+  const { fields, append, remove } = useFieldArray({ name: 'referenced_content' });
 
   const atLimit = fields.length >= maxReferencedContentItems;
 
@@ -363,7 +347,6 @@ const SkillReferencedContentFieldArrayEdit: React.FC<{ control: Control<SkillFor
               <EuiFlexItem key={field.id} grow={false}>
                 <ReferencedContentFileRow
                   index={index}
-                  control={control}
                   skillName={skillName}
                   onRemove={() => handleRemove(index)}
                   isEditing={activeIndex === index}
@@ -381,16 +364,14 @@ const SkillReferencedContentFieldArrayEdit: React.FC<{ control: Control<SkillFor
 };
 
 export interface SkillReferencedContentFieldArrayProps {
-  control: Control<SkillFormData>;
   readOnly?: boolean;
 }
 
 export const SkillReferencedContentFieldArray: React.FC<SkillReferencedContentFieldArrayProps> = ({
-  control,
   readOnly = false,
 }) => {
   if (readOnly) {
-    return <SkillReferencedContentReadOnlySection control={control} />;
+    return <SkillReferencedContentReadOnlySection />;
   }
-  return <SkillReferencedContentFieldArrayEdit control={control} />;
+  return <SkillReferencedContentFieldArrayEdit />;
 };

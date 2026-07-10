@@ -19,6 +19,7 @@ import {
 import { estimateTokens } from '@kbn/agent-builder-common/attachments';
 import { labels } from '../../utils/i18n';
 import type { ReferencedContentItem } from './skill_form_validation';
+import { getReferencedFileDisplayName } from './referenced_content_path_utils';
 
 interface ReadOnlyFileRowProps {
   item: ReferencedContentItem;
@@ -28,9 +29,7 @@ interface ReadOnlyFileRowProps {
 const ReadOnlyFileRow: React.FC<ReadOnlyFileRowProps> = ({ item, index }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'agentBuilderSkillReferencedContentReadOnly' });
   const tokenCount = useMemo(() => estimateTokens(item.content), [item.content]);
-  const displayName = item.name
-    ? `${item.name}.md`
-    : labels.skills.referencedFileSection.unnamedFilePlaceholder;
+  const displayName = getReferencedFileDisplayName(item.name);
 
   return (
     <EuiAccordion

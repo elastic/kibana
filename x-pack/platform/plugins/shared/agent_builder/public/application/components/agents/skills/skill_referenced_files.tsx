@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import type { SkillReferencedContent } from '@kbn/agent-builder-common';
 import { estimateTokens } from '@kbn/agent-builder-common/attachments';
 import { labels } from '../../../utils/i18n';
+import { getReferencedFileDisplayName } from '../../skills/referenced_content_path_utils';
 
 interface ReferencedFileRowProps {
   item: SkillReferencedContent;
@@ -32,9 +33,7 @@ const ReferencedFileRow: React.FC<ReferencedFileRowProps> = ({ item, index }) =>
   const accordionId = useGeneratedHtmlId({ prefix: 'agentBuilderSkillDetailReferencedFile' });
   const { euiTheme } = useEuiTheme();
   const tokenCount = useMemo(() => estimateTokens(item.content), [item.content]);
-  const displayName = item.name
-    ? `${item.name}.md`
-    : labels.skills.referencedFileSection.unnamedFilePlaceholder;
+  const displayName = getReferencedFileDisplayName(item.name);
 
   return (
     <EuiAccordion
