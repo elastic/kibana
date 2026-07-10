@@ -276,6 +276,9 @@ export const EditAiPanelFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
+              disabled={
+                draftEsqlQuery === (esqlQuery ?? '') && draftTemplate === (template ?? '')
+              }
               onClick={() => {
                 onSave(draftEsqlQuery.trim() || undefined, draftTemplate.trim() || undefined);
                 onClose();
