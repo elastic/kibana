@@ -18,6 +18,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { useEsqlTimeRangeFilter } from '../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useSecurityMlModuleJobIds } from '../../../../common/components/ml/hooks/use_security_ml_module_job_ids';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('@kbn/esql-utils', () => ({
@@ -37,6 +38,9 @@ jest.mock('../../../../common/hooks/esql/use_esql_global_filter', () => ({
   useEsqlTimeRangeFilter: jest.fn(),
 }));
 jest.mock('../../../../common/containers/use_global_time', () => ({ useGlobalTime: jest.fn() }));
+jest.mock('../../../../common/components/ml/hooks/use_security_ml_module_job_ids', () => ({
+  useSecurityMlModuleJobIds: jest.fn(),
+}));
 jest.mock('../../../../common/hooks/use_error_toast', () => ({ useErrorToast: jest.fn() }));
 
 const mockUseQuery = useQuery as jest.Mock;
@@ -48,6 +52,7 @@ const mockUseKibana = useKibana as jest.Mock;
 const mockUseGlobalFilterQuery = useGlobalFilterQuery as jest.Mock;
 const mockUseEsqlTimeRangeFilter = useEsqlTimeRangeFilter as jest.Mock;
 const mockUseGlobalTime = useGlobalTime as jest.Mock;
+const mockUseSecurityJobIds = useSecurityMlModuleJobIds as jest.Mock;
 
 const TOP_ROWS_SQL = 'TOP_ROWS_SQL';
 const DATA_SQL = 'DATA_SQL';
@@ -101,6 +106,7 @@ describe('useRecentAnomaliesQuery', () => {
       },
     });
     mockUseGlobalTime.mockReturnValue({ from: 'global-from', to: 'global-to' });
+    mockUseSecurityJobIds.mockReturnValue({ jobIds: ['security-job-01'], loading: false });
     mockUseEsqlTimeRangeFilter.mockReturnValue(TIME_FILTER);
     mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: EMPTY_BOOL });
     mockGetLatestEntitiesIndexName.mockReturnValue('entities-latest-default');
@@ -247,6 +253,44 @@ describe('useRecentAnomaliesQuery', () => {
       const { result } = renderHook(() => useRecentAnomaliesQuery(baseParams));
 
       expect(topRowsCall()![2].enabled).toBe(false);
+      expect(result.current.isLoading).toBe(true);
+    });
+  });
+
+  describe('when there are no security ML jobs', () => {
+    beforeEach(() => {
+      mockUseSecurityJobIds.mockReturnValue({ jobIds: [], loading: false });
+    });
+
+    it('short-circuits the top rows query to an empty result without querying ES|QL', async () => {
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      mockGetESQLResults.mockClear();
+      const result = await topRowsCall()![1]({ signal: undefined });
+
+      expect(result).toEqual({ records: [], rawResponse: undefined });
+      expect(mockGetESQLResults).not.toHaveBeenCalled();
+    });
+
+    it('short-circuits the anomaly data query to an empty result without querying ES|QL', async () => {
+      topRowsRecords = [{ entity_id: 'host:test_host_01', entity_name: 'h1', entity_type: 'host' }];
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      mockGetESQLResults.mockClear();
+      const result = await dataCall()![1]({ signal: undefined });
+
+      expect(result).toEqual({ anomalyRecords: [], rowLabels: [] });
+      expect(mockGetESQLResults).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('while resolving the security ML jobs', () => {
+    it('disables both queries and keeps the result loading', () => {
+      mockUseSecurityJobIds.mockReturnValue({ jobIds: undefined, loading: true });
+      const { result } = renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      expect(topRowsCall()![2].enabled).toBe(false);
+      expect(dataCall()![2].enabled).toBe(false);
       expect(result.current.isLoading).toBe(true);
     });
   });

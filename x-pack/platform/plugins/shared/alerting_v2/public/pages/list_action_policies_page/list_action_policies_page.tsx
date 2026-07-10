@@ -470,7 +470,7 @@ export const ListActionPoliciesPage = () => {
         sticky={false}
         title={ACTION_POLICIES_LIST_PAGE_TITLE}
         titleAppend={<ExperimentalBadge />}
-        padding={{ bleed: 'l' }}
+        padding={{ bleed: 'm' }}
         menu={actionPoliciesMenu}
       />
       <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>

@@ -51,6 +51,8 @@ interface InternalIlmArgs {
 
 export interface EditDataLifecycleFlyoutBodyContentProps {
   inheritLifecycle: boolean;
+  ilmReadOnly?: boolean;
+  ilmCardDisabled?: boolean;
   lifecycleMethod: DataLifecycleMethod;
   showLifecycleMethodPicker: boolean;
   inherit?: InternalInheritArgs;
@@ -62,6 +64,8 @@ export interface EditDataLifecycleFlyoutBodyContentProps {
 
 export const EditDataLifecycleFlyoutBodyContent = ({
   inheritLifecycle,
+  ilmReadOnly = inheritLifecycle,
+  ilmCardDisabled = false,
   lifecycleMethod,
   showLifecycleMethodPicker,
   inherit,
@@ -125,7 +129,12 @@ export const EditDataLifecycleFlyoutBodyContent = ({
               <LifecycleMethodCard
                 method="ilm"
                 selectedMethod={lifecycleMethod}
-                disabled={inheritLifecycle}
+                disabled={inheritLifecycle || ilmCardDisabled}
+                disabledTooltipContent={
+                  !inheritLifecycle && ilmCardDisabled
+                    ? strings.ilmNoManagePrivilegeTooltip
+                    : undefined
+                }
                 onChange={method.onChange}
               />
             </EuiFlexGroup>
@@ -193,12 +202,12 @@ export const EditDataLifecycleFlyoutBodyContent = ({
               selectedOptionName={ilm.selectedPolicyName}
               onSelectOption={ilm.onSelect}
               onInspect={ilm.onInspect}
-              isDisabled={inheritLifecycle}
+              isDisabled={ilmReadOnly}
               height="full"
               flyoutScrollContainerRef={flyoutScrollContainerRef}
-              showSearch={!inheritLifecycle}
-              listStyle={inheritLifecycle ? 'panel' : 'plain'}
-              showRowActions={!inheritLifecycle}
+              showSearch={!ilmReadOnly}
+              listStyle={ilmReadOnly ? 'panel' : 'plain'}
+              showRowActions={!ilmReadOnly}
               searchPlaceholder={strings.ilmSearchPlaceholder}
               inspectButtonLabel={strings.inspectPolicyAriaLabel}
             />

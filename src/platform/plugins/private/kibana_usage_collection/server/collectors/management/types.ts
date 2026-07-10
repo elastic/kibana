@@ -208,6 +208,12 @@ export interface UsageStats {
   'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsEnableCanvas': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
+  'observability:streamsSigEventsScheduledDiscoveryEnabled': boolean;
+  'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': number;
+  'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': number;
+  'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': number;
   'securitySolution:entityStoreEnableV2': boolean;
   'securitySolution:alertAnalysisWorkflowEnabled': boolean;
   'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': boolean;

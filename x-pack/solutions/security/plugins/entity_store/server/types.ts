@@ -33,7 +33,10 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/se
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AssetManagerClient } from './domain/asset_manager';
-import type { EntityMaintainersClient } from './domain/entity_maintainers';
+import type {
+  EntityMaintainersClient,
+  EntityMaintainerStatusEntry,
+} from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
 import type { LogsExtractionClient } from './domain/logs_extraction';
 import type { RemoteLogsExtractionClient } from './domain/logs_extraction/remote';
@@ -104,6 +107,10 @@ export interface EntityStoreStartContract {
     namespace: string
   ) => EntityMetadataClient;
   createResolutionClient: (esClient: ElasticsearchClient, namespace: string) => ResolutionClient;
+  getMaintainerStatus: (
+    namespace: string,
+    ids?: string[]
+  ) => Promise<EntityMaintainerStatusEntry[]>;
 }
 
 export interface EntityStoreSetupContract {
