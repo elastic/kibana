@@ -86,7 +86,6 @@ const EDGE_TYPES: EdgeTypes = {
   workflowEdge: WorkflowGraphEdge,
 };
 
-const PRO_OPTIONS = { hideAttribution: true } as const;
 // Predefined zoom for the initial graph view; user can zoom in/out from
 // the bar afterwards. Picked to match the readability shown in the design.
 const INITIAL_ZOOM = 1;
@@ -569,7 +568,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               nodeTypes={NODE_TYPES}
               edgeTypes={EDGE_TYPES}
               defaultEdgeOptions={defaultEdgeOptions}
-              proOptions={PRO_OPTIONS}
               colorMode={colorMode}
               onInit={handleInit}
               fitView={fitViewProp}
