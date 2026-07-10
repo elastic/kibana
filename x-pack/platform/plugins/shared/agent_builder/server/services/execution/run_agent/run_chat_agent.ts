@@ -76,6 +76,7 @@ const CYCLE_LIMIT = 30;
 export const runDefaultAgentMode: RunChatAgentFn = async (
   {
     nextInput,
+    roundSourceInput,
     conversation,
     agentConfiguration,
     capabilities,
@@ -351,6 +352,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       roundId,
       initialTodos,
       getWorkspaceId: () => context.bashService?.getWorkspaceId(),
+      roundSourceInput,
     }),
     evictInternalEvents(),
     shareReplay()

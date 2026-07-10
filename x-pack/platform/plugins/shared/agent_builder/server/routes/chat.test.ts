@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ConversationSourceType, ExecutionStatus } from '@kbn/agent-builder-common';
 import { of } from 'rxjs';
-import { internalApiPath } from '../../common/constants';
+import { internalApiPath, publicApiPath } from '../../common/constants';
 import {
   callbackConversePayloadSchema,
   conversePayloadSchema,
@@ -70,6 +70,14 @@ describe('promptResponseEntrySchema', () => {
 });
 
 describe('conversePayloadSchema', () => {
+  it('rejects non-string input', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: { channel: 'C123', text: 'hello', ts: '1712345678.000100' },
+      })
+    ).toThrow(/input/);
+  });
+
   it('rejects unsupported conversation access mode values', () => {
     expect(() =>
       conversePayloadSchema.validate({
@@ -85,7 +93,7 @@ describe('conversePayloadSchema', () => {
 describe('callbackConversePayloadSchema', () => {
   const basePayload = {
     agent_id: 'agent-1',
-    input: 'Hello',
+    input: '@agent hello',
     source: {
       type: ConversationSourceType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -99,13 +107,75 @@ describe('callbackConversePayloadSchema', () => {
     expect(() => callbackConversePayloadSchema.validate(basePayload)).not.toThrow();
   });
 
-  it('accepts callback payloads without source', () => {
+  it('accepts a source user when provided', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
-        source: undefined,
+        source: {
+          ...basePayload.source,
+          user: {
+            id: 'U123',
+            name: 'Jane Doe',
+            handle: 'jane',
+          },
+        },
       })
     ).not.toThrow();
+  });
+
+  it('requires source user id when source user is provided', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        source: {
+          ...basePayload.source,
+          user: {
+            name: 'Jane Doe',
+          },
+        },
+      })
+    ).toThrow(/id/);
+  });
+
+  it('rejects empty source user id', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        source: {
+          ...basePayload.source,
+          user: {
+            id: '',
+          },
+        },
+      })
+    ).toThrow(/id/);
+  });
+
+  it('rejects raw source message input', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        input: {
+          channel: 'C123',
+          text: '@agent hello',
+          ts: '1712345678.000100',
+          thread_ts: '1712345678.000000',
+          user: 'U123',
+        },
+      })
+    ).toThrow(/input/);
+  });
+
+  it('requires an input message', () => {
+    const { input, ...payloadWithoutInput } = basePayload;
+
+    expect(() => callbackConversePayloadSchema.validate(payloadWithoutInput)).toThrow(/input/);
+  });
+
+  it('requires a source', () => {
+    const { source, ...payloadWithoutSource } = basePayload;
+
+    expect(() => callbackConversePayloadSchema.validate(payloadWithoutSource)).toThrow(/source/);
   });
 
   it('rejects unsupported source types', () => {
@@ -191,6 +261,81 @@ describe('registerChatRoutes', () => {
     );
   });
 
+  it('does not pass source metadata for public converse requests', async () => {
+    const converseAsyncPath = `${publicApiPath}/converse/async`;
+    let converseAsyncHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    const executeAgent = jest.fn().mockResolvedValue({
+      executionId: 'execution-1',
+      events$: of(),
+    });
+
+    const router = {
+      versioned: {
+        post: jest.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: jest
+            .fn()
+            .mockImplementation(
+              (
+                _versionConfig: unknown,
+                handler: (ctx: any, req: any, res: any) => Promise<any>
+              ) => {
+                if (config.path === converseAsyncPath) {
+                  converseAsyncHandler = handler;
+                }
+              }
+            ),
+        })),
+      },
+    };
+
+    registerChatRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+      }),
+      coreSetup: {
+        getStartServices: jest.fn().mockResolvedValue([{}, { cloud: undefined }]),
+      } as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = {
+      ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
+      forbidden: jest.fn(),
+      customError: jest.fn(),
+      notFound: jest.fn(),
+    };
+
+    await converseAsyncHandler!(
+      {
+        core: Promise.resolve({}),
+        licensing: Promise.resolve({
+          license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+        }),
+        agentBuilder: Promise.resolve({
+          spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+        }),
+      },
+      {
+        body: {
+          agent_id: 'agent-1',
+          input: 'Hello',
+        },
+        events: {
+          aborted$: of(),
+        },
+      },
+      response
+    );
+
+    const params = executeAgent.mock.calls[0][0].params;
+
+    expect(params).not.toHaveProperty('roundSourceInput');
+    expect(params).not.toHaveProperty('structuredOutput');
+    expect(params).not.toHaveProperty('outputSchema');
+  });
+
   it('schedules callback converse with source for conversation resolution', async () => {
     const callbackPath = `${internalApiPath}/converse/callback`;
     let callbackHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
@@ -199,9 +344,14 @@ describe('registerChatRoutes', () => {
       executionId: 'execution-1',
       events$: of(),
     });
-    const source = {
+    const callbackSource = {
       type: ConversationSourceType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      user: {
+        id: 'U123',
+        name: 'Jane Doe',
+        handle: 'jane',
+      },
     };
 
     const router = {
@@ -254,7 +404,7 @@ describe('registerChatRoutes', () => {
         body: {
           agent_id: 'agent-1',
           input: 'Hello',
-          source,
+          source: callbackSource,
           callback: {
             url: 'https://relay.example.com/events?token=abc',
           },
@@ -276,7 +426,20 @@ describe('registerChatRoutes', () => {
         },
         params: expect.objectContaining({
           conversationId: undefined,
-          source,
+          source: {
+            external_conversation_id: callbackSource.external_conversation_id,
+          },
+          roundSourceInput: {
+            source: {
+              type: ConversationSourceType.Slack,
+            },
+          },
+          nextInput: {
+            message: 'Hello',
+            source: {
+              user: callbackSource.user,
+            },
+          },
         }),
       })
     );

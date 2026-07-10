@@ -25,6 +25,7 @@ import type {
   BackgroundAgentCompleteStep,
   TodosStep,
   UserQuestionAskedEvent,
+  ConversationRoundSourceInput,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
@@ -99,6 +100,7 @@ export const addRoundCompleteEvent = ({
   roundId: providedRoundId,
   initialTodos,
   getWorkspaceId,
+  roundSourceInput,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -117,6 +119,8 @@ export const addRoundCompleteEvent = ({
   initialTodos?: TodoItem[];
   /** Returns the workspace_id used in this round, if any */
   getWorkspaceId?: () => string | undefined;
+  /** Source metadata for the input triggering this round. */
+  roundSourceInput?: ConversationRoundSourceInput;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(shareReplay());
@@ -150,6 +154,10 @@ export const addRoundCompleteEvent = ({
                 compactionResult,
                 initialTodos,
               });
+
+          if (roundSourceInput) {
+            round.source = roundSourceInput.source;
+          }
 
           round.state = buildRoundState({ round, events, stateManager });
 
@@ -265,6 +273,7 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
+    source: next.source ?? previous.source,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
   };
 

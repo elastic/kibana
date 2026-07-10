@@ -12,7 +12,6 @@ import {
   AgentBuilderErrorCode,
   ChatEventType,
   ConversationAccessControlMode,
-  ConversationSourceType,
   createBadRequestError,
   type ChatEvent,
 } from '@kbn/agent-builder-common';
@@ -49,7 +48,6 @@ describe('handleAgentExecution', () => {
 
   it('reports metering with the resolved conversation id when continuing by source', async () => {
     const source = {
-      type: ConversationSourceType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:callback-continuation',
     };
     const conversation = createEmptyConversation({
