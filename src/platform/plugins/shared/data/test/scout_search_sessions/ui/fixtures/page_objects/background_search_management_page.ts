@@ -34,9 +34,19 @@ export class BackgroundSearchManagementPage {
     await expect(this.rows()).toHaveCount(count, { timeout });
   }
 
-  async waitForRowStatus(targetStatus: string, timeout = 30_000) {
-    const badge = this.table.getByTestId('sessionManagementStatusLabel');
-    await expect(badge).toHaveAttribute('data-test-status', targetStatus, { timeout });
+  async waitForRowStatus(targetStatus: string) {
+    const statusBadge = this.table.getByTestId('sessionManagementStatusLabel');
+    const refreshButton = this.page.testSubj.locator('sessionManagementRefreshBtn');
+
+    await expect
+      .poll(
+        async () => {
+          await refreshButton.click();
+          return statusBadge.getAttribute('data-test-status');
+        },
+        { timeout: 30_000, intervals: [2_000] }
+      )
+      .toBe(targetStatus);
   }
 
   async getRowExpires(): Promise<string> {

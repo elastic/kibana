@@ -133,20 +133,13 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
         'navigate to management and wait for the background search to complete',
         async () => {
           await pageObjects.backgroundSearchManagement.goTo();
-
-          // Management page auto-refreshes every 10 s (server arg).
-          // Allow up to 60 s for the background search to transition to "complete".
-          await pageObjects.backgroundSearchManagement.waitForRowStatus('complete', 60_000);
+          await pageObjects.backgroundSearchManagement.waitForRowStatus('complete');
         }
       );
 
       await spaceTest.step('rename the background search and verify details', async () => {
         await pageObjects.backgroundSearchManagement.renameRow(searchName);
-
-        // Trigger a manual refresh so the new name is reflected without waiting
-        // for the 10-second auto-refresh interval.
         await page.testSubj.click('sessionManagementRefreshBtn');
-
         await pageObjects.backgroundSearchManagement.expectRowCount(1);
         await expect(page.testSubj.locator('sessionManagementNameCol')).toHaveText(searchName, {
           timeout: 15_000,
@@ -157,10 +150,10 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
 
       await spaceTest.step('navigate back to the dashboard via the management link', async () => {
         await pageObjects.backgroundSearchManagement.viewRow();
-        await page.testSubj
-          .locator('embeddablePanelHeading-SumofBytesbyExtension(Delayed5s)')
-          .waitFor({ state: 'visible', timeout: 30_000 });
         await pageObjects.dashboard.waitForRenderComplete();
+        const viz = page.testSubj
+          .locator('embeddablePanelHeading-SumofBytesbyExtension(Delayed5s)')
+        await expect(viz).toBeVisible();
       });
     }
   );
