@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -234,6 +234,29 @@ const healthBadgeColor = (
   }
 };
 
+interface Viewport {
+  readonly scale: number;
+  readonly x: number;
+  readonly y: number;
+}
+
+const MIN_SCALE = 0.4;
+const MAX_SCALE = 5;
+const ZOOM_STEP = 1.25;
+const IDENTITY_VIEWPORT: Viewport = { scale: 1, x: 0, y: 0 };
+
+const clamp = (value: number, min: number, max: number): number =>
+  Math.min(max, Math.max(min, value));
+
+// Zoom around a fixed point (in viewBox coordinates): the point under the
+// cursor / the centre stays put while the content scales around it.
+const zoomAround = (view: Viewport, nextScaleRaw: number, point: { x: number; y: number }): Viewport => {
+  const scale = clamp(nextScaleRaw, MIN_SCALE, MAX_SCALE);
+  const contentX = (point.x - view.x) / view.scale;
+  const contentY = (point.y - view.y) / view.scale;
+  return { scale, x: point.x - scale * contentX, y: point.y - scale * contentY };
+};
+
 const TopologyPanel = ({
   topology,
   related,
@@ -256,6 +279,93 @@ const TopologyPanel = ({
     }
     return map;
   }, [layout]);
+
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [view, setView] = useState<Viewport>(IDENTITY_VIEWPORT);
+  const panRef = useRef<{
+    startX: number;
+    startY: number;
+    origin: Viewport;
+    pointerId: number;
+  } | null>(null);
+  const [isPanning, setIsPanning] = useState(false);
+
+  // Convert client (screen) pixels to viewBox user units, accounting for the
+  // responsive `preserveAspectRatio` fit via the SVG's screen CTM.
+  const clientToViewBox = useCallback((clientX: number, clientY: number) => {
+    const svg = svgRef.current;
+    const ctm = svg?.getScreenCTM();
+    if (!svg || !ctm) return { x: 0, y: 0 };
+    const point = svg.createSVGPoint();
+    point.x = clientX;
+    point.y = clientY;
+    const mapped = point.matrixTransform(ctm.inverse());
+    return { x: mapped.x, y: mapped.y };
+  }, []);
+
+  // Wheel zoom toward the cursor. Registered natively (non-passive) so we can
+  // preventDefault and stop the flyout body from scrolling underneath.
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      const point = clientToViewBox(event.clientX, event.clientY);
+      const factor = event.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
+      setView((current) => zoomAround(current, current.scale * factor, point));
+    };
+    svg.addEventListener('wheel', onWheel, { passive: false });
+    return () => svg.removeEventListener('wheel', onWheel);
+  }, [clientToViewBox]);
+
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<SVGRectElement>) => {
+      event.currentTarget.setPointerCapture(event.pointerId);
+      const start = clientToViewBox(event.clientX, event.clientY);
+      panRef.current = {
+        startX: start.x,
+        startY: start.y,
+        origin: view,
+        pointerId: event.pointerId,
+      };
+      setIsPanning(true);
+    },
+    [clientToViewBox, view]
+  );
+
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<SVGRectElement>) => {
+      const pan = panRef.current;
+      if (!pan) return;
+      const current = clientToViewBox(event.clientX, event.clientY);
+      setView({
+        scale: pan.origin.scale,
+        x: pan.origin.x + (current.x - pan.startX),
+        y: pan.origin.y + (current.y - pan.startY),
+      });
+    },
+    [clientToViewBox]
+  );
+
+  const endPan = useCallback((event: React.PointerEvent<SVGRectElement>) => {
+    if (!panRef.current) return;
+    if (event.currentTarget.hasPointerCapture(panRef.current.pointerId)) {
+      event.currentTarget.releasePointerCapture(panRef.current.pointerId);
+    }
+    panRef.current = null;
+    setIsPanning(false);
+  }, []);
+
+  const zoomByButton = useCallback(
+    (factor: number) => {
+      const center = { x: layout.width / 2, y: layout.height / 2 };
+      setView((current) => zoomAround(current, current.scale * factor, center));
+    },
+    [layout.width, layout.height]
+  );
+
+  const resetView = useCallback(() => setView(IDENTITY_VIEWPORT), []);
+
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="none">
       <div
@@ -270,6 +380,7 @@ const TopologyPanel = ({
       >
         <TopologyDotsBackground euiTheme={euiTheme} />
         <svg
+          ref={svgRef}
           viewBox={`0 0 ${layout.width} ${layout.height}`}
           preserveAspectRatio="xMidYMid meet"
           role="img"
@@ -282,48 +393,69 @@ const TopologyPanel = ({
             inset: 0;
             width: 100%;
             height: 100%;
+            touch-action: none;
+            cursor: ${isPanning ? 'grabbing' : 'grab'};
           `}
         >
-          {layout.edges.map((edge) => {
-            const from = nodeById.get(edge.fromId);
-            const to = nodeById.get(edge.toId);
-            if (!from || !to) return null;
-            return (
-              <TopologyEdgeLine
-                key={`${edge.fromId}-${edge.toId}`}
-                from={from}
-                to={to}
-                edge={edge}
-                euiTheme={euiTheme}
-              />
-            );
-          })}
-          {layout.nodes.map((node) => {
-            // Every non-focal node is clickable when the host supplies a
-            // selection handler; the host resolves whether the entity can be
-            // opened. The focal node is the entity already on screen — no
-            // point re-opening its own flyout.
-            const isClickable = !node.focal && Boolean(onSelectEntity);
-            return (
-              <TopologyNodeMark
-                key={node.id}
-                node={node}
-                euiTheme={euiTheme}
-                onSelect={
-                  isClickable
-                    ? () =>
-                        onSelectEntity!(node.label, {
-                          entityType: node.entityType,
-                          health: node.health,
-                        })
-                    : undefined
-                }
-              />
-            );
-          })}
+          {/* Transparent surface behind the graph captures drag-to-pan on
+              empty space; nodes sit above it and keep their own click. */}
+          <rect
+            x={0}
+            y={0}
+            width={layout.width}
+            height={layout.height}
+            fill="transparent"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={endPan}
+            onPointerCancel={endPan}
+          />
+          <g transform={`translate(${view.x} ${view.y}) scale(${view.scale})`}>
+            {layout.edges.map((edge) => {
+              const from = nodeById.get(edge.fromId);
+              const to = nodeById.get(edge.toId);
+              if (!from || !to) return null;
+              return (
+                <TopologyEdgeLine
+                  key={`${edge.fromId}-${edge.toId}`}
+                  from={from}
+                  to={to}
+                  edge={edge}
+                  euiTheme={euiTheme}
+                />
+              );
+            })}
+            {layout.nodes.map((node) => {
+              // Every non-focal node is clickable when the host supplies a
+              // selection handler; the host resolves whether the entity can be
+              // opened. The focal node is the entity already on screen — no
+              // point re-opening its own flyout.
+              const isClickable = !node.focal && Boolean(onSelectEntity);
+              return (
+                <TopologyNodeMark
+                  key={node.id}
+                  node={node}
+                  euiTheme={euiTheme}
+                  onSelect={
+                    isClickable
+                      ? () =>
+                          onSelectEntity!(node.label, {
+                            entityType: node.entityType,
+                            health: node.health,
+                          })
+                      : undefined
+                  }
+                />
+              );
+            })}
+          </g>
         </svg>
         {/* Controls last so they paint on top of the SVG without a z-index. */}
-        <TopologyControls />
+        <TopologyControls
+          onZoomIn={() => zoomByButton(ZOOM_STEP)}
+          onZoomOut={() => zoomByButton(1 / ZOOM_STEP)}
+          onReset={resetView}
+        />
         <TopologyHealthLegend />
       </div>
     </EuiPanel>
@@ -402,7 +534,15 @@ const TopologyHealthLegend = () => {
   );
 };
 
-const TopologyControls = () => (
+const TopologyControls = ({
+  onZoomIn,
+  onZoomOut,
+  onReset,
+}: {
+  readonly onZoomIn: () => void;
+  readonly onZoomOut: () => void;
+  readonly onReset: () => void;
+}) => (
   <div
     css={css`
       position: absolute;
@@ -419,6 +559,7 @@ const TopologyControls = () => (
           <EuiButtonIcon
             iconType="plus"
             color="text"
+            onClick={onZoomIn}
             aria-label={i18n.translate(
               'entityCentricLabFlyout.flyout.relationships.zoomInAriaLabel',
               { defaultMessage: 'Zoom in' }
@@ -430,6 +571,7 @@ const TopologyControls = () => (
           <EuiButtonIcon
             iconType="minus"
             color="text"
+            onClick={onZoomOut}
             aria-label={i18n.translate(
               'entityCentricLabFlyout.flyout.relationships.zoomOutAriaLabel',
               { defaultMessage: 'Zoom out' }
@@ -441,22 +583,12 @@ const TopologyControls = () => (
           <EuiButtonIcon
             iconType="bullseye"
             color="text"
+            onClick={onReset}
             aria-label={i18n.translate(
               'entityCentricLabFlyout.flyout.relationships.recenterAriaLabel',
               { defaultMessage: 'Re-center' }
             )}
             data-test-subj="entityCentricLabTopologyRecenter"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="grid"
-            color="text"
-            aria-label={i18n.translate(
-              'entityCentricLabFlyout.flyout.relationships.toggleGridAriaLabel',
-              { defaultMessage: 'Toggle grid' }
-            )}
-            data-test-subj="entityCentricLabTopologyGrid"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
