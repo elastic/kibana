@@ -24,6 +24,10 @@ import type { IRuleDataClient, IndexOptions } from '@kbn/rule-registry-plugin/se
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 
+import {
+  attackDiscoveryAlertFieldMap,
+  ATTACK_DISCOVERY_ALERTS_CONTEXT,
+} from '@kbn/attack-discovery-schedules-common';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   securityParentInferenceFeature,
@@ -50,8 +54,6 @@ import { appContextService } from './services/app_context';
 import { removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
 import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules/register_schedule/definition';
 import type { ConfigSchema } from './config_schema';
-import { attackDiscoveryAlertFieldMap } from './lib/attack_discovery/schedules/fields';
-import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from './lib/attack_discovery/schedules/constants';
 import { getAttackDiscoveryDataGeneratorRuleType } from './lib/attack_discovery/data_generator_rule/definition';
 
 interface FeatureFlagDefinition {
@@ -80,6 +82,7 @@ export class ElasticAssistantPlugin
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly config: ConfigSchema;
   private readonly isDev: boolean;
+  private inferencePlugin?: ElasticAssistantPluginStartDependencies['inference'];
   private workflowExecutorFactory?: AttackDiscoveryWorkflowExecutorFactory;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -206,6 +209,7 @@ export class ElasticAssistantPlugin
   ): ElasticAssistantPluginStart {
     this.logger.debug('elasticAssistant: Started');
     appContextService.start({ logger: this.logger });
+    this.inferencePlugin = plugins.inference;
 
     removeLegacyQuickPrompt(core.elasticsearch.client.asInternalUser)
       .then((res) => {
@@ -283,7 +287,7 @@ export class ElasticAssistantPlugin
     // Register the Attack Discovery Schedule type
     plugins.alerting.registerType(
       getAttackDiscoveryScheduleType({
-        core,
+        getInference: () => this.inferencePlugin,
         getWorkflowExecutorFactory: () => this.workflowExecutorFactory,
         logger: this.logger,
         publicBaseUrl: core.http.basePath.publicBaseUrl,
