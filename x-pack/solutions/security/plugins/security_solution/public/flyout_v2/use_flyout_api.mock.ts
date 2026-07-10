@@ -7,6 +7,7 @@
 
 import type { FlyoutApi } from './use_flyout_api';
 import { createAttackFlyoutApiMock } from './attack/use_attack_flyout_api.mock';
+import { createCspFlyoutApiMock } from './csp/use_csp_flyout_api.mock';
 import { createDocumentFlyoutApiMock } from './document/use_document_flyout_api.mock';
 import { createIocFlyoutApiMock } from './ioc/use_ioc_flyout_api.mock';
 import { createNetworkFlyoutApiMock } from './network/use_network_flyout_api.mock';
@@ -21,6 +22,7 @@ import { createRuleFlyoutApiMock } from './rule/use_rule_flyout_api.mock';
 export const createFlyoutApiMock = (): jest.Mocked<FlyoutApi> => ({
   ...createDocumentFlyoutApiMock(),
   ...createAttackFlyoutApiMock(),
+  ...createCspFlyoutApiMock(),
   ...createIocFlyoutApiMock(),
   ...createNetworkFlyoutApiMock(),
   ...createRuleFlyoutApiMock(),
