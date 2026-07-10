@@ -30484,7 +30484,6 @@
     "xpack.ml.jobsList.datafeedPreviewFailed": "数据馈送预览失败。此作业可能无法正确运行。",
     "xpack.ml.jobsList.datafeedPreviewNoData": "数据馈送预览未返回任何数据。该任务可能无法正常运行。",
     "xpack.ml.jobsList.datafeedPreviewValidationFailed": "无法验证数据馈送预览。原因：{reason}",
-    "xpack.ml.jobsList.datafeedStateLabel": "数据馈送状态",
     "xpack.ml.jobsList.deleteActionStatusText": "删除",
     "xpack.ml.jobsList.deletedActionStatusText": "已删除",
     "xpack.ml.jobsList.deleteJobCheckModal.removeAction": "正在移除",

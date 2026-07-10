@@ -30480,7 +30480,6 @@
     "xpack.ml.jobsList.datafeedPreviewFailed": "データフィードプレビューに失敗しました。このジョブは正しく実行されない可能性があります。",
     "xpack.ml.jobsList.datafeedPreviewNoData": "データフィードプレビューでデータが返されませんでした。このジョブは正しく実行されない可能性があります。",
     "xpack.ml.jobsList.datafeedPreviewValidationFailed": "データフィードのプレビューを検証できません。理由：{reason}",
-    "xpack.ml.jobsList.datafeedStateLabel": "データフィード状態",
     "xpack.ml.jobsList.deleteActionStatusText": "削除",
     "xpack.ml.jobsList.deletedActionStatusText": "削除されました",
     "xpack.ml.jobsList.deleteJobCheckModal.removeAction": "削除",

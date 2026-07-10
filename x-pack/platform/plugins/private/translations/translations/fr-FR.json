@@ -30318,7 +30318,6 @@
     "xpack.ml.jobsList.datafeedPreviewFailed": "La prévisualisation du flux de données a échoué. Cette tâche risque de ne pas s'exécuter correctement.",
     "xpack.ml.jobsList.datafeedPreviewNoData": "La prévisualisation du flux de données n'a renvoyé aucune donnée. Cette tâche risque de ne pas s'exécuter correctement.",
     "xpack.ml.jobsList.datafeedPreviewValidationFailed": "Impossible de valider l'aperçu du flux de données. Raison : {reason}",
-    "xpack.ml.jobsList.datafeedStateLabel": "État du flux de données",
     "xpack.ml.jobsList.deleteActionStatusText": "supprimer",
     "xpack.ml.jobsList.deletedActionStatusText": "supprimé",
     "xpack.ml.jobsList.deleteJobCheckModal.removeAction": "retrait",

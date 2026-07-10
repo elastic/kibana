@@ -30375,7 +30375,6 @@
     "xpack.ml.jobsList.datafeedPreviewFailed": "Datenfeed-Vorschau fehlgeschlagen. Dieser Auftrag wird möglicherweise nicht richtig ausgeführt.",
     "xpack.ml.jobsList.datafeedPreviewNoData": "Die Datafeed-Vorschau hat keine Daten geliefert. Dieser Auftrag wird möglicherweise nicht richtig ausgeführt.",
     "xpack.ml.jobsList.datafeedPreviewValidationFailed": "Die Datafeed-Vorschau kann nicht validiert werden. Grund: {reason}",
-    "xpack.ml.jobsList.datafeedStateLabel": "Datenfeed-Status",
     "xpack.ml.jobsList.deleteActionStatusText": "löschen",
     "xpack.ml.jobsList.deletedActionStatusText": "gelöscht",
     "xpack.ml.jobsList.deleteJobCheckModal.removeAction": "entfernen",
