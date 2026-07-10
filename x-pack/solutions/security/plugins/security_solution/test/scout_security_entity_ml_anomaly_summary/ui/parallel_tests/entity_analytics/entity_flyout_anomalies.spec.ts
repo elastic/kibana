@@ -330,8 +330,14 @@ spaceTest.describe(
           });
         });
 
+        // Await the table's one-time useGetInstalledJob hydration before opening the row-actions
+        // menu: otherwise the near-instant mocked jobs fetch re-renders the row (replacing the
+        // toggle node) just as the click lands, detaching the target mid-action.
+        const jobsResponse = page.waitForResponse('**/internal/ml/jobs/jobs');
+
         await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
         await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+        await jobsResponse;
         await pageObjects.entityFlyoutAnomaliesPage.openRowActionsMenu();
         await pageObjects.entityFlyoutAnomaliesPage.getRowAction('add-to-timeline').click();
 
