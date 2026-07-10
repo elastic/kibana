@@ -556,6 +556,30 @@ describe('rule_request_mappers', () => {
       });
     });
 
+    it('preserves recovery_strategy: none', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        recoveryStrategy: 'none',
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.recovery_strategy).toBe('none');
+    });
+
+    it('nullifies recovery_strategy when form recoveryStrategy is unset (do not recover)', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        recoveryStrategy: undefined,
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.recovery_strategy).toBeNull();
+    });
+
     it('nullifies empty grouping fields instead of leaving as undefined', () => {
       const formValues: FormValues = {
         ...baseFormValues,

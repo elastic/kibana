@@ -33,7 +33,7 @@ import {
 
 /**
  * Resolves the recovery_strategy for an API request.
- * Non-representable strategies (no_breach, none) are preserved as-is.
+ * Non-query strategies (no_breach, none) are preserved as-is.
  * 'query' is always derived from the recovery block presence — never
  * kept as a stale value — because the form can add/remove recovery
  * without updating the recoveryStrategy field.
