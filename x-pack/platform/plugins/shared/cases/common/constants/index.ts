@@ -301,6 +301,7 @@ export const LOCAL_STORAGE_KEYS = {
   userActivityFilters: 'cases.userActivity.redesign.filters',
   casesUtilityBarHideMaxLimitWarning: 'cases.utilityBar.hideMaxLimitWarning',
   caseViewSidebarOpen: 'cases.caseView.sidebarOpen',
+  caseViewSidebarAccordions: 'cases.caseView.sidebarAccordions',
 };
 
 /**
