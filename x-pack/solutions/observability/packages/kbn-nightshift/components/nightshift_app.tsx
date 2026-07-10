@@ -17,12 +17,14 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
   EuiMarkdownFormat,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
+  getDefaultEuiMarkdownProcessingPlugins,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
@@ -47,6 +49,7 @@ interface CommonConnectorType {
 export interface NightshiftAppProps {
   onStartOnboarding?: () => void;
   onStartGapClosing?: (connectorName?: string) => void;
+  onStartGapItemClosing?: (gapText: string) => void;
   agentBuilderAvailable?: boolean;
   gapsReport?: GapsReport | null;
   installedConnectorActionTypeIds?: string[];
@@ -143,15 +146,69 @@ const getConnectorButtonLabel = (connectorName: string) =>
     values: { connectorName },
   });
 
+const getGapItemLinkLabel = (gapText: string) =>
+  i18n.translate('xpack.nightshift.gapItemLinkLabel', {
+    defaultMessage: 'Start a chat about this gap: {gapText}',
+    values: { gapText },
+  });
+
+const extractNodeText = (node: React.ReactNode): string => {
+  if (node == null || typeof node === 'boolean') {
+    return '';
+  }
+  if (typeof node === 'string' || typeof node === 'number') {
+    return String(node);
+  }
+  if (Array.isArray(node)) {
+    return node.map(extractNodeText).join('');
+  }
+  if (React.isValidElement<{ children?: React.ReactNode }>(node)) {
+    return extractNodeText(node.props.children);
+  }
+  return '';
+};
+
 export function NightshiftApp({
   onStartOnboarding,
   onStartGapClosing,
+  onStartGapItemClosing,
   agentBuilderAvailable,
   gapsReport,
   installedConnectorActionTypeIds = [],
 }: NightshiftAppProps) {
   const [isGapsFlyoutOpen, setIsGapsFlyoutOpen] = useState(false);
   const flyoutTitleId = useGeneratedHtmlId();
+  const canCloseGapItem = Boolean(agentBuilderAvailable && onStartGapItemClosing);
+  const gapsMarkdownProcessingPlugins = useMemo(() => {
+    const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
+    const rehypeReactOptions = processingPlugins[1][1];
+    rehypeReactOptions.components = {
+      ...rehypeReactOptions.components,
+      li: ({ children, ...liProps }: React.LiHTMLAttributes<HTMLLIElement>) => {
+        const gapText = extractNodeText(children).trim();
+        if (!gapText) {
+          return <li {...liProps}>{children}</li>;
+        }
+        return (
+          <li {...liProps}>
+            <EuiLink
+              color="text"
+              disabled={!canCloseGapItem}
+              aria-label={getGapItemLinkLabel(gapText)}
+              onClick={() => {
+                setIsGapsFlyoutOpen(false);
+                onStartGapItemClosing?.(gapText);
+              }}
+              data-test-subj="nightshiftGapItemLink"
+            >
+              {children}
+            </EuiLink>
+          </li>
+        );
+      },
+    };
+    return processingPlugins;
+  }, [canCloseGapItem, onStartGapItemClosing, setIsGapsFlyoutOpen]);
   const installedConnectorIds = useMemo(
     () => new Set(installedConnectorActionTypeIds),
     [installedConnectorActionTypeIds]
@@ -330,7 +387,11 @@ export function NightshiftApp({
             </EuiText>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiMarkdownFormat textSize="s" data-test-subj="nightshiftGapsMarkdown">
+            <EuiMarkdownFormat
+              textSize="s"
+              processingPluginList={gapsMarkdownProcessingPlugins}
+              data-test-subj="nightshiftGapsMarkdown"
+            >
               {gapsReport.content}
             </EuiMarkdownFormat>
           </EuiFlyoutBody>

@@ -103,6 +103,39 @@ describe('NightshiftApp', () => {
       expect(onStartGapClosing).toHaveBeenCalledWith();
       expect(screen.queryByTestId('nightshiftGapsFlyout')).not.toBeInTheDocument();
     });
+
+    it('renders individual gap list items as clickable links', async () => {
+      const onStartGapItemClosing = jest.fn();
+      renderNightshiftApp(
+        <NightshiftApp
+          gapsReport={mockGapsReport}
+          agentBuilderAvailable
+          onStartGapItemClosing={onStartGapItemClosing}
+        />
+      );
+      await userEvent.click(screen.getByTestId('nightshiftViewGapsButton'));
+      const gapLinks = screen.getAllByTestId('nightshiftGapItemLink');
+      expect(gapLinks).toHaveLength(2);
+
+      await userEvent.click(gapLinks[0]);
+      expect(onStartGapItemClosing).toHaveBeenCalledWith(
+        'Deployment — Rollout strategy is not documented.'
+      );
+      expect(screen.queryByTestId('nightshiftGapsFlyout')).not.toBeInTheDocument();
+    });
+
+    it('disables gap item links when agentBuilder is unavailable', async () => {
+      renderNightshiftApp(
+        <NightshiftApp
+          gapsReport={mockGapsReport}
+          agentBuilderAvailable={false}
+          onStartGapItemClosing={jest.fn()}
+        />
+      );
+      await userEvent.click(screen.getByTestId('nightshiftViewGapsButton'));
+      const gapLinks = screen.getAllByTestId('nightshiftGapItemLink');
+      gapLinks.forEach((link) => expect(link).toBeDisabled());
+    });
   });
 
   describe('common connector suggestions', () => {

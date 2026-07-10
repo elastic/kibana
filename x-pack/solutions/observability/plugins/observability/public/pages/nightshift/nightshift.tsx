@@ -42,6 +42,13 @@ const getCloseGapsInitialMessage = (connectorName?: string) =>
       })
     : CLOSE_GAPS_INITIAL_MESSAGE;
 
+const getCloseGapItemInitialMessage = (gapText: string) =>
+  i18n.translate('xpack.observability.nightshift.closeGapItemInitialMessage', {
+    defaultMessage:
+      'Start the significant-events-onboarding skill. Read the _gaps/overview memory page for context, then help me close this specific knowledge gap: "{gapText}". Gather the missing operational context and update memory once resolved.',
+    values: { gapText },
+  });
+
 interface ActionConnectorResponseItem {
   actionTypeId?: string;
   connector_type_id?: string;
@@ -84,6 +91,17 @@ export function NightshiftPage() {
       agentBuilder?.openChat({
         newConversation: true,
         initialMessage: getCloseGapsInitialMessage(connectorName),
+        autoSendInitialMessage: true,
+      });
+    },
+    [agentBuilder]
+  );
+
+  const handleStartGapItemClosing = useCallback(
+    (gapText: string) => {
+      agentBuilder?.openChat({
+        newConversation: true,
+        initialMessage: getCloseGapItemInitialMessage(gapText),
         autoSendInitialMessage: true,
       });
     },
@@ -140,6 +158,7 @@ export function NightshiftPage() {
         agentBuilderAvailable={!!agentBuilder}
         onStartOnboarding={handleStartOnboarding}
         onStartGapClosing={handleStartGapClosing}
+        onStartGapItemClosing={handleStartGapItemClosing}
         gapsReport={gapsReport}
         installedConnectorActionTypeIds={installedConnectorActionTypeIds}
       />
