@@ -6,12 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  MAX_KQL_FILTER_LENGTH,
-  MAX_ID_LENGTH,
-  MAX_TAG_LENGTH,
-  MAX_ARRAY_FIELDS,
-} from '../../../../../constants';
+import { MAX_ID_LENGTH, MAX_TAG_LENGTH, MAX_ARRAY_FIELDS } from '../../../../../constants';
 
 export const findRuleTemplatesRequestQuerySchema = schema.object({
   per_page: schema.number({
