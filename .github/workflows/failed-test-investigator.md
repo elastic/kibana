@@ -190,11 +190,7 @@ Add `failure:ai-fixable` to the issue if we are confident that a fix is availabl
 
 ### "Insufficient data" label
 
-Add `failure:insufficient-data` (in addition to the classification label) when you could **not** reach a strong, confident conclusion because the data needed to diagnose the failure was missing — server logs, a Playwright trace, the failure screenshot, or build logs were absent, expired, or never uploaded. The signal is "the failure is real but under-diagnosed for lack of data", not "the evidence conflicts". Concretely:
-
-- Pair it with `failure:inconclusive` (or a `low`-confidence verdict); it is the reason the verdict is weak.
-- Do **not** add it alongside `failure:ai-fixable` — if a fix is confidently available, missing data was not the blocker.
-- When you set it, the comment's `#### Additional context` → "Open questions" bullet (or the `#### Data collection issues` section, if a fetch failed) must name exactly which logs or artifacts were missing and what re-run or added logging would unblock a firm conclusion.
+Add `failure:insufficient-data` (in addition to the classification label) when you could **not** reach a strong, confident conclusion because the data needed to diagnose the failure was missing — server logs, a Playwright trace, the failure screenshot, or build logs were absent, expired, or never uploaded. The signal is "the failure is real but under-diagnosed for lack of data", not "the evidence conflicts". When you set it, the comment's `#### Additional context` → "Open questions" bullet (or the `#### Data collection issues` section, if a fetch failed) must name exactly which logs or artifacts were missing and what re-run or added logging would unblock a firm conclusion.
 
 ### Refresh stale labels on re-investigation
 
