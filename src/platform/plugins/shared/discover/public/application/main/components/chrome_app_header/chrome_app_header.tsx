@@ -53,24 +53,23 @@ export const ChromeAppHeader = ({
       ...menu,
       isCollapsed,
       items: menu?.items?.map((item) => {
-        const next: AppMenuItemType = {
-          ...item,
-          // We need more space for the tabs as the title is now in the same row. Move all items to the overflow menu.
-          // (Except switch language)
-          overflow: item.id !== AppMenuActionId.switchLanguageMode,
-        } as AppMenuItemType;
+        // We need more space for the tabs as the title is now in the same row. Move all items to the
+        // overflow menu. (Except switch language)
+        const overflow = item.id !== AppMenuActionId.switchLanguageMode;
 
-        // Share is surfaced as the title-row action, but we also keep it in the overflow menu just
-        // above export, inside the same (tab-scoped) section. Move the section's leading separator
-        // onto share and drop the one `use_top_nav_links` puts above export.
-        if (next.id === AppMenuActionId.share) {
-          return { ...next, order: 7, separator: 'above' } as AppMenuItemType;
-        }
-        if (next.id === AppMenuActionId.export) {
-          return { ...next, separator: undefined } as AppMenuItemType;
+        // Share is surfaced as the title-row action, but we also keep it in the overflow menu leading
+        // the tab-scoped section. Take over that section's leading separator.
+        if (item.id === AppMenuActionId.share) {
+          return { ...item, overflow, order: 7, separator: 'above' } as AppMenuItemType;
         }
 
-        return next;
+        // The leading separator now belongs to share, so drop it from whichever tab-scoped item
+        // `use_top_nav_links` placed it on (export when present, otherwise inspect).
+        if (item.separator === 'above') {
+          return { ...item, overflow, separator: undefined } as AppMenuItemType;
+        }
+
+        return { ...item, overflow } as AppMenuItemType;
       }),
     };
   }, [isCollapsed, menu]);
