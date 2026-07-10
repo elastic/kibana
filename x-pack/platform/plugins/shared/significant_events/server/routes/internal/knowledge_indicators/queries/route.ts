@@ -38,6 +38,8 @@ import { persistQueries } from '../../../../lib/significant_events/persist_queri
 import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
 
 const RECONCILE_STREAM_CONCURRENCY = 3;
+// Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
+const RECONCILE_MAX_STREAMS = 10;
 
 const dateFromString = z
   .string()
@@ -313,11 +315,9 @@ const reconcileQueriesRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: z
-      .object({
-        streamNames: z.array(z.string().max(MAX_ID_LENGTH)).min(1).optional(),
-      })
-      .nullish(),
+    body: z.object({
+      streamNames: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(RECONCILE_MAX_STREAMS),
+    }),
   }),
   handler: async ({
     params,
@@ -335,28 +335,28 @@ const reconcileQueriesRoute = createServerRoute({
       error?: string;
     }>;
   }> => {
-    const scopedClients = await getScopedClients({ request });
+    const authUser = server.core.security.authc.getCurrentUser(request);
+    const cloneApiKeysOnCreate = authUser?.authentication_type === 'api_key';
+    const scopedClients = await getScopedClients({
+      request,
+      rulesClientOptions: { cloneApiKeysOnCreate },
+    });
     const { streamsClient, licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
-    const streamNames = params?.body?.streamNames;
-    const definitions = streamNames
-      ? await Promise.allSettled(
-          streamNames.map((streamName) => streamsClient.getStream(streamName))
-        )
-      : (await streamsClient.listStreams()).map((definition) => ({
-          status: 'fulfilled' as const,
-          value: definition,
-        }));
+    const { streamNames } = params.body;
+    const definitions = await Promise.allSettled(
+      streamNames.map((streamName) => streamsClient.getStream(streamName))
+    );
     const limiter = pLimit(RECONCILE_STREAM_CONCURRENCY);
 
     const streams = await Promise.all(
       definitions.map((result, index) =>
         limiter(async () => {
           if (result.status === 'rejected') {
-            const streamName = streamNames?.[index] ?? 'unknown';
+            const streamName = streamNames[index];
             const error =
               result.reason instanceof Error ? result.reason.message : String(result.reason);
             logger.warn(`Skipping query reconciliation for missing stream ${streamName}: ${error}`);

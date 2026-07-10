@@ -32,7 +32,9 @@ export interface RuleDetectionSchedule {
   quiet_stationary_peak_min_alert_count: number;
 }
 
-export function scheduleIntervalForQuery(query: Pick<StreamQuery, 'severity_score'>): string {
+export function scheduleIntervalForQuery(
+  query: Pick<StreamQuery, 'severity_score'>
+): typeof CRITICAL_RULE_INTERVAL | typeof DEFAULT_RULE_INTERVAL {
   return (query.severity_score ?? 0) >= CRITICAL_SEVERITY_THRESHOLD
     ? CRITICAL_RULE_INTERVAL
     : DEFAULT_RULE_INTERVAL;

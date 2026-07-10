@@ -6,9 +6,11 @@
  */
 
 import { esql } from '@elastic/esql';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { termsQuery } from '@kbn/es-query';
 import { toEsqlRequest } from '../../streams/esql';
 import {
   RULES_BUCKET_SIZE,
@@ -221,12 +223,12 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
     ruleIds,
     recentActivityMinutes = RECENT_ACTIVITY_MINUTES,
   }: ChangePointScanParams) {
-    const filter: Array<Record<string, unknown>> = [
-      { terms: { 'kibana.space_ids': [spaceId, '*'] } },
+    const filter: estypes.QueryDslQueryContainer[] = [
+      ...termsQuery('kibana.space_ids', [spaceId, '*']),
       { range: { '@timestamp': { gte: lookback } } },
     ];
     if (ruleIds?.length) {
-      filter.push({ terms: { 'kibana.alert.rule.uuid': ruleIds } });
+      filter.push(...termsQuery('kibana.alert.rule.uuid', ruleIds));
     }
 
     return {

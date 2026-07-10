@@ -13,6 +13,7 @@ jest.mock('../../../utils/assert_significant_events_access', () => ({
 }));
 
 const route = internalKIQueriesRoutes['POST /internal/streams/queries/_reconcile'];
+const RECONCILE_MAX_STREAMS = 10;
 
 type HandlerParams = Parameters<typeof route.handler>[0];
 
@@ -30,7 +31,31 @@ const makeQueryLink = (id: string, severityScore: number): QueryLink => ({
   rule_id: `rule-${id}`,
 });
 
+const makeServer = () =>
+  ({
+    core: {
+      security: {
+        authc: {
+          getCurrentUser: jest.fn().mockReturnValue({ authentication_type: 'basic' }),
+        },
+      },
+    },
+  } as unknown as HandlerParams['server']);
+
 describe('reconcileQueriesRoute', () => {
+  it('requires explicit stream names with a bounded batch size', () => {
+    expect(route.params.safeParse({ body: null }).success).toBe(false);
+    expect(route.params.safeParse({ body: {} }).success).toBe(false);
+    expect(
+      route.params.safeParse({
+        body: {
+          streamNames: Array.from({ length: RECONCILE_MAX_STREAMS + 1 }, (_, i) => `logs.${i}`),
+        },
+      }).success
+    ).toBe(false);
+    expect(route.params.safeParse({ body: { streamNames: ['logs.test'] } }).success).toBe(true);
+  });
+
   it('replays current stream queries through replaceStreamQueries', async () => {
     const currentLinks = [makeQueryLink('critical', 80), makeQueryLink('default', 60)];
     const replaceStreamQueries = jest
@@ -49,7 +74,7 @@ describe('reconcileQueriesRoute', () => {
         uiSettingsClient: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceStreamQueries }),
       }),
-      server: {},
+      server: makeServer(),
       logger: { warn: jest.fn() },
     } as unknown as HandlerParams;
 
@@ -69,17 +94,20 @@ describe('reconcileQueriesRoute', () => {
       .mockResolvedValueOnce(undefined)
       .mockRejectedValueOnce(new Error('rules unavailable'));
     const handlerParams = {
-      params: { body: null },
+      params: { body: { streamNames: ['logs.a', 'logs.b'] } },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         streamsClient: {
-          listStreams: jest.fn().mockResolvedValue([{ name: 'logs.a' }, { name: 'logs.b' }]),
+          getStream: jest
+            .fn()
+            .mockResolvedValueOnce({ name: 'logs.a' })
+            .mockResolvedValueOnce({ name: 'logs.b' }),
         },
         licensing: {},
         uiSettingsClient: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceStreamQueries }),
       }),
-      server: {},
+      server: makeServer(),
       logger: { warn: jest.fn() },
     } as unknown as HandlerParams;
 
