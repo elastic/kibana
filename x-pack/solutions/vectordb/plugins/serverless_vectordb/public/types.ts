@@ -8,7 +8,6 @@
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
@@ -28,7 +27,6 @@ export interface ServerlessVectordbAppStartDependencies {
 
 export interface ServerlessVectordbStartDependencies
   extends ServerlessVectordbAppStartDependencies {
-  serverless: ServerlessPluginStart;
   navigation: NavigationPublicPluginStart;
 }
 

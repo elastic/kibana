@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { ServerlessPluginSetup } from '@kbn/serverless/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -19,6 +19,5 @@ export interface WorkplaceAIServerlessPluginSetupDeps {
 }
 
 export interface WorkplaceAIServerlessPluginStartDeps {
-  serverless: ServerlessPluginStart;
   navigation: NavigationPublicPluginStart;
 }
