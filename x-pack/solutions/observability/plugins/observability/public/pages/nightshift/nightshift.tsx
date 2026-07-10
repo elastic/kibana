@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
 import { NightshiftApp } from '@kbn/nightshift';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
+import { useFetchSignificantEvents } from './hooks/use_fetch_significant_events';
 
 export function NightshiftPage() {
   const {
@@ -42,14 +44,25 @@ export function NightshiftPage() {
     { serverless }
   );
 
+  const { data, isLoading } = useFetchSignificantEvents();
+  const events = data?.hits ?? [];
+
+  const handleEventClick = useCallback((event: SignificantEvent) => {
+    // Will be wired to flyout in PR 2
+  }, []);
+
   if (!isEnabled) {
     history.replace(OVERVIEW_PATH);
     return null;
   }
 
   return (
-    <ObservabilityPageTemplate data-test-subj="nightshiftPage" isEmptyState>
-      <NightshiftApp />
+    <ObservabilityPageTemplate
+      data-test-subj="nightshiftPage"
+      restrictWidth="800px"
+      pageSectionProps={{ restrictWidth: '800px' }}
+    >
+      <NightshiftApp events={events} isLoading={isLoading} onEventClick={handleEventClick} />
     </ObservabilityPageTemplate>
   );
 }
