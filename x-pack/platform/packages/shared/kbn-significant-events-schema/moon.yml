@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/streamlang'
   - '@kbn/inference-common'
   - '@kbn/streams-schema'
+  - '@kbn/workflows'
 tags:
   - shared-common
   - package

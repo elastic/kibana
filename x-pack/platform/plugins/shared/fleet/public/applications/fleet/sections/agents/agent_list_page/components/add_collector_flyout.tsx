@@ -177,7 +177,6 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   // space instead of the current one. See https://github.com/elastic/kibana/issues/275528
   const isSpaceResolved = spaceId !== undefined;
   const { enrolledAgentIds } = usePollingAgentCount(getOpAMPPolicyId(spaceId), {
-    noLowerTimeLimit: true,
     pollImmediately: true,
     enabled: isSpaceResolved,
   });

@@ -10,8 +10,9 @@ import {
   MAX_USER_ACTIONS_PER_PAGE,
   MAX_USER_ACTION_SEARCH_LENGTH,
   MAX_USER_ACTION_AUTHOR_LENGTH,
+  MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
 } from '../../../constants';
-import { paginationSchema } from '../../../schema_zod';
+import { limitedArraySchema, limitedStringSchema, paginationSchema } from '../../../schema_zod';
 import { UserActionsSchema } from '../../domain_zod/user_action/v1';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
 
@@ -51,8 +52,17 @@ export const UserActionFindRequestSchema = paginationSchema({
 });
 
 export const UserActionInternalFindRequestSchema = UserActionFindRequestSchema.extend({
-  author: z.string().max(MAX_USER_ACTION_AUTHOR_LENGTH).optional(),
-  search: z.string().max(MAX_USER_ACTION_SEARCH_LENGTH).optional(),
+  authors: limitedArraySchema({
+    codec: z.string().min(1).max(MAX_USER_ACTION_AUTHOR_LENGTH),
+    fieldName: 'authors',
+    min: 0,
+    max: MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
+  }).optional(),
+  search: limitedStringSchema({
+    fieldName: 'search',
+    min: 1,
+    max: MAX_USER_ACTION_SEARCH_LENGTH,
+  }).optional(),
 });
 
 export const UserActionFindResponseSchema = z.object({

@@ -63,6 +63,11 @@ export interface AttachmentsSetup {
 export interface RenderersSetup {
   /**
    * Register a renderer type to be available in agentBuilder.
+   *
+   * A matching browser-side UI definition must be registered with the same
+   * `type` (via the browser plugin's `renderers.register`). Otherwise the
+   * agent will be told it can render this type, but `<render>` directives for
+   * it will fail to resolve in the UI.
    */
   register(rendererType: RendererTypeDefinition): void;
 }

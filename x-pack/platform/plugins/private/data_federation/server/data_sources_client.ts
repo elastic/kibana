@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { DataSource, DataSourceWithSecrets } from '../common';
+import type { DataSource } from '../common';
+import type { putDataSourceBodySchema } from './routes/data_sources/data_source_schema';
 
 /**
  * Server-side Elasticsearch client for data source management.
@@ -40,9 +42,9 @@ export class DataSourcesClient {
   }
 
   /**
-   * Calls Elasticsearch `PUT /_query/datasource/{id}` (create data source).
+   * Calls Elasticsearch `PUT /_query/datasource/{id}` (create or update a data source).
    */
-  public async put(id: string, body: Omit<DataSourceWithSecrets, 'name'>): Promise<void> {
+  public async put(id: string, body: TypeOf<typeof putDataSourceBodySchema>): Promise<void> {
     const encoded = encodeURIComponent(id);
     return await this.esClient.transport.request({
       method: 'PUT',
