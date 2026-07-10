@@ -13,7 +13,7 @@ import 'jest-canvas-mock';
 import { TimeCache } from './time_cache';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
-import { VegaThemeColors } from './utils';
+import { VegaThemeColors, getDefaultAreaGradientFill } from './utils';
 import { DEFAULT_EMS_DARKMAP_ID } from '@kbn/maps-ems-plugin/common';
 
 jest.mock('../services');
@@ -150,7 +150,10 @@ describe(`VegaParser._setDefaultColors`, () => {
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         mark: { color: VegaThemeColors.borealis.light.default },
-        area: { fillOpacity: 0.2, line: true },
+        area: {
+          fill: getDefaultAreaGradientFill(VegaThemeColors.borealis.light.default),
+          line: true,
+        },
         view: { stroke: null },
         style: {
           'group-title': {
@@ -183,7 +186,10 @@ describe(`VegaParser._setDefaultColors`, () => {
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         arc: { fill: VegaThemeColors.borealis.light.default },
-        area: { fill: VegaThemeColors.borealis.light.default, fillOpacity: 0.2, line: true },
+        area: {
+          fill: getDefaultAreaGradientFill(VegaThemeColors.borealis.light.default),
+          line: true,
+        },
         line: { stroke: VegaThemeColors.borealis.light.default },
         path: { stroke: VegaThemeColors.borealis.light.default },
         rect: { fill: VegaThemeColors.borealis.light.default },

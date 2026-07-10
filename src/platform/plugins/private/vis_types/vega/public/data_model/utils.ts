@@ -9,7 +9,9 @@
 
 import { prettyCompactStringify } from '@kbn/std';
 import type { CoreTheme } from '@kbn/core/public';
+import { transparentize } from '@elastic/eui';
 import { getEuiThemeVars } from '@kbn/ui-theme';
+import type { Gradient } from 'vega';
 import { normalizeObject } from '../vega_view/utils';
 
 function normalizeAndStringify(value: unknown) {
@@ -91,4 +93,20 @@ export function getVegaThemeColors(
 ) {
   const colorMode = theme.darkMode ? 'dark' : 'light';
   return VegaThemeColors[theme.name as keyof typeof VegaThemeColors]?.[colorMode][colorToken];
+}
+
+/** Default area fill gradient aligned with Lens styling. */
+export function getDefaultAreaGradientFill(defaultColor: string): Gradient {
+  return {
+    gradient: 'linear',
+    x1: 0,
+    y1: 1,
+    x2: 0,
+    y2: 0,
+    stops: [
+      { offset: 0, color: transparentize(defaultColor, 0) },
+      { offset: 0.7, color: transparentize(defaultColor, 0.8) },
+      { offset: 1, color: transparentize(defaultColor, 1) },
+    ],
+  };
 }
