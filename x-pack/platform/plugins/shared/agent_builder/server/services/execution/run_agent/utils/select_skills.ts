@@ -6,7 +6,6 @@
  */
 
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
-import { isElasticCapabilitiesExcludedBuiltinSkill } from '@kbn/agent-builder-common/skills';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillsService, WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 
@@ -49,7 +48,7 @@ export const resolveAgentSkills = async ({
 
   const merged = new Map(explicitSkillsMap);
   for (const skill of builtinSkills) {
-    if (!merged.has(skill.id) && !isElasticCapabilitiesExcludedBuiltinSkill(skill.id)) {
+    if (!merged.has(skill.id)) {
       merged.set(skill.id, skill);
     }
   }

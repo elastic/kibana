@@ -20,10 +20,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
-import {
-  isBuiltinSkillAutoIncludedForElasticCapabilities,
-  isElasticCapabilitiesExcludedBuiltinSkill,
-} from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useQueryClient } from '@kbn/react-query';
@@ -96,10 +92,7 @@ export const AgentSkills: React.FC = () => {
 
   const enableElasticCapabilities = agent?.configuration?.enable_elastic_capabilities ?? false;
 
-  const builtinSkills = useMemo(
-    () => allSkills.filter((s) => s.readonly && !isElasticCapabilitiesExcludedBuiltinSkill(s.id)),
-    [allSkills]
-  );
+  const builtinSkills = useMemo(() => allSkills.filter((s) => s.readonly), [allSkills]);
 
   const builtinSkillIdSet = useMemo(() => new Set(builtinSkills.map((s) => s.id)), [builtinSkills]);
 
@@ -165,7 +158,7 @@ export const AgentSkills: React.FC = () => {
   };
 
   const handleToggleSkill = (skill: PublicSkillSummary, isActive: boolean) => {
-    if (isBuiltinSkillAutoIncludedForElasticCapabilities(skill, enableElasticCapabilities)) {
+    if (enableElasticCapabilities && skill.readonly) {
       return;
     }
     if (isActive) {
@@ -179,7 +172,7 @@ export const AgentSkills: React.FC = () => {
     if (!selectedSkillId) return;
     const skill = activeSkills.find((s) => s.id === selectedSkillId);
     if (skill) {
-      if (isBuiltinSkillAutoIncludedForElasticCapabilities(skill, enableElasticCapabilities)) {
+      if (enableElasticCapabilities && skill.readonly) {
         return;
       }
       handleRemoveSkillWithReport(skill);
@@ -360,10 +353,7 @@ export const AgentSkills: React.FC = () => {
                         isSelected={selectedSkillId === skill.id}
                         onSelect={(s) => handleSelectSkill(s.id)}
                         onRemove={handleRemoveSkillWithReport}
-                        isAutoIncluded={isBuiltinSkillAutoIncludedForElasticCapabilities(
-                          skill,
-                          enableElasticCapabilities
-                        )}
+                        isAutoIncluded={enableElasticCapabilities && skill.readonly}
                         canEditAgent={canEditAgent}
                       />
                     </EuiFlexItem>
@@ -380,10 +370,8 @@ export const AgentSkills: React.FC = () => {
                   onRemove={handleRemoveSelectedSkill}
                   isAutoIncluded={
                     selectedActiveSkill !== undefined &&
-                    isBuiltinSkillAutoIncludedForElasticCapabilities(
-                      selectedActiveSkill,
-                      enableElasticCapabilities
-                    )
+                    enableElasticCapabilities &&
+                    selectedActiveSkill.readonly
                   }
                   canEditAgent={canEditAgent}
                   canManageSkills={manageSkills}

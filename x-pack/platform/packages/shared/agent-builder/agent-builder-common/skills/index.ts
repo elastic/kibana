@@ -34,9 +34,3 @@ export {
   type ReferencedContentRefineIssue,
   collectReferencedContentRefineIssues,
 } from './referenced_content_refine';
-export {
-  elasticCapabilitiesExcludedBuiltinSkillIds,
-  type ElasticCapabilitiesExcludedBuiltinSkillId,
-  isElasticCapabilitiesExcludedBuiltinSkill,
-  isBuiltinSkillAutoIncludedForElasticCapabilities,
-} from './elastic_capabilities_excluded_builtin_skills';
