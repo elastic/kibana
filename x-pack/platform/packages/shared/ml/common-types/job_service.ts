@@ -57,7 +57,7 @@ export interface BulkUpdateProjectRoutingResponse {
   results: {
     [jobId: string]: {
       success: boolean;
-      error?: unknown;
+      updateError?: unknown;
       /** When `stopDatafeed` failed before the update, for a datafeed that was running. */
       stopError?: unknown;
       /** When `startDatafeed` failed after the update, for a datafeed that was restarted. */
