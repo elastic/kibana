@@ -17,7 +17,7 @@ interface ModifierTypeMap {
        * present on resolution scores, where the level is aggregated across
        * group members and is otherwise unattributable from the score document.
        */
-      contributorEUID?: string;
+      contributor_euid?: string;
     };
   };
   watchlist: {

@@ -751,7 +751,7 @@ const ContextsSection = <T extends EntityType>({
     const criticalityMetadata = criticality?.metadata as
       | {
           criticality_level?: CriticalityLevel;
-          contributorEUID?: string;
+          contributor_euid?: string;
         }
       | undefined;
 
@@ -760,8 +760,8 @@ const ContextsSection = <T extends EntityType>({
         level: criticalityMetadata?.criticality_level ?? null,
         contribution: criticality?.contribution,
         contributorEUID:
-          typeof criticalityMetadata?.contributorEUID === 'string'
-            ? criticalityMetadata.contributorEUID
+          typeof criticalityMetadata?.contributor_euid === 'string'
+            ? criticalityMetadata.contributor_euid
             : undefined,
       },
       watchlists,

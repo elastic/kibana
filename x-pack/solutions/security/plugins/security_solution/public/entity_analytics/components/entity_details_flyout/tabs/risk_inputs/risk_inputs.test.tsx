@@ -685,7 +685,7 @@ describe('RiskInputsTab', () => {
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('entity-1');
   });
 
-  it('attributes criticality via the recorded contributorEUID even when current member levels diverge', () => {
+  it('attributes criticality via the recorded contributor_euid even when current member levels diverge', () => {
     const resolutionRiskScore = {
       '@timestamp': '2021-08-19T16:00:00.000Z',
       user: {
@@ -696,7 +696,7 @@ describe('RiskInputsTab', () => {
             {
               type: 'asset_criticality',
               contribution: 4.5,
-              metadata: { criticality_level: 'high_impact', contributorEUID: 'user:entity-1' },
+              metadata: { criticality_level: 'high_impact', contributor_euid: 'user:entity-1' },
             },
           ],
           category_1_count: 1,

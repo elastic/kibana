@@ -99,7 +99,7 @@ describe('extractModifiersFromEntity', () => {
       const [crit] = extractModifiersFromEntity(entity);
       expect(crit?.metadata).toEqual({
         criticality_level: 'high_impact',
-        contributorEUID: 'user:alias-1',
+        contributor_euid: 'user:alias-1',
       });
     });
 

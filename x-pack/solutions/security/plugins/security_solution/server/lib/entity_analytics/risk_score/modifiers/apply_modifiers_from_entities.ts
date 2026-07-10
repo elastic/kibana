@@ -56,7 +56,7 @@ const buildCriticalityModifier = (
     metadata: {
       criticality_level: criticalityLevel,
       ...(entity?.criticalityContributorEUID !== undefined && {
-        contributorEUID: entity.criticalityContributorEUID,
+        contributor_euid: entity.criticalityContributorEUID,
       }),
     },
   };
