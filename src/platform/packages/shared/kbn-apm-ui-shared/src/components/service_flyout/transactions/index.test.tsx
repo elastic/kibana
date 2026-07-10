@@ -14,8 +14,11 @@ import { LatencyAggregationType } from '@kbn/apm-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ServiceFlyoutTransactionsSection } from '.';
 import { useServiceFlyoutTransactions } from './hooks/use_service_flyout_transactions';
+import { useServiceFlyoutTransactionDetailedStatistics } from './hooks/use_service_flyout_transaction_detailed_statistics';
+import * as TransactionsTableModule from '../../transactions_table';
 
 jest.mock('./hooks/use_service_flyout_transactions');
+jest.mock('./hooks/use_service_flyout_transaction_detailed_statistics');
 
 const FIXTURE_ITEMS = [
   {
@@ -69,10 +72,14 @@ const BASE_PROPS = {
 };
 
 const mockedUseServiceFlyoutTransactions = useServiceFlyoutTransactions as jest.Mock;
+const mockedUseDetailedStatistics = useServiceFlyoutTransactionDetailedStatistics as jest.Mock;
+
+const EMPTY_DETAILED = { currentPeriod: {}, previousPeriod: {}, isLoading: false };
 
 describe('ServiceFlyoutTransactionsSection', () => {
   beforeEach(() => {
     mockedUseServiceFlyoutTransactions.mockReturnValue(DEFAULT_HOOK_RESULT);
+    mockedUseDetailedStatistics.mockReturnValue(EMPTY_DETAILED);
   });
 
   it('renders transaction names as links when locators are provided', () => {
@@ -122,6 +129,167 @@ describe('ServiceFlyoutTransactionsSection', () => {
     expect(badge).toBeInTheDocument();
     expect(badge.getAttribute('href')).toContain('serviceAlertsLocator');
     expect(badge.getAttribute('href')).toContain('frontend-node');
+  });
+
+  describe('detailed statistics hook wiring', () => {
+    it('calls useServiceFlyoutTransactionDetailedStatistics with transactionNames from main stats', () => {
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      expect(mockedUseDetailedStatistics).toHaveBeenCalledWith(
+        expect.objectContaining({
+          transactionNames: ['GET /api/orders', 'POST /api/checkout'],
+        })
+      );
+    });
+
+    it('forwards component props to useServiceFlyoutTransactionDetailedStatistics', () => {
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      expect(mockedUseDetailedStatistics).toHaveBeenCalledWith(
+        expect.objectContaining({
+          serviceName: 'frontend-node',
+          environment: 'production',
+          start: START,
+          end: END,
+          transactionType: 'request',
+          latencyAggregationType: LatencyAggregationType.p95,
+        })
+      );
+    });
+
+    it('calls useServiceFlyoutTransactionDetailedStatistics with empty transactionNames when main stats return no items', () => {
+      mockedUseServiceFlyoutTransactions.mockReturnValue({
+        ...DEFAULT_HOOK_RESULT,
+        items: [],
+      });
+
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      expect(mockedUseDetailedStatistics).toHaveBeenCalledWith(
+        expect.objectContaining({ transactionNames: [] })
+      );
+    });
+  });
+
+  describe('sparkline merge', () => {
+    let capturedItems: unknown[] = [];
+    let tableSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      capturedItems = [];
+      tableSpy = jest
+        .spyOn(TransactionsTableModule, 'TransactionsTable')
+        .mockImplementation(({ items }) => {
+          capturedItems = items;
+          return null;
+        });
+    });
+
+    afterEach(() => {
+      tableSpy.mockRestore();
+    });
+
+    it('passes items through unchanged when currentPeriod is empty', () => {
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      expect(capturedItems).toEqual(FIXTURE_ITEMS);
+    });
+
+    it('attaches series to each metric when currentPeriod has data for a transaction', () => {
+      mockedUseDetailedStatistics.mockReturnValue({
+        ...EMPTY_DETAILED,
+        currentPeriod: {
+          'GET /api/orders': {
+            transactionName: 'GET /api/orders',
+            latency: [{ x: 1, y: 200 }],
+            throughput: [{ x: 1, y: 5 }],
+            errorRate: [{ x: 1, y: 0.01 }],
+            impact: 80,
+          },
+        },
+      });
+
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      const enriched = (capturedItems as any[]).find((i) => i.name === 'GET /api/orders');
+      expect(enriched.latency.series).toEqual({ value: [{ x: 1, y: 200 }] });
+      expect(enriched.throughput.series).toEqual({ value: [{ x: 1, y: 5 }] });
+      expect(enriched.errorRate.series).toEqual({ value: [{ x: 1, y: 0.01 }] });
+    });
+
+    it('leaves items without a currentPeriod entry unchanged', () => {
+      mockedUseDetailedStatistics.mockReturnValue({
+        ...EMPTY_DETAILED,
+        currentPeriod: {
+          'GET /api/orders': {
+            transactionName: 'GET /api/orders',
+            latency: [{ x: 1, y: 200 }],
+            throughput: [{ x: 1, y: 5 }],
+            errorRate: [{ x: 1, y: 0.01 }],
+            impact: 80,
+          },
+        },
+      });
+
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      const untouched = (capturedItems as any[]).find((i) => i.name === 'POST /api/checkout');
+      expect(untouched.latency.series).toBeUndefined();
+      expect(untouched.throughput.series).toBeUndefined();
+      expect(untouched.errorRate.series).toBeUndefined();
+    });
+
+    it('coerces undefined y values to null in the series', () => {
+      mockedUseDetailedStatistics.mockReturnValue({
+        ...EMPTY_DETAILED,
+        currentPeriod: {
+          'GET /api/orders': {
+            transactionName: 'GET /api/orders',
+            latency: [{ x: 1, y: undefined }],
+            throughput: [{ x: 1, y: 5 }],
+            errorRate: [{ x: 1, y: null }],
+            impact: 80,
+          },
+        },
+      });
+
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      const item = (capturedItems as any[]).find((i) => i.name === 'GET /api/orders');
+      expect(item.latency.series.value).toEqual([{ x: 1, y: null }]);
+      expect(item.errorRate.series.value).toEqual([{ x: 1, y: null }]);
+    });
+
+    it('attaches comparison series when previousPeriod has data for a transaction', () => {
+      mockedUseDetailedStatistics.mockReturnValue({
+        currentPeriod: {
+          'GET /api/orders': {
+            transactionName: 'GET /api/orders',
+            latency: [{ x: 1, y: 200 }],
+            throughput: [{ x: 1, y: 5 }],
+            errorRate: [{ x: 1, y: 0.01 }],
+            impact: 80,
+          },
+        },
+        previousPeriod: {
+          'GET /api/orders': {
+            transactionName: 'GET /api/orders',
+            latency: [{ x: 1, y: 180 }],
+            throughput: [{ x: 1, y: 4 }],
+            errorRate: [{ x: 1, y: 0.02 }],
+            impact: 75,
+          },
+        },
+        isLoading: false,
+      });
+
+      render(<ServiceFlyoutTransactionsSection {...BASE_PROPS} />);
+
+      const item = (capturedItems as any[]).find((i) => i.name === 'GET /api/orders');
+      expect(item.latency.series.comparison).toEqual([{ x: 1, y: 180 }]);
+      expect(item.throughput.series.comparison).toEqual([{ x: 1, y: 4 }]);
+      expect(item.errorRate.series.comparison).toEqual([{ x: 1, y: 0.02 }]);
+    });
   });
 
   describe('error state', () => {
