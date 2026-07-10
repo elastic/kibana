@@ -136,9 +136,7 @@ export function buildActivityDoc(
       ...extractCuratedFields(a.type, a.payload, connectorId),
       // Omit when absent so the strict mapping stays sparse (a no-op under
       // `dynamic: 'strict'`), consistent with the curated extracts above.
-      ...(attachmentReferenceId != null
-        ? { attachment_reference_id: attachmentReferenceId }
-        : {}),
+      ...(attachmentReferenceId != null ? { attachment_reference_id: attachmentReferenceId } : {}),
     },
   };
 }
