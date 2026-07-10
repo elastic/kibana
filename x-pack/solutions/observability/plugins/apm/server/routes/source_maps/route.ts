@@ -65,9 +65,9 @@ const listSourceMapRoute = createApmServerRoute({
 
 export const uploadSourceMapParams = z.object({
   body: z.object({
-    service_name: z.string(),
-    service_version: z.string(),
-    bundle_filepath: z.string(),
+    service_name: z.string().max(1024),
+    service_version: z.string().max(1024),
+    bundle_filepath: z.string().max(1024),
     sourcemap: z
       .union([z.string(), z.instanceof(Buffer).transform((buf): string => buf.toString('utf-8'))])
       .pipe(
