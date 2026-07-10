@@ -212,12 +212,13 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     const timeoutId = setTimeout(() => {
       remove(conversationId!, 0);
       submitMessage(next);
+      onSubmit?.();
     }, 1000);
 
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [canDrainQueue, conversationId, remove, submitMessage, messageQueue]);
+  }, [canDrainQueue, conversationId, remove, submitMessage, onSubmit, messageQueue]);
 
   const handleSubmit = () => {
     if (isSubmitDisabled) {
@@ -240,6 +241,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       onSubmitOverride(content);
     } else if (canQueueMessage && isResponseLoading) {
       enqueue(conversationId!, content);
+      messageEditorController.clear();
+      return;
     } else {
       submitMessage(content);
     }
