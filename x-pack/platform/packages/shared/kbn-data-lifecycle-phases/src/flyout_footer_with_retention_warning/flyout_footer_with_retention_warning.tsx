@@ -47,6 +47,11 @@ export const useRetentionWarning = ({
   }, [ilmPolicies, selectedIlmPolicyName, canUseDownsampling, inheritLifecycle]);
 };
 
+/**
+ * Selects the downsampling warning body copy based on where the excluded steps come from:
+ * - `import_stream`: steps from the lifecycles imported from another stream (default).
+ * - `ilm_policy`: steps from the ILM policy selected in this flyout.
+ */
 export type DownsamplingWarningType = 'import_stream' | 'ilm_policy';
 
 export interface FlyoutFooterWithRetentionWarningProps {

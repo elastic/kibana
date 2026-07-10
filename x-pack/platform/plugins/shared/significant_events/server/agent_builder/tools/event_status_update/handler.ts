@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
+import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import type { EventClient } from '../../../lib/significant_events/events';
 
 export async function updateEventStatusToolHandler({
@@ -23,25 +23,5 @@ export async function updateEventStatusToolHandler({
   ignored: number;
   status: SignificantEventStatus;
 }> {
-  const { hits } = await eventClient.findById(eventId);
-  const latest = hits[hits.length - 1];
-
-  if (!latest || latest.status === status) {
-    return { event_id: eventId, updated: 0, ignored: 1, status };
-  }
-
-  const nextEventId = uuidv4();
-  const now = new Date().toISOString();
-  const updatedEvent = {
-    ...latest,
-    '@timestamp': now,
-    created_at: now,
-    event_id: nextEventId,
-    previous_event_id: latest.event_id,
-    status,
-  };
-
-  await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
-
-  return { event_id: nextEventId, updated: 1, ignored: 0, status };
+  return updateSignificantEventStatus({ eventClient, eventId, status });
 }

@@ -12,6 +12,7 @@ import { Generations } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import { getMockConnectors } from '../../../mock/mock_connectors';
 import { getMockGenerations } from '../../../mock/mock_generations';
+import { LoadingCallout } from '../../../loading_callout';
 
 const mockFutureTime = '2025-05-19T23:20:15.933Z';
 
@@ -21,6 +22,14 @@ jest.mock('./get_approximate_future_time', () => ({
 jest.mock('../../../utils/get_connector_name_from_id', () => ({
   getConnectorNameFromId: jest.fn(() => 'Mock Connector Name'),
 }));
+jest.mock('../../../loading_callout', () => ({
+  LoadingCallout: jest.fn(() => <div data-test-subj="loadingCallout" />),
+}));
+jest.mock('../../../use_attack_discovery/helpers', () => ({
+  getGenAiConfig: jest.fn(() => ({ defaultModel: 'gpt-4o' })),
+}));
+
+const MockLoadingCallout = LoadingCallout as jest.MockedFunction<typeof LoadingCallout>;
 
 const defaultProps = {
   aiConnectors: getMockConnectors(),
@@ -93,5 +102,69 @@ describe('Generations', () => {
     ).length;
 
     expect(screen.getAllByTestId('generations').length).toBe(nonDismissedGenerations);
+  });
+
+  describe('prop forwarding to LoadingCallout', () => {
+    beforeEach(() => {
+      MockLoadingCallout.mockClear();
+    });
+
+    it('passes connectorActionTypeId to LoadingCallout', () => {
+      const generation = {
+        ...getMockGenerations().generations[0],
+        connector_id: 'gpt41Azure',
+        status: 'failed' as const,
+      };
+
+      render(
+        <TestProviders>
+          <Generations {...defaultProps} data={{ generations: [generation] }} />
+        </TestProviders>
+      );
+
+      expect(MockLoadingCallout).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorActionTypeId: '.gen-ai' }),
+        expect.anything()
+      );
+    });
+
+    it('passes connectorModel to LoadingCallout', () => {
+      const generation = {
+        ...getMockGenerations().generations[0],
+        connector_id: 'gpt41Azure',
+        status: 'failed' as const,
+      };
+
+      render(
+        <TestProviders>
+          <Generations {...defaultProps} data={{ generations: [generation] }} />
+        </TestProviders>
+      );
+
+      expect(MockLoadingCallout).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorModel: 'gpt-4o' }),
+        expect.anything()
+      );
+    });
+
+    it('passes sourceMetadata to LoadingCallout', () => {
+      const sourceMetadata = { rule_id: 'rule-abc', rule_name: 'My Schedule Rule' };
+      const generation = {
+        ...getMockGenerations().generations[0],
+        source_metadata: sourceMetadata,
+        status: 'failed' as const,
+      };
+
+      render(
+        <TestProviders>
+          <Generations {...defaultProps} data={{ generations: [generation] }} />
+        </TestProviders>
+      );
+
+      expect(MockLoadingCallout).toHaveBeenCalledWith(
+        expect.objectContaining({ sourceMetadata }),
+        expect.anything()
+      );
+    });
   });
 });
