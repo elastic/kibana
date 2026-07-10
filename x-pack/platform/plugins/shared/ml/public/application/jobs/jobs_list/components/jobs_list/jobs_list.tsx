@@ -269,7 +269,7 @@ export const JobsList: FC<JobsListProps> = ({
         truncateText: false,
         width: '80px',
         render: (datafeedState: string, job: MlSummaryJobWithSpaces) =>
-          `${job.jobState} / ${datafeedState}`,
+          `${job.jobState} ${datafeedState}`,
       },
       {
         name: i18n.translate('xpack.ml.jobsList.latestTimestampLabel', {
