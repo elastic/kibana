@@ -11,4 +11,4 @@
 export {
   DASHBOARD_API_PATH,
   DASHBOARD_API_VERSION,
-} from './src/playwright/fixtures/scope/worker/apis/dashboard';
+} from './src/playwright/fixtures/scope/worker/apis/dashboard/constants';
