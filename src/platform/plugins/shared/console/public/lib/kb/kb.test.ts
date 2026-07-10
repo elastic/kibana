@@ -144,4 +144,26 @@ describe('Knowledge base', () => {
     indices: ['index1', 'index2'],
     autoCompleteSet: ['_multi_indices', '_single_index'],
   });
+
+  describe('Kibana API doc links', () => {
+    afterEach(() => {
+      kb._test.setKibanaApiDocLinks({});
+    });
+
+    it('returns an empty map by default', () => {
+      expect(kb.getKibanaApiDocLinks()).toEqual({});
+    });
+
+    it('stores and returns the provided doc links map', () => {
+      const docLinks = { '/api/spaces/space/{id}': { get: 'get-spaces-space-id' } };
+      kb._test.setKibanaApiDocLinks(docLinks);
+      expect(kb.getKibanaApiDocLinks()).toEqual(docLinks);
+    });
+
+    it('ignores non-record values', () => {
+      kb._test.setKibanaApiDocLinks({ foo: 'bar' });
+      kb._test.setKibanaApiDocLinks('not a record');
+      expect(kb.getKibanaApiDocLinks()).toEqual({ foo: 'bar' });
+    });
+  });
 });

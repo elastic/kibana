@@ -56,6 +56,7 @@ import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { monaco } from '@kbn/monaco';
 import { sendRequest } from '../../hooks';
 import { serviceContextMock } from '../../contexts/services_context.mock';
+import { _test as kbTest } from '../../../lib/kb';
 
 describe('Editor actions provider', () => {
   let editorActionsProvider: MonacoEditorActionsProvider;
@@ -162,7 +163,7 @@ describe('Editor actions provider', () => {
       expect(link).toBe(docsLink);
     });
 
-    it('returns the kibana API reference link for a kbn: request', async () => {
+    it('returns the kibana API reference link for a kbn: request with no matching operation', async () => {
       editor.getModel.mockReturnValue({
         getLineMaxColumn: () => 26,
         getPositionAt: () => ({ lineNumber: 1 }),
@@ -182,6 +183,34 @@ describe('Editor actions provider', () => {
         kibanaApiReferenceLink
       );
       expect(link).toBe(kibanaApiReferenceLink);
+    });
+
+    it('returns the specific operation deep link for a kbn: request that matches the doc links map', async () => {
+      kbTest.setKibanaApiDocLinks({
+        '/api/spaces/space/{id}': { get: 'get-spaces-space-id' },
+      });
+      editor.getModel.mockReturnValue({
+        getLineMaxColumn: () => 34,
+        getPositionAt: () => ({ lineNumber: 1 }),
+        getLineContent: () => 'GET kbn:/api/spaces/space/default',
+      } as unknown as monaco.editor.ITextModel);
+      mockGetParsedRequests.mockResolvedValue([
+        {
+          startOffset: 0,
+          endOffset: 34,
+          method: 'GET',
+          url: 'kbn:/api/spaces/space/default',
+        },
+      ]);
+      const kibanaApiReferenceLink = 'http://elastic.co/docs/api/doc/kibana/';
+      const link = await editorActionsProvider.getDocumentationLink(
+        docLinkVersion,
+        kibanaApiReferenceLink
+      );
+      expect(link).toBe(
+        'http://elastic.co/docs/api/doc/kibana/operation/operation-get-spaces-space-id'
+      );
+      kbTest.setKibanaApiDocLinks({});
     });
 
     it('returns null for a kbn: request when no kibana API reference link is provided', async () => {
