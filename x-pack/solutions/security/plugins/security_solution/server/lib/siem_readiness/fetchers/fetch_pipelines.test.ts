@@ -311,7 +311,6 @@ describe('fetchPipelines - stateful pipeline index drift', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('warns when a pipeline in nodes.stats has no matching index settings entry', async () => {
-    const now = Date.now();
     const esClient = makeEsClient({
       indexToPipeline: {},
       pipelineCounts: { 'orphan-pipeline': 10 },
