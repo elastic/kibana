@@ -57,6 +57,7 @@ const emptyResult = {
   totalAnomaliesCount: 0,
   from: FROM_MS,
   to: TO_MS,
+  hasJobsMissingThreatTactics: false,
 };
 
 interface RawHit {
@@ -242,6 +243,70 @@ describe('getEntityAnomalyOverview', () => {
 
       expect(result.from).toBe(FROM_MS);
       expect(result.to).toBe(TO_MS);
+    });
+  });
+
+  describe('hasJobsMissingThreatTactics', () => {
+    const JOB_A = 'job-a';
+    const JOB_B = 'job-b';
+
+    const searchResponse = makeSearchResponse(
+      [
+        {
+          key: FROM_MS + 1000,
+          doc_count: 2,
+          max_score: 75.5,
+          jobBuckets: [
+            { key: JOB_A, doc_count: 1 },
+            { key: JOB_B, doc_count: 1 },
+          ],
+        },
+      ],
+      [JOB_A, JOB_B],
+      2
+    );
+
+    beforeEach(() => {
+      mockGetSecurityMlJobIds.mockResolvedValue([JOB_A, JOB_B]);
+      mockMlAnomalySearch.mockResolvedValue(searchResponse);
+    });
+
+    it('is false when every contributing job has threatTactics configured', async () => {
+      mockGetJobConfig.mockResolvedValue(
+        new Map([
+          [JOB_A, { threatTactics: ['Execution'], threatTechniques: [], hasThreatTactics: true }],
+          [JOB_B, { threatTactics: ['Persistence'], threatTechniques: [], hasThreatTactics: true }],
+        ])
+      );
+
+      const result = await getEntityAnomalyOverview(baseParams);
+
+      expect(result.hasJobsMissingThreatTactics).toBe(false);
+    });
+
+    it('is true when a contributing job has no custom_settings.threat_tactics field', async () => {
+      mockGetJobConfig.mockResolvedValue(
+        new Map([
+          [JOB_A, { threatTactics: ['Execution'], threatTechniques: [], hasThreatTactics: true }],
+          [JOB_B, { threatTactics: [], threatTechniques: [], hasThreatTactics: false }],
+        ])
+      );
+
+      const result = await getEntityAnomalyOverview(baseParams);
+
+      expect(result.hasJobsMissingThreatTactics).toBe(true);
+    });
+
+    it('is true when a contributing job is missing from the job config map', async () => {
+      mockGetJobConfig.mockResolvedValue(
+        new Map([
+          [JOB_A, { threatTactics: ['Execution'], threatTechniques: [], hasThreatTactics: true }],
+        ])
+      );
+
+      const result = await getEntityAnomalyOverview(baseParams);
+
+      expect(result.hasJobsMissingThreatTactics).toBe(true);
     });
   });
 

@@ -18,6 +18,9 @@ export {
   QUERY_TYPE_STATS,
   bulkStreamQueryInputSchema,
   esqlQuerySchema,
+  isDurable,
+  isExpirable,
+  isExpired,
   queryFeatureSchema,
   queryTypeSchema,
   streamQuerySchema,
@@ -120,6 +123,15 @@ export {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
 } from './src/inference_feature_ids';
 
 export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
+
+export type {
+  RelayClaimResponse,
+  RelayClientContract,
+  RelayInstallRequest,
+  RelayInstallResponse,
+} from './src/relay_client';

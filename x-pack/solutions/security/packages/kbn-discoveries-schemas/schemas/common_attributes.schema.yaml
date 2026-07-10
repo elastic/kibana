@@ -10,6 +10,7 @@ components:
       type: string
       format: nonempty
       minLength: 1
+      maxLength: 1024
       description: A string that does not contain only whitespace characters.
       example: "I am a string"
 
@@ -62,14 +63,17 @@ components:
       properties:
         connector_id:
           type: string
+          maxLength: 1024
           description: Connector ID
           example: 'connector123'
         action_type_id:
           type: string
+          maxLength: 1024
           description: Action type ID
           example: 'actionType456'
         default_system_prompt_id:
           type: string
+          maxLength: 1024
           description: Default system prompt ID
           example: 'systemPrompt001'
         provider:
@@ -78,6 +82,7 @@ components:
           example: 'OpenAI'
         model:
           type: string
+          maxLength: 1024
           description: Model
           example: 'gpt-4'
 
