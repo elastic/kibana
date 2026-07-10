@@ -24,6 +24,7 @@ const setQueryAndRun = async (
   codeEditor: KibanaCodeEditorWrapper,
   query: string
 ) => {
+  await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
   await codeEditor.setCodeEditorValue(query);
   await page.testSubj.click('ESQLEditor-run-query-button');
 };
