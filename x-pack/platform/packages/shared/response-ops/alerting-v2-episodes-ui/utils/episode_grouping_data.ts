@@ -9,15 +9,8 @@ import { get, isPlainObject, isString } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 /** Resolve a dot-path against nested objects or a single top-level key (e.g. flattened `host.name`). */
-export const getValueByFieldPath = (data: Record<string, unknown>, field: string): unknown => {
-  const nested = get(data, field);
-
-  if (nested !== undefined) {
-    return nested;
-  }
-
-  return undefined;
-};
+export const getValueByFieldPath = (data: Record<string, unknown>, field: string): unknown =>
+  get(data, field);
 
 const isScalar = (value: unknown): value is string | number | boolean =>
   typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';

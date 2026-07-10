@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 import { getEsqlDataView } from '@kbn/discover-utils';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
@@ -22,6 +23,8 @@ export interface UseAlertingRuleSourceDataViewsOptions {
   http: HttpStart;
 }
 
+const EMPTY_DATA_VIEWS_BY_RULE = new Map<string, DataView>();
+
 /**
  * Resolves the source data view for each rule from its root ES|QL query, so grouping values across
  * multiple rules (e.g. in the episodes list) can be formatted with the correct field metadata via
@@ -32,59 +35,47 @@ export const useAlertingRuleSourceDataViews = ({
   dataViews,
   http,
 }: UseAlertingRuleSourceDataViewsOptions): Map<string, DataView> => {
-  const [dataViewsByRule, setDataViewsByRule] = useState<Map<string, DataView>>(new Map());
   const queryCacheRef = useRef<Map<string, DataView>>(new Map());
 
-  useEffect(() => {
-    let cancelled = false;
+  const dataViewsByRule = useAsync(async () => {
     const queryCache = queryCacheRef.current;
 
-    const resolve = async () => {
-      // Map each rule to its root ES|QL query, then resolve each *unique* query once.
-      const queryByRule = new Map<string, string>();
-      for (const [ruleId, rule] of Object.entries(rules)) {
-        const query = rule.query ? getRootEsqlQuery(rule.query) : undefined;
-        if (query) {
-          queryByRule.set(ruleId, query);
+    // Map each rule to its root ES|QL query, then resolve each *unique* query once.
+    const queryByRule = new Map<string, string>();
+    for (const [ruleId, rule] of Object.entries(rules)) {
+      const query = rule.query ? getRootEsqlQuery(rule.query) : undefined;
+      if (query) {
+        queryByRule.set(ruleId, query);
+      }
+    }
+
+    const uniqueQueries = [...new Set(queryByRule.values())];
+    await Promise.all(
+      uniqueQueries.map(async (query) => {
+        if (queryCache.has(query)) {
+          return;
         }
-      }
-
-      const uniqueQueries = [...new Set(queryByRule.values())];
-      await Promise.all(
-        uniqueQueries.map(async (query) => {
-          if (queryCache.has(query)) {
-            return;
-          }
-          try {
-            queryCache.set(
-              query,
-              await getEsqlDataView({ esql: query }, undefined, { dataViews, http })
-            );
-          } catch {
-            // Skip queries whose data view cannot be resolved; the untyped fallback renders instead.
-          }
-        })
-      );
-
-      const next = new Map<string, DataView>();
-      for (const [ruleId, query] of queryByRule) {
-        const dataView = queryCache.get(query);
-        if (dataView) {
-          next.set(ruleId, dataView);
+        try {
+          queryCache.set(
+            query,
+            await getEsqlDataView({ esql: query }, undefined, { dataViews, http })
+          );
+        } catch {
+          // Skip queries whose data view cannot be resolved; the untyped fallback renders instead.
         }
+      })
+    );
+
+    const next = new Map<string, DataView>();
+    for (const [ruleId, query] of queryByRule) {
+      const dataView = queryCache.get(query);
+      if (dataView) {
+        next.set(ruleId, dataView);
       }
+    }
 
-      if (!cancelled) {
-        setDataViewsByRule(next);
-      }
-    };
-
-    void resolve();
-
-    return () => {
-      cancelled = true;
-    };
+    return next;
   }, [rules, dataViews, http]);
 
-  return dataViewsByRule;
+  return dataViewsByRule.value ?? EMPTY_DATA_VIEWS_BY_RULE;
 };
