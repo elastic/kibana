@@ -45,7 +45,6 @@ const storageSettings = {
       }),
       source: types.object({
         properties: {
-          type: types.keyword({}),
           external_conversation_id: types.keyword({}),
         },
         dynamic: false,

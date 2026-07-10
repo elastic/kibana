@@ -13,6 +13,7 @@ import type {
   AgentConfiguration,
   RuntimeAgentConfigurationOverrides,
   ConversationAction,
+  ConversationRoundSourceInput,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
@@ -27,6 +28,10 @@ export interface RunAgentParams {
    * Current conversation.
    */
   conversation?: Conversation;
+  /**
+   * Source metadata for the input triggering this round.
+   */
+  roundSourceInput?: ConversationRoundSourceInput;
   /**
    * Configuration of the agent to run
    */

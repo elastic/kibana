@@ -149,6 +149,10 @@ export {
   type ConversationRound,
   type Conversation,
   type ConversationSource,
+  type ConversationSourceUser,
+  type RoundInputSource,
+  type ConversationRoundSource,
+  type ConversationRoundSourceInput,
   type ConversationWithoutRounds,
   type ToolCallStep,
   type ConversationRoundStep,
@@ -162,7 +166,6 @@ export {
   type CompactionToolCallSummary,
   type CompactionEntity,
   ConversationRoundStepType,
-  ConversationSourceType,
   isToolCallStep,
   isReasoningStep,
   isCompactionStep,
@@ -245,6 +248,7 @@ export {
   createUserQuestionAnsweredEvent,
   type ConversationListOptions,
 } from './chat';
+export { ConversationSourceType } from './chat/conversation_source';
 export {
   type PublicSkillDefinition,
   type PublicSkillSummary,

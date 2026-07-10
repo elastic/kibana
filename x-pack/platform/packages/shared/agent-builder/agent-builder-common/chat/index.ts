@@ -21,6 +21,10 @@ export {
   type ConversationRound,
   type Conversation,
   type ConversationSource,
+  type ConversationSourceUser,
+  type RoundInputSource,
+  type ConversationRoundSource,
+  type ConversationRoundSourceInput,
   type ConversationInternalState,
   type TodoItem,
   type TodoStatus,
@@ -48,7 +52,6 @@ export {
   type CompactionToolCallSummary,
   type CompactionEntity,
   ConversationRoundStepType,
-  ConversationSourceType,
   isToolCallStep,
   isReasoningStep,
   isCompactionStep,
@@ -57,6 +60,7 @@ export {
   createAskUserQuestionStep,
   isAskUserQuestionStep,
 } from './conversation';
+export { ConversationSourceType } from './conversation_source';
 export {
   ChatEventType,
   type ChatEventBase,
