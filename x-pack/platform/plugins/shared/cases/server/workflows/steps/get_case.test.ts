@@ -28,7 +28,7 @@ describe('getCaseStepDefinition', () => {
     ).toBe(true);
   });
 
-  it('fetches case with includeComments=true when include_comments is true', async () => {
+  it('ignores deprecated include_comments=true and always fetches with includeComments=false', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
@@ -42,7 +42,7 @@ describe('getCaseStepDefinition', () => {
       })
     );
 
-    expect(get).toHaveBeenCalledWith({ id: 'case-1', includeComments: true });
+    expect(get).toHaveBeenCalledWith({ id: 'case-1', includeComments: false });
     expect(result).toEqual({
       output: {
         case: createCaseResponseFixture,
@@ -65,6 +65,18 @@ describe('getCaseStepDefinition', () => {
     );
 
     expect(get).toHaveBeenCalledWith({ id: 'case-1', includeComments: false });
+  });
+
+  it('still accepts include_comments in the input schema (no validation error)', () => {
+    const getCasesClient = jest.fn();
+    const definition = getCaseStepDefinition(getCasesClient);
+
+    expect(
+      definition.inputSchema.safeParse({
+        case_id: 'case-1',
+        include_comments: true,
+      }).success
+    ).toBe(true);
   });
 
   it('returns error when client.cases.get throws', async () => {

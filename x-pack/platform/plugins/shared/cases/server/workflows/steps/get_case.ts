@@ -20,9 +20,12 @@ export const getCaseStepDefinition = (
   createServerStepDefinition({
     ...getCaseStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: GetCaseStepInput) => {
+      // `include_comments` is deprecated and intentionally ignored: comments are always
+      // excluded to avoid leaking a silently-mixed legacy/unified `comments[]` array when
+      // the unified-attachment feature flag is on.
       const theCase = await client.cases.get({
         id: input.case_id,
-        includeComments: input.include_comments,
+        includeComments: false,
       });
 
       return safeParseCaseForWorkflowOutput(
