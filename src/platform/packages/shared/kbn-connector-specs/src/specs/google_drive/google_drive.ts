@@ -30,12 +30,6 @@ const SHARED_DRIVE_LIST_PARAMS = {
   includeItemsFromAllDrives: true,
   supportsAllDrives: true,
 } as const;
-interface GoogleDriveFileMetadata {
-  id: string;
-  name: string;
-  mimeType: string;
-  size?: string;
-}
 
 /**
  * Escapes special characters in a string for use in Google Drive query syntax.
