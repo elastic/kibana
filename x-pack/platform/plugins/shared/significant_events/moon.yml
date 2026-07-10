@@ -84,6 +84,7 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/apm-utils'
   - '@kbn/actions-utils'
+  - '@kbn/es-query'
 tags:
   - plugin
   - prod

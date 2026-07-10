@@ -16,10 +16,11 @@ import { isEmpty } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 import { hasStatsCommand } from '@kbn/streams-schema';
-import { MAX_ALERTS_PER_EXECUTION, MAX_DEDUP_IDS, MATCH_LOOKBACK_MINUTES } from './common';
+import { MAX_ALERTS_PER_EXECUTION, MAX_DEDUP_IDS } from './common';
 import { buildEsqlSearchRequest } from './lib/build_esql_search_request';
 import { executeEsqlRequest } from './lib/execute_esql_request';
 import type { EsqlRuleInstanceState, EsqlRuleParams } from './types';
+import { getRuleLookbackMs } from '../schedule';
 
 export async function getRuleExecutor(
   options: RuleExecutorOptions<
@@ -50,11 +51,14 @@ export async function getRuleExecutor(
   const previousOriginalDocumentIds = state.previousOriginalDocumentIds ?? [];
 
   const now = moment(startedAt);
+  const lookbackMs = getRuleLookbackMs(rule.schedule.interval);
 
   const esqlRequest = buildEsqlSearchRequest({
     query: params.query,
     timestampField: params.timestampField,
-    from: now.clone().subtract(MATCH_LOOKBACK_MINUTES, 'minutes').toISOString(),
+    // Keep the v1 window based on startedAt: the 2x interval overlap absorbs
+    // ingestion lag, and getTimeRange() would diverge from alerting v2.
+    from: now.clone().subtract(lookbackMs, 'ms').toISOString(),
     to: now.clone().toISOString(),
     previousOriginalDocumentIds,
   });
@@ -64,6 +68,13 @@ export async function getRuleExecutor(
     esqlRequest,
     logger,
   });
+  const truncated = allResults.length > MAX_ALERTS_PER_EXECUTION;
+  if (truncated) {
+    logger.warn(
+      `Rule "${rule.id}" matched more than ${MAX_ALERTS_PER_EXECUTION} document(s) in one execution; truncating results.`
+    );
+  }
+  const cappedResults = truncated ? allResults.slice(0, MAX_ALERTS_PER_EXECUTION) : allResults;
 
   // ES|QL views (query streams) expose no real `_id`, so the `must_not terms _id`
   // dedup filter pushed to ES is a no-op for their synthesized ids. Dedup
@@ -72,7 +83,7 @@ export async function getRuleExecutor(
   // runs and add each accepted id as we go, so duplicates are removed both across
   // runs and within this batch (two identical view rows hash to the same `_id`).
   const seenDocumentIds = new Set(previousOriginalDocumentIds);
-  const results = allResults.filter((result) => {
+  const results = cappedResults.filter((result) => {
     if (seenDocumentIds.has(result._id)) {
       return false;
     }
