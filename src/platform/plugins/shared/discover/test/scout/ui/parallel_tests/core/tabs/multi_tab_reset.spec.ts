@@ -150,9 +150,8 @@ spaceTest.describe(
           await discover.waitForTabStateToPersist();
           await page.reload();
           await discover.waitUntilTabIsLoaded();
-          await expect
-            .poll(async () => discover.getEsqlQueryValue(), { timeout: 30_000 })
-            .toBe(esqlQuery2);
+          await discover.codeEditor.waitCodeEditorReady('ESQLEditor');
+          expect(await discover.getEsqlQueryValue()).toBe(esqlQuery2);
           await expectTabState(pageObjects, [
             { index: 4, dataView: adHocDataView2 },
             { index: 3, dataView: persistedDataView2 },

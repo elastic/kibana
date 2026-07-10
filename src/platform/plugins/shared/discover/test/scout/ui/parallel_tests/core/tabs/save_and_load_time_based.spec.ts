@@ -50,7 +50,8 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
       await spaceTest.step('switch is shown while the time-based tab is active', async () => {
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
-        await (await openSaveModalTimeSwitch(pageObjects, page)).waitFor({ state: 'visible' });
+        await discover.openSaveSearchModal();
+        await expect(page.testSubj.locator('storeTimeWithSearch')).toBeVisible();
         await closeSaveModal(page);
       });
 
@@ -59,7 +60,8 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
         await discover.waitForTabStateToPersist();
         await page.reload();
         await discover.waitUntilTabIsLoaded();
-        await expect(await openSaveModalTimeSwitch(pageObjects, page)).toBeVisible();
+        await discover.openSaveSearchModal();
+        await expect(page.testSubj.locator('storeTimeWithSearch')).toBeVisible();
         await closeSaveModal(page);
       });
     }
@@ -85,7 +87,8 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
       await spaceTest.step('switch is shown while the time-based tab is active', async () => {
         await unifiedTabs.selectTab(1);
         await discover.waitUntilTabIsLoaded();
-        await (await openSaveModalTimeSwitch(pageObjects, page)).waitFor({ state: 'visible' });
+        await discover.openSaveSearchModal();
+        await expect(page.testSubj.locator('storeTimeWithSearch')).toBeVisible();
         await closeSaveModal(page);
       });
 
@@ -94,7 +97,8 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
         await discover.waitForTabStateToPersist();
         await page.reload();
         await discover.waitUntilTabIsLoaded();
-        await expect(await openSaveModalTimeSwitch(pageObjects, page)).toBeVisible();
+        await discover.openSaveSearchModal();
+        await expect(page.testSubj.locator('storeTimeWithSearch')).toBeVisible();
         await closeSaveModal(page);
       });
     }
@@ -120,7 +124,8 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
       await spaceTest.step('switch is shown while the time-based tab is active', async () => {
         await unifiedTabs.selectTab(2);
         await discover.waitUntilTabIsLoaded();
-        await (await openSaveModalTimeSwitch(pageObjects, page)).waitFor({ state: 'visible' });
+        await discover.openSaveSearchModal();
+        await expect(page.testSubj.locator('storeTimeWithSearch')).toBeVisible();
         await closeSaveModal(page);
       });
 
@@ -129,7 +134,8 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
         await discover.waitForTabStateToPersist();
         await page.reload();
         await discover.waitUntilTabIsLoaded();
-        await expect(await openSaveModalTimeSwitch(pageObjects, page)).toBeVisible();
+        await discover.openSaveSearchModal();
+        await expect(page.testSubj.locator('storeTimeWithSearch')).toBeVisible();
         await closeSaveModal(page);
       });
     }
@@ -147,29 +153,21 @@ spaceTest.describe('tabs - time based save behavior', { tag: '@local-stateful-cl
       await addNonTimeBasedAdHocTab(pageObjects);
       await addNonTimeBasedEsqlTab(pageObjects);
 
-      await (await openSaveModalTimeSwitch(pageObjects, page)).waitFor({ state: 'hidden' });
+      await discover.openSaveSearchModal();
+      await expect(page.testSubj.locator('storeTimeWithSearch')).toBeHidden();
       await closeSaveModal(page);
 
       await spaceTest.step('switch stays hidden after a reload', async () => {
         await discover.waitForTabStateToPersist();
         await page.reload();
         await discover.waitUntilTabIsLoaded();
-        await expect(await openSaveModalTimeSwitch(pageObjects, page)).toBeHidden();
+        await discover.openSaveSearchModal();
+        await expect(page.testSubj.locator('storeTimeWithSearch')).toBeHidden();
         await closeSaveModal(page);
       });
     }
   );
 });
-
-/**
- * Opens the Save modal and returns the "Store time with saved search" switch
- * locator so the test can assert its visibility. Assertions stay in the test
- * body (per Scout best practices and the `playwright/expect-expect` rule).
- */
-const openSaveModalTimeSwitch = async (pageObjects: PageObjects, page: ScoutPage) => {
-  await pageObjects.discover.openSaveSearchModal();
-  return page.testSubj.locator('storeTimeWithSearch');
-};
 
 const closeSaveModal = async (page: ScoutPage) => {
   await page.testSubj.click('saveCancelButton');
