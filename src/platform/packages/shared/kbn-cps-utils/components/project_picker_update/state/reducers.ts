@@ -11,6 +11,7 @@ import { uniq } from 'lodash';
 import type { CPSProject } from '../../../types';
 
 export interface ProjectPickerStoredState {
+  filteringDimensions: string[];
   filterExpression: string[];
   availableProjects: Map<CPSProject['_id'], CPSProject>;
   includedOverrides: string[];

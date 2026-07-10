@@ -82,4 +82,10 @@ export const projectPickerDerivatives = [
     key: 'selectedProjects',
     compute: (state: ProjectPickerState) => computeSelectedProjects(state),
   },
+  {
+    key: 'filteringDimensions',
+    compute: (state: ProjectPickerState) => {
+      return Object.keys(state.availableProjects.values().next().value ?? {});
+    },
+  },
 ] as const satisfies Array<StoreDerivative<ProjectPickerState, keyof ProjectPickerState>>;
