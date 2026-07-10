@@ -20,6 +20,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const comboBox = getService('comboBox');
 
+  /**
+   * Purpose: Legacy options list control smoke test
+   *
+   * Migration: migrate to scout - move to legacy control vis plugin
+   */
   describe('dynamic options', () => {
     before(async () => {
       await visualize.initTests();

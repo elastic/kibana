@@ -366,6 +366,38 @@ describe('EditConnectorFlyout', () => {
       await act(() => Promise.resolve());
       expect(getByText(TECH_PREVIEW_LABEL)).toBeInTheDocument();
     });
+
+    it('does not show a docs link when the connector type has no docsUrl', async () => {
+      const { queryByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(queryByTestId('edit-connector-flyout-header-docs-link')).not.toBeInTheDocument();
+    });
+
+    it('shows a docs link when the connector type has a docsUrl', async () => {
+      const connectorDocsUrl =
+        'https://www.elastic.co/docs/reference/kibana/connectors-kibana/test-action-type';
+      actionTypeRegistry.get.mockReturnValue({ ...actionTypeModel, docsUrl: connectorDocsUrl });
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+      await act(() => Promise.resolve());
+      expect(getByTestId('edit-connector-flyout-header-docs-link')).toHaveAttribute(
+        'href',
+        connectorDocsUrl
+      );
+    });
   });
 
   describe('Tabs', () => {
