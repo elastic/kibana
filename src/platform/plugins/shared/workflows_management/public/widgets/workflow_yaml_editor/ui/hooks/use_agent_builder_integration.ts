@@ -184,6 +184,7 @@ export const useAgentBuilderIntegration = ({
     const bridge = new AttachmentBridge();
     bridge.start(agentBuilder.events.chat$, manager, editorRef, tracker, {
       attachmentId,
+      workflowId,
       onProposalReceived: ({ proposalId, toolId }) => {
         telemetry.reportAiProposalReceived({
           workflowId,

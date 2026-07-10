@@ -56,6 +56,7 @@ export class AttachmentBridge {
     | ((params: { proposalId: string; toolId: string; workflowId?: string }) => void)
     | undefined;
   private attachmentId: string | undefined;
+  private workflowId: string | undefined;
 
   start(
     chat$: Observable<BrowserChatEvent>,
@@ -65,6 +66,13 @@ export class AttachmentBridge {
     options?: {
       onError?: (err: unknown) => void;
       attachmentId?: string;
+      /**
+       * Saved workflow id this bridge is scoped to (undefined on the
+       * `/workflows/create` route). Used to distinguish saved-workflow
+       * bridges (strict attachment-id guard) from create-session bridges
+       * (only drop events explicitly targeting a different saved workflow).
+       */
+      workflowId?: string;
       onProposalReceived?: (params: {
         proposalId: string;
         toolId: string;
@@ -78,6 +86,7 @@ export class AttachmentBridge {
     this.onError = options?.onError ?? (() => {});
     this.onProposalReceived = options?.onProposalReceived;
     this.attachmentId = options?.attachmentId;
+    this.workflowId = options?.workflowId;
 
     this.subscription = chat$.subscribe((event) => {
       if (isToolUiEvent(event, WORKFLOW_YAML_CHANGED_EVENT)) {
@@ -116,6 +125,7 @@ export class AttachmentBridge {
     this.editorRef = null;
     this.processedProposals.clear();
     this.attachmentId = undefined;
+    this.workflowId = undefined;
   }
 
   private handleYamlChanged(payload: WorkflowYamlChangedPayload): void {
@@ -124,12 +134,18 @@ export class AttachmentBridge {
 
     const { proposalId, beforeYaml, afterYaml, attachmentVersion, workflowId, toolId } = payload;
 
-    // Drop events for a different attachment (e.g. a still-running convo from
-    // workflow A landing after the user navigated to B). Fall back to
-    // `workflowId` for events emitted before the server added `attachmentId`.
-    if (this.attachmentId) {
+    // Drop events that don't belong to this bridge's session.
+    // - Saved-workflow bridge: strict attachment-id match (fallback to
+    //   `workflowId` for legacy events without `attachmentId`).
+    // - Create-session bridge: only drop events explicitly targeting a
+    //   different saved workflow. On the very first generation, the server
+    //   mints a fresh `attachmentId` that the client hasn't seen yet, so
+    //   matching strictly here would drop the legitimate first proposal.
+    if (this.workflowId) {
       const payloadAttachmentId = payload.attachmentId ?? workflowId;
       if (payloadAttachmentId && payloadAttachmentId !== this.attachmentId) return;
+    } else if (workflowId && workflowId !== this.attachmentId) {
+      return;
     }
 
     if (this.processedProposals.has(proposalId)) return;
