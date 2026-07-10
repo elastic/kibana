@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppHeader } from '@kbn/app-header';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash';
@@ -14,6 +14,7 @@ import { FormProvider } from 'react-hook-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { isMap, parseDocument, type YAMLMap } from 'yaml';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import type { YamlEditorFormValues } from './template_form';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
@@ -37,15 +38,37 @@ import {
 } from '../../../../common/types/domain/template/fields';
 import { normalizeYamlString } from '../utils/normalize_yaml_string';
 import {
-  splitTemplateDefinition,
+  getTemplateSettingsAndConnectorFromYaml,
+  getExplicitTemplateSettings,
   mergeTemplateDefinition,
-  normalizeTemplateSettings,
+  stripTemplateConfigBlocks,
   normalizeTemplateConnector,
+  normalizeTemplateSettings,
 } from '../utils/template_settings_yaml';
+import { normalizeTemplateCaseDefaultsYaml } from '../utils/normalize_template_case_defaults';
+import { seedRequiredTemplateBlocks } from '../utils/seed_template_definition';
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
+import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
+import {
+  type TemplateMetadata,
+  type TemplateMetadataErrors,
+  normalizeTemplateMetadata,
+  validateTemplateMetadata,
+  hasTemplateMetadataErrors,
+} from '../utils/template_metadata';
+import type { EditableCaseDefaultField, EditableCaseDefaultValue } from '../case_default_fields';
 
-interface SettingsConnectorDraft {
+interface MetadataDraft extends TemplateMetadata {
+  templateId?: string;
+}
+
+/**
+ * Panel-owned case settings + default connector, drafted in local storage (keyed by templateId) like
+ * the metadata draft. These are NOT part of the editor buffer under the Fields/Configuration split;
+ * they are lifted out of the loaded definition and merged back in on save.
+ */
+interface TemplateConfigDraft {
   templateId?: string;
   settings?: TemplateSettings;
   connector?: CaseConnectorWithoutName;
@@ -54,19 +77,97 @@ interface SettingsConnectorDraft {
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
   title: string;
+  initialMetadata: TemplateMetadata;
   isLoading?: boolean;
   isSaving?: boolean;
-  onCreate: (data: YamlEditorFormValues, isEnabled: boolean) => Promise<void>;
+  onCreate: (
+    data: YamlEditorFormValues,
+    metadata: TemplateMetadata,
+    isEnabled: boolean
+  ) => Promise<void>;
   isEdit?: boolean;
   storageKey: string;
   initialValue: string;
   templateId?: string;
   initialIsEnabled?: boolean;
+  /**
+   * Default case settings for a NEW template whose definition carries no `settings` block (i.e.
+   * create). Ignored once the definition has its own settings (edit / imported). Lets the create
+   * page apply solution-aware defaults (e.g. sync alerts on only for Security).
+   */
+  initialSettings?: TemplateSettings;
 }
+
+// Full-height offset for the editor wrapper. Chrome that `--kbn-application--content-height` does
+// not already subtract must be reserved here:
+//  - the Security Solution app header row (~48px "Add integrations"/breadcrumbs) is NOT subtracted
+//    from `--kbn-application--content-height`; the surrounding EuiPageSection adds 24px of bottom
+//    padding which we bleed away (see the wrapper style's negative marginBottom), so the net
+//    app-header reservation is 48px − 24px = 24px; and
+//  - the Security Solution timeline bottom bar (~57px) overlays the page bottom. We reserve space
+//    for it rather than mutating Security Solution's DOM to hide it.
+const APP_HEADER_OFFSET = '24px';
+const TIMELINE_BOTTOM_BAR_OFFSET = '57px';
+const FULL_BODY_HEIGHT_OFFSET = `calc(${APP_HEADER_OFFSET} + ${TIMELINE_BOTTOM_BAR_OFFSET})`;
+const LEGACY_SETTINGS_GUIDANCE_COMMENT =
+  '# Case settings (sync alerts, extract observables) and the default connector are configured in the\n' +
+  '# Settings tab of the preview panel, not here.';
+const CURRENT_SETTINGS_GUIDANCE_COMMENT =
+  '# Case settings and the default connector are always represented below and can be edited here.';
+
+const normalizeLegacyTemplateYamlComments = (definitionYaml: string): string =>
+  (definitionYaml ?? '').replace(
+    LEGACY_SETTINGS_GUIDANCE_COMMENT,
+    CURRENT_SETTINGS_GUIDANCE_COMMENT
+  );
+
+/**
+ * Per-change YAML normalization: cosmetic comment cleanup only. Required blocks are seeded once when
+ * the editor initializes (see seedRequiredTemplateBlocks); they are intentionally NOT re-injected
+ * here, so removing a required block surfaces as a validation error rather than being silently
+ * re-added.
+ */
+const normalizeTemplateDefinitionYaml = (definitionYaml: string): string =>
+  normalizeLegacyTemplateYamlComments(definitionYaml);
+
+const updateYamlCaseDefault = (
+  definitionYaml: string,
+  field: EditableCaseDefaultField,
+  value: EditableCaseDefaultValue
+) => {
+  try {
+    const doc = parseDocument(definitionYaml ?? '');
+    if (!isMap(doc.contents)) {
+      return definitionYaml;
+    }
+
+    const root = doc.contents as YAMLMap<unknown, unknown>;
+
+    if (field === 'assignees') {
+      root.set('assignees', doc.createNode(value as CaseAssignees));
+      return doc.toString();
+    }
+
+    if (field === 'tags') {
+      root.set('tags', doc.createNode(value as string[]));
+      return doc.toString();
+    }
+
+    // Case-default scalars stay present (forced-present); a cleared value is written as `null`
+    // ("no default") rather than deleting the key. `name` cleared to null surfaces as a validation
+    // error because a case-default title is required.
+    const stringValue = value as string;
+    root.set(field, stringValue.length === 0 ? null : stringValue);
+    return doc.toString();
+  } catch {
+    return definitionYaml;
+  }
+};
 
 export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   form,
   title,
+  initialMetadata,
   isLoading,
   isSaving,
   onCreate,
@@ -75,6 +176,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   initialValue,
   templateId,
   initialIsEnabled = true,
+  initialSettings,
 }) => {
   const styles = useMemoCss(componentStyles);
   const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
@@ -88,49 +190,56 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
   const [isEnabled, setIsEnabled] = useState(initialIsEnabled);
-  // Bumped whenever we revert the Settings-tab state to its initial values (Reset). The connector
-  // picker runs its own hook_form_lib form that only seeds from `defaultValue` at mount, so it's
-  // remounted via this key to re-seed from the reverted connector. Keyed on a counter (not the
-  // connector object) so editing the connector fields never remounts and drops focus.
+  // Bumped whenever the YAML draft is reset. The connector picker reads default values at mount,
+  // so remounting guarantees it re-seeds from the restored YAML connector block.
   const [formResetKey, setFormResetKey] = useState(0);
 
-  // `connector` / `settings` are edited in the Settings tab, not the YAML buffer, so split them out
-  // of the initial definition (the editor shows fields only) and merge them back on save.
-  const {
-    fieldsYaml: initialFieldsYaml,
-    connector: initialConnector,
-    settings: initialSettings,
-  } = useMemo(() => splitTemplateDefinition(initialValue), [initialValue]);
-
-  // Settings-tab state isn't in the YAML buffer, so persist it alongside the YAML draft (keyed to
-  // the template) so edits survive a reload and count as unsaved changes.
-  const initialFormState = useMemo<SettingsConnectorDraft>(
-    () => ({ templateId, settings: initialSettings, connector: initialConnector }),
-    [templateId, initialSettings, initialConnector]
+  // The editor "blueprint" buffer holds only case defaults + fields — never template identity,
+  // settings, or the connector. Seed the case-default keys so they are always visible, then strip
+  // any settings/connector blocks (they are lifted into panel state below and merged back on save).
+  const initialDefinitionYaml = useMemo(
+    () =>
+      stripTemplateConfigBlocks(
+        seedRequiredTemplateBlocks(normalizeTemplateDefinitionYaml(initialValue))
+      ),
+    [initialValue]
   );
-  const [storedFormState, setStoredFormState] = useCasesLocalStorage<SettingsConnectorDraft>(
-    `${storageKey}.settingsConnector`,
-    initialFormState
+  // The settings + connector lifted out of the loaded definition — the seed for the panel state.
+  // When the definition carries no settings block (a new template), fall back to `initialSettings`
+  // so create can apply solution-aware defaults; an existing settings block always wins.
+  const initialConfig = useMemo(() => {
+    const extracted = getTemplateSettingsAndConnectorFromYaml(
+      normalizeTemplateDefinitionYaml(initialValue)
+    );
+    return { connector: extracted.connector, settings: extracted.settings ?? initialSettings };
+  }, [initialValue, initialSettings]);
+  // Template metadata (name/description/tags) is edited in the "Template details" section and saved
+  // on the template's attributes — it is NOT part of the YAML. It is drafted in local storage so a
+  // refresh never drops unsaved identity changes.
+  const initialMetadataState = useMemo<MetadataDraft>(
+    () => ({ ...initialMetadata, templateId }),
+    [initialMetadata, templateId]
   );
-  // Only reuse a persisted draft that belongs to the current template (mirrors the YAML draft).
-  const useStoredFormState = storedFormState != null && storedFormState.templateId === templateId;
-  const settings = useStoredFormState ? storedFormState.settings : initialSettings;
-  const connector = useStoredFormState ? storedFormState.connector : initialConnector;
-
-  const settingsRef = useRef(settings);
-  settingsRef.current = settings;
-  const connectorRef = useRef(connector);
-  connectorRef.current = connector;
-
-  const handleSettingsChange = useCallback(
-    (next: TemplateSettings) =>
-      setStoredFormState({ templateId, settings: next, connector: connectorRef.current }),
-    [setStoredFormState, templateId]
+  const [storedMetadataState, setStoredMetadataState] = useCasesLocalStorage<MetadataDraft>(
+    `${storageKey}.metadata`,
+    initialMetadataState
   );
-  const handleConnectorChange = useCallback(
-    (next: CaseConnectorWithoutName) =>
-      setStoredFormState({ templateId, settings: settingsRef.current, connector: next }),
-    [setStoredFormState, templateId]
+  const useStoredMetadataState =
+    storedMetadataState != null && storedMetadataState.templateId === templateId;
+  const metadata = useMemo<TemplateMetadata>(
+    () =>
+      useStoredMetadataState
+        ? {
+            name: storedMetadataState.name ?? '',
+            description: storedMetadataState.description ?? '',
+            tags: storedMetadataState.tags ?? [],
+          }
+        : initialMetadata,
+    [useStoredMetadataState, storedMetadataState, initialMetadata]
+  );
+  const metadataErrors = useMemo<TemplateMetadataErrors>(
+    () => validateTemplateMetadata(metadata),
+    [metadata]
   );
 
   const {
@@ -142,35 +251,133 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     isSaved: isYamlSaved,
   } = useDebouncedYamlEdit(
     storageKey,
-    initialFieldsYaml,
+    initialDefinitionYaml,
     (newValue) => form.setValue('definition', newValue),
     templateId
   );
-  const hasChanges = useMemo(() => {
-    const yamlChanged =
-      computeChangedLines(normalizeYamlString(initialFieldsYaml), normalizeYamlString(yamlValue))
-        .length > 0;
-    // Settings-tab edits (connector + case settings) count as unsaved changes too. Compare the
-    // normalized forms so the connector form's "no connector" shape (`.none`) and empty settings
-    // don't read as changes against the unset initial state.
-    const settingsChanged = !isEqual(
-      normalizeTemplateSettings(settings),
-      normalizeTemplateSettings(initialSettings)
-    );
-    const connectorChanged = !isEqual(
-      normalizeTemplateConnector(connector),
-      normalizeTemplateConnector(initialConnector)
-    );
-    return yamlChanged || settingsChanged || connectorChanged;
-  }, [initialFieldsYaml, yamlValue, settings, initialSettings, connector, initialConnector]);
-
-  const hasValidationErrors = useMemo(
-    () => !validateTemplateDefinitionYaml(yamlValue ?? '').success,
+  const normalizedYamlValue = useMemo(
+    () => normalizeTemplateDefinitionYaml(yamlValue ?? ''),
     [yamlValue]
   );
 
-  const yamlValueRef = useRef(yamlValue);
-  yamlValueRef.current = yamlValue;
+  // Panel-owned settings + connector, drafted in local storage (keyed by templateId) so a refresh
+  // never drops unsaved configuration. Seeded from the loaded definition; edited only on the
+  // Configuration tab; merged back into the definition on save.
+  const initialConfigState = useMemo<TemplateConfigDraft>(
+    () => ({ templateId, settings: initialConfig.settings, connector: initialConfig.connector }),
+    [initialConfig, templateId]
+  );
+  const [storedConfigState, setStoredConfigState] = useCasesLocalStorage<TemplateConfigDraft>(
+    `${storageKey}.config`,
+    initialConfigState
+  );
+  const useStoredConfigState =
+    storedConfigState != null && storedConfigState.templateId === templateId;
+  const settings = useStoredConfigState ? storedConfigState.settings : initialConfig.settings;
+  const connector = useStoredConfigState ? storedConfigState.connector : initialConfig.connector;
+
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
+  const connectorRef = useRef(connector);
+  connectorRef.current = connector;
+
+  const hasChanges = useMemo(() => {
+    const yamlChanged =
+      computeChangedLines(
+        normalizeYamlString(initialDefinitionYaml),
+        normalizeYamlString(normalizedYamlValue)
+      ).length > 0;
+    const metadataChanged = !isEqual(
+      normalizeTemplateMetadata(metadata),
+      normalizeTemplateMetadata(initialMetadata)
+    );
+    // Settings/connector are panel state, so compare them independently of the YAML. Normalizing
+    // collapses each to its canonical form (e.g. `.none` / default toggles → "unset") so a no-op
+    // never reads as dirty.
+    const settingsChanged = !isEqual(
+      normalizeTemplateSettings(settings),
+      normalizeTemplateSettings(initialConfig.settings)
+    );
+    const connectorChanged = !isEqual(
+      normalizeTemplateConnector(connector),
+      normalizeTemplateConnector(initialConfig.connector)
+    );
+    return yamlChanged || metadataChanged || settingsChanged || connectorChanged;
+  }, [
+    initialDefinitionYaml,
+    normalizedYamlValue,
+    metadata,
+    initialMetadata,
+    settings,
+    connector,
+    initialConfig,
+  ]);
+
+  const yamlValidationResult = useMemo(
+    () => validateTemplateDefinitionYaml(normalizedYamlValue),
+    [normalizedYamlValue]
+  );
+  const isYamlDefinitionValid = yamlValidationResult.success;
+
+  // Only the YAML's structural validity gates the Save button. Template-details validity (e.g. the
+  // required name) is checked at submit time against the freshest metadata (see handleSave), so the
+  // button stays responsive while the debounced metadata fields settle rather than flickering
+  // disabled after every keystroke.
+  const hasValidationErrors = useMemo(() => !isYamlDefinitionValid, [isYamlDefinitionValid]);
+
+  // Freshest YAML, updated synchronously on every edit so Save and each subsequent edit build on the
+  // latest value even while the debounced persistence hook (and the render-panel forms) lag behind.
+  const yamlValueRef = useRef(normalizedYamlValue);
+  useEffect(() => {
+    yamlValueRef.current = normalizedYamlValue;
+  }, [normalizedYamlValue]);
+
+  // Freshest template metadata, kept in a ref for the same reason (the metadata form propagates on a
+  // debounce, so Save must not read the lagging `metadata` state).
+  const metadataRef = useRef(metadata);
+  useEffect(() => {
+    metadataRef.current = metadata;
+  }, [metadata]);
+
+  const handleYamlChange = useCallback(
+    (nextYaml: string) => {
+      const normalized = normalizeTemplateDefinitionYaml(nextYaml);
+      yamlValueRef.current = normalized;
+      onYamlChange(normalized);
+    },
+    [onYamlChange]
+  );
+
+  const handleSettingsChange = useCallback(
+    (next: TemplateSettings) => {
+      // Settings are panel state, not YAML — update the draft (and the synchronous ref so Save reads
+      // the latest immediately). Both keys are kept explicit so "off" is a real `false`.
+      const explicit = getExplicitTemplateSettings(next);
+      settingsRef.current = explicit;
+      setStoredConfigState({ templateId, settings: explicit, connector: connectorRef.current });
+    },
+    [setStoredConfigState, templateId]
+  );
+
+  const handleConnectorChange = useCallback(
+    (next: CaseConnectorWithoutName) => {
+      // Connector is panel state, not YAML — update the draft (and the synchronous ref). No YAML
+      // re-serialization, so a flaky connector fetch can never dirty or reset the editor buffer.
+      connectorRef.current = next;
+      setStoredConfigState({ templateId, settings: settingsRef.current, connector: next });
+    },
+    [setStoredConfigState, templateId]
+  );
+
+  const handleMetadataChange = useCallback(
+    (next: TemplateMetadata) => {
+      // Template identity is not part of the YAML — only the draft/attributes track it. Update the
+      // synchronous ref first so Save reads the latest even before the state re-render lands.
+      metadataRef.current = next;
+      setStoredMetadataState({ ...next, templateId });
+    },
+    [setStoredMetadataState, templateId]
+  );
 
   const handleFieldDefaultChange = useCallback(
     (fieldName: string, value: string, control: string) => {
@@ -181,7 +388,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       if (isEmptyNumeric || isEmptyUserPicker) {
         const updatedYaml = removeYamlFieldDefault(yamlValueRef.current, fieldName);
         if (updatedYaml !== yamlValueRef.current) {
-          onYamlChange(updatedYaml);
+          handleYamlChange(updatedYaml);
         }
         return;
       }
@@ -207,10 +414,20 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       }
       const updatedYaml = updateYamlFieldDefault(yamlValueRef.current, fieldName, parsedValue);
       if (updatedYaml !== yamlValueRef.current) {
-        onYamlChange(updatedYaml);
+        handleYamlChange(updatedYaml);
       }
     },
-    [onYamlChange]
+    [handleYamlChange]
+  );
+
+  const handleCaseDefaultChange = useCallback(
+    (field: EditableCaseDefaultField, value: EditableCaseDefaultValue) => {
+      const updatedYaml = updateYamlCaseDefault(yamlValueRef.current, field, value);
+      if (updatedYaml !== yamlValueRef.current) {
+        handleYamlChange(updatedYaml);
+      }
+    },
+    [handleYamlChange]
   );
 
   const handleResetClick = useCallback(() => {
@@ -219,11 +436,22 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const handleResetConfirm = useCallback(() => {
     handleReset();
-    setStoredFormState(initialFormState);
-    // Remount the connector picker so it re-seeds from the reverted connector (see formResetKey).
+    setStoredMetadataState(initialMetadataState);
+    setStoredConfigState(initialConfigState);
+    // Sync the refs immediately so a Save right after Reset uses the restored config.
+    settingsRef.current = initialConfig.settings;
+    connectorRef.current = initialConfig.connector;
+    // Remount the connector picker so it re-seeds from the restored connector.
     setFormResetKey((count) => count + 1);
     setIsResetModalVisible(false);
-  }, [handleReset, setStoredFormState, initialFormState]);
+  }, [
+    handleReset,
+    setStoredMetadataState,
+    initialMetadataState,
+    setStoredConfigState,
+    initialConfigState,
+    initialConfig,
+  ]);
 
   const handleResetCancel = useCallback(() => {
     setIsResetModalVisible(false);
@@ -232,12 +460,22 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   const handleSave = useCallback(() => {
     setSubmitError(null);
 
-    // Merge the form-managed connector/settings back into the fields YAML, then validate the
-    // complete definition that will actually be persisted.
-    const mergedDefinition = mergeTemplateDefinition(yamlValue ?? '', { connector, settings });
+    // Read the synchronous refs (not the debounced state) so a value typed immediately before
+    // clicking Save is never lost. Template identity comes from the Configuration tab and is
+    // persisted on the saved-object attributes — never in the definition. The persisted definition
+    // is the edited blueprint (legacy top-level `title` canonicalized into `name`) with the
+    // panel-owned settings + connector merged back in, so the stored definition stays complete.
+    const normalizedMetadata = normalizeTemplateMetadata(metadataRef.current);
+    const mergedDefinition = mergeTemplateDefinition(
+      normalizeTemplateCaseDefaultsYaml(yamlValueRef.current),
+      { settings: settingsRef.current, connector: connectorRef.current }
+    );
 
     const validationResult = validateTemplateDefinitionYaml(mergedDefinition);
-    if (!validationResult.success) {
+    if (
+      !validationResult.success ||
+      hasTemplateMetadataErrors(validateTemplateMetadata(normalizedMetadata))
+    ) {
       setSubmitError(i18n.FIX_VALIDATION_ERRORS);
       return;
     }
@@ -245,11 +483,19 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     form.handleSubmit(
       async (data) => {
         try {
-          await onCreate({ ...data, definition: mergedDefinition }, isEnabled);
-          clearDraft(isEdit ? data.definition : undefined);
-          // Reset the persisted Settings-tab draft: keep the saved values when editing, revert to
-          // the template's defaults when creating (mirrors clearDraft's create/edit behavior).
-          setStoredFormState(isEdit ? { templateId, settings, connector } : initialFormState);
+          await onCreate({ ...data, definition: mergedDefinition }, normalizedMetadata, isEnabled);
+          clearDraft(isEdit ? mergedDefinition : undefined);
+          // Reset/advance ALL drafts on success so a subsequent create doesn't restore this
+          // template's identity OR config (settings/connector). On edit, the drafts become the
+          // just-saved values.
+          setStoredMetadataState(
+            isEdit ? { ...normalizedMetadata, templateId } : initialMetadataState
+          );
+          setStoredConfigState(
+            isEdit
+              ? { templateId, settings: settingsRef.current, connector: connectorRef.current }
+              : initialConfigState
+          );
         } catch (e) {
           setSubmitError(e?.message ?? i18n.FAILED_TO_SAVE_TEMPLATE);
         }
@@ -264,12 +510,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     isEnabled,
     isEdit,
     clearDraft,
-    yamlValue,
-    connector,
-    settings,
-    setStoredFormState,
+    setStoredMetadataState,
+    setStoredConfigState,
     templateId,
-    initialFormState,
+    initialMetadataState,
+    initialConfigState,
   ]);
 
   const handleIsEnabledChange = useCallback((enabled: boolean) => {
@@ -326,11 +571,10 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        // The header cancels the page-section padding itself (see its `padding` prop below),
-        // so the wrapper only needs to reserve the Security Solution timeline bottom bar
-        // (57px, the same value used by the validation accordion). This makes the page
-        // fill the viewport exactly and never scroll the header under the sticky top bar.
-        css={[kbnFullBodyHeightCss('57px'), styles.wrapper]}
+        // Reserve space for the in-flow app header and the Security Solution timeline bottom bar
+        // (see FULL_BODY_HEIGHT_OFFSET) so the split editor runs to the page bottom without
+        // reaching into another plugin's DOM.
+        css={[kbnFullBodyHeightCss(FULL_BODY_HEIGHT_OFFSET), styles.wrapper]}
       >
         <EuiFlexItem grow={false}>
           <AppHeader
@@ -349,18 +593,22 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         <EuiFlexItem css={styles.editorWrapper}>
           <TemplateEditorLayout
             isLoading={isLoading}
-            yamlValue={yamlValue}
-            onYamlChange={onYamlChange}
+            yamlValue={normalizedYamlValue}
+            onYamlChange={handleYamlChange}
             onFieldDefaultChange={handleFieldDefaultChange}
+            onCaseDefaultChange={handleCaseDefaultChange}
             isYamlSaving={isYamlSaving}
             isYamlSaved={isYamlSaved}
             previewWidth={previewWidth}
             onPreviewWidthChange={setPreviewWidth}
-            savedValue={isEdit ? initialFieldsYaml : undefined}
+            savedValue={isEdit ? initialDefinitionYaml : undefined}
             settings={settings}
             connector={connector}
             onSettingsChange={handleSettingsChange}
             onConnectorChange={handleConnectorChange}
+            metadata={metadata}
+            metadataErrors={metadataErrors}
+            onMetadataChange={handleMetadataChange}
             formResetKey={formResetKey}
           />
         </EuiFlexItem>
