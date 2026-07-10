@@ -28,6 +28,7 @@ export const ANOMALIES_TAB_MANAGE_JOBS_BUTTON_TEST_ID =
   'entity-anomalies-tab-manage-jobs-button' as const;
 export const ANOMALIES_TAB_DATE_RANGE_ERROR_TEST_ID =
   'entity-anomalies-tab-date-range-error' as const;
+export const ANOMALIES_TAB_ERROR_TEST_ID = 'entity-anomalies-tab-error' as const;
 
 // AnomalyTabTableSection — left panel anomalies table
 export const ANOMALIES_TAB_TABLE_TEST_ID = 'entity-anomalies-tab-table' as const;
