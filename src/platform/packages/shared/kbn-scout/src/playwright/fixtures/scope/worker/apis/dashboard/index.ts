@@ -94,7 +94,22 @@ export const getDashboardApiHelper = (
             unknown
           >;
           const panels = data.panels as Array<Record<string, unknown>>;
-          const panelId = panels[0].id as string;
+          if (!Array.isArray(panels) || panels.length === 0) {
+            throw new Error(
+              `Dashboard get response for '${dashboardId}': expected at least one panel, got ${JSON.stringify(
+                data.panels
+              )}`
+            );
+          }
+
+          const { id: panelId } = panels[0];
+          if (typeof panelId !== 'string' || panelId.length === 0) {
+            throw new Error(
+              `Dashboard get response for '${dashboardId}': expected a non-empty string panel id, got ${JSON.stringify(
+                panels[0].id
+              )}`
+            );
+          }
 
           return { dashboardId, panelId };
         }
