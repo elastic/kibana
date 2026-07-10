@@ -17,7 +17,6 @@ project:
   owner: '@elastic/nightshift-context-and-research-team'
   sourceRoot: x-pack/platform/packages/shared/kbn-evals-runner
 dependsOn:
-  - '@kbn/zod'
   - '@kbn/evals-common'
 tags:
   - shared-common
