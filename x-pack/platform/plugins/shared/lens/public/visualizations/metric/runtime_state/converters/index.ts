@@ -8,10 +8,12 @@
 import { getUpdatedMetricState } from '../../../../../common/content_management/v1/transforms/metric';
 import { removeLegacyTitleWeight } from './remove_legacy_title_weight';
 import { convertApplyColorTo } from './apply_color_to';
+import { convertDensity } from './density';
 
 export const getRuntimeConverters = () => [
   // v1 CM transform (idempotent): secondaryPrefix → secondaryLabel, valuesTextAlign → primaryAlign/secondaryAlign
   getUpdatedMetricState,
   removeLegacyTitleWeight,
   convertApplyColorTo,
+  convertDensity,
 ];

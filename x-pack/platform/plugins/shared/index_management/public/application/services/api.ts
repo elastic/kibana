@@ -82,6 +82,13 @@ export function useLoadSnapshotRepositories() {
   });
 }
 
+export function loadSnapshotRepositories() {
+  return sendRequest<SnapshotRepositoriesInfo>({
+    path: `${API_BASE_PATH}/snapshot_repositories`,
+    method: 'get',
+  });
+}
+
 export function useLoadDataStreams({ includeStats }: { includeStats: boolean }) {
   return useRequest<DataStream[]>({
     path: `${API_BASE_PATH}/data_streams`,
@@ -449,6 +456,18 @@ export function useLoadIndexTemplate(name: TemplateDeserialized['name'], isLegac
     query: {
       legacy: isLegacy,
     },
+  });
+}
+
+export interface FailureStoreClusterSettings {
+  enabled?: string[] | string;
+  defaultRetentionPeriod?: string;
+}
+
+export function useLoadFailureStoreSettings() {
+  return useRequest<FailureStoreClusterSettings>({
+    path: `${API_BASE_PATH}/data_streams/failure_store_settings`,
+    method: 'get',
   });
 }
 

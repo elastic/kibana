@@ -18,11 +18,6 @@ import type { FormValues, RuleQuery } from '../../../form/types';
 import { RecoveryConditionStep } from './recovery_condition_step';
 import { EsqlRecoveryContent } from './esql_recovery_content';
 
-jest.mock('@kbn/code-editor', () => ({
-  ...jest.requireActual('@kbn/code-editor'),
-  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="codeEditorMock">{value}</pre>,
-}));
-
 const BASE_QUERY = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
 const ALERT_SEGMENT = 'WHERE count > 100';
 const RECOVERY_SEGMENT = 'WHERE count < 100';
@@ -77,12 +72,6 @@ const CUSTOM_RECOVERY_QUERY: RuleQuery = {
   recovery: { segment: RECOVERY_SEGMENT },
 };
 
-const CUSTOM_NO_RECOVERY_QUERY: RuleQuery = {
-  format: 'composed',
-  base: BASE_QUERY,
-  breach: { segment: ALERT_SEGMENT },
-};
-
 const renderRecoveryStep = (
   stateOverrides: Partial<ComposeDiscoverState> = {},
   queryOverride?: RuleQuery
@@ -129,18 +118,6 @@ describe('RecoveryConditionStep', () => {
     expect(screen.getByText('Base query')).toBeInTheDocument();
     expect(screen.getByText('Recovery condition')).toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverEditRecovery')).toBeInTheDocument();
-  });
-
-  it('shows "Custom condition set" badge when recovery block is populated', () => {
-    renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_RECOVERY_QUERY);
-
-    expect(screen.getByText('Custom condition set')).toBeInTheDocument();
-  });
-
-  it('does not show badge when recovery block is empty', () => {
-    renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_NO_RECOVERY_QUERY);
-
-    expect(screen.queryByText('Custom condition set')).not.toBeInTheDocument();
   });
 
   it('disables the edit button when the child flyout is open', () => {

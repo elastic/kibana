@@ -6,6 +6,7 @@
  */
 import * as t from 'io-ts';
 import { nonEmptyStringRt } from '@kbn/io-ts-utils';
+import { z } from '@kbn/zod/v4';
 import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from './environment_filter_values';
 
 export const environmentStringRt = t.union([
@@ -20,3 +21,21 @@ export const environmentRt = t.type({
 });
 
 export type Environment = t.TypeOf<typeof environmentRt>['environment'];
+
+/**
+ * zod equivalents of the io-ts codecs above. Additive - see the comment in
+ * `@kbn/apm-api-shared`'s `default_api_types.ts` for why these can't replace
+ * the io-ts exports until every still-io-ts consumer of `environmentRt` has
+ * migrated (elastic/kibana#243355).
+ */
+
+// nonEmptyStringRt omitted: unreachable in the io-ts union too (t.string matches first).
+export const environmentStringSchema = z.union([
+  z.literal(ENVIRONMENT_NOT_DEFINED.value),
+  z.literal(ENVIRONMENT_ALL.value),
+  z.string(),
+]);
+
+export const environmentSchema = z.object({
+  environment: environmentStringSchema,
+});

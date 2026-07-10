@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -19,10 +19,6 @@ import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
@@ -33,15 +29,16 @@ import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 import { JsonTab } from './tabs/json_tab';
 import { TableTab } from './tabs/table_tab';
-import { NotesDetails } from '../../shared/tools/notes';
-import { useKibana } from '../../../common/lib/kibana';
-import { flyoutProviders } from '../../shared/components/flyout_provider';
+import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
+import { useTabs } from '../../shared/hooks/use_tabs';
+import { useFlyoutApi } from '../../use_flyout_api';
 import type { OpenFlyoutLinkProps } from '../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../shared/components/open_flyout_link';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
+import { getEcsField } from '../../shared/components/table_field_name_cell';
 import {
   HOST_NAME_FIELD_NAME,
+  IP_FIELD_TYPE,
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
@@ -60,6 +57,8 @@ const headerStyles = css`
 `;
 
 type DocumentFlyoutTabId = 'overview' | 'table' | 'json';
+
+const VALID_TAB_IDS: DocumentFlyoutTabId[] = ['overview', 'table', 'json'];
 
 export const OVERVIEW_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutOverviewTab';
 export const TABLE_TAB_TEST_ID = 'securitySolutionDocumentDetailsFlyoutTableTab';
@@ -98,21 +97,22 @@ export interface DocumentFlyoutProps {
  */
 export const DocumentFlyout = memo(
   ({ hit, onAlertUpdated, renderCellActions }: DocumentFlyoutProps) => {
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
+    const { openNotes } = useFlyoutApi();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
     const isSecurityApp = useIsInSecurityApp();
-    const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
     // The Table and JSON tabs are only available in Security Solution, not in Discover.
-    const [selectedTabId, setSelectedTabId] = useState<DocumentFlyoutTabId>('overview');
+    // The selected tab is persisted to localStorage, sharing the key with the legacy
+    // document flyout so the user's preference carries across both implementations.
+    const { selectedTabId, setSelectedTabId } = useTabs<DocumentFlyoutTabId>({
+      validTabIds: VALID_TAB_IDS,
+      storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
+    });
 
     // The rule flyout is keyed by the rule UUID, but the table/highlighted fields display the rule
     // name. We resolve the UUID from the document so a click on a rule name opens the right rule.
@@ -138,27 +138,20 @@ export const DocumentFlyout = memo(
           if (!ruleId) {
             return <>{props.children}</>;
           }
-          return <OpenFlyoutLink {...props} value={ruleId} />;
+          return <OpenFlyoutLink {...props} value={ruleId} asParent />;
         }
-        return <OpenFlyoutLink {...props} asParent={props.field === HOST_NAME_FIELD_NAME} />;
+        // Host and IP fields open as a new flyout (parent) rather than a child of the current one.
+        const isIpField = getEcsField(props.field)?.type === IP_FIELD_TYPE;
+        return (
+          <OpenFlyoutLink {...props} asParent={props.field === HOST_NAME_FIELD_NAME || isIpField} />
+        );
       },
       [ruleId]
     );
 
     const onShowNotes = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <NotesDetails hit={hit} />,
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-        }
-      );
-    }, [history, historyKey, hit, overlays, services, store]);
+      openNotes({ hit });
+    }, [openNotes, hit]);
 
     if (isAlert && loading) {
       return <FlyoutLoading data-test-subj="document-overview-loading" />;
@@ -208,13 +201,13 @@ export const DocumentFlyout = memo(
               <EuiSpacer size="m" />
             </>
           )}
-          {selectedTabId === 'table' ? (
+          {isSecurityApp && selectedTabId === 'table' ? (
             <TableTab
               hit={hit}
               renderCellActions={renderCellActions}
               renderFlyoutLink={renderFlyoutLink}
             />
-          ) : selectedTabId === 'json' ? (
+          ) : isSecurityApp && selectedTabId === 'json' ? (
             <JsonTab hit={hit} />
           ) : (
             <OverviewTab
