@@ -29,6 +29,7 @@ type XYLensAppearanceState = Pick<
   | 'valueLabels'
   | 'curveType'
   | 'fillOpacity'
+  | 'areaFill'
   | 'minBarHeight'
   | 'hideEndzones'
   | 'showCurrentTimeMarker'

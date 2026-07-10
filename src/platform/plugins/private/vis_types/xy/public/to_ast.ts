@@ -408,6 +408,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
       : undefined,
     detailedTooltip: vis.params.detailedTooltip,
     fillOpacity: vis.params.fillOpacity,
+    areaFill: vis.params.areaFill,
     showTooltip: vis.params.addTooltip,
     markSizeRatio:
       dimensions.z &&

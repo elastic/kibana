@@ -16,6 +16,8 @@ import type {
   StackMode,
   XYChartSeriesIdentifier,
   SeriesColorAccessorFn,
+  LinearGradient,
+  ColorVariant,
 } from '@elastic/charts';
 import { ColorVariant, ScaleType } from '@elastic/charts';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -34,7 +36,7 @@ import type {
   XScaleType,
   PointVisibility,
 } from '../../common';
-import { AxisModes, SeriesTypes } from '../../common/constants';
+import { AreaFillOptions, AxisModes, SeriesTypes } from '../../common/constants';
 import type { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
 import type { ColorAssignments } from './color_assignment';
@@ -42,6 +44,7 @@ import type { GroupsConfiguration } from './axes_configuration';
 import type { LayerAccessorsTitles, LayerFieldFormats, LayersFieldFormats } from './layers';
 import { getFormat } from './format';
 import { getColorSeriesAccessorFn } from './color/color_mapping_accessor';
+import type { AreaFillOption } from '../../common/types/expression_functions';
 
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 export type InvertedRawValueMap = Map<string, Map<string, RawValue>>;
@@ -61,6 +64,7 @@ type GetSeriesPropsFn = (config: {
   syncColors: boolean;
   timeZone: string;
   emphasizeFitting?: boolean;
+  areaFill?: AreaFillOption;
   fillOpacity?: number;
   formattedDatatableInfo: DatatableWithFormatInfo;
   defaultXScaleType: XScaleType;
@@ -409,6 +413,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   xAxis,
   timeZone,
   emphasizeFitting,
+  areaFill,
   fillOpacity,
   formattedDatatableInfo,
   defaultXScaleType,
@@ -523,6 +528,34 @@ export const getSeriesProps: GetSeriesPropsFn = ({
             singleTable
           );
 
+  const areaStyle: AreaSeriesStyle['area'] | undefined = (() => {
+    const style = {} satisfies AreaSeriesStyle['area'];
+
+    if (fillOpacity) {
+      style.opacity = fillOpacity;
+    }
+
+    switch (areaFill) {
+      case AreaFillOptions.SOLID:
+        return style;
+        break;
+      case AreaFillOptions.GRADIENT:
+        const gradient: LinearGradient = {
+          type: 'linear',
+          stops: [
+            { offset: 0, opacity: 0, color: ColorVariant.Series },
+            { offset: 0.5, opacity: 0.9, color: ColorVariant.Series },
+            { offset: 1, opacity: 1, color: ColorVariant.Series },
+          ],
+        };
+        style.gradient = gradient;
+        return style;
+        break;
+    }
+
+    return undefined;
+  })();
+
   return {
     splitSeriesAccessors: splitColumnIds.length ? splitColumnIds : [],
     stackAccessors: isStacked ? [xColumnId || 'unifiedX'] : [],
@@ -555,7 +588,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
         pointVisibility,
         pointsRadius: layer.pointsRadius,
       }),
-      ...(fillOpacity && { area: { opacity: fillOpacity } }),
+      ...(areaStyle && { area: areaStyle }),
       ...(emphasizeFitting && {
         fit: { area: { opacity: fillOpacity || 0.5 }, line: getFitLineConfig() },
       }),
