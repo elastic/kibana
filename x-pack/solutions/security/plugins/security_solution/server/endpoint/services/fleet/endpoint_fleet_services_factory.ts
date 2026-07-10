@@ -223,14 +223,6 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       },
     });
 
-    // FIXME:PT remove prior to commit
-    logger.info(
-      `wrapped client proxy_trap_handlers: ${JSON.stringify(
-        // @ts-ignore
-        proxiedAgentClient[PROXY_TRAP_HANDLERS]
-      )}`
-    );
-
     return proxiedAgentClient;
   };
 
