@@ -31,6 +31,9 @@ import { stringify } from '../../utils/stringify';
 import { NotFoundError } from '../../errors';
 import type { SavedObjectsClientFactory } from '../saved_objects';
 
+export const PROXY_TRAP_HANDLERS = Symbol('_PROXY_TRAP_HANDLERS_');
+export const HAS_JEST_SPY_MOCKS = Symbol('HAS_JEST_SPY_MOCKS');
+
 /**
  * The set of Fleet services used by Endpoint
  */
@@ -113,7 +116,13 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
   private wrapFleetAgentClient = (agentClient: AgentClient) => {
     const logger = this.logger.get('FleetAgentClientWrapper');
 
-    // Note that this function will possibly mutate the Agent object
+    // Exit if client is already wrapped
+    // @ts-expect-error due to `PROXY_TRAP_HANDLERS` not being a property of `agentClient`
+    if (agentClient[PROXY_TRAP_HANDLERS]) {
+      return agentClient;
+    }
+
+    // Note that this function will possibly mutate the Agent record
     const adjustAgentData = (data: Agent | Agent[], methodName: string): void => {
       const agentsData = Array.isArray(data) ? data : [data];
       const updatesDone: string[] = [];
@@ -139,36 +148,73 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       }
     };
 
-    const getAgentInterceptor: AgentClient['getAgent'] = async (agentId) => {
-      const agent = await agentClient.getAgent(agentId);
-      adjustAgentData(agent, 'getAgent');
-      return agent;
+    interface AgentClientTrapHandlers {
+      getAgentInterceptor: AgentClient['getAgent'];
+      getByIdsInterceptor: AgentClient['getByIds'];
+      listAgentsInterceptor: AgentClient['listAgents'];
+    }
+    const trapHandlers: AgentClientTrapHandlers = {
+      getAgentInterceptor: async (agentId) => {
+        const agent = await agentClient.getAgent(agentId);
+        adjustAgentData(agent, 'getAgent');
+        return agent;
+      },
+
+      getByIdsInterceptor: async (agentIds, options) => {
+        const agents = await agentClient.getByIds(agentIds, options);
+        adjustAgentData(agents, 'getByIds');
+        return agents;
+      },
+
+      listAgentsInterceptor: async (options) => {
+        const agents = await agentClient.listAgents(options);
+        adjustAgentData(agents.agents, 'listAgents');
+        return agents;
+      },
     };
 
-    const getByIdsInterceptor: AgentClient['getByIds'] = async (agentIds, options) => {
-      const agents = await agentClient.getByIds(agentIds, options);
-      adjustAgentData(agents, 'getByIds');
-      return agents;
-    };
-
-    const listAgentsInterceptor: AgentClient['listAgents'] = async (options) => {
-      const agents = await agentClient.listAgents(options);
-      adjustAgentData(agents.agents, 'listAgents');
-      return agents;
-    };
+    let hasJestSpyMocks = false;
 
     return new Proxy(agentClient, {
       get: (target, prop, receiver) => {
         switch (prop) {
           case 'getAgent':
-            return getAgentInterceptor;
+            return trapHandlers.getAgentInterceptor;
           case 'getByIds':
-            return getByIdsInterceptor;
+            return trapHandlers.getByIdsInterceptor;
           case 'listAgents':
-            return listAgentsInterceptor;
+            return trapHandlers.listAgentsInterceptor;
+          case HAS_JEST_SPY_MOCKS:
+            return hasJestSpyMocks;
+          case PROXY_TRAP_HANDLERS:
+            return trapHandlers;
         }
 
         return Reflect.get(target, prop, receiver);
+      },
+
+      set: (target, prop, value): boolean => {
+        // DO not forward internal wrapped properties to the target (the real AgentClient)
+        switch (prop) {
+          case HAS_JEST_SPY_MOCKS:
+            hasJestSpyMocks = Boolean(value);
+            return true;
+          case PROXY_TRAP_HANDLERS:
+            return true;
+        }
+
+        return Reflect.set(target, prop, value);
+      },
+
+      defineProperty(target, property, descriptor): boolean {
+        // DO not forward internal wrapped properties to the target (the real AgentClient)
+        switch (property) {
+          case HAS_JEST_SPY_MOCKS:
+          case PROXY_TRAP_HANDLERS:
+            return true;
+        }
+
+        return Reflect.defineProperty(target, property, descriptor);
       },
     });
   };

@@ -15,7 +15,11 @@ import type {
   EndpointFleetServicesFactoryInterface,
   EndpointInternalFleetServicesInterface,
 } from './endpoint_fleet_services_factory';
-import { EndpointFleetServicesFactory } from './endpoint_fleet_services_factory';
+import {
+  PROXY_TRAP_HANDLERS,
+  EndpointFleetServicesFactory,
+  HAS_JEST_SPY_MOCKS,
+} from './endpoint_fleet_services_factory';
 import { createSavedObjectsClientFactoryMock } from '../saved_objects/saved_objects_client_factory.mocks';
 
 export type EndpointInternalFleetServicesInterfaceMocked =
@@ -73,12 +77,20 @@ export const createEndpointFleetServicesFactoryMock = (
     jest.spyOn(fleetInternalServicesMocked, 'getSoClient');
     jest.spyOn(fleetInternalServicesMocked, 'isEndpointPackageInstalled');
 
-    // Because of changes done to the factory to wrap the Agent Service client with Proxy, we also now
-    // need to convert these methods to jest mock functions
-    // handle striping out the version suffix from `policy_id` field
-    jest.spyOn(fleetInternalServicesMocked.agent, 'getAgent');
-    jest.spyOn(fleetInternalServicesMocked.agent, 'getByIds');
-    jest.spyOn(fleetInternalServicesMocked.agent, 'listAgents');
+    // Because of changes done to the factory to wrap the Agent Service client with Proxy, we now
+    // need to also apply jest spy/mock functions to the proxy trap handlers, so that tests can
+    // continue to apply mocks to those AgnetClient methods.
+    // @ts-expect-error due to `HAS_JEST_SPY_MOCKS` not being a property of `fleetInternalServicesMocked.agent`
+    if (!fleetInternalServicesMocked.agent[HAS_JEST_SPY_MOCKS]) {
+      // @ts-expect-error due to `PROXY_TRAP_HANDLERS` not being a property of `fleetInternalServicesMocked.agent`
+      Object.keys(fleetInternalServicesMocked.agent[PROXY_TRAP_HANDLERS]).forEach((key) => {
+        // @ts-expect-error
+        jest.spyOn(fleetInternalServicesMocked.agent[PROXY_TRAP_HANDLERS], key);
+      });
+
+      // @ts-expect-error due to `HAS_JEST_SPY_MOCKS` not being a property of `fleetInternalServicesMocked.agent`
+      fleetInternalServicesMocked.agent[HAS_JEST_SPY_MOCKS] = true;
+    }
 
     return fleetInternalServicesMocked;
   });
