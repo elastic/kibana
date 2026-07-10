@@ -104,10 +104,13 @@ export function useAiPanelHtml({
           if (controller.signal.aborted) return;
           try {
             setHtml(fillTemplate(template, columns, values ?? []));
-          } catch {
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error('[ai_panel] failed to render template', err);
             setError(
               i18n.translate('xpack.aiPanel.error.templateRender', {
-                defaultMessage: 'Template error — please edit the prompt to regenerate.',
+                defaultMessage:
+                  "Couldn't render the panel. Try simplifying the request — for example, asking for one visualization at a time.",
               })
             );
           }
@@ -158,10 +161,13 @@ export function useAiPanelHtml({
         }
         try {
           rendered = fillTemplate(cleaned, esqlData.columns, esqlData.values ?? []);
-        } catch {
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error('[ai_panel] failed to render template', err);
           setError(
             i18n.translate('xpack.aiPanel.error.templateRender', {
-              defaultMessage: 'Template error — please edit the prompt to regenerate.',
+              defaultMessage:
+                "Couldn't render the panel. Try simplifying the request — for example, asking for one visualization at a time.",
             })
           );
           setIsLoading(false);

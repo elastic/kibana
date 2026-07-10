@@ -45,6 +45,7 @@ export interface EditAiPanelFlyoutProps {
   esqlQuery: string | undefined;
   template: string | undefined;
   timeRange: { from: string; to: string } | undefined;
+  hasGenerationFailed: boolean;
   onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
   onAgentUpdate: (params: UpdateAiPanelConfigParams) => void;
   onClose: () => void;
@@ -56,6 +57,7 @@ export const EditAiPanelFlyout = ({
   esqlQuery,
   template,
   timeRange,
+  hasGenerationFailed,
   onSave,
   onAgentUpdate,
   onClose,
@@ -198,7 +200,16 @@ export const EditAiPanelFlyout = ({
           initialIsOpen={false}
           paddingSize="m"
         >
-          {template === undefined && !draftTemplate ? (
+          {template === undefined && !draftTemplate && hasGenerationFailed ? (
+            <EuiText size="s" color="subdued">
+              <p>
+                {i18n.translate('xpack.aiPanel.editFlyout.templateGenerationFailed', {
+                  defaultMessage:
+                    "Generation failed, so there's no template yet. Refine the request in chat and try again.",
+                })}
+              </p>
+            </EuiText>
+          ) : template === undefined && !draftTemplate ? (
             <EuiText size="s" color="subdued">
               <p>
                 {i18n.translate('xpack.aiPanel.editFlyout.templateGenerating', {

@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiEmptyPrompt, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useAiPanelHtml } from '../hooks/use_ai_panel_html';
 
 interface AiPanelComponentProps {
@@ -19,6 +19,7 @@ interface AiPanelComponentProps {
   generationVersion: number;
   savedTemplate: string | undefined;
   onTemplateChange: (template: string) => void;
+  onErrorChange?: (error: string | undefined) => void;
 }
 
 const iframeContainerCss = css({
@@ -44,6 +45,7 @@ export const AiPanelComponent = ({
   generationVersion,
   savedTemplate,
   onTemplateChange,
+  onErrorChange,
 }: AiPanelComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const { html, isLoading, error, isAiUnavailable } = useAiPanelHtml({
@@ -56,6 +58,10 @@ export const AiPanelComponent = ({
     colorMode,
     onTemplateChange,
   });
+
+  useEffect(() => {
+    onErrorChange?.(error);
+  }, [error, onErrorChange]);
 
   const wrapperCss = useMemo(
     () =>

@@ -57,6 +57,7 @@ const defaultProps = {
   esqlQuery: undefined as string | undefined,
   template: undefined,
   timeRange: undefined,
+  hasGenerationFailed: false,
   onSave: jest.fn(),
   onAgentUpdate: jest.fn(),
   onClose: jest.fn(),
@@ -100,6 +101,12 @@ describe('EditAiPanelFlyout', () => {
   it('shows the template editor once a template is available', () => {
     mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftTemplate: '<p>hi</p>' });
     render(<EditAiPanelFlyout {...defaultProps} template="<p>hi</p>" />);
+    expect(screen.queryByText(/Still generating/)).not.toBeInTheDocument();
+  });
+
+  it('shows a generation-failed message instead of "still generating" when generation failed', () => {
+    render(<EditAiPanelFlyout {...defaultProps} template={undefined} hasGenerationFailed />);
+    expect(screen.getByText(/Generation failed/)).toBeInTheDocument();
     expect(screen.queryByText(/Still generating/)).not.toBeInTheDocument();
   });
 

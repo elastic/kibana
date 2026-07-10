@@ -125,6 +125,7 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
         );
 
         const [generationVersion, setGenerationVersion] = useState(0);
+        const [generationError, setGenerationError] = useState<string | undefined>(undefined);
         const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
           apiPublishesTimeRange(parentApi)
             ? parentApi.timeRange$.getValue() ?? undefined
@@ -172,6 +173,7 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
               generationVersion={generationVersion}
               savedTemplate={savedTemplate}
               onTemplateChange={onTemplateChange}
+              onErrorChange={setGenerationError}
             />
             {isEditFlyoutOpen && (
               <EditAiPanelFlyout
@@ -180,6 +182,7 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
                 esqlQuery={esqlQuery}
                 template={savedTemplate}
                 timeRange={timeRange}
+                hasGenerationFailed={Boolean(generationError)}
                 onSave={onSave}
                 onAgentUpdate={onAgentUpdate}
                 onClose={() => isEditFlyoutOpen$.next(false)}

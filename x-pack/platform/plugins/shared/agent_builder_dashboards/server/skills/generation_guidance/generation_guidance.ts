@@ -27,6 +27,7 @@ For a new dashboard:
 - Use \`add_section\` when panels naturally group into distinct topics or the dashboard is large enough that sections improve scanability. Include \`panels\` on the section when you can create that section's initial panels immediately.
 
 For an existing dashboard:
+- Use \`add_panels\` to add new panels — same batching rule as for a new dashboard: a single \`add_panels\` call may mix panel kinds and target different \`sectionId\` values, so batch related new panels together rather than calling it once per panel.
 - Prefer \`edit_panels\` to change existing panel content in place rather than removing and re-adding a panel.
 - If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
 - Use \`update_panel_layouts\` to resize, reposition, or move existing panels between top-level and sections without changing panel content.
@@ -35,6 +36,7 @@ For an existing dashboard:
 
 - Use \`source: "request"\` to create or edit a Lens panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a Lens \`config\` for a new visualization.
 - Use \`source: "config"\` only for content you have already resolved (an existing visualization's config, or markdown). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
+- An \`ai_panel\` panel renders from at most one ES|QL query. If a requested panel actually describes multiple different aggregations or groupings (e.g. a total, a top-N-by-category breakdown, and a top-N-by-customer ranking, in the same panel) — create one \`ai_panel\` per grouping instead of combining them into a single panel. Combining incompatible groupings into one \`ai_panel\` produces a query/template that cannot render correctly.
 
 ${dashboardDesignGuidancePrompt}
 
