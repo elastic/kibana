@@ -10,7 +10,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
@@ -173,6 +173,7 @@ const mockUseKibanaReturnValue = {
       get: jest.fn(),
       set: jest.fn(),
     },
+    telemetry: { reportEvent: jest.fn() },
     theme: {
       getTheme: jest.fn().mockReturnValue({ darkMode: false }),
     },
@@ -360,6 +361,46 @@ describe('AttackDiscovery', () => {
       );
 
       expect(screen.queryByTestId(CALLOUT_TEST_DATA_ID)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('workflows insufficient privileges callout', () => {
+    afterEach(() => {
+      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
+    });
+
+    it('renders the insufficient privileges callout when workflows are enabled but privileges are missing', async () => {
+      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(true);
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Insufficient privileges')).toBeInTheDocument();
+      });
+    });
+
+    it('does not render the insufficient privileges callout when workflows are disabled', () => {
+      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+
+      expect(screen.queryByText('Insufficient privileges')).not.toBeInTheDocument();
     });
   });
 });
