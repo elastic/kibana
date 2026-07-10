@@ -49,10 +49,12 @@ export function buildChangePointTimeSeriesAggs(
   {
     useDistinctSignalCount,
     includeFloorWindow = false,
+    recentActivityMinutes = RECENT_ACTIVITY_MINUTES,
     extendedBounds,
   }: {
     useDistinctSignalCount: boolean;
     includeFloorWindow?: boolean;
+    recentActivityMinutes?: number;
     extendedBounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
   }
 ): Record<string, AggregationsAggregationContainer> {
@@ -61,8 +63,8 @@ export function buildChangePointTimeSeriesAggs(
     ? { ...buildDateHistogramAgg(bucketInterval, extendedBounds), aggs: SIGNAL_COUNT_CARDINALITY }
     : buildDateHistogramAgg(bucketInterval, extendedBounds);
   const last5m: AggregationsAggregationContainer = useDistinctSignalCount
-    ? { filter: timestampGteFilter(RECENT_ACTIVITY_MINUTES), aggs: SIGNAL_COUNT_CARDINALITY }
-    : { filter: timestampGteFilter(RECENT_ACTIVITY_MINUTES) };
+    ? { filter: timestampGteFilter(recentActivityMinutes), aggs: SIGNAL_COUNT_CARDINALITY }
+    : { filter: timestampGteFilter(recentActivityMinutes) };
 
   const aggs: Record<string, AggregationsAggregationContainer> = {
     over_time: overTime,
