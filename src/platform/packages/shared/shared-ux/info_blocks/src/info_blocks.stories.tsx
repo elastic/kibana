@@ -147,8 +147,7 @@ export const Compressed: Story = {
   render: () => <CompressedDemo />,
 };
 
-// A mix of "big number" values and regular values. "Severity" shares a row with
-// the big-number "Healthy" block to show both cells take the same row height.
+// A mix of large and regular values.
 const BIG_NUMBER_ITEMS: InfoBlockItem[] = [
   { title: 'Risk score', value: '90', size: 'xl' },
   ...SAMPLE_ITEMS.slice(0, 3),
@@ -162,10 +161,7 @@ export const BigNumber: Story = {
   },
 };
 
-// A leading "big number" block followed by a leading spacer, so the rest of row
-// 1 stays blank and real content resumes on row 2. The spacer adapts to
-// the live column count: at 2 columns it fills 1 remaining cell, at 3 columns
-// it fills 2. Drive the width (or the 3 -> 2 -> 1 collapse) to see it adapt.
+// Starts regular content on the next row.
 const LEADING_SPACER_ITEMS: InfoBlocksItem[] = [
   { title: 'Risk score', value: '90', size: 'xl' },
   LEADING_SPACER,
@@ -188,8 +184,7 @@ export const LeadingSpacer: StoryObj<DefaultArgs> = {
   ),
 };
 
-// One block's value is an inline SVG that is 280px tall. The tall block sets its
-// row height; row-mates stretch and keep their content top-aligned.
+// Tall content sets the row height.
 const TALL_SVG = (
   <svg
     width="100%"
@@ -224,8 +219,7 @@ export const InlineSvg: Story = {
 // No-op handler for the interactive controls below.
 const noop = () => {};
 
-// A truncating link with a trailing copy action, matching the SAMPLE_ITEMS
-// "Resource" pattern.
+// A truncating link with a trailing copy action.
 const RESOURCE_LINK = (
   <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
     <EuiFlexItem
@@ -258,9 +252,7 @@ const RESOURCE_LINK = (
   </EuiFlexGroup>
 );
 
-// Each value is arbitrary interactive/actionable content: icon buttons, a
-// text+icon button, an avatar, a badge, brand/logo images, a health indicator,
-// and a truncating link with a copy action. No component change is required.
+// Examples of custom value content.
 const ACTIONABLE_ITEMS: InfoBlockItem[] = [
   {
     title: 'Assigned',

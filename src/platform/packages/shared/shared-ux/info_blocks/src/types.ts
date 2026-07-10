@@ -15,22 +15,14 @@ export interface InfoBlockItem {
   title: string;
   /** Arbitrary content rendered as the block value. */
   value: ReactNode;
-  /**
-   * Renders the value at the given EUI font scale (e.g. `'xl'` for a larger
-   * value), via `euiFontSize`. The title is unaffected. When omitted, the
-   * value uses the default text size. Ignored when `compressed` is true.
-   */
+  /** Optional EUI font scale for the value; ignored when compressed. */
   size?: _EuiThemeFontScale;
   /** Color for the value text, passed through to `EuiText` (e.g. `'success'`). */
   color?: EuiTextProps['color'];
   'data-test-subj'?: string;
 }
 
-/**
- * A "leading spacer": fills the remainder of its current row, adapting to the
- * live column count, so the following block leads a fresh row. It renders no
- * content. Use the {@link LEADING_SPACER} sentinel to add one.
- */
+/** Empty item that fills the rest of the row before the next block. */
 export interface LeadingSpacerItem {
   leadingSpacer: true;
 }
@@ -38,10 +30,7 @@ export interface LeadingSpacerItem {
 /** An entry in {@link InfoBlocksProps.items}: a real block or a leading spacer. */
 export type InfoBlocksItem = InfoBlockItem | LeadingSpacerItem;
 
-/**
- * Sentinel that fills the rest of its row so the following block leads a fresh
- * row (see {@link LeadingSpacerItem}).
- */
+/** Row-fill sentinel for {@link InfoBlocksProps.items}. */
 export const LEADING_SPACER: LeadingSpacerItem = { leadingSpacer: true };
 
 /** Narrows an {@link InfoBlocksItem} to the leading-spacer variant. */
@@ -56,8 +45,7 @@ export interface InfoBlocksProps {
   items: readonly InfoBlocksItem[];
   /**
    * Compact spacing/sizing. Intended to be driven by the flyout header's
-   * collapsed state. Drops {@link LEADING_SPACER} entries and ignores custom
-   * value sizes so the layout stays dense.
+   * collapsed state.
    */
   compressed?: boolean;
   'data-test-subj'?: string;

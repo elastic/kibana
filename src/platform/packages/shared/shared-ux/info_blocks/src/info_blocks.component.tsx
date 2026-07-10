@@ -16,20 +16,10 @@ import type { InfoBlocksItem, InfoBlocksProps } from './types';
 
 /** Maximum number of columns */
 const MAX_COLUMNS = 3;
-/**
- * Per-block minimum width (px) below which the grid drops a column. This is a
- * fixed design requirement, not an EUI screen breakpoint, so it stays a literal
- * constant rather than a theme value.
- */
+/** Minimum cell width before the grid drops a column. */
 const MIN_BLOCK_WIDTH = 140;
 
-/**
- * Computes the responsive column count from the available width: up to
- * {@link MAX_COLUMNS} columns, collapsing 3 -> 2 -> 1 so no block is narrower
- * than {@link MIN_BLOCK_WIDTH}px, and never more columns than there are items.
- * When the width is unknown (0, e.g. before the first measurement) it assumes
- * the maximum.
- */
+/** Pick 1-3 columns from measured width and visible item count. */
 export const getInfoBlocksColumnCount = (width: number, itemCount: number): number => {
   const fitColumns = width > 0 ? Math.floor(width / MIN_BLOCK_WIDTH) : MAX_COLUMNS;
   return Math.max(1, Math.min(MAX_COLUMNS, fitColumns, itemCount || 1));
@@ -41,11 +31,7 @@ export interface InfoBlockCellLayout {
   columnStart: number;
   /** Number of columns the cell spans (1 for a real block). */
   span: number;
-  /**
-   * True when the cell reaches the last grid column (the container's right
-   * edge); such a cell draws no inline-end (vertical) divider. A real block
-   * followed by a leading spacer is NOT last-column, so it keeps its divider.
-   */
+  /** Whether the cell reaches the trailing grid edge. */
   isLastColumn: boolean;
   /** True when a real block exists in a later row (drives the horizontal divider). */
   hasRowBelow: boolean;
@@ -53,12 +39,7 @@ export interface InfoBlockCellLayout {
   isSpacer: boolean;
 }
 
-/**
- * Single layout pass over the items for a given column count. A real block
- * spans one column; a leading spacer spans the rest of its row and pushes the
- * next block onto a fresh row. Divider hints are derived here so placement and
- * dividers stay in sync (see the pseudo-element notes in {@link InfoBlocks}).
- */
+/** Places items in grid order and derives divider flags. */
 export const getInfoBlocksLayout = (
   items: readonly InfoBlocksItem[],
   columns: number
@@ -78,8 +59,7 @@ export const getInfoBlocksLayout = (
       row += 1;
     }
   }
-  // Highest row index that holds a real block; a trailing spacer row never draws
-  // a horizontal divider above it.
+  // Trailing spacer-only rows do not count as content.
   const lastContentRow = placed.reduce(
     (last, cell) => (cell.isSpacer ? last : Math.max(last, cell.row)),
     -1
@@ -93,26 +73,20 @@ export const getInfoBlocksLayout = (
   }));
 };
 
-/**
- * Responsive "info blocks" card. Blocks lay out in up to {@link MAX_COLUMNS}
- * columns and collapse 3 -> 2 -> 1 as the container narrows, so no block ever
- * shrinks below {@link MIN_BLOCK_WIDTH}px. Does not stick on scroll.
- */
+/** Responsive card for a small set of labeled values. */
 export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compressed, ...rest }) => {
   const { euiTheme } = useEuiTheme();
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const { width } = useResizeObserver(container);
 
-  // Leading spacers only exist to shape the full layout; the compressed layout
-  // drops them so it stays dense.
+  // Compressed mode drops row-shaping spacers.
   const visibleItems = compressed ? items.filter((item) => !isLeadingSpacer(item)) : items;
   const columns = getInfoBlocksColumnCount(width, visibleItems.length);
   const layout = getInfoBlocksLayout(visibleItems, columns);
   const cellPadding = compressed ? euiTheme.size.s : euiTheme.size.m;
   const dividerColor = euiTheme.border.color;
   const dividerThickness = euiTheme.border.width.thin;
-  // Dividers stop this far short of the grid corners so the lines never meet
-  // at the intersections.
+  // Keep divider ends off the card corners.
   const dividerCornerGap = euiTheme.size.base;
 
   return (
@@ -128,13 +102,8 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
       `}
     >
       {visibleItems.map((item, index) => {
-        // Placement + divider hints come from the single layout pass so they
-        // stay correct across leading spacers and the live column count.
         const cell = layout[index];
 
-        // A leading spacer renders no content and no vertical divider, but it
-        // still carries the horizontal divider so that line stays continuous
-        // across the whole container.
         if (isLeadingSpacer(item)) {
           return (
             <div
@@ -161,17 +130,7 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, compress
           );
         }
 
-        // Dividers are drawn as pseudo-elements.
-        //  - ::before = vertical divider on the inline-END of a cell that is
-        //    not the last column, inset from top/bottom by dividerCornerGap so
-        //    it stops short of the corners. A real block followed by a leading
-        //    spacer keeps this divider (it is not the last column), and a
-        //    partial trailing row keeps the divider beside its last filled block.
-        //  - ::after = horizontal divider between rows, drawn on the block-END
-        //    of every cell (including leading spacers) that has a row below it, so
-        //    the line spans the whole container width and stays SOLID through
-        //    the interior column intersections — only the outer ends inset by
-        //    the gap.
+        // Cell dividers are pseudo-elements so content layout stays simple.
         const isFirstColumn = cell.columnStart === 0;
         return (
           <div

@@ -16,10 +16,7 @@ export interface InfoBlockProps extends InfoBlockItem {
   compressed?: boolean;
 }
 
-/**
- * A single info block: a fixed-style text title above an arbitrary node value.
- * Layout (columns, spacing) is owned by {@link InfoBlocks}.
- */
+/** Fixed-style title/value block used by {@link InfoBlocks}. */
 export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   title,
   value,
@@ -30,14 +27,9 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
 }) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
-  // When `size` is set, the value renders at that EUI font scale. In the
-  // compressed layout the custom size is suppressed so the value matches the
-  // surrounding text.
   const valueFontSize =
     size && !compressed ? euiFontSize(euiThemeContext, size, { unit: 'px' }) : undefined;
-  // Plain text values (and titles) truncate to a single line via
-  // EuiTextTruncate so a long string never overflows its column. Node values
-  // (badges, links, images) manage their own layout and render as-is.
+  // Primitive values get built-in single-line truncation.
   const isTextValue = typeof value === 'string' || typeof value === 'number';
   return (
     <div
