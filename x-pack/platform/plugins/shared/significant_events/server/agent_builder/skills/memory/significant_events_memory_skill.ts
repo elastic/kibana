@@ -6,8 +6,8 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import type { MemoryToolsOptions } from '../tools/memory';
-import { createMemoryTools } from '../tools/memory';
+import type { MemoryToolsOptions } from '../../tools/memory';
+import { createMemoryTools } from '../../tools/memory';
 import description from './significant_events_memory.description.text';
 import content from './significant_events_memory.skill.md.text';
 

@@ -6,7 +6,7 @@
  */
 
 import type { FeatureFlagsStart } from '@kbn/core/server';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG } from '../../../common/feature_flags';
+import { SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG } from '../../../common/investigation';
 
 export const isInvestigationEnabled = (featureFlags: FeatureFlagsStart) =>
   featureFlags.getBooleanValue(SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG, false);

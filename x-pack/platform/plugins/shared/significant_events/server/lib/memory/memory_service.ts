@@ -17,7 +17,7 @@ import type { IDataStreamClient } from '@kbn/data-streams';
 import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
 import { createMemoryHistoryStorage } from './history_storage';
 import { memoriesDataStream, type memoriesMappings, type StoredMemoryPage } from './data_stream';
-import { MEMORIES_DATA_STREAM } from '../../../common/constants';
+import { MEMORIES_DATA_STREAM } from '../../../common/memory';
 import { resolveSearchMode, type SearchMode } from '../../../common/queries';
 import { bulkCreateWithInferenceFallback } from '../knowledge_indicators/knowledge_indicator_client/bulk_with_inference_fallback';
 import type {

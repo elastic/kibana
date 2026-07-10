@@ -7,13 +7,11 @@
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { MemoryToolsOptions } from '../tools/memory';
+import type { MemoryToolsOptions } from '../../tools/memory';
 import { createSignificantEventsMemorySkill } from './significant_events_memory_skill';
-import {
-  createMemorySynthesisSkill,
-  createMemoryConsolidationSkill,
-  createConversationScraperSkill,
-} from './memory';
+import { createMemorySynthesisSkill } from './memory_synthesis_skill';
+import { createMemoryConsolidationSkill } from './memory_consolidation_skill';
+import { createConversationScraperSkill } from './conversation_scraper_skill';
 
 const MEMORY_SKILL_FACTORIES = [
   { id: 'significant-events-memory', create: createSignificantEventsMemorySkill },

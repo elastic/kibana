@@ -1076,7 +1076,7 @@ x-pack/platform/packages/shared/kbn-inference-prompt-utils @elastic/appex-ai-inf
 x-pack/platform/packages/shared/kbn-inference-tracing @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing-config @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-ink @elastic/streams-program-team
-x-pack/platform/packages/shared/kbn-investigation-output @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-investigation-output @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-threat-hunting
@@ -1891,6 +1891,23 @@ x-pack/platform/plugins/shared/significant_events/common/slack_app @elastic/nigh
 x-pack/platform/plugins/shared/significant_events/server/routes/internal/apps/slack @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/shared/streams_app/public/components/significant_events/significant_events_discovery/components/settings/apps_section @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-significant-events-schema/src/relay_client.ts @elastic/nightshift-context-and-research-team
+
+# Significant Events - Memory feature (owned by Nightshift context & research)
+x-pack/platform/plugins/shared/significant_events/server/lib/memory @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/server/routes/internal/memory @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/server/agent_builder/tools/memory @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/server/agent_builder/skills/memory @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/server/agent_builder/hooks/memory @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/common/memory.ts @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory @elastic/nightshift-context-and-research-team
+
+# Significant Events - Investigation feature (owned by Nightshift context & research)
+x-pack/platform/plugins/shared/significant_events/server/lib/investigations @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/server/agent_builder/agents/investigation @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/server/agent_builder/tools/event_investigation_attach @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/server/agent_builder/tools/investigation_progress_report @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/server/agent_builder/skills/investigation_management @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/common/investigation.ts @elastic/nightshift-context-and-research-team
 
 # Streams - Data quality overrides (owned by Kibana Management)
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_data_quality @elastic/kibana-management

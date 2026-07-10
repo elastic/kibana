@@ -12,8 +12,7 @@ import type { MemoryToolsOptions } from '../tools/memory';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
 import { sigEventsManagementSkill } from './significant_events_management';
-import { createSigEventsOnboardingSkill } from './significant_events_onboarding_skill';
-import { createGapDetectionSkill } from './memory';
+import { createSigEventsOnboardingSkill, createGapDetectionSkill } from './memory';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,

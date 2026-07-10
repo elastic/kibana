@@ -51,7 +51,7 @@ import {
 } from './lib/significant_events/significant_events_clients';
 import { createMemoryToolsOptions, registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
-import { registerStreamsMemoryAgentBuilder } from './agent_builder/skills/register_memory_skills';
+import { registerStreamsMemoryAgentBuilder } from './agent_builder/skills/memory/register';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import {
   createContinuousKiOnboardingWorkflowService,
@@ -65,10 +65,8 @@ import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 import { isInvestigationEnabled } from './lib/investigations/is_investigation_enabled';
 import { installInvestigationWorkflow } from './lib/investigations/install_investigation_workflow';
-import {
-  SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG,
-  SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
-} from '../common/feature_flags';
+import { SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG } from '../common/investigation';
+import { SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../common/memory';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significant_events';
