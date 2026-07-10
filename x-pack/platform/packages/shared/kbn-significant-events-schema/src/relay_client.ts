@@ -24,10 +24,8 @@ export interface RelayInstallRequest {
   kibana_url: string;
   /** The Kibana version of the connecting deployment, e.g. `9.2.0`. */
   kibana_version: string;
-  /** Deployment license, used by the Relay to gate tenant features. */
-  license_info: {
-    type: LicenseType;
-  };
+  /** Deployment license type, used by the Relay to gate tenant features. */
+  license_info: LicenseType;
   /** Optional audit marker for who initiated the install. */
   created_by_user_key?: string;
 }

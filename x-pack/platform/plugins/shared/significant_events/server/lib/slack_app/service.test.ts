@@ -124,7 +124,7 @@ describe('SlackAppService', () => {
         kibana_api_key: Buffer.from('key-1:secret').toString('base64'),
         kibana_url: 'https://kibana.test',
         kibana_version: '9.2.0',
-        license_info: { type: 'platinum' },
+        license_info: 'platinum',
         created_by_user_key: 'admin',
       });
       expect(soClient.create).toHaveBeenCalledWith(

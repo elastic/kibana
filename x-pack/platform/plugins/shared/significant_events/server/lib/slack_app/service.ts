@@ -155,7 +155,7 @@ export class SlackAppService {
         kibana_api_key: encodedApiKey,
         kibana_url: getKibanaUrl(this.server.core, this.server.cloud),
         kibana_version: this.server.kibanaVersion,
-        license_info: { type: license.type ?? 'basic' },
+        license_info: license.type ?? 'basic',
         ...(username ? { created_by_user_key: username } : {}),
       });
     } catch (error) {

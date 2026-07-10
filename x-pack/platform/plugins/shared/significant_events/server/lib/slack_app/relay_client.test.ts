@@ -46,7 +46,7 @@ describe('RelayClient', () => {
       kibana_api_key: 'a'.repeat(64),
       kibana_url: 'https://kibana.test',
       kibana_version: '9.2.0',
-      license_info: { type: 'platinum' },
+      license_info: 'platinum',
       created_by_user_key: 'admin',
     });
 
@@ -61,7 +61,7 @@ describe('RelayClient', () => {
       kibana_api_key: 'a'.repeat(64),
       kibana_url: 'https://kibana.test',
       kibana_version: '9.2.0',
-      license_info: { type: 'platinum' },
+      license_info: 'platinum',
       created_by_user_key: 'admin',
     });
   });
@@ -113,7 +113,7 @@ describe('RelayClient', () => {
         kibana_api_key: 'a'.repeat(64),
         kibana_url: 'https://kibana.test',
         kibana_version: '9.2.0',
-        license_info: { type: 'platinum' },
+        license_info: 'platinum',
       })
       .then(() => undefined)
       .catch((e) => e);
