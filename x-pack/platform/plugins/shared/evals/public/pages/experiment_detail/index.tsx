@@ -219,11 +219,7 @@ export const ExperimentDetailPage: React.FC = () => {
     error: experimentError,
     refetch: refetchExperiment,
   } = useEvaluationExperiment(experimentId, executionId, {
-    // Only poll once scores start landing (to stream stats in). Before that the
-    // experiment document does not exist, so polling would 404 continuously; once
-    // the run settles we stop, since a run that ingested no scores never becomes a
-    // queryable experiment.
-    refetchInterval: isLaunching && anyScoresIngested && !runSettled ? 3000 : false,
+    refetchInterval: isLaunching && !runSettled ? 3000 : false,
   });
 
   // Fetch the experiment as soon as scores appear, and once more when the run
@@ -340,6 +336,30 @@ export const ExperimentDetailPage: React.FC = () => {
     return Array.from(groupedStats.values()).sort((a, b) =>
       a.datasetName.localeCompare(b.datasetName)
     );
+  }, [experimentDetail?.stats]);
+
+  // Live progress derived from the scores already aggregated in Elasticsearch —
+  // the same source the results table streams from. The workflow step's own
+  // counters advance only per batch (and read 0 during a single in-flight batch),
+  // so we use these to floor the run-progress line and keep it consistent with
+  // the results shown below it.
+  const streamedProgress = useMemo(() => {
+    const stats = experimentDetail?.stats;
+    if (!stats || stats.length === 0) {
+      return undefined;
+    }
+    const esScoresIngested = stats.reduce((sum, stat) => sum + (stat.stats.count ?? 0), 0);
+    const exampleCountByDataset = new Map<string, number>();
+    for (const stat of stats) {
+      if (!exampleCountByDataset.has(stat.dataset_id)) {
+        exampleCountByDataset.set(stat.dataset_id, stat.example_count ?? 0);
+      }
+    }
+    const esExamplesDone = Array.from(exampleCountByDataset.values()).reduce(
+      (sum, value) => sum + value,
+      0
+    );
+    return { scoresIngested: esScoresIngested, examplesDone: esExamplesDone };
   }, [experimentDetail?.stats]);
 
   const statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>> = useMemo(
@@ -543,7 +563,7 @@ export const ExperimentDetailPage: React.FC = () => {
               )}
             </EuiFlexGroup>
             <EuiSpacer size="m" />
-            <WorkflowRunProgress executions={workflowExecutions} />
+            <WorkflowRunProgress executions={workflowExecutions} progressFloor={streamedProgress} />
             <EuiSpacer size="l" />
           </>
         )}

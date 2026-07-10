@@ -408,10 +408,6 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
       });
     },
     keepPreviousData: true,
-    // This is the page users return to right after launching a run, so always
-    // refetch on mount; otherwise the global 30s staleTime serves a cached list
-    // that is missing the just-run experiment. `keepPreviousData` avoids a flash
-    // while the fresh list loads.
     refetchOnMount: 'always',
     retry: (_failureCount, error) => {
       if (isHttpFetchError(error)) {

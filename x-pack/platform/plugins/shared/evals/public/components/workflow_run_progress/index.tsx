@@ -32,6 +32,12 @@ const EVALUATE_DATASET_STEP_TYPE = 'evals.evaluateDataset';
 
 const isTerminal = (status: string) => TERMINAL_STATUSES.has(status);
 
+/** ES-derived live counts used to floor a running step's own (batched) counters. */
+interface DatasetProgressFloor {
+  scoresIngested: number;
+  examplesDone: number;
+}
+
 const statusColor = (status: string): EuiBadgeProps['color'] => {
   switch (status) {
     case 'completed':
@@ -52,13 +58,24 @@ const cancelLabel = i18n.translate('xpack.evals.runProgress.cancel', {
   defaultMessage: 'Cancel run',
 });
 
-const DatasetStepProgress: React.FC<{ step: ExperimentExecutionStepStatus }> = ({ step }) => {
+const DatasetStepProgress: React.FC<{
+  step: ExperimentExecutionStepStatus;
+  progressFloor?: DatasetProgressFloor;
+}> = ({ step, progressFloor }) => {
   const progress = step.progress;
   const total = progress?.total;
-  const done = (progress?.completed ?? 0) + (progress?.failed ?? 0);
   const errors = progress?.errors;
 
   const settled = isTerminal(step.status);
+  const rawDone = (progress?.completed ?? 0) + (progress?.failed ?? 0);
+  // While a batch is in flight the step's own counters read 0, so floor them with
+  // the ES-derived live counts to match the streamed results. Once settled the
+  // step output is authoritative, so use it as-is.
+  const done = settled ? rawDone : Math.max(rawDone, progressFloor?.examplesDone ?? 0);
+  const scores = settled
+    ? progress?.scores_ingested ?? 0
+    : Math.max(progress?.scores_ingested ?? 0, progressFloor?.scoresIngested ?? 0);
+
   const knownTotal = typeof total === 'number' && total > 0 ? total : undefined;
   const max = knownTotal ?? Math.max(done, 1);
   // Show the indeterminate (animated) bar only while the step is running and
@@ -77,7 +94,7 @@ const DatasetStepProgress: React.FC<{ step: ExperimentExecutionStepStatus }> = (
             done,
             total: total ?? '?',
             failed: progress?.failed ?? 0,
-            scores: progress?.scores_ingested ?? 0,
+            scores,
           },
         })}
       </EuiText>
@@ -120,10 +137,11 @@ const DatasetStepProgress: React.FC<{ step: ExperimentExecutionStepStatus }> = (
   );
 };
 
-const WorkflowExecutionCard: React.FC<{ execution: WorkflowExecutionView; label?: string }> = ({
-  execution,
-  label,
-}) => {
+const WorkflowExecutionCard: React.FC<{
+  execution: WorkflowExecutionView;
+  label?: string;
+  progressFloor?: DatasetProgressFloor;
+}> = ({ execution, label, progressFloor }) => {
   const { id: workflowExecutionId, data, isError } = execution;
   const { services } = useKibana();
   const toasts = services.notifications?.toasts;
@@ -226,7 +244,7 @@ const WorkflowExecutionCard: React.FC<{ execution: WorkflowExecutionView; label?
           <EuiSpacer size="s" />
           {datasetSteps.map((step) => (
             <React.Fragment key={step.step_id}>
-              <DatasetStepProgress step={step} />
+              <DatasetStepProgress step={step} progressFloor={progressFloor} />
               <EuiSpacer size="s" />
             </React.Fragment>
           ))}
@@ -265,6 +283,15 @@ export interface WorkflowRunProgressProps {
   executions: WorkflowExecutionView[];
   /** Optional human label (e.g. model name) rendered on each card, by execution id. */
   getLabel?: (workflowExecutionId: string) => string | undefined;
+  /**
+   * Live counts derived from the scores already aggregated in Elasticsearch. The
+   * step's own counters advance only per batch and read 0 during a single
+   * in-flight batch, so the displayed counters are floored with these to stay
+   * consistent with the streamed results. Only applied when the run has exactly
+   * one dataset step (the unambiguous common case); dataset fan-out runs fall
+   * back to per-step counters.
+   */
+  progressFloor?: DatasetProgressFloor;
 }
 
 /**
@@ -276,16 +303,32 @@ export interface WorkflowRunProgressProps {
 export const WorkflowRunProgress: React.FC<WorkflowRunProgressProps> = ({
   executions,
   getLabel,
+  progressFloor,
 }) => {
   if (executions.length === 0) {
     return null;
   }
 
+  const datasetStepCount = executions.reduce(
+    (count, execution) =>
+      count +
+      (execution.data?.steps.filter((step) => step.step_type === EVALUATE_DATASET_STEP_TYPE)
+        .length ?? 0),
+    0
+  );
+  // The floor is an experiment-wide total, so only attribute it when there is a
+  // single dataset step to attribute it to.
+  const floor = datasetStepCount === 1 ? progressFloor : undefined;
+
   return (
     <div data-test-subj="evalsWorkflowRunProgress">
       {executions.map((execution) => (
         <React.Fragment key={execution.id}>
-          <WorkflowExecutionCard execution={execution} label={getLabel?.(execution.id)} />
+          <WorkflowExecutionCard
+            execution={execution}
+            label={getLabel?.(execution.id)}
+            progressFloor={floor}
+          />
           <EuiSpacer size="s" />
         </React.Fragment>
       ))}
