@@ -15,57 +15,57 @@ import {
   connectorsMock,
   getCaseUsersMockResponse,
   getUserAction,
-} from '../../../../containers/mock';
-import { noUpdateCasesPermissions, renderWithTestingProviders } from '../../../../common/mock';
+} from '../../../../../containers/mock';
+import { noUpdateCasesPermissions, renderWithTestingProviders } from '../../../../../common/mock';
 import { CaseViewActivity } from './case_view_activity';
-import type { CaseUI } from '../../../../../common';
-import type { CaseViewProps } from '../../../case_view/types';
-import { useFindCaseUserActions } from '../../../../containers/use_find_case_user_actions';
-import { usePostPushToService } from '../../../../containers/use_post_push_to_service';
-import { useGetSupportedActionConnectors } from '../../../../containers/configure/use_get_supported_action_connectors';
-import { useGetTags } from '../../../../containers/use_get_tags';
-import { useGetCategories } from '../../../../containers/use_get_categories';
-import { useGetCaseConnectors } from '../../../../containers/use_get_case_connectors';
-import { useGetCaseUsers } from '../../../../containers/use_get_case_users';
-import { waitForComponentToUpdate } from '../../../../common/test_utils';
-import { getCaseConnectorsMockResponse } from '../../../../common/mock/connectors';
+import type { CaseUI } from '../../../../../../common';
+import type { CaseViewProps } from '../../../../case_view/types';
+import { useFindCaseUserActions } from '../../../../../containers/use_find_case_user_actions';
+import { usePostPushToService } from '../../../../../containers/use_post_push_to_service';
+import { useGetSupportedActionConnectors } from '../../../../../containers/configure/use_get_supported_action_connectors';
+import { useGetTags } from '../../../../../containers/use_get_tags';
+import { useGetCategories } from '../../../../../containers/use_get_categories';
+import { useGetCaseConnectors } from '../../../../../containers/use_get_case_connectors';
+import { useGetCaseUsers } from '../../../../../containers/use_get_case_users';
+import { waitForComponentToUpdate } from '../../../../../common/test_utils';
+import { getCaseConnectorsMockResponse } from '../../../../../common/mock/connectors';
 import {
   defaultInfiniteUseFindCaseUserActions,
   defaultUseFindCaseUserActions,
-} from '../../../case_view/mocks';
-import { useGetCaseUserActionsStats } from '../../../../containers/use_get_case_user_actions_stats';
-import { useInfiniteFindCaseUserActions } from '../../../../containers/use_infinite_find_case_user_actions';
-import { useOnUpdateField } from '../../../case_view/use_on_update_field';
+} from '../../../../case_view/mocks';
+import { useGetCaseUserActionsStats } from '../../../../../containers/use_get_case_user_actions_stats';
+import { useInfiniteFindCaseUserActions } from '../../../../../containers/use_infinite_find_case_user_actions';
+import { useOnUpdateField } from '../../../../case_view/use_on_update_field';
 import {
   AttachmentType,
   ConnectorTypes,
   UserActionTypes,
-} from '../../../../../common/types/domain';
-import { useGetCaseConfiguration } from '../../../../containers/configure/use_get_case_configuration';
-import { useGetCurrentUserProfile } from '../../../../containers/user_profiles/use_get_current_user_profile';
-import { isLegacyAttachmentRequest } from '../../../../../common/utils/attachments';
+} from '../../../../../../common/types/domain';
+import { useGetCaseConfiguration } from '../../../../../containers/configure/use_get_case_configuration';
+import { useGetCurrentUserProfile } from '../../../../../containers/user_profiles/use_get_current_user_profile';
+import { isLegacyAttachmentRequest } from '../../../../../../common/utils/attachments';
 
-jest.mock('../../../../containers/use_infinite_find_case_user_actions');
-jest.mock('../../../../containers/use_find_case_user_actions');
-jest.mock('../../../../containers/use_get_case_user_actions_stats');
-jest.mock('../../../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../../../containers/use_post_push_to_service');
-jest.mock('../../../user_actions/timestamp', () => ({
+jest.mock('../../../../../containers/use_infinite_find_case_user_actions');
+jest.mock('../../../../../containers/use_find_case_user_actions');
+jest.mock('../../../../../containers/use_get_case_user_actions_stats');
+jest.mock('../../../../../containers/configure/use_get_supported_action_connectors');
+jest.mock('../../../../../containers/use_post_push_to_service');
+jest.mock('../../../../user_actions/timestamp', () => ({
   UserActionTimestamp: () => <></>,
 }));
-jest.mock('./sidebar_toggle_button', () => ({
+jest.mock('../sidebar/sidebar_toggle_button', () => ({
   SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
 }));
-jest.mock('../../../../common/navigation/hooks');
-jest.mock('../../../../containers/use_get_action_license');
-jest.mock('../../../../containers/use_get_tags');
-jest.mock('../../../../containers/use_get_categories');
-jest.mock('../../../../containers/user_profiles/use_bulk_get_user_profiles');
-jest.mock('../../../../containers/use_get_case_connectors');
-jest.mock('../../../../containers/use_get_case_users');
-jest.mock('../../../case_view/use_on_update_field');
-jest.mock('../../../../containers/configure/use_get_case_configuration');
-jest.mock('../../../../containers/user_profiles/use_get_current_user_profile');
+jest.mock('../../../../../common/navigation/hooks');
+jest.mock('../../../../../containers/use_get_action_license');
+jest.mock('../../../../../containers/use_get_tags');
+jest.mock('../../../../../containers/use_get_categories');
+jest.mock('../../../../../containers/user_profiles/use_bulk_get_user_profiles');
+jest.mock('../../../../../containers/use_get_case_connectors');
+jest.mock('../../../../../containers/use_get_case_users');
+jest.mock('../../../../case_view/use_on_update_field');
+jest.mock('../../../../../containers/configure/use_get_case_configuration');
+jest.mock('../../../../../containers/user_profiles/use_get_current_user_profile');
 
 (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 (useGetCategories as jest.Mock).mockReturnValue({ data: ['foo', 'bar'], refetch: jest.fn() });
