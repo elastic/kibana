@@ -30,6 +30,7 @@ interface SkillDetailPanelProps {
   onRemove: () => void;
   isAutoIncluded: boolean;
   canEditAgent: boolean;
+  canManageSkills: boolean;
 }
 
 export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
@@ -38,6 +39,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
   onRemove,
   isAutoIncluded = false,
   canEditAgent,
+  canManageSkills,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { skill, isLoading } = useSkill({ skillId });
@@ -77,6 +79,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
             <SkillHeaderActions
               openConfirmRemove={openConfirmRemove}
               canEditAgent={canEditAgent}
+              canManageSkills={canManageSkills}
               isAutoIncluded={isAutoIncluded}
               isReadOnly={skill?.readonly ?? false}
               onEdit={onEdit}
@@ -107,12 +110,14 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
 const SkillHeaderActions = ({
   openConfirmRemove,
   canEditAgent,
+  canManageSkills,
   isAutoIncluded,
   isReadOnly,
   onEdit,
 }: {
   openConfirmRemove: () => void;
   canEditAgent: boolean;
+  canManageSkills: boolean;
   isAutoIncluded: boolean;
   isReadOnly: boolean;
   onEdit: () => void;
@@ -130,7 +135,7 @@ const SkillHeaderActions = ({
 
   return (
     <>
-      {!isReadOnly && (
+      {!isReadOnly && canManageSkills && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             iconType="pencil"

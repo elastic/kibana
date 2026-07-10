@@ -21,6 +21,8 @@ dependsOn:
   - '@kbn/elastic-agent-utils'
   - '@kbn/apm-types-shared'
   - '@kbn/apm-types'
+  - '@kbn/zod'
+  - '@kbn/zod-helpers'
 tags:
   - shared-common
   - package

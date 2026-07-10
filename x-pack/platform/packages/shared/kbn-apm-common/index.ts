@@ -35,8 +35,11 @@ export {
 // Runtime types
 export {
   serviceRt,
+  serviceSchema,
   settingsRt,
+  settingsSchema,
   agentConfigurationIntakeRt,
+  agentConfigurationIntakeSchema,
 } from './src/agent_configuration/runtime_types/agent_configuration_intake_rt';
 export { booleanRt } from './src/agent_configuration/runtime_types/boolean_rt';
 export { captureBodyRt } from './src/agent_configuration/runtime_types/capture_body_rt';

@@ -5,15 +5,14 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { Artifact } from '@kbn/fleet-plugin/server';
 import {
   routeDefinitions,
-  sourceMapRt,
+  sourceMapSchema,
   type ListSourceMapArtifactsResponse,
 } from '@kbn/apm-api-shared';
-import * as t from 'io-ts';
-import { jsonRt, stringFromBufferRt } from '@kbn/io-ts-utils';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { Artifact } from '@kbn/fleet-plugin/server';
+import { z } from '@kbn/zod/v4';
 import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -67,12 +66,24 @@ const listSourceMapRoute = createApmServerRoute({
 // Can not migrate to apm-api-shared, it depends on Fleet
 const uploadSourceMapRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
-  params: t.type({
-    body: t.type({
-      service_name: t.string,
-      service_version: t.string,
-      bundle_filepath: t.string,
-      sourcemap: t.union([t.string, stringFromBufferRt]).pipe(jsonRt).pipe(sourceMapRt),
+  params: z.object({
+    body: z.object({
+      service_name: z.string(),
+      service_version: z.string(),
+      bundle_filepath: z.string(),
+      sourcemap: z
+        .union([z.string(), z.instanceof(Buffer).transform((buf) => buf.toString('utf-8'))])
+        .pipe(
+          z.string().transform((value, ctx) => {
+            try {
+              return JSON.parse(value);
+            } catch (err) {
+              ctx.addIssue({ code: 'custom', message: err.message });
+              return z.NEVER;
+            }
+          })
+        )
+        .pipe(sourceMapSchema),
     }),
   }),
   options: {

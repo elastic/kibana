@@ -141,6 +141,9 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 | Task type | `alerting_v2:rule_executor` | [`task_definition.ts`](task_definition.ts) |
 | Task timeout | `5m` | [`task_definition.ts`](task_definition.ts) |
 | Schedule | Per rule | [`schedule.ts`](schedule.ts) |
+| Max alerts per run | `xpack.alerting_v2.rules.run.alerts.max`, default and ceiling `10000` | [`config.ts`](../../config.ts) |
+
+`ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
 
 ## Pipeline state
 
