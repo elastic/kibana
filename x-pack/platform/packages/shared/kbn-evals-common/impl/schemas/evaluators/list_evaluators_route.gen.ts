@@ -29,6 +29,7 @@ export const ListEvaluatorsResponse = lazySchema(() =>
          */
         supports_bare_tool_trace: z.boolean().optional(),
         reference_data_schema: z.object({}).catchall(z.unknown()).optional(),
+        evidence_schema: z.object({}).catchall(z.unknown()).optional(),
       })
     ),
   })

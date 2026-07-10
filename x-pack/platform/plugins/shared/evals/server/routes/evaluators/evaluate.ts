@@ -17,11 +17,21 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
+import { normalizeEvidence } from '../../evaluators/evidence/evidence_service';
+import {
+  EvidenceMappingResolutionError,
+  resolveEvidenceMapping,
+} from '../../evaluators/evidence/resolve_mapping';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import { awaitTraceReady } from '../../evaluators/trace_readiness';
 import type { EvaluatorDefinition } from '../../evaluators/types';
-import { withEvalsEvaluatorSpan } from '../../task_providers/tracing';
 import type { RouteDependencies } from '../register_routes';
+
+const getIssuePath = (path: PropertyKey[]): string =>
+  path.map((segment) => String(segment)).join('.') || '<root>';
+
+const formatEvidenceSchemaIssues = (error: z.ZodError): string =>
+  error.issues.map((issue) => `${getIssuePath(issue.path)}: ${issue.message}`).join('; ');
 
 export const registerEvaluateRoute = ({
   router,
@@ -117,23 +127,32 @@ export const registerEvaluateRoute = ({
           esClient: coreContext.elasticsearch.client.asInternalUser,
         });
 
-        // Only wait for chat evidence when an evaluator actually consumes it. The
-        // readiness probe reads chat-event columns (`attributes.content`) that exist
-        // only for chat/agent traces; running it for a trace-metric-only request
-        // (tokens, latency, tool calls) would fail on a non-chat trace. Those
-        // evaluators handle trace-export latency with their own retries.
-        const needsChatEvidence = resolvedEvaluators.some(
-          (entry) => entry.definition.requiresChatEvidence
-        );
-        if (needsChatEvidence) {
-          try {
-            await awaitTraceReady(traceAccessor, logger);
-          } catch (error) {
-            return response.notFound({
-              body: { message: error instanceof Error ? error.message : String(error) },
-            });
+        let resolvedMapping;
+        try {
+          resolvedMapping = resolveEvidenceMapping(
+            subject.evidence_mapping ?? {
+              profile: 'elastic-inference',
+            }
+          );
+        } catch (error) {
+          if (error instanceof EvidenceMappingResolutionError) {
+            return response.badRequest({ body: { message: error.message } });
           }
+          throw error;
         }
+
+        // Gate on readiness using the same mapping the evaluators will use, so a
+        // non-conversation subject (e.g. a bare `agentBuilder.tool` run graded via
+        // the tool profile) isn't rejected just because it has no conversation.
+        try {
+          await awaitTraceReady(traceAccessor, logger, resolvedMapping);
+        } catch (error) {
+          return response.notFound({
+            body: { message: error instanceof Error ? error.message : String(error) },
+          });
+        }
+
+        const round = await normalizeEvidence(traceAccessor, resolvedMapping);
 
         let inferenceStartPromise: ReturnType<RouteDependencies['getInferenceStart']> | undefined;
         const inferenceClientByConnectorId = new Map<string, BoundInferenceClient>();
@@ -166,28 +185,40 @@ export const registerEvaluateRoute = ({
 
         const results: EvaluateResponse['results'] = [];
         for (const { config, definition, parsedReferenceData } of resolvedEvaluators) {
+          if (definition.evidenceSchema) {
+            const evidenceParsed = definition.evidenceSchema.safeParse(round);
+            if (!evidenceParsed.success) {
+              results.push({
+                status: 'error',
+                evaluator: {
+                  name: definition.name,
+                  version: definition.version,
+                  kind: definition.kind,
+                },
+                error: {
+                  code: 'evidence_unmet',
+                  message: `Evaluator evidence requirements not met: ${formatEvidenceSchemaIssues(
+                    evidenceParsed.error
+                  )}`,
+                },
+              });
+              continue;
+            }
+          }
+
           try {
             const inferenceClient =
               definition.kind === 'llm' && config.connector_id
                 ? await getInferenceClient(config.connector_id)
                 : undefined;
 
-            const runEvaluate = () =>
-              definition.evaluate({
-                trace: traceAccessor,
-                referenceData: parsedReferenceData,
-                inferenceClient,
-                log: logger,
-              });
-
-            // Root LLM judges in their own `judge · <name>` span so they read as
-            // judges (not tasks) in the Tracing UI, with the model's `chat` span
-            // nested underneath. Trace-metric evaluators emit no model spans, so
-            // they neither need nor want a wrapper span.
-            const result =
-              definition.kind === 'llm'
-                ? await withEvalsEvaluatorSpan(definition.name, runEvaluate)
-                : await runEvaluate();
+            const result = await definition.evaluate({
+              trace: traceAccessor,
+              round,
+              referenceData: parsedReferenceData,
+              inferenceClient,
+              log: logger,
+            });
 
             results.push({
               status: 'ok',
@@ -207,7 +238,7 @@ export const registerEvaluateRoute = ({
                 version: definition.version,
                 kind: definition.kind,
               },
-              error: { message: error instanceof Error ? error.message : String(error) },
+              error: { message: String(error) },
             });
           }
         }

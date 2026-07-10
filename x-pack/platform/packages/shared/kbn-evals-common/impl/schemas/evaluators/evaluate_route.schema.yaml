@@ -48,6 +48,134 @@ paths:
                           reference_data:
                             type: object
                             additionalProperties: true
+                    evidence_mapping:
+                      type: object
+                      required:
+                        - profile
+                      properties:
+                        profile:
+                          type: string
+                          maxLength: 128
+                        overrides:
+                          type: object
+                          properties:
+                            user_query:
+                              type: object
+                              properties:
+                                source:
+                                  type: string
+                                  enum:
+                                    - traces
+                                    - logs
+                                filter:
+                                  type: array
+                                  items:
+                                    type: object
+                                    required:
+                                      - field
+                                      - value
+                                    properties:
+                                      field:
+                                        type: string
+                                        maxLength: 256
+                                      value:
+                                        type: string
+                                        maxLength: 8192
+                                fields:
+                                  type: object
+                                  additionalProperties:
+                                    type: string
+                                    maxLength: 256
+                                select:
+                                  type: string
+                                  enum:
+                                    - first
+                                    - last
+                                    - all
+                                parse:
+                                  type: string
+                                  enum:
+                                    - string
+                                    - json
+                                    - genai_messages
+                            agent_response:
+                              type: object
+                              properties:
+                                source:
+                                  type: string
+                                  enum:
+                                    - traces
+                                    - logs
+                                filter:
+                                  type: array
+                                  items:
+                                    type: object
+                                    required:
+                                      - field
+                                      - value
+                                    properties:
+                                      field:
+                                        type: string
+                                        maxLength: 256
+                                      value:
+                                        type: string
+                                        maxLength: 8192
+                                fields:
+                                  type: object
+                                  additionalProperties:
+                                    type: string
+                                    maxLength: 256
+                                select:
+                                  type: string
+                                  enum:
+                                    - first
+                                    - last
+                                    - all
+                                parse:
+                                  type: string
+                                  enum:
+                                    - string
+                                    - json
+                                    - genai_messages
+                            tool_calls:
+                              type: object
+                              properties:
+                                source:
+                                  type: string
+                                  enum:
+                                    - traces
+                                    - logs
+                                filter:
+                                  type: array
+                                  items:
+                                    type: object
+                                    required:
+                                      - field
+                                      - value
+                                    properties:
+                                      field:
+                                        type: string
+                                        maxLength: 256
+                                      value:
+                                        type: string
+                                        maxLength: 8192
+                                fields:
+                                  type: object
+                                  additionalProperties:
+                                    type: string
+                                    maxLength: 256
+                                select:
+                                  type: string
+                                  enum:
+                                    - first
+                                    - last
+                                    - all
+                                parse:
+                                  type: string
+                                  enum:
+                                    - string
+                                    - json
+                                    - genai_messages
                 evaluators:
                   type: array
                   minItems: 1
@@ -134,6 +262,10 @@ paths:
                           required:
                             - message
                           properties:
+                            code:
+                              type: string
+                              enum:
+                                - evidence_unmet
                             message:
                               type: string
                               maxLength: 8192

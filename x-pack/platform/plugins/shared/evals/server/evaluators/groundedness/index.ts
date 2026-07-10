@@ -5,44 +5,51 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { runLlmJudge } from '../llm_judge';
 import type { EvaluatorDefinition } from '../types';
-import { IncompleteGroundednessEvidenceError, extractGroundednessEvidence } from './extractor';
 import { LlmGroundednessEvaluationPrompt } from './prompt';
 import { calculateGroundednessScore } from './scoring';
 import type { GroundednessAnalysis } from './types';
+
+const groundednessEvidenceSchema = z.object({
+  input: z.object({
+    message: z.string().trim().min(1),
+  }),
+  response: z.object({
+    message: z.string().trim().min(1),
+  }),
+  steps: z.array(z.object({}).catchall(z.unknown())),
+});
 
 export const groundednessEvaluator: EvaluatorDefinition = {
   name: 'groundedness',
   version: '1.0.0',
   kind: 'llm',
   description: 'Measures whether the response is grounded in tool-call outputs from the trace.',
-  requiresChatEvidence: true,
+  // Groundedness grades an answer against the tool calls that produced it, which is
+  // meaningless for a bare tool run (there is no separate answer to ground). Hidden
+  // for the `agentBuilder.tool` target in the experiment UI.
   supportsBareToolTrace: false,
-  async evaluate({ trace, inferenceClient, log }) {
+  evidenceSchema: groundednessEvidenceSchema,
+  async evaluate({ trace, round, inferenceClient, log }) {
     if (!inferenceClient) {
       throw new Error('Inference client is required for groundedness evaluator');
     }
 
-    let evidence;
-    try {
-      evidence = await extractGroundednessEvidence(trace, log);
-    } catch (error) {
-      if (error instanceof IncompleteGroundednessEvidenceError) {
-        return {
-          scores: [
-            {
-              name: 'groundedness',
-              label: 'potentially_incomplete',
-              metadata: {
-                incomplete: true,
-              },
+    if (!round.response.message.trim()) {
+      log.warn(`Returning incomplete groundedness evidence for trace ${trace.traceId}.`);
+      return {
+        scores: [
+          {
+            name: 'groundedness',
+            label: 'potentially_incomplete',
+            metadata: {
+              incomplete: true,
             },
-          ],
-        };
-      }
-
-      throw error;
+          },
+        ],
+      };
     }
 
     const analysis = await runLlmJudge<GroundednessAnalysis>({
@@ -50,9 +57,9 @@ export const groundednessEvaluator: EvaluatorDefinition = {
       prompt: LlmGroundednessEvaluationPrompt,
       toolName: 'analyze',
       input: {
-        user_query: evidence.user_query,
-        agent_response: evidence.agent_response,
-        tool_call_history: JSON.stringify(evidence.tool_call_history),
+        user_query: round.input.message,
+        agent_response: round.response.message,
+        tool_call_history: JSON.stringify(round.steps),
       },
     });
 

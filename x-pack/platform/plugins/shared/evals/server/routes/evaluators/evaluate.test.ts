@@ -27,7 +27,6 @@ describe('POST /internal/evals/_evaluate', () => {
     name = 'groundedness',
     version = '1.0.0',
     kind = 'llm',
-    requiresChatEvidence,
     evaluate = jest.fn().mockResolvedValue({
       scores: [{ name: 'groundedness', score: 1, label: 'GROUNDED' }],
     }),
@@ -36,7 +35,6 @@ describe('POST /internal/evals/_evaluate', () => {
     version,
     kind,
     description: `${name} evaluator`,
-    requiresChatEvidence,
     evaluate,
   });
 
@@ -49,13 +47,19 @@ describe('POST /internal/evals/_evaluate', () => {
       ),
   });
 
-  const buildContext = () =>
+  const buildContext = (
+    searchMock: jest.Mock = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    })
+  ) =>
     ({
       core: Promise.resolve({
         elasticsearch: {
           client: {
             asInternalUser: {
-              esql: { query: jest.fn() },
+              search: searchMock,
             },
           },
         },
@@ -128,13 +132,54 @@ describe('POST /internal/evals/_evaluate', () => {
       evaluate: secondEvaluate,
     });
     const getClient = jest.fn().mockReturnValue({ prompt: jest.fn() });
+    const searchMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-10T09:00:00.000Z',
+                'attributes.content': 'What is the payment status?',
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-10T09:00:01.000Z',
+                'attributes.message.content': 'Payment service is healthy.',
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-10T09:00:00.500Z',
+                'attributes.gen_ai.tool.call.id': 'call-1',
+                'attributes.gen_ai.tool.name': 'health_check',
+                'attributes.gen_ai.tool.call.arguments': '{"service":"payments"}',
+                'attributes.gen_ai.tool.call.result': '{"status":"healthy"}',
+              },
+            },
+          ],
+        },
+      });
     const { handler, logger } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([groundedness, correctness]),
       inferenceStart: { getClient } as unknown as InferenceServerStart,
     });
 
     const response = await handler(
-      buildContext() as unknown as Parameters<typeof handler>[0],
+      buildContext(searchMock) as unknown as Parameters<typeof handler>[0],
       {
         body: {
           subject: {
@@ -172,6 +217,18 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(firstEvaluate).toHaveBeenCalledWith(
       expect.objectContaining({
         trace: expect.objectContaining({ traceId: '0af7651916cd43dd8448eb211c80319c' }),
+        round: {
+          input: { message: 'What is the payment status?' },
+          response: { message: 'Payment service is healthy.' },
+          steps: [
+            {
+              tool_call_id: 'call-1',
+              tool_id: 'health_check',
+              arguments: { service: 'payments' },
+              result: { status: 'healthy' },
+            },
+          ],
+        },
         referenceData: { expected: 'ok' },
         inferenceClient: expect.any(Object),
         log: logger,
@@ -180,11 +237,213 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(secondEvaluate).toHaveBeenCalledWith(
       expect.objectContaining({
         trace: firstEvaluate.mock.calls[0][0].trace,
+        round: firstEvaluate.mock.calls[0][0].round,
         referenceData: { expected: 'ok' },
         inferenceClient: expect.any(Object),
         log: logger,
       })
     );
+    expect(searchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('uses otel-genai-attributes mapping when requested', async () => {
+    const evaluate = jest.fn().mockResolvedValue({
+      scores: [{ name: 'latency', score: 42 }],
+    });
+    const searchMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-10T09:00:00.000Z',
+                'attributes.gen_ai.input.messages': JSON.stringify([
+                  { role: 'system', parts: [{ type: 'text', content: 'system context' }] },
+                  { role: 'user', parts: [{ type: 'text', content: 'How many failed payments?' }] },
+                ]),
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-10T09:00:01.000Z',
+                'attributes.gen_ai.output.messages': [
+                  {
+                    role: 'assistant',
+                    parts: [{ type: 'text', content: 'There were 12 failed payments today.' }],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [],
+        },
+      });
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([
+        buildEvaluator({
+          name: 'latency',
+          kind: 'code',
+          evaluate,
+        }),
+      ]),
+    });
+
+    const response = await handler(
+      buildContext(searchMock) as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
+            evidence_mapping: { profile: 'otel-genai-attributes' },
+          },
+          evaluators: [{ name: 'latency' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(evaluate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        round: {
+          input: { message: 'How many failed payments?' },
+          response: { message: 'There were 12 failed payments today.' },
+          steps: [],
+        },
+      })
+    );
+  });
+
+  it('returns 400 for invalid evidence_mapping override field paths', async () => {
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([
+        buildEvaluator({ name: 'latency', kind: 'code' }),
+      ]),
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
+            evidence_mapping: {
+              profile: 'elastic-inference',
+              overrides: {
+                user_query: {
+                  filter: [{ field: '_source.password', value: 'secret' }],
+                },
+              },
+            },
+          },
+          evaluators: [{ name: 'latency' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.payload).toEqual({
+      message: 'Invalid override field path for user_query: _source.password',
+    });
+  });
+
+  it('returns evidence_unmet without inference calls when evaluator evidence requirements fail', async () => {
+    const groundednessEvaluate = jest.fn().mockResolvedValue({
+      scores: [{ name: 'groundedness', score: 1, label: 'GROUNDED' }],
+    });
+    const latencyEvaluate = jest.fn().mockResolvedValue({
+      scores: [{ name: 'latency', score: 42 }],
+    });
+    const getClient = jest.fn().mockReturnValue({ prompt: jest.fn() });
+    const searchMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-10T09:00:00.000Z',
+                'attributes.content': 'What is the payment status?',
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [],
+        },
+      });
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([
+        {
+          ...buildEvaluator({
+            name: 'groundedness',
+            kind: 'llm',
+            evaluate: groundednessEvaluate,
+          }),
+          evidenceSchema: z.object({
+            input: z.object({ message: z.string().trim().min(1) }),
+            response: z.object({ message: z.string().trim().min(1) }),
+            steps: z.array(z.unknown()),
+          }),
+        },
+        buildEvaluator({ name: 'latency', kind: 'code', evaluate: latencyEvaluate }),
+      ]),
+      inferenceStart: { getClient } as unknown as InferenceServerStart,
+    });
+
+    const response = await handler(
+      buildContext(searchMock) as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
+          },
+          evaluators: [
+            { name: 'groundedness', connector_id: 'connector-123' },
+            { name: 'latency' },
+          ],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload.results).toEqual([
+      expect.objectContaining({
+        status: 'error',
+        evaluator: expect.objectContaining({ name: 'groundedness' }),
+        error: expect.objectContaining({
+          code: 'evidence_unmet',
+        }),
+      }),
+      expect.objectContaining({
+        status: 'ok',
+        evaluator: expect.objectContaining({ name: 'latency' }),
+      }),
+    ]);
+    expect(response.payload.results[0].error.message).toContain('response.message');
+    expect(getClient).not.toHaveBeenCalled();
+    expect(groundednessEvaluate).not.toHaveBeenCalled();
+    expect(latencyEvaluate).toHaveBeenCalledTimes(1);
   });
 
   it('returns 400 for unknown evaluator names', async () => {
@@ -439,7 +698,7 @@ describe('POST /internal/evals/_evaluate', () => {
       {
         status: 'error',
         evaluator: { name: 'groundedness', version: '1.0.0', kind: 'llm' },
-        error: { message: 'failed badly' },
+        error: { message: 'Error: failed badly' },
       },
       expect.objectContaining({
         status: 'ok',
@@ -501,15 +760,11 @@ describe('POST /internal/evals/_evaluate', () => {
     ]);
   });
 
-  it('returns 404 when trace readiness check fails for a chat-evidence evaluator', async () => {
+  it('returns 404 when trace readiness check fails', async () => {
     awaitTraceReadyMock.mockRejectedValueOnce(
       new Error('Trace abc123 is not ready: agent response not yet available')
     );
-    const groundedness = buildEvaluator({
-      name: 'groundedness',
-      kind: 'llm',
-      requiresChatEvidence: true,
-    });
+    const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
     const latency = buildEvaluator({ name: 'latency', kind: 'code' });
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([groundedness, latency]),
@@ -535,34 +790,5 @@ describe('POST /internal/evals/_evaluate', () => {
     });
     expect(groundedness.evaluate).not.toHaveBeenCalled();
     expect(latency.evaluate).not.toHaveBeenCalled();
-  });
-
-  it('skips the chat-evidence readiness check when no evaluator requires chat evidence', async () => {
-    // The readiness probe reads chat-event columns that do not exist on a
-    // trace-metric-only run; it must not run (and must not 404) here.
-    awaitTraceReadyMock.mockRejectedValue(
-      new Error('verification_exception: Unknown column [attributes.content]')
-    );
-    const latency = buildEvaluator({ name: 'latency', kind: 'code' });
-    const inputTokens = buildEvaluator({ name: 'input_tokens', kind: 'code' });
-    const { handler } = setup({
-      evaluatorRegistry: buildEvaluatorRegistry([latency, inputTokens]),
-    });
-
-    const response = await handler(
-      buildContext() as unknown as Parameters<typeof handler>[0],
-      {
-        body: {
-          subject: { traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }] },
-          evaluators: [{ name: 'latency' }, { name: 'input_tokens' }],
-        },
-      } as unknown as Parameters<typeof handler>[1],
-      kibanaResponseFactory
-    );
-
-    expect(awaitTraceReadyMock).not.toHaveBeenCalled();
-    expect(response.status).toBe(200);
-    expect(latency.evaluate).toHaveBeenCalledTimes(1);
-    expect(inputTokens.evaluate).toHaveBeenCalledTimes(1);
   });
 });

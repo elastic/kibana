@@ -5,72 +5,135 @@
  * 2.0.
  */
 
-import type { EvaluatorContext } from '../types';
-import { inputTokensEvaluatorDef, TRACE_METRIC_RETRY } from '.';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import {
+  inputTokensEvaluatorDef,
+  latencyEvaluatorDef,
+  outputTokensEvaluatorDef,
+  toolCallsEvaluatorDef,
+} from '.';
 
-const TRACE_ID = 'a'.repeat(32);
+describe('trace metrics evaluators', () => {
+  const traceId = '0af7651916cd43dd8448eb211c80319c';
+  const log = loggingSystemMock.createLogger();
+  const round = {
+    input: { message: '' },
+    response: { message: '' },
+    steps: [],
+  };
 
-const buildLogger = () =>
-  ({
-    debug: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-    error: jest.fn(),
-  } as unknown as EvaluatorContext['log']);
+  const createEsClient = () => {
+    const searchMock = jest.fn();
+    const esClient = {
+      search: searchMock,
+    } as unknown as ElasticsearchClient;
 
-/** Builds an ES|QL response with a single `input_tokens` column (empty = no rows). */
-const esqlResponse = (value: number | null) => ({
-  columns: [{ name: 'input_tokens', type: 'long' }],
-  values: value === null ? [] : [[value]],
-});
+    return { esClient, searchMock };
+  };
 
-const buildContext = (query: jest.Mock, log = buildLogger()): EvaluatorContext =>
-  ({
-    trace: { traceId: TRACE_ID, esClient: { esql: { query } } },
-    log,
-  } as unknown as EvaluatorContext);
+  it('returns latency in seconds from duration max aggregation', async () => {
+    const { esClient, searchMock } = createEsClient();
+    searchMock.mockResolvedValue({
+      hits: { hits: [] },
+      aggregations: {
+        total_duration_ns: { value: 2_500_000_000 },
+      },
+    });
 
-describe('trace metric evaluator (input_tokens)', () => {
-  afterEach(() => jest.useRealTimers());
-
-  it('returns the metric on the first successful query', async () => {
-    const query = jest.fn().mockResolvedValue(esqlResponse(42));
-
-    const result = await inputTokensEvaluatorDef.evaluate(buildContext(query));
-
-    expect(result).toEqual({ scores: [{ name: 'input_tokens', score: 42 }] });
-    expect(query).toHaveBeenCalledTimes(1);
-  });
-
-  it('retries while the trace is not yet queryable, then returns the metric', async () => {
-    jest.useFakeTimers();
-    const query = jest
-      .fn()
-      .mockResolvedValueOnce(esqlResponse(null))
-      .mockResolvedValueOnce(esqlResponse(null))
-      .mockResolvedValue(esqlResponse(7));
-
-    const promise = inputTokensEvaluatorDef.evaluate(buildContext(query));
-    await jest.advanceTimersByTimeAsync(TRACE_METRIC_RETRY.baseDelayMs * 8);
-
-    await expect(promise).resolves.toEqual({ scores: [{ name: 'input_tokens', score: 7 }] });
-    expect(query).toHaveBeenCalledTimes(3);
-  });
-
-  it('returns "unavailable" after exhausting retries', async () => {
-    jest.useFakeTimers();
-    const query = jest.fn().mockResolvedValue(esqlResponse(null));
-    const log = buildLogger();
-
-    const promise = inputTokensEvaluatorDef.evaluate(buildContext(query, log));
-    await jest.advanceTimersByTimeAsync(
-      TRACE_METRIC_RETRY.maxDelayMs * TRACE_METRIC_RETRY.maxAttempts
+    await expect(
+      latencyEvaluatorDef.evaluate({ trace: { traceId, esClient }, round, log })
+    ).resolves.toEqual({
+      scores: [{ name: 'latency', score: 2.5 }],
+    });
+    expect(searchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'traces-*',
+        size: 0,
+        aggs: {
+          total_duration_ns: {
+            max: { field: 'duration' },
+          },
+        },
+      })
     );
+  });
 
-    await expect(promise).resolves.toEqual({
+  it('returns input token sum from aggregation', async () => {
+    const { esClient, searchMock } = createEsClient();
+    searchMock.mockResolvedValue({
+      hits: { hits: [] },
+      aggregations: {
+        input_tokens: { value: 123 },
+      },
+    });
+
+    await expect(
+      inputTokensEvaluatorDef.evaluate({
+        trace: { traceId, esClient },
+        round,
+        log,
+      })
+    ).resolves.toEqual({
+      scores: [{ name: 'input_tokens', score: 123 }],
+    });
+  });
+
+  it('returns output token sum from aggregation', async () => {
+    const { esClient, searchMock } = createEsClient();
+    searchMock.mockResolvedValue({
+      hits: { hits: [] },
+      aggregations: {
+        output_tokens: { value: 456 },
+      },
+    });
+
+    await expect(
+      outputTokensEvaluatorDef.evaluate({
+        trace: { traceId, esClient },
+        round,
+        log,
+      })
+    ).resolves.toEqual({
+      scores: [{ name: 'output_tokens', score: 456 }],
+    });
+  });
+
+  it('returns tool call count from filter aggregation doc_count', async () => {
+    const { esClient, searchMock } = createEsClient();
+    searchMock.mockResolvedValue({
+      hits: { hits: [] },
+      aggregations: {
+        tool_calls: { doc_count: 3 },
+      },
+    });
+
+    await expect(
+      toolCallsEvaluatorDef.evaluate({
+        trace: { traceId, esClient },
+        round,
+        log,
+      })
+    ).resolves.toEqual({
+      scores: [{ name: 'tool_calls', score: 3 }],
+    });
+  });
+
+  it('returns unavailable when a metric aggregation is missing', async () => {
+    const { esClient, searchMock } = createEsClient();
+    searchMock.mockResolvedValue({
+      hits: { hits: [] },
+      aggregations: {},
+    });
+
+    await expect(
+      inputTokensEvaluatorDef.evaluate({
+        trace: { traceId, esClient },
+        round,
+        log,
+      })
+    ).resolves.toEqual({
       scores: [{ name: 'input_tokens', label: 'unavailable' }],
     });
-    expect(query).toHaveBeenCalledTimes(TRACE_METRIC_RETRY.maxAttempts);
-    expect(log.warn).toHaveBeenCalled();
   });
 });

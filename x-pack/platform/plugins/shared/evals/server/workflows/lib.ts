@@ -25,6 +25,7 @@ import { buildScoreDocuments, mapWithConcurrency } from '@kbn/evals-runner';
 import type { EvaluatorResult, RunnerExample } from '@kbn/evals-runner';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { BUILT_IN_TASK_PROVIDERS } from '../task_providers/types';
+import { AGENT_BUILDER_TOOL_PROFILE } from '../evaluators/evidence/profiles';
 import type {
   EvalsCallKibanaApi,
   EvalsStepLogger,
@@ -73,6 +74,19 @@ export const resolveTaskProviderName = ({ taskRef, toolId, agentId }: TaskTarget
   return BUILT_IN_TASK_PROVIDERS.inference;
 };
 
+/**
+ * Picks the evidence mapping for a target. Bare tool runs (`agentBuilder.tool`)
+ * have no conversation to grade, so they use the tool evidence profile (the tool's
+ * arguments/result become the judge's question/answer). Other targets fall back to
+ * the server default (conversation) mapping.
+ */
+export const resolveEvidenceMappingForTarget = (
+  target: TaskTarget
+): { profile: string } | undefined =>
+  resolveTaskProviderName(target) === BUILT_IN_TASK_PROVIDERS.agentBuilderTool
+    ? { profile: AGENT_BUILDER_TOOL_PROFILE }
+    : undefined;
+
 /** Runs the feature under evaluation for a single example via the resolved provider. */
 export const runTask = async (
   registry: TaskProviderRegistry,
@@ -118,6 +132,12 @@ export const evaluateTrace = async (
     traceId: string;
     referenceData?: Record<string, unknown>;
     evaluators: EvaluatorConfig[];
+    /**
+     * Optional evidence mapping profile. Set for targets whose traces are not a
+     * conversation (e.g. bare `agentBuilder.tool` runs) so evaluators know how to
+     * reconstruct evidence. Omitted for the server default (conversation) mapping.
+     */
+    evidenceMapping?: { profile: string };
   }
 ): Promise<EvaluateTraceResult> => {
   const { body } = await runtime.callKibanaApi<EvaluateResponse>({
@@ -133,6 +153,7 @@ export const evaluateTrace = async (
             ...(params.referenceData ? { reference_data: params.referenceData } : {}),
           },
         ],
+        ...(params.evidenceMapping ? { evidence_mapping: params.evidenceMapping } : {}),
       },
       evaluators: params.evaluators,
     },
@@ -401,6 +422,7 @@ export const runExampleEvaluation = async (
         traceId: taskResult.traceId,
         referenceData: params.referenceData ?? normalizeReferenceData(params.example.output),
         evaluators: params.evaluators,
+        evidenceMapping: resolveEvidenceMappingForTarget(params.target),
       });
 
       // Partial failures: some evaluators errored but the trace was still graded. Surface

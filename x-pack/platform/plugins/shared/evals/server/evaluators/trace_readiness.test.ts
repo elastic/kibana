@@ -7,85 +7,109 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { awaitTraceReady } from './trace_readiness';
-import * as traceEvidenceModule from './trace_evidence';
+import * as evidenceServiceModule from './evidence/evidence_service';
 import type { TraceAccessor } from './types';
 
-jest.mock('./trace_evidence');
+jest.mock('./evidence/evidence_service');
 
 describe('awaitTraceReady', () => {
   const traceId = '0af7651916cd43dd8448eb211c80319c';
   const logger = loggingSystemMock.createLogger();
+  const searchMock = jest.fn();
   const traceAccessor: TraceAccessor = {
     traceId,
-    esClient: {} as TraceAccessor['esClient'],
+    esClient: {
+      search: searchMock,
+    } as unknown as TraceAccessor['esClient'],
   };
-  const extractTraceEvidenceMock = traceEvidenceModule.extractTraceEvidence as jest.Mock;
+  const normalizeEvidenceMock = evidenceServiceModule.normalizeEvidence as jest.Mock;
+  const probeProfilesMock = evidenceServiceModule.probeProfiles as jest.Mock;
 
   beforeEach(() => {
-    jest.useFakeTimers();
     jest.clearAllMocks();
+    jest.useFakeTimers();
   });
 
   afterEach(() => {
     jest.useRealTimers();
   });
 
-  const flushRetries = async () => {
-    // Async advance interleaves microtasks so the full pRetry chain (all
-    // attempts + backoff timers) drains regardless of the retry count.
-    for (let i = 0; i < 10; i++) {
-      await jest.advanceTimersByTimeAsync(8000);
-    }
-  };
-
-  it('resolves immediately when agent response is present', async () => {
-    extractTraceEvidenceMock.mockResolvedValueOnce({
-      user_query: 'hello',
-      agent_response: 'world',
+  it('resolves on the first attempt when a gradable response is already present', async () => {
+    normalizeEvidenceMock.mockResolvedValue({
+      input: { message: 'hello' },
+      response: { message: 'world' },
+      steps: [],
     });
 
-    const promise = awaitTraceReady(traceAccessor, logger);
-    await flushRetries();
-    await expect(promise).resolves.toBeUndefined();
-    expect(extractTraceEvidenceMock).toHaveBeenCalledTimes(1);
+    await expect(awaitTraceReady(traceAccessor, logger)).resolves.toBeUndefined();
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('retries when agent response is empty and succeeds on subsequent attempt', async () => {
-    extractTraceEvidenceMock
-      .mockResolvedValueOnce({ user_query: 'hello', agent_response: '' })
-      .mockResolvedValueOnce({ user_query: 'hello', agent_response: 'world' });
+  it('retries while evidence is still being exported, then resolves once it lands', async () => {
+    // The gradable response (a gen_ai `choice` log event) lands a beat after the
+    // spans, so the first probe sees nothing and the readiness check must wait.
+    normalizeEvidenceMock
+      .mockResolvedValueOnce({ input: { message: '' }, response: { message: '' }, steps: [] })
+      .mockResolvedValue({
+        input: { message: 'hello' },
+        response: { message: 'world' },
+        steps: [],
+      });
 
     const promise = awaitTraceReady(traceAccessor, logger);
-    await flushRetries();
+    await jest.runAllTimersAsync();
+
     await expect(promise).resolves.toBeUndefined();
-    expect(extractTraceEvidenceMock).toHaveBeenCalledTimes(2);
-    expect(logger.warn).toHaveBeenCalled();
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
   });
 
-  it('throws after exhausting retries when agent response never appears', async () => {
-    extractTraceEvidenceMock.mockResolvedValue({
-      user_query: 'hello',
-      agent_response: '',
+  it('fails with a profile diagnostic after retries when no gradable content ever lands', async () => {
+    normalizeEvidenceMock.mockResolvedValue({
+      input: { message: '' },
+      response: { message: '' },
+      steps: [],
     });
+    // hasNoTraceDocuments (final diagnostic) sees at least one indexed document, so
+    // this is reported as "no gradable content" rather than "no documents".
+    searchMock.mockResolvedValue({
+      hits: { hits: [{ _source: { '@timestamp': '2026-07-10T10:00:00.000Z' } }] },
+    });
+    probeProfilesMock.mockResolvedValue([
+      {
+        profile: 'elastic-inference',
+        evidence: {
+          user_query: { status: 'not_found' },
+          agent_response: { status: 'not_found' },
+          tool_calls: { status: 'not_found' },
+        },
+      },
+    ]);
 
     const promise = awaitTraceReady(traceAccessor, logger);
-    // Attach the rejection handler before draining timers so the rejection that
-    // occurs mid-flush is already handled (Kibana's jest treats an
-    // asynchronously-handled rejection warning as a fatal error).
-    const assertion = expect(promise).rejects.toThrow(
-      `Trace ${traceId} is not ready: agent response not yet available`
-    );
-    await flushRetries();
+    const assertion = expect(promise).rejects.toThrow('no gradable content was found in its trace');
+    await jest.runAllTimersAsync();
     await assertion;
-    expect(extractTraceEvidenceMock).toHaveBeenCalledTimes(5);
+
+    // Retried (4 retries => 5 attempts) before giving up.
+    expect(logger.warn).toHaveBeenCalledTimes(5);
+    expect(probeProfilesMock).toHaveBeenCalledTimes(1);
   });
 
-  it('propagates errors from extractTraceEvidence', async () => {
-    extractTraceEvidenceMock.mockRejectedValue(new Error('ES query failed'));
+  it('reports "no documents" when nothing at all was indexed for the trace', async () => {
+    normalizeEvidenceMock.mockResolvedValue({
+      input: { message: '' },
+      response: { message: '' },
+      steps: [],
+    });
+    // Both logs and traces searches come back empty => hasNoTraceDocuments is true.
+    searchMock.mockResolvedValue({ hits: { hits: [] } });
+    probeProfilesMock.mockResolvedValue([]);
 
     const promise = awaitTraceReady(traceAccessor, logger);
-    const assertion = expect(promise).rejects.toThrow('ES query failed');
-    await flushRetries();
+    const assertion = expect(promise).rejects.toThrow('no trace or log documents were indexed');
+    await jest.runAllTimersAsync();
     await assertion;
   });
 });
