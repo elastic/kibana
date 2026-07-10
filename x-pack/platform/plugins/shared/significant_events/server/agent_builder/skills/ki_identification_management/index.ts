@@ -25,6 +25,7 @@ export const createKiIdentificationManagementSkill = ({
     id: 'ki-identification-management',
     name: 'ki-identification-management',
     basePath: 'skills/platform/streams',
+    excludeFromElasticCapabilities: true,
     description,
     content,
     getInlineTools: () => [

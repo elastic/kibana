@@ -18,6 +18,7 @@ export const sigEventsManagementSkill = defineSkillType({
   id: 'significant-events-management',
   name: 'significant-events-management',
   basePath: 'skills/platform/streams',
+  excludeFromElasticCapabilities: true,
   description,
   content,
   getRegistryTools: () => [

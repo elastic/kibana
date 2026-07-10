@@ -24,6 +24,7 @@ export const streamsManagementSkill = defineSkillType({
   id: 'streams-management',
   name: 'streams-management',
   basePath: 'skills/platform/streams',
+  excludeFromElasticCapabilities: true,
   description:
     'Explore and manage Elastic streams. Use when the user mentions streams, stream names (logs.ecs, logs.otel, or any child like logs.ecs.android, logs.otel.linux), data quality, processing pipelines, or ingestion failures. Inspect definitions, schema, quality, lifecycle, and documents. Modify processing, retention, partitions, field mappings, failure store, and descriptions.',
   content: dedent(`

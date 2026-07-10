@@ -20,6 +20,7 @@ export const createGapDetectionSkill = (options: MemoryToolsOptions) =>
     id: 'streams-gap-detection',
     name: 'streams-gap-detection',
     basePath: 'skills/platform/streams',
+    excludeFromElasticCapabilities: true,
     description,
     content,
     getInlineTools: () => {

@@ -18,6 +18,7 @@ export const knowledgeIndicatorsManagementSkill = defineSkillType({
   id: 'knowledge-indicators-management',
   name: 'knowledge-indicators-management',
   basePath: 'skills/platform/streams',
+  excludeFromElasticCapabilities: true,
   description,
   content,
   getRegistryTools: () => [
