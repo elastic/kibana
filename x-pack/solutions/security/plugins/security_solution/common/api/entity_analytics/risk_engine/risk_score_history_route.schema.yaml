@@ -50,19 +50,6 @@ paths:
           schema:
             type: string
             enum: [base, propagated, resolution]
-        - name: page_size
-          in: query
-          required: false
-          description: >-
-            Deprecated and ignored. Results are now aggregated server-side into a
-            fixed number of buckets derived from the requested time range, so this
-            parameter no longer affects the response. Retained for backward
-            compatibility.
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 1000
-            default: 100
         - name: include_contributions
           in: query
           required: false

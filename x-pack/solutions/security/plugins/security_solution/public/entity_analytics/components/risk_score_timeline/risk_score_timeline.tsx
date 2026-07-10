@@ -39,6 +39,7 @@ import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, take } from 'lodash/fp';
 import dateMath from '@kbn/datemath';
+import { parseInterval } from '@kbn/data-plugin/common';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { RiskScoreHistoryEntry } from '../../../../common/api/entity_analytics';
 import { RISK_LEVEL_RANGES } from '../../../../common/entity_analytics/risk_engine';
@@ -67,29 +68,10 @@ interface QuickRange {
   display: string;
 }
 
-// Milliseconds per ES date_histogram interval unit, used only to floor the chart's
-// x-domain `minInterval` so buckets keep a sensible minimum spacing. Calendar
-// months/years are approximated (30d / 365d) — exact length is irrelevant here.
-const INTERVAL_UNIT_MS: Record<string, number> = {
-  ms: 1,
-  s: 1000,
-  m: 60 * 1000,
-  h: 60 * 60 * 1000,
-  d: 24 * 60 * 60 * 1000,
-  w: 7 * 24 * 60 * 60 * 1000,
-  M: 30 * 24 * 60 * 60 * 1000,
-  q: 91 * 24 * 60 * 60 * 1000,
-  y: 365 * 24 * 60 * 60 * 1000,
-};
-
-const intervalToMs = (interval: string | undefined): number | undefined => {
-  const match = /^(\d+)(ms|s|m|h|d|w|M|q|y)$/.exec(interval ?? '');
-  if (!match) {
-    return undefined;
-  }
-  const perUnit = INTERVAL_UNIT_MS[match[2]];
-  return perUnit === undefined ? undefined : Number(match[1]) * perUnit;
-};
+// Used only to floor the chart's x-domain `minInterval` so buckets keep a
+// sensible minimum spacing; moment's calendar-unit approximations are fine here.
+const intervalToMs = (interval: string | undefined): number | undefined =>
+  interval === undefined ? undefined : parseInterval(interval)?.asMilliseconds();
 
 export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
   entityType,
@@ -128,22 +110,19 @@ export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
     [quickRanges]
   );
 
-  const onTimeChange = useCallback(
-    ({ start, end, isInvalid }: OnTimeChangeProps) => {
-      if (isInvalid) {
-        return;
-      }
-      onRangeChange({ from: start, to: end });
-      setRecentlyUsedRanges((ranges) => [
-        { start, end },
-        ...take(
-          MAX_RECENTLY_USED_RANGES,
-          ranges.filter((range) => !(range.start === start && range.end === end))
-        ),
-      ]);
-    },
-    [onRangeChange]
-  );
+  const onTimeChange = ({ start, end, isInvalid }: OnTimeChangeProps) => {
+    if (isInvalid) {
+      return;
+    }
+    onRangeChange({ from: start, to: end });
+    setRecentlyUsedRanges((ranges) => [
+      { start, end },
+      ...take(
+        MAX_RECENTLY_USED_RANGES,
+        ranges.filter((range) => !(range.start === start && range.end === end))
+      ),
+    ]);
+  };
 
   return (
     <div

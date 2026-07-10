@@ -85,10 +85,6 @@ export const GetRiskScoreHistoryRequestQuery = lazySchema(() =>
      */
     score_type: z.enum(['base', 'propagated', 'resolution']).optional(),
     /**
-     * Deprecated and ignored. Results are now aggregated server-side into a fixed number of buckets derived from the requested time range, so this parameter no longer affects the response. Retained for backward compatibility.
-     */
-    page_size: z.coerce.number().int().min(1).max(1000).optional().default(100),
-    /**
      * When true, each entry also includes the contributions recorded for that scoring run (`inputs`, `modifiers`, category 2 fields, and `criticality_level`), when present on the underlying document.
      */
     include_contributions: BooleanFromString.optional().default(false),

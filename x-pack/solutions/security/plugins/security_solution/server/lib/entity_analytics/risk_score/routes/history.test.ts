@@ -89,12 +89,11 @@ describe('risk score history route', () => {
     });
   });
 
-  it('calls getRiskScoreHistory with the derived interval and range (no page_size)', async () => {
+  it('calls getRiskScoreHistory with the derived interval and range', async () => {
     const request = buildRequest({
       from: 'now-30d',
       to: 'now',
       score_type: 'base',
-      page_size: 50,
     });
 
     await server.inject(request, requestContextMock.convertContext(context));
@@ -199,20 +198,6 @@ describe('risk score history route', () => {
 
     it('rejects invalid entity_type', async () => {
       const request = buildRequest({ entity_type: 'invalid' });
-      const result = await server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalled();
-    });
-
-    it('rejects page_size above 1000', async () => {
-      const request = buildRequest({ page_size: 1001 });
-      const result = await server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalled();
-    });
-
-    it('rejects page_size below 1', async () => {
-      const request = buildRequest({ page_size: 0 });
       const result = await server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalled();
