@@ -16,8 +16,8 @@ test.describe(
   'Service Groups',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ browserAuth, kbnClient, pageObjects: { serviceGroupsPage } }) => {
-      await serviceGroupsPage.deleteServiceGroupsByName(kbnClient, GO_SERVICE_GROUP_NAME);
+    test.beforeEach(async ({ browserAuth, apiServices, pageObjects: { serviceGroupsPage } }) => {
+      await apiServices.apm.serviceGroups.deleteByName(GO_SERVICE_GROUP_NAME);
       await browserAuth.loginAsPrivilegedUser();
       await serviceGroupsPage.gotoServiceGroupsPageWithDateSelected(
         testData.START_DATE,

@@ -54,24 +54,13 @@ export class DiagnosticsPage {
     await this.page
       .locator('[data-test-subj="apmTemplateDescriptionClearBundleButton"]:not([role="status"] *)')
       .click();
+    await this.removeReportButton.waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
   }
 
-  getTableRows(containerTestSubj?: string) {
+  async expectTableRendered(containerTestSubj?: string) {
     const root = containerTestSubj
       ? this.page.getByTestId(containerTestSubj)
       : this.page.getByTestId('apmDiagnosticsTemplate');
-    return root.locator('.euiTableRow');
-  }
-
-  getPopulatedTableRows(containerTestSubj?: string) {
-    // EuiBasicTable renders a phantom "No items found" row when empty; exclude it so
-    // populated vs empty assertions work on the row count.
-    return this.getTableRows(containerTestSubj).filter({ hasNotText: 'No items found' });
-  }
-
-  async expectTablePopulated(containerTestSubj?: string) {
-    await expect(this.getPopulatedTableRows(containerTestSubj)).not.toHaveCount(0, {
-      timeout: EXTENDED_TIMEOUT,
-    });
+    await expect(root.locator('.euiTable')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
   }
 }

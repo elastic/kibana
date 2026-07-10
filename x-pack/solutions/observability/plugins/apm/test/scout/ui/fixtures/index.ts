@@ -9,6 +9,7 @@ import type {
   ObltPageObjects,
   ObltTestFixtures,
   ObltWorkerFixtures,
+  ObltApiServicesFixture,
   KibanaUrl,
   BrowserAuthFixture,
 } from '@kbn/scout-oblt';
@@ -42,6 +43,7 @@ import { DiagnosticsPage } from './page_objects/diagnostics';
 import { OnboardingPage } from './page_objects/onboarding';
 import { FeatureControlsPage } from './page_objects/feature_controls';
 import { CorrelationsPage } from './page_objects/correlations';
+import { getServiceGroupsApiService, type ServiceGroupsApiService } from './apis/service_groups';
 
 export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
   loginAsApmAllPrivilegesWithoutWriteSettings: () => Promise<void>;
@@ -81,11 +83,19 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   browserAuth: ApmBrowserAuthFixture;
 }
 
+export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {
+  apiServices: ObltApiServicesFixture & {
+    apm: {
+      serviceGroups: ServiceGroupsApiService;
+    };
+  };
+}
+
 const baseWithSynthtrace = mergeTests(base, synthtraceFixture);
 
 export const test = baseWithSynthtrace.extend<
   ExtendedScoutTestFixtures,
-  ObltWorkerFixtures & SynthtraceFixture
+  ExtendedScoutWorkerFixtures & SynthtraceFixture
 >({
   pageObjects: async (
     {
@@ -147,6 +157,19 @@ export const test = baseWithSynthtrace.extend<
       loginAsApmReadPrivilegesWithWriteSettings,
       loginAsApmMonitor,
     });
+  },
+  apiServices: async (
+    { apiServices, kbnClient },
+    use: (apiServices: ExtendedScoutWorkerFixtures['apiServices']) => Promise<void>
+  ) => {
+    const extendedApiServices: ExtendedScoutWorkerFixtures['apiServices'] = {
+      ...apiServices,
+      apm: {
+        serviceGroups: getServiceGroupsApiService({ kbnClient }),
+      },
+    };
+
+    await use(extendedApiServices);
   },
 });
 

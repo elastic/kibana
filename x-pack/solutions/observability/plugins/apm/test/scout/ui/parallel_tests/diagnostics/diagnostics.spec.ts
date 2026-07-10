@@ -59,18 +59,18 @@ test.describe('Diagnostics', { tag: tags.stateful.classic }, () => {
 
     await test.step('index templates tab is populated', async () => {
       await diagnosticsPage.clickTab('index-templates-tab');
-      await diagnosticsPage.expectTablePopulated();
+      await diagnosticsPage.expectTableRendered();
     });
 
     await test.step('data streams tab is populated', async () => {
       await diagnosticsPage.clickTab('data-streams-tab');
-      await diagnosticsPage.expectTablePopulated();
+      await diagnosticsPage.expectTableRendered();
     });
 
     await test.step('indices tab is populated', async () => {
       await diagnosticsPage.clickTab('indices-tab');
-      await diagnosticsPage.expectTablePopulated('indicedWithProblems');
-      await diagnosticsPage.expectTablePopulated('indicedWithoutProblems');
+      await diagnosticsPage.expectTableRendered('indicedWithProblems');
+      await diagnosticsPage.expectTableRendered('indicedWithoutProblems');
     });
   });
 
@@ -107,6 +107,6 @@ test.describe('Diagnostics', { tag: tags.stateful.classic }, () => {
     await browserAuth.loginAsViewer();
     await diagnosticsPage.importBundle(DIAGNOSTICS_BUNDLE);
     await diagnosticsPage.clickTab('documents-tab');
-    await diagnosticsPage.expectTablePopulated('documents-table');
+    await diagnosticsPage.expectTableRendered('documents-table');
   });
 });

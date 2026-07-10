@@ -21,6 +21,10 @@ export class NavigationPage {
 
   async gotoApm(path: string = '') {
     await this.page.goto(`${this.kbnUrl.app('apm')}${path}`);
+    await this.page.getByTestId('apmMainContainer').waitFor({
+      state: 'visible',
+      timeout: EXTENDED_TIMEOUT,
+    });
   }
 
   async gotoServiceOverview(serviceName: string, query: Record<string, string> = {}) {
@@ -66,11 +70,6 @@ export class NavigationPage {
 
   private async waitForSearchResults() {
     await this.searchPanel.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-
-    const loadingSpinner = this.searchPanel.locator('.euiLoadingSpinner');
-    if ((await loadingSpinner.count()) > 0) {
-      await loadingSpinner.waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
-    }
 
     await expect
       .poll(async () => this.searchPanel.getByTestId('nav-search-option').count(), {

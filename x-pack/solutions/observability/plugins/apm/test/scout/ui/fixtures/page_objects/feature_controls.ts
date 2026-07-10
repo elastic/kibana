@@ -23,6 +23,10 @@ export class FeatureControlsPage {
     const toggle = this.page.getByTestId('toggleNavButton');
     await toggle.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await toggle.click();
+    await this.page.getByTestId('collapsibleNav').waitFor({
+      state: 'visible',
+      timeout: EXTENDED_TIMEOUT,
+    });
   }
 
   getNavLink(name: string) {

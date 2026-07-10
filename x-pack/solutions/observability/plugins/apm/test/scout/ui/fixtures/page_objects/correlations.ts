@@ -33,7 +33,7 @@ export class CorrelationsPage {
 
   async waitForProgressComplete() {
     await this.page
-      .getByText('Progress: 100%')
+      .getByTestId('apmCorrelationsProgress_100')
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 }
