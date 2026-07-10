@@ -39,7 +39,7 @@ import { ProfileStateType, type ProfileStateDefinition } from '../../../../../co
 import { selectTab } from '../selectors';
 import {
   selectDataSourceProfileId,
-  selectUrlProfileStateDefinition,
+  selectCurrentProfileUrlStateDefinition,
   selectTabRuntimeState,
 } from '../runtime_state';
 import type {
@@ -239,7 +239,7 @@ export const setProfileState = <TState extends object>(
       return;
     }
 
-    const urlProfileStateDefinition = selectUrlProfileStateDefinition(
+    const profileUrlStateDefinition = selectCurrentProfileUrlStateDefinition(
       runtimeStateManager,
       payload.tabId
     );
@@ -247,7 +247,7 @@ export const setProfileState = <TState extends object>(
     if (
       payload.historyMethod !== 'replace' ||
       currentState.tabs.unsafeCurrentId !== payload.tabId ||
-      urlProfileStateDefinition?.key !== payload.profileStateDefinition.key
+      profileUrlStateDefinition?.key !== payload.profileStateDefinition.key
     ) {
       return dispatch(
         internalStateSlice.actions.setProfileState({

@@ -136,7 +136,7 @@ export const selectDataSourceProfileId = (
     .getContexts().dataSourceContext.profileId;
 };
 
-export const selectUrlProfileStateDefinition = (
+export const selectCurrentProfileUrlStateDefinition = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string
 ) => {
@@ -156,7 +156,7 @@ export const selectCurrentProfileUrlState = ({
   profileStateMap: ProfileStateMap;
   profileStateRegistry: ProfileStateRegistry;
 }): ProfileStateMap | undefined => {
-  const profileStateDefinition = selectUrlProfileStateDefinition(runtimeStateManager, tabId);
+  const profileStateDefinition = selectCurrentProfileUrlStateDefinition(runtimeStateManager, tabId);
 
   if (!profileStateDefinition) {
     return undefined;

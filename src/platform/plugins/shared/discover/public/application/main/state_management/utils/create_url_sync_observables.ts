@@ -14,7 +14,7 @@ import { type INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/publi
 import type { AnyAction, ThunkDispatch } from '@reduxjs/toolkit';
 import {
   internalStateActions,
-  selectUrlProfileStateDefinition,
+  selectCurrentProfileUrlStateDefinition,
   selectCurrentProfileUrlState,
   selectTab,
   selectTabAppState,
@@ -125,7 +125,10 @@ export const createUrlSyncObservables = ({
   const profileStateContainer: INullableBaseStateContainer<ProfileStateMap> = {
     get: () => getCurrentProfileUrlState() ?? EMPTY_PROFILE_URL_STATE,
     set: (profileUrlState) => {
-      const profileStateDefinition = selectUrlProfileStateDefinition(runtimeStateManager, tabId);
+      const profileStateDefinition = selectCurrentProfileUrlStateDefinition(
+        runtimeStateManager,
+        tabId
+      );
 
       if (!profileStateDefinition) {
         return;
