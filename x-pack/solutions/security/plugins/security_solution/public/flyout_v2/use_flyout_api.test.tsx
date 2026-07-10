@@ -11,6 +11,8 @@ import { FlowTargetSourceDest } from '../../common/search_strategy/security_solu
 import type { Indicator } from '../../common/threat_intelligence/types/indicator';
 import { useAttackFlyoutApi } from './attack/use_attack_flyout_api';
 import { createAttackFlyoutApiMock } from './attack/use_attack_flyout_api.mock';
+import { useCspFlyoutApi } from './csp/use_csp_flyout_api';
+import { createCspFlyoutApiMock } from './csp/use_csp_flyout_api.mock';
 import { useDocumentFlyoutApi } from './document/use_document_flyout_api';
 import { createDocumentFlyoutApiMock } from './document/use_document_flyout_api.mock';
 import { useIocFlyoutApi } from './ioc/use_ioc_flyout_api';
@@ -22,6 +24,7 @@ import { createRuleFlyoutApiMock } from './rule/use_rule_flyout_api.mock';
 import { useFlyoutApi } from './use_flyout_api';
 
 jest.mock('./attack/use_attack_flyout_api');
+jest.mock('./csp/use_csp_flyout_api');
 jest.mock('./document/use_document_flyout_api');
 jest.mock('./ioc/use_ioc_flyout_api');
 jest.mock('./network/use_network_flyout_api');
@@ -32,14 +35,16 @@ describe('useFlyoutApi', () => {
     jest.clearAllMocks();
   });
 
-  it('exposes document, attack, IOC, network, and rule methods from composed hooks', () => {
+  it('exposes document, attack, CSP, IOC, network, and rule methods from composed hooks', () => {
     const documentApi = createDocumentFlyoutApiMock();
     const attackApi = createAttackFlyoutApiMock();
+    const cspApi = createCspFlyoutApiMock();
     const iocApi = createIocFlyoutApiMock();
     const networkApi = createNetworkFlyoutApiMock();
     const ruleApi = createRuleFlyoutApiMock();
     jest.mocked(useDocumentFlyoutApi).mockReturnValue(documentApi);
     jest.mocked(useAttackFlyoutApi).mockReturnValue(attackApi);
+    jest.mocked(useCspFlyoutApi).mockReturnValue(cspApi);
     jest.mocked(useIocFlyoutApi).mockReturnValue(iocApi);
     jest.mocked(useNetworkFlyoutApi).mockReturnValue(networkApi);
     jest.mocked(useRuleFlyoutApi).mockReturnValue(ruleApi);
@@ -48,6 +53,8 @@ describe('useFlyoutApi', () => {
 
     const fromIndexParams = { documentId: '1', indexName: 'index' };
     const attackParams = { attackId: 'attack-1', indexName: '.alerts-security' };
+    const misconfigurationParams = { resourceId: 'resource-1', ruleId: 'rule-1' };
+    const vulnerabilityParams = { vulnerabilityId: 'CVE-1', resourceId: 'resource-1' };
     const iocParams = { indicator: { _id: 'ioc-1', fields: {} } as unknown as Indicator };
     const networkParams = { ip: '1.2.3.4', flowTarget: FlowTargetSourceDest.source };
     const ruleParams = { ruleId: 'rule-1' };
@@ -58,6 +65,10 @@ describe('useFlyoutApi', () => {
     result.current.openNotes({ hit });
     result.current.openAttackFlyout(attackParams);
     result.current.openAttackFlyoutAsChild(attackParams);
+    result.current.openMisconfigurationFinding(misconfigurationParams);
+    result.current.openMisconfigurationFindingAsChild(misconfigurationParams, { title: 'my-host' });
+    result.current.openVulnerabilityFinding(vulnerabilityParams);
+    result.current.openVulnerabilityFindingAsChild(vulnerabilityParams, { title: 'my-host' });
     result.current.openIocFlyout(iocParams);
     result.current.openIocFlyoutAsChild(iocParams);
     result.current.openNetworkFlyout(networkParams);
@@ -70,6 +81,14 @@ describe('useFlyoutApi', () => {
     expect(documentApi.openNotes).toHaveBeenCalledWith({ hit });
     expect(attackApi.openAttackFlyout).toHaveBeenCalledWith(attackParams);
     expect(attackApi.openAttackFlyoutAsChild).toHaveBeenCalledWith(attackParams);
+    expect(cspApi.openMisconfigurationFinding).toHaveBeenCalledWith(misconfigurationParams);
+    expect(cspApi.openMisconfigurationFindingAsChild).toHaveBeenCalledWith(misconfigurationParams, {
+      title: 'my-host',
+    });
+    expect(cspApi.openVulnerabilityFinding).toHaveBeenCalledWith(vulnerabilityParams);
+    expect(cspApi.openVulnerabilityFindingAsChild).toHaveBeenCalledWith(vulnerabilityParams, {
+      title: 'my-host',
+    });
     expect(iocApi.openIocFlyout).toHaveBeenCalledWith(iocParams);
     expect(iocApi.openIocFlyoutAsChild).toHaveBeenCalledWith(iocParams);
     expect(networkApi.openNetworkFlyout).toHaveBeenCalledWith(networkParams);
