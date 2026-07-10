@@ -8,14 +8,15 @@ disable-model-invocation: true
 
 Investigate a flaky Scout or FTR test failure and determine what should be done about it.
 
-- The outcome should be an accurate diagnosis, not a quick fix that treats the symptom.
+- The outcome should be an accurate diagnosis and a robust long-term fix, not a quick fix that treats the symptom.
 - Valid outcomes include "this is a real product bug, escalate to the owning team", "this is environmental and will likely self-resolve", or "there isn't enough data to draw a confident conclusion".
 
 ## Required input
 
 A link to a GitHub issue with the `failed-test` label is required. If none is provided, ask for one before proceeding.
 
-Ignore any prior root-cause analyses or fix proposals posted by automations; treat them as if they weren't there and reach your own conclusion. Failure-notification comments from `kibanamachine` are still useful as a history signal.
+- The issue may already have prior root-cause analyses or fix proposals posted by automations; take them into account, but always do your own research and reach your own conclusion, since a prior analysis may have been based on less data or on older test-troubleshooting guidance.
+- Other comments (including `kibanamachine`'s failure-notification comments) and events in the issue timeline can also help you get the full picture.
 
 ## Investigation
 
@@ -69,7 +70,7 @@ Work through all of these questions:
 - **Are other tests in the same suite or config failing with similar or identical errors?**
   - _Why it matters:_ shared failure modes point to shared building blocks (page objects, fixtures, setup) and usually call for a structural change rather than a per-test patch.
 - **Did it fail on a specific version branch?**
-  - _Why it matters:_ if the failure isn't happening on `main`, compare the branches to identify what's different. The branch that passes tells you what `main` is missing (or what it added).
+  - _Why it matters:_ if the failure isn't happening on `main`, compare the branches to identify what's different. The branch that passes tells you what `main` is missing (or what it added). Perhaps the test was fixed on `main` but the engineer didn't backport the fix to an older version branch.
 - **When did it first fail, and when did it last pass?**
   - _Why it matters:_ narrows down the Kibana commit or PR that may have introduced the flakiness.
 - **Has this issue or a related one been closed and reopened before?**
@@ -83,13 +84,13 @@ Work through all of these questions:
 
 Common best-practice violations that cause flakiness:
 
-- **Pick the right test type** (`docs/extend/scout/best-practices#pick-the-right-test-type`). UI tests are notoriously more flaky than component, API, and Jest unit/integration tests.
-- **Prefer APIs for setup and teardown** (`docs/extend/scout/ui-best-practices#prefer-kibana-apis-over-ui-for-setup-and-teardown`). Driving setup/teardown through the UI is slower and flakier.
-- **Wait for UI updates after actions** (`docs/extend/scout/ui-best-practices#wait-for-ui-updates-when-the-next-action-requires-it`). Confirm the action produced the expected result and the UI has rendered before continuing.
-- **Wait for complex UI to finish rendering** (`docs/extend/scout/ui-best-practices#wait-for-complex-components-to-fully-render`).
-- **Don't use manual retry loops** (`docs/extend/scout/ui-best-practices#dont-use-manual-retry-loops`). If a click or type only works "sometimes", don't re-issue it in a retry — that hides an actionability bug a real user would hit. Fix the interaction or wait on a stable readiness signal instead (see the retry pitfall below).
+- **Pick the right test type** (`docs/extend/testing/scout-best-practices#pick-the-right-test-type`). UI tests are notoriously more flaky than component, API, and Jest unit/integration tests.
+- **Prefer APIs for setup and teardown** (`docs/extend/testing/ui-best-practices#prefer-kibana-apis-over-ui-for-setup-and-teardown`). Driving setup/teardown through the UI is slower and flakier.
+- **Wait for UI updates after actions** (`docs/extend/testing/ui-best-practices#wait-for-ui-updates-when-the-next-action-requires-it`). Confirm the action produced the expected result and the UI has rendered before continuing.
+- **Wait for complex UI to finish rendering** (`docs/extend/testing/ui-best-practices#wait-for-complex-components-to-fully-render`).
+- **Don't use manual retry loops** (`docs/extend/testing/ui-best-practices#dont-use-manual-retry-loops`). If a click or type only works "sometimes", don't re-issue it in a retry — that hides an actionability bug a real user would hit. Fix the interaction or wait on a stable readiness signal instead (see the retry pitfall below).
 
-Scout and FTR tests should also follow the general best practices in `docs/extend/scout/best-practices.md`, the UI best practices in `docs/extend/scout/ui-best-practices.md`, and the API best practices in `docs/extend/scout/api-best-practices.md`.
+Scout and FTR tests should also follow the general best practices in `docs/extend/testing/scout-best-practices.md`, the UI best practices in `docs/extend/testing/ui-best-practices.md`, and the API best practices in `docs/extend/testing/api-best-practices.md`.
 
 ### Investigation pitfalls
 
@@ -110,7 +111,7 @@ Watch out for these pitfalls when investigating the failure:
 Consider alternatives before recommending a code fix. Once you have a diagnosis, the right next step is not always a code change. Consider:
 
 - **Delete the test.** Do other tests already cover what this one is testing?
-- **Refactor or downgrade the test.** See "Pick the right test type" in `docs/extend/scout/best-practices.md`. A functional test can often become an API, component, or Jest unit/integration test.
+- **Refactor or downgrade the test.** See "Pick the right test type" in `docs/extend/testing/scout-best-practices.md`. A functional test can often become an API, component, or Jest unit/integration test.
 - **Update the tags.** Are the test's tags still appropriate? Should it run on Cloud? Should it be excluded from certain serverless solution types (e.g. Security)?
 - **Escalate to the owning team.** If this is a recurring offender or you suspect a product bug, the most useful conclusion may be a writeup handed to the owners, not a fix attempt.
 
