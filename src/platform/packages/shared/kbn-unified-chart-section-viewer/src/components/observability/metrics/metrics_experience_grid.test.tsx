@@ -696,6 +696,8 @@ describe('MetricsExperienceGrid', () => {
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         onGridSettingsChange,
+        metricsSort: DEFAULT_METRICS_SORT,
+        onMetricsSortChange: jest.fn(),
       });
 
       const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {

@@ -46,7 +46,11 @@ describe('useToolbarActions', () => {
 
   const renderToolbarActions = () =>
     renderHook(() =>
-      useToolbarActions({ allDimensions: [], renderToggleActions: () => undefined })
+      useToolbarActions({
+        allDimensions: [],
+        renderToggleActions: () => undefined,
+        onOpenGridSettings: jest.fn(),
+      })
     );
 
   it('includes the sort selector when sorting is enabled', () => {
