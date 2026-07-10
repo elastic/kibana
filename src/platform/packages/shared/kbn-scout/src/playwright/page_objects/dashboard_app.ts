@@ -211,7 +211,7 @@ export class DashboardApp {
   async clickCancelOutOfEditMode() {
     await expect(this.viewOnlyModeButton).toBeVisible();
     await this.viewOnlyModeButton.click();
-    await expect(this.editModeButton).toBeHidden();
+    await expect(this.editModeButton).toBeVisible();
   }
 
   async ensureViewMode() {

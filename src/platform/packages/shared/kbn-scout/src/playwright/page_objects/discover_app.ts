@@ -224,6 +224,48 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
   }
 
+  /**
+   * Clicks the primary "Save" button (does not fill in the save modal).
+   * Useful when the save flow is already covered by a helper such as
+   * `clickSaveDiscoverTableToDashboard`, or the caller needs to inspect the
+   * modal before continuing.
+   */
+  async clickSaveSearchButton() {
+    await this.page.testSubj.click('discoverSaveButton');
+  }
+
+  /**
+   * Opens the split-save-button popover and clicks "Cancel", discarding any
+   * unsaved changes to the current saved search.
+   */
+  async clickCancelButton() {
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+    const cancelButton = this.page.testSubj.locator('discoverCancelButton');
+    await expect(cancelButton).toBeVisible();
+    await cancelButton.click();
+  }
+
+  /**
+   * Saves the current Discover table (e.g. an ES|QL session with controls) as
+   * a panel on a brand-new dashboard. Confirms the app-leave "Unsaved changes"
+   * prompt if one appears (core's `onAppLeave` guard fires because navigating
+   * to the Dashboard app leaves behind an unsaved Discover session).
+   */
+  async clickSaveDiscoverTableToDashboard(title: string) {
+    await this.page.testSubj.click('saveDiscoverTableToDashboardButton');
+    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
+    await this.page.testSubj.fill('savedObjectTitle', title);
+    await this.page.locator('#new-dashboard-option').click();
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+
+    const unsavedChangesConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    if (await unsavedChangesConfirmButton.isVisible({ timeout: 2_000 }).catch(() => false)) {
+      await unsavedChangesConfirmButton.click();
+    }
+
+    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+  }
+
   async saveUnsavedChanges() {
     await this.page.testSubj.click('discoverSaveButton');
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
