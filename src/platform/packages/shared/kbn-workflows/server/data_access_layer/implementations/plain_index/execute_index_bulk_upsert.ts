@@ -14,10 +14,7 @@ import {
   extractBulkWriteEsOptions,
   resolveBulkIndexName,
 } from './execute_index_bulk_common';
-import {
-  assertBulkUpsertSuccess,
-  EMPTY_BULK_UPSERT_RESPONSE,
-} from '../../lib/bulk_upsert_error';
+import { assertBulkUpsertSuccess, EMPTY_BULK_UPSERT_RESPONSE } from '../../lib/bulk_upsert_error';
 import {
   toBulkUpsertResponseFromBulk,
   toBulkUpsertResponseFromUpdate,
@@ -26,11 +23,7 @@ import {
   assertUpsertDocumentsHaveIds,
   normalizeUpsertDocuments,
 } from '../../lib/normalize_upsert_documents';
-import type {
-  BulkUpsertIndexResolver,
-  BulkUpsertRequest,
-  BulkUpsertResponse,
-} from '../../types';
+import type { BulkUpsertIndexResolver, BulkUpsertRequest, BulkUpsertResponse } from '../../types';
 
 interface ExecuteIndexBulkUpsertParams<TDoc extends { id: string }> {
   esClient: ElasticsearchClient;

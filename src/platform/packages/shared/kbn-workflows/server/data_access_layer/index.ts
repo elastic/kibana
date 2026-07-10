@@ -76,6 +76,7 @@ export type {
   ExecutionDataStreamClient,
   ExecutionSourceProjectionField,
   ExecutionStorageSource,
+  ExecutionsDalBundle,
   ExecutionsCountRequest,
   ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,

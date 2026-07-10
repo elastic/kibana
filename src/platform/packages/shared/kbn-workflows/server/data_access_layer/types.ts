@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '../../types/v1';
 
@@ -84,10 +84,8 @@ export type BulkUpsertResponse = Pick<estypes.BulkResponse, 'took' | 'errors' | 
 
 export interface CreateExecutionsDataAccessDeps {
   source: ExecutionStorageSource;
-  esClient: ElasticsearchClient;
-  /** Required when source is `data_stream`; ignored for index-backed sources. */
-  dataStreamClient?: ExecutionDataStreamClient;
-  logger?: Logger;
+  coreSetup: CoreSetup;
+  logger: Logger;
 }
 
 /** @deprecated Use {@link CreateExecutionsDataAccessDeps} */
@@ -124,6 +122,14 @@ export type ExecutionsDataAccess<TExecution extends { id: string }> =
 
 export type WorkflowExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowExecution>;
 export type StepExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowStepExecution>;
+
+/** Pair of workflow/step DAL instances plus lifecycle hooks from `createExecutionsDal`. */
+export interface ExecutionsDalBundle {
+  initSetup: () => Promise<void>;
+  initStart: () => Promise<void>;
+  createWorkflowExecutionsDal: () => Promise<WorkflowExecutionsDataAccess>;
+  createStepExecutionsDal: () => Promise<StepExecutionsDataAccess>;
+}
 
 export type WorkflowExecutionsSearchRequest = ExecutionsSearchRequest;
 export type StepExecutionsSearchRequest = ExecutionsSearchRequest;

@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createOrUpdateIndex } from './create_index';
+export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
+export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';

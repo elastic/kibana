@@ -9,93 +9,54 @@
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
+import { mappings } from '@kbn/es-mappings';
 import { TOKEN_USAGE_MAPPING } from './token_usage_mapping';
 
 export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
   properties: {
-    spaceId: {
-      type: 'keyword',
-    },
-    id: {
-      type: 'keyword',
-    },
-    workflowId: {
-      type: 'keyword',
-    },
-    managed: {
-      type: 'boolean',
-    },
-    managedBy: {
-      type: 'keyword',
-    },
-    originManagedWorkflowId: {
-      type: 'keyword',
-    },
-    managedVersion: {
-      type: 'long',
-    },
-    status: {
-      type: 'keyword',
-    },
-    workflowDefinition: {
-      type: 'object',
+    '@timestamp': mappings.date(),
+    spaceId: mappings.keyword(),
+    id: mappings.keyword(),
+    workflowId: mappings.keyword(),
+    managed: mappings.boolean(),
+    managedBy: mappings.keyword(),
+    originManagedWorkflowId: mappings.keyword(),
+    managedVersion: mappings.long(),
+    status: mappings.keyword(),
+    workflowDefinition: mappings.object({
       enabled: false,
-    },
-    createdAt: {
-      type: 'date',
-    },
-    isTestRun: {
-      type: 'boolean',
-    },
+      properties: {},
+    }),
+    createdAt: mappings.date(),
+    isTestRun: mappings.boolean(),
     // Only exists in single step test executions
-    stepId: {
-      type: 'keyword',
-    },
-    createdBy: {
-      type: 'keyword',
-    },
-    executedBy: {
-      type: 'keyword',
-    },
-    startedAt: {
-      type: 'date',
-    },
-    finishedAt: {
-      type: 'date',
-    },
-    duration: {
-      type: 'long',
-    },
-    triggeredBy: {
-      type: 'keyword',
-    },
-    eventChainDepth: {
-      type: 'long',
-    },
-    eventChainVisitedWorkflowIds: {
-      type: 'keyword',
-    },
-    dispatchEventId: {
-      type: 'keyword',
-    },
-    concurrencyGroupKey: {
-      type: 'keyword',
-    },
+    stepId: mappings.keyword(),
+    createdBy: mappings.keyword(),
+    executedBy: mappings.keyword(),
+    startedAt: mappings.date(),
+    finishedAt: mappings.date(),
+    duration: mappings.long(),
+    triggeredBy: mappings.keyword(),
+    eventChainDepth: mappings.long(),
+    eventChainVisitedWorkflowIds: mappings.keyword(),
+    dispatchEventId: mappings.keyword(),
+    concurrencyGroupKey: mappings.keyword(),
+    // Aggregated token usage across all token-consuming steps, accumulated
+    // incrementally as each step finishes.
     usage: TOKEN_USAGE_MAPPING,
-    stepUsage: {
-      type: 'nested',
+    // Per-step token usage, retained on the workflow execution so callers can
+    // query usage by producing step and resolved connector.
+    stepUsage: mappings.object({
       properties: {
-        stepId: { type: 'keyword' },
-        connectorId: { type: 'keyword' },
-        inputTokens: { type: 'long' },
-        outputTokens: { type: 'long' },
-        cachedTokens: { type: 'long' },
-        totalTokens: { type: 'long' },
+        stepId: mappings.keyword(),
+        connectorId: mappings.keyword(),
+        inputTokens: mappings.long(),
+        outputTokens: mappings.long(),
+        cachedTokens: mappings.long(),
+        totalTokens: mappings.long(),
       },
-    },
-    version: {
-      type: 'long',
-    },
+    }),
+    version: mappings.long(),
   },
 };

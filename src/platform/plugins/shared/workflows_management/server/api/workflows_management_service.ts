@@ -205,17 +205,18 @@ export class WorkflowsService {
       getActionsClientWithRequest: this.getActionsClientWithRequest,
     });
 
-    const { workflowExecutionsDal, stepExecutionsDal } = createExecutionsDal({
+    const executionsDalBundle = createExecutionsDal({
       source: 'system_index',
-      esClient: this.esClient,
+      coreSetup: core,
       logger: this.logger,
     });
-    this.workflowExecutionsDal = workflowExecutionsDal;
+    this.workflowExecutionsDal = await executionsDalBundle.createWorkflowExecutionsDal();
+    const stepExecutionsDal = await executionsDalBundle.createStepExecutionsDal();
 
     this.executionQueryService = new WorkflowExecutionQueryService({
       logger: this.logger,
       esClient: this.esClient,
-      workflowExecutionsDal,
+      workflowExecutionsDal: this.workflowExecutionsDal,
       stepExecutionsDal,
       workflowEventLoggerService: this.workflowsExecutionEngine.workflowEventLoggerService,
     });
@@ -224,7 +225,7 @@ export class WorkflowsService {
       logger: this.logger,
       workflowStorage: this.workflowStorage,
       esClient: this.esClient,
-      workflowExecutionsDal,
+      workflowExecutionsDal: this.workflowExecutionsDal,
     });
 
     await this.initializeChangeHistoryService(coreStart);
@@ -239,7 +240,7 @@ export class WorkflowsService {
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
       changeHistoryService: this.changeHistoryService,
-      workflowExecutionsDal,
+      workflowExecutionsDal: this.workflowExecutionsDal,
       stepExecutionsDal,
     });
 

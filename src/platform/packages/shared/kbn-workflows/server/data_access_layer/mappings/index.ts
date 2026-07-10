@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createOrUpdateIndex } from './create_index';
+export { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from './workflow_executions_mappings';
+export { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from './step_executions_mappings';
