@@ -789,6 +789,60 @@ describe('datatable cell renderer', () => {
       expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '123');
     });
 
+    it('resolves solid progress-bar fills through the shared cell color lookup', () => {
+      innerCellColorFnMock.mockReturnValueOnce('#663399');
+
+      const columnConfig = progressColumnConfig({
+        fillMode: 'solid',
+        valueRange: { mode: 'auto' },
+      });
+      columnConfig.columns[0].palette = {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          colors: ['#24c292', '#f6726a'],
+          gradient: true,
+          stops: [0, 100],
+          range: 'number',
+          rangeMin: 0,
+          rangeMax: 100,
+        },
+      };
+
+      const CellRenderer = makeCellRenderer({ columnConfig });
+      render(
+        <EuiThemeProvider>
+          <CellRenderer
+            rowIndex={0}
+            colIndex={0}
+            columnId="a"
+            setCellProps={setCellProps}
+            isExpandable={false}
+            isDetails={false}
+            isExpanded={false}
+          />
+        </EuiThemeProvider>,
+        {
+          wrapper: DataContextProviderWrapper({
+            table: baseTable,
+            minMaxByColumnId: defaultMinMaxByColumnId,
+          }),
+        }
+      );
+
+      expect(cellColorFnMock).toHaveBeenCalledWith(
+        'a',
+        expect.objectContaining({
+          params: expect.objectContaining({ gradient: false }),
+        }),
+        undefined
+      );
+      expect(innerCellColorFnMock).toHaveBeenCalledWith(123);
+      expect(document.querySelector('.echMeterFillPaint')).toHaveStyle({
+        backgroundColor: '#663399',
+      });
+    });
+
     it('anchors a flat positive auto range to zero in the rendered Meter domain', () => {
       const CellRenderer = makeCellRenderer({
         columnConfig: progressColumnConfig({ fillMode: 'single', valueRange: { mode: 'auto' } }),

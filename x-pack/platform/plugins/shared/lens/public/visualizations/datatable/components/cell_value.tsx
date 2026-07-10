@@ -7,8 +7,10 @@
 
 import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { MeterFillStyle } from '@elastic/charts';
 import { getFallbackDataBounds } from '@kbn/coloring';
 import { makeHighContrastColor, useEuiTheme } from '@elastic/eui';
+import type { MeterFill } from '@elastic/charts';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { RawValue } from '@kbn/data-plugin/common';
@@ -45,7 +47,7 @@ import {
 interface ProgressBarRenderProps {
   value: number;
   domain: [number, number];
-  fill: ReturnType<typeof getMeterFill>;
+  fill: MeterFill;
   labelWidthCh: number;
   baseline: number | undefined;
 }
@@ -117,20 +119,49 @@ export const createGridCell = (
       }
       const dataBounds = minMaxByColumnId?.get(getOriginalId(columnId)) ?? getFallbackDataBounds();
       const { min, max } = getProgressBarDomain({ fillStyle, palette }, dataBounds);
-      // Recompute default-palette stops when the serialized palette omits them,
-      // so solid/gradient bars are colored rather than falling back to a flat color.
-      const paletteStops = getProgressBarPaletteStops(
-        paletteService,
-        { min, max },
-        palette,
-        palette?.params?.colors,
-        palette?.params?.stops
-      );
-      const colorStops = toMeterColorStops(
-        paletteStops.map(({ color }) => color),
-        paletteStops.map(({ stop }) => stop)
-      );
-      const fill = getMeterFill(fillStyle, colorStops, DEFAULT_PROGRESS_BAR_COLOR);
+      const gradientStops =
+        fillStyle.fillMode === 'gradient'
+          ? getProgressBarPaletteStops(
+              paletteService,
+              { min, max },
+              palette,
+              palette?.params?.colors,
+              palette?.params?.stops
+            )
+          : [];
+      const solidPalette =
+        fillStyle.fillMode === 'solid' && palette?.params
+          ? {
+              ...palette,
+              params: {
+                ...palette.params,
+                gradient: false,
+              },
+            }
+          : palette;
+      const solidProgressColor =
+        fillStyle.fillMode === 'solid'
+          ? getCellColor(columnId, solidPalette, colorMapping)(rawValue) ??
+            DEFAULT_PROGRESS_BAR_COLOR
+          : undefined;
+      const fill: MeterFill =
+        fillStyle.fillMode === 'solid'
+          ? {
+              // Solid progress bars should reuse the same by-value color lookup as the
+              // other datatable decoration modes instead of interpolating inside Meter.
+              type: MeterFillStyle.Single,
+              color: solidProgressColor ?? DEFAULT_PROGRESS_BAR_COLOR,
+            }
+          : getMeterFill(
+              fillStyle,
+              toMeterColorStops(
+                // Recompute default-palette stops when the serialized palette omits them,
+                // so gradient bars preserve the selected palette rather than falling back.
+                gradientStops.map(({ color }) => color),
+                gradientStops.map(({ stop }) => stop)
+              ),
+              DEFAULT_PROGRESS_BAR_COLOR
+            );
       // Size the value gutter to the column's widest formatted bound so every
       // row's bar shares the same edge regardless of digit count.
       const labelWidthCh = getProgressBarLabelWidthCh(formatter, dataBounds.min, dataBounds.max);
@@ -141,7 +172,16 @@ export const createGridCell = (
         labelWidthCh,
         baseline: fillStyle.baseline,
       };
-    }, [renderMode, fillStyle, rawValue, minMaxByColumnId, columnId, palette, formatter]);
+    }, [
+      renderMode,
+      fillStyle,
+      rawValue,
+      minMaxByColumnId,
+      columnId,
+      palette,
+      formatter,
+      colorMapping,
+    ]);
 
     const badgeColor = useMemo(() => {
       if (renderMode !== 'badge') return null;
