@@ -60,6 +60,15 @@ export function isValidTemplate(template: string): boolean {
   return HTML_TAG_PATTERN.test(template);
 }
 
+// The rendering iframe is scripting-disabled and sanitizeHtml() strips <script> tags outright,
+// so a template relying on one wouldn't error — it would just silently render blank. Catching it
+// here, before that silent stripping, turns it into a clear error instead.
+const SCRIPT_TAG_PATTERN = /<script[\s>]/i;
+
+export function containsScript(template: string): boolean {
+  return SCRIPT_TAG_PATTERN.test(template);
+}
+
 export interface TemplateColumn {
   name: string;
   type: string;

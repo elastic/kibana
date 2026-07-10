@@ -15,8 +15,14 @@ import {
   fillTemplate,
   stripMarkdownFences,
   isValidTemplate,
+  containsScript,
   prepareHtml,
 } from '../utils/template_fill';
+
+const SCRIPT_ERROR_MESSAGE = i18n.translate('xpack.aiPanel.error.templateScript', {
+  defaultMessage:
+    'The generated panel relied on JavaScript, which this panel type does not support. Try rephrasing the request.',
+});
 
 export interface UseAiPanelHtmlParams {
   embeddableId: string;
@@ -159,6 +165,11 @@ export function useAiPanelHtml({
           setIsLoading(false);
           return;
         }
+        if (containsScript(cleaned)) {
+          setError(SCRIPT_ERROR_MESSAGE);
+          setIsLoading(false);
+          return;
+        }
         try {
           rendered = fillTemplate(cleaned, esqlData.columns, esqlData.values ?? []);
         } catch (err) {
@@ -176,6 +187,11 @@ export function useAiPanelHtml({
         selfWriteCountRef.current++;
         onTemplateChangeRef.current(cleaned);
       } else if (!esqlQuery) {
+        if (containsScript(accRef.current)) {
+          setError(SCRIPT_ERROR_MESSAGE);
+          setIsLoading(false);
+          return;
+        }
         rendered = prepareHtml(accRef.current);
         selfWriteCountRef.current++;
         onTemplateChangeRef.current(rendered);

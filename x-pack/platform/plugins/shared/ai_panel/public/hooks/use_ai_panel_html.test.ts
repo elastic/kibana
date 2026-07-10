@@ -163,6 +163,36 @@ describe('useAiPanelHtml', () => {
 
       await waitFor(() => expect(result.current.error).toMatch(/invalid template/i));
     });
+
+    it('shows a script-not-supported error instead of silently rendering blank (esqlQuery panel)', async () => {
+      (streamGenerate as jest.Mock).mockImplementation(
+        (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
+          onToken('<html><body><div id="chart"></div><script>doStuff()</script></body></html>');
+          return Promise.resolve();
+        }
+      );
+
+      const { result } = renderHook(() =>
+        useAiPanelHtml({ ...baseParams, esqlQuery: 'FROM logs | STATS count()' })
+      );
+
+      await waitFor(() => expect(result.current.error).toMatch(/javascript/i));
+      expect(result.current.html).toBe('');
+    });
+
+    it('shows a script-not-supported error instead of silently rendering blank (static panel)', async () => {
+      (streamGenerate as jest.Mock).mockImplementation(
+        (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
+          onToken('<html><body><div id="chart"></div><script>doStuff()</script></body></html>');
+          return Promise.resolve();
+        }
+      );
+
+      const { result } = renderHook(() => useAiPanelHtml({ ...baseParams, esqlQuery: undefined }));
+
+      await waitFor(() => expect(result.current.error).toMatch(/javascript/i));
+      expect(result.current.html).toBe('');
+    });
   });
 
   describe('abort on unmount', () => {

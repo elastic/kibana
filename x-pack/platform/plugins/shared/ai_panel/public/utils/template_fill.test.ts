@@ -11,7 +11,13 @@ jest.mock('dompurify', () => ({
   default: { sanitize: (html: string) => html },
 }));
 
-import { fillTemplate, stripMarkdownFences, isValidTemplate, injectCsp } from './template_fill';
+import {
+  fillTemplate,
+  stripMarkdownFences,
+  isValidTemplate,
+  containsScript,
+  injectCsp,
+} from './template_fill';
 
 const cols = [
   { name: 'category.keyword', type: 'keyword' },
@@ -226,5 +232,16 @@ describe('isValidTemplate', () => {
   it('returns false for empty or non-HTML content', () => {
     expect(isValidTemplate('')).toBe(false);
     expect(isValidTemplate('just some text')).toBe(false);
+  });
+});
+
+describe('containsScript', () => {
+  it('detects a script tag regardless of case or attributes', () => {
+    expect(containsScript('<div></div><script>doStuff()</script>')).toBe(true);
+    expect(containsScript('<SCRIPT type="application/json">{}</SCRIPT>')).toBe(true);
+  });
+
+  it('returns false for markup with no script tag', () => {
+    expect(containsScript('<div class="script-like">no actual script here</div>')).toBe(false);
   });
 });
