@@ -125,4 +125,23 @@ export class UnifiedFieldList {
   async clickFieldListItem(field: string): Promise<void> {
     await this.page.testSubj.click(`field-${field}`);
   }
+
+  /**
+   * Remove a field from the selected fields (no-op if not selected)
+   */
+  async clickFieldListItemRemove(field: string): Promise<void> {
+    if (!(await this.isFieldSelected(field))) {
+      return;
+    }
+
+    await this.page.testSubj.click(`fieldToggle-${field}`);
+
+    await this.page.waitForFunction(async (fieldName) => {
+      const selectedSection = document.querySelector(
+        '[data-test-subj="fieldListGroupedSelectedFields"]'
+      );
+      if (!selectedSection) return true;
+      return !selectedSection.querySelector(`[data-test-subj="field-${fieldName}"]`);
+    }, field);
+  }
 }
