@@ -50439,8 +50439,6 @@
     "xpack.streams.editIlmPhasesFlyout.downsamplePreviousIntervalWarmPhaseError": "Muss größer als und ein Vielfaches des Hot-Phase-Werts ({value}) sein",
     "xpack.streams.editIlmPhasesFlyout.downsamplingIntervalAriaLabel": "Wert für das Downsampling-Intervall",
     "xpack.streams.editIlmPhasesFlyout.downsamplingIntervalLabel": "Intervall",
-    "xpack.streams.editIlmPhasesFlyout.downsamplingLearnMoreLink": "Weitere Informationen",
-    "xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedBody": "Das Downsampling funktioniert nur für Zeitreihen-Streams. Die Konfiguration dieser Einstellungen hat keinen Einfluss auf die Speicherung der Daten dieses Streams. {learnMoreLink}",
     "xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedTitle": "Downsampling ist für diesen Stream nicht verfügbar",
     "xpack.streams.editIlmPhasesFlyout.downsamplingTitle": "Downsampling",
     "xpack.streams.editIlmPhasesFlyout.downsamplingUnitAria": "Downsampling-Intervalleinheit",

@@ -104,4 +104,44 @@ describe('FieldMarkdownRenderer', () => {
 
     expect(disabledActionsBadge).toBeInTheDocument();
   });
+
+  it('renders the field tooltip on the badge when disableActions is true', () => {
+    const icon = 'user';
+    const name = 'user.name';
+    const value = 'some.user';
+
+    render(
+      <TestProviders>
+        <MarkdownFormatterContext.Provider value={{ disableActions: true }}>
+          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+        </MarkdownFormatterContext.Provider>
+      </TestProviders>
+    );
+
+    const disabledActionsBadge = screen.getByTestId('disabledActionsBadge');
+
+    expect(disabledActionsBadge.closest('.euiToolTipAnchor')).toBeInTheDocument();
+    expect(screen.queryByTestId(`render-content-${name}`)).not.toBeInTheDocument();
+  });
+
+  it('renders the field tooltip via cell actions when disableActions is false', () => {
+    const icon = '';
+    const name = 'process.name';
+    const value = 'explorer.exe';
+
+    render(
+      <TestProviders>
+        <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
+          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+        </MarkdownFormatterContext.Provider>
+      </TestProviders>
+    );
+
+    const cellActionsContent = screen.getByTestId(`render-content-${name}`);
+
+    expect(screen.queryByTestId('fieldMarkdownRendererToolTip')).not.toBeInTheDocument();
+    expect(cellActionsContent.querySelector('.euiToolTipAnchor')).toBeInTheDocument();
+    expect(screen.queryByTestId('disabledActionsBadge')).not.toBeInTheDocument();
+    expect(screen.getByTestId('fieldMarkdownRendererInlineWrapper')).toBeInTheDocument();
+  });
 });

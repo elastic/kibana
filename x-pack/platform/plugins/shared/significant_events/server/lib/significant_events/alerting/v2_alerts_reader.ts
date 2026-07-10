@@ -12,6 +12,7 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { toEsqlRequest } from '../../streams/esql';
 import {
   RULES_BUCKET_SIZE,
+  RECENT_ACTIVITY_MINUTES,
   buildChangePointHistogramBounds,
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
@@ -30,6 +31,7 @@ import {
   type OccurrencesEsqlParams,
   buildRuleMetadataMap,
 } from './alerts_reader';
+import { getRuleDetectionSchedule } from '../rules/schedule';
 
 const EMPTY_CHANGE_POINT_TYPE: ChangePointTypeMap = {};
 
@@ -284,15 +286,26 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     };
   }
 
-  private buildChangePointScanBody({ lookback, bucketInterval, spaceId }: ChangePointScanParams) {
+  private buildChangePointScanBody({
+    lookback,
+    bucketInterval,
+    spaceId,
+    ruleIds,
+    recentActivityMinutes = RECENT_ACTIVITY_MINUTES,
+  }: ChangePointScanParams) {
+    const filter: Array<Record<string, unknown>> = [
+      { term: { type: 'signal' } },
+      { term: { space_id: spaceId } },
+      { range: { '@timestamp': { gte: lookback } } },
+    ];
+    if (ruleIds?.length) {
+      filter.push({ terms: { 'rule.id': ruleIds } });
+    }
+
     return {
       query: {
         bool: {
-          filter: [
-            { term: { type: 'signal' } },
-            { term: { space_id: spaceId } },
-            { range: { '@timestamp': { gte: lookback } } },
-          ],
+          filter,
         },
       },
       aggs: {
@@ -305,6 +318,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
             ...buildChangePointTimeSeriesAggs(bucketInterval, {
               useDistinctSignalCount: true,
               includeFloorWindow: true,
+              recentActivityMinutes,
               extendedBounds: buildChangePointHistogramBounds(lookback, bucketInterval),
             }),
           },
@@ -320,6 +334,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
     const meta = ruleMetadata.get(bucket.key);
     const ruleName = meta?.ruleName ?? 'unknown';
     const streamName = meta?.streamName ?? 'unknown';
+    const ruleSchedule = meta?.schedule ?? getRuleDetectionSchedule({});
     const changePoints = bucket.change_points?.type
       ? { type: bucket.change_points.type }
       : { type: EMPTY_CHANGE_POINT_TYPE };
@@ -332,6 +347,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       change_points: changePoints,
       last_5m: { doc_count: this.distinctSignalCount(bucket.last_5m) },
       last_floor_window: { doc_count: this.distinctSignalCount(bucket.last_floor_window) },
+      rule_schedule: ruleSchedule,
     };
   }
 

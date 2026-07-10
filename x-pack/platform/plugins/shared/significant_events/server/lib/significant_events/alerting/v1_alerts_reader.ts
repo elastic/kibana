@@ -9,10 +9,12 @@ import { esql } from '@elastic/esql';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { termsQuery } from '@kbn/es-query';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { toEsqlRequest } from '../../streams/esql';
 import {
   RULES_BUCKET_SIZE,
+  RECENT_ACTIVITY_MINUTES,
   buildChangePointHistogramBounds,
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
@@ -31,6 +33,7 @@ import {
   type OccurrencesEsqlParams,
   buildRuleMetadataMap,
 } from './alerts_reader';
+import { getRuleDetectionSchedule } from '../rules/schedule';
 
 const EMPTY_CHANGE_POINT_TYPE: ChangePointTypeMap = {};
 
@@ -226,14 +229,25 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
     return { aggregations: (response.aggregations ?? {}) as RuleAlertWindowAggregations };
   }
 
-  private buildChangePointScanBody({ lookback, bucketInterval, spaceId }: ChangePointScanParams) {
+  private buildChangePointScanBody({
+    lookback,
+    bucketInterval,
+    spaceId,
+    ruleIds,
+    recentActivityMinutes = RECENT_ACTIVITY_MINUTES,
+  }: ChangePointScanParams) {
+    const filter: QueryDslQueryContainer[] = [
+      ...termsQuery('kibana.space_ids', [spaceId, '*']),
+      { range: { '@timestamp': { gte: lookback } } },
+    ];
+    if (ruleIds?.length) {
+      filter.push(...termsQuery('kibana.alert.rule.uuid', ruleIds));
+    }
+
     return {
       query: {
         bool: {
-          filter: [
-            { terms: { 'kibana.space_ids': [spaceId, '*'] } },
-            { range: { '@timestamp': { gte: lookback } } },
-          ],
+          filter,
         },
       },
       aggs: {
@@ -253,6 +267,7 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
             ...buildChangePointTimeSeriesAggs(bucketInterval, {
               useDistinctSignalCount: false,
               includeFloorWindow: true,
+              recentActivityMinutes,
               extendedBounds: buildChangePointHistogramBounds(lookback, bucketInterval),
             }),
           },
@@ -271,6 +286,7 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
     const meta = ruleMetadata.get(bucket.key);
     const ruleName = meta?.ruleName ?? 'unknown';
     const streamName = meta?.streamName ?? 'unknown';
+    const ruleSchedule = meta?.schedule ?? getRuleDetectionSchedule({});
     const changePoints = bucket.change_points?.type
       ? { type: bucket.change_points.type }
       : { type: EMPTY_CHANGE_POINT_TYPE };
@@ -289,6 +305,7 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
       change_points: changePoints,
       last_5m: { doc_count: bucket.last_5m?.doc_count ?? 0 },
       last_floor_window: { doc_count: bucket.last_floor_window?.doc_count ?? 0 },
+      rule_schedule: ruleSchedule,
     };
   }
 }
