@@ -154,6 +154,17 @@ export class NavigationPublicPlugin
         this.addSolutionNavigation(solutionNavigation);
       },
       initNavigation: (id, navigationTree$) => {
+        // Idempotent: same id is a no-op; a different id is a caller bug,
+        // logged and ignored rather than re-running enableUi mid-session.
+        if (this.activeSolutionId === id) return;
+        if (this.activeSolutionId !== null) {
+          this.initializerContext.logger
+            .get()
+            .error(
+              `navigation.initNavigation() called with solution "${id}" but was already initialized with "${this.activeSolutionId}". Ignoring.`
+            );
+          return;
+        }
         this.activeSolutionId = id;
         chrome.project.initNavigation(id, navigationTree$);
         if (!isUnauthenticated) {

@@ -156,7 +156,6 @@ describe('Navigation Plugin', () => {
 
       const navigationTree$ = of({ body: [] });
       const { initNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
-      await new Promise((resolve) => setTimeout(resolve));
 
       initNavigation('es', navigationTree$);
 
@@ -172,7 +171,9 @@ describe('Navigation Plugin', () => {
 
       const enableUiSpy = jest.spyOn((plugin as any).customizationService, 'enableUi');
       const { initNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
-      await new Promise((resolve) => setTimeout(resolve));
+      // start() itself may call enableUi synchronously (e.g. registering the
+      // chrome handler); clear those calls so the assertion below is scoped
+      // to the one triggered by initNavigation().
       enableUiSpy.mockClear();
 
       initNavigation('security', of({ body: [] }));
@@ -187,7 +188,6 @@ describe('Navigation Plugin', () => {
 
       const enableUiSpy = jest.spyOn((plugin as any).customizationService, 'enableUi');
       const { initNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
-      await new Promise((resolve) => setTimeout(resolve));
       enableUiSpy.mockClear();
 
       initNavigation('security', of({ body: [] }));
