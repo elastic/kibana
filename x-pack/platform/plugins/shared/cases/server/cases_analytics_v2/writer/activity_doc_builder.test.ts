@@ -50,18 +50,18 @@ describe('buildActivityDoc', () => {
       expect(doc.action.verb).toBe('update');
     });
 
-    it('resolves cases.id from the associated-cases reference', () => {
+    it('resolves case.id from the associated-cases reference', () => {
       const doc = buildActivityDoc(
         makeUserAction('ua-1', {
           references: [{ id: 'case-xyz', type: CASE_SAVED_OBJECT, name: 'associated-cases' }],
         })
       );
-      expect(doc.cases.id).toBe('case-xyz');
+      expect(doc.case.id).toBe('case-xyz');
     });
 
-    it('sets cases.id to the empty string when no case reference is present (malformed SO)', () => {
+    it('sets case.id to the empty string when no case reference is present (malformed SO)', () => {
       const doc = buildActivityDoc(makeUserAction('ua-1', { references: [] }));
-      expect(doc.cases.id).toBe('');
+      expect(doc.case.id).toBe('');
     });
 
     it('projects created_by into actor.*', () => {
