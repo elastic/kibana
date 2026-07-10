@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core/public';
@@ -27,8 +27,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { TransactionGroup } from '../../transactions_table/types';
 import { TransactionsTable } from '../../transactions_table';
 import { SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS } from './ebt_constants';
-import { useServiceFlyoutTransactions } from './hooks/use_service_flyout_transactions';
-import { useServiceFlyoutTransactionDetailedStatistics } from './hooks/use_service_flyout_transaction_detailed_statistics';
+import { useServiceFlyoutTransactionData } from './hooks/use_service_flyout_transaction_data';
 
 const MAX_GROUPS_TOOLTIP = (
   <EuiText size="s" style={{ maxWidth: 448 }}>
@@ -50,10 +49,6 @@ const MAX_GROUPS_TOOLTIP = (
     />
   </EuiText>
 );
-
-function toPoints(coords: Array<{ x: number; y: number | null | undefined }>) {
-  return coords.map(({ x, y }) => ({ x, y: y ?? null }));
-}
 
 interface ServiceFlyoutTransactionsSectionProps {
   http: HttpStart;
@@ -82,8 +77,8 @@ export function ServiceFlyoutTransactionsSection({
 }: ServiceFlyoutTransactionsSectionProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { items, isLoading, maxCountExceeded, hasActiveAlerts, error } =
-    useServiceFlyoutTransactions({
+  const { items, isLoading, isSparklineLoading, maxCountExceeded, hasActiveAlerts, error } =
+    useServiceFlyoutTransactionData({
       http,
       notifications,
       serviceName,
@@ -95,58 +90,6 @@ export function ServiceFlyoutTransactionsSection({
       searchQuery,
       refreshToken,
     });
-
-  const transactionNames = useMemo(() => items.map(({ name }) => name), [items]);
-
-  const {
-    currentPeriod,
-    previousPeriod,
-    isLoading: isDetailedLoading,
-  } = useServiceFlyoutTransactionDetailedStatistics({
-    http,
-    serviceName,
-    environment,
-    start,
-    end,
-    transactionType,
-    latencyAggregationType,
-    transactionNames,
-  });
-
-  const itemsWithSparklines = useMemo(() => {
-    if (!Object.keys(currentPeriod).length) return items;
-
-    return items.map((item) => {
-      const stat = currentPeriod[item.name];
-      const comparisonStat = previousPeriod[item.name];
-      if (!stat) return item;
-
-      return {
-        ...item,
-        latency: {
-          ...item.latency,
-          series: {
-            value: toPoints(stat.latency),
-            ...(comparisonStat ? { comparison: toPoints(comparisonStat.latency) } : {}),
-          },
-        },
-        throughput: {
-          ...item.throughput,
-          series: {
-            value: toPoints(stat.throughput),
-            ...(comparisonStat ? { comparison: toPoints(comparisonStat.throughput) } : {}),
-          },
-        },
-        errorRate: {
-          ...item.errorRate,
-          series: {
-            value: toPoints(stat.errorRate),
-            ...(comparisonStat ? { comparison: toPoints(comparisonStat.errorRate) } : {}),
-          },
-        },
-      };
-    });
-  }, [items, currentPeriod, previousPeriod]);
 
   const openInTransactionsLocator = locators?.get<ServiceTransactionsLocatorParams>(
     SERVICE_TRANSACTIONS_LOCATOR_ID
@@ -199,9 +142,9 @@ export function ServiceFlyoutTransactionsSection({
             })
           : undefined
       }
-      items={itemsWithSparklines}
+      items={items}
       isLoading={isLoading}
-      isSparklineLoading={isDetailedLoading}
+      isSparklineLoading={isSparklineLoading}
       maxCountExceeded={maxCountExceeded}
       latencyAggregationType={latencyAggregationType}
       columns={[
