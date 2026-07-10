@@ -53,9 +53,21 @@ describe('conversation templating feasibility benchmark', () => {
       expect.objectContaining({
         priority_as_keyword: 'medium',
         risk_score_as_long: '1',
+        related_objects_as_array: expect.any(String),
         summary_as_text: expect.stringContaining('investigation summary'),
       })
     );
+    const relatedObjects = JSON.parse(document.extended_fields?.related_objects_as_array ?? '[]');
+
+    expect(relatedObjects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.stringMatching(/^template-object-\d+$/),
+          name: expect.stringMatching(/^benchmark-object-\d+$/),
+        }),
+      ])
+    );
+    expect(relatedObjects).toHaveLength(10);
     expect(document.conversation_rounds).toHaveLength(1000);
     expect(toolCalls).toHaveLength(500);
   });
@@ -99,6 +111,7 @@ describe('conversation templating feasibility benchmark', () => {
       'runtime_all_values_text',
       'indexed_all_values_text',
       'runtime_user_picker_name_wildcard',
+      'runtime_template_object_array_name_lookup',
       'runtime_tags_membership_with_complex_bool',
       'runtime_multi_field_source_scan',
       'indexed_multi_field_flattened_scan',
@@ -148,7 +161,21 @@ describe('conversation templating feasibility benchmark', () => {
         assignee_name_runtime: expect.objectContaining({ type: 'keyword' }),
       })
     );
+    expect(requests[6].request.runtime_mappings).toEqual(
+      expect.objectContaining({
+        related_object_name_runtime: expect.objectContaining({ type: 'keyword' }),
+      })
+    );
     expect(requests[6].request.query).toEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          filter: expect.arrayContaining([
+            { term: { related_object_name_runtime: 'benchmark-object-17' } },
+          ]),
+        }),
+      })
+    );
+    expect(requests[7].request.query).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({
           minimum_should_match: 1,
@@ -156,8 +183,8 @@ describe('conversation templating feasibility benchmark', () => {
         }),
       })
     );
-    expect(requests[8].request.runtime_mappings).toEqual(undefined);
-    expect(requests[8].request.query).toEqual(
+    expect(requests[9].request.runtime_mappings).toEqual(undefined);
+    expect(requests[9].request.query).toEqual(
       expect.objectContaining({
         bool: expect.objectContaining({
           filter: expect.arrayContaining([
@@ -237,8 +264,8 @@ describe('conversation templating feasibility benchmark', () => {
       })
     );
     expect(client.bulk).toHaveBeenCalledTimes(2);
-    expect(client.search).toHaveBeenCalledTimes(18);
-    expect(results).toHaveLength(9);
+    expect(client.search).toHaveBeenCalledTimes(20);
+    expect(results).toHaveLength(10);
     expect(results[0].samplesMs).toHaveLength(2);
     expect(results[0].esTookMs).toEqual([1, 1]);
     expect(logger).toHaveBeenCalledWith('Seeding 50% complete (1/2 batches)');

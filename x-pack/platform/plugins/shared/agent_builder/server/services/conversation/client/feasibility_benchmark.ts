@@ -85,6 +85,16 @@ const baseSearchFilters: QueryDslQueryContainer[] = [
   accessFilter,
 ];
 
+const buildTemplateObjectArray = (index: number): Array<{ id: string; name: string }> =>
+  Array.from({ length: 10 }, (_, objectIndex) => {
+    const value = (index * 31 + objectIndex * 17) % 100;
+
+    return {
+      id: `template-object-${value}`,
+      name: `benchmark-object-${value}`,
+    };
+  });
+
 export const buildFeasibilityConversationDocument = (
   index: number,
   corpus: ConversationFeasibilityCorpus = CONVERSATION_FEASIBILITY_CORPUS
@@ -110,6 +120,7 @@ export const buildFeasibilityConversationDocument = (
       assignee_as_user: JSON.stringify({ id: `user-${index % 10}`, name: `User ${index % 10}` }),
       tags_as_array: index % 2 === 0 ? 'prod,security' : 'dev,observability',
       summary_as_text: `conversation ${index} investigation summary with repeated tool output`,
+      related_objects_as_array: JSON.stringify(buildTemplateObjectArray(index)),
     },
     conversation_rounds: Array.from({ length: corpus.roundsPerConversation }, (_, roundIndex) => ({
       id: `round-${index}-${roundIndex}`,
@@ -332,6 +343,40 @@ export const buildConversationFeasibilitySearchRequests =
               ...baseSearchFilters,
               { wildcard: { assignee_name_runtime: 'User 1*' } },
               { terms: { 'template.id': ['template-1', 'template-2', 'template-3'] } },
+            ],
+          },
+        },
+      },
+    },
+    {
+      name: 'runtime_template_object_array_name_lookup',
+      request: {
+        track_total_hits: true,
+        size: 20,
+        runtime_mappings: {
+          related_object_name_runtime: {
+            type: 'keyword',
+            script: {
+              source: `
+                if (params._source == null) return;
+                def ef = params._source.get('extended_fields');
+                if (ef == null || !(ef instanceof Map)) return;
+                def raw = ef.get('related_objects_as_array');
+                if (raw == null) return;
+                def value = raw.toString();
+                def matcher = /"name":"([^"]*)"/.matcher(value);
+                while (matcher.find()) {
+                  emit(matcher.group(1));
+                }
+              `,
+            },
+          },
+        },
+        query: {
+          bool: {
+            filter: [
+              ...baseSearchFilters,
+              { term: { related_object_name_runtime: 'benchmark-object-17' } },
             ],
           },
         },
