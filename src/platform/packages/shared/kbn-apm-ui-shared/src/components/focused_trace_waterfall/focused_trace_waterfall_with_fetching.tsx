@@ -33,7 +33,11 @@ export function FocusedTraceWaterfallWithFetching({
 }: Props) {
   const getServiceBadgeHref = useGetServiceBadgeHrefFromCore(core, rangeFrom, rangeTo);
 
-  const { value: data, loading } = useAbortableAsync(
+  const {
+    value: data,
+    loading,
+    error,
+  } = useAbortableAsync(
     ({ signal }) => {
       return callApmApi('GET /internal/apm/unified_traces/{traceId}/summary', {
         signal,
@@ -46,11 +50,11 @@ export function FocusedTraceWaterfallWithFetching({
     [docId, rangeFrom, rangeTo, traceId]
   );
 
-  if (loading) {
+  if (loading || (!error && data === undefined)) {
     return <Loading />;
   }
 
-  if (data === undefined) {
+  if (error || data === undefined) {
     return (
       <EuiCallOut
         announceOnMount
