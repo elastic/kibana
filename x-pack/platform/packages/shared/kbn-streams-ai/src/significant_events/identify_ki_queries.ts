@@ -344,10 +344,7 @@ export async function identifyKIQueries({
                     format: 'json',
                   },
                   {
-                    signal: AbortSignal.any([
-                      signal,
-                      AbortSignal.timeout(queryValidationTimeoutMs),
-                    ]),
+                    requestTimeout: queryValidationTimeoutMs,
                   }
                 );
 
