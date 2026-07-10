@@ -18,7 +18,7 @@ export interface InfoBlockItem {
   /**
    * Renders the value at the given EUI font scale (e.g. `'xl'` for a larger
    * value), via `euiFontSize`. The title is unaffected. When omitted, the
-   * value uses the default text size.
+   * value uses the default text size. Ignored when `compressed` is true.
    */
   size?: _EuiThemeFontScale;
   /** Color for the value text, passed through to `EuiText` (e.g. `'success'`). */
@@ -50,14 +50,14 @@ export const isLeadingSpacer = (item: InfoBlocksItem): item is LeadingSpacerItem
 
 export interface InfoBlocksProps {
   /**
-   * The blocks to render. Up to 6 are supported; passing more is a consumer
-   * bug and is not validated or guarded at runtime. Use {@link LEADING_SPACER}
-   * for an entry that fills the rest of its row.
+   * The blocks to render. Designed for small sets, typically up to 6 blocks.
+   * Use {@link LEADING_SPACER} for an entry that fills the rest of its row.
    */
   items: readonly InfoBlocksItem[];
   /**
    * Compact spacing/sizing. Intended to be driven by the flyout header's
-   * collapsed state.
+   * collapsed state. Drops {@link LEADING_SPACER} entries and ignores custom
+   * value sizes so the layout stays dense.
    */
   compressed?: boolean;
   'data-test-subj'?: string;

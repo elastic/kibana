@@ -9,7 +9,7 @@
 
 export { InfoBlocks } from './src/info_blocks.component';
 export { InfoBlock } from './src/info_block.component';
-export { LEADING_SPACER, isLeadingSpacer } from './src/types';
+export { LEADING_SPACER } from './src/types';
 export type {
   InfoBlockItem,
   LeadingSpacerItem,
