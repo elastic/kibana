@@ -96,6 +96,7 @@ export const createManagementFooterItemsTree = (
             {
               link: 'management:application_connections',
               breadcrumbStatus: 'hidden',
+              badgeType: 'techPreview',
             },
             {
               link: 'management:roles',
