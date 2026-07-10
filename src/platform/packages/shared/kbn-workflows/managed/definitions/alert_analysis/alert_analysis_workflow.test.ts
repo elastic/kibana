@@ -25,6 +25,23 @@ const findStepByName = (steps: unknown[], name: string): Record<string, unknown>
   return undefined;
 };
 
+// Look the agent step up by type rather than name so these assertions survive the
+// onechat_runAgent_step -> runAgent_step rename that lands in a separate PR.
+const findStepByType = (steps: unknown[], type: string): Record<string, unknown> | undefined => {
+  for (const step of steps) {
+    const s = step as Record<string, unknown>;
+    if (s.type === type) return s;
+    for (const key of ['steps', 'else']) {
+      const nested = s[key];
+      if (Array.isArray(nested)) {
+        const found = findStepByType(nested, type);
+        if (found) return found;
+      }
+    }
+  }
+  return undefined;
+};
+
 describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   // The workflow is installed statically (no template rendering); it reads per-space config at run
   // time. These assertions run against the static yaml the definition ships.
@@ -112,6 +129,37 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(agentStep['connector-id']).toBe('{{ variables.connector_id }}');
     // `${{ }}` preserves the boolean; a plain `{{ }}` would render the string "false" (truthy).
     expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
+  });
+
+  it('trims the alert with the pick filter over the configured allow-list before the agent step', () => {
+    const minimalAlertStep = findStepByName(workflow.steps, 'build_minimal_alert') as {
+      type: string;
+      with: { minimal_alert: string };
+    };
+
+    expect(minimalAlertStep).toBeDefined();
+    expect(minimalAlertStep.type).toBe('data.set');
+    // Delegates the field selection to the `pick` filter + the shared const list, rather than
+    // hand-reshaping ~60 nested fields inline.
+    expect(minimalAlertStep.with.minimal_alert).toBe(
+      '${{ foreach.item | pick: consts.model_alert_fields }}'
+    );
+  });
+
+  it('lists the high-signal allow-list fields in consts.model_alert_fields', () => {
+    const fields = workflow.consts.model_alert_fields as string[];
+
+    expect(fields).toEqual(
+      expect.arrayContaining(['_id', '_index', 'process.command_line', 'kibana.alert.rule.name'])
+    );
+  });
+
+  it('sends the trimmed alert (not the full foreach item) to the agent attachment', () => {
+    const agentStep = findStepByType(workflow.steps, 'ai.agent') as {
+      with: { attachments: Array<{ type: string; data: { alert: string } }> };
+    };
+
+    expect(agentStep.with.attachments[0].data.alert).toBe('{{ variables.minimal_alert | json:2 }}');
   });
 
   it('adds token usage metadata to the verdict note', () => {
