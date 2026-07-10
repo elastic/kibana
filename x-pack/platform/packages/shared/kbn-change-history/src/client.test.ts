@@ -8,8 +8,10 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DataStreamClient } from '@kbn/data-streams';
+import { withSpan } from '@kbn/apm-utils';
 import { FLAGS } from './constants';
 import { ChangeHistoryClient } from './client';
+import type { ObjectChange } from './types';
 
 jest.mock('@kbn/data-streams', () => ({
   DataStreamClient: {
@@ -17,7 +19,18 @@ jest.mock('@kbn/data-streams', () => ({
   },
 }));
 
+jest.mock('@kbn/apm-utils', () => ({
+  withSpan: jest.fn(<T>(_opts: unknown, cb: () => Promise<T>) => cb()),
+}));
+
+const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
+
 const DataStreamClientMock = DataStreamClient as jest.Mocked<typeof DataStreamClient>;
+
+const dataStreamClientMock = {
+  create: jest.fn().mockResolvedValue(undefined),
+  search: jest.fn().mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } }),
+};
 
 describe('ChangeHistoryClient.initialize', () => {
   const logger = loggingSystemMock.createLogger();
@@ -30,7 +43,7 @@ describe('ChangeHistoryClient.initialize', () => {
 
   beforeEach(() => {
     FLAGS.FEATURE_ENABLED = true;
-    DataStreamClientMock.initialize.mockResolvedValue({} as never);
+    DataStreamClientMock.initialize.mockResolvedValue(dataStreamClientMock as never);
   });
 
   afterEach(() => {
@@ -60,5 +73,80 @@ describe('ChangeHistoryClient.initialize', () => {
       DataStreamClientMock.initialize.mock.calls[0]?.[0].dataStream.template.settings
     ).toBeUndefined();
     expect(client.isInitialized()).toBe(true);
+  });
+
+  describe('APM spans', () => {
+    describe('logBulk', () => {
+      const changes: ObjectChange[] = [
+        {
+          objectType: 'alert',
+          objectId: 'rule-1',
+          snapshot: { name: 'after' },
+        },
+      ];
+
+      it('emits the change_history.log_bulk.build_documents span with the supplied labels', async () => {
+        const client = new ChangeHistoryClient(defaultConstructorOpts);
+        await client.initialize(elasticsearchServiceMock.createElasticsearchClient());
+
+        await client.logBulk(changes, {
+          action: 'rule_update',
+          username: 'alice',
+          spaceId: 'default',
+          spanLabels: { solution: 'security', action: 'write' },
+        });
+
+        expect(withSpanMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'change_history.log_bulk.build_documents',
+            labels: { solution: 'security', action: 'write' },
+          }),
+          expect.any(Function)
+        );
+      });
+
+      it('emits the change_history.log_bulk.es_bulk_create span with the supplied labels', async () => {
+        const client = new ChangeHistoryClient(defaultConstructorOpts);
+        await client.initialize(elasticsearchServiceMock.createElasticsearchClient());
+
+        await client.logBulk(changes, {
+          action: 'rule_update',
+          username: 'alice',
+          spaceId: 'default',
+          spanLabels: { solution: 'security', action: 'write' },
+        });
+
+        expect(withSpanMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'change_history.log_bulk.es_bulk_create',
+            type: 'db',
+            subtype: 'elasticsearch',
+            labels: { solution: 'security', action: 'write' },
+          }),
+          expect.any(Function)
+        );
+      });
+    });
+
+    describe('getHistory', () => {
+      it('emits the change_history.get_history.es_search span with the supplied labels', async () => {
+        const client = new ChangeHistoryClient(defaultConstructorOpts);
+        await client.initialize(elasticsearchServiceMock.createElasticsearchClient());
+
+        await client.getHistory('default', 'alert', 'rule-1', {
+          spanLabels: { solution: 'security', action: 'read' },
+        });
+
+        expect(withSpanMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'change_history.get_history.es_search',
+            type: 'db',
+            subtype: 'elasticsearch',
+            labels: { solution: 'security', action: 'read' },
+          }),
+          expect.any(Function)
+        );
+      });
+    });
   });
 });
