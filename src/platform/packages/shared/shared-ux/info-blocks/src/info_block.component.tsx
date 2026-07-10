@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { type CSSProperties, type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import { EuiText, EuiTextTruncate, euiFontSize, useEuiTheme } from '@elastic/eui';
 import type { InfoBlockItem } from './types';
@@ -16,7 +16,7 @@ export interface InfoBlockProps extends InfoBlockItem {
   compressed?: boolean;
 }
 
-/** Fixed-style title/value block used by {@link InfoBlocks}. */
+/** Fixed-style title/value block used by {@link InfoBlock}. */
 export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   title,
   value,
@@ -31,32 +31,31 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
     size && !compressed ? euiFontSize(euiThemeContext, size, { unit: 'px' }) : undefined;
   // Primitive values get built-in single-line truncation.
   const isTextValue = typeof value === 'string' || typeof value === 'number';
+
+  const valueStyle: CSSProperties = valueFontSize
+    ? {
+        fontSize: valueFontSize.fontSize,
+        lineHeight: valueFontSize.lineHeight,
+        fontWeight: euiTheme.font.weight.semiBold,
+      }
+    : { fontWeight: euiTheme.font.weight.bold };
+
   return (
-    <div
-      data-test-subj={rest['data-test-subj'] ?? 'infoBlock'}
-      css={css`
-        min-width: 0;
-      `}
-    >
+    <div data-test-subj={rest['data-test-subj'] ?? 'infoBlock'} style={{ minWidth: 0 }}>
       <EuiText size="xs" color="subdued">
         <EuiTextTruncate text={title} />
       </EuiText>
       <EuiText
         size="s"
         color={color}
+        // Link weight only, so `a`'s inherited font-weight always tracks the
+        // value's own (dynamic) font-weight set via the `style` prop below.
         css={css`
-          font-weight: ${euiTheme.font.weight.bold};
-          ${valueFontSize
-            ? `
-                font-size: ${valueFontSize.fontSize};
-                line-height: ${valueFontSize.lineHeight};
-                font-weight: ${euiTheme.font.weight.semiBold};
-              `
-            : ''}
           a {
             font-weight: inherit;
           }
         `}
+        style={valueStyle}
       >
         {isTextValue ? <EuiTextTruncate text={String(value)} /> : value}
       </EuiText>

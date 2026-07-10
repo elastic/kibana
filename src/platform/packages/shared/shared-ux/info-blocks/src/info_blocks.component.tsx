@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type FunctionComponent } from 'react';
+import React, { useState, type CSSProperties, type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import { EuiPanel, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { InfoBlock } from './info_block.component';
@@ -78,6 +78,52 @@ export const getInfoBlocksLayout = (
   }));
 };
 
+// Dividers are drawn as pseudo-elements, whose declarations can't be reached
+// through the `style` prop, so their per-cell values (color/thickness/gap and
+// each divider's show/hide + inset) are threaded in as CSS custom properties
+// set via `style`. That keeps this `css` call static (one cached class) even
+// though the values it renders vary per cell and per render.
+const spacerCellCss = css`
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-start: var(--infoBlocksHorizontalDividerInsetStart, 0);
+    inset-inline-end: var(--infoBlocksHorizontalDividerInsetEnd, 0);
+    block-size: var(--infoBlocksDividerThickness);
+    background-color: var(--infoBlocksDividerColor);
+    display: var(--infoBlocksHorizontalDividerDisplay, none);
+  }
+`;
+
+const itemCellCss = css`
+  position: relative;
+  min-width: 0;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block: var(--infoBlocksDividerCornerGap);
+    inline-size: var(--infoBlocksDividerThickness);
+    background-color: var(--infoBlocksDividerColor);
+    display: var(--infoBlocksVerticalDividerDisplay, none);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-start: var(--infoBlocksHorizontalDividerInsetStart, 0);
+    inset-inline-end: var(--infoBlocksHorizontalDividerInsetEnd, 0);
+    block-size: var(--infoBlocksDividerThickness);
+    background-color: var(--infoBlocksDividerColor);
+    display: var(--infoBlocksHorizontalDividerDisplay, none);
+  }
+`;
+
 /** Responsive card for a small set of labeled values. */
 export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
   items,
@@ -107,6 +153,14 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
     item: cell.isSpacer ? null : items[nextItemIndex++],
   }));
 
+  const panelStyle: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+    ['--infoBlocksDividerColor' as string]: dividerColor,
+    ['--infoBlocksDividerThickness' as string]: dividerThickness,
+    ['--infoBlocksDividerCornerGap' as string]: dividerCornerGap,
+  };
+
   return (
     <EuiPanel
       panelRef={setContainer}
@@ -114,76 +168,44 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
       hasShadow={false}
       hasBorder
       data-test-subj={rest['data-test-subj'] ?? 'infoBlocks'}
-      css={css`
-        display: grid;
-        grid-template-columns: repeat(${columns}, minmax(0, 1fr));
-      `}
+      style={panelStyle}
     >
       {cells.map(({ cell, item }, cellIndex) => {
         if (cell.isSpacer) {
+          const spacerStyle: CSSProperties = {
+            gridColumn: `span ${cell.span}`,
+            ['--infoBlocksHorizontalDividerDisplay' as string]: cell.hasRowBelow ? 'block' : 'none',
+            ['--infoBlocksHorizontalDividerInsetStart' as string]:
+              cell.columnStart === 0 ? dividerCornerGap : '0',
+            ['--infoBlocksHorizontalDividerInsetEnd' as string]: cell.isLastColumn
+              ? dividerCornerGap
+              : '0',
+          };
           return (
-            <div
-              key="leading-spacer"
-              aria-hidden="true"
-              css={css`
-                position: relative;
-                grid-column: span ${cell.span};
-                ${cell.hasRowBelow
-                  ? `
-                      &::after {
-                        content: '';
-                        position: absolute;
-                        inset-block-end: 0;
-                        inset-inline-start: ${cell.columnStart === 0 ? dividerCornerGap : '0'};
-                        inset-inline-end: ${cell.isLastColumn ? dividerCornerGap : '0'};
-                        block-size: ${dividerThickness};
-                        background-color: ${dividerColor};
-                      }
-                    `
-                  : ''}
-              `}
-            />
+            <div key="leading-spacer" aria-hidden="true" css={spacerCellCss} style={spacerStyle} />
           );
         }
 
-        // Cell dividers are pseudo-elements so content layout stays simple.
         // `item` is non-null here: `cells` only pairs `null` with spacer cells.
         const isFirstColumn = cell.columnStart === 0;
         const infoBlockItem = item!;
+        const itemStyle: CSSProperties = {
+          padding: cellPadding,
+          gridColumn: `span ${cell.span}`,
+          ['--infoBlocksVerticalDividerDisplay' as string]: !cell.isLastColumn ? 'block' : 'none',
+          ['--infoBlocksHorizontalDividerDisplay' as string]: cell.hasRowBelow ? 'block' : 'none',
+          ['--infoBlocksHorizontalDividerInsetStart' as string]: isFirstColumn
+            ? dividerCornerGap
+            : '0',
+          ['--infoBlocksHorizontalDividerInsetEnd' as string]: cell.isLastColumn
+            ? dividerCornerGap
+            : '0',
+        };
         return (
           <div
             key={infoBlockItem['data-test-subj'] ?? cellIndex}
-            css={css`
-              position: relative;
-              min-width: 0;
-              padding: ${cellPadding};
-              grid-column: span ${cell.span};
-              ${!cell.isLastColumn
-                ? `
-                    &::before {
-                      content: '';
-                      position: absolute;
-                      inset-inline-end: 0;
-                      inset-block: ${dividerCornerGap};
-                      inline-size: ${dividerThickness};
-                      background-color: ${dividerColor};
-                    }
-                  `
-                : ''}
-              ${cell.hasRowBelow
-                ? `
-                    &::after {
-                      content: '';
-                      position: absolute;
-                      inset-block-end: 0;
-                      inset-inline-start: ${isFirstColumn ? dividerCornerGap : '0'};
-                      inset-inline-end: ${cell.isLastColumn ? dividerCornerGap : '0'};
-                      block-size: ${dividerThickness};
-                      background-color: ${dividerColor};
-                    }
-                  `
-                : ''}
-            `}
+            css={itemCellCss}
+            style={itemStyle}
           >
             <InfoBlock {...infoBlockItem} compressed={compressed} />
           </div>
