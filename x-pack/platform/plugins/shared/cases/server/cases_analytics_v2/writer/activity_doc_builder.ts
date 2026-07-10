@@ -133,10 +133,7 @@ export function buildActivityDoc(
       type: a.type,
       verb: a.action,
       payload_json: stringifyPayload(a.payload),
-      ...extractCuratedFields(a.type, a.payload, connectorId),
-      // Omit when absent so the strict mapping stays sparse (a no-op under
-      // `dynamic: 'strict'`), consistent with the curated extracts above.
-      ...(attachmentReferenceId != null ? { attachment_reference_id: attachmentReferenceId } : {}),
+      ...extractCuratedFields(a.type, a.payload, connectorId, attachmentReferenceId),
     },
   };
 }
@@ -189,9 +186,12 @@ function stringifyPayload(payload: Record<string, unknown> | null | undefined): 
 /**
  * Extracts the curated typed sub-fields for the analytics doc,
  * conditional on the action `type`. Most clauses read from `payload`;
- * `connector_id_new` is the exception — its id is stripped from the
- * payload at persist time and lives in `so.references`, so the caller
- * resolves it and passes it in via `connectorId`.
+ * `connector_id_new` and `attachment_reference_id` are the exceptions —
+ * their ids live in `so.references`, not `payload`, so the caller resolves
+ * them and passes them in via `connectorId` / `attachmentReferenceId`. Keeping
+ * every curated extract here (rather than spreading some inline in
+ * `buildActivityDoc`) keeps the extraction — and its per-type gating — in one
+ * place.
  *
  * For each clause:
  *   1. Confirm the relevant value is present (in `payload`, or in
@@ -209,7 +209,8 @@ function stringifyPayload(payload: Record<string, unknown> | null | undefined): 
 function extractCuratedFields(
   type: string,
   payload: Record<string, unknown> | null | undefined,
-  connectorId: string | undefined
+  connectorId: string | undefined,
+  attachmentReferenceId: string | undefined
 ): Partial<ActivityAnalyticsDoc['action']> {
   const out: Partial<ActivityAnalyticsDoc['action']> = {};
 
@@ -219,6 +220,18 @@ function extractCuratedFields(
   // it runs even when `payload` is null.
   if (type === 'connector' && typeof connectorId === 'string' && connectorId.length > 0) {
     out.connector_id_new = connectorId;
+  }
+
+  // `attachment_reference_id` is likewise sourced from `so.references`
+  // (resolved by the caller via `findCommentReferenceId`). Gate on the
+  // `comment` action type so the code matches the "comment actions only"
+  // contract asserted in the interface and mapping. Independent of `payload`.
+  if (
+    type === 'comment' &&
+    typeof attachmentReferenceId === 'string' &&
+    attachmentReferenceId.length > 0
+  ) {
+    out.attachment_reference_id = attachmentReferenceId;
   }
 
   if (payload == null) return out;
