@@ -98,6 +98,7 @@ function MetricCell({
 
   return (
     <EuiFlexGroup
+      data-test-subj="transactionSparklineChart"
       justifyContent="flexEnd"
       gutterSize="xs"
       alignItems="flexEnd"
