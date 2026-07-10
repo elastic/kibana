@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { SpanLinkDetails } from '@kbn/apm-types';
-import { processorEventRt } from '@kbn/apm-types';
+import { processorEventSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema } from '../../default_api_types';
 
 export interface SpanLinksResponse {
   outgoingSpanLinks: SpanLinkDetails[];
@@ -17,11 +17,13 @@ export interface SpanLinksResponse {
 
 export const spanLinksRoute = defineRoute<SpanLinksResponse>()({
   endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-      spanId: t.string,
+  params: z.object({
+    path: z.object({
+      traceId: z.string(),
+      spanId: z.string(),
     }),
-    query: t.intersection([kueryRt, rangeRt, t.partial({ processorEvent: processorEventRt })]),
+    query: kuerySchema
+      .merge(rangeSchema)
+      .extend({ processorEvent: processorEventSchema.optional() }),
   }),
 });

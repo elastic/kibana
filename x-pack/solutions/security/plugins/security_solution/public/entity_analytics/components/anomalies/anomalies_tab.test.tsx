@@ -10,6 +10,7 @@ import { render, screen, act, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { SeverityOption } from '@kbn/ml-plugin/public/application/explorer/hooks/use_severity_options';
 import { AnomaliesTab } from './anomalies_tab';
+import { ANOMALIES_TAB_ERROR_TEST_ID } from './test_ids';
 
 // ─── Hook mocks ──────────────────────────────────────────────────────────────
 
@@ -56,11 +57,13 @@ jest.mock('./mitre/components/mitre_attack_chain', () => ({
     selectedTactic,
     anomalyCountByTactic,
     triggeredTactics,
+    showPersistentFirstTacticBadge,
   }: {
     onSelectTactic?: (t: string) => void;
     selectedTactic?: string | null;
     anomalyCountByTactic?: Record<string, number>;
     triggeredTactics: string[];
+    showPersistentFirstTacticBadge?: boolean;
   }) => {
     onSelectTactic = handler;
     return (
@@ -69,17 +72,33 @@ jest.mock('./mitre/components/mitre_attack_chain', () => ({
         data-selected-tactic={selectedTactic ?? ''}
         data-tactic-counts={JSON.stringify(anomalyCountByTactic ?? {})}
         data-triggered-tactics={JSON.stringify(triggeredTactics)}
+        data-show-persistent-first-tactic-badge={String(Boolean(showPersistentFirstTacticBadge))}
+        data-has-select-handler={String(handler !== undefined)}
       />
     );
   },
 }));
 
 jest.mock('./anomalies_tab_timeline', () => ({
-  AnomalyTabTimelineSection: () => <div data-test-subj="mock-timeline" />,
+  AnomalyTabTimelineSection: ({
+    isLoading,
+    isEmpty,
+  }: {
+    isLoading?: boolean;
+    isEmpty?: boolean;
+  }) => (
+    <div
+      data-test-subj="mock-timeline"
+      data-is-loading={String(Boolean(isLoading))}
+      data-is-empty={String(Boolean(isEmpty))}
+    />
+  ),
 }));
 
 jest.mock('./anomalies_tab_table', () => ({
-  AnomalyTabTableSection: () => <div data-test-subj="mock-table" />,
+  AnomalyTabTableSection: ({ isLoading }: { isLoading?: boolean }) => (
+    <div data-test-subj="mock-table" data-is-loading={String(Boolean(isLoading))} />
+  ),
 }));
 
 // ─── Infrastructure mocks ─────────────────────────────────────────────────────
@@ -121,10 +140,15 @@ const emptyOverview = {
   data: { tacticCounts: {}, anomalyByTimeBucket: [], recentAnomalies: [], from: 0, to: 1 },
   error: null,
   isFetching: false,
+  isLoading: false,
+  isError: false,
 };
 const emptySummary = {
   data: { anomalies: [], page: 1, page_size: 10, total: 0 },
   error: null,
+  isFetching: false,
+  isLoading: false,
+  isError: false,
 };
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -379,6 +403,153 @@ describe('AnomaliesTab', () => {
       const chain = screen.getByTestId('mock-mitre-attack-chain');
       const triggeredTactics = JSON.parse(chain.getAttribute('data-triggered-tactics') ?? '[]');
       expect(triggeredTactics).toEqual(expect.arrayContaining(['Initial Access', 'Execution']));
+    });
+  });
+
+  describe('attack chain loading state', () => {
+    it('renders a loading chart placeholder instead of the MitreAttackChain while overview is loading', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: undefined,
+        isLoading: true,
+      });
+      const { container } = render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(container.querySelector('.euiLoadingChart')).toBeInTheDocument();
+      // The placeholder renders a hidden MitreAttackChain with no tactic data.
+      expect(screen.getByTestId('mock-mitre-attack-chain')).toHaveAttribute(
+        'data-triggered-tactics',
+        '[]'
+      );
+    });
+
+    it('renders the real MitreAttackChain once overview finishes loading', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isLoading: false,
+      });
+      const { container } = render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(container.querySelector('.euiLoadingChart')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mock-mitre-attack-chain')).toHaveAttribute(
+        'data-triggered-tactics',
+        JSON.stringify(['Initial Access'])
+      );
+    });
+
+    it('hides the attack chain accordion once loading finishes with no tactics', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: {} },
+        isLoading: false,
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.queryByTestId('mock-mitre-attack-chain')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('attack chain empty state', () => {
+    it('shows the persistent first tactic badge and disables tactic selection when totalAnomaliesCount is 0', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: {
+          ...emptyOverview.data,
+          tacticCounts: { 'Initial Access': 1 },
+          totalAnomaliesCount: 0,
+        },
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      const chain = screen.getByTestId('mock-mitre-attack-chain');
+      expect(chain).toHaveAttribute('data-show-persistent-first-tactic-badge', 'true');
+      expect(chain).toHaveAttribute('data-has-select-handler', 'false');
+      expect(chain).toHaveAttribute('data-selected-tactic', '');
+    });
+
+    it('does not show the persistent first tactic badge and allows tactic selection when there are anomalies', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: {
+          ...emptyOverview.data,
+          tacticCounts: { 'Initial Access': 1 },
+          totalAnomaliesCount: 5,
+        },
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      const chain = screen.getByTestId('mock-mitre-attack-chain');
+      expect(chain).toHaveAttribute('data-show-persistent-first-tactic-badge', 'false');
+      expect(chain).toHaveAttribute('data-has-select-handler', 'true');
+    });
+  });
+
+  describe('timeline and table loading/empty props', () => {
+    it('sets the timeline isLoading prop from useAnomalyOverview.isLoading', () => {
+      mockUseAnomalyOverview.mockReturnValue({ ...emptyOverview, isLoading: true });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'true');
+    });
+
+    it('sets the timeline isEmpty prop when the overview has no time bucket anomalies', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, anomalyByTimeBucket: [] },
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-empty', 'true');
+    });
+
+    it('clears the timeline isLoading and isEmpty props when overview has data and no error', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, anomalyByTimeBucket: [{ x: 0, y: 1 }] },
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      const timeline = screen.getByTestId('mock-timeline');
+      expect(timeline).toHaveAttribute('data-is-loading', 'false');
+      expect(timeline).toHaveAttribute('data-is-empty', 'false');
+    });
+
+    it('sets the table isLoading prop from useAnomalySummary.isLoading', () => {
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isLoading: true });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'true');
+    });
+  });
+
+  describe('tab error state', () => {
+    it('shows the error prompt and hides the attack chain, timeline, and table when the overview errors', () => {
+      mockUseAnomalyOverview.mockReturnValue({ ...emptyOverview, data: undefined, isError: true });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId(ANOMALIES_TAB_ERROR_TEST_ID)).toBeInTheDocument();
+      expect(screen.queryByTestId('mock-mitre-attack-chain')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-timeline')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-table')).not.toBeInTheDocument();
+    });
+
+    it('shows the error prompt and hides the attack chain, timeline, and table when the summary errors', () => {
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, data: undefined, isError: true });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.getByTestId(ANOMALIES_TAB_ERROR_TEST_ID)).toBeInTheDocument();
+      expect(screen.queryByTestId('mock-mitre-attack-chain')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-timeline')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-table')).not.toBeInTheDocument();
+    });
+
+    it('does not show the error prompt when there is no error', () => {
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.queryByTestId(ANOMALIES_TAB_ERROR_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('does not show the error prompt for the date-range-too-old error, since the specific warning callout covers it', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: undefined,
+        isError: true,
+        error: {
+          response: { status: 400 },
+          body: { message: '`from` must not be older than 1 year' },
+        },
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.queryByTestId(ANOMALIES_TAB_ERROR_TEST_ID)).not.toBeInTheDocument();
     });
   });
 });
