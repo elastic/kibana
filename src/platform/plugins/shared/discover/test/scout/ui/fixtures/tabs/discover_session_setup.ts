@@ -19,6 +19,19 @@ const toSavedObjectTimeRange = ({ start, end }: { start: string; end: string }) 
   to: end,
 });
 
+const createSearchSourceJSON = ({
+  query,
+  dataView,
+}: {
+  query: string;
+  dataView: string | Record<string, unknown>;
+}) =>
+  JSON.stringify({
+    query: { query, language: 'kuery' },
+    filter: [],
+    ...(typeof dataView === 'string' ? { indexRefName: dataView } : { index: dataView }),
+  });
+
 const createClassicTabAttributes = ({
   columns,
   query,
@@ -42,11 +55,7 @@ const createClassicTabAttributes = ({
   timeRange,
   chartInterval,
   kibanaSavedObjectMeta: {
-    searchSourceJSON: JSON.stringify({
-      query: { query, language: 'kuery' },
-      filter: [],
-      index: dataView,
-    }),
+    searchSourceJSON: createSearchSourceJSON({ query, dataView }),
   },
 });
 
