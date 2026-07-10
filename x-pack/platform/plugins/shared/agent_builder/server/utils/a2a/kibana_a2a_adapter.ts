@@ -71,7 +71,7 @@ export class KibanaA2AAdapter {
     // Kibana load balancing lacks session affinity, so `tasks/get` polling for a non-blocking
     // execution may land on a different node than the one that scheduled it. Backing the store
     // with the ES-persisted execution document (rather than in-memory) makes that safe.
-    const taskStore = new KibanaTaskStore(this.getInternalServices);
+    const taskStore = new KibanaTaskStore(this.getInternalServices, kibanaRequest);
 
     const agentExecutor = new KibanaAgentExecutor(
       this.logger,

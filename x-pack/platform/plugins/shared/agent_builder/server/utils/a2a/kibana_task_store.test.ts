@@ -24,9 +24,17 @@ describe('KibanaTaskStore', () => {
       ...overrides,
     } as AgentExecution);
 
-  const createStore = (getExecution: jest.Mock) => {
-    const getInternalServices = () => ({ execution: { getExecution } } as any);
-    return new KibanaTaskStore(getInternalServices);
+  const createStore = (
+    getExecution: jest.Mock,
+    { currentSpaceId = 'default' }: { currentSpaceId?: string } = {}
+  ) => {
+    const getInternalServices = () =>
+      ({
+        execution: { getExecution },
+        spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue(currentSpaceId) } },
+      } as any);
+    const kibanaRequest = {} as any;
+    return new KibanaTaskStore(getInternalServices, kibanaRequest);
   };
 
   it('returns undefined when the execution is not found', async () => {
@@ -58,6 +66,26 @@ describe('KibanaTaskStore', () => {
         status: expect.objectContaining({ state: expectedState }),
       })
     );
+  });
+
+  it('returns undefined when the execution belongs to a different space', async () => {
+    const getExecution = jest.fn().mockResolvedValue(createExecution({ spaceId: 'other-space' }));
+    const store = createStore(getExecution, { currentSpaceId: 'default' });
+
+    const task = await store.load('exec-1');
+
+    expect(task).toBeUndefined();
+  });
+
+  it('uses the persisted a2aContextId as contextId when present', async () => {
+    const getExecution = jest
+      .fn()
+      .mockResolvedValue(createExecution({ metadata: { a2aContextId: 'ctx-1' } }));
+    const store = createStore(getExecution);
+
+    const task = await store.load('exec-1');
+
+    expect(task).toEqual(expect.objectContaining({ contextId: 'ctx-1' }));
   });
 
   it('includes the final response message when completed', async () => {

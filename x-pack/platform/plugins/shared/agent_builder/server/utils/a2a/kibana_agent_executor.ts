@@ -53,6 +53,8 @@ export class KibanaAgentExecutor implements AgentExecutor {
         request: this.kibanaRequest,
         useTaskManager: !this.blocking,
         executionId: this.blocking ? undefined : taskId,
+        // Persisted so KibanaTaskStore can echo the same contextId back on `tasks/get` polls.
+        metadata: { a2aContextId: contextId },
         params: {
           agentId: this.agentId,
           nextInput: { message: userText },

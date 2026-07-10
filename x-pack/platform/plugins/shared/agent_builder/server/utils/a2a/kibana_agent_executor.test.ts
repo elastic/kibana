@@ -66,6 +66,19 @@ describe('KibanaAgentExecutor', () => {
     );
   });
 
+  it('persists the A2A contextId as execution metadata, for both blocking and non-blocking requests', async () => {
+    const execution = createExecutionMock();
+    const executor = createExecutor(execution);
+    const eventBus = createEventBusMock();
+    const requestContext = new RequestContext(createUserMessage(), 'task-1', 'ctx-1');
+
+    await executor.execute(requestContext, eventBus);
+
+    expect(execution.executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({ metadata: { a2aContextId: 'ctx-1' } })
+    );
+  });
+
   it('schedules on task manager and publishes a working task for non-blocking requests, without awaiting completion', async () => {
     const execution = createExecutionMock();
     const executor = createExecutor(execution, false);
