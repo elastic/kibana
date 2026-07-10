@@ -8,11 +8,11 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithTestingProviders } from '../../../../common/mock';
+import { renderWithTestingProviders } from '../../../../../common/mock';
 import { SidebarToggleButton } from './sidebar_toggle_button';
 import { SidebarProvider } from './sidebar_context';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana');
 
 const renderButton = () => {
   return renderWithTestingProviders(

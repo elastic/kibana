@@ -6,8 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
-import { useCasesLocalStorage } from '../../../../common/use_cases_local_storage';
-import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
+import { useCasesLocalStorage } from '../../../../../common/use_cases_local_storage';
+import { LOCAL_STORAGE_KEYS } from '../../../../../../common/constants';
 
 interface SidebarContextValue {
   isSidebarOpen: boolean;
