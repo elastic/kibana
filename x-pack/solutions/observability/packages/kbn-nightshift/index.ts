@@ -6,4 +6,3 @@
  */
 
 export { NightshiftApp } from './components/nightshift_app';
-export type { NightshiftAppProps, StatusFilter } from './components/nightshift_app';

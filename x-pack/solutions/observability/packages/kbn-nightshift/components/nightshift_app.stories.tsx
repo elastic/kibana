@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
-import React from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { NightshiftApp } from './nightshift_app';
 
-describe('NightshiftApp', () => {
-  it('renders the title', () => {
-    render(<NightshiftApp />);
+const meta: Meta<typeof NightshiftApp> = {
+  title: 'app/Nightshift/NightshiftApp',
+  component: NightshiftApp,
+};
 
-    expect(screen.getByText('Nightshift')).toBeInTheDocument();
-  });
-});
+export default meta;
+type Story = StoryObj<typeof NightshiftApp>;
+
+export const Default: Story = {};

@@ -9,7 +9,6 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/storybook",
-    "@kbn/kibana-react-plugin",
-    "@kbn/significant-events-schema"
+    "@kbn/kibana-react-plugin"
   ]
 }
