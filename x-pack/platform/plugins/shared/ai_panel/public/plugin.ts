@@ -10,6 +10,8 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { AI_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
+import { AI_PANEL_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
+import { aiPanelContextAttachmentUiDefinition } from './attachment_types/ai_panel_context';
 import { setServices } from './services';
 
 interface SetupDeps {
@@ -31,5 +33,10 @@ export class AiPanelPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
 
   start(core: CoreStart, { data, agentBuilder }: StartDeps) {
     setServices(core, data.search.search, agentBuilder);
+
+    agentBuilder.attachments.addAttachmentType(
+      AI_PANEL_CONTEXT_ATTACHMENT_TYPE,
+      aiPanelContextAttachmentUiDefinition
+    );
   }
 }

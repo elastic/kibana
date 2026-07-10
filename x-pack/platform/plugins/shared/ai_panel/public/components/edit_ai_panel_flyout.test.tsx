@@ -11,6 +11,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MockedCodeEditor } from '@kbn/code-editor-mock';
 import type { MockedMonacoEditor } from '@kbn/code-editor-mock/monaco_mock';
+import { AI_PANEL_CONTEXT_ATTACHMENT_TYPE } from '../../common/panel_context_attachment';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
@@ -118,7 +119,7 @@ describe('EditAiPanelFlyout', () => {
       expect(setChatConfig).toHaveBeenCalledWith(
         expect.objectContaining({
           sessionTag: 'ai_panel-panel-1',
-          attachments: [expect.objectContaining({ type: 'screen_context' })],
+          attachments: [expect.objectContaining({ type: AI_PANEL_CONTEXT_ATTACHMENT_TYPE })],
           browserApiTools: [expect.objectContaining({ id: 'update_ai_panel_config' })],
         })
       );
@@ -137,7 +138,7 @@ describe('EditAiPanelFlyout', () => {
 
       expect(setChatConfig).toHaveBeenCalledTimes(2);
       const lastCall = setChatConfig.mock.calls[1][0];
-      expect(lastCall.attachments[0].data.additional_data.esql_query).toBe('FROM logs | LIMIT 5');
+      expect(lastCall.attachments[0].data.esql_query).toBe('FROM logs | LIMIT 5');
     });
 
     it('clears the chat config on unmount', () => {
@@ -174,6 +175,11 @@ describe('EditAiPanelFlyout', () => {
 
   describe('save / cancel', () => {
     it('disables Apply and close when nothing has been edited', () => {
+      mockUseEditFlyoutState.mockReturnValue({
+        ...baseFlyoutState,
+        draftEsqlQuery: 'FROM logs',
+        draftTemplate: '<p>hi</p>',
+      });
       render(<EditAiPanelFlyout {...defaultProps} esqlQuery="FROM logs" template="<p>hi</p>" />);
       expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
     });

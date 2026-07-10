@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import { AI_PANEL_CONTEXT_ATTACHMENT_TYPE } from '../../common/panel_context_attachment';
 import { buildAiPanelContextAttachment, createUpdateAiPanelConfigTool } from './agent_refine';
 
 describe('buildAiPanelContextAttachment', () => {
-  it('carries the current prompt and esqlQuery as hidden screen context', () => {
+  it('carries the current prompt and esqlQuery as a visible panel-context attachment', () => {
     const attachment = buildAiPanelContextAttachment('Show KPI cards', 'FROM logs | STATS count()');
 
-    expect(attachment.hidden).toBe(true);
-    expect(attachment.type).toBe(AttachmentType.screenContext);
-    expect(attachment.data).toMatchObject({
-      additional_data: {
-        panel_instructions: 'Show KPI cards',
-        esql_query: 'FROM logs | STATS count()',
-      },
+    expect(attachment.hidden).toBeUndefined();
+    expect(attachment.type).toBe(AI_PANEL_CONTEXT_ATTACHMENT_TYPE);
+    expect(attachment.data).toEqual({
+      panel_instructions: 'Show KPI cards',
+      esql_query: 'FROM logs | STATS count()',
     });
   });
 
@@ -26,9 +24,7 @@ describe('buildAiPanelContextAttachment', () => {
     const attachment = buildAiPanelContextAttachment('Show KPI cards', undefined);
 
     expect(attachment.data).toMatchObject({
-      additional_data: {
-        esql_query: '',
-      },
+      esql_query: '',
     });
   });
 });

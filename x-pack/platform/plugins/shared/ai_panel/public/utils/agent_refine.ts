@@ -7,8 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import { AttachmentType, type AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
+import {
+  AI_PANEL_CONTEXT_ATTACHMENT_TYPE,
+  type AiPanelContextAttachmentData,
+} from '../../common/panel_context_attachment';
 import { AI_PANEL_MAX_PROMPT_LENGTH, AI_PANEL_MAX_ESQL_QUERY_LENGTH } from '../../common/constants';
 
 export const AI_PANEL_REFINE_SESSION_TAG = 'ai_panel';
@@ -16,24 +20,12 @@ export const AI_PANEL_REFINE_SESSION_TAG = 'ai_panel';
 export function buildAiPanelContextAttachment(
   prompt: string,
   esqlQuery: string | undefined
-): AttachmentInput {
+): AttachmentInput<typeof AI_PANEL_CONTEXT_ATTACHMENT_TYPE, AiPanelContextAttachmentData> {
   return {
-    hidden: true,
-    type: AttachmentType.screenContext,
+    type: AI_PANEL_CONTEXT_ATTACHMENT_TYPE,
     data: {
-      app: AI_PANEL_REFINE_SESSION_TAG,
-      description: i18n.translate('xpack.aiPanel.agentRefine.screenContextDescription', {
-        defaultMessage:
-          'The user is refining one specific AI-generated dashboard panel that is already ' +
-          'visible on their screen right now. To apply ANY change the user asks for, call ' +
-          'update_ai_panel_config. Do not call load_skill, ai-panel-authoring, or any ' +
-          'dashboard/panel-generation tool for this — those create a separate, unrelated ' +
-          'preview and will NOT change what the user is looking at.',
-      }),
-      additional_data: {
-        panel_instructions: prompt,
-        esql_query: esqlQuery ?? '',
-      },
+      panel_instructions: prompt,
+      esql_query: esqlQuery ?? '',
     },
   };
 }
