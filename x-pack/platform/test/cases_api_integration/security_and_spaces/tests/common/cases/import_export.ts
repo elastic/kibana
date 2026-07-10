@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expectExportToHaveCaseSavedObject(objects, expectedCaseRequest);
       expectExportToHaveUserActions(objects, expectedCaseRequest);
-      expectExportToHaveAComment(objects);
+      expectExportToHaveOneAttachment(objects);
     });
 
     it('imports a case with a comment and user actions', async () => {
@@ -266,18 +266,15 @@ const expectCreateCommentUserAction = (
   expect(createCommentUserAction.payload.comment).to.eql(postCommentUserReq);
 };
 
-const expectExportToHaveAComment = (objects: SavedObject[]) => {
+const expectExportToHaveOneAttachment = (objects: SavedObject[]) => {
   // The attachment SO type depends on `xpack.cases.attachments.enabled`: legacy
   // `cases-comments` when OFF, unified `cases-attachments` when ON. This test
   // only asserts that the case's single attachment round-trips through export;
   // the per-flag on-disk shape is covered by the attachments-framework suites,
   // and the comment text is asserted via the create-comment user action above.
   const attachmentSOs = [
-    ...findSavedObjectsByType<UserCommentAttachmentAttributes>(objects, CASE_COMMENT_SAVED_OBJECT),
-    ...findSavedObjectsByType<UserCommentAttachmentAttributes>(
-      objects,
-      CASE_ATTACHMENT_SAVED_OBJECT
-    ),
+    ...findSavedObjectsByType(objects, CASE_COMMENT_SAVED_OBJECT),
+    ...findSavedObjectsByType(objects, CASE_ATTACHMENT_SAVED_OBJECT),
   ];
 
   expect(attachmentSOs.length).to.eql(1);

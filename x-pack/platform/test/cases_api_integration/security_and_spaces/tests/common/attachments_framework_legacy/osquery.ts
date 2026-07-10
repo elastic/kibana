@@ -9,9 +9,11 @@ import expect from '@kbn/expect';
 import {
   OSQUERY_ATTACHMENT_TYPE,
   CASE_COMMENT_SAVED_OBJECT,
+} from '@kbn/cases-plugin/common/constants';
+import {
   AttachmentType,
   ExternalReferenceStorageType,
-} from '@kbn/cases-plugin/common';
+} from '@kbn/cases-plugin/common/types/domain';
 import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq } from '../../../../common/lib/mock';
@@ -32,7 +34,7 @@ const legacyOsqueryPayload = (overrides: Record<string, unknown> = {}): Attachme
     type: AttachmentType.externalReference,
     externalReferenceId: 'action-1',
     externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
-    externalReferenceAttachmentTypeId: 'osquery',
+    externalReferenceAttachmentTypeId: OSQUERY_ATTACHMENT_TYPE,
     externalReferenceMetadata: {
       actionId: 'action-1',
       agentIds: ['agent-1'],
