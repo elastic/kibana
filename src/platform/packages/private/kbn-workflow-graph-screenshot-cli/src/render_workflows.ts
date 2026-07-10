@@ -143,7 +143,6 @@ export const renderWorkflows = async (options: RenderOptions): Promise<void> => 
     // ── 3. Launch Playwright ────────────────────────────────────────────────
     let playwright: typeof import('playwright');
     try {
-      // eslint-disable-next-line import/no-extraneous-dependencies
       playwright = await import('playwright');
     } catch {
       throw new Error(
