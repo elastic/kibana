@@ -24,7 +24,7 @@ export const ActionPoliciesApp = () => {
         <Route exact path="/create">
           <RequireAlertingPrivilege
             features={['actionPolicies']}
-            requireWrite
+            capability="all"
             pageName={i18n.translate('xpack.alertingV2.actionPoliciesApp.createPageName', {
               defaultMessage: 'Create action policy',
             })}
@@ -35,7 +35,7 @@ export const ActionPoliciesApp = () => {
         <Route exact path="/edit/:id">
           <RequireAlertingPrivilege
             features={['actionPolicies']}
-            requireWrite
+            capability="all"
             pageName={i18n.translate('xpack.alertingV2.actionPoliciesApp.editPageName', {
               defaultMessage: 'Edit action policy',
             })}

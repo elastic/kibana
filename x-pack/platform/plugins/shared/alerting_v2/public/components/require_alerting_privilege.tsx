@@ -21,10 +21,10 @@ export interface RequireAlertingPrivilegeProps {
   /** Human-readable name of the gated page, surfaced in the interstitial. */
   pageName: string;
   /**
-   * When `true`, the gate requires the `write` (all) capability for every
+   * The gate requires the `write` (all) capability for every
    * feature instead of the minimum `read` capability.
    */
-  requireWrite?: boolean;
+  capability?: 'all' | 'read';
   children: React.ReactNode;
 }
 
@@ -36,19 +36,19 @@ export interface RequireAlertingPrivilegeProps {
 export const RequireAlertingPrivilege = ({
   features,
   pageName,
-  requireWrite = false,
+  capability = 'read',
   children,
 }: RequireAlertingPrivilegeProps) => {
   const userCapabilities = useService(UserCapabilities);
   const hasPrivilege = features.every((feature) =>
-    requireWrite ? userCapabilities.canWrite(feature) : userCapabilities.canRead(feature)
+    capability === 'all' ? userCapabilities.canWrite(feature) : userCapabilities.canRead(feature)
   );
 
   if (!hasPrivilege) {
     return (
       <RequiredPrivilegesPrompt
         pageName={pageName}
-        requiredPrivileges={getAlertingRequiredPrivileges(features, requireWrite ? 'all' : 'read')}
+        requiredPrivileges={getAlertingRequiredPrivileges(features, capability)}
       />
     );
   }

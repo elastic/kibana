@@ -38,11 +38,11 @@ const mockWritableFeatures = (writable: (feature: AlertingV2Feature) => boolean)
 
 const renderGate = (
   features: RequireAlertingPrivilegeProps['features'] = ['rules'],
-  { requireWrite }: { requireWrite?: boolean } = {}
+  { capability }: { capability?: 'read' | 'all' } = {}
 ) =>
   render(
     <I18nProvider>
-      <RequireAlertingPrivilege features={features} pageName="Rules" requireWrite={requireWrite}>
+      <RequireAlertingPrivilege features={features} pageName="Rules" capability={capability}>
         <div data-test-subj="gatedContent">Gated content</div>
       </RequireAlertingPrivilege>
     </I18nProvider>
@@ -89,7 +89,7 @@ describe('RequireAlertingPrivilege', () => {
   describe('when requireWrite is set', () => {
     it('renders children when the user can write the required feature', () => {
       mockWritableFeatures(() => true);
-      renderGate(['actionPolicies'], { requireWrite: true });
+      renderGate(['actionPolicies'], { capability: 'all' });
 
       expect(screen.getByTestId('gatedContent')).toBeInTheDocument();
       expect(mockCanWrite).toHaveBeenCalledWith('actionPolicies');
@@ -97,7 +97,7 @@ describe('RequireAlertingPrivilege', () => {
 
     it('renders the interstitial when the user cannot write the required feature', () => {
       mockWritableFeatures(() => false);
-      renderGate(['actionPolicies'], { requireWrite: true });
+      renderGate(['actionPolicies'], { capability: 'all' });
 
       expect(screen.queryByTestId('gatedContent')).not.toBeInTheDocument();
       expect(screen.getByTestId('alertingRequiredPrivilegesPrompt')).toBeInTheDocument();
