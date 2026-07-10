@@ -7,13 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { uniq } from 'lodash';
 import type { CPSProject } from '../../../types';
 
-export interface ProjectPickerState {
-  selectedProjects: string[];
-  availableProjects: Map<CPSProject['_id'], CPSProject>;
+export interface ProjectPickerStoredState {
   filterExpression: string[];
+  availableProjects: Map<CPSProject['_id'], CPSProject>;
+  includedOverrides: string[];
+  excludedOverrides: string[];
 }
+
+export interface ProjectPickerState extends ProjectPickerStoredState {
+  filteredProjectIds: string[];
+  selectedProjects: string[];
+}
+
+const addOverrides = (overrides: string[], projectIds: string[]): string[] => {
+  return uniq([...overrides, ...projectIds]);
+};
+
+const removeOverrides = (overrides: string[], projectIds: string[]): string[] => {
+  return overrides.filter((id) => !projectIds.includes(id));
+};
 
 export function createStoreReducers() {
   return {
@@ -22,14 +37,16 @@ export function createStoreReducers() {
      */
     setSelectedProjects: (state: ProjectPickerState, payload: { projects: string[] }) => ({
       ...state,
-      selectedProjects: state.selectedProjects.concat(payload.projects),
+      includedOverrides: addOverrides(state.includedOverrides, payload.projects),
+      excludedOverrides: removeOverrides(state.excludedOverrides, payload.projects),
     }),
     /**
      * Excludes the provided project ids from the selected projects list.
      */
     excludeSelectedProjects: (state: ProjectPickerState, payload: { projects: string[] }) => ({
       ...state,
-      selectedProjects: state.selectedProjects.filter((p) => !payload.projects.includes(p)),
+      excludedOverrides: addOverrides(state.excludedOverrides, payload.projects),
+      includedOverrides: removeOverrides(state.includedOverrides, payload.projects),
     }),
     /**
      * Sets the available projects map.
@@ -40,23 +57,37 @@ export function createStoreReducers() {
     }),
     revertToSpaceDefaults: (state: ProjectPickerState) => ({
       ...state,
-      selectedProjects: Array.from(state.availableProjects.keys()),
+      filterExpression: [],
+      includedOverrides: [],
+      excludedOverrides: [],
     }),
     clearProjectFilters: (state: ProjectPickerState) => ({
       ...state,
-      selectedProjects: [],
+      filterExpression: [],
+      includedOverrides: [],
+      excludedOverrides: [],
     }),
-    includeAllVisibleProjects: (state: ProjectPickerState) => ({
-      ...state,
-      selectedProjects: Array.from(state.availableProjects.keys()),
-    }),
-    excludeAllVisibleProjects: (state: ProjectPickerState) => ({
-      ...state,
-      selectedProjects: state.selectedProjects.filter((p) => !state.availableProjects.has(p)),
-    }),
+    includeAllVisibleProjects: (state: ProjectPickerState) => {
+      const visibleProjectIds = Array.from(state.availableProjects.keys());
+
+      return {
+        ...state,
+        includedOverrides: addOverrides(state.includedOverrides, visibleProjectIds),
+        excludedOverrides: removeOverrides(state.excludedOverrides, visibleProjectIds),
+      };
+    },
+    excludeAllVisibleProjects: (state: ProjectPickerState) => {
+      const visibleProjectIds = Array.from(state.availableProjects.keys());
+
+      return {
+        ...state,
+        excludedOverrides: addOverrides(state.excludedOverrides, visibleProjectIds),
+        includedOverrides: removeOverrides(state.includedOverrides, visibleProjectIds),
+      };
+    },
     setFilterExpression: (state: ProjectPickerState, payload: { filterExpression: string }) => ({
       ...state,
-      filterExpression: payload.filterExpression,
+      filterExpression: state.filterExpression.concat(payload.filterExpression),
     }),
   } as const;
 }
