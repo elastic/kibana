@@ -14,10 +14,10 @@ import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { type savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
-import { coreServices, taggingService, logger } from '../../kibana_services';
-import { setStubKibanaServices } from '../../mocks';
-import { registerDeleteRoute } from './register_delete_route';
+import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
+import { coreServices, taggingService, logger } from '../../../kibana_services';
+import { setStubKibanaServices } from '../../../mocks';
+import { registerDeleteRoute } from '../register_delete_route';
 
 const input: DashboardSavedObjectAttributes = {
   pinned_panels: { panels: {} },
