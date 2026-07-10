@@ -216,7 +216,7 @@ Add the following snippet of Markdown right after (and outside) the `<details>` 
 
 ```markdown
 > [!TIP]
-> Label this issue `ai:fix-flaky` and an agent will **open a fix PR** for you. This usually takes 15–20 minutes.
+> Add the `ai:fix-flaky` label and an agent will **open a fix PR** (usually within 15–20 minutes).
 ```
 
 If a fix PR is already up (in draft or in review) in the Kibana repository, mention the PR link in the same tip block (instead of suggesting to add the label).
