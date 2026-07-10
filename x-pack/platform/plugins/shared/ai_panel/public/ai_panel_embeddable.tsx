@@ -27,8 +27,15 @@ import { AI_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
 
 export type AiPanelApi = DefaultEmbeddableApi<AiPanelEmbeddableState> & HasEditCapabilities;
 import { AiPanelComponent } from './components/ai_panel_component';
-import { EditAiPanelFlyout } from './components/edit_ai_panel_flyout';
 import type { UpdateAiPanelConfigParams } from './utils/agent_refine';
+
+// Lazy — the edit flyout (and its ES|QL/code editor/agent-builder dependencies) is only needed
+// once a user clicks Edit, so it shouldn't inflate the chunk loaded for every dashboard view.
+const LazyEditAiPanelFlyout = React.lazy(() =>
+  import('./components/edit_ai_panel_flyout').then(({ EditAiPanelFlyout }) => ({
+    default: EditAiPanelFlyout,
+  }))
+);
 
 export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
   AiPanelEmbeddableState,
@@ -176,17 +183,19 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
               onErrorChange={setGenerationError}
             />
             {isEditFlyoutOpen && (
-              <EditAiPanelFlyout
-                embeddableId={uuid}
-                prompt={prompt}
-                esqlQuery={esqlQuery}
-                template={savedTemplate}
-                timeRange={timeRange}
-                hasGenerationFailed={Boolean(generationError)}
-                onSave={onSave}
-                onAgentUpdate={onAgentUpdate}
-                onClose={() => isEditFlyoutOpen$.next(false)}
-              />
+              <React.Suspense fallback={null}>
+                <LazyEditAiPanelFlyout
+                  embeddableId={uuid}
+                  prompt={prompt}
+                  esqlQuery={esqlQuery}
+                  template={savedTemplate}
+                  timeRange={timeRange}
+                  hasGenerationFailed={Boolean(generationError)}
+                  onSave={onSave}
+                  onAgentUpdate={onAgentUpdate}
+                  onClose={() => isEditFlyoutOpen$.next(false)}
+                />
+              </React.Suspense>
             )}
           </>
         );

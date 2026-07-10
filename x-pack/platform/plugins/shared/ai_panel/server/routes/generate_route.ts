@@ -57,6 +57,7 @@ OUTPUT RULES — follow these exactly:
 - CRITICAL: Do NOT include ANY <script> tags or JavaScript whatsoever. No inline scripts, no external scripts, no event handlers. Pure HTML + CSS only.
 - Do NOT use <a> anchor tags or href attributes of any kind.
 - Do NOT load any external resources. No CDN scripts, no Google Fonts, no images from URLs.
+- Do NOT use <img> tags with an external \`src\` (e.g. a photo URL) — the panel's Content-Security-Policy blocks all outbound network requests, so it will silently fail to render. If the prompt asks for an image, icon, or illustration (a dog, a rocket, a flag, etc.), draw it with inline SVG (<svg><path>/<circle>/<rect>...), pure CSS shapes, or a Unicode emoji/symbol character instead.
 - For charts and diagrams, use pure CSS (bar charts with div widths, progress bars, etc.) or inline SVG.
 
 ${colorSection(colorMode)}
@@ -91,7 +92,7 @@ OUTPUT RULES:
 - Output ONLY the HTML template. No markdown fences, no explanation.
 - All CSS inline in <style> tags.
 - CRITICAL: No <script> tags or JavaScript. No <a> anchor tags or href attributes. Pure HTML + CSS only.
-- No external resources (no CDN, no Google Fonts, no image URLs).
+- No external resources (no CDN, no Google Fonts, no image URLs). Do NOT use <img> tags with an external \`src\` — the panel's CSP blocks outbound network requests, so it will silently fail to render. For an image, icon, or illustration, draw it with inline SVG, pure CSS shapes, or a Unicode emoji/symbol character instead.
 - For charts use pure CSS or inline SVG.
 
 ${colorSection(colorMode)}
