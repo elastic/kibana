@@ -68,7 +68,7 @@ jest.mock('../../../../../hooks/use_time_range', () => ({
   }),
 }));
 
-const mockUnifiedWaterfallFlyout = jest.fn(() => (
+const mockUnifiedWaterfallFlyout = jest.fn((props: any) => (
   <div data-test-subj="mock-unified-waterfall-flyout" />
 ));
 

@@ -63,11 +63,12 @@ const listSourceMapRoute = createApmServerRoute({
   },
 });
 
+const MAX_LENGTH_1024 = 1024;
 export const uploadSourceMapParams = z.object({
   body: z.object({
-    service_name: z.string().max(1024),
-    service_version: z.string().max(1024),
-    bundle_filepath: z.string().max(1024),
+    service_name: z.string().max(MAX_LENGTH_1024),
+    service_version: z.string().max(MAX_LENGTH_1024),
+    bundle_filepath: z.string().max(MAX_LENGTH_1024),
     sourcemap: z
       .union([z.string(), z.instanceof(Buffer).transform((buf): string => buf.toString('utf-8'))])
       .pipe(
