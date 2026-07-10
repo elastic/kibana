@@ -46,8 +46,8 @@ export const SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS: Record<
   max_entity_filters: { min: 1, max: 50, integer: true },
   semantic_min_score: { min: 0, max: 1 },
   rrf_rank_constant: { min: 1, max: 100, integer: true },
-  sampling_timeout_ms: { min: 1, max: 240_000, integer: true },
-  query_validation_timeout_ms: { min: 1, max: 240_000, integer: true },
+  sampling_timeout_ms: { min: 1000, max: 240_000, integer: true },
+  query_validation_timeout_ms: { min: 1000, max: 240_000, integer: true },
 };
 
 export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningConfig = {
