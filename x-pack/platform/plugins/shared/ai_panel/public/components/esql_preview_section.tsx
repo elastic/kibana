@@ -74,6 +74,8 @@ export const EsqlPreviewSection = ({
   return (
     <EuiAccordion
       id="editAiPanelEsqlSection"
+      borders="horizontal"
+      buttonProps={{ paddingSize: 'm' }}
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -91,7 +93,7 @@ export const EsqlPreviewSection = ({
         </EuiFlexGroup>
       }
       initialIsOpen={initialIsOpen}
-      paddingSize="s"
+      paddingSize="m"
     >
       <ESQLLangEditor
         query={{ esql: draftEsqlQuery }}

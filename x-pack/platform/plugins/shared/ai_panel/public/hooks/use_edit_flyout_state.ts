@@ -24,7 +24,7 @@ export interface EditFlyoutState {
   handlePreview: () => Promise<void>;
 }
 
-interface UseEditFlyoutStateParams {
+export interface UseEditFlyoutStateParams {
   esqlQuery: string | undefined;
   template: string | undefined;
   timeRange: { from: string; to: string } | undefined;
@@ -37,6 +37,15 @@ export function useEditFlyoutState({
 }: UseEditFlyoutStateParams): EditFlyoutState {
   const [draftEsqlQuery, setDraftEsqlQueryRaw] = useState(esqlQuery ?? '');
   const [draftTemplate, setDraftTemplate] = useState(template ?? '');
+
+  // template is undefined while the panel is (re)generating. If the flyout was opened before
+  // that finished, draftTemplate locked in empty on mount — pick up the real value once it
+  // arrives, but only if the user hasn't already started editing the (still-empty) draft.
+  useEffect(() => {
+    if (template !== undefined && draftTemplate === '') {
+      setDraftTemplate(template);
+    }
+  }, [template, draftTemplate]);
   const [detectedTimeField, setDetectedTimeField] = useState<string | undefined>(undefined);
   const [isAiAvailable, setIsAiAvailable] = useState<boolean | undefined>(undefined);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);

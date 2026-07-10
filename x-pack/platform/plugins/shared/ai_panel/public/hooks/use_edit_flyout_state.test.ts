@@ -18,7 +18,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { getServices } from '../services';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
-import { useEditFlyoutState } from './use_edit_flyout_state';
+import { useEditFlyoutState, type UseEditFlyoutStateParams } from './use_edit_flyout_state';
 
 const mockHttp = {
   get: jest.fn(),
@@ -38,7 +38,7 @@ afterEach(() => {
   jest.useRealTimers();
 });
 
-const baseParams = {
+const baseParams: UseEditFlyoutStateParams = {
   esqlQuery: undefined,
   template: undefined,
   timeRange: undefined,
@@ -54,6 +54,31 @@ describe('useEditFlyoutState', () => {
       expect(result.current.draftTemplate).toBe('<p>hi</p>');
       expect(result.current.isAiAvailable).toBeUndefined();
       expect(result.current.previewData).toBeNull();
+    });
+  });
+
+  describe('template re-sync', () => {
+    it('picks up the template once it arrives if it was undefined on mount', () => {
+      const { result, rerender } = renderHook(
+        (props: UseEditFlyoutStateParams) => useEditFlyoutState(props),
+        { initialProps: baseParams }
+      );
+      expect(result.current.draftTemplate).toBe('');
+
+      rerender({ ...baseParams, template: '<p>generated</p>' });
+      expect(result.current.draftTemplate).toBe('<p>generated</p>');
+    });
+
+    it('does not clobber a draft the user already started typing', () => {
+      const { result, rerender } = renderHook(
+        (props: UseEditFlyoutStateParams) => useEditFlyoutState(props),
+        { initialProps: baseParams }
+      );
+
+      act(() => result.current.setDraftTemplate('<p>user typed this</p>'));
+
+      rerender({ ...baseParams, template: '<p>generated</p>' });
+      expect(result.current.draftTemplate).toBe('<p>user typed this</p>');
     });
   });
 
