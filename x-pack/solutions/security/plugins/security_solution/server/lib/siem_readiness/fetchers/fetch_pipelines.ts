@@ -184,18 +184,30 @@ export const fetchPipelines = async ({
 
     rawPipelines = Object.keys(pipelineStatsMap)
       .filter((name) => pipelineStatsMap[name].count > 0)
-      .map((name) => ({
-        name,
-        indices: Array.from(pipelineToIndices[name] || []),
-        docsCount: pipelineStatsMap[name].count,
-        failedDocsCount: pipelineStatsMap[name].failed,
-        statsAvailable: true,
-      }));
+      .map((name) => {
+        const indices = Array.from(pipelineToIndices[name] || []);
+        if (indices.length === 0) {
+          logger.warn(
+            `fetchPipelines: pipeline "${name}" has processed documents (nodes.stats) but no backing indices in index settings; continuity health may be incomplete`
+          );
+        }
+        return {
+          name,
+          indices,
+          docsCount: pipelineStatsMap[name].count,
+          failedDocsCount: pipelineStatsMap[name].failed,
+          statsAvailable: true,
+        };
+      });
   }
 
-  const pipelines: PipelineStats[] = rawPipelines.map((p) =>
+  let pipelines: PipelineStats[] = rawPipelines.map((p) =>
     enrichWithHealth({ pipeline: p, indexHealth, indexToCategoryMap, now })
   );
+
+  if (isServerless) {
+    pipelines = pipelines.filter((p) => p.lastEventMs != null);
+  }
 
   logger.info(
     `Retrieved ${pipelines.length} ingest pipelines${isServerless ? ' (serverless mode)' : ''}`

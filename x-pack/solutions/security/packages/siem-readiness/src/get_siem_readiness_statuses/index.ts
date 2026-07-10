@@ -17,3 +17,5 @@ export {
 } from './status_check_helpers';
 export { getContinuityDataFlowHealth } from './get_pipeline_data_flow_health';
 export type { PipelineDataFlowHealth } from './get_pipeline_data_flow_health';
+export { buildContinuitySummary, SERVERLESS_FAILURE_RATE_NOTE } from './build_continuity_summary';
+export type { BuildContinuitySummaryParams } from './build_continuity_summary';

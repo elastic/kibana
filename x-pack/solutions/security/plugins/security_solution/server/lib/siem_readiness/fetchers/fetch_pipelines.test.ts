@@ -278,4 +278,53 @@ describe('fetchPipelines - serverless silence and volume', () => {
     expect(pipe?.isSilent).toBe(true);
     expect(pipe?.silenceMs).toBeGreaterThan(30 * MINUTE);
   });
+
+  it('excludes serverless pipelines that have never ingested (no lastEventMs)', async () => {
+    const esClient = makeEsClient({
+      indexToPipeline: {
+        'idx-active': 'pipe-active',
+        'idx-never-ingested': 'pipe-never-ingested',
+      },
+      pipelineCounts: { 'pipe-active': 5, 'pipe-never-ingested': 5 },
+      lastEventByStream: { 'idx-active': Date.now() - 5 * MINUTE },
+      categoriesSearchMapping: {
+        'idx-active': 'Endpoint',
+        'idx-never-ingested': 'Endpoint',
+      },
+    });
+
+    const result = await fetchPipelines({
+      esClient,
+      isServerless: true,
+      logger,
+      categoriesData: buildCategoriesData({
+        'idx-active': 'Endpoint',
+        'idx-never-ingested': 'Endpoint',
+      }),
+    });
+
+    expect(result.map((p) => p.name)).toEqual(['pipe-active']);
+  });
+});
+
+describe('fetchPipelines - stateful pipeline index drift', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('warns when a pipeline in nodes.stats has no matching index settings entry', async () => {
+    const now = Date.now();
+    const esClient = makeEsClient({
+      indexToPipeline: {},
+      pipelineCounts: { 'orphan-pipeline': 10 },
+      lastEventByStream: {},
+    });
+
+    const result = await fetchPipelines({
+      esClient,
+      isServerless: false,
+      logger,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('orphan-pipeline'));
+    expect(result.find((p) => p.name === 'orphan-pipeline')).toBeDefined();
+  });
 });

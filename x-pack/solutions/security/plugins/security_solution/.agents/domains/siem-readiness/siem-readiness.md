@@ -9,7 +9,7 @@ kibana_paths:
   - x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/siem_readiness/**
   - x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/siem_readiness/**
   - x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/events/siem_readiness/**
-last_updated: 2026-06-18
+last_updated: 2026-07-09
 source_prs:
   - https://github.com/elastic/kibana/pull/269284
   - https://github.com/elastic/kibana/pull/252902
@@ -49,6 +49,8 @@ Any `event.category` value not in this table is **uncategorized** and excluded f
 
 - **Recompute `status` and `summary` after filtering items.** Orchestrators compute status and summary over ALL items (including uncategorized). When an agent tool or UI tab filters `items` to categorized-only, it must recompute `status` and `summary` from the filtered count. Spreading `{ ...payload, items: categorizedItems }` without recomputing leaves stale totals — "8 of 20" when 3 categorized items were actually returned.
 
+- **Single-source any computed output shown on more than one surface.** This is the general rule the other single-sourcing invariants below are instances of. If a value — a status, a summary string, a label, a classification, a URL — is produced for both a dimension payload and an agent tool (or UI tab), it must be a pure exported function in `@kbn/siem-readiness`, not re-implemented per surface. A surface MAY *transform inputs* (filter items, enrich findings, recompute counts from the filtered set) but MUST NOT *reimplement the output computation*. Review lens: ask "does this surface **transform** the payload or **recompute** it?" — recomputing an output the orchestrator already produces is the smell. When a computed output has a fixed set of variants (e.g. `ContinuityFindingType`), prefer an exhaustive `switch` with a `never` default in the shared function so adding a variant is a compile error until every branch is handled.
+
 - **Threshold and status functions must be single-sourced.** `isCriticalFailureRate`, `isRetentionNonCompliant`, and the `get*Status` functions live in `@kbn/siem-readiness`. Every consumer (status cards, tab tables, case detail generators, agent tools) must import them from there. Never re-implement the threshold check inline.
 
 - **Count unique indices, not category-index pairs.** An index (e.g., `logs-cloud_asset_inventory.asset_inventory-2`) can appear in multiple category groups because it ingests documents with multiple `event.category` values. When computing "how many indices", deduplicate first. Counting per-category-item pair gives inflated totals.
@@ -76,6 +78,8 @@ Any `event.category` value not in this table is **uncategorized** and excluded f
 - **`blastRadiusStatus` and similar status unions must use named values for all states — no `undefined` for "ok".** Returning `undefined` from `deriveBlastRadiusStatus` to signal "complete and trustworthy" forces every caller to check for both `undefined` and named values. Use a consistent named value (e.g., `'complete'`) for the healthy state so callers can switch on a full enum.
 
 - **All `z.string()` fields in attachment schemas must have `.max()` constraints.** Every `z.string()` in `actionableFindingSchema`, `siemReadinessContinuityDataSchema`, and related schemas must include `.max(N)`. Use context-appropriate limits (IDs ≤ 100, labels ≤ 500, messages ≤ 5000, summaries ≤ 8000). This is enforced by CodeQL "Unbounded string in schema validation" and aligns with existing conventions in the file.
+
+- **Platform labels compose vendor + OS via generic title-casing — no lookup maps.** `classifyPlatform` labels endpoint data as `Vendor (OS)` (e.g. `Crowdstrike (Windows)`) so same-OS vendors are distinguishable, falling back to `OS Endpoints` when no vendor field is present. Vendor comes from `event.module` → `observer.vendor` → the data stream package name; both vendor and OS names are derived with a single generic `titleCase` helper. Do NOT introduce `VENDOR_DISPLAY_NAMES` / `OS_DISPLAY_NAMES` tables — the vendor/OS space is open-ended and hardcoded maps do not scale. Accepted cosmetic tradeoffs: `macos` → `Macos`, and Elastic Defend reads as `Endpoint (Windows)` since `event.module` is `endpoint`.
 
 - **Never duplicate the `toDataStreamName` conversion logic inline.** The regex that converts a backing index name to its parent data stream name (`.ds-{name}-YYYY.MM.DD-NNNNNN` → `{name}`) is defined once and exported. Import it; do not inline the regex at a call site. Two copies will diverge silently if the index naming convention changes.
 
@@ -123,7 +127,11 @@ Any `event.category` value not in this table is **uncategorized** and excluded f
 
 **PR #272394 — `.find()` discards multi-stream health signals (caught by @JordanSh):** The initial `fetchPipelines` enrichment used `.find(h => h !== undefined)` to look up health data for a pipeline's backing indices. For pipelines attached to multiple data streams, all but the first match were silently discarded — so a pipeline that was silent on stream B (but healthy on stream A, which was found first) would appear healthy. A generic reviewer would have missed this because the code looks correct: it reads a health entry and uses it.
 
+**Endpoint platform labels collapsed by OS (caught during composite vendor+OS work):** The initial `classifyPlatform` implementation checked `host.os.family` before any vendor field (`event.module`, `observer.vendor`), so every Windows endpoint vendor (CrowdStrike, Elastic Defend, SentinelOne) collapsed into a single `windows Endpoints` label. The agent could not distinguish vendors on the same OS. Fix: compose `Vendor (OS)` when a vendor signal is present, using generic title-casing rather than hardcoded lookup maps.
+
 **PR #270871 — WeakMap cache permanently stores rejected Promises (caught by @JordanSh):** The per-request shared-context cache stored a Promise without a rejection handler. If the first fetch failed, the rejected Promise stayed in the cache — every subsequent tool call for the same request re-rejected immediately. A generic reviewer would have missed this because the pattern looks like standard lazy initialization; the failure mode only manifests when the first call errors.
+
+**Duplicated continuity summary logic (caught in PR review):** `buildContinuitySummary` in the Continuity dimension and the agent tool's inline `filteredSummary` block independently built the same `findings → parts → join` string. They began as genuinely different computations (all pipelines vs categorized-only) and their wording drifted ("are healthy" vs "functioning properly, with no document failures"), so they read as two features rather than one duplicate. When the serverless failure-rate note was later appended to each by hand, they became two sources of truth for one rule — and the note reached the `healthy` path but not `noData`. Fix: extracted `buildContinuitySummary` into `@kbn/siem-readiness`; both surfaces now call it with a caller-supplied `noDataMessage`. This is the concrete case behind the "single-source any computed output shown on more than one surface" invariant: incidental duplication with divergent wording hides in review because each copy is individually correct.
 
 ## Documentation
 

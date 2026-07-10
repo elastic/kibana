@@ -12,6 +12,7 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { MainCategories } from '@kbn/siem-readiness';
 import {
+  buildContinuitySummary,
   getIndexCategoryMap,
   filterPipelinesByCategories,
   enrichFindings,
@@ -103,35 +104,13 @@ export const getContinuityTool = (
           ? ('actionsRequired' as const)
           : ('healthy' as const);
 
-      const serverlessFailureRateNote = isServerless
-        ? ' Failure-rate is not evaluated in serverless.'
-        : '';
-
-      let filteredSummary: string;
-      if (filteredStatus === 'noData') {
-        filteredSummary = 'No ingest pipeline statistics available for categorized indices.';
-      } else if (enrichedFindings.length === 0) {
-        filteredSummary = isServerless
-          ? `All ${categorizedItems.length} active ingest pipelines are healthy.${serverlessFailureRateNote}`
-          : `All ${categorizedItems.length} active ingest pipelines are functioning properly, with no document failures.`;
-      } else {
-        const silentCount = enrichedFindings.filter((f) => f.type === 'silence').length;
-        const dropCritical = enrichedFindings.filter(
-          (f) => f.type === 'volume_drop_critical'
-        ).length;
-        const dropWarning = enrichedFindings.filter((f) => f.type === 'volume_drop_warning').length;
-        const failureCount = enrichedFindings.filter((f) => f.type === 'pipeline_failure').length;
-
-        const parts: string[] = [];
-        if (silentCount) parts.push(`${silentCount} silent`);
-        if (dropCritical) parts.push(`${dropCritical} critical volume drop`);
-        if (dropWarning) parts.push(`${dropWarning} volume drop warning`);
-        if (failureCount) parts.push(`${failureCount} pipeline failure`);
-
-        filteredSummary = `${parts.join(', ')} across ${
-          categorizedItems.length
-        } active pipelines.${serverlessFailureRateNote}`;
-      }
+      const filteredSummary = buildContinuitySummary({
+        status: filteredStatus,
+        pipelineCount: categorizedItems.length,
+        findings: enrichedFindings,
+        isServerless,
+        noDataMessage: 'No ingest pipeline statistics available for categorized indices.',
+      });
 
       return {
         results: [

@@ -134,6 +134,27 @@ describe('fetchIndexHealth', () => {
       expect(result['logs-new.stream-default'].lastEventMs).toBeNull();
       expect(result['logs-new.stream-default'].silenceMs).toBeNull();
     });
+
+    it('warns on serverless when streams exist but none have maximum_timestamp', async () => {
+      const warn = jest.fn();
+      const esClient = makeEsClient({
+        streams: [{ name: 'logs-endpoint.events-default' }, { name: 'logs-system.syslog-default' }],
+        creationDates: {
+          'logs-endpoint.events-default': BOOTSTRAP_CUTOFF - 1,
+          'logs-system.syslog-default': BOOTSTRAP_CUTOFF - 1,
+        },
+      });
+
+      const result = await fetchIndexHealth({
+        esClient,
+        isServerless: true,
+        logger: { warn } as unknown as import('@kbn/logging').Logger,
+      });
+
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('no maximum_timestamp'));
+      expect(result['logs-endpoint.events-default'].lastEventMs).toBeNull();
+      expect(result['logs-system.syslog-default'].lastEventMs).toBeNull();
+    });
   });
 
   describe('young stream guard (creation_date within SILENCE_BOOTSTRAP_DAYS)', () => {

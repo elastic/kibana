@@ -103,6 +103,77 @@ const fetchVolumeByStreamDay = async (
   return volumeByStreamDay;
 };
 
+const populateServerlessStreamMetadata = async ({
+  esClient,
+  creationDateByStream,
+  lastEventByStream,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  creationDateByStream: Map<string, number>;
+  lastEventByStream: Map<string, number | null>;
+  logger?: Logger;
+}): Promise<void> => {
+  const dataStreamResponse = await esClient.indices.getDataStream({
+    name: ['logs-*', 'metrics-*'],
+    verbose: true,
+    filter_path: [
+      'data_streams.name',
+      'data_streams.creation_date',
+      'data_streams.maximum_timestamp',
+    ],
+  });
+
+  const dataStreams =
+    (dataStreamResponse as unknown as DataStreamMetaResponseShape).data_streams ?? [];
+  let streamsWithMaxTimestamp = 0;
+
+  for (const ds of dataStreams) {
+    if (ds.creation_date != null) {
+      creationDateByStream.set(ds.name, ds.creation_date);
+    }
+    if (ds.maximum_timestamp != null) {
+      streamsWithMaxTimestamp += 1;
+    }
+    lastEventByStream.set(ds.name, ds.maximum_timestamp ?? null);
+  }
+
+  if (dataStreams.length > 0 && streamsWithMaxTimestamp === 0) {
+    logger?.warn(
+      'fetchIndexHealth: serverless getDataStream response has data streams but no maximum_timestamp; silence detection is unavailable'
+    );
+  }
+};
+
+const populateStatefulStreamMetadata = async ({
+  esClient,
+  creationDateByStream,
+  lastEventByStream,
+}: {
+  esClient: ElasticsearchClient;
+  creationDateByStream: Map<string, number>;
+  lastEventByStream: Map<string, number | null>;
+}): Promise<void> => {
+  const [statsResponse, dataStreamResponse] = await Promise.all([
+    esClient.indices.dataStreamsStats({ name: ['logs-*', 'metrics-*'] }),
+    esClient.indices.getDataStream({
+      name: ['logs-*', 'metrics-*'],
+      filter_path: ['data_streams.name', 'data_streams.creation_date'],
+    }),
+  ]);
+
+  for (const ds of (dataStreamResponse as unknown as DataStreamMetaResponseShape).data_streams ??
+    []) {
+    if (ds.creation_date != null) {
+      creationDateByStream.set(ds.name, ds.creation_date);
+    }
+  }
+
+  for (const ds of (statsResponse as unknown as DataStreamsStatsResponseShape).data_streams ?? []) {
+    lastEventByStream.set(ds.data_stream, ds.maximum_timestamp ?? null);
+  }
+};
+
 /**
  * Fetch last-event time and volume health for all SIEM data streams.
  *
@@ -138,43 +209,18 @@ export const fetchIndexHealth = async ({
   const lastEventByStream = new Map<string, number | null>();
 
   if (isServerless) {
-    const dataStreamResponse = await esClient.indices.getDataStream({
-      name: ['logs-*', 'metrics-*'],
-      verbose: true,
-      filter_path: [
-        'data_streams.name',
-        'data_streams.creation_date',
-        'data_streams.maximum_timestamp',
-      ],
+    await populateServerlessStreamMetadata({
+      esClient,
+      creationDateByStream,
+      lastEventByStream,
+      logger,
     });
-
-    for (const ds of (dataStreamResponse as unknown as DataStreamMetaResponseShape).data_streams ??
-      []) {
-      if (ds.creation_date != null) {
-        creationDateByStream.set(ds.name, ds.creation_date);
-      }
-      lastEventByStream.set(ds.name, ds.maximum_timestamp ?? null);
-    }
   } else {
-    const [statsResponse, dataStreamResponse] = await Promise.all([
-      esClient.indices.dataStreamsStats({ name: ['logs-*', 'metrics-*'] }),
-      esClient.indices.getDataStream({
-        name: ['logs-*', 'metrics-*'],
-        filter_path: ['data_streams.name', 'data_streams.creation_date'],
-      }),
-    ]);
-
-    for (const ds of (dataStreamResponse as unknown as DataStreamMetaResponseShape).data_streams ??
-      []) {
-      if (ds.creation_date != null) {
-        creationDateByStream.set(ds.name, ds.creation_date);
-      }
-    }
-
-    for (const ds of (statsResponse as unknown as DataStreamsStatsResponseShape).data_streams ??
-      []) {
-      lastEventByStream.set(ds.data_stream, ds.maximum_timestamp ?? null);
-    }
+    await populateStatefulStreamMetadata({
+      esClient,
+      creationDateByStream,
+      lastEventByStream,
+    });
   }
 
   // Daily doc-count volume per data stream, via a paginated composite aggregation.
