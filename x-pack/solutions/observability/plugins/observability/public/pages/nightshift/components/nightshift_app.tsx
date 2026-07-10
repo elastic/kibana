@@ -98,7 +98,7 @@ export function NightshiftApp({ events, isLoading, onEventClick }: NightshiftApp
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink>
+            <EuiLink data-test-subj="o11yNightshiftAppShowAllLink">
               {i18n.translate('xpack.nightshift.summary.showAll', {
                 defaultMessage: 'Show all',
               })}

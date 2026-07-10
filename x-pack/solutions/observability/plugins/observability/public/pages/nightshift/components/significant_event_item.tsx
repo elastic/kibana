@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHealth,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHealth, EuiPanel, EuiText } from '@elastic/eui';
 import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 
 export interface SignificantEventItemProps {
@@ -101,9 +94,7 @@ export function SignificantEventItem({ event, onClick }: SignificantEventItemPro
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={getInvestigationBadgeColor(event.status)}>
-            {statusLabel}
-          </EuiBadge>
+          <EuiBadge color={getInvestigationBadgeColor(event.status)}>{statusLabel}</EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -111,12 +102,7 @@ export function SignificantEventItem({ event, onClick }: SignificantEventItemPro
         <p style={{ margin: 0 }}>{event.title}</p>
       </EuiText>
 
-      <EuiFlexGroup
-        gutterSize="xs"
-        wrap
-        responsive={false}
-        style={{ marginTop: 8 }}
-      >
+      <EuiFlexGroup gutterSize="xs" wrap responsive={false} style={{ marginTop: 8 }}>
         {visibleStreams.map((name) => (
           <EuiFlexItem grow={false} key={name}>
             <EuiBadge color="hollow">{name}</EuiBadge>

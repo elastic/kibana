@@ -7,7 +7,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider } from '@kbn/i18n-react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftApp } from './nightshift_app';
 
@@ -33,9 +33,7 @@ function renderWithIntl(ui: React.ReactElement) {
 
 describe('NightshiftApp', () => {
   it('renders hero message when events need action', () => {
-    renderWithIntl(
-      <NightshiftApp events={[mockEvent()]} isLoading={false} />
-    );
+    renderWithIntl(<NightshiftApp events={[mockEvent()]} isLoading={false} />);
     expect(screen.getByText(/1 significant event need/i)).toBeInTheDocument();
   });
 

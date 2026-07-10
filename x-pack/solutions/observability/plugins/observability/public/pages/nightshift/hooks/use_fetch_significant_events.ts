@@ -22,18 +22,15 @@ export const useFetchSignificantEvents = () => {
   return useQuery<SignificantEventsResponse, Error>({
     queryKey: ['nightshift.significantEvents'],
     queryFn: async ({ signal }) => {
-      return http.get<SignificantEventsResponse>(
-        '/internal/significant_events/events',
-        {
-          query: {
-            page: 1,
-            perPage: 50,
-            from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-            to: new Date().toISOString(),
-          },
-          signal,
-        }
-      );
+      return http.get<SignificantEventsResponse>('/internal/significant_events/events', {
+        query: {
+          page: 1,
+          perPage: 50,
+          from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          to: new Date().toISOString(),
+        },
+        signal,
+      });
     },
   });
 };

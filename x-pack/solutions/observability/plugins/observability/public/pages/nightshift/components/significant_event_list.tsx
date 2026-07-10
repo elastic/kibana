@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SignificantEventItem } from './significant_event_item';
@@ -23,7 +17,11 @@ export interface SignificantEventListProps {
   onEventClick?: (event: SignificantEvent) => void;
 }
 
-export function SignificantEventList({ events, isLoading, onEventClick }: SignificantEventListProps) {
+export function SignificantEventList({
+  events,
+  isLoading,
+  onEventClick,
+}: SignificantEventListProps) {
   if (isLoading) {
     return (
       <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
