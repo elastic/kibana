@@ -253,19 +253,56 @@ export class AttackDiscoveryScheduleDataClient {
   });
 
   /**
+   * Narrows the requested ids to those this client's `filterTags` would surface
+   * via `findSchedules`. Both missing ids (no such rule) and hidden ids (tag
+   * filtered) are silently dropped, mirroring the by-id single mutations'
+   * visibility guard. The unfiltered (internal) client — which has no
+   * `filterTags` — returns the ids unchanged, keeping the pure query-based
+   * native bulk semantics.
+   *
+   * This lets the bulk path preserve BOTH the #266760 silent-exclusion contract
+   * (missing ids are excluded, not surfaced as per-id errors) AND the
+   * legacy↔workflow isolation boundary (a filtered caller can never mutate a
+   * schedule it is not allowed to see).
+   */
+  private filterVisibleIds = async (ids: string[]): Promise<string[]> => {
+    if (this.options.filterTags == null) {
+      return ids;
+    }
+
+    const visibility = await Promise.all(
+      ids.map(async (id) => {
+        try {
+          const rule = await this.options.rulesClient.get<AttackDiscoveryScheduleParams>({ id });
+          return this.tagsSatisfyFilter(rule.tags) ? id : undefined;
+        } catch {
+          return undefined;
+        }
+      })
+    );
+
+    return visibility.filter((id): id is string => id != null);
+  };
+
+  /**
    * Bulk methods delegate to the Alerting `RulesClient` bulk APIs (query-based),
    * matching the public Attack Discovery schedules contract from
    * https://github.com/elastic/kibana/issues/266760: ids that do not resolve to
-   * an existing rule are silently excluded, so `total` reflects the rules
-   * actually matched and `errors` only carries genuine per-rule failures. Unlike
-   * the by-id single methods, these do NOT apply `filterTags` visibility.
+   * a visible rule are silently excluded, so `total` reflects the rules actually
+   * matched and `errors` only carries genuine per-rule failures. For a filtered
+   * (public) client the requested ids are first narrowed to the ones the caller
+   * may see (`filterVisibleIds`), preserving legacy↔workflow tag isolation.
    */
   public bulkDeleteSchedules = async ({
     ids,
   }: {
     ids: string[];
   }): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
-    const result = await this.options.rulesClient.bulkDeleteRules({ ids });
+    const visibleIds = await this.filterVisibleIds(ids);
+    if (visibleIds.length === 0) {
+      return { errors: [], ids: [], total: 0 };
+    }
+    const result = await this.options.rulesClient.bulkDeleteRules({ ids: visibleIds });
     return this.transformBulkActionResult(result);
   };
 
@@ -274,7 +311,11 @@ export class AttackDiscoveryScheduleDataClient {
   }: {
     ids: string[];
   }): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
-    const result = await this.options.rulesClient.bulkEnableRules({ ids });
+    const visibleIds = await this.filterVisibleIds(ids);
+    if (visibleIds.length === 0) {
+      return { errors: [], ids: [], total: 0 };
+    }
+    const result = await this.options.rulesClient.bulkEnableRules({ ids: visibleIds });
     return this.transformBulkActionResult(result);
   };
 
@@ -283,7 +324,11 @@ export class AttackDiscoveryScheduleDataClient {
   }: {
     ids: string[];
   }): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
-    const result = await this.options.rulesClient.bulkDisableRules({ ids });
+    const visibleIds = await this.filterVisibleIds(ids);
+    if (visibleIds.length === 0) {
+      return { errors: [], ids: [], total: 0 };
+    }
+    const result = await this.options.rulesClient.bulkDisableRules({ ids: visibleIds });
     return this.transformBulkActionResult(result);
   };
 }
