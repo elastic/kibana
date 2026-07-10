@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { z } from '@kbn/zod/v4';
 import { renderHook } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
@@ -37,7 +36,7 @@ const buildRegistry = () => {
     getAttachmentTabViewObject: () => ({
       children: () => <div data-test-subj="test-alerts-table">{'Alerts'}</div>,
     }),
-    schema: z.object({}),
+    schemaValidator: () => {},
   });
   // File type is intentionally registered: the hook must NOT count it from
   // comments — files are counted via the file stats API instead.
@@ -49,7 +48,7 @@ const buildRegistry = () => {
     getAttachmentTabViewObject: () => ({
       children: () => <div />,
     }),
-    schema: z.object({}),
+    schemaValidator: () => {},
   });
   return registry;
 };
