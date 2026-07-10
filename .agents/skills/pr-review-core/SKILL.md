@@ -5,19 +5,18 @@ description: Shared methodology, scope guardrails, and the exact finding output 
 
 # Kibana PR Review Core
 
-Shared methodology for the specialized Kibana PR review subagents (`pr-reviewer-*`). Each reviewer applies its own concern-specific checklist on top of this file. You are a read-only reviewer: you inspect the change and return findings. You never post comments, submit reviews, resolve threads, or write/edit files — the review orchestrator does all posting.
+Shared methodology for the specialized Kibana PR review subagents (`pr-reviewer-*`). Each reviewer applies its own concern-specific checklist on top of this file. The orchestrator dispatches you with a specific list of assigned files; review only those — every changed file is assigned to some reviewer, so the rest of the PR is covered by others. You are a read-only reviewer: you inspect the change and return findings. You never post comments, submit reviews, resolve threads, or write/edit files — the review orchestrator does all posting.
 
 ## Review process
 
-1. Start with the workflow-provided PR context artifacts under `/tmp/gh-aw/agent/`: read `pr-metadata.json` and `pr-files.json` first to understand scope before reading any diff content.
-2. Walk the changed files in the order listed in `pr-files.json`, skipping generated or output-only files. Review each non-generated changed file once unless later context makes a second look necessary.
-3. For the current file, use `pr-files.json` to build the exact diff header (`diff --git a/${previous_filename ?? filename} b/${filename}`), then search `pr-diff.txt` for that section and inspect it. Do not read `pr-diff.txt` from top to bottom, create derived full-diff dumps, or run `git show origin/main:` (or similar) to reconstruct pre-change versions — `pr-diff.txt` is the source of old-vs-new content.
-4. Limit verification to the changed files and the files they directly import; do not run repo-wide `grep`/`Grep`, open files outside that set, or chase investigations beyond it.
-5. Do not print generated files, snapshots, OpenAPI specs, full diffs, or repo-wide search output back into context.
-6. Do not run local validation or setup commands, including tests, type checks, lint, bootstrap, package installs, builds, or repo scripts. Review from static source, prefetched artifacts, and GitHub data only.
-7. Work only from the prefetched artifacts and the checked-out repository files (the changed files and their direct imports). If those are insufficient to confirm a specific finding, drop the finding rather than expanding scope.
-8. If a time-budget hook message says to stop exploration and prepare output, finish the current verification and then return your findings JSON immediately.
-9. Ground architectural and maintainability findings in the changed files and their direct imports, and in clear behavioral risk, not personal preference.
+1. Review only the files the orchestrator assigned to you. Do not walk the full `pr-files.json` set or comment on files outside your assignment, and skip generated or output-only files within it.
+2. For each assigned file, find its section in `/tmp/gh-aw/agent/pr-diff.txt` by searching for its `b/<path>` diff header, and inspect that hunk. Do not read `pr-diff.txt` from top to bottom, create derived full-diff dumps, or run `git show origin/main:` (or similar) to reconstruct pre-change versions — `pr-diff.txt` is the source of old-vs-new content.
+3. Limit verification to your assigned files and the files they directly import; do not run repo-wide `grep`/`Grep`, open files outside that set, or chase investigations beyond it.
+4. Do not print generated files, snapshots, OpenAPI specs, full diffs, or repo-wide search output back into context.
+5. Do not run local validation or setup commands, including tests, type checks, lint, bootstrap, package installs, builds, or repo scripts. Review from static source, prefetched artifacts, and GitHub data only.
+6. Work only from the prefetched artifacts and the checked-out repository files (your assigned files and their direct imports). If those are insufficient to confirm a specific finding, drop the finding rather than expanding scope.
+7. If a time-budget hook message says to stop exploration and prepare output, finish the current verification and then return your findings JSON immediately.
+8. Ground architectural and maintainability findings in your assigned files and their direct imports, and in clear behavioral risk, not personal preference.
 
 ## Re-run behavior
 
