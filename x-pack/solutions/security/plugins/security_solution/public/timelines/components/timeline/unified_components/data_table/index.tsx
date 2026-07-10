@@ -12,8 +12,6 @@ import type {
   UnifiedDataTableProps,
   UnifiedDataTableSettingsColumn,
 } from '@kbn/unified-data-table';
-import { getFieldValue } from '@kbn/discover-utils';
-import { ALERT_ATTACK_DISCOVERY_TITLE } from '@kbn/elastic-assistant-common';
 import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
@@ -59,6 +57,7 @@ import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { getDocumentHistoryTitle } from '../../../../../flyout_v2/document/main/utils/get_header_title';
+import { getAttackTitleValue } from '../../../../../flyout_v2/attack/utils/get_attack_title';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -191,9 +190,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               attackId: eventData._id,
               indexName: eventData.ecs._index ?? '',
               onAttackUpdated: refetch,
-              attackTitle: getFieldValue(eventData, ALERT_ATTACK_DISCOVERY_TITLE) as
-                | string
-                | undefined,
+              attackTitle: getAttackTitleValue(eventData),
             });
           } else {
             openDocumentFlyoutFromIndex({

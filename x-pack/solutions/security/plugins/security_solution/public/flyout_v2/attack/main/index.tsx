@@ -15,9 +15,7 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getFieldValue } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { ALERT_ATTACK_DISCOVERY_TITLE } from '@kbn/elastic-assistant-common';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -37,6 +35,7 @@ import { TableTab } from './tabs/table_tab';
 import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
 import { Footer } from './footer';
 import { formatFlyoutTitle, NOTES_TITLE } from '../../shared/constants/flyout_titles';
+import { getAttackTitleValue } from '../utils/get_attack_title';
 
 type AttackFlyoutTabId = 'overview' | 'table' | 'json';
 
@@ -88,10 +87,7 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
   const history = useHistory();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const attackTitle = useMemo(
-    () => getFieldValue(hit, ALERT_ATTACK_DISCOVERY_TITLE) as string | undefined,
-    [hit]
-  );
+  const attackTitle = useMemo(() => getAttackTitleValue(hit), [hit]);
 
   // The selected tab is persisted to localStorage, sharing the key with the legacy
   // attack flyout so the user's preference carries across both implementations.

@@ -13,8 +13,6 @@ import { noop } from 'lodash/fp';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { getFieldValue } from '@kbn/discover-utils';
-import { ALERT_ATTACK_DISCOVERY_TITLE } from '@kbn/elastic-assistant-common';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
@@ -31,9 +29,7 @@ import {
   formatFlyoutTitle,
 } from '../shared/constants/flyout_titles';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
-
-const getAttackTitle = (hit: DataTableRecord): string | undefined =>
-  getFieldValue(hit, ALERT_ATTACK_DISCOVERY_TITLE) as string | undefined;
+import { getAttackTitleValue } from './utils/get_attack_title';
 
 // Lazy-loaded so consumers of this hook don't statically pull the attack flyout graph into their
 // bundle; the chunk only loads when the flyout (or one of its tools) is actually opened.
@@ -178,7 +174,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
-        title: formatFlyoutTitle(ATTACK_CORRELATIONS_TITLE, getAttackTitle(hit)),
+        title: formatFlyoutTitle(ATTACK_CORRELATIONS_TITLE, getAttackTitleValue(hit)),
       });
     },
     [open, historyKey]
@@ -190,7 +186,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
-        title: formatFlyoutTitle(ATTACK_ENTITIES_TITLE, getAttackTitle(hit)),
+        title: formatFlyoutTitle(ATTACK_ENTITIES_TITLE, getAttackTitleValue(hit)),
       });
     },
     [open, historyKey]

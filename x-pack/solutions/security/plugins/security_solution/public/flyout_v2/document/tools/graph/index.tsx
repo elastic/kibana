@@ -37,7 +37,6 @@ import {
 } from '../../../entity/shared/render_entity_details';
 import { buildFlyoutNavTitle } from '../../../shared/utils/build_flyout_nav_title';
 import { ENTITIES_TITLE, EVENT_TITLE, GRAPH_TITLE } from '../../../shared/constants/flyout_titles';
-import { getAlertHistoryTitle } from '../../main/utils/get_header_title';
 
 export const GRAPH_TOOLS_TEST_ID = `${PREFIX}GraphTools` as const;
 
@@ -70,7 +69,7 @@ export const GraphDetails = memo(
           indexName,
           renderCellActions,
           onAlertUpdated,
-          title: isEvent ? EVENT_TITLE : getAlertHistoryTitle(),
+          title: isEvent ? EVENT_TITLE : undefined,
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );

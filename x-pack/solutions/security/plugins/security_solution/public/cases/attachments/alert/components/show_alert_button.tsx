@@ -18,6 +18,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { getAlertHistoryTitle } from '../../../../flyout_v2/document/main/utils/get_header_title';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { SHOW_ALERT_TOOLTIP } from '../translations';
 
@@ -62,6 +63,7 @@ export const ShowAlertButton = ({ id, alertId, index }: ShowAlertButtonProps) =>
             documentId: alertId,
             indexName: index,
             renderCellActions: casesCellActionRenderer,
+            title: getAlertHistoryTitle(),
           });
         } else {
           openFlyout({

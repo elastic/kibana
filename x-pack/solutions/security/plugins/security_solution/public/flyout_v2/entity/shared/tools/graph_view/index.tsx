@@ -27,7 +27,6 @@ import {
   ENTITY_GRAPH_VIEW_TITLE,
   EVENT_TITLE,
 } from '../../../../shared/constants/flyout_titles';
-import { getAlertHistoryTitle } from '../../../../document/main/utils/get_header_title';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
@@ -75,7 +74,7 @@ export const GraphView = memo(
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
-          title: isEvent ? EVENT_TITLE : getAlertHistoryTitle(),
+          title: isEvent ? EVENT_TITLE : undefined,
         }),
       [openDocumentFlyoutFromIndexAsChild]
     );
