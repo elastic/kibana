@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
 
 import { SchedulesTable } from '.';
 import { useFindAttackDiscoverySchedules } from '../logic/use_find_schedules';
@@ -171,19 +171,56 @@ describe('SchedulesTable', () => {
     expect(getAllByRole('row').length).toBe(1 + mockFindAttackDiscoverySchedules.schedules.length); // 1 header row + schedule rows
   });
 
-  it('should invoke delete schedule mutation', async () => {
-    const { getAllByTestId } = renderTable();
+  const confirmDeleteInModal = (getByTestId: ReturnType<typeof renderTable>['getByTestId']) => {
+    const modal = getByTestId('schedulesTableBulkDeleteConfirmationModal');
+    act(() => {
+      fireEvent.click(within(modal).getByText('Delete'));
+    });
+  };
+
+  it('should show single delete confirmation modal when trash icon is clicked', () => {
+    const { getAllByTestId, getByTestId, getByText } = renderTable();
+
+    act(() => {
+      fireEvent.click(getAllByTestId('deleteButton')[0]);
+    });
+
+    expect(getByTestId('schedulesTableBulkDeleteConfirmationModal')).toBeInTheDocument();
+    expect(getByText('Delete schedule?')).toBeInTheDocument();
+    expect(
+      getByText('This action will delete this scheduled attack discovery.')
+    ).toBeInTheDocument();
+  });
+
+  it('should invoke delete schedule mutation after confirmation', async () => {
+    const { getAllByTestId, getByTestId } = renderTable();
 
     const firstDeleteButton = getAllByTestId('deleteButton')[0];
     act(() => {
       fireEvent.click(firstDeleteButton);
     });
+    confirmDeleteInModal(getByTestId);
 
     await waitFor(() => {
       expect(deleteAttackDiscoveryScheduleMock).toHaveBeenCalledWith({
         id: mockFindAttackDiscoverySchedules.schedules[0].id,
       });
     });
+  });
+
+  it('should not invoke delete schedule mutation when confirmation is cancelled', async () => {
+    const { getAllByTestId, getByTestId } = renderTable();
+
+    const firstDeleteButton = getAllByTestId('deleteButton')[0];
+    act(() => {
+      fireEvent.click(firstDeleteButton);
+    });
+    const modal = getByTestId('schedulesTableBulkDeleteConfirmationModal');
+    act(() => {
+      fireEvent.click(within(modal).getByText('Cancel'));
+    });
+
+    expect(deleteAttackDiscoveryScheduleMock).not.toHaveBeenCalled();
   });
 
   it('should invoke disable schedule mutation', async () => {
@@ -288,7 +325,7 @@ describe('SchedulesTable', () => {
   });
 
   it('should invoke bulk delete schedules mutation after confirmation', async () => {
-    const { container, getByTestId, getAllByText } = renderTable();
+    const { container, getByTestId } = renderTable();
 
     selectSchedule(container, mockFindAttackDiscoverySchedules.schedules[0].id);
     act(() => {
@@ -297,9 +334,7 @@ describe('SchedulesTable', () => {
     act(() => {
       fireEvent.click(getByTestId('schedulesTableBulkDeleteButton'));
     });
-    act(() => {
-      fireEvent.click(getAllByText('Delete')[1]);
-    });
+    confirmDeleteInModal(getByTestId);
 
     await waitFor(() => {
       expect(bulkDeleteAttackDiscoverySchedulesMock).toHaveBeenCalledWith({
@@ -369,11 +404,12 @@ describe('SchedulesTable', () => {
     });
 
     it('invokes the workflow delete mutation when the delete button is clicked', async () => {
-      const { getAllByTestId } = renderTable();
+      const { getAllByTestId, getByTestId } = renderTable();
 
       act(() => {
         fireEvent.click(getAllByTestId('deleteButton')[0]);
       });
+      confirmDeleteInModal(getByTestId);
 
       await waitFor(() => {
         expect(mockWorkflowDeleteMutateAsync).toHaveBeenCalledWith({
@@ -409,11 +445,12 @@ describe('SchedulesTable', () => {
     });
 
     it('refetches the schedules after the workflow delete mutation so the table updates', async () => {
-      const { getAllByTestId } = renderTable();
+      const { getAllByTestId, getByTestId } = renderTable();
 
       act(() => {
         fireEvent.click(getAllByTestId('deleteButton')[0]);
       });
+      confirmDeleteInModal(getByTestId);
 
       await waitFor(() => {
         expect(refetchSchedulesMock).toHaveBeenCalled();
