@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftApp } from './components/nightshift_app';
+import { EventFlyout } from './components/event_flyout';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
@@ -25,6 +26,7 @@ export function NightshiftPage() {
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
+  const [selectedEvent, setSelectedEvent] = useState<SignificantEvent | null>(null);
 
   const isEnabled = uiSettings.get<boolean>(
     OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
@@ -48,7 +50,11 @@ export function NightshiftPage() {
   const events = data?.hits ?? [];
 
   const handleEventClick = useCallback((event: SignificantEvent) => {
-    // Will be wired to flyout in PR 2
+    setSelectedEvent(event);
+  }, []);
+
+  const handleFlyoutClose = useCallback(() => {
+    setSelectedEvent(null);
   }, []);
 
   if (!isEnabled) {
@@ -63,6 +69,9 @@ export function NightshiftPage() {
       pageSectionProps={{ restrictWidth: '800px' }}
     >
       <NightshiftApp events={events} isLoading={isLoading} onEventClick={handleEventClick} />
+      {selectedEvent && (
+        <EventFlyout event={selectedEvent} onClose={handleFlyoutClose} />
+      )}
     </ObservabilityPageTemplate>
   );
 }
