@@ -91,6 +91,19 @@ describe('UserStorageClient', () => {
       await expect(client.get('missing', 'fallback')).resolves.toBe('fallback');
     });
 
+    it('does not re-fetch a key whose successful fetch resolved to undefined (sticky hydration)', async () => {
+      // Regression: a bare in-flight `Map` (with no separate "already fetched"
+      // memory) would see `cache[key] === undefined` forever after such a
+      // fetch and re-issue the HTTP request on every subsequent call.
+      const { client, api } = buildClient({});
+      api.get.mockResolvedValue(undefined);
+
+      await client.get('missing', 'fallback');
+      await client.get('missing', 'fallback');
+
+      expect(api.get).toHaveBeenCalledTimes(1);
+    });
+
     it('rejects when the lazy fetch fails, and does not cache a value', async () => {
       const { client, api } = buildClient({});
       api.get.mockRejectedValue(new Error('network-error'));

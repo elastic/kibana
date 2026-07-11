@@ -37,6 +37,9 @@ export interface UserStorageClientParams {
  *   request. Once the response arrives, the cache is populated and `get$` /
  *   `getState$` subscribers for that key receive the resolved value. Concurrent
  *   callers for the same uncached key share a single in-flight request.
+ * - A successful fetch is sticky even if it resolves to `undefined` (e.g. a key
+ *   with no registered default): the key is considered hydrated (via property
+ *   presence, not a `!== undefined` check) and is not re-fetched on later calls.
  * - Fetch failures are published to `getHttpError$` but do not cause `get$`
  *   to error or complete; `get()` rejects and `getState$` emits `{status:'error'}`.
  *   The cache entry remains absent, so the next call retries the fetch.
@@ -96,10 +99,10 @@ export class UserStorageClient implements IUserStorageClient {
   public get<T = unknown>(key: string): Promise<T | undefined>;
   public get<T = unknown>(key: string, defaultValue: T): Promise<T>;
   public async get<T = unknown>(key: string, defaultValue?: T): Promise<T | undefined> {
-    const cached = this.cache[key];
-    if (cached !== undefined) return cached as T;
-
-    const value = await this.startFetch(key);
+    // `isCached` (not a plain `!== undefined` check) gates the fetch so a
+    // successful hydration that resolves to `undefined` is sticky — it will
+    // not be re-fetched on every subsequent call.
+    const value = this.isCached(key) ? this.cache[key] : await this.startFetch(key);
     return value !== undefined ? (value as T) : defaultValue;
   }
 
@@ -238,8 +241,7 @@ export class UserStorageClient implements IUserStorageClient {
    * in-flight map so the next call retries.
    */
   private startFetch(key: string): Promise<unknown> {
-    const cached = this.cache[key];
-    if (cached !== undefined) return Promise.resolve(cached);
+    if (this.isCached(key)) return Promise.resolve(this.cache[key]);
 
     const inFlight = this.fetchesInFlight.get(key);
     if (inFlight) return inFlight;
@@ -269,5 +271,16 @@ export class UserStorageClient implements IUserStorageClient {
     // swallow the rejection here so it doesn't surface as an unhandled
     // promise rejection.
     void this.startFetch(key).catch(() => {});
+  }
+
+  /**
+   * Whether `key` has a hydrated cache entry — a preloaded value, or a lazy
+   * fetch that has already completed successfully. Uses property presence
+   * (not a `!== undefined` check) so a fetch that resolves to `undefined`
+   * (e.g. a key with no registered default) is still sticky and does not
+   * trigger a repeat fetch on every subsequent call.
+   */
+  private isCached(key: string): boolean {
+    return Object.prototype.hasOwnProperty.call(this.cache, key);
   }
 }
