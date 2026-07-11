@@ -222,6 +222,7 @@ export const createTabsStorageManager = ({
       profileStateRegistry.pickStateByType({
         profileStateMap: profileState,
         stateTypes: LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
+        defaultsHandling: 'expand',
       })
     );
 
@@ -239,7 +240,7 @@ export const createTabsStorageManager = ({
       profileStateRegistry.pickStateByType({
         profileStateMap: tabStateInStorage.profileState,
         stateTypes: LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
-        shouldMergeDefaults: true,
+        defaultsHandling: 'strip',
       })
     );
 

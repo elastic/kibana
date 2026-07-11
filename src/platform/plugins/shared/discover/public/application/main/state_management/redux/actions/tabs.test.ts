@@ -163,7 +163,9 @@ describe('tabs actions', () => {
       );
 
       expect(selectTab(internalState.getState(), duplicatedTab.id).profileState).toEqual({
-        testProfileState: profileState,
+        testProfileState: {
+          uiValue: 'primary',
+        },
       });
     });
 
@@ -283,10 +285,8 @@ describe('tabs actions', () => {
 
       expect(selectTab(internalState.getState(), restoredTab.id).profileState).toEqual({
         testProfileState: {
-          uiValue: 'defaultUi',
           urlValue: 'url',
           persistentValue: 'persistent',
-          nestedValue: { count: 0 },
         },
       });
     });

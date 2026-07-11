@@ -18,6 +18,7 @@ export {
   type ProfileStateDefinition,
   type ProfileStateDescriptor,
   type ProfileStateMutationOptions,
+  type ProfileStateDefaultsHandling,
   ProfileStateRegistry,
   ProfileStateType,
 } from './profile_state';

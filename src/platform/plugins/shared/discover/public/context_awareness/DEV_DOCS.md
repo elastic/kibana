@@ -209,10 +209,10 @@ Definitions live near the providers that use them and are registered from `profi
 
 `ProfileStateType` is a field-level lifetime preference: `Ui` for ephemeral UI state, `Url` for Discover URL sync and local tab storage, and `Persistent` for local tab storage without URL sync.
 
-- Main Discover stores state in `TabState.profileState`, scoped to a tab. Fresh tabs start with raw `profileState: {}`, duplicated tabs copy full profile state, and restored or locally reloaded tabs hydrate registered `Persistent` and `Url` fields from local tab storage merged over the definition `defaultState`. Stored `Ui` fields are ignored and come from defaults on restore.
-- Main Discover syncs `Url` fields to the `_p` URL parameter for the definition exposed by the active data source profile context (`context.profileState`). Clearing `_p` resets URL fields to definition defaults.
+- Main Discover stores explicit overrides in `TabState.profileState`, scoped to a tab. Fresh tabs start with raw `profileState: {}` and duplicated tabs copy the explicit profile state. Restored or locally reloaded tabs hydrate registered `Persistent` and `Url` fields from local tab storage, then strip values equal to the current definition `defaultState`. Stored `Ui` fields are ignored and come from defaults on restore.
+- Main Discover writes `Url` fields to the `_p` URL parameter for the definition exposed by the active data source profile context (`context.profileState`). URL hydration can accept registered non-active `_p` entries before profile resolution so history navigation and shared links can carry state for the profile that becomes active next. URL and local storage serialization expands requested-type defaults for entries that already have explicit state, while hydration strips current defaults back to explicit overrides. Clearing `_p` resets active URL fields to definition defaults.
 - Simplified hosts (document route, surrounding documents page, embeddables) use `createInMemoryContextAwarenessToolkit()`, storing all profile state in memory for that scoped host instance. `Url` and `Persistent` fields are accepted there but do not change the lifetime.
-- Adapters return `definition.defaultState` until state has been written.
+- Adapters return `definition.defaultState` merged with explicit overrides.
 
 ### State adapters
 

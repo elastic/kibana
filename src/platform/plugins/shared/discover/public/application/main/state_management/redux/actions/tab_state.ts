@@ -35,7 +35,11 @@ import {
   transitionedFromEsqlToDataView,
   transitionedFromDataViewToEsql,
 } from '../internal_state';
-import { ProfileStateType, type ProfileStateDefinition } from '../../../../../context_awareness';
+import {
+  ProfileStateType,
+  type ProfileStateDefinition,
+  type ProfileStateDefaultsHandling,
+} from '../../../../../context_awareness';
 import { selectTab } from '../selectors';
 import {
   selectDataSourceProfileId,
@@ -220,6 +224,14 @@ type ProfileStatePayload<TState extends object> = TabActionPayload<{
   historyMethod?: 'push' | 'replace';
 }>;
 
+const ALL_PROFILE_STATE_TYPES = new Set([
+  ProfileStateType.Ui,
+  ProfileStateType.Url,
+  ProfileStateType.Persistent,
+]);
+const NON_URL_PROFILE_STATE_TYPES = new Set([ProfileStateType.Ui, ProfileStateType.Persistent]);
+const URL_PROFILE_STATE_TYPES = new Set([ProfileStateType.Url]);
+
 /**
  * Updates tab profile state for provided definition, and optionally pushes to URL history
  */
@@ -231,74 +243,103 @@ export const setProfileState = <TState extends object>(
     getState,
     { runtimeStateManager, services, urlStateStorage }
   ) {
+    const {
+      tabId,
+      profileStateDefinition,
+      profileState: nextProfileState,
+      historyMethod,
+    } = payload;
+    const { key, defaultState } = profileStateDefinition;
     const currentState = getState();
-    const currentTab = selectTab(currentState, payload.tabId);
+    const currentTab = selectTab(currentState, tabId);
 
+    // Adapter writes can race with tab closure, so ignore them if the tab is closed
     if (!currentTab) {
       return;
     }
 
-    const currentProfileState =
-      currentTab.profileState[payload.profileStateDefinition.key] ??
-      payload.profileStateDefinition.defaultState;
+    // Consumers work with effective state, while Redux stores only explicit (non-default) overrides
+    const currentExplicitProfileState = currentTab.profileState[key];
+    const currentProfileState = currentExplicitProfileState
+      ? { ...defaultState, ...currentExplicitProfileState }
+      : defaultState;
 
-    if (isEqual(currentProfileState, payload.profileState)) {
+    if (isEqual(currentProfileState, nextProfileState)) {
       return;
     }
 
+    const filterProfileState = ({
+      profileState,
+      stateTypes,
+      defaultsHandling,
+    }: {
+      profileState: object | undefined;
+      stateTypes: Set<ProfileStateType>;
+      defaultsHandling?: ProfileStateDefaultsHandling;
+    }) => {
+      return services.profileStateRegistry.filterFieldsByType({
+        profileState,
+        stateKey: key,
+        stateTypes,
+        defaultsHandling,
+      });
+    };
+
+    const dispatchProfileState = (profileState: object | undefined) => {
+      dispatch(internalStateSlice.actions.setProfileState({ tabId, key, profileState }));
+    };
+
     const profileUrlStateDefinition = selectCurrentProfileUrlStateDefinition(
       runtimeStateManager,
-      payload.tabId
+      tabId
     );
 
+    // Normalize once to the canonical Redux shape before splitting by field lifetime
+    const nextExplicitProfileState = filterProfileState({
+      profileState: nextProfileState,
+      stateTypes: ALL_PROFILE_STATE_TYPES,
+      defaultsHandling: 'strip',
+    });
+
+    // Only active-profile replace updates need URL coordination; other updates can write straight
+    // to Redux and let the usual sync paths handle URL persistence
     if (
-      payload.historyMethod !== 'replace' ||
-      currentState.tabs.unsafeCurrentId !== payload.tabId ||
-      profileUrlStateDefinition?.key !== payload.profileStateDefinition.key
+      historyMethod !== 'replace' ||
+      currentState.tabs.unsafeCurrentId !== tabId ||
+      profileUrlStateDefinition?.key !== key
     ) {
-      return dispatch(
-        internalStateSlice.actions.setProfileState({
-          tabId: payload.tabId,
-          key: payload.profileStateDefinition.key,
-          profileState: payload.profileState,
-        })
-      );
+      return dispatchProfileState(nextExplicitProfileState);
     }
 
-    const nonUrlProfileState = services.profileStateRegistry.filterFieldsByType({
-      profileState: payload.profileState,
-      stateKey: payload.profileStateDefinition.key,
-      stateTypes: [ProfileStateType.Ui, ProfileStateType.Persistent],
+    const nextNonUrlProfileState = filterProfileState({
+      profileState: nextExplicitProfileState,
+      stateTypes: NON_URL_PROFILE_STATE_TYPES,
     });
-    const currentUrlProfileState = services.profileStateRegistry.filterFieldsByType({
-      profileState: currentProfileState,
-      stateKey: payload.profileStateDefinition.key,
-      stateTypes: [ProfileStateType.Url],
+    const nextUrlProfileState = filterProfileState({
+      profileState: nextExplicitProfileState,
+      stateTypes: URL_PROFILE_STATE_TYPES,
     });
-    const nextUrlProfileState = services.profileStateRegistry.filterFieldsByType({
-      profileState: payload.profileState,
-      stateKey: payload.profileStateDefinition.key,
-      stateTypes: [ProfileStateType.Url],
+    const currentUrlProfileState = filterProfileState({
+      profileState: currentExplicitProfileState,
+      stateTypes: URL_PROFILE_STATE_TYPES,
+      defaultsHandling: 'strip',
     });
 
     // Replace-mode updates keep old URL fields in Redux until the URL storage flush syncs the
     // replacement value back, so synchronous state observers can briefly see new non-URL fields
-    // paired with old URL fields.
-    dispatch(
-      internalStateSlice.actions.setProfileState({
-        tabId: payload.tabId,
-        key: payload.profileStateDefinition.key,
-        profileState: {
-          ...payload.profileStateDefinition.defaultState,
-          ...nonUrlProfileState,
-          ...currentUrlProfileState,
-        },
-      })
-    );
+    // paired with old URL fields
+    dispatchProfileState({ ...nextNonUrlProfileState, ...currentUrlProfileState });
 
     if (!isEqual(currentUrlProfileState, nextUrlProfileState)) {
-      const profileStateForUrl = nextUrlProfileState
-        ? { [payload.profileStateDefinition.key]: nextUrlProfileState }
+      // Expand defaults only at the URL boundary so the replacement URL is self-contained without
+      // changing Redux's explicit-only representation
+      const expandedUrlProfileState = filterProfileState({
+        profileState: nextExplicitProfileState,
+        stateTypes: URL_PROFILE_STATE_TYPES,
+        defaultsHandling: 'expand',
+      });
+      const profileStateForUrl = expandedUrlProfileState
+        ? { [key]: expandedUrlProfileState }
         : undefined;
 
       void urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, { replace: true });

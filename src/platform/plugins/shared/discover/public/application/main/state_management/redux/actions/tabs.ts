@@ -218,7 +218,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         tab.profileState = services.profileStateRegistry.pickStateByType({
           profileStateMap: recentlyClosedTabToRestore.profileState,
           stateTypes: [ProfileStateType.Persistent, ProfileStateType.Url],
-          shouldMergeDefaults: true,
+          defaultsHandling: 'strip',
         });
       } else if (!('appState' in item)) {
         // the new tab is a fresh one

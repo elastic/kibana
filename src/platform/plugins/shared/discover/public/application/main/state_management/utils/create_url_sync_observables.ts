@@ -126,15 +126,22 @@ export const createUrlSyncObservables = ({
     get: () => getCurrentProfileUrlState() ?? EMPTY_PROFILE_URL_STATE,
     set: (profileUrlState) => {
       const currentProfileStateMap = selectTab(getState(), tabId).profileState;
+
+      // URL state may be expanded with defaults, while Redux stores explicit overrides only.
+      // Normalize both sides to explicit URL fields before comparing or writing.
       const currentProfileUrlStateMap = services.profileStateRegistry.pickStateByType({
         profileStateMap: currentProfileStateMap,
         stateTypes: [ProfileStateType.Url],
+        defaultsHandling: 'strip',
       });
       const nextProfileUrlStateMap = services.profileStateRegistry.pickStateByType({
         profileStateMap: profileUrlState ?? undefined,
         stateTypes: [ProfileStateType.Url],
+        defaultsHandling: 'strip',
       });
 
+      // Apply every registered URL entry from `_p`, not only the current active profile, because
+      // URL hydration can run before profile resolution makes one of these entries active
       for (const [stateKey, nextProfileUrlState] of Object.entries(nextProfileUrlStateMap)) {
         const currentProfileUrlState = currentProfileUrlStateMap[stateKey];
 
@@ -142,21 +149,20 @@ export const createUrlSyncObservables = ({
           continue;
         }
 
+        // URL hydration should replace URL-backed fields only; keep tab-local UI and persistent
+        // overrides that do not belong to `_p`
         const nonUrlProfileState = services.profileStateRegistry.filterFieldsByType({
           profileState: currentProfileStateMap[stateKey],
           stateKey,
           stateTypes: [ProfileStateType.Ui, ProfileStateType.Persistent],
-          shouldMergeDefaults: true,
+          defaultsHandling: 'strip',
         });
 
         dispatch(
           internalStateSlice.actions.setProfileState({
             tabId,
             key: stateKey,
-            profileState: {
-              ...nonUrlProfileState,
-              ...nextProfileUrlState,
-            },
+            profileState: { ...nonUrlProfileState, ...nextProfileUrlState },
           })
         );
       }
@@ -166,13 +172,15 @@ export const createUrlSyncObservables = ({
         tabId
       );
 
+      // If `_p` omits the active profile key, treat that as clearing active URL overrides. Non-URL
+      // overrides stay in Redux so adapters still merge them with defaults.
       if (profileUrlStateDefinition && !nextProfileUrlStateMap[profileUrlStateDefinition.key]) {
         const currentProfileState = currentProfileStateMap[profileUrlStateDefinition.key];
         const nonUrlProfileState = services.profileStateRegistry.filterFieldsByType({
           profileState: currentProfileState,
           stateKey: profileUrlStateDefinition.key,
           stateTypes: [ProfileStateType.Ui, ProfileStateType.Persistent],
-          shouldMergeDefaults: true,
+          defaultsHandling: 'strip',
         });
 
         if (!isEqual(currentProfileState, nonUrlProfileState)) {

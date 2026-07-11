@@ -169,7 +169,10 @@ describe('createContextAwarenessToolkit', () => {
     stateAdapter.setState(firstState);
     expect(stateAdapter.getState()).toEqual(firstState);
     expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
-      testProfileState: firstState,
+      testProfileState: {
+        uiValue: 'primary',
+        nestedValue: { count: 50 },
+      },
     });
 
     stateAdapter.updateState({ nestedValue: { count: 100 } });

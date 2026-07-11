@@ -166,6 +166,7 @@ export const selectCurrentProfileUrlState = ({
     profileState: profileStateMap[profileStateDefinition.key],
     stateKey: profileStateDefinition.key,
     stateTypes: [ProfileStateType.Url],
+    defaultsHandling: 'expand',
   });
 
   return filteredUrlState ? { [profileStateDefinition.key]: filteredUrlState } : undefined;

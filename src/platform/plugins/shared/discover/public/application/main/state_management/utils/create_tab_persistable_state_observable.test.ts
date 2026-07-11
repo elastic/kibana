@@ -23,6 +23,7 @@ import { TEST_PROFILE_STATE_DEF } from '../../../../context_awareness/__mocks__/
 describe('createTabPersistableStateObservable', () => {
   const setup = async () => {
     const services = createDiscoverServicesMock();
+    services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
     const toolkit = getDiscoverInternalStateMock({
       services,
       persistedDataViews: [dataViewMockWithTimeField],
@@ -213,7 +214,9 @@ describe('createTabPersistableStateObservable', () => {
 
     expect(emittedValues).toHaveLength(1);
     expect(emittedValues[0].profileState).toEqual({
-      testProfileState: profileState,
+      testProfileState: {
+        persistentValue: 'primary',
+      },
     });
 
     subscription.unsubscribe();

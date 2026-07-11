@@ -121,6 +121,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     const urlProfileState = services.profileStateRegistry.pickStateByType({
       profileStateMap: urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY) ?? undefined,
       stateTypes: [ProfileStateType.Url],
+      defaultsHandling: 'strip',
     });
 
     const discoverTabLoadTracker = scopedEbtManager$

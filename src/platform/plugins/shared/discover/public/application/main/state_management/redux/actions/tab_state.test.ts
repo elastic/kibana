@@ -189,7 +189,11 @@ describe('tab_state actions', () => {
       );
 
       expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
-        [TEST_PROFILE_STATE_DEF.key]: profileState,
+        [TEST_PROFILE_STATE_DEF.key]: {
+          uiValue: 'ui',
+          urlValue: 'nextUrl',
+          persistentValue: 'persistent',
+        },
       });
       expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, expectedUrlState);
       expect(flushSpy).not.toHaveBeenCalled();
@@ -222,7 +226,11 @@ describe('tab_state actions', () => {
       );
 
       expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
-        [TEST_PROFILE_STATE_DEF.key]: profileState,
+        [TEST_PROFILE_STATE_DEF.key]: {
+          uiValue: 'ui',
+          urlValue: 'nextUrl',
+          persistentValue: 'persistent',
+        },
       });
       expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, expectedUrlState, {
         replace: true,
@@ -265,7 +273,8 @@ describe('tab_state actions', () => {
 
       expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
         [TEST_PROFILE_STATE_DEF.key]: {
-          ...profileState,
+          uiValue: 'ui',
+          urlValue: 'nextUrl',
           persistentValue: 'updatedPersistent',
         },
       });
@@ -312,7 +321,9 @@ describe('tab_state actions', () => {
       );
 
       expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
-        [TEST_PROFILE_STATE_DEF.key]: profileState,
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'nextUrl',
+        },
       });
       expect(setUrlStateSpy).not.toHaveBeenCalled();
       expect(flushSpy).not.toHaveBeenCalled();

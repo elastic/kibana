@@ -286,7 +286,6 @@ describe('tab_sync actions', () => {
 
       expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
         [TEST_PROFILE_STATE_DEF.key]: {
-          ...TEST_PROFILE_STATE_DEF.defaultState,
           urlValue: 'nextUrl',
         },
       });

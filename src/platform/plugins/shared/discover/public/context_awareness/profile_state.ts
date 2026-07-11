@@ -92,6 +92,22 @@ export interface ProfileStateDefinition<TState extends object> {
 export type ProfileStateMap = Record<string, object | undefined>;
 
 /**
+ * Controls how registered default values are handled when filtering profile state.
+ */
+export type ProfileStateDefaultsHandling = 'none' | 'expand' | 'strip';
+
+type ProfileStateDescriptorEntry<TState extends object> = [
+  keyof TState,
+  ProfileStateDescriptor<TState>[keyof TState]
+];
+
+const getProfileStateDescriptorEntries = <TState extends object>(
+  descriptor: ProfileStateDescriptor<TState>
+): Array<ProfileStateDescriptorEntry<TState>> => {
+  return Object.entries(descriptor) as Array<ProfileStateDescriptorEntry<TState>>;
+};
+
+/**
  * Registry of profile state definitions supported by Discover.
  */
 export class ProfileStateRegistry {
@@ -134,17 +150,18 @@ export class ProfileStateRegistry {
    * Filters a profile state map by field lifetime type. Unregistered state keys and entries with no
    * matching fields are omitted from the returned map.
    *
-   * When `shouldMergeDefaults` is true, each returned entry is merged over its registered default
-   * state.
+   * When `defaultsHandling` is `expand`, each returned entry is merged over the registered default
+   * fields for the requested state types. When `defaultsHandling` is `strip`, default-valued fields
+   * are omitted from returned entries.
    */
   public pickStateByType({
     profileStateMap,
     stateTypes,
-    shouldMergeDefaults = false,
+    defaultsHandling = 'none',
   }: {
     profileStateMap: ProfileStateMap | undefined;
     stateTypes: ProfileStateType[];
-    shouldMergeDefaults?: boolean;
+    defaultsHandling?: ProfileStateDefaultsHandling;
   }): ProfileStateMap {
     const filteredStateMap: ProfileStateMap = {};
 
@@ -159,7 +176,7 @@ export class ProfileStateRegistry {
         profileState,
         stateKey,
         stateTypes: stateTypeSet,
-        shouldMergeDefaults,
+        defaultsHandling,
       });
 
       if (filteredState) {
@@ -213,19 +230,20 @@ export class ProfileStateRegistry {
    * `stateKey`.
    *
    * Returns `undefined` when the state key is not registered, the state is missing, or no fields
-   * match the requested type. When `shouldMergeDefaults` is true, the matching fields are merged over
-   * the registered default state.
+   * match the requested type. When `defaultsHandling` is `expand`, the matching fields are merged
+   * over the registered default fields for the requested state types. When `defaultsHandling` is
+   * `strip`, fields equal to the registered defaults are omitted.
    */
   public filterFieldsByType<TState extends object>({
     profileState,
     stateKey,
     stateTypes,
-    shouldMergeDefaults = false,
+    defaultsHandling = 'none',
   }: {
     profileState: Partial<TState> | undefined;
     stateKey: ProfileStateDefinition<TState>['key'];
     stateTypes: ProfileStateType[] | Set<ProfileStateType>;
-    shouldMergeDefaults?: boolean;
+    defaultsHandling?: ProfileStateDefaultsHandling;
   }): Partial<TState> | undefined {
     const definition = this.stateDefinitions.get(stateKey) as
       | ProfileStateDefinition<TState>
@@ -238,19 +256,35 @@ export class ProfileStateRegistry {
     const stateTypeSet = stateTypes instanceof Set ? stateTypes : new Set(stateTypes);
     const filteredState: Partial<TState> = {};
 
-    for (const [field, value] of Object.entries(profileState)) {
-      const castedField = field as keyof TState;
+    let shouldReturnFilteredState = false;
 
-      if (stateTypeSet.has(definition.descriptor[castedField]?.type)) {
-        filteredState[castedField] = value as TState[keyof TState];
+    for (const [field, descriptor] of getProfileStateDescriptorEntries(definition.descriptor)) {
+      if (!stateTypeSet.has(descriptor.type)) {
+        continue;
+      }
+
+      const profileStateHasField = Object.hasOwn(profileState, field);
+
+      // Expand fills requested defaults but only returns when at least one requested field is
+      // explicit; none preserves explicit fields; strip preserves explicit non-default fields.
+      if (defaultsHandling === 'expand') {
+        if (profileStateHasField) {
+          shouldReturnFilteredState = true;
+          filteredState[field] = profileState[field];
+        } else {
+          filteredState[field] = definition.defaultState[field];
+        }
+      } else if (
+        profileStateHasField &&
+        (defaultsHandling === 'none' ||
+          !isEqual(profileState[field], definition.defaultState[field]))
+      ) {
+        shouldReturnFilteredState = true;
+        filteredState[field] = profileState[field];
       }
     }
 
-    if (Object.keys(filteredState).length === 0) {
-      return undefined;
-    }
-
-    return shouldMergeDefaults ? { ...definition.defaultState, ...filteredState } : filteredState;
+    return shouldReturnFilteredState ? filteredState : undefined;
   }
 }
 
