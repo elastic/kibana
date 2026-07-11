@@ -96,6 +96,13 @@ describe('TemplateFields', () => {
     expect(screen.getByText('Priority')).toBeInTheDocument();
   });
 
+  it('does not render the Extended fields heading when showHeader is false', () => {
+    render(<TemplateFields {...defaultProps} showHeader={false} />);
+
+    expect(screen.queryByText('Extended fields')).not.toBeInTheDocument();
+    expect(screen.getByText('Summary')).toBeInTheDocument();
+  });
+
   it('fetches the template with the correct id and version', () => {
     render(<TemplateFields {...defaultProps} />);
 

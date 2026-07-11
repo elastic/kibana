@@ -8,7 +8,14 @@
  */
 
 import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
-import type { ICommandContext } from '../../registry/types';
+import type { ICommandContext, ESQLColumnData } from '../../registry/types';
+import { commandsMetadata } from '../generated/commands/commands';
+import type { Commands } from '../keywords';
+import type {
+  ElasticsearchCommandDefinition,
+  ElasticsearchCommandOutputDefinition,
+  ElasticsearchCommandOutputVariant,
+} from '../types';
 import { fuzzySearch } from './shared';
 
 export function getColumnExists(
@@ -43,3 +50,26 @@ export function columnIsPresent(node: ESQLColumn | ESQLIdentifier, columns: Set<
 export function getColumnName(node: ESQLColumn | ESQLIdentifier): string {
   return node.type === 'identifier' ? node.name : node.parts.join('.');
 }
+
+/** Reads the generated output schema for a command from the command definitions. */
+export const getCommandOutput = (
+  command: Commands
+): ElasticsearchCommandOutputDefinition | undefined =>
+  (commandsMetadata[command] as ElasticsearchCommandDefinition | undefined)?.output;
+
+/** Reads the generated output columns for a command variant (defaults to the single `all` variant). */
+export const getCommandOutputColumns = (
+  command: Commands,
+  variant: string = 'all'
+): ElasticsearchCommandOutputVariant | undefined => getCommandOutput(command)?.variants[variant];
+
+/** Builds columns by prefixing each generated output column with the target field name. */
+export const buildPrefixedColumns = (
+  prefix: string,
+  columns: ElasticsearchCommandOutputVariant
+): ESQLColumnData[] =>
+  Object.entries(columns).map(([suffix, { type }]) => ({
+    name: `${prefix}.${suffix}`,
+    type,
+    userDefined: false,
+  }));

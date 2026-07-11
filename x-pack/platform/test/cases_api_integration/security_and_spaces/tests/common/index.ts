@@ -50,15 +50,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/replace_custom_field'));
     loadTestFile(require.resolve('./internal/find_user_actions.ts'));
 
-    /**
-     * Attachments framework
-     */
-
-    loadTestFile(require.resolve('./attachments_framework/external_references.ts'));
-    loadTestFile(require.resolve('./attachments_framework/persistable_state.ts'));
-    loadTestFile(require.resolve('./attachments_framework/osquery.ts'));
-    loadTestFile(require.resolve('./attachments_framework/endpoint.ts'));
-    loadTestFile(require.resolve('./attachments_framework/indicator.ts'));
+    // NOTE: The attachments-framework suites are flag-sensitive and run under
+    // their own configs with the feature flag pinned
 
     /**
      * Cases client
