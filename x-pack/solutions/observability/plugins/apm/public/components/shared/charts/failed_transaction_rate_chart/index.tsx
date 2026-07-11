@@ -32,13 +32,19 @@ import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
 import { APM_CHART_EBT_ELEMENTS } from '../ebt_constants';
 import { OpenAnomalies } from '../../links/machine_learning_links/open_anomalies';
 import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
+import { unit } from '../../../../utils/style';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
 }
 
+/** Title row + panel padding above the plot when `sectionHeight` is set. */
+const SECTION_CHROME_HEIGHT = unit * 5;
+
 interface Props {
   height?: number;
+  /** Fixed outer panel height; plot fills remaining space below the title row. */
+  sectionHeight?: number;
   showAnnotations?: boolean;
   kuery: string;
 }
@@ -61,7 +67,12 @@ export const errorRateI18n = i18n.translate('xpack.apm.errorRate.tip', {
   defaultMessage:
     "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
 });
-export function FailedTransactionRateChart({ height, showAnnotations = true, kuery }: Props) {
+export function FailedTransactionRateChart({
+  height,
+  sectionHeight,
+  showAnnotations = true,
+  kuery,
+}: Props) {
   const {
     urlParams: { transactionName },
   } = useLegacyUrlParams();
@@ -166,8 +177,17 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
       : []),
   ];
 
+  const chartHeight = sectionHeight !== undefined ? sectionHeight - SECTION_CHROME_HEIGHT : height;
+
   return (
-    <EuiPanel hasBorder={true}>
+    <EuiPanel
+      hasBorder={true}
+      css={
+        sectionHeight !== undefined
+          ? { height: sectionHeight, display: 'flex', flexDirection: 'column' }
+          : undefined
+      }
+    >
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -225,7 +245,7 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
 
       <TimeseriesChartWithContext
         id="errorRate"
-        height={height}
+        height={chartHeight}
         showAnnotations={showAnnotations}
         fetchStatus={status}
         timeseries={timeseries}
