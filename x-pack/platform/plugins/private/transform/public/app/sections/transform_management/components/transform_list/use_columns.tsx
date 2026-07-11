@@ -275,7 +275,7 @@ export const useColumns = (
         );
       },
     },
-    ...(cpsManager
+    ...(cpsManager && cpsManager.hasLinkedProjects()
       ? [
           {
             name: i18n.translate('xpack.transform.projectScope', {
