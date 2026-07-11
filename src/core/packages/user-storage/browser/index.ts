@@ -10,6 +10,7 @@
 export type {
   IUserStorageClient,
   UserStorageUpdate,
+  UserStorageValue,
   UserStorageProviderProps,
   UserStorageSetter,
 } from './src';

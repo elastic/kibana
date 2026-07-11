@@ -18,14 +18,32 @@ const apiMock = (): jest.Mocked<UserStorageApi> =>
     remove: jest.fn(),
   } as unknown as jest.Mocked<UserStorageApi>);
 
-const buildClient = (initialValues: Record<string, unknown> = {}) => {
+const buildClient = (initialValues: Record<string, unknown> = {}, available = true) => {
   const api = apiMock();
   const done$ = new Subject<void>();
-  const client = new UserStorageClient({ api, initialValues, done$ });
+  const client = new UserStorageClient({ api, initialValues, available, done$ });
   return { api, done$, client };
 };
 
 describe('UserStorageClient', () => {
+  describe('isAvailable / canWrite', () => {
+    it('reflects the `available` flag passed at construction', () => {
+      expect(buildClient({}, true).client.isAvailable()).toBe(true);
+      expect(buildClient({}, false).client.isAvailable()).toBe(false);
+    });
+
+    it('canWrite mirrors isAvailable', () => {
+      expect(buildClient({}, true).client.canWrite()).toBe(true);
+      expect(buildClient({}, false).client.canWrite()).toBe(false);
+    });
+
+    it('isAvailable$/canWrite$ emit the current value', async () => {
+      const { client } = buildClient({}, true);
+      await expect(firstValueFrom(client.isAvailable$())).resolves.toBe(true);
+      await expect(firstValueFrom(client.canWrite$())).resolves.toBe(true);
+    });
+  });
+
   describe('peek', () => {
     it('returns cached values without triggering a lazy fetch', () => {
       const { client, api } = buildClient({ a: 1 });
@@ -50,33 +68,42 @@ describe('UserStorageClient', () => {
   });
 
   describe('get', () => {
-    it('returns cached values seeded from initialValues', () => {
-      const { client } = buildClient({ a: 1, b: 'two' });
+    it('resolves cached values seeded from initialValues without an HTTP call', async () => {
+      const { client, api } = buildClient({ a: 1, b: 'two' });
 
-      expect(client.get('a')).toBe(1);
-      expect(client.get('b')).toBe('two');
+      await expect(client.get('a')).resolves.toBe(1);
+      await expect(client.get('b')).resolves.toBe('two');
+      expect(api.get).not.toHaveBeenCalled();
     });
 
-    it('returns the defaultValue when the key is not cached', () => {
-      const { client } = buildClient({});
-
-      expect(client.get('missing', 'fallback')).toBe('fallback');
-    });
-
-    it('triggers a lazy fetch on first access for an uncached key', () => {
+    it('awaits the lazy fetch and resolves the fetched value for an uncached key', async () => {
       const { client, api } = buildClient({});
       api.get.mockResolvedValue('lazy-value');
 
-      client.get('uncached');
-
+      await expect(client.get('uncached')).resolves.toBe('lazy-value');
       expect(api.get).toHaveBeenCalledWith('uncached');
     });
 
-    it('does not trigger a second fetch when the key is already cached', () => {
+    it('resolves the defaultValue when the fetch resolves with no value', async () => {
+      const { client, api } = buildClient({});
+      api.get.mockResolvedValue(undefined);
+
+      await expect(client.get('missing', 'fallback')).resolves.toBe('fallback');
+    });
+
+    it('rejects when the lazy fetch fails, and does not cache a value', async () => {
+      const { client, api } = buildClient({});
+      api.get.mockRejectedValue(new Error('network-error'));
+
+      await expect(client.get('key', 'fallback')).rejects.toThrow('network-error');
+      expect(client.peek('key')).toBeUndefined();
+    });
+
+    it('does not trigger a second fetch when the key is already cached', async () => {
       const { client, api } = buildClient({ key: 'present' });
 
-      client.get('key');
-      client.get('key');
+      await client.get('key');
+      await client.get('key');
 
       expect(api.get).not.toHaveBeenCalled();
     });
@@ -86,8 +113,8 @@ describe('UserStorageClient', () => {
       // never resolves — simulates in-flight request
       api.get.mockReturnValue(new Promise(() => {}));
 
-      client.get('key');
-      client.get('key');
+      void client.get('key');
+      void client.get('key');
 
       expect(api.get).toHaveBeenCalledTimes(1);
     });
@@ -116,6 +143,14 @@ describe('UserStorageClient', () => {
       await expect(first).resolves.toBe('initial');
     });
 
+    it('triggers the lazy fetch on subscribe for an uncached key', () => {
+      const { client, api } = buildClient({});
+
+      client.get$('key').subscribe();
+
+      expect(api.get).toHaveBeenCalledWith('key');
+    });
+
     it('emits the lazy-fetched value once the fetch resolves', async () => {
       const { client, api } = buildClient({});
 
@@ -139,15 +174,79 @@ describe('UserStorageClient', () => {
 
       const httpError = firstValueFrom(client.getHttpError$());
 
-      // First get triggers the fetch
-      client.get('key');
+      // First subscription triggers the fetch
+      client.get$('key').subscribe();
 
       await expect(httpError).resolves.toMatchObject({ message: 'network-error' });
 
-      // After failure the key is removed from fetchInitiated — a new get should re-trigger
+      // After failure the key is removed from the in-flight map — a new
+      // subscription should re-trigger the fetch.
       api.get.mockResolvedValue('retry-value');
-      client.get('key');
+      client.get$('key').subscribe();
       expect(api.get).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('getState$', () => {
+    it('emits resolved immediately when the key is already cached', async () => {
+      const { client, api } = buildClient({ key: 'cached' });
+
+      await expect(firstValueFrom(client.getState$<string>('key'))).resolves.toEqual({
+        status: 'resolved',
+        value: 'cached',
+      });
+      expect(api.get).not.toHaveBeenCalled();
+    });
+
+    it('emits loading then resolved for an uncached key', async () => {
+      const { client, api } = buildClient({});
+      let resolveFetch!: (v: string) => void;
+      api.get.mockReturnValue(new Promise<string>((resolve) => (resolveFetch = resolve)));
+
+      const emissions = lastValueFrom(
+        client.getState$<string>('key', 'default').pipe(take(2), toArray())
+      );
+
+      resolveFetch('resolved-value');
+      await Promise.resolve();
+
+      expect(await emissions).toEqual([
+        { status: 'loading', value: 'default' },
+        { status: 'resolved', value: 'resolved-value' },
+      ]);
+    });
+
+    it('emits loading then error when the fetch fails', async () => {
+      const { client, api } = buildClient({});
+      const error = new Error('boom');
+      let rejectFetch!: (e: Error) => void;
+      api.get.mockReturnValue(new Promise<string>((_resolve, reject) => (rejectFetch = reject)));
+
+      const emissions = lastValueFrom(
+        client.getState$<string>('key', 'default').pipe(take(2), toArray())
+      );
+
+      rejectFetch(error);
+      await Promise.resolve();
+
+      expect(await emissions).toEqual([
+        { status: 'loading', value: 'default' },
+        { status: 'error', value: 'default', error },
+      ]);
+    });
+
+    it('re-emits resolved after an explicit write', async () => {
+      const { client, api } = buildClient({ key: 'first' });
+      api.set.mockResolvedValue('second');
+
+      const emissions = lastValueFrom(client.getState$<string>('key').pipe(take(2), toArray()));
+
+      await client.set('key', 'second');
+
+      expect(await emissions).toEqual([
+        { status: 'resolved', value: 'first' },
+        { status: 'resolved', value: 'second' },
+      ]);
     });
   });
 
@@ -160,7 +259,7 @@ describe('UserStorageClient', () => {
 
       await client.set('key', 'new');
 
-      expect(client.get('key')).toBe('new');
+      expect(client.peek('key')).toBe('new');
       await expect(updates).resolves.toEqual({
         type: 'set',
         key: 'key',
@@ -178,7 +277,7 @@ describe('UserStorageClient', () => {
       const stored = await client.set('key', '  trimmed  ');
 
       expect(stored).toBe('trimmed');
-      expect(client.get('key')).toBe('trimmed');
+      expect(client.peek('key')).toBe('trimmed');
     });
 
     it('update$ emits the server-validated newValue, not the raw input', async () => {
@@ -199,7 +298,7 @@ describe('UserStorageClient', () => {
       const errors = firstValueFrom(client.getHttpError$());
 
       await expect(client.set('key', 'new')).rejects.toThrow('boom');
-      expect(client.get('key')).toBe('old');
+      expect(client.peek('key')).toBe('old');
       await expect(errors).resolves.toEqual(expect.any(Error));
     });
   });
@@ -213,7 +312,7 @@ describe('UserStorageClient', () => {
 
       await client.remove('key');
 
-      expect(client.get('key')).toBeUndefined();
+      expect(client.peek('key')).toBeUndefined();
       await expect(updates).resolves.toEqual({ type: 'remove', key: 'key', oldValue: 'old' });
     });
 
@@ -224,8 +323,57 @@ describe('UserStorageClient', () => {
       const errors = firstValueFrom(client.getHttpError$());
 
       await expect(client.remove('key')).rejects.toThrow('nope');
-      expect(client.get('key')).toBe('old');
+      expect(client.peek('key')).toBe('old');
       await expect(errors).resolves.toEqual(expect.any(Error));
+    });
+  });
+
+  describe('update', () => {
+    it('reads the resolved (not unhydrated) current value as the mutation base', async () => {
+      // Regression for the presets data-loss race (elastic/kibana#276110): a
+      // save issued before a lazy key hydrates must not compute its mutation
+      // from the caller's default — it must await the real stored value.
+      const { client, api } = buildClient({});
+      let resolveFetch!: (v: { items: string[] }) => void;
+      api.get.mockReturnValue(
+        new Promise<{ items: string[] }>((resolve) => (resolveFetch = resolve))
+      );
+
+      const updatePromise = client.update<{ items: string[] }>('key', { items: [] }, (current) => ({
+        items: [...current.items, 'new'],
+      }));
+
+      // Cache is still unhydrated at this point — if `update` read via `peek`
+      // it would compute from `{ items: [] }` instead of the real stored value.
+      resolveFetch({ items: ['existing'] });
+
+      await updatePromise;
+
+      expect(api.set).toHaveBeenCalledWith('key', { items: ['existing', 'new'] });
+    });
+
+    it('skips the write when the updater returns the same reference (no-op)', async () => {
+      // The client clones `initialValues` internally, so assert against the
+      // cached (post-clone) reference rather than the object passed in here.
+      const { client, api } = buildClient({ key: { items: ['a'] } });
+      const cached = client.peek('key');
+
+      const result = await client.update('key', { items: [] }, (current) => current);
+
+      expect(result).toBe(cached);
+      expect(api.set).not.toHaveBeenCalled();
+    });
+
+    it('persists the updater result when it differs from the current value', async () => {
+      const { client, api } = buildClient({ key: { items: ['a'] } });
+      api.set.mockResolvedValue({ items: ['a', 'b'] });
+
+      const result = await client.update<{ items: string[] }>('key', { items: [] }, (current) => ({
+        items: [...current.items, 'b'],
+      }));
+
+      expect(api.set).toHaveBeenCalledWith('key', { items: ['a', 'b'] });
+      expect(result).toEqual({ items: ['a', 'b'] });
     });
   });
 

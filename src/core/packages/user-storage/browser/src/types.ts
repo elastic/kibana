@@ -24,6 +24,22 @@ export type UserStorageUpdate<T = unknown> =
   | { type: 'remove'; key: string; oldValue: T | undefined };
 
 /**
+ * Load state for a lazily-fetched key, as emitted by {@link IUserStorageClient.getState$}.
+ *
+ * - `'loading'`: the effective value is not yet known; `value` is the caller-supplied
+ *   fallback/default and should not be treated as the real stored value.
+ * - `'resolved'`: `value` is the true effective value (stored override or registered default).
+ * - `'error'`: the lazy fetch failed; `value` is the fallback/default and `error` describes
+ *   the failure. Safe to display, but destructive/write actions should stay disabled.
+ *
+ * @public
+ */
+export type UserStorageValue<T> =
+  | { status: 'loading'; value: T }
+  | { status: 'resolved'; value: T }
+  | { status: 'error'; value: T; error: Error };
+
+/**
  * Browser-side user storage client. Returns synchronously from an in-memory
  * cache that is seeded from preloaded (server-injected) metadata at first
  * paint, and is refreshed by `set` / `remove` after the corresponding HTTP
@@ -36,36 +52,75 @@ export type UserStorageUpdate<T = unknown> =
  */
 export interface IUserStorageClient {
   /**
+   * Whether user storage is available for the current user/session (e.g. `false`
+   * for anonymous users or users without a `profile_uid`). A static, page-render-time
+   * signal — does not change over the lifetime of a page load.
+   *
+   * Consumers should gate save/delete affordances on this (or {@link canWrite})
+   * rather than querying user profile state directly.
+   */
+  isAvailable(): boolean;
+  /** Observable counterpart to {@link isAvailable}. Emits once with the current value. */
+  isAvailable$(): Observable<boolean>;
+
+  /**
+   * Whether the current user can persist writes. Today this is identical to
+   * {@link isAvailable} (write access and read access share the same `profile_uid`
+   * requirement), but is exposed separately so availability and writeability can
+   * diverge in the future without a consumer-facing API change.
+   */
+  canWrite(): boolean;
+  /** Observable counterpart to {@link canWrite}. Emits once with the current value. */
+  canWrite$(): Observable<boolean>;
+
+  /**
    * Pure synchronous read from the local cache with no side effects.
    * Returns `undefined` when no cached value exists for the key and no
    * `defaultValue` is provided.
    *
    * Unlike `get`, `peek` never triggers a lazy fetch, making it safe to
    * call during React render (which may be invoked multiple times before
-   * a commit under concurrent mode).
+   * a commit under concurrent mode). Also useful for `preload: true` keys,
+   * which are always cached at first paint, and for best-effort snapshots
+   * where triggering a fetch is not wanted.
    */
   peek<T = unknown>(key: string): T | undefined;
   peek<T = unknown>(key: string, defaultValue: T): T;
 
   /**
-   * Synchronous read from the local cache. Returns `undefined` when no cached
-   * value exists for the key and no `defaultValue` is provided.
+   * Safe, async resolved read: resolves only once the effective value is known.
    *
-   * For keys without `preload: true`, the first call for an uncached key
-   * triggers a fire-and-forget lazy HTTP fetch in the background. Prefer
-   * `peek` in render functions; use `get` in imperative / effect code where
-   * triggering the fetch on first access is the intended behaviour.
+   * If the key is already cached (preloaded, or a prior lazy fetch already
+   * hydrated it), resolves immediately. Otherwise triggers (or awaits an
+   * already-triggered) lazy HTTP fetch and resolves once it completes. Rejects
+   * if the fetch fails — callers should not build subsequent writes on a failed
+   * read. Use this (not `peek`) as the read half of any read-modify-write
+   * sequence, or prefer {@link update} which does this for you.
    */
-  get<T = unknown>(key: string): T | undefined;
-  get<T = unknown>(key: string, defaultValue: T): T;
+  get<T = unknown>(key: string): Promise<T | undefined>;
+  get<T = unknown>(key: string, defaultValue: T): Promise<T>;
 
   /**
    * Observable that emits the current cached value followed by every future
    * value seen for the given key. Emits `undefined` when no cached value
    * exists and no `defaultValue` is provided. Suitable for React subscriptions.
+   *
+   * The first emission is a synchronous cache snapshot (like `peek`) — it may be
+   * a temporary default for a non-preloaded key that hasn't hydrated yet. Use
+   * {@link getState$} if you need to distinguish that from a resolved value.
    */
   get$<T = unknown>(key: string): Observable<T | undefined>;
   get$<T = unknown>(key: string, defaultValue: T): Observable<T>;
+
+  /**
+   * Observable load-state stream for a key: emits `{status:'loading', value: default}`
+   * immediately if the key isn't cached yet (triggering the lazy fetch), then
+   * `{status:'resolved', value}` once hydrated, or `{status:'error', value: default, error}`
+   * if the fetch fails. If already cached, emits `{status:'resolved', value}` immediately.
+   * Lets UI render a fallback while disabling destructive/write actions until resolved.
+   */
+  getState$<T = unknown>(key: string): Observable<UserStorageValue<T | undefined>>;
+  getState$<T = unknown>(key: string, defaultValue: T): Observable<UserStorageValue<T>>;
 
   /**
    * Persists a new value via `PUT /internal/user_storage/{key}`. Returns the
@@ -81,6 +136,21 @@ export interface IUserStorageClient {
    * `defaultValue`) and subscribers are notified.
    */
   remove(key: string): Promise<void>;
+
+  /**
+   * Safe read-modify-write helper for structured values behind a lazy key.
+   * Awaits the resolved current value (see `get`), applies `updater`, and
+   * persists the result via `set` — so the mutation is always computed from
+   * the true stored value, never an unhydrated default.
+   *
+   * If `updater` returns the exact same reference it was given, `update`
+   * treats the call as a no-op and skips the HTTP write, returning the
+   * unchanged current value.
+   *
+   * This is a single resolved-read-then-write; it does not detect or retry
+   * on concurrent writers (last write wins, same as `set`).
+   */
+  update<T = unknown>(key: string, defaultValue: T, updater: (current: T) => T): Promise<T>;
 
   /**
    * Stream of every successful key update (write or remove).

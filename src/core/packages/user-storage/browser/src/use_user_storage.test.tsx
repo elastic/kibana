@@ -18,18 +18,29 @@ const buildClient = (initial: Record<string, unknown> = {}): IUserStorageClient 
   const cache: Record<string, unknown> = { ...initial };
   const subject$ = new BehaviorSubject<Record<string, unknown>>(cache);
   const client: IUserStorageClient = {
+    isAvailable: () => true,
+    isAvailable$: () => new BehaviorSubject(true).asObservable(),
+    canWrite: () => true,
+    canWrite$: () => new BehaviorSubject(true).asObservable(),
     peek: ((key: string, defaultValue?: unknown) =>
       (cache[key] !== undefined
         ? cache[key]
         : defaultValue) as never) as IUserStorageClient['peek'],
     get: ((key: string, defaultValue?: unknown) =>
-      (cache[key] !== undefined ? cache[key] : defaultValue) as never) as IUserStorageClient['get'],
+      Promise.resolve(
+        cache[key] !== undefined ? cache[key] : defaultValue
+      )) as unknown as IUserStorageClient['get'],
     get$: ((key: string, defaultValue?: unknown) => {
       // simple "get current value" observable
       return new BehaviorSubject(
         cache[key] !== undefined ? cache[key] : defaultValue
       ).asObservable();
     }) as IUserStorageClient['get$'],
+    getState$: ((key: string, defaultValue?: unknown) =>
+      new BehaviorSubject({
+        status: 'resolved' as const,
+        value: cache[key] !== undefined ? cache[key] : defaultValue,
+      }).asObservable()) as IUserStorageClient['getState$'],
     set: jest.fn(async (key: string, value: unknown) => {
       cache[key] = value;
       subject$.next({ ...cache });
@@ -39,6 +50,14 @@ const buildClient = (initial: Record<string, unknown> = {}): IUserStorageClient 
       delete cache[key];
       subject$.next({ ...cache });
     }) as IUserStorageClient['remove'],
+    update: (async (key: string, defaultValue: unknown, updater: (current: unknown) => unknown) => {
+      const current = cache[key] !== undefined ? cache[key] : defaultValue;
+      const next = updater(current);
+      if (next === current) return current;
+      cache[key] = next;
+      subject$.next({ ...cache });
+      return next;
+    }) as unknown as IUserStorageClient['update'],
     getUpdate$: () =>
       new BehaviorSubject({ type: 'remove' as const, key: '', oldValue: undefined }),
     getHttpError$: () => new BehaviorSubject(new Error('noop')),

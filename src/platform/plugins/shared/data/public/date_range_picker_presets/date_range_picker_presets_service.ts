@@ -27,7 +27,6 @@ import { mapQuickRanges, TIMEPICKER_QUICK_RANGES_SETTING, type QuickRange } from
 export interface DateRangePickerPresetsServiceDeps {
   userStorage: CoreStart['userStorage'];
   uiSettings: CoreStart['uiSettings'];
-  userProfile: CoreStart['userProfile'];
 }
 
 const toPresetItem = ({ start, end, label }: PresetItem): PresetItem => ({
@@ -47,12 +46,10 @@ const toPresetItem = ({ start, end, label }: PresetItem): PresetItem => ({
 export class DateRangePickerPresetsService implements IDateRangePickerPresetsService {
   private readonly userStorage: CoreStart['userStorage'];
   private readonly uiSettings: CoreStart['uiSettings'];
-  private readonly userProfile: CoreStart['userProfile'];
 
-  constructor({ userStorage, uiSettings, userProfile }: DateRangePickerPresetsServiceDeps) {
+  constructor({ userStorage, uiSettings }: DateRangePickerPresetsServiceDeps) {
     this.userStorage = userStorage;
     this.uiSettings = uiSettings;
-    this.userProfile = userProfile;
   }
 
   public getDefaultPresets(): PresetItem[] {
@@ -66,54 +63,51 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
   }
 
   public getCanWrite$(): Observable<boolean> {
-    return this.userProfile.getUserProfile$().pipe(map((profile) => Boolean(profile)));
+    return this.userStorage.canWrite$();
   }
 
   public async savePreset(preset: PresetItem): Promise<SavePresetOutcome> {
-    const base = this.getMutationBase();
+    let outcome: SavePresetOutcome = 'saved';
     const presetKey = getPresetKey(preset);
 
-    if (base.some((item) => getPresetKey(item) === presetKey)) {
-      return 'duplicate';
-    }
+    await this.userStorage.update<StoredPresets>(
+      DATE_RANGE_PICKER_PRESETS_KEY,
+      DEFAULT_STORED_PRESETS,
+      (stored) => {
+        const base = normalize(stored).presets ?? this.getDefaultPresets();
 
-    if (base.length >= MAX_PRESETS) {
-      return 'limit-reached';
-    }
+        if (base.some((item) => getPresetKey(item) === presetKey)) {
+          outcome = 'duplicate';
+          return stored;
+        }
 
-    await this.persist([...base, preset]);
-    return 'saved';
+        if (base.length >= MAX_PRESETS) {
+          outcome = 'limit-reached';
+          return stored;
+        }
+
+        return { version: 1, presets: [...base, preset].map(toPresetItem) };
+      }
+    );
+
+    return outcome;
   }
 
   public async deletePreset(preset: PresetItem): Promise<void> {
     const presetKey = getPresetKey(preset);
-    const next = this.getMutationBase().filter((item) => getPresetKey(item) !== presetKey);
-    await this.persist(next);
-  }
 
-  /**
-   * Current presets used as the base for a mutation, read synchronously from
-   * the local cache via `peek`.
-   *
-   * NOTE: with the `preload: false` key, `peek` returns the unseeded default
-   * until the lazy fetch triggered by `getPresets$` hydrates the cache — so a
-   * save issued before hydration can overwrite previously stored presets. A
-   * robust fix needs a core "value ready" signal (tracked with the
-   * `userStorage.isAvailable` follow-up); centralising writes here makes that a
-   * one-spot change.
-   */
-  private getMutationBase(): PresetItem[] {
-    const cached = normalize(
-      this.userStorage.peek<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, DEFAULT_STORED_PRESETS)
+    await this.userStorage.update<StoredPresets>(
+      DATE_RANGE_PICKER_PRESETS_KEY,
+      DEFAULT_STORED_PRESETS,
+      (stored) => {
+        const base = normalize(stored).presets ?? this.getDefaultPresets();
+        const next = base.filter((item) => getPresetKey(item) !== presetKey);
+
+        // Nothing matched — no-op, skips the write.
+        if (next.length === base.length) return stored;
+
+        return { version: 1, presets: next.map(toPresetItem) };
+      }
     );
-
-    return cached.presets ?? this.getDefaultPresets();
-  }
-
-  private async persist(presets: PresetItem[]): Promise<void> {
-    await this.userStorage.set<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, {
-      version: 1,
-      presets: presets.map(toPresetItem),
-    });
   }
 }
