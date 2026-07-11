@@ -19,6 +19,7 @@ import {
   internalStateActions,
   selectDataSourceProfileId,
   selectTab,
+  selectTabRuntimeState,
   type DiscoverAppState,
 } from '../redux';
 import type { ProfileStateDefinition } from '../../../../context_awareness';
@@ -331,5 +332,70 @@ describe('createUrlSyncObservables', () => {
       },
     });
     expect(result.profileStateContainer.get()).toBeUndefined();
+  });
+
+  it('should apply profile URL state after the active profile has already changed', async () => {
+    const { result, internalState, runtimeStateManager, tabId, initializeSingleTab } =
+      await setup();
+    const scopedProfilesManager = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    ).scopedProfilesManager$.getValue();
+    const contexts = scopedProfilesManager.getContexts();
+
+    await initializeSingleTab({ tabId });
+    internalState.dispatch(
+      internalStateActions.setProfileState({
+        tabId,
+        profileStateDefinition: TEST_PROFILE_STATE_DEF,
+        profileState: {
+          uiValue: 'ui',
+          urlValue: 'currentProfileUrl',
+          persistentValue: 'persistent',
+          nestedValue: { count: 1 },
+        },
+      })
+    );
+    internalState.dispatch(
+      internalStateActions.setProfileState({
+        tabId,
+        profileStateDefinition: SECONDARY_PROFILE_STATE_DEF,
+        profileState: {
+          secondaryUrlValue: 'previousSecondaryUrl',
+          secondaryPersistentValue: 'secondaryPersistent',
+        },
+      })
+    );
+    jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+      ...contexts,
+      dataSourceContext: {
+        ...contexts.dataSourceContext,
+        profileState: SECONDARY_PROFILE_STATE_DEF,
+      },
+    });
+
+    result.profileStateContainer.set({
+      [SECONDARY_PROFILE_STATE_DEF.key]: {
+        secondaryUrlValue: 'nextSecondaryUrl',
+      },
+    });
+
+    expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+      [TEST_PROFILE_STATE_DEF.key]: {
+        uiValue: 'ui',
+        urlValue: 'currentProfileUrl',
+        persistentValue: 'persistent',
+        nestedValue: { count: 1 },
+      },
+      [SECONDARY_PROFILE_STATE_DEF.key]: {
+        secondaryUrlValue: 'nextSecondaryUrl',
+        secondaryPersistentValue: 'secondaryPersistent',
+      },
+    });
+    expect(result.profileStateContainer.get()).toEqual({
+      [SECONDARY_PROFILE_STATE_DEF.key]: {
+        secondaryUrlValue: 'nextSecondaryUrl',
+      },
+    });
   });
 });
