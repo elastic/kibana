@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from '@kbn/streams-plugin/server';
+import { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from '@kbn/significant-events-plugin/server';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
 import type { Discovery } from '@kbn/significant-events-schema';
@@ -32,13 +32,13 @@ import {
 import { buildAvailableSnapshotsBySource } from '../shared';
 import type { DiscoveryJudgeScenario } from '../../src/datasets';
 import { createJudgeEvaluators } from '../../src/evaluators/discovery';
-import { parseSignificantEvents } from '../../src/evaluators/discovery/utils/parse_agent_output';
+import { extractSignificantEventsFromToolCall } from '../../src/evaluators/discovery/utils/parse_agent_output';
 import { buildDiscoveryJudgeInput } from '../../src/evaluators/discovery/judge/build_agent_input';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 evaluate.describe(
-  'Significant Events Discovery - Judge',
+  'Significant Events Discovery - Judge Agent',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
@@ -257,7 +257,7 @@ evaluate.describe(
                     return {
                       // The agent returns its result as JSON in the final message (no emit tool /
                       // structured_output on the public converse API); parse it for the evaluators.
-                      significantEvents: parseSignificantEvents(converseResult.message),
+                      significantEvents: extractSignificantEventsFromToolCall(converseResult.steps),
                       inputDiscoveries: discoveries,
                       // Raw converse steps — the trajectory and grounding evaluators read tool calls.
                       steps: converseResult.steps,

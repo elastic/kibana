@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
         .post(DETECTION_ENGINE_ATTACKS_SEARCH_URL)
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
-        .send({ ids: [attackId] })
+        .send({ query: { ids: { values: [attackId] } } })
         .expect(200);
 
       expect(body.hits.total.value).toEqual(1);

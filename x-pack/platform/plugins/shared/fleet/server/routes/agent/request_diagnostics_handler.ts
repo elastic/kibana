@@ -61,7 +61,11 @@ export const bulkRequestDiagnosticsHandler: FleetRequestHandler<
     ...agentOptions,
     batchSize: request.body.batchSize,
     additionalMetrics: request.body.additional_metrics,
+    dryRun: request.body.dryRun,
   });
 
-  return response.ok({ body: { actionId: result.actionId } });
+  if (request.body.dryRun) {
+    return response.ok({ body: { count: (result as { count: number }).count } });
+  }
+  return response.ok({ body: { actionId: (result as { actionId: string }).actionId } });
 };

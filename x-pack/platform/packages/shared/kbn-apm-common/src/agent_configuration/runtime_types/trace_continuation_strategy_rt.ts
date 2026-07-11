@@ -6,9 +6,13 @@
  */
 
 import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
 export const traceContinuationStrategyRt = t.union([
   t.literal('continue'),
   t.literal('restart'),
   t.literal('restart_external'),
 ]);
+
+// zod equivalent, additive (io-ts -> zod migration, elastic/kibana#243355).
+export const traceContinuationStrategySchema = z.enum(['continue', 'restart', 'restart_external']);

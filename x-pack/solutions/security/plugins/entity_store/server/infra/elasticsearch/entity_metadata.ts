@@ -58,3 +58,55 @@ export const bulkCreateEntityMetadataDocs = async <TDoc extends object>(
 
   return { successful, failed, dropsByType: dropAggregator.summary() };
 };
+
+/**
+ * Read the most recent metadata doc for a given entity and event action.
+ *
+ * The metadata datastream is append-only, so multiple docs of the same
+ * `event.action` can exist for one `entity.id` (e.g. one per AI-summary
+ * generation). This returns the latest by `@timestamp` ("latest wins"),
+ * which is what single-entity views (the flyout) need.
+ *
+ * Two failure modes are handled differently, on purpose:
+ *   - Missing datastream (nothing written in this space yet): tolerated, returns `null`.
+ *   - No read privilege: NOT tolerated, the error propagates so a gated caller
+ *     (reading as the current user) can tell "no access" apart from "no data".
+ *
+ * This is why we do NOT set `ignore_unavailable` / `allow_no_indices`. With those
+ * on, Elasticsearch treats an index the caller can't read as just "unavailable",
+ * skips it, and returns an empty 200 instead of a 403 — hiding the authorization
+ * failure and making it look identical to "no data".
+ */
+export const getLatestEntityMetadataDoc = async <TDoc>(
+  esClient: ElasticsearchClient,
+  params: {
+    index: string;
+    entityId: string;
+    eventAction: string;
+  }
+): Promise<TDoc | null> => {
+  try {
+    const response = await esClient.search<TDoc>({
+      index: params.index,
+      size: 1,
+      sort: [{ '@timestamp': { order: 'desc' } }],
+      query: {
+        bool: {
+          filter: [
+            { term: { 'event.action': params.eventAction } },
+            { term: { 'entity.id': params.entityId } },
+          ],
+        },
+      },
+    });
+
+    return response.hits.hits[0]?._source ?? null;
+  } catch (error) {
+    // Datastream not created yet (no docs written in this space) → no summary.
+    // A 403 (no metadata read privilege) still propagates to the caller.
+    if (error?.meta?.statusCode === 404 || error?.statusCode === 404) {
+      return null;
+    }
+    throw error;
+  }
+};
