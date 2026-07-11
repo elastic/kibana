@@ -1,5 +1,5 @@
 {
-  "sha1": "1901bdb54d913413aeac61bd32dc5e463886ab2c",
+  "sha1": "7c5692151504da2b15539047d44ac603f6a2817a",
   "tests": [
     {
       "id": "a3a9f820a79c452-b8b452a1ef0f11e",
@@ -194,7 +194,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 171,
+        "line": 58,
         "column": 7
       }
     },
@@ -220,13 +220,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 179,
+        "line": 60,
         "column": 7
       }
     },
     {
-      "id": "7f96a53ae822170-db59bb93282ac5a",
-      "title": "Management pages - required privileges user without alerting_v2 access sees the interstitial on every page",
+      "id": "7f96a53ae822170-568f55e8c7b81e1",
+      "title": "Management pages - required privileges user without alerting_v2 access is redirected to the management landing on every page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -246,7 +246,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 187,
+        "line": 65,
         "column": 7
       }
     },
@@ -272,7 +272,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 195,
+        "line": 70,
         "column": 7
       }
     },
@@ -298,7 +298,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 203,
+        "line": 75,
         "column": 7
       }
     },
@@ -324,7 +324,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 211,
+        "line": 80,
         "column": 7
       }
     },
@@ -350,7 +350,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 219,
+        "line": 85,
         "column": 7
       }
     },

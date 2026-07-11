@@ -128,6 +128,15 @@ const EDIT_MODE_OPTIONS = [
   { id: 'yaml', label: YAML_VIEW_LABEL, iconType: 'editorCodeBlock' },
 ];
 
+const getQuerySandboxTitle = (isBuilderMode: boolean) =>
+  isBuilderMode
+    ? i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.builderContextualTitle', {
+        defaultMessage: 'Query sandbox: Preview results',
+      })
+    : i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.editorContextualTitle', {
+        defaultMessage: 'Query sandbox: Edit queries',
+      });
+
 const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
   if (mode === 'clone') return CLONE_TITLE;
   if (mode === 'edit') return EDIT_TITLE;
@@ -157,8 +166,18 @@ export interface ComposeDiscoverFlyoutProps {
     payload: ReturnType<typeof composeFormToCreateRequest>,
     notifications?: RuleNotificationsValue
   ) => void;
-  /** Called with id + update payload when the user submits in edit mode. */
-  onUpdateRule?: (id: string, payload: ReturnType<typeof composeFormToUpdateRequest>) => void;
+  /**
+   * Called with id + update payload when the user submits in edit mode. When the user
+   * configures simple actions, `notifications` carries the captured action draft list so
+   * the caller can create or update linked action policies; otherwise it is `undefined`.
+   * `notificationsDirty` is true only when the user changed the simple actions in this session.
+   */
+  onUpdateRule?: (
+    id: string,
+    payload: ReturnType<typeof composeFormToUpdateRequest>,
+    notifications?: RuleNotificationsValue,
+    notificationsDirty?: boolean
+  ) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
   builderType?: string;
@@ -201,6 +220,7 @@ const EMPTY_FORM_VALUES: FormValues = {
   schedule: { every: '1m', lookback: '5m' },
   query: { format: 'composed', base: '', breach: { segment: '' } },
   grouping: undefined,
+  noDataStrategy: 'last_known_status',
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -361,6 +381,10 @@ export function ComposeDiscoverFlyout({
   const yamlBaselineRef = useRef<string | null>(null);
   const yamlTextRef = useRef('');
   const hasBeenEditedRef = useRef(false);
+  const notificationsDirtyRef = useRef(false);
+  if (methods.formState.dirtyFields.notifications) {
+    notificationsDirtyRef.current = true;
+  }
 
   /*
    * recoveryType lives in uiState (not RHF), so toggling it doesn't mark
@@ -576,6 +600,7 @@ export function ComposeDiscoverFlyout({
         const alertQuery = splitResultToRuleQuery(full).query;
         setSandboxQuery(alertQuery);
         methods.setValue('query', alertQuery, { shouldDirty: true });
+        methods.setValue('noDataStrategy', 'last_known_status', { shouldDirty: true });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
         const assembled = getBreachQuery(methods.getValues('query'));
@@ -585,6 +610,7 @@ export function ComposeDiscoverFlyout({
         };
         setSandboxQuery(standalone);
         methods.setValue('query', standalone, { shouldDirty: true });
+        methods.setValue('noDataStrategy', undefined, { shouldDirty: true });
       }
       methods.setValue('kind', kind, { shouldDirty: true });
       dispatch({ type: 'KIND_CHANGE', kind });
@@ -825,7 +851,12 @@ export function ComposeDiscoverFlyout({
     if (isCreate) {
       onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType));
+      onUpdateRule(
+        ruleId,
+        composeFormToUpdateRequest(values, builderType),
+        values.notifications,
+        notificationsDirtyRef.current || Boolean(methods.formState.dirtyFields.notifications)
+      );
     }
   });
 
@@ -1284,6 +1315,7 @@ export function ComposeDiscoverFlyout({
                 helpText={sandboxHelpText}
                 headerActions={sandboxHeaderActions}
                 onApply={isBuilderMode ? undefined : handleSandboxApply}
+                title={getQuerySandboxTitle(isBuilderMode)}
               />
             )}
           </EuiFlyout>

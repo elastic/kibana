@@ -41,7 +41,6 @@ Experimental Workflows features are gated behind a separate Advanced Setting:
 ```yml
 uiSettings.overrides:
   workflows:experimentalFeatures: true
-  workflows:ui:visualEditor:enabled: true
   workflows:ui:executionGraph:enabled: true
   workflows:ui:showExecutor:enabled: true
 ```

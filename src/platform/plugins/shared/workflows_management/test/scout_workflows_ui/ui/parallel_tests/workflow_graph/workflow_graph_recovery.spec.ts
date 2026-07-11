@@ -17,7 +17,6 @@ import {
 } from '../../fixtures/workflows';
 
 const EXPERIMENTAL_FEATURES_SETTING = 'workflows:experimentalFeatures';
-const VISUAL_EDITOR_SETTING = 'workflows:ui:visualEditor:enabled';
 const WORKFLOW_NAME = 'Graph Recovery Test';
 
 test.describe(
@@ -33,7 +32,6 @@ test.describe(
     test.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.set({
         [EXPERIMENTAL_FEATURES_SETTING]: true,
-        [VISUAL_EDITOR_SETTING]: true,
       });
     });
 
@@ -43,7 +41,6 @@ test.describe(
 
     test.afterAll(async ({ scoutSpace, apiServices }) => {
       await scoutSpace.uiSettings.unset(EXPERIMENTAL_FEATURES_SETTING);
-      await scoutSpace.uiSettings.unset(VISUAL_EDITOR_SETTING);
       await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
     });
 

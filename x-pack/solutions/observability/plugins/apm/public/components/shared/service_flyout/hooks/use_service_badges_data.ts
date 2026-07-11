@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceAnomalyScoreResponse } from '../../../../../server/routes/services/get_services/get_service_anomaly_score_for_service';
+import type { ServiceAnomalyScoreResponse } from '@kbn/apm-api-shared';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { Environment } from '../../../../../common/environment_rt';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';

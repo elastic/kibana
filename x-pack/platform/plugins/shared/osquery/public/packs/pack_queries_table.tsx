@@ -239,6 +239,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
 
   return (
     <EuiBasicTable<PackQueryFormData>
+      data-test-subj="packQueriesTable"
       items={data}
       itemId={itemId}
       columns={columns}

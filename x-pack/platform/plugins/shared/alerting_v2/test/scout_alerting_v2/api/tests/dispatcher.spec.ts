@@ -131,7 +131,7 @@ const buildAlertAction = ({
 });
 
 /**
- * Polls `apiServices.alertingV2.alertActions.find(...)` until the count matches
+ * Polls `apiServices.alertingV2.alertActionsEvents.find(...)` until the count matches
  * `expected`, then waits for one more dispatcher tick to surface any extras
  * a regression might produce, and finally asserts the count is exactly
  * `expected`. Use this when a test asserts an exact number of side-effect
@@ -142,10 +142,10 @@ const expectStableCount = async (
   expected: number,
   filter: AlertActionsFilter
 ): Promise<AlertAction[]> => {
-  await apiServices.alertingV2.alertActions.waitForAtLeast(expected, filter);
+  await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(expected, filter);
   await apiServices.alertingV2.dispatcher.waitForDispatcherTick();
 
-  const actions = await apiServices.alertingV2.alertActions.find(filter);
+  const actions = await apiServices.alertingV2.alertActionsEvents.find(filter);
 
   expect(actions).toHaveLength(expected);
 
@@ -158,7 +158,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
     await apiServices.alertingV2.actionPolicies.cleanUp();
     await apiServices.alertingV2.rules.cleanUp();
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
 
     for (const ruleId of TEST_RULE_IDS) {
       await apiServices.alertingV2.rules.upsert(
@@ -235,7 +235,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
     await apiServices.alertingV2.ruleEvents.cleanUp();
     await apiServices.alertingV2.maintenanceWindows.cleanUp();
 
@@ -258,7 +258,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
     await apiServices.alertingV2.ruleEvents.cleanUp();
     await apiServices.alertingV2.rules.cleanUp();
     await apiServices.alertingV2.actionPolicies.cleanUp();
@@ -274,7 +274,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       // surface stray actions.
       await apiServices.alertingV2.dispatcher.waitForDispatcherTick({ ticks: 2 });
 
-      const actions = await apiServices.alertingV2.alertActions.find();
+      const actions = await apiServices.alertingV2.alertActionsEvents.find();
       expect(actions).toHaveLength(0);
     }
   );
@@ -372,7 +372,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       // Each dispatch produces one fire per episode and one notified per
       // action group; with `per_episode` grouping (the default for np-1) the
       // notified action carries both `action_group_id` and `episode_status`.
-      const notifiedActions = await apiServices.alertingV2.alertActions.find({
+      const notifiedActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['notified'],
       });
@@ -502,14 +502,14 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       ];
 
       await apiServices.alertingV2.ruleEvents.seed(initialEvents);
-      await apiServices.alertingV2.alertActions.waitForAtLeast(3, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(3, {
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
 
       // Capture the latest fire timestamp so we can scope the post-seed
       // assertion to events strictly newer than the initial dispatch run.
-      const initialFires = await apiServices.alertingV2.alertActions.find({
+      const initialFires = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
@@ -535,7 +535,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       await expect
         .poll(
           async () => {
-            const actions = await apiServices.alertingV2.alertActions.find({
+            const actions = await apiServices.alertingV2.alertActionsEvents.find({
               ruleId: 'rule-1',
               actionTypes: ['fire'],
             });
@@ -685,7 +685,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           timestamp: actionTs(173),
         }),
       ];
-      await apiServices.alertingV2.alertActions.seed(userActions);
+      await apiServices.alertingV2.alertActionsEvents.seed(userActions);
 
       // Wait until the dispatcher has produced the full set:
       //  - rule-001:                fire     (ack/unack net = no suppress)
@@ -698,13 +698,13 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       //  - rule-005 series-1:       suppress (deactivated)
       //  - rule-005 series-2:       fire
       // Total: 5 fire + 4 suppress = 9.
-      await apiServices.alertingV2.alertActions.waitForAtLeast(9, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(9, {
         actionTypes: ['fire', 'suppress'],
       });
 
       // Filter out the user actions seeded above (ack/unack/snooze/deactivate)
       // so the assertions only see dispatcher-generated fire/suppress actions.
-      const dispatched = await apiServices.alertingV2.alertActions.find({
+      const dispatched = await apiServices.alertingV2.alertActionsEvents.find({
         actionTypes: ['fire', 'suppress'],
       });
 
@@ -875,13 +875,13 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           timestamp: actionTs(30),
         }),
       ];
-      await apiServices.alertingV2.alertActions.seed(userActions);
+      await apiServices.alertingV2.alertActionsEvents.seed(userActions);
 
-      await apiServices.alertingV2.alertActions.waitForAtLeast(3, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(3, {
         actionTypes: ['fire'],
       });
 
-      const dispatched = await apiServices.alertingV2.alertActions.find({
+      const dispatched = await apiServices.alertingV2.alertActionsEvents.find({
         actionTypes: ['fire', 'suppress'],
       });
 
@@ -945,12 +945,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         }),
       ]);
 
-      await apiServices.alertingV2.alertActions.waitForAtLeast(3, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(3, {
         ruleId: 'rule-matcher',
         actionTypes: ['fire', 'unmatched'],
       });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-matcher',
         actionTypes: ['fire', 'unmatched'],
       });
@@ -1044,7 +1044,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         });
       }
 
-      const notifiedActions = await apiServices.alertingV2.alertActions.find({
+      const notifiedActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-groupby',
         actionTypes: ['notified'],
       });
@@ -1150,7 +1150,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
       expect(fires).toHaveLength(3);
 
-      const notifiedActions = await apiServices.alertingV2.alertActions.find({
+      const notifiedActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['notified'],
       });
@@ -1196,12 +1196,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         }),
       ]);
 
-      await apiServices.alertingV2.alertActions.waitForAtLeast(3, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(3, {
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
 
-      const initialFires = await apiServices.alertingV2.alertActions.find({
+      const initialFires = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
@@ -1223,12 +1223,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         }),
       ]);
 
-      await apiServices.alertingV2.alertActions.waitForAtLeast(4, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(4, {
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
 
-      const finalFires = await apiServices.alertingV2.alertActions.find({
+      const finalFires = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
@@ -1280,7 +1280,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
       expect(fires).toHaveLength(3);
 
-      const notifiedActions = await apiServices.alertingV2.alertActions.find({
+      const notifiedActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['notified'],
       });
@@ -1344,7 +1344,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
       expect(fires).toHaveLength(4);
 
-      const notified = await apiServices.alertingV2.alertActions.find({
+      const notified = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-groupby',
         actionTypes: ['notified'],
       });
@@ -1416,12 +1416,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         }),
       ]);
 
-      await apiServices.alertingV2.alertActions.waitForAtLeast(3, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(3, {
         ruleId: 'rule-mw',
         actionTypes: ['suppress'],
       });
 
-      const suppressActions = await apiServices.alertingV2.alertActions.find({
+      const suppressActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-mw',
         actionTypes: ['suppress'],
       });
@@ -1441,7 +1441,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
       // A fire action for `rule-mw` would mean the MW gate let an episode
       // through, defeating the purpose of the maintenance window.
-      const fires = await apiServices.alertingV2.alertActions.find({
+      const fires = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-mw',
         actionTypes: ['fire'],
       });
@@ -1534,7 +1534,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
       // Two notified records (one per action group / policy), under the
       // default per_episode grouping mode.
-      const notified = await apiServices.alertingV2.alertActions.find({
+      const notified = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['notified'],
       });
@@ -1548,7 +1548,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       );
 
       // No suppress / unmatched leakage from a multi-policy match.
-      const otherActions = await apiServices.alertingV2.alertActions.find({
+      const otherActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['suppress', 'unmatched'],
       });
@@ -1577,7 +1577,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       // regression that re-reads stale events a chance to surface.
       await apiServices.alertingV2.dispatcher.waitForDispatcherTick({ ticks: 2 });
 
-      const actions = await apiServices.alertingV2.alertActions.find({ ruleId: 'rule-1' });
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({ ruleId: 'rule-1' });
       expect(actions).toHaveLength(0);
     }
   );
@@ -1615,7 +1615,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         action_type: 'unmatched',
       });
 
-      const fires = await apiServices.alertingV2.alertActions.find({
+      const fires = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
@@ -1655,7 +1655,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         reason: `dispatched by policy ${MISSING_WORKFLOW_POLICY_ID}`,
       });
 
-      const notified = await apiServices.alertingV2.alertActions.find({
+      const notified = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['notified'],
       });
@@ -1713,7 +1713,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       ]);
 
       // StoreActionsStep writes a throttled-policy suppress record.
-      await apiServices.alertingV2.alertActions.waitForAtLeast(1, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
         ruleId: 'rule-1',
         actionTypes: ['suppress'],
       });
@@ -1725,7 +1725,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
       expect(stableFires).toHaveLength(1);
 
-      const suppress = await apiServices.alertingV2.alertActions.find({
+      const suppress = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['suppress'],
       });
@@ -1771,7 +1771,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
 
       // No fire / suppress leaked through.
-      const otherActions = await apiServices.alertingV2.alertActions.find({
+      const otherActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-matcher',
         actionTypes: ['fire', 'suppress'],
       });
