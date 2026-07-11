@@ -9,7 +9,6 @@
 
 import YAML from 'yaml';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { ByteSizeValue } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -21,6 +20,8 @@ import { mockContextDependencies } from '../server/execution_functions/__mock__/
 import { createMockWorkflowExecutionEngineConfig } from '../server/execution_functions/execution_functions_test_utils';
 import { runWorkflow } from '../server/execution_functions/run_workflow';
 import { workflowsExecutionEngineMock } from '../server/mocks';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { WorkflowsExecutionEngineConfig } from '../server/config';
 
 // Mock the repository classes so setupDependencies uses our mocks
 jest.mock('../server/repositories/workflow_execution_repository');
@@ -51,7 +52,8 @@ export class WorkflowRunFixture {
     getUnsecuredActionsClient: jest.fn().mockReturnValue(this.unsecuredActionsClientMock),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(this.scopedActionsClientMock),
   } as unknown as ActionsPluginStartContract);
-  public readonly configMock = createMockWorkflowExecutionEngineConfig();
+  public readonly configMock: WorkflowsExecutionEngineConfig =
+    createMockWorkflowExecutionEngineConfig();
   public readonly fakeKibanaRequest = {} as KibanaRequest;
   public readonly workflowExecutionRepositoryMock = new WorkflowExecutionRepositoryMock();
   public readonly stepExecutionRepositoryMock = new StepExecutionRepositoryMock();

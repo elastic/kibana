@@ -35,6 +35,7 @@ export class StreamsApp {
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
   public readonly concatLiteralInput;
+  public readonly createStreamButton;
   public readonly createQueryStreamButton;
   public readonly childStreamTypeSelector;
   public readonly queryStreamFlyout;
@@ -86,6 +87,7 @@ export class StreamsApp {
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
     this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
+    this.createStreamButton = this.page.getByTestId('streamsAppCreateStreamButton');
     this.createQueryStreamButton = this.page.getByTestId('streamsAppCreateQueryStreamButton');
     this.childStreamTypeSelector = this.page.getByTestId('streamsAppChildStreamTypeSelector');
     this.queryStreamFlyout = this.page.getByTestId('streamsAppQueryStreamFlyout');
@@ -1219,8 +1221,13 @@ export class StreamsApp {
 
   async selectAllAttachmentsInFlyout() {
     const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
-    // Click the header checkbox to select all
     await flyoutTable.locator('thead input[type="checkbox"]').click();
+  }
+
+  async selectAttachmentInFlyout(attachmentTitle: string) {
+    const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
+    const row = flyoutTable.getByRole('row', { name: attachmentTitle });
+    await row.locator('input[type="checkbox"]').click();
   }
 
   async clickAddToStreamButton() {
@@ -1325,7 +1332,17 @@ export class StreamsApp {
     await this.concatLiteralInput.fill(value);
   }
 
+  async openCreateStreamPopover() {
+    await this.createStreamButton.click();
+  }
+
+  async openStreamsSettings() {
+    await this.page.getByTestId('app-menu-overflow-button').click();
+    await this.page.getByTestId('streamsAppSettingsButton').click();
+  }
+
   async clickCreateQueryStreamButton() {
+    await this.openCreateStreamPopover();
     await this.createQueryStreamButton.click();
   }
 

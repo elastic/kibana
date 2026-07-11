@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { buildFlyoutContent } from './build_flyout_content';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import { USER_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 
 jest.mock('../components/table_field_name_cell', () => ({
   getEcsField: (field: string) => {
@@ -31,6 +32,14 @@ jest.mock('../../entity/host/main', () => ({
   Host: ({ hostName, hit }: { hostName: string; hit?: { flattened: Record<string, unknown> } }) => (
     <div data-test-subj="mockHost" data-has-hit={hit ? 'true' : 'false'}>
       {hostName}
+    </div>
+  ),
+}));
+
+jest.mock('../../entity/user/main', () => ({
+  User: ({ userName, hit }: { userName: string; hit?: { flattened: Record<string, unknown> } }) => (
+    <div data-test-subj="mockUser" data-has-hit={hit ? 'true' : 'false'}>
+      {userName}
     </div>
   ),
 }));
@@ -87,6 +96,30 @@ describe('buildFlyoutContent', () => {
 
     const { findByTestId } = render(result!);
     expect(await findByTestId('mockHost')).toHaveAttribute('data-has-hit', 'true');
+  });
+
+  it('should return a User element for a user.name field', async () => {
+    const result = buildFlyoutContent(USER_NAME_FIELD_NAME, 'my-user');
+
+    expect(result).not.toBeNull();
+
+    const { findByTestId } = render(result!);
+    expect(await findByTestId('mockUser')).toHaveTextContent('my-user');
+  });
+
+  it('should pass hit to User element when provided', async () => {
+    const mockHit = {
+      id: 'test-doc-id',
+      raw: { _id: 'test-doc-id', _index: 'test-index' },
+      flattened: { 'user.name': 'my-user' },
+    } as unknown as Parameters<typeof buildFlyoutContent>[2];
+
+    const result = buildFlyoutContent(USER_NAME_FIELD_NAME, 'my-user', mockHit);
+
+    expect(result).not.toBeNull();
+
+    const { findByTestId } = render(result!);
+    expect(await findByTestId('mockUser')).toHaveAttribute('data-has-hit', 'true');
   });
 
   it('should return null for an unknown field', () => {

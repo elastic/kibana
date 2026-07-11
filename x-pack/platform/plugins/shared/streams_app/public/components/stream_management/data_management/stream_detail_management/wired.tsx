@@ -190,7 +190,6 @@ export function WiredStreamDetailManagement({
               <LifecycleTabLabel
                 definition={definition}
                 showActions={tab === 'lifecycle'}
-                indexTemplateName={`${definition.stream.name}@stream`}
                 notifications={notifications}
                 share={share}
               />

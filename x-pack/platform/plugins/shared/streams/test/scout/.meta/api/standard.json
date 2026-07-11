@@ -1,5 +1,5 @@
 {
-  "sha1": "f9e3ec5c67cab9343102a891e9d7b802336dc00b",
+  "sha1": "b7c9a4697a32c41d977c7141c17a9ad92747f043",
   "tests": [
     {
       "id": "4aaafd2a7000640-70ec3e6d9549722",
@@ -148,48 +148,6 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
         "line": 67,
-        "column": 12
-      }
-    },
-    {
-      "id": "e0e7435b0fe0092-094ac08f869a28e",
-      "title": "Significant Events discovery pipeline API POST _execute (trigger) returns an executionId",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/significant_events/significant_event_discovery_run.spec.ts",
-        "line": 30,
-        "column": 12
-      }
-    },
-    {
-      "id": "e0e7435b0fe0092-b38b60bd6807012",
-      "title": "Significant Events discovery pipeline API GET _status returns a valid status after trigger",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/significant_events/significant_event_discovery_run.spec.ts",
-        "line": 47,
-        "column": 12
-      }
-    },
-    {
-      "id": "e0e7435b0fe0092-8f29a28b4278864",
-      "title": "Significant Events discovery pipeline API POST _execute (cancel) returns executionId or null",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/significant_events/significant_event_discovery_run.spec.ts",
-        "line": 72,
         "column": 12
       }
     },

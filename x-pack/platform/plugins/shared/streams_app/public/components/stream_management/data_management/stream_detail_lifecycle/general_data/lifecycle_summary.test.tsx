@@ -236,6 +236,28 @@ describe('LifecycleSummary', () => {
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
     });
 
+    it('highlights only the delete phase while the standalone delete phase flyout is open', () => {
+      const definition = createDslDefinition('30d');
+
+      renderWithSync(
+        <LifecycleSummary definition={definition} isMetricsStream isEditingDeletePhase />
+      );
+
+      expect(screen.getByTestId('lifecyclePhase-delete-button')).toHaveStyle(
+        `box-shadow: inset 0 0 0 2px #000000`
+      );
+    });
+
+    it('does not highlight the delete phase when the standalone flyout is not open', () => {
+      const definition = createDslDefinition('30d');
+
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
+
+      expect(screen.getByTestId('lifecyclePhase-delete-button')).not.toHaveStyle(
+        `box-shadow: inset 0 0 0 2px #000000`
+      );
+    });
+
     it('should show "Add downsample step" button and open the DSL flyout', async () => {
       const definition = createDslDefinition('60d', [{ after: '10d', fixed_interval: '1h' }]);
 

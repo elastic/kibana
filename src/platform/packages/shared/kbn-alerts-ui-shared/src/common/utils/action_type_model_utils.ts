@@ -9,7 +9,7 @@
 
 import { lazy, useMemo } from 'react';
 import type { ActionType } from '@kbn/actions-types';
-import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
@@ -56,6 +56,34 @@ export async function fetchConnectorSpec(
 }
 
 /**
+ * Resolves the documentation URL for a spec-based connector.
+ *
+ * The connectors base always comes from the doc-links service, so links stay correct
+ * if the docs structure changes:
+ * - `docsUrl === ''` → the connector has no dedicated page; link to the top-level connectors page.
+ * - `docsUrl` set → used as-is (e.g. a specific page or a third-party site).
+ * - `docsUrl` absent → derive from the connector id (strip leading '.', convert
+ *   underscores/camelCase to kebab-case, append '-action-type').
+ */
+function getDocsUrlFromSpec(spec: ConnectorSpecResponse, docLinks: DocLinksStart): string {
+  const { docsUrl, id } = spec.metadata;
+  const connectorsDocs = docLinks.links.alerting.connectors;
+
+  if (docsUrl === '') {
+    return connectorsDocs;
+  }
+  if (docsUrl) {
+    return docsUrl;
+  }
+  const slug = id
+    .replace(/^\./, '')
+    .replace(/_/g, '-')
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase();
+  return `${connectorsDocs}/${slug}-action-type`;
+}
+
+/**
  * Resolves the icon for a connector based on the spec metadata.
  */
 function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
@@ -79,6 +107,7 @@ function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
  */
 export function transformSpecToActionTypeModel(
   spec: ConnectorSpecResponse,
+  docLinks: DocLinksStart,
   uiSettings?: IUiSettingsClient
 ): ActionTypeModel {
   return {
@@ -88,6 +117,7 @@ export function transformSpecToActionTypeModel(
     iconClass: getIconFromSpec(spec),
     subtype: undefined,
     isExperimental: spec.metadata.isTechnicalPreview ?? false,
+    docsUrl: getDocsUrlFromSpec(spec, docLinks),
     getHideInUi: (_actionTypes: ActionType[]) =>
       shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
     actionConnectorFields: lazy(async () => {

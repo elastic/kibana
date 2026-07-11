@@ -11,7 +11,11 @@ import { useTemplateFormSync } from './use_template_form_sync';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 
 const mockSetFieldValue = jest.fn();
-const mockUseFormContext = jest.fn(() => ({ setFieldValue: mockSetFieldValue }));
+const mockUpdateFieldValues = jest.fn();
+const mockUseFormContext = jest.fn(() => ({
+  setFieldValue: mockSetFieldValue,
+  updateFieldValues: mockUpdateFieldValues,
+}));
 const mockUseFormData = jest.fn();
 
 jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => ({
@@ -28,6 +32,13 @@ const mockUseGetFieldDefinitions = jest.fn();
 jest.mock('../field_library/hooks/use_get_field_definitions', () => ({
   useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
 }));
+
+const mockUseGetSupportedActionConnectors = jest.fn();
+jest.mock('../../containers/configure/use_get_supported_action_connectors', () => ({
+  useGetSupportedActionConnectors: () => mockUseGetSupportedActionConnectors(),
+}));
+
+const jiraConnector = { id: 'jira-1', actionTypeId: '.jira', name: 'My Jira' };
 
 const mockTemplate = {
   templateId: 'template-1',
@@ -98,6 +109,7 @@ describe('useTemplateFormSync', () => {
       data: { fieldDefinitions: [] },
       isLoading: false,
     });
+    mockUseGetSupportedActionConnectors.mockReturnValue({ data: [], isLoading: false });
   });
 
   it('returns the template and loading state', () => {
@@ -603,6 +615,291 @@ describe('useTemplateFormSync', () => {
       expect(innerForm.reset).toHaveBeenCalledWith({
         [CASE_EXTENDED_FIELDS]: { overridden_name_as_keyword: 'lib_default' },
       });
+    });
+  });
+
+  describe('connector', () => {
+    const templateWithJiraConnector = {
+      templateId: 'template-connector',
+      templateVersion: 1,
+      definition: {
+        name: 'Connector Template',
+        fields: [],
+        connector: {
+          type: '.jira',
+          id: 'jira-1',
+          fields: { issueType: '10001', priority: 'High', parent: null },
+        },
+      },
+    };
+
+    it('pre-selects the connector and pre-fills its fields when the id resolves', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-connector' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithJiraConnector, isLoading: false });
+      mockUseGetSupportedActionConnectors.mockReturnValue({
+        data: [jiraConnector],
+        isLoading: false,
+      });
+
+      renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      // Applied via updateFieldValues so the nested connector inputs (which remount on connector
+      // change and initialize from the form default) pick up the template's values.
+      expect(mockUpdateFieldValues).toHaveBeenCalledWith(
+        {
+          connectorId: 'jira-1',
+          fields: {
+            issueType: '10001',
+            priority: 'High',
+            parent: null,
+          },
+        },
+        // deserializer skipped: values are already in form shape (the deserializer expects a
+        // `connector` object and would throw on `connector.id`).
+        { runDeserializer: false }
+      );
+    });
+
+    it('falls back to the .none connector when the connector id no longer exists', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-connector' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithJiraConnector, isLoading: false });
+      // No connectors available -> id cannot be resolved.
+      mockUseGetSupportedActionConnectors.mockReturnValue({ data: [], isLoading: false });
+
+      renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      // Reset via updateFieldValues so both the live fields and the form default-value object are
+      // cleared (a plain setFieldValue would leave a previously-applied connector in the default).
+      expect(mockUpdateFieldValues).toHaveBeenCalledWith(
+        { connectorId: 'none', fields: null },
+        { runDeserializer: false }
+      );
+    });
+
+    it('falls back to the .none connector when the id resolves but the type differs', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-connector' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithJiraConnector, isLoading: false });
+      // Same id, different connector type (e.g. deleted and the id re-used by another connector).
+      mockUseGetSupportedActionConnectors.mockReturnValue({
+        data: [{ id: 'jira-1', actionTypeId: '.servicenow', name: 'SN' }],
+        isLoading: false,
+      });
+
+      renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      expect(mockUpdateFieldValues).toHaveBeenCalledWith(
+        { connectorId: 'none', fields: null },
+        { runDeserializer: false }
+      );
+    });
+
+    it('does not apply the connector until supported connectors finish loading', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-connector' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithJiraConnector, isLoading: false });
+      mockUseGetSupportedActionConnectors.mockReturnValue({ data: undefined, isLoading: true });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      expect(mockUpdateFieldValues).not.toHaveBeenCalled();
+
+      // Once connectors load, the connector is applied.
+      mockUseGetSupportedActionConnectors.mockReturnValue({
+        data: [jiraConnector],
+        isLoading: false,
+      });
+      rerender();
+
+      expect(mockUpdateFieldValues).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'jira-1' }),
+        { runDeserializer: false }
+      );
+    });
+
+    it('reverts the connector to .none when a connector-bearing template is cleared', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-connector' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithJiraConnector, isLoading: false });
+      mockUseGetSupportedActionConnectors.mockReturnValue({
+        data: [jiraConnector],
+        isLoading: false,
+      });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      mockSetFieldValue.mockClear();
+      mockUpdateFieldValues.mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: '' }]);
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+
+      rerender();
+
+      expect(mockUpdateFieldValues).toHaveBeenCalledWith(
+        { connectorId: 'none', fields: null },
+        { runDeserializer: false }
+      );
+    });
+
+    it('reverts the connector to .none when switching to a template that declares no connector', () => {
+      // Direct A -> B switch: templateId goes straight from A's id to B's id (never through '').
+      mockUseFormData.mockReturnValue([{ templateId: 'template-connector' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithJiraConnector, isLoading: false });
+      mockUseGetSupportedActionConnectors.mockReturnValue({
+        data: [jiraConnector],
+        isLoading: false,
+      });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      mockSetFieldValue.mockClear();
+      mockUpdateFieldValues.mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: 'template-plain' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-plain',
+          templateVersion: 1,
+          definition: { name: 'B', fields: [] },
+        },
+        isLoading: false,
+      });
+
+      rerender();
+
+      expect(mockUpdateFieldValues).toHaveBeenCalledWith(
+        { connectorId: 'none', fields: null },
+        { runDeserializer: false }
+      );
+    });
+
+    it('does not touch the connector when a cleared template never set one', () => {
+      // mockTemplate has no connector block.
+      mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
+      mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      mockSetFieldValue.mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: '' }]);
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+
+      rerender();
+
+      expect(mockSetFieldValue).not.toHaveBeenCalledWith('connectorId', expect.anything());
+      expect(mockSetFieldValue).not.toHaveBeenCalledWith('fields', expect.anything());
+    });
+  });
+
+  describe('settings', () => {
+    const templateWithSettings = {
+      templateId: 'template-settings',
+      templateVersion: 1,
+      definition: {
+        name: 'Settings Template',
+        fields: [],
+        settings: { syncAlerts: false, extractObservables: true },
+      },
+    };
+
+    it('applies syncAlerts and extractObservables from the template', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-settings' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithSettings, isLoading: false });
+
+      renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', true);
+    });
+
+    it('resets settings keys the template omits to their defaults (a declared block is authoritative)', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-settings' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-settings',
+          templateVersion: 1,
+          definition: { name: 'S', fields: [], settings: { syncAlerts: false } },
+        },
+        isLoading: false,
+      });
+
+      renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      // extractObservables is omitted by the template, so it resets to its default (not inherited).
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+    });
+
+    it('reverts settings to off (the template default) when a settings-bearing template is cleared', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-settings' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithSettings, isLoading: false });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      mockSetFieldValue.mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: '' }]);
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+
+      rerender();
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+    });
+
+    it('reverts settings to off when switching to a template that declares no settings', () => {
+      // Direct A -> B switch: templateId goes straight from A's id to B's id (never through '').
+      mockUseFormData.mockReturnValue([{ templateId: 'template-settings' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithSettings, isLoading: false });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      mockSetFieldValue.mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: 'template-plain' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-plain',
+          templateVersion: 1,
+          definition: { name: 'B', fields: [] },
+        },
+        isLoading: false,
+      });
+
+      rerender();
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+    });
+
+    it('resets undeclared settings keys when switching to a template with a partial settings block', () => {
+      // A declares both `true`; B declares only `syncAlerts`. B's omitted `extractObservables` must
+      // reset to its default rather than inheriting A's `true`.
+      mockUseFormData.mockReturnValue([{ templateId: 'template-a' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-a',
+          templateVersion: 1,
+          definition: {
+            name: 'A',
+            fields: [],
+            settings: { syncAlerts: true, extractObservables: true },
+          },
+        },
+        isLoading: false,
+      });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      mockSetFieldValue.mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: 'template-b' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-b',
+          templateVersion: 1,
+          definition: { name: 'B', fields: [], settings: { syncAlerts: false } },
+        },
+        isLoading: false,
+      });
+
+      rerender();
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
     });
   });
 });
