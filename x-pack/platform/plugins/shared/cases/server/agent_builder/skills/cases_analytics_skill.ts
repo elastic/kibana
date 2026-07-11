@@ -19,6 +19,12 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
  * don't exist otherwise). All queries run as the requesting user, so
  * Elasticsearch implicit-privileges DLS scopes results to the owners + spaces
  * the user can already read.
+ *
+ * NOTE ON FIELD PATHS: the index is named `.cases` (plural), but its document
+ * fields live under the singular `case.*` object namespace (see
+ * `mappings/case.ts` / `writer/case_doc_builder.ts`). The mapping is
+ * `dynamic: 'strict'`, so recipes must use `case.<field>` (e.g. `case.id`,
+ * `case.status`) — not `cases.<field>`.
  */
 export const casesAnalyticsSkill = defineSkillType({
   id: 'cases-analytics',
@@ -43,25 +49,29 @@ Use it for **aggregate / reporting / metric / dashboard** questions about cases:
 
 Do **not** use it for single-case operations — creating, reading, updating, commenting, assigning, or fetching one case's details. Route those to the **cases-management** skill (\`${platformCoreTools.cases}\` and the write tools).
 
+## Field paths: index \`.cases\`, fields \`case.*\`
+
+The indices are named \`.cases\` / \`.cases-activity\` / \`.cases-attachments\` (plural), but document fields live under the **singular** \`case.*\` namespace, and the mapping is \`dynamic: 'strict'\`. Always write \`case.<field>\` (e.g. \`case.id\`, \`case.status\`) — a \`cases.<field>\` path references an undefined column and the query fails. Keep the plural form only for index names (\`FROM .cases\`), the tool id (\`${platformCoreTools.cases}\`), and the config key.
+
 ## Indices & join model
 
 | Index | Grain | Key fields |
 |-------|-------|-----------|
-| \`.cases\` | one doc per case (lookup-mode) | \`cases.id\`, \`cases.status\`, \`cases.severity\`, \`cases.owner\`, \`cases.created_at\`, \`cases.closed_at\`, \`cases.in_progress_at\`, \`cases.time_to_acknowledge\`, \`cases.time_to_investigate\`, \`cases.time_to_resolve\`, \`cases.duration\`, \`cases.total_alerts\`, \`cases.total_comments\`, \`cases.tags\`, \`cases.category\`, \`cases.assignees.uid\`, \`cases.observables.<type>\`, \`cases.extended_fields\` |
-| \`.cases-activity\` | one doc per user action | \`cases.id\`, \`action.type\`, \`action.verb\`, \`action.status_new\`, \`action.severity_new\`, \`action.assignees_changed\`, \`action.tags_changed\`, \`action.connector_id_new\`, \`action.attachment_reference_id\`, \`actor.*\`, \`@timestamp\` |
-| \`.cases-attachments\` | one doc per comment/attachment | \`cases.id\`, \`attachment.type\`, \`attachment.comment\`, \`attachment.alert.rule.id\`, \`attachment.alert.rule.name\`, \`attachment.alert.indices\`, \`attachment.event.indices\`, \`attachment.attachment_id\`, \`created_at\` |
+| \`.cases\` | one doc per case (lookup-mode) | \`case.id\`, \`case.status\`, \`case.severity\`, \`case.owner\`, \`case.created_at\`, \`case.closed_at\`, \`case.in_progress_at\`, \`case.time_to_acknowledge\`, \`case.time_to_investigate\`, \`case.time_to_resolve\`, \`case.duration\`, \`case.total_alerts\`, \`case.total_comments\`, \`case.tags\`, \`case.category\`, \`case.assignees.uid\`, \`case.observables.<type>\`, \`case.extended_fields\` |
+| \`.cases-activity\` | one doc per user action | \`case.id\`, \`action.type\`, \`action.verb\`, \`action.status_new\`, \`action.severity_new\`, \`action.assignees_changed\`, \`action.tags_changed\`, \`action.connector_id_new\`, \`action.attachment_reference_id\`, \`actor.*\`, \`@timestamp\` |
+| \`.cases-attachments\` | one doc per comment/attachment | \`case.id\`, \`attachment.type\`, \`attachment.comment\`, \`attachment.alert.rule.id\`, \`attachment.alert.rule.name\`, \`attachment.alert.indices\`, \`attachment.event.indices\`, \`attachment.attachment_id\`, \`created_at\` |
 
-All three carry \`cases.id\`, \`owner\`, and \`space_id\`. \`.cases\` is lookup-mode, so the fact indices enrich with current case fields via:
+All three carry \`case.id\`, \`owner\`, and \`space_id\`. \`.cases\` is lookup-mode, so the fact indices enrich with current case fields via:
 
 \`\`\`esql
-FROM .cases-activity | LOOKUP JOIN .cases ON cases.id | KEEP @timestamp, cases.id, cases.status, cases.severity
+FROM .cases-activity | LOOKUP JOIN .cases ON case.id | KEEP @timestamp, case.id, case.status, case.severity
 \`\`\`
 
-Always \`KEEP\` the concrete columns you need after a \`LOOKUP JOIN\` — don't let the raw \`cases.extended_fields\` (flattened) column flow through a joined result; read custom fields with \`FIELD_EXTRACT\` instead (see "Custom fields").
+Always \`KEEP\` the concrete columns you need after a \`LOOKUP JOIN\` — don't let the raw \`case.extended_fields\` (flattened) column flow through a joined result; read custom fields with \`FIELD_EXTRACT\` instead (see "Custom fields").
 
 Status values: \`open\`, \`in-progress\`, \`closed\`. Severity: \`low\`, \`medium\`, \`high\`, \`critical\` (stored as readable strings, not enums).
 
-**Field units.** \`cases.duration\`, \`cases.time_to_acknowledge\`, \`cases.time_to_investigate\`, \`cases.time_to_resolve\` are integer **seconds** (NOT milliseconds), and are \`null\` until the case reaches the relevant state (in-progress / closed). Convert for humans in the answer — \`/ 3600\` for hours, \`/ 86400\` for days — and always label the unit. Timestamps (\`cases.created_at\`, \`cases.closed_at\`, \`cases.in_progress_at\`, \`@timestamp\`) are dates; \`cases.total_alerts\` / \`total_comments\` / \`total_events\` / \`total_observables\` are integer counts.
+**Field units.** \`case.duration\`, \`case.time_to_acknowledge\`, \`case.time_to_investigate\`, \`case.time_to_resolve\` are integer **seconds** (NOT milliseconds), and are \`null\` until the case reaches the relevant state (in-progress / closed). Convert for humans in the answer — \`/ 3600\` for hours, \`/ 86400\` for days — and always label the unit. Timestamps (\`case.created_at\`, \`case.closed_at\`, \`case.in_progress_at\`, \`@timestamp\`) are dates; \`case.total_alerts\` / \`total_comments\` / \`total_events\` / \`total_observables\` are integer counts.
 
 ## Boundaries & authorization
 
@@ -79,29 +89,29 @@ cross-check against the source of truth with \`${platformCoreTools.cases}\` (get
 
 ## KQL / the Case Analytics data view (self-service + fallback)
 
-A managed, per-space **\`Case Analytics\` data view** spans all three indices and publishes each custom field as a typed top-level runtime field \`cases.<name>_as_<type>\` (e.g. \`cases.effort_as_integer\`). Use it:
+A managed, per-space **\`Case Analytics\` data view** spans all three indices and publishes each custom field as a typed top-level runtime field \`case.<name>_as_<type>\` (e.g. \`case.effort_as_integer\`). Use it:
 
-- **Hand off for self-service** when a user prefers Discover/Lens with KQL — author the KQL for them and name the fields, e.g. \`cases.status: "open" and cases.effort_as_integer > 3\`.
+- **Hand off for self-service** when a user prefers Discover/Lens with KQL — author the KQL for them and name the fields, e.g. \`case.status: "open" and case.effort_as_integer > 3\`.
 - **As the custom-field fallback** when \`FIELD_EXTRACT\` returns nothing or you need guaranteed typed results (the runtime field reads the same flattened values via doc-values).
 
 Boundary: your ES|QL tools (\`${platformCoreTools.generateEsql}\`, \`${platformCoreTools.executeEsql}\`, \`${platformCoreTools.createVisualization}\`) query the indices directly and do NOT read the data view's runtime fields — so custom-field analytics in ES|QL goes through \`FIELD_EXTRACT\` (see "Custom fields"), and the \`Case Analytics\` data view is the self-service / fallback surface.
 
 ## Custom fields (extended / template fields)
 
-Custom fields are exposed two ways on \`.cases\` — **always use \`cases.extended_fields\`, never \`cases.customFields\`, for analytics:**
-- \`cases.customFields\` — a **nested** array of \`{ key, type, value }\`. It is **not directly queryable in ES|QL**; don't try to aggregate it (that path dead-ends — don't waste turns on it).
-- \`cases.extended_fields\` — a **flattened** field keyed as \`<name>_as_<type>\` (e.g. \`effort_as_integer\`, \`summary_as_keyword\`, \`reviewedAt_as_date\`). This is the queryable, typed path — always prefer it. (The suffix is the template field type; the value is stored as a string in the flattened field.)
+Custom fields are exposed two ways on \`.cases\` — **always use \`case.extended_fields\`, never \`case.customFields\`, for analytics:**
+- \`case.customFields\` — a **nested** array of \`{ key, type, value }\`. It is **not directly queryable in ES|QL**; don't try to aggregate it (that path dead-ends — don't waste turns on it).
+- \`case.extended_fields\` — a **flattened** field keyed as \`<name>_as_<type>\` (e.g. \`effort_as_integer\`, \`summary_as_keyword\`, \`reviewedAt_as_date\`). This is the queryable, typed path — always prefer it. (The suffix is the template field type; the value is stored as a string in the flattened field.)
 
 Extract with \`FIELD_EXTRACT\`, cast to the type you need, then aggregate:
 
 \`\`\`esql
 FROM .cases
-| WHERE cases.status != "closed"
-| EVAL effort = FIELD_EXTRACT(cases.extended_fields, "effort_as_integer")
+| WHERE case.status != "closed"
+| EVAL effort = FIELD_EXTRACT(case.extended_fields, "effort_as_integer")
 | STATS avg_effort = AVG(effort::double), with_value = COUNT(effort), total = COUNT(*)
 \`\`\`
 
-\`FIELD_EXTRACT\` is a **Technical Preview** function. It reads numeric and keyword sub-keys from the flattened \`cases.extended_fields\`, but blank/unset custom fields are common, so **always report how many docs had the field populated** (\`COUNT(<extracted>)\`) alongside the metric. When precision matters or FIELD_EXTRACT returns nothing, fall back to the \`Case Analytics\` data view (see "KQL / the Case Analytics data view"), whose typed runtime field \`cases.<name>_as_<type>\` reads the same values.
+\`FIELD_EXTRACT\` is a **Technical Preview** function. It reads numeric and keyword sub-keys from the flattened \`case.extended_fields\`, but blank/unset custom fields are common, so **always report how many docs had the field populated** (\`COUNT(<extracted>)\`) alongside the metric. When precision matters or FIELD_EXTRACT returns nothing, fall back to the \`Case Analytics\` data view (see "KQL / the Case Analytics data view"), whose typed runtime field \`case.<name>_as_<type>\` reads the same values.
 
 ## Building visualizations
 
@@ -113,9 +123,9 @@ To assemble multiple panels into a dashboard, use the **dashboard-management** s
 
 ## Query hygiene
 
-- Always time-bound trend queries (e.g. \`WHERE cases.created_at >= NOW() - 30 days\`).
+- Always time-bound trend queries (e.g. \`WHERE case.created_at >= NOW() - 30 days\`).
 - \`STATS ... BY\` before returning raw rows; use \`LIMIT\` to keep output bounded.
-- SLA/timing fields (\`cases.time_to_*\`, \`cases.duration\`) are integer **seconds** — aggregate with \`AVG\`/\`MEDIAN\`/percentiles, then convert in the answer (\`/ 3600\` hours, \`/ 86400\` days) and label the unit. Never report them as milliseconds.
+- SLA/timing fields (\`case.time_to_*\`, \`case.duration\`) are integer **seconds** — aggregate with \`AVG\`/\`MEDIAN\`/percentiles, then convert in the answer (\`/ 3600\` hours, \`/ 86400\` days) and label the unit. Never report them as milliseconds.
 - See the referenced query templates for ready-made patterns.
 `,
 
@@ -128,24 +138,24 @@ To assemble multiple panels into a dashboard, use the **dashboard-management** s
 ## Case volume by severity (last 30 days)
 \`\`\`esql
 FROM .cases
-| WHERE cases.created_at >= NOW() - 30 days
-| STATS cases = COUNT(*) BY cases.severity
-| SORT cases DESC
+| WHERE case.created_at >= NOW() - 30 days
+| STATS case_count = COUNT(*) BY case.severity
+| SORT case_count DESC
 \`\`\`
 
 ## Open cases opened per week (trend, last 90 days)
 \`\`\`esql
 FROM .cases
-| WHERE cases.created_at >= NOW() - 90 days
-| STATS opened = COUNT(*) BY week = BUCKET(cases.created_at, 1 week)
+| WHERE case.created_at >= NOW() - 90 days
+| STATS opened = COUNT(*) BY week = BUCKET(case.created_at, 1 week)
 | SORT week ASC
 \`\`\`
 
 ## Closure rate by solution
 \`\`\`esql
 FROM .cases
-| EVAL is_closed = CASE(cases.status == "closed", 1, 0)
-| STATS total = COUNT(*), closed = SUM(is_closed) BY cases.owner
+| EVAL is_closed = CASE(case.status == "closed", 1, 0)
+| STATS total = COUNT(*), closed = SUM(is_closed) BY case.owner
 | EVAL closure_rate = ROUND(closed::double / total, 3)
 | SORT total DESC
 \`\`\`
@@ -153,22 +163,22 @@ FROM .cases
 ## MTTR (mean time to resolve) by severity
 \`\`\`esql
 FROM .cases
-| WHERE cases.status == "closed" AND cases.time_to_resolve IS NOT NULL
-| STATS mttr_seconds = AVG(cases.time_to_resolve), p90_seconds = PERCENTILE(cases.time_to_resolve, 90) BY cases.severity
+| WHERE case.status == "closed" AND case.time_to_resolve IS NOT NULL
+| STATS mttr_seconds = AVG(case.time_to_resolve), p90_seconds = PERCENTILE(case.time_to_resolve, 90) BY case.severity
 | EVAL mttr_hours = ROUND(mttr_seconds / 3600, 1)
 | SORT mttr_seconds DESC
 \`\`\`
-\`cases.time_to_resolve\` (like \`time_to_acknowledge\` / \`time_to_investigate\` / \`duration\`) is in **seconds** — the \`EVAL\` converts MTTR to hours for readability.
+\`case.time_to_resolve\` (like \`case.time_to_acknowledge\` / \`case.time_to_investigate\` / \`case.duration\`) is in **seconds** — the \`EVAL\` converts MTTR to hours for readability.
 
 ## Open backlog by assignee
 \`\`\`esql
 FROM .cases
-| WHERE cases.status != "closed"
-| MV_EXPAND cases.assignees.uid
-| STATS open_cases = COUNT(*) BY cases.assignees.uid
+| WHERE case.status != "closed"
+| MV_EXPAND case.assignees.uid
+| STATS open_cases = COUNT(*) BY case.assignees.uid
 | SORT open_cases DESC
 \`\`\`
-Note: \`cases.assignees.uid\` is a profile UID, and **no tool resolves it to a display name today** — the cases tools return assignees as UIDs. Present the UID and say the name isn't available rather than guessing. (The \`cases.created_by\` / \`updated_by\` / \`closed_by\` fields, by contrast, do carry \`username\` / \`full_name\` / \`email\`.)`,
+Note: \`case.assignees.uid\` is a profile UID, and **no tool resolves it to a display name today** — the cases tools return assignees as UIDs. Present the UID and say the name isn't available rather than guessing. (The \`case.created_by\` / \`case.updated_by\` / \`case.closed_by\` fields, by contrast, do carry \`username\` / \`full_name\` / \`email\`.)`,
     },
     {
       relativePath: './analytics',
@@ -180,29 +190,29 @@ The \`.cases-activity\` stream is append-only (one row per user action). Time-in
 ## Status transitions for a case, in order
 \`\`\`esql
 FROM .cases-activity
-| WHERE action.type == "status" AND cases.id == "<CASE_ID>"
+| WHERE action.type == "status" AND case.id == "<CASE_ID>"
 | KEEP @timestamp, action.status_new
 | SORT @timestamp ASC
 \`\`\`
-Compute time-in-status by differencing consecutive \`@timestamp\` values (successive rows are the enter-times of each status). "Time to escalate" at the case level is available directly on \`.cases\` as \`cases.in_progress_at - cases.created_at\`; "time to resolve" as \`cases.time_to_resolve\`.
+Compute time-in-status by differencing consecutive \`@timestamp\` values (successive rows are the enter-times of each status). "Time to escalate" at the case level is available directly on \`.cases\` as \`case.in_progress_at - case.created_at\`; "time to resolve" as \`case.time_to_resolve\`.
 
 ## Most active cases (last 7 days), enriched with current case fields
 \`\`\`esql
 FROM .cases-activity
 | WHERE @timestamp >= NOW() - 7 days
-| STATS actions = COUNT(*) BY cases.id
+| STATS actions = COUNT(*) BY case.id
 | SORT actions DESC
 | LIMIT 20
-| LOOKUP JOIN .cases ON cases.id
-| KEEP cases.id, cases.title, cases.status, cases.severity, actions
+| LOOKUP JOIN .cases ON case.id
+| KEEP case.id, case.title, case.status, case.severity, actions
 \`\`\`
 
 ## Connector adoption (pushes by connector)
 \`\`\`esql
 FROM .cases-activity
 | WHERE action.type == "connector" AND action.connector_id_new IS NOT NULL
-| STATS cases = COUNT_DISTINCT(cases.id) BY action.connector_id_new
-| SORT cases DESC
+| STATS case_count = COUNT_DISTINCT(case.id) BY action.connector_id_new
+| SORT case_count DESC
 \`\`\``,
     },
     {
@@ -214,15 +224,15 @@ FROM .cases-activity
 \`\`\`esql
 FROM .cases-attachments
 | WHERE attachment.alert.rule.name IS NOT NULL
-| STATS cases = COUNT_DISTINCT(cases.id) BY attachment.alert.rule.name
-| SORT cases DESC
+| STATS case_count = COUNT_DISTINCT(case.id) BY attachment.alert.rule.name
+| SORT case_count DESC
 \`\`\`
 
 ## Alert-attachment count per case (top 20)
 \`\`\`esql
 FROM .cases-attachments
 | WHERE attachment.alert.indices IS NOT NULL
-| STATS alert_attachments = COUNT(*) BY cases.id
+| STATS alert_attachments = COUNT(*) BY case.id
 | SORT alert_attachments DESC
 | LIMIT 20
 \`\`\`
@@ -231,41 +241,41 @@ Filter on the presence of \`attachment.alert.*\` (populated only for alert subty
 ## Observable (IOC) frequency across cases — e.g. IPv4
 \`\`\`esql
 FROM .cases
-| MV_EXPAND cases.observables.ipv4
-| WHERE cases.observables.ipv4 IS NOT NULL
-| STATS occurrences = COUNT(*) BY cases.observables.ipv4
+| MV_EXPAND case.observables.ipv4
+| WHERE case.observables.ipv4 IS NOT NULL
+| STATS occurrences = COUNT(*) BY case.observables.ipv4
 | SORT occurrences DESC
 \`\`\`
 Swap \`ipv4\` for the observable type of interest (e.g. \`url\`, \`domain\`, \`file-hash\`).
 
 ## MTTD note
-The alert's original detection time is not stored on the attachment (only rule id/name and source indices). To compute MTTD, join out to the alerts indices in \`attachment.alert.indices\` using the alert ids in \`attachment.attachment_id\`, then compare the alert's original time to \`cases.created_at\`.`,
+The alert's original detection time is not stored on the attachment (only rule id/name and source indices). To compute MTTD, join out to the alerts indices in \`attachment.alert.indices\` using the alert ids in \`attachment.attachment_id\`, then compare the alert's original time to \`case.created_at\`.`,
     },
     {
       relativePath: './analytics',
       name: 'custom-fields',
       content: `# Custom-field (extended field) queries
 
-Custom fields live in the **flattened** \`cases.extended_fields\`, keyed \`<name>_as_<type>\`. Use \`FIELD_EXTRACT\` (Technical Preview) and cast. Do NOT use the nested \`cases.customFields\` — it isn't queryable in ES|QL.
+Custom fields live in the **flattened** \`case.extended_fields\`, keyed \`<name>_as_<type>\`. Use \`FIELD_EXTRACT\` (Technical Preview) and cast. Do NOT use the nested \`case.customFields\` — it isn't queryable in ES|QL.
 
 ## Average of a numeric custom field, open cases
 \`\`\`esql
 FROM .cases
-| WHERE cases.status != "closed"
-| EVAL effort = FIELD_EXTRACT(cases.extended_fields, "effort_as_integer")
+| WHERE case.status != "closed"
+| EVAL effort = FIELD_EXTRACT(case.extended_fields, "effort_as_integer")
 | STATS avg_effort = AVG(effort::double), with_value = COUNT(effort), total = COUNT(*)
 \`\`\`
 
 ## Breakdown by a keyword custom field
 \`\`\`esql
 FROM .cases
-| EVAL component = FIELD_EXTRACT(cases.extended_fields, "affected_components_as_keyword")
+| EVAL component = FIELD_EXTRACT(case.extended_fields, "affected_components_as_keyword")
 | WHERE component IS NOT NULL
-| STATS cases = COUNT(*) BY component
-| SORT cases DESC
+| STATS case_count = COUNT(*) BY component
+| SORT case_count DESC
 \`\`\`
 
-Always surface populated-vs-total counts — blank custom fields are common and FIELD_EXTRACT is Technical Preview. For guaranteed typed results or self-service exploration, use the \`Case Analytics\` data view's \`cases.<name>_as_<type>\` runtime fields in Discover / Lens.`,
+Always surface populated-vs-total counts — blank custom fields are common and FIELD_EXTRACT is Technical Preview. For guaranteed typed results or self-service exploration, use the \`Case Analytics\` data view's \`case.<name>_as_<type>\` runtime fields in Discover / Lens.`,
     },
   ],
 
