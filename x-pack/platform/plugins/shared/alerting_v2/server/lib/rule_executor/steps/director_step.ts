@@ -13,6 +13,7 @@ import {
 } from '../../services/logger_service/logger_service';
 import { DirectorService } from '../../director/director';
 import { guardedExpandStep } from '../stream_utils';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 
 @injectable()
 export class DirectorStep implements RuleExecutionStep {
@@ -47,7 +48,7 @@ export class DirectorStep implements RuleExecutionStep {
         return;
       }
 
-      const processedBatch = await step.director.run({
+      const { alertEvents, stats } = await step.director.run({
         rule,
         executionContext: input.executionContext,
         alertEvents: alertEventsBatch,
@@ -55,7 +56,12 @@ export class DirectorStep implements RuleExecutionStep {
 
       yield {
         type: 'continue',
-        state: { ...state, alertEventsBatch: processedBatch },
+        state: { ...state, alertEventsBatch: alertEvents },
+        meta: {
+          counters: {
+            [RULE_EXECUTION_COUNTERS.newEpisodesGenerated]: stats.newEpisodeCount,
+          },
+        },
       };
     });
   }

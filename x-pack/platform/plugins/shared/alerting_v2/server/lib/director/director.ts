@@ -14,11 +14,7 @@ import type { QueryServiceContract } from '../services/query_service/query_servi
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
 import type { AlertEpisodeStatus } from '../../resources/datastreams/alert_events';
-import {
-  alertEpisodeStatus,
-  alertEventType,
-  type AlertEvent,
-} from '../../resources/datastreams/alert_events';
+import { alertEpisodeStatus, type AlertEvent } from '../../resources/datastreams/alert_events';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy, StateTransitionResult } from './strategies/types';
 import type { ExecutionContext } from '../execution_context';
@@ -41,6 +37,20 @@ interface ResolveEpisodeIdParams {
   nextStatus: AlertEpisodeStatus;
 }
 
+interface ResolveEpisodeIdResult {
+  readonly episodeId: string;
+  readonly isNew: boolean;
+}
+
+export interface DirectorRunStats {
+  readonly newEpisodeCount: number;
+}
+
+export interface DirectorRunResult {
+  readonly alertEvents: AlertEvent[];
+  readonly stats: DirectorRunStats;
+}
+
 @injectable()
 export class DirectorService {
   constructor(
@@ -50,9 +60,13 @@ export class DirectorService {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  async run({ rule, alertEvents, executionContext }: RunDirectorParams): Promise<AlertEvent[]> {
+  async run({
+    rule,
+    alertEvents,
+    executionContext,
+  }: RunDirectorParams): Promise<DirectorRunResult> {
     if (alertEvents.length === 0) {
-      return [];
+      return { alertEvents: [], stats: { newEpisodeCount: 0 } };
     }
 
     const strategy = this.strategyFactory.getStrategy(rule);
@@ -65,7 +79,7 @@ export class DirectorService {
     alertEvents: readonly AlertEvent[],
     strategy: ITransitionStrategy,
     executionContext: ExecutionContext
-  ): Promise<AlertEvent[]> {
+  ): Promise<DirectorRunResult> {
     const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
     const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
@@ -79,14 +93,23 @@ export class DirectorService {
     try {
       executionContext.throwIfAborted();
 
-      return alertEvents.map((currentAlertEvent) =>
-        this.getAlertEventWithNextEpisode({
+      let newEpisodeCount = 0;
+      const processed = alertEvents.map((currentAlertEvent) => {
+        const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
           rule,
           currentAlertEvent,
           previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
           strategy,
-        })
-      );
+        });
+
+        if (isNewEpisode) {
+          newEpisodeCount += 1;
+        }
+
+        return alertEvent;
+      });
+
+      return { alertEvents: processed, stats: { newEpisodeCount } };
     } finally {
       await scope.disposeAll();
     }
@@ -115,7 +138,7 @@ export class DirectorService {
     currentAlertEvent,
     previousAlertEvent,
     strategy,
-  }: CalculateNextStateParams): AlertEvent {
+  }: CalculateNextStateParams): { alertEvent: AlertEvent; isNewEpisode: boolean } {
     const currentStatus = previousAlertEvent?.last_episode_status;
 
     const result: StateTransitionResult = strategy.getNextState({
@@ -124,7 +147,7 @@ export class DirectorService {
       previousEpisode: previousAlertEvent,
     });
 
-    const episodeId = this.resolveEpisodeId({
+    const { episodeId, isNew } = this.resolveEpisodeId({
       previousAlertEvent,
       nextStatus: result.status,
     });
@@ -138,26 +161,31 @@ export class DirectorService {
     }
 
     return {
-      ...currentAlertEvent,
-      type: alertEventType.alert,
-      episode: {
-        id: episodeId,
-        status: result.status,
-        ...(result.statusCount != null ? { status_count: result.statusCount } : {}),
+      alertEvent: {
+        ...currentAlertEvent,
+        episode: {
+          id: episodeId,
+          status: result.status,
+          ...(result.statusCount != null ? { status_count: result.statusCount } : {}),
+        },
       },
+      isNewEpisode: isNew,
     };
   }
 
-  private resolveEpisodeId({ previousAlertEvent, nextStatus }: ResolveEpisodeIdParams): string {
+  private resolveEpisodeId({
+    previousAlertEvent,
+    nextStatus,
+  }: ResolveEpisodeIdParams): ResolveEpisodeIdResult {
     if (!previousAlertEvent) {
-      return uuidV4();
+      return { episodeId: uuidV4(), isNew: true };
     }
 
     const currentEpisodeStatus = previousAlertEvent.last_episode_status;
     const currentEpisodeId = previousAlertEvent.last_episode_id;
 
     if (currentEpisodeStatus == null) {
-      return uuidV4();
+      return { episodeId: uuidV4(), isNew: true };
     }
 
     const isNewLifecycle =
@@ -165,9 +193,13 @@ export class DirectorService {
       nextStatus !== alertEpisodeStatus.inactive;
 
     if (isNewLifecycle) {
-      return uuidV4();
+      return { episodeId: uuidV4(), isNew: true };
     }
 
-    return currentEpisodeId ?? uuidV4();
+    if (currentEpisodeId == null) {
+      return { episodeId: uuidV4(), isNew: true };
+    }
+
+    return { episodeId: currentEpisodeId, isNew: false };
   }
 }

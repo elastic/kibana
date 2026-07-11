@@ -16,6 +16,7 @@ import {
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createDirectorService } from '../../director/director.mock';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 
 describe('DirectorStep', () => {
   const { loggerService } = createLoggerService();
@@ -49,6 +50,32 @@ describe('DirectorStep', () => {
     expect(mockEsClient.esql.query).toHaveBeenCalled();
     expect(result.type).toBe('continue');
     expect(result.state.alertEventsBatch).toBeDefined();
+  });
+
+  it('emits newEpisodesGenerated on meta.counters for alertable rules', async () => {
+    const { directorService, mockEsClient } = createDirectorService();
+    const step = new DirectorStep(loggerService, directorService);
+
+    mockEsClient.esql.query.mockResolvedValue(createEmptyEsqlResponse());
+
+    const alertEventsBatch = [
+      createAlertEvent({ group_hash: 'hash-1' }),
+      createAlertEvent({ group_hash: 'hash-2' }),
+    ];
+
+    const state = createRulePipelineState({
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch,
+    });
+
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.type).toBe('continue');
+
+    // @ts-expect-error: meta is present on the result
+    expect(result.meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.newEpisodesGenerated]: 2,
+    });
   });
 
   it('skips episode tracking for signal rules', async () => {
