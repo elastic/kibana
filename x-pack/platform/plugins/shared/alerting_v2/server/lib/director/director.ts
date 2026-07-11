@@ -156,6 +156,10 @@ export class DirectorService {
         alertEvent: {
           ...currentAlertEvent,
           type: alertEventType.alert,
+          episode: {
+            id: previousAlertEvent!.last_episode_id!,
+            status: alertEpisodeStatus.active,
+          },
         },
         isNewEpisode: false,
       };
