@@ -20,6 +20,7 @@ export const RULE_EXECUTION_COUNTERS = {
   signalsGenerated: 'signalsGenerated',
   ruleEventsGenerated: 'ruleEventsGenerated',
   newEpisodesGenerated: 'newEpisodesGenerated',
+  rowsReturnedByQuery: 'rowsReturnedByQuery',
 } as const;
 
 /**
