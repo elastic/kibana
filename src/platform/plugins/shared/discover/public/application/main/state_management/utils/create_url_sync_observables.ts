@@ -164,14 +164,16 @@ export const createUrlSyncObservables = ({
         );
       }
 
+      const hasNextProfileUrlState = Object.keys(nextProfileUrlStateMap).length > 0;
       const profileUrlStateDefinition = selectCurrentProfileUrlStateDefinition(
         runtimeStateManager,
         tabId
       );
 
       // If `_p` omits the active profile key, treat that as clearing active URL overrides. Non-URL
-      // overrides stay in Redux so adapters still merge them with defaults.
-      if (profileUrlStateDefinition && !nextProfileUrlStateMap[profileUrlStateDefinition.key]) {
+      // overrides stay in Redux so adapters still merge them with defaults. When `_p` contains
+      // another profile key, keep the active profile intact until profile re-resolution catches up.
+      if (!hasNextProfileUrlState && profileUrlStateDefinition) {
         const currentProfileState = currentProfileStateMap[profileUrlStateDefinition.key];
         const nonUrlProfileState = services.profileStateRegistry.filterFieldsByType({
           profileState: currentProfileState,

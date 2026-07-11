@@ -297,7 +297,7 @@ describe('createUrlSyncObservables', () => {
     expect(result.profileStateContainer.get()).toBeUndefined();
   });
 
-  it('should clear profile URL state fields when profileStateContainer receives another profile key', async () => {
+  it('should preserve active profile URL state when profileStateContainer receives another profile key', async () => {
     const { result, internalState, tabId, initializeSingleTab } = await setup();
     const currentProfileState = {
       uiValue: 'ui',
@@ -323,15 +323,17 @@ describe('createUrlSyncObservables', () => {
 
     expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
       [TEST_PROFILE_STATE_DEF.key]: {
-        uiValue: currentProfileState.uiValue,
-        persistentValue: currentProfileState.persistentValue,
-        nestedValue: currentProfileState.nestedValue,
+        ...currentProfileState,
       },
       [SECONDARY_PROFILE_STATE_DEF.key]: {
         secondaryUrlValue: 'otherProfileUrl',
       },
     });
-    expect(result.profileStateContainer.get()).toBeUndefined();
+    expect(result.profileStateContainer.get()).toEqual({
+      [TEST_PROFILE_STATE_DEF.key]: {
+        urlValue: currentProfileState.urlValue,
+      },
+    });
   });
 
   it('should apply profile URL state after the active profile has already changed', async () => {
