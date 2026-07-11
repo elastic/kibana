@@ -220,14 +220,14 @@ export const ExperimentsListPage: React.FC = () => {
   const { data, isLoading, error, refetch } = useEvaluationExperiments({
     page: pageIndex + 1,
     perPage: pageSize,
-    branch: searchText || undefined,
+    search: searchText || undefined,
     suiteId: suiteIdFilter || undefined,
   });
 
   const { data: suiteFilterData } = useEvaluationExperiments({
     page: 1,
     perPage: 100,
-    branch: searchText || undefined,
+    search: searchText || undefined,
   });
 
   const suiteOptions = useMemo(() => {

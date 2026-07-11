@@ -223,6 +223,32 @@ describe('query_builders', () => {
       });
     });
 
+    it('filters by search matching experiment name or branch', () => {
+      const query = buildExperimentsListingFilterQuery({ search: 'in-tool' });
+      expect(query).toEqual({
+        bool: {
+          must_not: [preflightExclusion],
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    wildcard: { experiment_name: { value: '*in-tool*', case_insensitive: true } },
+                  },
+                  {
+                    wildcard: {
+                      'metadata.git.branch': { value: '*in-tool*', case_insensitive: true },
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      });
+    });
+
     it('filters by datasetId', () => {
       const query = buildExperimentsListingFilterQuery({ datasetId: 'dataset-1' });
       expect(query).toEqual({

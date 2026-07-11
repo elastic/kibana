@@ -12,7 +12,7 @@ export const TABLE_CAPTION = i18n.translate('xpack.evals.experimentsList.tableCa
 });
 
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.evals.experimentsList.searchPlaceholder', {
-  defaultMessage: 'Filter by branch...',
+  defaultMessage: 'Search by name or branch...',
 });
 
 export const COLUMN_NAME = i18n.translate('xpack.evals.experimentsList.columns.name', {

@@ -457,7 +457,12 @@ export const ExperimentDetailPage: React.FC = () => {
         </EuiTitle>
         <EuiSpacer size="l" />
 
-        {isLaunching && launchedConfig && (
+        {/* While a run is launching we show a summary of the launched config as a
+            stand-in for the not-yet-existent experiment document. Once the real
+            experiment detail loads (`showLaunchView` flips to false) we drop this
+            summary so its metadata doesn't render alongside the canonical stat
+            cards below. */}
+        {showLaunchView && launchedConfig && (
           <>
             <LaunchedConfigSummary config={launchedConfig} />
             <EuiSpacer size="l" />

@@ -21,6 +21,8 @@ interface ExperimentsListingFilterOptions {
   suiteId?: string;
   modelId?: string;
   branch?: string;
+  /** Free-text term matched (case-insensitively) against experiment name or git branch. */
+  search?: string;
   datasetId?: string;
   datasetName?: string;
   buildId?: string;
@@ -235,6 +237,20 @@ export const buildExperimentsListingFilterQuery = (
           value: `*${options.branch}*`,
           case_insensitive: true,
         },
+      },
+    });
+  }
+  if (options?.search) {
+    // A single search box in the UI matches either the human-readable experiment
+    // name or the git branch, so users don't have to know which field they want.
+    const pattern = `*${options.search}*`;
+    filters.push({
+      bool: {
+        should: [
+          { wildcard: { experiment_name: { value: pattern, case_insensitive: true } } },
+          { wildcard: { 'metadata.git.branch': { value: pattern, case_insensitive: true } } },
+        ],
+        minimum_should_match: 1,
       },
     });
   }

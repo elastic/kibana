@@ -68,6 +68,8 @@ export interface ExperimentsListFilters {
   suiteId?: string;
   modelId?: string;
   branch?: string;
+  /** Free-text term matched against experiment name or git branch. */
+  search?: string;
   buildId?: string;
   datasetId?: string;
   page?: number;
@@ -397,6 +399,7 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
       if (filters.suiteId) query.suite_id = filters.suiteId;
       if (filters.modelId) query.model_id = filters.modelId;
       if (filters.branch) query.branch = filters.branch;
+      if (filters.search) query.search = filters.search;
       if (filters.buildId) query.build_id = filters.buildId;
       if (filters.datasetId) query.dataset_id = filters.datasetId;
       if (filters.page) query.page = filters.page;
