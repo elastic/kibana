@@ -127,7 +127,7 @@ export const splitSnakeKey = (snakeKey: string): { name: string; suffix: string 
  * safe.
  */
 export const buildPainlessSource = (snakeKey: string, runtimeType: RuntimeType): string => {
-  const fieldPath = `cases.extended_fields.${snakeKey}`;
+  const fieldPath = `case.extended_fields.${snakeKey}`;
   // `doc[path]` throws if the flattened sub-key was never indexed, so the
   // access is wrapped in try/catch and treated as "no value". `.empty`
   // handles the key-exists-but-unset case; iteration yields the typed leaf
