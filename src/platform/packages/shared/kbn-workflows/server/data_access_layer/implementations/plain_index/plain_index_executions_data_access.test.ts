@@ -12,15 +12,19 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { PlainIndexExecutionsDataAccess } from './plain_index_executions_data_access';
 
 describe('PlainIndexExecutionsDataAccess', () => {
-  it('deleteByQuery targets the configured index', async () => {
+  const createDal = () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.deleteByQuery.mockResolvedValue({ deleted: 2, total: 2 } as never);
-
     const dal = new PlainIndexExecutionsDataAccess<{ id: string }>({
       esClient,
       indexName: '.workflows-executions',
       mappings: { properties: {} },
     });
+    return { esClient, dal };
+  };
+
+  it('deleteByQuery targets the configured index', async () => {
+    const { esClient, dal } = createDal();
+    esClient.deleteByQuery.mockResolvedValue({ deleted: 2, total: 2 } as never);
 
     const query = { term: { workflowId: 'wf-1' } };
     await dal.deleteByQuery({ query, refresh: true, conflicts: 'proceed' });
@@ -30,6 +34,97 @@ describe('PlainIndexExecutionsDataAccess', () => {
       query,
       refresh: true,
       conflicts: 'proceed',
+    });
+  });
+
+  describe('scriptUpdate', () => {
+    it('returns updated when ES reports an update', async () => {
+      const { esClient, dal } = createDal();
+      esClient.update.mockResolvedValue({ result: 'updated' } as never);
+
+      await expect(
+        dal.scriptUpdate({
+          id: 'step-1',
+          script: 'ctx._source.status = params.status',
+          params: { status: 'completed' },
+          retryOnConflict: 3,
+          refresh: 'wait_for',
+        })
+      ).resolves.toEqual({ result: 'updated' });
+
+      expect(esClient.update).toHaveBeenCalledWith({
+        index: '.workflows-executions',
+        id: 'step-1',
+        script: {
+          source: 'ctx._source.status = params.status',
+          lang: 'painless',
+          params: { status: 'completed' },
+        },
+        retry_on_conflict: 3,
+        refresh: 'wait_for',
+      });
+    });
+
+    it('returns noop when ES reports a noop', async () => {
+      const { esClient, dal } = createDal();
+      esClient.update.mockResolvedValue({ result: 'noop' } as never);
+
+      await expect(
+        dal.scriptUpdate({
+          id: 'step-1',
+          script: 'ctx.op = "noop"',
+          params: {},
+        })
+      ).resolves.toEqual({ result: 'noop' });
+    });
+
+    it('returns not_found when ES throws a 404', async () => {
+      const { esClient, dal } = createDal();
+      const notFoundError = new Error('Not Found');
+      (notFoundError as { statusCode?: number }).statusCode = 404;
+      esClient.update.mockRejectedValue(notFoundError);
+
+      await expect(
+        dal.scriptUpdate({
+          id: 'missing-step',
+          script: 'ctx.op = "noop"',
+          params: {},
+        })
+      ).resolves.toEqual({ result: 'not_found' });
+    });
+
+    it('omits optional retry and refresh when not provided', async () => {
+      const { esClient, dal } = createDal();
+      esClient.update.mockResolvedValue({ result: 'updated' } as never);
+
+      await dal.scriptUpdate({
+        id: 'step-1',
+        script: 'ctx._source.status = params.status',
+        params: { status: 'completed' },
+      });
+
+      expect(esClient.update).toHaveBeenCalledWith({
+        index: '.workflows-executions',
+        id: 'step-1',
+        script: {
+          source: 'ctx._source.status = params.status',
+          lang: 'painless',
+          params: { status: 'completed' },
+        },
+      });
+    });
+
+    it('rethrows unexpected ES failures', async () => {
+      const { esClient, dal } = createDal();
+      esClient.update.mockRejectedValue(new Error('cluster unavailable'));
+
+      await expect(
+        dal.scriptUpdate({
+          id: 'step-1',
+          script: 'ctx._source.status = params.status',
+          params: { status: 'completed' },
+        })
+      ).rejects.toThrow('cluster unavailable');
     });
   });
 });

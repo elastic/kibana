@@ -57,6 +57,7 @@ export interface ReadonlyExecutionsDataAccess<TExecution extends { id: string }>
 
 export interface WritableExecutionsDataAccess<TExecution extends { id: string }> {
   bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse>;
+  scriptUpdate(request: ScriptUpdateRequest): Promise<ScriptUpdateResponse>;
   deleteByQuery(request: ExecutionsDeleteByQueryRequest): Promise<estypes.DeleteByQueryResponse>;
 }
 
@@ -119,4 +120,18 @@ export interface BulkItemResponse {
 export interface BulkResponse {
   items: BulkItemResponse[];
   errors: boolean;
+}
+
+export type ScriptUpdateResult = 'updated' | 'not_found' | 'noop';
+
+export interface ScriptUpdateRequest {
+  id: string;
+  script: string;
+  params: Record<string, unknown>;
+  retryOnConflict?: number;
+  refresh?: boolean | 'wait_for';
+}
+
+export interface ScriptUpdateResponse {
+  result: ScriptUpdateResult;
 }

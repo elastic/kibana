@@ -802,34 +802,30 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<boolean> {
     try {
-      const response = await this.deps.esClient.update({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      const response = await this.deps.stepExecutionsDal.scriptUpdate({
         id: stepExecutionId,
         // `respondedAt` is the first-writer-wins guard. Retrying conflicts
         // lets simultaneous updates re-run the script against the winner's
         // write and return `noop` instead of leaking a version conflict.
-        retry_on_conflict: 3,
-        script: {
-          source:
-            'if (ctx._source.spaceId != params.spaceId) { ctx.op = "noop"; return; }' +
-            'if (ctx._source.finishedAt != null) { ctx.op = "noop"; return; }' +
-            'if (ctx._source.status != null && params.settledStatuses.contains(ctx._source.status)) { ctx.op = "noop"; return; }' +
-            'if (ctx._source.hitl != null && ctx._source.hitl.respondedAt != null) { ctx.op = "noop"; return; }' +
-            'if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
-            'ctx._source.hitl.respondedBy = params.respondedBy;' +
-            'ctx._source.hitl.respondedAt = params.respondedAt;' +
-            'ctx._source.hitl.channel = params.channel;' +
-            'if (ctx._source.input != null) { ctx._source.input.remove(params.tokenHashField); ctx._source.input.remove(params.tokenExpiresAtField); }',
-          lang: 'painless',
-          params: {
-            spaceId,
-            respondedBy: audit.respondedBy,
-            respondedAt: audit.respondedAt,
-            channel: audit.channel,
-            settledStatuses: SETTLED_STEP_STATUSES,
-            tokenHashField: HITL_TOKEN_HASH_INPUT_FIELD,
-            tokenExpiresAtField: HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
-          },
+        retryOnConflict: 3,
+        script:
+          'if (ctx._source.spaceId != params.spaceId) { ctx.op = "noop"; return; }' +
+          'if (ctx._source.finishedAt != null) { ctx.op = "noop"; return; }' +
+          'if (ctx._source.status != null && params.settledStatuses.contains(ctx._source.status)) { ctx.op = "noop"; return; }' +
+          'if (ctx._source.hitl != null && ctx._source.hitl.respondedAt != null) { ctx.op = "noop"; return; }' +
+          'if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
+          'ctx._source.hitl.respondedBy = params.respondedBy;' +
+          'ctx._source.hitl.respondedAt = params.respondedAt;' +
+          'ctx._source.hitl.channel = params.channel;' +
+          'if (ctx._source.input != null) { ctx._source.input.remove(params.tokenHashField); ctx._source.input.remove(params.tokenExpiresAtField); }',
+        params: {
+          spaceId,
+          respondedBy: audit.respondedBy,
+          respondedAt: audit.respondedAt,
+          channel: audit.channel,
+          settledStatuses: SETTLED_STEP_STATUSES,
+          tokenHashField: HITL_TOKEN_HASH_INPUT_FIELD,
+          tokenExpiresAtField: HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
         },
         refresh: 'wait_for',
       });

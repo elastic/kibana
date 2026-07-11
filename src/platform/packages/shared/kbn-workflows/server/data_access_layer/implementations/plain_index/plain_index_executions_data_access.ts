@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { executeScriptUpdate } from '../../lib/execute_script_update';
 import type {
   BulkItem,
   BulkItemResponse,
@@ -21,6 +22,8 @@ import type {
   ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,
   GetExecutionsByIdsOptions,
+  ScriptUpdateRequest,
+  ScriptUpdateResponse,
 } from '../../types';
 
 export interface PlainIndexExecutionsDataAccessDeps<TExecution extends { id: string }> {
@@ -169,6 +172,14 @@ export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
       items,
       errors: response.errors,
     };
+  }
+
+  public async scriptUpdate(request: ScriptUpdateRequest): Promise<ScriptUpdateResponse> {
+    return executeScriptUpdate({
+      esClient: this.deps.esClient,
+      indexName: this.deps.indexName,
+      request,
+    });
   }
 
   public async deleteByQuery(

@@ -17,6 +17,7 @@ export const createMockWorkflowExecutionsDal = (
     count: jest.fn(),
     getByIds: jest.fn(),
     bulk: jest.fn(),
+    scriptUpdate: jest.fn(),
     deleteByQuery: jest.fn(),
     ...overrides,
   }) as jest.Mocked<WorkflowExecutionsDataAccess>;
@@ -29,6 +30,7 @@ export const createMockStepExecutionsDal = (
     count: jest.fn(),
     getByIds: jest.fn(),
     bulk: jest.fn(),
+    scriptUpdate: jest.fn(),
     deleteByQuery: jest.fn(),
     ...overrides,
   }) as jest.Mocked<StepExecutionsDataAccess>;
