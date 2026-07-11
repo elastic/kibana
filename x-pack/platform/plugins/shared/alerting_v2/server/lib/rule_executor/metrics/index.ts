@@ -24,3 +24,4 @@ export { MetricCollectorImpl } from './metric_collector';
 export { MetricCollectorFactory } from './metric_collector_factory';
 export { MetricsMiddleware } from './metrics_middleware';
 export { EmittedCountersRecorder } from './recorders/emitted_counters_recorder';
+export { PersistedRuleEventsRecorder } from './recorders/persisted_rule_events_recorder';

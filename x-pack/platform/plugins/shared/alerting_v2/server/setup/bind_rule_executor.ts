@@ -34,6 +34,7 @@ import {
   MetricCollectorFactoryToken,
   MetricRecorderToken,
   MetricsMiddleware,
+  PersistedRuleEventsRecorder,
 } from '../lib/rule_executor/metrics';
 
 export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) => {
@@ -62,6 +63,7 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
    */
   bind(MetricCollectorFactoryToken).to(MetricCollectorFactory).inSingletonScope();
   bind(MetricRecorderToken).to(EmittedCountersRecorder).inSingletonScope();
+  bind(MetricRecorderToken).to(PersistedRuleEventsRecorder).inSingletonScope();
 
   /**
    * Rule execution steps via multi-injection.
