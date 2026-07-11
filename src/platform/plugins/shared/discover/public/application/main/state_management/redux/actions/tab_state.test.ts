@@ -534,6 +534,54 @@ describe('tab_state actions', () => {
       );
     });
 
+    it('should preserve existing profile URL state before the data source profile is resolved', async () => {
+      const { internalState, runtimeStateManager, stateStorageContainer, tabId } = await setup();
+      const scopedProfilesManager = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).scopedProfilesManager$.getValue();
+      const existingUrlState = {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'sharedUrl',
+        },
+      };
+
+      await stateStorageContainer.set(PROFILE_STATE_URL_KEY, existingUrlState);
+      jest.spyOn(scopedProfilesManager, 'hasResolvedDataSourceProfile').mockReturnValue(false);
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+
+      await internalState.dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId }));
+
+      expect(setUrlStateSpy.mock.calls.filter(([key]) => key === PROFILE_STATE_URL_KEY)).toEqual(
+        []
+      );
+      expect(stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toEqual(existingUrlState);
+    });
+
+    it('should clear existing profile URL state once the data source profile is resolved without URL state', async () => {
+      const { internalState, runtimeStateManager, stateStorageContainer, tabId } = await setup();
+      const scopedProfilesManager = selectTabRuntimeState(
+        runtimeStateManager,
+        tabId
+      ).scopedProfilesManager$.getValue();
+      const existingUrlState = {
+        [SECONDARY_PROFILE_STATE_DEF.key]: {
+          secondaryUrlValue: 'sharedSecondaryUrl',
+        },
+      };
+
+      expect(scopedProfilesManager.hasResolvedDataSourceProfile()).toBe(true);
+      await stateStorageContainer.set(PROFILE_STATE_URL_KEY, existingUrlState);
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+
+      await internalState.dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId }));
+
+      expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, undefined, {
+        replace: true,
+      });
+      expect(stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toBeNull();
+    });
+
     it('should write only the current profile URL state to the URL even when state is unchanged', async () => {
       const { internalState, stateStorageContainer, tabId } = await setup();
       const profileState = {

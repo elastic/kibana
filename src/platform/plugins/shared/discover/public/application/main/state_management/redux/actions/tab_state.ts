@@ -364,6 +364,16 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
       dispatch(updateGlobalStateAndReplaceUrl({ tabId, globalState: {} })),
       dispatch(updateAppStateAndReplaceUrl({ tabId, appState: {} })),
       (async () => {
+        const scopedProfilesManager = selectTabRuntimeState(
+          runtimeStateManager,
+          tabId
+        ).scopedProfilesManager$.getValue();
+
+        // Keep any hydrated profile URL state until we know which profile owns it
+        if (!scopedProfilesManager.hasResolvedDataSourceProfile()) {
+          return;
+        }
+
         const profileStateForUrl = selectCurrentProfileUrlState({
           runtimeStateManager,
           tabId,
