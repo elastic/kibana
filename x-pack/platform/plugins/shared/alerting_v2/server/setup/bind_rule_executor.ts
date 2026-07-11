@@ -61,7 +61,9 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   /**
    * Metrics collection primitives.
    */
-  bind(MetricCollectorFactoryToken).to(MetricCollectorFactory).inSingletonScope();
+  bind(MetricCollectorFactoryToken)
+    .toDynamicValue(() => new MetricCollectorFactory())
+    .inSingletonScope();
   bind(MetricRecorderToken).to(EmittedCountersRecorder).inSingletonScope();
   bind(MetricRecorderToken).to(PersistedRuleEventsRecorder).inSingletonScope();
 

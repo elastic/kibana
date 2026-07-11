@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { injectable } from 'inversify';
 import { v4 as uuidV4 } from 'uuid';
 import type { MetricCollector, MetricCollectorFactoryContract } from './types';
 import { MetricCollectorImpl } from './metric_collector';
@@ -16,21 +15,19 @@ import { MetricCollectorImpl } from './metric_collector';
  * Sources `executionId` from `uuid.v4()` and `startedAt` from `Date`. Both
  * seams are overridable via constructor options so tests can stamp
  * deterministic values without patching globals.
+ *
+ * Deliberately not `@injectable()`: DI never supplies constructor arguments.
+ * The container wires it via `.toDynamicValue(() => new MetricCollectorFactory())`
+ * in `bind_rule_executor.ts` and tests bypass DI entirely — keeping this class
+ * framework-agnostic and free of decorator/metadata footguns.
  */
-@injectable()
 export class MetricCollectorFactory implements MetricCollectorFactoryContract {
   readonly #generateExecutionId: () => string;
   readonly #now: () => Date;
 
-  constructor({
-    generateExecutionId = uuidV4,
-    now = () => new Date(),
-  }: {
-    generateExecutionId?: () => string;
-    now?: () => Date;
-  } = {}) {
-    this.#generateExecutionId = generateExecutionId;
-    this.#now = now;
+  constructor(options?: { generateExecutionId?: () => string; now?: () => Date }) {
+    this.#generateExecutionId = options?.generateExecutionId ?? uuidV4;
+    this.#now = options?.now ?? (() => new Date());
   }
 
   public create(): MetricCollector {
