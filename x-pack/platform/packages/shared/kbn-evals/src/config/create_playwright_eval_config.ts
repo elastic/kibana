@@ -29,6 +29,7 @@ export function createPlaywrightEvalsConfig({
   timeout,
   retries,
   runGlobalSetup,
+  workers,
 }: {
   testDir: string;
   testIgnore?: PlaywrightTestConfig['testIgnore'];
@@ -36,10 +37,15 @@ export function createPlaywrightEvalsConfig({
   timeout?: number;
   retries?: number;
   runGlobalSetup?: boolean;
+  // A single suite still shares one Kibana/ES stack across all its workers —
+  // going beyond 3 risks compounding the ES master-node congestion these
+  // suites already flake on (Entity Store installs, siem-readiness timeouts).
+  workers?: 1 | 2 | 3;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
   const { reporter, use, outputDir, projects, ...config } = createPlaywrightConfig({
     testDir,
     runGlobalSetup,
+    workers,
   });
 
   // gets the connectors from either the env variable or kibana.yml/kibana.dev.yml
