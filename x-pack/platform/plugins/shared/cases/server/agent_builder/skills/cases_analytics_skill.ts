@@ -9,7 +9,7 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import { platformCoreTools } from '@kbn/agent-builder-common';
 
 /**
- * Analytics/reporting skill for Cases-as-Data v2. Distinct from the
+ * Analytics/reporting skill for Elastic Cases. Distinct from the
  * `cases-management` skill (per-case CRUD via the Cases API): this skill runs
  * ES|QL over the three cluster-level analytics indices — `.cases`,
  * `.cases-activity`, `.cases-attachments` — and builds visualizations /
@@ -29,7 +29,7 @@ export const casesAnalyticsSkill = defineSkillType({
 
   content: `# Cases Analytics
 
-Answer aggregate, trend, and reporting questions about Elastic Cases, and build visualizations/dashboards, using ES|QL over three cluster-level analytics indices populated from the case saved objects (Cases-as-Data v2).
+Answer aggregate, trend, and reporting questions about Elastic Cases, and build visualizations/dashboards, using ES|QL over three cluster-level analytics indices populated from the case saved objects.
 
 ## When to use this skill
 
@@ -54,8 +54,10 @@ Do **not** use it for single-case operations — creating, reading, updating, co
 All three carry \`cases.id\`, \`owner\`, and \`space_id\`. \`.cases\` is lookup-mode, so the fact indices enrich with current case fields via:
 
 \`\`\`esql
-FROM .cases-activity | LOOKUP JOIN .cases ON cases.id
+FROM .cases-activity | LOOKUP JOIN .cases ON cases.id | KEEP @timestamp, cases.id, cases.status, cases.severity
 \`\`\`
+
+Always \`KEEP\` the concrete columns you need after a \`LOOKUP JOIN\` — don't let the raw \`cases.extended_fields\` (flattened) column flow through a joined result; read custom fields with \`FIELD_EXTRACT\` instead (see "Custom fields").
 
 Status values: \`open\`, \`in-progress\`, \`closed\`. Severity: \`low\`, \`medium\`, \`high\`, \`critical\` (stored as readable strings, not enums).
 
@@ -73,14 +75,14 @@ These indices are **re-indexed from the case saved objects** by real-time hooks 
 
 cross-check against the source of truth with \`${platformCoreTools.cases}\` (get / bulk_get / search) and reconcile. Prefer the saved-object value when they disagree, and tell the user there may be indexing lag. Never present a suspicious analytics number as fact without this check.
 
-## KQL / the Cases data view (self-service + fallback)
+## KQL / the Case Analytics data view (self-service + fallback)
 
-A managed, per-space **\`Cases\` data view** spans all three indices and publishes each custom field as a typed top-level runtime field \`cases.<name>_as_<type>\` (e.g. \`cases.effort_as_integer\`). Use it:
+A managed, per-space **\`Case Analytics\` data view** spans all three indices and publishes each custom field as a typed top-level runtime field \`cases.<name>_as_<type>\` (e.g. \`cases.effort_as_integer\`). Use it:
 
 - **Hand off for self-service** when a user prefers Discover/Lens with KQL — author the KQL for them and name the fields, e.g. \`cases.status: "open" and cases.effort_as_integer > 3\`.
 - **As the custom-field fallback** when \`FIELD_EXTRACT\` returns nothing or you need guaranteed typed results (the runtime field reads the same flattened values via doc-values).
 
-Boundary: your ES|QL tools (\`${platformCoreTools.generateEsql}\`, \`${platformCoreTools.executeEsql}\`, \`${platformCoreTools.createVisualization}\`) query the indices and do NOT read the data view's runtime fields — so custom-field analytics in ES|QL goes through \`FIELD_EXTRACT\` (see "Custom fields"), and the data view is the self-service / fallback surface.
+Boundary: your ES|QL tools (\`${platformCoreTools.generateEsql}\`, \`${platformCoreTools.executeEsql}\`, \`${platformCoreTools.createVisualization}\`) query the indices directly and do NOT read the data view's runtime fields — so custom-field analytics in ES|QL goes through \`FIELD_EXTRACT\` (see "Custom fields"), and the \`Case Analytics\` data view is the self-service / fallback surface.
 
 ## Custom fields (extended / template fields)
 
@@ -97,7 +99,7 @@ FROM .cases
 | STATS avg_effort = AVG(effort::double), with_value = COUNT(effort), total = COUNT(*)
 \`\`\`
 
-\`FIELD_EXTRACT\` is a **Technical Preview** function. It works against the flattened \`cases.extended_fields\` (verified for numeric and keyword fields on the lookup-mode \`.cases\` index), but blank/unset custom fields are common, so **always report how many docs had the field populated** (\`COUNT(<extracted>)\`) alongside the metric. When precision matters or FIELD_EXTRACT returns nothing, fall back to the \`Cases\` data view (see "KQL / the Cases data view"), whose typed runtime field \`cases.<name>_as_<type>\` reads the same values.
+\`FIELD_EXTRACT\` is a **Technical Preview** function. It reads numeric and keyword sub-keys from the flattened \`cases.extended_fields\`, but blank/unset custom fields are common, so **always report how many docs had the field populated** (\`COUNT(<extracted>)\`) alongside the metric. When precision matters or FIELD_EXTRACT returns nothing, fall back to the \`Case Analytics\` data view (see "KQL / the Case Analytics data view"), whose typed runtime field \`cases.<name>_as_<type>\` reads the same values.
 
 ## Building visualizations
 
@@ -259,7 +261,7 @@ FROM .cases
 | SORT cases DESC
 \`\`\`
 
-Always surface populated-vs-total counts — blank custom fields are common and FIELD_EXTRACT is Technical Preview. For guaranteed typed results or self-service exploration, use the \`Cases\` data view's \`cases.<name>_as_<type>\` runtime fields in Discover / Lens.`,
+Always surface populated-vs-total counts — blank custom fields are common and FIELD_EXTRACT is Technical Preview. For guaranteed typed results or self-service exploration, use the \`Case Analytics\` data view's \`cases.<name>_as_<type>\` runtime fields in Discover / Lens.`,
     },
   ],
 
