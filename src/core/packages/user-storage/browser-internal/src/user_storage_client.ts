@@ -150,28 +150,32 @@ export class UserStorageClient implements IUserStorageClient {
     defaultValue?: T
   ): Observable<UserStorageValue<T | undefined>> {
     return new Observable<UserStorageValue<T | undefined>>((subscriber) => {
-      const cached = this.cache[key];
-      if (cached !== undefined) {
-        subscriber.next({ status: 'resolved', value: cached as T });
+      const emitResolved = () => {
+        const cached = this.cache[key];
+        const resolved = cached !== undefined ? (cached as T) : defaultValue;
+        subscriber.next({ status: 'resolved', value: resolved });
+      };
+
+      if (this.isCached(key)) {
+        emitResolved();
       } else {
         subscriber.next({ status: 'loading', value: defaultValue });
         this.startFetch(key).then(
-          (value) => {
-            const resolved = value !== undefined ? (value as T) : defaultValue;
-            subscriber.next({ status: 'resolved', value: resolved });
+          () => {
+            if (subscriber.closed) return;
+            emitResolved();
           },
           (error: Error) => {
+            if (subscriber.closed) return;
             subscriber.next({ status: 'error', value: defaultValue, error });
           }
         );
       }
 
       // Re-emit the resolved value on every subsequent explicit write.
-      const writeSub = this.update$.pipe(filter((u) => u.key === key)).subscribe(() => {
-        const current = this.cache[key];
-        const resolved = current !== undefined ? (current as T) : defaultValue;
-        subscriber.next({ status: 'resolved', value: resolved });
-      });
+      const writeSub = this.update$
+        .pipe(filter((u) => u.key === key))
+        .subscribe(() => emitResolved());
 
       return () => writeSub.unsubscribe();
     }).pipe(share());
