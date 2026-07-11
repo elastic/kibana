@@ -77,9 +77,9 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
   const LINEAR_HAIRLINE = `1px solid color-mix(in srgb, ${colors.borderBaseSubdued} 70%, transparent)`;
 
   return css`
-    // ${scope} {
-    //   ${layoutVarName('application.marginRight')}: 0px !important;
-    // }
+    ${scope} {
+      ${layoutVarName('application.marginTop')}: 8px !important;
+    }
 
     /* ----- Base surfaces ----- */
     /* Content area reads as pure white; the color *step* against the nav
@@ -95,7 +95,6 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .kbnChromeLayoutNavigation {
       background-color: ${LINEAR_SURFACE_NAV} !important;
       border-inline-end: none !important;
-      height: calc(100vh - 48px) !important;
     }
 
     /* ----- Attbana expanded nav — layout width + grid column sync ----- */
@@ -394,15 +393,15 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
       outline-offset: -2px !important;
     }
 
-    /* Full-width footer hairline (default high-contrast separators are 32px centered). */
-    ${scope} [class*='css-'][class*='-footer--root']::before {
+    /* Full-width nav footer hairline (default high-contrast separators are 32px centered). */
+    ${scope} [data-test-subj='kbnChromeNav-footer']::before {
       width: 100% !important;
       left: 0 !important;
       right: 0 !important;
       margin: 0 !important;
     }
 
-    ${scope} [class*='css-'][class*='-footer--collapseDivider'] {
+    ${scope} [data-test-subj='kbnChromeNav-footer'] [class*='collapseDivider'] {
       display: none !important;
     }
 
@@ -763,9 +762,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
       background-color: ${LINEAR_SURFACE} !important;
       box-shadow: none !important;
       outline: none !important;
-      margin: 8px !important;
-      margin-left: 0 !important;
-      height: calc(100vh - 64px) !important;
+      margin-right: 8px !important;
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
