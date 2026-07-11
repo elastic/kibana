@@ -218,6 +218,25 @@ export class UnifiedTabs {
   }
 
   /**
+   * Opens the active tab's menu and clicks the given menu item test subject
+   * (e.g. `unifiedTabs_tabMenuItem_inspect`). Generic building block for
+   * per-tab menu actions beyond the dedicated helpers above.
+   */
+  async clickActiveTabMenuItem(menuItemTestSubj: string) {
+    const activeTabTestSubj = await this.getActiveTabTestSubj();
+    const tabId = activeTabTestSubj.slice(UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix.length);
+
+    // Close any menu/popover that might already be open so opening this
+    // tab's menu is deterministic regardless of the page's prior state.
+    await this.page.keyboard.press('Escape');
+    await this.page.testSubj.click(`${UNIFIED_TABS_TEST_SUBJ.tabMenuBtnPrefix}${tabId}`);
+
+    const menuItem = this.page.testSubj.locator(menuItemTestSubj);
+    await menuItem.waitFor({ state: 'visible' });
+    await menuItem.click();
+  }
+
+  /**
    * Duplicates the currently active tab via its tab menu.
    * The duplicated tab becomes the active one; this helper waits for the
    * active-tab marker to move to a different test subject before returning.

@@ -11,6 +11,7 @@ import type { Download } from 'playwright-core';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { DataGrid } from './data_grid';
+import { UnifiedTabs } from './unified_tabs';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 import { resolveSelector } from '../utils';
@@ -33,10 +34,12 @@ export interface DataViewOptions {
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
   private readonly dataGrid: DataGrid;
+  private readonly unifiedTabs: UnifiedTabs;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.dataGrid = new DataGrid(page);
+    this.unifiedTabs = new UnifiedTabs(page);
   }
 
   async goto(options: DiscoverGotoOptions) {
@@ -97,6 +100,29 @@ export class DiscoverApp {
     return this.page.testSubj
       .locator('discover-dataView-switch-link')
       .or(this.page.testSubj.locator('dataView-switch-link'));
+  }
+
+  /**
+   * Opens the data-view switcher and returns the list of available data view
+   * names (parsed from each option's `data-test-subj="dataView-<name>"`).
+   * Closes the switcher popover before returning.
+   */
+  async getAvailableDataViewNames(): Promise<string[]> {
+    const dataViewSwitch = await this.getVisibleDataViewSwitch();
+    await dataViewSwitch.click();
+    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    await expect(switcher).toBeVisible();
+
+    const names = await switcher
+      .locator('[data-test-subj^="dataView-"]')
+      .evaluateAll((elements) =>
+        elements.map((el) => (el.getAttribute('data-test-subj') ?? '').slice('dataView-'.length))
+      );
+
+    await this.page.keyboard.press('Escape');
+    await expect(switcher).toBeHidden();
+
+    return names;
   }
 
   /**
@@ -513,11 +539,7 @@ export class DiscoverApp {
   };
 
   async clickFieldSort(field: string, sortOption: string) {
-    const header = this.dataGrid.getColumnHeader(field);
-    await header.click();
-    await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
-      state: 'visible',
-    });
+    await this.dataGrid.openColumnMenuByField(field);
     await this.page.locator(`button:has-text("${sortOption}")`).click();
   }
 
@@ -848,5 +870,101 @@ export class DiscoverApp {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Opens the request inspector via the active tab's overflow menu.
+   */
+  async openInspectorFromTabMenu() {
+    await this.unifiedTabs.clickActiveTabMenuItem('unifiedTabs_tabMenuItem_inspect');
+    await expect(this.page.testSubj.locator('inspectorPanel')).toBeVisible();
+  }
+
+  /**
+   * Switches the active tab from ES|QL back to classic (data view) mode via
+   * the tab menu. When `discardModal` is set, also confirms the
+   * "discard changes" modal that appears when switching away from an ES|QL
+   * session with unsaved changes.
+   */
+  async selectDataViewMode(options?: { discardModal?: boolean }) {
+    await this.unifiedTabs.clickActiveTabMenuItem('unifiedTabs_tabMenuItem_switchToClassic');
+    await this.waitUntilTabIsLoaded();
+
+    if (options?.discardModal) {
+      const modal = this.page.testSubj.locator('discover-esql-to-dataview-modal');
+      await expect(modal).toBeVisible();
+      await this.page.testSubj.click('discover-esql-to-dataview-no-save-btn');
+      await expect(modal).toBeHidden();
+    }
+  }
+
+  /**
+   * Drags a selection across the histogram to trigger a time-range brush.
+   * Waits for the chart to finish its current render before dragging so the
+   * canvas coordinates are stable.
+   */
+  async brushHistogram() {
+    await this.waitForHistogramRendered();
+    const canvas = this.page.locator(
+      '[data-test-subj="unifiedHistogramChart"] canvas:last-of-type'
+    );
+    const box = await canvas.boundingBox();
+    if (!box) {
+      throw new Error('Could not read the histogram canvas bounding box');
+    }
+
+    const centerY = box.y + box.height / 2;
+    const fromX = box.x + box.width / 2 - 100;
+    const toX = box.x + box.width / 2 + 100;
+
+    await this.page.mouse.move(fromX, centerY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(toX, centerY, { steps: 10 });
+    await this.page.mouse.up();
+  }
+
+  /**
+   * Returns the labels currently shown in the histogram legend.
+   */
+  async getHistogramLegendList(): Promise<string[]> {
+    const legendItems = this.page.testSubj
+      .locator('unifiedHistogramChart')
+      .locator('.echLegendItem__label');
+    return legendItems.allInnerTexts();
+  }
+
+  /**
+   * Clicks a histogram legend value's filter action (`+` for "filter for",
+   * `-` for "filter out").
+   */
+  async clickLegendFilter(field: string, type: '+' | '-') {
+    const filterType = type === '+' ? 'filterIn' : 'filterOut';
+    await this.page.testSubj.click(`legend-${field}`);
+    await this.page.testSubj.click(`legend-${field}-${filterType}`);
+  }
+
+  /**
+   * Opts out of the "cascade layout" (grouped results) view that Discover
+   * renders by default for ES|QL `STATS ... BY` aggregation queries, falling
+   * back to the flat data grid. Only call this after submitting a query that
+   * actually renders the cascade layout (the grouping toggle is expected to
+   * be visible).
+   */
+  async optOutOfCascadeGrouping() {
+    const groupBySwitch = this.page.testSubj.locator('discoverEnableCascadeLayoutSwitch');
+    await expect(groupBySwitch).toBeVisible();
+    await groupBySwitch.click();
+
+    const list = this.page.testSubj.locator('discoverGroupBySelectionList');
+    await expect(list).toBeVisible();
+
+    await this.page.testSubj.click('discoverCascadeLayoutOptOutButton');
+
+    // Selecting the option doesn't reliably close the popover on its own
+    // (`EuiSelectable`'s `onActiveOptionChange` doesn't always fire a change
+    // when the clicked option was already active), so close it explicitly
+    // via the popover's own `closePopover` (wired to the Escape key).
+    await this.page.keyboard.press('Escape');
+    await expect(list).toBeHidden();
   }
 }
