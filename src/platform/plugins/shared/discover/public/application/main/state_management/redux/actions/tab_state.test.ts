@@ -200,6 +200,57 @@ describe('tab_state actions', () => {
       expect(stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toEqual(expectedUrlState);
     });
 
+    it('clears pushed profile URL state when URL fields reset to defaults', async () => {
+      const { internalState, stateStorageContainer, tabId } = await setup();
+      const nextUrlProfileState = {
+        ...TEST_PROFILE_STATE_DEF.defaultState,
+        urlValue: 'nextUrl',
+      };
+      const expectedUrlState = {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'nextUrl',
+        },
+      };
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const flushSpy = jest.spyOn(stateStorageContainer.kbnUrlControls, 'flush');
+
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState: nextUrlProfileState,
+        })
+      );
+
+      expect(stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toEqual(expectedUrlState);
+      setUrlStateSpy.mockClear();
+
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState: TEST_PROFILE_STATE_DEF.defaultState,
+        })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({});
+      expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, undefined);
+      expect(flushSpy).not.toHaveBeenCalled();
+      expect(stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toBeNull();
+      setUrlStateSpy.mockClear();
+
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState: nextUrlProfileState,
+        })
+      );
+
+      expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, expectedUrlState);
+      expect(stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toEqual(expectedUrlState);
+    });
+
     it('replaces active profile URL state and flushes the URL update when requested', async () => {
       const { internalState, services, stateStorageContainer, tabId } = await setup();
       const profileState = {

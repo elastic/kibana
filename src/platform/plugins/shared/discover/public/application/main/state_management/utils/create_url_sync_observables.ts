@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Observable, distinctUntilChanged, filter, map, skip } from 'rxjs';
+import { type Observable, distinctUntilChanged, map, skip } from 'rxjs';
 import { isEqual } from 'lodash';
 import { type GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { type INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/public';
@@ -26,8 +26,6 @@ import { internalStateSlice } from '../redux/internal_state';
 import { createTabAppStateObservable } from './create_tab_app_state_observable';
 import type { ProfileStateMap } from '../../../../context_awareness';
 import { ProfileStateType } from '../../../../context_awareness';
-
-const EMPTY_PROFILE_URL_STATE = {};
 
 /**
  * Create observables and state containers for 2-directional syncing of appState and globalState with the URL
@@ -116,14 +114,13 @@ export const createUrlSyncObservables = ({
     });
 
   const profileState$ = internalState$.pipe(
-    skip(1),
-    map(() => getCurrentProfileUrlState()),
-    filter((profileUrlState) => profileUrlState !== undefined),
-    distinctUntilChanged((a, b) => isEqual(a, b))
+    map(getCurrentProfileUrlState),
+    distinctUntilChanged((a, b) => isEqual(a, b)),
+    skip(1)
   );
 
-  const profileStateContainer: INullableBaseStateContainer<ProfileStateMap> = {
-    get: () => getCurrentProfileUrlState() ?? EMPTY_PROFILE_URL_STATE,
+  const profileStateContainer: INullableBaseStateContainer<ProfileStateMap | undefined> = {
+    get: () => getCurrentProfileUrlState(),
     set: (profileUrlState) => {
       const currentProfileStateMap = selectTab(getState(), tabId).profileState;
 

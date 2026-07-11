@@ -293,7 +293,7 @@ describe('createUrlSyncObservables', () => {
         nestedValue: currentProfileState.nestedValue,
       },
     });
-    expect(result.profileStateContainer.get()).toEqual({});
+    expect(result.profileStateContainer.get()).toBeUndefined();
   });
 
   it('should clear profile URL state fields when profileStateContainer receives another profile key', async () => {
@@ -330,6 +330,6 @@ describe('createUrlSyncObservables', () => {
         secondaryUrlValue: 'otherProfileUrl',
       },
     });
-    expect(result.profileStateContainer.get()).toEqual({});
+    expect(result.profileStateContainer.get()).toBeUndefined();
   });
 });

@@ -362,7 +362,7 @@ resolve: () => ({
 });
 ```
 
-Only the active data source profile's URL fields are read from and written to `_p`. Removing `_p` resets those fields to their definition defaults.
+Main Discover stores URL-backed fields in the `_p` URL parameter so they survive refreshes, browser history, and shared links. State is written for the active data source profile, and shared links can carry URL-backed state for a registered profile that becomes active when the link opens. Removing `_p` resets the active profile's URL-backed fields to their definition defaults.
 
 Use `toolkit.getStateAdapter()` inside extension point implementations to read, observe, and update the state:
 
