@@ -203,9 +203,16 @@ describe('tabs actions', () => {
 
       await addNewTab({ tab: otherTab });
       await initializeSingleTab({ tabId: otherTab.id });
-      await switchToTab({ tabId: currentTab.id });
 
       const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+
+      await switchToTab({ tabId: currentTab.id });
+
+      expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, undefined, {
+        replace: true,
+      });
+
+      setUrlStateSpy.mockClear();
 
       await switchToTab({ tabId: otherTab.id });
 

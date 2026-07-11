@@ -19,12 +19,7 @@ interface ModeDefinition {
 }
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, unifiedTabs } = getPageObjects([
-    'common',
-    'discover',
-    'unifiedFieldList',
-    'unifiedTabs',
-  ]);
+  const { common, discover, unifiedTabs } = getPageObjects(['common', 'discover', 'unifiedTabs']);
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
@@ -166,6 +161,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
+  const expectNoProfileUrlState = async () => {
+    await retry.try(async () => {
+      expect(await getProfileUrlState()).to.be(undefined);
+    });
+  };
+
   const openProfileStateDocView = async () => {
     await dataGrid.clickRowToggle({
       rowIndex: 0,
@@ -290,6 +291,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await waitForPersistentProfileStateInStorage('warning');
           await expectProfileUrlBoxColor('danger');
 
+          await browser.goBack();
+          await expectNoProfileUrlState();
+          await expectBoxColor('transparent');
+
+          await browser.goForward();
+          await expectProfileUrlBoxColor('danger');
+          await expectBoxColor('danger');
+
           await browser.refresh();
           await discover.waitUntilTabIsLoaded();
           await openProfileStateDocView();
@@ -303,6 +312,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await unifiedTabs.createNewTab();
           await discover.waitUntilTabIsLoaded();
           await unifiedTabs.closeTab(0);
+          await waitForRecentlyClosedProfileStateInStorage('warning');
+
+          await browser.refresh();
+          await discover.waitUntilTabIsLoaded();
           await waitForRecentlyClosedProfileStateInStorage('warning');
 
           await unifiedTabs.restoreRecentlyClosedTab(0);

@@ -258,10 +258,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
                       options={boxColorOptions}
                       value={boxColor}
                       onChange={(event) => {
-                        stateAdapter.updateState(
-                          { boxColor: getBoxColor(event.target.value) },
-                          { historyMethod: 'replace' }
-                        );
+                        stateAdapter.updateState({ boxColor: getBoxColor(event.target.value) });
                       }}
                     />
                   </EuiFormRow>

@@ -313,6 +313,44 @@ describe('tab_sync actions', () => {
       });
     });
 
+    it('should prefer initial profile URL state over existing tab profile state during initialization', async () => {
+      const { tabId, initializeSingleTab, internalState, stateStorageContainer } = await setup();
+      const currentTab = selectTab(internalState.getState(), tabId);
+
+      internalState.dispatch(
+        internalStateActions.setTabs({
+          allTabs: [
+            {
+              ...currentTab,
+              profileState: {
+                [TEST_PROFILE_STATE_DEF.key]: {
+                  urlValue: 'fromTabState',
+                  persistentValue: 'fromTabState',
+                },
+              },
+            },
+          ],
+          selectedTabId: tabId,
+          recentlyClosedTabs: [],
+        })
+      );
+
+      await stateStorageContainer.set(PROFILE_STATE_URL_KEY, {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'fromUrl',
+        },
+      });
+
+      await initializeSingleTab({ tabId });
+
+      expect(selectTab(internalState.getState(), tabId).profileState).toEqual({
+        [TEST_PROFILE_STATE_DEF.key]: {
+          urlValue: 'fromUrl',
+          persistentValue: 'fromTabState',
+        },
+      });
+    });
+
     it('should unsubscribe from tabStateSubscription when stopSyncing is called', async () => {
       const mockTabState$: Subject<TabPersistableState> = new Subject();
       jest

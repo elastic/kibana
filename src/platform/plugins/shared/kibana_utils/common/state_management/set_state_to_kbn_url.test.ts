@@ -71,6 +71,16 @@ describe('set_state_to_kbn_url', () => {
       expect(newUrl).toMatchInlineSnapshot(`"http://localhost:5601/oxf/app/kibana#/yourApp?_g=()"`);
     });
 
+    it('should remove hashed state from url when state is undefined', () => {
+      const newUrl = setStateToKbnUrl(
+        '_s',
+        undefined,
+        { useHash: true },
+        'http://localhost:5601/oxf/app/kibana#/yourApp?_s=h@a897fac&_g=()'
+      );
+      expect(newUrl).toMatchInlineSnapshot(`"http://localhost:5601/oxf/app/kibana#/yourApp?_g=()"`);
+    });
+
     it('should remove state from url before hash when state is undefined', () => {
       const newUrl = setStateToKbnUrl(
         '_s',
