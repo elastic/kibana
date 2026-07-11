@@ -351,7 +351,7 @@ export const internalStateSlice = createSlice({
       }),
 
     /**
-     * Set the initial tab state, overwriting existing state and pushing to URL history
+     * Set the initial tab app and profile state
      */
     initializeTabState: (
       state,

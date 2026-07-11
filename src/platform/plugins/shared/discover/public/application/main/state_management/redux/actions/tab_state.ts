@@ -39,6 +39,7 @@ import {
   ProfileStateType,
   type ProfileStateDefinition,
   type ProfileStateDefaultsHandling,
+  type ProfileStateMutationOptions,
 } from '../../../../../context_awareness';
 import { selectTab } from '../selectors';
 import {
@@ -221,7 +222,7 @@ export const updateAttributes: InternalStateThunkActionCreator<[AttributesPayloa
 type ProfileStatePayload<TState extends object> = TabActionPayload<{
   profileStateDefinition: ProfileStateDefinition<TState>;
   profileState: TState;
-  historyMethod?: 'push' | 'replace';
+  historyMethod?: ProfileStateMutationOptions['historyMethod'];
 }>;
 
 const ALL_PROFILE_STATE_TYPES = new Set([

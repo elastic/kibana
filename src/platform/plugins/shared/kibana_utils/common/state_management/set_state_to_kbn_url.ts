@@ -56,6 +56,8 @@ const internalSetStateToKbnUrl = createSetStateToKbnUrl(<State>(rawState: State)
  * will return url:
  * http://localhost:5601/oxf/app/kibana#/yourApp?_a=(tab:other)&_b=(f:test,i:'',l:'')
  *
+ * Passing `undefined` removes the key from the URL; passing `null` stores a Rison null value.
+ *
  * By default due to Kibana legacy reasons assumed that state is stored in a query inside a hash part of the URL:
  * http://localhost:5601/oxf/app/kibana#/yourApp?_a={STATE}
  *
