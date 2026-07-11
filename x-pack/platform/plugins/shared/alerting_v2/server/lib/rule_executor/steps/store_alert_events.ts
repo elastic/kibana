@@ -37,7 +37,7 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
       });
 
       this.logger.debug({
-        message: `[${this.name}] Bulk-indexed alert events batch (attempted=${bulkResult.attempted}, persisted=${bulkResult.persisted})`,
+        message: `[${this.name}] Bulk-indexed alert events batch (attempted=${bulkResult.attempted}, persisted=${bulkResult.docs.length})`,
       });
 
       return {

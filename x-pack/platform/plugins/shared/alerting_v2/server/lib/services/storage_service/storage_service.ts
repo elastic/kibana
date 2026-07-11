@@ -66,19 +66,30 @@ export interface BulkIndexError<TDocument extends Record<string, unknown>> {
  * Per-batch bulk persistence outcome returned by the bulk index methods.
  *
  * A successful call to `esClient.bulk` may still contain per-item errors
- * (`response.errors === true`). Callers that need to know whether each doc
- * landed read this result rather than assuming success from the absence of a
- * thrown error.
+ * (`response.errors === true`). Callers get two symmetric arrays back:
+ * `docs` for what persisted and `errors` for what didn't. No correlation
+ * against the input array is required — consumers iterate the arrays
+ * directly.
+ *
+ * `attempted` is redundant with `docs.length + errors.length` but retained
+ * as a caller-facing invariant ("here's the input count I saw"), useful for
+ * sanity assertions and logging without walking either array.
  */
 export interface BulkIndexResult<TDocument extends Record<string, unknown>> {
-  /** Number of documents submitted to the bulk request. */
-  readonly attempted: number;
-  /** Number of documents Elasticsearch acknowledged (`attempted - errors.length`). */
-  readonly persisted: number;
   /**
-   * Per-document rejections. Empty when all docs persisted. Consumers
-   * correlate failures with their input via `error.document` reference
-   * identity.
+   * Number of documents submitted to the bulk request. Always equal to
+   * `docs.length + errors.length`.
+   */
+  readonly attempted: number;
+  /**
+   * Documents Elasticsearch acknowledged as created. Each element is the
+   * exact reference the caller passed in `params.docs`.
+   */
+  readonly docs: readonly TDocument[];
+  /**
+   * Per-document rejections. Empty when all docs persisted. `error.document`
+   * carries the input reference so callers can log or replay the failed
+   * doc without any correlation step.
    */
   readonly errors: ReadonlyArray<BulkIndexError<TDocument>>;
 }
@@ -150,7 +161,7 @@ export class StorageService implements StorageServiceContract {
     refresh: boolean | 'wait_for'
   ): Promise<BulkIndexResult<TDocument>> {
     if (entries.length === 0) {
-      return { attempted: 0, persisted: 0, errors: [] };
+      return { attempted: 0, docs: [], errors: [] };
     }
 
     const operations: NonNullable<BulkRequest<TDocument>['operations']> = entries.flatMap(
@@ -189,15 +200,25 @@ export class StorageService implements StorageServiceContract {
     const attempted = entries.length;
 
     if (!response.errors) {
-      return { attempted, persisted: attempted, errors: [] };
+      return {
+        attempted,
+        docs: entries.map((entry) => entry.doc),
+        errors: [],
+      };
     }
 
+    const docs: TDocument[] = [];
     const errors: Array<BulkIndexError<TDocument>> = [];
-    response.items.forEach((item, index) => {
-      const rejection = item.create?.error;
-      if (!rejection) return;
 
+    response.items.forEach((item, index) => {
       const entry = entries[index];
+      const rejection = item.create?.error;
+
+      if (!rejection) {
+        docs.push(entry.doc);
+        return;
+      }
+
       errors.push({
         code: rejection.type ?? 'unknown_error',
         message: rejection.reason ?? 'Unknown Elasticsearch bulk error',
@@ -207,11 +228,7 @@ export class StorageService implements StorageServiceContract {
       });
     });
 
-    return {
-      attempted,
-      persisted: attempted - errors.length,
-      errors,
-    };
+    return { attempted, docs, errors };
   }
 
   private logBulkIndexResponse({

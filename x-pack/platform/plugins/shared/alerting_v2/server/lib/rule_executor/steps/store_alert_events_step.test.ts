@@ -59,7 +59,7 @@ describe('StoreAlertEventsStep', () => {
           observations: {
             bulkIndexResult: {
               attempted: alertEventsBatch.length,
-              persisted: alertEventsBatch.length,
+              docs: alertEventsBatch,
               errors: [],
             },
           },
@@ -103,7 +103,7 @@ describe('StoreAlertEventsStep', () => {
         state,
         meta: {
           observations: {
-            bulkIndexResult: { attempted: 0, persisted: 0, errors: [] },
+            bulkIndexResult: { attempted: 0, docs: [], errors: [] },
           },
         },
       });
@@ -145,7 +145,7 @@ describe('StoreAlertEventsStep', () => {
           observations: {
             bulkIndexResult: {
               attempted: 2,
-              persisted: 1,
+              docs: [alertEventsBatch[0]],
               errors: [
                 {
                   code: 'mapper_parsing_exception',
@@ -160,6 +160,8 @@ describe('StoreAlertEventsStep', () => {
         },
       });
 
+      // @ts-expect-error: meta is present on the result
+      expect(result.meta?.observations?.bulkIndexResult?.docs[0]).toBe(alertEventsBatch[0]);
       // @ts-expect-error: meta is present on the result
       expect(result.meta?.observations?.bulkIndexResult?.errors[0].document).toBe(
         alertEventsBatch[1]

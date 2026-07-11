@@ -87,10 +87,14 @@ export interface EmissionObservations {
  * storage service's `BulkIndexResult` so the store step forwards the result
  * without transformation, but declared here to avoid a rule-executor →
  * storage-service module dependency.
+ *
+ * Symmetric arrays: `docs` for what persisted, `errors` for what didn't.
+ * `attempted` equals `docs.length + errors.length` and is kept for logging
+ * / sanity checks without having to walk either array.
  */
 export interface BulkIndexObservation {
   readonly attempted: number;
-  readonly persisted: number;
+  readonly docs: readonly Record<string, unknown>[];
   readonly errors: readonly BulkIndexObservationError[];
 }
 

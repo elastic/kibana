@@ -21,7 +21,7 @@ import {
  */
 export const EMPTY_BULK_INDEX_RESULT: BulkIndexResult<Record<string, unknown>> = {
   attempted: 0,
-  persisted: 0,
+  docs: [],
   errors: [],
 };
 

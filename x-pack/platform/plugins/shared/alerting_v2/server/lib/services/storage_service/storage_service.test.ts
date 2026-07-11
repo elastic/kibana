@@ -47,7 +47,7 @@ describe('StorageService', () => {
       const result = await storageService.bulkIndexDocs({ index, docs: [] });
 
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
-      expect(result).toEqual({ attempted: 0, persisted: 0, errors: [] });
+      expect(result).toEqual({ attempted: 0, docs: [], errors: [] });
     });
 
     it('should successfully bulk index documents', async () => {
@@ -71,7 +71,9 @@ describe('StorageService', () => {
         ],
         refresh: false,
       });
-      expect(result).toEqual({ attempted: 2, persisted: 2, errors: [] });
+      expect(result).toEqual({ attempted: 2, docs: mockDocs, errors: [] });
+      expect(result.docs[0]).toBe(mockDocs[0]);
+      expect(result.docs[1]).toBe(mockDocs[1]);
     });
 
     it('should pass custom refresh option when provided', async () => {
@@ -136,7 +138,7 @@ describe('StorageService', () => {
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual({
         attempted: 2,
-        persisted: 1,
+        docs: [mockDocs[0]],
         errors: [
           {
             code: 'mapper_parsing_exception',
@@ -147,6 +149,7 @@ describe('StorageService', () => {
           },
         ],
       });
+      expect(result.docs[0]).toBe(mockDocs[0]);
       expect(result.errors[0].document).toBe(mockDocs[1]);
     });
 
@@ -163,7 +166,7 @@ describe('StorageService', () => {
       const result = await storageService.bulkIndexDocs({ index, docs: [mockDocs[0]] });
 
       expect(mockLogger.error).not.toHaveBeenCalled();
-      expect(result).toEqual({ attempted: 1, persisted: 1, errors: [] });
+      expect(result).toEqual({ attempted: 1, docs: [mockDocs[0]], errors: [] });
     });
 
     it('should throw error and log when bulk operation fails', async () => {
@@ -219,7 +222,7 @@ describe('StorageService', () => {
         ],
         refresh: 'wait_for',
       });
-      expect(result).toEqual({ attempted: 2, persisted: 2, errors: [] });
+      expect(result).toEqual({ attempted: 2, docs: mockDocs, errors: [] });
     });
 
     it('reports partial failures with per-doc rejection details and preserves the target index', async () => {
@@ -249,7 +252,7 @@ describe('StorageService', () => {
 
       expect(result).toEqual({
         attempted: 2,
-        persisted: 1,
+        docs: [mockDocs[0]],
         errors: [
           {
             code: 'mapper_parsing_exception',
@@ -260,6 +263,7 @@ describe('StorageService', () => {
           },
         ],
       });
+      expect(result.docs[0]).toBe(mockDocs[0]);
       expect(result.errors[0].document).toBe(mockDocs[1]);
     });
 
@@ -286,7 +290,7 @@ describe('StorageService', () => {
       const result = await storageService.bulkIndexDocsAcrossIndices({ docs: [] });
 
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
-      expect(result).toEqual({ attempted: 0, persisted: 0, errors: [] });
+      expect(result).toEqual({ attempted: 0, docs: [], errors: [] });
     });
 
     it('throws and logs when the underlying bulk call fails', async () => {
