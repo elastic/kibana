@@ -24,6 +24,35 @@ import {
   SCOUT_TESTS_ONLY_EXCLUDE_GLOBS,
 } from './paths';
 
+describe('SCOUT_SERVERS_ROOT', () => {
+  const ORIGINAL_ENV = process.env.CI_PARALLEL_PROCESS_NUMBER;
+
+  afterEach(() => {
+    if (ORIGINAL_ENV === undefined) {
+      delete process.env.CI_PARALLEL_PROCESS_NUMBER;
+    } else {
+      process.env.CI_PARALLEL_PROCESS_NUMBER = ORIGINAL_ENV;
+    }
+    jest.resetModules();
+  });
+
+  it('resolves to the bare servers dir when CI_PARALLEL_PROCESS_NUMBER is unset', () => {
+    delete process.env.CI_PARALLEL_PROCESS_NUMBER;
+    jest.resetModules();
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { SCOUT_SERVERS_ROOT } = require('./paths');
+    expect(SCOUT_SERVERS_ROOT).toBe(path.resolve(REPO_ROOT, '.scout', 'servers'));
+  });
+
+  it('scopes to a per-worker subdirectory when CI_PARALLEL_PROCESS_NUMBER is set', () => {
+    process.env.CI_PARALLEL_PROCESS_NUMBER = '2';
+    jest.resetModules();
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { SCOUT_SERVERS_ROOT } = require('./paths');
+    expect(SCOUT_SERVERS_ROOT).toBe(path.resolve(REPO_ROOT, '.scout', 'servers', 'worker-2'));
+  });
+});
+
 describe('Scout path globs', () => {
   describe('TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB', () => {
     const shouldMatch = [
