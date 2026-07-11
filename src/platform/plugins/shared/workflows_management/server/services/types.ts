@@ -44,22 +44,22 @@ export interface WorkflowCrudDeps extends WorkflowStorageDeps {
   validationService: WorkflowValidationService;
   getCoreStart: () => CoreStart;
   changeHistoryService: IWorkflowChangeHistoryService;
-  workflowExecutionsDal: WorkflowExecutionsDataAccess;
-  stepExecutionsDal: StepExecutionsDataAccess;
+  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
+  stepExecutionsDataAccess: StepExecutionsDataAccess;
 }
 
 /** Deps for WorkflowSearchService. */
 export interface WorkflowSearchDeps extends WorkflowStorageDeps {
   esClient: ElasticsearchClient;
-  workflowExecutionsDal: WorkflowExecutionsDataAccess;
+  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
 }
 
 /** Deps for WorkflowExecutionQueryService. */
 export interface WorkflowExecutionQueryDeps {
   logger: Logger;
   esClient: ElasticsearchClient;
-  workflowExecutionsDal: WorkflowExecutionsDataAccess;
-  stepExecutionsDal: StepExecutionsDataAccess;
+  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
+  stepExecutionsDataAccess: StepExecutionsDataAccess;
   workflowEventLoggerService: IWorkflowEventLoggerService;
 }
 

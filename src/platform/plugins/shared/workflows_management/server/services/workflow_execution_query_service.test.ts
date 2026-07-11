@@ -16,8 +16,8 @@ import type {
   WorkflowExecutionsDataAccess,
 } from '@kbn/workflows/server/data_access_layer';
 import {
-  createMockStepExecutionsDal,
-  createMockWorkflowExecutionsDal,
+  createMockStepExecutionsDataAccess,
+  createMockWorkflowExecutionsDataAccess,
 } from '@kbn/workflows/server/data_access_layer';
 import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
 
@@ -30,8 +30,8 @@ import {
 
 describe('WorkflowExecutionQueryService', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockWorkflowExecutionsDal: jest.Mocked<WorkflowExecutionsDataAccess>;
-  let mockStepExecutionsDal: jest.Mocked<StepExecutionsDataAccess>;
+  let mockWorkflowExecutionsDataAccess: jest.Mocked<WorkflowExecutionsDataAccess>;
+  let mockStepExecutionsDataAccess: jest.Mocked<StepExecutionsDataAccess>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockEventLoggerService: jest.Mocked<IWorkflowEventLoggerService>;
   let service: WorkflowExecutionQueryService;
@@ -43,14 +43,14 @@ describe('WorkflowExecutionQueryService', () => {
       mget: jest.fn(),
       update: jest.fn(),
     } as any;
-    mockWorkflowExecutionsDal = {
-      ...createMockWorkflowExecutionsDal(),
+    mockWorkflowExecutionsDataAccess = {
+      ...createMockWorkflowExecutionsDataAccess(),
       search: jest.fn((request) =>
         mockEsClient.search({ index: WORKFLOWS_EXECUTIONS_INDEX, ...request })
       ),
     };
-    mockStepExecutionsDal = {
-      ...createMockStepExecutionsDal(),
+    mockStepExecutionsDataAccess = {
+      ...createMockStepExecutionsDataAccess(),
       search: jest.fn((request) =>
         mockEsClient.search({ index: WORKFLOWS_STEP_EXECUTIONS_INDEX, ...request })
       ),
@@ -64,8 +64,8 @@ describe('WorkflowExecutionQueryService', () => {
     service = new WorkflowExecutionQueryService({
       logger: mockLogger,
       esClient: mockEsClient,
-      workflowExecutionsDal: mockWorkflowExecutionsDal,
-      stepExecutionsDal: mockStepExecutionsDal,
+      workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
+      stepExecutionsDataAccess: mockStepExecutionsDataAccess,
       workflowEventLoggerService: mockEventLoggerService,
     });
   });

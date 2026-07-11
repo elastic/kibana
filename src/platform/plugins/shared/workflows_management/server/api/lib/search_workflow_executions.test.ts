@@ -10,18 +10,18 @@
 import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
-import { createMockWorkflowExecutionsDal } from '@kbn/workflows/server/data_access_layer';
+import { createMockWorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
 import {
   searchWorkflowExecutions,
   WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES,
 } from './search_workflow_executions';
 
 describe('searchWorkflowExecutions', () => {
-  let mockWorkflowExecutionsDal: jest.Mocked<WorkflowExecutionsDataAccess>;
+  let mockWorkflowExecutionsDataAccess: jest.Mocked<WorkflowExecutionsDataAccess>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
 
   beforeEach(() => {
-    mockWorkflowExecutionsDal = createMockWorkflowExecutionsDal();
+    mockWorkflowExecutionsDataAccess = createMockWorkflowExecutionsDataAccess();
 
     mockLogger = loggerMock.create();
     mockLogger.error = jest.fn();
@@ -29,7 +29,7 @@ describe('searchWorkflowExecutions', () => {
 
   describe('response transformation', () => {
     it('should include concurrencyGroupKey in list results when present', async () => {
-      mockWorkflowExecutionsDal.search.mockResolvedValue({
+      mockWorkflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           total: { value: 1 },
           hits: [
@@ -54,7 +54,7 @@ describe('searchWorkflowExecutions', () => {
       } as any);
 
       const result = await searchWorkflowExecutions({
-        workflowExecutionsDal: mockWorkflowExecutionsDal,
+        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
         logger: mockLogger,
         query: { term: { workflowId: 'workflow-1' } },
         page: 1,
@@ -70,7 +70,7 @@ describe('searchWorkflowExecutions', () => {
     });
 
     it('should include version in list results when present', async () => {
-      mockWorkflowExecutionsDal.search.mockResolvedValue({
+      mockWorkflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           total: { value: 1 },
           hits: [
@@ -95,7 +95,7 @@ describe('searchWorkflowExecutions', () => {
       } as any);
 
       const result = await searchWorkflowExecutions({
-        workflowExecutionsDal: mockWorkflowExecutionsDal,
+        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
         logger: mockLogger,
         query: { term: { workflowId: 'workflow-1' } },
         page: 1,
@@ -111,7 +111,7 @@ describe('searchWorkflowExecutions', () => {
     });
 
     it('should omit version from list results when absent', async () => {
-      mockWorkflowExecutionsDal.search.mockResolvedValue({
+      mockWorkflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           total: { value: 1 },
           hits: [
@@ -135,7 +135,7 @@ describe('searchWorkflowExecutions', () => {
       } as any);
 
       const result = await searchWorkflowExecutions({
-        workflowExecutionsDal: mockWorkflowExecutionsDal,
+        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
         logger: mockLogger,
         query: { term: { workflowId: 'workflow-1' } },
         page: 1,
@@ -148,7 +148,7 @@ describe('searchWorkflowExecutions', () => {
 
   describe('search options', () => {
     it('should request only list metadata fields from Elasticsearch', async () => {
-      mockWorkflowExecutionsDal.search.mockResolvedValue({
+      mockWorkflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           total: { value: 0 },
           hits: [],
@@ -156,12 +156,12 @@ describe('searchWorkflowExecutions', () => {
       } as any);
 
       await searchWorkflowExecutions({
-        workflowExecutionsDal: mockWorkflowExecutionsDal,
+        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
         logger: mockLogger,
         query: { term: { workflowId: 'workflow-1' } },
       });
 
-      expect(mockWorkflowExecutionsDal.search).toHaveBeenCalledWith(
+      expect(mockWorkflowExecutionsDataAccess.search).toHaveBeenCalledWith(
         expect.objectContaining({
           _source: { includes: [...WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES] },
         })
@@ -169,7 +169,7 @@ describe('searchWorkflowExecutions', () => {
     });
 
     it('should forward collapse to Elasticsearch search', async () => {
-      mockWorkflowExecutionsDal.search.mockResolvedValue({
+      mockWorkflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           total: { value: 0 },
           hits: [],
@@ -177,13 +177,13 @@ describe('searchWorkflowExecutions', () => {
       } as any);
 
       await searchWorkflowExecutions({
-        workflowExecutionsDal: mockWorkflowExecutionsDal,
+        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
         logger: mockLogger,
         query: { term: { workflowId: 'workflow-1' } },
         collapse: { field: 'concurrencyGroupKey' },
       });
 
-      expect(mockWorkflowExecutionsDal.search).toHaveBeenCalledWith(
+      expect(mockWorkflowExecutionsDataAccess.search).toHaveBeenCalledWith(
         expect.objectContaining({
           collapse: { field: 'concurrencyGroupKey' },
         })
@@ -207,10 +207,10 @@ describe('searchWorkflowExecutions', () => {
         warnings: [],
       });
 
-      mockWorkflowExecutionsDal.search.mockRejectedValue(indexNotFoundError);
+      mockWorkflowExecutionsDataAccess.search.mockRejectedValue(indexNotFoundError);
 
       const result = await searchWorkflowExecutions({
-        workflowExecutionsDal: mockWorkflowExecutionsDal,
+        workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
         logger: mockLogger,
         query: { term: { workflowId: 'workflow-1' } },
         page: 1,
@@ -242,11 +242,11 @@ describe('searchWorkflowExecutions', () => {
         warnings: [],
       });
 
-      mockWorkflowExecutionsDal.search.mockRejectedValue(otherError);
+      mockWorkflowExecutionsDataAccess.search.mockRejectedValue(otherError);
 
       await expect(
         searchWorkflowExecutions({
-          workflowExecutionsDal: mockWorkflowExecutionsDal,
+          workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
           logger: mockLogger,
           query: { term: { workflowId: 'workflow-1' } },
         })
@@ -261,11 +261,11 @@ describe('searchWorkflowExecutions', () => {
       mockLogger.error.mockClear();
       const genericError = new Error('Network error');
 
-      mockWorkflowExecutionsDal.search.mockRejectedValue(genericError);
+      mockWorkflowExecutionsDataAccess.search.mockRejectedValue(genericError);
 
       await expect(
         searchWorkflowExecutions({
-          workflowExecutionsDal: mockWorkflowExecutionsDal,
+          workflowExecutionsDataAccess: mockWorkflowExecutionsDataAccess,
           logger: mockLogger,
           query: { term: { workflowId: 'workflow-1' } },
         })

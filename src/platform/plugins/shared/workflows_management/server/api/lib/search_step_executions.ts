@@ -23,7 +23,7 @@ export interface StepExecutionListResult {
 }
 
 export interface SearchStepExecutionsParams {
-  stepExecutionsDal: StepExecutionsDataAccess;
+  stepExecutionsDataAccess: StepExecutionsDataAccess;
   logger: Logger;
   /** When set, search steps for a single workflow run (existing behavior). */
   workflowExecutionId?: string;
@@ -85,7 +85,7 @@ function getTotalFromResponse(
 }
 
 export const searchStepExecutions = async ({
-  stepExecutionsDal,
+  stepExecutionsDataAccess,
   logger,
   workflowExecutionId,
   workflowId,
@@ -119,7 +119,7 @@ export const searchStepExecutions = async ({
     const pageSize = size ?? (isPaginated ? 100 : 1000);
     const from = isPaginated && page !== undefined ? (page - 1) * pageSize : 0;
 
-    const response = await stepExecutionsDal.search({
+    const response = await stepExecutionsDataAccess.search({
       query: { bool: { must: mustQueries } },
       ...(sourceExcludes?.length ? { _source: { excludes: sourceExcludes } } : {}),
       sort: 'startedAt:desc',

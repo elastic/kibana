@@ -98,10 +98,10 @@ const makeDeps = (
       safeParse: (v: unknown) => ({ success: true, data: v }),
     }),
   } as unknown as WorkflowValidationService;
-  const workflowExecutionsDal = {
+  const workflowExecutionsDataAccess = {
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as WorkflowExecutionsDataAccess;
-  const stepExecutionsDal = {
+  const stepExecutionsDataAccess = {
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as StepExecutionsDataAccess;
   const deps: WorkflowCrudDeps = {
@@ -118,8 +118,8 @@ const makeDeps = (
       asScoped: jest.fn(),
       asSystemUser: jest.fn(),
     } as any,
-    workflowExecutionsDal,
-    stepExecutionsDal,
+    workflowExecutionsDataAccess,
+    stepExecutionsDataAccess,
     ...depsOverrides,
   };
   return { deps, client };

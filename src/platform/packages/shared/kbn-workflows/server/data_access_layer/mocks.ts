@@ -9,7 +9,7 @@
 
 import type { StepExecutionsDataAccess, WorkflowExecutionsDataAccess } from './types';
 
-export const createMockWorkflowExecutionsDal = (
+export const createMockWorkflowExecutionsDataAccess = (
   overrides: Partial<jest.Mocked<WorkflowExecutionsDataAccess>> = {}
 ): jest.Mocked<WorkflowExecutionsDataAccess> =>
   ({
@@ -22,7 +22,7 @@ export const createMockWorkflowExecutionsDal = (
     ...overrides,
   }) as jest.Mocked<WorkflowExecutionsDataAccess>;
 
-export const createMockStepExecutionsDal = (
+export const createMockStepExecutionsDataAccess = (
   overrides: Partial<jest.Mocked<StepExecutionsDataAccess>> = {}
 ): jest.Mocked<StepExecutionsDataAccess> =>
   ({

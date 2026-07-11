@@ -100,8 +100,8 @@ const restoreDisabledWorkflows = async (
 const purgeWorkflowRelatedData = async (
   workflowIds: string[],
   spaceId: string,
-  workflowExecutionsDal: WorkflowExecutionsDataAccess,
-  stepExecutionsDal: StepExecutionsDataAccess,
+  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess,
+  stepExecutionsDataAccess: StepExecutionsDataAccess,
   logger: Logger
 ): Promise<void> => {
   if (workflowIds.length === 0) {
@@ -121,12 +121,12 @@ const purgeWorkflowRelatedData = async (
   } as const;
 
   const deleteOps = [
-    workflowExecutionsDal.deleteByQuery(deleteByQueryRequest).catch((error) => {
+    workflowExecutionsDataAccess.deleteByQuery(deleteByQueryRequest).catch((error) => {
       logger.warn(
         `Failed to purge executions for workflows [${workflowIds.join(', ')}]: ${error.message}`
       );
     }),
-    stepExecutionsDal.deleteByQuery(deleteByQueryRequest).catch((error) => {
+    stepExecutionsDataAccess.deleteByQuery(deleteByQueryRequest).catch((error) => {
       logger.warn(
         `Failed to purge step executions for workflows [${workflowIds.join(', ')}]: ${
           error.message
@@ -145,8 +145,8 @@ const hardDeleteWorkflows = async (
   spaceId: string,
   failures: Array<{ id: string; error: string }>,
   deps: {
-    workflowExecutionsDal: WorkflowExecutionsDataAccess;
-    stepExecutionsDal: StepExecutionsDataAccess;
+    workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
+    stepExecutionsDataAccess: StepExecutionsDataAccess;
     taskScheduler: WorkflowTaskScheduler | null;
     logger: Logger;
     getWorkflowExecutions: (
@@ -155,7 +155,7 @@ const hardDeleteWorkflows = async (
     ) => Promise<WorkflowExecutionListDto>;
   }
 ): Promise<DeleteWorkflowsResponse> => {
-  const { workflowExecutionsDal, stepExecutionsDal, taskScheduler, logger, getWorkflowExecutions } =
+  const { workflowExecutionsDataAccess, stepExecutionsDataAccess, taskScheduler, logger, getWorkflowExecutions } =
     deps;
   const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
 
@@ -203,8 +203,8 @@ const hardDeleteWorkflows = async (
   await purgeWorkflowRelatedData(
     successfulIds,
     spaceId,
-    workflowExecutionsDal,
-    stepExecutionsDal,
+    workflowExecutionsDataAccess,
+    stepExecutionsDataAccess,
     logger
   );
 
@@ -283,8 +283,8 @@ export const deleteWorkflows = async (params: {
   spaceId: string;
   force: boolean;
   storage: WorkflowStorage;
-  workflowExecutionsDal: WorkflowExecutionsDataAccess;
-  stepExecutionsDal: StepExecutionsDataAccess;
+  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
+  stepExecutionsDataAccess: StepExecutionsDataAccess;
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
   getWorkflowExecutions: (
@@ -297,8 +297,8 @@ export const deleteWorkflows = async (params: {
     spaceId,
     force,
     storage,
-    workflowExecutionsDal,
-    stepExecutionsDal,
+    workflowExecutionsDataAccess,
+    stepExecutionsDataAccess,
     taskScheduler,
     logger,
     getWorkflowExecutions,
@@ -320,8 +320,8 @@ export const deleteWorkflows = async (params: {
 
   if (force) {
     return hardDeleteWorkflows(ids, hits, client, spaceId, failures, {
-      workflowExecutionsDal,
-      stepExecutionsDal,
+      workflowExecutionsDataAccess,
+      stepExecutionsDataAccess,
       taskScheduler,
       logger,
       getWorkflowExecutions,

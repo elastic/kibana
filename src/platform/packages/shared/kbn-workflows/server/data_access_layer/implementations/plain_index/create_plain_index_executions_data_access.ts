@@ -19,12 +19,12 @@ import { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/step_ex
 import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/workflow_executions_mappings';
 import type {
   CreateExecutionsDataAccessDeps,
-  ExecutionsDalBundle,
+  ExecutionsDataAccessBundle,
   StepExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
 } from '../../types';
 
-export class PlainIndexExecutionsDalBundle implements ExecutionsDalBundle {
+export class PlainIndexExecutionsDataAccessBundle implements ExecutionsDataAccessBundle {
   constructor(private readonly deps: CreateExecutionsDataAccessDeps) {}
 
   async initSetup(): Promise<void> {
@@ -57,7 +57,7 @@ export class PlainIndexExecutionsDalBundle implements ExecutionsDalBundle {
     return Promise.resolve();
   }
 
-  async createWorkflowExecutionsDal(): Promise<WorkflowExecutionsDataAccess> {
+  async createWorkflowExecutionsDataAccess(): Promise<WorkflowExecutionsDataAccess> {
     const esClient = await this.deps.coreSetup
       .getStartServices()
       .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
@@ -69,7 +69,7 @@ export class PlainIndexExecutionsDalBundle implements ExecutionsDalBundle {
     });
   }
 
-  async createStepExecutionsDal(): Promise<StepExecutionsDataAccess> {
+  async createStepExecutionsDataAccess(): Promise<StepExecutionsDataAccess> {
     const esClient = await this.deps.coreSetup
       .getStartServices()
       .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);

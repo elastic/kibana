@@ -76,10 +76,10 @@ Source: `workflows_execution_engine/server/repositories/step_execution_repositor
 
 | Method | Migrate? | Mapping |
 |--------|----------|---------|
-| `bulkUpsert` | **Direct** | 1:1 with `stepExecutionsDal.bulkUpsert(docs)` — same ES semantics |
-| `getStepExecutionsByIds` | **Direct** | `stepExecutionsDal.getByIds(ids, { sourceIncludes, sourceExcludes })` — normalization already in DAL |
+| `bulkUpsert` | **Direct** | 1:1 with `stepExecutionsDataAccess.bulkUpsert(docs)` — same ES semantics |
+| `getStepExecutionsByIds` | **Direct** | `stepExecutionsDataAccess.getByIds(ids, { sourceIncludes, sourceExcludes })` — normalization already in DAL |
 | `getStepExecutionsByWorkflowExecution` | **Domain helper** | Keep as standalone function composing `getByIds` + `search` — see [Domain helper](#domain-helper-getstepexecutionsbyworkflowexecution) |
-| `searchStepExecutionsByExecutionId` | **Via DAL** | `stepExecutionsDal.search({ query: { match: { workflowRunId } }, sort, size })` |
+| `searchStepExecutionsByExecutionId` | **Via DAL** | `stepExecutionsDataAccess.search({ query: { match: { workflowRunId } }, sort, size })` |
 | `markNonTerminalStepsFailed` | **Stay in repo** | Domain orchestration: search → filter by status → bulkUpsert |
 
 **Step migration difficulty: Low.** ~70% of ES surface area maps cleanly. The repo shrinks to domain helpers plus a delegate layer.
@@ -90,30 +90,30 @@ Source: `workflows_execution_engine/server/repositories/step_execution_repositor
 
 **Decision:** Keep this as a **standalone domain helper** — not part of `ExecutionsDataAccess`. It composes DAL primitives (`getByIds` + `search`) and encodes the mget-vs-search fallback for older executions that lack `stepExecutionIds` on the workflow doc.
 
-Today: `data_access_layer/lib/get_step_executions_by_workflow_execution.ts` takes `stepExecutionsDal: StepExecutionsDataAccess`.  
+Today: `data_access_layer/lib/get_step_executions_by_workflow_execution.ts` takes `stepExecutionsDataAccess: StepExecutionsDataAccess`.  
 Target: accept `StepExecutionsDataAccess` only (index name stays inside the DAL).
 
 ### Proposed API
 
 ```typescript
 interface GetStepExecutionsByWorkflowExecutionParams {
-  stepExecutionsDal: StepExecutionsDataAccess;
+  stepExecutionsDataAccess: StepExecutionsDataAccess;
   workflowExecutionId: string;
   stepExecutionIds?: string[];
   sourceExcludes?: Array<keyof EsWorkflowStepExecution>;
 }
 
 export const getStepExecutionsByWorkflowExecution = async ({
-  stepExecutionsDal,
+  stepExecutionsDataAccess,
   workflowExecutionId,
   stepExecutionIds,
   sourceExcludes,
 }: GetStepExecutionsByWorkflowExecutionParams): Promise<EsWorkflowStepExecution[]> => {
   if (stepExecutionIds?.length) {
-    return stepExecutionsDal.getByIds(stepExecutionIds, { sourceExcludes });
+    return stepExecutionsDataAccess.getByIds(stepExecutionIds, { sourceExcludes });
   }
 
-  const response = await stepExecutionsDal.search({
+  const response = await stepExecutionsDataAccess.search({
     query: { match: { workflowRunId: workflowExecutionId } },
     ...(sourceExcludes?.length ? { _source: { excludes: sourceExcludes } } : {}),
     sort: 'startedAt:desc',
@@ -128,8 +128,8 @@ export const getStepExecutionsByWorkflowExecution = async ({
 
 | Path | Today | With DAL |
 |------|-------|----------|
-| `stepExecutionIds` present | `mget` via `getStepExecutionsByIds` | `stepExecutionsDal.getByIds` (includes step `output → null` normalization when `output` is in `sourceIncludes`) |
-| No IDs (legacy runs) | `search` on `workflowRunId` | `stepExecutionsDal.search` with same query, sort, and size |
+| `stepExecutionIds` present | `mget` via `getStepExecutionsByIds` | `stepExecutionsDataAccess.getByIds` (includes step `output → null` normalization when `output` is in `sourceIncludes`) |
+| No IDs (legacy runs) | `search` on `workflowRunId` | `stepExecutionsDataAccess.search` with same query, sort, and size |
 
 ### Location & exports
 
@@ -141,7 +141,7 @@ export const getStepExecutionsByWorkflowExecution = async ({
 
 | Caller | Change |
 |--------|--------|
-| **Engine `StepExecutionRepository`** | Inject `StepExecutionsDataAccess`; `getStepExecutionsByWorkflowExecution` delegates to helper with `stepExecutionsDal` |
+| **Engine `StepExecutionRepository`** | Inject `StepExecutionsDataAccess`; `getStepExecutionsByWorkflowExecution` delegates to helper with `stepExecutionsDataAccess` |
 | **Management** (`get_workflow_execution.ts`, `get_child_workflow_executions.ts`) | Replace `esClient` + `stepsExecutionIndex` with `createStepExecutionsDataAccess({ source: 'system_index', esClient })` (or receive DAL from plugin setup). Management no longer passes index names for steps. |
 
 ### Optional migration bridge
@@ -156,7 +156,7 @@ Source: `workflows_execution_engine/server/repositories/workflow_execution_repos
 
 | Method | Migrate? | Mapping / gap |
 |--------|----------|---------------|
-| `searchWorkflowExecutions` | **Via DAL** | `workflowExecutionsDal.search({ query, size })` |
+| `searchWorkflowExecutions` | **Via DAL** | `workflowExecutionsDataAccess.search({ query, size })` |
 | `hasRunningExecution` | **Via DAL** | `search` with `size: 0`, `terminate_after: 1`, `_source: false` |
 | `getRunningExecutionsByWorkflowId` | **Via DAL** | Same filter clauses via `search` |
 | `getRunningExecutionsByConcurrencyGroup` | **Via DAL** | `search` with projection + sort |
@@ -232,7 +232,7 @@ Repository uses `index` / bulk `create`; DAL unified on `doc_as_upsert`. Design 
 
 | Today | Target |
 |-------|--------|
-| Engine `common/create_indexes.ts` inits both indices | Plugin calls `workflowExecutionsDal.init()` + `stepExecutionsDal.init()` |
+| Engine `common/create_indexes.ts` inits both indices | Plugin calls `workflowExecutionsDataAccess.init()` + `stepExecutionsDataAccess.init()` |
 | Engine `common/mappings.ts` | DAL `mappings/` + `constants/` (already duplicated) |
 
 Migration should **delete engine copies** and import from `@kbn/workflows`.
@@ -267,17 +267,17 @@ Repositories retain **public API** (no churn across ~30 engine call sites) while
 
 ```typescript
 // Plugin startup
-const workflowExecutionsDal = createWorkflowExecutionsDataAccess({
+const workflowExecutionsDataAccess = createWorkflowExecutionsDataAccess({
   source: 'system_index',
   esClient: internalEsClient,
   logger,
 });
-const stepExecutionsDal = createStepExecutionsDataAccess({ ... });
+const stepExecutionsDataAccess = createStepExecutionsDataAccess({ ... });
 
-await Promise.all([workflowExecutionsDal.init(), stepExecutionsDal.init()]);
+await Promise.all([workflowExecutionsDataAccess.init(), stepExecutionsDataAccess.init()]);
 
-const workflowExecutionRepository = new WorkflowExecutionRepository(workflowExecutionsDal);
-const stepExecutionRepository = new StepExecutionRepository(stepExecutionsDal);
+const workflowExecutionRepository = new WorkflowExecutionRepository(workflowExecutionsDataAccess);
+const stepExecutionRepository = new StepExecutionRepository(stepExecutionsDataAccess);
 ```
 
 ```typescript
@@ -292,7 +292,7 @@ async getStepExecutionsByIds(ids, includes?, excludes?) {
 
 async getStepExecutionsByWorkflowExecution(workflowExecutionId, stepExecutionIds?) {
   return getStepExecutionsByWorkflowExecution({
-    stepExecutionsDal: this.dal,
+    stepExecutionsDataAccess: this.dal,
     workflowExecutionId,
     stepExecutionIds,
   });

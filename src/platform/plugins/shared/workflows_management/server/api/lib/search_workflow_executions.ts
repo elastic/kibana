@@ -19,7 +19,7 @@ import { pickWorkflowDocumentVersion } from '@kbn/workflows';
 import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
 
 interface SearchWorkflowExecutionsParams {
-  workflowExecutionsDal: WorkflowExecutionsDataAccess;
+  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
   logger: Logger;
   query: QueryDslQueryContainer;
   sort?: Sort;
@@ -48,7 +48,7 @@ export const WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES = [
 ] as const;
 
 export const searchWorkflowExecutions = async ({
-  workflowExecutionsDal,
+  workflowExecutionsDataAccess,
   logger,
   query,
   sort = [{ createdAt: 'desc' }],
@@ -59,7 +59,7 @@ export const searchWorkflowExecutions = async ({
 }: SearchWorkflowExecutionsParams): Promise<WorkflowExecutionListDto> => {
   try {
     logger.debug('Searching workflow executions');
-    const response = await workflowExecutionsDal.search({
+    const response = await workflowExecutionsDataAccess.search({
       query,
       _source: { includes: [...WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES] },
       sort,

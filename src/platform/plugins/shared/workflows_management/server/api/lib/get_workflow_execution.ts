@@ -23,8 +23,8 @@ import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server/data
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 
 interface GetWorkflowExecutionParams {
-  workflowExecutionsDal: WorkflowExecutionsDataAccess;
-  stepExecutionsDal: StepExecutionsDataAccess;
+  workflowExecutionsDataAccess: WorkflowExecutionsDataAccess;
+  stepExecutionsDataAccess: StepExecutionsDataAccess;
   logger: Logger;
   workflowExecutionId: string;
   spaceId: string;
@@ -33,8 +33,8 @@ interface GetWorkflowExecutionParams {
 }
 
 export const getWorkflowExecution = async ({
-  workflowExecutionsDal,
-  stepExecutionsDal,
+  workflowExecutionsDataAccess,
+  stepExecutionsDataAccess,
   logger,
   workflowExecutionId,
   spaceId,
@@ -44,7 +44,7 @@ export const getWorkflowExecution = async ({
   try {
     // Use mget by id for O(1) lookup performance instead of search
     // This is critical for reducing ES CPU load from frequent UI polling
-    const [doc] = await workflowExecutionsDal.getByIds([workflowExecutionId]);
+    const [doc] = await workflowExecutionsDataAccess.getByIds([workflowExecutionId]);
 
     // Verify spaceId matches for security/multi-tenancy
     if (!doc || doc.spaceId !== spaceId) {
@@ -56,7 +56,7 @@ export const getWorkflowExecution = async ({
     if (!includeOutput) sourceExcludes.push('output');
 
     const stepExecutions = await getStepExecutionsByWorkflowExecution({
-      stepExecutionsDal,
+      stepExecutionsDataAccess,
       workflowExecutionId,
       stepExecutionIds: doc.stepExecutionIds,
       sourceExcludes: sourceExcludes as GetStepExecutionsByIdsOptions['sourceExcludes'],

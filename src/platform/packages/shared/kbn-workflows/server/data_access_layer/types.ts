@@ -67,12 +67,12 @@ export type ExecutionsDataAccess<TExecution extends { id: string }> =
 export type WorkflowExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowExecution>;
 export type StepExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowStepExecution>;
 
-/** Pair of workflow/step DAL instances plus lifecycle hooks from `createExecutionsDal`. */
-export interface ExecutionsDalBundle {
+/** Pair of workflow/step data access instances plus lifecycle hooks from `createExecutionsDataAccess`. */
+export interface ExecutionsDataAccessBundle {
   initSetup: () => Promise<void>;
   initStart: () => Promise<void>;
-  createWorkflowExecutionsDal: () => Promise<WorkflowExecutionsDataAccess>;
-  createStepExecutionsDal: () => Promise<StepExecutionsDataAccess>;
+  createWorkflowExecutionsDataAccess: () => Promise<WorkflowExecutionsDataAccess>;
+  createStepExecutionsDataAccess: () => Promise<StepExecutionsDataAccess>;
 }
 
 export type WorkflowExecutionsSearchRequest = ExecutionsSearchRequest;

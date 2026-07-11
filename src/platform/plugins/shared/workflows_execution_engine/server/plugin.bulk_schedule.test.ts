@@ -15,10 +15,10 @@ import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 jest.mock('@kbn/workflows/server/data_access_layer', () => {
   const actual = jest.requireActual('@kbn/workflows/server/data_access_layer');
-  const { createExecutionsDalJestMock } = jest.requireActual('./test_utils/executions_dal_jest_mock');
+  const { createExecutionsDataAccessJestMock } = jest.requireActual('./test_utils/executions_data_access_jest_mock');
   return {
     ...actual,
-    createExecutionsDal: jest.fn(() => createExecutionsDalJestMock()),
+    createExecutionsDataAccess: jest.fn(() => createExecutionsDataAccessJestMock()),
   };
 });
 jest.mock('./lib/check_license', () => ({

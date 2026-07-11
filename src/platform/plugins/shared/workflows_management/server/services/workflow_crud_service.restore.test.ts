@@ -349,10 +349,10 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
       validationService,
       getCoreStart: () => ({} as CoreStart),
       changeHistoryService,
-      workflowExecutionsDal: {
+      workflowExecutionsDataAccess: {
         deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
       } as any,
-      stepExecutionsDal: {
+      stepExecutionsDataAccess: {
         deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
       } as any,
     };

@@ -18,8 +18,8 @@ import {
   TerminalExecutionStatuses,
 } from '@kbn/workflows';
 import {
-  createMockStepExecutionsDal,
-  createMockWorkflowExecutionsDal,
+  createMockStepExecutionsDataAccess,
+  createMockWorkflowExecutionsDataAccess,
 } from '@kbn/workflows/server/data_access_layer';
 import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
@@ -28,7 +28,7 @@ import { WorkflowExecutionRepository } from './repositories/workflow_execution_r
 import { WORKFLOW_SCHEDULED_TASK_TYPE } from './workflow_task_manager/types';
 
 describe('checkAndSkipIfExistingScheduledExecution', () => {
-  let workflowExecutionsDal: jest.Mocked<WorkflowExecutionsDataAccess>;
+  let workflowExecutionsDataAccess: jest.Mocked<WorkflowExecutionsDataAccess>;
   let workflowExecutionRepository: WorkflowExecutionRepository;
   let stepExecutionRepository: StepExecutionRepository;
   let logger: Logger;
@@ -57,9 +57,9 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
   };
 
   beforeEach(() => {
-    workflowExecutionsDal = createMockWorkflowExecutionsDal();
-    workflowExecutionRepository = new WorkflowExecutionRepository(workflowExecutionsDal);
-    stepExecutionRepository = new StepExecutionRepository(createMockStepExecutionsDal());
+    workflowExecutionsDataAccess = createMockWorkflowExecutionsDataAccess();
+    workflowExecutionRepository = new WorkflowExecutionRepository(workflowExecutionsDataAccess);
+    stepExecutionRepository = new StepExecutionRepository(createMockStepExecutionsDataAccess());
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
     logger = loggingSystemMock.create().get();
     workflow = {
@@ -90,7 +90,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
   describe('when no existing non-terminal scheduled execution exists', () => {
     it('should return false and not create a skipped execution', async () => {
-      workflowExecutionsDal.search.mockResolvedValue({
+      workflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           hits: [],
           total: { value: 0, relation: 'eq' },
@@ -107,7 +107,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(false);
-      expect(workflowExecutionsDal.search).toHaveBeenCalledWith({
+      expect(workflowExecutionsDataAccess.search).toHaveBeenCalledWith({
         query: {
           bool: {
             filter: [
@@ -125,7 +125,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         size: 1,
         terminate_after: 1,
       });
-      expect(workflowExecutionsDal.bulk).not.toHaveBeenCalled();
+      expect(workflowExecutionsDataAccess.bulk).not.toHaveBeenCalled();
       expect(logger.info).not.toHaveBeenCalled();
     });
   });
@@ -142,13 +142,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         },
       };
 
-      workflowExecutionsDal.search.mockResolvedValue({
+      workflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           hits: [existingExecution],
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDal.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataAccess.bulk.mockResolvedValue({} as any);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -160,8 +160,8 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(true);
-      expect(workflowExecutionsDal.bulk).toHaveBeenCalledTimes(1);
-      expect(workflowExecutionsDal.bulk).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledTimes(1);
+      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           refresh: false,
           items: [
@@ -209,7 +209,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       ];
 
       for (const status of nonTerminalStatuses) {
-        workflowExecutionsDal.search.mockResolvedValue({
+        workflowExecutionsDataAccess.search.mockResolvedValue({
           hits: {
             hits: [
               {
@@ -225,7 +225,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
             total: { value: 1, relation: 'eq' },
           },
         } as any);
-        workflowExecutionsDal.bulk.mockResolvedValue({} as any);
+        workflowExecutionsDataAccess.bulk.mockResolvedValue({} as any);
 
         const result = await checkAndSkipIfExistingScheduledExecution(
           workflow,
@@ -237,14 +237,14 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         );
 
         expect(result).toBe(true);
-        expect(workflowExecutionsDal.bulk).toHaveBeenCalled();
+        expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalled();
         jest.clearAllMocks();
       }
     });
 
     it('should not skip when only terminal status executions exist', async () => {
       for (const _status of TerminalExecutionStatuses) {
-        workflowExecutionsDal.search.mockResolvedValue({
+        workflowExecutionsDataAccess.search.mockResolvedValue({
           hits: {
             hits: [],
             total: { value: 0, relation: 'eq' },
@@ -261,13 +261,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         );
 
         expect(result).toBe(false);
-        expect(workflowExecutionsDal.bulk).not.toHaveBeenCalled();
+        expect(workflowExecutionsDataAccess.bulk).not.toHaveBeenCalled();
         jest.clearAllMocks();
       }
     });
 
     it('should not skip when existing execution is for a different workflow', async () => {
-      workflowExecutionsDal.search.mockResolvedValue({
+      workflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           hits: [],
           total: { value: 0, relation: 'eq' },
@@ -284,11 +284,11 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(false);
-      expect(workflowExecutionsDal.bulk).not.toHaveBeenCalled();
+      expect(workflowExecutionsDataAccess.bulk).not.toHaveBeenCalled();
     });
 
     it('should not skip when existing execution is for a different space', async () => {
-      workflowExecutionsDal.search.mockResolvedValue({
+      workflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           hits: [],
           total: { value: 0, relation: 'eq' },
@@ -305,11 +305,11 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(false);
-      expect(workflowExecutionsDal.bulk).not.toHaveBeenCalled();
+      expect(workflowExecutionsDataAccess.bulk).not.toHaveBeenCalled();
     });
 
     it('should not skip when existing execution is not scheduled (triggeredBy !== scheduled)', async () => {
-      workflowExecutionsDal.search.mockResolvedValue({
+      workflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           hits: [],
           total: { value: 0, relation: 'eq' },
@@ -326,11 +326,11 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(false);
-      expect(workflowExecutionsDal.bulk).not.toHaveBeenCalled();
+      expect(workflowExecutionsDataAccess.bulk).not.toHaveBeenCalled();
     });
 
     it('should create skipped execution with correct context structure', async () => {
-      workflowExecutionsDal.search.mockResolvedValue({
+      workflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           hits: [
             {
@@ -346,7 +346,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDal.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataAccess.bulk.mockResolvedValue({} as any);
 
       await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -357,7 +357,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         logger
       );
 
-      const bulkCall = workflowExecutionsDal.bulk.mock.calls[0]![0] as {
+      const bulkCall = workflowExecutionsDataAccess.bulk.mock.calls[0]![0] as {
         items: Array<{ document: { context: Record<string, unknown> } }>;
       };
       expect(bulkCall.items[0]!.document.context).toMatchObject({
@@ -388,13 +388,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         },
       };
 
-      workflowExecutionsDal.search.mockResolvedValue({
+      workflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           hits: [existingExecution],
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDal.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataAccess.bulk.mockResolvedValue({} as any);
 
       // Use attempts > 1 to indicate this is a retry/recovery
       const retryTaskInstance = createMockTaskInstance({ attempts: 2 });
@@ -409,7 +409,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(false); // Proceed with new execution
-      expect(workflowExecutionsDal.bulk).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           items: [
             expect.objectContaining({
@@ -427,7 +427,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         })
       );
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Found stale execution'));
-      expect(workflowExecutionsDal.bulk).toHaveBeenCalledTimes(1);
+      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledTimes(1);
     });
 
     it('should skip without failing when stale execution is waiting_for_input', async () => {
@@ -443,7 +443,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         },
       };
 
-      workflowExecutionsDal.search.mockResolvedValue({
+      workflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           hits: [existingExecution],
           total: { value: 1, relation: 'eq' },
@@ -462,7 +462,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(true);
-      expect(workflowExecutionsDal.bulk).not.toHaveBeenCalled();
+      expect(workflowExecutionsDataAccess.bulk).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('waiting_for_input'));
     });
 
@@ -479,13 +479,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         },
       };
 
-      workflowExecutionsDal.search.mockResolvedValue({
+      workflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           hits: [existingExecution],
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDal.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataAccess.bulk.mockResolvedValue({} as any);
 
       // Use attempts = 1 (first attempt)
       const firstAttemptTaskInstance = createMockTaskInstance({ attempts: 1 });
@@ -500,7 +500,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(true);
-      expect(workflowExecutionsDal.bulk).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           items: [
             expect.objectContaining({
@@ -527,13 +527,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         },
       };
 
-      workflowExecutionsDal.search.mockResolvedValue({
+      workflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           hits: [existingExecution],
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDal.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataAccess.bulk.mockResolvedValue({} as any);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -545,7 +545,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(true);
-      expect(workflowExecutionsDal.bulk).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           items: [
             expect.objectContaining({
@@ -574,13 +574,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         },
       };
 
-      workflowExecutionsDal.search.mockResolvedValue({
+      workflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           hits: [existingExecution],
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDal.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataAccess.bulk.mockResolvedValue({} as any);
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -592,7 +592,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(true);
-      expect(workflowExecutionsDal.bulk).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           items: [
             expect.objectContaining({
@@ -618,13 +618,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         },
       };
 
-      workflowExecutionsDal.search.mockResolvedValue({
+      workflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           hits: [existingExecution],
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDal.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataAccess.bulk.mockResolvedValue({} as any);
 
       const taskInstanceWithoutRunAt = createMockTaskInstance({ runAt: undefined as any });
 
@@ -638,7 +638,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(true);
-      expect(workflowExecutionsDal.bulk).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           items: [
             expect.objectContaining({
@@ -665,13 +665,13 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         },
       };
 
-      workflowExecutionsDal.search.mockResolvedValue({
+      workflowExecutionsDataAccess.search.mockResolvedValue({
         hits: {
           hits: [existingExecution],
           total: { value: 1, relation: 'eq' },
         },
       } as any);
-      workflowExecutionsDal.bulk.mockResolvedValue({} as any);
+      workflowExecutionsDataAccess.bulk.mockResolvedValue({} as any);
 
       // Use attempts > 1 to indicate this is a retry/recovery
       const retryTaskInstance = createMockTaskInstance({ attempts: 2 });
@@ -686,7 +686,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
 
       expect(result).toBe(false);
-      expect(workflowExecutionsDal.bulk).toHaveBeenCalledWith(
+      expect(workflowExecutionsDataAccess.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           items: [
             expect.objectContaining({

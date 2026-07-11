@@ -15,7 +15,7 @@ import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExec
 export type StepExecutionField = keyof EsWorkflowStepExecution;
 
 export class StepExecutionRepository {
-  constructor(private stepExecutionsDal: StepExecutionsDataAccess) {}
+  constructor(private stepExecutionsDataAccess: StepExecutionsDataAccess) {}
 
   /**
    * Searches for step executions by workflow execution ID.
@@ -26,7 +26,7 @@ export class StepExecutionRepository {
   public async searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
-    const response = await this.stepExecutionsDal.search({
+    const response = await this.stepExecutionsDataAccess.search({
       query: {
         match: { workflowRunId: executionId },
       },
@@ -47,7 +47,7 @@ export class StepExecutionRepository {
     stepExecutionIds?: string[]
   ): Promise<EsWorkflowStepExecution[]> {
     return getStepExecutionsByWorkflowExecutionShared({
-      stepExecutionsDal: this.stepExecutionsDal,
+      stepExecutionsDataAccess: this.stepExecutionsDataAccess,
       workflowExecutionId,
       stepExecutionIds,
     });
@@ -73,7 +73,7 @@ export class StepExecutionRepository {
     sourceIncludes?: StepExecutionField[],
     sourceExcludes?: StepExecutionField[]
   ): Promise<EsWorkflowStepExecution[]> {
-    return this.stepExecutionsDal.getByIds(stepExecutionIds, {
+    return this.stepExecutionsDataAccess.getByIds(stepExecutionIds, {
       sourceIncludes,
       sourceExcludes,
     });
@@ -115,7 +115,7 @@ export class StepExecutionRepository {
       }
     });
 
-    await this.stepExecutionsDal.bulk({
+    await this.stepExecutionsDataAccess.bulk({
       items: stepExecutions.map((stepExecution) => ({
         operation: 'upsert',
         document: stepExecution as Partial<EsWorkflowStepExecution> & { id: string },

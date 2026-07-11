@@ -11,7 +11,7 @@ import type { EsWorkflowStepExecution } from '../../../types/v1';
 import type { GetStepExecutionsByIdsOptions, StepExecutionsDataAccess } from '../types';
 
 export interface GetStepExecutionsByWorkflowExecutionParams {
-  stepExecutionsDal: StepExecutionsDataAccess;
+  stepExecutionsDataAccess: StepExecutionsDataAccess;
   workflowExecutionId: string;
   stepExecutionIds?: string[];
   sourceExcludes?: GetStepExecutionsByIdsOptions['sourceExcludes'];
@@ -23,16 +23,16 @@ export interface GetStepExecutionsByWorkflowExecutionParams {
  * falls back to search for backward compatibility with older executions.
  */
 export const getStepExecutionsByWorkflowExecution = async ({
-  stepExecutionsDal,
+  stepExecutionsDataAccess,
   workflowExecutionId,
   stepExecutionIds,
   sourceExcludes,
 }: GetStepExecutionsByWorkflowExecutionParams): Promise<EsWorkflowStepExecution[]> => {
   if (stepExecutionIds?.length) {
-    return stepExecutionsDal.getByIds(stepExecutionIds, { sourceExcludes });
+    return stepExecutionsDataAccess.getByIds(stepExecutionIds, { sourceExcludes });
   }
 
-  const response = await stepExecutionsDal.search({
+  const response = await stepExecutionsDataAccess.search({
     query: {
       match: { workflowRunId: workflowExecutionId },
     },
