@@ -13,10 +13,12 @@ import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 
 export const clientMock = (): jest.Mocked<IUserStorageClient> => {
   const mock: jest.Mocked<IUserStorageClient> = lazyObject({
-    isAvailable: jest.fn().mockReturnValue(false),
-    isAvailable$: jest.fn().mockReturnValue(of(false)),
-    canWrite: jest.fn().mockReturnValue(false),
-    canWrite$: jest.fn().mockReturnValue(of(false)),
+    // Default to a writable client — most tests exercise an authenticated
+    // user; override per-test for anonymous/no-profile scenarios.
+    isAvailable: jest.fn().mockReturnValue(true),
+    isAvailable$: jest.fn().mockReturnValue(of(true)),
+    canWrite: jest.fn().mockReturnValue(true),
+    canWrite$: jest.fn().mockReturnValue(of(true)),
     peek: jest.fn(),
     get: jest.fn().mockResolvedValue(undefined),
     get$: jest.fn().mockReturnValue(new Subject<unknown>()),
