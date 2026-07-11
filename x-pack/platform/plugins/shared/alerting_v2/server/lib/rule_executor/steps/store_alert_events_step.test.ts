@@ -15,7 +15,6 @@ import {
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createStorageService } from '../../services/storage_service/storage_service.mock';
-import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 
 describe('StoreAlertEventsStep', () => {
   let step: StoreAlertEventsStep;
@@ -33,17 +32,20 @@ describe('StoreAlertEventsStep', () => {
   });
 
   describe('execute', () => {
-    it('stores alert events and returns continue', async () => {
+    it('stores alert events and emits the persistence outcome on meta.persistence.alertEventsBatch', async () => {
       const alertEventsBatch = [
         createAlertEvent({ group_hash: 'hash-1', status: 'breached' }),
         createAlertEvent({ group_hash: 'hash-2', status: 'recovered' }),
       ];
 
-      mockEsClient.bulk.mockResolvedValue({
-        items: [],
+      const mockBulkResponse = {
+        items: [{ create: { _id: '1', status: 201 } }, { create: { _id: '2', status: 201 } }],
         errors: false,
         took: 1,
-      });
+      };
+
+      // @ts-expect-error - not all BulkResponseItem fields are used
+      mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
 
       const state = createRulePipelineState({ alertEventsBatch });
       const [result] = await collectStreamResults(
@@ -54,9 +56,11 @@ describe('StoreAlertEventsStep', () => {
         type: 'continue',
         state,
         meta: {
-          metrics: {
-            counters: {
-              [RULE_EXECUTION_COUNTERS.ruleEventsGenerated]: alertEventsBatch.length,
+          observations: {
+            bulkIndexResult: {
+              attempted: alertEventsBatch.length,
+              persisted: alertEventsBatch.length,
+              errors: [],
             },
           },
         },
@@ -88,7 +92,7 @@ describe('StoreAlertEventsStep', () => {
       });
     });
 
-    it('handles empty alert events array without calling bulk', async () => {
+    it('handles empty alert events array without calling bulk and emits a zero bulk-index observation', async () => {
       const state = createRulePipelineState({ alertEventsBatch: [] });
       const [result] = await collectStreamResults(
         step.executeStream(createPipelineStream([state]))
@@ -98,14 +102,68 @@ describe('StoreAlertEventsStep', () => {
         type: 'continue',
         state,
         meta: {
-          metrics: {
-            counters: {
-              [RULE_EXECUTION_COUNTERS.ruleEventsGenerated]: 0,
-            },
+          observations: {
+            bulkIndexResult: { attempted: 0, persisted: 0, errors: [] },
           },
         },
       });
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('surfaces per-doc failures on meta.observations.bulkIndexResult.errors with the original document', async () => {
+      const alertEventsBatch = [
+        createAlertEvent({ group_hash: 'hash-1', status: 'breached' }),
+        createAlertEvent({ group_hash: 'hash-2', status: 'breached' }),
+      ];
+
+      const mockBulkResponse = {
+        items: [
+          { create: { _id: '1', status: 201 } },
+          {
+            create: {
+              _id: '2',
+              status: 400,
+              error: { type: 'mapper_parsing_exception', reason: 'boom', status: 400 },
+            },
+          },
+        ],
+        errors: true,
+      };
+
+      // @ts-expect-error - not all BulkResponseItem fields are used
+      mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
+
+      const state = createRulePipelineState({ alertEventsBatch });
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+
+      expect(result).toEqual({
+        type: 'continue',
+        state,
+        meta: {
+          observations: {
+            bulkIndexResult: {
+              attempted: 2,
+              persisted: 1,
+              errors: [
+                {
+                  code: 'mapper_parsing_exception',
+                  message: 'boom',
+                  details: { statusCode: 400 },
+                  index: ALERT_EVENTS_DATA_STREAM,
+                  document: alertEventsBatch[1],
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      // @ts-expect-error: meta is present on the result
+      expect(result.meta?.observations?.bulkIndexResult?.errors[0].document).toBe(
+        alertEventsBatch[1]
+      );
     });
 
     it('halts with state_not_ready when alertEventsBatch is missing from state', async () => {

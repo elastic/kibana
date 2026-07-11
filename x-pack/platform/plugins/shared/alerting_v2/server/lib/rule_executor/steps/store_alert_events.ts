@@ -15,7 +15,6 @@ import {
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import { guardedMapStep } from '../stream_utils';
-import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 
 @injectable()
 export class StoreAlertEventsStep implements RuleExecutionStep {
@@ -32,23 +31,21 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
         message: `[${this.name}] Storing alert events batch to ${ALERT_EVENTS_DATA_STREAM}`,
       });
 
-      await this.storageService.bulkIndexDocs({
+      const bulkResult = await this.storageService.bulkIndexDocs({
         index: ALERT_EVENTS_DATA_STREAM,
         docs: state.alertEventsBatch,
       });
 
       this.logger.debug({
-        message: `[${this.name}] Successfully stored alert events batch`,
+        message: `[${this.name}] Bulk-indexed alert events batch (attempted=${bulkResult.attempted}, persisted=${bulkResult.persisted})`,
       });
 
       return {
         type: 'continue',
         state,
         meta: {
-          metrics: {
-            counters: {
-              [RULE_EXECUTION_COUNTERS.ruleEventsGenerated]: state.alertEventsBatch.length,
-            },
+          observations: {
+            bulkIndexResult: bulkResult,
           },
         },
       };
