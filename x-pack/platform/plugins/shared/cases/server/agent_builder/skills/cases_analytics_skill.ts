@@ -61,6 +61,8 @@ Always \`KEEP\` the concrete columns you need after a \`LOOKUP JOIN\` — don't 
 
 Status values: \`open\`, \`in-progress\`, \`closed\`. Severity: \`low\`, \`medium\`, \`high\`, \`critical\` (stored as readable strings, not enums).
 
+**Field units.** \`cases.duration\`, \`cases.time_to_acknowledge\`, \`cases.time_to_investigate\`, \`cases.time_to_resolve\` are integer **seconds** (NOT milliseconds), and are \`null\` until the case reaches the relevant state (in-progress / closed). Convert for humans in the answer — \`/ 3600\` for hours, \`/ 86400\` for days — and always label the unit. Timestamps (\`cases.created_at\`, \`cases.closed_at\`, \`cases.in_progress_at\`, \`@timestamp\`) are dates; \`cases.total_alerts\` / \`total_comments\` / \`total_events\` / \`total_observables\` are integer counts.
+
 ## Boundaries & authorization
 
 - The user defines the scope. Filter by \`owner\` (\`securitySolution\`, \`observability\`, \`cases\`) and/or \`space_id\` **only when the user asks to narrow to a solution or space** — do not force a solution choice, and do not restrict scope on your own.
@@ -113,7 +115,7 @@ To assemble multiple panels into a dashboard, use the **dashboard-management** s
 
 - Always time-bound trend queries (e.g. \`WHERE cases.created_at >= NOW() - 30 days\`).
 - \`STATS ... BY\` before returning raw rows; use \`LIMIT\` to keep output bounded.
-- SLA/timing fields (\`cases.time_to_*\`, \`cases.duration\`) are numeric — aggregate with \`AVG\`/\`MEDIAN\`/percentiles; convert units in the answer.
+- SLA/timing fields (\`cases.time_to_*\`, \`cases.duration\`) are integer **seconds** — aggregate with \`AVG\`/\`MEDIAN\`/percentiles, then convert in the answer (\`/ 3600\` hours, \`/ 86400\` days) and label the unit. Never report them as milliseconds.
 - See the referenced query templates for ready-made patterns.
 `,
 
@@ -152,9 +154,11 @@ FROM .cases
 \`\`\`esql
 FROM .cases
 | WHERE cases.status == "closed" AND cases.time_to_resolve IS NOT NULL
-| STATS mttr_ms = AVG(cases.time_to_resolve), p90_ms = PERCENTILE(cases.time_to_resolve, 90) BY cases.severity
-| SORT mttr_ms DESC
+| STATS mttr_seconds = AVG(cases.time_to_resolve), p90_seconds = PERCENTILE(cases.time_to_resolve, 90) BY cases.severity
+| EVAL mttr_hours = ROUND(mttr_seconds / 3600, 1)
+| SORT mttr_seconds DESC
 \`\`\`
+\`cases.time_to_resolve\` (like \`time_to_acknowledge\` / \`time_to_investigate\` / \`duration\`) is in **seconds** — the \`EVAL\` converts MTTR to hours for readability.
 
 ## Open backlog by assignee
 \`\`\`esql
