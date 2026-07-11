@@ -125,45 +125,66 @@ export const createUrlSyncObservables = ({
   const profileStateContainer: INullableBaseStateContainer<ProfileStateMap> = {
     get: () => getCurrentProfileUrlState() ?? EMPTY_PROFILE_URL_STATE,
     set: (profileUrlState) => {
-      const profileStateDefinition = selectCurrentProfileUrlStateDefinition(
+      const currentProfileStateMap = selectTab(getState(), tabId).profileState;
+      const currentProfileUrlStateMap = services.profileStateRegistry.pickStateByType({
+        profileStateMap: currentProfileStateMap,
+        stateTypes: [ProfileStateType.Url],
+      });
+      const nextProfileUrlStateMap = services.profileStateRegistry.pickStateByType({
+        profileStateMap: profileUrlState ?? undefined,
+        stateTypes: [ProfileStateType.Url],
+      });
+
+      for (const [stateKey, nextProfileUrlState] of Object.entries(nextProfileUrlStateMap)) {
+        const currentProfileUrlState = currentProfileUrlStateMap[stateKey];
+
+        if (isEqual(currentProfileUrlState, nextProfileUrlState)) {
+          continue;
+        }
+
+        const nonUrlProfileState = services.profileStateRegistry.filterFieldsByType({
+          profileState: currentProfileStateMap[stateKey],
+          stateKey,
+          stateTypes: [ProfileStateType.Ui, ProfileStateType.Persistent],
+          shouldMergeDefaults: true,
+        });
+
+        dispatch(
+          internalStateSlice.actions.setProfileState({
+            tabId,
+            key: stateKey,
+            profileState: {
+              ...nonUrlProfileState,
+              ...nextProfileUrlState,
+            },
+          })
+        );
+      }
+
+      const profileUrlStateDefinition = selectCurrentProfileUrlStateDefinition(
         runtimeStateManager,
         tabId
       );
 
-      if (!profileStateDefinition) {
-        return;
+      if (profileUrlStateDefinition && !nextProfileUrlStateMap[profileUrlStateDefinition.key]) {
+        const currentProfileState = currentProfileStateMap[profileUrlStateDefinition.key];
+        const nonUrlProfileState = services.profileStateRegistry.filterFieldsByType({
+          profileState: currentProfileState,
+          stateKey: profileUrlStateDefinition.key,
+          stateTypes: [ProfileStateType.Ui, ProfileStateType.Persistent],
+          shouldMergeDefaults: true,
+        });
+
+        if (!isEqual(currentProfileState, nonUrlProfileState)) {
+          dispatch(
+            internalStateSlice.actions.setProfileState({
+              tabId,
+              key: profileUrlStateDefinition.key,
+              profileState: nonUrlProfileState,
+            })
+          );
+        }
       }
-
-      const currentProfileState = selectTab(getState(), tabId).profileState[
-        profileStateDefinition.key
-      ];
-      const nonUrlState = services.profileStateRegistry.filterFieldsByType({
-        profileState: currentProfileState,
-        stateKey: profileStateDefinition.key,
-        stateTypes: [ProfileStateType.Ui, ProfileStateType.Persistent],
-      });
-      const urlState = services.profileStateRegistry.filterFieldsByType({
-        profileState: profileUrlState?.[profileStateDefinition.key],
-        stateKey: profileStateDefinition.key,
-        stateTypes: [ProfileStateType.Url],
-      });
-      const nextProfileState = {
-        ...profileStateDefinition.defaultState,
-        ...nonUrlState,
-        ...urlState,
-      };
-
-      if (isEqual(currentProfileState, nextProfileState)) {
-        return;
-      }
-
-      dispatch(
-        internalStateSlice.actions.setProfileState({
-          tabId,
-          key: profileStateDefinition.key,
-          profileState: nextProfileState,
-        })
-      );
     },
     state$: profileState$,
   };

@@ -8,7 +8,14 @@
  */
 
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { type DiscoverAppState, internalStateActions, selectTab } from '..';
+import {
+  DEFAULT_TAB_STATE,
+  createTabItem,
+  type DiscoverAppState,
+  internalStateActions,
+  selectAllTabs,
+  selectTab,
+} from '..';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
@@ -19,10 +26,27 @@ import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
+import type { ProfileStateDefinition } from '../../../../../context_awareness';
+import { ProfileStateType } from '../../../../../context_awareness';
+
+interface SecondaryProfileState {
+  secondaryUrlValue: string;
+}
+
+const SECONDARY_PROFILE_STATE_DEF: ProfileStateDefinition<SecondaryProfileState> = {
+  key: 'secondaryProfileState',
+  descriptor: {
+    secondaryUrlValue: { type: ProfileStateType.Url },
+  },
+  defaultState: {
+    secondaryUrlValue: 'defaultSecondaryUrl',
+  },
+};
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
   services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+  services.profileStateRegistry.registerDefinition(SECONDARY_PROFILE_STATE_DEF);
   const toolkit = getDiscoverInternalStateMock({
     services,
     persistedDataViews: [dataViewMockWithTimeField],
@@ -293,6 +317,48 @@ describe('tab_state actions', () => {
       expect(setUrlStateSpy).not.toHaveBeenCalled();
       expect(flushSpy).not.toHaveBeenCalled();
     });
+
+    it('does nothing when the tab has been closed', async () => {
+      const { internalState, stateStorageContainer, tabId } = await setup();
+      const allTabs = selectAllTabs(internalState.getState());
+      const remainingTab = {
+        ...DEFAULT_TAB_STATE,
+        ...createTabItem(allTabs),
+        id: 'remaining-tab',
+      };
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+
+      internalState.dispatch(
+        internalStateActions.setTabs({
+          allTabs: [...allTabs, remainingTab],
+          selectedTabId: remainingTab.id,
+          recentlyClosedTabs: [],
+        })
+      );
+      internalState.dispatch(
+        internalStateActions.setTabs({
+          allTabs: [remainingTab],
+          selectedTabId: remainingTab.id,
+          recentlyClosedTabs: [],
+        })
+      );
+
+      expect(() =>
+        internalState.dispatch(
+          internalStateActions.setProfileState({
+            tabId,
+            profileStateDefinition: TEST_PROFILE_STATE_DEF,
+            profileState: {
+              ...TEST_PROFILE_STATE_DEF.defaultState,
+              urlValue: 'nextUrl',
+            },
+          })
+        )
+      ).not.toThrow();
+
+      expect(setUrlStateSpy).not.toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, expect.anything());
+      expect(selectTab(internalState.getState(), remainingTab.id).profileState).toEqual({});
+    });
   });
 
   describe('updateAppStateAndReplaceUrl', () => {
@@ -404,11 +470,15 @@ describe('tab_state actions', () => {
       );
     });
 
-    it('should write the current profile URL state to the URL even when state is unchanged', async () => {
-      const { internalState, runtimeStateManager, stateStorageContainer, tabId } = await setup();
+    it('should write only the current profile URL state to the URL even when state is unchanged', async () => {
+      const { internalState, stateStorageContainer, tabId } = await setup();
       const profileState = {
         ...TEST_PROFILE_STATE_DEF.defaultState,
         urlValue: 'nextUrl',
+      };
+      const secondaryProfileState = {
+        ...SECONDARY_PROFILE_STATE_DEF.defaultState,
+        secondaryUrlValue: 'secondaryUrl',
       };
       const expectedUrlState = {
         [TEST_PROFILE_STATE_DEF.key]: {
@@ -423,7 +493,13 @@ describe('tab_state actions', () => {
           profileState,
         })
       );
-      clearActiveDataSourceProfileState({ runtimeStateManager, tabId });
+      internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: SECONDARY_PROFILE_STATE_DEF,
+          profileState: secondaryProfileState,
+        })
+      );
       const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
 
       await internalState.dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId }));

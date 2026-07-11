@@ -39,6 +39,7 @@ import { ProfileStateType, type ProfileStateDefinition } from '../../../../../co
 import { selectTab } from '../selectors';
 import {
   selectDataSourceProfileId,
+  selectCurrentProfileUrlState,
   selectCurrentProfileUrlStateDefinition,
   selectTabRuntimeState,
 } from '../runtime_state';
@@ -231,8 +232,14 @@ export const setProfileState = <TState extends object>(
     { runtimeStateManager, services, urlStateStorage }
   ) {
     const currentState = getState();
+    const currentTab = selectTab(currentState, payload.tabId);
+
+    if (!currentTab) {
+      return;
+    }
+
     const currentProfileState =
-      selectTab(currentState, payload.tabId).profileState[payload.profileStateDefinition.key] ??
+      currentTab.profileState[payload.profileStateDefinition.key] ??
       payload.profileStateDefinition.defaultState;
 
     if (isEqual(currentProfileState, payload.profileState)) {
@@ -274,6 +281,9 @@ export const setProfileState = <TState extends object>(
       stateTypes: [ProfileStateType.Url],
     });
 
+    // Replace-mode updates keep old URL fields in Redux until the URL storage flush syncs the
+    // replacement value back, so synchronous state observers can briefly see new non-URL fields
+    // paired with old URL fields.
     dispatch(
       internalStateSlice.actions.setProfileState({
         tabId: payload.tabId,
@@ -306,22 +316,20 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
   async function pushCurrentTabStateToUrlThunkFn(
     dispatch,
     getState,
-    { services, urlStateStorage }
+    { runtimeStateManager, services, urlStateStorage }
   ) {
     await Promise.all([
       dispatch(updateGlobalStateAndReplaceUrl({ tabId, globalState: {} })),
       dispatch(updateAppStateAndReplaceUrl({ tabId, appState: {} })),
       (async () => {
-        const profileStateForUrl = services.profileStateRegistry.pickStateByType({
+        const profileStateForUrl = selectCurrentProfileUrlState({
+          runtimeStateManager,
+          tabId,
           profileStateMap: selectTab(getState(), tabId).profileState,
-          stateTypes: [ProfileStateType.Url],
+          profileStateRegistry: services.profileStateRegistry,
         });
 
-        return urlStateStorage.set(
-          PROFILE_STATE_URL_KEY,
-          Object.keys(profileStateForUrl).length > 0 ? profileStateForUrl : undefined,
-          { replace: true }
-        );
+        return urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, { replace: true });
       })(),
     ]);
   };

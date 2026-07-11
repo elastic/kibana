@@ -9,6 +9,8 @@
 
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../../context_awareness/toolkit';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
+import type { ProfileStateDefinition } from '../../../../../context_awareness';
+import { ProfileStateType } from '../../../../../context_awareness';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
@@ -26,9 +28,24 @@ import * as runtimeStateModule from '../runtime_state';
 import * as contextAwarenessToolkitModule from '../context_awareness_toolkit';
 import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 
+interface SecondaryProfileState {
+  secondaryUrlValue: string;
+}
+
+const SECONDARY_PROFILE_STATE_DEF: ProfileStateDefinition<SecondaryProfileState> = {
+  key: 'secondaryProfileState',
+  descriptor: {
+    secondaryUrlValue: { type: ProfileStateType.Url },
+  },
+  defaultState: {
+    secondaryUrlValue: 'defaultSecondaryUrl',
+  },
+};
+
 const setup = async () => {
   const services = createDiscoverServicesMock();
   services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+  services.profileStateRegistry.registerDefinition(SECONDARY_PROFILE_STATE_DEF);
   const runtimeStateManager = createRuntimeStateManager();
   const toolkit = getDiscoverInternalStateMock({
     services,
@@ -165,6 +182,10 @@ describe('tabs actions', () => {
         uiValue: 'ui',
         urlValue: 'urlFromOtherTab',
       };
+      const secondaryProfileState = {
+        ...SECONDARY_PROFILE_STATE_DEF.defaultState,
+        secondaryUrlValue: 'secondaryUrlFromOtherTab',
+      };
 
       await initializeSingleTab({ tabId: currentTab.id, skipWaitForDataFetching: true });
 
@@ -174,6 +195,7 @@ describe('tabs actions', () => {
         id: 'other-tab',
         profileState: {
           [TEST_PROFILE_STATE_DEF.key]: profileState,
+          [SECONDARY_PROFILE_STATE_DEF.key]: secondaryProfileState,
         },
       };
 

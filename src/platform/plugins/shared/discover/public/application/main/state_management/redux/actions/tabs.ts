@@ -29,6 +29,7 @@ import {
 } from '../internal_state';
 import {
   createTabRuntimeState,
+  selectCurrentProfileUrlState,
   selectTabRuntimeState,
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
@@ -263,9 +264,11 @@ export const updateTabs: InternalStateThunkActionCreator<
       if (nextTab && nextTabDataStateContainer) {
         const { timeRange, refreshInterval, filters: globalFilters } = nextTab.globalState;
         const { filters: appFilters, query } = nextTab.appState;
-        const profileStateForUrl = services.profileStateRegistry.pickStateByType({
+        const profileStateForUrl = selectCurrentProfileUrlState({
+          runtimeStateManager,
+          tabId: nextTab.id,
           profileStateMap: nextTab.profileState,
-          stateTypes: [ProfileStateType.Url],
+          profileStateRegistry: services.profileStateRegistry,
         });
 
         await Promise.all([
@@ -281,11 +284,7 @@ export const updateTabs: InternalStateThunkActionCreator<
           urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, nextTab.appState, {
             replace: true,
           }),
-          urlStateStorage.set(
-            PROFILE_STATE_URL_KEY,
-            Object.keys(profileStateForUrl).length > 0 ? profileStateForUrl : undefined,
-            { replace: true }
-          ),
+          urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, { replace: true }),
         ]);
 
         services.timefilter.setTime(timeRange ?? services.timefilter.getTimeDefaults());

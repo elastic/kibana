@@ -28,6 +28,7 @@ import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
+import type { ProfileStateMap } from '../../../../../context_awareness';
 import { ProfileStateType } from '../../../../../context_awareness';
 import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
@@ -118,8 +119,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         cleanupUrlState(urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY), services.uiSettings)),
     };
     const urlProfileState = services.profileStateRegistry.pickStateByType({
-      profileStateMap:
-        urlStateStorage.get<TabState['profileState']>(PROFILE_STATE_URL_KEY) ?? undefined,
+      profileStateMap: urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY) ?? undefined,
       stateTypes: [ProfileStateType.Url],
     });
 
