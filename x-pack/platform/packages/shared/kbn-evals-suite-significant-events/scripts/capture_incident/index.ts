@@ -7,61 +7,85 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
-import { createKibanaClient } from '@kbn/kibana-api-cli';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { captureIncidentSnapshot } from './incident_snapshot';
+import { writeIncidentConfigFromId } from './incident_autoconfig';
+import { AGENT_KIBANA_URL, LOCAL_ES_URL, LOGS_KIBANA_URL, OVERVIEW_ES_URL } from './constants';
 
-interface ConnectionFlags {
-  'kibana-url'?: string;
-  'es-url'?: string;
-  'es-api-key'?: string;
-}
-
-const createEsClientFromUrl = (esUrl: string, apiKey?: string): Client => {
+/** Builds an ES client from a URL, using credentials embedded in the URL. */
+const createEsClientFromUrl = (esUrl: string): Client => {
   const { protocol, host, pathname, username, password } = new URL(esUrl);
 
   return new Client({
     node: `${protocol}//${host}${pathname}`,
-    auth: apiKey ? { apiKey } : username && password ? { username, password } : undefined,
+    auth: username && password ? { username, password } : undefined,
   });
 };
 
-const getEsClient = async (flags: ConnectionFlags, log: ToolingLog): Promise<Client> => {
-  const { 'es-url': esUrl, 'es-api-key': esApiKey, 'kibana-url': kibanaUrl } = flags;
+/**
+ * Investigates an incident id via the platform-logging Agent Builder, confirms it
+ * against the Overview source cluster, and writes the derived `<id>.incident.yml`.
+ * Returns the path so the capture reads the config back from that file. Cluster
+ * endpoints are fixed constants; only the API keys come from the environment.
+ */
+const deriveConfigForIncident = async (incidentId: string, log: ToolingLog): Promise<string> => {
+  const agentApiKey = process.env.AGENT_KIBANA_API_KEY;
+  const logsApiKey = process.env.LOGS_KIBANA_API_KEY;
+  const overviewApiKey = process.env.OVERVIEW_ES_API_KEY || process.env.OVERVIEW_API_KEY;
 
-  if (esApiKey && !esUrl) {
+  if (!agentApiKey) {
     throw new Error(
-      '--es-api-key requires --es-url. API key auth is not supported when connecting through Kibana (--kibana-url).'
+      `Missing AGENT_KIBANA_API_KEY. Set it in secrets.env to a Kibana API key with the ` +
+        `agentBuilder:read privilege on the INCIDENT cluster (see the README).`
+    );
+  }
+  if (!logsApiKey) {
+    throw new Error(
+      `Missing LOGS_KIBANA_API_KEY. Set it in secrets.env to a Kibana API key with the ` +
+        `agentBuilder:read privilege on the LOGS cluster (see the README).`
     );
   }
 
-  if (esUrl) {
-    return createEsClientFromUrl(esUrl, esApiKey);
-  }
-
-  const kibanaClient = await createKibanaClient({
+  return writeIncidentConfigFromId({
     log,
     signal: new AbortController().signal,
-    baseUrl: kibanaUrl,
+    incidentId,
+    agentKibanaUrl: AGENT_KIBANA_URL,
+    agentApiKey,
+    logsKibanaUrl: LOGS_KIBANA_URL,
+    logsApiKey,
+    overviewEsUrl: OVERVIEW_ES_URL,
+    overviewApiKey,
   });
-  return kibanaClient.es;
 };
 
 run(
   async ({ log, flags }) => {
-    const { config: configPath, 'dry-run': dryRun } = flags as ConnectionFlags & {
+    const {
+      config: configFlag,
+      'incident-id': incidentId,
+      'dry-run': dryRun,
+    } = flags as {
       config?: string;
+      'incident-id'?: string;
       'dry-run'?: boolean;
     };
 
-    if (!configPath) {
-      throw new Error('--config is required');
+    if (incidentId && configFlag) {
+      throw new Error('Provide either --incident-id or --config, not both.');
+    }
+    if (!incidentId && !configFlag) {
+      throw new Error('Required: --incident-id <id> (auto) or --config <path> (manual).');
     }
 
-    const esClient = await getEsClient(flags as ConnectionFlags, log);
+    const esClient = createEsClientFromUrl(LOCAL_ES_URL);
 
     log.info(`Capture Incident Snapshot`);
     log.info(`=========================`);
+
+    // Auto mode derives + writes `<id>.incident.yml`, then the capture reads it
+    // back — so both modes ultimately run from a config file on disk.
+    const configPath = incidentId ? await deriveConfigForIncident(incidentId, log) : configFlag!;
 
     await captureIncidentSnapshot({
       esClient,
@@ -74,27 +98,33 @@ run(
     description:
       'Remote-reindex a curated incident from a source cluster into local ES and snapshot to GCS',
     flags: {
-      string: ['config', 'kibana-url', 'es-url', 'es-api-key'],
+      string: ['config', 'incident-id'],
       boolean: ['dry-run'],
       help: `
-      Usage: node scripts/capture_incident_snapshot.js --config <path> [options]
+      Usage:
+        Auto (just an incident id):
+          node scripts/capture_incident_snapshot.js --incident-id <id> [--dry-run]
+        Manual (hand-written config):
+          node scripts/capture_incident_snapshot.js --config <path> [--dry-run]
 
-      --config            (required) Path to the incident config file (.yml/.yaml/.json)
+      --incident-id       Investigate this incident via Agent Builder, write
+                          <id>.incident.yml, and capture from it
+      --config            Path to a hand-written incident config file (.yml/.yaml/.json)
 
       --dry-run           Validate config + prerequisites and print the reindex/snapshot
                           request bodies without mutating anything
 
-      --es-url            Local Elasticsearch URL with credentials
-                          Example: http://elastic:changeme@localhost:9200
-
-      --es-api-key        Local Elasticsearch API key (base64 encoded)
-                          When provided, overrides credentials in --es-url
-
-      --kibana-url        Kibana URL (ES requests proxied through Kibana)
-                          Example: http://localhost:5601
-
-      The source (Overview) API key is read from the OVERVIEW_API_KEY environment
-      variable (preferred) or the config's "source.apiKey".
+      Cluster endpoints are fixed in constants.ts (local ES, the two Agent Builder
+      clusters, and the Overview source). Only the API keys come from env variables
+      (set them in secrets.env):
+        AGENT_KIBANA_API_KEY
+          INCIDENT cluster Agent Builder key (rootly metadata; needs agentBuilder:read).
+        LOGS_KIBANA_API_KEY
+          LOGS cluster Agent Builder key (log-grounded symptom; needs agentBuilder:read).
+        OVERVIEW_ES_API_KEY
+          Overview source cluster key for the probe. Falls back to OVERVIEW_API_KEY.
+        OVERVIEW_API_KEY
+          Source API key for the remote reindex (cluster:["monitor"] + read on logs-*).
       `,
     },
   }

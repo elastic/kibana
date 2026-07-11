@@ -29,7 +29,11 @@ import { NIGHTSHIFT_INCIDENT_BUCKET } from './constants';
 // client socket timeout.
 const REINDEX_SUBMIT_REQUEST_TIMEOUT_MS = 60 * 1000;
 const REINDEX_POLL_INTERVAL_MS = 15 * 1000;
-const REINDEX_MAX_WAIT_MS = 4 * 60 * 60 * 1000;
+const REINDEX_MAX_WAIT_MS = 8 * 60 * 60 * 1000;
+
+// Safety ceiling on the estimated reindex size, to avoid a runaway capture from a
+// too-broad entity scope. Tune per environment; captures above this must narrow.
+const MAX_REINDEX_DOCS = 3_000_000;
 
 /** Extracts the `host:port` form used by `reindex.remote.whitelist` from a URL. */
 function toHostPort(hostUrl: string): string {
@@ -387,6 +391,13 @@ async function remoteReindex({
 
   const request: ReindexRequest = {
     wait_for_completion: true,
+    // Scroll keep-alive for the reindex's underlying scroll. The default (5m) is
+    // shorter than the gap between frozen-tier batches (a single 5k batch can take
+    // several minutes to thaw from blob storage), so the scroll context expires
+    // mid-run and the reindex silently ENDS early (reporting only the docs copied so
+    // far, with no failure). A generous keep-alive prevents that truncation; it is
+    // refreshed on every batch, so only a single batch slower than this would trip.
+    scroll: '1h',
     source: {
       remote: {
         host: config.source.host,
@@ -400,8 +411,10 @@ async function remoteReindex({
       },
       index: config.sourceIndex,
       query,
-      // Larger scroll batches mean fewer round trips to the slow frozen source
-      // (remote reindex does not support `slices`, so batch size is the main lever).
+      // Larger scroll batches mean fewer round trips to the slow frozen source, which
+      // is the main throughput lever (remote reindex does not support `slices`). The
+      // scroll keep-alive above (refreshed per batch) — not the batch size — is what
+      // prevents mid-run expiry, so keep batches large for speed.
       size: 5000,
     },
     // The painless script routes every doc to its original name, so this nominal
@@ -460,10 +473,23 @@ async function waitForReindexTask({
         throw new Error(`Reindex task ${taskId} failed: ${JSON.stringify(task.error)}`);
       }
       const response = task.response as
-        | { timed_out?: boolean; created?: number; failures?: unknown[] }
+        | { timed_out?: boolean; total?: number; created?: number; failures?: unknown[] }
         | undefined;
       if (response?.timed_out) {
         throw new Error(`Reindex timed out capturing incident ${incidentId}`);
+      }
+      // Guard against silent truncation: a completed reindex whose `created` is short
+      // of `total` (with no explicit failures) means the source scroll ended early
+      // (e.g. a frozen-tier scroll-context expiry). Fail loudly rather than snapshot
+      // a partial capture.
+      const total = response?.total ?? 0;
+      const createdSoFar = response?.created ?? 0;
+      if (total > 0 && createdSoFar < total) {
+        throw new Error(
+          `Reindex truncated capturing incident ${incidentId}: created ${createdSoFar} of ${total} ` +
+            `docs with no reported failure (source scroll likely expired mid-run). Retry; if it ` +
+            `recurs, lower the scope (SCOPE_KEY_MAX_DOCS) or shorten the window.`
+        );
       }
       const failures = (response?.failures ?? []) as Array<{
         index?: string;
@@ -557,6 +583,11 @@ export async function captureIncidentSnapshot({
 }: {
   esClient: Client;
   log: ToolingLog;
+  /**
+   * Path to the incident config file. In `--config` mode this is the user's
+   * hand-written file; in `--incident-id` mode it is the `<id>.incident.yml` the
+   * auto flow just derived and wrote.
+   */
   configPath: string;
   dryRun?: boolean;
 }): Promise<void> {
@@ -602,6 +633,19 @@ export async function captureIncidentSnapshot({
     );
     log.info('[dry-run] No changes made.');
     return;
+  }
+
+  // Safety guard: refuse to kick off a runaway reindex. A broad entity scope over a
+  // multi-day window on busy infra can be tens of millions of docs (impractical,
+  // especially from a frozen tier). The estimate comes from the probe.
+  const estimated = config.snapshot?.expectedDocCount;
+  if (estimated !== undefined && estimated > MAX_REINDEX_DOCS) {
+    throw new Error(
+      `Estimated ${estimated} docs to reindex exceeds the ${MAX_REINDEX_DOCS} safety limit. ` +
+        `Narrow the scope before capturing: tighten the symptom (fewer entities), use a ` +
+        `pod-level entity, exclude more datasets, or shorten the window. Re-run with --dry-run ` +
+        `to inspect the derived config.`
+    );
   }
 
   // 2. Ensure a high-priority, plain, dynamic:false template covers the capture

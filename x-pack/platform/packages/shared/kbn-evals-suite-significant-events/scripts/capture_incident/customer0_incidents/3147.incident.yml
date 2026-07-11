@@ -1,0 +1,109 @@
+# =============================================================================
+# Incident 3147: Extraction failing on indices with inconsistent mappings
+# -----------------------------------------------------------------------------
+# Date:        2026-05-28            Severity: SEV2
+# Summary:     Entity extraction failed across many Serverless environments (22
+#              affected customers), breaking Entity Store / Entity Analytics.
+#              Kibana's entity_store extract_entity_task logged repeated
+#              ERROR verification_exception / "incompatible types" failures for
+#              ~3.5 days (28 May -> 1 Jun) until an emergency Serverless release.
+# Root cause:  Non-ECS-compliant cross-index mappings. The Entity Store pipeline
+#              assumed landmark fields like user.id / host.id were keyword/string
+#              and skipped type casting (perf choice, #263056); some indices
+#              mapped them as long, so the ES|QL pipeline hit verification errors.
+# Resolution:  Quick fix PR #271752 (+ refactor cherry-pick, emergency PR #271927)
+#              shipped via an emergency Serverless release; rollout completed
+#              2026-05-30 13:46 UTC (last error ~13:19 UTC).
+# RCA doc:     RCA [INTERNAL] - Extraction failing on indices with inconsistent mappings
+# Slack:       #incident-3147-extraction-failing-on-indices-with-inconsistent-mappings
+# Logs:        Overview (CCS) -> serverless-logging-* remotes. The symptom
+#              (entity_store verification errors) is in data_stream.dataset
+#              kibana.log, but the snapshot spans ALL logs-* datasets for the
+#              affected project (kibana.log + elasticsearch.server, where the
+#              verification_exception originates) so the incident is reproducible
+#              end-to-end. Symptom appears across ~23 serverless projects / many
+#              regions (~232k ERROR hits total). https://overview.elastic-cloud.com/app/r/s/X7zck
+#
+# Scope note: the incident is multi-region / multi-customer and the full broad
+# slice for all affected projects is impractical to reindex + snapshot. This config
+# captures ONE representative affected project (e0c92e6c..., aws-eu-central-1)
+# across all its logs-* datasets over the symptom-anchored window (noise incl.) so
+# the incident can be reproduced and analyzed. The "snapshot" query is reindexed &
+# snapshotted; each doc is stored under its ORIGINAL source data-stream name (e.g.
+# logs-kibana.log-default), so restore brings the indices back under those names.
+# The "symptom" query is stored so it can be replayed against the restored full-log
+# indices to isolate just the entity_store error lines.
+# =============================================================================
+
+incident:
+  id: '3147'
+  title: 'Extraction failing on indices with inconsistent mappings'
+  date: '2026-05-28'
+  slackChannel: '#incident-3147-extraction-failing-on-indices-with-inconsistent-mappings'
+
+source:
+  # Overview cluster's real Elasticsearch endpoint (remote _reindex source). The
+  # incident logs live on CCS-linked serverless-logging-* remotes; the affected
+  # representative project sits on the aws-eu-central-1 remote, reached via the
+  # CCS-prefixed index pattern below. Must be in the local ES
+  # `reindex.remote.whitelist` (see the capture-incident README).
+  host: 'https://1abe339b8ee8411bacfda74fc62f1fca.us-east-1.aws.found.io:443'
+  # API key read from the OVERVIEW_API_KEY env var (preferred). Never commit a key.
+  # apiKey: '<base64-api-key>'
+  # BROAD `logs-*` capture for the representative affected project (the entity scope
+  # in `query.snapshot` keeps it to that serverless.project.id, so it stays a
+  # manageable slice spanning kibana.log + elasticsearch.server + the surrounding
+  # controller/fleet/gc context). `exclude` drops proxy.log (~3.1M HTTP-access-noise
+  # docs that dwarf the incident-relevant datasets) and any frozen `partial-`
+  # indices the source key can't read. Add more patterns here if a run aborts on an
+  # unreadable / oversized dataset. One remote is used to dedupe the twinned
+  # logging-* / serverless-logging-* remotes.
+  index: 'serverless-logging-aws-eu-central-1:logs-*'
+  exclude:
+    - 'serverless-logging-aws-eu-central-1:logs-proxy.log-*'
+  cluster: 'serverless-logging-aws-eu-central-1'
+
+query:
+  # Incident window anchored on the representative project's symptom timestamps:
+  # 1h before the first symptom log (2026-05-29 14:59:14) to 1h after the last
+  # (2026-05-30 13:06:31). Covers the emergency-release rollout + recovery on
+  # 2026-05-30. Do NOT repeat this range inside the queries below (the tool adds
+  # it from timeRange).
+  timeRange:
+    gte: '2026-05-29T13:59:14Z'
+    lt: '2026-05-30T14:06:31Z'
+
+  # symptom: narrow Query DSL that LOCATES and CONFIRMS the incident (5,312
+  # entity_store extraction failures for this project). NOT snapshotted — stored
+  # so it can be replayed against the restored full-log index to pull out just the
+  # error lines. Translated from the incident's canonical ES|QL WHERE:
+  #   log.level == "ERROR"
+  #   AND STARTS_WITH(log.logger, "plugins.entityStore.entity_store:v2:extract_entity_task")
+  #   AND CONTAINS(message, "verification_exception")
+  #   AND CONTAINS(message, "incompatible types")
+  # message is analyzed text, so CONTAINS -> match_phrase; STARTS_WITH -> prefix.
+  symptom:
+    bool:
+      filter:
+        - term: { 'log.level': 'ERROR' }
+        - prefix: { 'log.logger': 'plugins.entityStore.entity_store:v2:extract_entity_task' }
+        - match_phrase: { message: 'verification_exception' }
+        - match_phrase: { message: 'incompatible types' }
+
+  # snapshot: BROAD slice that IS reindexed & snapshotted (noise INCLUDED). Scoped
+  # by ENTITY (the single representative affected serverless.project.id) — a clean
+  # cross-dataset key — so it spans every logs-* dataset that project emitted
+  # (kibana.log + elasticsearch.server + …), all levels (INFO / WARN / ERROR). The
+  # symptom filter and any noise-exclusion are intentionally NOT applied here.
+  snapshot:
+    term:
+      serverless.project.id: 'e0c92e6cf8884b2b899aa928cd074775'
+
+snapshot:
+  # Symptom hit count confirmed by the ES|QL discovery probe (informational).
+  expectedSymptomDocCount: 5312
+  # expectedDocCount is the TOTAL across all captured indices — set it from the
+  # entity-scoped re-probe (the old single-dataset 26025 no longer applies).
+  # expectedDocCount: <re-probe total>
+  # Keep the original _index / source cluster on each doc so provenance survives.
+  preserveProvenance: true

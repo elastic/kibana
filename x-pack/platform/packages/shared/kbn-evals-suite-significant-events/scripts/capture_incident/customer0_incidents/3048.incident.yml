@@ -1,0 +1,138 @@
+# =============================================================================
+# Incident 3048: Repeated OOMs on the es-es-search tier (circuit-breaker undercount)
+# -----------------------------------------------------------------------------
+# Date:        2026-05-06            Severity: SEV2
+# Summary:     A serverless project (f7c4f91990c944ddaf6eec9c12bfbe23) hit repeated
+#              Out-of-Memory failures. The es-es-search tier tripped the parent
+#              circuit breaker ('Data too large' / circuit_breaking_exception) on
+#              ES|QL async queries, cascading into query/transform/ML failures and
+#              OOM-driven instability. Autoscaling did not trigger before the OOMs.
+# Root cause:  The request circuit breaker under-counted compressed aggregation
+#              results (~27MB tracked vs ~2.8GB real, up to 16:1 compression from
+#              elastic/elasticsearch#126988), so it never tripped before the JVM was
+#              OOM-killed. Fix tracked in elastic/elasticsearch#147190. NOTE: this
+#              deeper mechanism came from heap dumps + control plane, NOT these
+#              logs — the logs only show the symptom layer (breaker trips / OOM
+#              instability). There are 0 'OutOfMemoryError' hits in `message` (the
+#              node was OOM-killed at the JVM level).
+# Resolution:  Manual scaling overrides via serverless-gitops PR #109265, then
+#              stepped up via PR #109893 after a second OOM the following day.
+# RCA doc:     [INTERNAL RCA Lite] Project f7c4f91990c944ddaf6eec9c12bfbe23
+#              Repeated OOMs (Rootly timeline: https://root.ly/xbvmw7)
+# Slack:       #incident-3048-project-f7c4f91990c944ddaf6eec9c12bfbe23-repeated-ooms
+# Logs:        Overview (CCS) -> logging-us-east-1 (frozen partial- tier). The
+#              symptom (breaker/OOM) is in data_stream.dataset elasticsearch.server,
+#              but the snapshot spans ALL logs-* datasets the affected pods emitted
+#              (elasticsearch.server + container_logs + system.syslog OOM-kill) so
+#              the full node context is captured. These server logs carry a
+#              different project token than the O11y serverless.project.id, so the
+#              snapshot is scoped by the affected POD host.name, not by project.
+#              https://overview.elastic-cloud.com/app/r/s/xowIP
+#
+# NOTE (doc discrepancy): the pasted incident doc's header line read
+# "Proxy pods stuck pending (Azure MCR auth)", but its logs/ES|QL/Slack channel/RCA
+# all describe the repeated-OOM / circuit-breaker incident above. This config
+# captures what the logs actually contain (the OOM incident), matching the Slack
+# channel and RCA doc for incident 3048.
+#
+# This config captures a BROAD, real-world log slice (noise included) across every
+# dataset the affected pods emitted, so the incident can be reproduced and
+# analyzed. The "snapshot" query is reindexed & snapshotted; each doc is stored
+# under its ORIGINAL source data-stream name (e.g. logs-elasticsearch.server-default),
+# so restore brings the indices back under those names. The "symptom" query (same
+# Query DSL language) is stored so it can be replayed against the restored full-log
+# indices to isolate just the error lines.
+# =============================================================================
+
+incident:
+  id: '3048'
+  title: 'Repeated OOMs on the es-es-search tier (circuit-breaker undercount)'
+  date: '2026-05-06'
+  slackChannel: '#incident-3048-project-f7c4f91990c944ddaf6eec9c12bfbe23-repeated-ooms'
+
+source:
+  # Overview cluster's real Elasticsearch endpoint (remote _reindex source). The
+  # incident logs live on the CCS-linked logging-us-east-1 remote, reached via the
+  # CCS-prefixed index pattern below. Must be in the local ES
+  # `reindex.remote.whitelist` (see the capture-incident README).
+  host: 'https://1abe339b8ee8411bacfda74fc62f1fca.us-east-1.aws.found.io:443'
+  # API key read from the OVERVIEW_API_KEY env var (preferred). Never commit a key.
+  # apiKey: '<base64-api-key>'
+  # Two dataset families the affected ES pods emitted: the structured
+  # `elasticsearch.*` logs (server / log / apm_agent — carrying the breaker/OOM
+  # symptom) and `system.syslog` (node-level OOM-kill; the JVM was OOM-killed, so
+  # there are 0 'OutOfMemoryError' hits in the ES logs themselves). `exclude` drops
+  # elasticsearch.gc: ~22.5M verbose GC-log docs over this window, impractical to
+  # reindex + snapshot. The entity scope in `query.snapshot` keeps the capture to
+  # the affected pods. Older windows sit in `partial-` frozen indices.
+  index:
+    - 'logging-us-east-1:logs-elasticsearch.*-*'
+    - 'logging-us-east-1:logs-system.syslog-*'
+  exclude:
+    - 'logging-us-east-1:logs-elasticsearch.gc-*'
+  cluster: 'logging-us-east-1'
+
+query:
+  # Incident window anchored on the true symptom timestamps from the discovery
+  # probe (first hit 2026-05-05T19:09:22Z, last hit 2026-05-08T06:56:05Z), with a
+  # 1-hour buffer on each side to capture lead-up and recovery context.
+  timeRange:
+    gte: '2026-05-05T18:09:22Z'
+    lt: '2026-05-08T07:56:05Z'
+
+  # symptom: narrow query that LOCATES and CONFIRMS the incident (460 breaker/OOM
+  # hits across the window). NOT snapshotted — stored so it can be replayed against
+  # the restored full-log index to pull out just the error lines. Translated
+  # verbatim from the incident's canonical KQL(...) filter (all-field phrase-ORs
+  # work as a Lucene query_string).
+  symptom:
+    query_string:
+      query: 'OutOfMemoryError OR circuit_breaking_exception OR "Data too large"'
+
+  # snapshot: BROAD slice that IS reindexed & snapshotted (noise INCLUDED). Scoped
+  # by ENTITY (the 11 es-es-search / es-es-index / es-es-ml pods that emitted the
+  # breaker/OOM symptoms), NOT by dataset. The discovery re-probe confirmed these
+  # pods are keyed as `host.name` in elasticsearch.server but as
+  # `kubernetes.pod.name` in elasticsearch.gc, so BOTH are matched (bool.should) to
+  # span every dataset those pods emitted — including the GC logs that show the
+  # memory pressure behind the OOM. The symptom filter and noise-exclusion are NOT
+  # applied here.
+  snapshot:
+    bool:
+      minimum_should_match: 1
+      should:
+        - terms:
+            host.name:
+              - 'es-es-search-86c9df5bff-5qftk'
+              - 'es-es-search-86c9df5bff-6t46k'
+              - 'es-es-search-6cbc9dbf6-66dqg'
+              - 'es-es-search-6cbc9dbf6-k25fr'
+              - 'es-es-search-6cbc9dbf6-2h7xf'
+              - 'es-es-index-6f5fdffcf5-5v8dk'
+              - 'es-es-index-6f5fdffcf5-2x4v4'
+              - 'es-es-index-5d8999b9c5-sxxck'
+              - 'es-es-index-bc4c4f479-74m5k'
+              - 'es-es-index-67df557b5f-8cdkp'
+              - 'es-es-ml-cb5bff694-hdmb6'
+        - terms:
+            kubernetes.pod.name:
+              - 'es-es-search-86c9df5bff-5qftk'
+              - 'es-es-search-86c9df5bff-6t46k'
+              - 'es-es-search-6cbc9dbf6-66dqg'
+              - 'es-es-search-6cbc9dbf6-k25fr'
+              - 'es-es-search-6cbc9dbf6-2h7xf'
+              - 'es-es-index-6f5fdffcf5-5v8dk'
+              - 'es-es-index-6f5fdffcf5-2x4v4'
+              - 'es-es-index-5d8999b9c5-sxxck'
+              - 'es-es-index-bc4c4f479-74m5k'
+              - 'es-es-index-67df557b5f-8cdkp'
+              - 'es-es-ml-cb5bff694-hdmb6'
+
+snapshot:
+  # Symptom hit count confirmed by the ES|QL discovery probe (informational).
+  expectedSymptomDocCount: 460
+  # expectedDocCount is the TOTAL across all captured indices — set it from the
+  # entity-scoped re-probe (the old single-dataset 86784 no longer applies).
+  # expectedDocCount: <re-probe total>
+  # Keep the original _index / source cluster on each doc so provenance survives.
+  preserveProvenance: true

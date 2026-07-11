@@ -11,7 +11,201 @@ Each snapshot carries native, immutable metadata (queryable via the ES snapshot
 API) plus a bucket-local `manifest.json`, so any snapshot is self-describing
 without an external catalog.
 
-One config file == one incident. Run the command once per incident.
+One incident == one snapshot. Run the command once per incident.
+
+## Two ways to run
+
+- **Auto (`--incident-id`)** — give just an incident id. The script asks the
+  platform-logging cluster's **Agent Builder** to investigate the incident (look
+  it up in `rootly_incidents`, cross-reference PagerDuty, surface the Slack/Drive
+  links) and return the portable derivation: the time window, a symptom
+  `query_string`, the affected entity, and the region. It then **confirms** that
+  entity against the Overview source cluster and computes the expected doc counts,
+  **writes `<id>.incident.yml`**, and runs the capture by reading that file back.
+- **Manual (`--config`)** — hand-write (or edit an auto-generated) config file and
+  pass it via `--config`. See [`example.incident.yml`](./example.incident.yml).
+
+Both modes ultimately run from a config file on disk — auto mode just generates
+that file first, so the derived `<id>.incident.yml` is the single source of truth
+for the run (inspect or tweak it, then re-run with `--config` if needed).
+
+Two clusters are involved and they are different:
+
+| Role          | Cluster                            | Used for                                              |
+| ------------- | ---------------------------------- | ----------------------------------------------------- |
+| Investigation | platform-logging (GCP us-central1) | Agent Builder + `rootly_incidents` lookup             |
+| Source        | Overview                           | the remote `_reindex` source + the confirmation probe |
+
+The agent runs on a different cluster than the reindex pulls from, so `source.host`
+and the doc counts are resolved against Overview, never taken from the agent.
+
+How the config is derived (generic, incident-agnostic):
+
+- The agent returns the incident's **portable symptom** (a specific `query_string`
+  of documented error phrases), the **region**, and which **entity field** to scope
+  by (`host.name` / `serverless.project.id` / `kubernetes.pod.name`) — never
+  concrete entity values, since those are cluster-specific.
+- The Overview probe then, against the real source: finds the symptom's first/last
+  timestamps and sets `query.timeRange = [first - 1h, last + 1h]`; discovers the
+  affected entity values from the symptom hits and builds the broad
+  `query.snapshot` (`terms` on the entity field); and drops **oversized /
+  low-signal datasets** that do not carry the symptom (GC logs, proxy/access noise,
+  bootstrap logs, or a runaway dominant dataset) into `source.exclude`, so the
+  snapshot keeps meaningful noise without ballooning. `expectedDocCount` reflects
+  the post-exclude total.
+
+### Auto-mode usage
+
+Copy [`secrets.env.example`](./secrets.env.example) to `secrets.env` and fill it
+in. To load it only for this one command (without leaving the variables in your
+shell), run it in a subshell — the `( … )` exports vanish when the command exits:
+
+```bash
+( source x-pack/platform/packages/shared/kbn-evals-suite-significant-events/scripts/capture_incident/secrets.env && \
+  node scripts/capture_incident_snapshot.js --incident-id 1234 --dry-run )
+```
+
+### Auto-mode configuration
+
+The cluster endpoints (the Agent Builder cluster, the Overview source cluster,
+and the local ES) are **pinned in [`constants.ts`](./constants.ts)** and cannot be
+overridden by env vars or flags. Only the API keys come from the environment (copy
+[`secrets.env.example`](./secrets.env.example) to `secrets.env`, fill it in, and
+`source` it). There are no auto-mode flags — each Agent Builder cluster picks its
+own default connector.
+
+Auto mode uses TWO Agent Builder clusters: the **incident** cluster
+(`rootly_incidents`) supplies the incident metadata, and the **logs** (Overview)
+cluster derives + verifies the symptom against the real logs.
+
+| Env var                | Purpose                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| `AGENT_KIBANA_API_KEY` | INCIDENT cluster Agent Builder key (`agentBuilder:read`) — rootly metadata     |
+| `LOGS_KIBANA_API_KEY`  | LOGS cluster Agent Builder key (`agentBuilder:read`) — log-grounded symptom    |
+| `OVERVIEW_ES_API_KEY`  | Overview/logs ES probe key (falls back to `OVERVIEW_API_KEY`)                  |
+| `OVERVIEW_API_KEY`     | Source key for the remote reindex (`cluster:["monitor"]` + `read` on `logs-*`) |
+
+To point at different clusters, edit the `AGENT_KIBANA_URL`, `LOGS_KIBANA_URL`,
+`OVERVIEW_ES_URL`, and `LOCAL_ES_URL` constants in [`constants.ts`](./constants.ts).
+
+Auto-mode prerequisites (in addition to the manual-mode ones below):
+
+- Both the incident cluster and the logs (Overview) cluster have **Agent Builder
+  enabled** with the `elastic-ai-agent` agent + an inference connector, on an
+  Enterprise/trial license.
+- The Overview `source.host` is in the local ES `reindex.remote.whitelist`.
+
+### Creating the API keys
+
+There are three API-key variables to fill in, across two deployments:
+
+- `AGENT_KIBANA_API_KEY` — the **incident** cluster (its own deployment).
+- `LOGS_KIBANA_API_KEY`, `OVERVIEW_ES_API_KEY`, `OVERVIEW_API_KEY` — the **logs /
+  Overview** cluster. Its Kibana (`overview.elastic-cloud.com`) is the Agent Builder
+  endpoint and its Elasticsearch (`...found.io`) is the reindex source + probe —
+  **the same deployment**.
+
+Even on that one deployment you need **two different privilege types**, so you
+cannot reuse a plain Elasticsearch key for everything:
+
+| Use                                                                    | Called on     | Privilege needed                                 |
+| ---------------------------------------------------------------------- | ------------- | ------------------------------------------------ |
+| Agent Builder `converse` (`LOGS_KIBANA_API_KEY`)                       | Kibana        | **Agent Builder: Read** Kibana feature privilege |
+| Probe + remote `_reindex` (`OVERVIEW_ES_API_KEY` / `OVERVIEW_API_KEY`) | Elasticsearch | `cluster: ["monitor"]` + `read` on `logs-*`      |
+
+A plain ES API key (like the `OVERVIEW_*` key you may already have) has NO Kibana
+feature privilege, so it 401s on `converse`. You have two options:
+
+Option 1 — recommended (keep your ES key, add one Kibana key). Keep the existing
+`OVERVIEW_ES_API_KEY` / `OVERVIEW_API_KEY` (the ES key), and create a separate
+Kibana key for `LOGS_KIBANA_API_KEY`.
+
+Option 2 — one combined key for all three logs-cluster vars. Create a single key
+through Kibana's API that carries BOTH privilege types (only a Kibana-created key
+can), then set all three logs-cluster vars to it.
+
+#### Create a Kibana Agent-Builder key (incident cluster, and logs cluster for Option 1)
+
+`converse` needs more than the `agentBuilder` privilege:
+
+- It persists the conversation (Agent Builder **write**) and must **get + execute
+  the LLM connector** (the _Actions and Connectors_ feature). A read-only key 403s
+  with `Unauthorized to get actions`.
+- The only LLM connectors on these clusters are `.inference` type, so routing the
+  model does `cluster:monitor/xpack/inference/get` — that needs ES **`monitor`**
+  (else `action [cluster:monitor/xpack/inference/get] is unauthorized`).
+- The agent's search/ES|QL tools read `rootly_incidents` / `pagerduty_incidents`
+  AND fetch their mappings (`indices:admin/mappings/get`, to generate ES|QL), so
+  the key needs ES **`read` + `view_index_metadata`** (plain `read` alone fails
+  with `action [indices:admin/mappings/get] is unauthorized`).
+
+Feature-scoping every dependency is fiddly, so for a short-lived eval key just
+grant Kibana `base: ["all"]` + ES `monitor` and `read`. The **same recipe works on
+both clusters** — run it once per cluster.
+
+UI: on that cluster's Kibana, **Stack Management → API keys → Create API key** →
+enable **Control security privileges** → grant Kibana **All** and ES cluster
+`monitor` + `read` on indices. Copy the **Base64 / `encoded`** value.
+
+Or in that cluster's Kibana **Dev Tools** — the `kbn:` prefix calls Kibana's own
+APIs (and sends the internal-origin header). Note this is an INTERNAL route
+(`/internal/security/api_key`), NOT `/api/...` (that path 404s):
+
+```
+POST kbn:/internal/security/api_key
+{
+  "name": "incident-agent-reader",
+  "expiration": "30d",
+  "kibana_role_descriptors": {
+    "incident-agent-reader": {
+      "elasticsearch": {
+        "cluster": ["monitor"],
+        "indices": [ { "names": ["*"], "privileges": ["read", "view_index_metadata"] } ]
+      },
+      "kibana": [ { "base": ["all"], "feature": {}, "spaces": ["*"] } ]
+    }
+  }
+}
+```
+
+Set the incident cluster's key as `AGENT_KIBANA_API_KEY`, and (Option 1) the logs
+cluster's key as `LOGS_KIBANA_API_KEY`.
+
+#### Create one combined key for the logs cluster (Option 2)
+
+Run against the **logs / Overview** cluster's Kibana; the same key gets Kibana
+`base: ["all"]` (Agent Builder converse needs Agent Builder write + _Actions and
+Connectors_ execute — see the note above) plus ES `monitor` + `read` on ALL
+indices (local and, via `remote_indices`, the CCS remotes the reindex federates to
+— so index resolution never trips on a non-`logs-*` alias/placeholder). Narrow
+`"*"` to `"logs-*"` if you prefer least-privilege on the ES side:
+
+```
+POST kbn:/internal/security/api_key
+{
+  "name": "incident-logs-reader",
+  "expiration": "30d",
+  "kibana_role_descriptors": {
+    "incident-logs-reader": {
+      "elasticsearch": {
+        "cluster": ["monitor"],
+        "indices": [ { "names": ["*"], "privileges": ["read", "view_index_metadata"] } ],
+        "remote_indices": [ { "clusters": ["*"], "names": ["*"], "privileges": ["read", "view_index_metadata"] } ]
+      },
+      "kibana": [ { "base": ["all"], "feature": {}, "spaces": ["*"] } ]
+    }
+  }
+}
+```
+
+Copy the `encoded` value and set all three logs-cluster vars to it:
+
+```bash
+# in scripts/capture_incident/secrets.env
+export LOGS_KIBANA_API_KEY="<the encoded value>"
+export OVERVIEW_ES_API_KEY="<the encoded value>"
+export OVERVIEW_API_KEY="<the encoded value>"
+```
 
 ## Why a reindex is needed
 
@@ -44,10 +238,11 @@ POST /_security/api_key
 }
 ```
 
-Export it before running (preferred over putting it in the config file):
+Add it to your `secrets.env` (preferred over putting it in the config file):
 
 ```bash
-export OVERVIEW_API_KEY='<the-api-key>'
+# in scripts/capture_incident/secrets.env
+export OVERVIEW_API_KEY="<the-api-key>"
 ```
 
 ### 2. A local Elasticsearch with remote reindex + GCS enabled
@@ -68,36 +263,34 @@ the exact command to re-run.
 
 ## Usage
 
+The local Elasticsearch the reindex + snapshot run against is pinned by the
+`LOCAL_ES_URL` constant in [`constants.ts`](./constants.ts) (with credentials in
+the URL). Edit that constant to target a different local ES.
+
 ```bash
 # Dry run: validate config + prerequisites, print request bodies, no mutations.
 node scripts/capture_incident_snapshot.js \
   --config x-pack/platform/packages/shared/kbn-evals-suite-significant-events/scripts/capture_incident/example.incident.yml \
-  --es-url http://elastic:changeme@localhost:9200 \
   --dry-run
 
 # Real run.
-node scripts/capture_incident_snapshot.js \
-  --config ./my-incident.yml \
-  --es-url http://elastic:changeme@localhost:9200
+node scripts/capture_incident_snapshot.js --config ./my-incident.yml
 ```
 
-`--config` is required. The connection flags (`--es-url`, `--es-api-key`,
-`--kibana-url`) mirror the `es_snapshot_loader` commands used to restore/replay the
-result. The source API key comes from `OVERVIEW_API_KEY` (preferred) or
-`source.apiKey` in the config.
+The source API key for the remote reindex comes from `OVERVIEW_API_KEY`
+(preferred) or `source.apiKey` in the config.
 
 ### Flags
 
-| Flag           | Required | Description                                                      |
-| -------------- | -------- | ---------------------------------------------------------------- |
-| `--config`     | yes      | Path to the incident config file (`.yml`/`.yaml`/`.json`)        |
-| `--dry-run`    | no       | Validate + print request bodies without mutating anything        |
-| `--es-url`     | no\*     | Local Elasticsearch URL with credentials                         |
-| `--es-api-key` | no       | Local Elasticsearch API key (base64; overrides `--es-url` creds) |
-| `--kibana-url` | no\*     | Kibana URL (ES requests proxied through Kibana)                  |
+| Flag            | Required | Description                                                           |
+| --------------- | -------- | --------------------------------------------------------------------- |
+| `--incident-id` | \*\*     | Investigate via Agent Builder, write `<id>.incident.yml`, and capture |
+| `--config`      | \*\*     | Path to a hand-written incident config file (`.yml`/`.yaml`/`.json`)  |
+| `--dry-run`     | no       | Validate + print request bodies without mutating anything             |
 
-\* Provide `--es-url` (or `--kibana-url`) to point at your local ES. See
-`node scripts/capture_incident_snapshot.js --help`.
+\*\* Provide exactly one of `--incident-id` (auto) or `--config` (manual). Cluster
+endpoints are pinned in `constants.ts` and API keys come from environment
+variables (see above). See `node scripts/capture_incident_snapshot.js --help`.
 
 ## Config file
 
@@ -160,7 +353,7 @@ can't read or that are too large (e.g. `logs-elasticsearch.gc-*`).
 | `query.snapshot`                   | no       | Query DSL query for the reindexed slice; scope by entity; `{}`/omit = whole `source.index`    |
 | `snapshot.expectedSymptomDocCount` | no       | Symptom hit count from the probe (informational)                                              |
 | `snapshot.expectedDocCount`        | no       | If set, the run fails on a reindexed-count mismatch (TOTAL across captured indices)           |
-| `snapshot.gcsBasePath`             | no       | GCS base path (default: `customer0-incidents/incident-<id>`)                                  |
+| `snapshot.gcsBasePath`             | no       | GCS base path (default: `incidents/incident-<id>`)                                            |
 | `snapshot.preserveProvenance`      | no       | Keep original `_index`/cluster on each doc (default `true`)                                   |
 
 `query.snapshot` is optional; omit it to snapshot the whole `source.index` within
@@ -243,14 +436,18 @@ against the restored indices.
 
 ## Files
 
-| File                                             | Purpose                                                          |
-| ------------------------------------------------ | ---------------------------------------------------------------- |
-| [`constants.ts`](./constants.ts)                 | GCS bucket / ES repository name, `OVERVIEW_API_KEY` env var name |
-| [`incident_config.ts`](./incident_config.ts)     | Config schema (zod), JSON/YAML loader, `buildIncidentQuery`      |
-| [`incident_gcs.ts`](./incident_gcs.ts)           | GCS repo registration, snapshot-with-metadata, manifest upload   |
-| [`incident_snapshot.ts`](./incident_snapshot.ts) | Orchestration (prereq → reindex → verify → snapshot → manifest)  |
-| [`index.ts`](./index.ts)                         | CLI entry (flags + ES client) for the command                    |
-| [`example.incident.yml`](./example.incident.yml) | Copy-paste config template                                       |
+| File                                                     | Purpose                                                           |
+| -------------------------------------------------------- | ----------------------------------------------------------------- |
+| [`constants.ts`](./constants.ts)                         | GCS bucket / ES repo name, env var names, Agent Builder constants |
+| [`incident_config.ts`](./incident_config.ts)             | Config schema (zod), JSON/YAML loader, query + YAML builders      |
+| [`incident_agent_client.ts`](./incident_agent_client.ts) | Thin client for `POST /api/agent_builder/converse`                |
+| [`incident_investigate.ts`](./incident_investigate.ts)   | Agent prompt + parse/validate of the derived capture spec         |
+| [`incident_probe.ts`](./incident_probe.ts)               | Overview source probe (confirm entity + count) via Query DSL aggs |
+| [`incident_autoconfig.ts`](./incident_autoconfig.ts)     | `--incident-id` orchestrator (investigate → probe → build config) |
+| [`incident_gcs.ts`](./incident_gcs.ts)                   | GCS repo registration, snapshot-with-metadata, manifest upload    |
+| [`incident_snapshot.ts`](./incident_snapshot.ts)         | Orchestration (prereq → reindex → verify → snapshot → manifest)   |
+| [`index.ts`](./index.ts)                                 | CLI entry (flags + ES client) for the command                     |
+| [`example.incident.yml`](./example.incident.yml)         | Copy-paste config template                                        |
 
 The command runs through the root launcher
 [`scripts/capture_incident_snapshot.js`](../../../../../../../scripts/capture_incident_snapshot.js),
