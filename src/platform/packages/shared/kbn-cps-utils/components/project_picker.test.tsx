@@ -249,7 +249,7 @@ describe('ProjectPickerContent', () => {
             <ProjectPickerContent
               projects={mockProjects}
               onProjectRoutingChange={jest.fn()}
-              showProjectRoutingControls={false}
+              controlsState="hidden"
             />
           </EuiThemeProvider>
         </I18nProvider>
@@ -273,7 +273,7 @@ describe('ProjectPickerContent', () => {
                 originProject: null,
               }}
               onProjectRoutingChange={jest.fn()}
-              showProjectRoutingControls={false}
+              controlsState="hidden"
             />
           </EuiThemeProvider>
         </I18nProvider>

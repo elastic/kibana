@@ -63,8 +63,7 @@ const ProjectScopePopoverContent = ({ cpsManager, projectRouting }: ProjectScope
       projectRouting={effectiveProjectRouting}
       onProjectRoutingChange={() => {}}
       projects={projects}
-      isReadonly
-      showProjectRoutingControls={false}
+      controlsState="hidden"
     />
   );
 };

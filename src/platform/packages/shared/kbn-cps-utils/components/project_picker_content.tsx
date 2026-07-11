@@ -28,12 +28,19 @@ import { ProjectListItem } from './project_list_item';
 import { strings } from './strings';
 import type { UseFetchProjectsResult } from './use_fetch_projects';
 
+export type ProjectPickerControlsState = 'enabled' | 'disabled' | 'hidden';
+
 export interface ProjectPickerContentProps {
   projectRouting?: ProjectRouting;
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
   projects: UseFetchProjectsResult;
-  isReadonly?: boolean;
-  showProjectRoutingControls?: boolean;
+  /**
+   * Controls the project routing toggle (`All projects` / `This project`):
+   * - `enabled`: interactive (default)
+   * - `disabled`: shown but not interactive
+   * - `hidden`: not rendered, leaving a read-only project list
+   */
+  controlsState?: ProjectPickerControlsState;
 }
 
 const projectPickerOptions = [
@@ -53,8 +60,7 @@ export const ProjectPickerContent = ({
   projectRouting,
   onProjectRoutingChange,
   projects,
-  isReadonly = false,
-  showProjectRoutingControls = true,
+  controlsState = 'enabled',
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
   const { originProject, linkedProjects, error, isLoading } = projects;
@@ -67,7 +73,7 @@ export const ProjectPickerContent = ({
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column" responsive={false} css={styles.container}>
-      {showProjectRoutingControls ? (
+      {controlsState !== 'hidden' ? (
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             isFullWidth
@@ -79,7 +85,7 @@ export const ProjectPickerContent = ({
             }}
             css={styles.buttonGroup}
             buttonSize="compressed"
-            isDisabled={isReadonly}
+            isDisabled={controlsState === 'disabled'}
           />
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>

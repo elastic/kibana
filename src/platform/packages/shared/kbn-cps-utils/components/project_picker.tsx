@@ -148,7 +148,7 @@ export const ProjectPicker = ({
           projectRouting={projectRouting}
           onProjectRoutingChange={onProjectRoutingChange}
           projects={projects}
-          isReadonly={isReadonly}
+          controlsState={isReadonly ? 'disabled' : 'enabled'}
         />
       </EuiPopover>
     </EuiTourStep>
