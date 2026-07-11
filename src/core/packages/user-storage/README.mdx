@@ -325,9 +325,25 @@ const NavLayoutEditor = () => {
 };
 ```
 
-`useUserStorage(key, defaultValue?)` returns `[value, setter]`. The value reflects the synchronous cache and re-renders on change. The setter persists via HTTP, refreshes the cache on success, and resolves to the validated value. If the HTTP write fails, the cache is unchanged, the returned promise rejects, and the error is published to `getHttpError$`.
+`useUserStorage(key, defaultValue?)` returns `[value, setter, state]`, backed by `getState$` under the hood. `value` re-renders on every cache change; the setter persists via HTTP, refreshes the cache on success, and resolves to the validated value (if the HTTP write fails, the cache is unchanged, the returned promise rejects, and the error is published to `getHttpError$`). `state.status` is `'loading'` | `'resolved'` | `'error'` (with `state.error` set for the last one) — use it to tell a temporary fallback apart from the resolved value, and to keep destructive actions disabled until it settles:
 
-Because `myPlugin:nav-layout` is registered with `preload: true`, `layout` is populated synchronously on the very first render — no loading state needed.
+```tsx
+const [layout, setLayout, { status }] = useUserStorage<NavLayout>('myPlugin:nav-layout', {
+  hidden: [],
+  order: [],
+});
+
+return (
+  <button
+    disabled={status !== 'resolved'}
+    onClick={() => setLayout({ ...layout, hidden: [...layout.hidden, 'discover'] })}
+  >
+    Hide Discover
+  </button>
+);
+```
+
+Because `myPlugin:nav-layout` is registered with `preload: true`, `layout` (and `status: 'resolved'`) are populated synchronously on the very first render — no loading state to handle in practice for preloaded keys. Lazy (non-preloaded) keys start at `status: 'loading'` with `layout` set to the caller's `defaultValue` until the background fetch resolves.
 
 For the less common operations — `remove`, `getUpdate$`, `getHttpError$` — reach for the underlying client:
 

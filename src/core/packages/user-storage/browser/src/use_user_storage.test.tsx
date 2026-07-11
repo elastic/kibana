@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
-import type { IUserStorageClient } from './types';
+import { BehaviorSubject, Subject } from 'rxjs';
+import type { IUserStorageClient, UserStorageValue } from './types';
 import { UserStorageProvider } from './user_storage_provider';
 import { useUserStorage, useUserStorageClient } from './use_user_storage';
 
@@ -106,15 +106,16 @@ describe('useUserStorage', () => {
     );
   });
 
-  it('returns the cached value as the initial render', () => {
+  it('returns the cached value as the initial render, with resolved status', () => {
     const client = buildClient({ 'navigation:layout': { hidden: ['discover'] } });
 
     const { result } = renderHook(() => useUserStorage<{ hidden: string[] }>('navigation:layout'), {
       wrapper: wrapper(client),
     });
 
-    const [value] = result.current;
+    const [value, , state] = result.current;
     expect(value).toEqual({ hidden: ['discover'] });
+    expect(state).toEqual({ status: 'resolved' });
   });
 
   it('falls back to defaultValue when the key is missing', () => {
@@ -140,5 +141,43 @@ describe('useUserStorage', () => {
     });
 
     expect(client.set).toHaveBeenCalledWith('counter', 7);
+  });
+
+  it('reports loading, then resolved, for a lazily-hydrating key', async () => {
+    const client = buildClient();
+    const state$ = new Subject<UserStorageValue<string>>();
+    client.getState$ = jest
+      .fn()
+      .mockReturnValue(state$) as unknown as IUserStorageClient['getState$'];
+
+    const { result } = renderHook(() => useUserStorage<string>('lazy', 'default'), {
+      wrapper: wrapper(client),
+    });
+
+    expect(result.current[2]).toEqual({ status: 'loading' });
+    expect(result.current[0]).toBe('default');
+
+    act(() => state$.next({ status: 'resolved', value: 'hydrated' }));
+
+    expect(result.current[2]).toEqual({ status: 'resolved' });
+    expect(result.current[0]).toBe('hydrated');
+  });
+
+  it('reports an error status (without discarding the fallback value) when the lazy fetch fails', () => {
+    const client = buildClient();
+    const state$ = new Subject<UserStorageValue<string>>();
+    client.getState$ = jest
+      .fn()
+      .mockReturnValue(state$) as unknown as IUserStorageClient['getState$'];
+    const error = new Error('boom');
+
+    const { result } = renderHook(() => useUserStorage<string>('lazy', 'default'), {
+      wrapper: wrapper(client),
+    });
+
+    act(() => state$.next({ status: 'error', value: 'default', error }));
+
+    expect(result.current[2]).toEqual({ status: 'error', error });
+    expect(result.current[0]).toBe('default');
   });
 });

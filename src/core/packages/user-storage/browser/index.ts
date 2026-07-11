@@ -13,5 +13,6 @@ export type {
   UserStorageValue,
   UserStorageProviderProps,
   UserStorageSetter,
+  UserStorageHookState,
 } from './src';
 export { UserStorageProvider, useUserStorage, useUserStorageClient } from './src';

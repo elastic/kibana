@@ -10,7 +10,7 @@
 import { useCallback, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import type { IUserStorageClient } from './types';
+import type { IUserStorageClient, UserStorageValue } from './types';
 import { UserStorageContext } from './user_storage_context';
 
 const PROVIDER_MISSING_MESSAGE =
@@ -34,9 +34,29 @@ export const useUserStorageClient = (): IUserStorageClient => {
 export type UserStorageSetter<T> = (newValue: T) => Promise<T>;
 
 /**
- * Subscribes to a single user-storage key and returns a `[value, setter]`
- * tuple. The value reflects the synchronous cache and re-renders on change.
- * The setter persists via HTTP and updates the cache on success.
+ * Load state of the value returned by {@link useUserStorage}, mirroring
+ * {@link UserStorageValue}'s `status` without repeating its `value`.
+ *
+ * - `'loading'`: a non-preloaded key's lazy fetch hasn't resolved yet — the
+ *   returned value is a temporary fallback/default, not the true stored value.
+ * - `'resolved'`: the returned value is the true effective value.
+ * - `'error'`: the lazy fetch failed; `error` describes the failure. The
+ *   returned value is still the fallback/default — safe to display, but
+ *   consumers should avoid enabling destructive actions while in this state.
+ *
+ * @public
+ */
+export type UserStorageHookState =
+  | { status: 'loading' }
+  | { status: 'resolved' }
+  | { status: 'error'; error: Error };
+
+/**
+ * Subscribes to a single user-storage key and returns a `[value, setter, state]`
+ * tuple. The value re-renders on every cache change; `state.status` lets
+ * callers distinguish a temporary fallback (`'loading'`) from the resolved
+ * value, and disable destructive actions until it settles. The setter
+ * persists via HTTP and updates the cache on success.
  *
  * When called without a `defaultValue` the first element of the tuple is
  * `T | undefined` — it is `undefined` when the key has no cached value.
@@ -44,7 +64,7 @@ export type UserStorageSetter<T> = (newValue: T) => Promise<T>;
  *
  * @example
  * ```tsx
- * const [layout, setLayout] = useUserStorage<NavLayout>(
+ * const [layout, setLayout, { status }] = useUserStorage<NavLayout>(
  *   'navigation:layout',
  *   defaultLayout
  * );
@@ -52,32 +72,43 @@ export type UserStorageSetter<T> = (newValue: T) => Promise<T>;
  *
  * @public
  */
-export function useUserStorage<T = unknown>(key: string): [T | undefined, UserStorageSetter<T>];
+export function useUserStorage<T = unknown>(
+  key: string
+): [T | undefined, UserStorageSetter<T>, UserStorageHookState];
 export function useUserStorage<T = unknown>(
   key: string,
   defaultValue: T
-): [T, UserStorageSetter<T>];
+): [T, UserStorageSetter<T>, UserStorageHookState];
 export function useUserStorage<T = unknown>(
   key: string,
   defaultValue?: T
-): [T | undefined, UserStorageSetter<T>] {
+): [T | undefined, UserStorageSetter<T>, UserStorageHookState] {
   const client = useUserStorageClient();
 
-  const observable$: Observable<T | undefined> = useMemo(
-    () => (defaultValue !== undefined ? client.get$<T>(key, defaultValue) : client.get$<T>(key)),
+  const state$: Observable<UserStorageValue<T | undefined>> = useMemo(
+    () =>
+      defaultValue !== undefined
+        ? client.getState$<T>(key, defaultValue)
+        : client.getState$<T>(key),
     [client, key, defaultValue]
   );
-  // Use peek (pure, no side effects) for the synchronous initial render value.
-  // The lazy fetch is triggered by the get$() subscription inside useObservable,
-  // which runs inside an effect after the first commit — safe under concurrent mode.
-  const value = useObservable<T | undefined>(
-    observable$,
-    defaultValue !== undefined ? client.peek<T>(key, defaultValue) : client.peek<T>(key)
-  );
+  // Use peek (pure, no side effects) for the synchronous initial render value,
+  // reported as 'loading' until the getState$ subscription (which runs inside
+  // an effect after the first commit — safe under concurrent mode) settles it.
+  const initialValue =
+    defaultValue !== undefined ? client.peek<T>(key, defaultValue) : client.peek<T>(key);
+  const state = useObservable<UserStorageValue<T | undefined>>(state$, {
+    status: 'loading',
+    value: initialValue,
+  });
+
   const set = useCallback<UserStorageSetter<T>>(
     (newValue) => client.set<T>(key, newValue),
     [client, key]
   );
 
-  return [value, set];
+  const hookState: UserStorageHookState =
+    state.status === 'error' ? { status: 'error', error: state.error } : { status: state.status };
+
+  return [state.value, set, hookState];
 }
