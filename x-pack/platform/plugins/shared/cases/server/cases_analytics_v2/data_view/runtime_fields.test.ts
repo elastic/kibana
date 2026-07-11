@@ -123,7 +123,7 @@ describe('buildPainlessSource', () => {
     for (const type of ['long', 'double', 'date', 'boolean', 'keyword'] as const) {
       const src = buildPainlessSource('unpopulated_as_thing', type);
       expect(src).toMatch(
-        /try\s*\{\s*vals = doc\['cases\.extended_fields\.unpopulated_as_thing'\];\s*\}\s*catch\s*\(Exception e\)\s*\{\s*return;\s*\}/
+        /try\s*\{\s*vals = doc\['case\.extended_fields\.unpopulated_as_thing'\];\s*\}\s*catch\s*\(Exception e\)\s*\{\s*return;\s*\}/
       );
     }
   });
