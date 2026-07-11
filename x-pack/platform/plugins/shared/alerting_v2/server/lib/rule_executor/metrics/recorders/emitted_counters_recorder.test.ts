@@ -24,15 +24,13 @@ describe('EmittedCountersRecorder', () => {
     expect(recorder.name).toBe('emitted_counters');
   });
 
-  it('forwards every counter in meta.metrics.counters into the collector', () => {
+  it('forwards every counter in meta.counters into the collector', () => {
     recorder.record(collector, {
       state: createRulePipelineState(),
       meta: {
-        metrics: {
-          counters: {
-            signalsGenerated: 3,
-            ruleEventsGenerated: 2,
-          },
+        counters: {
+          signalsGenerated: 3,
+          ruleEventsGenerated: 2,
         },
       },
       stepName: 'step1',
@@ -55,10 +53,10 @@ describe('EmittedCountersRecorder', () => {
     expect(collector.snapshot().counters).toEqual({});
   });
 
-  it('no-ops when meta.metrics.counters is absent', () => {
+  it('no-ops when meta.counters is absent', () => {
     recorder.record(collector, {
       state: createRulePipelineState(),
-      meta: { metrics: {} },
+      meta: {},
       stepName: 'step1',
       emissionIndex: 0,
     });
@@ -70,7 +68,7 @@ describe('EmittedCountersRecorder', () => {
     for (let i = 0; i < 3; i++) {
       recorder.record(collector, {
         state: createRulePipelineState(),
-        meta: { metrics: { counters: { signalsGenerated: 2 } } },
+        meta: { counters: { signalsGenerated: 2 } },
         stepName: 'step1',
         emissionIndex: i,
       });

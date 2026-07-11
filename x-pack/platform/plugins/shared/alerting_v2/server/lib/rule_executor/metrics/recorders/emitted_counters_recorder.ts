@@ -10,11 +10,11 @@ import type { MetricCollectorWriter, MetricRecorder, MetricRecorderContext } fro
 
 /**
  * Built-in generic {@link MetricRecorder} that forwards every counter
- * contribution a step emitted on `meta.metrics.counters` into the collector.
+ * contribution a step emitted on `meta.counters` into the collector.
  *
  * Observes `'all'` steps. This is the single seam that makes step-emitted
- * counters need zero bespoke recorders — a step gets a new counter by adding
- * a name to the catalog and emitting it on `meta.metrics.counters`.
+ * counters need zero bespoke recorders — a step gets a new counter by
+ * adding a name to the catalog and emitting it on `meta.counters`.
  */
 @injectable()
 export class EmittedCountersRecorder implements MetricRecorder {
@@ -22,7 +22,7 @@ export class EmittedCountersRecorder implements MetricRecorder {
   public readonly observes = 'all' as const;
 
   public record(collector: MetricCollectorWriter, { meta }: MetricRecorderContext): void {
-    const counters = meta?.metrics?.counters;
+    const counters = meta?.counters;
     if (!counters) return;
 
     for (const [name, value] of Object.entries(counters)) {

@@ -69,10 +69,8 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
             type: 'continue',
             state: { ...state, queryPayload, esqlRowBatch: batch },
             meta: {
-              metrics: {
-                counters: {
-                  [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
-                },
+              counters: {
+                [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
               },
             },
           };

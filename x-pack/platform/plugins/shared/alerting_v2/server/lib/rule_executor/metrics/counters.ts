@@ -9,9 +9,9 @@
  * Catalog of every rule-execution counter name.
  *
  * Single source of truth for counter identifiers. Producers reference these
- * constants when emitting counter contributions on `meta.metrics.counters`,
- * which gives typo-safe, discoverable metric names and prevents collisions
- * as the metric surface grows.
+ * constants when emitting counter contributions on `meta.counters`, which
+ * gives typo-safe, discoverable metric names and prevents collisions as the
+ * metric surface grows.
  *
  * Adding a new counter is the designated, append-only extension point. It is
  * NOT "touching collection logic" — the middleware and forwarder stay closed.

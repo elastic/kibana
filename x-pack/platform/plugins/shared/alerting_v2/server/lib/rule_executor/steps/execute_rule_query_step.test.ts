@@ -204,14 +204,14 @@ describe('ExecuteRuleQueryStep', () => {
     expect(results[0].type).toBe('continue');
 
     // @ts-expect-error: meta is present on the result
-    expect(results[0].meta?.metrics?.counters).toEqual({
+    expect(results[0].meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
     });
 
     expect(results[1].type).toBe('continue');
 
     // @ts-expect-error: meta is present on the result
-    expect(results[1].meta?.metrics?.counters).toEqual({
+    expect(results[1].meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 1,
     });
   });
@@ -225,7 +225,7 @@ describe('ExecuteRuleQueryStep', () => {
     expect(result.type).toBe('continue');
 
     // @ts-expect-error: meta is present on the result
-    expect(result.meta?.metrics?.counters).toEqual({
+    expect(result.meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 0,
     });
   });

@@ -26,11 +26,21 @@ without coupling to Task Manager state.
    the collector, returns the snapshot on `RuleExecutionPipelineResult.metrics`
    AND publishes it on the alerting bus in the `finally` block.
 
-Steps never import the collector. They contribute to metrics by emitting
-counter contributions on the ephemeral `meta.metrics.counters` channel of
-their `continue` result. `EmissionMeta` is per-emission and never threaded
-forward — the next step rebuilds its own emission, so `meta` never reaches
-`bulkIndexDocs` or any persisted document.
+Steps never import the collector. They contribute to metrics via one of two
+per-emission channels on `EmissionMeta`:
+
+- **`meta.counters`** — the DIRECT channel. Step names the metric and its
+  value. Consumed generically by `EmittedCountersRecorder` (observes `'all'`),
+  which merges every key into the collector without knowing what any of them
+  mean.
+- **`meta.observations`** — the RAW channel. Step exposes a typed,
+  domain-shaped payload; a domain-aware recorder derives metrics from it.
+  Adding a new observation kind extends `EmissionObservations` (in
+  `rule_executor/types.ts`).
+
+`EmissionMeta` is per-emission and never threaded forward — the next step
+rebuilds its own emission, so `meta` never reaches `bulkIndexDocs` or any
+persisted document.
 
 ## Two ways to add a metric
 
@@ -45,7 +55,7 @@ catalog — a value-only import.
 
 1. Add the counter name to `RULE_EXECUTION_COUNTERS` in
    `metrics/counters.ts`.
-2. In the owning step, emit the counter on `meta.metrics.counters` on the
+2. In the owning step, emit the counter on `meta.counters` on the
    `continue` result:
 
    ```ts
@@ -53,9 +63,7 @@ catalog — a value-only import.
      type: 'continue',
      state,
      meta: {
-       metrics: {
-         counters: { [RULE_EXECUTION_COUNTERS.myCounter]: n },
-       },
+       counters: { [RULE_EXECUTION_COUNTERS.myCounter]: n },
      },
    };
    ```
@@ -66,8 +74,12 @@ catalog — a value-only import.
 ### 2. Derived / cross-step recorder (the exception)
 
 Use when the datum is computed from `state` the step already exposes
-(filters, joins across fields), or spans multiple steps and doesn't belong
-in any single step. Requires **no step change**.
+(filters, joins across fields), or from a typed observation emitted on
+`meta.observations`, or spans multiple steps and doesn't belong in any
+single step. Requires **no step change** for the state-derived case; for
+observation-driven metrics, the producing step publishes to
+`meta.observations` and the recorder consumes it (see
+`PersistedRuleEventsRecorder` for a worked example).
 
 1. Add the counter name to `RULE_EXECUTION_COUNTERS`.
 2. Implement a `MetricRecorder` that observes the relevant step(s) and reads

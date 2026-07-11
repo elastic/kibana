@@ -35,18 +35,79 @@ export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';
 
 /**
  * Ephemeral, per-emission side-channel for observability data. Steps attach
- * transient annotations here (e.g. counter contributions) that the metrics
- * middleware consumes without polluting {@link RulePipelineState}. `meta` is
- * naturally dropped by the next step, which rebuilds its own emission, so it
- * never threads forward and never reaches persisted docs.
+ * transient annotations here that domain-aware recorders consume without
+ * polluting {@link RulePipelineState}. `meta` is naturally dropped by the
+ * next step, which rebuilds its own emission, so it never threads forward
+ * and never reaches persisted docs.
  *
- * Core stays name-agnostic: `counters` is a generic record. Type-safe keys
- * come from `metrics/counters.ts` at the emission call site.
+ * Two emission channels, distinguished by who owns the metric shape:
+ *
+ * 1. `counters` — DIRECT channel. The step has already decided the metric
+ *    name and value. `EmittedCountersRecorder` is name-agnostic and merges
+ *    every key into the run's collector. Counter names are catalogued in
+ *    `metrics/counters.ts`.
+ * 2. `observations` — RAW channel. The step exposes structured,
+ *    domain-shaped data; a domain-aware recorder derives metrics from it.
+ *    Keeps steps focused on their domain (storage, querying, ...) and out
+ *    of metric-naming decisions.
+ *
+ * Both channels are top-level containers, not step-specific instances —
+ * adding a new observation kind extends {@link EmissionObservations}, not
+ * `EmissionMeta`.
  */
 export interface EmissionMeta {
-  readonly metrics?: {
-    readonly counters?: Readonly<Record<string, number>>;
-  };
+  readonly counters?: Readonly<Record<string, number>>;
+  readonly observations?: EmissionObservations;
+}
+
+/**
+ * Catalog of typed observations a step may expose on
+ * {@link EmissionMeta.observations}. Each field is one known observation
+ * kind; the paired recorder opts in to the specific kind it consumes.
+ *
+ * Adding a new observation is a schema change: extend this interface (and,
+ * typically, publish a recorder that consumes it). The payload type lives
+ * here so both the producing step and the consuming recorder see the same
+ * shape.
+ */
+export interface EmissionObservations {
+  /**
+   * Outcome of a bulk write. Set by writer steps that called the
+   * `StorageService`; consumed by
+   * {@link PersistedRuleEventsRecorder} (and other future persistence-aware
+   * recorders) to derive counters like `ruleEventsGenerated` and
+   * `signalsGenerated` from what actually landed in Elasticsearch — not
+   * from what was built in memory.
+   */
+  readonly bulkIndexResult?: BulkIndexObservation;
+}
+
+/**
+ * Storage-agnostic per-batch bulk-write outcome. Structurally mirrors the
+ * storage service's `BulkIndexResult` so the store step forwards the result
+ * without transformation, but declared here to avoid a rule-executor →
+ * storage-service module dependency.
+ */
+export interface BulkIndexObservation {
+  readonly attempted: number;
+  readonly persisted: number;
+  readonly errors: readonly BulkIndexObservationError[];
+}
+
+/**
+ * Per-document rejection surfaced on
+ * {@link BulkIndexObservation.errors}. Structurally mirrors `BulkIndexError`
+ * from the storage service (see `storage_service.ts` for the field-level
+ * rationale on `code` / `details.statusCode`). `document` holds the same
+ * reference the emitting step passed to the storage service, so recorders
+ * correlate failures by identity.
+ */
+export interface BulkIndexObservationError {
+  readonly code: string;
+  readonly message: string;
+  readonly details?: Readonly<Record<string, unknown>>;
+  readonly index: string;
+  readonly document: Record<string, unknown>;
 }
 
 export type StepStreamResult =

@@ -364,7 +364,7 @@ describe('RuleExecutionPipeline', () => {
         pipeStream(input, (state) => ({
           type: 'continue',
           state,
-          meta: { metrics: { counters: contribution } },
+          meta: { counters: contribution },
         }))
       );
 
