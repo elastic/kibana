@@ -15,6 +15,7 @@ import {
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createStorageService } from '../../services/storage_service/storage_service.mock';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 
 describe('StoreAlertEventsStep', () => {
   let step: StoreAlertEventsStep;
@@ -49,7 +50,17 @@ describe('StoreAlertEventsStep', () => {
         step.executeStream(createPipelineStream([state]))
       );
 
-      expect(result).toEqual({ type: 'continue', state });
+      expect(result).toEqual({
+        type: 'continue',
+        state,
+        meta: {
+          metrics: {
+            counters: {
+              [RULE_EXECUTION_COUNTERS.ruleEventsGenerated]: alertEventsBatch.length,
+            },
+          },
+        },
+      });
       expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
 
       const bulkCall = mockEsClient.bulk.mock.calls[0][0];
@@ -83,7 +94,17 @@ describe('StoreAlertEventsStep', () => {
         step.executeStream(createPipelineStream([state]))
       );
 
-      expect(result).toEqual({ type: 'continue', state });
+      expect(result).toEqual({
+        type: 'continue',
+        state,
+        meta: {
+          metrics: {
+            counters: {
+              [RULE_EXECUTION_COUNTERS.ruleEventsGenerated]: 0,
+            },
+          },
+        },
+      });
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
 

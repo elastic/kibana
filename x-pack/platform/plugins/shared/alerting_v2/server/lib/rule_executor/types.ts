@@ -33,8 +33,24 @@ export interface RulePipelineState {
 
 export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';
 
+/**
+ * Ephemeral, per-emission side-channel for observability data. Steps attach
+ * transient annotations here (e.g. counter contributions) that the metrics
+ * middleware consumes without polluting {@link RulePipelineState}. `meta` is
+ * naturally dropped by the next step, which rebuilds its own emission, so it
+ * never threads forward and never reaches persisted docs.
+ *
+ * Core stays name-agnostic: `counters` is a generic record. Type-safe keys
+ * come from `metrics/counters.ts` at the emission call site.
+ */
+export interface EmissionMeta {
+  readonly metrics?: {
+    readonly counters?: Readonly<Record<string, number>>;
+  };
+}
+
 export type StepStreamResult =
-  | { type: 'continue'; state: RulePipelineState }
+  | { type: 'continue'; state: RulePipelineState; meta?: EmissionMeta }
   | { type: 'halt'; reason: HaltReason; state: RulePipelineState };
 
 export type PipelineStateStream = AsyncIterableIterator<StepStreamResult>;

@@ -15,6 +15,7 @@ import {
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import { guardedMapStep } from '../stream_utils';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 
 @injectable()
 export class StoreAlertEventsStep implements RuleExecutionStep {
@@ -40,7 +41,17 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
         message: `[${this.name}] Successfully stored alert events batch`,
       });
 
-      return { type: 'continue', state };
+      return {
+        type: 'continue',
+        state,
+        meta: {
+          metrics: {
+            counters: {
+              [RULE_EXECUTION_COUNTERS.ruleEventsGenerated]: state.alertEventsBatch.length,
+            },
+          },
+        },
+      };
     });
   }
 }
