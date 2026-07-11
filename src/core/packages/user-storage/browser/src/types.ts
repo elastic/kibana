@@ -40,13 +40,18 @@ export type UserStorageValue<T> =
   | { status: 'error'; value: T; error: Error };
 
 /**
- * Browser-side user storage client. Returns synchronously from an in-memory
- * cache that is seeded from preloaded (server-injected) metadata at first
- * paint, and is refreshed by `set` / `remove` after the corresponding HTTP
- * write completes.
+ * Browser-side user storage client, backed by an in-memory cache that is
+ * seeded from preloaded (server-injected) metadata at first paint and
+ * refreshed by `set` / `remove` after the corresponding HTTP write completes.
+ *
+ * `peek` is the only purely synchronous read (cache-only, no side effects).
+ * `get`, `get$`, and `getState$` may trigger a lazy HTTP fetch for keys that
+ * were not preloaded; `get` and `update` are `Promise`-based so they can await
+ * that fetch, while `get$` / `getState$` surface it reactively.
  *
  * Distinct from the server-side `IUserStorageClient` (in
- * `@kbn/core-user-storage-common`) which is fully Promise-based.
+ * `@kbn/core-user-storage-common`), which is fully Promise-based for every
+ * method, including single-key reads.
  *
  * @public
  */
