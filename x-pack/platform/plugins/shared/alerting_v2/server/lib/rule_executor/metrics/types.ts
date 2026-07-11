@@ -8,10 +8,16 @@
 import type { EmissionMeta, RulePipelineState } from '../types';
 
 /**
- * Read-only view of a per-run metric collector.
+ * Read-only view of a per-run metric collector. The symmetrical counterpart
+ * to {@link MetricCollectorWriter}: exposes identity, timing and the current
+ * snapshot but cannot mutate or freeze the collector.
  *
- * Callers that only need to inspect the collector (e.g. the pipeline building
- * a snapshot for the run result) depend on this narrower interface.
+ * Intended for consumers that need to observe metrics without owning
+ * the finalize transition — e.g. a diagnostics endpoint reading mid-flight
+ * counters, a bus subscriber that samples the snapshot, or a periodic
+ * exporter. Kept intentionally symmetrical to the writer so read-only
+ * consumers can be added without widening the pipeline's exclusive
+ * `finalize()` capability.
  */
 export interface MetricCollectorReader {
   readonly executionId: string;

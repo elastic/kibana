@@ -10,7 +10,10 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { EventBus } from '../event_bus';
 import { createEventBusMock } from '../event_bus/event_bus.mock';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
-import { RuleExecutorEventPublisher } from './rule_executor_event_publisher';
+import {
+  RuleExecutorEventPublisher,
+  type RuleExecutorEventPublisherContract,
+} from './rule_executor_event_publisher';
 
 export function createRuleExecutorEventPublisher(): {
   publisher: RuleExecutorEventPublisher;
@@ -26,3 +29,8 @@ export function createRuleExecutorEventPublisher(): {
     request,
   };
 }
+
+export const createMockRuleExecutorEventPublisher =
+  (): jest.Mocked<RuleExecutorEventPublisherContract> => ({
+    publishExecutionCompleted: jest.fn(),
+  });
