@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
@@ -21,6 +22,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHighlight,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -28,6 +30,7 @@ import {
   useGeneratedHtmlId,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -39,6 +42,7 @@ import type {
 import { useDatasets } from '../../hooks/use_evals_api';
 import {
   useAgentBuilderAgents,
+  useAgentBuilderTools,
   useEvaluators,
   useModelConnectors,
   useExperimentTemplates,
@@ -79,6 +83,9 @@ const strings = {
   }),
   toolIdLabel: i18n.translate('xpack.evals.newExperiment.toolIdLabel', {
     defaultMessage: 'Agent Builder tool ID',
+  }),
+  toolIdHelp: i18n.translate('xpack.evals.newExperiment.toolIdHelp', {
+    defaultMessage: 'Pick an existing tool or type a custom tool ID.',
   }),
   datasetsLabel: i18n.translate('xpack.evals.newExperiment.datasetsLabel', {
     defaultMessage: 'Dataset(s)',
@@ -139,6 +146,54 @@ interface SelectedEvaluator {
   kind: 'llm' | 'code';
   connectorId?: string;
 }
+
+/** Combo-box option carrying the extra tool metadata surfaced in {@link renderToolOption}. */
+type ToolOption = EuiComboBoxOptionOption<string> & {
+  toolType?: string;
+  description?: string;
+};
+
+// The eval-experiments skill's own tools live under this namespace; they are not
+// meaningful evaluation targets, so they are excluded from the tool picker.
+const EVALS_OWN_TOOL_PREFIX = 'platform.evals.';
+
+const toolDescriptionCss = css`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+/**
+ * Renders a tool option as its id (with the search term highlighted), a badge for
+ * its type, and a truncated description — so `generate_esql` is distinguishable
+ * from `get_document` at a glance.
+ */
+const renderToolOption = (
+  option: EuiComboBoxOptionOption<string>,
+  searchValue: string,
+  contentClassName: string
+) => {
+  const { label, toolType, description } = option as ToolOption;
+  return (
+    <span className={contentClassName}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+        </EuiFlexItem>
+        {toolType && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{toolType}</EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      {description && (
+        <EuiText size="xs" color="subdued" className={toolDescriptionCss}>
+          {description}
+        </EuiText>
+      )}
+    </span>
+  );
+};
 
 export interface NewExperimentFlyoutProps {
   onClose: () => void;
@@ -205,6 +260,9 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const { data: agentsData, isLoading: agentsLoading } = useAgentBuilderAgents({
     enabled: taskTarget === 'agentBuilder.converse',
   });
+  const { data: toolsData, isLoading: toolsLoading } = useAgentBuilderTools({
+    enabled: isBareToolTarget,
+  });
 
   const connectorOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () => (connectorsData ?? []).map((c) => ({ label: c.name, value: c.id })),
@@ -249,6 +307,19 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
         value: agent.id,
       })),
     [agentsData]
+  );
+
+  const toolOptions = useMemo<ToolOption[]>(
+    () =>
+      (toolsData ?? [])
+        .filter((tool) => !tool.id.startsWith(EVALS_OWN_TOOL_PREFIX))
+        .map((tool) => ({
+          label: tool.id,
+          value: tool.id,
+          toolType: tool.type,
+          description: tool.description,
+        })),
+    [toolsData]
   );
 
   const spaceOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
@@ -539,6 +610,9 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const selectedAgentOptions = agentId
     ? [agentOptions.find((o) => o.value === agentId) ?? { label: agentId, value: agentId }]
     : [];
+  const selectedToolOptions: ToolOption[] = toolId
+    ? [toolOptions.find((o) => o.value === toolId) ?? { label: toolId, value: toolId }]
+    : [];
   const selectedSpaceOptions = spaceOptions.filter((o) => spaceIds.includes(o.value as string));
 
   // Deep-link to the saved workflow's detail page in the Workflows app, where it
@@ -684,11 +758,17 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
           )}
 
           {taskTarget === 'agentBuilder.tool' && (
-            <EuiFormRow label={strings.toolIdLabel} fullWidth>
-              <EuiFieldText
+            <EuiFormRow label={strings.toolIdLabel} helpText={strings.toolIdHelp} fullWidth>
+              <EuiComboBox<string>
                 fullWidth
-                value={toolId}
-                onChange={(e) => setToolId(e.target.value)}
+                singleSelection={{ asPlainText: true }}
+                isClearable
+                isLoading={toolsLoading}
+                options={toolOptions}
+                selectedOptions={selectedToolOptions}
+                onChange={(selected) => setToolId((selected[0]?.value as string) ?? '')}
+                onCreateOption={(value) => setToolId(value.trim())}
+                renderOption={renderToolOption}
                 data-test-subj="evalsToolId"
               />
             </EuiFormRow>

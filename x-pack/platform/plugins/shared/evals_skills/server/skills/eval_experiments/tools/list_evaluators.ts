@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+import { ToolType } from '@kbn/agent-builder-common';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { evalsTools, otherResult, toErrorResult } from './common';
+import type { EvalExperimentsToolDeps } from './deps';
+
+const schema = z.object({});
+
+/**
+ * Lists the registered evaluators, including whether each one is LLM-backed
+ * (and therefore needs a judge connector) and whether it applies to bare tool traces.
+ */
+export const listEvaluatorsTool = (
+  deps: EvalExperimentsToolDeps
+): BuiltinSkillBoundedTool<typeof schema> => ({
+  id: evalsTools.listEvaluators,
+  type: ToolType.builtin,
+  description:
+    'List available evaluators (name, version, kind, description). `llm` evaluators require a judge connector_id (needsJudgeConnector=true); `code` evaluators do not. `supportsBareToolTrace=false` evaluators only apply to agent (converse) targets, not bare tools.',
+  schema,
+  handler: async () => {
+    try {
+      const { evals } = await deps.getStartDependencies();
+      if (!evals.listEvaluators) {
+        return toErrorResult(
+          new Error('the evals evaluator registry is unavailable'),
+          'Failed to list evaluators'
+        );
+      }
+
+      const evaluators = evals.listEvaluators();
+      return otherResult({ total: evaluators.length, evaluators });
+    } catch (error) {
+      return toErrorResult(error, 'Failed to list evaluators');
+    }
+  },
+});

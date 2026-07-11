@@ -78,28 +78,19 @@ export const experimentRequestToParams = (
 });
 
 export interface GenerateExperimentParams {
-  /** Human-readable workflow name. A default is derived when omitted. */
   name?: string;
-  /** One or more models under evaluation. Two or more triggers cross-model comparison. */
   connectorIds: string[];
-  /** Agent Builder agent id — routes the task to the `agentBuilder.converse` provider. */
   agentId?: string;
-  /** Agent Builder tool id — routes the task to the `agentBuilder.tool` provider. */
   toolId?: string;
-  /** Explicit registered task provider id (overrides agent/tool/inference inference). */
   taskRef?: string;
-  /** Free-form params forwarded to the task provider. */
   params?: Record<string, unknown>;
   datasetIds: string[];
   evaluators: WorkflowEvaluatorInput[];
   repetitions?: number;
   concurrency?: number;
-  /** Append an `evals.compareExperiments` step to cross-model saved workflows. */
   compare?: boolean;
   /**
-   * Spaces the produced scores are assigned to. Inlined into the evaluate step so
-   * every (possibly scheduled) run of a saved workflow keeps the same assignment.
-   * When omitted, the ingest step falls back to the workflow's execution space.
+   * Spaces the produced scores are assigned to. When omitted, the ingest step falls back to the workflow's space.
    */
   spaceIds?: string[];
 }
@@ -107,27 +98,18 @@ export interface GenerateExperimentParams {
 export type ExperimentRunMode = 'single' | 'dataset-fanout' | 'cross-model';
 
 export interface GeneratedExecution {
-  /** Self-contained workflow YAML with values inlined for this execution. */
   yaml: string;
   connectorId: string;
   datasetIds: string[];
-  /** The execution id inlined into this execution's YAML; groups its score docs (one list row). */
   executionId: string;
-  /** Present for single-model runs (route-generated, shared across shards). */
   experimentId?: string;
 }
 
 export interface GeneratedExperimentRun {
-  /** Shared invocation id; scores group under `metadata.execution_id`. */
   executionId: string;
   executions: GeneratedExecution[];
-  /** Known experiment ids (single-model / shard runs); empty for cross-model. */
   experimentIds: string[];
   mode: ExperimentRunMode;
-  /**
-   * How the resulting experiments should be compared/queried: cross-model runs
-   * group by the shared `execution_id`; single-model runs by `experiment_id`.
-   */
   compareBy: 'execution' | 'experiment';
 }
 

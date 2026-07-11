@@ -67,7 +67,7 @@ export class EvalsPlugin
   ): EvalsPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('Evals plugin is disabled');
-      return { registerTaskProvider: () => {} };
+      return { enabled: false, registerTaskProvider: () => {} };
     }
 
     this.logger.info('Setting up Evals plugin');
@@ -172,6 +172,7 @@ export class EvalsPlugin
 
     const taskProviderRegistry = this.taskProviderRegistry;
     return {
+      enabled: true,
       registerTaskProvider: (provider) => taskProviderRegistry.register(provider),
     };
   }
@@ -211,6 +212,15 @@ export class EvalsPlugin
     return {
       datasetService: this.datasetService,
       evaluationScoreService: this.evaluationScoreService,
+      listEvaluators: () =>
+        (this.evaluatorRegistry?.list() ?? []).map((def) => ({
+          name: def.name,
+          version: def.version,
+          kind: def.kind,
+          description: def.description,
+          needsJudgeConnector: def.kind === 'llm',
+          supportsBareToolTrace: def.supportsBareToolTrace ?? true,
+        })),
     };
   }
 

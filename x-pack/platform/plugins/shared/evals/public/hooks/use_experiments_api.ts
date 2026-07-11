@@ -151,6 +151,44 @@ export const useAgentBuilderAgents = ({ enabled = true }: { enabled?: boolean } 
   });
 };
 
+/** A minimal view of an Agent Builder tool, used to populate the tool task-target picker. */
+export interface AgentBuilderTool {
+  id: string;
+  type: string;
+  description?: string;
+}
+
+interface ListAgentBuilderToolsResponse {
+  results: AgentBuilderTool[];
+}
+
+/** Public Agent Builder HTTP API for listing tools. */
+const AGENT_BUILDER_TOOLS_URL = '/api/agent_builder/tools';
+
+/**
+ * Lists Agent Builder tools (including built-in ones) so the experiment form can
+ * suggest them for the "Agent Builder tool" target. Agent Builder may be disabled
+ * in some deployments, so callers should treat an error or empty result as "no
+ * suggestions" and still allow free-form ids.
+ */
+export const useAgentBuilderTools = ({ enabled = true }: { enabled?: boolean } = {}) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: ['evals', 'agent-builder-tools'],
+    enabled,
+    queryFn: async (): Promise<AgentBuilderTool[]> => {
+      const response = await services.http!.get<ListAgentBuilderToolsResponse>(
+        AGENT_BUILDER_TOOLS_URL,
+        { version: AGENT_BUILDER_PUBLIC_API_VERSION }
+      );
+      return response.results ?? [];
+    },
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+};
+
 export const useRunExperiment = () => {
   const { services } = useKibana();
 

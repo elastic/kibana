@@ -19,15 +19,30 @@ import type { EvaluatorRegistry } from './evaluators/types';
 import type { EvalsTaskProvider } from './task_providers/types';
 
 export interface EvalsPluginSetup {
-  /**
-   * Registers a task provider so suites (or other plugins) can expose their real
-   * "feature under evaluation" function to the workflow-based experiment engine.
-   */
+  enabled: boolean;
   registerTaskProvider: (provider: EvalsTaskProvider) => void;
 }
+
+/**
+ * Serializable summary of a registered evaluator, exposed on the start contract
+ * for consumers (such as the evals Agent Builder skill) that need to discover
+ * the available evaluators without pulling in the full registry definition.
+ */
+export interface EvaluatorSummary {
+  name: string;
+  version: string;
+  kind: 'llm' | 'code';
+  description: string;
+  /** `llm` evaluators require a judge connector id to be supplied at run time. */
+  needsJudgeConnector: boolean;
+  /** Whether the evaluator produces meaningful scores for a bare tool trace. */
+  supportsBareToolTrace: boolean;
+}
+
 export interface EvalsPluginStart {
   datasetService?: DatasetService;
   evaluationScoreService?: EvaluationScoreService;
+  listEvaluators?: () => EvaluatorSummary[];
 }
 
 /**
