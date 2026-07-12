@@ -28,4 +28,3 @@ export const test = base.extend<DataFederationFixtures, ScoutWorkerFixtures>({
 });
 
 export { CUSTOM_ROLES } from './custom_roles';
-
