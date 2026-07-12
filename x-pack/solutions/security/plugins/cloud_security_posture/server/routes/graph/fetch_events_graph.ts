@@ -378,6 +378,13 @@ const buildEsqlQuery = ({
   alertsMappingsIncluded,
   pinnedIds,
 }: BuildEsqlQueryParams): string => {
+  // TODO: switch back to LOAD once ES|QL supports accessing subfields of flattened-type
+  // parents under unmapped_fields="LOAD" (currently throws verification_exception for fields
+  // like m365_defender.event.additional_fields.*, snyk.audit_logs.content.*,
+  // greenhouse.audit.event.meta.name, cisco_meraki.*.vap).
+  // When LOAD is restored, keep the global user.id cast below and add similar casts for any
+  // other field known to be mapped with the wrong type in some integration index.
+  // See NULLIFY_WORKAROUNDS.md for the full revert checklist.
   const query = `SET unmapped_fields="NULLIFY";
 FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
