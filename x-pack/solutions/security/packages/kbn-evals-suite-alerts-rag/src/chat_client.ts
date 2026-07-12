@@ -66,6 +66,9 @@ export class AlertsRagAgentBuilderChatClient {
           connector_id: this.connectorId,
           conversation_id: conversationId,
           input: message,
+          // Run inline so the eval traceparent propagates and trace-based evaluators
+          // (skill_invoked, tool_calls, token metrics) correlate with the returned trace_id.
+          _execution_mode: 'local',
         }),
       })) as {
         conversation_id?: string;
