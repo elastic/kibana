@@ -45,6 +45,8 @@ export const useEsqlAutocomplete = (services: RuleFormServices) => {
     const stableCallbacks: ESQLCallbacks = {
       getSources: (...args) => callbacksRef.current.getSources?.(...args) ?? [],
       getColumnsFor: (...args) => callbacksRef.current.getColumnsFor?.(...args) ?? [],
+      getDatasets: (...args) => callbacksRef.current.getDatasets?.(...args) ?? { datasets: [] },
+      getViews: (...args) => callbacksRef.current.getViews?.(...args) ?? { views: [] },
     };
 
     const disposables: monaco.IDisposable[] = [];
