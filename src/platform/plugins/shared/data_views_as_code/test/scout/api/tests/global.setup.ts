@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import { globalSetupHook } from '@kbn/scout';
+import { DATA_VIEWS_AS_CODE_ENABLED_FEATURE_FLAG } from '../fixtures/constants';
 
-export default createPlaywrightConfig({
-  testDir: './tests',
-  runGlobalSetup: true,
+globalSetupHook('Enable the data views as code API', async ({ apiServices, log }) => {
+  log.debug('[setup] Enabling the data views as code API');
+  await apiServices.core.settings({
+    'feature_flags.overrides': {
+      [DATA_VIEWS_AS_CODE_ENABLED_FEATURE_FLAG]: true,
+    },
+  });
 });
