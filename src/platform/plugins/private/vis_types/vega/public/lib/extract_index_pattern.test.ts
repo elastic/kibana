@@ -14,10 +14,14 @@ import { extractIndexPatternsFromSpec } from './extract_index_pattern';
 import { setDataViews, setHttp } from '../services';
 
 import type { VegaSpec } from '../data_model/types';
+import { vegaVisType } from '../vega_type';
 
 jest.mock('@kbn/esql-utils', () => ({
   getIndexPatternFromESQLQuery: jest.fn(),
   getESQLAdHocDataview: jest.fn(),
+}));
+jest.mock('../default_spec', () => ({
+  getDefaultSpec: jest.fn(() => ''),
 }));
 
 const getMockedSpec = (mockedObj: any) => mockedObj as unknown as VegaSpec;
@@ -265,5 +269,22 @@ describe('extractIndexPatternsFromSpec', () => {
         },
       ]
     `);
+  });
+
+  test('should return no data views when asynchronous data view resolution fails', async () => {
+    (getESQLAdHocDataview as jest.Mock).mockRejectedValueOnce(new Error('resolution failed'));
+
+    const getUsedIndexPattern = vegaVisType.getUsedIndexPattern;
+    if (!getUsedIndexPattern) {
+      throw new Error('Vega must define getUsedIndexPattern');
+    }
+
+    await expect(
+      getUsedIndexPattern({
+        spec: JSON.stringify({
+          data: { url: { '%type%': 'esql', query: 'FROM logs-*' } },
+        }),
+      })
+    ).resolves.toEqual([]);
   });
 });
