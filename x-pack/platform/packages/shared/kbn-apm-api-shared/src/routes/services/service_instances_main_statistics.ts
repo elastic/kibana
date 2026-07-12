@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { instancesSortFieldRt, latencyAggregationTypeRt } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { instancesSortFieldSchema, latencyAggregationTypeSchema } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt, offsetRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
 
 export type ServiceInstanceMainStatisticsResponse = Array<{
   serviceNodeName: string;
@@ -27,19 +27,18 @@ export interface ServiceInstancesMainStatisticsRouteResponse {
 export const serviceInstancesMainStatisticsRoute =
   defineRoute<ServiceInstancesMainStatisticsRouteResponse>()({
     endpoint: 'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics',
-    params: t.type({
-      path: t.type({ serviceName: t.string }),
-      query: t.intersection([
-        t.type({
-          latencyAggregationType: latencyAggregationTypeRt,
-          transactionType: t.string,
-          sortField: instancesSortFieldRt,
-          sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-        }),
-        offsetRt,
-        environmentRt,
-        kueryRt,
-        rangeRt,
-      ]),
+    params: z.object({
+      path: z.object({ serviceName: z.string() }),
+      query: z
+        .object({
+          latencyAggregationType: latencyAggregationTypeSchema,
+          transactionType: z.string(),
+          sortField: instancesSortFieldSchema,
+          sortDirection: z.union([z.literal('asc'), z.literal('desc')]),
+        })
+        .merge(offsetSchema)
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(rangeSchema),
     }),
   });
