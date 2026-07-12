@@ -264,7 +264,8 @@ export function PipelineFlyout({
   onApply,
 }: {
   onClose: () => void;
-  onApply?: () => void;
+  /** Applies the pipeline to the canvas; the created node is named `pipelineName`. */
+  onApply?: (pipelineName?: string) => void;
 }) {
   const titleId = useGeneratedHtmlId({ prefix: 'pipelineFlyoutTitle' });
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -272,16 +273,19 @@ export function PipelineFlyout({
   const [isCreating, setIsCreating] = useState(false);
 
   const detailPipeline = PIPELINES.find((p) => p.id === detailId) ?? null;
+  const selectedPipeline = PIPELINES.find((p) => p.id === selectedId) ?? null;
 
   const applyAndClose = onApply ?? onClose;
 
   // Clicking "Create new pipeline" replaces this flyout with a larger creation flyout.
+  // The new pipeline inherits the name of the pipeline selected in the table (if any).
   if (isCreating) {
     return (
       <CreatePipelineFlyout
+        initialName={selectedPipeline?.name}
         onBack={() => setIsCreating(false)}
         onClose={onClose}
-        onApply={applyAndClose}
+        onApply={() => applyAndClose(selectedPipeline?.name)}
       />
     );
   }
@@ -299,7 +303,7 @@ export function PipelineFlyout({
         applyMode
         onBack={() => setDetailId(null)}
         onClose={onClose}
-        onApply={applyAndClose}
+        onApply={() => applyAndClose(detailPipeline.name)}
       />
     );
   }
@@ -394,7 +398,11 @@ export function PipelineFlyout({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill isDisabled={selectedId === null} onClick={applyAndClose}>
+            <EuiButton
+              fill
+              isDisabled={selectedId === null}
+              onClick={() => applyAndClose(selectedPipeline?.name)}
+            >
               {i18n.translate('xpack.streams.pipelineFlyout.applyPipeline', {
                 defaultMessage: 'Apply pipeline',
               })}

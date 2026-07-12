@@ -28,8 +28,15 @@ const NODE_HEIGHT = { source: 96, pipeline: 40, routing: 64, destination: 70 } a
 // Small builders so the seed graph reads as a topology rather than a wall of
 // object literals. They mirror the data shapes the node renderers expect.
 // `cy` is the row's CENTER line; the builder converts it to a top-left Y.
-function srcNode(id: string, x: number, cy: number, d: SourceNodeData): Node {
-  return { id, type: 'source', position: { x, y: cy - NODE_HEIGHT.source / 2 }, data: d };
+function srcNode(id: string, x: number, cy: number, d: Omit<SourceNodeData, 'mode'>): Node {
+  return {
+    id,
+    type: 'source',
+    position: { x, y: cy - NODE_HEIGHT.source / 2 },
+    // Every seeded source starts fully configured — only newly-placed sources
+    // begin unconfigured (see unconfiguredSourceData in node-data.ts).
+    data: { ...d, mode: 'configured' },
+  };
 }
 function pipeNode(id: string, x: number, cy: number, d: PipelineNodeData): Node {
   return { id, type: 'pipeline', position: { x, y: cy - NODE_HEIGHT.pipeline / 2 }, data: d };

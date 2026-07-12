@@ -646,6 +646,7 @@ export function CreatePipelineFlyout({
   onClose,
   onApply,
   pipelineName,
+  initialName,
   description,
   initialPopulated = false,
   applyMode = false,
@@ -658,6 +659,12 @@ export function CreatePipelineFlyout({
    * header) rather than a brand-new "Untitled" pipeline.
    */
   pipelineName?: string;
+  /**
+   * Seeds the header name for a brand-new pipeline (e.g. inherited from the
+   * pipeline selected in the selector) without treating it as an existing
+   * pipeline — the footer keeps its "Create pipeline" creation flow.
+   */
+  initialName?: string;
   description?: string;
   /**
    * Start with the processors/conditions already populated (used when opening
@@ -690,7 +697,7 @@ export function CreatePipelineFlyout({
           onBack={onBack}
           onClose={onClose}
           titleId={titleId}
-          pipelineName={pipelineName}
+          pipelineName={pipelineName ?? initialName}
           description={description}
         />
       </EuiFlyoutHeader>

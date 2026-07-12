@@ -12,11 +12,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { BaseEdge, EdgeLabelRenderer, type EdgeProps, type EdgeTypes } from '@xyflow/react';
 import {
-  EuiHorizontalRule,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiIcon,
-  EuiPanel,
   EuiPopover,
-  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/css';
@@ -54,48 +53,6 @@ const flowClassName = css`
   animation: ${flowMarch} 0.9s linear infinite;
   pointer-events: none;
 `;
-
-function EdgeMenuItem({
-  title,
-  description,
-  onClick,
-}: {
-  title: string;
-  description: string;
-  onClick: () => void;
-}) {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={css`
-        width: 100%;
-        text-align: left;
-        background: transparent;
-        border: none;
-        padding: ${euiTheme.size.xs} 0;
-        cursor: pointer;
-        &:hover p:first-of-type {
-          text-decoration: underline;
-        }
-      `}
-    >
-      <EuiText
-        size="xs"
-        className={css`
-          font-weight: ${euiTheme.font.weight.medium};
-          color: ${euiTheme.colors.textPrimary};
-        `}
-      >
-        {title}
-      </EuiText>
-      <EuiText size="xs" color="subdued">
-        {description}
-      </EuiText>
-    </button>
-  );
-}
 
 function PipelineRoutingEdge({
   id,
@@ -179,7 +136,7 @@ function PipelineRoutingEdge({
           d={edgePath}
           className={flowClassName}
           stroke={euiTheme.colors.primary}
-          strokeWidth={2.5}
+          strokeWidth={1}
           strokeLinecap="round"
           style={{ opacity: 0.85 }}
         />
@@ -241,40 +198,33 @@ function PipelineRoutingEdge({
                 </button>
               }
             >
-              <EuiPanel
-                hasShadow={false}
-                paddingSize="none"
-                className={css`
-                  padding: ${euiTheme.size.s} ${euiTheme.size.m};
-                  min-width: 220px;
-                `}
-              >
-                <EdgeMenuItem
-                  title={i18n.translate('xpack.streams.streamsCanvas.pipeline', {
-                    defaultMessage: 'Pipeline',
-                  })}
-                  description={i18n.translate('xpack.streams.streamsCanvas.pipelineDescription', {
-                    defaultMessage: 'transform your data in transit',
-                  })}
-                  onClick={() => {
-                    setIsPopoverOpen(false);
-                    openPipelineFlyout(id);
-                  }}
-                />
-                <EuiHorizontalRule margin="xs" />
-                <EdgeMenuItem
-                  title={i18n.translate('xpack.streams.streamsCanvas.routing', {
-                    defaultMessage: 'Routing',
-                  })}
-                  description={i18n.translate('xpack.streams.streamsCanvas.routingDescription', {
-                    defaultMessage: 'conditionally route or duplicate your data',
-                  })}
-                  onClick={() => {
-                    setIsPopoverOpen(false);
-                    openEdgeRoutingFlyout(id);
-                  }}
-                />
-              </EuiPanel>
+              <EuiContextMenuPanel
+                size="s"
+                items={[
+                  <EuiContextMenuItem
+                    key="add-processing"
+                    onClick={() => {
+                      setIsPopoverOpen(false);
+                      openPipelineFlyout(id);
+                    }}
+                  >
+                    {i18n.translate('xpack.streams.streamsCanvas.addProcessing', {
+                      defaultMessage: 'Add processing',
+                    })}
+                  </EuiContextMenuItem>,
+                  <EuiContextMenuItem
+                    key="add-routing"
+                    onClick={() => {
+                      setIsPopoverOpen(false);
+                      openEdgeRoutingFlyout(id);
+                    }}
+                  >
+                    {i18n.translate('xpack.streams.streamsCanvas.addRouting', {
+                      defaultMessage: 'Add routing',
+                    })}
+                  </EuiContextMenuItem>,
+                ]}
+              />
             </EuiPopover>
           </div>
         ) : null}

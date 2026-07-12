@@ -10,12 +10,20 @@
 
 import type { Node } from '@xyflow/react';
 
+export type SourceMode = 'unconfigured' | 'configured';
+
 export interface SourceNodeData {
   title: string;
   subtitle: string;
   rate: string;
   /** EUI icon type shown in the heading badge (e.g. a source logo). */
   icon?: string;
+  /**
+   * A freshly-placed source starts 'unconfigured' (an attention card prompting
+   * "Click to configure") until the user finishes setting it up, mirroring the
+   * destination node's unconfigured → configured flow.
+   */
+  mode: SourceMode;
   [key: string]: unknown;
 }
 

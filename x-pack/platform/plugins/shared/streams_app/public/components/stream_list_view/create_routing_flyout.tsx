@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
+  EuiCheckableCard,
   EuiFieldText,
   EuiFilterButton,
   EuiFilterGroup,
@@ -35,6 +36,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface SampleRow {
   logLevel: string;
@@ -179,10 +181,35 @@ const DESTINATION_OPTIONS = [
       defaultMessage: 'None set (connect later)',
     }),
   },
+  { value: 'logs.otel', text: 'logs.otel' },
   { value: 'logs-app', text: 'logs-app' },
   { value: 'logs-errors', text: 'logs-errors' },
   { value: 'logs-archive', text: 'logs-archive' },
 ];
+
+// Sample values offered for the condition's right-hand side in the inline
+// "Create routing" card (this component ships with mock data).
+const VALUE_OPTIONS = [
+  { value: 'nginx', text: 'nginx' },
+  { value: 'mysql', text: 'mysql' },
+  { value: 'redis', text: 'redis' },
+  { value: 'api', text: 'api' },
+];
+
+// Destinations the user can route into from the "Existing destination" option.
+const EXISTING_DESTINATION_OPTIONS = [
+  { value: 'logs-nginx-default', text: 'logs-nginx-default' },
+  { value: 'logs.otel', text: 'logs.otel' },
+  { value: 'logs-app', text: 'logs-app' },
+  { value: 'logs-errors', text: 'logs-errors' },
+  { value: 'logs-archive', text: 'logs-archive' },
+];
+
+const DEFAULT_EXISTING_DESTINATION = EXISTING_DESTINATION_OPTIONS[0].value;
+
+// Where matching data should go, as chosen in the inline create card: create a
+// brand-new destination, route into an existing one, or leave it unrouted.
+type DestinationMode = 'new' | 'existing' | 'nowhere';
 
 interface ConditionRow {
   id: string;
@@ -195,6 +222,32 @@ let conditionIdCounter = 0;
 function makeCondition(field = 'event.dataset', value = 'foo'): ConditionRow {
   conditionIdCounter += 1;
   return { id: `condition-${conditionIdCounter}`, field, operator: 'equals', value };
+}
+
+// A single row in the "Routing rules" list (the edge connector's "Add step"
+// entry point). A route with no conditions is a catch-all — it always exists
+// by default so data passes straight through until narrowed.
+interface RouteEntry {
+  id: string;
+  name: string;
+  conditions: ConditionRow[];
+  destination: string;
+  newDestinationName: string;
+  newDestinationStorage: 'local' | 'external';
+}
+
+let routeIdCounter = 0;
+function makeRoute(overrides: Partial<RouteEntry> = {}): RouteEntry {
+  routeIdCounter += 1;
+  return {
+    id: `route-${routeIdCounter}`,
+    name: `Route-${routeIdCounter}`,
+    conditions: [],
+    destination: 'logs.otel',
+    newDestinationName: '',
+    newDestinationStorage: 'local',
+    ...overrides,
+  };
 }
 
 // Shared right-hand "Data Preview" panel, present in every state.
@@ -254,9 +307,6 @@ function DataPreviewPanel() {
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="visTable" />
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText
                 size="s"
@@ -366,6 +416,8 @@ function DataPreviewPanel() {
           min-height: 0;
           overflow-y: auto;
           border-top: ${euiTheme.border.thin};
+          padding-left: ${euiTheme.size.base};
+          padding-right: ${euiTheme.size.base};
         `}
       >
         {/* Header row */}
@@ -931,6 +983,575 @@ function ConditionValueBadge({ field, value }: { field: string; value: string })
   );
 }
 
+// A single route's collapsed summary within the "Routing rules" list: its
+// name, either its condition (as AND-ed badges) or its catch-all destination
+// line, an edit affordance, and — for catch-all routes — the reminder that
+// they absorb everything not matched by a route above them.
+function RouteSummaryCard({ route, onEdit }: { route: RouteEntry; onEdit: () => void }) {
+  const { euiTheme } = useEuiTheme();
+  const hasNoCondition = route.conditions.length === 0;
+  const isNewDestination = route.destination === 'new';
+  const destinationLabel = isNewDestination
+    ? route.newDestinationName.trim() ||
+      i18n.translate('xpack.streams.createRoutingFlyout.newDestinationDefaultName', {
+        defaultMessage: 'Destination name',
+      })
+    : DESTINATION_OPTIONS.find((option) => option.value === route.destination)?.text ??
+      route.destination;
+
+  return (
+    <div
+      className={css`
+        border: ${euiTheme.border.thin};
+        border-radius: ${euiTheme.border.radius.medium};
+        padding: ${euiTheme.size.base};
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+      `}
+    >
+      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+        <EuiFlexItem>
+          <EuiText
+            size="s"
+            className={css`
+              font-weight: ${euiTheme.font.weight.semiBold};
+            `}
+          >
+            {route.name}
+          </EuiText>
+          <EuiSpacer size="xs" />
+          {hasNoCondition ? (
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.streams.createRoutingFlyout.dataGoesExclusivelyTo"
+                defaultMessage="Data goes exclusively to {destination}"
+                values={{ destination: <EuiLink>{destinationLabel}</EuiLink> }}
+              />
+            </EuiText>
+          ) : (
+            <EuiFlexGroup
+              gutterSize="xs"
+              alignItems="center"
+              responsive={false}
+              wrap
+              className={css`
+                row-gap: ${euiTheme.size.xs};
+              `}
+            >
+              {route.conditions.map((condition, index) => (
+                <React.Fragment key={condition.id}>
+                  {index > 0 ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiText
+                        size="xs"
+                        className={css`
+                          font-weight: ${euiTheme.font.weight.bold};
+                        `}
+                      >
+                        {i18n.translate('xpack.streams.createRoutingFlyout.and', {
+                          defaultMessage: 'AND',
+                        })}
+                      </EuiText>
+                    </EuiFlexItem>
+                  ) : null}
+                  <EuiFlexItem grow={false}>
+                    <ConditionValueBadge field={condition.field} value={condition.value} />
+                  </EuiFlexItem>
+                </React.Fragment>
+              ))}
+            </EuiFlexGroup>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="pencil"
+            color="primary"
+            size="xs"
+            onClick={onEdit}
+            aria-label={i18n.translate('xpack.streams.createRoutingFlyout.editRoute', {
+              defaultMessage: 'Edit route',
+            })}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {hasNoCondition ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            size="s"
+            color="primary"
+            iconType="info"
+            title={i18n.translate('xpack.streams.createRoutingFlyout.catchAllNotice', {
+              defaultMessage: 'A route with no condition catches everything left over.',
+            })}
+          />
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+export interface CreateRoutingResult {
+  routingId: string;
+  conditions: ConditionRow[];
+  destinationMode: DestinationMode;
+  existingDestination: string;
+  newDestinationName: string;
+  newDestinationStorage: 'local' | 'external';
+}
+
+interface CreateRoutingCardInitial {
+  routingId: string;
+  conditions: ConditionRow[];
+  destinationMode: DestinationMode;
+  existingDestination: string;
+  newDestinationName: string;
+  newDestinationStorage: 'local' | 'external';
+}
+
+// The inline "Create routing" card shown in the list flow when adding or editing
+// a route. It carries its own draft state and reports the result on submit, so
+// the surrounding list stays visible while a route is being configured.
+function CreateRoutingCard({
+  title,
+  submitLabel,
+  initial,
+  onCancel,
+  onSubmit,
+}: {
+  title: string;
+  submitLabel: string;
+  initial: CreateRoutingCardInitial;
+  onCancel: () => void;
+  onSubmit: (result: CreateRoutingResult) => void;
+}) {
+  const { euiTheme } = useEuiTheme();
+  const radioGroupId = useGeneratedHtmlId({ prefix: 'createRoutingDestination' });
+  const [routingId, setRoutingId] = useState(initial.routingId);
+  const [conditions, setConditions] = useState<ConditionRow[]>(initial.conditions);
+  const [destinationMode, setDestinationMode] = useState<DestinationMode>(initial.destinationMode);
+  const [existingDestination, setExistingDestination] = useState(initial.existingDestination);
+  const [newDestinationName, setNewDestinationName] = useState(initial.newDestinationName);
+  const [newDestinationStorage, setNewDestinationStorage] = useState<'local' | 'external'>(
+    initial.newDestinationStorage
+  );
+
+  const updateCondition = (id: string, patch: Partial<ConditionRow>) => {
+    setConditions((current) =>
+      current.map((condition) => (condition.id === id ? { ...condition, ...patch } : condition))
+    );
+  };
+
+  const destinationOptions: Array<{
+    mode: DestinationMode;
+    title: string;
+    description: string;
+  }> = [
+    {
+      mode: 'new',
+      title: i18n.translate('xpack.streams.createRoutingFlyout.newDestinationOption', {
+        defaultMessage: 'New destination',
+      }),
+      description: i18n.translate('xpack.streams.createRoutingFlyout.newDestinationOptionHelp', {
+        defaultMessage: 'Create a local or external target for this data.',
+      }),
+    },
+    {
+      mode: 'existing',
+      title: i18n.translate('xpack.streams.createRoutingFlyout.existingDestinationOption', {
+        defaultMessage: 'Existing destination',
+      }),
+      description: i18n.translate(
+        'xpack.streams.createRoutingFlyout.existingDestinationOptionHelp',
+        {
+          defaultMessage: 'Route this data into a destination you already have.',
+        }
+      ),
+    },
+    {
+      mode: 'nowhere',
+      title: i18n.translate('xpack.streams.createRoutingFlyout.nowhereDestinationOption', {
+        defaultMessage: 'Nowhere, for now',
+      }),
+      description: i18n.translate(
+        'xpack.streams.createRoutingFlyout.nowhereDestinationOptionHelp',
+        {
+          defaultMessage:
+            'Save the condition without routing. Matching data stays in this stream until you pick a destination.',
+        }
+      ),
+    },
+  ];
+
+  return (
+    <div
+      className={css`
+        border: ${euiTheme.border.thin};
+        border-radius: ${euiTheme.border.radius.medium};
+        padding: ${euiTheme.size.base};
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+      `}
+    >
+      <EuiTitle size="xxs">
+        <h3>{title}</h3>
+      </EuiTitle>
+
+      <EuiSpacer size="m" />
+
+      <EuiFormRow
+        label={i18n.translate('xpack.streams.createRoutingFlyout.routingId', {
+          defaultMessage: 'Routing ID',
+        })}
+        fullWidth
+      >
+        <EuiFieldText
+          fullWidth
+          value={routingId}
+          onChange={(event) => setRoutingId(event.target.value)}
+          placeholder={i18n.translate('xpack.streams.createRoutingFlyout.routingIdPlaceholder', {
+            defaultMessage: 'Name',
+          })}
+          aria-label={i18n.translate('xpack.streams.createRoutingFlyout.routingId', {
+            defaultMessage: 'Routing ID',
+          })}
+        />
+      </EuiFormRow>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="xs"
+            className={css`
+              font-weight: ${euiTheme.font.weight.semiBold};
+            `}
+          >
+            {i18n.translate('xpack.streams.createRoutingFlyout.conditionToMatch', {
+              defaultMessage: 'Condition to match',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem />
+        <EuiFlexItem grow={false}>
+          <EuiLink>
+            {i18n.translate('xpack.streams.createRoutingFlyout.syntaxEditor', {
+              defaultMessage: 'Syntax editor',
+            })}
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {conditions.map((condition, index) => (
+          <React.Fragment key={condition.id}>
+            {index > 0 ? (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem>
+                    <EuiHorizontalRule margin="none" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">
+                      {i18n.translate('xpack.streams.createRoutingFlyout.and', {
+                        defaultMessage: 'AND',
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiHorizontalRule margin="none" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem>
+                  <EuiSelect
+                    options={FIELD_OPTIONS}
+                    value={condition.field}
+                    onChange={(event) => updateCondition(condition.id, { field: event.target.value })}
+                    aria-label={i18n.translate('xpack.streams.createRoutingFlyout.conditionField', {
+                      defaultMessage: 'Condition field',
+                    })}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiSelect
+                    options={OPERATOR_OPTIONS}
+                    value={condition.operator}
+                    onChange={(event) =>
+                      updateCondition(condition.id, { operator: event.target.value })
+                    }
+                    aria-label={i18n.translate(
+                      'xpack.streams.createRoutingFlyout.conditionOperator',
+                      {
+                        defaultMessage: 'Condition operator',
+                      }
+                    )}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiSelect
+                    options={VALUE_OPTIONS}
+                    value={condition.value}
+                    hasNoInitialSelection={
+                      !VALUE_OPTIONS.some((option) => option.value === condition.value)
+                    }
+                    onChange={(event) => updateCondition(condition.id, { value: event.target.value })}
+                    aria-label={i18n.translate('xpack.streams.createRoutingFlyout.conditionValue', {
+                      defaultMessage: 'Condition value',
+                    })}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </React.Fragment>
+        ))}
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiText
+        size="xs"
+        className={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+        `}
+      >
+        {i18n.translate('xpack.streams.createRoutingFlyout.whereShouldDataGo', {
+          defaultMessage: 'Where should matching data go?',
+        })}
+      </EuiText>
+
+      <EuiSpacer size="s" />
+
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {destinationOptions.map((option) => (
+          <EuiFlexItem grow={false} key={option.mode}>
+            <EuiCheckableCard
+              id={`${radioGroupId}-${option.mode}`}
+              name={radioGroupId}
+              value={option.mode}
+              checked={destinationMode === option.mode}
+              onChange={() => setDestinationMode(option.mode)}
+              label={
+                <>
+                  <EuiText
+                    size="s"
+                    className={css`
+                      font-weight: ${euiTheme.font.weight.semiBold};
+                    `}
+                  >
+                    {option.title}
+                  </EuiText>
+                  <EuiText size="xs" color="subdued">
+                    {option.description}
+                  </EuiText>
+                </>
+              }
+            >
+              {option.mode === 'existing' && destinationMode === 'existing' ? (
+                <EuiSelect
+                  fullWidth
+                  options={EXISTING_DESTINATION_OPTIONS}
+                  value={existingDestination}
+                  onChange={(event) => setExistingDestination(event.target.value)}
+                  aria-label={i18n.translate(
+                    'xpack.streams.createRoutingFlyout.existingDestinationSelect',
+                    {
+                      defaultMessage: 'Existing destination',
+                    }
+                  )}
+                />
+              ) : option.mode === 'new' && destinationMode === 'new' ? (
+                <EuiFlexGroup direction="column" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiFilterGroup fullWidth compressed>
+                      <EuiFilterButton
+                        grow
+                        withNext
+                        hasActiveFilters={newDestinationStorage === 'local'}
+                        onClick={() => setNewDestinationStorage('local')}
+                      >
+                        {i18n.translate('xpack.streams.createRoutingFlyout.localElasticsearch', {
+                          defaultMessage: 'Local Elasticsearch',
+                        })}
+                      </EuiFilterButton>
+                      <EuiFilterButton
+                        grow
+                        hasActiveFilters={newDestinationStorage === 'external'}
+                        onClick={() => setNewDestinationStorage('external')}
+                      >
+                        {i18n.translate('xpack.streams.createRoutingFlyout.externalStorage', {
+                          defaultMessage: 'External storage',
+                        })}
+                      </EuiFilterButton>
+                    </EuiFilterGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFieldText
+                      fullWidth
+                      value={newDestinationName}
+                      onChange={(event) => setNewDestinationName(event.target.value)}
+                      placeholder={i18n.translate(
+                        'xpack.streams.createRoutingFlyout.newDestinationName',
+                        {
+                          defaultMessage: 'Name',
+                        }
+                      )}
+                      aria-label={i18n.translate(
+                        'xpack.streams.createRoutingFlyout.newDestinationName',
+                        {
+                          defaultMessage: 'Name',
+                        }
+                      )}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : null}
+            </EuiCheckableCard>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="none" />
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="editorCodeBlock"
+            color="primary"
+            size="s"
+            aria-label={i18n.translate('xpack.streams.createRoutingFlyout.viewCode', {
+              defaultMessage: 'View code',
+            })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem />
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="s" color="primary" onClick={onCancel}>
+            {i18n.translate('xpack.streams.createRoutingFlyout.cancel', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            fill
+            onClick={() =>
+              onSubmit({
+                routingId,
+                conditions,
+                destinationMode,
+                existingDestination,
+                newDestinationName,
+                newDestinationStorage,
+              })
+            }
+          >
+            {submitLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  );
+}
+
+// State 1 (list flow) — the "Routing rules" list, reached from the plain
+// "Add step" entry point on an edge connector. A catch-all route (no
+// condition, so all data passes straight through) always exists by default;
+// "New routing" adds further, more specific routes above it. While a route is
+// being created or edited, its inline "Create routing" card is shown in place.
+function RoutingRulesListPanel({
+  routes,
+  onEditRoute,
+  onNewRoute,
+  isFormOpen,
+  editingRouteId,
+  createCard,
+  editCard,
+}: {
+  routes: RouteEntry[];
+  onEditRoute: (routeId: string) => void;
+  onNewRoute: () => void;
+  isFormOpen: boolean;
+  editingRouteId: string | null;
+  createCard: React.ReactNode;
+  editCard: React.ReactNode;
+}) {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText
+              size="s"
+              className={css`
+                font-weight: ${euiTheme.font.weight.semiBold};
+              `}
+            >
+              {i18n.translate('xpack.streams.createRoutingFlyout.routingRules', {
+                defaultMessage: 'Routing rules',
+              })}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              iconType="sparkles"
+              className={css`
+                background-color: ${euiTheme.colors.backgroundBasePrimary};
+                color: ${euiTheme.colors.primary};
+                border: none;
+                box-shadow: none;
+              `}
+            >
+              {i18n.translate('xpack.streams.createRoutingFlyout.getSuggestionsShort', {
+                defaultMessage: 'Get suggestions',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              color="text"
+              onClick={onNewRoute}
+              isDisabled={isFormOpen}
+              className={css`
+                background-color: ${euiTheme.colors.backgroundBasePlain};
+              `}
+            >
+              {i18n.translate('xpack.streams.createRoutingFlyout.newRouting', {
+                defaultMessage: 'New routing',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {createCard ? <EuiFlexItem grow={false}>{createCard}</EuiFlexItem> : null}
+          {routes.map((route) => (
+            <EuiFlexItem grow={false} key={route.id}>
+              {editingRouteId === route.id ? (
+                editCard
+              ) : (
+                <RouteSummaryCard route={route} onEdit={() => onEditRoute(route.id)} />
+              )}
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
 // State 3 — the applied routing condition summary.
 function AppliedRoutingPanel({
   conditions,
@@ -1122,7 +1743,7 @@ function AppliedRoutingPanel({
   );
 }
 
-type RoutingStep = 'empty' | 'form' | 'applied';
+type RoutingStep = 'empty' | 'list' | 'form' | 'applied';
 
 export interface RoutingApplyResult {
   /** True when the user chose "Send data to new destination". */
@@ -1164,7 +1785,21 @@ export function CreateRoutingFlyout({
 }) {
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'createRoutingFlyoutTitle' });
-  const [step, setStep] = useState<RoutingStep>(initialStep);
+  // The "Routing rules" list view is reached only from the plain "Add step"
+  // entry point on an edge connector. Editing an existing routing node and the
+  // opinionated "inheritance" flow (from a destination's context menu) keep
+  // the original single-route empty/form/applied flow untouched.
+  const isRoutingListFlow = initialStep === 'empty' && !opinionated;
+  const [step, setStep] = useState<RoutingStep>(isRoutingListFlow ? 'list' : initialStep);
+  // A route with no condition always exists by default — it's the catch-all
+  // that passes all data straight through until a more specific route is added
+  // above it.
+  const [routes, setRoutes] = useState<RouteEntry[]>(() =>
+    isRoutingListFlow ? [makeRoute()] : []
+  );
+  // Which route the form step is currently editing; null while creating a new
+  // one via "New routing".
+  const [editingRouteId, setEditingRouteId] = useState<string | null>(null);
   // The opinionated ("routing with inheritance") flow creates a new destination
   // by default; the standard flow starts with no destination set.
   const [destination, setDestination] = useState(opinionated ? 'new' : 'none');
@@ -1189,17 +1824,153 @@ export function CreateRoutingFlyout({
     return inheritedDestinationName ? `${inheritedDestinationName}.${trimmed}` : trimmed;
   })();
 
+  // Opens the inline "Create routing" card for a brand-new route.
+  const startNewRoute = () => {
+    setEditingRouteId(null);
+    setStep('form');
+  };
+
+  // Opens the inline card in place of an existing route's summary card.
+  const startEditRoute = (routeId: string) => {
+    setEditingRouteId(routeId);
+    setStep('form');
+  };
+
+  // Closes the inline card without saving, returning to the plain list.
+  const cancelInlineRoute = () => {
+    setEditingRouteId(null);
+    setStep('list');
+  };
+
+  // Writes the inline card's result back into the routes list — updating the
+  // route being edited, or appending a new one — and returns to the list view.
+  const submitInlineRoute = (result: CreateRoutingResult) => {
+    const destination =
+      result.destinationMode === 'new'
+        ? 'new'
+        : result.destinationMode === 'existing'
+        ? result.existingDestination
+        : 'none';
+    setRoutes((current) => {
+      const fields = {
+        name:
+          result.routingId.trim() ||
+          i18n.translate('xpack.streams.createRoutingFlyout.routeDefaultName', {
+            defaultMessage: 'Route-{index}',
+            values: { index: current.length + 1 },
+          }),
+        conditions: result.conditions,
+        destination,
+        newDestinationName: result.newDestinationName,
+        newDestinationStorage: result.newDestinationStorage,
+      };
+      return editingRouteId
+        ? current.map((route) => (route.id === editingRouteId ? { ...route, ...fields } : route))
+        : current.concat(makeRoute(fields));
+    });
+    setEditingRouteId(null);
+    setStep('list');
+  };
+
+  // Builds the inline card's initial draft state — a fresh route defaults to a
+  // single service.name condition routed into an existing destination; editing
+  // an existing route reflects its current condition and destination.
+  const buildCardInitial = (): CreateRoutingCardInitial => {
+    const editingRoute = editingRouteId
+      ? routes.find((candidate) => candidate.id === editingRouteId)
+      : undefined;
+    if (!editingRoute) {
+      return {
+        routingId: '',
+        conditions: [makeCondition('service.name', 'nginx')],
+        destinationMode: 'existing',
+        existingDestination: DEFAULT_EXISTING_DESTINATION,
+        newDestinationName: '',
+        newDestinationStorage: 'local',
+      };
+    }
+    const destinationMode: DestinationMode =
+      editingRoute.destination === 'new'
+        ? 'new'
+        : editingRoute.destination === 'none'
+        ? 'nowhere'
+        : 'existing';
+    return {
+      routingId: editingRoute.name,
+      conditions: editingRoute.conditions.length
+        ? editingRoute.conditions
+        : [makeCondition('service.name', 'nginx')],
+      destinationMode,
+      existingDestination:
+        destinationMode === 'existing' ? editingRoute.destination : DEFAULT_EXISTING_DESTINATION,
+      newDestinationName: editingRoute.newDestinationName,
+      newDestinationStorage: editingRoute.newDestinationStorage,
+    };
+  };
+
+  const inlineCard =
+    isRoutingListFlow && step === 'form' ? (
+      <CreateRoutingCard
+        key={editingRouteId ?? 'new'}
+        title={
+          editingRouteId
+            ? i18n.translate('xpack.streams.createRoutingFlyout.editRouting', {
+                defaultMessage: 'Edit routing',
+              })
+            : i18n.translate('xpack.streams.createRoutingFlyout.createRoutingCardTitle', {
+                defaultMessage: 'Create routing',
+              })
+        }
+        submitLabel={
+          editingRouteId
+            ? i18n.translate('xpack.streams.createRoutingFlyout.save', {
+                defaultMessage: 'Save',
+              })
+            : i18n.translate('xpack.streams.createRoutingFlyout.create', {
+                defaultMessage: 'Create',
+              })
+        }
+        initial={buildCardInitial()}
+        onCancel={cancelInlineRoute}
+        onSubmit={submitInlineRoute}
+      />
+    ) : null;
+
+  // Commits the routing rules from the list flow's footer "Route your data"
+  // button.
+  const handleRouteYourData = () => {
+    if (onApply) {
+      onApply({
+        createNewDestination: false,
+        newDestinationName: '',
+        newDestinationStorage: 'local',
+      });
+      return;
+    }
+    onClose();
+  };
+
+  // Dismissing the flyout (✕, Esc, click-outside) discards changes — the list
+  // flow commits only through the explicit "Route your data" footer button.
+  const handleFlyoutClose = () => {
+    onClose();
+  };
+
   return (
     <EuiFlyout
       size="l"
-      onClose={onClose}
+      onClose={handleFlyoutClose}
       aria-labelledby={titleId}
       data-test-subj="createRoutingFlyout"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={titleId}>
-            {opinionated
+            {isRoutingListFlow
+              ? i18n.translate('xpack.streams.createRoutingFlyout.routeYourDataTitle', {
+                  defaultMessage: 'Route your data',
+                })
+              : opinionated
               ? i18n.translate('xpack.streams.createRoutingFlyout.inheritanceTitle', {
                   defaultMessage:
                     'Create routing conditions inheriting the selected destination schema',
@@ -1213,6 +1984,21 @@ export function CreateRoutingFlyout({
                 })}
           </h2>
         </EuiTitle>
+        {isRoutingListFlow ? (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              {i18n.translate('xpack.streams.createRoutingFlyout.routeYourDataDescription', {
+                defaultMessage: 'Send incoming data to destinations based on what it has in common.',
+              })}{' '}
+              <EuiLink external target="_blank">
+                {i18n.translate('xpack.streams.createRoutingFlyout.seeOurDocs', {
+                  defaultMessage: 'See our docs',
+                })}
+              </EuiLink>
+            </EuiText>
+          </>
+        ) : null}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody
@@ -1238,12 +2024,23 @@ export function CreateRoutingFlyout({
               border-right: ${euiTheme.border.thin};
               padding: ${step === 'empty' ? euiTheme.size.xl : euiTheme.size.base} ${euiTheme.size
                 .l};
+              padding-right: ${euiTheme.size.base};
               overflow-y: auto;
               ${step === 'empty' ? 'display: flex; align-items: flex-start; justify-content: center;' : ''}
             `}
           >
             {step === 'empty' ? (
               <EmptyRoutingPanel onCreate={() => setStep('form')} opinionated={opinionated} />
+            ) : isRoutingListFlow ? (
+              <RoutingRulesListPanel
+                routes={routes}
+                onEditRoute={startEditRoute}
+                onNewRoute={startNewRoute}
+                isFormOpen={step === 'form'}
+                editingRouteId={step === 'form' ? editingRouteId : null}
+                createCard={step === 'form' && !editingRouteId ? inlineCard : null}
+                editCard={inlineCard}
+              />
             ) : step === 'form' ? (
               <RoutingConditionForm
                 conditions={conditions}
@@ -1273,7 +2070,26 @@ export function CreateRoutingFlyout({
         </EuiFlexGroup>
       </EuiFlyoutBody>
 
-      {step === 'applied' ? (
+      {isRoutingListFlow ? (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose} flush="left">
+                {i18n.translate('xpack.streams.createRoutingFlyout.cancel', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={handleRouteYourData}>
+                {i18n.translate('xpack.streams.createRoutingFlyout.routeYourDataSubmit', {
+                  defaultMessage: 'Route your data',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      ) : step === 'applied' ? (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>

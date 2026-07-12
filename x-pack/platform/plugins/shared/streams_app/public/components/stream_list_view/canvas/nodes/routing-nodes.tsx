@@ -23,9 +23,9 @@ import type { RoutingBranch, RoutingFlowNode, RoutingNodeData } from '../types';
 import {
   hiddenHandleClassName,
   inflateClassName,
-  restingShadowClassName,
   useAnchorHandleClassName,
   useRaiseOnHoverClassName,
+  useRestingShadowClassName,
 } from '../node-styles';
 
 // A routing node shows one labelled row per line exiting it. Labels and traffic
@@ -60,6 +60,7 @@ function RoutingNodeContents({
 }) {
   const { euiTheme } = useEuiTheme();
   const raiseOnHoverClassName = useRaiseOnHoverClassName();
+  const restingShadowClassName = useRestingShadowClassName();
   return (
     <EuiPanel
       hasShadow={false}
@@ -129,7 +130,8 @@ function RoutingNodeContents({
                   className={css`
                     flex-shrink: 0;
                     width: 24px;
-                    font-size: 9px;
+                    font-family: ${euiTheme.font.familyCode};
+                    font-size: 10px;
                     line-height: ${euiTheme.size.m};
                     color: ${euiTheme.colors.textSubdued};
                     text-align: right;

@@ -16,12 +16,13 @@ import { css } from '@emotion/css';
 import type { PipelineFlowNode, PipelineNodeData } from '../types';
 import {
   inflateClassName,
-  restingShadowClassName,
   useAnchorHandleClassName,
   useRaiseOnHoverClassName,
+  useRestingShadowClassName,
 } from '../node-styles';
 
-const statTextClassName = (color: string) => css`
+const statTextClassName = (color: string, fontFamily: string) => css`
+  font-family: ${fontFamily};
   font-size: 10px;
   line-height: 12px;
   color: ${color};
@@ -30,6 +31,8 @@ const statTextClassName = (color: string) => css`
 function PipelineNodeContents({ data }: { data: PipelineNodeData }) {
   const { euiTheme } = useEuiTheme();
   const raiseOnHoverClassName = useRaiseOnHoverClassName();
+  const restingShadowClassName = useRestingShadowClassName();
+  const statClassName = statTextClassName(euiTheme.colors.textSubdued, euiTheme.font.familyCode);
 
   // The inline pipeline node from the design: a compact pill holding the
   // processor icon and its throughput/latency stats, with the pipeline name
@@ -48,10 +51,10 @@ function PipelineNodeContents({ data }: { data: PipelineNodeData }) {
         paddingSize="none"
         className={`${restingShadowClassName} ${css`
           display: flex;
-          gap: ${euiTheme.size.s};
+          gap: ${euiTheme.size.m};
           align-items: center;
           justify-content: center;
-          padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+          padding: ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.m};
           border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
           border-radius: ${euiTheme.border.radius.small};
         `}`}
@@ -62,17 +65,13 @@ function PipelineNodeContents({ data }: { data: PipelineNodeData }) {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            justify-content: space-between;
+            height: 24px;
             white-space: nowrap;
           `}
         >
-          {data.eps ? (
-            <EuiText className={statTextClassName(euiTheme.colors.textSubdued)}>{data.eps}</EuiText>
-          ) : null}
-          {data.latency ? (
-            <EuiText className={statTextClassName(euiTheme.colors.textSubdued)}>
-              {data.latency}
-            </EuiText>
-          ) : null}
+          {data.eps ? <EuiText className={statClassName}>{data.eps}</EuiText> : null}
+          {data.latency ? <EuiText className={statClassName}>{data.latency}</EuiText> : null}
         </div>
       </EuiPanel>
       {/* Pipeline name badge, centered just above the pill. */}
@@ -93,10 +92,11 @@ function PipelineNodeContents({ data }: { data: PipelineNodeData }) {
       >
         <EuiText
           className={css`
-            font-size: 9px;
+            font-size: 10.5px;
             line-height: 12px;
             font-weight: ${euiTheme.font.weight.semiBold};
             color: ${euiTheme.colors.textParagraph};
+            vertical-align: middle;
           `}
         >
           {data.title}

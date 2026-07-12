@@ -73,7 +73,11 @@ import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
 
 import { DestinationFlyout } from './destination_flyout';
-import { SourceFlyout } from './source_flyout';
+import {
+  DestinationConfigurationFlyout,
+  type DestinationConfigurationDetails,
+} from './destination_configuration_flyout';
+import { SourceFlyout, type SourceConfigurationDetails } from './source_flyout';
 import { PipelineFlyout } from './pipeline_flyout';
 import { CreatePipelineFlyout } from './create_pipeline_flyout';
 import { CreateRoutingFlyout, type RoutingApplyResult } from './create_routing_flyout';
@@ -87,7 +91,6 @@ import {
   danglingEndpointIdOf,
   DRAG_DATA_TYPE,
   GRID_SIZE,
-  noop,
   type CanvasNodeType,
 } from './canvas/constants';
 import type { DestinationNodeData, PipelineNodeData, SourceNodeData } from './canvas/types';
@@ -103,11 +106,13 @@ import {
 import { useEdgeBridges } from './canvas/use-edge-bridges';
 import {
   configuredDestinationData,
+  configuredSourceData,
   createNode,
+  NEW_SOURCE_TITLE,
   pipelineData,
   routingData,
-  sourceData,
   unconfiguredDestinationData,
+  unconfiguredSourceData,
 } from './canvas/node-data';
 import { initialEdges, initialNodes } from './canvas/seed-graph';
 import { canvasSignature, INITIAL_CANVAS_SIGNATURE } from './canvas/canvas-signature';
@@ -115,10 +120,11 @@ import { computeCleanupLayout, straightenChains } from './canvas/auto-layout';
 import { flowDirectionFor, reachableFlow } from './canvas/connected-flow';
 import { evaluateSearch } from './canvas/search';
 import { nodeTypes } from './canvas/nodes/node-types';
-import { SourceNodeContents } from './canvas/nodes/source-node';
+import { UnconfiguredSourceContents } from './canvas/nodes/source-node';
 import { UnconfiguredDestinationContents } from './canvas/nodes/destination-node';
 import { edgeTypes } from './canvas/edges/pipeline-routing-edge';
 import { CanvasControls, CanvasZoomControls } from './canvas/canvas-toolbar';
+import { CanvasMinimap } from './canvas/canvas-minimap';
 import { useCanvasHistory } from './canvas/use-canvas-history';
 import { useCanvasShortcuts } from './canvas/use-canvas-shortcuts';
 import { useCanvasSelection } from './canvas/use-canvas-selection';
@@ -144,7 +150,7 @@ const CANVAS_TRANSLATE_EXTENT: [[number, number], [number, number]] = (() => {
 
 function ShadowNode({ type, position }: { type: CanvasNodeType; position: XYPosition }) {
   // Mirror what createNode produces so the preview matches the placed node.
-  const data = type === 'source' ? sourceData() : unconfiguredDestinationData();
+  const data = type === 'source' ? unconfiguredSourceData() : unconfiguredDestinationData();
   return (
     <div
       className={css`
@@ -158,13 +164,9 @@ function ShadowNode({ type, position }: { type: CanvasNodeType; position: XYPosi
       `}
     >
       {type === 'source' ? (
-        <SourceNodeContents data={data as SourceNodeData} interactive={false} />
+        <UnconfiguredSourceContents data={data as SourceNodeData} interactive={false} />
       ) : (
-        <UnconfiguredDestinationContents
-          data={data as DestinationNodeData}
-          onClick={noop}
-          interactive={false}
-        />
+        <UnconfiguredDestinationContents data={data as DestinationNodeData} interactive={false} />
       )}
     </div>
   );
@@ -239,7 +241,18 @@ function StreamsCanvasInner() {
   // Whether the destination whose flyout is open runs a processor (marked by the
   // `processor` footer glyph). Gates the flyout's extra "Processing" tab.
   const [flyoutDestinationHasProcessing, setFlyoutDestinationHasProcessing] = useState(false);
+  // The id of the freshly-placed destination node whose configuration flyout is
+  // open; null = closed. Saving turns that node into a regular (still
+  // unconnected) configured destination.
+  const [destinationConfigNodeId, setDestinationConfigNodeId] = useState<string | null>(null);
   const [flyoutSource, setFlyoutSource] = useState<string | null>(null);
+  // The id of the source node the flyout is acting on — set for both an
+  // unconfigured node finishing setup and an already-configured node being
+  // viewed. Lets Save update, and Delete source remove, the right node.
+  const [flyoutSourceNodeId, setFlyoutSourceNodeId] = useState<string | null>(null);
+  // Whether the source flyout is in "finish setup" mode (configuration form +
+  // Save) rather than viewing an already-configured source.
+  const [flyoutSourceConfiguring, setFlyoutSourceConfiguring] = useState(false);
   const [pipelineFlyoutEdgeId, setPipelineFlyoutEdgeId] = useState<string | null>(null);
   // The id of the connector whose "Add step" menu opened the routing flyout.
   // Applying a routing condition splices a routing node into that edge.
@@ -285,9 +298,73 @@ function StreamsCanvasInner() {
     setFlyoutDestinationHasProcessing(hasProcessing);
   }, []);
 
-  const openSourceFlyout = useCallback((sourceName: string) => {
-    setFlyoutSource(sourceName);
+  // Clicking a freshly-placed (unconfigured) destination card opens the
+  // configuration flyout, mirroring the source "finish setup" flow rather than
+  // transforming the card inline.
+  const openDestinationConfigurationFlyout = useCallback((nodeId: string) => {
+    setDestinationConfigNodeId(nodeId);
   }, []);
+
+  const closeDestinationConfigurationFlyout = useCallback(() => {
+    setDestinationConfigNodeId(null);
+  }, []);
+
+  // Saving the configuration turns the node into a regular configured
+  // destination. It stays unconnected (no incoming edge), so the card renders
+  // its "Data not flowing in" state until a source is wired to it.
+  const saveDestinationConfiguration = useCallback(
+    (details: DestinationConfigurationDetails) => {
+      if (destinationConfigNodeId) {
+        setNodes((current) =>
+          current.map((node) =>
+            node.id === destinationConfigNodeId
+              ? { ...node, data: configuredDestinationData(details.name, details.storage) }
+              : node
+          )
+        );
+      }
+      setDestinationConfigNodeId(null);
+    },
+    [destinationConfigNodeId, setNodes]
+  );
+
+  const openSourceFlyout = useCallback((sourceName: string, nodeId: string | null = null) => {
+    setFlyoutSource(sourceName);
+    setFlyoutSourceNodeId(nodeId);
+    setFlyoutSourceConfiguring(false);
+  }, []);
+
+  // Clicking an unconfigured source card opens the same flyout in a
+  // "finish setup" capacity: a configuration form instead of the
+  // read-only view, and Save instead of Delete source.
+  const openSourceConfigurationFlyout = useCallback((nodeId: string) => {
+    setFlyoutSource(NEW_SOURCE_TITLE);
+    setFlyoutSourceNodeId(nodeId);
+    setFlyoutSourceConfiguring(true);
+  }, []);
+
+  const closeSourceFlyout = useCallback(() => {
+    setFlyoutSource(null);
+    setFlyoutSourceNodeId(null);
+    setFlyoutSourceConfiguring(false);
+  }, []);
+
+  // Saving the configuration flyout fills the source in with the entered
+  // name/type (mocking everything else), same as how the destination card's
+  // inline form transitions unconfigured → configured.
+  const saveSourceConfiguration = useCallback(
+    (details: SourceConfigurationDetails) => {
+      setNodes((current) =>
+        current.map((node) =>
+          node.id === flyoutSourceNodeId
+            ? { ...node, data: configuredSourceData(details.name, details.sourceTypeLabel) }
+            : node
+        )
+      );
+      closeSourceFlyout();
+    },
+    [flyoutSourceNodeId, setNodes, closeSourceFlyout]
+  );
 
   const openAttachedRoutingFlyout = useCallback(() => {
     setAttachedRoutingFlyoutOpen(true);
@@ -312,6 +389,15 @@ function StreamsCanvasInner() {
     onNodeContextMenu,
   } = useCanvasSelection({ setNodes, recordHistory });
 
+  // "Delete source" in the configured-source flyout: remove the node (and its
+  // connected edges, via deleteNodes) from the canvas, then close the flyout.
+  const deleteSource = useCallback(() => {
+    if (flyoutSourceNodeId) {
+      deleteNodes([flyoutSourceNodeId]);
+    }
+    closeSourceFlyout();
+  }, [flyoutSourceNodeId, deleteNodes, closeSourceFlyout]);
+
   const openPipelineFlyout = useCallback((edgeId: string) => {
     setPipelineFlyoutEdgeId(edgeId);
   }, []);
@@ -323,73 +409,77 @@ function StreamsCanvasInner() {
   // Inserts a pipeline node in the middle of the connector that opened the flyout,
   // re-routing the original edge through the new node (source -> pipeline -> target),
   // then closes the flyout.
-  const applyPipeline = useCallback(() => {
-    const edgeId = pipelineFlyoutEdgeId;
-    if (!edgeId) {
-      return;
-    }
+  const applyPipeline = useCallback(
+    (pipelineName?: string) => {
+      const edgeId = pipelineFlyoutEdgeId;
+      if (!edgeId) {
+        return;
+      }
 
-    const targetEdge = getEdges().find((edge) => edge.id === edgeId);
-    const sourceNode = targetEdge && getNodes().find((node) => node.id === targetEdge.source);
-    const destinationNode = targetEdge && getNodes().find((node) => node.id === targetEdge.target);
+      const targetEdge = getEdges().find((edge) => edge.id === edgeId);
+      const sourceNode = targetEdge && getNodes().find((node) => node.id === targetEdge.source);
+      const destinationNode =
+        targetEdge && getNodes().find((node) => node.id === targetEdge.target);
 
-    if (targetEdge && sourceNode && destinationNode) {
-      recordHistory();
-      const pipelineNodeId = `pipeline-${Date.now()}`;
+      if (targetEdge && sourceNode && destinationNode) {
+        recordHistory();
+        const pipelineNodeId = `pipeline-${Date.now()}`;
 
-      // Center the small pipeline node on the connector: horizontally between the
-      // source's right edge and the destination's left edge, vertically on the line
-      // joining the two nodes' centers. Fall back to sensible defaults if React Flow
-      // has not measured the nodes yet.
-      const sourceWidth = sourceNode.measured?.width ?? sourceNode.width ?? 204;
-      const sourceHeight = sourceNode.measured?.height ?? sourceNode.height ?? 96;
-      const destinationHeight =
-        destinationNode.measured?.height ?? destinationNode.height ?? sourceHeight;
-      // The "Big" pipeline card is a fixed-width horizontal card; offset by half
-      // its footprint so its center lands on the connector midpoint.
-      const PIPELINE_NODE_WIDTH = 120;
-      const PIPELINE_NODE_HEIGHT = 40;
+        // Center the small pipeline node on the connector: horizontally between the
+        // source's right edge and the destination's left edge, vertically on the line
+        // joining the two nodes' centers. Fall back to sensible defaults if React Flow
+        // has not measured the nodes yet.
+        const sourceWidth = sourceNode.measured?.width ?? sourceNode.width ?? 204;
+        const sourceHeight = sourceNode.measured?.height ?? sourceNode.height ?? 96;
+        const destinationHeight =
+          destinationNode.measured?.height ?? destinationNode.height ?? sourceHeight;
+        // The "Big" pipeline card is a fixed-width horizontal card; offset by half
+        // its footprint so its center lands on the connector midpoint.
+        const PIPELINE_NODE_WIDTH = 120;
+        const PIPELINE_NODE_HEIGHT = 40;
 
-      const sourceCenterY = sourceNode.position.y + sourceHeight / 2;
-      const destinationCenterY = destinationNode.position.y + destinationHeight / 2;
-      const sourceRightEdge = sourceNode.position.x + sourceWidth;
+        const sourceCenterY = sourceNode.position.y + sourceHeight / 2;
+        const destinationCenterY = destinationNode.position.y + destinationHeight / 2;
+        const sourceRightEdge = sourceNode.position.x + sourceWidth;
 
-      const midpoint: XYPosition = {
-        x: (sourceRightEdge + destinationNode.position.x) / 2 - PIPELINE_NODE_WIDTH / 2,
-        y: (sourceCenterY + destinationCenterY) / 2 - PIPELINE_NODE_HEIGHT / 2,
-      };
+        const midpoint: XYPosition = {
+          x: (sourceRightEdge + destinationNode.position.x) / 2 - PIPELINE_NODE_WIDTH / 2,
+          y: (sourceCenterY + destinationCenterY) / 2 - PIPELINE_NODE_HEIGHT / 2,
+        };
 
-      setNodes((current) =>
-        current.concat({
-          id: pipelineNodeId,
-          type: 'pipeline',
-          position: midpoint,
-          data: pipelineData(),
-        })
-      );
+        setNodes((current) =>
+          current.concat({
+            id: pipelineNodeId,
+            type: 'pipeline',
+            position: midpoint,
+            data: pipelineData(pipelineName),
+          })
+        );
 
-      setEdges((current) =>
-        current
-          .filter((edge) => edge.id !== edgeId)
-          .concat(
-            {
-              id: `${targetEdge.source}-${pipelineNodeId}`,
-              source: targetEdge.source,
-              target: pipelineNodeId,
-              type: 'pipelineRouting',
-            },
-            {
-              id: `${pipelineNodeId}-${targetEdge.target}`,
-              source: pipelineNodeId,
-              target: targetEdge.target,
-              type: 'pipelineRouting',
-            }
-          )
-      );
-    }
+        setEdges((current) =>
+          current
+            .filter((edge) => edge.id !== edgeId)
+            .concat(
+              {
+                id: `${targetEdge.source}-${pipelineNodeId}`,
+                source: targetEdge.source,
+                target: pipelineNodeId,
+                type: 'pipelineRouting',
+              },
+              {
+                id: `${pipelineNodeId}-${targetEdge.target}`,
+                source: pipelineNodeId,
+                target: targetEdge.target,
+                type: 'pipelineRouting',
+              }
+            )
+        );
+      }
 
-    setPipelineFlyoutEdgeId(null);
-  }, [pipelineFlyoutEdgeId, getEdges, getNodes, setNodes, setEdges, recordHistory]);
+      setPipelineFlyoutEdgeId(null);
+    },
+    [pipelineFlyoutEdgeId, getEdges, getNodes, setNodes, setEdges, recordHistory]
+  );
 
   const openEdgeRoutingFlyout = useCallback((edgeId: string) => {
     setRoutingFlyoutEdgeId(edgeId);
@@ -739,7 +829,12 @@ function StreamsCanvasInner() {
         return;
       }
       if (node.type === 'source') {
-        openSourceFlyout((node.data as SourceNodeData).title);
+        const data = node.data as SourceNodeData;
+        if (data.mode === 'unconfigured') {
+          openSourceConfigurationFlyout(node.id);
+        } else {
+          openSourceFlyout(data.title, node.id);
+        }
       } else if (node.type === 'pipeline') {
         // Clicking a pipeline already on the canvas opens the pipeline editor
         // preloaded with that pipeline, not the "Apply pipeline" picker.
@@ -750,23 +845,23 @@ function StreamsCanvasInner() {
         setRoutingNodeFlyoutOpen(true);
       } else if (node.type === 'destination') {
         const data = node.data as DestinationNodeData;
-        if (data.mode === 'configuring') {
-          return; // the inline form handles its own clicks
-        }
-        const connected = getEdges().some((edge) => edge.target === node.id);
-        if (data.mode === 'configured' && connected) {
+        if (data.mode === 'configured') {
+          // A configured destination opens its detail flyout (whether or not a
+          // source is wired to it yet).
           openDestinationFlyout(data.title, Boolean(data.footerIcon));
         } else {
-          // Unconfigured, or configured-but-not-connected: open the config form.
-          setNodes((current) =>
-            current.map((n) =>
-              n.id === node.id ? { ...n, data: { ...n.data, mode: 'configuring' } } : n
-            )
-          );
+          // A freshly-placed destination opens the configuration flyout instead
+          // of transforming the card inline, mirroring the source flow.
+          openDestinationConfigurationFlyout(node.id);
         }
       }
     },
-    [openSourceFlyout, openDestinationFlyout, getEdges, setNodes]
+    [
+      openSourceFlyout,
+      openSourceConfigurationFlyout,
+      openDestinationFlyout,
+      openDestinationConfigurationFlyout,
+    ]
   );
 
   // Hovering a node spotlights everywhere an event could travel relative to it
@@ -1284,9 +1379,11 @@ function StreamsCanvasInner() {
                       flex: 1;
                       min-height: 0;
                       width: 100%;
+                      /* Canvas surface — Figma "canvas-background" swatch:
+                         Backgrounds/Base/Subdued fill + Radii/Panel/Medium corners. */
                       background-color: ${euiTheme.colors.backgroundBaseSubdued};
                       border: none;
-                      border-radius: ${euiTheme.border.radius.small};
+                      border-radius: ${euiTheme.border.radius.medium};
                       overflow: hidden;
                       ${placementType ? 'cursor: copy;' : ''}
 
@@ -1385,9 +1482,8 @@ function StreamsCanvasInner() {
                       panOnDrag={canvasMode === 'pan' ? true : [1]}
                       proOptions={{ hideAttribution: true }}
                     >
-                      <Background gap={GRID_SIZE} color={euiTheme.colors.borderBaseSubdued} />
-                      {/* Minimap hidden for now — re-enable by uncommenting:
-          <CanvasMinimap hoveredFlow={hoveredFlow} /> */}
+                      <Background gap={GRID_SIZE} color={euiTheme.colors.borderBasePlain} />
+                      <CanvasMinimap hoveredFlow={hoveredFlow} />
                     </ReactFlow>
                     <CanvasZoomControls />
                     {placementType && shadowPosition ? (
@@ -1453,8 +1549,20 @@ function StreamsCanvasInner() {
                     onClose={() => setFlyoutDestination(null)}
                   />
                 ) : null}
+                {destinationConfigNodeId !== null ? (
+                  <DestinationConfigurationFlyout
+                    onClose={closeDestinationConfigurationFlyout}
+                    onSave={saveDestinationConfiguration}
+                  />
+                ) : null}
                 {flyoutSource !== null ? (
-                  <SourceFlyout sourceName={flyoutSource} onClose={() => setFlyoutSource(null)} />
+                  <SourceFlyout
+                    sourceName={flyoutSource}
+                    onClose={closeSourceFlyout}
+                    isConfiguring={flyoutSourceConfiguring}
+                    onSave={saveSourceConfiguration}
+                    onDelete={deleteSource}
+                  />
                 ) : null}
                 {pipelineFlyoutEdgeId !== null ? (
                   <PipelineFlyout onClose={closePipelineFlyout} onApply={applyPipeline} />

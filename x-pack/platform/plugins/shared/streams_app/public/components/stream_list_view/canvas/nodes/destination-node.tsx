@@ -5,277 +5,95 @@
  * 2.0.
  */
 
-// The destination node and its three states: unconfigured / configuring /
-// configured. A configured destination renders as a SINGLE card (not a
-// card-within-a-card) and is fully draggable; clicking is handled at the canvas
-// level (onNodeClick).
+// The destination node and its two states: unconfigured / configured. A
+// configured destination renders as a SINGLE card (not a card-within-a-card)
+// and is fully draggable; clicking is handled at the canvas level (onNodeClick),
+// which opens the configuration flyout for an unconfigured node and the
+// destination detail flyout for a configured one.
 
-import React, { memo, useCallback, useContext, useEffect, useState } from 'react';
+import React, { memo, useContext, useEffect } from 'react';
 import {
   Handle,
   Position,
   useNodeConnections,
-  useReactFlow,
   useUpdateNodeInternals,
   type NodeProps,
 } from '@xyflow/react';
 import {
   EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonGroup,
-  EuiButtonIcon,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
-  EuiSpacer,
   EuiText,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import type { DestinationFlowNode, DestinationNodeData, DestinationStorage } from '../types';
+import type { DestinationFlowNode, DestinationNodeData } from '../types';
 import {
   hiddenHandleClassName,
   inflateClassName,
-  restingShadowClassName,
   useAnchorHandleClassName,
   useRaiseOnHoverClassName,
+  useRestingShadowClassName,
 } from '../node-styles';
-import {
-  NEW_DESTINATION_TITLE,
-  configuredDestinationData,
-  unconfiguredDestinationData,
-} from '../node-data';
 import { AttachedRoutingFlyoutContext } from '../contexts';
 
-function DestinationTitle({ title, icon }: { title: string; icon: string }) {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={icon} size="s" />
-      </EuiFlexItem>
-      <EuiFlexItem
-        className={css`
-          min-width: 0;
-        `}
-      >
-        <EuiText
-          size="xs"
-          className={css`
-            font-weight: ${euiTheme.font.weight.semiBold};
-            color: ${euiTheme.colors.textParagraph};
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          `}
-        >
-          {title}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
-
-// The bordered frame used by the unconfigured (attention) and configuring
-// states.
-function BorderedShell({
-  children,
-  className,
-  tone = 'danger',
-  hasShadow = false,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  tone?: 'danger' | 'subdued';
-  hasShadow?: boolean;
-}) {
-  const { euiTheme } = useEuiTheme();
-  const borderColor =
-    tone === 'danger' ? euiTheme.colors.danger : euiTheme.colors.borderBaseSubdued;
-  return (
-    <EuiPanel
-      hasShadow={hasShadow}
-      paddingSize="none"
-      className={`${css`
-        display: flex;
-        align-items: stretch;
-        gap: ${euiTheme.size.xxs};
-        padding: ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.s};
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
-        border: ${euiTheme.border.width.thin} solid ${borderColor};
-        border-radius: ${euiTheme.border.radius.medium};
-      `} ${className ?? ''}`}
-    >
-      {children}
-    </EuiPanel>
-  );
-}
-
+// A freshly-placed destination starts as this attention card — a single
+// danger-bordered card (matching the unconfigured source card treatment)
+// prompting the user to finish setting it up. Clicking is handled at the canvas
+// level (onNodeClick), same as the configured card, so the whole node stays
+// draggable and a click opens the configuration flyout.
 export function UnconfiguredDestinationContents({
   data,
-  onClick,
   interactive = true,
 }: {
   data: DestinationNodeData;
-  onClick: () => void;
   interactive?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const raiseOnHoverClassName = useRaiseOnHoverClassName();
-  // Lift the whole card (the bordered shell), not just the inner button, so the
-  // "click to configure" node raises as one piece rather than the button
-  // detaching from its frame.
   return (
-    <BorderedShell className={interactive ? raiseOnHoverClassName : undefined}>
-      <EuiPanel
-        element="button"
-        hasShadow={false}
-        hasBorder
-        paddingSize="s"
-        onClick={(event) => {
-          event.stopPropagation();
-          onClick();
-        }}
-        className={`nodrag ${css`
-          min-width: 140px;
-          cursor: pointer;
-          border-radius: ${euiTheme.border.radius.medium};
-        `}`}
-      >
-        <DestinationTitle title={data.title} icon="dashedCircle" />
-        <EuiText size="xs" color="subdued" textAlign="center">
-          {i18n.translate('xpack.streams.streamsCanvas.clickToConfigure', {
-            defaultMessage: 'Click to configure',
-          })}
-        </EuiText>
-      </EuiPanel>
-    </BorderedShell>
-  );
-}
-
-const STORAGE_OPTIONS = [
-  {
-    id: 'local',
-    label: i18n.translate('xpack.streams.streamsCanvas.storageLocal', {
-      defaultMessage: 'Local Elasticsearch',
-    }),
-  },
-  {
-    id: 'external',
-    label: i18n.translate('xpack.streams.streamsCanvas.storageExternal', {
-      defaultMessage: 'External storage',
-    }),
-  },
-];
-
-function ConfiguringDestinationContents({
-  data,
-  onCancel,
-  onSave,
-  onDelete,
-}: {
-  data: DestinationNodeData;
-  onCancel: () => void;
-  onSave: (name: string) => void;
-  onDelete: () => void;
-}) {
-  const { euiTheme } = useEuiTheme();
-  const [name, setName] = useState(data.title === NEW_DESTINATION_TITLE ? '' : data.title);
-  const [storage, setStorage] = useState<DestinationStorage>(data.storage ?? 'local');
-  const storageGroupId = useGeneratedHtmlId({ prefix: 'destinationStorage' });
-
-  // Prevent React Flow from panning/selecting while interacting with the form.
-  const stop = (event: React.SyntheticEvent) => event.stopPropagation();
-
-  return (
-    <BorderedShell
-      className={css`
-        width: 366px;
-        flex-shrink: 0;
-        align-items: flex-start;
-      `}
+    <EuiPanel
+      hasShadow={false}
+      paddingSize="none"
+      className={`${css`
+        display: flex;
+        flex-direction: column;
+        gap: ${euiTheme.size.xs};
+        width: 184px;
+        padding: ${euiTheme.size.m};
+        text-align: left;
+        cursor: pointer;
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.danger};
+        border-radius: ${euiTheme.border.radius.medium};
+      `} ${interactive ? raiseOnHoverClassName : ''}`}
     >
-      <EuiPanel
-        hasShadow={false}
-        hasBorder
-        paddingSize="s"
-        className={`nodrag nopan ${css`
-          flex: 1 1 0;
-          min-width: 0;
-          border-radius: ${euiTheme.border.radius.medium};
-        `}`}
-        onClick={stop}
-        onMouseDown={stop}
+      <EuiText
+        size="xs"
+        className={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+          color: ${euiTheme.colors.textHeading};
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        `}
       >
-        <DestinationTitle title={data.title} icon="dashedCircle" />
-        <EuiSpacer size="m" />
-        <EuiButtonGroup
-          legend={i18n.translate('xpack.streams.streamsCanvas.storageLegend', {
-            defaultMessage: 'Destination storage',
-          })}
-          options={STORAGE_OPTIONS}
-          idSelected={storage}
-          onChange={(id) => setStorage(id as DestinationStorage)}
-          buttonSize="compressed"
-          isFullWidth
-          name={storageGroupId}
-        />
-        <EuiSpacer size="m" />
-        <EuiFieldText
-          compressed
-          fullWidth
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder={i18n.translate('xpack.streams.streamsCanvas.namePlaceholder', {
-            defaultMessage: 'foo.bar',
-          })}
-          aria-label={i18n.translate('xpack.streams.streamsCanvas.nameAriaLabel', {
-            defaultMessage: 'Destination name',
-          })}
-        />
-        <EuiSpacer size="xs" />
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.streams.streamsCanvas.nameHelpText', {
-            defaultMessage:
-              'Name your destination or leave to be renamed when connected to a source. This can’t be changed.',
-          })}
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              display="base"
-              onClick={onDelete}
-              aria-label={i18n.translate('xpack.streams.streamsCanvas.deleteDestination', {
-                defaultMessage: 'Delete destination',
-              })}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" color="text" onClick={onCancel}>
-              {i18n.translate('xpack.streams.streamsCanvas.cancel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s" fill onClick={() => onSave(name)}>
-              {i18n.translate('xpack.streams.streamsCanvas.save', {
-                defaultMessage: 'Save',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </BorderedShell>
+        {data.title}
+      </EuiText>
+      <EuiText
+        size="xs"
+        className={css`
+          color: ${euiTheme.colors.textDanger};
+          font-weight: ${euiTheme.font.weight.medium};
+        `}
+      >
+        {i18n.translate('xpack.streams.streamsCanvas.clickToConfigure', {
+          defaultMessage: 'Click to configure',
+        })}
+      </EuiText>
+    </EuiPanel>
   );
 }
 
@@ -289,9 +107,11 @@ function ConfiguredDestinationBody({
   isConnected: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
-  // Footer metadata (throughput/latency): "Fine print (small)" — 10.5px / 16px.
+  // Footer metadata (throughput/latency): monospace to match the pipeline
+  // node's stat text, since these are numeric/tabular values.
   const metaTextClassName = css`
-    font-size: 10.5px;
+    font-family: ${euiTheme.font.familyCode};
+    font-size: 10px;
     line-height: ${euiTheme.size.base};
     color: ${euiTheme.colors.textSubdued};
   `;
@@ -375,6 +195,7 @@ function ConfiguredDestinationContents({
 }) {
   const { euiTheme } = useEuiTheme();
   const raiseOnHoverClassName = useRaiseOnHoverClassName();
+  const restingShadowClassName = useRestingShadowClassName();
   const openAttachedRoutingFlyout = useContext(AttachedRoutingFlyoutContext);
 
   if (data.attachedRouting) {
@@ -463,7 +284,6 @@ function ConfiguredDestinationContents({
 }
 
 export const DestinationNode = memo(({ id, data }: NodeProps<DestinationFlowNode>) => {
-  const { setNodes, deleteElements } = useReactFlow();
   const anchorHandleClassName = useAnchorHandleClassName();
   const updateNodeInternals = useUpdateNodeInternals();
 
@@ -481,54 +301,16 @@ export const DestinationNode = memo(({ id, data }: NodeProps<DestinationFlowNode
   }, [id, data.mode, data.attachedRouting, updateNodeInternals]);
 
   // A destination is "connected to a source" once an incoming (target) edge exists.
-  // Until then it stays editable: clicking it re-opens the configuration card.
   const incomingConnections = useNodeConnections({ handleType: 'target' });
   const isConnectedToSource = incomingConnections.length > 0;
-
-  const updateData = useCallback(
-    (patch: Partial<DestinationNodeData>) => {
-      setNodes((current) =>
-        current.map((node) =>
-          node.id === id ? { ...node, data: { ...node.data, ...patch } } : node
-        )
-      );
-    },
-    [id, setNodes]
-  );
-
-  const startConfiguring = useCallback(() => {
-    updateData({ mode: 'configuring' });
-  }, [updateData]);
-
-  const cancelConfiguring = useCallback(() => {
-    updateData({ ...unconfiguredDestinationData() });
-  }, [updateData]);
-
-  const save = useCallback(
-    (name: string) => {
-      updateData({ ...configuredDestinationData(name) });
-    },
-    [updateData]
-  );
-
-  const remove = useCallback(() => {
-    deleteElements({ nodes: [{ id }] });
-  }, [deleteElements, id]);
 
   return (
     <div className={inflateClassName} onAnimationEnd={() => updateNodeInternals(id)}>
       <Handle type="target" position={Position.Left} className={anchorHandleClassName} />
       {data.mode === 'configured' ? (
         <ConfiguredDestinationContents data={data} isConnected={isConnectedToSource} />
-      ) : data.mode === 'configuring' ? (
-        <ConfiguringDestinationContents
-          data={data}
-          onCancel={cancelConfiguring}
-          onSave={save}
-          onDelete={remove}
-        />
       ) : (
-        <UnconfiguredDestinationContents data={data} onClick={startConfiguring} />
+        <UnconfiguredDestinationContents data={data} />
       )}
       {/*
         Legacy default source handle kept for layout compatibility. The routing
