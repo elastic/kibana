@@ -23,12 +23,6 @@ triggers:
     with:
       every: "4h"
   - type: manual
-    inputs:
-      - name: connectorId
-        type: string
-        default: ".anthropic-claude-4.6-sonnet-chat_completion"
-        required: false
-        description: "AI connector ID to use for the extraction agent."
 
 consts:
   CONVERSATIONS_LOOKBACK: "now-8h"
@@ -72,7 +66,9 @@ steps:
     steps:
       - name: extract_knowledge
         type: ai.agent
-        connector-id: "${{ inputs.connectorId }}"
+        # Keep in sync with @kbn/significant-events-schema inference_feature_ids.ts
+        # (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
+        connector-id-by-feature: "significant_events_memory"
         create-conversation: true
         timeout: 1800s
         with:
