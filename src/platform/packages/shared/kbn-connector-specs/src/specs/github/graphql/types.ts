@@ -7,25 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ZodSchema } from '@kbn/zod/v4';
+
 export interface GitHubGraphQLPageInfo {
   hasNextPage: boolean;
-  endCursor?: string | null;
+  endCursor: string | null;
 }
 
 export interface GitHubGraphQLRateLimit {
+  cost: number;
   limit: number;
   remaining: number;
   resetAt: string;
-  used?: number;
 }
 
-export interface GitHubGraphQLResult<TData = unknown> {
-  data: TData;
-  pageInfo?: GitHubGraphQLPageInfo;
-  rateLimit?: GitHubGraphQLRateLimit;
-  /** True when remaining rate-limit budget is low and workflows should wait before the next call. */
+/** The stable output contract for every runQueryTemplate call. */
+export interface GitHubGraphQLResult {
+  data: unknown[];
+  meta?: Record<string, unknown>;
+  pageInfo: GitHubGraphQLPageInfo;
+  rateLimit: GitHubGraphQLRateLimit;
   shouldBackoff: boolean;
-  templateId?: string;
+  templateId: string;
 }
 
 export interface GitHubGraphQLRequestBody {
@@ -36,7 +39,7 @@ export interface GitHubGraphQLRequestBody {
 
 export interface GitHubGraphQLResponseBody<TData = unknown> {
   data?: TData;
-  errors?: Array<{ message: string }>;
+  errors?: Array<{ message: string; path?: string[] }>;
   extensions?: {
     rateLimit?: GitHubGraphQLRateLimit;
   };
@@ -45,7 +48,12 @@ export interface GitHubGraphQLResponseBody<TData = unknown> {
 export interface GitHubQueryTemplate {
   id: string;
   description: string;
-  query: string;
-  /** Dot-separated path to a PageInfo object inside `data`, e.g. "organization.repositories". */
-  pageInfoPath?: string;
+  /** Full GraphQL document with rateLimit selection included. */
+  document: string;
+  /** Zod schema for template-specific variables (excludes first/after). */
+  variablesSchema: ZodSchema<Record<string, unknown>>;
+  /** Dot-separated path to the result inside `data` (e.g. "organization.repositories"). */
+  resultPath: string;
+  /** True for paginated templates (nodes+pageInfo); false for single-entity templates. */
+  isPaginated: boolean;
 }
