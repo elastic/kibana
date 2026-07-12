@@ -11,7 +11,6 @@ import { fetchEvents } from './fetch_events_graph';
 import { regroupEvents, enrichEventDocData } from './parse_records';
 import type { Logger } from '@kbn/core/server';
 import type { OriginEventId, EsQuery, EventEsqlRow } from './types';
-import { GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 import { hashIds } from './utils';
 
@@ -133,7 +132,7 @@ describe('fetchEvents', () => {
   });
 
   describe('Target entity filtering', () => {
-    it('should require at least one target field to exist when showUnknownTarget is false', async () => {
+    it('should filter unknown targets in ES|QL when showUnknownTarget is false', async () => {
       await fetchEvents({
         esClient,
         logger,
@@ -147,29 +146,19 @@ describe('fetchEvents', () => {
       });
 
       const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-      const filterArg = args.filter as any;
+      const query: string = args.query;
 
-      const allTargetFields = [
-        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.user,
-        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.host,
-        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.service,
-        ...GRAPH_TARGET_EUID_SOURCE_FIELDS.generic,
-      ];
-      const expectedExistsChecks = allTargetFields.map((field) => ({ exists: { field } }));
-
-      expect(filterArg.bool.filter).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            bool: expect.objectContaining({
-              should: expect.arrayContaining(expectedExistsChecks),
-              minimum_should_match: 1,
-            }),
-          }),
-        ])
-      );
+      // Filtering happens in ES|QL (after enrichment), not in the DSL pre-filter,
+      // so that enrichment-computed entity.target.id values are visible before the check.
+      expect(query).toContain('| WHERE __target_exists');
+      expect(query).toContain('__target_exists = ');
+      // The __target_exists EVAL must appear before the WHERE clause
+      const evalPos = query.indexOf('__target_exists =');
+      const wherePos = query.indexOf('| WHERE __target_exists');
+      expect(evalPos).toBeLessThan(wherePos);
     });
 
-    it('should not filter targets when showUnknownTarget is true', async () => {
+    it('should not filter targets in ES|QL when showUnknownTarget is true', async () => {
       await fetchEvents({
         esClient,
         logger,
@@ -183,12 +172,9 @@ describe('fetchEvents', () => {
       });
 
       const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-      const filterArg = args.filter as any;
+      const query: string = args.query;
 
-      const hasTargetCheck = filterArg.bool.filter.some((f: any) =>
-        f.bool?.should?.some((s: any) => s.exists?.field?.includes('target'))
-      );
-      expect(hasTargetCheck).toBe(false);
+      expect(query).not.toContain('| WHERE __target_exists');
     });
   });
 

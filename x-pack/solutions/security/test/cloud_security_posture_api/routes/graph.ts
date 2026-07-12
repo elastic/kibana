@@ -1292,6 +1292,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should filter unknown targets', async () => {
         const response = await postGraph(supertest, {
+          showUnknownTarget: false,
           query: {
             indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
             originEventIds: [],

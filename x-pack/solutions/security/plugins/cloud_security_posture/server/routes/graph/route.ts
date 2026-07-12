@@ -47,7 +47,7 @@ export const defineGraphRoute = (router: CspRouter) =>
       },
       async (context: CspRequestHandlerContext, request, response) => {
         const cspContext = await context.csp;
-        const { nodesLimit, showUnknownTarget = false } = request.body;
+        const { nodesLimit, showUnknownTarget = true } = request.body;
         const {
           originEventIds,
           start,

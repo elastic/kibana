@@ -47,6 +47,7 @@ interface BuildEsqlQueryParams {
   alertsMappingsIncluded: boolean;
   pinnedIds?: string[];
   integrationEnrichmentEnabled?: boolean;
+  showUnknownTarget: boolean;
 }
 
 /**
@@ -122,6 +123,7 @@ export const fetchEvents = async ({
     alertsMappingsIncluded,
     pinnedIds,
     integrationEnrichmentEnabled,
+    showUnknownTarget,
   });
 
   logger.trace(
@@ -382,6 +384,7 @@ const buildEsqlQuery = ({
   alertsMappingsIncluded,
   pinnedIds,
   integrationEnrichmentEnabled,
+  showUnknownTarget,
 }: BuildEsqlQueryParams): string => {
   // TODO: switch back to LOAD once ES|QL supports accessing subfields of flattened-type
   // parents under unmapped_fields="LOAD" (currently throws verification_exception for fields
@@ -395,9 +398,6 @@ FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
 | EVAL  __actor_exists = user.id IS NOT NULL OR user.full_name IS NOT NULL OR user.email IS NOT NULL
-| EVAL __target_exists = user.target.id IS NOT NULL OR user.target.name IS NOT NULL OR user.target.email IS NOT NULL
-    OR service.target.id IS NOT NULL OR service.target.name IS NOT NULL
-    OR entity.target.id IS NOT NULL OR entity.target.name IS NOT NULL
 | EVAL  __action_exists = event.action IS NOT NULL
 | EVAL data_stream.dataset = COALESCE(event.dataset, data_stream.dataset)
 // Normalise user.id to keyword: fixes CASE return-type conflicts when user.id is mapped as
@@ -409,6 +409,11 @@ ${
     ? buildEnrichmentQuery({ skipColumns: ['host.ip', 'host.target.ip', 'host.target.port'] })
     : ''
 }
+// Recompute after enrichment so entity.target.id set by integration enrichment is visible.
+| EVAL __target_exists = user.target.id IS NOT NULL OR user.target.name IS NOT NULL OR user.target.email IS NOT NULL
+    OR service.target.id IS NOT NULL OR service.target.name IS NOT NULL
+    OR entity.target.id IS NOT NULL OR entity.target.name IS NOT NULL
+${showUnknownTarget ? '' : '| WHERE __target_exists'}
 ${buildV2ActorResolution()}
 | WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
 ${buildV2TargetResolution()}
