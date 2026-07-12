@@ -90,7 +90,7 @@ function createEvaluateTriageQuality({
   executorClient,
   traceEsClient,
   log,
-  skillNames = ['alert-analysis'],
+  skillNames = ['alert-triage'],
 }: {
   fetch: HttpHandler;
   connector: { id: string };
@@ -181,7 +181,7 @@ const evaluate = base.extend<
           executorClient,
           traceEsClient,
           log,
-          skillNames: ['alert-analysis', 'entity-analytics'],
+          skillNames: ['alert-triage', 'entity-analytics'],
         })
       );
     },

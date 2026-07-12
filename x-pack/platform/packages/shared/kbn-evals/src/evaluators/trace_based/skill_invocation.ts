@@ -13,17 +13,7 @@ import { createTraceBasedEvaluator } from './factory';
 const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
 
 export function buildSkillInvokedCaseExpression(skillName: string): string {
-  return `(
-      attributes.gen_ai.tool.name == "filestore.read"
-        AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"
-    ) OR (
-      attributes.gen_ai.tool.name == "load_skill"
-        AND (
-          attributes.gen_ai.tool.call.arguments LIKE "*\\"skill\\":\\"${skillName}\\"*"
-          OR attributes.gen_ai.tool.call.arguments LIKE "*\\"skill\\": \\"${skillName}\\"*"
-          OR attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"
-        )
-    )`;
+  return `attributes.gen_ai.tool.name LIKE "*${skillName}*"`;
 }
 
 export interface ExampleScopedSkillInvocationContext {

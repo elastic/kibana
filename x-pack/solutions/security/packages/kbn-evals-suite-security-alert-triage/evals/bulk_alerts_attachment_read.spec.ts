@@ -90,7 +90,7 @@ function createEvaluateAlertBatches({
       createSkillInvocationEvaluator({
         traceEsClient,
         log,
-        skillName: 'alert-analysis',
+        skillName: 'alert-triage',
       }),
       ...Object.values(evaluators.traceBasedEvaluators),
     ]);
