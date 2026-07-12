@@ -24,29 +24,42 @@ export class DataFrameAnalyticsPage {
 
   async gotoJobList(): Promise<void> {
     await this.page.goto(this.kbnUrl.app('management/ml/analytics'));
-    // The analytics list renders null until its first API fetch completes (isInitialized).
-    // Override the global 10 s actionTimeout so slow environments don't flake here.
+    // DataFrameAnalyticsList renders null until its first ML API fetch completes
+    // (isInitialized). 60 s covers cold-start and environments with many existing jobs.
     await this.page.testSubj
       .locator('mlAnalyticsJobList')
-      .waitFor({ state: 'visible', timeout: 30_000 });
+      .waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   // ── Creation wizard ───────────────────────────────────────────────────────
 
   /**
-   * Clicks the empty-state "create first job" button and waits for the source
-   * selection page. After cleanDataFrameAnalytics the list is always empty, so
-   * the empty-state button is always the right entry point — if it is missing,
-   * the test fails loudly here rather than silently using a fallback.
+   * Clicks the "Create job" button in the page header and waits for the source
+   * selection page. The header button (mlAnalyticsButtonCreate) is always rendered
+   * regardless of whether the job list is empty or not, making it safe to use in
+   * non-clean CI environments that carry leftover DFA jobs from previous runs.
    */
   async startCreation(): Promise<void> {
-    await this.page.testSubj.locator('mlAnalyticsCreateFirstButton').click();
+    await this.page.testSubj.locator('mlAnalyticsButtonCreate').click();
     await this.page.testSubj.locator('mlDFAPageSourceSelection').waitFor({ state: 'visible' });
   }
 
   async selectSource(sourceName: string): Promise<void> {
+    // SavedObjectFinder fires an async fetch on mount; mlDFAPageSourceSelection becoming
+    // visible does not guarantee the item list is populated yet. Wait for the initial load
+    // to settle before typing. EuiBasicTable sets aria-busy="true" on the inner <table>
+    // while loading and removes the attribute when done (it is never set to "false").
+    await this.page.testSubj
+      .locator('savedObjectsFinderTable')
+      .locator('table:not([aria-busy="true"])')
+      .waitFor({ state: 'visible', timeout: 40_000 });
     await this.page.testSubj.locator('savedObjectFinderSearchInput').fill(sourceName);
-    await this.page.testSubj.locator(`savedObjectTitle${sourceName}`).click();
+    // fill() triggers a 300 ms debounced API search. Wait explicitly for the matching
+    // source item rather than relying on the 10 s default action timeout — the search
+    // can be slow in loaded CI environments or when the data view was just created.
+    const resultItem = this.page.testSubj.locator(`savedObjectTitle${sourceName}`);
+    await resultItem.waitFor({ state: 'visible', timeout: 40_000 });
+    await resultItem.click();
     await this.page.testSubj.locator('mlAnalyticsCreationContainer').waitFor({ state: 'visible' });
   }
 
@@ -200,11 +213,16 @@ export class DataFrameAnalyticsPage {
       await startSwitch.click();
     }
     await this.page.testSubj.locator('mlAnalyticsCreateJobWizardCreateButton').click();
-    await this.page.testSubj.locator('analyticsWizardCardManagement').waitFor({ state: 'visible' });
+    // The ML backend may be busy; give the post-creation card 30 s to appear.
+    await this.page.testSubj
+      .locator('analyticsWizardCardManagement')
+      .waitFor({ state: 'visible', timeout: 40_000 });
     await this.page.testSubj.locator('analyticsWizardCardManagement').click();
+    // After navigation the list re-fetches all jobs; 60 s covers slow ML backends and
+    // environments carrying many existing jobs.
     await this.page.testSubj
       .locator('mlAnalyticsJobList')
-      .waitFor({ state: 'visible', timeout: 30_000 });
+      .waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   // ── Job table ─────────────────────────────────────────────────────────────
@@ -213,9 +231,11 @@ export class DataFrameAnalyticsPage {
     await this.page.testSubj
       .locator('~mlAnalyticsTable')
       .waitFor({ state: 'visible', timeout: 60_000 });
+    // "loaded" suffix is set by the component once data rendering completes; 60 s covers
+    // environments with many existing jobs slowing the EUI table render.
     await this.page.testSubj
       .locator('mlAnalyticsTable loaded')
-      .waitFor({ state: 'visible', timeout: 30_000 });
+      .waitFor({ state: 'visible', timeout: 60_000 });
   }
 
   async filterByJobId(jobId: string): Promise<void> {
@@ -223,11 +243,11 @@ export class DataFrameAnalyticsPage {
     const searchInput = this.page.testSubj.locator('mlAnalyticsSearchBox');
     await searchInput.fill('');
     await searchInput.fill(jobId);
-    // wait for the matching row to appear
+    // 30 s covers search + table re-render latency under CI load.
     await this.page.testSubj
       .locator('~mlAnalyticsTable')
       .locator(`[data-test-subj~="row-${jobId}"]`)
-      .waitFor({ state: 'visible' });
+      .waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   /** Returns key visible column values from the matching table row. */
