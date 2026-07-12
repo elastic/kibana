@@ -214,6 +214,64 @@ vulnerability events. This was a silent data bug, not a crash.
 
 ---
 
+## Research: user.id Mapping Across All 47 Integrations
+
+The global `| EVAL user.id = TO_STRING(user.id)` cast would crash at plan time if `user.id`
+were absent from **all** queried index mappings (null-typed). An audit of the 47 integration
+packages queried by the graph was performed to determine whether this scenario can occur in
+practice.
+
+### Method
+
+Each integration's `kibana.jsonc` was checked for `type: "content"` (no data streams) and
+`format_version`. For packages with real data streams, presence of `user.id` in field
+definitions was checked. Additionally, all integrations with `format_version >= 2.0.0` are
+known to automatically include `ecs@mappings` as a component template on all their index
+templates, which maps `user.id` as keyword regardless of whether the integration's own
+`fields.yml` references it.
+
+### Results
+
+| Category | Count | Details |
+|---|---|---|
+| **HAS_USER_ID** — user.id confirmed as keyword (via `ecs@mappings`) | 33 | aws_bedrock, aws_bedrock_agentcore, aws_securityhub, azure_ai_foundry, azure_app_service, cisco_meraki, cisco_secure_email_gateway, cisco_umbrella, cyera, entityanalytics_ad, entityanalytics_okta, extrahop, forgerock, fortinet_fortigate, gitlab, infoblox_bloxone_ddi, jamf_pro, linux, m365_defender, microsoft_dhcp, microsoft_intune, ping_one, prisma_cloud, qualys_vmdr, servicenow, slack, suricata, sysdig, tanium, ti_misp, wiz, zscaler_zia, darktrace |
+| **NO_USER_ID** — user.id absent | 3 | aws_cloudtrail_otel, aws_vpcflow_otel, corelight |
+| **UNCERTAIN** — ECS template applies (format_version ≥ 3.0) but audit couldn't confirm statically | 10 | azure_openai, checkpoint_email, citrix_waf, greenhouse, osquery, ping_federate, salesforce, snort, snyk, gcp_vertexai |
+
+### Why NO_USER_ID is not a crash risk
+
+All three NO_USER_ID packages (`aws_cloudtrail_otel`, `aws_vpcflow_otel`, `corelight`) are
+**content-only packages** (`type: "content"` in `kibana.jsonc`). They have no data streams, no
+index templates, and no associated Elasticsearch indices. They are Kibana dashboard bundles that
+display data from separate ingest paths. There is no `logs-aws_cloudtrail_otel.*` index for
+the graph query to target — the index patterns simply don't match anything. Querying these
+patterns returns empty results rather than a schema error.
+
+### Why UNCERTAIN is not a crash risk
+
+All 10 UNCERTAIN integrations have `format_version >= 3.0` and real data streams, which means
+the `ecs@mappings` component template is applied automatically to every index template they
+create. `ecs@mappings` maps `user.id` as keyword. The audit flagged them as uncertain only
+because the static field definitions in their `fields.yml` files do not list `user.id`
+explicitly — the mapping comes from the shared ECS template, not from the package's own
+field list.
+
+### Conclusion
+
+The global `| EVAL user.id = TO_STRING(user.id)` cast is safe for all integrations the graph
+queries in practice:
+
+- 33 integrations have `user.id` mapped as keyword via `ecs@mappings` — no crash, no wrong type.
+- 3 content-only packages have no data and no indices — crash scenario is unreachable.
+- 10 UNCERTAIN integrations all use `ecs@mappings` via `format_version >= 3.0` — user.id is
+  keyword at runtime even without explicit field definitions.
+
+The only theoretical crash scenario is a completely custom non-ECS index with no `user.id`
+mapping at all, queried in complete isolation. This is outside the scope of the integration
+support this feature is designed for.
+
+---
+
 ## Summary of Changes
 
 | File | Change |

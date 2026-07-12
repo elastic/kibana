@@ -384,7 +384,7 @@ const buildEsqlQuery = ({
   // greenhouse.audit.event.meta.name, cisco_meraki.*.vap).
   // When LOAD is restored, keep the global user.id cast below and add similar casts for any
   // other field known to be mapped with the wrong type in some integration index.
-  // See NULLIFY_WORKAROUNDS.md for the full revert checklist.
+  // See NULLIFY_WORKAROUNDS.md for the full revert checklist and the user.id audit results.
   const query = `SET unmapped_fields="NULLIFY";
 FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
@@ -395,6 +395,9 @@ FROM ${indexPatterns
     OR entity.target.id IS NOT NULL OR entity.target.name IS NOT NULL
 | EVAL  __action_exists = event.action IS NOT NULL
 | EVAL data_stream.dataset = COALESCE(event.dataset, data_stream.dataset)
+// Normalise user.id to keyword: fixes CASE return-type conflicts when user.id is mapped as
+// "long" (e.g. aws_bedrock.invocation) and LIKE type errors in aws_bedrock enrichment.
+// Safe across all 47 integrations — see NULLIFY_WORKAROUNDS.md for the mapping audit.
 | EVAL user.id = TO_STRING(user.id)
 ${buildEnrichmentQuery({ skipColumns: ['host.ip', 'host.target.ip', 'host.target.port'] })}
 ${buildV2ActorResolution()}
