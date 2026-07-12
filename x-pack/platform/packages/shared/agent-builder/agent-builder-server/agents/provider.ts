@@ -110,6 +110,8 @@ export interface ExperimentalFeatures {
   askUserQuestion: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
+  /** Whether the OpenCode coding sub-agent (sandboxed, over ACP) is enabled */
+  opencodeSubagent: boolean;
 }
 
 export interface AgentHandlerContext {

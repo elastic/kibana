@@ -30,6 +30,8 @@ import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderMcpClientsPage } from './pages/mcp_clients';
 import { AgentBuilderMcpClientCreatePage } from './pages/mcp_client_create';
+import { AgentBuilderSandboxesPage } from './pages/sandboxes';
+import { AgentBuilderAgentSandboxPage } from './pages/agent_sandbox';
 import { agentBuilderViewIds } from './agent_builder_view_ids';
 import { appPaths } from './utils/app_paths';
 
@@ -38,6 +40,8 @@ export type SidebarView = 'conversation' | 'manage';
 export interface FeatureFlags {
   experimental: boolean;
   uiamOAuthClientManagement: boolean;
+  /** Experimental coding sub-agent / Sandboxes capability. */
+  sandboxes: boolean;
 }
 
 export interface Capabilities {
@@ -57,6 +61,8 @@ export interface RouteDefinition {
   isExperimental?: boolean;
   requiresUIAM?: boolean;
   requiresUiamOAuthClientManagement?: boolean;
+  /** Only enabled when the Sandboxes (coding sub-agent) capability is on. */
+  requiresSandboxes?: boolean;
   navLabel?: string;
   navIcon?: string;
 }
@@ -79,6 +85,9 @@ const navLabels = {
   }),
   agents: i18n.translate('xpack.agentBuilder.routeConfig.agents', {
     defaultMessage: 'Agents',
+  }),
+  sandboxes: i18n.translate('xpack.agentBuilder.routeConfig.sandboxes', {
+    defaultMessage: 'Sandboxes',
   }),
 };
 
@@ -126,6 +135,14 @@ export const agentRoutes: RouteDefinition[] = [
     sidebarView: 'conversation',
     navLabel: navLabels.tools,
     element: <AgentBuilderAgentToolsPage />,
+  },
+  {
+    path: '/agents/:agentId/sandbox',
+    viewId: agentBuilderViewIds.agentSandbox,
+    sidebarView: 'conversation',
+    navLabel: navLabels.sandboxes,
+    requiresSandboxes: true,
+    element: <AgentBuilderAgentSandboxPage />,
   },
   // Catch-all for agent root - must be last
   {
@@ -197,6 +214,14 @@ export const manageRoutes: RouteDefinition[] = [
     navLabel: navLabels.connectors,
     isExperimental: true,
     element: <AgentBuilderConnectorsPage />,
+  },
+  {
+    path: '/manage/sandboxes',
+    viewId: agentBuilderViewIds.manageSandboxes,
+    sidebarView: 'manage',
+    navLabel: navLabels.sandboxes,
+    requiresSandboxes: true,
+    element: <AgentBuilderSandboxesPage />,
   },
   {
     path: '/manage/tools',
@@ -297,11 +322,13 @@ export interface SidebarNavItem {
 }
 
 const isRouteEnabled = (route: RouteDefinition, config: RouteAccessConfig): boolean => {
-  const { isExperimental, requiresUIAM, requiresUiamOAuthClientManagement } = route;
+  const { isExperimental, requiresUIAM, requiresUiamOAuthClientManagement, requiresSandboxes } =
+    route;
   const { featureFlags, capabilities } = config;
   if (isExperimental && !featureFlags.experimental) return false;
   if (requiresUIAM && !capabilities.isUIAMEnabled) return false;
   if (requiresUiamOAuthClientManagement && !featureFlags.uiamOAuthClientManagement) return false;
+  if (requiresSandboxes && !featureFlags.sandboxes) return false;
   return true;
 };
 

@@ -37,6 +37,17 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import {
+  initOpencodeSubagentExecutor,
+  stopOpencodeSubagentExecutor,
+} from './services/execution/opencode_subagent';
+import {
+  sandboxProfileSavedObjectType,
+  SANDBOX_PROFILE_SO_TYPE,
+  SANDBOX_PROFILE_ATTRIBUTES_IN_AAD,
+  SANDBOX_PROFILE_ATTRIBUTES_TO_ENCRYPT,
+} from './services/sandboxes/saved_object';
+import { initSandboxProfileProvider } from './services/sandboxes';
 
 export class AgentBuilderPlugin
   implements
@@ -56,6 +67,7 @@ export class AgentBuilderPlugin
   private home: HomeServerPluginSetup | null = null;
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
+  private canEncryptSandboxProfiles = false;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -125,6 +137,18 @@ export class AgentBuilderPlugin
     );
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
+
+    // Sandbox Profiles are stored as Encrypted Saved Objects (secrets encrypted at
+    // rest). Local Kubernetes has no secret, but the field is encrypted from day
+    // one so secret-bearing providers can be added without an unsupported
+    // unencrypted->encrypted migration.
+    coreSetup.savedObjects.registerType(sandboxProfileSavedObjectType);
+    setupDeps.encryptedSavedObjects.registerType({
+      type: SANDBOX_PROFILE_SO_TYPE,
+      attributesToEncrypt: new Set(SANDBOX_PROFILE_ATTRIBUTES_TO_ENCRYPT),
+      attributesToIncludeInAAD: new Set(SANDBOX_PROFILE_ATTRIBUTES_IN_AAD),
+    });
+    this.canEncryptSandboxProfiles = setupDeps.encryptedSavedObjects.canEncrypt;
 
     setupDeps.workflowsExtensions.registerStepDefinition(
       getRunAgentStepDefinition(this.serviceManager)
@@ -228,6 +252,25 @@ export class AgentBuilderPlugin
       this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
     });
 
+    // Experimental OpenCode coding sub-agent executor. The tool itself is only
+    // registered when the opencodeSubagent UI setting is on; initializing the
+    // executor here is cheap and side-effect-free until invoked.
+    initOpencodeSubagentExecutor({
+      config: this.config.opencodeSubagent,
+      logger: this.logger.get('opencodeSubagent'),
+      esClient: elasticsearch.client.asInternalUser,
+      security,
+    });
+
+    // Request-scoped Sandbox Profile CRUD (Encrypted Saved Objects). Cheap to
+    // initialize; only used by the Sandboxes management page + agent attach.
+    initSandboxProfileProvider({
+      core: coreStart,
+      encryptedSavedObjects: startDeps.encryptedSavedObjects,
+      canEncrypt: this.canEncryptSandboxProfiles,
+      logger: this.logger.get('sandboxProfiles'),
+    });
+
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
@@ -299,6 +342,7 @@ export class AgentBuilderPlugin
   }
 
   async stop() {
+    await stopOpencodeSubagentExecutor();
     await this.teardownTracing?.();
   }
   /**

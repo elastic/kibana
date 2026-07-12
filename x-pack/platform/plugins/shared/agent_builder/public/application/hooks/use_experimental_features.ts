@@ -6,8 +6,19 @@
  */
 
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import {
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  AGENT_BUILDER_OPENCODE_SUBAGENT_SETTING_ID,
+} from '@kbn/management-settings-ids';
 
 export const useExperimentalFeatures = (): boolean => {
   return useUiSetting<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+};
+
+/**
+ * Whether the experimental coding sub-agent (Sandboxes) capability is enabled.
+ * Gates the Sandboxes management page and the per-agent sandbox attach section.
+ */
+export const useSandboxesEnabled = (): boolean => {
+  return useUiSetting<boolean>(AGENT_BUILDER_OPENCODE_SUBAGENT_SETTING_ID);
 };

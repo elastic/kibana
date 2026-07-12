@@ -7,6 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import { getSkillsInstructions } from './utils/skills';
 import { getConversationAttachmentsSection } from '../utils/attachment_presentation';
 import { convertPreviousRounds } from '../utils/to_langchain_messages';
@@ -63,8 +64,17 @@ const getAgentSystemMessage = async ({
   experimentalFeatures,
   capabilities,
   renderers,
+  toolManager,
 }: ResearchAgentPromptParams): Promise<string> => {
   const visEnabled = capabilities.visualizations;
+  // The coding sub-agent tool is now registered per-agent (only when a Sandbox
+  // Profile is attached). Surface rule #7 only when the tool is actually present,
+  // so agents without a sandbox aren't told to delegate to a tool they lack.
+  const hasCodingSubagent =
+    experimentalFeatures.opencodeSubagent &&
+    // getToolIdMapping maps langchain tool name -> internal tool id; the coding
+    // sub-agent's internal id is the value we look for.
+    [...toolManager.getToolIdMapping().values()].includes(internalTools.runOpencodeSubagent);
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -92,7 +102,12 @@ When choosing which tool to use, follow this precedence (stop at first applicabl
 3. Prefer specialized tools: use the most targeted tool available for the task — a precise tool produces better results than a general one.
 4. Prefer search over structural inspection: do not use index or schema inspection tools just to discover where data lives — a search tool can find it directly. Reserve inspection tools for when the user explicitly asks about index structure or field metadata, or when no search tool is available.
 5. Follow up before asking: if initial results do not fully answer the question, issue targeted follow-up tool calls rather than asking the user for more information.
-6. Adapt gracefully: if a tool is unavailable or returns an error, re-evaluate and continue with the remaining available tools.
+6. Adapt gracefully: if a tool is unavailable or returns an error, re-evaluate and continue with the remaining available tools.${
+    hasCodingSubagent
+      ? `
+7. Delegate coding to the coding sub-agent: if the request involves writing, generating, editing, or running code or scripts (any language), cloning or investigating a repository, reproducing or fixing a bug in code, or opening a pull request, you MUST use the \`run_opencode_subagent\` tool. Do NOT satisfy such requests by printing code or step-by-step instructions for the user to run themselves, and do NOT use \`run_subagent\` or \`bash\` for them — \`run_opencode_subagent\` is a real sandboxed coding environment that actually writes and executes the code and returns real output.`
+      : ''
+  }
 
 ## REFLECTION
 Before each tool call, assess whether your current approach is making progress:

@@ -16,6 +16,9 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { ScopedRunner } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import { createSubagentTool } from './run_subagent';
+import { createOpencodeSubagentTool } from './run_opencode_subagent';
+import { getOpencodeSubagentExecutor } from '../../opencode_subagent';
+import { resolveProfileWithSecrets } from '../../../sandboxes';
 import { createSleepTool } from './sleep';
 import { createLoadSkillTool } from './load_skill';
 import { createAskUserQuestionTool } from './ask_user_question';
@@ -33,6 +36,13 @@ export interface RegisterInternalToolsParams {
   capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
   backgroundExecutionService: BackgroundExecutionService;
+  /**
+   * Sandbox Profile attached to the agent (from its configuration). When set (and
+   * the coding sub-agent capability is enabled), the agent gets the OpenCode
+   * coding sub-agent running in that profile's sandbox. When absent, the agent
+   * has no coding sub-agent — it behaves as a normal Agent Builder agent.
+   */
+  sandboxProfileId?: string;
 }
 
 /**
@@ -47,6 +57,7 @@ export const registerInternalTools = async ({
   capabilities,
   abortSignal,
   backgroundExecutionService,
+  sandboxProfileId,
 }: RegisterInternalToolsParams): Promise<void> => {
   const {
     toolManager,
@@ -61,6 +72,7 @@ export const registerInternalTools = async ({
     filesystemService,
     bashService,
     todoStateManager,
+    spaceId,
   } = context;
 
   const interactive = executionMode !== AgentExecutionMode.standalone;
@@ -93,6 +105,44 @@ export const registerInternalTools = async ({
       })
     );
     tools.push(createSleepTool());
+  }
+
+  // OpenCode coding sub-agent — experimental, per-agent, not in standalone mode.
+  //
+  // Gating is now PER AGENT: the tool is only registered when the capability is
+  // enabled AND this agent has a resolvable Sandbox Profile attached. An agent
+  // with no profile behaves as a normal Agent Builder agent (no coding sub-agent),
+  // even if the capability flag is globally on. The resolved profile (with
+  // secrets) is bound to the tool so the run uses the agent's own sandbox.
+  if (experimentalFeatures.opencodeSubagent && interactive && sandboxProfileId) {
+    const opencodeExecutor = getOpencodeSubagentExecutor();
+    if (!opencodeExecutor) {
+      logger.warn(
+        'opencodeSubagent feature is enabled but the executor is not initialized; skipping run_opencode_subagent tool'
+      );
+    } else {
+      try {
+        const profile = await resolveProfileWithSecrets(sandboxProfileId, { namespace: spaceId });
+        if (profile) {
+          // The executor mints a per-run, privilege-scoped API key (on behalf of
+          // the requesting user) for the sandbox's MCP loopback, so no static
+          // credential is threaded here. See McpAuthMinter.
+          tools.push(createOpencodeSubagentTool({ executor: opencodeExecutor, profile }));
+        } else {
+          logger.warn(
+            `Agent ${
+              agentId ?? 'unknown'
+            } references sandbox profile ${sandboxProfileId} which was not found; skipping coding sub-agent`
+          );
+        }
+      } catch (e) {
+        logger.warn(
+          `Failed to resolve sandbox profile ${sandboxProfileId} for agent ${
+            agentId ?? 'unknown'
+          }: ${(e as Error).message}`
+        );
+      }
+    }
   }
 
   // ask_user_question — not available in standalone mode.

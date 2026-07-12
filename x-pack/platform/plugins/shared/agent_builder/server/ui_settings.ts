@@ -12,6 +12,7 @@ import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_OPENCODE_SUBAGENT_SETTING_ID,
   AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID,
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
@@ -61,6 +62,20 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       }),
       name: i18n.translate('xpack.agentBuilder.uiSettings.bashSupport.name', {
         defaultMessage: 'Elastic Agent Builder: Bash Tool',
+      }),
+      schema: schema.boolean(),
+      value: false,
+      experimental: true,
+      requiresPageReload: false,
+      readonly: false,
+    },
+    [AGENT_BUILDER_OPENCODE_SUBAGENT_SETTING_ID]: {
+      description: i18n.translate('xpack.agentBuilder.uiSettings.opencodeSubagent.description', {
+        defaultMessage:
+          'Enables the experimental OpenCode coding sub-agent for Elastic Agent Builder. Delegates coding tasks to a sandboxed OpenCode agent over ACP. Disabled by default; intended for controlled experimentation.',
+      }),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.opencodeSubagent.name', {
+        defaultMessage: 'Elastic Agent Builder: OpenCode Sub-agent',
       }),
       schema: schema.boolean(),
       value: false,

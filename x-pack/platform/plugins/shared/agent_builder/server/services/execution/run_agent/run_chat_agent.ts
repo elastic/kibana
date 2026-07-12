@@ -202,6 +202,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     capabilities,
     abortSignal,
     backgroundExecutionService,
+    sandboxProfileId: agentConfiguration.sandbox_profile_id,
   });
 
   // Then add dynamic tools

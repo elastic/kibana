@@ -141,5 +141,6 @@ export const agentFormSchema = z.object({
     enable_elastic_capabilities: z.boolean().optional(),
     workflow_ids: z.array(z.string()).optional(),
     plugin_ids: z.array(z.string()).optional(),
+    sandbox_profile_id: z.string().optional(),
   }),
 });

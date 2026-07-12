@@ -22,7 +22,11 @@ export type AgentUpdateRequest = Partial<
   Pick<AgentDefinition, 'name' | 'description' | 'labels' | 'avatar_color' | 'avatar_symbol'>
 > & {
   access_control?: Pick<AgentAccessControl, 'access_mode'>;
-  configuration?: Partial<AgentConfiguration>;
+  // `sandbox_profile_id: null` explicitly detaches the sandbox (JSON drops
+  // `undefined`, so `null` is the wire signal for "clear this field").
+  configuration?: Partial<Omit<AgentConfiguration, 'sandbox_profile_id'>> & {
+    sandbox_profile_id?: string | null;
+  };
 };
 
 export type AgentDeleteRequest = Pick<AgentDefinition, 'id'>;

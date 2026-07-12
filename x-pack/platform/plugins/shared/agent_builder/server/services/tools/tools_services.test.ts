@@ -9,6 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
 import { ToolsService } from './tools_service';
 import { createMockedBuiltinTool } from '../../test_utils/tools';
+import { createMockConfig } from '../../test_utils/config';
 
 jest.mock('@kbn/agent-builder-server/allow_lists');
 
@@ -35,16 +36,7 @@ describe('ToolsService', () => {
 
       const serviceSetup = service.setup({
         logger,
-        config: {
-          enabled: true,
-          githubBaseUrl: 'https://github.com',
-          topSnippets: { numSnippets: 2, numWords: 750 },
-          tracing: {
-            exporters: [],
-            scheduledDelay: 1000,
-            opik_distributed_tracing: false,
-          },
-        },
+        config: createMockConfig(),
       });
 
       expect(() => serviceSetup.register(createMockedBuiltinTool())).not.toThrow();
@@ -55,16 +47,7 @@ describe('ToolsService', () => {
 
       const serviceSetup = service.setup({
         logger,
-        config: {
-          enabled: true,
-          githubBaseUrl: 'https://github.com',
-          topSnippets: { numSnippets: 2, numWords: 750 },
-          tracing: {
-            exporters: [],
-            scheduledDelay: 1000,
-            opik_distributed_tracing: false,
-          },
-        },
+        config: createMockConfig(),
       });
 
       expect(() => serviceSetup.register(createMockedBuiltinTool()))

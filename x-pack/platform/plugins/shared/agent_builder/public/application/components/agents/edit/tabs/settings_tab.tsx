@@ -46,6 +46,8 @@ import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_ser
 import { useKibana } from '../../../../hooks/use_kibana';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
 import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
+import { useSandboxesEnabled } from '../../../../hooks/use_experimental_features';
+import { AgentSandboxSection } from './agent_sandbox_section';
 import { ACCESS_CONTROL_MODE_LABELS } from '../../../../utils/access_control_mode_i18n';
 import type { AgentFormData } from '../agent_form';
 import { truncateAvatarSymbol } from '../agent_form_validation';
@@ -90,6 +92,8 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   const showAgentWorkflowsSection = useMemo(() => {
     return isPreExecutionWorkflowEnabled(uiSettings);
   }, [uiSettings]);
+
+  const showSandboxSection = useSandboxesEnabled();
 
   /* Enable shrinking; default min-width:auto blocks it and causes overflow */
   const formFlexColumnStyles = css`
@@ -811,6 +815,17 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </>
+      )}
+
+      {showSandboxSection && (
+        <>
+          <EuiHorizontalRule />
+          <AgentSandboxSection
+            control={control}
+            isFormDisabled={isFormDisabled}
+            formFlexColumnStyles={formFlexColumnStyles}
+          />
         </>
       )}
     </>

@@ -90,6 +90,7 @@ export const attachmentTools = {
 
 export const internalTools = {
   runSubagent: 'run_subagent',
+  runOpencodeSubagent: 'run_opencode_subagent',
   sleep: 'sleep',
   writeTodos: 'write_todos',
   loadSkill: 'load_skill',

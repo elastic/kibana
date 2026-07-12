@@ -41,6 +41,8 @@ const toolDescription = `Start a sub-agent to perform a specific task.
 
 The sub-agent runs with the same configuration as the current agent. Use this to delegate complex sub-tasks.
 
+Do NOT use this tool for coding work — writing, editing, or running code or scripts, cloning or investigating a repository, fixing a bug in code, or opening a pull request. This sub-agent has no filesystem, shell, or git and cannot actually run code. For any such task use the \`run_opencode_subagent\` tool instead (a real sandboxed coding environment).
+
 The effort level will be used to select the model - "low" means a faster and smaller model, "high" means a slower and more powerful model. Choose accordingly.
 
 ## Writing the prompt

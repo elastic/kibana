@@ -19,6 +19,7 @@
       "dataViews",
       "embeddable",
       "uiActions",
+      "encryptedSavedObjects",
       "esql",
       "features",
       "inference",

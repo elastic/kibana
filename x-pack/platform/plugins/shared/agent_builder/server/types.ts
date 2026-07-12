@@ -32,6 +32,10 @@ import type {
   AgentContextLayerPluginSetup,
   AgentContextLayerPluginStart,
 } from '@kbn/agent-context-layer-plugin/server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 
 export type {
   AgentBuilderPluginSetup,
@@ -66,6 +70,7 @@ export interface AgentBuilderSetupDependencies {
   home: HomeServerPluginSetup;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
   agentContextLayer: AgentContextLayerPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface AgentBuilderStartDependencies {
@@ -79,4 +84,5 @@ export interface AgentBuilderStartDependencies {
   security?: SecurityPluginStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   agentContextLayer: AgentContextLayerPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }

@@ -20,6 +20,7 @@ export const appPaths = {
     plugins: ({ agentId }: { agentId: string }) => `/agents/${agentId}/plugins`,
     tools: ({ agentId }: { agentId: string }) => `/agents/${agentId}/tools`,
     connectors: ({ agentId }: { agentId: string }) => `/agents/${agentId}/connectors`,
+    sandbox: ({ agentId }: { agentId: string }) => `/agents/${agentId}/sandbox`,
     overview: ({ agentId }: { agentId: string }) => `/agents/${agentId}/overview`,
   },
 
@@ -38,6 +39,7 @@ export const appPaths = {
     plugins: '/manage/plugins',
     pluginDetails: ({ pluginId }: { pluginId: string }) => `/manage/plugins/${pluginId}`,
     connectors: '/manage/connectors',
+    sandboxes: '/manage/sandboxes',
     mcpClients: '/manage/tools/mcp_clients',
     mcpClientCreate: '/manage/tools/mcp_clients/new',
   },

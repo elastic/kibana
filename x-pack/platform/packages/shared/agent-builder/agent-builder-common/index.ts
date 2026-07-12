@@ -295,3 +295,18 @@ export {
   OAuthClientType,
 } from './oauth_clients';
 export { MCP_SERVER_PATH } from './mcp';
+export {
+  type SandboxProviderId,
+  type SandboxRuntimeId,
+  type LocalK8sConnection,
+  type CloudRunConnection,
+  type SandboxConnection,
+  type SandboxPolicy,
+  type OpencodeRuntimeConfig,
+  type SandboxRuntimeConfig,
+  type SandboxProfile,
+  type SandboxProfileCreateRequest,
+  type SandboxProfileUpdateRequest,
+  DEFAULT_SANDBOX_POLICY,
+  CLOUD_RUN_SA_SECRET_KEY,
+} from './sandboxes';

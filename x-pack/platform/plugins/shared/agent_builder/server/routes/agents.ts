@@ -72,6 +72,17 @@ const CONNECTORS_SCHEMA = schema.arrayOf(
   }
 );
 
+const SANDBOX_PROFILE_ID_SCHEMA = schema.string({
+  meta: {
+    description:
+      'Optional id of the Sandbox Profile attached to this agent (experimental). Gives the agent a coding sub-agent that runs in the profile\u2019s isolated sandbox.',
+  },
+});
+
+// On update only, `null` explicitly detaches the sandbox (JSON drops
+// `undefined`, so `null` is the wire signal for "clear this field").
+const SANDBOX_PROFILE_ID_UPDATE_SCHEMA = schema.nullable(SANDBOX_PROFILE_ID_SCHEMA);
+
 const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
   [
     schema.literal(AgentAccessControlMode.Public),
@@ -292,6 +303,7 @@ export function registerAgentRoutes({
                   ),
                   plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                   connector_ids: schema.maybe(CONNECTORS_SCHEMA),
+                  sandbox_profile_id: schema.maybe(SANDBOX_PROFILE_ID_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -422,6 +434,7 @@ export function registerAgentRoutes({
                     ),
                     plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                     connector_ids: schema.maybe(CONNECTORS_SCHEMA),
+                    sandbox_profile_id: schema.maybe(SANDBOX_PROFILE_ID_UPDATE_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },

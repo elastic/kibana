@@ -25,6 +25,8 @@ import { registerPluginsRoutes } from './plugins';
 import { registerInternalExecutionRoutes } from './internal/executions';
 import { registerAccessPrincipalsRoutes } from './internal/access_principals';
 import { registerWorkspaceFileRoutes } from './internal/workspace_files';
+import { registerInternalSandboxRoutes } from './internal/sandboxes';
+import { registerInternalSandboxProfileRoutes } from './internal/sandbox_profiles';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
@@ -46,4 +48,6 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerInternalExecutionRoutes(dependencies);
   registerAccessPrincipalsRoutes(dependencies);
   registerWorkspaceFileRoutes(dependencies);
+  registerInternalSandboxRoutes(dependencies);
+  registerInternalSandboxProfileRoutes(dependencies);
 };

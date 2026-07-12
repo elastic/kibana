@@ -17,6 +17,7 @@ export const agentBuilderViewIds = {
   agentPlugins: 'agent_builder_agent_plugins',
   agentConnectors: 'agent_builder_agent_connectors',
   agentTools: 'agent_builder_agent_tools',
+  agentSandbox: 'agent_builder_agent_sandbox',
   manageAgents: 'agent_builder_manage_agents',
   manageAgentCreate: 'agent_builder_manage_agents_create',
   manageAgentEdit: 'agent_builder_manage_agents_edit',
@@ -32,4 +33,5 @@ export const agentBuilderViewIds = {
   manageToolDetails: 'agent_builder_manage_tools_detail',
   manageMcpClients: 'agent_builder_manage_mcp_clients',
   manageMcpClientCreate: 'agent_builder_manage_mcp_clients_create',
+  manageSandboxes: 'agent_builder_manage_sandboxes',
 } as const;

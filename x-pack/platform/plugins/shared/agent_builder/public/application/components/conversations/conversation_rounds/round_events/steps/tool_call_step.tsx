@@ -32,6 +32,7 @@ import { JsonCodeBlock } from '../json_code_block';
 import { ToolResult, isInlineRenderableResult } from '../results/tool_result';
 import { ToolResponseFlyout } from '../flyouts/tool_response_flyout';
 import { SubAgentExecutionFlyout } from '../flyouts/sub_agent_execution_flyout';
+import { OpencodeSubagentStep, isOpencodeSubagentStep } from './opencode_subagent_step';
 
 const labels = {
   toolCall: i18n.translate('xpack.agentBuilder.roundEvents.steps.toolCall.ariaLabel', {
@@ -60,6 +61,12 @@ export const ToolCallStep: React.FC<ToolCallStepProps> = ({ step }) => {
   const onToggle = () => setIsExpanded((v) => !v);
 
   const hasResults = step.results.length > 0;
+
+  // OpenCode coding sub-agent gets a dedicated, always-expanded card with a live
+  // activity timeline and a rendered final response (Cursor-style).
+  if (isOpencodeSubagentStep(step)) {
+    return <OpencodeSubagentStep step={step} />;
+  }
 
   return (
     <StepLayout

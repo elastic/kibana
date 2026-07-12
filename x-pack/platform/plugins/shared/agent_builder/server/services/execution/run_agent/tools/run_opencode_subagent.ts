@@ -1,0 +1,209 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+import { ToolType, platformCoreTools } from '@kbn/agent-builder-common';
+import { internalTools } from '@kbn/agent-builder-common/tools';
+import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
+import {
+  createErrorResult,
+  createOtherResult,
+  getAgentFromRunContext,
+} from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { getConnectorSpec } from '@kbn/connector-specs';
+import type { SandboxProfile } from '@kbn/agent-builder-common';
+import type { OpencodeSubagentExecutor } from '../../opencode_subagent/executor';
+
+/**
+ * Build a plain-text briefing of the connectors currently attached to the
+ * conversation, so the OpenCode sub-agent knows which connectorId + sub-actions
+ * it can call over MCP (via platform.core.execute_connector_sub_action) WITHOUT
+ * the user having to spell out ids/sub-actions in the prompt.
+ *
+ * This mirrors the connector attachment representation the parent agent already
+ * sees; we surface it to the sub-agent because it runs in its own session.
+ */
+const buildConnectorContext = (attachments: AttachmentStateManager): string => {
+  const toolId = platformCoreTools.executeConnectorSubAction;
+  const connectorAttachments = attachments
+    .getActive()
+    .filter((a) => a.type === AttachmentType.connector);
+
+  if (connectorAttachments.length === 0) return '';
+
+  const blocks: string[] = [];
+  for (const attachment of connectorAttachments) {
+    const data = getLatestVersion(attachment)?.data as ConnectorAttachmentData | undefined;
+    if (!data) continue;
+    const {
+      connector_id: connectorId,
+      connector_name: connectorName,
+      connector_type: connectorType,
+    } = data;
+    const spec = getConnectorSpec(connectorType);
+    const subActions = spec
+      ? Object.entries(spec.actions)
+          .filter(([, action]) => action.isTool)
+          .map(([name, action]) => `  - ${name}: ${action.description ?? name}`)
+      : [];
+
+    const lines = [
+      `Connector: ${connectorName} (${connectorType})`,
+      `Connector ID: ${connectorId}`,
+    ];
+    if (subActions.length > 0) {
+      lines.push('Available sub-actions:', ...subActions);
+    }
+    blocks.push(lines.join('\n'));
+  }
+
+  if (blocks.length === 0) return '';
+
+  return [
+    '## Available Kibana connectors',
+    '',
+    `You can call these connectors through the agent_builder MCP tool "${toolId}".`,
+    `Invoke it with JSON {"connectorId":"<id below>","subAction":"<sub-action>","params":{ ... }}.`,
+    'Kibana holds the credentials and makes the external call; you never see the secret.',
+    '',
+    ...blocks,
+  ].join('\n');
+};
+
+export const OpencodeSubagentToolName = internalTools.runOpencodeSubagent;
+
+const schema = z.object({
+  description: z.string().describe('A short (3-5 word) description of the coding task'),
+  prompt: z
+    .string()
+    .describe(
+      'The coding task for the OpenCode sub-agent to perform. Include repository, the problem to investigate or fix, and what output you expect (e.g. a PR, a patch summary, a root-cause explanation).'
+    ),
+});
+
+const toolDescription = `Delegate ANY task that involves writing, running, or reasoning about code to a sandboxed OpenCode sub-agent.
+
+ALWAYS use this tool (instead of just describing steps to the user) when the user
+asks you to:
+- write / create / generate code or a script (any language)
+- run or execute code and report the output
+- clone a repository and investigate or fix a bug
+- apply a change and open a pull request
+Do NOT answer coding requests by printing instructions for the user to run
+themselves — actually delegate the work here and relay the real result.
+
+The OpenCode sub-agent runs inside an isolated Kubernetes sandbox with git and a
+full coding toolchain (Node.js, git, ripgrep). Its network egress is locked
+down: it can reach this Kibana's tools (Agent Builder MCP), the model gateway,
+and GitHub — nothing else. Note: only Node.js is guaranteed to be installed, so
+prefer JavaScript/TypeScript for "run this" tasks unless a repo brings its own
+toolchain.
+
+Because it is wired back into Agent Builder over MCP, the OpenCode sub-agent can
+call the SAME Kibana-aware tools you have (ES|QL, index mappings, cases,
+connectors, workflows, ...) WHILE it writes and runs code.
+
+## Writing the prompt
+
+Brief it like a smart engineer who just joined:
+- State the goal and why it matters.
+- Name the repository and any specific files/areas if you know them.
+- Share what you've already learned (e.g. the failing behaviour, relevant index
+  or log data you found via your own tools).
+- Say what deliverable you want back (root cause, a patch, a PR URL).
+
+## Usage notes
+
+- This runs a full sandboxed coding session; it can take several minutes.
+- When it's done it returns a single summary. Relay a concise version to the user.
+- The sub-agent's file changes live only in its sandbox unless it pushes/opens a PR.`;
+
+export const createOpencodeSubagentTool = ({
+  executor,
+  profile,
+}: {
+  executor: OpencodeSubagentExecutor;
+  /** The agent's attached Sandbox Profile (provider + runtime + policy). */
+  profile: SandboxProfile;
+}): BuiltinToolDefinition<typeof schema> => {
+  return {
+    id: OpencodeSubagentToolName,
+    description: toolDescription,
+    type: ToolType.builtin,
+    schema,
+    tags: ['subagent', 'coding'],
+    handler: async (
+      { description, prompt },
+      { events, runContext, spaceId, request, attachments }
+    ) => {
+      try {
+        // Prepend any attached connectors so the sub-agent can use them by id
+        // without the user spelling out connectorId/subAction. The parent agent
+        // discovers connectors via SML (sml_search/sml_attach); this forwards
+        // that context into the sub-agent's separate session.
+        const connectorContext = buildConnectorContext(attachments);
+        const fullPrompt = connectorContext
+          ? `${description}\n\n${connectorContext}\n\n---\n\n${prompt}`
+          : `${description}\n\n${prompt}`;
+
+        const agentCtx = getAgentFromRunContext(runContext);
+
+        const result = await executor.execute({
+          prompt: fullPrompt,
+          request,
+          profile,
+          runContext: {
+            conversationId: agentCtx?.conversationId,
+            agentId: agentCtx?.agentId,
+            executionId: agentCtx?.executionId,
+            spaceId,
+          },
+          onProgress: (progress) => {
+            // Stream each activity item to the UI. Metadata values must be
+            // strings, so the full structured item (id, phase, status, command,
+            // output, todos, ...) is serialized under `item`; the UI parses it
+            // and upserts by id for a live, Cursor-style activity feed.
+            events.reportProgress(progress.label, {
+              metadata: {
+                opencode_subagent: 'true',
+                item: JSON.stringify(progress),
+              },
+            });
+          },
+        });
+
+        if (result.status === 'error') {
+          return {
+            results: [createErrorResult(`OpenCode sub-agent failed: ${result.error}`)],
+          };
+        }
+
+        return {
+          results: [
+            createOtherResult({
+              opencode_subagent: true,
+              status: 'completed',
+              run_id: result.runId,
+              stop_reason: result.stopReason,
+              timeline: result.timeline,
+              tool_calls: result.toolCalls,
+              response: result.answer,
+            }),
+          ],
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return {
+          results: [createErrorResult(`OpenCode sub-agent execution failed: ${message}`)],
+        };
+      }
+    },
+  };
+};

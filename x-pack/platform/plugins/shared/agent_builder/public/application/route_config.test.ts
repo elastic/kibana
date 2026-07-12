@@ -17,7 +17,7 @@ import {
 } from './route_config';
 
 const allEnabled: RouteAccessConfig = {
-  featureFlags: { experimental: true, uiamOAuthClientManagement: true },
+  featureFlags: { experimental: true, uiamOAuthClientManagement: true, sandboxes: true },
   capabilities: { isUIAMEnabled: true },
 };
 const enabledRoutesWithExperimental = getEnabledRoutes(allEnabled);
@@ -192,7 +192,7 @@ describe('route_config', () => {
       uiamOAuthClientManagement: boolean,
       isUIAMEnabled: boolean
     ): RouteAccessConfig => ({
-      featureFlags: { experimental: true, uiamOAuthClientManagement },
+      featureFlags: { experimental: true, uiamOAuthClientManagement, sandboxes: false },
       capabilities: { isUIAMEnabled },
     });
 
@@ -216,7 +216,7 @@ describe('route_config', () => {
       expect(
         findMcpRoute(
           getEnabledRoutes({
-            featureFlags: { experimental: false, uiamOAuthClientManagement: true },
+            featureFlags: { experimental: false, uiamOAuthClientManagement: true, sandboxes: false },
             capabilities: { isUIAMEnabled: true },
           })
         )

@@ -332,6 +332,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       datasets: false,
       askUserQuestion: false,
       bash: false,
+      opencodeSubagent: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -389,6 +390,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       datasets: false,
       askUserQuestion: false,
       bash: false,
+      opencodeSubagent: false,
     },
   };
 };
@@ -439,6 +441,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       datasets: false,
       askUserQuestion: false,
       bash: false,
+      opencodeSubagent: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),

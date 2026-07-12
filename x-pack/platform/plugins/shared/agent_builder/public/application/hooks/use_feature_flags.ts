@@ -7,14 +7,15 @@
 
 import { useMemo } from 'react';
 import type { FeatureFlags } from '../route_config';
-import { useExperimentalFeatures } from './use_experimental_features';
+import { useExperimentalFeatures, useSandboxesEnabled } from './use_experimental_features';
 import { useUiamOAuthClientManagement } from './use_uiam_oauth_client_management';
 
 export const useFeatureFlags = (): FeatureFlags => {
   const experimental = useExperimentalFeatures();
   const uiamOAuthClientManagement = useUiamOAuthClientManagement();
+  const sandboxes = useSandboxesEnabled();
   return useMemo(
-    () => ({ experimental, uiamOAuthClientManagement }),
-    [experimental, uiamOAuthClientManagement]
+    () => ({ experimental, uiamOAuthClientManagement, sandboxes }),
+    [experimental, uiamOAuthClientManagement, sandboxes]
   );
 };

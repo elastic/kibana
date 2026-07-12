@@ -10,6 +10,7 @@ import type {
   ToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import { isToolCallStep, isTodosStep } from '@kbn/agent-builder-common/chat/conversation';
+import { isOpencodeSubagentStep } from './steps/opencode_subagent_step';
 
 export type GroupedStep =
   | { kind: 'step'; step: ConversationRoundStep; index: number }
@@ -29,7 +30,14 @@ export const groupSteps = (steps: ConversationRoundStep[]): GroupedStep[] => {
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
     if (isToolCallStep(step)) {
-      toolBuffer.push(step);
+      // OpenCode sub-agent steps render as a prominent standalone card, not
+      // buried inside a collapsed "N tools" group.
+      if (isOpencodeSubagentStep(step)) {
+        flushBuffer();
+        result.push({ kind: 'step', step, index: i });
+      } else {
+        toolBuffer.push(step);
+      }
     } else if (!isTodosStep(step)) {
       flushBuffer();
       result.push({ kind: 'step', step, index: i });

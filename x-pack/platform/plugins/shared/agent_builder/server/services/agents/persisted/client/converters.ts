@@ -58,6 +58,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
       workflow_ids: configuration.workflow_ids,
       plugin_ids: configuration.plugin_ids,
       connector_ids: configuration.connector_ids,
+      sandbox_profile_id: configuration.sandbox_profile_id,
     },
   };
 };
@@ -95,6 +96,7 @@ export const createRequestToEs = ({
       workflow_ids: profile.configuration.workflow_ids,
       plugin_ids: profile.configuration.plugin_ids,
       connector_ids: profile.configuration.connector_ids,
+      sandbox_profile_id: profile.configuration.sandbox_profile_id,
     },
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
@@ -125,6 +127,22 @@ export const updateRequestToEs = ({
     ...restCurrentProps
   } = currentProps;
 
+  // A `null` sandbox_profile_id means "detach": strip it so the persisted config
+  // drops the field (JSON drops `undefined`, so the client sends explicit `null`
+  // to clear). `restConfiguration` is then free of the nullable field.
+  const detachSandbox = configuration?.sandbox_profile_id === null;
+  const { sandbox_profile_id: _incomingSandboxId, ...restConfiguration } = configuration ?? {};
+  const mergedConfig: AgentConfigurationProperties = {
+    ...currentConfig,
+    ...restConfiguration,
+    ...(detachSandbox || _incomingSandboxId == null
+      ? {}
+      : { sandbox_profile_id: _incomingSandboxId }),
+  };
+  if (detachSandbox) {
+    delete mergedConfig.sandbox_profile_id;
+  }
+
   const updated: AgentProperties = {
     ...restCurrentProps,
     ...restUpdate,
@@ -132,10 +150,7 @@ export const updateRequestToEs = ({
     access_control: access_control
       ? { ...currentAccessControl, access_mode: access_control.access_mode }
       : currentAccessControl,
-    config: {
-      ...currentConfig,
-      ...configuration,
-    },
+    config: mergedConfig,
     updated_at: updateDate.toISOString(),
   };
 

@@ -116,6 +116,14 @@ export interface AgentConfiguration {
    * When undefined, all connectors remain visible (backward compatibility).
    */
   connector_ids?: string[];
+
+  /**
+   * Optional id of the Sandbox Profile attached to this agent (experimental).
+   * When set (and the coding sub-agent capability is enabled), the agent gains a
+   * coding sub-agent that runs in the profile's isolated sandbox. When undefined,
+   * the agent behaves as a normal Agent Builder agent with no coding sub-agent.
+   */
+  sandbox_profile_id?: string;
 }
 
 /**

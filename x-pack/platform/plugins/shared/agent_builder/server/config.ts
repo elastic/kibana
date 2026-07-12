@@ -33,6 +33,31 @@ export const configSchema = schema.object({
     opik_distributed_tracing: schema.boolean({ defaultValue: false }),
     scheduledDelay,
   }),
+  // Experimental OpenCode coding sub-agent. Delegates coding tasks to a
+  // sandboxed OpenCode agent driven over ACP inside a Kubernetes pod. This is a
+  // PoC: settings describe how to reach the local `kind` sandbox and the model
+  // gateway. Gated additionally by the opencodeSubagent UI setting.
+  opencodeSubagent: schema.object({
+    // How the executor reaches the sandbox. `kubectl` uses the k8s exec
+    // subresource to drive `opencode acp` over stdio inside a pod.
+    kubeContext: schema.string({ defaultValue: 'kind-opencode-sandbox' }),
+    namespace: schema.string({ defaultValue: 'opencode-sandbox' }),
+    image: schema.string({ defaultValue: 'opencode-sandbox:0.1' }),
+    // URL the sandbox pod uses to reach this Kibana's Agent Builder MCP server.
+    // From inside a kind pod on Docker Desktop this is the host gateway.
+    mcpUrl: schema.string({
+      defaultValue: 'http://host.docker.internal:5610/api/agent_builder/mcp',
+    }),
+    // Model gateway (LiteLLM) the sandboxed OpenCode talks to.
+    litellm: schema.object({
+      baseUrl: schema.string({ defaultValue: 'https://elastic.litellm-prod.ai/v1' }),
+      apiKey: schema.maybe(schema.string()),
+      orchestratorModel: schema.string({ defaultValue: 'llm-gateway/claude-sonnet-4-6' }),
+      coderModel: schema.string({ defaultValue: 'llm-gateway/gpt-5.3-codex' }),
+    }),
+    // Hard ceiling on a single sub-agent run before the pod is force-deleted.
+    maxRunSeconds: schema.number({ defaultValue: 1800, min: 60 }),
+  }),
 });
 
 export type AgentBuilderConfig = TypeOf<typeof configSchema>;

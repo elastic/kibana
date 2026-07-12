@@ -12,6 +12,7 @@ import { createPluginsService, type PluginsServiceStart } from './plugin_service
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import type { SkillClient } from '../skills/persisted/client';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
+import { createMockConfig } from '../../test_utils/config';
 
 const mockRandomUUID = jest.fn().mockReturnValue('test-plugin-uuid');
 jest.mock('crypto', () => ({
@@ -156,16 +157,7 @@ describe('PluginsService', () => {
       logger: loggerMock.create(),
       elasticsearch: mockElasticsearch as any,
       getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
-      config: {
-        enabled: true,
-        githubBaseUrl: 'https://github.com',
-        topSnippets: { numSnippets: 2, numWords: 750 },
-        tracing: {
-          exporters: [],
-          scheduledDelay: 1000,
-          opik_distributed_tracing: false,
-        },
-      },
+      config: createMockConfig(),
       analyticsService: mockAnalyticsService as unknown as AnalyticsService,
       trackingService: mockTrackingService as unknown as TrackingService,
     });
@@ -557,16 +549,7 @@ describe('PluginsService', () => {
             logger: loggerMock.create(),
             elasticsearch: mockElasticsearch as any,
             getToolRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
-            config: {
-              enabled: true,
-              githubBaseUrl: 'https://github.com',
-              topSnippets: { numSnippets: 2, numWords: 750 },
-              tracing: {
-                exporters: [],
-                scheduledDelay: 1000,
-                opik_distributed_tracing: false,
-              },
-            },
+            config: createMockConfig(),
             analyticsService: mockAnalyticsService as unknown as AnalyticsService,
           });
 
