@@ -11,7 +11,10 @@ import {
 } from '@kbn/cloud-security-posture-common/schema/graph/latest';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { GRAPH_ROUTE_PATH } from '../../../common/constants';
+import {
+  GRAPH_ROUTE_PATH,
+  GRAPH_INTEGRATION_ENRICHMENT_ENABLED_SETTING,
+} from '../../../common/constants';
 import type { CspRequestHandlerContext, CspRouter } from '../../types';
 import { getGraph as getGraphV1 } from './v1';
 
@@ -64,6 +67,11 @@ export const defineGraphRoute = (router: CspRouter) =>
           });
         }
 
+        const coreContext = await context.core;
+        const integrationEnrichmentEnabled = await coreContext.uiSettings.client.get<boolean>(
+          GRAPH_INTEGRATION_ENRICHMENT_ENABLED_SETTING
+        );
+
         try {
           const resp = await getGraphV1({
             services: {
@@ -83,6 +91,7 @@ export const defineGraphRoute = (router: CspRouter) =>
             },
             showUnknownTarget,
             nodesLimit,
+            integrationEnrichmentEnabled,
           });
 
           return response.ok({ body: resp });

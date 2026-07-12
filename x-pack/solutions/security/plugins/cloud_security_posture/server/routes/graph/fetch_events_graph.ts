@@ -46,6 +46,7 @@ interface BuildEsqlQueryParams {
   originAlertIds: OriginEventId[];
   alertsMappingsIncluded: boolean;
   pinnedIds?: string[];
+  integrationEnrichmentEnabled?: boolean;
 }
 
 /**
@@ -69,6 +70,7 @@ export const fetchEvents = async ({
   esQuery,
   pinnedIds,
   projectRouting,
+  integrationEnrichmentEnabled,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -81,6 +83,7 @@ export const fetchEvents = async ({
   esQuery?: EsQuery;
   pinnedIds?: string[];
   projectRouting?: ProjectRouting;
+  integrationEnrichmentEnabled?: boolean;
 }): Promise<EsqlToRecords<EventEsqlRow>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
@@ -118,6 +121,7 @@ export const fetchEvents = async ({
     originAlertIds,
     alertsMappingsIncluded,
     pinnedIds,
+    integrationEnrichmentEnabled,
   });
 
   logger.trace(
@@ -377,6 +381,7 @@ const buildEsqlQuery = ({
   originAlertIds,
   alertsMappingsIncluded,
   pinnedIds,
+  integrationEnrichmentEnabled,
 }: BuildEsqlQueryParams): string => {
   // TODO: switch back to LOAD once ES|QL supports accessing subfields of flattened-type
   // parents under unmapped_fields="LOAD" (currently throws verification_exception for fields
@@ -399,7 +404,11 @@ FROM ${indexPatterns
 // "long" (e.g. aws_bedrock.invocation) and LIKE type errors in aws_bedrock enrichment.
 // Safe across all 47 integrations — see NULLIFY_WORKAROUNDS.md for the mapping audit.
 | EVAL user.id = TO_STRING(user.id)
-${buildEnrichmentQuery({ skipColumns: ['host.ip', 'host.target.ip', 'host.target.port'] })}
+${
+  integrationEnrichmentEnabled !== false
+    ? buildEnrichmentQuery({ skipColumns: ['host.ip', 'host.target.ip', 'host.target.port'] })
+    : ''
+}
 ${buildV2ActorResolution()}
 | WHERE event.action IS NOT NULL AND actorEntityId IS NOT NULL
 ${buildV2TargetResolution()}
