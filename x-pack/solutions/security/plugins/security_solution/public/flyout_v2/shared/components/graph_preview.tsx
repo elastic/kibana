@@ -71,11 +71,18 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
 
     return isLoading ? (
       <LoadingComponent />
-    ) : isError || memoizedNodes.length === 0 ? (
+    ) : isError ? (
       <EuiPanel>
         <FormattedMessage
           id="xpack.securitySolution.flyout.visualizations.graphPreview.errorDescription"
           defaultMessage="An error is preventing this alert from being visualized."
+        />
+      </EuiPanel>
+    ) : memoizedNodes.length === 0 ? (
+      <EuiPanel>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.visualizations.graphPreview.emptyDescription"
+          defaultMessage="No graph nodes found for this alert."
         />
       </EuiPanel>
     ) : (
