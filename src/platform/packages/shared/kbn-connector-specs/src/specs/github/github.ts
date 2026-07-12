@@ -8,9 +8,11 @@
  */
 
 /**
- * GitHub MCP Connector (v2)
+ * GitHub Connector (v2)
  *
- * An MCP-native v2 connector that connects to the GitHub Copilot MCP server.
+ * Dual transport:
+ * - MCP plane (Agent Builder): GitHub Copilot MCP server for interactive discovery
+ * - GraphQL ingest plane (Workflows): GitHub GraphQL API for org-scale read-only ingest
  *
  * Auth: Bearer token (PAT or OAuth token)
  */
@@ -19,6 +21,12 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
+import {
+  executeRunQueryTemplate,
+  executeGraphQLViewer,
+  getTemplate,
+  listTemplates,
+} from './graphql';
 import type {
   CallToolInput,
   GetCommitInput,
@@ -30,9 +38,11 @@ import type {
   ListCommitsInput,
   ListIssuesInput,
   ListPullRequestsInput,
+  ListQueryTemplatesInput,
   ListReleasesInput,
   ListTagsInput,
   PullRequestReadInput,
+  RunQueryTemplateInput,
   SearchCodeInput,
   SearchIssuesInput,
   SearchPullRequestsInput,
@@ -60,9 +70,25 @@ import {
   GetIssueInputSchema,
   GetIssueCommentsInputSchema,
   CallToolInputSchema,
+  RunQueryTemplateInputSchema,
+  ListQueryTemplatesInputSchema,
 } from './types';
 
 const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
+
+const buildTemplateVariables = (
+  input: RunQueryTemplateInput,
+  isPaginated: boolean
+): Record<string, unknown> => {
+  const variables: Record<string, unknown> = { ...(input.variables ?? {}) };
+  if (isPaginated) {
+    variables.first = input.first ?? 50;
+    if (input.after !== undefined) {
+      variables.after = input.after;
+    }
+  }
+  return variables;
+};
 
 export const GithubConnector: ConnectorSpec = {
   metadata: {
@@ -125,11 +151,25 @@ export const GithubConnector: ConnectorSpec = {
             defaultMessage: 'The URL of the GitHub Copilot MCP server.',
           }),
         }),
+      graphqlApiUrl: UISchemas.url()
+        .default('https://api.github.com/graphql')
+        .describe('GitHub GraphQL API URL used by workflow ingest actions')
+        .meta({
+          widget: 'text',
+          placeholder: 'https://api.github.com/graphql',
+          label: i18n.translate('connectorSpecs.github.config.graphqlApiUrl.label', {
+            defaultMessage: 'GraphQL API URL',
+          }),
+          helpText: i18n.translate('connectorSpecs.github.config.graphqlApiUrl.helpText', {
+            defaultMessage:
+              'GitHub GraphQL endpoint for read-only ingest actions. Override for GitHub Enterprise Server.',
+          }),
+        }),
     })
   ),
 
   validateUrls: {
-    fields: ['serverUrl'],
+    fields: ['serverUrl', 'graphqlApiUrl'],
   },
 
   actions: {
@@ -398,21 +438,63 @@ export const GithubConnector: ConnectorSpec = {
         return callToolContent(ctx, input.name, input.arguments);
       },
     },
+
+    runQueryTemplate: {
+      isTool: false,
+      description:
+        'Run a named read-only GitHub GraphQL query template for workflow ingest. Returns a normalized result with data (node array), pageInfo, rateLimit, and shouldBackoff. Use listQueryTemplates to discover available templates.',
+      input: RunQueryTemplateInputSchema,
+      handler: async (ctx, input: RunQueryTemplateInput) => {
+        const template = getTemplate(input.templateId);
+        // Pre-flight: validate template-specific variables before any network call
+        const parsed = template.variablesSchema.safeParse(input.variables ?? {});
+        if (!parsed.success) {
+          const issues = parsed.error.issues
+            .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+            .join('; ');
+          throw new Error(
+            `Variable validation failed for template "${input.templateId}": ${issues}`
+          );
+        }
+        const variables = buildTemplateVariables(input, template.isPaginated);
+        return executeRunQueryTemplate({ ctx, template, variables });
+      },
+    },
+
+    listQueryTemplates: {
+      isTool: false,
+      description:
+        'List available read-only GitHub GraphQL query templates for use with runQueryTemplate. Returns template IDs and descriptions.',
+      input: ListQueryTemplatesInputSchema,
+      handler: async (_ctx, _input: ListQueryTemplatesInput) => {
+        return { templates: listTemplates() };
+      },
+    },
   },
 
   test: {
     description: i18n.translate('connectorSpecs.github.test.description', {
       defaultMessage:
-        'Verifies connection to the GitHub Copilot MCP server by listing available tools.',
+        'Verifies MCP connectivity and GitHub GraphQL API access for ingest workflows.',
     }),
     handler: async (ctx) => {
-      return withMcpClient(ctx, async (mcp) => {
+      const mcpToolCount = await withMcpClient(ctx, async (mcp) => {
         const { tools } = await mcp.listTools();
-        return {
-          ok: true,
-          message: `Connected to GitHub MCP server. ${tools.length} tools available.`,
-        };
+        return tools.length;
       });
+
+      const { login } = await executeGraphQLViewer({ ctx });
+
+      return {
+        ok: true,
+        message: i18n.translate('connectorSpecs.github.test.successMessage', {
+          defaultMessage:
+            'Connected to GitHub MCP ({mcpToolCount} tools) and GraphQL API (viewer: {login}).',
+          values: { mcpToolCount, login },
+        }),
+        mcpToolCount,
+        graphqlViewer: login,
+      };
     },
   },
 
@@ -422,6 +504,7 @@ export const GithubConnector: ConnectorSpec = {
     '- For broad discovery: use search* actions (searchCode, searchRepositories, searchIssues, searchPullRequests, searchUsers).',
     '- For browsing a specific repo: use list* actions (listIssues, listPullRequests, listCommits, listBranches, listReleases, listTags). All use cursor-based pagination via "first" + "after".',
     '- For specific details: use get* actions (getIssue, getIssueComments, pullRequestRead, getCommit, getLatestRelease, getFileContents).',
+    '- For workflow ingest at org scale: use runQueryTemplate (orgCatalog.*, activity.*, graph.*) and listQueryTemplates to discover templates. These actions are workflow primitives — not exposed to agents.',
     '- For capabilities not yet exposed as named actions: listTools to discover, callTool to invoke.',
   ].join('\n'),
 };
