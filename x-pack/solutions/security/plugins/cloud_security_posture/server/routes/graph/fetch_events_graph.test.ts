@@ -79,7 +79,7 @@ describe('fetchEvents', () => {
     // CASE has a preserve branch "user.id IS NOT NULL, user.id" that returns long, while all
     // other branches return keyword strings — causing "argument of [CASE] must be [long]".
     // The fix: emit "| EVAL user.id = TO_STRING(user.id)" before buildEnrichmentQuery() runs.
-    fetchEvents({
+    void fetchEvents({
       esClient,
       logger,
       start: 0,
