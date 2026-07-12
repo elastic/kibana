@@ -9,6 +9,26 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { test, CUSTOM_ROLES } from '../fixtures';
 
+const checkA11yWithRetry = async (
+  page: { checkA11y: Function; waitForTimeout: (ms: number) => Promise<void> },
+  options: { include: string[] }
+): Promise<{ violations: unknown[] }> => {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      return (await page.checkA11y(options)) as { violations: unknown[] };
+    } catch (error) {
+      lastError = error;
+      const message = String(error);
+      if (!message.includes('Execution context was destroyed')) {
+        throw error;
+      }
+      await page.waitForTimeout(500 * attempt);
+    }
+  }
+  throw lastError;
+};
+
 test.describe('ES|QL Data Federation — Stack Management', { tag: tags.stateful.classic }, () => {
   test('loads the management app and can open the connect data source flyout', async ({
     browserAuth,
@@ -32,7 +52,7 @@ test.describe('ES|QL Data Federation — Stack Management', { tag: tags.stateful
     });
 
     await test.step('page has no accessibility violations', async () => {
-      const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });
+      const { violations } = await checkA11yWithRetry(page, { include: ['.kbnAppWrapper'] });
       expect(violations).toStrictEqual([]);
     });
 
@@ -44,7 +64,7 @@ test.describe('ES|QL Data Federation — Stack Management', { tag: tags.stateful
     });
 
     await test.step('flyout has no accessibility violations', async () => {
-      const { violations } = await page.checkA11y({ include: ['.euiFlyout'] });
+      const { violations } = await checkA11yWithRetry(page, { include: ['.euiFlyout'] });
       expect(violations).toStrictEqual([]);
     });
 
