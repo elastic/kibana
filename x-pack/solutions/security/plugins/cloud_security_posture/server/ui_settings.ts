@@ -25,7 +25,7 @@ export const cspUiSettings: Record<string, UiSettingsParams> = {
       }
     ),
     type: 'boolean',
-    category: ['cloudSecurityPosture'],
+    category: ['securitySolution'],
     requiresPageReload: false,
     schema: schema.boolean(),
     solutionViews: ['classic', 'security'],
