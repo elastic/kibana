@@ -400,13 +400,14 @@ FROM ${indexPatterns
 | EVAL  __actor_exists = user.id IS NOT NULL OR user.full_name IS NOT NULL OR user.email IS NOT NULL
 | EVAL  __action_exists = event.action IS NOT NULL
 | EVAL data_stream.dataset = COALESCE(event.dataset, data_stream.dataset)
-// Normalise user.id to keyword: fixes CASE return-type conflicts when user.id is mapped as
-// "long" (e.g. aws_bedrock.invocation) and LIKE type errors in aws_bedrock enrichment.
-// Safe across all 47 integrations — see NULLIFY_WORKAROUNDS.md for the mapping audit.
-| EVAL user.id = TO_STRING(user.id)
 ${
   integrationEnrichmentEnabled !== false
-    ? buildEnrichmentQuery({ skipColumns: ['host.ip', 'host.target.ip', 'host.target.port'] })
+    ? `// Normalise user.id to keyword: fixes CASE return-type conflicts when user.id is mapped as
+// "long" (e.g. aws_bedrock.invocation) and LIKE type errors in aws_bedrock enrichment.
+// Safe across all 47 integrations — see NULLIFY_WORKAROUNDS.md for the mapping audit.
+// Gated behind integrationEnrichmentEnabled so users can disable it as an escape hatch.
+| EVAL user.id = TO_STRING(user.id)
+${buildEnrichmentQuery({ skipColumns: ['host.ip', 'host.target.ip', 'host.target.port'] })}`
     : ''
 }
 // Recompute after enrichment so entity.target.id set by integration enrichment is visible.

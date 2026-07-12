@@ -101,6 +101,24 @@ describe('fetchEvents', () => {
     expect(castPos).toBeLessThan(enrichmentPos);
   });
 
+  it('omits user.id cast when integrationEnrichmentEnabled is false (escape hatch)', () => {
+    void fetchEvents({
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [] as OriginEventId[],
+      showUnknownTarget: false,
+      indexPatterns: ['valid_index'],
+      spaceId: 'default',
+      esQuery: undefined,
+      integrationEnrichmentEnabled: false,
+    });
+
+    const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    expect(args.query).not.toContain('EVAL user.id = TO_STRING(user.id)');
+  });
+
   it('should include origin event parameters when originEventIds are provided', async () => {
     const originEventIds: OriginEventId[] = [
       { id: '1', isAlert: true },
