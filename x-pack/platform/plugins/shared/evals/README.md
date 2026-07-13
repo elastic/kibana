@@ -116,7 +116,9 @@ Step definitions (Zod input/output schemas + i18n labels) live in [`common/workf
 
 ### Running experiments
 
-**From the UI.** The **New experiment** button on the Experiments tab opens a form (connectors, task target, datasets, evaluators, repetitions, concurrency). The server infers the workflow topology from the inputs — you never pick a "shape":
+#### From the UI
+
+The **New experiment** button on the Experiments tab opens a form (connectors, task target, datasets, evaluators, repetitions, concurrency). The server infers the workflow topology from the inputs — you never pick a "shape":
 
 - one model, few datasets → a single pooled execution;
 - one model, many datasets (> 5) → one execution per dataset (fan-out), still one experiment;
@@ -124,7 +126,13 @@ Step definitions (Zod input/output schemas + i18n labels) live in [`common/workf
 
 "Run now" launches the execution(s) and redirects to the experiment detail page, which polls live progress and offers cancellation. "Save as workflow" persists a reusable, self-contained workflow instead.
 
-**From YAML.** Because steps are ordinary workflow steps, a data scientist can version-control an experiment as a workflow file and (re-)run it by posting the YAML to Workflows Management — no UI required. A minimal single-model experiment:
+#### From Agent Builder
+
+The `eval-experiment-authoring` skill (registered by the `evals_skills` plugin) drives this same server-side path conversationally. From an Agent Builder chat you can discover datasets, evaluators, task targets, and model connectors, preview the generated experiment, then save it as a workflow or run it — the skill calls the same preview/save/run routes as the UI, so the outcome is identical. The skill is registered only when `xpack.evals.enabled` is set.
+
+#### From YAML
+
+Because steps are ordinary workflow steps, a data scientist can version-control an experiment as a workflow file and (re-)run it by posting the YAML to Workflows Management — no UI required. A minimal single-model experiment:
 
 ```yaml
 version: '1'
