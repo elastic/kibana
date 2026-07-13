@@ -227,6 +227,8 @@ spaceTest.describe(
         });
 
         await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeVisible();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesExpandablePanel).toBeVisible();
         await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesRecentTable).toBeVisible();
         await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesCountLink();
 
