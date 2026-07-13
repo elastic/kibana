@@ -13,6 +13,7 @@ export {
   type QueryLink,
   type QueryType,
   type StreamQuery,
+  CRITICAL_SEVERITY_THRESHOLD,
   HIGH_SEVERITY_THRESHOLD,
   QUERY_TYPE_MATCH,
   QUERY_TYPE_STATS,
@@ -92,6 +93,11 @@ export {
   INVESTIGATE_STEP_ID,
   detectionSchema,
   discoverySchema,
+  discoveryDetectionSchema,
+  dependencyEdgeSchema,
+  infraComponentSchema,
+  causeKiSchema,
+  evidenceSchema,
   significantEventSchema,
   significantEventStatusSchema,
   significantEventsTuningConfigSchema,
@@ -123,6 +129,7 @@ export {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
 } from './src/inference_feature_ids';
 

@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
 export const logLevelRt = t.union([
   t.literal('trace'),
@@ -15,4 +16,15 @@ export const logLevelRt = t.union([
   t.literal('error'),
   t.literal('critical'),
   t.literal('off'),
+]);
+
+// zod equivalent, additive (io-ts -> zod migration, elastic/kibana#243355).
+export const logLevelSchema = z.enum([
+  'trace',
+  'debug',
+  'info',
+  'warning',
+  'error',
+  'critical',
+  'off',
 ]);
