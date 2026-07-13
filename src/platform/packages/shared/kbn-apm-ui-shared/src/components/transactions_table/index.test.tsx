@@ -24,7 +24,11 @@ jest.mock('@elastic/eui', () => ({
 
 jest.mock('../sparkline', () => ({
   Sparkline: ({ isLoading }: { isLoading?: boolean }) =>
-    isLoading ? <div data-testid="sparkline-loading" /> : <div data-testid="sparkline-chart" />,
+    isLoading ? (
+      <div data-test-subj="sparkline-loading" />
+    ) : (
+      <div data-test-subj="sparkline-chart" />
+    ),
 }));
 
 const items: TransactionGroup[] = [
