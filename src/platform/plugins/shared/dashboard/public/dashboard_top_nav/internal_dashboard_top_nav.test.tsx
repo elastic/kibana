@@ -246,7 +246,7 @@ describe('Internal dashboard top nav', () => {
     it('should be disabled when there is no ES|QL panel', async () => {
       const { api, internalApi } = buildMockDashboardApi();
 
-      renderWithChrome(
+      renderWithI18n(
         <DashboardContext.Provider value={api}>
           <DashboardInternalContext.Provider value={internalApi}>
             <InternalDashboardTopNav redirectTo={jest.fn()} />
@@ -271,7 +271,7 @@ describe('Internal dashboard top nav', () => {
         usesEsql$: new BehaviorSubject(true),
       } as unknown as Parameters<typeof api.registerChildApi>[0]);
 
-      renderWithChrome(
+      renderWithI18n(
         <DashboardContext.Provider value={api}>
           <DashboardInternalContext.Provider value={internalApi}>
             <InternalDashboardTopNav redirectTo={jest.fn()} />
