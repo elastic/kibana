@@ -451,13 +451,13 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly summary API: min_score filters out anomalies below the threshold',
+      'Anomaly summary API: score_ranges filters out anomalies below the threshold',
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. min_score=10 should exclude 5.65.
         const response = await apiClient.post(buildUrl(WIN_APP01_EUID, 'host'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
-          body: { min_score: 10 },
+          body: { score_ranges: [{ min_score: 10 }] },
         });
 
         expect(response.statusCode).toBe(200);
@@ -468,13 +468,13 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly summary API: max_score filters out anomalies above the threshold',
+      'Anomaly summary API: score_ranges filters out anomalies above the threshold',
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. max_score=10 should exclude 31.06.
         const response = await apiClient.post(buildUrl(WIN_APP01_EUID, 'host'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
-          body: { max_score: 10 },
+          body: { score_ranges: [{ min_score: 0, max_score: 10 }] },
         });
 
         expect(response.statusCode).toBe(200);
@@ -485,13 +485,13 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly summary API: min_score and max_score together narrow results to range',
+      'Anomaly summary API: a single score_ranges entry with both bounds narrows results to that range',
       async ({ apiClient }) => {
         // Carol has scores 24.37 and 25.44. Range [24, 25] includes only 24.37.
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
-          body: { min_score: 24, max_score: 25 },
+          body: { score_ranges: [{ min_score: 24, max_score: 25 }] },
         });
 
         expect(response.statusCode).toBe(200);
@@ -504,12 +504,29 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly summary API: min_score that excludes all anomalies returns empty results',
+      'Anomaly summary API: multiple score_ranges are combined with OR semantics, not collapsed into one span',
+      async ({ apiClient }) => {
+        // WIN_APP01 has two anomalies: scores 5.65 and 31.06.
+        const response = await apiClient.post(buildUrl(WIN_APP01_EUID, 'host'), {
+          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          responseType: 'json',
+          body: { score_ranges: [{ min_score: 0, max_score: 10 }, { min_score: 75 }] },
+        });
+
+        expect(response.statusCode).toBe(200);
+        const body = response.body as AnomalySummaryResponse;
+        expect(body.anomalies).toHaveLength(1);
+        expect(body.anomalies[0].recordScore).toBeLessThan(10);
+      }
+    );
+
+    apiTest(
+      'Anomaly summary API: score_ranges that exclude all anomalies returns empty results',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
-          body: { min_score: 50 },
+          body: { score_ranges: [{ min_score: 50 }] },
         });
 
         expect(response.statusCode).toBe(200);
@@ -520,12 +537,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly summary API: returns 400 when min_score is negative',
+      'Anomaly summary API: returns 400 when a score_ranges min_score is negative',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
-          body: { min_score: -1 },
+          body: { score_ranges: [{ min_score: -1 }] },
         });
 
         expect(response.statusCode).toBe(400);
@@ -533,12 +550,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly summary API: returns 400 when max_score exceeds 100',
+      'Anomaly summary API: returns 400 when a score_ranges max_score exceeds 100',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
-          body: { max_score: 101 },
+          body: { score_ranges: [{ min_score: 0, max_score: 101 }] },
         });
 
         expect(response.statusCode).toBe(400);
@@ -546,12 +563,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly summary API: returns 400 when min_score is greater than max_score',
+      'Anomaly summary API: returns 400 when a score_ranges min_score is greater than its max_score',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
-          body: { min_score: 50, max_score: 25 },
+          body: { score_ranges: [{ min_score: 50, max_score: 25 }] },
         });
 
         expect(response.statusCode).toBe(400);
@@ -705,13 +722,13 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly overview API: min_score reduces totalAnomaliesCount to matching records',
+      'Anomaly overview API: score_ranges reduces totalAnomaliesCount to matching records',
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. min_score=10 excludes 5.65.
         const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
-          body: { min_score: 10 },
+          body: { score_ranges: [{ min_score: 10 }] },
         });
 
         expect(response).toHaveStatusCode(200);
@@ -725,13 +742,13 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly overview API: max_score reduces totalAnomaliesCount to matching records',
+      'Anomaly overview API: score_ranges upper bound reduces totalAnomaliesCount to matching records',
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. max_score=10 excludes 31.06.
         const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
-          body: { max_score: 10 },
+          body: { score_ranges: [{ min_score: 0, max_score: 10 }] },
         });
 
         expect(response).toHaveStatusCode(200);
@@ -745,12 +762,31 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly overview API: min_score that excludes all anomalies returns empty response',
+      'Anomaly overview API: multiple score_ranges are combined with OR semantics, not collapsed into one span',
+      async ({ apiClient }) => {
+        // WIN_APP01 has two anomalies: scores 5.65 and 31.06.
+        const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
+          headers: { ...defaultHeaders, 'elastic-api-version': '1' },
+          responseType: 'json',
+          body: { score_ranges: [{ min_score: 0, max_score: 10 }, { min_score: 75 }] },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as AnomalyOverviewResponse;
+        expect(body.totalAnomaliesCount).toBe(1);
+        for (const entry of body.anomalyByTimeBucket) {
+          expect(entry.maxScore).toBeLessThan(10);
+        }
+      }
+    );
+
+    apiTest(
+      'Anomaly overview API: score_ranges that exclude all anomalies returns empty response',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
-          body: { min_score: 50 },
+          body: { score_ranges: [{ min_score: 50 }] },
         });
 
         expect(response).toHaveStatusCode(200);
@@ -762,12 +798,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly overview API: returns 400 when min_score is negative',
+      'Anomaly overview API: returns 400 when a score_ranges min_score is negative',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
-          body: { min_score: -1 },
+          body: { score_ranges: [{ min_score: -1 }] },
         });
 
         expect(response).toHaveStatusCode(400);
@@ -775,12 +811,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly overview API: returns 400 when max_score exceeds 100',
+      'Anomaly overview API: returns 400 when a score_ranges max_score exceeds 100',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
-          body: { max_score: 101 },
+          body: { score_ranges: [{ min_score: 0, max_score: 101 }] },
         });
 
         expect(response).toHaveStatusCode(400);
@@ -788,12 +824,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly overview API: returns 400 when min_score is greater than max_score',
+      'Anomaly overview API: returns 400 when a score_ranges min_score is greater than its max_score',
       async ({ apiClient }) => {
         const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
-          body: { min_score: 50, max_score: 25 },
+          body: { score_ranges: [{ min_score: 50, max_score: 25 }] },
         });
 
         expect(response).toHaveStatusCode(400);

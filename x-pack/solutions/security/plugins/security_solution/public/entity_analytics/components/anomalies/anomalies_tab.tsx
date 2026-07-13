@@ -27,6 +27,7 @@ import type { SeverityOption } from '@kbn/ml-plugin/public';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { DateRangePickerSettings, TimeRangeBoundsOption } from '@kbn/date-range-picker/types';
 import { DateRangePicker, type DateRangePickerOnChangeProps } from '@kbn/date-range-picker';
+import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { parseDateWithDefault } from '../../../common/utils/default_date_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/entity_analytics/anomalies/constants';
@@ -130,17 +131,14 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     setTablePageIndex(0);
   }, []);
 
-  const scoreFilter = useMemo<{ min_score?: number; max_score?: number }>(() => {
-    if (selectedSeverities.length === severityOptions.length) return {};
-    const mins = selectedSeverities.map((s) => s.threshold.min);
-    const maxes = selectedSeverities
-      .map((s) => ('max' in s.threshold ? s.threshold.max : undefined))
-      .filter((m): m is number => m != null);
-    return {
-      min_score: Math.min(...mins),
-      // Only set an upper bound when every selected severity has a max (i.e. critical not included)
-      max_score: maxes.length === selectedSeverities.length ? Math.max(...maxes) : undefined,
-    };
+  const scoreRanges = useMemo<AnomalyScoreRange[] | undefined>(() => {
+    if (selectedSeverities.length === severityOptions.length) return undefined;
+    // One range per selected severity bucket, so non-contiguous selections
+    // don't get collapsed into a single min/max span
+    return selectedSeverities.map((s) => ({
+      min_score: s.threshold.min,
+      max_score: 'max' in s.threshold ? s.threshold.max : undefined,
+    }));
   }, [selectedSeverities, severityOptions.length]);
 
   const [tablePageIndex, setTablePageIndex] = useState(0);
@@ -175,8 +173,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     from: timeRangeMs.from,
     to: timeRangeMs.to,
     threatTactics: selectedTactic ? [selectedTactic] : undefined,
-    minScore: scoreFilter.min_score,
-    maxScore: scoreFilter.max_score,
+    scoreRanges,
   });
 
   const uniqueTactics = useMemo(
@@ -197,8 +194,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
       from: timeRangeMs.from,
       to: timeRangeMs.to,
       threat_tactics: selectedTactic ? [selectedTactic] : undefined,
-      min_score: scoreFilter.min_score,
-      max_score: scoreFilter.max_score,
+      score_ranges: scoreRanges,
       page: tablePageIndex + 1,
       page_size: tablePageSize,
       sort: [{ field: tableSortField, order: tableSortDirection }],
