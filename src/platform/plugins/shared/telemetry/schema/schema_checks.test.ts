@@ -57,7 +57,7 @@ describe('Telemetry Schema Checks', () => {
      * setting description instead. When you remove an entry from the list below, decrement
      * `EXPECTED_COUNT`. The goal is for both this count and the list to reach zero.
      */
-    const EXPECTED_COUNT = 151;
+    const EXPECTED_COUNT = 150;
 
     expect(keysWithNonDefaultDescriptions).toHaveLength(EXPECTED_COUNT);
     expect(keysWithNonDefaultDescriptions).toEqual([
@@ -185,7 +185,6 @@ describe('Telemetry Schema Checks', () => {
       'securitySolution:enableCloudConnector',
       'securitySolution:enableGroupedNav',
       'securitySolution:enableNewsFeed',
-      'securitySolution:enableRuleChangesHistory',
       'securitySolution:excludedDataTiersForRuleExecution.items',
       'securitySolution:refreshIntervalDefaults',
       'securitySolution:rulesTableRefresh',

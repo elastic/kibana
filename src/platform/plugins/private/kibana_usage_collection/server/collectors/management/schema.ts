@@ -180,7 +180,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'securitySolution:enableRuleChangesHistory': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: { description: 'Allows users to enable/disable Rule Changes History.' },
   },
   'search:includeFrozen': {
     type: 'boolean',
