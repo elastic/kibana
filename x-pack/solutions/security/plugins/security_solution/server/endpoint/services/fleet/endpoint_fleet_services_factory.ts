@@ -40,6 +40,11 @@ export const HAS_JEST_SPY_MOCKS = Symbol('HAS_JEST_SPY_MOCKS');
 export interface EndpointFleetServicesInterface {
   /** The space id used to initialize the current `EndpointFleetServicesInterface` instance */
   spaceId: string;
+
+  /**
+   * IMPORTANT: USE AGENT METHODS EXPOSED DIRECTLY ON `EndpointFleetServicesInterface` FOR
+   * RETRIEVING AGENT DATA FROM FLEET INSTEAD OF THESE SERVICES PROVIDED BY FLEET.
+   */
   agent: AgentClient;
   agentPolicy: AgentPolicyServiceInterface;
   packages: PackageClient;
@@ -80,6 +85,33 @@ export interface EndpointFleetServicesInterface {
 
   /** Checks to see if the Endpoint (Elastic Defend) package is installed */
   isEndpointPackageInstalled: () => Promise<boolean>;
+
+  /**
+   *  Fetch single agent from Fleet.
+   *  Method differs from the one provided by Fleet's `AgentClinet` in that it removes the
+   *  suffix from `policy_id` from the returned agent.
+   */
+  fetchAgent: (
+    ...props: Parameters<AgentClient['getAgent']>
+  ) => ReturnType<AgentClient['getAgent']>;
+
+  /**
+   *  Fetch list of agents from Fleet.
+   *  Method differs from the one provided by Fleet's `AgentClinet` in that it removes the
+   *  suffix from `policy_id` from the returned list of agents.
+   */
+  fetchAgentList: (
+    ...props: Parameters<AgentClient['listAgents']>
+  ) => ReturnType<AgentClient['listAgents']>;
+
+  /**
+   *  Fetch list of agents from Fleet usign their UUIDs.
+   *  Method differs from the one provided by Fleet's `AgentClinet` in that it removes the
+   *  suffix from `policy_id` from the returned list of agents.
+   */
+  fetchAgentsById: (
+    ...props: Parameters<AgentClient['getByIds']>
+  ) => ReturnType<AgentClient['getByIds']>;
 }
 
 export interface EndpointInternalFleetServicesInterface extends EndpointFleetServicesInterface {
@@ -108,155 +140,6 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     private readonly logger: Logger
   ) {}
 
-  /**
-   * Wraps the Fleet Agent client to handle recently introduced backwards incompatible
-   * changes to the `policy_id` value of the agent record.
-   * @param agentClient
-   */
-  private wrapFleetAgentClient = (agentClient: AgentClient) => {
-    const logger = this.logger.get('FleetAgentClientWrapper');
-
-    // Exit if client is already wrapped
-    // @ts-expect-error due to `PROXY_TRAP_HANDLERS` not being a property of `agentClient`
-    if (agentClient[PROXY_TRAP_HANDLERS]) {
-      logger.debug(`returning Agent Client provided on input: client already wrapped`);
-      return agentClient;
-    }
-
-    // Note that this function will possibly mutate the Agent record
-    const adjustAgentData = (data: Agent | Agent[], methodName: string): void => {
-      const agentsData = Array.isArray(data) ? data : [data];
-      const updatesDone: string[] = [];
-
-      for (const agentRecord of agentsData) {
-        // Remove version suffix from `policy_id` field
-        // Issue caused by: https://github.com/elastic/package-spec/issues/165
-        if (agentRecord.policy_id && /#.*$/.test(agentRecord.policy_id)) {
-          const updatedPolicyId = agentRecord.policy_id.replace(/#.*$/i, '');
-
-          updatesDone.push(
-            `Agent [${agentRecord.id}][${agentRecord.local_metadata?.host?.hostname}]: adjusted 'policy_id' property value from [${agentRecord.policy_id}] to [${updatedPolicyId}]`
-          );
-
-          agentRecord.policy_id = updatedPolicyId;
-        }
-      }
-
-      if (updatesDone.length) {
-        logger
-          .get(methodName)
-          .debug(`Adjusted ${updatesDone.length} agent records:\n${updatesDone.join('\n')}`);
-      }
-    };
-
-    // All original methods of Agent Client need to be `.bind` so that when calling them from
-    // the interceptors below, they are called with the correct `this` context (important because
-    // AgentClient is a class that executes private class methods).
-    const boundMethods: AgentClient = {
-      getAgent: agentClient.getAgent.bind(agentClient),
-      getByIds: agentClient.getByIds.bind(agentClient),
-      listAgents: agentClient.listAgents.bind(agentClient),
-      getAgentStatusForAgentPolicy: agentClient.getAgentStatusForAgentPolicy.bind(agentClient),
-      getAgentStatusById: agentClient.getAgentStatusById.bind(agentClient),
-      getLatestAgentAvailableBaseVersion:
-        agentClient.getLatestAgentAvailableBaseVersion.bind(agentClient),
-      getLatestAgentAvailableDockerImageVersion:
-        agentClient.getLatestAgentAvailableDockerImageVersion.bind(agentClient),
-      getLatestAgentAvailableVersion: agentClient.getLatestAgentAvailableVersion.bind(agentClient),
-    };
-
-    interface AgentClientTrapHandlers {
-      getAgentInterceptor: AgentClient['getAgent'];
-      getByIdsInterceptor: AgentClient['getByIds'];
-      listAgentsInterceptor: AgentClient['listAgents'];
-    }
-    const trapHandlers: AgentClientTrapHandlers = {
-      getAgentInterceptor: async (...props) => {
-        const agent = await boundMethods.getAgent(...props);
-        adjustAgentData(agent, 'getAgent');
-        return agent;
-      },
-
-      getByIdsInterceptor: async (...props) => {
-        const agents = await boundMethods.getByIds(...props);
-        adjustAgentData(agents, 'getByIds');
-        return agents;
-      },
-
-      listAgentsInterceptor: async (...props) => {
-        const agents = await boundMethods.listAgents(...props);
-        adjustAgentData(agents.agents, 'listAgents');
-        return agents;
-      },
-    };
-
-    let hasJestSpyMocks = false;
-
-    const proxiedAgentClient = new Proxy(agentClient, {
-      get: (target, prop, receiver) => {
-        switch (prop) {
-          case 'getAgent':
-            return trapHandlers.getAgentInterceptor;
-          case 'getByIds':
-            return trapHandlers.getByIdsInterceptor;
-          case 'listAgents':
-            return trapHandlers.listAgentsInterceptor;
-          case HAS_JEST_SPY_MOCKS:
-            return hasJestSpyMocks;
-          case PROXY_TRAP_HANDLERS:
-            return trapHandlers;
-        }
-
-        if (prop in boundMethods) {
-          return boundMethods[prop as keyof AgentClient];
-        }
-
-        return Reflect.get(target, prop, receiver);
-      },
-
-      set: (target, prop, value): boolean => {
-        switch (prop) {
-          // Jest tests need to be able to override these methods
-          case 'getAgent':
-            trapHandlers.getAgentInterceptor = value;
-            return true;
-          case 'getByIds':
-            trapHandlers.getByIdsInterceptor = value;
-            return true;
-          case 'listAgents':
-            trapHandlers.listAgentsInterceptor = value;
-            return true;
-          // DO not forward internal wrapped properties to the target (the real AgentClient)
-          case HAS_JEST_SPY_MOCKS:
-            hasJestSpyMocks = Boolean(value);
-            return true;
-          case PROXY_TRAP_HANDLERS:
-            return true;
-        }
-
-        if (prop in boundMethods) {
-          boundMethods[prop as keyof AgentClient] = value;
-          return true;
-        }
-
-        return Reflect.set(target, prop, value);
-      },
-
-      defineProperty(target, property, descriptor): boolean {
-        // DO not forward internal wrapped properties to the target (the real AgentClient)
-        switch (property) {
-          case HAS_JEST_SPY_MOCKS:
-          case PROXY_TRAP_HANDLERS:
-            return true;
-        }
-
-        return Reflect.defineProperty(target, property, descriptor);
-      },
-    });
-
-    return proxiedAgentClient;
-  };
-
   asInternalUser(
     spaceId?: string,
     unscoped: boolean = false
@@ -277,9 +160,9 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       agentService,
       packageService,
     } = this.fleetDependencies;
-    const agent = this.wrapFleetAgentClient(
-      spaceId ? agentService.asInternalScopedUser(spaceId) : agentService.asInternalUser
-    );
+    const agent = spaceId
+      ? agentService.asInternalScopedUser(spaceId)
+      : agentService.asInternalUser;
 
     // Lazily Initialized at the time it is needed
     let _soClient: SavedObjectsClientContract;
@@ -370,6 +253,10 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       getIntegrationNamespaces,
       getSoClient,
       isEndpointPackageInstalled,
+
+      fetchAgent: fetchFleetAgent.bind(null, agent, this.logger),
+      fetchAgentsById: fetchFleetAgentsById.bind(null, agent, this.logger),
+      fetchAgentList: fetchFleetAgentList.bind(null, agent, this.logger),
     };
   }
 }
@@ -658,4 +545,61 @@ const fetchIntegrationNamespaces = async ({
   logger.debug(() => `Integration namespaces in use:\n${stringify(response)}`);
 
   return response;
+};
+
+// Note that this function will possibly mutate the Agent record
+const adjustAgentData = (data: Agent | Agent[], methodName: string, _logger: Logger): void => {
+  const logger = _logger.get('adjustAgentData');
+  const agentsData = Array.isArray(data) ? data : [data];
+  const updatesDone: string[] = [];
+
+  for (const agentRecord of agentsData) {
+    // Remove version suffix from `policy_id` field
+    // Issue caused by: https://github.com/elastic/package-spec/issues/165
+    if (agentRecord.policy_id && /#.*$/.test(agentRecord.policy_id)) {
+      const updatedPolicyId = agentRecord.policy_id.replace(/#.*$/i, '');
+
+      updatesDone.push(
+        `Agent [${agentRecord.id}][${agentRecord.local_metadata?.host?.hostname}]: adjusted 'policy_id' property value from [${agentRecord.policy_id}] to [${updatedPolicyId}]`
+      );
+
+      agentRecord.policy_id = updatedPolicyId;
+    }
+  }
+
+  if (updatesDone.length) {
+    logger
+      .get(methodName)
+      .debug(`Adjusted ${updatesDone.length} agent records:\n${updatesDone.join('\n')}`);
+  }
+};
+
+const fetchFleetAgent = async (
+  agentClient: AgentClient,
+  logger: Logger,
+  ...props: Parameters<AgentClient['getAgent']>
+): ReturnType<AgentClient['getAgent']> => {
+  const agent = await agentClient.getAgent(...props);
+  adjustAgentData(agent, 'getAgent', logger);
+  return agent;
+};
+
+const fetchFleetAgentList = async (
+  agentClient: AgentClient,
+  logger: Logger,
+  ...props: Parameters<AgentClient['listAgents']>
+): ReturnType<AgentClient['listAgents']> => {
+  const agents = await agentClient.listAgents(...props);
+  adjustAgentData(agents.agents, 'listAgents', logger);
+  return agents;
+};
+
+const fetchFleetAgentsById = async (
+  agentClient: AgentClient,
+  logger: Logger,
+  ...props: Parameters<AgentClient['getByIds']>
+): ReturnType<AgentClient['getByIds']> => {
+  const agents = await agentClient.getByIds(...props);
+  adjustAgentData(agents, 'getByIds', logger);
+  return agents;
 };
