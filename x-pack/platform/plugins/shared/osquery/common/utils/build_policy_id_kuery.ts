@@ -6,19 +6,23 @@
  */
 
 import { uniq } from 'lodash';
+import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 
 // Matches both a base Fleet agent policy id and its version-specific
 // variants (`<policyId>#<major.minor>`), which Fleet assigns when the policy
 // has an integration with an agent-version condition. Without the wildcard,
 // those agents are silently excluded from selection and dispatch.
+// Values are escaped per Fleet's getPolicyOrVersionSpecificKuery; the shared
+// `policy_id:(...)` prefix keeps the kuery compact since it can travel in a
+// GET query string.
 export const buildPolicyIdKuery = (policyIds: string[]): string => {
   const ids = uniq(policyIds);
 
   if (!ids.length) {
-    return 'policy_id:()'; // matches nothing, valid KQL
+    return 'policy_id:("")'; // parseable KQL that matches nothing
   }
 
-  const fragments = ids.flatMap((id) => [`policy_id:${id}`, `policy_id:${id}#*`]);
+  const values = ids.flatMap((id) => [`"${escapeQuotes(id)}"`, `${escapeKuery(id)}#*`]);
 
-  return `(${fragments.join(' or ')})`;
+  return `policy_id:(${values.join(' or ')})`;
 };

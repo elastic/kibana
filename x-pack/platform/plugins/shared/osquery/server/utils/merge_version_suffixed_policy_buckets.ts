@@ -30,5 +30,7 @@ export const mergeVersionSuffixedPolicyBuckets = (buckets: PolicyBucket[]): Poli
     });
   }
 
-  return Array.from(merged.values()).sort((a, b) => b.size - a.size);
+  return Array.from(merged.values()).sort(
+    (a, b) => b.size - a.size || a.id.localeCompare(b.id)
+  );
 };

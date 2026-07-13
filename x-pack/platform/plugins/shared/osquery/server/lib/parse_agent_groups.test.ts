@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import { aggregateResults, parseAgentSelection } from './parse_agent_groups';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -450,7 +451,7 @@ describe('parseAgentSelection', () => {
         selection: { allAgentsSelected: true },
         expectedFragments: [
           'status:online',
-          '(policy_id:policy-1 or policy_id:policy-1#* or policy_id:policy-2 or policy_id:policy-2#* or policy_id:policy-3 or policy_id:policy-3#*)',
+          'policy_id:("policy-1" or policy-1#* or "policy-2" or policy-2#* or "policy-3" or policy-3#*)',
         ],
       },
       {
@@ -459,7 +460,7 @@ describe('parseAgentSelection', () => {
         expectedFragments: [
           'status:online',
           'local_metadata.os.platform:(linux or darwin)',
-          '(policy_id:policy-1 or policy_id:policy-1#*)',
+          'policy_id:("policy-1" or policy-1#*)',
         ],
       },
     ])('$name', async ({ selection, expectedFragments }) => {
@@ -474,39 +475,7 @@ describe('parseAgentSelection', () => {
       expectedFragments.forEach((fragment) => {
         expect(kueryCall).toContain(fragment);
       });
-    });
-
-    it('builds a kuery matching version-suffixed policy id variants', async () => {
-      mockAgentService.listAgents = createSimpleMockResponse(['agent-1']);
-
-      await parseAgentSelection(mockSoClient, mockElasticsearchClient, mockContextWithServices, {
-        policiesSelected: ['policy-1'],
-        spaceId: 'default',
-      });
-
-      const kueryCall = mockAgentService.listAgents.mock.calls[0][0].kuery;
-      expect(kueryCall).toContain('policy_id:policy-1');
-      expect(kueryCall).toContain('policy_id:policy-1#*');
-    });
-
-    it('includes an agent whose policy_id carries a Fleet version suffix', async () => {
-      mockAgentService.listAgents = jest.fn().mockImplementation(({ kuery }) => {
-        const matches = /policy_id:policy-1#\*/.test(kuery ?? '');
-
-        return Promise.resolve({
-          agents: matches ? [{ id: 'agent-suffixed', sort: [0] }] : [],
-          total: matches ? 1 : 0,
-        });
-      });
-
-      const result = await parseAgentSelection(
-        mockSoClient,
-        mockElasticsearchClient,
-        mockContextWithServices,
-        { policiesSelected: ['policy-1'], spaceId: 'default' }
-      );
-
-      expect(result).toContain('agent-suffixed');
+      expect(() => fromKueryExpression(kueryCall ?? '')).not.toThrow();
     });
 
     it('should set showInactive to false', async () => {

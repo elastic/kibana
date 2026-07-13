@@ -12,6 +12,14 @@ describe('stripPolicyIdVersionSuffix', () => {
     expect(stripPolicyIdVersionSuffix('policy-1#9.4')).toBe('policy-1');
   });
 
+  it('strips a multi-digit minor version suffix', () => {
+    expect(stripPolicyIdVersionSuffix('policy-1#9.10')).toBe('policy-1');
+  });
+
+  it('does not strip a patch-level suffix (not a Fleet version suffix)', () => {
+    expect(stripPolicyIdVersionSuffix('policy-1#9.5.0')).toBe('policy-1#9.5.0');
+  });
+
   it('leaves an id with no suffix untouched', () => {
     expect(stripPolicyIdVersionSuffix('policy-1')).toBe('policy-1');
   });

@@ -70,6 +70,18 @@ describe('mergeVersionSuffixedPolicyBuckets', () => {
     ).toEqual([{ id: 'policy-1', name: 'policy-1', size: 6 }]);
   });
 
+  it('orders equal-size buckets by id for a stable result', () => {
+    expect(
+      mergeVersionSuffixedPolicyBuckets([
+        { id: 'policy-b', name: 'policy-b', size: 1 },
+        { id: 'policy-a', name: 'policy-a', size: 1 },
+      ])
+    ).toEqual([
+      { id: 'policy-a', name: 'policy-a', size: 1 },
+      { id: 'policy-b', name: 'policy-b', size: 1 },
+    ]);
+  });
+
   it('returns an empty array for no buckets', () => {
     expect(mergeVersionSuffixedPolicyBuckets([])).toEqual([]);
   });
