@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/streams-schema'
   - '@kbn/workflows'
+  - '@kbn/licensing-types'
 tags:
   - shared-common
   - package

@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/270398
+issues:
+- https://github.com/elastic/kibana/issues/217860
+- https://github.com/elastic/kibana/issues/137464
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+areas:
+- Search and data
+title: Add min_* rollover fields
+description: Adds support for configuring minimum rollover conditions in Index Lifecycle Management policies. Users can now set `min_age`, `min_docs`, `min_size`, `min_primary_shard_docs`, and `min_primary_shard_size` in the hot phase rollover action, alongside the existing maximum rollover triggers.
