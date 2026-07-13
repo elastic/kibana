@@ -16,6 +16,8 @@ import {
   KSPM,
   METERING_CONFIGS,
   BILLABLE_ASSETS_CONFIG,
+  GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS,
+  GCP_COMPUTE_INSTANCE_SUB_TYPE,
 } from './constants';
 import type { ResourceSubtypeCounter, Tier, UsageRecord } from '../types';
 import type {
@@ -163,9 +165,72 @@ export const getSearchQueryByCloudSecuritySolution = (
     });
   }
 
+  if (cloudSecuritySolution === CSPM) {
+    mustFilters.push(getGcpComputeDurationFilter());
+  }
+
   return {
     bool: {
       must: mustFilters,
+    },
+  };
+};
+
+/**
+ * Returns a filter clause that excludes GCP compute instances with running duration < 24h.
+ * For non-gcp-compute-instance resources, documents pass through unchanged.
+ * For gcp-compute-instance resources, a Painless script checks:
+ *   - If status == "RUNNING": running duration = now - lastStartTimestamp
+ *   - If status != "RUNNING" (TERMINATED/STOPPED): running duration = lastStopTimestamp - lastStartTimestamp
+ * Only resources with running duration >= 24h are included.
+ */
+export const getGcpComputeDurationFilter = () => {
+  const minDurationMillis = GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS * 60 * 60 * 1000;
+
+  return {
+    bool: {
+      should: [
+        {
+          bool: {
+            must_not: [{ term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } }],
+          },
+        },
+        {
+          bool: {
+            must: [
+              { term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } },
+              {
+                script: {
+                  script: {
+                    source: `
+                      def status = doc['resource.raw.status'].size() > 0 ? doc['resource.raw.status'].value : '';
+                      def lastStart = doc['resource.raw.lastStartTimestamp'].size() > 0 ? doc['resource.raw.lastStartTimestamp'].value.toInstant().toEpochMilli() : 0L;
+
+                      if (lastStart == 0L) { return false; }
+
+                      long duration;
+                      if (status == 'RUNNING') {
+                        duration = new Date().getTime() - lastStart;
+                      } else {
+                        def lastStop = doc['resource.raw.lastStopTimestamp'].size() > 0 ? doc['resource.raw.lastStopTimestamp'].value.toInstant().toEpochMilli() : 0L;
+                        if (lastStop == 0L) { return false; }
+                        duration = lastStop - lastStart;
+                      }
+
+                      return duration >= params.minDurationMillis;
+                    `,
+                    lang: 'painless',
+                    params: {
+                      minDurationMillis,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
+      minimum_should_match: 1,
     },
   };
 };
