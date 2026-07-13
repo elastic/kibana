@@ -42,6 +42,7 @@ export {
   isESQLColumnGroupable,
   isESQLFieldGroupable,
   sanitazeESQLInput,
+  escapeEsqlColumnName,
   queryCannotBeSampled,
   mapVariableToColumn,
   getValuesFromQueryField,

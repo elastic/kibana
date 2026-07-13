@@ -17,6 +17,7 @@ import { uniqBy } from 'lodash';
 import type { GetColumnsByTypeFn, ICommandContext, ISuggestionItem } from '../../../registry/types';
 import type { SupportedDataType } from '../../types';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
+import { escapeEsqlColumnName } from '../columns';
 import { buildConstantsDefinitions } from '../literals';
 import { getColumnByName } from '../shared';
 
@@ -28,7 +29,11 @@ export const shouldBeQuotedText = (
 };
 
 export const getSafeInsertText = (text: string, options: { dashSupported?: boolean } = {}) => {
-  return shouldBeQuotedText(text, options) ? `\`${text.replace(/`/g, '``')}\`` : text;
+  if (options.dashSupported) {
+    return shouldBeQuotedText(text, options) ? `\`${text.replace(/`/g, '``')}\`` : text;
+  }
+
+  return escapeEsqlColumnName(text);
 };
 
 export const buildUserDefinedColumnsDefinitions = (
@@ -94,10 +99,6 @@ export async function getFieldsSuggestions(
     addComma,
     variableType,
   })) as ISuggestionItem[];
-}
-
-export function getLastNonWhitespaceChar(text: string) {
-  return text[text.trimEnd().length - 1];
 }
 
 export const columnExists = (col: string, context?: ICommandContext) =>
