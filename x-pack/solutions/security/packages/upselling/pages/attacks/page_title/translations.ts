@@ -4,4 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { offsetRt, offsetSchema } from '@kbn/apm-api-shared';
+
+import { i18n } from '@kbn/i18n';
+
+export const ATTACKS_PAGE_TITLE = i18n.translate(
+  'securitySolutionPackages.upselling.pages.attacks.pageTitle.pageTitle',
+  {
+    defaultMessage: 'Attacks',
+  }
+);
