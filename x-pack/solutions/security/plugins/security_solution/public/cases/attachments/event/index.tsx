@@ -7,8 +7,11 @@
 
 import React, { Suspense, lazy, type ComponentType } from 'react';
 import { EuiAvatar } from '@elastic/eui';
-import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';
-import { AttachmentActionType, defineAttachment } from '@kbn/cases-plugin/public';
+import type {
+  CommonAttachmentTabViewProps,
+  UnifiedReferenceAttachmentType,
+} from '@kbn/cases-plugin/public';
+import { AttachmentActionType } from '@kbn/cases-plugin/public';
 import {
   SECURITY_EVENT_ATTACHMENT_TYPE,
   isIndexMetadata,
@@ -93,15 +96,14 @@ const getAttachmentRemovalObject = (props: UnifiedReferenceAttachmentViewProps) 
 /**
  * Returns the event attachment type for registration with the unified registry.
  */
-export const getEventType = () =>
-  defineAttachment({
-    id: SECURITY_EVENT_ATTACHMENT_TYPE,
-    displayName: EVENT_DISPLAY_NAME,
-    icon: 'bell',
-    schema: SecurityEventAttachmentPayloadSchema,
-    getAttachmentViewObject: (props) => getAttachmentViewObject(props),
-    getAttachmentRemovalObject: (props) => getAttachmentRemovalObject(props),
-    getAttachmentTabViewObject: () => ({
-      children: EventTabContentWrapper,
-    }),
-  });
+export const getEventType = (): UnifiedReferenceAttachmentType => ({
+  id: SECURITY_EVENT_ATTACHMENT_TYPE,
+  displayName: EVENT_DISPLAY_NAME,
+  icon: 'bell',
+  schema: SecurityEventAttachmentPayloadSchema,
+  getAttachmentViewObject: (props) => getAttachmentViewObject(props),
+  getAttachmentRemovalObject: (props) => getAttachmentRemovalObject(props),
+  getAttachmentTabViewObject: () => ({
+    children: EventTabContentWrapper,
+  }),
+});
