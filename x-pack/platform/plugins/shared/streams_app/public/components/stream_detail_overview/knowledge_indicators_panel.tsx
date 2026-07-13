@@ -22,9 +22,10 @@ import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useFetchDiscoveryQueries } from '../../hooks/significant_events/use_fetch_discovery_queries';
 import { useStreamFeatures } from '../../hooks/significant_events/use_stream_features';
+import { useStreamOnboardingStatus } from '../../hooks/significant_events/use_stream_onboarding_status';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 const ACTIVE_DRAFT_STATUS = ['active', 'draft'] as const;
-import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 interface KnowledgeIndicatorsPanelProps {
   definition: Streams.all.GetResponse;
@@ -48,7 +49,8 @@ function KnowledgeIndicatorCount({
   'data-test-subj': dataTestSubj,
 }: KnowledgeIndicatorCountProps) {
   const showSpinner = isLoading && (count === undefined || isFetching);
-  const showUnavailable = isError && count === undefined;
+  const showUnavailable =
+    count === undefined && (isError || (!isLoading && !isFetching));
 
   return (
     <EuiFlexItem grow={false} data-test-subj={dataTestSubj}>
@@ -85,15 +87,22 @@ function KnowledgeIndicatorCount({
 export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPanelProps) {
   const router = useStreamsAppRouter();
   const streamName = definition.stream.name;
+  const streamOnboardingResult = useStreamOnboardingStatus(streamName);
 
-  const { features, featuresLoading, error: featuresError } = useStreamFeatures(definition.stream);
-  const queriesFetchState = useFetchDiscoveryQueries({
-    name: streamName,
-    query: '',
-    page: 1,
-    perPage: 1,
-    status: [...ACTIVE_DRAFT_STATUS],
-  });
+  const { features, featuresLoading, error: featuresError } = useStreamFeatures(
+    definition.stream,
+    [streamOnboardingResult]
+  );
+  const queriesFetchState = useFetchDiscoveryQueries(
+    {
+      name: streamName,
+      query: '',
+      page: 1,
+      perPage: 1,
+      status: [...ACTIVE_DRAFT_STATUS],
+    },
+    [streamOnboardingResult]
+  );
   const queriesCount = queriesFetchState.data?.total;
   const queriesLoading = queriesFetchState.isLoading;
   const queriesFetching = queriesFetchState.isFetching;
@@ -126,14 +135,14 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
   const ariaLabel =
     featuresIsLoading || queriesIsLoading
       ? i18n.translate('xpack.streams.streamOverview.knowledgeIndicatorsPanel.linkAriaLabelLoading', {
-        defaultMessage: 'View knowledge indicators for {streamName}: loading counts',
-        values: { streamName },
-      })
-    : i18n.translate('xpack.streams.streamOverview.knowledgeIndicatorsPanel.linkAriaLabel', {
-        defaultMessage:
-          'View knowledge indicators for {streamName}: {featuresCount, plural, one {# feature} other {# features}}, {queriesCount, plural, one {# query} other {# queries}}',
-        values: { streamName, featuresCount, queriesCount: queriesCount ?? 0 },
-      });
+          defaultMessage: 'View knowledge indicators for {streamName}: loading counts',
+          values: { streamName },
+        })
+      : i18n.translate('xpack.streams.streamOverview.knowledgeIndicatorsPanel.linkAriaLabel', {
+          defaultMessage:
+            'View knowledge indicators for {streamName}: {featuresCount, plural, one {# feature} other {# features}}, {queriesCount, plural, one {# query} other {# queries}}',
+          values: { streamName, featuresCount, queriesCount: queriesCount ?? 0 },
+        });
 
   return (
     <EuiLink
@@ -169,7 +178,7 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
             data-test-subj="streamsAppKnowledgeIndicatorsFeaturesCount"
           />
           <KnowledgeIndicatorCount
-            count={queriesError ? undefined : queriesCount}
+            count={queriesError || queriesCount === undefined ? undefined : queriesCount}
             isLoading={queriesIsLoading}
             isFetching={queriesFetching}
             isError={queriesError}

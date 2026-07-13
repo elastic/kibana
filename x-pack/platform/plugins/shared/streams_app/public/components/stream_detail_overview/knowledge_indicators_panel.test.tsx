@@ -23,6 +23,10 @@ jest.mock('../../hooks/significant_events/use_fetch_discovery_queries', () => ({
   useFetchDiscoveryQueries: (...args: unknown[]) => mockUseFetchDiscoveryQueries(...args),
 }));
 
+jest.mock('../../hooks/significant_events/use_stream_onboarding_status', () => ({
+  useStreamOnboardingStatus: () => undefined,
+}));
+
 jest.mock('../../hooks/use_streams_app_router', () => ({
   useStreamsAppRouter: () => mockUseStreamsAppRouter(),
 }));
@@ -137,6 +141,28 @@ describe('KnowledgeIndicatorsPanel', () => {
     renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
 
     expect(screen.getAllByTestId('knowledgeIndicatorsCountUnavailable')).toHaveLength(2);
+  });
+
+  it('shows unavailable state when query count data is missing without an error', () => {
+    mockUseStreamFeatures.mockReturnValue({
+      features: [{ id: 'feature-1' }],
+      featuresLoading: false,
+      error: undefined,
+    });
+    mockUseFetchDiscoveryQueries.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+    });
+
+    renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
+
+    expect(
+      screen.getByTestId('streamsAppKnowledgeIndicatorsQueriesCount').querySelector(
+        '[data-test-subj="knowledgeIndicatorsCountUnavailable"]'
+      )
+    ).toBeInTheDocument();
   });
 
   it('shows loading spinner for queries while refetching after time range changes', () => {

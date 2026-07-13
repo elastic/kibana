@@ -74,7 +74,7 @@ export function WiredStreamDetailManagement({
   const { rangeFrom, rangeTo } = useTimeRange();
   const isProcessingEnabled = !definition.replicated;
   const {
-    features: { canvas },
+    features: { canvas, significantEventsDiscovery },
   } = useStreamsPrivileges();
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
@@ -283,11 +283,17 @@ export function WiredStreamDetailManagement({
   }
 
   if (tab === 'significantEvents') {
+    if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
+      return (
+        <RedirectTo
+          path="/_discovery/{tab}"
+          params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
+        />
+      );
+    }
+
     return (
-      <RedirectTo
-        path="/_discovery/{tab}"
-        params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
-      />
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
     );
   }
 

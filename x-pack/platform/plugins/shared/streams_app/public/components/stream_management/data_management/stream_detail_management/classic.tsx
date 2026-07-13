@@ -74,7 +74,7 @@ export function ClassicStreamDetailManagement({
   const { rangeFrom, rangeTo } = useTimeRange();
 
   const {
-    features: { canvas, queryStreams },
+    features: { canvas, queryStreams, significantEventsDiscovery },
   } = useStreamsPrivileges();
 
   const isProcessingEnabled = !definition.replicated;
@@ -221,11 +221,17 @@ export function ClassicStreamDetailManagement({
   }
 
   if (tab === 'significantEvents') {
+    if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
+      return (
+        <RedirectTo
+          path="/_discovery/{tab}"
+          params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
+        />
+      );
+    }
+
     return (
-      <RedirectTo
-        path="/_discovery/{tab}"
-        params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
-      />
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
     );
   }
 
