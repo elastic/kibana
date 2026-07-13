@@ -83,6 +83,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/core-http-server-mocks'
   - '@kbn/actions-utils'
+  - '@kbn/es-query'
 tags:
   - plugin
   - prod

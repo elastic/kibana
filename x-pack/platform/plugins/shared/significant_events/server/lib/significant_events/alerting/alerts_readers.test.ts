@@ -13,6 +13,7 @@ import {
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
 import { ALERTS_READER_V1, ALERTS_READER_V2 } from './alerts_reader';
+import { getRuleDetectionSchedule } from '../rules/schedule';
 
 const SPACE_ID = 'default';
 const RULE_UUID = 'rule-abc';
@@ -172,6 +173,7 @@ describe('SignificantEventsAlertsReaderV1', () => {
         change_points: { type: { mean_shift: { p_value: 0.01 } } },
         last_5m: { doc_count: 5 },
         last_floor_window: { doc_count: 8 },
+        rule_schedule: getRuleDetectionSchedule({ severity_score: 60 }),
       },
     ]);
   });
@@ -202,6 +204,7 @@ describe('SignificantEventsAlertsReaderV1', () => {
         change_points: { type: {} },
         last_5m: { doc_count: 0 },
         last_floor_window: { doc_count: 0 },
+        rule_schedule: getRuleDetectionSchedule({ severity_score: 60 }),
       })
     );
   });
@@ -400,8 +403,51 @@ describe('SignificantEventsAlertsReaderV2', () => {
         change_points: { type: { mean_shift: { p_value: 0.02 } } },
         last_5m: { doc_count: 5 },
         last_floor_window: { doc_count: 8 },
+        rule_schedule: getRuleDetectionSchedule({ severity_score: 60 }),
       },
     ]);
+  });
+
+  it('filters change-point scans to the provided rule IDs and recent activity window', async () => {
+    const { client, search } = createEsClient();
+    search.mockResolvedValue({ aggregations: { by_rule: { buckets: [] } } });
+
+    await reader.runChangePointScan(
+      client,
+      {
+        lookback: 'now-110m',
+        bucketInterval: '5m',
+        recentActivityMinutes: 10,
+        ruleIds: [RULE_UUID],
+        spaceId: SPACE_ID,
+      },
+      [makeQueryLink()]
+    );
+
+    expect(search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'signal' } },
+              { term: { space_id: SPACE_ID } },
+              { range: { '@timestamp': { gte: 'now-110m' } } },
+              { terms: { 'rule.id': [RULE_UUID] } },
+            ],
+          },
+        },
+        aggs: expect.objectContaining({
+          by_rule: expect.objectContaining({
+            aggs: expect.objectContaining({
+              last_5m: {
+                filter: { range: { '@timestamp': { gte: 'now-10m' } } },
+                aggs: { signal_count: { cardinality: { field: 'group_hash' } } },
+              },
+            }),
+          }),
+        }),
+      })
+    );
   });
 
   it('normalizes rule activity windows to doc_count from signal_count', async () => {
