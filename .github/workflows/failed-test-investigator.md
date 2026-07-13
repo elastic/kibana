@@ -326,12 +326,11 @@ Explain _why_ it failed in a few tight sentences or bullets, each anchored to a 
 
 #### Backporting strategy (only when a fix is proposed)
 
-Include this section **only** when you propose a fix; omit it otherwise. Keep it dead simple — just where the fix lands and which open branches to backport it to. Backport fixes wherever they apply; later workflows (e.g. the Flaky Test Fixer) handle the labels and tooling, so don't mention those here.
+Include this section **only** when you propose a fix; omit it otherwise. Keep it dead simple — just where the fix lands and which open branches to backport it to.
 
-- Lead with one line ("Open the fix on `main` and backport to:"), then one bullet per target branch.
+- Lead with one line — "Open the fix on `<branch>` (usually `main`) and backport to:" — then one bullet per target branch.
 - List a branch only when the failing test / patched code exists there (check the open branches in `versions.json`) so the fix actually applies. **Never guess** — skip any branch you can't confirm.
-- Note the backport complexity next to each branch when you can, e.g. "`9.4` — clean" or "`9.3` — likely conflicts (helper was refactored)".
-- If `main` is already fixed (the failure is release-branch-only), say so and list only the release branch(es) that still need it.
+- If `main` is already fixed (the failure is release-branch-only), say so instead, and list the release branch(es) that still need it along with the PR that should be backported to them.
 
 #### Additional context (optional)
 
