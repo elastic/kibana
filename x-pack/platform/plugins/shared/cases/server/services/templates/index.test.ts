@@ -970,7 +970,9 @@ describe('TemplatesService', () => {
         },
         'alice'
       )
-    ).rejects.toThrow('Template name "Existing Template" already exists for owner "securitySolution"');
+    ).rejects.toThrow(
+      'Template name "Existing Template" already exists for owner "securitySolution"'
+    );
 
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });

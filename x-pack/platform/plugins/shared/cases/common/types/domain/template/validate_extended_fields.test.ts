@@ -497,12 +497,12 @@ describe('validateExtendedFields', () => {
     it('accepts true/false string values', () => {
       const fields: FieldSchemaType[] = [makeToggleField()];
 
-      expect(
-        validateExtendedFields({ requires_escalation_as_keyword: 'true' }, fields)
-      ).toEqual([]);
-      expect(
-        validateExtendedFields({ requires_escalation_as_keyword: 'false' }, fields)
-      ).toEqual([]);
+      expect(validateExtendedFields({ requires_escalation_as_keyword: 'true' }, fields)).toEqual(
+        []
+      );
+      expect(validateExtendedFields({ requires_escalation_as_keyword: 'false' }, fields)).toEqual(
+        []
+      );
     });
 
     it('rejects values other than true/false', () => {
