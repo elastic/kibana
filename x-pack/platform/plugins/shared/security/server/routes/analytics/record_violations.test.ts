@@ -166,7 +166,7 @@ describe('POST /internal/security/analytics/_record_violations', () => {
       ).not.toHaveBeenCalled();
     });
 
-    it('reports permissions policy violation with null optional fields (as sent by real browsers)', async () => {
+    it('reports permissions policy violation with null optional fields', async () => {
       const permissionsPolicyViolationWithNulls: PermissionsPolicyViolationReport = {
         type: 'permissions-policy-violation',
         url: 'http://localhost:5601/app/home',
