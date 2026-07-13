@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { SavedApmCustomDashboard } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 
@@ -12,18 +12,17 @@ export type SaveServiceDashboardResponse = SavedApmCustomDashboard;
 
 export const saveServiceDashboardRoute = defineRoute<SaveServiceDashboardResponse>()({
   endpoint: 'POST /internal/apm/custom-dashboard',
-  params: t.type({
-    query: t.union([
-      t.partial({
-        customDashboardId: t.string,
-      }),
-      t.undefined,
-    ]),
-    body: t.type({
-      dashboardSavedObjectId: t.string,
-      kuery: t.union([t.string, t.undefined]),
-      serviceNameFilterEnabled: t.boolean,
-      serviceEnvironmentFilterEnabled: t.boolean,
+  params: z.object({
+    query: z
+      .object({
+        customDashboardId: z.string().optional(),
+      })
+      .optional(),
+    body: z.object({
+      dashboardSavedObjectId: z.string(),
+      kuery: z.string().optional(),
+      serviceNameFilterEnabled: z.boolean(),
+      serviceEnvironmentFilterEnabled: z.boolean(),
     }),
   }),
 });

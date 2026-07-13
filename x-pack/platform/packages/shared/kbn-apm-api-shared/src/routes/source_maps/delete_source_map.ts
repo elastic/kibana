@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 
 export const deleteSourceMapRoute = defineRoute<void>()({
   endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
-  params: t.type({
-    path: t.type({
-      id: t.string,
+  params: z.object({
+    path: z.object({
+      id: z.string(),
     }),
   }),
 });
