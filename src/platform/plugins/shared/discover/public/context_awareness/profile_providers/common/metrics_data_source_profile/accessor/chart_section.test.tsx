@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { ReplaySubject } from 'rxjs';
+import { act, render } from '@testing-library/react';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type {
   ChartSectionProps,
@@ -18,6 +18,8 @@ import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramServices,
 } from '@kbn/unified-histogram/types';
+import type { MetricsGridSettings } from '@kbn/unified-chart-section-viewer';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/unified-chart-section-viewer';
 import { createChartSection } from './chart_section';
 import type { ChartSectionConfiguration } from '../../../../types';
 import { DataSourceCategory } from '../../../../profiles';
@@ -27,7 +29,7 @@ import {
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
-import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
+import type { ContextAwarenessToolkit, ContextAwarenessToolkitActions } from '../../../../toolkit';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../toolkit';
 
 type UnifiedGridProps = ChartSectionProps & {
@@ -41,6 +43,8 @@ type UnifiedGridProps = ChartSectionProps & {
     docLinks?: { links: { query: { queryESQL: string } } };
     logger?: unknown;
   };
+  gridSettings?: MetricsGridSettings;
+  onGridSettingsChange?: (update: Partial<MetricsGridSettings>) => void;
 };
 
 let unifiedGridProps: UnifiedGridProps | undefined;
@@ -50,7 +54,24 @@ jest.mock('@kbn/unified-chart-section-viewer', () => ({
     unifiedGridProps = props;
     return null;
   },
+  METRICS_GRID_SETTINGS_DEFAULTS: {
+    counterAggregation: 'sum',
+    gaugeAggregation: 'avg',
+    histogramPercentile: 'p95',
+  },
 }));
+
+const createFakeGridSettingsAdapter = (initialState: MetricsGridSettings) => {
+  const subject = new BehaviorSubject(initialState);
+  return {
+    getState: () => subject.getValue(),
+    getState$: () => subject.asObservable(),
+    setState: (state: MetricsGridSettings) => subject.next(state),
+    updateState: jest.fn((update: Partial<MetricsGridSettings>) =>
+      subject.next({ ...subject.getValue(), ...update })
+    ),
+  };
+};
 
 jest.mock('../../../../../application/main/state_management/redux', () => ({
   internalStateActions: {
@@ -110,6 +131,7 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
   const toolkitActions: ContextAwarenessToolkitActions = {
     addFilter: jest.fn(),
   };
+  const gridSettingsAdapter = createFakeGridSettingsAdapter(METRICS_GRID_SETTINGS_DEFAULTS);
   const getChartSection = createChartSection();
 
   if (!getChartSection) {
@@ -123,6 +145,9 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
       toolkit: {
         ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         actions: toolkitActions,
+        getStateAdapter: jest.fn(
+          () => gridSettingsAdapter
+        ) as unknown as ContextAwarenessToolkit['getStateAdapter'],
       },
     }
   );
@@ -139,7 +164,7 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
 
   render(<>{config.renderChartSection(createChartSectionProps(overrides))}</>);
 
-  return { toolkitActions };
+  return { toolkitActions, gridSettingsAdapter };
 };
 
 describe('MetricsExperienceGridWrapper', () => {
@@ -205,5 +230,25 @@ describe('MetricsExperienceGridWrapper', () => {
     const { toolkitActions } = renderChartSection();
 
     expect(unifiedGridProps?.actions).toBe(toolkitActions);
+  });
+
+  it('passes the resolved grid settings to UnifiedMetricsExperienceGrid', () => {
+    renderChartSection();
+
+    expect(unifiedGridProps?.gridSettings).toEqual(METRICS_GRID_SETTINGS_DEFAULTS);
+  });
+
+  it('updates the grid settings state adapter when onGridSettingsChange is invoked', () => {
+    const { gridSettingsAdapter } = renderChartSection();
+
+    act(() => {
+      unifiedGridProps?.onGridSettingsChange?.({ counterAggregation: 'max' });
+    });
+
+    expect(gridSettingsAdapter.updateState).toHaveBeenCalledWith({ counterAggregation: 'max' });
+    expect(unifiedGridProps?.gridSettings).toEqual({
+      ...METRICS_GRID_SETTINGS_DEFAULTS,
+      counterAggregation: 'max',
+    });
   });
 });
