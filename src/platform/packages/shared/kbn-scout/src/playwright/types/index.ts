@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PlaywrightTestConfig, PlaywrightTestOptions } from 'playwright/test';
+import type { PlaywrightTestConfig, PlaywrightTestOptions } from 'playwright/test';
+import type { ScoutTestChannel } from '@kbn/scout-info';
 
 export type Protocol = 'http' | 'https';
 
@@ -32,4 +33,13 @@ export interface ScoutPlaywrightOptions extends Pick<PlaywrightTestConfig, 'test
    * Defaults to false.
    */
   runGlobalSetup?: boolean;
+  metadata?: {
+    scout?: {
+      testChannels?: ScoutTestChannel[];
+    };
+    [key: string]: unknown;
+  };
 }
+
+// Re-export channel types so plugin authors can use them without a direct dependency on @kbn/scout-info.
+export type { ScoutTestChannel, ScoutTestChannelsDefinition } from '@kbn/scout-info';

@@ -77,6 +77,7 @@ steps:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
       SCOUT_CONFIGS_DEPS: 'build_scout_tests'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+      SCOUT_TEST_CHANNELS: ci-on-commit
       SELECTIVE_TESTING_ENABLED: 'false'
     retry:
       automatic:
