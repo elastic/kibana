@@ -309,7 +309,8 @@ export function StreamListView() {
           iconType="info"
           onDismiss={() => setIsPrototypeCalloutVisible(false)}
           title={i18n.translate('xpack.streams.streamsListView.prototypeCalloutTitle', {
-            defaultMessage: 'This is a UX prototype. Scope and capabilities are limited.',
+            defaultMessage:
+              'This is a UX prototype, using hardcoded dummy data. Scope and capabilities are limited.',
           })}
           className={css`
             border-radius: 0;
