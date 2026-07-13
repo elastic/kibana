@@ -59,6 +59,7 @@ const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
         path: config.path,
         hasTests: !!runnableTest,
         tags: allTags,
+        testChannels: config.manifest.testChannels,
         serverRunFlags: [], // Will be computed from tags after cross-tag filtering
         usesParallelWorkers,
       };
