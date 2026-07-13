@@ -142,4 +142,61 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
       },
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // Scenario 4: Follow up on a prior response action by action ID
+  // ---------------------------------------------------------------------------
+  evaluate('look up prior response action status by action ID', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'endpoint-response-actions: action status follow-up',
+        description:
+          'Validates that the agent uses the read-only get_response_action_status tool ' +
+          'when the analyst asks about a previously dispatched response action, instead of ' +
+          'falling back to platform.core.search or raw Elasticsearch queries.',
+        examples: [
+          {
+            input: {
+              question:
+                'Can you check the status of response action 8d043de1-a9ea-4dc9-ae41-2a5ff7dc693e?',
+            },
+            output: {
+              criteria: [
+                `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                'Called endpoint-response-actions.get_response_action_status with action ID 8d043de1-a9ea-4dc9-ae41-2a5ff7dc693e',
+                'Did not use platform.core.search or raw Elasticsearch queries to look up the action status',
+                'Reported the lookup result to the analyst (action status if found, or a clear not-found message)',
+              ],
+            },
+          },
+          {
+            input: {
+              question:
+                'The malware scan on eval-host-isolate returned pending earlier — what is the status of action c1db8485-5110-4fef-a683-d5c037a65de5 now?',
+            },
+            output: {
+              criteria: [
+                `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                'Called endpoint-response-actions.get_response_action_status with action ID c1db8485-5110-4fef-a683-d5c037a65de5',
+                'Did not dispatch a new scan or other write action just to check status',
+                'Reported the current action status or a clear not-found message to the analyst',
+              ],
+            },
+          },
+          {
+            input: {
+              question: "What's the weather in Amsterdam today?",
+            },
+            output: {
+              criteria: [
+                'Did not activate the endpoint response actions skill',
+                'Did not call endpoint-response-actions.get_response_action_status',
+                'Did not attempt to isolate, release, or scan any endpoint',
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
 });
