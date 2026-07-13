@@ -31,12 +31,12 @@ jest.mock('../../api/hooks/use_anomaly_summary', () => ({
 // Defined here for use in test bodies; the mock factory below must inline its
 // own copy because jest.mock factories are hoisted before these declarations.
 const WARNING = {
-  val: 25,
+  val: 3,
   display: 'Warning',
   color: '',
-  threshold: { min: 25, max: 50 } as const,
+  threshold: { min: 3, max: 25 } as const,
 };
-const MINOR = { val: 3, display: 'Minor', color: '', threshold: { min: 3, max: 25 } as const };
+const MINOR = { val: 25, display: 'Minor', color: '', threshold: { min: 25, max: 50 } as const };
 const MAJOR = { val: 50, display: 'Major', color: '', threshold: { min: 50, max: 75 } as const };
 const CRITICAL = { val: 75, display: 'Critical', color: '', threshold: { min: 75 } as const };
 
@@ -204,9 +204,9 @@ describe('AnomaliesTab', () => {
 
     it('emits one range per selected severity (no critical)', () => {
       render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
-      // Select only Minor [3,25) and Warning [25,50)
+      // Select only Warning [3,25) and Minor [25,50)
       act(() => {
-        onSeverityChange!([MINOR, WARNING] as unknown as SeverityOption[]);
+        onSeverityChange!([WARNING, MINOR] as unknown as SeverityOption[]);
       });
       expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -239,9 +239,9 @@ describe('AnomaliesTab', () => {
       // selection into a single min/max span silently re-included the deselected Major range
       // whenever critical (which has no upper bound) stayed selected.
       render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
-      // Select Minor, Warning, and Critical, but deselect Major [50,75).
+      // Select Warning, Minor, and Critical, but deselect Major [50,75).
       act(() => {
-        onSeverityChange!([MINOR, WARNING, CRITICAL] as unknown as SeverityOption[]);
+        onSeverityChange!([WARNING, MINOR, CRITICAL] as unknown as SeverityOption[]);
       });
       expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
         expect.objectContaining({

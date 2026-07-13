@@ -124,7 +124,7 @@ export const registerAnomalySummaryRoutes = ({
           if (scoreRanges?.some((r) => r.max_score !== undefined && r.min_score > r.max_score)) {
             return siemResponse.error({
               statusCode: 400,
-              body: '`min_score` must not be greater than `max_score`',
+              body: "each `score_ranges` entry's `min_score` must not be greater than its `max_score`",
             });
           }
 
@@ -239,7 +239,7 @@ export const registerAnomalySummaryRoutes = ({
           if (scoreRanges?.some((r) => r.max_score !== undefined && r.min_score > r.max_score)) {
             return siemResponse.error({
               statusCode: 400,
-              body: '`min_score` must not be greater than `max_score`',
+              body: "each `score_ranges` entry's `min_score` must not be greater than its `max_score`",
             });
           }
 

@@ -148,7 +148,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
       min_score: s.threshold.min,
       max_score: 'max' in s.threshold ? s.threshold.max : undefined,
     }));
-  }, [selectedSeverities, severityOptions.length]);
+  }, [selectedSeverities, severityOptions]);
 
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(DEFAULT_TABLE_PAGE_SIZE);

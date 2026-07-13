@@ -572,7 +572,9 @@ apiTest.describe(
         });
 
         expect(response.statusCode).toBe(400);
-        expect(response.body.message).toContain('`min_score` must not be greater than `max_score`');
+        expect(response.body.message).toContain(
+          "each `score_ranges` entry's `min_score` must not be greater than its `max_score`"
+        );
       }
     );
 
@@ -833,7 +835,9 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(400);
-        expect(response.body.message).toContain('`min_score` must not be greater than `max_score`');
+        expect(response.body.message).toContain(
+          "each `score_ranges` entry's `min_score` must not be greater than its `max_score`"
+        );
       }
     );
 
