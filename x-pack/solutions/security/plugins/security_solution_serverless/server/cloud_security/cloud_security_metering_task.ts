@@ -186,6 +186,7 @@ export const getSearchQueryByCloudSecuritySolution = (
  */
 export const getGcpComputeDurationFilter = () => {
   const minDurationMillis = GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS * 60 * 60 * 1000;
+  const nowMillis = Date.now();
 
   return {
     bool: {
@@ -210,7 +211,7 @@ export const getGcpComputeDurationFilter = () => {
 
                       long duration;
                       if (status == 'RUNNING') {
-                        duration = new Date().getTime() - lastStart;
+                        duration = params.nowMillis - lastStart;
                       } else {
                         def lastStop = doc['resource.raw.lastStopTimestamp'].size() > 0 ? doc['resource.raw.lastStopTimestamp'].value.toInstant().toEpochMilli() : 0L;
                         if (lastStop == 0L) { return false; }
@@ -222,6 +223,7 @@ export const getGcpComputeDurationFilter = () => {
                     lang: 'painless',
                     params: {
                       minDurationMillis,
+                      nowMillis,
                     },
                   },
                 },
