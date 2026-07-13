@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { z } from '@kbn/zod/v4';
 import {
   basicCase,
   alertComment,
@@ -47,7 +46,7 @@ const buildRegistry = () => {
     getAttachmentTabViewObject: () => ({
       children: () => <div data-test-subj="test-alerts-table">{'Alerts table'}</div>,
     }),
-    schema: z.object({}),
+    schemaValidator: () => {},
   });
   registry.register({
     id: 'security.event',
@@ -57,7 +56,7 @@ const buildRegistry = () => {
     getAttachmentTabViewObject: () => ({
       children: () => <div data-test-subj="test-events-table">{'Events table'}</div>,
     }),
-    schema: z.object({}),
+    schemaValidator: () => {},
   });
   registry.register({
     id: 'file',
@@ -67,7 +66,7 @@ const buildRegistry = () => {
     getAttachmentTabViewObject: () => ({
       children: () => <div data-test-subj="test-files-table">{'Files table'}</div>,
     }),
-    schema: z.object({}),
+    schemaValidator: () => {},
   });
   // Comment is intentionally registered without `getAttachmentTabViewObject`
   // to mirror production: comments live in the activity tab, not here.
@@ -76,7 +75,7 @@ const buildRegistry = () => {
     displayName: 'Comment',
     icon: 'editorComment',
     getAttachmentViewObject: () => ({ event: 'added a comment' }),
-    schema: z.object({}),
+    schemaValidator: () => {},
   });
   return registry;
 };

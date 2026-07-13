@@ -13,7 +13,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   SmlIndexAction,
   SmlIndexAttachmentParams,
-} from '@kbn/agent-context-layer-plugin/server';
+} from '@kbn/agent-builder-sml-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
