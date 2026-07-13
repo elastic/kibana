@@ -34,28 +34,12 @@ const stateSchemaV1 = schema.object({
   ),
   count_by_schedule: schema.maybe(schema.arrayOf(nameValuePairSchema)),
   count_by_lookback: schema.maybe(schema.arrayOf(nameValuePairSchema)),
-  count_with_recovery_policy: schema.maybe(schema.number()),
-  count_by_recovery_policy_type: schema.maybe(
-    schema.object({
-      query: schema.maybe(schema.number()),
-      no_breach: schema.maybe(schema.number()),
-    })
-  ),
   avg_pending_count: schema.maybe(schema.nullable(schema.number())),
   avg_recovering_count: schema.maybe(schema.nullable(schema.number())),
   count_by_pending_timeframe: schema.maybe(schema.arrayOf(nameValuePairSchema)),
   count_by_recovering_timeframe: schema.maybe(schema.arrayOf(nameValuePairSchema)),
   count_with_grouping: schema.maybe(schema.number()),
   avg_grouping_fields_count: schema.maybe(schema.nullable(schema.number())),
-  count_with_no_data: schema.maybe(schema.number()),
-  count_by_no_data_behavior: schema.maybe(
-    schema.object({
-      no_data: schema.maybe(schema.number()),
-      last_status: schema.maybe(schema.number()),
-      recover: schema.maybe(schema.number()),
-    })
-  ),
-  count_by_no_data_timeframe: schema.maybe(schema.arrayOf(nameValuePairSchema)),
   min_created_at: schema.maybe(schema.nullable(schema.string())),
 
   // execution stats
@@ -104,6 +88,11 @@ const stateSchemaV1 = schema.object({
   alerts_index_size_bytes: schema.maybe(schema.nullable(schema.number())),
 });
 
+const stateSchemaV2 = stateSchemaV1.extends({
+  count_agent_builder_assisted: schema.maybe(schema.number()),
+  action_policies_count_agent_builder_assisted: schema.maybe(schema.number()),
+});
+
 export const stateSchemaByVersion = {
   1: {
     up: (state: Record<string, unknown>) => ({
@@ -115,17 +104,12 @@ export const stateSchemaByVersion = {
       count_by_kind: state.count_by_kind ?? undefined,
       count_by_schedule: state.count_by_schedule ?? undefined,
       count_by_lookback: state.count_by_lookback ?? undefined,
-      count_with_recovery_policy: state.count_with_recovery_policy ?? undefined,
-      count_by_recovery_policy_type: state.count_by_recovery_policy_type ?? undefined,
       avg_pending_count: state.avg_pending_count ?? undefined,
       avg_recovering_count: state.avg_recovering_count ?? undefined,
       count_by_pending_timeframe: state.count_by_pending_timeframe ?? undefined,
       count_by_recovering_timeframe: state.count_by_recovering_timeframe ?? undefined,
       count_with_grouping: state.count_with_grouping ?? undefined,
       avg_grouping_fields_count: state.avg_grouping_fields_count ?? undefined,
-      count_with_no_data: state.count_with_no_data ?? undefined,
-      count_by_no_data_behavior: state.count_by_no_data_behavior ?? undefined,
-      count_by_no_data_timeframe: state.count_by_no_data_timeframe ?? undefined,
       min_created_at: state.min_created_at ?? undefined,
       executions_count_24hr: state.executions_count_24hr ?? undefined,
       executions_count_by_status_24hr: state.executions_count_by_status_24hr ?? undefined,
@@ -153,9 +137,18 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV1,
   },
+  2: {
+    up: (state: Record<string, unknown>) => ({
+      ...state,
+      count_agent_builder_assisted: state.count_agent_builder_assisted ?? undefined,
+      action_policies_count_agent_builder_assisted:
+        state.action_policies_count_agent_builder_assisted ?? undefined,
+    }),
+    schema: stateSchemaV2,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[1].schema;
+const latestTaskStateSchema = stateSchemaByVersion[2].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {

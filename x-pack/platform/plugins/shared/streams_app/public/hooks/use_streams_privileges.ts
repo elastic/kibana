@@ -12,8 +12,9 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_CANVAS,
 } from '@kbn/management-settings-ids';
-import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
+import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/significant-events-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';
@@ -60,6 +61,7 @@ export function useStreamsPrivileges() {
   );
 
   const draftStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS, false);
+  const canvasEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CANVAS, false);
 
   return {
     ui: streams as {
@@ -89,6 +91,9 @@ export function useStreamsPrivileges() {
       },
       draftStreams: {
         enabled: draftStreamsEnabled,
+      },
+      canvas: {
+        enabled: canvasEnabled,
       },
     },
     isLoading: !license,

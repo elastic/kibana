@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { AgentName } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt, kueryRt } from '../../default_api_types';
+import { rangeSchema, kuerySchema } from '../../default_api_types';
 
 export type LookupServicesResponse = Array<{
   serviceName: string;
@@ -21,7 +21,7 @@ export interface LookupServicesRouteResponse {
 
 export const serviceGroupServicesRoute = defineRoute<LookupServicesRouteResponse>()({
   endpoint: 'GET /internal/apm/service-group/services',
-  params: t.type({
-    query: t.intersection([rangeRt, t.partial(kueryRt.props)]),
+  params: z.object({
+    query: rangeSchema.merge(kuerySchema.partial()),
   }),
 });

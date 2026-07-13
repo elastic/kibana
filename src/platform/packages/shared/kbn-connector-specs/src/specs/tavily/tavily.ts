@@ -41,6 +41,7 @@ export const TavilyConnector: ConnectorSpec = {
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
+    docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/tavily-action-type`,
   },
 
   auth: {
@@ -55,6 +56,7 @@ export const TavilyConnector: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'https://mcp.tavily.com/mcp/',
+          hidden: true,
           label: i18n.translate('connectorSpecs.tavily.config.serverUrl.label', {
             defaultMessage: 'MCP Server URL',
           }),

@@ -137,9 +137,9 @@ export const ArgumentFileSelector = memo<
         button={
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
-              <div className="eui-textTruncate" title={selectedFileTitleTooltip}>
-                {selectedFileDisplayText}
-              </div>
+              <EuiToolTip content={selectedFileTitleTooltip}>
+                <div className="eui-textTruncate">{selectedFileDisplayText}</div>
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip content={OPEN_FILE_PICKER_LABEL} disableScreenReaderOutput>

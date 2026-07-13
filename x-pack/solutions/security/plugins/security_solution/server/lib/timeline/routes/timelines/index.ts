@@ -9,6 +9,7 @@ export { deleteTimelinesRoute } from './delete_timelines';
 export { exportTimelinesRoute } from './export_timelines';
 export { getTimelineRoute } from './get_timeline';
 export { getTimelinesRoute } from './get_timelines';
+export { getTimelinesByIdsRoute } from './get_timelines_by_ids';
 export { importTimelinesRoute } from './import_timelines';
 export { patchTimelinesRoute } from './patch_timelines';
 export { persistFavoriteRoute } from './persist_favorite';

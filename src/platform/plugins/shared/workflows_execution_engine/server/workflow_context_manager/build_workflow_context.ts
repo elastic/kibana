@@ -9,6 +9,7 @@
 
 import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowContext } from '@kbn/workflows';
+import { pickWorkflowDocumentVersion } from '@kbn/workflows';
 import {
   applyInputDefaults,
   getInputsFromDefinition,
@@ -50,12 +51,14 @@ export function buildInputDefaultRenderContext(
       url: executionUrl,
       executedBy: workflowExecution.executedBy ?? 'unknown',
       triggeredBy: workflowExecution.triggeredBy,
+      usage: workflowExecution.usage,
     },
     workflow: {
       id: workflowExecution.workflowId,
       name: workflowExecution.workflowDefinition?.name ?? '',
       enabled: workflowExecution.workflowDefinition?.enabled ?? false,
       spaceId: workflowExecution.spaceId,
+      ...pickWorkflowDocumentVersion(workflowExecution),
     },
     kibanaUrl,
     consts: workflowExecution.workflowDefinition?.consts ?? {},

@@ -21,19 +21,11 @@ import {
   WATCHLISTS_MANAGEMENT_TABLE,
 } from '../../../screens/entity_analytics/watchlists_management';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/273235
+describe.skip(
   'Entity Analytics Watchlists Management Page ',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsWatchlistEnabled',
-          ])}`,
-        ],
-      },
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     const WATCHLISTS_LIST_URL = `${WATCHLISTS_URL}/list`;

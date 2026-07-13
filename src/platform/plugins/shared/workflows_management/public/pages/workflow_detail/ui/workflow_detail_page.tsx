@@ -11,6 +11,7 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,7 +24,6 @@ import { WorkflowDetailLoadingState } from './workflow_detail_loading_state';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
 import { WorkflowNotFoundPage } from './workflow_not_found_page';
-import { PLUGIN_ID } from '../../../../common';
 import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import {
@@ -34,6 +34,7 @@ import {
 import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk';
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
 import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflows_thunk';
+import { WorkflowChangeHistoryProvider } from '../../../features/change_history';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
@@ -41,6 +42,10 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import {
+  navigateToWorkflowsList,
+  type WorkflowDetailRouteState,
+} from '../../../shared/utils/workflow_navigation';
 
 const isLoadWorkflowNotFoundError = (error: unknown) =>
   isHttpFetchError(error) && error.response?.status === 404;
@@ -58,6 +63,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     useAsyncThunkState(loadWorkflowThunk);
   const telemetry = useTelemetry();
   const { application } = useKibana().services;
+  const location = useLocation<WorkflowDetailRouteState | undefined>();
 
   const isReady = !isLoadingWorkflow && !isLoadingConnectors;
 
@@ -135,8 +141,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   }, [setSelectedExecution]);
 
   const onBackToWorkflows = useCallback(() => {
-    application.navigateToApp(PLUGIN_ID);
-  }, [application]);
+    void navigateToWorkflowsList(application, location.state);
+  }, [application, location.state]);
 
   if (error) {
     if (isLoadWorkflowNotFoundError(error)) {
@@ -168,7 +174,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     );
   }
 
-  return (
+  const pageContent = (
     <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
       <EuiFlexItem grow={false}>
         <WorkflowDetailHeader
@@ -205,5 +211,15 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
         <WorkflowDetailTestStepModal />
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+
+  if (!id) {
+    return pageContent;
+  }
+
+  return (
+    <WorkflowChangeHistoryProvider workflowId={id} workflowName={workflowName ?? workflowId}>
+      {pageContent}
+    </WorkflowChangeHistoryProvider>
   );
 }

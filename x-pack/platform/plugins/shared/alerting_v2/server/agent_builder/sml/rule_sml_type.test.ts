@@ -26,7 +26,10 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  evaluation: { query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' } },
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  },
   state_transition: null,
   enabled: true,
   createdBy: 'elastic',
@@ -51,6 +54,7 @@ describe('createRuleSmlType', () => {
   let getRule: jest.Mock;
   let getRepoSo: jest.Mock;
   let createFinder: jest.Mock;
+  let getIsAlertingV2Enabled: jest.Mock;
   let repository: ISavedObjectsRepository;
   let rulesClient: RulesClient;
 
@@ -58,6 +62,7 @@ describe('createRuleSmlType', () => {
     getRule = jest.fn();
     getRepoSo = jest.fn();
     createFinder = jest.fn();
+    getIsAlertingV2Enabled = jest.fn().mockResolvedValue(true);
 
     repository = {
       get: getRepoSo,
@@ -71,6 +76,7 @@ describe('createRuleSmlType', () => {
     createRuleSmlType({
       getScopedRulesClient: () => rulesClient,
       getInternalRepository: () => repository,
+      getIsAlertingV2Enabled: () => getIsAlertingV2Enabled(),
     });
 
   describe('id and fetchFrequency', () => {
@@ -164,6 +170,15 @@ describe('createRuleSmlType', () => {
       await expect(drainList()).rejects.toThrow('boom');
       expect(close).toHaveBeenCalledTimes(1);
     });
+
+    it('yields nothing and never touches the repository when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const items = await drainList();
+
+      expect(items).toEqual([]);
+      expect(createFinder).not.toHaveBeenCalled();
+    });
   });
 
   describe('getSmlData', () => {
@@ -183,15 +198,12 @@ describe('createRuleSmlType', () => {
               'CPU breach detection',
               'alert',
               'ops, cpu',
-              baseRuleAttrs.evaluation!.query!.base,
+              (baseRuleAttrs.query as { breach: { query: string } }).breach.query,
             ].join('\n'),
-            permissions: {
-              kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       });
+      expect(result?.chunks[0]).not.toHaveProperty('permissions');
     });
 
     it('falls back to originId for title when metadata.name is missing', async () => {
@@ -218,6 +230,25 @@ describe('createRuleSmlType', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining("SML rule: failed to get data for 'rule-missing'")
       );
+    });
+
+    it('returns undefined without reading the saved object when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().getSmlData('rule-1', buildSmlContext());
+
+      expect(result).toBeUndefined();
+      expect(getRepoSo).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getPermissions', () => {
+    it('returns the rules-read API privilege', () => {
+      const permissions = buildDefinition().getPermissions!('rule-1', buildSmlContext());
+      expect(permissions).toEqual({
+        kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
+        elasticsearch: { indices: [] },
+      });
     });
   });
 
@@ -275,6 +306,18 @@ describe('createRuleSmlType', () => {
       );
 
       expect(result).toBeUndefined();
+    });
+
+    it('returns undefined without calling the rules client when alerting v2 is disabled', async () => {
+      getIsAlertingV2Enabled.mockResolvedValue(false);
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result).toBeUndefined();
+      expect(getRule).not.toHaveBeenCalled();
     });
   });
 });

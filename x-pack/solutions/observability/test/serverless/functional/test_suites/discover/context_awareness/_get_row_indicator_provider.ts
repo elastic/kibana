@@ -34,7 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
-  describe('extension getRowIndicatorProvider', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/266279
+  describe.skip('extension getRowIndicatorProvider', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
       await esArchiver.loadIfNeeded(

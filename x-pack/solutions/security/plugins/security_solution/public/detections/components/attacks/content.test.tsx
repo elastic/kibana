@@ -31,6 +31,10 @@ jest.mock('./search_bar/search_bar_section', () => ({
   SearchBarSection: () => <div data-test-subj="search-bar-section" />,
 }));
 
+jest.mock('./filters/type_filter', () => ({
+  TypeFilter: () => <div data-test-subj="mock-type-filter" />,
+}));
+
 jest.mock(
   '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover',
   () => ({
@@ -53,6 +57,15 @@ jest.mock('../../../attack_discovery/pages/use_attack_discovery_controls', () =>
   }),
 }));
 
+jest.mock('@kbn/inference-connectors', () => ({
+  useLoadConnectors: jest.fn().mockReturnValue({ data: undefined }),
+}));
+
+jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
+  ...jest.requireActual('../../../attack_discovery/pages/use_find_attack_discoveries'),
+  useFindAttackDiscoveries: jest.fn().mockReturnValue({ data: undefined }),
+}));
+
 const dataView: DataView = createStubDataView({ spec: {} });
 
 describe('AttacksPageContent', () => {
@@ -68,8 +81,18 @@ describe('AttacksPageContent', () => {
             getUpdate$: jest.fn().mockReturnValue(of()),
           },
         },
+        notifications: {
+          tours: {
+            isEnabled: jest.fn().mockReturnValue(false),
+          },
+        },
         telemetry: {
           reportEvent,
+        },
+        storage: {
+          get: jest.fn(),
+          set: jest.fn(),
+          remove: jest.fn(),
         },
       },
     });
@@ -170,6 +193,18 @@ describe('AttacksPageContent', () => {
     expect(onGenerateMock).toHaveBeenCalled();
     expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.GenerateClicked, {
       source: 'attacks_page_header',
+    });
+  });
+
+  it('should render `Type` filter', async () => {
+    render(
+      <TestProviders>
+        <AttacksPageContent dataView={dataView} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mock-type-filter')).toBeInTheDocument();
     });
   });
 

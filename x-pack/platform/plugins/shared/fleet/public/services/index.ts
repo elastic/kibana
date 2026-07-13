@@ -13,6 +13,7 @@ export type {
   PackagePolicyInputValidationResults,
 } from '../../common/services';
 export { ExperimentalFeaturesService } from './experimental_features';
+export { isAgentlessPoliciesUIEnabled } from './agentless_policies_ui';
 export {
   AgentStatusKueryHelper,
   agentPolicyRouteService,
@@ -31,6 +32,7 @@ export {
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
   isValidNamespace,
+  isValidDuration,
   LicenseService,
   isAgentUpgradeable,
   getNotUpgradeableMessage,

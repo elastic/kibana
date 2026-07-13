@@ -218,8 +218,13 @@ export const useEsqlCallbacks = ({
   }, [core.http]);
 
   const getViewsCallback = useCallback(async () => {
-    return await getViews(core.http);
-  }, [core.http]);
+    const views = await getViews(core.http);
+    const enrichViews = esqlService?.enrichViews;
+    if (!enrichViews) {
+      return views;
+    }
+    return { ...views, views: await enrichViews(views.views) };
+  }, [core.http, esqlService]);
 
   const getDatasetsCallback = useCallback(async () => {
     return await getDatasets(core.http);
@@ -296,6 +301,7 @@ export const useEsqlCallbacks = ({
             label: suggestion.text,
             detail: typeof suggestion.description === 'string' ? suggestion.description : undefined,
             kind: KQL_TYPE_TO_KIND_MAP[suggestion.type] ?? 'Value',
+            range: { start: suggestion.start, end: suggestion.end },
           };
         }) ?? []
       );

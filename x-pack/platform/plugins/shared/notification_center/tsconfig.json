@@ -1,0 +1,19 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/zod",
+    "@kbn/std",
+    "@kbn/core-data-streams-server",
+    "@kbn/core-data-streams-server-mocks",
+    "@kbn/core-user-storage-server",
+    "@kbn/core-user-storage-server-mocks",
+    "@kbn/es-mappings",
+  ]
+}
