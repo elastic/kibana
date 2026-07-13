@@ -9,7 +9,6 @@ import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
-  createDashboardWithPanelId,
   openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
   testData,
@@ -19,7 +18,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
   let dashboardId: string;
   let panelId: string;
 
-  spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
+  spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
     await scoutSpace.uiSettings.set({
       defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
       'dateFormat:tz': 'UTC',
@@ -55,7 +54,7 @@ spaceTest.describe('Lens ES|QL metric trendline toggle', { tag: tags.stateful.cl
       ],
     };
 
-    const result = await createDashboardWithPanelId(kbnClient, body, scoutSpace.id);
+    const result = await apiServices.dashboard.createWithPanelId(body, scoutSpace.id);
     dashboardId = result.dashboardId;
     panelId = result.panelId;
   });
