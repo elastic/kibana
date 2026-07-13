@@ -9,7 +9,14 @@
 
 import { z } from '@kbn/zod';
 
-const filterExpressionPattern = /^(-?)(.*):(.*)$/;
+const filterExpressionPattern = /^(.*):(_.*):(.*)$/;
+
+export const FilterOperator = {
+  EQUALS: 'is',
+  NOT_EQUALS: 'not',
+} as const;
+
+export type FilterOperatorLiteral = (typeof FilterOperator)[keyof typeof FilterOperator];
 
 /**
  * filter expression codec declaration for CPS project picker filtering,
@@ -18,15 +25,34 @@ const filterExpressionPattern = /^(-?)(.*):(.*)$/;
 export const filterExpressionCodec = z.codec(
   z.optional(z.string()),
   z.object({
-    operator: z.optional(z.string()),
+    operator: z.optional(z.enum(FilterOperator)),
     tagName: z.optional(z.string()),
     tagValue: z.optional(z.string()),
   }),
   {
     decode: (value) => {
-      const [, operator, tagName, tagValue] = (value ?? '').match(filterExpressionPattern) ?? [];
+      const [, operatorLiteral, tagName, tagValue] =
+        (value ?? '').match(filterExpressionPattern) ?? [];
+
+      let operatorValue: FilterOperatorLiteral | undefined;
+
+      switch (operatorLiteral) {
+        case FilterOperator.EQUALS:
+          operatorValue = FilterOperator.EQUALS;
+          break;
+        case FilterOperator.NOT_EQUALS:
+          operatorValue = FilterOperator.NOT_EQUALS;
+          break;
+        default:
+          break;
+      }
+
+      if (operatorLiteral && !operatorValue) {
+        throw new Error('Invalid filter expression');
+      }
+
       return {
-        operator,
+        operator: operatorValue,
         tagName,
         tagValue,
       };
