@@ -44,7 +44,7 @@ describe('ConfirmRegionChangeModal', () => {
       expect(screen.getByText('Confirm region change')).toBeInTheDocument();
     });
 
-    it('renders "Confirm geo zone change" title in geo mode', () => {
+    it('renders "Confirm geographies change" title in geo mode', () => {
       render(
         <Wrapper>
           <ConfirmRegionChangeModal
