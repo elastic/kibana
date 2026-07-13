@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { openLazyFlyout } from './src/open_lazy_flyout';
-export { getPanelContextMenuTriggerId } from './src/focus_helpers';
-export { tracksOverlays, type TracksOverlays } from './src/tracks_overlays';
+import { createPlaywrightConfig } from '@kbn/scout';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
