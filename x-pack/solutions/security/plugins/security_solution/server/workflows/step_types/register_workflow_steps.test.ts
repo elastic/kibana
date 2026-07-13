@@ -18,6 +18,8 @@ import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_s
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
 import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
+import { createRuleExceptionStepDefinition } from './create_rule_exception_step/create_rule_exception_step';
+import { createExceptionListItemStepDefinition } from './create_exception_list_item_step/create_exception_list_item_step';
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
@@ -29,7 +31,7 @@ describe('registerWorkflowSteps (server)', () => {
       publicAttacksApiEnabled: true,
     } as ExperimentalFeatures);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(10);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(12);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );
@@ -60,6 +62,12 @@ describe('registerWorkflowSteps (server)', () => {
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       disableRuleStepDefinition
     );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      createRuleExceptionStepDefinition
+    );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      createExceptionListItemStepDefinition
+    );
   });
 
   it('does not register the attack steps when publicAttacksApiEnabled is false', () => {
@@ -69,7 +77,7 @@ describe('registerWorkflowSteps (server)', () => {
       publicAttacksApiEnabled: false,
     } as ExperimentalFeatures);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(9);
     const registeredSteps = workflowsExtensions.registerStepDefinition.mock.calls.map(
       ([arg]) => arg
     );
