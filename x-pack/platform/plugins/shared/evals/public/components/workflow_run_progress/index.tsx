@@ -80,13 +80,10 @@ const DatasetStepProgress: React.FC<{
     : Math.max(progress?.scores_ingested ?? 0, progressFloor?.scoresIngested ?? 0);
 
   const knownTotal = typeof total === 'number' && total > 0 ? total : undefined;
-  const max = knownTotal ?? Math.max(done, 1);
-  // Show the indeterminate (animated) bar only while the step is running and
-  // nothing has finished yet — this conveys activity for long single-batch runs
-  // instead of a bar frozen at 0. As soon as anything completes (or the step
-  // settles) switch to a determinate bar so it never keeps spinning after
-  // finishing.
-  const value = settled ? max : done > 0 ? done : undefined;
+
+  const indeterminate = !settled && done === 0;
+  const max = indeterminate ? undefined : knownTotal ?? Math.max(done, 1);
+  const value = indeterminate ? undefined : settled ? max : done;
 
   return (
     <div data-test-subj="evalsDatasetStepProgress">
