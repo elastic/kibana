@@ -112,8 +112,10 @@ export async function getSharingData(
             let field = column;
 
             // If this column is a nested field, add a wildcard to the field name in order to fetch
-            // all leaf fields for the report, since the fields API doesn't support nested field roots
-            if (isNestedFieldParent(column, index)) {
+            // all leaf fields for the report, since the fields API doesn't support nested field roots.
+            // In ES|QL mode there is no data view (`index` is undefined) and nested field roots do
+            // not apply, so the check is skipped.
+            if (index && isNestedFieldParent(column, index)) {
               field = `${column}.*`;
             }
 
