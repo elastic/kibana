@@ -339,7 +339,7 @@ export class EndpointMetadataService {
    */
   async getFleetAgent(agentId: string): Promise<Agent> {
     try {
-      return await this.fleetServices.agent.getAgent(agentId);
+      return await this.fleetServices.fetchAgent(agentId);
     } catch (error) {
       if (error instanceof AgentNotFoundError) {
         throw new FleetAgentNotFoundError(`agent with id ${agentId} not found`, error);
