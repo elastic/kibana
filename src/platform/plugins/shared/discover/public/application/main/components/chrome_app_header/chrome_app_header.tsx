@@ -49,6 +49,9 @@ export const ChromeAppHeader = ({
   }, [embeddableEditor]);
 
   const appMenu = useMemo(() => {
+    // Share is an optional plugin; when it's absent there's no share item to re-host the separator.
+    const hasShare = menu?.items?.some((item) => item.id === AppMenuActionId.share) ?? false;
+
     return {
       ...menu,
       isCollapsed,
@@ -64,8 +67,9 @@ export const ChromeAppHeader = ({
         }
 
         // The leading separator now belongs to share, so drop it from whichever tab-scoped item
-        // `use_top_nav_links` placed it on (export when present, otherwise inspect).
-        if (item.separator === 'above') {
+        // `use_top_nav_links` placed it on (export when present, otherwise inspect). Only strip it
+        // when share is present to re-host it, otherwise leave the section's separator intact.
+        if (hasShare && item.separator === 'above') {
           return { ...item, overflow, separator: undefined } as AppMenuItemType;
         }
 
