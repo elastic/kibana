@@ -49894,11 +49894,9 @@ paths:
                           properties:
                             description:
                               description: A short description of the markdown library item.
-                              maxLength: 10000
                               type: string
                             title:
                               description: The markdown library item title.
-                              maxLength: 1000
                               type: string
                           required:
                             - title
