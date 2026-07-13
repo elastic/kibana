@@ -146,10 +146,6 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'schema');
   }
 
-  async gotoSignificantEventsTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'significantEvents');
-  }
-
   async gotoAttachmentsTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'attachments');
   }

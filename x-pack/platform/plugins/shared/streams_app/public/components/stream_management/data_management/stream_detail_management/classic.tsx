@@ -35,7 +35,6 @@ const classicStreamManagementSubTabs = [
   'partitioning',
   'processing',
   'dataQuality',
-  'significantEvents',
   'schemaEditor',
   'schema',
   'attachments',
@@ -78,7 +77,7 @@ export function ClassicStreamDetailManagement({
     features: { canvas, queryStreams },
   } = useStreamsPrivileges();
 
-  const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
+  const { processing } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
   });
@@ -205,10 +204,6 @@ export function ClassicStreamDetailManagement({
     };
   }
 
-  if (otherTabs.significantEvents) {
-    tabs.significantEvents = otherTabs.significantEvents;
-  }
-
   if (tab === 'partitioning' && !queryStreams.enabled) {
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'lifecycle' } }} />
@@ -234,9 +229,5 @@ export function ClassicStreamDetailManagement({
       />
     );
   }
-  if (isLoading) {
-    return null;
-  }
-
   return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />;
 }

@@ -36,7 +36,6 @@ const wiredStreamManagementSubTabs = [
   'processing',
   'schema',
   'lifecycle',
-  'significantEvents',
   'dataQuality',
   'attachments',
   'canvas',
@@ -74,7 +73,7 @@ export function WiredStreamDetailManagement({
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
 
-  const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
+  const { processing } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
   });
@@ -261,7 +260,6 @@ export function WiredStreamDetailManagement({
           },
         }
       : {}),
-    ...otherTabs,
   };
 
   const redirectConfig = tabRedirects[tab];
@@ -288,10 +286,6 @@ export function WiredStreamDetailManagement({
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
     );
-  }
-
-  if (isLoading) {
-    return null;
   }
 
   return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />;
