@@ -378,9 +378,11 @@ function StreamsCanvasInner() {
     contextMenu,
     setContextMenu,
     selectStream,
+    cleanupSelected,
     deleteNodes,
     onSelectionContextMenu,
     onNodeContextMenu,
+    onPaneContextMenu,
   } = useCanvasSelection({ setNodes, recordHistory });
 
   // "Delete source" in the configured-source flyout: remove the node (and its
@@ -1432,7 +1434,7 @@ function StreamsCanvasInner() {
                       onNodeMouseLeave={onNodeMouseLeave}
                       onNodeContextMenu={onNodeContextMenu}
                       onSelectionContextMenu={onSelectionContextMenu}
-                      onPaneContextMenu={() => setContextMenu(null)}
+                      onPaneContextMenu={onPaneContextMenu}
                       nodeDragThreshold={4}
                       onNodeDragStart={onNodeDragStart}
                       onNodeDrag={onNodeDrag}
@@ -1520,7 +1522,6 @@ function StreamsCanvasInner() {
                     <CanvasControls
                       placementType={placementType}
                       onActivatePlacement={activatePlacement}
-                      onCleanup={cleanup}
                       onUndo={undo}
                       onRedo={redo}
                       canUndo={canUndo}
@@ -1534,6 +1535,8 @@ function StreamsCanvasInner() {
                       onAddRoutingWithInheritance={(nodeIds) =>
                         setInheritanceRoutingNodeId(nodeIds[0] ?? null)
                       }
+                      onCleanupAll={cleanup}
+                      onCleanupSelected={cleanupSelected}
                     />
                   </div>
                 </div>

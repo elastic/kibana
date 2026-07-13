@@ -9,7 +9,8 @@
 //   - selectStream    — select everything a node's flow reaches (directed), as a
 //                       real React Flow selection (box + move-together).
 //   - cleanupSelected — auto-layout + straighten only the selected sub-graph.
-//   - context-menu handlers that open the menu for a selection or a single node.
+//   - context-menu handlers that open the menu for a selection, a single node,
+//     or the empty pane (whole-graph actions).
 // Kept out of the canvas orchestrator so the selection feature lives on its own.
 
 import type React from 'react';
@@ -150,6 +151,13 @@ export function useCanvasSelection({ setNodes, recordHistory }: SelectionDeps) {
     [getNodes, openContextMenu]
   );
 
+  // Right-click on the empty canvas → open a pane menu (no nodes) that offers
+  // whole-graph actions like "Tidy up".
+  const onPaneContextMenu = useCallback((event: React.MouseEvent | MouseEvent) => {
+    event.preventDefault();
+    setContextMenu({ x: event.clientX, y: event.clientY, nodeIds: [], nodeTypes: [] });
+  }, []);
+
   return {
     contextMenu,
     setContextMenu,
@@ -158,5 +166,6 @@ export function useCanvasSelection({ setNodes, recordHistory }: SelectionDeps) {
     deleteNodes,
     onSelectionContextMenu,
     onNodeContextMenu,
+    onPaneContextMenu,
   };
 }

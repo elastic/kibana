@@ -9,10 +9,11 @@
 // the viewport after render (so a right-click near a screen edge doesn't push it
 // off-screen). A full-screen backdrop closes it on any outside click.
 //
-// The menu is type-aware: a right-click on a single destination node shows a
+// The menu is context-aware: a right-click on a single destination node shows a
 // destination-specific menu (Add routing with inheritance / Select stream /
-// View in Discover / Delete), while everything else shows the generic menu
-// (Select stream / Delete).
+// View in Discover / Delete); a right-click on a node or multi-selection shows
+// the generic menu (Select stream / Tidy up selection / Delete); and a
+// right-click on the empty canvas shows whole-graph actions (Tidy up).
 
 import React, { useLayoutEffect, useRef } from 'react';
 import {
@@ -34,6 +35,10 @@ interface CanvasContextMenuProps {
   onDeleteNodes: (nodeIds: string[]) => void;
   /** Destination-only action: open the "opinionated routing" flyout. */
   onAddRoutingWithInheritance: (nodeIds: string[]) => void;
+  /** Pane action: auto-layout the whole graph into a tidy arrangement. */
+  onCleanupAll: () => void;
+  /** Selection action: auto-layout only the selected nodes. */
+  onCleanupSelected: (nodeIds: string[]) => void;
 }
 
 export function CanvasContextMenu({
@@ -42,6 +47,8 @@ export function CanvasContextMenu({
   onSelectStream,
   onDeleteNodes,
   onAddRoutingWithInheritance,
+  onCleanupAll,
+  onCleanupSelected,
 }: CanvasContextMenuProps) {
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -65,9 +72,41 @@ export function CanvasContextMenu({
 
   if (!menu) return null;
 
+  // A right-click on the empty canvas (no nodes) shows whole-graph actions.
+  const isPane = menu.nodeIds.length === 0;
   // A right-click on exactly one destination node gets the destination-specific
   // menu; multi-selections and other node types fall back to the generic menu.
   const isSingleDestination = menu.nodeIds.length === 1 && menu.nodeTypes[0] === 'destination';
+
+  const tidyUpAllItem = (
+    <EuiContextMenuItem
+      key="tidy-up-all"
+      icon="grid"
+      onClick={() => {
+        onCleanupAll();
+        onClose();
+      }}
+    >
+      {i18n.translate('xpack.streams.streamsCanvas.tidyUp', {
+        defaultMessage: 'Tidy up',
+      })}
+    </EuiContextMenuItem>
+  );
+
+  const tidyUpSelectionItem = (
+    <EuiContextMenuItem
+      key="tidy-up-selection"
+      icon="grid"
+      onClick={() => {
+        onCleanupSelected(menu.nodeIds);
+        onClose();
+      }}
+    >
+      {i18n.translate('xpack.streams.streamsCanvas.tidyUpSelection', {
+        defaultMessage: 'Tidy up selection',
+      })}
+    </EuiContextMenuItem>
+  );
 
   const selectStreamItem = (
     <EuiContextMenuItem
@@ -99,42 +138,54 @@ export function CanvasContextMenu({
     </EuiContextMenuItem>
   );
 
-  const items = isSingleDestination
-    ? [
-        <EuiContextMenuItem
-          key="add-routing-with-inheritance"
-          onClick={() => {
-            onAddRoutingWithInheritance(menu.nodeIds);
-            onClose();
-          }}
-        >
-          <span>
-            {i18n.translate('xpack.streams.streamsCanvas.addRoutingWithInheritance', {
-              defaultMessage: 'Add routing with inheritance',
+  let items: React.ReactNode[];
+  if (isPane) {
+    // Empty-canvas menu: whole-graph actions only.
+    items = [tidyUpAllItem];
+  } else if (isSingleDestination) {
+    items = [
+      <EuiContextMenuItem
+        key="add-routing-with-inheritance"
+        onClick={() => {
+          onAddRoutingWithInheritance(menu.nodeIds);
+          onClose();
+        }}
+      >
+        <span>
+          {i18n.translate('xpack.streams.streamsCanvas.addRoutingWithInheritance', {
+            defaultMessage: 'Add routing with inheritance',
+          })}
+        </span>
+        <EuiText size="xs">
+          <EuiTextColor color="subdued">
+            {i18n.translate('xpack.streams.streamsCanvas.addRoutingWithInheritanceHint', {
+              defaultMessage: 'Keep this configuration downstream',
             })}
-          </span>
-          <EuiText size="xs">
-            <EuiTextColor color="subdued">
-              {i18n.translate('xpack.streams.streamsCanvas.addRoutingWithInheritanceHint', {
-                defaultMessage: 'Keep this configuration downstream',
-              })}
-            </EuiTextColor>
-          </EuiText>
-        </EuiContextMenuItem>,
-        selectStreamItem,
-        <EuiContextMenuItem
-          key="view-in-discover"
-          // TODO: wire up the "View in Discover" navigation in a later step.
-          onClick={onClose}
-        >
-          {i18n.translate('xpack.streams.streamsCanvas.viewInDiscover', {
-            defaultMessage: 'View in Discover',
-          })}{' '}
-          <EuiIcon type="popout" size="s" />
-        </EuiContextMenuItem>,
-        deleteItem,
-      ]
-    : [selectStreamItem, deleteItem];
+          </EuiTextColor>
+        </EuiText>
+      </EuiContextMenuItem>,
+      selectStreamItem,
+      <EuiContextMenuItem
+        key="view-in-discover"
+        // TODO: wire up the "View in Discover" navigation in a later step.
+        onClick={onClose}
+      >
+        {i18n.translate('xpack.streams.streamsCanvas.viewInDiscover', {
+          defaultMessage: 'View in Discover',
+        })}{' '}
+        <EuiIcon type="popout" size="s" />
+      </EuiContextMenuItem>,
+      deleteItem,
+    ];
+  } else {
+    // Generic node / multi-selection menu. "Tidy up selection" only makes sense
+    // when at least two nodes are selected.
+    items = [
+      selectStreamItem,
+      ...(menu.nodeIds.length >= 2 ? [tidyUpSelectionItem] : []),
+      deleteItem,
+    ];
+  }
 
   return (
     <>

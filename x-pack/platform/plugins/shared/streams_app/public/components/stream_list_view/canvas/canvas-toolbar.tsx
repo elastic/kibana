@@ -85,7 +85,6 @@ function PaletteButton({ type, iconType, label, isActive, onActivate }: PaletteB
 export interface CanvasControlsProps {
   placementType: CanvasNodeType | null;
   onActivatePlacement: (type: CanvasNodeType) => void;
-  onCleanup: () => void;
   onUndo: () => void;
   onRedo: () => void;
   canUndo: boolean;
