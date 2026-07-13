@@ -14,6 +14,7 @@ import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
 import type { UnauthorizedError as EsNotAuthorizedError } from '@kbn/es-errors';
 import { isUnauthorizedError as isElasticsearchUnauthorizedError } from '@kbn/es-errors';
+import { isDeferredInitializationError } from '@kbn/core-deferred-init-common';
 import type {
   KibanaRequest,
   ErrorHttpResponseOptions,
@@ -227,6 +228,23 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
         this.log.error('401 Unauthorized', formatErrorMeta(401, { request, error }));
         return hapiResponseAdapter.handle(
           kibanaResponseFactory.unauthorized(convertEsUnauthorized(error))
+        );
+      }
+
+      // a lazy plugin's wrapped start() contract function was called before its deferred init
+      // succeeded; mirror the guarded router's own 503 so this trigger path behaves the same way
+      if (isDeferredInitializationError(error)) {
+        this.log.debug(
+          `503 deferred-init for "${error.pluginId}"`,
+          formatErrorMeta(503, { request, error })
+        );
+        return hapiResponseAdapter.handle(
+          kibanaResponseFactory.custom({
+            statusCode: 503,
+            headers: { 'retry-after': '1' },
+            bypassErrorFormat: true,
+            body: { pluginId: error.pluginId, status: 'initializing' },
+          })
         );
       }
 

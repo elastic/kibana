@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/deferred-init-example-consumer-plugin",
+  "owner": ["@elastic/kibana-core"],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "deferredInitExampleConsumer",
+    "browser": false,
+    "server": true,
+    "requiredPlugins": ["deferredInitExample"],
+    "optionalPlugins": []
+  }
+}

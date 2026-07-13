@@ -278,6 +278,10 @@ src/core/packages/plugins/browser-internal @elastic/kibana-core
 src/core/packages/plugins/browser-mocks @elastic/kibana-core
 src/core/packages/plugins/contracts-browser @elastic/kibana-core
 src/core/packages/plugins/contracts-server @elastic/kibana-core
+src/core/packages/plugins/deferred-init-browser @elastic/kibana-core
+src/core/packages/plugins/deferred-init-browser-internal @elastic/kibana-core
+src/core/packages/plugins/deferred-init-browser-mocks @elastic/kibana-core
+src/core/packages/plugins/deferred-init-common @elastic/kibana-core
 src/core/packages/plugins/server @elastic/kibana-core
 src/core/packages/plugins/server-internal @elastic/kibana-core
 src/core/packages/plugins/server-mocks @elastic/kibana-core
@@ -820,6 +824,8 @@ src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/table_persist @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/toolbar_selector @elastic/obs-exploration-team
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
+src/platform/plugins/private/deferred_init_example @elastic/kibana-core
+src/platform/plugins/private/deferred_init_example_consumer @elastic/kibana-core
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
 src/platform/plugins/private/files_management @elastic/appex-sharedux

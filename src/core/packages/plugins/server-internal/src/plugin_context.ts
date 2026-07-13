@@ -28,6 +28,7 @@ import type {
 } from './plugins_service';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
+import { createGuardedRouter, type DeferredInitEngine } from './deferred_init';
 
 /** @internal */
 export interface InstanceInfo {
@@ -189,12 +190,28 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
   deps,
   plugin,
   runtimeResolver,
+  deferredInitEngine,
 }: {
   deps: PluginsServiceSetupDeps;
   plugin: PluginWrapper<TPlugin, TPluginDependencies>;
   runtimeResolver: IRuntimePluginContractResolver;
+  deferredInitEngine?: DeferredInitEngine;
 }): CoreSetup {
   const router = deps.http.createRouter('', plugin.opaqueId);
+
+  // For plugins opted into deferred init, hand the plugin a guarded router whose routes return
+  // 503 until init completes. Resolved lazily (memoized) on first `createRouter()` call.
+  // Asset serving via `resources` keeps the raw, un-gated router.
+  let exposedRouter: IRouter | undefined;
+  const getExposedRouter = (): IRouter => {
+    if (!exposedRouter) {
+      exposedRouter =
+        deferredInitEngine && plugin.enableLazyInitialize
+          ? createGuardedRouter(router, deferredInitEngine, plugin.name)
+          : router;
+    }
+    return exposedRouter;
+  };
 
   return {
     analytics: {
@@ -242,7 +259,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
         provider: IContextProvider<Context, ContextName>
       ) => deps.http.registerRouteHandlerContext(plugin.opaqueId, contextName, provider),
       createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() =>
-        router as IRouter<Context>,
+        getExposedRouter() as IRouter<Context>,
       resources: deps.httpResources.createRegistrar(router),
       registerOnPreRouting: deps.http.registerOnPreRouting,
       registerOnPreAuth: deps.http.registerOnPreAuth,
@@ -307,6 +324,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+      loadPluginContract: (dependencyName) =>
+        runtimeResolver.loadPluginContract(plugin.name, dependencyName),
     },
     pricing: {
       isFeatureAvailable: deps.pricing.isFeatureAvailable,
@@ -419,6 +438,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+      loadPluginContract: (dependencyName) =>
+        runtimeResolver.loadPluginContract(plugin.name, dependencyName),
     },
     pricing: deps.pricing,
     security: {

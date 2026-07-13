@@ -16,6 +16,7 @@ import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import { type PluginOpaqueId, PluginType } from '@kbn/core-base-common';
 import type {
+  LazyInitContext,
   Plugin,
   PluginConfigDescriptor,
   PluginInitializer,
@@ -114,6 +115,26 @@ export class PluginWrapper<
       throw new Error(
         `Plugin "${this.name}" does not export the "plugin" definition or "module" (${this.path}).`
       );
+    }
+  }
+
+  /**
+   * Whether the plugin opted into core-managed deferred (lazy) Elasticsearch initialization via
+   * the manifest's `enableLazyInitialize` flag. Unlike the runner itself, this is known from the
+   * manifest alone, before the plugin instance exists — the browser's `uiPlugins()` snapshot
+   * (built during `discover()`, ahead of `init()`) relies on that to gate the browser app.
+   */
+  public get enableLazyInitialize(): boolean {
+    return this.manifest.enableLazyInitialize === true;
+  }
+
+  /**
+   * Runs the plugin's deferred initialization work. Invoked lazily by the deferred-init
+   * engine (never at boot), with a context built from internal-user clients.
+   */
+  public async runLazyInitialize(ctx: LazyInitContext): Promise<void> {
+    if (this.instance != null && 'lazyInitialize' in this.instance) {
+      await this.instance.lazyInitialize?.(ctx);
     }
   }
 

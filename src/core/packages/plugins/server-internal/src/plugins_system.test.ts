@@ -24,9 +24,11 @@ import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
+import { DeferredInitializationError } from '@kbn/core-deferred-init-common';
 import { PluginWrapper } from './plugin';
 import { findCircularDependencies, normalizeCycle, PluginsSystem } from './plugins_system';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+import { DeferredInitEngine } from './deferred_init';
 
 function createPlugin(
   id: string,
@@ -81,6 +83,7 @@ let coreContext: CoreContext;
 
 beforeEach(() => {
   runtimeResolverMock.setDependencyMap.mockReset();
+  runtimeResolverMock.setDeferredInitEngine.mockReset();
   runtimeResolverMock.resolveSetupRequests.mockReset();
   runtimeResolverMock.resolveStartRequests.mockReset();
 
@@ -730,6 +733,168 @@ describe('start', () => {
       pluginA: 'contractA',
       pluginB: 'contractB',
     });
+  });
+
+  it('attaches the deferred-init runner for lazy plugins before the loop moves on', async () => {
+    const engine = new DeferredInitEngine(logger.get());
+    jest.spyOn(engine, 'setRunner');
+    const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
+
+    const lazyPlugin = createPlugin('lazyPlugin');
+    jest.spyOn(lazyPlugin, 'enableLazyInitialize', 'get').mockReturnValue(true);
+    jest.spyOn(lazyPlugin, 'setup').mockReturnValue({});
+    jest.spyOn(lazyPlugin, 'start').mockReturnValue('lazyContract');
+    jest.spyOn(lazyPlugin, 'runLazyInitialize').mockResolvedValue(undefined);
+
+    localPluginsSystem.addPlugin(lazyPlugin);
+
+    await localPluginsSystem.setupPlugins(setupDeps);
+    await localPluginsSystem.startPlugins(startDeps);
+
+    expect(engine.setRunner).toHaveBeenCalledTimes(1);
+    const [pluginId, runner] = (engine.setRunner as jest.Mock).mock.calls[0];
+    expect(pluginId).toBe('lazyPlugin');
+
+    // the runner delegates to the plugin's own runLazyInitialize
+    await runner({});
+    expect(lazyPlugin.runLazyInitialize).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not attach a runner for plugins that did not opt into lazy init', async () => {
+    const engine = new DeferredInitEngine(logger.get());
+    jest.spyOn(engine, 'setRunner');
+    const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
+
+    const plugin = createPlugin('regularPlugin');
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    jest.spyOn(plugin, 'start').mockReturnValue('contract');
+
+    localPluginsSystem.addPlugin(plugin);
+
+    await localPluginsSystem.setupPlugins(setupDeps);
+    await localPluginsSystem.startPlugins(startDeps);
+
+    expect(engine.setRunner).not.toHaveBeenCalled();
+  });
+});
+
+describe('start - retrying on deferred-init failures', () => {
+  it('retries the whole start() call on a retriable DeferredInitializationError until it succeeds', async () => {
+    jest.useFakeTimers();
+    try {
+      const plugin = createPlugin('retryable-start');
+      jest.spyOn(plugin, 'setup').mockResolvedValue({});
+      jest
+        .spyOn(plugin, 'start')
+        .mockRejectedValueOnce(new DeferredInitializationError('someDependency'))
+        .mockResolvedValueOnce('contract');
+
+      pluginsSystem.addPlugin(plugin);
+      mockCreatePluginSetupContext.mockImplementation(() => ({}));
+      mockCreatePluginStartContext.mockImplementation(() => ({}));
+
+      await pluginsSystem.setupPlugins(setupDeps);
+      const startPromise = pluginsSystem.startPlugins(startDeps);
+
+      // Flush the failed attempt's jittered cooldown (capped at 60s) so the retry fires.
+      await jest.advanceTimersByTimeAsync(60_000);
+
+      const contracts = await startPromise;
+      expect(contracts.get('retryable-start')).toBe('contract');
+      expect(plugin.start).toHaveBeenCalledTimes(2);
+
+      const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+      expect(log.warn).toHaveBeenCalledWith(expect.stringContaining('Retrying because'));
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('aborts immediately, without retrying, on an error unrelated to deferred init', async () => {
+    const plugin = createPlugin('non-retriable-start');
+    jest.spyOn(plugin, 'setup').mockResolvedValue({});
+    const error = new Error('boom');
+    jest.spyOn(plugin, 'start').mockRejectedValueOnce(error);
+
+    pluginsSystem.addPlugin(plugin);
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+    mockCreatePluginStartContext.mockImplementation(() => ({}));
+
+    await pluginsSystem.setupPlugins(setupDeps);
+
+    await expect(pluginsSystem.startPlugins(startDeps)).rejects.toBe(error);
+    expect(plugin.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('aborts immediately on a non-retriable DeferredInitializationError (e.g. no runner attached)', async () => {
+    const plugin = createPlugin('misconfigured-start');
+    jest.spyOn(plugin, 'setup').mockResolvedValue({});
+    const error = new DeferredInitializationError('someDependency', {
+      message: 'no runner attached',
+      retriable: false,
+    });
+    jest.spyOn(plugin, 'start').mockRejectedValueOnce(error);
+
+    pluginsSystem.addPlugin(plugin);
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+    mockCreatePluginStartContext.mockImplementation(() => ({}));
+
+    await pluginsSystem.setupPlugins(setupDeps);
+
+    await expect(pluginsSystem.startPlugins(startDeps)).rejects.toBe(error);
+    expect(plugin.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('rethrows the original error once the retry budget is exhausted', async () => {
+    jest.useFakeTimers();
+    try {
+      const plugin = createPlugin('exhausted-start');
+      jest.spyOn(plugin, 'setup').mockResolvedValue({});
+      const error = new DeferredInitializationError('someDependency');
+      jest.spyOn(plugin, 'start').mockRejectedValue(error);
+
+      pluginsSystem.addPlugin(plugin);
+      mockCreatePluginSetupContext.mockImplementation(() => ({}));
+      mockCreatePluginStartContext.mockImplementation(() => ({}));
+
+      await pluginsSystem.setupPlugins(setupDeps);
+      const startPromise = pluginsSystem.startPlugins(startDeps);
+      const rejection = expect(startPromise).rejects.toBe(error);
+
+      // One retriable failure per attempt; flush every cooldown (each capped at 60s).
+      for (let i = 0; i < 8; i++) {
+        await jest.advanceTimersByTimeAsync(60_000);
+      }
+
+      await rejection;
+      expect(plugin.start).toHaveBeenCalledTimes(9); // 1 initial attempt + 8 retries
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+});
+
+describe('deferred-init engine wiring', () => {
+  it('registers the deferred-init engine with the runtime contract resolver, when present', async () => {
+    const engine = new DeferredInitEngine(logger.get());
+    const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
+    const plugin = createPlugin('somePlugin');
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    localPluginsSystem.addPlugin(plugin);
+
+    await localPluginsSystem.setupPlugins(setupDeps);
+
+    expect(runtimeResolverMock.setDeferredInitEngine).toHaveBeenCalledWith(engine);
+  });
+
+  it('does not attempt to register an engine when none was provided', async () => {
+    const plugin = createPlugin('somePlugin');
+    jest.spyOn(plugin, 'setup').mockReturnValue({});
+    pluginsSystem.addPlugin(plugin);
+
+    await pluginsSystem.setupPlugins(setupDeps);
+
+    expect(runtimeResolverMock.setDeferredInitEngine).not.toHaveBeenCalled();
   });
 });
 

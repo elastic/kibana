@@ -36,6 +36,7 @@ import type { PluginsConfigType } from './plugins_config';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
+import { DeferredInitEngine, registerDeferredInitStatusRoute } from './deferred_init';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -89,6 +90,7 @@ export class PluginsService
   private readonly config$: Observable<PluginsConfig>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
   private readonly pluginConfigUsageDescriptors = new Map<string, Record<string, any | any[]>>();
+  private readonly deferredInitEngine: DeferredInitEngine;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
@@ -96,8 +98,13 @@ export class PluginsService
     this.config$ = coreContext.configService
       .atPath<PluginsConfigType>('plugins')
       .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
+    this.deferredInitEngine = new DeferredInitEngine(coreContext.logger.get('deferred-init'));
     this.prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
-    this.standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
+    this.standardPluginsSystem = new PluginsSystem(
+      this.coreContext,
+      PluginType.standard,
+      this.deferredInitEngine
+    );
   }
 
   public async discover({
@@ -170,6 +177,10 @@ export class PluginsService
     this.log.debug('Setting up plugins service');
 
     const config = await firstValueFrom(this.config$);
+
+    // Always-available core endpoint the initializing UI polls for deferred-init state.
+    // Registered on a core router so it is never gated while a plugin is initializing.
+    registerDeferredInitStatusRoute(deps.http.createRouter(''), this.deferredInitEngine);
 
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {

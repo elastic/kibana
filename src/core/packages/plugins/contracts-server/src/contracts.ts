@@ -81,6 +81,25 @@ export interface PluginsServiceSetup {
    * ```
    */
   onStart: PluginContractResolver;
+  /**
+   * Loads a single declared dependency's start contract, waiting for it to become safe to use:
+   * the dependency's `start()` must have returned, and if it opted into deferred (lazy)
+   * initialization, that initialization must have completed. Rejects with a
+   * `DeferredInitializationError` (see `@kbn/core-plugins-server`) if the deferred
+   * initialization ultimately fails.
+   *
+   * The dependency must be declared in the calling plugin's manifest (required, optional, or
+   * `runtimePluginDependencies`), otherwise the API throws at call time.
+   *
+   * @example
+   * ```ts
+   * setup(core) {
+   *   const fleetContract = await core.plugins.loadPluginContract<FleetStartContract>('fleet');
+   *   await fleetContract.fleetSetupCompleted();
+   * }
+   * ```
+   */
+  loadPluginContract: LoadPluginContract;
 }
 
 /**
@@ -122,6 +141,25 @@ export interface PluginsServiceStart {
    * @experimental
    */
   onStart: PluginContractResolver;
+  /**
+   * Loads a single declared dependency's start contract, waiting for it to become safe to use:
+   * the dependency's `start()` must have returned, and if it opted into deferred (lazy)
+   * initialization, that initialization must have completed. Rejects with a
+   * `DeferredInitializationError` (see `@kbn/core-plugins-server`) if the deferred
+   * initialization ultimately fails.
+   *
+   * The dependency must be declared in the calling plugin's manifest (required, optional, or
+   * `runtimePluginDependencies`), otherwise the API throws at call time.
+   *
+   * @example
+   * ```ts
+   * start(core) {
+   *   const fleetContract = await core.plugins.loadPluginContract<FleetStartContract>('fleet');
+   *   await fleetContract.fleetSetupCompleted();
+   * }
+   * ```
+   */
+  loadPluginContract: LoadPluginContract;
 }
 
 /**
@@ -183,3 +221,12 @@ export type PluginContractResolverResponse<ContractMap extends PluginContractMap
 export type PluginContractResolver = <T extends PluginContractMap>(
   ...pluginNames: Array<keyof T>
 ) => Promise<PluginContractResolverResponse<T>>;
+
+/**
+ * Loads a single declared dependency's start contract, typed by an explicit generic type
+ * argument. See {@link PluginsServiceSetup.loadPluginContract} and
+ * {@link PluginsServiceStart.loadPluginContract} for documentation and examples.
+ *
+ * @public
+ */
+export type LoadPluginContract = <T>(pluginName: PluginName) => Promise<T>;
