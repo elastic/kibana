@@ -129,6 +129,57 @@ describe('Editor actions provider', () => {
       const curl = await editorActionsProvider.getCurl('http://localhost');
       expect(curl).toBe('curl -XGET "http://localhost/_search" -H "kbn-xsrf: reporting"');
     });
+
+    it.each(['//', '#'])(
+      'removes %s comments from the request body while preserving triple-quote strings',
+      async (commentMarker) => {
+        // Regression test for https://github.com/elastic/kibana/issues/277160
+        const content = [
+          'POST _watcher/watch/test',
+          '{',
+          `  ${commentMarker} watch metadata`,
+          '  "script": """',
+          '    return 1; // painless comment',
+          '  """',
+          '}',
+        ];
+        const totalLength = content.join('\n').length;
+        editor.getModel.mockReturnValue({
+          getLineContent: (lineNumber: number) => content[lineNumber - 1],
+          getValueInRange: ({
+            startLineNumber,
+            endLineNumber,
+          }: {
+            startLineNumber: number;
+            endLineNumber: number;
+          }) => content.slice(startLineNumber - 1, endLineNumber).join('\n'),
+          getLineMaxColumn: (lineNumber: number) => content[lineNumber - 1].length + 1,
+          getPositionAt: (offset: number) => ({ lineNumber: offset === 0 ? 1 : content.length }),
+          getLineCount: () => content.length,
+        } as unknown as monaco.editor.ITextModel);
+        editor.getSelection.mockReturnValue({
+          startLineNumber: 1,
+          endLineNumber: content.length,
+        } as unknown as monaco.Selection);
+        mockGetParsedRequests.mockResolvedValue([
+          {
+            startOffset: 0,
+            endOffset: totalLength,
+            method: 'POST',
+            url: '_watcher/watch/test',
+          },
+        ]);
+
+        const curl = await editorActionsProvider.getCurl('http://localhost');
+        expect(curl).not.toContain('watch metadata');
+        expect(curl).toContain('return 1; // painless comment');
+        // The body sent in the curl command is valid JSON
+        const body = curl.split(`-d'\n`)[1].slice(0, -1);
+        expect(JSON.parse(body)).toEqual({
+          script: '\n    return 1; // painless comment\n  ',
+        });
+      }
+    );
   });
 
   describe('getDocumentationLink', () => {

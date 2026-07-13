@@ -25,6 +25,7 @@ import {
   seedUserEntity,
   triggerMaintainerRun,
   waitForResolution,
+  type ApiClientFixture,
 } from '../fixtures/helpers';
 
 apiTest.describe(
@@ -112,74 +113,91 @@ apiTest.describe(
         const disabledSeedId = 'user:disabled@example.com@entra_id';
         const disabledAdId = 'user:T04KX2Z@active_directory';
 
-        await expectAliasResolutionEnabled(apiClient, defaultHeaders, true);
-
-        await seedUserEntity(esClient, {
-          entityId: seedId,
-          namespace: 'entra_id',
-          email: 'seed@example.com',
-          userName: 'seed@example.com',
-        });
-        await seedUserEntity(esClient, {
-          entityId: adId,
-          namespace: 'active_directory',
-          email: 'ad@example.com',
-          userName: 'T03KX1Z',
-        });
-        await seedEntityAnalyticsSource(esClient, {
-          email: 'seed@example.com',
-          relatedUsers: ['T03KX1Z'],
+        await apiTest.step('Baseline — assert the rule is enabled', async () => {
+          await expectAliasResolutionEnabled(apiClient, defaultHeaders, true);
         });
 
-        await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
-          sync: true,
-        });
-        await waitForResolution(esClient, seedId, adId);
+        await apiTest.step(
+          'Initial resolve — seed entities, trigger maintainer, wait for resolution',
+          async () => {
+            await seedUserEntity(esClient, {
+              entityId: seedId,
+              namespace: 'entra_id',
+              email: 'seed@example.com',
+              userName: 'seed@example.com',
+            });
+            await seedUserEntity(esClient, {
+              entityId: adId,
+              namespace: 'active_directory',
+              email: 'ad@example.com',
+              userName: 'T03KX1Z',
+            });
+            await seedEntityAnalyticsSource(esClient, {
+              email: 'seed@example.com',
+              relatedUsers: ['T03KX1Z'],
+            });
 
-        const disable = await apiClient.put(
-          ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(
-            RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION
-          ),
-          {
-            headers: defaultHeaders,
-            responseType: 'json',
+            await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+              sync: true,
+            });
+            await waitForResolution(esClient, seedId, adId);
           }
         );
-        expect(disable.statusCode).toBe(200);
-        await expectAliasResolutionEnabled(apiClient, defaultHeaders, false);
 
-        const group = await apiClient.get(
-          `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${seedId}&apiVersion=2`,
-          {
-            headers: defaultHeaders,
-            responseType: 'json',
+        await apiTest.step(
+          'Disable + preservation — disable rule and confirm existing link is preserved',
+          async () => {
+            const disable = await apiClient.put(
+              ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(
+                RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION
+              ),
+              {
+                headers: defaultHeaders,
+                responseType: 'json',
+              }
+            );
+            expect(disable.statusCode).toBe(200);
+            await expectAliasResolutionEnabled(apiClient, defaultHeaders, false);
+
+            const group = await apiClient.get(
+              `${ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP}?entity_id=${seedId}&apiVersion=2`,
+              {
+                headers: defaultHeaders,
+                responseType: 'json',
+              }
+            );
+            expect(group.statusCode).toBe(200);
+            expect(group.body.target.entity.id).toBe(adId);
+            expect(group.body.group_size).toBe(2);
           }
         );
-        expect(group.statusCode).toBe(200);
-        expect(group.body.target.entity.id).toBe(adId);
-        expect(group.body.group_size).toBe(2);
 
-        await seedUserEntity(esClient, {
-          entityId: disabledSeedId,
-          namespace: 'entra_id',
-          email: 'disabled@example.com',
-          userName: 'disabled@example.com',
-        });
-        await seedUserEntity(esClient, {
-          entityId: disabledAdId,
-          namespace: 'active_directory',
-          email: 'disabled-ad@example.com',
-          userName: 'T04KX2Z',
-        });
-        await seedEntityAnalyticsSource(esClient, {
-          email: 'disabled@example.com',
-          relatedUsers: ['T04KX2Z'],
-        });
+        await apiTest.step(
+          'Post-disable refusal — seed fresh candidate and assert no new linking',
+          async () => {
+            await seedUserEntity(esClient, {
+              entityId: disabledSeedId,
+              namespace: 'entra_id',
+              email: 'disabled@example.com',
+              userName: 'disabled@example.com',
+            });
+            await seedUserEntity(esClient, {
+              entityId: disabledAdId,
+              namespace: 'active_directory',
+              email: 'disabled-ad@example.com',
+              userName: 'T04KX2Z',
+            });
+            await seedEntityAnalyticsSource(esClient, {
+              email: 'disabled@example.com',
+              relatedUsers: ['T04KX2Z'],
+            });
 
-        await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
-          sync: true,
-        });
-        await assertNotResolved(esClient, disabledSeedId);
+            await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+              sync: true,
+            });
+            await assertNotResolved(esClient, disabledSeedId);
+          }
+        );
       }
     );
 
@@ -274,9 +292,7 @@ apiTest.describe(
 );
 
 const expectAliasResolutionEnabled = async (
-  apiClient: {
-    get: Function;
-  },
+  apiClient: ApiClientFixture,
   headers: Record<string, string>,
   enabled: boolean
 ) => {
