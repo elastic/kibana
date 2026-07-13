@@ -56,6 +56,7 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
     const searchResponse: estypes.SearchResponse<TExecution> = await this.deps.esClient.search({
       index: [this.deps.dataStreamName, ...this.additionalIndexesToQuery],
       ...request,
+      ignore_unavailable: true,
     });
 
     searchResponse.hits.hits.forEach((hit) => {
