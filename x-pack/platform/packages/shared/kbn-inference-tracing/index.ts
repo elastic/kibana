@@ -5,7 +5,8 @@
  * 2.0.
  */
 export { withChatCompleteSpan } from './src/with_chat_complete_span';
-export { withExecuteToolSpan } from './src/with_execute_tool_span';
+export { withExecuteToolSpan, TOOL_ERROR_TYPE } from './src/with_execute_tool_span';
+export type { WithExecuteToolSpanOptions } from './src/with_execute_tool_span';
 export { withActiveInferenceSpan } from './src/with_active_inference_span';
 export { withInferenceContext } from './src/with_inference_context';
 export { GenAISemanticConventions, ElasticGenAIAttributes } from './src/types';

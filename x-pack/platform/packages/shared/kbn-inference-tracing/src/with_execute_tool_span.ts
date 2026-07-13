@@ -6,12 +6,31 @@
  */
 
 import type { Span } from '@opentelemetry/api';
-import { SpanKind } from '@opentelemetry/api';
+import { SpanKind, SpanStatusCode } from '@opentelemetry/api';
 import { isPromise } from 'util/types';
 import { safeJsonStringify } from '@kbn/std';
 import type { WithActiveSpanOptions } from '@kbn/tracing-utils';
 import { ElasticGenAIAttributes, GenAISemanticConventions } from './types';
 import { withActiveInferenceSpan } from './with_active_inference_span';
+
+/**
+ * Per the GenAI semantic conventions (and MCP conventions), when a tool
+ * call succeeds at the execution level but the tool itself returns an
+ * error result, `error.type` SHOULD be set to `'tool_error'`.
+ */
+export const TOOL_ERROR_TYPE = 'tool_error';
+
+export interface WithExecuteToolSpanOptions<T = unknown> extends WithActiveSpanOptions {
+  tool: {
+    description?: string;
+    toolCallId?: string;
+    input?: unknown;
+  };
+  /**
+   * Returns `true` when the tool produced an error result.
+   */
+  isToolError: (result: Awaited<T>) => boolean;
+}
 
 /**
  * Wrapper around {@link withActiveInferenceSpan} that sets the right attributes for a execute_tool operation span.
@@ -20,13 +39,7 @@ import { withActiveInferenceSpan } from './with_active_inference_span';
  */
 export function withExecuteToolSpan<T>(
   toolName: string,
-  options: WithActiveSpanOptions & {
-    tool: {
-      description?: string;
-      toolCallId?: string;
-      input?: unknown;
-    };
-  },
+  options: WithExecuteToolSpanOptions<T>,
   cb: (span?: Span) => T
 ): T {
   const { description, toolCallId, input } = options.tool;
@@ -56,9 +69,15 @@ export function withExecuteToolSpan<T>(
 
       if (isPromise(res)) {
         return res.then((value) => {
-          const stringified = safeJsonStringify(value);
-          if (stringified) {
-            span.setAttribute(GenAISemanticConventions.GenAIToolCallResult, stringified);
+          if (options.isToolError?.(value as Awaited<T>)) {
+            span.setAttribute('error.type', TOOL_ERROR_TYPE);
+            span.setStatus({ code: SpanStatusCode.ERROR, message: TOOL_ERROR_TYPE });
+            span.end();
+          } else {
+            const stringified = safeJsonStringify(value);
+            if (stringified) {
+              span.setAttribute(GenAISemanticConventions.GenAIToolCallResult, stringified);
+            }
           }
           return value;
         }) as T;
