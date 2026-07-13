@@ -370,7 +370,7 @@ describe('findRuleTemplates', () => {
   describe('authorization', () => {
     test('throws 403 when user has no access to any rule types', async () => {
       authorization.getByRuleTypeAuthorizationFilter.mockRejectedValueOnce(
-        Boom.forbidden('Unauthorized to find rules for any rule types')
+        Boom.forbidden('Unauthorized to find rules for any rule types.')
       );
 
       await expect(
@@ -382,7 +382,7 @@ describe('findRuleTemplates', () => {
         output: {
           statusCode: 403,
         },
-        message: 'Unauthorized to find rules for any rule types',
+        message: 'Unauthorized to find rules for any rule types.',
       });
 
       expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
@@ -553,7 +553,7 @@ describe('findRuleTemplates', () => {
 
     test('throws on authorization failure without audit logging', async () => {
       authorization.getByRuleTypeAuthorizationFilter.mockRejectedValueOnce(
-        Boom.forbidden('Unauthorized to find rules for any rule types')
+        Boom.forbidden('Unauthorized to find rules for any rule types.')
       );
 
       await expect(
@@ -561,7 +561,7 @@ describe('findRuleTemplates', () => {
           perPage: 10,
           page: 1,
         })
-      ).rejects.toThrow('Unauthorized to find rules for any rule types');
+      ).rejects.toThrow('Unauthorized to find rules for any rule types.');
 
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
