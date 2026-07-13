@@ -21,6 +21,7 @@ export const authenticationServiceMock = {
       listConnections: jest.fn(),
       updateConnection: jest.fn(),
       revokeConnection: jest.fn(),
+      resolveUsers: jest.fn(),
     },
     login: jest.fn(),
     logout: jest.fn(),
