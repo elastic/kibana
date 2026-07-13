@@ -53,10 +53,41 @@ export const validateWorkflowInputs = async (
   const templateEngine = new WorkflowTemplatingEngine({
     liquidSettings: workflowExecution.workflowDefinition.settings?.liquid,
   });
+
+  // Provided input values are runtime data, not workflow-authored templates. They may
+  // legitimately contain text resembling Liquid syntax (e.g. attack discovery markdown
+  // using `{{ field.name value }}` field references), which must be passed through
+  // verbatim: rendering it would either fail to parse (e.g. 'expected "|" before filter')
+  // or silently resolve unknown variables to empty strings, corrupting the data.
+  // Only the explicit `${{ ... }}` expression form is evaluated, as an unambiguous
+  // opt-in for dynamic provided values.
+  const renderProvidedValue = (value: unknown): unknown => {
+    if (typeof value === 'string') {
+      return value.startsWith('${{') && value.endsWith('}}')
+        ? templateEngine.render(value, renderContext)
+        : value;
+    }
+    if (Array.isArray(value)) {
+      return value.map(renderProvidedValue);
+    }
+    if (value !== null && typeof value === 'object') {
+      return Object.fromEntries(
+        Object.entries(value).map(([key, nested]) => [key, renderProvidedValue(nested)])
+      );
+    }
+    return value;
+  };
+
   let inputsWithDefaults: Record<string, unknown> | undefined;
   try {
-    inputsWithDefaults = applyInputDefaults(renderContext.inputs, normalizedSchema, (value) =>
-      templateEngine.render(value, renderContext)
+    inputsWithDefaults = applyInputDefaults(
+      renderContext.inputs,
+      normalizedSchema,
+      (value, source) =>
+        source === 'default'
+          ? // Schema defaults are author-controlled templates; render them fully.
+            templateEngine.render(value, renderContext)
+          : renderProvidedValue(value)
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
