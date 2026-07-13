@@ -17,18 +17,15 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
-import { normalizeEvidence } from '../../evaluators/evidence/evidence_service';
 import { getEvidenceMapping } from '../../evaluators/evidence/resolve_mapping';
+import { formatEvidenceSchemaIssues } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import { awaitTraceReady } from '../../evaluators/trace_readiness';
 import type { EvaluatorDefinition } from '../../evaluators/types';
 import type { RouteDependencies } from '../register_routes';
 
-const getIssuePath = (path: PropertyKey[]): string =>
-  path.map((segment) => String(segment)).join('.') || '<root>';
-
-const formatEvidenceSchemaIssues = (error: z.ZodError): string =>
-  error.issues.map((issue) => `${getIssuePath(issue.path)}: ${issue.message}`).join('; ');
+const isUnresolvableTraceError = (error: unknown): boolean =>
+  String(error).includes('evidence is unresolvable for profile');
 
 export const registerEvaluateRoute = ({
   router,
@@ -127,13 +124,15 @@ export const registerEvaluateRoute = ({
         const activeProfile = subject.evidence_mapping?.profile ?? 'elastic-inference';
         const resolvedMapping = getEvidenceMapping(activeProfile);
 
+        let round: Awaited<ReturnType<typeof awaitTraceReady>>;
         try {
-          await awaitTraceReady(traceAccessor, resolvedMapping, activeProfile, logger);
+          round = await awaitTraceReady(traceAccessor, resolvedMapping, activeProfile, logger);
         } catch (error) {
-          return response.notFound({ body: { message: String(error) } });
+          if (isUnresolvableTraceError(error)) {
+            return response.notFound({ body: { message: String(error) } });
+          }
+          throw error;
         }
-
-        const round = await normalizeEvidence(traceAccessor, resolvedMapping);
 
         let inferenceStartPromise: ReturnType<RouteDependencies['getInferenceStart']> | undefined;
         const inferenceClientByConnectorId = new Map<string, BoundInferenceClient>();

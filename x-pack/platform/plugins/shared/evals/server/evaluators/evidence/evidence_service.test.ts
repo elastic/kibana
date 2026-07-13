@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { createTraceAccessor } from '../trace_accessor';
 import { normalizeEvidence } from './evidence_service';
 import { getEvidenceMapping } from './resolve_mapping';
 
@@ -23,6 +24,7 @@ describe('normalizeEvidence', () => {
   it('normalizes elastic-inference docs stored with dotted attribute keys', async () => {
     const mapping = getEvidenceMapping('elastic-inference');
     const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
 
     // Mirrors the real `_source` shape returned by ES: a nested `attributes`
     // object whose keys are dotted (partially flattened OTLP attributes).
@@ -69,7 +71,7 @@ describe('normalizeEvidence', () => {
         },
       });
 
-    await expect(normalizeEvidence({ traceId, esClient }, mapping)).resolves.toEqual({
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
       input: { message: 'What is the payment status?' },
       response: { message: 'Payment service is healthy.' },
       steps: [
@@ -83,9 +85,93 @@ describe('normalizeEvidence', () => {
     });
   });
 
+  it('adds exists filter for string parse message specs', async () => {
+    const mapping = getEvidenceMapping('elastic-inference');
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    searchMock.mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    });
+
+    await normalizeEvidence(traceAccessor, mapping);
+
+    const userSearchRequest = searchMock.mock.calls[0][0];
+    const filters =
+      (userSearchRequest.query as { bool?: { filter?: unknown[] } })?.bool?.filter ?? [];
+    expect(filters).toEqual(
+      expect.arrayContaining([{ exists: { field: mapping.user_query.contentField } }])
+    );
+  });
+
+  it('skips redacted first string message hit and returns later hit with content', async () => {
+    const mapping = getEvidenceMapping('elastic-inference');
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    searchMock
+      .mockImplementationOnce(async (request: { query?: { bool?: { filter?: unknown[] } } }) => {
+        const filters = request.query?.bool?.filter ?? [];
+        const hasContentFilter = filters.some(
+          (filter) =>
+            typeof filter === 'object' &&
+            filter !== null &&
+            'exists' in filter &&
+            (filter as { exists?: { field?: string } }).exists?.field ===
+              mapping.user_query.contentField
+        );
+
+        return {
+          hits: {
+            hits: hasContentFilter
+              ? [
+                  {
+                    _source: {
+                      '@timestamp': '2026-06-26T10:00:01.000Z',
+                      'attributes.content': 'non-redacted user query',
+                    },
+                  },
+                ]
+              : [
+                  {
+                    _source: {
+                      '@timestamp': '2026-06-26T10:00:00.000Z',
+                    },
+                  },
+                  {
+                    _source: {
+                      '@timestamp': '2026-06-26T10:00:01.000Z',
+                      'attributes.content': 'non-redacted user query',
+                    },
+                  },
+                ],
+          },
+        };
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [],
+        },
+      });
+
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
+      input: { message: 'non-redacted user query' },
+      response: { message: '' },
+      steps: [],
+    });
+  });
+
   it('resolves fields regardless of flattened, nested, or dotted-key document shape', async () => {
     const mapping = getEvidenceMapping('elastic-inference');
     const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
 
     searchMock
       // fully flattened root key
@@ -131,7 +217,7 @@ describe('normalizeEvidence', () => {
         },
       });
 
-    await expect(normalizeEvidence({ traceId, esClient }, mapping)).resolves.toEqual({
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
       input: { message: 'flattened question' },
       response: { message: 'nested answer' },
       steps: [{ tool_call_id: 'call-1', tool_id: 'health_check' }],
@@ -141,6 +227,7 @@ describe('normalizeEvidence', () => {
   it('normalizes otel-genai-attributes chat span messages', async () => {
     const mapping = getEvidenceMapping('otel-genai-attributes');
     const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
 
     searchMock
       .mockResolvedValueOnce({
@@ -203,7 +290,7 @@ describe('normalizeEvidence', () => {
         },
       });
 
-    await expect(normalizeEvidence({ traceId, esClient }, mapping)).resolves.toEqual({
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
       input: { message: 'How many failed payments today?' },
       response: { message: 'There were 12 failed payments today.' },
       steps: [

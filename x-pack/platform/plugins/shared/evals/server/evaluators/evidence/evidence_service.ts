@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  createTraceAccessor,
-  type TraceAccessorWithSearch,
-  type TraceFilter,
-} from '../trace_accessor';
-import type { TraceAccessor } from '../types';
+import { type TraceAccessorWithSearch, type TraceFilter } from '../trace_accessor';
 import { EVIDENCE_MAPPING_PROFILES } from './profiles';
 import { getEvidenceMapping } from './resolve_mapping';
 import type {
@@ -40,15 +35,16 @@ export interface EvidenceProfileProbeResult {
   evidence: Record<EvidenceItemKey, EvidenceItemProbeResult>;
 }
 
-export const hasTraceDocuments = async (traceAccessor: TraceAccessor): Promise<boolean> => {
-  const accessor = createTraceAccessor(traceAccessor);
+export const hasTraceDocuments = async (
+  traceAccessor: TraceAccessorWithSearch
+): Promise<boolean> => {
   const [logs, traces] = await Promise.all([
-    accessor.runSearch('logs', {
+    traceAccessor.runSearch('logs', {
       fields: ['@timestamp'],
       size: 1,
       sort: { field: '@timestamp', order: 'desc' },
     }),
-    accessor.runSearch('traces', {
+    traceAccessor.runSearch('traces', {
       fields: ['@timestamp'],
       size: 1,
       sort: { field: '@timestamp', order: 'desc' },
@@ -110,7 +106,7 @@ const toTraceFilters = (
     value,
   }));
 
-  if (includeContentPresenceFilter && 'contentField' in spec && spec.parse === 'genai_messages') {
+  if (includeContentPresenceFilter && 'contentField' in spec) {
     filters.push({ type: 'exists', field: spec.contentField });
   }
 
@@ -325,18 +321,19 @@ const probeItem = async (
 };
 
 export const normalizeEvidence = async (
-  traceAccessor: TraceAccessor,
+  traceAccessor: TraceAccessorWithSearch,
   mapping: EvidenceMapping
 ): Promise<EvidenceRound> => {
-  const accessor = createTraceAccessor(traceAccessor);
-
   const [userSearch, agentSearch, toolSearch] = await Promise.all([
-    accessor.runSearch(mapping.user_query.source, getMessageSearchParams(mapping.user_query, true)),
-    accessor.runSearch(
+    traceAccessor.runSearch(
+      mapping.user_query.source,
+      getMessageSearchParams(mapping.user_query, true)
+    ),
+    traceAccessor.runSearch(
       mapping.agent_response.source,
       getMessageSearchParams(mapping.agent_response, true)
     ),
-    accessor.runSearch(
+    traceAccessor.runSearch(
       mapping.tool_calls.source,
       getToolCallsSearchParams(mapping.tool_calls, false)
     ),
@@ -358,17 +355,16 @@ export const normalizeEvidence = async (
 };
 
 export const probeProfiles = async (
-  traceAccessor: TraceAccessor
+  traceAccessor: TraceAccessorWithSearch
 ): Promise<EvidenceProfileProbeResult[]> => {
-  const accessor = createTraceAccessor(traceAccessor);
   const profileNames = Object.keys(EVIDENCE_MAPPING_PROFILES);
   const profileResults = await Promise.all(
     profileNames.map(async (profile): Promise<EvidenceProfileProbeResult> => {
       const mapping = getEvidenceMapping(profile);
       const [userQueryProbe, agentResponseProbe, toolCallsProbe] = await Promise.all([
-        probeItem(accessor, 'user_query', mapping.user_query),
-        probeItem(accessor, 'agent_response', mapping.agent_response),
-        probeItem(accessor, 'tool_calls', mapping.tool_calls),
+        probeItem(traceAccessor, 'user_query', mapping.user_query),
+        probeItem(traceAccessor, 'agent_response', mapping.agent_response),
+        probeItem(traceAccessor, 'tool_calls', mapping.tool_calls),
       ]);
 
       return {

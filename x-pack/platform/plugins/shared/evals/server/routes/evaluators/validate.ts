@@ -18,12 +18,10 @@ import type { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import { normalizeEvidence } from '../../evaluators/evidence/evidence_service';
 import { getEvidenceMapping } from '../../evaluators/evidence/resolve_mapping';
+import { getIssuePath } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import type { EvaluatorDefinition } from '../../evaluators/types';
 import type { RouteDependencies } from '../register_routes';
-
-const getIssuePath = (path: PropertyKey[]): string =>
-  path.map((segment) => String(segment)).join('.') || '<root>';
 
 const getUnmetPaths = (error: z.ZodError): string[] => [
   ...new Set(error.issues.map((issue) => getIssuePath(issue.path))),

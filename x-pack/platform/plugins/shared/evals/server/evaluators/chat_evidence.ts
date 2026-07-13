@@ -8,11 +8,15 @@
 import type { TraceAccessor } from './types';
 import { normalizeEvidence } from './evidence/evidence_service';
 import { getEvidenceMapping } from './evidence/resolve_mapping';
+import { createTraceAccessor } from './trace_accessor';
 
 export const extractChatEvidence = async (
   traceAccessor: TraceAccessor
 ): Promise<{ user_query: string; agent_response: string }> => {
-  const round = await normalizeEvidence(traceAccessor, getEvidenceMapping('elastic-inference'));
+  const round = await normalizeEvidence(
+    createTraceAccessor(traceAccessor),
+    getEvidenceMapping('elastic-inference')
+  );
   if (!round.input.message) {
     throw new Error(`No user message span events found for trace ${traceAccessor.traceId}`);
   }

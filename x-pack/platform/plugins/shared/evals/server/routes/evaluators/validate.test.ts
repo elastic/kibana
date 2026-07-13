@@ -22,66 +22,13 @@ import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
 import { registerValidateRoute } from './validate';
-
-interface SearchRequest {
-  index?: string | string[];
-  query?: {
-    bool?: {
-      filter?: Array<Record<string, unknown>>;
-    };
-  };
-}
+import { buildSearchMock, hasTermFilter, withHits } from './test_helpers';
 
 const FULL_TRACE_ID = '0af7651916cd43dd8448eb211c80319c';
 const REDACTED_TRACE_ID = '0af7651916cd43dd8448eb211c80319d';
 
-const emptySearchResponse = { hits: { hits: [] } };
-
-const withHits = (documents: Array<Record<string, unknown>>) => ({
-  hits: {
-    hits: documents.map((document) => ({ _source: document })),
-  },
-});
-
-const getFilters = (request: SearchRequest): Array<Record<string, unknown>> =>
-  request.query?.bool?.filter ?? [];
-
-const getFilterTraceId = (filters: Array<Record<string, unknown>>): string | undefined => {
-  for (const filter of filters) {
-    const termFilter = filter.term as Record<string, unknown> | undefined;
-    if (!termFilter) {
-      continue;
-    }
-
-    const traceFromLogs = termFilter.trace_id;
-    if (typeof traceFromLogs === 'string') {
-      return traceFromLogs;
-    }
-
-    const traceFromTraces = termFilter['trace.id'];
-    if (typeof traceFromTraces === 'string') {
-      return traceFromTraces;
-    }
-  }
-
-  return undefined;
-};
-
-const hasTermFilter = (
-  filters: Array<Record<string, unknown>>,
-  field: string,
-  expectedValue: string
-): boolean =>
-  filters.some((filter) => {
-    const termFilter = filter.term as Record<string, unknown> | undefined;
-    return termFilter?.[field] === expectedValue;
-  });
-
-const buildSearchMock = () =>
-  jest.fn(async (request: SearchRequest) => {
-    const index = Array.isArray(request.index) ? request.index[0] : request.index;
-    const filters = getFilters(request);
-    const traceId = getFilterTraceId(filters);
+const buildRouteSearchMock = () =>
+  buildSearchMock(async ({ index, filters, traceId, emptySearchResponse }) => {
     if (!traceId) {
       return emptySearchResponse;
     }
@@ -171,7 +118,7 @@ describe('POST /internal/evals/evaluators/_validate', () => {
       response: z.object({
         message: z.string().trim().min(1),
       }),
-      steps: z.array(z.unknown()),
+      steps: z.array(z.object({}).catchall(z.unknown())),
     }),
     evaluate: jest.fn(),
   };
@@ -215,7 +162,7 @@ describe('POST /internal/evals/evaluators/_validate', () => {
     return { handler, routeConfig };
   };
 
-  const buildContext = (searchMock = buildSearchMock()) =>
+  const buildContext = (searchMock = buildRouteSearchMock()) =>
     ({
       core: Promise.resolve({
         elasticsearch: {

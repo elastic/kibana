@@ -7,11 +7,11 @@
 
 import type { Logger } from '@kbn/logging';
 import pRetry from 'p-retry';
-import type { TraceAccessor } from './types';
+import type { TraceAccessorWithSearch } from './trace_accessor';
 import { hasTraceDocuments, normalizeEvidence, probeProfiles } from './evidence/evidence_service';
-import type { EvidenceMapping, EvidenceProfile } from './evidence/types';
+import type { EvidenceMapping, EvidenceProfile, EvidenceRound } from './evidence/types';
 
-const summarizeProfiles = async (traceAccessor: TraceAccessor): Promise<string> => {
+const summarizeProfiles = async (traceAccessor: TraceAccessorWithSearch): Promise<string> => {
   const probes = await probeProfiles(traceAccessor);
   return probes
     .map(({ profile, evidence }) => {
@@ -25,50 +25,63 @@ const summarizeProfiles = async (traceAccessor: TraceAccessor): Promise<string> 
     .join('; ');
 };
 
+class MissingAgentResponseError extends Error {}
+
 export const awaitTraceReady = async (
-  traceAccessor: TraceAccessor,
+  traceAccessor: TraceAccessorWithSearch,
   mapping: EvidenceMapping,
   profile: EvidenceProfile,
   log: Logger
-): Promise<void> => {
-  await pRetry(
-    async () => {
-      if (!(await hasTraceDocuments(traceAccessor))) {
-        throw new Error(
-          `Trace ${traceAccessor.traceId} is not ready: no documents indexed in traces-* or logs-* yet`
-        );
-      }
+): Promise<EvidenceRound> => {
+  let lastRound: EvidenceRound | undefined;
 
-      const round = await normalizeEvidence(traceAccessor, mapping);
-      if (round.response.message.trim()) {
-        return;
-      }
+  try {
+    return await pRetry(
+      async () => {
+        if (!(await hasTraceDocuments(traceAccessor))) {
+          throw new Error(
+            `Trace ${traceAccessor.traceId} is not ready: no documents indexed in traces-* or logs-* yet`
+          );
+        }
 
-      const profileSummary = await summarizeProfiles(traceAccessor);
-      const hasAnyResolvedEvidence =
-        Boolean(round.input.message.trim()) ||
-        Boolean(round.response.message.trim()) ||
-        round.steps.length > 0;
-      if (!hasAnyResolvedEvidence) {
-        throw new pRetry.AbortError(
-          `Trace ${traceAccessor.traceId} has documents but evidence is unresolvable for profile "${profile}". Probed profiles: ${profileSummary}`
-        );
-      }
+        const round = await normalizeEvidence(traceAccessor, mapping);
+        lastRound = round;
+        if (round.response.message.trim()) {
+          return round;
+        }
 
-      throw new pRetry.AbortError(
-        `Trace ${traceAccessor.traceId} has documents but agent response is unavailable for profile "${profile}". Probed profiles: ${profileSummary}`
-      );
-    },
-    {
-      retries: 2,
-      factor: 2,
-      minTimeout: 2000,
-      maxTimeout: 10000,
-      onFailedAttempt: (error) => {
-        log.warn(
-          `Trace ${traceAccessor.traceId} not ready on attempt ${error.attemptNumber}; retrying`
+        const profileSummary = await summarizeProfiles(traceAccessor);
+        const hasAnyResolvedEvidence =
+          Boolean(round.input.message.trim()) ||
+          Boolean(round.response.message.trim()) ||
+          round.steps.length > 0;
+        if (!hasAnyResolvedEvidence) {
+          throw new pRetry.AbortError(
+            `Trace ${traceAccessor.traceId} has documents but evidence is unresolvable for profile "${profile}". Probed profiles: ${profileSummary}`
+          );
+        }
+
+        throw new MissingAgentResponseError(
+          `Trace ${traceAccessor.traceId} has documents but agent response is unavailable for profile "${profile}". Probed profiles: ${profileSummary}`
         );
       },
+      {
+        retries: 2,
+        factor: 2,
+        minTimeout: 2000,
+        maxTimeout: 10000,
+        onFailedAttempt: (error) => {
+          log.warn(
+            `Trace ${traceAccessor.traceId} not ready on attempt ${error.attemptNumber}; retrying`
+          );
+        },
+      }
+    );
+  } catch (error) {
+    if (!(error instanceof MissingAgentResponseError) || !lastRound) {
+      throw error;
     }
-  );
+
+    return lastRound;
+  }
 };

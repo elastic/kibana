@@ -82,10 +82,11 @@ describe('groundedness trace extractor', () => {
       sort: [{ '@timestamp': { order: 'asc' } }],
       query: {
         bool: {
-          filter: [
+          filter: expect.arrayContaining([
             { term: { trace_id: traceId } },
             { term: { event_name: 'gen_ai.user.message' } },
-          ],
+            { exists: { field: 'attributes.content' } },
+          ]),
         },
       },
     });
@@ -97,7 +98,11 @@ describe('groundedness trace extractor', () => {
       sort: [{ '@timestamp': { order: 'desc' } }],
       query: {
         bool: {
-          filter: [{ term: { trace_id: traceId } }, { term: { event_name: 'gen_ai.choice' } }],
+          filter: expect.arrayContaining([
+            { term: { trace_id: traceId } },
+            { term: { event_name: 'gen_ai.choice' } },
+            { exists: { field: 'attributes.message.content' } },
+          ]),
         },
       },
     });

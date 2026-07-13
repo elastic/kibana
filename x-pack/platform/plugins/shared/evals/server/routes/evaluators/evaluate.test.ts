@@ -22,6 +22,11 @@ import { registerEvaluateRoute } from './evaluate';
 
 jest.mock('../../evaluators/trace_readiness');
 const awaitTraceReadyMock = awaitTraceReady as jest.MockedFunction<typeof awaitTraceReady>;
+const DEFAULT_ROUND = {
+  input: { message: 'default input' },
+  response: { message: 'default response' },
+  steps: [],
+};
 
 describe('POST /internal/evals/_evaluate', () => {
   const buildEvaluator = ({
@@ -100,7 +105,7 @@ describe('POST /internal/evals/_evaluate', () => {
   };
 
   beforeEach(() => {
-    awaitTraceReadyMock.mockResolvedValue(undefined);
+    awaitTraceReadyMock.mockResolvedValue(DEFAULT_ROUND);
   });
 
   afterEach(() => {
@@ -116,6 +121,19 @@ describe('POST /internal/evals/_evaluate', () => {
   });
 
   it('returns two ok results, reuses one trace accessor, and caches inference client by connector', async () => {
+    const round = {
+      input: { message: 'What is the payment status?' },
+      response: { message: 'Payment service is healthy.' },
+      steps: [
+        {
+          tool_call_id: 'call-1',
+          tool_id: 'health_check',
+          arguments: { service: 'payments' },
+          result: { status: 'healthy' },
+        },
+      ],
+    };
+    awaitTraceReadyMock.mockResolvedValueOnce(round);
     const firstEvaluate = jest.fn().mockResolvedValue({
       scores: [{ name: 'groundedness', score: 0.9, label: 'GROUNDED' }],
     });
@@ -218,18 +236,7 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(firstEvaluate).toHaveBeenCalledWith(
       expect.objectContaining({
         trace: expect.objectContaining({ traceId: '0af7651916cd43dd8448eb211c80319c' }),
-        round: {
-          input: { message: 'What is the payment status?' },
-          response: { message: 'Payment service is healthy.' },
-          steps: [
-            {
-              tool_call_id: 'call-1',
-              tool_id: 'health_check',
-              arguments: { service: 'payments' },
-              result: { status: 'healthy' },
-            },
-          ],
-        },
+        round,
         referenceData: { expected: 'ok' },
         inferenceClient: expect.any(Object),
         log: logger,
@@ -244,10 +251,15 @@ describe('POST /internal/evals/_evaluate', () => {
         log: logger,
       })
     );
-    expect(searchMock).toHaveBeenCalledTimes(3);
   });
 
   it('uses otel-genai-attributes mapping when requested', async () => {
+    const round = {
+      input: { message: 'How many failed payments?' },
+      response: { message: 'There were 12 failed payments today.' },
+      steps: [],
+    };
+    awaitTraceReadyMock.mockResolvedValueOnce(round);
     const evaluate = jest.fn().mockResolvedValue({
       scores: [{ name: 'latency', score: 42 }],
     });
@@ -317,11 +329,7 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.status).toBe(200);
     expect(evaluate).toHaveBeenCalledWith(
       expect.objectContaining({
-        round: {
-          input: { message: 'How many failed payments?' },
-          response: { message: 'There were 12 failed payments today.' },
-          steps: [],
-        },
+        round,
       })
     );
     expect(awaitTraceReadyMock).toHaveBeenCalledWith(
@@ -345,6 +353,11 @@ describe('POST /internal/evals/_evaluate', () => {
   });
 
   it('returns evidence_unmet without inference calls when evaluator evidence requirements fail', async () => {
+    awaitTraceReadyMock.mockResolvedValueOnce({
+      input: { message: 'What is the payment status?' },
+      response: { message: '' },
+      steps: [],
+    });
     const groundednessEvaluate = jest.fn().mockResolvedValue({
       scores: [{ name: 'groundedness', score: 1, label: 'GROUNDED' }],
     });
@@ -387,7 +400,7 @@ describe('POST /internal/evals/_evaluate', () => {
           evidenceSchema: z.object({
             input: z.object({ message: z.string().trim().min(1) }),
             response: z.object({ message: z.string().trim().min(1) }),
-            steps: z.array(z.unknown()),
+            steps: z.array(z.object({}).catchall(z.unknown())),
           }),
         },
         buildEvaluator({ name: 'latency', kind: 'code', evaluate: latencyEvaluate }),
@@ -428,6 +441,45 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.payload.results[0].error.message).toContain('response.message');
     expect(getClient).not.toHaveBeenCalled();
     expect(groundednessEvaluate).not.toHaveBeenCalled();
+    expect(latencyEvaluate).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns 200 for metrics-only evaluators when response evidence is missing', async () => {
+    awaitTraceReadyMock.mockResolvedValueOnce({
+      input: { message: 'What is the payment status?' },
+      response: { message: '' },
+      steps: [],
+    });
+    const latencyEvaluate = jest.fn().mockResolvedValue({
+      scores: [{ name: 'latency', score: 42 }],
+    });
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([
+        buildEvaluator({ name: 'latency', kind: 'code', evaluate: latencyEvaluate }),
+      ]),
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
+          },
+          evaluators: [{ name: 'latency' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload.results).toEqual([
+      expect.objectContaining({
+        status: 'ok',
+        evaluator: expect.objectContaining({ name: 'latency' }),
+        scores: [{ name: 'latency', score: 42 }],
+      }),
+    ]);
     expect(latencyEvaluate).toHaveBeenCalledTimes(1);
   });
 
@@ -747,7 +799,9 @@ describe('POST /internal/evals/_evaluate', () => {
 
   it('returns 404 when trace readiness check fails', async () => {
     awaitTraceReadyMock.mockRejectedValueOnce(
-      new Error('Trace abc123 is not ready: agent response not yet available')
+      new Error(
+        'Trace abc123 has documents but evidence is unresolvable for profile "elastic-inference"'
+      )
     );
     const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
     const latency = buildEvaluator({ name: 'latency', kind: 'code' });
@@ -771,7 +825,8 @@ describe('POST /internal/evals/_evaluate', () => {
 
     expect(response.status).toBe(404);
     expect(response.payload).toEqual({
-      message: 'Error: Trace abc123 is not ready: agent response not yet available',
+      message:
+        'Error: Trace abc123 has documents but evidence is unresolvable for profile "elastic-inference"',
     });
     expect(groundedness.evaluate).not.toHaveBeenCalled();
     expect(latency.evaluate).not.toHaveBeenCalled();

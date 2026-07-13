@@ -20,75 +20,16 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { EvaluatorRegistry } from '../../evaluators/types';
 import { registerResolveMappingsRoute } from './resolve_mappings';
-
-interface SearchRequest {
-  index?: string | string[];
-  query?: {
-    bool?: {
-      filter?: Array<Record<string, unknown>>;
-    };
-  };
-}
+import { buildSearchMock, hasExistsFilter, hasTermFilter, withHits } from './test_helpers';
 
 const ELASTIC_TRACE_ID = '0af7651916cd43dd8448eb211c80319c';
 const ATTR_TRACE_ID = '0af7651916cd43dd8448eb211c80319d';
 const REDACTED_TRACE_ID = '0af7651916cd43dd8448eb211c80319e';
 const ABSENT_TRACE_ID = '0af7651916cd43dd8448eb211c80319f';
+const NO_TOOL_CALLS_TRACE_ID = '0af7651916cd43dd8448eb211c8031aa';
 
-const emptySearchResponse = { hits: { hits: [] } };
-
-const withHits = (documents: Array<Record<string, unknown>>) => ({
-  hits: {
-    hits: documents.map((document) => ({ _source: document })),
-  },
-});
-
-const getFilters = (request: SearchRequest): Array<Record<string, unknown>> =>
-  request.query?.bool?.filter ?? [];
-
-const getFilterTraceId = (filters: Array<Record<string, unknown>>): string | undefined => {
-  for (const filter of filters) {
-    const termFilter = filter.term as Record<string, unknown> | undefined;
-    if (!termFilter) {
-      continue;
-    }
-
-    const traceFromLogs = termFilter.trace_id;
-    if (typeof traceFromLogs === 'string') {
-      return traceFromLogs;
-    }
-
-    const traceFromTraces = termFilter['trace.id'];
-    if (typeof traceFromTraces === 'string') {
-      return traceFromTraces;
-    }
-  }
-
-  return undefined;
-};
-
-const hasTermFilter = (
-  filters: Array<Record<string, unknown>>,
-  field: string,
-  expectedValue: string
-): boolean =>
-  filters.some((filter) => {
-    const termFilter = filter.term as Record<string, unknown> | undefined;
-    return termFilter?.[field] === expectedValue;
-  });
-
-const hasExistsFilter = (filters: Array<Record<string, unknown>>, field: string): boolean =>
-  filters.some((filter) => {
-    const existsFilter = filter.exists as Record<string, unknown> | undefined;
-    return existsFilter?.field === field;
-  });
-
-const buildSearchMock = () =>
-  jest.fn(async (request: SearchRequest) => {
-    const index = Array.isArray(request.index) ? request.index[0] : request.index;
-    const filters = getFilters(request);
-    const traceId = getFilterTraceId(filters);
-
+const buildRouteSearchMock = () =>
+  buildSearchMock(async ({ index, filters, traceId, emptySearchResponse }) => {
     if (!traceId || traceId === ABSENT_TRACE_ID) {
       return emptySearchResponse;
     }
@@ -130,48 +71,75 @@ const buildSearchMock = () =>
       }
     }
 
-    if (traceId === ATTR_TRACE_ID) {
-      if (index === 'traces-*') {
-        if (hasExistsFilter(filters, 'attributes.gen_ai.input.messages')) {
+    if (traceId === NO_TOOL_CALLS_TRACE_ID) {
+      if (index === 'logs-*') {
+        if (hasTermFilter(filters, 'event_name', 'gen_ai.user.message')) {
           return withHits([
             {
-              '@timestamp': '2026-07-10T10:10:00.000Z',
-              'attributes.gen_ai.input.messages': JSON.stringify([
-                {
-                  role: 'user',
-                  parts: [{ type: 'text', content: 'Summarize failures in last 24h.' }],
-                },
-              ]),
+              '@timestamp': '2026-07-10T12:00:00.000Z',
+              'attributes.content': 'Show me errors from checkout.',
             },
           ]);
         }
-        if (hasExistsFilter(filters, 'attributes.gen_ai.output.messages')) {
+        if (hasTermFilter(filters, 'event_name', 'gen_ai.choice')) {
           return withHits([
             {
-              '@timestamp': '2026-07-10T10:10:01.000Z',
-              'attributes.gen_ai.output.messages': [
-                {
-                  role: 'assistant',
-                  parts: [{ type: 'text', content: 'There were 12 failures in the last 24h.' }],
-                },
-              ],
+              '@timestamp': '2026-07-10T12:00:01.000Z',
+              'attributes.message.content': 'There are 3 checkout errors in the last hour.',
             },
           ]);
         }
-        if (hasTermFilter(filters, 'attributes.gen_ai.operation.name', 'execute_tool')) {
-          return withHits([
-            {
-              '@timestamp': '2026-07-10T10:10:00.500Z',
-              'attributes.gen_ai.tool.call.id': 'call-2',
-              'attributes.gen_ai.tool.name': 'failure_summary',
-              'attributes.gen_ai.tool.call.arguments': '{"window":"24h"}',
-              'attributes.gen_ai.tool.call.result': '{"count":12}',
-            },
-          ]);
-        }
-
-        return withHits([{ '@timestamp': '2026-07-10T10:10:00.000Z' }]);
+        return withHits([{ '@timestamp': '2026-07-10T12:00:00.000Z' }]);
       }
+
+      if (index === 'traces-*') {
+        if (hasTermFilter(filters, 'attributes.elastic.inference.span.kind', 'TOOL')) {
+          return emptySearchResponse;
+        }
+        return withHits([{ '@timestamp': '2026-07-10T12:00:00.500Z' }]);
+      }
+    }
+
+    if (traceId === ATTR_TRACE_ID && index === 'traces-*') {
+      if (hasExistsFilter(filters, 'attributes.gen_ai.input.messages')) {
+        return withHits([
+          {
+            '@timestamp': '2026-07-10T10:10:00.000Z',
+            'attributes.gen_ai.input.messages': JSON.stringify([
+              {
+                role: 'user',
+                parts: [{ type: 'text', content: 'Summarize failures in last 24h.' }],
+              },
+            ]),
+          },
+        ]);
+      }
+      if (hasExistsFilter(filters, 'attributes.gen_ai.output.messages')) {
+        return withHits([
+          {
+            '@timestamp': '2026-07-10T10:10:01.000Z',
+            'attributes.gen_ai.output.messages': [
+              {
+                role: 'assistant',
+                parts: [{ type: 'text', content: 'There were 12 failures in the last 24h.' }],
+              },
+            ],
+          },
+        ]);
+      }
+      if (hasTermFilter(filters, 'attributes.gen_ai.operation.name', 'execute_tool')) {
+        return withHits([
+          {
+            '@timestamp': '2026-07-10T10:10:00.500Z',
+            'attributes.gen_ai.tool.call.id': 'call-2',
+            'attributes.gen_ai.tool.name': 'failure_summary',
+            'attributes.gen_ai.tool.call.arguments': '{"window":"24h"}',
+            'attributes.gen_ai.tool.call.result': '{"count":12}',
+          },
+        ]);
+      }
+
+      return withHits([{ '@timestamp': '2026-07-10T10:10:00.000Z' }]);
     }
 
     if (traceId === REDACTED_TRACE_ID) {
@@ -224,7 +192,7 @@ describe('POST /internal/evals/traces/_resolve_mappings', () => {
     return { handler, routeConfig };
   };
 
-  const buildContext = (searchMock = buildSearchMock()) =>
+  const buildContext = (searchMock = buildRouteSearchMock()) =>
     ({
       core: Promise.resolve({
         elasticsearch: {
@@ -319,6 +287,32 @@ describe('POST /internal/evals/traces/_resolve_mappings', () => {
           agent_response: expect.objectContaining({ status: 'content_redacted' }),
           tool_calls: expect.objectContaining({ status: 'content_redacted' }),
         },
+      })
+    );
+  });
+
+  it('recommends mapping when user and response are found but tool_calls are not found', async () => {
+    const { handler } = setup();
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: { trace_id: NO_TOOL_CALLS_TRACE_ID },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    const payload = response.payload as ResolveMappingsResponse;
+    expect(payload.recommended_mapping).toEqual({ profile: 'elastic-inference' });
+    expect(payload.profiles).toContainEqual(
+      expect.objectContaining({
+        profile: 'elastic-inference',
+        evidence: expect.objectContaining({
+          user_query: expect.objectContaining({ status: 'found' }),
+          agent_response: expect.objectContaining({ status: 'found' }),
+          tool_calls: expect.objectContaining({ status: 'not_found' }),
+        }),
       })
     );
   });

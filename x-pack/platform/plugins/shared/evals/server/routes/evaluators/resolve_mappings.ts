@@ -23,9 +23,7 @@ const getRecommendedMapping = (
   profiles: ResolveMappingsResponse['profiles']
 ): ResolveMappingsResponse['recommended_mapping'] => {
   const firstFullyResolvedProfile = profiles.find(({ evidence }) =>
-    [evidence.user_query, evidence.agent_response, evidence.tool_calls].every(
-      ({ status }) => status === 'found'
-    )
+    [evidence.user_query, evidence.agent_response].every(({ status }) => status === 'found')
   );
 
   return firstFullyResolvedProfile ? { profile: firstFullyResolvedProfile.profile } : null;

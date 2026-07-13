@@ -29,7 +29,7 @@ describe('GET /internal/evals/evaluators', () => {
         evidenceSchema: z.object({
           input: z.object({ message: z.string().min(1) }),
           response: z.object({ message: z.string().min(1) }),
-          steps: z.array(z.unknown()),
+          steps: z.array(z.object({}).catchall(z.unknown())),
         }),
         evaluate: jest.fn(),
       },

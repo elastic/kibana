@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import { normalizeEvidence } from '../evidence/evidence_service';
 import { getEvidenceMapping } from '../evidence/resolve_mapping';
+import { createTraceAccessor } from '../trace_accessor';
 import type { TraceAccessor } from '../types';
 
 interface GroundednessEvidence {
@@ -34,7 +35,10 @@ export const extractGroundednessEvidence = async (
   traceAccessor: TraceAccessor,
   log: Logger
 ): Promise<GroundednessEvidence> => {
-  const round = await normalizeEvidence(traceAccessor, DEFAULT_EVIDENCE_MAPPING);
+  const round = await normalizeEvidence(
+    createTraceAccessor(traceAccessor),
+    DEFAULT_EVIDENCE_MAPPING
+  );
 
   const baseEvidence: GroundednessEvidence = {
     user_query: round.input.message,
