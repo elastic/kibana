@@ -38,13 +38,7 @@ export const getExportJsonConfig = (services: {
   flyoutContent: ({ closeFlyout }) => {
     return (
       <ExportJsonFlyoutContext.Provider value={{ services }}>
-        <ExportJsonFlyout<LensWireAPIConfig, LensWireAPIConfig>
-          closeFlyout={closeFlyout}
-          sanitizeState={async (state: LensWireAPIConfig) => {
-            return { data: state, warnings: [] };
-          }}
-          apiPath={'/api/lens'}
-        />
+        <ExportJsonFlyout<LensWireAPIConfig> closeFlyout={closeFlyout} apiPath={'/api/lens'} />
       </ExportJsonFlyoutContext.Provider>
     );
   },

@@ -12,7 +12,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ExportJsonFlyout, ExportJsonFlyoutContext } from '@kbn/as-code-export-utils';
 import type { ExportShareParameters } from '@kbn/share-plugin/public';
-import type { LinksState } from '../../server';
+import type { LinksApiState } from '../../server';
 import { coreServices, shareServices } from '../services/kibana_services';
 
 export const exportJsonConfig: ExportShareParameters = {
@@ -38,13 +38,7 @@ export const exportJsonConfig: ExportShareParameters = {
       <ExportJsonFlyoutContext.Provider
         value={{ services: { core: coreServices, share: shareServices } }}
       >
-        <ExportJsonFlyout<LinksState, LinksState>
-          closeFlyout={closeFlyout}
-          sanitizeState={async (state: LinksState) => {
-            return { data: state, warnings: [] };
-          }}
-          apiPath={'/api/links'}
-        />
+        <ExportJsonFlyout<LinksApiState> closeFlyout={closeFlyout} apiPath={'/api/links'} />
       </ExportJsonFlyoutContext.Provider>
     );
   },

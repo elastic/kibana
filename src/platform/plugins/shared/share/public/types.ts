@@ -470,9 +470,6 @@ export type ConditionallyTypedShareOptions<
   ? ShareIntegrationOptions
   : Omit<ShowShareMenuOptions, 'asExport' | 'anchorElement'>;
 
-type Test = ConditionallyTypedShareOptions<ShareIntegration>;
-type Test2 = ConditionallyTypedShareOptions<LinkShare>;
-
 export interface ClientConfigType {
-  new_version: { enaßbled: boolean };
+  new_version: { enabled: boolean };
 }

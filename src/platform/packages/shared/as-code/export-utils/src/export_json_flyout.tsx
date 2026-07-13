@@ -47,15 +47,22 @@ const flyoutBodyCss = css`
   }
 `;
 
-export const ExportJsonFlyout = <State extends object, SanitizedState extends object>({
+type NoSanitizedState = void & {};
+
+export const ExportJsonFlyout = <
+  State extends object,
+  SanitizedState extends object = NoSanitizedState
+>({
   apiPath,
   closeFlyout,
   sanitizeState,
-}: {
-  apiPath: string;
-  closeFlyout: () => void;
-  sanitizeState: SanitizeStateFunction<State, SanitizedState>;
-}) => {
+}: SanitizedState extends NoSanitizedState
+  ? { apiPath: string; closeFlyout: () => void; sanitizeState?: undefined }
+  : {
+      apiPath: string;
+      closeFlyout: () => void;
+      sanitizeState: SanitizeStateFunction<State, SanitizedState>;
+    }) => {
   const [exportFullState, setExportFullState] = useState<boolean>(false);
   const { objectType, objectTypeAlias, sharingData } = useShareTypeContext(
     'integration',
@@ -67,7 +74,7 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
 
   const { status, data, warnings, error, retry } = useSanitizedState<State, SanitizedState>({
     state,
-    sanitizeState,
+    sanitizeState: sanitizeState as SanitizeStateFunction<State, SanitizedState> | undefined,
   });
 
   const onDownload = useCallback(async () => {

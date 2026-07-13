@@ -39,13 +39,7 @@ export const exportJsonConfig: ExportShareParameters = {
       <ExportJsonFlyoutContext.Provider
         value={{ services: { core: coreServices, share: shareServices } }}
       >
-        <ExportJsonFlyout<LensWireAPIConfig, LensWireAPIConfig>
-          closeFlyout={closeFlyout}
-          sanitizeState={async (state: LensWireAPIConfig) => {
-            return { data: state, warnings: [] };
-          }}
-          apiPath={'/api/markdowns'}
-        />
+        <ExportJsonFlyout<LensWireAPIConfig> closeFlyout={closeFlyout} apiPath={'/api/markdowns'} />
       </ExportJsonFlyoutContext.Provider>
     );
   },
