@@ -136,6 +136,7 @@ export function EpisodeDetailsPage() {
       userProfile: services.userProfile,
       spaces: services.spaces,
       uiSettings: services.uiSettings,
+      dataViews: services.dataViews,
     }),
     [
       services.data,
@@ -144,6 +145,7 @@ export function EpisodeDetailsPage() {
       services.userProfile,
       services.spaces,
       services.uiSettings,
+      services.dataViews,
     ]
   );
 
@@ -151,9 +153,8 @@ export function EpisodeDetailsPage() {
     () => ({
       ...detailsServices,
       unifiedDocViewer: services.unifiedDocViewer,
-      dataViews: services.dataViews,
     }),
-    [detailsServices, services.unifiedDocViewer, services.dataViews]
+    [detailsServices, services.unifiedDocViewer]
   );
 
   const episodeActions: EpisodeAction[] = useMemo(
@@ -405,7 +406,7 @@ export function EpisodeDetailsPage() {
         badges={headerBadges}
         menu={headerMenu}
         tabs={headerTabs}
-        padding={{ bleed: 'l' }}
+        padding={{ bleed: 'm' }}
       />
       <EuiSpacer size="m" />
       {isLoading ? (

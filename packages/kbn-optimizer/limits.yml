@@ -16,7 +16,7 @@ pageLoadAssetSize:
   automaticImport: 18629
   banners: 4006
   canvas: 14881
-  cases: 242517
+  cases: 242617
   charts: 40269
   cloud: 11743
   cloudConnect: 9149
@@ -50,6 +50,7 @@ pageLoadAssetSize:
   devTools: 8107
   discover: 32000
   discoverEnhanced: 5353
+  discoveries: 35780
   discoverShared: 2322
   elasticAssistant: 299772
   elasticAssistantSharedState: 4881
@@ -111,7 +112,7 @@ pageLoadAssetSize:
   lens: 99147
   licenseManagement: 8193
   licensing: 10073
-  links: 8620
+  links: 8340
   lists: 5093
   logsDataAccess: 7900
   logsShared: 82701

@@ -1,0 +1,73 @@
+{
+  "10.3.0": [
+    {
+      "apiKeyId": "string",
+      "apiKeyToUse": "string",
+      "createdAt": "string",
+      "duration": "string",
+      "enabled": "boolean",
+      "end": "string?",
+      "spaceId": "string",
+      "start": "string",
+      "status": "complete|pending|running|error|timeout",
+      "schedule": "array",
+      "initiator": "user|system",
+      "initiatorId": "string?",
+      "rule": {
+        "name": "string",
+        "tags": "array",
+        "alertTypeId": "string",
+        "params": "record",
+        "apiKeyOwner": "string?|null",
+        "apiKeyCreatedByUser": "boolean?|null",
+        "consumer": "string",
+        "enabled": "boolean",
+        "createdBy": "string?|null",
+        "updatedBy": "string?|null",
+        "updatedAt": "string",
+        "createdAt": "string",
+        "revision": "number",
+        "actions": "array?",
+        "schedule": {
+          "interval": "string"
+        }
+      }
+    }
+  ],
+  "10.4.0": [
+    {
+      "apiKeyId": "string",
+      "apiKeyToUse": "string",
+      "createdAt": "string",
+      "duration": "string",
+      "enabled": "boolean",
+      "end": "string?",
+      "spaceId": "string",
+      "start": "string",
+      "status": "complete|pending|running|error|timeout",
+      "schedule": "array",
+      "initiator": "user|system",
+      "initiatorId": "string?",
+      "uiamApiKey": "string?",
+      "rule": {
+        "name": "string",
+        "tags": "array",
+        "alertTypeId": "string",
+        "params": "record",
+        "apiKeyOwner": "string?|null",
+        "apiKeyCreatedByUser": "boolean?|null",
+        "consumer": "string",
+        "enabled": "boolean",
+        "createdBy": "string?|null",
+        "updatedBy": "string?|null",
+        "updatedAt": "string",
+        "createdAt": "string",
+        "revision": "number",
+        "actions": "array?",
+        "schedule": {
+          "interval": "string"
+        }
+      }
+    }
+  ]
+}

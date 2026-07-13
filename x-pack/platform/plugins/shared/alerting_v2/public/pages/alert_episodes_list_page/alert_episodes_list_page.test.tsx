@@ -118,6 +118,13 @@ jest.mock('react-use/lib/useObservable', () =>
 const mockHttp = httpServiceMock.createStartContract();
 const mockSpaces = createMockSpaces();
 
+const mockStorage = {
+  get: jest.fn().mockReturnValue(null),
+  set: jest.fn(),
+  remove: jest.fn(),
+  clear: jest.fn(),
+};
+
 const mockServices = {
   http: mockHttp,
   data: {
@@ -145,6 +152,7 @@ const mockServices = {
   userProfile: {},
   uiActions: { getTriggerCompatibleActions: jest.fn().mockResolvedValue([]) },
   spaces: mockSpaces,
+  storage: mockStorage,
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({

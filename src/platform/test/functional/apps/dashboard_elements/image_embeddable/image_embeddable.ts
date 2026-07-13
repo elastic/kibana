@@ -20,6 +20,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
   const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
 
+  /**
+   * Purpose: Image embeddable smoke test
+   *
+   * Migration: replace with unit image embeddable unit tests
+   */
   describe('image embeddable', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
