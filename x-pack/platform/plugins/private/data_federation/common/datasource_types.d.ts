@@ -1,17 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 /**
  * Fields accepted when creating or updating a data source (Elasticsearch
  * `PUT /_query/datasource/{id}` and the internal Kibana proxy route).
  */
 export interface DataSourceCommon<T extends DataSourceType, S extends {}> {
-    type: T;
-    description: string;
-    name: string;
-    settings: S;
+  type: T;
+  description: string;
+  name: string;
+  settings: S;
 }
 export type DataSource = S3DataSource | GCSDataSource | AzureDataSource;
-export type DataSourceWithSecrets = S3DataSourceWithSecrets | GCSDataSourceWithSecrets | AzureDataSourceWithSecrets;
+export type DataSourceWithSecrets =
+  | S3DataSourceWithSecrets
+  | GCSDataSourceWithSecrets
+  | AzureDataSourceWithSecrets;
 /** Sentinel value Elasticsearch substitutes for a secret field on GET. */
-export declare const ES_REDACTED_SECRET_VALUE = "::es_redacted::";
+export declare const ES_REDACTED_SECRET_VALUE = '::es_redacted::';
 export type DataSourceType = 's3' | 'gcs' | 'azure';
 /**
  * The settings fields Elasticsearch stores as encrypted secrets, per data source type.
@@ -41,45 +51,48 @@ export declare const DATA_SOURCE_TYPES_TO_HELP_TEXT: Partial<Record<DataSourceTy
 export type S3DataSource = DataSourceCommon<'s3', S3DataSourceSettings>;
 export type S3DataSourceWithSecrets = DataSourceCommon<'s3', S3DataSourceSettingsWithSecrets>;
 export interface S3DataSourceSettings {
-    region?: string;
-    endpoint?: string;
-    auth?: string;
+  region?: string;
+  endpoint?: string;
+  auth?: string;
 }
 export interface S3DataSourceSettingsWithSecrets extends S3DataSourceSettings {
-    access_key?: string;
-    secret_key?: string;
-    role_arn?: string;
-    jwt_audience?: string;
-    role_session_name?: string;
-    sts_endpoint?: string;
-    sts_region?: string;
+  access_key?: string;
+  secret_key?: string;
+  role_arn?: string;
+  jwt_audience?: string;
+  role_session_name?: string;
+  sts_endpoint?: string;
+  sts_region?: string;
 }
 export type GCSDataSource = DataSourceCommon<'gcs', GCSDataSourceSettings>;
 export type GCSDataSourceWithSecrets = DataSourceCommon<'gcs', GCSDataSourceSettingsWithSecrets>;
 export interface GCSDataSourceSettings {
-    project_id?: string;
-    endpoint?: string;
-    token_uri?: string;
-    auth?: string;
+  project_id?: string;
+  endpoint?: string;
+  token_uri?: string;
+  auth?: string;
 }
 export interface GCSDataSourceSettingsWithSecrets extends GCSDataSourceSettings {
-    credentials?: string;
-    jwt_audience?: string;
-    sts_audience?: string;
-    service_account_impersonation_url?: string;
+  credentials?: string;
+  jwt_audience?: string;
+  sts_audience?: string;
+  service_account_impersonation_url?: string;
 }
 export type AzureDataSource = DataSourceCommon<'azure', AzureDataSourceSettings>;
-export type AzureDataSourceWithSecrets = DataSourceCommon<'azure', AzureDataSourceSettingsWithSecrets>;
+export type AzureDataSourceWithSecrets = DataSourceCommon<
+  'azure',
+  AzureDataSourceSettingsWithSecrets
+>;
 export interface AzureDataSourceSettings {
-    endpoint?: string;
-    account?: string;
-    auth?: string;
+  endpoint?: string;
+  account?: string;
+  auth?: string;
 }
 export interface AzureDataSourceSettingsWithSecrets extends AzureDataSourceSettings {
-    connection_string?: string;
-    key?: string;
-    sas_token?: string;
-    tenant_id?: string;
-    client_id?: string;
-    jwt_audience?: string;
+  connection_string?: string;
+  key?: string;
+  sas_token?: string;
+  tenant_id?: string;
+  client_id?: string;
+  jwt_audience?: string;
 }
