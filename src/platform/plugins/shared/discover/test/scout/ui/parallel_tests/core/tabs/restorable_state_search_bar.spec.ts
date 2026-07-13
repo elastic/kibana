@@ -13,15 +13,14 @@ import { spaceTest } from '../../../fixtures/common';
 
 const DEFAULT_ESQL_QUERY = 'FROM logstash-*';
 
-const expectClassicQueryState = async (
-  { discover, queryBar }: PageObjects,
-  query: string,
-  isDirty: boolean
-) => {
+const expectCleanClassicQueryState = async ({ discover, queryBar }: PageObjects, query: string) => {
   expect(await queryBar.getQuery()).toBe(query);
-  expect(await discover.getQuerySubmitButtonLabel()).toBe(
-    isDirty ? 'Needs updating' : 'Refresh query'
-  );
+  expect(await discover.getQuerySubmitButtonLabel()).toBe('Refresh query');
+};
+
+const expectDirtyClassicQueryState = async ({ discover, queryBar }: PageObjects, query: string) => {
+  expect(await queryBar.getQuery()).toBe(query);
+  expect(await discover.getQuerySubmitButtonLabel()).toBe('Needs updating');
 };
 
 const expectEsqlQueryState = async ({ discover }: PageObjects, query: string) => {
@@ -54,46 +53,46 @@ spaceTest.describe(
         const draftQuery0 = 'jpg';
         const draftQuery2 = 'png';
 
-        await expectClassicQueryState(pageObjects, '', false);
+        await expectCleanClassicQueryState(pageObjects, '');
         await queryBar.setQuery(draftQuery0);
-        await expectClassicQueryState(pageObjects, draftQuery0, true);
+        await expectDirtyClassicQueryState(pageObjects, draftQuery0);
 
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
-        await expectClassicQueryState(pageObjects, '', false);
+        await expectCleanClassicQueryState(pageObjects, '');
 
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
-        await expectClassicQueryState(pageObjects, '', false);
+        await expectCleanClassicQueryState(pageObjects, '');
         await queryBar.setQuery(draftQuery2);
-        await expectClassicQueryState(pageObjects, draftQuery2, true);
+        await expectDirtyClassicQueryState(pageObjects, draftQuery2);
 
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
-        await expectClassicQueryState(pageObjects, draftQuery0, true);
+        await expectDirtyClassicQueryState(pageObjects, draftQuery0);
         expect(await discover.getHitCount()).toBe('14,004');
         await discover.submitQuery();
         await discover.waitUntilTabIsLoaded();
-        await expectClassicQueryState(pageObjects, draftQuery0, false);
+        await expectCleanClassicQueryState(pageObjects, draftQuery0);
         expect(await discover.getHitCount()).toBe('11,829');
 
         await unifiedTabs.selectTab(1);
         await discover.waitUntilTabIsLoaded();
-        await expectClassicQueryState(pageObjects, '', false);
+        await expectCleanClassicQueryState(pageObjects, '');
         expect(await discover.getHitCount()).toBe('14,004');
 
         await unifiedTabs.selectTab(2);
         await discover.waitUntilTabIsLoaded();
-        await expectClassicQueryState(pageObjects, draftQuery2, true);
+        await expectDirtyClassicQueryState(pageObjects, draftQuery2);
         expect(await discover.getHitCount()).toBe('14,004');
         await discover.submitQuery();
         await discover.waitUntilTabIsLoaded();
-        await expectClassicQueryState(pageObjects, draftQuery2, false);
+        await expectCleanClassicQueryState(pageObjects, draftQuery2);
         expect(await discover.getHitCount()).toBe('1,373');
 
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
-        await expectClassicQueryState(pageObjects, draftQuery0, false);
+        await expectCleanClassicQueryState(pageObjects, draftQuery0);
         expect(await discover.getHitCount()).toBe('11,829');
       }
     );
