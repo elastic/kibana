@@ -15,7 +15,7 @@ import type {
 import type { ChatRequestBodyPayload, ChatResponse } from './chat';
 
 export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
-  source: ConversationSource & {
+  source?: ConversationSource & {
     type: ConversationSourceType;
     user?: ConversationSourceUser;
   };
