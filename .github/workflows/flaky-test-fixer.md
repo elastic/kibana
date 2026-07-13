@@ -187,6 +187,8 @@ Kibana is already bootstrapped for you.
 
 ## PR format
 
+Write the body so a developer can grasp the fix and its root cause at a glance — from the PR alone, without leaving the page or opening extra links.
+
 - **Branch**: name the PR's source branch `fix/flaky-<issue-number>-<short-kebab-slug>` (e.g. `fix/flaky-275144-host-flow-ingestion-wait`) to keep fixer branches uniform.
 - **Title**: `[<Plugin name>] <concise summary of the fix>`. Derive the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`).
 - **Body**:
