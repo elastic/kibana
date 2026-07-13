@@ -42,6 +42,7 @@ import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/cons
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
+import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
@@ -219,6 +220,12 @@ export const AlertEpisodesListPage = () => {
     services,
   });
 
+  const sourceDataViewsByRule = useAlertingRuleSourceDataViews({
+    rules: rulesCache,
+    dataViews: services.dataViews,
+    http: services.http,
+  });
+
   const ruleOptions = useMemo(
     () =>
       Object.entries(rulesCache).map(([id, rule]) => ({
@@ -372,6 +379,7 @@ export const AlertEpisodesListPage = () => {
           rulesCache={rulesCache}
           isLoadingRules={isLoadingRules}
           rowHeight={rowHeight}
+          sourceDataViewsByRule={sourceDataViewsByRule}
         />
       ),
       assignees: (props) => {
@@ -381,7 +389,7 @@ export const AlertEpisodesListPage = () => {
         );
       },
     }),
-    [rulesCache, isLoadingRules, rowHeight, services.userProfile]
+    [rulesCache, isLoadingRules, rowHeight, services.userProfile, sourceDataViewsByRule]
   );
 
   const episodesMenu = useMemo(
