@@ -7,7 +7,7 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createDashboard, testData } from '../fixtures';
+import { testData } from '../fixtures';
 
 spaceTest.describe(
   'Lens metric trendline on dashboard (DSL)',
@@ -44,7 +44,7 @@ spaceTest.describe(
 
     spaceTest(
       'renders trendline when panel uses inline data view spec',
-      async ({ browserAuth, kbnClient, page, pageObjects, scoutSpace }) => {
+      async ({ apiServices, browserAuth, page, pageObjects, scoutSpace }) => {
         const body = {
           title: 'Metric trendline spec',
           time_range: testData.LOGSTASH_IN_RANGE_DATES,
@@ -73,7 +73,7 @@ spaceTest.describe(
           ],
         };
 
-        const dashboardId = await createDashboard(kbnClient, body, scoutSpace.id);
+        const dashboardId = await apiServices.dashboard.create(body, scoutSpace.id);
         await browserAuth.loginAsPrivilegedUser();
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
@@ -84,7 +84,7 @@ spaceTest.describe(
 
     spaceTest(
       'renders trendline when panel uses stored data view reference',
-      async ({ browserAuth, kbnClient, page, pageObjects, scoutSpace }) => {
+      async ({ apiServices, browserAuth, page, pageObjects, scoutSpace }) => {
         spaceTest.fail(!storedDataViewId, 'Stored data view was not created in beforeAll');
 
         const body = {
@@ -114,7 +114,7 @@ spaceTest.describe(
           ],
         };
 
-        const dashboardId = await createDashboard(kbnClient, body, scoutSpace.id);
+        const dashboardId = await apiServices.dashboard.create(body, scoutSpace.id);
         await browserAuth.loginAsPrivilegedUser();
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
 

@@ -10,11 +10,14 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { SignificantEventsAlertsReaderV1 } from './v1_alerts_reader';
 import { SignificantEventsAlertsReaderV2 } from './v2_alerts_reader';
+import { getRuleDetectionSchedule, type RuleDetectionSchedule } from '../rules/schedule';
 
 export interface ChangePointScanParams {
   lookback: string;
   bucketInterval: string;
   spaceId: string;
+  ruleIds?: string[];
+  recentActivityMinutes?: number;
 }
 
 export interface ChangePointRuleBucket {
@@ -35,11 +38,13 @@ export interface ChangePointRuleBucket {
   last_floor_window: {
     doc_count: number;
   };
+  rule_schedule: RuleDetectionSchedule;
 }
 
 export interface RuleMetadata {
   ruleName: string;
   streamName: string;
+  schedule: RuleDetectionSchedule;
 }
 
 export interface CountDetectionAlertsParams {
@@ -108,6 +113,7 @@ export function buildRuleMetadataMap(queryLinks: QueryLink[]): Map<string, RuleM
     map.set(link.rule_id, {
       ruleName: link.query.title,
       streamName: link.stream_name,
+      schedule: getRuleDetectionSchedule(link.query),
     });
   }
   return map;
