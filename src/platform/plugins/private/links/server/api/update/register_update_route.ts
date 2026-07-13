@@ -8,7 +8,7 @@
  */
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
+import { writeErrorHandler } from '@kbn/as-code-utils';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
