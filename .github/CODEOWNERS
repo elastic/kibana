@@ -445,6 +445,7 @@ src/platform/packages/private/kbn-transpose-utils @elastic/kibana-visualizations
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-validate-oas @elastic/kibana-core
+src/platform/packages/private/kbn-workflow-graph-screenshot-cli @elastic/workflows-eng
 src/platform/packages/private/opentelemetry/kbn-metrics @elastic/kibana-core @elastic/stack-monitoring
 src/platform/packages/private/opentelemetry/kbn-metrics-config @elastic/kibana-core
 src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
@@ -456,6 +457,7 @@ src/platform/packages/shared/as-code/filters-transforms @elastic/kibana-presenta
 src/platform/packages/shared/as-code/shared-schemas @elastic/kibana-presentation
 src/platform/packages/shared/as-code/shared-telemetry @elastic/kibana-presentation
 src/platform/packages/shared/as-code/shared-transforms @elastic/kibana-presentation
+src/platform/packages/shared/as-code/utils @elastic/kibana-presentation
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/chart-test-jest-helpers @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
@@ -1075,7 +1077,7 @@ x-pack/platform/packages/shared/kbn-inference-prompt-utils @elastic/appex-ai-inf
 x-pack/platform/packages/shared/kbn-inference-tracing @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing-config @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-ink @elastic/streams-program-team
-x-pack/platform/packages/shared/kbn-investigation-output @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-investigation-output @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-threat-hunting
@@ -1184,9 +1186,9 @@ x-pack/platform/plugins/shared/actions @elastic/response-ops
 x-pack/platform/plugins/shared/agent_builder @elastic/workchat-eng
 x-pack/platform/plugins/shared/agent_builder_dashboards @elastic/kibana-presentation
 x-pack/platform/plugins/shared/agent_builder_platform @elastic/workchat-eng
+x-pack/platform/plugins/shared/agent_builder_sml @elastic/workchat-eng
 x-pack/platform/plugins/shared/agent_builder_visualizations @elastic/kibana-presentation
 x-pack/platform/plugins/shared/agent_builder_workflows @elastic/workchat-eng @elastic/workflows-eng
-x-pack/platform/plugins/shared/agent_context_layer @elastic/context-eng
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
@@ -1314,7 +1316,6 @@ x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
 x-pack/solutions/observability/plugins/apm @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-presentation-team @elastic/obs-exploration-team
-x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/solutions/observability/plugins/exploratory_view @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-presentation-team
@@ -1885,6 +1886,16 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/global_retention.test.ts @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/failure_store.ts @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/lifecycle_retention.ts @elastic/kibana-management
+x-pack/platform/plugins/shared/significant_events/server/lib/slack_app @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/common/slack_app @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/server/routes/internal/apps/slack @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/streams_app/public/components/significant_events/significant_events_discovery/components/settings/apps_section @elastic/nightshift-context-and-research-team
+x-pack/platform/packages/shared/kbn-significant-events-schema/src/relay_client.ts @elastic/nightshift-context-and-research-team
+
+# Significant Events - Memory & investigation features (owned by Nightshift context & research)
+x-pack/platform/plugins/shared/significant_events/server/memory_and_investigation @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/common/memory_and_investigation.ts @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation @elastic/nightshift-context-and-research-team
 
 # Streams - Data quality overrides (owned by Kibana Management)
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_data_quality @elastic/kibana-management
@@ -1998,8 +2009,6 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 # APM
 /x-pack/platform/test/stack_functional_integration/apps/apm @elastic/obs-presentation-team
 /src/platform/test/api_integration/apis/ui_metric/*.ts @elastic/obs-presentation-team
-/x-pack/solutions/observability/test/functional/apps/apm/ @elastic/obs-presentation-team
-/x-pack/solutions/observability/test/apm_cypress/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/apm_api_integration/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/apm_api_integration/ @elastic/obs-presentation-team
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
@@ -2521,7 +2530,6 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /src/platform/test/plugin_functional/test_suites/hardening @elastic/kibana-security
 /x-pack/platform/test/accessibility/apps/group1/login_page.ts @elastic/kibana-security
 /x-pack/platform/test/accessibility/apps/group1/roles.ts @elastic/kibana-security
-/x-pack/platform/test/accessibility/apps/group1/spaces.ts @elastic/kibana-security
 /x-pack/platform/test/accessibility/apps/group1/users.ts @elastic/kibana-security
 /x-pack/platform/test/api_integration/apis/security/ @elastic/kibana-security
 /x-pack/platform/test/api_integration/apis/spaces/ @elastic/kibana-security
@@ -2529,7 +2537,6 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /x-pack/platform/test/ui_capabilities/ @elastic/kibana-security
 /x-pack/platform/test/encrypted_saved_objects_api_integration/ @elastic/kibana-security
 /x-pack/platform/test/functional/apps/security/ @elastic/kibana-security
-/x-pack/platform/test/functional/apps/spaces/ @elastic/kibana-security
 /x-pack/platform/test/security_api_integration/ @elastic/kibana-security
 /x-pack/platform/test/security_functional/ @elastic/kibana-security
 /x-pack/platform/test/spaces_api_integration/ @elastic/kibana-security
@@ -3135,6 +3142,9 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_alert_tags_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_attack_tags_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_attack_status_step @elastic/security-threat-hunting
+
+# Significant Events managed workflows
+src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/obs-sig-events-team
 
 # Alert analysis workflow
 src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @elastic/security-threat-hunting
