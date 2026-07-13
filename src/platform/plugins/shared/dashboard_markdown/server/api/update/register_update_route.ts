@@ -82,10 +82,6 @@ If no item exists with the specified ID, a new one is created.`,
             return res.ok({ body });
           }
         } catch (e) {
-          if (e.isBoom && e.output.statusCode === 403) {
-            logRequest(logger, req, 'debug', e.message);
-            return res.forbidden({ body: { message: e.message } });
-          }
           return writeErrorHandler(e, res, logger, req);
         }
       })

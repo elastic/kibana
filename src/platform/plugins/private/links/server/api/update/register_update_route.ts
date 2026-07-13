@@ -82,10 +82,6 @@ export function registerUpdateRoute(
             return res.ok({ body });
           }
         } catch (e) {
-          if (e.isBoom && e.output.statusCode === 403) {
-            logRequest(logger, req, 'debug', e.message);
-            return res.forbidden({ body: { message: e.message } });
-          }
           return writeErrorHandler(e, res, logger, req);
         }
       })
