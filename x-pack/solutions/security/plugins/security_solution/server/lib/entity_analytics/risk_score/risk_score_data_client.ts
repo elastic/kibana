@@ -6,6 +6,7 @@
  */
 
 import type {
+  AggregationsCalendarInterval,
   ClusterPutComponentTemplateRequest,
   MappingDynamicMapping,
   Metadata,
@@ -562,14 +563,24 @@ interface RiskScoreTimeSeriesSource {
 
 // ES only accepts calendar units (`1w`, `1M`, `1q`, `1y`) with a value of 1 and
 // rejects them as `fixed_interval`; every other unit (`ms/s/m/h/d`) is fixed and
-// accepts any multiple. `1d` is valid either way — we treat it as fixed.
-const CALENDAR_INTERVAL_UNITS = new Set(['w', 'M', 'q', 'y']);
+// accepts any multiple. `1d` is valid either way — we treat it as fixed. TimeBuckets
+// (the only source of `interval`) never emits a calendar unit with value !== 1, so a
+// lookup keyed by unit alone is safe and gives ES the exact literal type it expects.
+const CALENDAR_INTERVAL_EXPRESSIONS: Record<string, AggregationsCalendarInterval> = {
+  w: '1w',
+  M: '1M',
+  q: '1q',
+  y: '1y',
+};
 
-const toDateHistogramInterval = (interval: { value: number; unit: string }) => {
-  const expression = `${interval.value}${interval.unit}`;
-  return CALENDAR_INTERVAL_UNITS.has(interval.unit)
-    ? { calendar_interval: expression }
-    : { fixed_interval: expression };
+const toDateHistogramInterval = (interval: {
+  value: number;
+  unit: string;
+}): { calendar_interval: AggregationsCalendarInterval } | { fixed_interval: string } => {
+  const calendarExpression = CALENDAR_INTERVAL_EXPRESSIONS[interval.unit];
+  return calendarExpression !== undefined
+    ? { calendar_interval: calendarExpression }
+    : { fixed_interval: `${interval.value}${interval.unit}` };
 };
 
 const toScoreTypeFilter = (
