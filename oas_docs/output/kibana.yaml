@@ -96658,18 +96658,22 @@ components:
           type: object
           properties:
             description:
+              description: A short description of the panel.
               type: string
             esqlQuery:
               type: string
             hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
               type: boolean
             hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
               type: boolean
             prompt:
               type: string
             template:
               type: string
             title:
+              description: The panel title.
               type: string
           required:
             - prompt
