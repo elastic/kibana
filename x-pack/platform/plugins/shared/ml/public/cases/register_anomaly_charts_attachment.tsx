@@ -34,7 +34,7 @@ export function registerAnomalyChartsCasesAttachment(
         event: (
           <FormattedMessage
             id="xpack.ml.cases.anomalyCharts.embeddableAddedEvent"
-            defaultMessage="added anomaly chart"
+            defaultMessage="added anomaly charts"
           />
         ),
         timelineAvatar: PLUGIN_ICON,
@@ -54,6 +54,9 @@ export function registerAnomalyChartsCasesAttachment(
         }),
       }),
       schema: AnomalyChartsAttachmentPayloadSchema,
+      // `data.state` is the ML embeddable input bag produced by the anomaly
+      // charts "Add to case" flow — not authorable in YAML.
+      workflowSchema: false,
     })
   );
 }

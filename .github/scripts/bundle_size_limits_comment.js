@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 const THRESHOLD = 0.15;
 const MARKER = '<!-- bundle-size-limits-comment -->';
 
@@ -64,7 +73,9 @@ module.exports = async ({ github, context }) => {
     .sort((a, b) => b.pct - a.pct)
     .map(
       ({ plugin, baseSize, headSize, pct }) =>
-        `| \`${plugin}\` | ${baseSize.toLocaleString()} | ${headSize.toLocaleString()} | +${(pct * 100).toFixed(1)}% |`
+        `| \`${plugin}\` | ${baseSize.toLocaleString()} | ${headSize.toLocaleString()} | +${(
+          pct * 100
+        ).toFixed(1)}% |`
     )
     .join('\n');
 

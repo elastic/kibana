@@ -186,6 +186,10 @@ export type {
   DatatableColumnArgs,
   DatatableColumnResult,
   ColumnState,
+  ColumnCellDecorationMode,
+  CellDecorationFillMode,
+  CellDecorationValueRange,
+  CellDecorationFillConfig,
   RowHeightMode,
   DataGridDensity,
   DatatableVisualizationState,
@@ -196,6 +200,7 @@ export type {
   LensToggleAction,
   LensPagesizeAction,
 } from './visualizations/datatable/types';
+export { COLUMN_CELL_DECORATION_MODE } from './visualizations/datatable/types';
 export type { GaugeAccessors, GaugeVisualizationState } from './visualizations/gauge/types';
 export type { HeatmapPalette, HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type {
@@ -213,6 +218,7 @@ export type {
   IconPosition,
   Alignment,
   PrimaryMetricPosition,
+  MetricDensity,
   MetricStyleTemplateId,
   MetricStyleTemplatePresetId,
   MetricLayoutWithDefault,
@@ -259,6 +265,7 @@ export {
   isPersistedByReferenceAnnotationsLayer,
   isPersistedByValueAnnotationsLayer,
   isPersistedLinkedByValueAnnotationsLayer,
+  isRuntimeByReferenceAnnotationsLayer,
 } from './visualizations/xy/persistence';
 export type {
   LensEmbeddableInput,
@@ -390,6 +397,7 @@ export {
   LENS_PARTITION_DEFAULT_PERCENT_DECIMALS,
 } from './visualizations/partition/constants';
 export {
+  LENS_TAGCLOUD_ID,
   TAGCLOUD_ORIENTATION,
   TAGCLOUD_SCALE_OPTIONS,
   LENS_TAGCLOUD_DEFAULT_STATE,
@@ -417,3 +425,10 @@ export { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from '
 export { LENS_DATASOURCE_ID } from './embeddable/types';
 export type { LensDatasourceId } from './embeddable/types';
 export { LENS_EMBEDDABLE_TYPE } from './embeddable/constants';
+export { AUTO_TARGET_NUMBER_OF_BUCKETS } from './esql/constants';
+export {
+  buildTrendlineBucketExpression,
+  appendTimeBucketToEsqlQuery,
+  buildTrendlineQueryWithMetricFieldMap,
+  queryHasStatsCommand,
+} from './esql/trendline_query';

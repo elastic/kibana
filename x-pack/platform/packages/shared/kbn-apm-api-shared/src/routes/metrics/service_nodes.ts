@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema } from '../../default_api_types';
 
 export type ServiceNodesResponse = Array<{
   name: string;
@@ -24,8 +24,8 @@ export interface ServiceMetricsNodesRouteResponse {
 
 export const serviceMetricsNodesRoute = defineRoute<ServiceMetricsNodesRouteResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/nodes',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([kueryRt, rangeRt, environmentRt]),
+  params: z.object({
+    path: z.object({ serviceName: z.string() }),
+    query: kuerySchema.merge(rangeSchema).merge(environmentSchema),
   }),
 });

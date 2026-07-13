@@ -24,6 +24,7 @@ const REPO_ROOT = discoverRepoRoot();
 const SCENARIO_ALIASES: Record<string, string> = {
   agent_config: 'x-pack/solutions/observability/plugins/apm/test/scenarios/agent_config.ts',
   apache_logs: 'x-pack/platform/plugins/shared/streams/test/scenarios/apache_logs.ts',
+  apm_anomalies: 'x-pack/solutions/observability/plugins/apm/test/scenarios/apm_anomalies.ts',
   apm_jvm_metrics_type_conflict:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/apm_jvm_metrics_type_conflict.ts',
   apm_metrics_dashboards:
@@ -108,6 +109,8 @@ const SCENARIO_ALIASES: Record<string, string> = {
   simple_trace: 'x-pack/solutions/observability/plugins/apm/test/scenarios/simple_trace.ts',
   slash_logs: 'x-pack/platform/plugins/shared/streams/test/scenarios/slash_logs.ts',
   span_links: 'x-pack/solutions/observability/plugins/apm/test/scenarios/span_links.ts',
+  trace_with_long_service_names:
+    'x-pack/solutions/observability/plugins/apm/test/scenarios/trace_with_long_service_names.ts',
   trace_with_orphan_items:
     'x-pack/solutions/observability/plugins/apm/test/scenarios/trace_with_orphan_items.ts',
   trace_with_service_names_with_slashes:

@@ -16,6 +16,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./data_streams'));
     loadTestFile(require.resolve('./data_streams_index_mode'));
+    loadTestFile(require.resolve('./failure_store_settings'));
     loadTestFile(require.resolve('./templates'));
     loadTestFile(require.resolve('./component_templates'));
     loadTestFile(require.resolve('./cluster_nodes'));
@@ -24,5 +25,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./create_enrich_policy'));
     loadTestFile(require.resolve('./data_enrichers'));
     loadTestFile(require.resolve('./searchprofiler'));
+    loadTestFile(require.resolve('./snapshot_repositories'));
   });
 }

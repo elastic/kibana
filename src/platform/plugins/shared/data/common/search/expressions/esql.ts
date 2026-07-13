@@ -87,7 +87,12 @@ function extractTypeAndReason(attributes: any): { type?: string; reason?: string
   return {};
 }
 
-function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: Input): Datatable {
+function mapResponseToDatatable(
+  body: ESQLSearchResponse,
+  query: string,
+  input: Input,
+  warning?: string
+): Datatable {
   // all_columns in the response means that there is a separation between
   // columns with data and empty columns
   // columns contain only columns with data while all_columns everything
@@ -115,13 +120,15 @@ function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: 
     : null;
 
   const allColumns =
-    (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
+    (body.all_columns ?? body.columns)?.map(({ name, type, original_types, _meta }) => {
       const originalTypes = original_types ?? [];
       const hasConflict = type === 'unsupported' && originalTypes.length > 1;
       const kibanaFieldType = hasConflict
         ? KBN_FIELD_TYPES.CONFLICT
         : esFieldTypeToKibanaFieldType(type);
 
+      const isSourceFieldFilterable =
+        !querySummary.newColumns.has(name) || (renameSourceFieldMap?.has(name) ?? false);
       const sourceField = renameSourceFieldMap?.get(name) ?? name;
 
       return {
@@ -137,14 +144,17 @@ function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: 
                   params: {},
                   indexPattern,
                   sourceField,
+                  isSourceFieldFilterable,
                 }
               : {
                   indexPattern,
                   sourceField,
+                  isSourceFieldFilterable,
                 },
           params: {
             id: kibanaFieldType,
           },
+          ...(_meta !== undefined && { esMeta: _meta }),
         },
         isNull: hasEmptyColumns ? !lookup.has(name) : false,
         isComputedColumn: isComputedColumn(name, querySummary),
@@ -177,7 +187,7 @@ function mapResponseToDatatable(body: ESQLSearchResponse, query: string, input: 
     },
     columns: updatedWithVariablesColumns,
     rows,
-    warning: undefined,
+    warning,
   } as Datatable;
 }
 
@@ -337,7 +347,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
       };
 
       try {
-        const { rawResponse, requestParams } = await searchService.esql(
+        const { rawResponse, requestParams, warning } = await searchService.esql(
           {
             query: fixedQuery,
             params: params.params,
@@ -350,6 +360,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             sessionId: getSearchSessionId(),
             executionContext: getExecutionContext(),
             projectRouting: input?.projectRouting,
+            approximation: input?.isApproximate,
             dropNullColumns: true,
             includeExecutionMetadata: true,
           }
@@ -399,15 +410,21 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 },
               }),
           })
-          .json(params)
+          .json({
+            ...params,
+            ...(input?.isApproximate !== undefined && { approximation: input.isApproximate }),
+          })
           .ok({ json: { rawResponse }, requestParams });
 
         // Map to Datatable
-        return mapResponseToDatatable(rawResponse as any, query, input);
+        return mapResponseToDatatable(rawResponse as any, query, input, warning);
       } catch (error) {
         // Inspector logging on error
         logInspectorRequest()
-          .json(params)
+          .json({
+            ...params,
+            ...(input?.isApproximate !== undefined && { approximation: input.isApproximate }),
+          })
           .error({
             json: 'attributes' in error ? error.attributes : { message: error.message },
           });

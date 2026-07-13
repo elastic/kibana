@@ -8,6 +8,8 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ServiceAgentResponse } from '@kbn/apm-api-shared';
+import { getAgentName } from '@kbn/elastic-agent-utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
@@ -21,18 +23,8 @@ import {
   TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import type { ServerlessType } from '../../../common/serverless';
 import { getServerlessTypeFromCloudData } from '../../../common/serverless';
 import { maybe } from '../../../common/utils/maybe';
-
-export interface ServiceAgentResponse {
-  agentName?: string;
-  runtimeName?: string;
-  runtimeVersion?: string;
-  telemetrySdkName?: string;
-  telemetrySdkLanguage?: string;
-  serverlessType?: ServerlessType;
-}
 
 export async function getServiceAgent({
   serviceName,
@@ -75,8 +67,13 @@ export async function getServiceAgent({
           { term: { [SERVICE_NAME]: serviceName } },
           ...rangeQuery(start, end),
           {
-            exists: {
-              field: AGENT_NAME,
+            bool: {
+              should: [
+                { exists: { field: AGENT_NAME } },
+                { exists: { field: TELEMETRY_SDK_NAME } },
+                { exists: { field: TELEMETRY_SDK_LANGUAGE } },
+              ],
+              minimum_should_match: 1,
             },
           },
         ],
@@ -120,8 +117,15 @@ export async function getServiceAgent({
     event[SERVICE_RUNTIME_VERSION] ??
     (hit.fields?.[PROCESS_RUNTIME_VERSION]?.[0] as string | undefined);
 
+  const agentName =
+    getAgentName(
+      event[AGENT_NAME] ?? null,
+      event[TELEMETRY_SDK_LANGUAGE] ?? null,
+      event[TELEMETRY_SDK_NAME] ?? null
+    ) ?? undefined;
+
   return {
-    agentName: event[AGENT_NAME],
+    agentName,
     telemetrySdkName: event[TELEMETRY_SDK_NAME],
     telemetrySdkLanguage: event[TELEMETRY_SDK_LANGUAGE],
     runtimeName: event[SERVICE_RUNTIME_NAME],

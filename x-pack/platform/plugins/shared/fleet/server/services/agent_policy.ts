@@ -23,7 +23,7 @@ import type {
   Logger,
   KibanaRequest,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, isSavedObjectErrorResult } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -838,7 +838,7 @@ class AgentPolicyService {
     const agentPolicies = await pMap(
       bulkGetResponse.saved_objects,
       async (agentPolicySO) => {
-        if (agentPolicySO.error) {
+        if (isSavedObjectErrorResult(agentPolicySO)) {
           if (options.ignoreMissing && agentPolicySO.error.statusCode === 404) {
             logger.debug(
               `Agent policy [${agentPolicySO.id}] was not found, but 'options.ignoreMissing' is 'true'`
@@ -1651,7 +1651,7 @@ class AgentPolicyService {
       [
         ...agentPoliciesUsingOutput.saved_objects,
         ...agentPoliciesOfPackagePoliciesUsingOutput.saved_objects,
-      ],
+      ].filter((so): so is SavedObject<AgentPolicySOAttributes> => !isSavedObjectErrorResult(so)),
       options
     );
   }
@@ -2120,8 +2120,12 @@ class AgentPolicyService {
         scroll_size: SO_SEARCH_LIMIT,
         refresh: true,
         query: {
-          term: {
-            policy_id: agentPolicyId,
+          bool: {
+            should: [
+              { term: { policy_id: agentPolicyId } },
+              { prefix: { policy_id: `${agentPolicyId}${AGENT_POLICY_VERSION_SEPARATOR}` } },
+            ],
+            minimum_should_match: 1,
           },
         },
       });
@@ -2383,7 +2387,9 @@ class AgentPolicyService {
 
     return this._bumpPolicies(
       internalSoClientWithoutSpaceExtension,
-      bulkGetResponse.saved_objects,
+      bulkGetResponse.saved_objects.filter(
+        (so): so is SavedObject<AgentPolicySOAttributes> => !isSavedObjectErrorResult(so)
+      ),
       options
     );
   }
@@ -2455,7 +2461,7 @@ class AgentPolicyService {
     }> = [];
 
     updatedAgentPolicies.forEach((policy) => {
-      if (policy.error) {
+      if (isSavedObjectErrorResult(policy)) {
         failedPolicies.push({
           id: policy.id,
           error: policy.error,
@@ -2463,7 +2469,9 @@ class AgentPolicyService {
       }
     });
 
-    const updatedPoliciesSuccess = updatedAgentPolicies.filter((policy) => !policy.error);
+    const updatedPoliciesSuccess = updatedAgentPolicies.filter(
+      (policy): policy is SavedObject<AgentPolicySOAttributes> => !isSavedObjectErrorResult(policy)
+    );
 
     await scheduleDeployAgentPoliciesTask(
       appContextService.getTaskManagerStart()!,

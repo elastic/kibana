@@ -4,14 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export interface OverallLatencyDistributionResponse {
-  durationMin?: number;
-  durationMax?: number;
-  totalDocCount?: number;
-  percentileThresholdValue?: number | null;
-  overallHistogram?: Array<{
-    key: number;
-    doc_count: number;
-  }>;
-}
+export type { OverallLatencyDistributionResponse } from '@kbn/apm-types';
