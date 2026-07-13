@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, of, filter, tap, catchError, throwError, EMPTY } from 'rxjs';
+import { merge, of, filter, map, shareReplay, tap, catchError, throwError, EMPTY } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -13,7 +13,7 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
-import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
+import type { ChatEvent, ConversationAction, RoundCompleteEvent } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
@@ -28,6 +28,7 @@ import type { SerializedExecutionError } from '@kbn/agent-builder-common';
 import type {
   AgentExecution,
   ConversationAgentExecution,
+  ExecutionConversationSource,
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
@@ -94,6 +95,35 @@ export const handleAgentExecution = async ({
 };
 
 /**
+ * Stamps external source attribution on a completed round: the source `type` on the round
+ * and the external `user` on the round input. Rounds that already carry a source (resumed
+ * pending rounds) keep their original attribution.
+ */
+const attributeRoundSource = (
+  event: RoundCompleteEvent,
+  source: ExecutionConversationSource
+): RoundCompleteEvent => {
+  const { round } = event.data;
+  if (round.source) {
+    return event;
+  }
+  return {
+    ...event,
+    data: {
+      ...event.data,
+      round: {
+        ...round,
+        source: { type: source.type },
+        input: {
+          ...round.input,
+          ...(source.user ? { source: { user: source.user } } : {}),
+        },
+      },
+    },
+  };
+};
+
+/**
  * Handles conversation-mode execution — resolves/creates conversation, generates title,
  * persists round, reports metering and telemetry.
  */
@@ -118,7 +148,6 @@ const handleConversationExecution = async ({
     storeConversation = true,
     autoCreateConversationWithId = false,
     source,
-    roundSource,
     nextInput,
     browserApiTools,
     configurationOverrides,
@@ -139,14 +168,14 @@ const handleConversationExecution = async ({
     ...deps,
   });
 
-  // Get conversation
+  // Get conversation — only the conversation-level part of the source is persisted on it
   const conversation = await getConversation({
     agentId,
     conversationId,
     autoCreateConversationWithId,
     conversationClient,
     accessControl,
-    source,
+    source: source ? { external_conversation_id: source.external_conversation_id } : undefined,
   });
 
   // Emit conversation ID for new conversations (only when persisting)
@@ -155,7 +184,8 @@ const handleConversationExecution = async ({
       ? of(createConversationIdSetEvent(conversation.id))
       : EMPTY;
 
-  // Execute agent
+  // Execute agent. Round source attribution is stamped on the completed round here, at the
+  // single multicast source, so persistence, metering and the output stream all see it.
   const agentEvents$ = executeAgent$({
     agentId,
     executionId: execution.executionId,
@@ -166,14 +196,18 @@ const handleConversationExecution = async ({
     outputSchema,
     abortSignal,
     conversation,
-    roundSource,
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
     runAgent,
     browserApiTools,
     configurationOverrides,
     action,
-  });
+  }).pipe(
+    map((event) =>
+      isRoundCompleteEvent(event) && source ? attributeRoundSource(event, source) : event
+    ),
+    shareReplay()
+  );
 
   // Generate title (for CREATE) or use existing title (for UPDATE)
   const title$ =

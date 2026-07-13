@@ -13,11 +13,6 @@ import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  ConversationRoundSource,
-  ConversationSource,
-  RoundInputSource,
-} from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   createBadRequestError,
@@ -26,7 +21,10 @@ import {
   ConversationSourceType,
   ExecutionStatus,
 } from '@kbn/agent-builder-common';
-import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import type {
+  AgentExecutionService,
+  ExecutionConversationSource,
+} from '@kbn/agent-builder-server/execution';
 import {
   ConnectorOrInferenceIdConflictError,
   resolveConnectorOrInferenceId,
@@ -384,28 +382,20 @@ export function registerChatRoutes({
   /**
    * Derives execution options shared by all converse routes.
    * Public requests may opt into local or Task Manager execution with _execution_mode,
-   * while callback requests always use Task Manager and carry callback metadata/source.
+   * while callback requests always use Task Manager and carry the callback and source.
    */
   const resolveExecutionOptions = (
     payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload
   ): {
     useTaskManager: boolean | undefined;
-    metadata: Record<string, string> | undefined;
-    source: ConversationSource | undefined;
-    roundSource: ConversationRoundSource | undefined;
-    nextInputSource: RoundInputSource | undefined;
+    source: ExecutionConversationSource | undefined;
+    callback: { url: string } | undefined;
   } => {
     if (isChatCallbackRequestBodyPayload(payload)) {
       return {
         useTaskManager: true,
-        metadata: {
-          callback_url: payload.callback.url,
-        },
-        source: payload.source
-          ? { external_conversation_id: payload.source.external_conversation_id }
-          : undefined,
-        roundSource: payload.source ? { type: payload.source.type } : undefined,
-        nextInputSource: payload.source?.user ? { user: payload.source.user } : undefined,
+        source: payload.source,
+        callback: payload.callback,
       };
     }
 
@@ -414,10 +404,8 @@ export function registerChatRoutes({
     return {
       useTaskManager:
         executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined,
-      metadata: undefined,
       source: undefined,
-      roundSource: undefined,
-      nextInputSource: undefined,
+      callback: undefined,
     };
   };
 
@@ -445,15 +433,13 @@ export function registerChatRoutes({
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
-    const { useTaskManager, metadata, source, roundSource, nextInputSource } =
-      resolveExecutionOptions(payload);
+    const { useTaskManager, source, callback } = resolveExecutionOptions(payload);
 
     return executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
       request,
       executionId,
       useTaskManager,
-      metadata,
       params: {
         agentId,
         connectorId,
@@ -461,14 +447,13 @@ export function registerChatRoutes({
         autoCreateConversationWithId: true,
         accessControl,
         source,
-        roundSource,
+        callback,
         capabilities,
         browserApiTools,
         configurationOverrides,
         action,
         nextInput: {
           message: input,
-          ...(nextInputSource ? { source: nextInputSource } : {}),
           prompts,
           attachments,
         },

@@ -331,7 +331,6 @@ const prepareRoundInput = async ({
   }
   return {
     message: input.message ?? '',
-    ...(input.source ? { source: input.source } : {}),
     attachments,
   };
 };

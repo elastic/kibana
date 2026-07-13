@@ -306,19 +306,12 @@ describe('registerChatRoutes', () => {
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
         useTaskManager: true,
-        metadata: {
-          callback_url: 'https://relay.example.com/events?token=abc',
-        },
         params: expect.objectContaining({
           conversationId: undefined,
-          source: {
-            external_conversation_id: source.external_conversation_id,
+          source,
+          callback: {
+            url: 'https://relay.example.com/events?token=abc',
           },
-          nextInput: expect.objectContaining({
-            source: {
-              user: source.user,
-            },
-          }),
         }),
       })
     );

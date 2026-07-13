@@ -7,6 +7,7 @@
 
 export type {
   BaseExecutionParams,
+  ExecutionConversationSource,
   ConversationExecutionParams,
   StandaloneExecutionParams,
   AgentExecutionParams,

@@ -63,8 +63,6 @@ export interface ConverseInput {
    * A text message from the user.
    */
   message?: string;
-  /** Source metadata for this input, when it originated outside Kibana. */
-  source?: RoundInputSource;
   /**
    * Optional attachments to provide to the agent.
    * Use `origin` without `data` for by-reference types that implement `resolve`.

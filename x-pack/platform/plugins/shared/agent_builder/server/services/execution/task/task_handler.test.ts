@@ -82,13 +82,13 @@ describe('TaskHandler callback finalization', () => {
     spaceId: 'default',
     eventCount: 0,
     events: [],
-    metadata: {
-      callback_url: 'https://relay.example.com/events?token=abc',
-    },
     executionMode: AgentExecutionMode.conversation,
     agentParams: {
       conversationId: 'conversation-1',
       nextInput: { message: 'hello' },
+      callback: {
+        url: 'https://relay.example.com/events?token=abc',
+      },
     },
   } as const;
 
@@ -134,8 +134,7 @@ describe('TaskHandler callback finalization', () => {
     });
 
     expect(callbackDeliveryService.makeSuccessCallbackRequestIfConfigured).toHaveBeenCalledWith({
-      callbackUrl: 'https://relay.example.com/events?token=abc',
-      executionId: 'execution-1',
+      execution,
       events,
     });
     expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).not.toHaveBeenCalled();
@@ -154,7 +153,7 @@ describe('TaskHandler callback finalization', () => {
     });
 
     expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
-      callbackUrl: 'https://relay.example.com/events?token=abc',
+      execution,
       payload: {
         execution_id: 'execution-1',
         error: { code: 'internal_error', message: 'agent failed' },
@@ -177,6 +176,9 @@ describe('TaskHandler callback finalization', () => {
           type: 'slack',
           external_conversation_id: 'team:T123/channel:C123/thread:callback-continuation',
         },
+        callback: {
+          url: 'https://relay.example.com/events?token=abc',
+        },
       },
     };
     executionClient.get.mockResolvedValue(sourceBasedExecution);
@@ -189,7 +191,7 @@ describe('TaskHandler callback finalization', () => {
     });
 
     expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
-      callbackUrl: 'https://relay.example.com/events?token=abc',
+      execution: sourceBasedExecution,
       payload: {
         execution_id: 'execution-1',
         error: { code: 'internal_error', message: 'agent failed' },
@@ -209,7 +211,7 @@ describe('TaskHandler callback finalization', () => {
     });
 
     expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
-      callbackUrl: 'https://relay.example.com/events?token=abc',
+      execution,
       payload: {
         execution_id: 'execution-1',
         error: { code: 'internal_error', message: 'Converse request was aborted' },
@@ -232,7 +234,7 @@ describe('TaskHandler callback finalization', () => {
     });
 
     expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
-      callbackUrl: 'https://relay.example.com/events?token=abc',
+      execution,
       payload: {
         execution_id: 'execution-1',
         status: ExecutionStatus.failed,
@@ -268,7 +270,7 @@ describe('TaskHandler callback finalization', () => {
     });
 
     expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
-      callbackUrl: 'https://relay.example.com/events?token=abc',
+      execution,
       payload: {
         execution_id: 'execution-1',
         error: { code: 'internal_error', message: 'Converse request was aborted' },
@@ -282,15 +284,16 @@ describe('TaskHandler callback finalization', () => {
     );
   });
 
-  it('omits the conversation id for standalone execution failure callbacks', async () => {
-    executionClient.get.mockResolvedValue({
+  it('passes standalone executions through to failure callback delivery', async () => {
+    const standaloneExecution = {
       ...execution,
       executionMode: AgentExecutionMode.standalone,
       agentParams: {
         nextInput: { message: 'hello' },
         telemetryMetadata: undefined,
       },
-    });
+    };
+    executionClient.get.mockResolvedValue(standaloneExecution);
     handleAgentExecutionMock.mockRejectedValue(new Error('agent failed'));
 
     await createHandler().run({
@@ -299,7 +302,7 @@ describe('TaskHandler callback finalization', () => {
     });
 
     expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
-      callbackUrl: 'https://relay.example.com/events?token=abc',
+      execution: standaloneExecution,
       payload: {
         execution_id: 'execution-1',
         error: { code: 'internal_error', message: 'agent failed' },

@@ -6,13 +6,20 @@
  */
 
 import pRetry, { AbortError } from 'p-retry';
-import { ExecutionStatus, type ChatEvent } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, ExecutionStatus, type ChatEvent } from '@kbn/agent-builder-common';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
+import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type {
   CallbackPayload,
   ChatCallbackFailurePayload,
 } from '../../../common/http_api/chat_callback';
 import { buildChatResponseFromEvents } from './utils/chat_response';
+
+/** Callback delivery is only supported for conversation-mode executions. */
+const getCallbackUrl = (execution: AgentExecution): string | undefined =>
+  execution.executionMode === AgentExecutionMode.conversation
+    ? execution.agentParams.callback?.url
+    : undefined;
 
 const callbackRetryOptions = {
   retries: 2,
@@ -37,18 +44,17 @@ export class CallbackDeliveryService {
   }
 
   /**
-   * Delivers a success callback for a completed execution when a callback URL is configured.
-   * No-op otherwise.
+   * Delivers a success callback for a completed execution when the execution has a callback
+   * configured. No-op otherwise, including for non-conversation executions.
    */
   async makeSuccessCallbackRequestIfConfigured({
-    executionId,
+    execution,
     events,
-    callbackUrl,
   }: {
-    executionId: string;
+    execution: AgentExecution;
     events: ChatEvent[];
-    callbackUrl: string | undefined;
   }): Promise<void> {
+    const callbackUrl = getCallbackUrl(execution);
     if (!callbackUrl) {
       return;
     }
@@ -56,7 +62,7 @@ export class CallbackDeliveryService {
     await this.makeCallbackRequest({
       callbackUrl,
       payload: {
-        execution_id: executionId,
+        execution_id: execution.executionId,
         status: ExecutionStatus.completed,
         response: buildChatResponseFromEvents(events),
       },
@@ -64,16 +70,17 @@ export class CallbackDeliveryService {
   }
 
   /**
-   * Delivers a failure callback for a failed or aborted execution when a callback URL is
-   * configured. No-op otherwise.
+   * Delivers a failure callback for a failed or aborted execution when the execution has a
+   * callback configured. No-op otherwise, including for non-conversation executions.
    */
   async makeFailureCallbackRequestIfConfigured({
-    callbackUrl,
+    execution,
     payload,
   }: {
-    callbackUrl: string | undefined;
+    execution: AgentExecution;
     payload: ChatCallbackFailurePayload;
   }): Promise<void> {
+    const callbackUrl = getCallbackUrl(execution);
     if (!callbackUrl) {
       return;
     }

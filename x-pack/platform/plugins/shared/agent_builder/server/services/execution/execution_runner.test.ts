@@ -12,7 +12,9 @@ import {
   AgentBuilderErrorCode,
   ChatEventType,
   ConversationAccessControlMode,
+  ConversationSourceType,
   createBadRequestError,
+  isRoundCompleteEvent,
   type ChatEvent,
 } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -119,6 +121,142 @@ describe('handleAgentExecution', () => {
         conversationId: 'conversation-from-source',
       })
     );
+  });
+
+  describe('round source attribution', () => {
+    const sourceUser = { id: 'U123', name: 'Jane Doe', handle: 'jane' };
+    const source = {
+      type: ConversationSourceType.Slack,
+      external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      user: sourceUser,
+    };
+
+    const setup = ({ roundCompleteEvent }: { roundCompleteEvent: ChatEvent }) => {
+      const conversation = createEmptyConversation({
+        id: 'conversation-from-source',
+        agent_id: 'test-agent',
+        source: { external_conversation_id: source.external_conversation_id },
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.getBySource.mockResolvedValue(conversation);
+      conversationClient.update.mockResolvedValue(conversation);
+
+      executeAgentMock.mockReturnValue(of(roundCompleteEvent));
+      resolveServicesMock.mockResolvedValue({
+        conversationClient,
+        selectedConnectorId: 'connector-1',
+        modelProvider: {
+          getDefaultModel: jest.fn().mockResolvedValue({
+            chatModel: {
+              getConnector: () => ({ type: '.gen-ai' }),
+            },
+          }),
+        },
+      } as never);
+
+      const deps = {
+        logger: loggingSystemMock.createLogger(),
+        runAgent: jest.fn(),
+        agentService: {
+          getRegistry: jest
+            .fn()
+            .mockResolvedValue({ get: jest.fn().mockResolvedValue({ name: 'Test agent' }) }),
+        },
+        meteringService: {
+          reportExecution: jest.fn().mockResolvedValue(undefined),
+        },
+      } as never;
+
+      return { conversationClient, deps };
+    };
+
+    const runExecution = async ({
+      deps,
+      executionSource,
+    }: {
+      deps: unknown;
+      executionSource?: typeof source;
+    }) => {
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          agentParams: {
+            agentId: 'test-agent',
+            source: executionSource,
+            conversationId: executionSource ? undefined : 'conversation-from-source',
+            nextInput: { message: 'Continue this thread' },
+          },
+        } as never,
+        deps: deps as never,
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      });
+
+      return lastValueFrom(events$.pipe(toArray()));
+    };
+
+    it('stamps source type and user on the completed round and resolves the conversation by external id', async () => {
+      const { conversationClient, deps } = setup({
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({}) },
+        },
+      });
+
+      const events = await runExecution({ deps, executionSource: source });
+
+      const roundCompleteEvent = events.find(isRoundCompleteEvent);
+      expect(roundCompleteEvent?.data.round.source).toEqual({
+        type: ConversationSourceType.Slack,
+      });
+      expect(roundCompleteEvent?.data.round.input.source).toEqual({ user: sourceUser });
+      expect(conversationClient.getBySource).toHaveBeenCalledWith({
+        external_conversation_id: source.external_conversation_id,
+      });
+      expect(conversationClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          rounds: [roundCompleteEvent?.data.round],
+        }),
+        expect.anything()
+      );
+    });
+
+    it('keeps the original attribution when the round already has a source', async () => {
+      const originalUser = { id: 'U999', name: 'John Roe', handle: 'john' };
+      const { deps } = setup({
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: createRound({
+              source: { type: ConversationSourceType.Slack },
+              input: { message: 'user message', source: { user: originalUser } },
+            }),
+          },
+        },
+      });
+
+      const events = await runExecution({ deps, executionSource: source });
+
+      const roundCompleteEvent = events.find(isRoundCompleteEvent);
+      expect(roundCompleteEvent?.data.round.input.source).toEqual({ user: originalUser });
+    });
+
+    it('leaves rounds untouched when the execution has no source', async () => {
+      const { deps } = setup({
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({}) },
+        },
+      });
+
+      const events = await runExecution({ deps, executionSource: undefined });
+
+      const roundCompleteEvent = events.find(isRoundCompleteEvent);
+      expect(roundCompleteEvent?.data.round.source).toBeUndefined();
+      expect(roundCompleteEvent?.data.round.input.source).toBeUndefined();
+    });
   });
 });
 

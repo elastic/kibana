@@ -6,7 +6,6 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { RoundInputSource } from '@kbn/agent-builder-common';
 import type { AttachmentBoundedTool, AttachmentRepresentation } from './attachments';
 
 /**
@@ -23,6 +22,5 @@ export interface ProcessedAttachment {
  */
 export interface ProcessedRoundInput {
   message: string;
-  source?: RoundInputSource;
   attachments: ProcessedAttachment[];
 }

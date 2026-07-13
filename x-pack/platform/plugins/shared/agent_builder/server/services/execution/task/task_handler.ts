@@ -99,8 +99,7 @@ class TaskHandlerImpl implements TaskHandler {
 
       // 6. Deliver success callback if configured
       await this.deps.callbackDeliveryService.makeSuccessCallbackRequestIfConfigured({
-        callbackUrl: execution.metadata?.callback_url,
-        executionId,
+        execution,
         events,
       });
 
@@ -174,7 +173,7 @@ class TaskHandlerImpl implements TaskHandler {
   }): Promise<FailureOutcome> {
     try {
       await this.deps.callbackDeliveryService.makeFailureCallbackRequestIfConfigured({
-        callbackUrl: execution.metadata?.callback_url,
+        execution,
         payload: {
           execution_id: executionId,
           ...initialFailureOutcome,
