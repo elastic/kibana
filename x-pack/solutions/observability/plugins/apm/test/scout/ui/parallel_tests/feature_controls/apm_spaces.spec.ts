@@ -37,10 +37,10 @@ test.describe('APM feature controls - spaces', { tag: tags.stateful.classic }, (
   });
 
   test('shows the Applications nav link when no features are disabled', async ({
-    pageObjects: { featureControlsPage },
+    pageObjects: { featureControlsPage, collapsibleNav },
   }) => {
     await featureControlsPage.gotoHome(SPACE_APM_ENABLED);
-    await featureControlsPage.toggleNavigation();
+    await collapsibleNav.expandNav();
     await expect(featureControlsPage.getNavLink('Applications')).not.toHaveCount(0, {
       timeout: EXTENDED_TIMEOUT,
     });
@@ -55,10 +55,10 @@ test.describe('APM feature controls - spaces', { tag: tags.stateful.classic }, (
   });
 
   test('does not show the Applications nav link when apm is disabled', async ({
-    pageObjects: { featureControlsPage },
+    pageObjects: { featureControlsPage, collapsibleNav },
   }) => {
     await featureControlsPage.gotoHome(SPACE_APM_DISABLED);
-    await featureControlsPage.toggleNavigation();
+    await collapsibleNav.expandNav();
     await expect(featureControlsPage.getNavLink('Applications')).toBeHidden();
   });
 

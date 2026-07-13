@@ -12,7 +12,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import {
   createTemplateLinkFromSettings,
-  deleteCustomLink,
+  deleteCustomLinkIfExists,
   getExpectedTemplateUrl,
   TEMPLATE_URL,
 } from '../../fixtures/custom_links_helpers';
@@ -26,8 +26,17 @@ test.describe(
   'Custom links template validation',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    const createdLabels = new Set<string>();
+
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsPrivilegedUser();
+    });
+
+    test.afterEach(async ({ page, pageObjects: { customLinksPage } }) => {
+      for (const label of createdLabels) {
+        await deleteCustomLinkIfExists(customLinksPage, page, label);
+      }
+      createdLabels.clear();
     });
 
     test('creates custom link with template URL and filters from settings', async ({
@@ -35,9 +44,9 @@ test.describe(
       pageObjects: { customLinksPage },
     }) => {
       const uniqueLabel = `template-test-${randomUUID()}`;
+      createdLabels.add(uniqueLabel);
 
       await createTemplateLinkFromSettings(customLinksPage, page, uniqueLabel);
-      await deleteCustomLink(customLinksPage, page, uniqueLabel);
     });
 
     test('populates template variables in transaction custom link URLs', async ({
@@ -45,6 +54,7 @@ test.describe(
       pageObjects: { customLinksPage, transactionDetailsPage },
     }) => {
       const uniqueLabel = `template-test-${randomUUID()}`;
+      createdLabels.add(uniqueLabel);
       const expectedUrl = getExpectedTemplateUrl(SERVICE_SYNTH_NODE_1, PRODUCTION_ENVIRONMENT);
 
       await createTemplateLinkFromSettings(customLinksPage, page, uniqueLabel);
@@ -61,8 +71,6 @@ test.describe(
 
       await transactionDetailsPage.openActionMenu();
       expect(await transactionDetailsPage.getCustomLinkHref(uniqueLabel)).toBe(expectedUrl);
-
-      await deleteCustomLink(customLinksPage, page, uniqueLabel);
     });
 
     test('creates custom link from transaction details with prefilled filters', async ({
@@ -70,6 +78,7 @@ test.describe(
       pageObjects: { transactionDetailsPage, customLinksPage },
     }) => {
       const defaultLabel = `template-test-default-${randomUUID()}`;
+      createdLabels.add(defaultLabel);
       const expectedUrl = getExpectedTemplateUrl(SERVICE_SYNTH_NODE_1, PRODUCTION_ENVIRONMENT);
 
       await transactionDetailsPage.goToTransactionDetails({
@@ -121,8 +130,6 @@ test.describe(
         timeout: EXTENDED_TIMEOUT,
       });
       expect(await transactionDetailsPage.getCustomLinkHref(defaultLabel)).toBe(expectedUrl);
-
-      await deleteCustomLink(customLinksPage, page, defaultLabel);
     });
   }
 );

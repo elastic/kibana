@@ -17,16 +17,7 @@ export class FeatureControlsPage {
 
   async gotoHome(spaceId?: string) {
     await this.page.goto(this.kbnUrl.app('home', spaceId ? { space: spaceId } : undefined));
-  }
-
-  async toggleNavigation() {
-    const toggle = this.page.getByTestId('toggleNavButton');
-    await toggle.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await toggle.click();
-    await this.page.getByTestId('collapsibleNav').waitFor({
-      state: 'visible',
-      timeout: EXTENDED_TIMEOUT,
-    });
+    await this.page.getByTestId('logo').waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   getNavLink(name: string) {

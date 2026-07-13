@@ -59,3 +59,15 @@ export const deleteCustomLink = async (
   });
   await expect(page.getByTestId('euiToastHeader__title')).toHaveText('Deleted custom link.');
 };
+
+export const deleteCustomLinkIfExists = async (
+  customLinksPage: CustomLinksPage,
+  page: ScoutPage,
+  label: string
+) => {
+  await customLinksPage.goto();
+  const row = customLinksPage.getCustomLinkRow(label);
+  if (await row.isVisible()) {
+    await deleteCustomLink(customLinksPage, page, label);
+  }
+};
