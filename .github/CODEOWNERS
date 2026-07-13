@@ -2291,7 +2291,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/common/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/control_columns @elastic/security-threat-hunting
-/x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/test/scout/flyout @elastic/security-threat-hunting
 
 
 ## Security Solution Threat Hunting areas - Threat Hunting Investigations
