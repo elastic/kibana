@@ -225,6 +225,7 @@ export function getChatSpan(span: tracing.ReadableSpan) {
         const responsePart = msg.parts.find(isToolCallResponsePart);
         if (responsePart) {
           entry[MESSAGE_TOOL_CALL_ID] = responsePart.id;
+          entry[SemanticConventions.MESSAGE_CONTENT] = responsePart.response;
         }
       }
 
