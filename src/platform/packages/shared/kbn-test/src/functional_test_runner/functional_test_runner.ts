@@ -33,6 +33,7 @@ import { createEsClientForFtrConfig } from '../ftr_es_client';
 interface FunctionalTestRunnerRunResult {
   failureCount: number;
   failedTestFiles: string[];
+  customTestRunnerResult?: any; // matches main's inferred Promise<any> contract
 }
 
 export class FunctionalTestRunner {
@@ -52,6 +53,10 @@ export class FunctionalTestRunner {
 
   async run(abortSignal?: AbortSignal, retry = 0) {
     let result = await this.runWithResult(abortSignal);
+
+    if (result.customTestRunnerResult !== undefined) {
+      return result.customTestRunnerResult;
+    }
 
     for (let attempt = 1; attempt <= retry; attempt++) {
       if (result.failureCount === 0 || result.failedTestFiles.length === 0) {
@@ -112,8 +117,9 @@ export class FunctionalTestRunner {
           'custom test runner defined, ignoring all mocha/suite/filtering related options'
         );
         return {
-          failureCount: (await providers.invokeProviderFn(customTestRunner)) || 0,
+          failureCount: 0,
           failedTestFiles: [],
+          customTestRunnerResult: (await providers.invokeProviderFn(customTestRunner)) || 0,
         };
       }
 
