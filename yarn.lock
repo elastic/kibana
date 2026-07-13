@@ -2099,17 +2099,17 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@dagrejs/dagre@1.1.8":
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/@dagrejs/dagre/-/dagre-1.1.8.tgz#fcbee59344c7b4f48b711ba30783543b70029310"
-  integrity sha512-5SEDlndt4W/LaVzPYJW+bSmSEZc9EzTf8rJ20WCKvjS5EAZAN0b+x0Yww7VMT4R3Wootkg+X9bUfUxazYw6Blw==
+"@dagrejs/dagre@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@dagrejs/dagre/-/dagre-3.0.0.tgz#543f20188f7494db0f45d634f7b3760747f87f23"
+  integrity sha512-ZzhnTy1rfuoew9Ez3EIw4L2znPGnYYhfn8vc9c4oB8iw6QAsszbiU0vRhlxWPFnmmNSFAkrYeF1PhM5m4lAN0Q==
   dependencies:
-    "@dagrejs/graphlib" "2.2.4"
+    "@dagrejs/graphlib" "4.0.1"
 
-"@dagrejs/graphlib@2.2.4":
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/@dagrejs/graphlib/-/graphlib-2.2.4.tgz#d77bfa9ff49e2307c0c6e6b8b26b5dd3c05816c4"
-  integrity sha512-mepCf/e9+SKYy1d02/UkvSy6+6MoyXhVxP8lLDfA7BPE1X1d4dR0sZznmbM8/XVJ1GPM+Svnx7Xj6ZweByWUkw==
+"@dagrejs/graphlib@4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@dagrejs/graphlib/-/graphlib-4.0.1.tgz#a9cf907cc5ddf9140a64360ad487766f17d1ee36"
+  integrity sha512-IvcV6FduIIAmLwnH+yun+QtV36SC7mERqa86aClNqmMN09WhmPPYU8ckHrZBozErf+UvHPWOTJYaGYiIcs0DgA==
 
 "@date-fns/tz@^1.4.1":
   version "1.4.1"
@@ -4514,6 +4514,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-sml-plugin@link:x-pack/platform/plugins/shared/agent_builder_sml":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-builder-tools-base@link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base":
   version "0.0.0"
   uid ""
@@ -4539,10 +4543,6 @@
   uid ""
 
 "@kbn/agent-builder-workflows-plugin@link:x-pack/platform/plugins/shared/agent_builder_workflows":
-  version "0.0.0"
-  uid ""
-
-"@kbn/agent-context-layer-plugin@link:x-pack/platform/plugins/shared/agent_context_layer":
   version "0.0.0"
   uid ""
 
@@ -10262,25 +10262,25 @@
   dependencies:
     js-tiktoken "^1.0.12"
 
-"@launchdarkly/js-sdk-common@2.24.4":
-  version "2.24.4"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.24.4.tgz#46162f52ecdd7005be2bd6b9394fdd578d6d03c9"
-  integrity sha512-ikD6MElNa3WPUxXdUIDSBvbig21gfjemEus1Vh0HGcgLThxGglq+EGb0coyc8199+3aqu8c9kpuXEdMBZhOowA==
+"@launchdarkly/js-sdk-common@2.25.1":
+  version "2.25.1"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.25.1.tgz#0c91f23cccdc007801558ab79371df6a3884b721"
+  integrity sha512-erG2RbA8QQMKW+D9Y7Uahez1dU+TzmyTzv9qlB7b0Pr/DS2SmUg5H8pJbkLcRrSxoshczZdB1UqsuE3RAk7UYQ==
 
-"@launchdarkly/js-server-sdk-common@2.18.7":
-  version "2.18.7"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.18.7.tgz#523ea35437c39d3525841f9b11576333399d9e9d"
-  integrity sha512-v1vttu8tALIvpm1+Bal2HKtuvpdBBOTVJfAidlqS4PgSO9qyIzMa5R9fTkRFFXUpQh/iLRqPMI2TINubdfd5kg==
+"@launchdarkly/js-server-sdk-common@2.19.2":
+  version "2.19.2"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.19.2.tgz#6296d91950f8db5f72ac4ff4a5ee16b047f05d4a"
+  integrity sha512-SZApHxn0PqYyRFfXtrJKQAGx6tlLD2sV0XvqOUkUdey1lKeObOL4hIw+70gQ3jrRAIvEH+SBC0uqlJ7uGlrRyA==
   dependencies:
-    "@launchdarkly/js-sdk-common" "2.24.4"
+    "@launchdarkly/js-sdk-common" "2.25.1"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@9.10.14":
-  version "9.10.14"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.10.14.tgz#e11332322878ca7964d5f068287fac936a29058b"
-  integrity sha512-mpgBT0mRBO/2dup7VrKaydyowv7pu3xRqyN7QMsXnOVF5yvC2N2HOBJ7HwBYaNtII32vEa9uQJbX8v2mBfVMaw==
+"@launchdarkly/node-server-sdk@9.11.3":
+  version "9.11.3"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.11.3.tgz#d59a1daa868f4c5f37eb5fc48533fa916afbfcfe"
+  integrity sha512-Nhw7kZmTE14pzSEO06ttSjhAPeVVtFQoGbaJ33Bf3fxNPUCR8ZIBALzPVnZTTWz+hAqhrntMp8JzKcA7Bw6GCQ==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.18.7"
+    "@launchdarkly/js-server-sdk-common" "2.19.2"
     https-proxy-agent "^7.0.6"
     launchdarkly-eventsource "2.2.0"
 
@@ -11100,14 +11100,14 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/context-async-hooks/-/context-async-hooks-2.8.0.tgz#24381ef388bc28d53fa8dad72dfd1429acc82016"
   integrity sha512-/3FIraneMcng67SUJCxvyInk/oxzwsxyadufk0wwfOBLf5wqtAGX4MoQASwSbndBPeARzBryUM9Azr5kHIdWLw==
 
-"@opentelemetry/core@1.30.1", "@opentelemetry/core@^1.1.0", "@opentelemetry/core@^1.11.0", "@opentelemetry/core@^1.25.1", "@opentelemetry/core@^1.26.0", "@opentelemetry/core@^1.30.1", "@opentelemetry/core@^1.8.0":
+"@opentelemetry/core@1.30.1", "@opentelemetry/core@^1.1.0", "@opentelemetry/core@^1.25.1", "@opentelemetry/core@^1.26.0", "@opentelemetry/core@^1.30.1", "@opentelemetry/core@^1.8.0":
   version "1.30.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-1.30.1.tgz#a0b468bb396358df801881709ea38299fc30ab27"
   integrity sha512-OOCM2C/QIURhJMuKaekP3TRBxBKxG/TWWA0TL2J6nXUtDnuCtccy49LUJF8xPFXMX+0LMcxFpCo8M9cGY1W6rQ==
   dependencies:
     "@opentelemetry/semantic-conventions" "1.28.0"
 
-"@opentelemetry/core@2.8.0", "@opentelemetry/core@2.x", "@opentelemetry/core@^2.0.0":
+"@opentelemetry/core@2.8.0", "@opentelemetry/core@2.x", "@opentelemetry/core@^2.0.0", "@opentelemetry/core@^2.8.0":
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-2.8.0.tgz#f6e86de3688bdb54a6ca8f4935363a5b588ae91c"
   integrity sha512-hd1Lfh8p545nNz+jq1Ejfz+Mn1hyLuxYn1YzTfFNrxr8urEWMNQLPf1Th8kjOH+HxwawCrtgBp8JpBUR4ZSgww==
@@ -11980,7 +11980,7 @@
     "@opentelemetry/core" "1.30.1"
     "@opentelemetry/resources" "1.30.1"
 
-"@opentelemetry/sdk-metrics@1.30.1", "@opentelemetry/sdk-metrics@^1.12.0":
+"@opentelemetry/sdk-metrics@1.30.1":
   version "1.30.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-metrics/-/sdk-metrics-1.30.1.tgz#70e2bcd275b9df6e7e925e3fe53cfe71329b5fc8"
   integrity sha512-q9zcZ0Okl8jRgmy7eNW3Ku1XSgg3sDLa5evHZpCwjspw7E8Is4K/haRPDJrBcX3YSn/Y7gUvFnByNYEKQNbNog==
@@ -11988,7 +11988,7 @@
     "@opentelemetry/core" "1.30.1"
     "@opentelemetry/resources" "1.30.1"
 
-"@opentelemetry/sdk-metrics@2.8.0":
+"@opentelemetry/sdk-metrics@2.8.0", "@opentelemetry/sdk-metrics@^2.8.0":
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-metrics/-/sdk-metrics-2.8.0.tgz#c3f908d9e7e02fb855673fcfd4b298ce279e61f1"
   integrity sha512-UDBGaj6W0Rgy5rTTaoxs8gVGF/aGkAKyjurJv7se6wjRxJu7FoquTLT/vt54DZfo4crbprYfhX/SOK9+BPw1qg==
@@ -21082,15 +21082,15 @@ ejs@3.1.10:
   dependencies:
     jake "^10.8.5"
 
-elastic-apm-node@4.15.0:
-  version "4.15.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.15.0.tgz#d98e9da2155eea019c2bf0a62e6129981604e79d"
-  integrity sha512-8N176AlRizpX+JcNP3xPPbl9HjiDG6PRTIY0XfY2SSmI7dAvxlYk/TFBcOXeGpoMTYCHZHNPUUL0ryvaMV7EGA==
+elastic-apm-node@4.18.0:
+  version "4.18.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.18.0.tgz#239cbffb67a0e09331a0d39425e377428280d7f7"
+  integrity sha512-qOjG+Z1pu7mwQESw9XsCBUPKqsrc6uOr8CYl7LE8iQlscviEs7P/3NtKuA/Jn5mktEM7NAZcdG3n+TCZRGJxmA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
-    "@opentelemetry/core" "^1.11.0"
-    "@opentelemetry/sdk-metrics" "^1.12.0"
+    "@opentelemetry/core" "^2.8.0"
+    "@opentelemetry/sdk-metrics" "^2.8.0"
     after-all-results "^2.0.0"
     agentkeepalive "^4.2.1"
     async-value-promise "^1.1.1"
@@ -21105,7 +21105,7 @@ elastic-apm-node@4.15.0:
     fast-safe-stringify "^2.0.7"
     fast-stream-to-buffer "^1.0.0"
     http-headers "^3.0.2"
-    import-in-the-middle "1.14.4"
+    import-in-the-middle "1.15.0"
     json-bigint "^1.0.0"
     lru-cache "10.2.0"
     measured-reporting "^1.51.1"
@@ -24449,10 +24449,10 @@ import-fresh@^3.2.1, import-fresh@^3.3.0:
     parent-module "^1.0.0"
     resolve-from "^4.0.0"
 
-import-in-the-middle@1.14.4, import-in-the-middle@^1.14.2, import-in-the-middle@^1.8.1:
-  version "1.14.4"
-  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.14.4.tgz#5350cf8eba46e3b51cd3e507f5fe36a8faeb3684"
-  integrity sha512-eWjxh735SJLFJJDs5X82JQ2405OdJeAHDBnaoFCfdr5GVc7AWc9xU7KbrF+3Xd5F2ccP1aQFKtY+65X6EfKZ7A==
+import-in-the-middle@1.15.0, import-in-the-middle@^1.14.2, import-in-the-middle@^1.8.1:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.15.0.tgz#9e20827a322bbadaeb5e3bac49ea8f6d4685fdd8"
+  integrity sha512-bpQy+CrsRmYmoPMAE/0G33iwRqwW4ouqdRg8jgbH3aKuCtOc8lxgmYXg2dMM92CRiGP660EtBcymH/eVUpCSaA==
   dependencies:
     acorn "^8.14.0"
     acorn-import-attributes "^1.9.5"
@@ -26427,22 +26427,21 @@ launchdarkly-eventsource@2.2.0:
   resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-2.2.0.tgz#dcabc7264d9dee05a60dcf5fca9fd0cefcc82d22"
   integrity sha512-u38fYlLSq/m6oFz0MS1/76Sj2xzlYhTKZ+sf/vju6PA86PMc6fPlY5k8CdU79edLXjNwsvIQTDvDNy3llDqB8A==
 
-launchdarkly-js-client-sdk@3.9.1:
-  version "3.9.1"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.9.1.tgz#c2246b625deadc29907a121acde8879400acf172"
-  integrity sha512-5mq/eHZxOoxptTJMgpHKHVHrSNZ3GsNv4Kn493UIMt6hRXfHrX0QjBRWACOCTWMt/MkGdKvtN4LOqEHIttKMbA==
+launchdarkly-js-client-sdk@3.9.3:
+  version "3.9.3"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.9.3.tgz#4c236da45da7555eeb1717601b2cdc91854adbfa"
+  integrity sha512-1q+TqfBEBQcaz77EHwPf5F0L1hc22iwoa/S+69O5DSyp7+Txg35SDrvIQJWDcpigYxg0WN9VswAiq3uFci1ZhA==
   dependencies:
     escape-string-regexp "^4.0.0"
-    launchdarkly-js-sdk-common "5.8.0"
+    launchdarkly-js-sdk-common "5.8.1"
 
-launchdarkly-js-sdk-common@5.8.0:
-  version "5.8.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-sdk-common/-/launchdarkly-js-sdk-common-5.8.0.tgz#fa5f35668ceb9fdb884cf4ddf025b156d914cbfa"
-  integrity sha512-9X70K3kN1fuR6ZnRudkH7etMgFhi3sEU0mnJ+y2nhID+DpfkNDVnYUGnUs8/s4tsSDs7Q7Gpm4qnr3oqOqT9+A==
+launchdarkly-js-sdk-common@5.8.1:
+  version "5.8.1"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-sdk-common/-/launchdarkly-js-sdk-common-5.8.1.tgz#4b86cf5a6faae78b4193f2c39880e4efc6559d83"
+  integrity sha512-q6sYOatAhkKJYIT+8eeJyFBy4HZxOjHLxg8028Q6j7/ZdaySbo451ntPnlyKBrvXw9YfyB+62pL9ZHME3U6trg==
   dependencies:
     base64-js "^1.3.0"
     fast-deep-equal "^2.0.1"
-    uuid "^8.0.0"
 
 lazy-ass@^2.0.3:
   version "2.0.3"
@@ -35669,7 +35668,7 @@ uuid@^14.0.0:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-14.0.0.tgz#0af883220163d264ffe0c084f6b8a89b9666966d"
   integrity sha512-Qo+uWgilfSmAhXCMav1uYFynlQO7fMFiMVZsQqZRMIXp0O7rR7qjkj+cPvBHLgBqi960QCoo/PH2/6ZtVqKvrg==
 
-uuid@^8.0.0, uuid@^8.3.2:
+uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
