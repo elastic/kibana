@@ -124,7 +124,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 
   const {
     isResponseLoading,
-    isStreaming,
     error,
     retry: retrySendMessage,
     resumeRound,
