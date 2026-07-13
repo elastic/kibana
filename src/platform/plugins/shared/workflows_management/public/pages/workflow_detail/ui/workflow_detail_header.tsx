@@ -308,10 +308,9 @@ export const WorkflowDetailHeader = React.memo(
         <WorkflowDetailHeaderToolbar
           switchConfig={enabledSwitchConfig}
           showHistoryButton={showHistoryButton}
-          onOpenHistory={openHistoryModal}
         />
       );
-    }, [enabledSwitchConfig, isAppMenuSwitchInline, showHistoryButton, openHistoryModal]);
+    }, [enabledSwitchConfig, isAppMenuSwitchInline, showHistoryButton]);
 
     const { handleRunClick, runConfirmationModal } = useRunWorkflowWithConfirmation(openTestModal);
 
