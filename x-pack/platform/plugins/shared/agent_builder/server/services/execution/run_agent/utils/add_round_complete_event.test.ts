@@ -33,11 +33,11 @@ describe('addRoundCompleteEvent', () => {
     } as unknown as AttachmentStateManager,
   });
 
-  it('stamps source type on the round and source user on the input for new rounds', async () => {
+  it('stamps source type on the round and source author on the input for new rounds', async () => {
     const source = {
       type: ConversationSourceType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-      user: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
     };
     const messageCompleteEvent: ChatEvent = {
       type: ChatEventType.messageComplete,
@@ -69,7 +69,7 @@ describe('addRoundCompleteEvent', () => {
       type: ConversationSourceType.Slack,
     });
     expect(roundCompleteEvent?.data.round.input.source).toEqual({
-      user: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
     });
   });
 
@@ -79,7 +79,7 @@ describe('addRoundCompleteEvent', () => {
       source: { type: ConversationSourceType.Slack },
       input: {
         message: '@agent summarize this',
-        source: { user: { id: 'U123', name: 'Jane Doe', handle: 'jane' } },
+        source: { author: { id: 'U123', name: 'Jane Doe', handle: 'jane' } },
       },
     });
     const messageCompleteEvent: ChatEvent = {
@@ -102,7 +102,7 @@ describe('addRoundCompleteEvent', () => {
           source: {
             type: ConversationSourceType.Slack,
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-            user: { id: 'U999', name: 'John Roe', handle: 'john' },
+            author: { id: 'U999', name: 'John Roe', handle: 'john' },
           },
           startTime: new Date('2026-01-01T00:00:00.000Z'),
         }),
@@ -116,7 +116,7 @@ describe('addRoundCompleteEvent', () => {
       type: ConversationSourceType.Slack,
     });
     expect(roundCompleteEvent?.data.round.input.source).toEqual({
-      user: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+      author: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
     });
   });
 });

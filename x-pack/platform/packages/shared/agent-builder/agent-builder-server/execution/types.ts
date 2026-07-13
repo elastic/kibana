@@ -17,7 +17,7 @@ import type {
   ConversationAccessControl,
   ConversationRoundSource,
   ConversationSource,
-  ConversationSourceUser,
+  ConversationSourceAuthor,
   ExecutionStatus,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
@@ -55,12 +55,12 @@ export interface BaseExecutionParams {
 /**
  * External source that initiated a conversation execution, for example a Slack thread.
  * Each attribute is persisted on its parent model: `external_conversation_id` on the
- * conversation, `type` on the round, and `user` on the round input.
+ * conversation, `type` on the round, and `author` on the round input.
  */
 export type ExecutionConversationSource = ConversationSource &
   ConversationRoundSource & {
-    /** User attribution from the external source. */
-    user?: ConversationSourceUser;
+    /** Author attribution from the external source. */
+    author?: ConversationSourceAuthor;
   };
 
 /**

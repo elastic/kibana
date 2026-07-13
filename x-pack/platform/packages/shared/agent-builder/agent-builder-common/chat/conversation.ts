@@ -30,8 +30,8 @@ import type { RoundState } from './round_state';
  * Source metadata attached to the user input that initiated a round.
  */
 export interface RoundInputSource {
-  /** User attribution from the external source. */
-  user?: ConversationSourceUser;
+  /** Author attribution from the external source. */
+  author?: ConversationSourceAuthor;
 }
 
 /**
@@ -366,8 +366,8 @@ export interface ConversationSource {
   external_conversation_id: string;
 }
 
-export interface ConversationSourceUser {
-  /** Stable user identifier in the external source. */
+export interface ConversationSourceAuthor {
+  /** Stable author identifier in the external source. */
   id: string;
   /** Optional display name from the external source. */
   name?: string;

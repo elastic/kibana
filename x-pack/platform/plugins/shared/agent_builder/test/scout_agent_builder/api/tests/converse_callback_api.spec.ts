@@ -144,7 +144,7 @@ apiTest.describe(
       'stores callback source authorship on list and get conversation responses',
       async ({ apiClient }) => {
         const externalConversationId = 'team:T123/channel:C123/thread:callback-authorship';
-        const sourceUser = {
+        const sourceAuthor = {
           id: 'U123',
           name: 'Jane Doe',
           handle: 'jane',
@@ -167,7 +167,7 @@ apiTest.describe(
             source: {
               type: ConversationSourceType.Slack,
               external_conversation_id: externalConversationId,
-              user: sourceUser,
+              author: sourceAuthor,
             },
             callback: {
               url: `${callbackServerUrl}/callback?token=authorship`,
@@ -232,7 +232,7 @@ apiTest.describe(
         expect(firstRound.input).toMatchObject({
           message: 'Hello from Slack',
           source: {
-            user: sourceUser,
+            author: sourceAuthor,
           },
         });
       }

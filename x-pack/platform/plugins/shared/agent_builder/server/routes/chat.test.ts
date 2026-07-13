@@ -108,13 +108,13 @@ describe('callbackConversePayloadSchema', () => {
     ).not.toThrow();
   });
 
-  it('accepts a source user when provided', () => {
+  it('accepts a source author when provided', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
         source: {
           ...basePayload.source,
-          user: {
+          author: {
             id: 'U123',
             name: 'Jane Doe',
             handle: 'jane',
@@ -124,13 +124,13 @@ describe('callbackConversePayloadSchema', () => {
     ).not.toThrow();
   });
 
-  it('requires source user id when source user is provided', () => {
+  it('requires source author id when source author is provided', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({
         ...basePayload,
         source: {
           ...basePayload.source,
-          user: {
+          author: {
             name: 'Jane Doe',
           },
         },
@@ -232,7 +232,7 @@ describe('registerChatRoutes', () => {
     const source = {
       type: ConversationSourceType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-      user: {
+      author: {
         id: 'U123',
         name: 'Jane Doe',
         handle: 'jane',

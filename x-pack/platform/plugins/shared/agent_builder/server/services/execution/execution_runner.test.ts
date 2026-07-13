@@ -124,11 +124,11 @@ describe('handleAgentExecution', () => {
   });
 
   describe('round source attribution', () => {
-    const sourceUser = { id: 'U123', name: 'Jane Doe', handle: 'jane' };
+    const sourceAuthor = { id: 'U123', name: 'Jane Doe', handle: 'jane' };
     const source = {
       type: ConversationSourceType.Slack,
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-      user: sourceUser,
+      author: sourceAuthor,
     };
 
     const setup = ({ roundCompleteEvent }: { roundCompleteEvent: RoundCompleteEvent }) => {

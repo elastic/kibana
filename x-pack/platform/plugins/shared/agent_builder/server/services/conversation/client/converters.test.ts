@@ -507,7 +507,7 @@ describe('conversation model converters', () => {
     it('deserializes round source authorship', () => {
       const serialized = documentBase();
       serialized._source!.conversation_rounds[0].input.source = {
-        user: {
+        author: {
           id: 'U123',
           name: 'Jane Doe',
           handle: 'jane',
@@ -523,7 +523,7 @@ describe('conversation model converters', () => {
         type: 'slack',
       });
       expect(deserialized.rounds[0].input.source).toEqual({
-        user: {
+        author: {
           id: 'U123',
           name: 'Jane Doe',
           handle: 'jane',
@@ -733,7 +733,7 @@ describe('conversation model converters', () => {
     it('serializes round source authorship', () => {
       const conversation = conversationBase();
       conversation.rounds[0].input.source = {
-        user: {
+        author: {
           id: 'U123',
           name: 'Jane Doe',
           handle: 'jane',
@@ -749,7 +749,7 @@ describe('conversation model converters', () => {
         type: 'slack',
       });
       expect(serialized.conversation_rounds[0].input.source).toEqual({
-        user: {
+        author: {
           id: 'U123',
           name: 'Jane Doe',
           handle: 'jane',

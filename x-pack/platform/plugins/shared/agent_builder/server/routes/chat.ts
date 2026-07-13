@@ -302,7 +302,7 @@ export const callbackConversePayloadSchema = conversePayloadSchema.extends({
     schema.object({
       type: schema.literal(ConversationSourceType.Slack),
       external_conversation_id: schema.string({ minLength: 1, maxLength: 1024 }),
-      user: schema.maybe(
+      author: schema.maybe(
         schema.object({
           id: schema.string({ minLength: 1, maxLength: 1024 }),
           name: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),

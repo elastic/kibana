@@ -435,7 +435,7 @@ const createRound = ({
     state: undefined,
     input: {
       ...input,
-      ...(source?.user ? { source: { user: source.user } } : {}),
+      ...(source?.author ? { source: { author: source.author } } : {}),
       ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
     },
     steps,

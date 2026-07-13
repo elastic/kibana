@@ -37,7 +37,7 @@ describe('registerConversationRoutes', () => {
           input: {
             message: 'hello',
             source: {
-              user: {
+              author: {
                 id: 'U123',
                 name: 'Bruno',
               },
@@ -126,7 +126,7 @@ describe('registerConversationRoutes', () => {
     expect(result.payload.rounds[0].source).toEqual({
       type: ConversationSourceType.Slack,
     });
-    expect(result.payload.rounds[0].input.source.user).toEqual({
+    expect(result.payload.rounds[0].input.source.author).toEqual({
       id: 'U123',
       name: 'Bruno',
     });

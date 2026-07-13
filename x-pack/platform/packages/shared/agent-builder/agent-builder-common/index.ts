@@ -150,7 +150,7 @@ export {
   type ConversationRound,
   type Conversation,
   type ConversationSource,
-  type ConversationSourceUser,
+  type ConversationSourceAuthor,
   type RoundInputSource,
   type ConversationRoundSource,
   type ConversationWithoutRounds,
