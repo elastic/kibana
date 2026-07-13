@@ -72,7 +72,10 @@ describe('TemplateSettingsForm', () => {
 
     await user.click(screen.getByTestId('templateSettingsSyncAlertsSwitch'));
 
-    expect(onSettingsChange).toHaveBeenCalledWith({ syncAlerts: true });
+    expect(onSettingsChange).toHaveBeenCalledWith({
+      syncAlerts: true,
+      extractObservables: false,
+    });
   });
 
   it('preserves other settings when toggling one', async () => {
