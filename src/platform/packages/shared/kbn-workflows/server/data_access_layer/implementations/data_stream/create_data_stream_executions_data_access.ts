@@ -17,6 +17,7 @@ import type { EsWorkflowExecution, EsWorkflowStepExecution } from '../../../../t
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/step_executions_mappings';
 import type {
   CreateExecutionsDataAccessDeps,
+  DocumentVersionFields,
   ExecutionsDataAccessBundle,
   StepExecutionsDataAccess,
   WorkflowExecutionsDataAccess,
@@ -59,6 +60,7 @@ export class DataStreamExecutionsDataAccessBundle implements ExecutionsDataAcces
 
     return new DataStreamExecutionsDataAccess<EsWorkflowExecution>({
       esClient,
+      versionsCollector: new Map<string, Required<DocumentVersionFields>>(),
       additionalIndexesToQuery: ['.workflows-executions'],
       logger: this.deps.logger,
       dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
@@ -72,6 +74,7 @@ export class DataStreamExecutionsDataAccessBundle implements ExecutionsDataAcces
 
     return new DataStreamExecutionsDataAccess<EsWorkflowStepExecution>({
       esClient,
+      versionsCollector: new Map<string, Required<DocumentVersionFields>>(),
       additionalIndexesToQuery: ['.workflows-step-executions'],
       logger: this.deps.logger,
       dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,

@@ -36,6 +36,7 @@ const notImplemented = (method: string): never => {
 export interface DataStreamExecutionsDataAccessDeps {
   esClient: ElasticsearchClient;
   dataStreamName: string;
+  versionsCollector?: Map<string, Required<DocumentVersionFields>>;
   additionalIndexesToQuery?: string[];
   logger?: Logger;
 }
@@ -44,10 +45,11 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
   implements ExecutionsDataAccess<TExecution>
 {
   private additionalIndexesToQuery: string[];
-  private versions = new Map<string, Required<DocumentVersionFields>>();
+  private versionsCollector: Map<string, Required<DocumentVersionFields>> | undefined;
 
   constructor(private readonly deps: DataStreamExecutionsDataAccessDeps) {
     this.additionalIndexesToQuery = deps.additionalIndexesToQuery ?? [];
+    this.versionsCollector = deps.versionsCollector;
   }
 
   public async search(
@@ -61,7 +63,7 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
 
     searchResponse.hits.hits.forEach((hit) => {
       if (hit._id && hit?._source && hit._seq_no !== undefined && hit._primary_term !== undefined) {
-        this.versions.set(hit._id, {
+        this.versionsCollector?.set(hit._id, {
           index: hit._index,
           seqNo: hit._seq_no,
           primaryTerm: hit._primary_term,
@@ -84,7 +86,7 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
   ): Promise<GetExecutionsByIdsResponse<TExecution>> {
     const resolved = ids.map((id) => {
       if (typeof id === 'string') {
-        const version = this.versions.get(id);
+        const version = this.versionsCollector?.get(id);
 
         if (version) {
           return { id, index: version.index };
@@ -101,7 +103,7 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
         return;
       }
 
-      this.versions.set(item.document.id, {
+      this.versionsCollector?.set(item.document.id, {
         index: item.index,
         seqNo: item.seqNo,
         primaryTerm: item.primaryTerm,
@@ -123,7 +125,7 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
         return;
       }
 
-      this.versions.set(item.id, {
+      this.versionsCollector?.set(item.id, {
         index: item.index,
         seqNo: item.seqNo,
         primaryTerm: item.primaryTerm,
@@ -150,7 +152,7 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      const cached = this.versions.get(item.document.id);
+      const cached = this.versionsCollector?.get(item.document.id);
 
       if (item.operation === 'create') {
         resolved[i] = { ...item, index: this.deps.dataStreamName };
