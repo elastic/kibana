@@ -71,10 +71,10 @@ function InternalTraceWaterfall({
   dataView,
   ebtDetail = TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
 }: Props) {
-  const { data, apmUIComponents } = getUnifiedDocViewerServices();
+  const { data, apmShared } = getUnifiedDocViewerServices();
   const FocusedTraceWaterfallWithFetching = useMemo(
-    () => apmUIComponents.FocusedTraceWaterfallWithFetching,
-    [apmUIComponents.FocusedTraceWaterfallWithFetching]
+    () => apmShared.FocusedTraceWaterfallWithFetching,
+    [apmShared.FocusedTraceWaterfallWithFetching]
   );
   const { indexes } = useDataSourcesContext();
 

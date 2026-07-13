@@ -72,10 +72,10 @@ export const FullScreenWaterfall = ({
 }: FullScreenWaterfallProps) => {
   const historyKey = useFlyoutHistoryKey();
   const originDocType = useOriginDocType();
-  const { analytics, apmUIComponents } = getUnifiedDocViewerServices();
+  const { analytics, apmShared } = getUnifiedDocViewerServices();
   const TraceWaterfallWithFetching = useMemo(
-    () => apmUIComponents.TraceWaterfallWithFetching,
-    [apmUIComponents.TraceWaterfallWithFetching]
+    () => apmShared.TraceWaterfallWithFetching,
+    [apmShared.TraceWaterfallWithFetching]
   );
 
   const { euiTheme } = useEuiTheme();

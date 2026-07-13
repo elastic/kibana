@@ -30,7 +30,7 @@ import { useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { isFailureOrError } from './utils/is_failure_or_error';
 
-const ORPHAN_TITLE = i18n.translate('apmCommon.trace.barDetails.euiIconTip.orphanTitleLabel', {
+const ORPHAN_TITLE = i18n.translate('apmUiShared.trace.barDetails.euiIconTip.orphanTitleLabel', {
   defaultMessage: 'Orphan',
 });
 const ORPHAN_CONTENT = i18n.translate(
@@ -127,7 +127,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               href={getServiceBadgeHref?.(item.serviceName) as any}
               aria-label={
                 getServiceBadgeHref
-                  ? i18n.translate('apmCommon.trace.barDetails.serviceBadge.ariaLabel', {
+                  ? i18n.translate('apmUiShared.trace.barDetails.serviceBadge.ariaLabel', {
                       defaultMessage: 'Go to {serviceName} service overview',
                       values: { serviceName: item.serviceName },
                     })

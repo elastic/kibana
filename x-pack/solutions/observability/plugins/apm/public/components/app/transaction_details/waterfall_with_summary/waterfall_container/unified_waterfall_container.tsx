@@ -64,12 +64,9 @@ export function UnifiedWaterfallContainer({
   discoverHref,
 }: Props) {
   const {
-    services: { apmUIComponents },
+    services: { apmShared },
   } = useKibana();
-  const TraceWaterfall = useMemo(
-    () => apmUIComponents.TraceWaterfall,
-    [apmUIComponents.TraceWaterfall]
-  );
+  const TraceWaterfall = useMemo(() => apmShared.TraceWaterfall, [apmShared.TraceWaterfall]);
   const history = useHistory();
   const handleErrorClick = useErrorClickHandler(traceItems);
   const getServiceBadgeHref = useGetServiceBadgeHrefFromRouter();

@@ -61,7 +61,7 @@ export function FocusedTraceWaterfallWithFetching({
         data-test-subj="FocusedTraceWaterfallEmbeddableNoData"
         color="danger"
         size="s"
-        title={i18n.translate('apmCommon.focusedTraceWaterfallEmbeddable.noDataCalloutLabel', {
+        title={i18n.translate('apmUiShared.focusedTraceWaterfallEmbeddable.noDataCalloutLabel', {
           defaultMessage: 'Trace waterfall could not be loaded.',
         })}
       />

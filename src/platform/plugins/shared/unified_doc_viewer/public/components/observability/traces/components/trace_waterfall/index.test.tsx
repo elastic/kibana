@@ -15,7 +15,7 @@ import { TraceWaterfall } from '.';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
 import type { FullScreenWaterfallProps } from '../full_screen_waterfall';
-import { apmUIComponentsMock } from '@kbn/apm-ui-components-plugin/public/mocks';
+import { apmSharedMock } from '@kbn/apm-shared/public/mocks';
 
 jest.mock('../../../../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => ({
@@ -94,7 +94,7 @@ describe('TraceWaterfall', () => {
           },
         },
       },
-      apmUIComponents: apmUIComponentsMock.createStartContract(),
+      apmShared: apmSharedMock.createStartContract(),
     } as unknown as UnifiedDocViewerServices);
   });
 

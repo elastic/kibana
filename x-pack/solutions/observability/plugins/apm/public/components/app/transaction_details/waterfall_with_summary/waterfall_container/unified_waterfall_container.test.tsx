@@ -26,7 +26,7 @@ const MockTraceWaterfall = jest.fn((props: any) => {
 jest.mock('../../../../../context/kibana_context/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      apmUIComponents: {
+      apmShared: {
         TraceWaterfall: MockTraceWaterfall,
       },
     },

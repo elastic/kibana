@@ -150,7 +150,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
               role={onClick ? 'button' : undefined}
               aria-label={
                 onClick
-                  ? i18n.translate('apmCommon.traceItemRow.openDetailsButton', {
+                  ? i18n.translate('apmUiShared.traceItemRow.openDetailsButton', {
                       defaultMessage: 'View details for {name}',
                       values: { name: item.name },
                     })

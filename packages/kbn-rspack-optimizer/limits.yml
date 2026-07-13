@@ -13,7 +13,7 @@ pageLoadAssetSize:
   alertingVTwo: 15636
   apm: 31488
   apmSourcesAccess: 779
-  apmUIComponents: 1956
+  apmShared: 1956
   automaticImport: 13257
   banners: 1157
   canvas: 6000

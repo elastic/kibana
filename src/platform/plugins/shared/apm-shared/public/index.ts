@@ -8,11 +8,11 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { ApmUIComponentsPlugin } from './plugin';
+import { ApmSharedPlugin } from './plugin';
 
-export const plugin = (_initContext: PluginInitializerContext) => new ApmUIComponentsPlugin();
+export const plugin = (_initContext: PluginInitializerContext) => new ApmSharedPlugin();
 
-export type { ApmUIComponentsPluginSetup, ApmUIComponentsPluginStart } from './types';
+export type { ApmSharedPluginSetup, ApmSharedPluginStart } from './types';
 
 /** Use with `feature_flags.overrides` in kibana.yml to toggle CPS integration for APM. */
 export const OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG = 'observability.apm.cpsEnabled' as const;

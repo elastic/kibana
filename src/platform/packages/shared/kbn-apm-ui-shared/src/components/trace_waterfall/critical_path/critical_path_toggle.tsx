@@ -20,7 +20,7 @@ export function CriticalPathToggle({ checked, onChange }: Props) {
   return (
     <EuiSwitch
       data-test-subj="criticalPathToggle"
-      label={i18n.translate('apmCommon.traceWaterfall.showCriticalPath', {
+      label={i18n.translate('apmUiShared.traceWaterfall.showCriticalPath', {
         defaultMessage: 'Show critical path',
       })}
       checked={checked}

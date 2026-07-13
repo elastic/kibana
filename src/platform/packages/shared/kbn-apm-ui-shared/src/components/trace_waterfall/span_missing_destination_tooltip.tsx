@@ -11,9 +11,12 @@ import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-const title = i18n.translate('apmCommon.trace.barDetails.euiIconTip.spanMissingDestinationTitle', {
-  defaultMessage: 'Missing destination',
-});
+const title = i18n.translate(
+  'apmUiShared.trace.barDetails.euiIconTip.spanMissingDestinationTitle',
+  {
+    defaultMessage: 'Missing destination',
+  }
+);
 
 const content = i18n.translate(
   'apmCommon.trace.barDetails.euiIconTip.spanMissingDestinationContent',

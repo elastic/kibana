@@ -1,4 +1,4 @@
-# `@kbn/apm-ui-components-plugin`
+# `@kbn/apm-shared`
 
 A UI-only Kibana plugin that provides ready-to-use APM UI components with data-fetching dependencies pre-bound.
 
@@ -13,7 +13,7 @@ Without a shared owner, every plugin that wants to render an APM component must 
 
 ## Solution
 
-`apmUIComponents` centralises this setup. On `start()` it:
+`apmShared` centralises this setup. On `start()` it:
 
 1. Reads the `observability.apm.cpsEnabled` feature flag
 2. Creates a single lazy `callApmApi` proxy (with optional CPS manager integration)
@@ -22,7 +22,7 @@ Without a shared owner, every plugin that wants to render an APM component must 
 ## Start contract
 
 ```typescript
-interface ApmUIComponentsPluginStart {
+interface ApmSharedPluginStart {
   /** Pre-configured APM API client — use this instead of creating your own. */
   callApmApi: APMClientV2;
 
@@ -45,7 +45,7 @@ interface ApmUIComponentsPluginStart {
 // your-plugin/kibana.jsonc
 {
   "plugin": {
-    "requiredPlugins": ["apmUIComponents"]
+    "requiredPlugins": ["apmShared"]
   }
 }
 ```
@@ -53,10 +53,10 @@ interface ApmUIComponentsPluginStart {
 ### 2. Add the type to your start deps
 
 ```typescript
-import type { ApmUIComponentsPluginStart } from '@kbn/apm-ui-components-plugin/public';
+import type { ApmSharedPluginStart } from '@kbn/apm-shared/public';
 
 interface MyPluginStartDeps {
-  apmUIComponents: ApmUIComponentsPluginStart;
+  apmShared: ApmSharedPluginStart;
 }
 ```
 
@@ -64,7 +64,7 @@ interface MyPluginStartDeps {
 
 ```tsx
 // Option A — pre-bound component (no core/callApmApi needed)
-const { FocusedTraceWaterfallWithFetching } = pluginsStart.apmUIComponents;
+const { FocusedTraceWaterfallWithFetching } = pluginsStart.apmShared;
 
 <FocusedTraceWaterfallWithFetching
   traceId={traceId}
@@ -74,7 +74,7 @@ const { FocusedTraceWaterfallWithFetching } = pluginsStart.apmUIComponents;
 />
 
 // Option B — direct API calls
-const { callApmApi } = pluginsStart.apmUIComponents;
+const { callApmApi } = pluginsStart.apmShared;
 
 const result = await callApmApi('GET /internal/apm/...', { signal, params: { ... } });
 ```
@@ -94,5 +94,5 @@ To expose a new data-fetching component from `@kbn/apm-ui-shared`:
 
 1. Add a `dynamic(() => import('@kbn/apm-ui-shared').then(...))` lazy loader in `plugin.tsx`
 2. Create a wrapper that injects `core` and/or `callApmApi` as needed
-3. Add the component type to `ApmUIComponentsPluginStart` in `types.ts`
+3. Add the component type to `ApmSharedPluginStart` in `types.ts`
 4. Re-export the prop type from `index.ts` if consumers need it

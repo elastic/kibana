@@ -7,11 +7,11 @@ This directory contains two components for rendering APM trace waterfalls:
 
 ## Which one should I use?
 
-| Scenario | Component |
-|---|---|
-| Rendering a trace by ID with no data yet | `TraceWaterfallWithFetching` |
-| You already have `TraceItem[]` data | `TraceWaterfall` |
-| Consuming from another Kibana plugin | Use the pre-bound wrappers from `@kbn/apm-ui-components-plugin` |
+| Scenario                                 | Component                                         |
+| ---------------------------------------- | ------------------------------------------------- |
+| Rendering a trace by ID with no data yet | `TraceWaterfallWithFetching`                      |
+| You already have `TraceItem[]` data      | `TraceWaterfall`                                  |
+| Consuming from another Kibana plugin     | Use the pre-bound wrappers from `@kbn/apm-shared` |
 
 ---
 
@@ -28,21 +28,21 @@ type Props = FullTraceWaterfallProps & {
 };
 ```
 
-| Prop | Type | Required | Description |
-|---|---|---|---|
-| `core` | `CoreStart` | Yes | Kibana core services |
-| `callApmApi` | `APMClientV2` | Yes | APM API client (from `@kbn/apm-api-shared`) |
-| `traceId` | `string` | Yes | Trace ID to fetch and render |
-| `rangeFrom` | `string` | Yes | Start of time range (ISO string or date math, e.g. `now-15m`) |
-| `rangeTo` | `string` | Yes | End of time range (ISO string or date math, e.g. `now`) |
-| `ebt` | `{ row, errorBadge, serviceBadge }` | Yes | Event-based telemetry context (see [EBT](#ebt-event-based-telemetry)) |
-| `serviceName` | `string` | No | Service name used in the legend |
-| `scrollElement` | `Element` | No | Custom scroll container |
-| `onNodeClick` | `(spanId: string) => void` | No | Called when a span row is clicked |
-| `onErrorClick` | `FullTraceWaterfallOnErrorClick` | No | Called when an error badge is clicked |
-| `contextSpanIds` | `string[]` | No | Span IDs to highlight and auto-expand |
-| `scrollStrategy` | `'window' \| 'parent'` | No | See [Scroll strategy](#scroll-strategy) |
-| `scrollToContextOnMount` | `boolean` | No | Auto-scroll to `contextSpanIds` on mount (requires `scrollStrategy: 'parent'`) |
+| Prop                     | Type                                | Required | Description                                                                    |
+| ------------------------ | ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| `core`                   | `CoreStart`                         | Yes      | Kibana core services                                                           |
+| `callApmApi`             | `APMClientV2`                       | Yes      | APM API client (from `@kbn/apm-api-shared`)                                    |
+| `traceId`                | `string`                            | Yes      | Trace ID to fetch and render                                                   |
+| `rangeFrom`              | `string`                            | Yes      | Start of time range (ISO string or date math, e.g. `now-15m`)                  |
+| `rangeTo`                | `string`                            | Yes      | End of time range (ISO string or date math, e.g. `now`)                        |
+| `ebt`                    | `{ row, errorBadge, serviceBadge }` | Yes      | Event-based telemetry context (see [EBT](#ebt-event-based-telemetry))          |
+| `serviceName`            | `string`                            | No       | Service name used in the legend                                                |
+| `scrollElement`          | `Element`                           | No       | Custom scroll container                                                        |
+| `onNodeClick`            | `(spanId: string) => void`          | No       | Called when a span row is clicked                                              |
+| `onErrorClick`           | `FullTraceWaterfallOnErrorClick`    | No       | Called when an error badge is clicked                                          |
+| `contextSpanIds`         | `string[]`                          | No       | Span IDs to highlight and auto-expand                                          |
+| `scrollStrategy`         | `'window' \| 'parent'`              | No       | See [Scroll strategy](#scroll-strategy)                                        |
+| `scrollToContextOnMount` | `boolean`                           | No       | Auto-scroll to `contextSpanIds` on mount (requires `scrollStrategy: 'parent'`) |
 
 ### Example
 
@@ -61,13 +61,13 @@ import { TraceWaterfallWithFetching, TRACE_WATERFALL_EBT_ELEMENTS } from '@kbn/a
     serviceBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_SERVICE_BADGE },
   }}
   onNodeClick={(spanId) => console.log('clicked span', spanId)}
-/>
+/>;
 ```
 
-If your plugin uses `@kbn/apm-ui-components-plugin`, `core` and `callApmApi` are pre-bound:
+If your plugin uses `@kbn/apm-shared`, `core` and `callApmApi` are pre-bound:
 
 ```tsx
-const { TraceWaterfallWithFetching } = pluginsStart.apmUIComponents;
+const { TraceWaterfallWithFetching } = pluginsStart.apmShared;
 
 <TraceWaterfallWithFetching
   traceId="abc123"
@@ -78,7 +78,7 @@ const { TraceWaterfallWithFetching } = pluginsStart.apmUIComponents;
     errorBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_ERROR_BADGE },
     serviceBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_SERVICE_BADGE },
   }}
-/>
+/>;
 ```
 
 ---
@@ -113,41 +113,45 @@ type TraceWaterfallProps = {
   getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
   discoverHref?: string;
   children?: React.ReactNode;
-  ebt?: { row: { element: string }; errorBadge: { element: string }; serviceBadge: { element: string } };
+  ebt?: {
+    row: { element: string };
+    errorBadge: { element: string };
+    serviceBadge: { element: string };
+  };
 } & (
   | { scrollStrategy?: 'window'; contextSpanIds?: string[] }
   | { scrollStrategy: 'parent'; contextSpanIds?: string[]; scrollToContextOnMount?: boolean }
 );
 ```
 
-| Prop | Type | Required | Description |
-|---|---|---|---|
-| `traceItems` | `TraceItem[]` | Yes | Pre-fetched span/transaction items |
-| `errors` | `Error[]` | No | Errors associated with the trace |
-| `agentMarks` | `Record<string, number>` | No | Agent instrumentation timing marks |
-| `traceDocsTotal` | `number` | No | Total trace docs in Elasticsearch (shows truncation warning if `> maxTraceItems`) |
-| `maxTraceItems` | `number` | No | Threshold for truncation warning |
-| `entryTransactionId` | `string` | No | ID of the entry transaction (used as root) |
-| `serviceName` | `string` | No | Service name for legend display |
-| `isFiltered` | `boolean` | No | Whether trace items have been filtered |
-| `showAccordion` | `boolean` | No | Show expand/collapse controls (default: `true`) |
-| `showLegend` | `boolean` | No | Show color legend (default: `false`) |
-| `isEmbeddable` | `boolean` | No | Reduces chrome for embedded contexts (default: `false`) |
-| `showCriticalPathControl` | `boolean` | No | Show critical path toggle button |
-| `showCriticalPath` | `boolean` | No | Controlled critical path visibility |
-| `defaultShowCriticalPath` | `boolean` | No | Uncontrolled default critical path visibility |
-| `onShowCriticalPathChange` | `(value: boolean) => void` | No | Fires when critical path toggle changes |
-| `onClick` | `OnNodeClick` | No | Called when a span row is clicked |
-| `onErrorClick` | `OnErrorClick` | No | Called when an error badge is clicked |
-| `scrollElement` | `Element` | No | Custom scroll container |
-| `getRelatedErrorsHref` | function | No | Returns href for related errors link |
-| `getServiceBadgeHref` | function | No | Returns href for service badge link |
-| `discoverHref` | `string` | No | Link to Discover for full trace view |
-| `children` | `ReactNode` | No | Extra content rendered below the waterfall |
-| `ebt` | object | No | EBT telemetry context |
-| `contextSpanIds` | `string[]` | No | Span IDs to highlight and auto-expand |
-| `scrollStrategy` | `'window' \| 'parent'` | No | See [Scroll strategy](#scroll-strategy) |
-| `scrollToContextOnMount` | `boolean` | No | Auto-scroll to context on mount (`scrollStrategy: 'parent'` only) |
+| Prop                       | Type                       | Required | Description                                                                       |
+| -------------------------- | -------------------------- | -------- | --------------------------------------------------------------------------------- |
+| `traceItems`               | `TraceItem[]`              | Yes      | Pre-fetched span/transaction items                                                |
+| `errors`                   | `Error[]`                  | No       | Errors associated with the trace                                                  |
+| `agentMarks`               | `Record<string, number>`   | No       | Agent instrumentation timing marks                                                |
+| `traceDocsTotal`           | `number`                   | No       | Total trace docs in Elasticsearch (shows truncation warning if `> maxTraceItems`) |
+| `maxTraceItems`            | `number`                   | No       | Threshold for truncation warning                                                  |
+| `entryTransactionId`       | `string`                   | No       | ID of the entry transaction (used as root)                                        |
+| `serviceName`              | `string`                   | No       | Service name for legend display                                                   |
+| `isFiltered`               | `boolean`                  | No       | Whether trace items have been filtered                                            |
+| `showAccordion`            | `boolean`                  | No       | Show expand/collapse controls (default: `true`)                                   |
+| `showLegend`               | `boolean`                  | No       | Show color legend (default: `false`)                                              |
+| `isEmbeddable`             | `boolean`                  | No       | Reduces chrome for embedded contexts (default: `false`)                           |
+| `showCriticalPathControl`  | `boolean`                  | No       | Show critical path toggle button                                                  |
+| `showCriticalPath`         | `boolean`                  | No       | Controlled critical path visibility                                               |
+| `defaultShowCriticalPath`  | `boolean`                  | No       | Uncontrolled default critical path visibility                                     |
+| `onShowCriticalPathChange` | `(value: boolean) => void` | No       | Fires when critical path toggle changes                                           |
+| `onClick`                  | `OnNodeClick`              | No       | Called when a span row is clicked                                                 |
+| `onErrorClick`             | `OnErrorClick`             | No       | Called when an error badge is clicked                                             |
+| `scrollElement`            | `Element`                  | No       | Custom scroll container                                                           |
+| `getRelatedErrorsHref`     | function                   | No       | Returns href for related errors link                                              |
+| `getServiceBadgeHref`      | function                   | No       | Returns href for service badge link                                               |
+| `discoverHref`             | `string`                   | No       | Link to Discover for full trace view                                              |
+| `children`                 | `ReactNode`                | No       | Extra content rendered below the waterfall                                        |
+| `ebt`                      | object                     | No       | EBT telemetry context                                                             |
+| `contextSpanIds`           | `string[]`                 | No       | Span IDs to highlight and auto-expand                                             |
+| `scrollStrategy`           | `'window' \| 'parent'`     | No       | See [Scroll strategy](#scroll-strategy)                                           |
+| `scrollToContextOnMount`   | `boolean`                  | No       | Auto-scroll to context on mount (`scrollStrategy: 'parent'` only)                 |
 
 ### Example
 
@@ -167,7 +171,7 @@ import { TraceWaterfall, TRACE_WATERFALL_EBT_ELEMENTS } from '@kbn/apm-ui-shared
     errorBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_ERROR_BADGE },
     serviceBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_SERVICE_BADGE },
   }}
-/>
+/>;
 ```
 
 ---
@@ -210,7 +214,7 @@ const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
       scrollToContextOnMount
     />
   )}
-</div>
+</div>;
 ```
 
 ---
@@ -241,14 +245,14 @@ const ebt = {
 
 Available constants:
 
-| Constant | Value | Use when |
-|---|---|---|
-| `WATERFALL_ROW` | `'waterfallRow'` | Row in a main page waterfall |
-| `WATERFALL_ERROR_BADGE` | `'waterfallErrorBadge'` | Error badge in main page waterfall |
-| `WATERFALL_SERVICE_BADGE` | `'waterfallServiceBadge'` | Service badge in main page waterfall |
-| `FLYOUT_WATERFALL_ROW` | `'flyoutWaterfallRow'` | Row in a flyout waterfall |
-| `FLYOUT_WATERFALL_ERROR_BADGE` | `'flyoutWaterfallErrorBadge'` | Error badge in flyout waterfall |
-| `FLYOUT_WATERFALL_SERVICE_BADGE` | `'flyoutWaterfallServiceBadge'` | Service badge in flyout waterfall |
+| Constant                         | Value                           | Use when                             |
+| -------------------------------- | ------------------------------- | ------------------------------------ |
+| `WATERFALL_ROW`                  | `'waterfallRow'`                | Row in a main page waterfall         |
+| `WATERFALL_ERROR_BADGE`          | `'waterfallErrorBadge'`         | Error badge in main page waterfall   |
+| `WATERFALL_SERVICE_BADGE`        | `'waterfallServiceBadge'`       | Service badge in main page waterfall |
+| `FLYOUT_WATERFALL_ROW`           | `'flyoutWaterfallRow'`          | Row in a flyout waterfall            |
+| `FLYOUT_WATERFALL_ERROR_BADGE`   | `'flyoutWaterfallErrorBadge'`   | Error badge in flyout waterfall      |
+| `FLYOUT_WATERFALL_SERVICE_BADGE` | `'flyoutWaterfallServiceBadge'` | Service badge in flyout waterfall    |
 
 ---
 
@@ -267,7 +271,12 @@ type FullTraceWaterfallOnErrorClick = (params: {
 Typical pattern — open a detail flyout for a single error, or open a multi-error list:
 
 ```tsx
-const onErrorClick: FullTraceWaterfallOnErrorClick = ({ docId, errorCount, errorDocId, docIndex }) => {
+const onErrorClick: FullTraceWaterfallOnErrorClick = ({
+  docId,
+  errorCount,
+  errorDocId,
+  docIndex,
+}) => {
   if (errorCount > 1) {
     openErrorListFlyout(docId);
   } else if (errorDocId) {
@@ -286,13 +295,20 @@ export { TraceWaterfall, type TraceWaterfallProps } from '@kbn/apm-ui-shared';
 export { TraceWaterfallWithFetching } from '@kbn/apm-ui-shared';
 
 // EBT constants
-export { TRACE_WATERFALL_EBT_ELEMENTS, TRACE_WATERFALL_EBT_CLICK_ACTIONS } from '@kbn/apm-ui-shared';
+export {
+  TRACE_WATERFALL_EBT_ELEMENTS,
+  TRACE_WATERFALL_EBT_CLICK_ACTIONS,
+} from '@kbn/apm-ui-shared';
 
 // Types
 export type { OnErrorClick } from '@kbn/apm-ui-shared';
 
 // Utilities
-export { getTraceParentChildrenMap, getRootItemOrFallback, getSubtreeIds } from '@kbn/apm-ui-shared';
+export {
+  getTraceParentChildrenMap,
+  getRootItemOrFallback,
+  getSubtreeIds,
+} from '@kbn/apm-ui-shared';
 export { useTraceWaterfallContext } from '@kbn/apm-ui-shared';
 export { useGetServiceBadgeHrefFromCore } from '@kbn/apm-ui-shared';
 ```

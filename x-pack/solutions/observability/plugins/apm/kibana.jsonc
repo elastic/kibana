@@ -40,7 +40,7 @@
       "savedSearch",
       "fieldsMetadata",
       "discoverShared",
-      "apmUIComponents"
+      "apmShared"
     ],
     "optionalPlugins": [
       "actions",

@@ -24,11 +24,11 @@ Siblings and unrelated ancestors are omitted. This makes it suitable for context
 
 ## Which one should I use?
 
-| Scenario | Component |
-|---|---|
-| Rendering by trace ID with no data yet | `FocusedTraceWaterfallWithFetching` |
-| You already have `FocusedTrace` data | `FocusedTraceWaterfall` |
-| Consuming from another Kibana plugin | Use the pre-bound wrapper from `@kbn/apm-ui-components-plugin` |
+| Scenario                               | Component                                        |
+| -------------------------------------- | ------------------------------------------------ |
+| Rendering by trace ID with no data yet | `FocusedTraceWaterfallWithFetching`              |
+| You already have `FocusedTrace` data   | `FocusedTraceWaterfall`                          |
+| Consuming from another Kibana plugin   | Use the pre-bound wrapper from `@kbn/apm-shared` |
 
 ---
 
@@ -49,14 +49,14 @@ type Props = {
 };
 ```
 
-| Prop | Type | Required | Description |
-|---|---|---|---|
-| `traceId` | `string` | Yes | Trace ID to fetch |
-| `rangeFrom` | `string` | Yes | Start of time range (ISO 8601 or date math, e.g. `now-15m`) |
-| `rangeTo` | `string` | Yes | End of time range |
-| `docId` | `string` | No | Document ID to focus on. When provided the API returns only that document plus its root, parent, and descendants. When omitted the API returns the root transaction as the focus point. |
-| `core` | `CoreStart` | Yes | Kibana core services (used to build service badge hrefs) |
-| `callApmApi` | `APMClientV2` | Yes | APM API client (from `@kbn/apm-api-shared`) |
+| Prop         | Type          | Required | Description                                                                                                                                                                             |
+| ------------ | ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `traceId`    | `string`      | Yes      | Trace ID to fetch                                                                                                                                                                       |
+| `rangeFrom`  | `string`      | Yes      | Start of time range (ISO 8601 or date math, e.g. `now-15m`)                                                                                                                             |
+| `rangeTo`    | `string`      | Yes      | End of time range                                                                                                                                                                       |
+| `docId`      | `string`      | No       | Document ID to focus on. When provided the API returns only that document plus its root, parent, and descendants. When omitted the API returns the root transaction as the focus point. |
+| `core`       | `CoreStart`   | Yes      | Kibana core services (used to build service badge hrefs)                                                                                                                                |
+| `callApmApi` | `APMClientV2` | Yes      | APM API client (from `@kbn/apm-api-shared`)                                                                                                                                             |
 
 ### Example
 
@@ -70,20 +70,20 @@ import { FocusedTraceWaterfallWithFetching } from '@kbn/apm-ui-shared';
   rangeFrom="2024-01-01T00:00:00.000Z"
   rangeTo="2024-01-01T01:00:00.000Z"
   docId={selectedSpanId}
-/>
+/>;
 ```
 
-If your plugin uses `@kbn/apm-ui-components-plugin`, `core` and `callApmApi` are pre-bound:
+If your plugin uses `@kbn/apm-shared`, `core` and `callApmApi` are pre-bound:
 
 ```tsx
-const { FocusedTraceWaterfallWithFetching } = pluginsStart.apmUIComponents;
+const { FocusedTraceWaterfallWithFetching } = pluginsStart.apmShared;
 
 <FocusedTraceWaterfallWithFetching
   traceId="abc123"
   rangeFrom="2024-01-01T00:00:00.000Z"
   rangeTo="2024-01-01T01:00:00.000Z"
   docId={selectedSpanId}
-/>
+/>;
 ```
 
 ---
@@ -106,12 +106,12 @@ type Props = {
 type FocusedTrace = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/summary'>;
 ```
 
-| Prop | Type | Required | Description |
-|---|---|---|---|
-| `items` | `FocusedTrace` | Yes | Full API response (trace items + summary) |
-| `isEmbeddable` | `boolean` | No | Reduces chrome for embedded contexts |
-| `onErrorClick` | `(params: { traceId, docId }) => void` | No | Called when an error badge is clicked |
-| `getServiceBadgeHref` | `WaterfallGetServiceBadgeHref` | No | Returns href for service badge links |
+| Prop                  | Type                                   | Required | Description                               |
+| --------------------- | -------------------------------------- | -------- | ----------------------------------------- |
+| `items`               | `FocusedTrace`                         | Yes      | Full API response (trace items + summary) |
+| `isEmbeddable`        | `boolean`                              | No       | Reduces chrome for embedded contexts      |
+| `onErrorClick`        | `(params: { traceId, docId }) => void` | No       | Called when an error badge is clicked     |
+| `getServiceBadgeHref` | `WaterfallGetServiceBadgeHref`         | No       | Returns href for service badge links      |
 
 ### Example
 
@@ -122,7 +122,7 @@ import { FocusedTraceWaterfall } from '@kbn/apm-ui-shared';
   items={focusedTraceData}
   isEmbeddable
   onErrorClick={({ traceId, docId }) => openErrorFlyout(traceId, docId)}
-/>
+/>;
 ```
 
 ---
@@ -137,11 +137,11 @@ GET /internal/apm/unified_traces/{traceId}/summary
 
 **Query parameters:**
 
-| Parameter | Type | Description |
-|---|---|---|
-| `start` | `string` | ISO 8601 start time (`rangeFrom`) |
-| `end` | `string` | ISO 8601 end time (`rangeTo`) |
-| `docId` | `string` (optional) | Focus the response on this document |
+| Parameter | Type                | Description                         |
+| --------- | ------------------- | ----------------------------------- |
+| `start`   | `string`            | ISO 8601 start time (`rangeFrom`)   |
+| `end`     | `string`            | ISO 8601 end time (`rangeTo`)       |
+| `docId`   | `string` (optional) | Focus the response on this document |
 
 **Response shape:**
 
@@ -177,10 +177,10 @@ It also renders a `TraceSummary` bar below the waterfall showing service count, 
 
 ## `docId` behaviour
 
-| `docId` | What the API returns |
-|---|---|
-| Omitted | The root transaction is used as the focus point. Shows the entry transaction and its full subtree. |
-| Provided (root doc ID) | Same as omitting it — root is already the focus. |
+| `docId`                  | What the API returns                                                                                                  |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| Omitted                  | The root transaction is used as the focus point. Shows the entry transaction and its full subtree.                    |
+| Provided (root doc ID)   | Same as omitting it — root is already the focus.                                                                      |
 | Provided (child span ID) | Root transaction → parent span (if not root) → focused span → focused span's descendants only. Siblings are excluded. |
 
 ---
@@ -189,10 +189,14 @@ It also renders a `TraceSummary` bar below the waterfall showing service count, 
 
 ```typescript
 // Flattens the nested TraceItemChild tree into a flat TraceItem[]
-export function flattenChildren(children: FocusedTrace['traceItems']['focusedTraceTree']): TraceItem[]
+export function flattenChildren(
+  children: FocusedTrace['traceItems']['focusedTraceTree']
+): TraceItem[];
 
 // Re-parents the focused document to root for correct waterfall display
-export function reparentDocumentToRoot(items: FocusedTrace['traceItems']): FocusedTraceItems | undefined
+export function reparentDocumentToRoot(
+  items: FocusedTrace['traceItems']
+): FocusedTraceItems | undefined;
 ```
 
 ---

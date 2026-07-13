@@ -74,12 +74,12 @@ describe('FullScreenWaterfall', () => {
   beforeAll(() => {
     setUnifiedDocViewerServices({
       ...mockUnifiedDocViewerServices,
-      apmUIComponents: {
-        ...mockUnifiedDocViewerServices.apmUIComponents,
+      apmShared: {
+        ...mockUnifiedDocViewerServices.apmShared,
         TraceWaterfallWithFetching: (props: FullTraceWaterfallProps) => {
           capturedWaterfallProps = props;
           return React.createElement(
-            mockUnifiedDocViewerServices.apmUIComponents.TraceWaterfallWithFetching,
+            mockUnifiedDocViewerServices.apmShared.TraceWaterfallWithFetching,
             props
           );
         },

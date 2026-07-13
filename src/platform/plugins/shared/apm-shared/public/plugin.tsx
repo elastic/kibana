@@ -13,11 +13,7 @@ import type { APMClientV2 } from '@kbn/apm-api-shared';
 import type { FocusedTraceWaterfallProps, FullTraceWaterfallProps } from '@kbn/apm-types';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { TraceWaterfallProps } from '@kbn/apm-ui-shared';
-import type {
-  ApmUIComponentsPluginSetup,
-  ApmUIComponentsPluginStart,
-  ApmUIComponentsPluginStartDeps,
-} from './types';
+import type { ApmSharedPluginSetup, ApmSharedPluginStart, ApmSharedPluginStartDeps } from './types';
 
 /** Use with `feature_flags.overrides` in kibana.yml to toggle CPS integration for APM. */
 const OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG = 'observability.apm.cpsEnabled' as const;
@@ -56,23 +52,14 @@ const LoadingFallback = () => (
   </Suspense>
 );
 
-export class ApmUIComponentsPlugin
-  implements
-    Plugin<
-      ApmUIComponentsPluginSetup,
-      ApmUIComponentsPluginStart,
-      {},
-      ApmUIComponentsPluginStartDeps
-    >
+export class ApmSharedPlugin
+  implements Plugin<ApmSharedPluginSetup, ApmSharedPluginStart, {}, ApmSharedPluginStartDeps>
 {
-  public setup(): ApmUIComponentsPluginSetup {
+  public setup(): ApmSharedPluginSetup {
     return {};
   }
 
-  public start(
-    core: CoreStart,
-    { cps }: ApmUIComponentsPluginStartDeps
-  ): ApmUIComponentsPluginStart {
+  public start(core: CoreStart, { cps }: ApmSharedPluginStartDeps): ApmSharedPluginStart {
     const isCpsEnabled = core.featureFlags.getBooleanValue(
       OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
       OBSERVABILITY_APM_CPS_ENABLED_DEFAULT

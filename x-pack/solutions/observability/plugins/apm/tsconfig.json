@@ -175,7 +175,7 @@
     "@kbn/apm-common",
     "@kbn/storybook",
     "@kbn/lens-embeddable-utils",
-    "@kbn/apm-ui-components-plugin"
+    "@kbn/apm-shared"
   ],
   "exclude": ["target/**/*"]
 }

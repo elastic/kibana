@@ -79,8 +79,8 @@ import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/
 import {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-  type ApmUIComponentsPluginStart,
-} from '@kbn/apm-ui-components-plugin/public';
+  type ApmSharedPluginStart,
+} from '@kbn/apm-shared/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
@@ -196,7 +196,7 @@ export interface ApmPluginStartDeps {
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   slo?: SLOPublicStart;
   cps?: CPSPluginStart;
-  apmUIComponents: ApmUIComponentsPluginStart;
+  apmShared: ApmSharedPluginStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -535,7 +535,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     );
 
     const ApmInternalServices: ApmInternalServices = {
-      callApmApi: plugins.apmUIComponents.callApmApi,
+      callApmApi: plugins.apmShared.callApmApi,
     };
 
     if (isCpsEnabled) {

@@ -14,15 +14,15 @@ import type { CPSPluginStart } from '@kbn/cps/public';
 import type { TraceWaterfallProps } from '@kbn/apm-ui-shared';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ApmUIComponentsPluginSetup {}
+export interface ApmSharedPluginSetup {}
 
-export interface ApmUIComponentsPluginStart {
+export interface ApmSharedPluginStart {
   callApmApi: APMClientV2;
   FocusedTraceWaterfallWithFetching: ComponentType<FocusedTraceWaterfallProps>;
   TraceWaterfallWithFetching: ComponentType<FullTraceWaterfallProps>;
   TraceWaterfall: ComponentType<TraceWaterfallProps>;
 }
 
-export interface ApmUIComponentsPluginStartDeps {
+export interface ApmSharedPluginStartDeps {
   cps?: CPSPluginStart;
 }
