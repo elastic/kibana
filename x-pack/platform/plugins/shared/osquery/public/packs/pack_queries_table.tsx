@@ -42,16 +42,29 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   const isRruleSchedulingEnabled = ExperimentalFeaturesService.get().rruleScheduling;
 
   const renderScheduleColumn = useCallback(
-    (_: unknown, item: PackQueryFormData) =>
-      formatQuerySchedule(
-        item.schedule_type
-          ? {
-              schedule_type: item.schedule_type,
-              interval: item.interval,
-              rrule_schedule: item.rrule_schedule,
-            }
-          : packSchedule ?? { interval: item.interval }
-      ),
+    (_: unknown, item: PackQueryFormData) => {
+      if (item.schedule_type) {
+        return formatQuerySchedule({
+          schedule_type: item.schedule_type,
+          interval: item.interval,
+          rrule_schedule: item.rrule_schedule,
+        });
+      }
+
+      // Inheriting the pack schedule is only meaningful when it's a real one
+      // (recurrence, or an explicitly persisted interval). A legacy pack with
+      // no real pack-level schedule synthesizes an interval default purely so
+      // the form has something to render — that default must not shadow the
+      // query's own interval. See elastic/kibana#277700.
+      const inheritsRealPackSchedule =
+        packSchedule?.schedule_type === 'rrule' || !!packSchedule?.hasExplicitSchedule;
+
+      return formatQuerySchedule(
+        inheritsRealPackSchedule
+          ? packSchedule
+          : { schedule_type: 'interval', interval: item.interval }
+      );
+    },
     [packSchedule]
   );
   const renderDeleteAction = useCallback(

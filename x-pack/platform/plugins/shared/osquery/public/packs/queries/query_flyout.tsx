@@ -50,7 +50,7 @@ import type {
   PackQueryFormData,
   PackSOQueryFormData,
 } from './use_pack_query_form';
-import { usePackQueryForm } from './use_pack_query_form';
+import { usePackQueryForm, resolveInheritedScheduleInput } from './use_pack_query_form';
 import { deserializeSchedule } from '../form/schedule_serializer';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
@@ -97,6 +97,8 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   const overridePackSchedule = watch('override_pack_schedule');
   const schedule = watch('schedule');
 
+  const queryOwnInterval = defaultValue?.interval ? parseInt(defaultValue.interval, 10) : undefined;
+
   const originalStartDate = useMemo(() => {
     if (!isRruleSchedulingEnabled) {
       return undefined;
@@ -110,13 +112,9 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
             schedule_type: defaultValue?.schedule_type,
             rrule_schedule: defaultValue?.rrule_schedule,
           }
-        : {
-            schedule_type: packSchedule?.schedule_type,
-            interval: packSchedule?.interval,
-            rrule_schedule: packSchedule?.rrule_schedule,
-          }
+        : resolveInheritedScheduleInput(packSchedule, queryOwnInterval)
     ).startDate;
-  }, [isRruleSchedulingEnabled, defaultValue, packSchedule]);
+  }, [isRruleSchedulingEnabled, defaultValue, packSchedule, queryOwnInterval]);
 
   // Single source of truth for the override schedule. Only an
   // active override has a schedule to validate — an inherited query defers to
@@ -145,11 +143,17 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     seededPackModeRef.current = incomingPackMode;
     setValue(
       'schedule',
-      deserializeSchedule({
-        schedule_type: packSchedule?.schedule_type,
-        interval: packSchedule?.interval,
-        rrule_schedule: packSchedule?.rrule_schedule,
-      }),
+      deserializeSchedule(
+        resolveInheritedScheduleInput(
+          {
+            schedule_type: packSchedule?.schedule_type,
+            interval: packSchedule?.interval,
+            rrule_schedule: packSchedule?.rrule_schedule,
+            hasExplicitSchedule: packSchedule?.hasExplicitSchedule,
+          },
+          queryOwnInterval
+        )
+      ),
       { shouldDirty: false }
     );
   }, [
@@ -159,6 +163,8 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     packSchedule?.schedule_type,
     packSchedule?.interval,
     packSchedule?.rrule_schedule,
+    packSchedule?.hasExplicitSchedule,
+    queryOwnInterval,
     setValue,
   ]);
 
