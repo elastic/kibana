@@ -49,7 +49,10 @@ export const ChromeAppHeader = ({
   }, [embeddableEditor]);
 
   const appMenu = useMemo(() => {
-    // Share is an optional plugin; when it's absent there's no share item to re-host the separator.
+    // `use_top_nav_links` marks the first tab-scoped item (export/inspect) with a leading separator.
+    // Share is surfaced as the title-row action but also kept in the overflow menu, where we want it
+    // to lead that section. Share is an optional plugin, so it may be absent from the menu.
+    const sectionLeader = menu?.items?.find((item) => item.separator === 'above');
     const hasShare = menu?.items?.some((item) => item.id === AppMenuActionId.share) ?? false;
 
     return {
@@ -60,15 +63,19 @@ export const ChromeAppHeader = ({
         // overflow menu. (Except switch language)
         const overflow = item.id !== AppMenuActionId.switchLanguageMode;
 
-        // Share is surfaced as the title-row action, but we also keep it in the overflow menu leading
-        // the tab-scoped section. Take over that section's leading separator.
-        if (item.id === AppMenuActionId.share) {
-          return { ...item, overflow, order: 7, separator: 'above' } as AppMenuItemType;
+        // Place share just above the section leader and hand the leading separator to it. The
+        // fractional offset keeps share adjacent-above the leader without colliding with any order.
+        if (item.id === AppMenuActionId.share && sectionLeader) {
+          return {
+            ...item,
+            overflow,
+            order: sectionLeader.order - 0.5,
+            separator: 'above',
+          } as AppMenuItemType;
         }
 
-        // The leading separator now belongs to share, so drop it from whichever tab-scoped item
-        // `use_top_nav_links` placed it on (export when present, otherwise inspect). Only strip it
-        // when share is present to re-host it, otherwise leave the section's separator intact.
+        // The leading separator now belongs to share, so drop it from the section leader. Only when
+        // share is present to re-host it, otherwise leave the section's separator intact.
         if (hasShare && item.separator === 'above') {
           return { ...item, overflow, separator: undefined } as AppMenuItemType;
         }
