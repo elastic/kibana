@@ -12,10 +12,13 @@ export const getUpdatableSavedObjectTypes = async ({
   request,
   types,
   authorization,
+  action = 'update',
 }: {
   types: string[];
   request: KibanaRequest;
   authorization?: SecurityPluginSetup['authz'];
+  /** The privilege action to check for each type. Defaults to `'update'`. */
+  action?: string;
 }) => {
   // Don't bother authorizing if the security plugin is disabled, or if security is disabled in ES
   const shouldAuthorize = authorization?.mode.useRbacForRequest(request) ?? false;
@@ -25,7 +28,7 @@ export const getUpdatableSavedObjectTypes = async ({
 
   // Each Saved Object type has a distinct privilege/action that we need to check
   const typeActionMap = types.reduce((acc, type) => {
-    acc[type] = authorization!.actions.savedObject.get(type, 'update');
+    acc[type] = authorization!.actions.savedObject.get(type, action);
     return acc;
   }, {} as Record<string, string>);
 

@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useCallback, useState, useMemo } from 'react';
+import React, { useEffect, useCallback, useState, useMemo, useRef } from 'react';
 import { Subject } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
 import { Query } from '@elastic/eui';
@@ -15,13 +15,33 @@ import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
 import type { TagsCapabilities } from '../../common';
 import type { TagWithRelations } from '../../common/types';
+import type { MergeStatusResponse } from '../../common/merge';
 import { getCreateModalOpener } from '../components/edition_modal';
-import type { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
+import type {
+  ITagInternalClient,
+  ITagAssignmentService,
+  ITagsCache,
+  IMergeClient,
+} from '../services';
 import type { TagBulkAction } from './types';
-import { Header, TagTable, ActionBar } from './components';
+import {
+  Header,
+  TagTable,
+  ActionBar,
+  DuplicateTagsCallout,
+  MergeInProgressCallout,
+  MergeDuplicateTagsFlyout,
+} from './components';
 import { getTableActions } from './actions';
 import { getBulkActions } from './bulk_actions';
-import { getTagConnectionsUrl } from './utils';
+import {
+  getTagConnectionsUrl,
+  groupDuplicateTagsByName,
+  buildTagNameLookup,
+  type DuplicateTagGroup,
+} from './utils';
+
+const MERGE_STATUS_POLL_INTERVAL_MS = 5000;
 
 interface TagManagementPageParams {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
@@ -29,6 +49,7 @@ interface TagManagementPageParams {
   tagClient: ITagInternalClient;
   tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
+  mergeClient: IMergeClient;
   capabilities: TagsCapabilities;
   assignableTypes: string[];
 }
@@ -39,6 +60,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   tagClient,
   tagCache,
   assignmentService,
+  mergeClient,
   capabilities,
   assignableTypes,
 }) => {
@@ -47,6 +69,8 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   const [allTags, setAllTags] = useState<TagWithRelations[]>([]);
   const [selectedTags, setSelectedTags] = useState<TagWithRelations[]>([]);
   const [query, setQuery] = useState<Query | undefined>();
+  const [mergingGroup, setMergingGroup] = useState<DuplicateTagGroup | undefined>();
+  const [mergeStatus, setMergeStatus] = useState<MergeStatusResponse | undefined>();
 
   const filteredTags = useMemo(() => {
     return query ? Query.execute(query, allTags) : allTags;
@@ -72,9 +96,59 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     setLoading(false);
   }, [tagClient]);
 
+  // A merge job deletes duplicate source tags server-side, via an async Task Manager task, not
+  // through this client — so the shared `TagsCache` (used by tag pickers elsewhere in the app)
+  // never sees it through its normal onDidDelete hook. Force a refresh so those pickers don't
+  // keep offering deleted tags until the cache's own periodic refresh or a page reload.
+  const refreshAfterMerge = useCallback(async () => {
+    await Promise.all([fetchTags(), tagClient.invalidateCache()]);
+  }, [fetchTags, tagClient]);
+
   useMount(() => {
     fetchTags();
   });
+
+  // Merge jobs are singleton per space and run entirely server-side, so one can still be running
+  // (or finish) even if the flyout that started it was never opened on this page load. Poll
+  // independently of the flyout so both the "in progress" banner and the tag list itself
+  // (including the now-stale duplicate-tags warning once source tags are deleted) stay correct
+  // even when nothing ever opened the flyout to trigger its own `onMerged` refresh.
+  const wasInProgressRef = useRef(false);
+  useEffect(() => {
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const result = await mergeClient.status();
+        if (cancelled) {
+          return;
+        }
+        setMergeStatus(result);
+        if (wasInProgressRef.current && result.status !== 'in_progress') {
+          refreshAfterMerge();
+        }
+        wasInProgressRef.current = result.status === 'in_progress';
+      } catch (e) {
+        // best-effort awareness banner; a failed poll just tries again next interval.
+      }
+    };
+    poll();
+    const interval = setInterval(poll, MERGE_STATUS_POLL_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [mergeClient, refreshAfterMerge]);
+
+  const getTagName = useMemo(() => buildTagNameLookup(allTags), [allTags]);
+  const duplicateGroups = useMemo(() => groupDuplicateTagsByName(allTags), [allTags]);
+
+  const viewMergeProgress = useCallback(() => {
+    const runningToId = mergeStatus?.job?.toId;
+    const runningGroup = duplicateGroups.find((group) =>
+      group.tags.some((tag) => tag.id === runningToId)
+    );
+    setMergingGroup(runningGroup ?? { normalizedName: '', tags: [] });
+  }, [mergeStatus, duplicateGroups]);
 
   const createModalOpener = useMemo(
     () => getCreateModalOpener({ ...startServices, tagClient }),
@@ -199,6 +273,13 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     <>
       <Header canCreate={capabilities.create} onCreate={openCreateModal} />
       <EuiSpacer size="l" />
+      {mergeStatus?.status === 'in_progress' && (
+        <MergeInProgressCallout
+          tagName={mergeStatus.job ? getTagName(mergeStatus.job.toId) : undefined}
+          onViewProgress={viewMergeProgress}
+        />
+      )}
+      <DuplicateTagsCallout groups={duplicateGroups} onMergeGroup={setMergingGroup} />
       <TagTable
         loading={loading}
         tags={filteredTags}
@@ -220,6 +301,15 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
           showTagRelations(tag);
         }}
       />
+      {mergingGroup && (
+        <MergeDuplicateTagsFlyout
+          tags={mergingGroup.tags}
+          allTags={allTags}
+          mergeClient={mergeClient}
+          onClose={() => setMergingGroup(undefined)}
+          onMerged={refreshAfterMerge}
+        />
+      )}
     </>
   );
 };

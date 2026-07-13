@@ -14,3 +14,5 @@ export type {
 export { TagsCache, TagsClient, isServerValidationError } from './tags';
 export type { ITagAssignmentService } from './assignments';
 export { TagAssignmentService } from './assignments';
+export type { IMergeClient } from './merge';
+export { MergeClient } from './merge';

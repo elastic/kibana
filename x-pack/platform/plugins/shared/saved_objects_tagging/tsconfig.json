@@ -26,7 +26,9 @@
     "@kbn/as-code-shared-schemas",
     "@kbn/core-http-server",
     "@kbn/core-http-browser",
-    "@kbn/as-code-shared-telemetry"
+    "@kbn/as-code-shared-telemetry",
+    "@kbn/task-manager-plugin",
+    "@kbn/spaces-plugin"
   ],
   "exclude": [
     "target/**/*",

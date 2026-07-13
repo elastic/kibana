@@ -17,11 +17,13 @@
     "requiredPlugins": [
       "features",
       "management",
-      "savedObjectsTaggingOss"
+      "savedObjectsTaggingOss",
+      "taskManager"
     ],
     "optionalPlugins": [
       "usageCollection",
-      "security"
+      "security",
+      "spaces"
     ],
     "requiredBundles": []
   }

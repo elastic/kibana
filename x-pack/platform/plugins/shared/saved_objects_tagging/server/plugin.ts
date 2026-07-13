@@ -9,6 +9,11 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { savedObjectsTaggingFeature } from './features';
 import { tagType } from './saved_objects';
 import type {
@@ -19,6 +24,7 @@ import type {
 } from './types';
 import { TagsRequestHandlerContext } from './request_handler_context';
 import { registerRoutes } from './routes';
+import { registerTagMergeTaskType } from './tasks/tag_merge';
 import { createTagUsageCollector } from './usage';
 import { TagsClient, AssignmentService } from './services';
 import { convertTagNameToId, getTagsFromReferences, replaceTagReferences } from '../common';
@@ -27,10 +33,13 @@ interface SetupDeps {
   features: FeaturesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 interface StartDeps {
   security?: SecurityPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export class SavedObjectTaggingPlugin
@@ -38,7 +47,7 @@ export class SavedObjectTaggingPlugin
 {
   public setup(
     { savedObjects, http, getStartServices }: CoreSetup<StartDeps, SavedObjectTaggingStart>,
-    { features, usageCollection, security }: SetupDeps
+    { features, usageCollection, security, spaces, taskManager }: SetupDeps
   ) {
     savedObjects.registerType(tagType);
 
@@ -46,7 +55,11 @@ export class SavedObjectTaggingPlugin
     const apiUsageCounter: UsageCounter | undefined = usageCollection?.createUsageCounter(
       'saved_objects_tagging_api'
     );
-    registerRoutes({ router, usageCounter: apiUsageCounter });
+    registerRoutes({
+      router,
+      usageCounter: apiUsageCounter,
+      mergeRouteDeps: { getStartServices, spacesService: spaces?.spacesService },
+    });
 
     http.registerRouteHandlerContext<TagsHandlerContext, 'tags'>(
       'tags',
@@ -56,6 +69,8 @@ export class SavedObjectTaggingPlugin
     );
 
     features.registerKibanaFeature(savedObjectsTaggingFeature);
+
+    registerTagMergeTaskType({ taskManager, getStartServices });
 
     if (usageCollection) {
       const getKibanaIndices = () =>

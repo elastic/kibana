@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export { getTagConnectionsUrl } from './get_tag_connections_url';
-export type { DuplicateTagGroup } from './group_duplicate_tags';
-export { groupDuplicateTagsByName } from './group_duplicate_tags';
-export { buildTagNameLookup } from './tag_name_lookup';
+export type { IMergeClient } from './merge_client';
+export { MergeClient } from './merge_client';
