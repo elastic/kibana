@@ -5,26 +5,6 @@
  * 2.0.
  */
 
-/**
- * Local Scout audit log smoke tests.
- *
- * Runs against the `security_audit` config set, which enables audit logging with a
- * JSON file appender at AUDIT_LOG_PATH. Tests verify that the security plugin emits
- * the correct audit events in ECS format (the canonical format before OTel renames).
- *
- * OTel-specific field shape tests (renames, drops, defaults) live in the sibling
- * `test/scout_security_audit_otel/api/tests/audit_log.spec.ts`, using a fake local OTLP
- * receiver instead of a real OpenTelemetry Collector + Elasticsearch pipeline.
- *
- * Run locally (serverless):
- *   node scripts/scout run-tests --arch serverless --domain security_complete \
- *     --config x-pack/platform/plugins/shared/security/test/scout_security_audit/api/playwright.config.ts
- *
- * Run locally (stateful):
- *   node scripts/scout run-tests --arch stateful --domain classic \
- *     --config x-pack/platform/plugins/shared/security/test/scout_security_audit/api/playwright.config.ts
- */
-
 import { readFileSync } from 'fs';
 
 import { apiTest, tags } from '@kbn/scout';

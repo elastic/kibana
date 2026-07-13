@@ -5,20 +5,6 @@
  * 2.0.
  */
 
-/**
- * Scout audit log integration tests.
- *
- * Runs against the `security_audit_otel` config set, which configures the security
- * plugin's OTel audit appender (`protocol: 'http'`) to POST OTLP JSON log records to
- * a fake local receiver (`OtlpLogReceiver`, started below) instead of a real OpenTelemetry
- * Collector + Elasticsearch pipeline. This verifies exactly what the appender emits —
- * the field renames, drops, and defaults in AUDIT_OTEL_FIELD_RENAMES, AUDIT_OTEL_FIELD_DROPS,
- * and AUDIT_OTEL_FIELD_DEFAULTS from audit_service.ts — without depending on external infra.
- *
- * The appender already flattens attributes to dot-notation keys (e.g. `kibana.space.id`)
- * before OTLP serialization, so assertions match directly against the decoded flat map.
- */
-
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -26,9 +12,7 @@ import { OtlpLogReceiver } from '../lib/otlp_log_receiver';
 
 // Must match OTEL_RECEIVER_PORT in the security_audit_otel Scout config set.
 const OTEL_RECEIVER_PORT = 18923;
-// Both internal.security/login and the public saved_objects/_find route are
-// access:'internal' on serverless (restrictInternalApis) — this header is required
-// to call them directly instead of through Kibana's own UI/plugin code.
+
 const KBN_XSRF = { 'kbn-xsrf': 'xxx', 'x-elastic-internal-origin': 'kibana' };
 const TEST_DASHBOARD_ID = 'audit-log-otel-test-dashboard';
 
@@ -40,10 +24,6 @@ apiTest.describe(
   () => {
     apiTest.beforeAll(async ({ kbnClient }) => {
       await receiver.start(OTEL_RECEIVER_PORT);
-
-      // Seeded so `saved_object_find` below has a hit to find — Kibana only emits a
-      // saved_object_find audit event per matched object, not per requested type, so
-      // a query that legitimately returns zero results never produces an audit event.
       await kbnClient.savedObjects.create({
         type: 'dashboard',
         id: TEST_DASHBOARD_ID,
