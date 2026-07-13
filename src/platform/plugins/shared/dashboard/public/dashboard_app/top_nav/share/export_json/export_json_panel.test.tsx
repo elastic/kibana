@@ -10,8 +10,8 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import '@kbn/code-editor-mock/jest_helper';
-import type { DashboardState } from '../../server';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
+import type { DashboardState } from '../../../../../server';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/constants';
 import { ExportJsonPanel } from './export_json_panel';
 import { userEvent } from '@testing-library/user-event';
 import type { ExportJsonSanitizedState } from './types';

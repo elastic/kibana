@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { apm } from '@elastic/apm-rum';
-import type { DashboardState } from '../../server';
+import type { DashboardState } from '../../../../../server';
 import { sanitizeDashboard } from './sanitize_dashboard';
 import type { ExportJsonSanitizedState, ExportJsonStatus } from './types';
 

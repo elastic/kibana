@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardState } from '../../server';
+import type { DashboardState } from '../../../../../server';
 
 export type ExportJsonStatus = 'loading' | 'success' | 'error';
 

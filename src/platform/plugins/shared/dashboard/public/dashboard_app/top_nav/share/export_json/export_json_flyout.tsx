@@ -28,7 +28,7 @@ import { downloadFileAs, useShareTypeContext } from '@kbn/share-plugin/public';
 
 import { ExportJsonPanel } from './export_json_panel';
 import { buildExportJsonFilename } from './export_json_share_utils';
-import type { buildExportSharingData } from '../dashboard_app/top_nav/share/share_options_utils';
+import type { buildExportSharingData } from '../share_options_utils';
 import { useSanitizedDashboardState } from './use_sanitized_dashboard_state';
 
 const flyoutBodyCss = css`

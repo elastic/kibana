@@ -8,8 +8,8 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import type { DashboardState } from '../../server';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
+import type { DashboardState } from '../../../../../server';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/constants';
 import { sanitizeDashboard } from './sanitize_dashboard';
 import { useSanitizedDashboardState } from './use_sanitized_dashboard_state';
 

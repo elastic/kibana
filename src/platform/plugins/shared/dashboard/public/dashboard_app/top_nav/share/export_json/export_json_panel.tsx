@@ -31,7 +31,7 @@ import { compressToEncodedURIComponent } from 'lz-string';
 import { CodeEditor } from '@kbn/code-editor';
 import type { ExportJsonSanitizedState } from './types';
 import { buildCreateDashboardRequestForConsole } from './export_json_share_utils';
-import { coreServices, shareService } from '../services/kibana_services';
+import { coreServices, shareService } from '../../../../services/kibana_services';
 
 export type ExportJsonPanelProps = ExportJsonSanitizedState & { onRetry: () => void };
 

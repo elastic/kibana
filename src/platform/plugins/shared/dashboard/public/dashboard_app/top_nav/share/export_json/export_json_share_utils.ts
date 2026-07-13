@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_API_PATH } from '../../common/constants';
+import { DASHBOARD_API_PATH } from '../../../../../common/constants';
 
 const DEFAULT_FILENAME_BASE = 'export';
 
