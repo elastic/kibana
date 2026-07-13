@@ -81,9 +81,12 @@ spaceTest.describe('Discover ES|QL view - inspector', { tag: tags.deploymentAgno
     // The "Table" request (doc/stats data) resolves first; the "Visualization"
     // request (Lens' own data fetch for the chart) can complete slightly
     // later, so poll the already-open inspector rather than re-submitting
-    // the query.
-    expect(await hasInspectorRequest(page, 'Table')).toBe(true);
-    await expect.poll(() => hasInspectorRequest(page, 'Visualization')).toBe(true);
+    // the query. CI runners can be slower than a local dev machine, so both
+    // checks get extra headroom above the default assertion timeout.
+    await expect.poll(() => hasInspectorRequest(page, 'Table'), { timeout: 15_000 }).toBe(true);
+    await expect
+      .poll(() => hasInspectorRequest(page, 'Visualization'), { timeout: 15_000 })
+      .toBe(true);
   });
 
   spaceTest(
@@ -111,8 +114,10 @@ spaceTest.describe('Discover ES|QL view - inspector', { tag: tags.deploymentAgno
 
       await discover.openInspectorFromTabMenu();
       await switchToRequestsView(page);
-      expect(await hasInspectorRequest(page, 'Table')).toBe(true);
-      await expect.poll(() => hasInspectorRequest(page, 'Visualization')).toBe(true);
+      await expect.poll(() => hasInspectorRequest(page, 'Table'), { timeout: 15_000 }).toBe(true);
+      await expect
+        .poll(() => hasInspectorRequest(page, 'Visualization'), { timeout: 15_000 })
+        .toBe(true);
 
       // Exactly one "Table" and one "Visualization" entry - never duplicated
       // by the slow round-trip (a duplicate would render a second element

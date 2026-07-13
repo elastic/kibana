@@ -111,7 +111,10 @@ spaceTest.describe(
         await discover.selectDataViewMode({ discardModal: true });
         await discover.waitUntilTabIsLoaded();
 
-        expect(await discover.getHitCountInt()).toBe(14004);
+        // The hit count can take a moment to refresh after the mode switch
+        // (the FTR original retried this same assertion for 2s via
+        // `discover.assertHitCount`), so poll instead of a single read.
+        await expect.poll(() => discover.getHitCountInt()).toBe(14004);
 
         const availableDataViews = await discover.getAvailableDataViewNames();
         for (const item of ['All logs', 'kibana_sample_data_flights', 'logstash-*']) {
