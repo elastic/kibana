@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { createSignificantEventsTracedEsClient } from '../../../lib/significant_events/create_significant_events_traced_es_client';
 import {
   CRITICAL_RULE_INTERVAL,
   DEFAULT_RULE_INTERVAL,
@@ -58,14 +59,18 @@ const countAlertsRoute = createServerRoute({
       ruleUuid: z.string().max(256).optional(),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
+  handler: async ({ params, request, getScopedClients, server, getSpaceId, logger }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
     const { alertsReader } = await scopedClients.getSignificantEventsAlertingContext();
-    const count = await alertsReader.countAlerts(scopedClusterClient.asCurrentUser, {
+    const count = await alertsReader.countAlerts(esClient, {
       lookback: params.body.lookback,
       ruleUuid: params.body.ruleUuid,
       spaceId: await getSpaceId(request),
@@ -94,12 +99,16 @@ const changePointScanRoute = createServerRoute({
       bucketInterval: z.string().max(64),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server, getSpaceId, telemetry }) => {
+  handler: async ({ params, request, getScopedClients, server, getSpaceId, telemetry, logger }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
     const spaceId = await getSpaceId(request);
     const [kiClient, sigEventsContext] = await Promise.all([
       scopedClients.getKnowledgeIndicatorClient(),
@@ -112,7 +121,7 @@ const changePointScanRoute = createServerRoute({
       groupQueryLinksByRuleSchedule(queryLinks).map(({ schedule, queryLinks: groupedLinks }) => {
         const criticalCadence = schedule.interval_minutes === 1;
         return sigEventsContext.alertsReader.runChangePointScan(
-          scopedClusterClient.asCurrentUser,
+          esClient,
           {
             lookback: criticalCadence ? params.body.lookback : schedule.lookback,
             bucketInterval: criticalCadence ? params.body.bucketInterval : schedule.bucket_interval,
@@ -167,14 +176,18 @@ const ruleChangePointRoute = createServerRoute({
       bucketInterval: z.string().max(64),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
+  handler: async ({ params, request, getScopedClients, server, getSpaceId, logger }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
     const { alertsReader } = await scopedClients.getSignificantEventsAlertingContext();
-    const result = await alertsReader.runRuleChangePoint(scopedClusterClient.asCurrentUser, {
+    const result = await alertsReader.runRuleChangePoint(esClient, {
       ruleUuid: params.body.ruleUuid,
       lookback: params.body.lookback,
       bucketInterval: params.body.bucketInterval,
@@ -204,14 +217,18 @@ const ruleActivityRoute = createServerRoute({
       windowInterval: z.string().max(64),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
+  handler: async ({ params, request, getScopedClients, server, getSpaceId, logger }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
     const { alertsReader } = await scopedClients.getSignificantEventsAlertingContext();
-    const result = await alertsReader.runRuleActivity(scopedClusterClient.asCurrentUser, {
+    const result = await alertsReader.runRuleActivity(esClient, {
       ruleUuid: params.body.ruleUuid,
       lookback: params.body.lookback,
       windowInterval: params.body.windowInterval,
@@ -243,14 +260,18 @@ const ruleAlertWindowsRoute = createServerRoute({
       referenceLookbackLt: z.string().max(64),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server, getSpaceId }) => {
+  handler: async ({ params, request, getScopedClients, server, getSpaceId, logger }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
     const { alertsReader } = await scopedClients.getSignificantEventsAlertingContext();
-    const result = await alertsReader.runRuleAlertWindows(scopedClusterClient.asCurrentUser, {
+    const result = await alertsReader.runRuleAlertWindows(esClient, {
       ruleUuid: params.body.ruleUuid,
       currentLookback: params.body.currentLookback,
       referenceLookbackGte: params.body.referenceLookbackGte,
