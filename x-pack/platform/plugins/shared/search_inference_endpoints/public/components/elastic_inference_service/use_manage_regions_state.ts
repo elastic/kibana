@@ -97,9 +97,9 @@ export const useManageRegionsState = (onClose: () => void) => {
   // --- Common derived values ---
   const isLoading = isPolicyLoading || isEndpointsLoading;
   const isError = isPolicyError || isEndpointsError;
-  const isDirty =
-    syncedFromInitial &&
-    (isNewPolicy || (activeTab === 'regions' ? regionSelection.isDirty : geoSelection.isDirty));
+  const activeSelectionIsDirty =
+    activeTab === 'regions' ? regionSelection.isDirty : geoSelection.isDirty;
+  const isDirty = syncedFromInitial && (isNewPolicy || activeSelectionIsDirty);
 
   const handleTabChange = useCallback((tab: PolicyMode) => {
     setActiveTab(tab);
