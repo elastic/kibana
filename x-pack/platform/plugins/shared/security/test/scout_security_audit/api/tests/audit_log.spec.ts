@@ -13,7 +13,8 @@
  * the correct audit events in ECS format (the canonical format before OTel renames).
  *
  * OTel-specific field shape tests (renames, drops, defaults) live in the sibling
- * `test/scout/api/tests/audit_log.spec.ts` and require a real OTel pipeline (MKI).
+ * `test/scout_security_audit_otel/api/tests/audit_log.spec.ts`, using a fake local OTLP
+ * receiver instead of a real OpenTelemetry Collector + Elasticsearch pipeline.
  *
  * Run locally (serverless):
  *   node scripts/scout run-tests --arch serverless --domain security_complete \
@@ -29,7 +30,7 @@ import { readFileSync } from 'fs';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-// Must match the fileName in config_sets/security_audit/{stateful,serverless}/base.config.ts
+// Must match the fileName in config_sets/security_audit/shared.ts
 const AUDIT_LOG_PATH = '/tmp/kibana-scout-security-audit.log';
 
 const waitForAuditEvent = async (

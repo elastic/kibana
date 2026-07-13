@@ -127,8 +127,8 @@ export interface OtelAppenderConfig {
   fieldDrops?: string[];
   /**
    * Optional default attribute values written only when the key is not already present in the log
-   * record attributes. Applied after `fieldRenames`. Use to satisfy RFC requirements for fields that
-   * are absent from some event types (e.g. `event.type` on authentication events).
+   * record attributes. Applied after `fieldRenames` and `fieldDrops`. Use to fill in fields that are
+   * absent from some event types (e.g. `event.type` on authentication events).
    * Values may be a string or an array of strings.
    */
   fieldDefaults?: Record<string, string | string[]>;

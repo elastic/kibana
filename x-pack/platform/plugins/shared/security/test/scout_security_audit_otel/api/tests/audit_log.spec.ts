@@ -82,7 +82,7 @@ apiTest.describe(
             attrs['user.name'] === username
         );
 
-        // Core RFC fields
+        // Core audit fields
         expect(e['event.action']).toBe('user_login');
         expect(e['event.outcome']).toBe('success');
 

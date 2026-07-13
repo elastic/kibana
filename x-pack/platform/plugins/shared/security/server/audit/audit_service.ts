@@ -26,8 +26,8 @@ export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
 
 // OTel-only overrides injected into the appender config when the audit appender is of type 'otel'.
-// These translations/suppressions/defaults bring the output into alignment with the Serverless
-// Audit Log Field Reference RFC without touching the upstream AuditEvent type or any non-OTel path.
+// These translations/suppressions/defaults bring the output into alignment with Serverless
+// audit log field requirements without touching the upstream AuditEvent type or any non-OTel path.
 
 export const AUDIT_OTEL_FIELD_RENAMES: Record<string, string | string[]> = {
   'kibana.space_id': 'kibana.space.id',
@@ -40,10 +40,10 @@ export const AUDIT_OTEL_FIELD_RENAMES: Record<string, string | string[]> = {
   'http.request.headers.x-forwarded-for': 'http.request.header.x-forwarded-for',
 };
 
-// RFC excludes both fields on Serverless; stripped from log record and resource attributes.
+// Both fields are excluded on Serverless; stripped from log record and resource attributes.
 export const AUDIT_OTEL_FIELD_DROPS: string[] = ['service.version', 'host.name'];
 
-// RFC requires event.type on every audit log. Authentication events omit it; default to 'access'.
+// event.type is required on every audit log. Authentication events omit it; default to 'access'.
 // SO/Space events already carry a specific type (e.g. 'creation', 'deletion') so are unaffected.
 export const AUDIT_OTEL_FIELD_DEFAULTS: Record<string, string | string[]> = {
   'event.type': ['access'],
