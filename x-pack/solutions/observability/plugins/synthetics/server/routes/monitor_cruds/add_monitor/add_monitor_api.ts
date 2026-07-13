@@ -323,6 +323,10 @@ export class AddEditMonitorAPI {
       string,
       { preserve_namespace?: boolean }
     >;
+    // When the caller explicitly provides a namespace we honor it verbatim (even `default`).
+    // Only when it is omitted do we fall back to the Kibana space namespace. See issue #221335.
+    const isNamespaceProvided =
+      (request.body as CreateMonitorPayLoad | undefined)?.[ConfigKey.NAMESPACE] !== undefined;
     return {
       ...normalizedMonitor,
       [ConfigKey.MONITOR_QUERY_ID]:
@@ -330,15 +334,17 @@ export class AddEditMonitorAPI {
       [ConfigKey.CONFIG_ID]: newMonitorId,
       [ConfigKey.NAMESPACE]: preserveNamespace
         ? normalizedMonitor[ConfigKey.NAMESPACE]
-        : this.getMonitorNamespace(normalizedMonitor[ConfigKey.NAMESPACE]),
+        : this.getMonitorNamespace(normalizedMonitor[ConfigKey.NAMESPACE], isNamespaceProvided),
     };
   }
 
-  getMonitorNamespace(configuredNamespace: string) {
+  getMonitorNamespace(configuredNamespace: string, isNamespaceProvided = false) {
     const { spaceId } = this.routeContext;
     const kibanaNamespace = formatKibanaNamespace(spaceId);
     const namespace =
-      configuredNamespace === DEFAULT_NAMESPACE_STRING ? kibanaNamespace : configuredNamespace;
+      !isNamespaceProvided && configuredNamespace === DEFAULT_NAMESPACE_STRING
+        ? kibanaNamespace
+        : configuredNamespace;
     const { error } = isValidNamespace(namespace);
     if (error) {
       throw new Error(`Cannot save monitor. Monitor namespace is invalid: ${error}`);
