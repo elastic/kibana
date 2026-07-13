@@ -26,6 +26,7 @@ import {
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
 } from './core';
+import { applyDefaultDashboardTimeRange } from './time_range';
 
 const newDashboardMetadataErrorMessage =
   'New dashboards require a set_metadata operation with a non-empty title.';
@@ -71,6 +72,10 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
       grid: widget.grid,
     };
   }),
+  controls: (dashboardData.pinned_panels ?? []).map((control) => {
+    const c = control as { id?: string; type?: string; config?: { title?: string } };
+    return { id: c.id, type: c.type, title: c.config?.title };
+  }),
 });
 
 /**
@@ -97,11 +102,12 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 Use operations[] to:
 1. set metadata
-2. add panels (resolved panel configs or visualizations from natural language)
-3. edit existing Lens or markdown panel content
+2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
+3. edit existing Lens, Vega, or markdown panel content
 4. update panel layouts without changing content
 5. add / remove sections, including inline section panels during add_section
-6. remove panels`,
+6. remove panels
+7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
@@ -130,16 +136,23 @@ Use operations[] to:
           }),
         });
 
-        const description = `Dashboard: ${dashboardData.title}`;
+        // Data-aware default time range computation
+        const finalDashboardData = await applyDefaultDashboardTimeRange({
+          dashboardData,
+          esClient,
+          logger,
+        });
+
+        const description = `Dashboard: ${finalDashboardData.title}`;
         const attachment = isNewDashboard
           ? await attachments.add({
               id: dashboardAttachmentId,
               type: DASHBOARD_ATTACHMENT_TYPE,
               description,
-              data: dashboardData,
+              data: finalDashboardData,
             })
           : await attachments.update(dashboardAttachmentId, {
-              data: dashboardData,
+              data: finalDashboardData,
               description,
             });
 
@@ -157,7 +170,7 @@ Use operations[] to:
               data: {
                 attachment_id: attachment.id,
                 version: attachment.current_version ?? 1,
-                dashboard: summarizeDashboard(dashboardData),
+                dashboard: summarizeDashboard(finalDashboardData),
                 failures: failures.length > 0 ? failures : undefined,
               },
             },

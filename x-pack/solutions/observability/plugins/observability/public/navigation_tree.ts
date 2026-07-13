@@ -13,6 +13,7 @@ import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import type { Location } from 'history';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
@@ -77,9 +78,7 @@ function createNavTree({
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
-      {
-        link: 'workflows',
-      },
+      ...getWorkflowsNavPanel(coreStart),
       {
         link: 'observability-overview:alerts',
         icon: 'warning',
@@ -514,6 +513,9 @@ function createNavTree({
               },
               {
                 link: 'management:rollup_jobs',
+              },
+              {
+                link: 'management:data_federation',
               },
               {
                 link: 'management:data_quality',

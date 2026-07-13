@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ServiceAnomalyScoreResponse } from '@kbn/apm-api-shared';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { Environment } from '../../../../../common/environment_rt';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
@@ -20,7 +21,7 @@ interface ServiceBadgesDataParams {
 
 interface ServiceBadgesData {
   alertsCount?: number;
-  anomalyScore?: number;
+  anomalyData?: ServiceAnomalyScoreResponse;
 }
 
 export function useServiceBadgesData({
@@ -62,8 +63,8 @@ export function useServiceBadgesData({
           query: { start, end, environment },
         },
       })
-        .then((res) => ({ anomalyScore: res.anomalyScore }))
-        .catch((): { anomalyScore?: number } => ({}));
+        .then((res) => res)
+        .catch((): Partial<ServiceAnomalyScoreResponse> => ({}));
     },
     [serviceName, start, end, environment, canReadMlJobs],
     { showToastOnError: false }
@@ -74,11 +75,11 @@ export function useServiceBadgesData({
   const canShowAlerts = isAlertingAvailable && canReadAlerts && alertsResolved && alertsCount > 0;
 
   const anomalyResolved = anomalyStatus === FETCH_STATUS.SUCCESS;
-  const anomalyScore = anomalyResolved ? anomalyData?.anomalyScore : undefined;
-  const canShowAnomaly = canReadMlJobs && anomalyResolved && anomalyScore !== undefined;
+  const canShowAnomaly =
+    canReadMlJobs && anomalyResolved && anomalyData?.anomalyScore !== undefined;
 
   return {
     alertsCount: canShowAlerts ? alertsCount : undefined,
-    anomalyScore: canShowAnomaly ? anomalyScore : undefined,
+    anomalyData: canShowAnomaly ? anomalyData : undefined,
   };
 }

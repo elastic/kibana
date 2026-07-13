@@ -8,12 +8,14 @@
  */
 
 import React, { type MouseEvent, type ReactNode } from 'react';
+import { css } from '@emotion/react';
 import { isArray, isFunction, upperFirst } from 'lodash';
 import {
   type EuiButtonColor,
   type EuiThemeComputed,
   type EuiContextMenuPanelDescriptor,
   type EuiContextMenuPanelItemDescriptor,
+  type UseEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -213,6 +215,8 @@ export const mapAppMenuItemToPanelItem = (
 
   const itemTestSubj = item.testId ?? getAppMenuItemTestSubj(item.id);
 
+  const showAsSelected = Boolean(item.isSelected);
+
   const itemName: ReactNode = item.labelBadgeText ? (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>{upperFirst(item.label)}</EuiFlexItem>
@@ -243,6 +247,11 @@ export const mapAppMenuItemToPanelItem = (
     },
     ...(childPanelId !== undefined && { panel: childPanelId }),
     ...(item?.isDestructive && { color: 'danger' }),
+    ...(showAsSelected && {
+      css: ({ euiTheme }: UseEuiTheme) => css`
+        background-color: ${getIsSelectedColor({ color: 'text', euiTheme, isFilled: false })};
+      `,
+    }),
   };
 };
 

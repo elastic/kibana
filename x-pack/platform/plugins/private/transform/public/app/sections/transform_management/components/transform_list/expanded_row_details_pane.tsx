@@ -143,6 +143,19 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
         title: 'source_index',
         description: <SourceIndexDescription index={item.config.source.index} />,
       },
+      ...(isDefined(item.config.source.project_routing)
+        ? [
+            {
+              title: i18n.translate(
+                'xpack.transform.transformList.transformDetails.projectRoutingLabel',
+                {
+                  defaultMessage: 'Project routing',
+                }
+              ),
+              description: item.config.source.project_routing,
+            },
+          ]
+        : []),
       {
         title: 'destination_index',
         description: item.config.dest.index,

@@ -40,12 +40,19 @@ export type SkillsDirectoryStructure = Directory<{
       alerts: FileDirectory<{
         rules: FileDirectory;
       }>;
+      // The `attack-discovery` skill directory is registered by the
+      // discoveries plugin's attack-discovery-generator skill. Type-only
+      // addition is FF-off safe (no runtime impact) and required for the
+      // discoveries plugin to type-check.
+      'attack-discovery': FileDirectory<{}>;
       compliance: FileDirectory<{}>;
       rules: FileDirectory;
       entities: FileDirectory<{}>;
+      watchlists: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
       ml: FileDirectory<{}>;
       siem_readiness: FileDirectory<{}>;
+      entity_analytics_leads: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;

@@ -63,6 +63,7 @@ export const EditMode: Story = {
       throttleStrategy: 'time_interval',
       throttleInterval: '5m',
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
+      inlineActions: [],
     },
   },
 };
@@ -79,6 +80,7 @@ export const PerEpisodeWithInterval: Story = {
       throttleStrategy: 'per_status_interval',
       throttleInterval: '1h',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
+      inlineActions: [],
     },
   },
 };
@@ -95,6 +97,7 @@ export const DigestMode: Story = {
       throttleStrategy: 'time_interval',
       throttleInterval: '15m',
       destinations: [{ type: 'workflow', id: 'workflow-3' }],
+      inlineActions: [],
     },
   },
 };

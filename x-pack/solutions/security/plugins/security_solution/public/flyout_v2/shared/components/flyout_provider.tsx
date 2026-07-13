@@ -107,9 +107,7 @@ export const flyoutProviders = ({
                     <CaseProvider>
                       <EntityStoreEuidApiProvider>
                         <MlCapabilitiesProvider>
-                          <AssistantProvider>
-                            <TimeRangeSync>{flyoutContent}</TimeRangeSync>
-                          </AssistantProvider>
+                          <TimeRangeSync>{flyoutContent}</TimeRangeSync>
                         </MlCapabilitiesProvider>
                       </EntityStoreEuidApiProvider>
                     </CaseProvider>

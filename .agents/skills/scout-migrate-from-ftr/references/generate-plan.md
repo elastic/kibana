@@ -105,7 +105,7 @@ The execution step picks the specific Scout auth method (`loginAsViewer`, `login
 
 ### 8. Server configuration and feature flags
 
-**Prefer Scout's default servers config.** It mirrors the Elastic Cloud (MKI/ECH) setup and is batched with other default-config suites in CI, so tests that pass locally on it are likely to pass on Cloud. A custom server config set runs only in local pipelines (no Cloud) and adds CI cost — treat it as a last resort, used only when a setting must be present at Kibana boot (e.g. registering HTTP routes at plugin `setup`). See [Can your tests reuse Scout's default servers config?](../../../../docs/extend/scout/migrate-tests.md#dont-migrate-blindly).
+**Prefer Scout's default servers config.** It mirrors the Elastic Cloud (MKI/ECH) setup and is batched with other default-config suites in CI, so tests that pass locally on it are likely to pass on Cloud. A custom server config set runs only in local pipelines (no Cloud) and adds CI cost — treat it as a last resort, used only when a setting must be present at Kibana boot (e.g. registering HTTP routes at plugin `setup`). See [Can your tests reuse Scout's default servers config?](../../../../docs/extend/testing/migrate-tests.md#dont-migrate-blindly).
 
 1. **List every server arg** from `kbnTestServer.serverArgs` and `esTestCluster.serverArgs` across all relevant configs (including inherited base configs)
 2. **Classify each arg**:
@@ -116,7 +116,7 @@ The execution step picks the specific Scout auth method (`loginAsViewer`, `login
 
 ### 9. Deployment targets and Cloud portability
 
-Scout is deployment-agnostic — the goal is "write once, run locally and on Elastic Cloud." Reference [Design tests with a cloud-first mindset](../../../../docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset) for the underlying principles.
+Scout is deployment-agnostic — the goal is "write once, run locally and on Elastic Cloud." Reference [Design tests with a cloud-first mindset](../../../../docs/extend/testing/scout-best-practices.md#design-tests-with-a-cloud-first-mindset) for the underlying principles.
 
 For each test group, answer all four:
 
@@ -130,7 +130,7 @@ For each test group, answer all four:
    - Node topology assumptions (single-node, specific port)
    - Cluster settings unavailable on Elastic Cloud
    - Custom server args / feature flags set in FTR configs (these need to become runtime settings or move to a Scout server config set)
-4. **Custom servers config or default?** Default to Scout's default test servers config (see step 8 for why); only call for a [custom servers config](../../../../docs/extend/scout/feature-flags.md#scout-feature-flags-custom-servers) when a server arg must apply at Kibana boot. If custom, list which args force the choice and whether a matching config set already exists.
+4. **Custom servers config or default?** Default to Scout's default test servers config (see step 8 for why); only call for a [custom servers config](../../../../docs/extend/testing/feature-flags.md#scout-feature-flags-custom-servers) when a server arg must apply at Kibana boot. If custom, list which args force the choice and whether a matching config set already exists.
 
 ### 10. FTR test smells
 
@@ -184,4 +184,4 @@ Output the plan to `migration-plan-<source-dir-slug>-<YYYY-MM-DD>.md` (see **Out
 
 - Plan output structure (every section, table, and bullet format): [`plan-template.md`](plan-template.md)
 - Test-type downgrade catalog (UI vs API vs RTL/Jest): [`pick-correct-test-type.md`](pick-correct-test-type.md)
-- Cloud-first mindset (rationale for step 9): [`docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset`](../../../../docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset)
+- Cloud-first mindset (rationale for step 9): [`docs/extend/testing/scout-best-practices.md#design-tests-with-a-cloud-first-mindset`](../../../../docs/extend/testing/scout-best-practices.md#design-tests-with-a-cloud-first-mindset)

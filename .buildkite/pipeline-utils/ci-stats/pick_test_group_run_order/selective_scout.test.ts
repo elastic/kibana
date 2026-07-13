@@ -30,13 +30,40 @@ describe('isScoutTestsOnlyDiff', () => {
     ).toBe(true);
   });
 
-  it('returns true for shared test code (fixtures, page objects) inside a scope', () => {
+  it('returns true for co-located shared test code (helpers) inside a scope', () => {
     expect(
       isScoutTestsOnlyDiff([
-        'src/platform/plugins/shared/discover/test/scout/ui/fixtures/page_objects/landing.ts',
         'src/platform/plugins/shared/discover/test/scout/ui/helpers/build_query.ts',
       ])
     ).toBe(true);
+  });
+
+  it('returns false for fixtures / page objects (cross-plugin importable surface)', () => {
+    expect(
+      isScoutTestsOnlyDiff([
+        'src/platform/plugins/shared/discover/test/scout/ui/fixtures/page_objects/landing.ts',
+      ])
+    ).toBe(false);
+    // namespaced fixtures, both placements
+    expect(
+      isScoutTestsOnlyDiff([
+        'src/platform/plugins/shared/discover/test/scout/ui/fixtures/traces_experience/page_objects/apm.ts',
+      ])
+    ).toBe(false);
+    expect(
+      isScoutTestsOnlyDiff([
+        'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/fixtures/data.ts',
+      ])
+    ).toBe(false);
+  });
+
+  it('returns false when a fixtures change is mixed with in-scope specs', () => {
+    expect(
+      isScoutTestsOnlyDiff([
+        'src/platform/plugins/shared/discover/test/scout/ui/tests/foo.spec.ts',
+        'src/platform/plugins/shared/discover/test/scout/ui/fixtures/page_objects/landing.ts',
+      ])
+    ).toBe(false);
   });
 
   it('returns true for custom Scout server directories (scout_*)', () => {
@@ -67,7 +94,9 @@ describe('isScoutTestsOnlyDiff', () => {
   });
 
   it('returns false when the diff is noise-only (no Scout signal)', () => {
-    expect(isScoutTestsOnlyDiff(['README.md', 'docs/extend/scout/best-practices.md'])).toBe(false);
+    expect(isScoutTestsOnlyDiff(['README.md', 'docs/extend/testing/scout-best-practices.md'])).toBe(
+      false
+    );
   });
 
   it('returns false when any non-Scout, non-noise file is present', () => {

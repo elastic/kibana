@@ -41,6 +41,7 @@ export function useServiceFlyoutTransactions({
   transactionType,
   latencyAggregationType,
   searchQuery,
+  refreshToken,
 }: {
   http: HttpStart;
   notifications: NotificationsStart;
@@ -51,6 +52,7 @@ export function useServiceFlyoutTransactions({
   transactionType?: string;
   latencyAggregationType?: LatencyAggregationType;
   searchQuery: string;
+  refreshToken?: number;
 }) {
   const enabled = !!transactionType && !!latencyAggregationType;
 
@@ -90,6 +92,11 @@ export function useServiceFlyoutTransactions({
   }, [dataSourceError, notifications.toasts]);
 
   const [maxCountExceeded, setMaxCountExceeded] = useState(false);
+
+  useEffect(() => {
+    setMaxCountExceeded(false);
+  }, [serviceName, environment, start, end, transactionType]);
+
   const serverSearchQuery = maxCountExceeded ? searchQuery : '';
 
   const { value: response, loading: isLoading } = useAbortableAsync(
@@ -115,7 +122,7 @@ export function useServiceFlyoutTransactions({
           },
         }
       );
-      setMaxCountExceeded(result.maxCountExceeded);
+      setMaxCountExceeded((prev) => prev || result.maxCountExceeded);
       return result;
     },
     [
@@ -129,6 +136,7 @@ export function useServiceFlyoutTransactions({
       serverSearchQuery,
       enabled,
       dataSource,
+      refreshToken,
     ]
   );
 
@@ -152,7 +160,7 @@ export function useServiceFlyoutTransactions({
   return {
     items,
     isLoading: isLoading || isDataSourceLoading,
-    maxCountExceeded: response?.maxCountExceeded ?? false,
+    maxCountExceeded,
     hasActiveAlerts: response?.hasActiveAlerts ?? false,
     error: dataSourceError,
   };
