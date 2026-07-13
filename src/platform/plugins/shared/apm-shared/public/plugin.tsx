@@ -14,15 +14,10 @@ import type { FocusedTraceWaterfallProps, FullTraceWaterfallProps } from '@kbn/a
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { TraceWaterfallProps } from '@kbn/apm-ui-shared';
 import type { ApmSharedPluginSetup, ApmSharedPluginStart, ApmSharedPluginStartDeps } from './types';
-
-/** Use with `feature_flags.overrides` in kibana.yml to toggle CPS integration for APM. */
-const OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG = 'observability.apm.cpsEnabled' as const;
-
-/**
- * Fallback when the flag is unset and no override exists (same default as the removed
- * `xpack.apm.featureFlags.apmCPSEnabled` setting).
- */
-const OBSERVABILITY_APM_CPS_ENABLED_DEFAULT = true;
+import {
+  OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+} from '.';
 
 const LazyFocusedTraceWaterfallWithFetching = dynamic(() =>
   import('@kbn/apm-ui-shared').then((mod) => ({
