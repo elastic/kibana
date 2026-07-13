@@ -2759,24 +2759,6 @@
     tslib "^2.4.0"
     typescript "5"
 
-"@frsource/base64@1.0.17":
-  version "1.0.17"
-  resolved "https://registry.yarnpkg.com/@frsource/base64/-/base64-1.0.17.tgz#b5a37e2ffab4f7fc9ef2e9f660dd3f38ccb05ff4"
-  integrity sha512-QyMv52jCRIMUIlDM6ysSVPc6Cp3KCTu6/YeLUyJpTEhleXssYB3CT5PqmQijGGwu4819qvan8Eu4PWJRAW5Akg==
-
-"@frsource/cypress-plugin-visual-regression-diff@3.3.10":
-  version "3.3.10"
-  resolved "https://registry.yarnpkg.com/@frsource/cypress-plugin-visual-regression-diff/-/cypress-plugin-visual-regression-diff-3.3.10.tgz#f8c42d457409c4ac3868814085894db705026e97"
-  integrity sha512-ZjfOpdmXUgNRfLpsbrYiDujUzNEgLx+3dMtvMJHO3d+Yri0wniMB3mukf5+58QUMXuw8mr1cLoBkeWr1UxCOpA==
-  dependencies:
-    "@frsource/base64" "1.0.17"
-    glob "8.1.0"
-    meta-png "1.0.6"
-    move-file "2.1.0"
-    pixelmatch "5.3.0"
-    pngjs "7.0.0"
-    sharp "0.32.1"
-
 "@google/generative-ai@0.24.1":
   version "0.24.1"
   resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.24.1.tgz#634a3c06f8ea7a6125c1b0d6c1e66bb11afb52c9"
@@ -4318,10 +4300,6 @@
   uid ""
 
 "@kbn/apm-data-view@link:src/platform/packages/shared/kbn-apm-data-view":
-  version "0.0.0"
-  uid ""
-
-"@kbn/apm-ftr-e2e@link:x-pack/solutions/observability/plugins/apm/ftr_e2e":
   version "0.0.0"
   uid ""
 
@@ -21522,17 +21500,6 @@ glob@11.1.0:
     package-json-from-dist "^1.0.0"
     path-scurry "^2.0.0"
 
-glob@8.1.0:
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/glob/-/glob-8.1.0.tgz#d388f656593ef708ee3e34640fdfb99a9fd1c33e"
-  integrity sha512-r8hpEjiQEYlF2QU0df3dS+nxxSIreXQS1qRhMJM0Q5NDdR386C7jb7Hwwod8Fgiuex+k0GFjgft18yvxm5XoCQ==
-  dependencies:
-    fs.realpath "^1.0.0"
-    inflight "^1.0.4"
-    inherits "2"
-    minimatch "^5.0.1"
-    once "^1.3.0"
-
 glob@^10.0.0, glob@^10.4.5:
   version "10.5.0"
   resolved "https://registry.yarnpkg.com/glob/-/glob-10.5.0.tgz#8ec0355919cd3338c28428a23d4f24ecc5fe738c"
@@ -26313,13 +26280,6 @@ moo@^0.4.3:
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/moo/-/moo-0.4.3.tgz#3f847a26f31cf625a956a87f2b10fbc013bfd10e"
   integrity sha512-gFD2xGCl8YFgGHsqJ9NKRVdwlioeW3mI1iqfLNYQOv0+6JRwG58Zk9DIGQgyIaffSYaO1xsKnMaYzzNr1KyIAw==
-
-move-file@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/move-file/-/move-file-2.1.0.tgz#3bec9d34fbe4832df6865f112cda4492b56e8507"
-  integrity sha512-i9qLW6gqboJ5Ht8bauZi7KlTnQ3QFpBCvMvFfEcHADKgHGeJ9BZMO7SFCTwHPV9Qa0du9DYY1Yx3oqlGt30nXA==
-  dependencies:
-    path-exists "^4.0.0"
 
 mri@1.1.4:
   version "1.1.4"
