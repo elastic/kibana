@@ -15,8 +15,10 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
@@ -43,6 +45,7 @@ export const EsqlPreviewSection = ({
   onPreview,
   initialIsOpen,
 }: EsqlPreviewSectionProps) => {
+  const { euiTheme } = useEuiTheme();
   const [hasRunPreview, setHasRunPreview] = useState(false);
   useEffect(() => {
     if (previewData) setHasRunPreview(true);
@@ -75,6 +78,14 @@ export const EsqlPreviewSection = ({
     <EuiAccordion
       id="editAiPanelEsqlSection"
       borders="horizontal"
+      css={css({
+        '.euiAccordion__triggerWrapper': {
+          paddingInline: euiTheme.size.base,
+        },
+        '.euiAccordion__children': {
+          paddingTop: 0,
+        },
+      })}
       buttonProps={{ paddingSize: 'm' }}
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
