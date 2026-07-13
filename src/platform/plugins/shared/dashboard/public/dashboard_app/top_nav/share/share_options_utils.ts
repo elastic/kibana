@@ -153,7 +153,7 @@ export function buildShareableUrlLocatorParams(locatorParams: DashboardLocatorPa
 
 export const mapExportIntegrationToMetaData = (intgrationId: string) => {
   switch (intgrationId) {
-    case 'exportJson':
+    case EXPORT_JSON_SHARE_ID:
       return {
         label: topNavStrings.export.jsonLabel,
         testId: 'exportMenuItem-JSON',

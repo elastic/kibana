@@ -20,6 +20,7 @@ import { coreServices, shareService } from '../../services/kibana_services';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
 import { BehaviorSubject } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
+import { EXPORT_JSON_SHARE_ID } from './share/export_json/setup_export_json';
 
 describe('useDashboardMenuItems', () => {
   beforeEach(() => {
@@ -138,7 +139,7 @@ describe('useDashboardMenuItems', () => {
           if (groupId === 'exportDerivatives') {
             return [
               {
-                id: 'exportJson',
+                id: EXPORT_JSON_SHARE_ID,
                 shareType: 'integration',
                 groupId: 'exportDerivatives',
                 config: async () => ({}),
@@ -171,7 +172,7 @@ describe('useDashboardMenuItems', () => {
 
       const viewModeExportItemIds = viewModeExportMenuItem.items!.map((item) => item.id);
       expect(viewModeExportItemIds).toEqual(
-        expect.arrayContaining(['exportJson', 'pdfReports', 'imageReports'])
+        expect.arrayContaining([EXPORT_JSON_SHARE_ID, 'pdfReports', 'imageReports'])
       );
 
       const editModeExportMenuItem = result.current.editModeTopNavConfig.items!.find(
@@ -180,7 +181,7 @@ describe('useDashboardMenuItems', () => {
 
       const editModeExportItemIds = editModeExportMenuItem.items!.map((item) => item.id);
       expect(editModeExportItemIds).toEqual(
-        expect.arrayContaining(['exportJson', 'pdfReports', 'imageReports'])
+        expect.arrayContaining([EXPORT_JSON_SHARE_ID, 'pdfReports', 'imageReports'])
       );
     });
   });

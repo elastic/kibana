@@ -9,9 +9,11 @@
 
 import type { ExportShareDerivatives, SharePluginSetup } from '@kbn/share-plugin/public';
 
+export const EXPORT_JSON_SHARE_ID = 'exportJson';
+
 export function setupExportJson(share: SharePluginSetup) {
   share.registerShareIntegration<ExportShareDerivatives>('dashboard', {
-    id: 'exportJson',
+    id: EXPORT_JSON_SHARE_ID,
     groupId: 'exportDerivatives',
     getShareIntegrationConfig: async () => {
       const { exportJsonConfig } = await import('../../../../dashboard_renderer/dashboard_module');
