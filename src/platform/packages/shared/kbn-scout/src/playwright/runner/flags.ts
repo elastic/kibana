@@ -13,18 +13,15 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import path from 'path';
 import type { ScoutTestTarget } from '@kbn/scout-info';
 import { validateAndProcessTestFiles } from '../../common/utils';
+import type { StartServerOptions } from '../../servers';
 import { SERVER_FLAG_OPTIONS, parseServerFlags } from '../../servers';
 import { validatePlaywrightConfig } from './config_validator';
 
-export interface RunTestsOptions {
-  testTarget: ScoutTestTarget;
+export interface RunTestsOptions extends StartServerOptions {
   configPath: string;
   headed: boolean;
   repeatEach: number | undefined;
   testFiles?: string[];
-  esFrom: 'serverless' | 'source' | 'snapshot' | undefined;
-  installDir: string | undefined;
-  logsDir: string | undefined;
 }
 
 export const TEST_FLAG_OPTIONS: FlagOptions = {

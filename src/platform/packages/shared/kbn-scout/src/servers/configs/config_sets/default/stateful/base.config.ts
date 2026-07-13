@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mkdirSync, writeFileSync } from 'fs';
 import { join, resolve } from 'path';
 import { format as formatUrl } from 'url';
 
@@ -68,31 +67,6 @@ const servers = {
 
 const kbnUrl = `${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`;
 
-const CLUSTER_STATE_ENCRYPTION_PASSWORD_ID = 'data_fed_test';
-const scoutSecureSettingsDir = resolve(REPO_ROOT, '.scout', 'secure_settings');
-mkdirSync(scoutSecureSettingsDir, { recursive: true });
-
-const clusterStateEncryptionActivePasswordIdFile = resolve(
-  scoutSecureSettingsDir,
-  'cluster_state_encryption_active_password_id'
-);
-const clusterStateEncryptionPasswordFile = resolve(
-  scoutSecureSettingsDir,
-  `cluster_state_encryption_password_${CLUSTER_STATE_ENCRYPTION_PASSWORD_ID}`
-);
-
-// These are test-only values used to enable ES cluster state encryption for
-// features (like data federation sources) that store encrypted values in
-// the cluster state. The config is loaded eagerly, so write files here.
-writeFileSync(clusterStateEncryptionActivePasswordIdFile, CLUSTER_STATE_ENCRYPTION_PASSWORD_ID, {
-  encoding: 'utf8',
-});
-writeFileSync(
-  clusterStateEncryptionPasswordFile,
-  'kibana-scout-cluster-state-encryption-password',
-  { encoding: 'utf8' }
-);
-
 export const defaultConfig: ScoutServerConfig = {
   servers,
   dockerServers: defineDockerServersConfig({
@@ -113,10 +87,6 @@ export const defaultConfig: ScoutServerConfig = {
     files: [
       // Passing the roles that are equivalent to the ones we have in serverless
       resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml'),
-    ],
-    secureFiles: [
-      `cluster.state.encryption.active_password_id=${clusterStateEncryptionActivePasswordIdFile}`,
-      `cluster.state.encryption.password.${CLUSTER_STATE_ENCRYPTION_PASSWORD_ID}=${clusterStateEncryptionPasswordFile}`,
     ],
     serverArgs: [
       'path.repo=/tmp/',
