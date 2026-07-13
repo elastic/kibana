@@ -17,7 +17,7 @@ import {
 import {
   STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
-} from '@kbn/streams-plugin/common';
+} from '@kbn/significant-events-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';

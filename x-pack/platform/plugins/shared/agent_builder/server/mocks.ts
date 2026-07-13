@@ -8,7 +8,7 @@
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from './types';
 import { createMockedExecutableTool, createToolRegistryMock } from './test_utils/tools';
 import { createMockedAgentRegistry } from './test_utils/agents';
-import { createFormatContextMock } from './test_utils/attachments';
+import { createFormatContextMock, createResolveContextMock } from './test_utils/attachments';
 import { createToolHandlerContextMock } from './test_utils/runner';
 import { createModelProviderMock } from './test_utils/model_provider';
 
@@ -26,6 +26,9 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     },
     attachments: {
       registerType: jest.fn(),
+    },
+    renderers: {
+      register: jest.fn(),
     },
     skills: {
       register: jest.fn(),
@@ -73,10 +76,6 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
         list: jest.fn(),
       }),
     },
-    dashboard: {
-      syncOverview: jest.fn(),
-      syncOverviewForSpace: jest.fn(),
-    },
   };
 };
 
@@ -86,6 +85,7 @@ export const agentBuilderMocks = {
   createTool: createMockedExecutableTool,
   attachments: {
     createFormatContextMock,
+    createResolveContextMock,
   },
   tools: {
     createHandlerContext: createToolHandlerContextMock,

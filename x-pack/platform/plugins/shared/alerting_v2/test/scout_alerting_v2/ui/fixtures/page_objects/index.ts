@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PageObjects, ScoutPage } from '@kbn/scout';
+import type { KibanaUrl, PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import { AlertingNavigation } from './alerting_navigation';
 import { ComposeDiscoverPage } from './compose_discover_page';
@@ -38,7 +38,8 @@ export type AlertingPageObjects = PageObjects & {
 
 export const extendPageObjects = (
   pageObjects: PageObjects,
-  page: ScoutPage
+  page: ScoutPage,
+  kbnUrl: KibanaUrl
 ): AlertingPageObjects => {
   const discoverAppMenu = createLazyPageObject(DiscoverAppMenu, page);
 
@@ -47,7 +48,7 @@ export const extendPageObjects = (
     alertingNavigation: createLazyPageObject(AlertingNavigation, page),
     composeDiscover: createLazyPageObject(ComposeDiscoverPage, page),
     discoverAppMenu,
-    executionHistory: createLazyPageObject(ExecutionHistoryPage, page),
+    executionHistory: createLazyPageObject(ExecutionHistoryPage, page, kbnUrl),
     ruleBuilder: createLazyPageObject(RuleBuilderPage, page),
     ruleForm: createLazyPageObject(RuleFormPage, page, discoverAppMenu),
     rulesList: createLazyPageObject(RulesListPage, page),

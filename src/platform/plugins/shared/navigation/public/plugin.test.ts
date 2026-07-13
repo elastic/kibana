@@ -182,10 +182,10 @@ describe('Navigation Plugin', () => {
       expect(coreStart.chrome.setChromeStyle).not.toHaveBeenCalled();
     });
 
-    it('should set the Chrome style to "project" when space solution is a known solution', async () => {
+    it('should set the Chrome style to "project" for every known solution type', async () => {
       const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
 
-      for (const solution of ['es', 'oblt', 'security']) {
+      for (const solution of ['oblt', 'es', 'security']) {
         spaces.getActiveSpace$ = jest
           .fn()
           .mockReturnValue(of({ solution } as Pick<Space, 'solution'>));

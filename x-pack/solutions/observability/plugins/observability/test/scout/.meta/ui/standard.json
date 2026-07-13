@@ -1,5 +1,5 @@
 {
-  "sha1": "ff2a67d24d04b1557255fb3827545d78117676b5",
+  "sha1": "c29015ecd4d130100b55b80a8b7d52d076b5e2c2",
   "tests": [
     {
       "id": "7f09fed36a7e0d8-c1ae45431291e6d",
@@ -287,11 +287,29 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/mute_unmute.spec.ts",
-        "line": 123,
+        "line": 150,
+        "column": 9
+      }
+    },
+    {
+      "id": "0bc216e8d6c9fd0-8450021caccf973",
+      "title": "Observability alerts - bulk mute / unmute Observability Alerts only user sees the muted indicator without mute privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/mute_unmute.spec.ts",
+        "line": 229,
         "column": 9
       }
     },
@@ -340,42 +358,42 @@
     {
       "id": "3d30f1f27e8f75f-13c366bfc2c5cd4",
       "title": "Observability alerts - add to case (all privileges) renders the case options in the row actions menu",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 9
       }
     },
     {
       "id": "3d30f1f27e8f75f-92c49a4a4bc87de",
       "title": "Observability alerts - add to case (all privileges) opens the create-case flyout from \"Add to new case\"",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
-        "line": 42,
+        "line": 43,
         "column": 9
       }
     },
     {
       "id": "3d30f1f27e8f75f-329e97db5764fcf",
       "title": "Observability alerts - add to case (all privileges) opens the existing-cases modal from \"Add to existing case\"",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 9
       }
     },

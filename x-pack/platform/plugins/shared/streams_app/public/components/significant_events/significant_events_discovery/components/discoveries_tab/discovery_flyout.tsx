@@ -24,7 +24,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Discovery } from '@kbn/streams-schema';
+import type { Discovery } from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { CHANGE_TYPE_LABELS, DISCOVERY_KIND_LABELS } from '../shared/translations';
 import { DISCOVERY_KIND_COLORS } from '../shared/constants';
@@ -95,7 +95,8 @@ export const DiscoveryFlyout = ({
         title: i18n.translate('xpack.streams.discoveryFlyout.confidence', {
           defaultMessage: 'Confidence',
         }),
-        description: discovery.confidence != null ? `${discovery.confidence}%` : '-',
+        description:
+          discovery.confidence != null ? `${Math.round(discovery.confidence * 100)}%` : '-',
       },
       {
         title: i18n.translate('xpack.streams.discoveryFlyout.streams', {

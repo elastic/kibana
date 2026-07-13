@@ -1,5 +1,6 @@
 .artifacts
 docs/**/.artifacts
+/.superset
 .aws-config.json
 .bk.yaml
 .signing-config.json
@@ -38,6 +39,7 @@ __tmp__
 .bug-fixer-session/
 .playwright-mcp/
 .exploratory-session/
+.codex/
 config_sets/bug_fixer/
 
 # Ignore example plugin builds
@@ -208,3 +210,9 @@ src/platform/plugins/shared/console/packaging/react/translations
 # Agent skill working output (team-auto-tests-stats markdown only — never commit)
 .cursor/tmp/
 .agents/tmp/
+
+# Parallel step internal working notes (kept locally, not committed)
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_gaps.md
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_red_flags.md
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_p1_scope_brief.md
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_nested_flow_control_tradeoff.md

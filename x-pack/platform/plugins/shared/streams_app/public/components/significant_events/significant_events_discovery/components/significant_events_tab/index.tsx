@@ -10,6 +10,7 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import {
   EuiBasicTable,
   EuiBadge,
+  EuiButtonIcon,
   EuiCallOut,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -21,8 +22,8 @@ import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import useInterval from 'react-use/lib/useInterval';
 import { i18n } from '@kbn/i18n';
-import { SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/streams-schema';
-import type { SignificantEvent, SignificantEventStatus } from '@kbn/streams-schema';
+import { SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/significant-events-schema';
+import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import { useFetchSignificantEvents } from '../../../../../hooks/significant_events/use_fetch_significant_events';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
@@ -36,6 +37,65 @@ import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
+import { useTriggerInvestigation } from '../../../../../hooks/significant_events/use_trigger_investigation';
+import { useUpdateSignificantEvent } from '../../../../../hooks/significant_events/use_update_significant_event';
+
+const RUN_ARIA_LABEL = i18n.translate(
+  'xpack.streams.sigEventsTab.runInvestigationButton.ariaLabel',
+  {
+    defaultMessage: 'Run investigation for this event',
+  }
+);
+
+const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
+  'xpack.streams.sigEventsTab.closeEventButton.ariaLabel',
+  {
+    defaultMessage: 'Close this significant event',
+  }
+);
+
+const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
+  const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
+  return (
+    <EuiButtonIcon
+      iconType="inspect"
+      aria-label={RUN_ARIA_LABEL}
+      onClick={(e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!isTriggering) triggerInvestigation(event.event_id);
+      }}
+      isDisabled={isTriggering}
+      isLoading={isTriggering}
+      size="s"
+      color="primary"
+      data-test-subj="sigEventRunInvestigationIconButton"
+    />
+  );
+};
+
+const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
+  const { updateEventStatus, isUpdating } = useUpdateSignificantEvent();
+
+  if (event.status === 'closed') {
+    return null;
+  }
+
+  return (
+    <EuiButtonIcon
+      iconType="cross"
+      aria-label={CLOSE_EVENT_ARIA_LABEL}
+      onClick={(e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!isUpdating) updateEventStatus({ eventId: event.event_id, status: 'closed' });
+      }}
+      isDisabled={isUpdating}
+      isLoading={isUpdating}
+      size="s"
+      color="danger"
+      data-test-subj="sigEventCloseIconButton"
+    />
+  );
+};
 
 const MAX_VISIBLE_STREAMS = 3;
 
@@ -126,6 +186,21 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
     width: '100px',
     render: (criticality: number | undefined) => <EuiText size="xs">{criticality ?? '-'}</EuiText>,
   },
+  {
+    name: '',
+    width: '88px',
+    align: 'right' as const,
+    render: (item: SignificantEvent) => (
+      <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <RunInvestigationCell event={item} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CloseEventCell event={item} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  },
 ];
 
 const extractCheckedKeys = (options: EuiSelectableOption[]): string[] =>
@@ -150,7 +225,10 @@ export const SigEventsTab = () => {
   const { timeState } = useTimefilter();
 
   const { filteredStreams } = useKiGeneration();
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  // Closed events are hidden by default; users can opt back in via the Status filter.
+  const [statusFilter, setStatusFilter] = useState<string[]>(() =>
+    SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status !== 'closed')
+  );
   const [streamFilter, setStreamFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);

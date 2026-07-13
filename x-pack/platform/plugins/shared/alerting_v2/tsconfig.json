@@ -11,6 +11,7 @@
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "public/**/*",
+    "test/scout/**/*",
     "test/scout_alerting_v2/**/*"
   ],
   "kbn_references": [
@@ -122,7 +123,10 @@
     "@kbn/management-settings-ids",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-application-browser-mocks",
-    "@kbn/es-types"
+    "@kbn/alerts-ui-shared",
+    "@kbn/es-types",
+    "@kbn/app-header",
+    "@kbn/core-chrome-browser-context-mocks"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

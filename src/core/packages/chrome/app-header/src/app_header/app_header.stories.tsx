@@ -42,7 +42,29 @@ const badges: AppHeaderBadge[] = [
 ];
 
 const tabs: AppHeaderTab[] = [
-  { id: 'overview', label: 'Overview', isSelected: true, onClick: action('tab-overview') },
+  {
+    id: 'overview',
+    label: 'Overview',
+    isSelected: true,
+    onClick: action('tab-overview'),
+    actions: {
+      ariaLabel: 'More actions',
+      items: [
+        {
+          id: 'copy',
+          label: 'Copy API request',
+          iconType: 'copy',
+          onClick: action('tab-overview-copy'),
+        },
+        {
+          id: 'edit',
+          label: 'Edit configuration',
+          iconType: 'gear',
+          onClick: action('tab-overview-edit'),
+        },
+      ],
+    },
+  },
   { id: 'alerts', label: 'Alerts', badge: 3, onClick: action('tab-alerts') },
   {
     id: 'insights',
@@ -61,9 +83,9 @@ const tabs: AppHeaderTab[] = [
 ];
 
 const metadata: AppHeaderMetadataItems = [
-  { type: 'text', label: 'Created by: analyst' },
   { type: 'health', label: 'Healthy', color: 'success' },
-  { type: 'button', label: 'Updated 2 minutes ago', onClick: action('metadata-clicked') },
+  { type: 'text', label: 'Created by', value: 'analyst' },
+  { type: 'button', label: 'View details', onClick: action('view-details-clicked') },
 ];
 
 // Six items so the menu overflows the visible limit into the "More" popover.

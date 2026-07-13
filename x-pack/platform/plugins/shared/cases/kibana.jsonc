@@ -30,7 +30,9 @@
       "workflowsExtensions"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "cloud",
+      "dataViews",
       "dashboard",
       "home",
       "maps",
@@ -41,11 +43,11 @@
       "savedObjectsTaggingOss"
     ],
     "requiredBundles": [
+      "dashboard",
       "esUiShared",
       "kibanaReact",
       "kibanaUtils",
-      "savedObjectsFinder",
-      "dashboard"
+      "savedObjectsFinder"
     ],
     "extraPublicDirs": ["common"]
   }

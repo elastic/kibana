@@ -11,8 +11,8 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { ChatEventType, type ChatEvent } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import type { SignificantEvent } from '@kbn/streams-schema';
-import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/streams-plugin/common';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
 import { FocusedSignificantEventService } from '../../../services/significant_events/focused_significant_event_service';
 import {
   registerSignificantEventAutoAttach,

@@ -1,21 +1,22 @@
 pageLoadAssetSize:
   actions: 20500
   advancedSettings: 6196
-  agentBuilder: 52317
+  agentBuilder: 51190
   agentBuilderDashboards: 7786
-  agentBuilderPlatform: 15544
+  agentBuilderPlatform: 26248
+  agentBuilderVisualizations: 7356
   agentBuilderWorkflows: 24405
-  agentContextLayer: 8828
+  agentContextLayer: 10146
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
   alertingVTwo: 56591
-  apm: 54371
+  apm: 57201
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
   canvas: 14881
-  cases: 242517
+  cases: 242617
   charts: 40269
   cloud: 11743
   cloudConnect: 9149
@@ -35,7 +36,8 @@ pageLoadAssetSize:
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8661
-  data: 496646
+  data: 2758999
+  dataFederation: 7106
   dataQuality: 11469
   datasetQuality: 49315
   dataUsage: 8743
@@ -44,10 +46,11 @@ pageLoadAssetSize:
   dataViewManagement: 6250
   dataViews: 66000
   dataVisualizer: 32727
-  developerToolbar: 5758
+  developerToolbar: 6043
   devTools: 8107
-  discover: 30501
+  discover: 32000
   discoverEnhanced: 5353
+  discoveries: 35780
   discoverShared: 2322
   elasticAssistant: 299772
   elasticAssistantSharedState: 4881
@@ -55,7 +58,7 @@ pageLoadAssetSize:
   embeddable: 19587
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
-  entityStore: 9718
+  entityStore: 14114
   esql: 29469
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -65,7 +68,7 @@ pageLoadAssetSize:
   exploratoryView: 45042
   expressionGauge: 15748
   expressionHeatmap: 20303
-  expressionLegacyMetricVis: 11834
+  expressionLegacyMetricVis: 13800
   expressionMetricVis: 18100
   expressionPartitionVis: 29826
   expressions: 104955
@@ -109,7 +112,7 @@ pageLoadAssetSize:
   lens: 99147
   licenseManagement: 8193
   licensing: 10073
-  links: 8620
+  links: 8340
   lists: 5093
   logsDataAccess: 7900
   logsShared: 82701
@@ -122,7 +125,7 @@ pageLoadAssetSize:
   ml: 99842
   mockIdpPlugin: 7463
   monitoring: 28983
-  navigation: 17399
+  navigation: 18600
   newsfeed: 11110
   noDataPage: 1749
   notificationCenter: 1791
@@ -137,7 +140,7 @@ pageLoadAssetSize:
   osquery: 48128
   painlessLab: 6299
   presentationUtil: 8391
-  productDocBase: 5678
+  productDocBase: 6769
   productIntercept: 9860
   profiling: 20716
   queryActivity: 4326
@@ -176,6 +179,7 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64059
+  significant_events: 15000
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
@@ -216,4 +220,3 @@ pageLoadAssetSize:
   workflowsExtensions: 43032
   workflowsManagement: 39968
   workplaceAIApp: 6234
-  
