@@ -46,7 +46,7 @@ import type { AdjustedParsedRequest } from './types';
 import { type RequestToRestore, RestoreMethod } from '../../../types';
 import { StorageQuotaError } from '../../components/storage_quota_error';
 import { ContextValue } from '../../contexts';
-import { containsComments, indentData } from './utils/requests_utils';
+import { containsComments, removeCommentsFromData } from './utils/requests_utils';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
 const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
@@ -276,8 +276,10 @@ export class MonacoEditorActionsProvider {
       if (requestTextFromEditor && requestTextFromEditor.data.length > 0) {
         requestTextFromEditor.data = requestTextFromEditor.data.map((dataString) => {
           if (containsComments(dataString)) {
-            // parse and stringify to remove comments
-            dataString = indentData(dataString);
+            // Comments must be removed before the request is sent since the body is
+            // flattened into a single line and a line comment would otherwise
+            // comment out the rest of the body (see https://github.com/elastic/kibana/issues/277160)
+            dataString = removeCommentsFromData(dataString);
           }
           return collapseLiteralStrings(dataString);
         });
