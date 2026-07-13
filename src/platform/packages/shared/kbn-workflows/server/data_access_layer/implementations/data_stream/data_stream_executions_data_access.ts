@@ -33,24 +33,28 @@ const notImplemented = (method: string): never => {
   throw new Error(`DataStreamExecutionsDataAccess.${method} is not implemented`);
 };
 
-export interface DataStreamExecutionsDataAccessDeps<TExecution extends { id: string }> {
+export interface DataStreamExecutionsDataAccessDeps {
   esClient: ElasticsearchClient;
   dataStreamName: string;
+  additionalIndexesToQuery?: string[];
   logger?: Logger;
 }
 
 export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
   implements ExecutionsDataAccess<TExecution>
 {
+  private additionalIndexesToQuery: string[];
   private versions = new Map<string, Required<DocumentVersionFields>>();
 
-  constructor(private readonly deps: DataStreamExecutionsDataAccessDeps<TExecution>) {}
+  constructor(private readonly deps: DataStreamExecutionsDataAccessDeps) {
+    this.additionalIndexesToQuery = deps.additionalIndexesToQuery ?? [];
+  }
 
   public async search(
     request: ExecutionsSearchRequest
   ): Promise<estypes.SearchResponse<TExecution>> {
     const searchResponse: estypes.SearchResponse<TExecution> = await this.deps.esClient.search({
-      index: this.deps.dataStreamName,
+      index: [this.deps.dataStreamName, ...this.additionalIndexesToQuery],
       ...request,
     });
 
@@ -227,7 +231,7 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
     if (ids.length === 0) {
       return { items: [], missing: [] };
     }
-    const idsWithResolvedIndexes: { id: string; index: string }[] = [];
+    const idsWithResolvedIndexes: { id: string; index: string[] }[] = [];
 
     // Create a map of the ids to undefined so we can track which ids are missing after the search
     const map: Map<string, GetExecutionByIdsItem<TExecution> | undefined> = ids.reduce(
@@ -248,9 +252,9 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
         if (!resolvedWriteIndex) {
           resolvedWriteIndex = await this.resolveWriteIndex();
         }
-        idsWithResolvedIndexes.push({ id: item, index: resolvedWriteIndex });
+        idsWithResolvedIndexes.push({ id: item, index: [resolvedWriteIndex] });
       } else if (item.id && item.index) {
-        idsWithResolvedIndexes.push({ id: item.id, index: item.index });
+        idsWithResolvedIndexes.push({ id: item.id, index: [item.index] });
       }
     }
 

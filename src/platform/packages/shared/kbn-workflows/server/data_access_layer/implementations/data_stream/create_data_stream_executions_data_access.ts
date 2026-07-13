@@ -45,11 +45,11 @@ export class DataStreamExecutionsDataAccessBundle implements ExecutionsDataAcces
   }
 
   async initStart(): Promise<void> {
-    // const dataStreams = await this.deps.coreSetup
-    //   .getStartServices()
-    //   .then(([coreStart]) => coreStart.dataStreams);
-    // await dataStreams.initializeClient(WORKFLOWS_EXECUTIONS_DATA_STREAM);
-    // await dataStreams.initializeClient(WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM);
+    const dataStreams = await this.deps.coreSetup
+      .getStartServices()
+      .then(([coreStart]) => coreStart.dataStreams);
+    await dataStreams.initializeClient(WORKFLOWS_EXECUTIONS_DATA_STREAM);
+    await dataStreams.initializeClient(WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM);
   }
 
   async createWorkflowExecutionsDataAccess(): Promise<WorkflowExecutionsDataAccess> {
@@ -59,6 +59,7 @@ export class DataStreamExecutionsDataAccessBundle implements ExecutionsDataAcces
 
     return new DataStreamExecutionsDataAccess<EsWorkflowExecution>({
       esClient,
+      additionalIndexesToQuery: ['.workflows-executions'],
       logger: this.deps.logger,
       dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
     });
@@ -71,6 +72,7 @@ export class DataStreamExecutionsDataAccessBundle implements ExecutionsDataAcces
 
     return new DataStreamExecutionsDataAccess<EsWorkflowStepExecution>({
       esClient,
+      additionalIndexesToQuery: ['.workflows-step-executions'],
       logger: this.deps.logger,
       dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
     });

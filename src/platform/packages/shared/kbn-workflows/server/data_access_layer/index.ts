@@ -29,7 +29,6 @@ export type {
 } from './types';
 export type { PlainIndexExecutionsDataAccessDeps } from './implementations/plain_index/plain_index_executions_data_access';
 export { PlainIndexExecutionsDataAccess } from './implementations/plain_index/plain_index_executions_data_access';
-export { normalizeStepExecutionOnGet } from './implementations/plain_index/normalize_step_execution_on_get';
 export { createExecutionsDataAccess } from './implementations/create_executions_data_access';
 export {
   createMockGetExecutionsByIdsResponse,

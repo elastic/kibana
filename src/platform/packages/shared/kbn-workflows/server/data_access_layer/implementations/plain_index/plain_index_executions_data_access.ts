@@ -27,7 +27,7 @@ import type {
   ScriptUpdateResponse,
 } from '../../types';
 
-export interface PlainIndexExecutionsDataAccessDeps<TExecution extends { id: string }> {
+export interface PlainIndexExecutionsDataAccessDeps {
   esClient: ElasticsearchClient;
   indexName: string;
   mappings: MappingTypeMapping;
@@ -37,7 +37,7 @@ export interface PlainIndexExecutionsDataAccessDeps<TExecution extends { id: str
 export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
   implements ExecutionsDataAccess<TExecution>
 {
-  constructor(private readonly deps: PlainIndexExecutionsDataAccessDeps<TExecution>) {}
+  constructor(private readonly deps: PlainIndexExecutionsDataAccessDeps) {}
 
   public async search(
     request: ExecutionsSearchRequest
@@ -61,7 +61,9 @@ export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
   ): Promise<GetExecutionsByIdsResponse<TExecution>> {
     return getExecutionsByIds({
       esClient: this.deps.esClient,
-      ids,
+      ids: ids.map((id) =>
+        typeof id === 'string' ? { id, index: [this.deps.indexName] } : id
+      ) as (string | { id: string; index: string[] })[],
       defaultIndex: this.deps.indexName,
       options,
     });

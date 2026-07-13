@@ -15,6 +15,7 @@ import type { CreateExecutionsDataAccessDeps, ExecutionsDataAccessBundle } from 
 export function createExecutionsDataAccess(
   deps: CreateExecutionsDataAccessDeps
 ): ExecutionsDataAccessBundle {
+  return new DataStreamExecutionsDataAccessBundle(deps);
   switch (deps.source) {
     case 'system_index':
       return new PlainIndexExecutionsDataAccessBundle(deps);
