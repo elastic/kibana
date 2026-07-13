@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { EuiComboBoxWrapper, KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures/common';
@@ -18,59 +18,6 @@ const ESQL_MULTI_VALUE_QUERY =
   'FROM logstash-* | WHERE MV_CONTAINS( ?values, geo.dest ) | KEEP geo.dest';
 
 const createSessionName = (prefix: string, spaceId: string) => `${prefix}-${spaceId}-${Date.now()}`;
-
-const getControlsGroup = (page: ScoutPage) => page.testSubj.locator('controls-group-wrapper');
-
-const getControlFrames = (page: ScoutPage) => page.testSubj.locator('control-frame');
-
-const getDashboardViewport = (page: ScoutPage) => page.testSubj.locator('dshDashboardViewport');
-
-const getDashboardControls = (page: ScoutPage) =>
-  getDashboardViewport(page).locator('[data-control-id]');
-
-const getControlIds = async (page: ScoutPage) => {
-  await getControlFrames(page).evaluateAll((frames) => {
-    if (!frames.length) {
-      throw new Error('No control frames found');
-    }
-  });
-
-  return getControlFrames(page)
-    .locator('[data-control-id]')
-    .evaluateAll((controls) => {
-      return controls.map((control) => control.getAttribute('data-control-id') ?? '');
-    });
-};
-
-const getOnlyControlId = async (page: ScoutPage) => {
-  await expect(getControlFrames(page)).toHaveCount(1);
-  const controlIds = await getControlIds(page);
-
-  if (controlIds.length !== 1 || !controlIds[0]) {
-    throw new Error(`Expected exactly one control id, got: ${controlIds.join(', ')}`);
-  }
-
-  return controlIds[0];
-};
-
-const getControlFrame = (page: ScoutPage, controlId: string): Locator =>
-  getControlFrames(page)
-    .locator(`[data-control-id='${controlId}']`)
-    .locator('xpath=ancestor::*[@data-test-subj="control-frame"][1]');
-
-const openControlPopover = async (page: ScoutPage, controlId: string) => {
-  await getControlFrame(page, controlId).locator(`[data-control-id='${controlId}']`).click();
-  await page.testSubj.locator('optionsList-control-search-input').waitFor({ state: 'visible' });
-};
-
-const selectControlOption = async (page: ScoutPage, value: string) => {
-  const searchInput = page.testSubj.locator('optionsList-control-search-input');
-  await searchInput.fill(value);
-
-  const option = page.testSubj.locator(`optionsList-control-selection-${value}`);
-  await option.waitFor({ state: 'visible' });
-  await option.click();
-};
 
 const createEsqlControl = async (
   page: ScoutPage,
@@ -96,7 +43,7 @@ const createEsqlControl = async (
   await page.testSubj.locator('saveEsqlControlsFlyoutButton').waitFor({ state: 'visible' });
   await page.testSubj.locator('saveEsqlControlsFlyoutButton').click();
   await page.testSubj.locator('create_esql_control_flyout').waitFor({ state: 'hidden' });
-  await getControlsGroup(page).waitFor({ state: 'visible' });
+  await page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
 };
 
 const saveHistogramToNewDashboard = async (page: ScoutPage, title: string) => {
@@ -110,20 +57,6 @@ const saveHistogramToNewDashboard = async (page: ScoutPage, title: string) => {
 
   await page.testSubj.locator('confirmSaveSavedObjectButton').click();
   await page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'hidden' });
-};
-
-const removeOnlyControl = async (page: ScoutPage) => {
-  const controlId = await getOnlyControlId(page);
-  const controlFrame = getControlFrame(page, controlId);
-  await controlFrame.locator(`[data-control-id='${controlId}']`).hover();
-
-  const hoverActions = controlFrame.getByTestId(`hover-actions-${controlId}`);
-  await hoverActions.waitFor({ state: 'visible' });
-
-  const deleteAction = hoverActions.getByTestId('embeddablePanelAction-deletePanel');
-  await deleteAction.waitFor({ state: 'visible' });
-  await deleteAction.click();
-  await expect(getControlFrames(page)).toHaveCount(0);
 };
 
 const expectOnlyRowsContaining = (rows: string[][], values: string[]) => {
@@ -154,12 +87,12 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
   spaceTest(
     'creates an ES|QL value control and keeps it after refresh',
     async ({ page, pageObjects }) => {
-      const { discover } = pageObjects;
+      const { dashboard, discover } = pageObjects;
 
       await createEsqlControl(page, LOGSTASH_QUERY_START);
       await discover.waitUntilTabIsLoaded();
 
-      await getControlsGroup(page).waitFor({ state: 'visible' });
+      await dashboard.getControlsGroupLocator().waitFor({ state: 'visible' });
       expect(await discover.getEsqlQueryValue()).toContain(
         'FROM logstash-* | WHERE geo.dest == ?geo_dest'
       );
@@ -167,20 +100,20 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await page.reload();
       await discover.waitUntilTabIsLoaded();
 
-      await getControlsGroup(page).waitFor({ state: 'visible' });
-      await expect(getControlFrames(page)).toHaveCount(1);
+      await dashboard.getControlsGroupLocator().waitFor({ state: 'visible' });
+      await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
     }
   );
 
   spaceTest(
     'creates an ES|QL multi-value control and filters grid rows',
     async ({ page, pageObjects }) => {
-      const { dataGrid, discover } = pageObjects;
+      const { dashboard, dataGrid, discover } = pageObjects;
 
       await createEsqlControl(page, ESQL_MULTI_VALUE_QUERY_START, { values: ['IN', 'US'] });
       await discover.waitUntilTabIsLoaded();
 
-      await getControlsGroup(page).waitFor({ state: 'visible' });
+      await dashboard.getControlsGroupLocator().waitFor({ state: 'visible' });
       expect(await discover.getEsqlQueryValue()).toContain(
         'FROM logstash-* | WHERE MV_CONTAINS( ?values'
       );
@@ -193,9 +126,9 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
       expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);
 
-      const controlId = await getOnlyControlId(page);
-      await openControlPopover(page, controlId);
-      await selectControlOption(page, 'US');
+      const controlId = await dashboard.getOnlyControlId();
+      await dashboard.optionsListOpenPopover(controlId);
+      await dashboard.optionsListPopoverSelectOption('US');
       await discover.waitUntilTabIsLoaded();
       await dataGrid.waitForLoad();
       await dataGrid.waitForDocTableRendered();
@@ -207,24 +140,24 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
   spaceTest(
     'persists controls through saved sessions and unsaved-change revert',
     async ({ page, pageObjects, scoutSpace }) => {
-      const { discover } = pageObjects;
+      const { dashboard, discover } = pageObjects;
       const savedSession = createSessionName('esql-control-session', scoutSpace.id);
 
       await createEsqlControl(page, LOGSTASH_QUERY_START);
       await discover.waitUntilTabIsLoaded();
       await discover.saveSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
-      await getControlsGroup(page).waitFor({ state: 'visible' });
+      await dashboard.getControlsGroupLocator().waitFor({ state: 'visible' });
 
       await discover.clickNewSearch();
       await discover.loadSavedSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
-      await getControlsGroup(page).waitFor({ state: 'visible' });
-      await expect(getControlFrames(page)).toHaveCount(1);
+      await dashboard.getControlsGroupLocator().waitFor({ state: 'visible' });
+      await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
 
-      const controlId = await getOnlyControlId(page);
-      await openControlPopover(page, controlId);
-      await selectControlOption(page, 'CN');
+      const controlId = await dashboard.getOnlyControlId();
+      await dashboard.optionsListOpenPopover(controlId);
+      await dashboard.optionsListPopoverSelectOption('CN');
       await discover.waitUntilTabIsLoaded();
 
       await discover.unsavedChangesIndicator().waitFor({ state: 'visible' });
@@ -249,35 +182,36 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await discover.clickNewSearch();
       await discover.loadSavedSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
-      await getControlsGroup(page).waitFor({ state: 'visible' });
+      await dashboard.getControlsGroupLocator().waitFor({ state: 'visible' });
 
       await saveHistogramToNewDashboard(page, savedChart);
       await dashboard.waitForRenderComplete();
-      await expect(getDashboardControls(page)).toHaveCount(1);
+      await expect(dashboard.getDashboardControlsLocator()).toHaveCount(1);
 
       await dashboard.openNewDashboard();
       await dashboard.addSavedSearch(savedSession);
       await dashboard.waitForRenderComplete();
-      await expect(getDashboardControls(page)).toHaveCount(1);
+      await expect(dashboard.getDashboardControlsLocator()).toHaveCount(1);
     }
   );
 
   spaceTest(
     'persists saved sessions after removing controls',
     async ({ page, pageObjects, scoutSpace }) => {
-      const { discover } = pageObjects;
+      const { dashboard, discover } = pageObjects;
       const savedSession = createSessionName('esql-control-removed-session', scoutSpace.id);
 
       await createEsqlControl(page, LOGSTASH_QUERY_START);
       await discover.waitUntilTabIsLoaded();
-      await expect(getControlFrames(page)).toHaveCount(1);
+      await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
 
       await discover.saveSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
 
-      await removeOnlyControl(page);
+      await dashboard.removeControl(await dashboard.getOnlyControlId());
+      await expect(dashboard.getControlFramesLocator()).toHaveCount(0);
       await discover.waitUntilTabIsLoaded();
-      await getControlsGroup(page).waitFor({ state: 'hidden' });
+      await dashboard.getControlsGroupLocator().waitFor({ state: 'hidden' });
 
       await discover.saveSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
@@ -285,8 +219,8 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await discover.loadSavedSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
 
-      await getControlsGroup(page).waitFor({ state: 'hidden' });
-      await expect(getControlFrames(page)).toHaveCount(0);
+      await dashboard.getControlsGroupLocator().waitFor({ state: 'hidden' });
+      await expect(dashboard.getControlFramesLocator()).toHaveCount(0);
     }
   );
 });
