@@ -11,7 +11,6 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import type { FlagOptions, FlagsReader } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import path from 'path';
-import type { ScoutTestTarget } from '@kbn/scout-info';
 import { validateAndProcessTestFiles } from '../../common/utils';
 import type { StartServerOptions } from '../../servers';
 import { SERVER_FLAG_OPTIONS, parseServerFlags } from '../../servers';
