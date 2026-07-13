@@ -100,17 +100,25 @@ export async function reassignAgents(
   options: ({ agents: Agent[] } | GetAgentsOptions) & {
     force?: boolean;
     batchSize?: number;
+    dryRun?: boolean;
   },
   newAgentPolicyId: string
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   await verifyNewAgentPolicy(soClient, newAgentPolicyId);
 
   const currentSpaceId = getCurrentNamespace(soClient);
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
   if ('agents' in options) {
+    if (options.dryRun) {
+      return { count: options.agents.length };
+    }
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
+    if (options.dryRun) {
+      const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+      return { count: maybeAgents.filter((a) => !('notFound' in a)).length };
+    }
     const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
     for (const maybeAgent of maybeAgents) {
       if ('notFound' in maybeAgent) {
@@ -132,6 +140,9 @@ export async function reassignAgents(
       page: 1,
       perPage: batchSize,
     });
+    if (options.dryRun) {
+      return { count: res.total };
+    }
     // running action in async mode for >10k agents (or actions > batchSize for testing purposes)
     if (res.total <= batchSize) {
       givenAgents = res.agents;

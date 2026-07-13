@@ -22433,6 +22433,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "enrollment_token": {
                     "type": "string"
                   },
@@ -22508,16 +22511,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -22612,6 +22631,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "user_info": {
                     "additionalProperties": false,
                     "properties": {
@@ -22648,16 +22670,32 @@
                   }
                 },
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -22748,6 +22786,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "includeInactive": {
                     "default": false,
                     "type": "boolean"
@@ -22770,16 +22811,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -22871,6 +22928,9 @@
                   },
                   "batchSize": {
                     "type": "number"
+                  },
+                  "dryRun": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -22886,16 +22946,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -22990,6 +23066,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "includeInactive": {
                     "default": false,
                     "type": "boolean"
@@ -23018,20 +23097,37 @@
                   }
                 },
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionIds": {
-                      "items": {
-                        "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionIds": {
+                          "items": {
+                            "maxLength": 36,
+                            "type": "string"
+                          },
+                          "maxItems": 10000,
+                          "type": "array"
+                        }
                       },
-                      "maxItems": 10000,
-                      "type": "array"
+                      "required": [
+                        "actionIds"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionIds"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -23124,6 +23220,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "force": {
                     "description": "Unenrolls hosted agents too",
                     "type": "boolean"
@@ -23150,16 +23249,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -23242,6 +23357,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "includeInactive": {
                     "default": false,
                     "type": "boolean"
@@ -23274,16 +23392,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -23366,6 +23500,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "force": {
                     "type": "boolean"
                   },
@@ -23404,16 +23541,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -25702,16 +25855,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },

@@ -18,6 +18,7 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
+import { MAX_SHORT_STRING_LENGTH } from '../../utils/schema_limits';
 import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID =
@@ -40,7 +41,7 @@ export interface GetAnomalyDetectionJobsToolResult {
 
 const getAnomalyDetectionJobsSchema = z.object({
   jobIds: z
-    .array(z.string().min(1))
+    .array(z.string().min(1).max(MAX_SHORT_STRING_LENGTH))
     .min(1)
     .max(20)
     .describe(

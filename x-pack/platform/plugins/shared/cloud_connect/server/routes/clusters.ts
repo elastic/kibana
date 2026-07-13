@@ -17,6 +17,7 @@ import { createStorageService } from '../lib/create_storage_service';
 import { enableInferenceCCM, disableInferenceCCM } from '../services/inference_ccm';
 import { updateDefaultLLMActions } from '../lib/update_default_llm_actions';
 import { waitForInferenceEndpoint } from '../lib/wait_for_inference_endpoint';
+import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -40,13 +41,7 @@ export const registerClustersRoute = ({
   router.get(
     {
       path: `${API_BASE_PATH}/cluster_details`,
-      security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates to the Cloud Connect API for authentication and authorization.',
-        },
-      },
+      security: CLOUD_CONNECT_READ_SECURITY,
       validate: false,
       options: {
         access: 'internal',
@@ -145,13 +140,7 @@ export const registerClustersRoute = ({
   router.delete(
     {
       path: `${API_BASE_PATH}/cluster`,
-      security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates to the Cloud Connect API for authentication and authorization.',
-        },
-      },
+      security: CLOUD_CONNECT_MANAGE_SECURITY,
       validate: false,
       options: {
         access: 'internal',
@@ -219,13 +208,7 @@ export const registerClustersRoute = ({
   router.put(
     {
       path: `${API_BASE_PATH}/cluster_details`,
-      security: {
-        authz: {
-          enabled: false,
-          reason:
-            'This route delegates to the Cloud Connect API for authentication and authorization.',
-        },
-      },
+      security: CLOUD_CONNECT_MANAGE_SECURITY,
       validate: {
         body: schema.object({
           services: schema.recordOf(

@@ -6,10 +6,16 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 import { keyBy } from 'lodash';
 
 import { packageHasNoPolicyTemplates } from '../../../common/services/policy_template';
-import type { NewPackagePolicy, RegistryStream, UpdatePackagePolicy } from '../../../common';
+import type {
+  NewPackagePolicy,
+  PackagePolicyConfigRecordEntry,
+  RegistryStream,
+  UpdatePackagePolicy,
+} from '../../../common';
 import { SO_SEARCH_LIMIT } from '../../../common';
 import {
   doesPackageHaveIntegrations,
@@ -218,7 +224,9 @@ export async function findPackagePoliciesUsingSecrets(opts: {
 }): Promise<Array<{ id: string; policyIds: string[] }>> {
   const { soClient, ids } = opts;
   const packagePolicies = await packagePolicyService.list(soClient, {
-    kuery: `ingest-package-policies.secret_references.id: (${ids.join(' or ')})`,
+    kuery: `ingest-package-policies.secret_references.id: (${ids
+      .map((id) => `"${escapeQuotes(id)}"`)
+      .join(' or ')})`,
     perPage: SO_SEARCH_LIMIT,
     page: 1,
   });
@@ -318,6 +326,13 @@ function isSecretVar(varDef: RegistryVarsEntry) {
   return varDef.secret === true;
 }
 
+// A var's value can already be a secret reference even if the current package spec
+// no longer marks it `secret: true` (e.g. the var was dropped from a newer package version).
+// Such values must still be treated as secret paths so their underlying secrets get cleaned up.
+function isSecretRefValue(configEntry: PackagePolicyConfigRecordEntry) {
+  return !!configEntry?.value?.isSecretRef;
+}
+
 function containsSecretVar(vars?: RegistryVarsEntry[]) {
   return vars?.some(isSecretVar);
 }
@@ -330,8 +345,8 @@ function _getPackageLevelSecretPaths(
   const packageSecretVarsByName = keyBy(packageSecretVars, 'name');
   const packageVars = Object.entries(packagePolicy.vars || {});
 
-  return packageVars.reduce((vars, [name, configEntry], i) => {
-    if (packageSecretVarsByName[name]) {
+  return packageVars.reduce((vars, [name, configEntry]) => {
+    if (packageSecretVarsByName[name] || isSecretRefValue(configEntry)) {
       vars.push({
         value: configEntry,
         path: ['vars', name],
@@ -364,7 +379,10 @@ function _getInputSecretPaths(
     const inputVars = Object.entries(input.vars || {});
     if (inputVars.length) {
       inputVars.forEach(([name, configEntry]) => {
-        if (inputSecretVarDefsByPolicyTemplateAndType[inputKey]?.[name]) {
+        if (
+          inputSecretVarDefsByPolicyTemplateAndType[inputKey]?.[name] ||
+          isSecretRefValue(configEntry)
+        ) {
           currentInputVarPaths.push({
             path: ['inputs', inputIndex.toString(), 'vars', name],
             value: configEntry,
@@ -376,24 +394,22 @@ function _getInputSecretPaths(
     if (input.streams.length) {
       input.streams.forEach((stream, streamIndex) => {
         const streamVarDefs =
-          streamSecretVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`];
-        if (streamVarDefs && Object.keys(streamVarDefs).length) {
-          Object.entries(stream.vars || {}).forEach(([name, configEntry]) => {
-            if (streamVarDefs[name]) {
-              currentInputVarPaths.push({
-                path: [
-                  'inputs',
-                  inputIndex.toString(),
-                  'streams',
-                  streamIndex.toString(),
-                  'vars',
-                  name,
-                ],
-                value: configEntry,
-              });
-            }
-          });
-        }
+          streamSecretVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`] || {};
+        Object.entries(stream.vars || {}).forEach(([name, configEntry]) => {
+          if (streamVarDefs[name] || isSecretRefValue(configEntry)) {
+            currentInputVarPaths.push({
+              path: [
+                'inputs',
+                inputIndex.toString(),
+                'streams',
+                streamIndex.toString(),
+                'vars',
+                name,
+              ],
+              value: configEntry,
+            });
+          }
+        });
       });
     }
 
