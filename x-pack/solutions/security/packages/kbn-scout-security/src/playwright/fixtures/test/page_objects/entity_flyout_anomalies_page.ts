@@ -135,7 +135,11 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   async clickAnomaliesCountLink() {
-    await this.anomaliesExpandablePanelTitleLink.click();
+    // The title link's onClick opens the left panel via an in-app history push, which Playwright's
+    // click() auto-waits on as a "scheduled navigation" that never commits — timing out despite the
+    // click landing. dispatchEvent fires the DOM click without that post-navigation wait; the caller
+    // gates on the section being rendered first, and the anomaliesTab wait below asserts the outcome.
+    await this.anomaliesExpandablePanelTitleLink.dispatchEvent('click');
     await this.anomaliesTab.waitFor({ state: 'visible' });
   }
 
