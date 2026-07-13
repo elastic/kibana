@@ -104,7 +104,7 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
       defaultMessage: 'Confidence',
     }),
     width: '100px',
-    render: (value: number | undefined) => (value != null ? `${value}%` : '-'),
+    render: (value: number | undefined) => (value != null ? `${Math.round(value * 100)}%` : '-'),
   },
   {
     name: i18n.translate('xpack.streams.discoveriesTab.eventColumn', {

@@ -11,14 +11,14 @@ import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import type { SignificantEventsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
-import { MemoryServiceImpl } from '../lib/memory';
-import type { MemoryToolsOptions } from './tools/memory';
+import { MemoryServiceImpl } from '../memory_and_investigation/lib/memory';
+import type { MemoryToolsOptions } from '../memory_and_investigation/tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderSkills } from './skills/register_skills';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
 import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
-import { registerInvestigationAgents } from './agents/investigation';
-import { streamsInvestigationManagementSkill } from './skills/investigation_management';
+import { registerInvestigationAgents } from '../memory_and_investigation/agents/investigation';
+import { streamsInvestigationManagementSkill } from '../memory_and_investigation/skills/investigation_management';
 
 export const createMemoryToolsOptions = ({
   getScopedClients,

@@ -11,6 +11,7 @@ import {
   platformSignificantEventsTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
+import { chatAgentTypeId } from '@kbn/agent-builder-common';
 
 /**
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
@@ -119,6 +120,18 @@ export const isAllowedBuiltinAgent = (agentName: string) => {
 };
 
 /**
+ * This is a manually maintained list of all agent types registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new agent type.
+ */
+export const AGENT_BUILDER_AGENT_TYPES = [chatAgentTypeId] as const;
+
+export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
+
+export const isAllowedAgentType = (typeId: string) => {
+  return (AGENT_BUILDER_AGENT_TYPES as readonly string[]).includes(typeId);
+};
+
+/**
  * This is a manually maintained list of all built-in skills registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new skill.
  */
@@ -145,6 +158,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-management',
   'significant-events-memory',
   'significant-events-management',
+  'significant-events-changepoint-analysis',
+  'significant-events-ki-grounding',
+  'significant-events-assessment',
   'streams-investigation-management',
   'knowledge-indicators-management',
   'ki-identification-management',
@@ -170,7 +186,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'threat-hunting',
   'find-security-rules',
   'pci-compliance',
+  'investigate-rule',
   'siem-readiness',
+  'attack-discovery-alert-retrieval-builder',
+  'attack-discovery-generator',
+  'attack-discovery-workflow-troubleshooting',
 
   // O11Y
   'observability.rca',
