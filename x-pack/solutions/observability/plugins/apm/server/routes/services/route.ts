@@ -76,6 +76,10 @@ import { getServicesItems } from './get_services/get_services_items';
 import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import { getThroughput } from './get_throughput';
 
+// Bounds the serviceName path param to satisfy the CodeQL "unbounded string in
+// route validation" rule; 1024 matches the ES keyword default `ignore_above`.
+const MAX_SERVICE_NAME_LENGTH = 1024;
+
 const servicesRoute = createApmServerRoute({
   endpoint: routeDefinitions.services.servicesList.endpoint,
   params: routeDefinitions.services.servicesList.params,
@@ -388,7 +392,7 @@ const serviceAnnotationsCreateRoute = createApmServerRoute({
   },
   params: z.object({
     path: z.object({
-      serviceName: z.string(),
+      serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH),
     }),
     body: z
       .object({
@@ -845,7 +849,7 @@ const serviceSlosRoute = createApmServerRoute({
 const serviceHasSystemMetricsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/has_system_metrics',
   params: z.object({
-    path: z.object({ serviceName: z.string() }),
+    path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
     query: environmentSchema.merge(rangeSchema),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
