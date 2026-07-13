@@ -18,6 +18,7 @@ import { TraceWaterfallFlyoutFooter } from './flyout_footer';
 import { useLogsIndexPattern } from '../../../../../hooks/use_logs_index_pattern';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { getApmInternalServices } from '../../../../../plugin';
+import { useGetErrorMarkerHrefFromRouter } from '../waterfall_container/use_get_error_marker_href_from_router';
 
 const TRACE_WATERFALL_FLYOUT_HISTORY_KEY = Symbol.for('apmTraceWaterfallFlyout');
 
@@ -41,6 +42,7 @@ export function TraceWaterfallFlyout({
   const { callApmApi } = getApmInternalServices();
   const { core } = useApmPluginContext();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const getErrorMarkerHref = useGetErrorMarkerHrefFromRouter();
   const { dataView, apmIndices } = useAdHocApmDataView();
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [selectedDocIndex, setSelectedDocIndex] = useState<string | undefined>(undefined);
@@ -121,6 +123,7 @@ export function TraceWaterfallFlyout({
           callApmApi={callApmApi}
           onNodeClick={onNodeClick}
           onErrorClick={onErrorClick}
+          getErrorMarkerHref={getErrorMarkerHref}
           ebt={{
             row: { element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_ROW },
             errorBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_ERROR_BADGE },

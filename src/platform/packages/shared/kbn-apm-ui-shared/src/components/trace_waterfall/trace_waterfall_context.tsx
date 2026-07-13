@@ -13,6 +13,7 @@ import type {
   IWaterfallGetRelatedErrorsHref,
   IWaterfallLegend,
   TraceItem,
+  WaterfallGetErrorMarkerHref,
   WaterfallGetServiceBadgeHref,
 } from '@kbn/apm-types';
 import { WaterfallLegendType } from '@kbn/apm-types';
@@ -51,6 +52,7 @@ export interface TraceWaterfallContextProps {
   scrollToContextOnMount?: boolean;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
+  getErrorMarkerHref?: WaterfallGetErrorMarkerHref;
   isEmbeddable: boolean;
   legends: IWaterfallLegend[];
   colorBy: WaterfallLegendType;
@@ -97,6 +99,7 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   scrollElement: undefined,
   scrollStrategy: 'window',
   getServiceBadgeHref: undefined,
+  getErrorMarkerHref: undefined,
   ebt: undefined,
 });
 
@@ -121,6 +124,7 @@ interface Props {
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
   getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
+  getErrorMarkerHref?: WaterfallGetErrorMarkerHref;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   isEmbeddable: boolean;
   showLegend: boolean;
@@ -154,6 +158,7 @@ export function TraceWaterfallContextProvider({
   onClick,
   onErrorClick,
   getServiceBadgeHref,
+  getErrorMarkerHref,
   scrollElement,
   getRelatedErrorsHref,
   isEmbeddable,
@@ -176,6 +181,7 @@ export function TraceWaterfallContextProvider({
       isFiltered,
       errors,
       onErrorClick,
+      getErrorMarkerHref,
       entryTransactionId,
     });
 
@@ -291,6 +297,7 @@ export function TraceWaterfallContextProvider({
         onClick: onClick ? handleNodeClick : undefined,
         onErrorClick,
         getServiceBadgeHref,
+        getErrorMarkerHref,
         contextSpanIds,
         selectedSpanId,
         scrollToContextOnMount,

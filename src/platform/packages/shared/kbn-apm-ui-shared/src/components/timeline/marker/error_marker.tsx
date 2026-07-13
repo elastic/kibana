@@ -11,6 +11,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPopover,
   EuiText,
   useEuiTheme,
@@ -28,6 +29,7 @@ export interface ErrorMark extends Mark {
   error: Error;
   serviceColor: string;
   onClick?: () => void;
+  errorMarkerHref?: string;
 }
 
 interface Props {
@@ -42,6 +44,12 @@ const Button = styled(Legend)`
   height: 20px;
   display: flex;
   align-items: flex-end;
+`;
+
+const ErrorLink = styled(EuiLink)`
+  display: block;
+  margin: ${({ theme }) => `${theme.euiTheme.size.s} 0`};
+  overflow-wrap: break-word;
 `;
 
 // We chose 240 characters because it fits most error messages and it's still easily readable on a screen.
@@ -103,7 +111,11 @@ export function ErrorMarker({ mark }: Props) {
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            {mark.onClick ? (
+            {mark.errorMarkerHref ? (
+              <ErrorLink href={mark.errorMarkerHref} onClick={togglePopover}>
+                {truncatedErrorMessage}
+              </ErrorLink>
+            ) : mark.onClick ? (
               <EuiButtonEmpty
                 data-test-subj="apmTimelineErrorMarkerButton"
                 onClick={() => {

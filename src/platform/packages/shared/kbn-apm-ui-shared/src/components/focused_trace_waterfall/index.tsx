@@ -10,7 +10,11 @@
 import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { APIReturnType } from '@kbn/apm-api-shared';
-import type { TraceItem, WaterfallGetServiceBadgeHref } from '@kbn/apm-types';
+import type {
+  TraceItem,
+  WaterfallGetErrorMarkerHref,
+  WaterfallGetServiceBadgeHref,
+} from '@kbn/apm-types';
 import { TraceWaterfall } from '../trace_waterfall';
 import { TraceSummary } from './trace_summary';
 
@@ -21,6 +25,7 @@ interface Props {
   isEmbeddable?: boolean;
   onErrorClick?: (params: { traceId: string; docId: string }) => void;
   getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
+  getErrorMarkerHref?: WaterfallGetErrorMarkerHref;
 }
 
 export function flattenChildren(
@@ -74,6 +79,7 @@ export function FocusedTraceWaterfall({
   onErrorClick,
   isEmbeddable,
   getServiceBadgeHref,
+  getErrorMarkerHref,
 }: Props) {
   const reparentedItems = reparentDocumentToRoot(items.traceItems);
   const traceItems = reparentedItems ? getTraceItems(reparentedItems) : [];
@@ -91,6 +97,7 @@ export function FocusedTraceWaterfall({
         onErrorClick={onErrorClick}
         isEmbeddable={isEmbeddable}
         getServiceBadgeHref={getServiceBadgeHref}
+        getErrorMarkerHref={getErrorMarkerHref}
       />
       {reparentedItems ? (
         <>

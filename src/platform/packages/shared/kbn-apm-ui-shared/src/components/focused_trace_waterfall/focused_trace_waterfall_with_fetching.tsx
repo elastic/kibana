@@ -9,7 +9,7 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import type { APMClientV2 } from '@kbn/apm-api-shared';
-import type { FocusedTraceWaterfallProps } from '@kbn/apm-types';
+import type { FocusedTraceWaterfallProps, WaterfallGetErrorMarkerHref } from '@kbn/apm-types';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
@@ -21,6 +21,7 @@ import { useGetServiceBadgeHrefFromCore } from '../trace_waterfall/use_get_servi
 interface Props extends FocusedTraceWaterfallProps {
   core: CoreStart;
   callApmApi: APMClientV2;
+  getErrorMarkerHref?: WaterfallGetErrorMarkerHref;
 }
 
 export function FocusedTraceWaterfallWithFetching({
@@ -30,6 +31,7 @@ export function FocusedTraceWaterfallWithFetching({
   docId,
   core,
   callApmApi,
+  getErrorMarkerHref,
 }: Props) {
   const getServiceBadgeHref = useGetServiceBadgeHrefFromCore(core, rangeFrom, rangeTo);
 
@@ -69,6 +71,11 @@ export function FocusedTraceWaterfallWithFetching({
   }
 
   return (
-    <FocusedTraceWaterfall items={data} isEmbeddable getServiceBadgeHref={getServiceBadgeHref} />
+    <FocusedTraceWaterfall
+      items={data}
+      isEmbeddable
+      getServiceBadgeHref={getServiceBadgeHref}
+      getErrorMarkerHref={getErrorMarkerHref}
+    />
   );
 }

@@ -102,11 +102,25 @@ describe('FocusedTraceWaterfallWithFetching', () => {
     renderComponent();
 
     expect(mockFocusedTraceWaterfall).toHaveBeenCalledWith(
-      {
+      expect.objectContaining({
         items: mockData,
         isEmbeddable: true,
         getServiceBadgeHref: mockGetServiceBadgeHref,
-      },
+      }),
+      {}
+    );
+  });
+
+  it('forwards getErrorMarkerHref to FocusedTraceWaterfall when provided', () => {
+    mockUseAbortableAsync.mockReturnValue({ value: mockData, loading: false });
+    const mockGetErrorMarkerHref = jest.fn();
+
+    renderComponent({ getErrorMarkerHref: mockGetErrorMarkerHref });
+
+    expect(mockFocusedTraceWaterfall).toHaveBeenCalledWith(
+      expect.objectContaining({
+        getErrorMarkerHref: mockGetErrorMarkerHref,
+      }),
       {}
     );
   });

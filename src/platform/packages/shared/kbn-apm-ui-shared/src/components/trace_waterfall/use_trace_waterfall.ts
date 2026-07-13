@@ -9,7 +9,7 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { getTimestampUs } from '@kbn/apm-common';
-import type { Error, TraceItem } from '@kbn/apm-types';
+import type { Error, TraceItem, WaterfallGetErrorMarkerHref } from '@kbn/apm-types';
 import { WaterfallLegendType, type IWaterfallLegend } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
@@ -45,12 +45,14 @@ export function useTraceWaterfall({
   isFiltered = false,
   errors,
   onErrorClick,
+  getErrorMarkerHref,
   entryTransactionId,
 }: {
   traceItems: TraceItem[];
   isFiltered?: boolean;
   errors?: Error[];
   onErrorClick?: OnErrorClick;
+  getErrorMarkerHref?: WaterfallGetErrorMarkerHref;
   entryTransactionId?: string;
 }) {
   const waterfall = useMemo(() => {
@@ -91,6 +93,7 @@ export function useTraceWaterfall({
               traceItems: traceWaterfall,
               rootItem,
               onErrorClick,
+              getErrorMarkerHref,
             })
           : [];
 
@@ -117,7 +120,7 @@ export function useTraceWaterfall({
         errorMarks: [],
       };
     }
-  }, [traceItems, isFiltered, errors, onErrorClick, entryTransactionId]);
+  }, [traceItems, isFiltered, errors, onErrorClick, getErrorMarkerHref, entryTransactionId]);
 
   return waterfall;
 }
@@ -127,11 +130,13 @@ function getWaterfallErrorsMarks({
   traceItems,
   rootItem,
   onErrorClick,
+  getErrorMarkerHref,
 }: {
   errors: Error[];
   traceItems: TraceWaterfallItem[];
   rootItem: TraceItem;
   onErrorClick?: OnErrorClick;
+  getErrorMarkerHref?: WaterfallGetErrorMarkerHref;
 }): ErrorMark[] {
   const rootTimestampUs = rootItem.timestampUs;
   const traceItemsByIdMap = new Map(traceItems.map((item) => [item.id, item]));
@@ -157,6 +162,15 @@ function getWaterfallErrorsMarks({
                 docIndex: error.index,
               });
             }
+          : undefined,
+      errorMarkerHref:
+        getErrorMarkerHref && error.error.grouping_key
+          ? getErrorMarkerHref({
+              serviceName: error.service.name,
+              errorGroupId: error.error.grouping_key,
+              traceId: error.trace?.id,
+              transactionId: error.transaction?.id,
+            })
           : undefined,
     };
   });

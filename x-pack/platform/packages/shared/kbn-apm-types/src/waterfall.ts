@@ -18,3 +18,9 @@ export interface IWaterfallLegend {
 
 export type IWaterfallGetRelatedErrorsHref = (docId: string) => string;
 export type WaterfallGetServiceBadgeHref = (serviceName: string) => string;
+export type WaterfallGetErrorMarkerHref = (params: {
+  serviceName: string;
+  errorGroupId: string;
+  traceId?: string;
+  transactionId?: string;
+}) => string;

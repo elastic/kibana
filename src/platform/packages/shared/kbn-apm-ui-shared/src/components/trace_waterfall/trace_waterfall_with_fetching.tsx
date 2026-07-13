@@ -31,6 +31,7 @@ export function TraceWaterfallWithFetching({
   core,
   ebt,
   callApmApi,
+  getErrorMarkerHref,
   ...scrollProps
 }: Props) {
   const getServiceBadgeHref = useGetServiceBadgeHrefFromCore(core, rangeFrom, rangeTo);
@@ -86,6 +87,7 @@ export function TraceWaterfallWithFetching({
       onErrorClick={onErrorClick}
       ebt={ebt}
       getServiceBadgeHref={getServiceBadgeHref}
+      getErrorMarkerHref={getErrorMarkerHref}
       agentMarks={data.agentMarks}
       showCriticalPathControl
       traceDocsTotal={data.traceDocsTotal}

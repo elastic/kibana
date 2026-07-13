@@ -13,6 +13,7 @@ import type {
   Error,
   IWaterfallGetRelatedErrorsHref,
   TraceItem,
+  WaterfallGetErrorMarkerHref,
   WaterfallGetServiceBadgeHref,
 } from '@kbn/apm-types';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
@@ -44,10 +45,16 @@ interface BaseTraceWaterfallProps {
   errors?: Error[];
   showAccordion?: boolean;
   onClick?: OnNodeClick;
+  /** Called when an error badge on a waterfall row is clicked. Receives the trace/span context needed to navigate to or open the error. */
   onErrorClick?: OnErrorClick;
   scrollElement?: Element;
+  /** Builds the href for the "related errors" link on a waterfall row error badge. Receives the span/transaction doc ID and returns a URL string. */
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
+  /** Builds the href for the error message link in the timeline error marker popover.
+   * Receives the service name and error grouping key and returns a URL to the error group detail page.
+   * When provided, the error message in the popover renders as a real anchor link; otherwise falls back to the onErrorClick callback or plain text. */
+  getErrorMarkerHref?: WaterfallGetErrorMarkerHref;
   isEmbeddable?: boolean;
   showLegend?: boolean;
   serviceName?: string;
@@ -87,6 +94,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
     scrollElement,
     getRelatedErrorsHref,
     getServiceBadgeHref,
+    getErrorMarkerHref,
     isEmbeddable = false,
     showLegend = false,
     serviceName,
@@ -119,6 +127,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
       scrollElement={scrollElement}
       getRelatedErrorsHref={getRelatedErrorsHref}
       getServiceBadgeHref={getServiceBadgeHref}
+      getErrorMarkerHref={getErrorMarkerHref}
       isEmbeddable={isEmbeddable}
       showLegend={showLegend}
       serviceName={serviceName}
