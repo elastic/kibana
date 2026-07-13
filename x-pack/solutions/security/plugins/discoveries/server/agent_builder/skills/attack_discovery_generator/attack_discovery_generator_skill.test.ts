@@ -246,7 +246,9 @@ describe('attackDiscoveryGeneratorSkill', () => {
     });
 
     it('documents a minimal live-retrieval tool path when retrieval is already specified', () => {
-      expect(attackDiscoveryGeneratorSkill.content).toContain('Minimal path when retrieval is already specified');
+      expect(attackDiscoveryGeneratorSkill.content).toContain(
+        'Minimal path when retrieval is already specified'
+      );
     });
 
     it('limits status-only turns to get_status as the only tool call', () => {
