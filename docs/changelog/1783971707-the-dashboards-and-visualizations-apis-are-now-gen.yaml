@@ -1,6 +1,8 @@
 type: feature
 prs:
 - https://github.com/elastic/docs-content/pull/7338
+issues:
+ - https://github.com/elastic/roadmap/issues/285
 products:
 - product: cloud-serverless
   target: 2026-07-13
