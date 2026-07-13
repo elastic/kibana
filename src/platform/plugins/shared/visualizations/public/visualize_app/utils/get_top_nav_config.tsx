@@ -47,7 +47,7 @@ import type {
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
 import type { VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
-import { getVizEditorOriginatingAppUrl } from './utils';
+import { getVisEditorOriginatingAppUrl } from './utils';
 
 import { serializeState } from '../../embeddable/state';
 import { hasLibraryItemWithTitle } from '../../utils/saved_objects_utils';
@@ -417,7 +417,7 @@ export const getTopNavConfig = (
               const updatedWithMeta = {
                 ...navigateToLensConfig,
                 embeddableId,
-                vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
+                visEditorOriginatingAppUrl: getVisEditorOriginatingAppUrl(history),
                 legacyEditorOriginatingApp: VisualizeConstants.APP_ID,
                 originatingApp,
                 originatingPath,

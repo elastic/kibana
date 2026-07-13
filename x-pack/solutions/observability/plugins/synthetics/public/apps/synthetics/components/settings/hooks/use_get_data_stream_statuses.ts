@@ -95,6 +95,7 @@ function toMissingDataStream({
       delete_index: true,
       manage_data_stream_lifecycle: true,
       read_failure_store: true,
+      manage: true,
     },
     hidden: false,
     nextGenerationManagedBy: 'Data stream lifecycle',

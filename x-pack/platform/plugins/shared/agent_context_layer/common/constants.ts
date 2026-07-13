@@ -8,5 +8,11 @@
 export const internalApiPath = '/internal/agent_context_layer';
 export const smlSearchPath = `${internalApiPath}/sml/_search`;
 export const smlBasePath = `${internalApiPath}/sml`;
-export const smlByIdPath = `${smlBasePath}/{id}`;
+// Both `type` and `originId` are required: the canonical storage key is `origin.uri = ${type}://${originId}` — bare originId values are not globally unique.
+export const smlByTypeAndOriginIdPath = `${smlBasePath}/{type}/{originId}`;
 export const smlAutocompletePath = `${internalApiPath}/sml/_autocomplete`;
+
+export const MAX_SML_ORIGIN_ID_LENGTH = 512;
+
+export const MAX_SML_TYPE_LENGTH = 256;
+export const MAX_CHUNKS_PER_ORIGIN = 1000;

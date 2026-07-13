@@ -54,6 +54,13 @@ export interface ConnectorMetadata {
   displayName: string;
   icon?: string;
   description: string;
+  /**
+   * Documentation URL for this connector type. Set it when the id-based derivation
+   * wouldn't resolve to the published page (e.g. a differing slug or a third-party site).
+   * Use an empty string when the connector has no dedicated page: it resolves to the
+   * connectors index via the doc-links service. When omitted, the URL is derived from
+   * the connector id.
+   */
   docsUrl?: string;
   minimumLicense: LicenseType;
   isTechnicalPreview?: boolean;
@@ -252,13 +259,29 @@ export interface Transformations {
 // TESTING
 // ============================================================================
 
+export const TEST_CONNECTOR_SUB_ACTION = '_test';
+
+/**
+ * Success = return data; failure = throw (mapped to error by the executor).
+ *
+ * Transitional union: new handlers return arbitrary data (`Record<string, unknown>`,
+ * use `{}` when there's nothing to report), while not-yet-migrated handlers may still
+ * return the legacy `{ ok, message }` shape. Once every handler follows the
+ * throw-on-failure contract this can be narrowed to `Record<string, unknown>`.
+ */
+export type ConnectorTestHandlerResult =
+  | Record<string, unknown>
+  | { ok: boolean; message?: string };
+
 export interface ConnectorTest {
-  handler: (ctx: ActionContext) => Promise<{
-    ok: boolean;
-    message?: string;
-    [key: string]: unknown;
-  }>;
+  /**
+   * Test-tab handler. Return data (use `{}` when there's nothing to report); throw on failure.
+   * A resolved value is treated as success by the executor.
+   */
+  handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
+  /** Flag to opt-in for testing */
+  enabled?: boolean;
 }
 
 // ============================================================================
@@ -267,9 +290,15 @@ export interface ConnectorTest {
 
 export interface AuthTypeDef {
   type: string;
+  /** When true, renders a "Recommended" badge in the picker to highlight the preferred auth option. */
+  isRecommended?: boolean;
+  /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
+  isLegacy?: boolean;
   isExperimental?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {
+    /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
+    label?: string;
     meta?: Record<string, Record<string, unknown>>;
     // can override other Zod fields here in the future if needed
   };

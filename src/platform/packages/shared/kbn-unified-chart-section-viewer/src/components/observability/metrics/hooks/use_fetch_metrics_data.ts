@@ -10,7 +10,12 @@
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import {
+  buildJoinedFilter,
+  buildMetricsInfoQuery,
+  escapeStringValue,
+  hasTransformationalCommand,
+} from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
 import type { Dimension, MetricsESQLResponse, MetricsInfo, ParsedMetrics } from '../../../../types';
 import { useTelemetry } from '../../../../context/ebt_telemetry_context';
@@ -70,10 +75,16 @@ export function useFetchMetricsData({
     [appliedDimensions]
   );
 
-  const metricsInfoQuery = useMemo(
-    () => buildMetricsInfoQuery(esql, appliedDimensionNames),
-    [esql, appliedDimensionNames]
-  );
+  const metricsInfoQuery = useMemo(() => {
+    // `dimension_fields` is the multivalue column returned by METRICS_INFO; this
+    // caller owns that response-schema knowledge, so it builds the post-filter
+    // (AND = metric must declare every selected dimension) and passes it in.
+    const declaredDimensionFilter = buildJoinedFilter(
+      appliedDimensionNames,
+      (dimension) => `MV_CONTAINS(dimension_fields, ${escapeStringValue(dimension)})`
+    );
+    return buildMetricsInfoQuery(esql, appliedDimensionNames, declaredDimensionFilter);
+  }, [esql, appliedDimensionNames]);
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
     async (

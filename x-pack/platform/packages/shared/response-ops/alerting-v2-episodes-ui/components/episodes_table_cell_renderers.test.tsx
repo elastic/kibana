@@ -7,24 +7,16 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import {
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
+  EpisodeSeverityCell,
 } from './episodes_table_cell_renderers';
-import { AlertEpisodeStatusBadges } from './status/status_badges';
-import { AlertEpisodeTags } from './actions/tags';
 
-jest.mock('./status/status_badges', () => ({
-  AlertEpisodeStatusBadges: jest.fn(() => <div data-test-subj="statusBadges" />),
-}));
-jest.mock('./actions/tags', () => ({
-  AlertEpisodeTags: jest.fn(() => <div data-test-subj="episodeTags" />),
-}));
-
-const mockStatusBadges = jest.mocked(AlertEpisodeStatusBadges);
-const mockTags = jest.mocked(AlertEpisodeTags);
+const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 type Rule = FindRulesResponse['items'][number];
 
@@ -48,21 +40,8 @@ const baseCellProps = {
   isExpandable: false,
 };
 
-beforeEach(() => jest.clearAllMocks());
-
 describe('EpisodeStatusCell', () => {
-  it('renders AlertEpisodeStatusBadges', () => {
-    const row = makeRow({
-      'episode.status': 'active',
-      'episode.id': 'ep1',
-      'rule.id': 'r1',
-      group_hash: 'gh1',
-    });
-    render(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
-    expect(screen.getByTestId('statusBadges')).toBeInTheDocument();
-  });
-
-  it('passes status, episodeAction and groupAction derived from row fields', () => {
+  it('renders the status label plus snooze + ack indicators when the row carries those action fields', () => {
     const row = makeRow({
       'episode.status': 'active',
       'episode.id': 'ep1',
@@ -71,54 +50,45 @@ describe('EpisodeStatusCell', () => {
       last_ack_action: 'ack',
       last_snooze_action: 'snooze',
       snooze_expiry: '2025-01-01T00:00:00Z',
-      last_deactivate_action: 'deactivate',
-      last_tags: ['x'],
     });
-    render(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
-    const props = mockStatusBadges.mock.calls[0][0];
-    expect(props.status).toBe('active');
-    expect(props.episodeAction).toMatchObject({ episodeId: 'ep1', lastAckAction: 'ack' });
-    expect(props.groupAction).toMatchObject({
-      groupHash: 'gh1',
-      lastSnoozeAction: 'snooze',
-      snoozeExpiry: '2025-01-01T00:00:00Z',
-      lastDeactivateAction: 'deactivate',
-      tags: ['x'],
-    });
+    renderWithI18n(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
+
+    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(screen.getByTestId('alertEpisodeStatusCellSnoozeIndicator')).toBeInTheDocument();
+    expect(screen.getByTestId('alertEpisodeStatusCellAckIndicator')).toBeInTheDocument();
   });
 
-  it('passes null action fields and empty tags when row fields are absent', () => {
+  it('renders only the status label when the row has no action fields', () => {
     const row = makeRow({
       'episode.status': 'active',
       'episode.id': 'ep1',
       'rule.id': 'r1',
       group_hash: 'gh1',
     });
-    render(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
-    const props = mockStatusBadges.mock.calls[0][0];
-    expect(props.episodeAction).toMatchObject({ lastAckAction: null });
-    expect(props.groupAction).toMatchObject({
-      lastSnoozeAction: null,
-      lastDeactivateAction: null,
-      snoozeExpiry: null,
-      tags: [],
-    });
+    renderWithI18n(<EpisodeStatusCell {...baseCellProps} columnId="episode.status" row={row} />);
+
+    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertEpisodeStatusCellSnoozeIndicator')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertEpisodeStatusCellAckIndicator')).not.toBeInTheDocument();
   });
 });
 
 describe('EpisodeTagsCell', () => {
-  it('passes tags from row last_tags field', () => {
+  it('renders a badge for each tag in the row last_tags field', () => {
     const row = makeRow({ group_hash: 'gh3', last_tags: ['foo', 'bar'] });
-    render(<EpisodeTagsCell {...baseCellProps} row={row} />);
-    const props = mockTags.mock.calls[0][0];
-    expect(props.tags).toEqual(['foo', 'bar']);
-  });
+    renderWithI18n(<EpisodeTagsCell {...baseCellProps} row={row} />);
 
-  it('passes empty tags when last_tags is absent from the row', () => {
-    const row = makeRow({ group_hash: 'gh3' });
-    render(<EpisodeTagsCell {...baseCellProps} row={row} />);
-    const props = mockTags.mock.calls[0][0];
-    expect(props.tags).toEqual([]);
+    expect(screen.getByText('foo')).toBeInTheDocument();
+    expect(screen.getByText('bar')).toBeInTheDocument();
+  });
+});
+
+describe('EpisodeSeverityCell', () => {
+  it('renders the severity badge for the row severity field', () => {
+    const row = makeRow({ severity: 'high' });
+    renderWithI18n(<EpisodeSeverityCell {...baseCellProps} row={row} />);
+
+    expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-high')).toHaveTextContent('High');
   });
 });
 
@@ -143,6 +113,21 @@ describe('EpisodeRuleCell', () => {
       />
     );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('renders the raw ruleId when the rule id is missing from bulk get', () => {
+    const row = makeRow({ 'rule.id': 'deleted-rule' });
+    render(
+      <EpisodeRuleCell
+        {...baseCellProps}
+        columnId="rule.id"
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+        rowHeight={1}
+      />
+    );
+    expect(screen.getByText('deleted-rule')).toBeInTheDocument();
   });
 
   it('renders the raw ruleId when the rule is not in cache', () => {

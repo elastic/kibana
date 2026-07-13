@@ -13,6 +13,7 @@ plugins:
     - cloud_security_posture
     - console
     - contentManagementExamples
+    - content_management
     - cross_cluster_replication
     - custom_branding
     - dashboard
@@ -25,6 +26,7 @@ plugins:
     - dev_tools
     - discover
     - discover_enhanced
+    - discoveries
     - entity_store
     - error_boundary_example
     - event_annotation_listing
@@ -66,7 +68,9 @@ plugins:
     - security_solution
     - serverless_observability
     - share
+    - significant_events
     - slo
+    - snapshot_restore
     - spaces
     - stack_connectors
     - streams
@@ -102,3 +106,4 @@ excluded_configs:
   - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/playwright.config.ts

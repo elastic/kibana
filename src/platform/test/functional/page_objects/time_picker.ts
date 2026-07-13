@@ -137,6 +137,7 @@ export class TimePickerPageObject extends FtrService {
       // The component's toTestSubj replaces all whitespace with underscores
       const presetTestSubj = `dateRangePickerPresetItem-${option.replace(/\s+/g, '_')}`;
       await this.testSubjects.exists(presetTestSubj, { timeout: 5000 });
+      await this.testSubjects.scrollIntoView(presetTestSubj);
       await this.testSubjects.click(presetTestSubj);
       await this.testSubjects.missingOrFail('dateRangePickerPopoverPanel', { timeout: 5000 });
       await this.browser.pressKeys(this.browser.keys.ESCAPE);
@@ -240,8 +241,12 @@ export class TimePickerPageObject extends FtrService {
     const tz = await this.getConfiguredTimezone();
     // Try the legacy format first; fall back to moment's auto-detection
     // so callers can pass dates in any format (e.g. custom dateFormat).
-    const parsed = moment.tz(fromTime, TimePickerPageObject.LEGACY_DATE_FORMAT, true, tz);
-    const expectedFromISO = (parsed.isValid() ? parsed : moment.tz(fromTime, tz)).toISOString();
+    const parsedFrom = moment.tz(fromTime, TimePickerPageObject.LEGACY_DATE_FORMAT, true, tz);
+    const parsedTo = moment.tz(toTime, TimePickerPageObject.LEGACY_DATE_FORMAT, true, tz);
+    const expectedFromISO = (
+      parsedFrom.isValid() ? parsedFrom : moment.tz(fromTime, tz)
+    ).toISOString();
+    const expectedToISO = (parsedTo.isValid() ? parsedTo : moment.tz(toTime, tz)).toISOString();
     await this.retry.waitFor(`date range to be set to ${rangeText}`, async () => {
       // Tooltips can sometimes hide the picker, so move mouse directly to it instead of direct click
       const picker = await this.testSubjects.find('dateRangePickerControlButton');
@@ -259,7 +264,8 @@ export class TimePickerPageObject extends FtrService {
       this.log.debug(
         `Validating date range - expected ISO: '${expectedFromISO}', actual: '${actualRange}'`
       );
-      return actualRange != null && actualRange.includes(expectedFromISO);
+      const expectedRange = `${expectedFromISO} to ${expectedToISO}`;
+      return actualRange === expectedRange;
     });
     // Ensure the popover is fully closed before returning, so it doesn't
     // overlay other elements and intercept clicks.

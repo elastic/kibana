@@ -431,10 +431,12 @@ export function getFunctionForInlineCast(castingType: InlineCastingType): string
   return inlineCastsMapping[castingType];
 }
 
+// TODO: Remove the hardcoded TO_TEXT handling once Elasticsearch adds text -> to_text
+// to the ES|QL inline_cast.json metadata.
 export function isTypeConversionFunction(functionName: string): boolean {
   const lower = functionName.toLowerCase();
+
   return (
-    // TO_TEXT is the only conversion function not covered by inlineCastsMapping (text is not an inline cast type).
     lower === EsqlFunctionNames.TO_TEXT || Object.values<string>(inlineCastsMapping).includes(lower)
   );
 }

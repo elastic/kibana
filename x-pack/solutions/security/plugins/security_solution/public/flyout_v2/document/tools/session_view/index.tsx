@@ -14,10 +14,10 @@ import { type DataTableRecord } from '@kbn/discover-utils';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
-import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
+import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import type { SessionViewConfig } from '../../../../../common/types/session_view';
-import { DocumentFlyoutWrapper } from '../../main/document_flyout_wrapper';
+import { useFlyoutApi } from '../../../use_flyout_api';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -73,6 +73,7 @@ export const SessionView: FC<SessionViewProps> = memo(
     const store = useStore();
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
 
     const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
@@ -88,34 +89,13 @@ export const SessionView: FC<SessionViewProps> = memo(
 
     const openAlertDetails = useCallback(
       (alertId: string, alertIndex: string, onClose?: () => void) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <DocumentFlyoutWrapper
-                documentId={alertId}
-                indexName={alertIndex}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            session: 'inherit',
-          }
-        ),
-      [
-        defaultFlyoutProperties,
-        history,
-        onAlertUpdated,
-        overlays,
-        renderCellActions,
-        services,
-        store,
-      ]
+        openDocumentFlyoutFromIndexAsChild({
+          documentId: alertId,
+          indexName: alertIndex,
+          renderCellActions,
+          onAlertUpdated,
+        }),
+      [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
 
     const handleJumpToEvent = useCallback(
@@ -211,9 +191,9 @@ export const SessionView: FC<SessionViewProps> = memo(
             padding-block: ${euiTheme.size.s} !important;
           `}
         >
-          <ToolsFlyoutHeader
-            hit={hit}
+          <DocumentToolsFlyoutHeader
             title={TITLE}
+            hit={hit}
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}
           />

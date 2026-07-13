@@ -1685,6 +1685,22 @@ describe('SearchInterceptor', () => {
         expect(mockCoreSetup.http.post).toBeCalledTimes(1);
       });
 
+      test('should not return from cache when only approximation differs', async () => {
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
+
+        searchInterceptor
+          .search(basicReq, { sessionId, approximation: false })
+          .subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toBeCalledTimes(1);
+
+        searchInterceptor
+          .search(basicReq, { sessionId, approximation: true })
+          .subscribe({ next, error, complete });
+        await timeTravel(10);
+        expect(mockCoreSetup.http.post).toBeCalledTimes(2);
+      });
+
       test('aborting a search that didnt get any response should retrigger search', async () => {
         mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
 
@@ -2489,6 +2505,59 @@ describe('SearchInterceptor', () => {
         const requestBody = JSON.parse(requestOptions.body as string);
         expect(requestBody.projectRouting).toBeUndefined();
       });
+    });
+  });
+
+  describe('approximation parameter handling', () => {
+    const getSearchInterceptor = () =>
+      new SearchInterceptor({
+        toasts: mockCoreSetup.notifications.toasts,
+        startServices: new Promise((resolve) => {
+          resolve([
+            mockCoreStart,
+            {
+              inspector: {} as unknown as InspectorStart,
+            } as unknown as SearchServiceStartDependencies,
+            {},
+          ]);
+        }),
+        uiSettings: mockCoreSetup.uiSettings,
+        http: mockCoreSetup.http,
+        executionContext: mockCoreSetup.executionContext,
+        session: sessionService,
+        searchConfig: getMockSearchConfig({}),
+      });
+
+    beforeEach(() => {
+      mockCoreSetup.http.post.mockResolvedValue(getMockSearchResponse());
+    });
+
+    test('sends approximation to ES when passed', async () => {
+      searchInterceptor = getSearchInterceptor();
+
+      await searchInterceptor
+        .search({ params: {} }, { approximation: true, strategy: ESQL_ASYNC_SEARCH_STRATEGY })
+        .toPromise();
+
+      const requestOptions = (
+        mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+      )[1];
+      const requestBody = JSON.parse(requestOptions.body as string);
+      expect(requestBody.approximation).toBe(true);
+    });
+
+    test('does not send approximation when not passed', async () => {
+      searchInterceptor = getSearchInterceptor();
+
+      await searchInterceptor
+        .search({ params: {} }, { strategy: ESQL_ASYNC_SEARCH_STRATEGY })
+        .toPromise();
+
+      const requestOptions = (
+        mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+      )[1];
+      const requestBody = JSON.parse(requestOptions.body as string);
+      expect(requestBody.approximation).toBeUndefined();
     });
   });
 

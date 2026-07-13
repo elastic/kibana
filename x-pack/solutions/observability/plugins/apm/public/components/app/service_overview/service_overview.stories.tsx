@@ -108,8 +108,18 @@ Example.parameters = {
         return { currentPeriod: [], previousPeriod: [] };
       if (endpoint.endsWith('/service_overview_instances/detailed_statistics')) return EMPTY_STATS;
       if (endpoint.endsWith('/dependencies')) return { serviceDependencies: [] };
+      if (endpoint.endsWith('/service-map'))
+        return {
+          spans: [],
+          servicesData: [],
+          anomalies: { mlJobIds: [], serviceAnomalies: [] },
+          tracesCount: 0,
+        };
       return {};
     },
-    () => EMPTY_STATS
+    (endpoint) => {
+      if (endpoint.endsWith('/service-map/service_badges')) return { alerts: [], slos: [] };
+      return EMPTY_STATS;
+    }
   ),
 };

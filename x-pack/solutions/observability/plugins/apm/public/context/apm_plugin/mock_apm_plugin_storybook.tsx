@@ -4,66 +4,64 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { createCallApmApiV2 } from '@kbn/apm-api-shared';
 import type { CoreStart } from '@kbn/core/public';
+import { PerformanceContext } from '@kbn/ebt-tools';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
+import { UI_SETTINGS as DATA_UI_SETTINGS } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/observability-shared-plugin/public/hooks/use_kibana_ui_settings';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
-import { PerformanceContext } from '@kbn/ebt-tools';
 import type { Router } from '@kbn/typed-react-router-config';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { createMemoryHistory } from 'history';
 import { merge, noop } from 'lodash';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable, of } from 'rxjs';
-import { getMockApiCache } from '../../services/rest/call_apm_api_spy';
-import type { ITelemetryClient } from '../../services/telemetry/types';
+import { setApmInternalServices } from '../../plugin';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
+import { storybookMockHttp } from '../../services/rest/storybook_mock_http';
+import type { ITelemetryClient } from '../../services/telemetry/types';
 import type { APMServiceContextValue } from '../apm_service/apm_service_context';
 import { APMServiceContext } from '../apm_service/apm_service_context';
+import { ChartPointerEventContextProvider } from '../chart_pointer_event/chart_pointer_event_context';
 import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_range_metadata_context_provider';
 import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time_range_metadata_context';
+import type { ConfigSchema } from '../..';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
 
-/**
- * Routes a real HTTP call (pathname + method) to the matching registered
- * mockApmApiCallResponse entry.  Needed because webpack live-binding means
- * the spyObj-based spy never intercepts useFetcher calls in the browser;
- * intercepting at the core.http level is the only reliable hook.
- *
- * Cache keys look like:
- *   "GET /internal/apm/services/{serviceName}/transactions/charts/latency"
- *   "GET /api/apm/services/{serviceName}/annotation/search 2023-10-31"
- *
- * We take parts[1] as the URL template (strips optional trailing version date),
- * convert {param} segments to [^/]+ and test against the actual pathname.
- */
-function findMockHandler(httpMethod: string, pathname: string): Function | undefined {
-  const cache = getMockApiCache();
-  for (const key of Object.keys(cache)) {
-    const parts = key.split(' ');
-    if (parts[0].toUpperCase() !== httpMethod.toUpperCase()) continue;
-    const urlTemplate = parts[1]; // e.g. /internal/apm/services/{serviceName}/...
-    const regexStr = '^' + urlTemplate.replace(/\{[^}]+\}/g, '[^/]+') + '$';
-    if (new RegExp(regexStr).test(pathname)) return cache[key];
-  }
-  return undefined;
-}
+const mockConfig: ConfigSchema = {
+  serviceMapEnabled: true,
+  ui: {
+    enabled: false,
+  },
+  latestAgentVersionsUrl: '',
+  serverlessOnboarding: false,
+  managedServiceUrl: '',
+  featureFlags: {
+    agentConfigurationAvailable: true,
+    configurableIndicesAvailable: true,
+    infrastructureTabAvailable: true,
+    infraUiAvailable: true,
+    migrationToFleetAvailable: true,
+    sourcemapApiAvailable: true,
+    storageExplorerAvailable: true,
+    // to be removed in https://github.com/elastic/kibana/issues/221904
+    profilingIntegrationAvailable: false,
+    ruleFormV2Enabled: false,
+  },
+  serverless: { enabled: false },
+};
 
-function makeMockHttpMethod(httpMethod: string) {
-  return async (pathname: string, options?: Record<string, unknown>) => {
-    const handler = findMockHandler(httpMethod, pathname);
-    if (handler) {
-      return handler({ params: { query: options?.query, body: options?.body } });
-    }
-    return undefined;
-  };
-}
+const mockPerformanceApi = {
+  onPageReady: () => {},
+  onPageRefreshStart: () => {},
+};
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -87,7 +85,14 @@ const uiSettings: Record<string, unknown> = {
     value: 100000,
   },
   [enableInspectEsQueries]: false,
+  [DATA_UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS]: true,
+  [DATA_UI_SETTINGS.QUERY_STRING_OPTIONS]: {},
+  [DATA_UI_SETTINGS.DATEFORMAT_TZ]: 'Browser',
+  [DATA_UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: false,
 };
+
+const getUiSetting = (key: string, defaultValue?: unknown) =>
+  key in uiSettings ? uiSettings[key] : defaultValue;
 
 const urlService = new UrlService({
   navigate: async () => {},
@@ -102,7 +107,6 @@ const mockPlugin = {
   ml: {
     locator,
   },
-  alerting: {},
   data: {
     query: {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
@@ -123,9 +127,9 @@ const mockPlugin = {
 export const mockCore = {
   application: {
     capabilities: {
-      apm: { save: true, 'alerting:show': true, 'alerting:save': true },
-      ml: { canGetJobs: true },
-      slo: { read: true, write: true },
+      apm: {},
+      ml: {},
+      slo: { read: true },
       savedObjectsManagement: {},
       dashboard_v2: { show: true },
     },
@@ -148,18 +152,7 @@ export const mockCore = {
       security: { apiKeyServiceSettings: '' },
     },
   },
-  http: {
-    basePath: {
-      prepend: (path: string) => `/basepath${path}`,
-      get: () => '/basepath',
-    },
-    get: makeMockHttpMethod('GET'),
-    post: makeMockHttpMethod('POST'),
-    put: makeMockHttpMethod('PUT'),
-    delete: makeMockHttpMethod('DELETE'),
-    patch: makeMockHttpMethod('PATCH'),
-    fetch: async () => undefined,
-  },
+  http: storybookMockHttp,
   i18n: {
     Context: ({ children }: { children: ReactNode }) => children,
   },
@@ -171,8 +164,15 @@ export const mockCore = {
     },
   },
   uiSettings: {
-    get: (key: string) => uiSettings[key],
-    get$: (key: string) => of(mockCore.uiSettings.get(key)),
+    get: getUiSetting,
+    get$: (key: string, defaultValue?: unknown) => of(getUiSetting(key, defaultValue)),
+  },
+  settings: {
+    client: {
+      get: getUiSetting,
+      get$: (key: string, defaultValue?: unknown) => of(getUiSetting(key, defaultValue)),
+      set: async () => true,
+    },
   },
   unifiedSearch: {
     autocomplete: {
@@ -213,11 +213,7 @@ export const storybookTelemetry: ITelemetryClient = {
   reportServiceMapAddedToDashboard: () => {},
   reportMetricsCalloutDateRangeSelected: () => {},
   reportMetricsCalloutLoaded: () => {},
-};
-
-const mockPerformanceApi = {
-  onPageReady: () => {},
-  onPageRefreshStart: () => {},
+  reportServiceFlyoutViewed: () => {},
 };
 
 const mockUnifiedSearchBar = {
@@ -229,6 +225,7 @@ const mockUnifiedSearchBar = {
 export const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
+  config: mockConfig,
   unifiedSearch: mockUnifiedSearchBar,
   observabilityAIAssistant: {
     service: { setScreenContext: () => noop },
@@ -244,24 +241,26 @@ export const mockApmPluginContext = {
 
 export function MockApmPluginStorybook({
   children,
-  router,
   apmContext = {} as ApmPluginContextValue,
   routePath,
+  router,
   serviceContextValue = {} as APMServiceContextValue,
 }: {
   children?: ReactNode;
+  routePath?: string;
   /**
    * The typed router to provide. Callers must pass `apmRouter` (or another router) explicitly:
    * importing `apmRouter` here would eagerly load the full route tree, which breaks per-test
-   * `jest.mock()` hoisting in tests that mock modules reachable from the route config.
+   * `jest.mock()` of any module reachable from a route component.
    */
   router: Router<any>;
-  routePath?: string;
   apmContext?: ApmPluginContextValue;
   serviceContextValue?: APMServiceContextValue;
 }) {
   const contextMock = merge({}, mockApmPluginContext, apmContext);
   createCallApmApi(contextMock.core);
+  const callApmApi = createCallApmApiV2(contextMock.core, { cpsManager: undefined });
+  setApmInternalServices({ callApmApi });
   const KibanaReactContext = createKibanaReactContext(
     merge({}, contextMock.core, {
       telemetry: storybookTelemetry,
@@ -293,17 +292,19 @@ export function MockApmPluginStorybook({
       <EuiThemeProvider darkMode={false}>
         <KibanaReactContext.Provider>
           <ApmPluginContext.Provider value={contextMock}>
-            <APMServiceContext.Provider value={serviceContextValue}>
-              <RouterProvider router={router as any} history={history}>
-                <PerformanceContext.Provider value={mockPerformanceApi}>
+            <PerformanceContext.Provider value={mockPerformanceApi}>
+              <APMServiceContext.Provider value={serviceContextValue}>
+                <RouterProvider router={router} history={history}>
                   <MockTimeRangeContextProvider>
                     <ApmTimeRangeMetadataContextProvider>
-                      {children}
+                      <ChartPointerEventContextProvider>
+                        {children}
+                      </ChartPointerEventContextProvider>
                     </ApmTimeRangeMetadataContextProvider>
                   </MockTimeRangeContextProvider>
-                </PerformanceContext.Provider>
-              </RouterProvider>
-            </APMServiceContext.Provider>
+                </RouterProvider>
+              </APMServiceContext.Provider>
+            </PerformanceContext.Provider>
           </ApmPluginContext.Provider>
         </KibanaReactContext.Provider>
       </EuiThemeProvider>

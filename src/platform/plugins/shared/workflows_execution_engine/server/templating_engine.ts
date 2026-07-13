@@ -8,10 +8,16 @@
  */
 
 import type { Template } from 'liquidjs';
-import { createWorkflowLiquidEngine } from '@kbn/workflows';
+import { i18n } from '@kbn/i18n';
+import type { LiquidSettings } from '@kbn/workflows';
+import { createWorkflowLiquidEngine, pickObjectFields } from '@kbn/workflows';
 
 type TemplateVariableSegment = string | number;
 type TemplateVariableSegments = TemplateVariableSegment[];
+
+interface WorkflowTemplatingEngineOptions {
+  liquidSettings?: LiquidSettings;
+}
 
 export class WorkflowTemplatingEngine {
   /**
@@ -21,15 +27,33 @@ export class WorkflowTemplatingEngine {
   private static readonly TEMPLATE_SYNTAX_PATTERN = /\{\{|\{%/;
   private static readonly PARSED_TEMPLATE_CACHE_SIZE = 64;
   private static readonly VARIABLE_SEGMENTS_CACHE_SIZE = 64;
+  private static readonly LIQUID_LIMIT_ERRORS = new Set([
+    'memory alloc limit exceeded',
+    'parse length limit exceeded',
+    'render limit exceeded',
+    'template render limit exceeded',
+  ]);
+  private static readonly LIQUID_LIMIT_ERROR_MESSAGE = i18n.translate(
+    'workflowsExecutionEngine.templatingEngine.liquidLimitExceededErrorMessage',
+    {
+      defaultMessage:
+        'Liquid template rendering exceeded a workflow limit. Reduce the template size, simplify loops or filters, reduce the rendered output size, or override the limit in workflow settings and try again.',
+    }
+  );
 
   private readonly engine;
   private readonly parsedTemplateCache = new Map<string, Template[]>();
   private readonly variableSegmentsCache = new Map<string, TemplateVariableSegments[] | null>();
 
-  constructor() {
+  constructor(options?: WorkflowTemplatingEngineOptions) {
+    const { liquidSettings } = options ?? {};
+
     this.engine = createWorkflowLiquidEngine({
       strictFilters: true,
       strictVariables: false,
+      parseLimit: liquidSettings?.parseLimit,
+      renderLimit: liquidSettings?.renderLimit,
+      memoryLimit: liquidSettings?.memoryLimit,
     });
 
     // register json_parse filter that converts JSON string to object
@@ -50,6 +74,17 @@ export class WorkflowTemplatingEngine {
         return value;
       }
       return Object.entries(value).map(([k, v]) => ({ key: k, value: v }));
+    });
+
+    // register pick filter that keeps only the given dotted-path fields of an object,
+    // preserving nested structure and value types. Accepts a single array of paths
+    // (e.g. `| pick: consts.fields`) or several string args (e.g. `| pick: "a", "b"`).
+    this.engine.registerFilter('pick', (value: unknown, ...args: unknown[]): unknown => {
+      const paths = args.length === 1 && Array.isArray(args[0]) ? args[0] : args;
+      return pickObjectFields(
+        value,
+        paths.filter((path): path is string => typeof path === 'string')
+      );
     });
   }
 
@@ -136,7 +171,11 @@ export class WorkflowTemplatingEngine {
       const errorMessage = error instanceof Error ? error.message : String(error);
       // customer-facing error message without the default line number and column number
       const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
-      throw new Error(customerFacingErrorMessage);
+      throw new Error(
+        WorkflowTemplatingEngine.LIQUID_LIMIT_ERRORS.has(customerFacingErrorMessage)
+          ? WorkflowTemplatingEngine.LIQUID_LIMIT_ERROR_MESSAGE
+          : customerFacingErrorMessage
+      );
     }
   }
 

@@ -6,12 +6,12 @@
  */
 
 import React, { useMemo, useRef } from 'react';
+import type { RefObject } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { editDataLifecycleFlyoutStrings as strings } from './strings';
 import type { DataLifecycleMethod, IlmPolicyForFlyout } from './types';
 import { getIlmPolicySummaryStats } from './ilm_policy_summary_stats';
 import { EditDataLifecycleFlyoutBodyContent } from './edit_data_lifecycle_flyout_body_content';
-import { editDataLifecycleFlyoutBodyStyles as styles } from './styles';
 
 const EMPTY_ILM_POLICIES: IlmPolicyForFlyout[] = [];
 
@@ -34,8 +34,11 @@ export interface EditDataLifecycleFlyoutBodyMethodConfig {
 export interface EditDataLifecycleFlyoutBodyIlmConfig {
   policies: IlmPolicyForFlyout[];
   selectedPolicyName?: string;
+  isLoadingInherited?: boolean;
   onSelect: (policyName: string) => void;
   onInspect?: (policyName: string) => void;
+  canManage?: boolean;
+  hasExistingPolicy?: boolean;
 }
 
 export interface EditDataLifecycleFlyoutBodyProps {
@@ -73,6 +76,10 @@ export const EditDataLifecycleFlyoutBody = (props: EditDataLifecycleFlyoutBodyPr
 
   const ilmPolicies = props.ilm?.policies ?? EMPTY_ILM_POLICIES;
   const selectedIlmPolicyName = props.ilm?.selectedPolicyName;
+  const canManageIlm = props.ilm?.canManage ?? true;
+  const hasExistingIlmPolicy = props.ilm?.hasExistingPolicy ?? false;
+  const ilmReadOnly = inheritLifecycle || !canManageIlm;
+  const ilmCardDisabled = !canManageIlm && !hasExistingIlmPolicy;
 
   const dataStreamLifecycleContentForUi = props.dataStreamLifecycleContent ? (
     // Force a remount when toggling inheritance so uncontrolled inputs can't keep a locally edited value.
@@ -119,20 +126,27 @@ export const EditDataLifecycleFlyoutBody = (props: EditDataLifecycleFlyoutBodyPr
   }, [retentionOptions, pinnedPolicyName]);
 
   const visibleRetentionOptions = useMemo(() => {
-    if (!inheritLifecycle) return sortedRetentionOptions;
-    // When inheriting, only the inherited policy should appear. The empty-list
-    // case (no inherited policy) is handled upstream by a no-policy panel.
-    return sortedRetentionOptions.filter((option) => option.name === selectedIlmPolicyName);
-  }, [inheritLifecycle, sortedRetentionOptions, selectedIlmPolicyName]);
+    if (!ilmReadOnly) return sortedRetentionOptions;
+    if (!selectedIlmPolicyName) return [];
+    // In read-only mode only the applied policy should appear.
+    const matching = sortedRetentionOptions.filter(
+      (option) => option.name === selectedIlmPolicyName
+    );
+
+    return matching.length > 0 ? matching : [{ name: selectedIlmPolicyName }];
+  }, [ilmReadOnly, sortedRetentionOptions, selectedIlmPolicyName]);
+
+  const flyoutScrollContainerRef = useRef<HTMLDivElement>(null);
+  const flyoutScrollContainerRefForContent: RefObject<HTMLElement | null> | undefined =
+    showLifecycleMethodPicker ? flyoutScrollContainerRef : undefined;
 
   return (
-    <EuiFlyoutBody
-      css={
-        lifecycleMethod === 'ilm' && showLifecycleMethodPicker ? styles.overflowHidden : undefined
-      }
-    >
+    <EuiFlyoutBody scrollContainerRef={flyoutScrollContainerRef}>
       <EditDataLifecycleFlyoutBodyContent
+        flyoutScrollContainerRef={flyoutScrollContainerRefForContent}
         inheritLifecycle={inheritLifecycle}
+        ilmReadOnly={ilmReadOnly}
+        ilmCardDisabled={ilmCardDisabled}
         lifecycleMethod={lifecycleMethod}
         showLifecycleMethodPicker={showLifecycleMethodPicker}
         inherit={
@@ -151,6 +165,7 @@ export const EditDataLifecycleFlyoutBody = (props: EditDataLifecycleFlyoutBodyPr
             ? {
                 retentionOptions: visibleRetentionOptions,
                 selectedPolicyName: selectedIlmPolicyName,
+                isLoadingInherited: props.ilm.isLoadingInherited,
                 onSelect: props.ilm.onSelect,
                 onInspect: props.ilm.onInspect,
               }

@@ -11,9 +11,11 @@ import { StepCategory } from '@kbn/workflows';
 import { JsonModelSchema } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { i18n } from '@kbn/i18n';
 import {
+  CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
   normalizeOptionalConnectorOrInferenceParam,
 } from '../resolve_connector_or_inference_id';
+import { normalizeOptionalStringParam } from '../normalize_optional_string_param';
 
 /**
  * Step type ID for the agentBuilder run agent step.
@@ -74,6 +76,19 @@ export const InputSchema = z.object({
     .string()
     .optional()
     .describe('Optional existing conversation ID to continue a previous conversation.'),
+  /**
+   * Optional arbitrary key-value tags stored with the underlying agent execution, searchable
+   * via the execution service's findExecutions. Lets a caller that doesn't yet know the
+   * execution's (auto-generated) id look it up by a tag it does know — e.g. the workflow
+   * execution id — to follow the agent's live event stream (tool calls, reasoning, custom UI
+   * events) while this step is still running, instead of waiting for the step to complete.
+   */
+  metadata: z
+    .record(z.string().max(512), z.string().max(1024))
+    .optional()
+    .describe(
+      'Optional key-value tags stored with the underlying agent execution and searchable via findExecutions. Callers that need to discover the execution id before this step completes (e.g. to follow it live) can tag it with a value they already know and look it up by that tag.'
+    ),
 });
 
 /**
@@ -98,8 +113,17 @@ export const OutputSchema = z.object({
   metadata: z
     .object({
       usage: z.object({
+        connectorId: z
+          .string()
+          .max(512)
+          .optional()
+          .describe('Id of the LLM connector used for this step, when reported by the model.'),
         inputTokens: z.number().describe('Total input tokens consumed across all LLM rounds.'),
         outputTokens: z.number().describe('Total output tokens produced across all LLM rounds.'),
+        cachedTokens: z
+          .number()
+          .optional()
+          .describe('Cached input tokens reused across all LLM rounds. Subset of inputTokens.'),
         totalTokens: z.number().describe('Sum of input and output tokens across all LLM rounds.'),
       }),
     })
@@ -145,6 +169,16 @@ export const ConfigSchema = z
         'The inference endpoint ID to use. Mutually exclusive with `connector-id`; defaults apply when both are omitted.'
       ),
     /**
+     * Model Management > Feature settings feature id to resolve the connector from.
+     * Mutually exclusive with `connector-id` and `inference-id`.
+     */
+    'connector-id-by-feature': z
+      .string()
+      .optional()
+      .describe(
+        'The Model Management feature id whose configured connector should be used. Mutually exclusive with `connector-id` and `inference-id`.'
+      ),
+    /**
      * When true, create/persist a conversation and associate it with the executing user.
      * If conversation_id is provided, this can auto-create the conversation with that id if it does not exist.
      */
@@ -179,11 +213,19 @@ export const ConfigSchema = z
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
     const inference = normalizeOptionalConnectorOrInferenceParam(cfg['inference-id']);
+    const connectorByFeature = normalizeOptionalStringParam(cfg['connector-id-by-feature']);
     if (connector !== undefined && inference !== undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
         path: ['connector-id'],
+      });
+    }
+    if (connectorByFeature !== undefined && (connector !== undefined || inference !== undefined)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
+        path: ['connector-id-by-feature'],
       });
     }
     if (cfg['aggregate-by'] !== undefined && cfg['plugin-id'] === undefined) {
@@ -248,6 +290,16 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
   inference-id: "my-inference-endpoint-id"
   with:
     message: "Summarize the findings."
+\`\`\``,
+
+      `## Use the connector configured for a Model Management feature (mutually exclusive with connector-id / inference-id)
+\`\`\`yaml
+- name: investigate
+  type: ${RunAgentStepTypeId}
+  agent-id: "platform.sig_events.investigation"
+  connector-id-by-feature: "significant_events_investigation"
+  with:
+    message: "Investigate the significant events in this stream."
 \`\`\``,
 
       `## Create a conversation and reuse it in a follow-up step
@@ -321,6 +373,22 @@ When a schema is provided, the agent's response will be available in \`output.st
         - sentiment
         - confidence
 \`\`\``,
+
+      `## Follow the agent execution live while the step is still running
+\`\`\`yaml
+- name: investigate
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  with:
+    metadata:
+      workflow_execution_id: "{{ execution.id }}"
+    message: "Investigate the root cause of the issue."
+\`\`\`
+
+Tagging the execution with a value the caller already knows (such as the workflow execution id)
+lets the caller look up the agent execution's (auto-generated) id via the execution service's
+findExecutions, then follow its live event stream — tool calls, reasoning, and custom UI events —
+before this step returns.`,
     ],
   },
   inputSchema: InputSchema,
