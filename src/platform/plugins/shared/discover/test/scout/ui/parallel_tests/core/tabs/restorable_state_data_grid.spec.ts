@@ -50,80 +50,63 @@ spaceTest.describe(
       expect(await dataGrid.isSelectedRowsMenuVisible()).toBe(true);
     });
 
-    spaceTest('restores density setting per tab', async ({ pageObjects }) => {
-      const { dataGrid, discover, unifiedTabs } = pageObjects;
+    spaceTest(
+      'restores display settings and in-table search per tab',
+      async ({ page, pageObjects }) => {
+        const { dataGrid, discover, unifiedTabs } = pageObjects;
+        const searchTerm = 'Sep 22, 2015 @ 18:16:13.025';
+        const updatedActiveMatch = '2/3';
 
-      await dataGrid.openGridDisplaySettings();
-      expect(await dataGrid.getCurrentDensityValue()).toBe('Compact');
+        expect(await dataGrid.getCurrentPageNumber()).toBe('1');
 
-      await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
-      await dataGrid.openGridDisplaySettings();
-      await dataGrid.setDensityValue('Normal');
-      expect(await dataGrid.getCurrentDensityValue()).toBe('Normal');
+        await dataGrid.openGridDisplaySettings();
+        await dataGrid.setDensityValue('Expanded');
+        await dataGrid.setRowHeight('Auto');
+        expect(await dataGrid.getCurrentDensityValue()).toBe('Expanded');
+        expect(await dataGrid.getCurrentRowHeight('row')).toBe('Auto');
+        await page.keyboard.press('Escape');
 
-      await unifiedTabs.selectTab(0);
-      await discover.waitUntilTabIsLoaded();
-      await dataGrid.openGridDisplaySettings();
-      expect(await dataGrid.getCurrentDensityValue()).toBe('Compact');
+        await dataGrid.runInTableSearch(searchTerm);
+        await dataGrid.goToNextInTableSearchMatch();
+        expect(await dataGrid.getInTableSearchTerm()).toBe(searchTerm);
+        await expect(dataGrid.getInTableSearchMatchesCounter()).toHaveText(updatedActiveMatch);
+        expect(await dataGrid.getCurrentPageNumber()).toBe('3');
 
-      await unifiedTabs.selectTab(1);
-      await discover.waitUntilTabIsLoaded();
-      await dataGrid.openGridDisplaySettings();
-      expect(await dataGrid.getCurrentDensityValue()).toBe('Normal');
-    });
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.openGridDisplaySettings();
+        await dataGrid.setDensityValue('Normal');
+        await dataGrid.setRowHeight('Custom');
+        expect(await dataGrid.getCurrentDensityValue()).toBe('Normal');
+        expect(await dataGrid.getCurrentRowHeight('row')).toBe('Custom');
+        await page.keyboard.press('Escape');
+        expect(await dataGrid.getInTableSearchTerm()).toBeNull();
+        expect(await dataGrid.getCurrentPageNumber()).toBe('1');
 
-    spaceTest('restores row height setting per tab', async ({ pageObjects }) => {
-      const { dataGrid, discover, unifiedTabs } = pageObjects;
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.openGridDisplaySettings();
+        expect(await dataGrid.getCurrentDensityValue()).toBe('Expanded');
+        expect(await dataGrid.getCurrentRowHeight('row')).toBe('Auto');
+        await page.keyboard.press('Escape');
+        expect(await dataGrid.getInTableSearchTerm()).toBe(searchTerm);
+        await expect(dataGrid.getInTableSearchMatchesCounter()).toHaveText(updatedActiveMatch);
+        expect(await dataGrid.getCurrentPageNumber()).toBe('3');
 
-      await dataGrid.openGridDisplaySettings();
-      expect(await dataGrid.getCurrentRowHeight('row')).toBe('Custom');
+        await dataGrid.closeInTableSearch();
+        expect(await dataGrid.getInTableSearchTerm()).toBeNull();
+        expect(await dataGrid.getCurrentPageNumber()).toBe('3');
 
-      await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
-      await dataGrid.openGridDisplaySettings();
-      await dataGrid.setRowHeight('Auto');
-      expect(await dataGrid.getCurrentRowHeight('row')).toBe('Auto');
-
-      await unifiedTabs.selectTab(0);
-      await discover.waitUntilTabIsLoaded();
-      await dataGrid.openGridDisplaySettings();
-      expect(await dataGrid.getCurrentRowHeight('row')).toBe('Custom');
-
-      await unifiedTabs.selectTab(1);
-      await discover.waitUntilTabIsLoaded();
-      await dataGrid.openGridDisplaySettings();
-      expect(await dataGrid.getCurrentRowHeight('row')).toBe('Auto');
-    });
-
-    spaceTest('restores in-table search per tab', async ({ pageObjects }) => {
-      const { dataGrid, discover, unifiedTabs } = pageObjects;
-      const searchTerm = 'Sep 22, 2015 @ 18:16:13.025';
-      const updatedActiveMatch = '2/3';
-
-      expect(await dataGrid.getCurrentPageNumber()).toBe('1');
-
-      await dataGrid.runInTableSearch(searchTerm);
-      await dataGrid.goToNextInTableSearchMatch();
-      expect(await dataGrid.getInTableSearchTerm()).toBe(searchTerm);
-      await expect(dataGrid.getInTableSearchMatchesCounter()).toHaveText(updatedActiveMatch);
-      expect(await dataGrid.getCurrentPageNumber()).toBe('3');
-
-      await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
-      expect(await dataGrid.getInTableSearchTerm()).toBeNull();
-      expect(await dataGrid.getCurrentPageNumber()).toBe('1');
-
-      await unifiedTabs.selectTab(0);
-      await discover.waitUntilTabIsLoaded();
-      expect(await dataGrid.getInTableSearchTerm()).toBe(searchTerm);
-      await expect(dataGrid.getInTableSearchMatchesCounter()).toHaveText(updatedActiveMatch);
-      expect(await dataGrid.getCurrentPageNumber()).toBe('3');
-
-      await dataGrid.closeInTableSearch();
-      expect(await dataGrid.getInTableSearchTerm()).toBeNull();
-      expect(await dataGrid.getCurrentPageNumber()).toBe('3');
-    });
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await dataGrid.openGridDisplaySettings();
+        expect(await dataGrid.getCurrentDensityValue()).toBe('Normal');
+        expect(await dataGrid.getCurrentRowHeight('row')).toBe('Custom');
+        await page.keyboard.press('Escape');
+        expect(await dataGrid.getInTableSearchTerm()).toBeNull();
+        expect(await dataGrid.getCurrentPageNumber()).toBe('1');
+      }
+    );
 
     spaceTest('restores comparison mode per tab', async ({ pageObjects }) => {
       const { dataGrid, discover, unifiedTabs } = pageObjects;
