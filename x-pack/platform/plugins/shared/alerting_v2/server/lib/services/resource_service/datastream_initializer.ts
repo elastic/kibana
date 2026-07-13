@@ -14,6 +14,12 @@ import type { IResourceInitializer } from './resource_manager';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
+// Max Java long. Installing at the highest priority keeps our managed template
+// from being rejected for tying with a user template whose patterns overlap
+// `.rule-events*` / `.alert-actions*` (ES only rejects overlapping templates at
+// equal priority). Stringified to avoid JS number precision loss.
+const INDEX_TEMPLATE_PRIORITY = `${9223372036854775807n}` as unknown as number;
+
 export class DatastreamInitializer implements IResourceInitializer {
   constructor(
     private readonly logger: Logger,
@@ -28,7 +34,7 @@ export class DatastreamInitializer implements IResourceInitializer {
       version: this.resourceDefinition.version,
       template: {
         aliases: {},
-        priority: 500,
+        priority: INDEX_TEMPLATE_PRIORITY,
         mappings: this.resourceDefinition.mappings,
         lifecycle: this.resourceDefinition.lifecycle,
         settings: {

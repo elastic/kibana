@@ -20,6 +20,7 @@ import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
@@ -71,6 +72,10 @@ export interface AttackFlyoutProps {
    * and notifies the surface that opened the flyout to refresh as well.
    */
   onAttackUpdated: () => void;
+  /**
+   * Renderer for cell actions in this flyout and nested alert flyouts.
+   */
+  renderCellActions?: CellActionRenderer;
 }
 
 /**
@@ -78,80 +83,86 @@ export interface AttackFlyoutProps {
  * from `AttackFlyoutWrapper` (which owns the single data fetch) and renders the
  * header, overview tab, and footer.
  */
-export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyoutProps) => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+export const AttackFlyout = memo(
+  ({ hit, attack, onAttackUpdated, renderCellActions = cellActionRenderer }: AttackFlyoutProps) => {
+    const { services } = useKibana();
+    const { overlays } = services;
+    const store = useStore();
+    const history = useHistory();
+    const isInSecurityApp = useIsInSecurityApp();
+    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
-  // The selected tab is persisted to localStorage, sharing the key with the legacy
-  // attack flyout so the user's preference carries across both implementations.
-  const { selectedTabId, setSelectedTabId } = useTabs<AttackFlyoutTabId>({
-    validTabIds: VALID_TAB_IDS,
-    storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
-  });
+    // The selected tab is persisted to localStorage, sharing the key with the legacy
+    // attack flyout so the user's preference carries across both implementations.
+    const { selectedTabId, setSelectedTabId } = useTabs<AttackFlyoutTabId>({
+      validTabIds: VALID_TAB_IDS,
+      storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
+    });
 
-  const onShowNotes = useCallback(() => {
-    overlays.openSystemFlyout(
-      flyoutProviders({
-        services,
-        store,
-        history,
-        children: <NotesDetails hit={hit} />,
-      }),
-      { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+    const onShowNotes = useCallback(() => {
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: <NotesDetails hit={hit} />,
+        }),
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+      );
+    }, [history, historyKey, hit, overlays, services, store]);
+
+    return (
+      <>
+        <EuiFlyoutHeader data-test-subj="attack-flyout-header">
+          <Header hit={hit} onAttackUpdated={onAttackUpdated} onShowNotes={onShowNotes} />
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody data-test-subj="attack-flyout-body">
+          <EuiTabs>
+            <EuiTab
+              isSelected={selectedTabId === 'overview'}
+              onClick={() => setSelectedTabId('overview')}
+              data-test-subj={OVERVIEW_TAB_TEST_ID}
+            >
+              {OVERVIEW_TAB_LABEL}
+            </EuiTab>
+            <EuiTab
+              isSelected={selectedTabId === 'table'}
+              onClick={() => setSelectedTabId('table')}
+              data-test-subj={TABLE_TAB_TEST_ID}
+            >
+              {TABLE_TAB_LABEL}
+            </EuiTab>
+            <EuiTab
+              isSelected={selectedTabId === 'json'}
+              onClick={() => setSelectedTabId('json')}
+              data-test-subj={JSON_TAB_TEST_ID}
+            >
+              {JSON_TAB_LABEL}
+            </EuiTab>
+          </EuiTabs>
+          <EuiSpacer size="m" />
+          {selectedTabId === 'table' ? (
+            <TableTab hit={hit} renderCellActions={renderCellActions} />
+          ) : selectedTabId === 'json' ? (
+            <SharedJsonTab
+              value={hit.raw as unknown as Record<string, unknown>}
+              showFooterOffset={false}
+              data-test-subj={JSON_TAB_CONTENT_TEST_ID}
+            />
+          ) : (
+            <OverviewTab
+              hit={hit}
+              onAttackUpdated={onAttackUpdated}
+              renderCellActions={renderCellActions}
+            />
+          )}
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter data-test-subj="attack-flyout-footer">
+          <Footer attack={attack} hit={hit} onAttackUpdated={onAttackUpdated} />
+        </EuiFlyoutFooter>
+      </>
     );
-  }, [history, historyKey, hit, overlays, services, store]);
-
-  return (
-    <>
-      <EuiFlyoutHeader data-test-subj="attack-flyout-header">
-        <Header hit={hit} onAttackUpdated={onAttackUpdated} onShowNotes={onShowNotes} />
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj="attack-flyout-body">
-        <EuiTabs>
-          <EuiTab
-            isSelected={selectedTabId === 'overview'}
-            onClick={() => setSelectedTabId('overview')}
-            data-test-subj={OVERVIEW_TAB_TEST_ID}
-          >
-            {OVERVIEW_TAB_LABEL}
-          </EuiTab>
-          <EuiTab
-            isSelected={selectedTabId === 'table'}
-            onClick={() => setSelectedTabId('table')}
-            data-test-subj={TABLE_TAB_TEST_ID}
-          >
-            {TABLE_TAB_LABEL}
-          </EuiTab>
-          <EuiTab
-            isSelected={selectedTabId === 'json'}
-            onClick={() => setSelectedTabId('json')}
-            data-test-subj={JSON_TAB_TEST_ID}
-          >
-            {JSON_TAB_LABEL}
-          </EuiTab>
-        </EuiTabs>
-        <EuiSpacer size="m" />
-        {selectedTabId === 'table' ? (
-          <TableTab hit={hit} renderCellActions={cellActionRenderer} />
-        ) : selectedTabId === 'json' ? (
-          <SharedJsonTab
-            value={hit.raw as unknown as Record<string, unknown>}
-            showFooterOffset={false}
-            data-test-subj={JSON_TAB_CONTENT_TEST_ID}
-          />
-        ) : (
-          <OverviewTab hit={hit} onAttackUpdated={onAttackUpdated} />
-        )}
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter data-test-subj="attack-flyout-footer">
-        <Footer attack={attack} hit={hit} onAttackUpdated={onAttackUpdated} />
-      </EuiFlyoutFooter>
-    </>
-  );
-});
+  }
+);
 
 AttackFlyout.displayName = 'AttackFlyout';
