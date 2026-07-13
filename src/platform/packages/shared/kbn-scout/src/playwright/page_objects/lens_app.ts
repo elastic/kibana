@@ -56,6 +56,34 @@ export class LensApp {
     await expect(this.lensApp).toBeVisible();
   }
 
+  async openNewEditor() {
+    await this.page.gotoApp('lens');
+    await this.waitForLensApp();
+  }
+
+  async switchDataPanelDataView(dataViewTitle: string) {
+    const dataViewSwitch = this.page.testSubj.locator('lns-dataView-switch-link');
+    if ((await dataViewSwitch.innerText()).trim() === dataViewTitle) {
+      return;
+    }
+
+    await dataViewSwitch.click();
+    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeVisible();
+    await this.page.testSubj.locator('indexPattern-switcher--input').fill(dataViewTitle);
+
+    const dataViewOption = this.page.testSubj
+      .locator('indexPattern-switcher')
+      .locator(`[data-test-subj="dataView-${dataViewTitle}"]`)
+      .or(
+        this.page
+          .locator('[data-test-subj="indexPattern-switcher"]')
+          .locator(`[title="${dataViewTitle}"]`)
+      );
+    await dataViewOption.click();
+    await expect(this.page.testSubj.locator('indexPattern-switcher')).toBeHidden();
+    await expect(this.page.testSubj.locator('fieldListLoading')).toBeHidden({ timeout: 30_000 });
+  }
+
   /**
    * Switches the active visualization via the chart switcher.
    *
@@ -291,7 +319,7 @@ export class LensApp {
     await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
   }
 
-  private async selectOperation(operation: string, isPreviousIncompatible = false) {
+  async selectOperation(operation: string, isPreviousIncompatible = false) {
     const operationSelector = isPreviousIncompatible
       ? `lns-indexPatternDimension-${operation} incompatible`
       : `lns-indexPatternDimension-${operation}`;
@@ -503,6 +531,17 @@ export class LensApp {
     }
 
     return data;
+  }
+
+  async getMessageListTexts(severity: 'warning' | 'error') {
+    await this.page.testSubj.locator('lens-message-list-trigger').click();
+
+    const messageSelector = this.page.testSubj.locator(`lens-message-list-${severity}`);
+    await messageSelector.waitFor({ state: 'visible' });
+    const messages = await messageSelector.allInnerTexts();
+
+    await this.page.testSubj.locator('lens-message-list-trigger').click();
+    return messages;
   }
 
   /** Opens the palette panel flyout for the currently active dimension. */
