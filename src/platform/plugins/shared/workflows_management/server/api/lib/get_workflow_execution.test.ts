@@ -13,6 +13,8 @@ import type {
   WorkflowExecutionsDataAccess,
 } from '@kbn/workflows/server/data_access_layer';
 import {
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+  createMockGetExecutionsByIdsResponse,
   createMockStepExecutionsDataAccess,
   createMockWorkflowExecutionsDataAccess,
 } from '@kbn/workflows/server/data_access_layer';
@@ -39,6 +41,11 @@ describe('getWorkflowExecution', () => {
     concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
   };
 
+  const mockStepGetByIds = (documents: unknown[]) =>
+    createMockGetExecutionsByIdsResponse(documents as any, {
+      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+    });
+
   beforeEach(() => {
     mockWorkflowExecutionsDataAccess = createMockWorkflowExecutionsDataAccess();
     mockStepExecutionsDataAccess = createMockStepExecutionsDataAccess();
@@ -48,11 +55,15 @@ describe('getWorkflowExecution', () => {
 
   describe('source excludes with mget (stepExecutionIds present)', () => {
     beforeEach(() => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue([baseExecutionDoc] as any);
-      mockStepExecutionsDataAccess.getByIds.mockResolvedValue([
-        { stepId: 's1', status: 'completed', globalExecutionIndex: 0 },
-        { stepId: 's2', status: 'completed', globalExecutionIndex: 1 },
-      ] as any);
+      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([baseExecutionDoc] as any)
+      );
+      mockStepExecutionsDataAccess.getByIds.mockResolvedValue(
+        mockStepGetByIds([
+          { stepId: 's1', status: 'completed', globalExecutionIndex: 0 },
+          { stepId: 's2', status: 'completed', globalExecutionIndex: 1 },
+        ])
+      );
     });
 
     it('should not pass _source_excludes when both includeInput and includeOutput are true', async () => {
@@ -132,9 +143,11 @@ describe('getWorkflowExecution', () => {
 
   describe('source excludes with search fallback (no stepExecutionIds)', () => {
     beforeEach(() => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue([
-        { ...baseExecutionDoc, stepExecutionIds: undefined },
-      ] as any);
+      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          { ...baseExecutionDoc, stepExecutionIds: undefined },
+        ] as any)
+      );
       mockStepExecutionsDataAccess.search.mockResolvedValue({ hits: { hits: [] } } as any);
     });
 
@@ -175,7 +188,9 @@ describe('getWorkflowExecution', () => {
 
   describe('basic behavior', () => {
     it('should return null when document is not found', async () => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue([]);
+      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([])
+      );
 
       const result = await getWorkflowExecution({
         ...baseParams,
@@ -188,9 +203,11 @@ describe('getWorkflowExecution', () => {
     });
 
     it('should return null when spaceId does not match', async () => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue([
-        { ...baseExecutionDoc, spaceId: 'other-space' },
-      ] as any);
+      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          { ...baseExecutionDoc, spaceId: 'other-space' },
+        ] as any)
+      );
 
       const result = await getWorkflowExecution({
         ...baseParams,
@@ -203,21 +220,25 @@ describe('getWorkflowExecution', () => {
     });
 
     it('should return the execution DTO with step executions', async () => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue([baseExecutionDoc] as any);
-      mockStepExecutionsDataAccess.getByIds.mockResolvedValue([
-        {
-          stepId: 's1',
-          status: 'completed',
-          globalExecutionIndex: 1,
-          output: { result: 'ok' },
-        },
-        {
-          stepId: 's2',
-          status: 'completed',
-          globalExecutionIndex: 0,
-          input: { arg: 1 },
-        },
-      ] as any);
+      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([baseExecutionDoc] as any)
+      );
+      mockStepExecutionsDataAccess.getByIds.mockResolvedValue(
+        mockStepGetByIds([
+          {
+            stepId: 's1',
+            status: 'completed',
+            globalExecutionIndex: 1,
+            output: { result: 'ok' },
+          },
+          {
+            stepId: 's2',
+            status: 'completed',
+            globalExecutionIndex: 0,
+            input: { arg: 1 },
+          },
+        ])
+      );
 
       const result = await getWorkflowExecution({
         ...baseParams,
@@ -234,10 +255,10 @@ describe('getWorkflowExecution', () => {
     });
 
     it('should include workflow document version when present on the execution', async () => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue([
-        { ...baseExecutionDoc, version: 7 },
-      ] as any);
-      mockStepExecutionsDataAccess.getByIds.mockResolvedValue([]);
+      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([{ ...baseExecutionDoc, version: 7 }] as any)
+      );
+      mockStepExecutionsDataAccess.getByIds.mockResolvedValue(mockStepGetByIds([]));
 
       const result = await getWorkflowExecution({
         ...baseParams,
@@ -250,8 +271,10 @@ describe('getWorkflowExecution', () => {
     });
 
     it('should omit workflow document version when absent on legacy executions', async () => {
-      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue([baseExecutionDoc] as any);
-      mockStepExecutionsDataAccess.getByIds.mockResolvedValue([]);
+      mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([baseExecutionDoc] as any)
+      );
+      mockStepExecutionsDataAccess.getByIds.mockResolvedValue(mockStepGetByIds([]));
 
       const result = await getWorkflowExecution({
         ...baseParams,

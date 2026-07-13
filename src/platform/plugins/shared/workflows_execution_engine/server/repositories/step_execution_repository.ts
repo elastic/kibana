@@ -73,10 +73,11 @@ export class StepExecutionRepository {
     sourceIncludes?: StepExecutionField[],
     sourceExcludes?: StepExecutionField[]
   ): Promise<EsWorkflowStepExecution[]> {
-    return this.stepExecutionsDataAccess.getByIds(stepExecutionIds, {
+    const { items } = await this.stepExecutionsDataAccess.getByIds(stepExecutionIds, {
       sourceIncludes,
       sourceExcludes,
     });
+    return items.map(({ document }) => document);
   }
 
   /**

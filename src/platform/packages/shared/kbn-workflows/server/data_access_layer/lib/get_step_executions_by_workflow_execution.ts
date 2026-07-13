@@ -29,7 +29,8 @@ export const getStepExecutionsByWorkflowExecution = async ({
   sourceExcludes,
 }: GetStepExecutionsByWorkflowExecutionParams): Promise<EsWorkflowStepExecution[]> => {
   if (stepExecutionIds?.length) {
-    return stepExecutionsDataAccess.getByIds(stepExecutionIds, { sourceExcludes });
+    const { items } = await stepExecutionsDataAccess.getByIds(stepExecutionIds, { sourceExcludes });
+    return items.map(({ document }) => document);
   }
 
   const response = await stepExecutionsDataAccess.search({

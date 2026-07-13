@@ -62,12 +62,12 @@ const fetchChildDocs = async (
   childIds: string[],
   spaceId: string
 ): Promise<Map<string, EsWorkflowExecution>> => {
-  const docs = await workflowExecutionsDataAccess.getByIds(childIds, {
+  const { items } = await workflowExecutionsDataAccess.getByIds(childIds, {
     sourceIncludes: CHILD_SOURCE_INCLUDES,
   });
 
   const result = new Map<string, EsWorkflowExecution>();
-  for (const doc of docs) {
+  for (const { document: doc } of items) {
     if (doc.spaceId === spaceId) {
       result.set(doc.id, doc);
     }
@@ -94,9 +94,10 @@ export const getChildWorkflowExecutions = async ({
   parentExecutionId,
   spaceId,
 }: GetChildWorkflowExecutionsParams): Promise<ChildWorkflowExecutionItem[]> => {
-  const [parentDoc] = await workflowExecutionsDataAccess.getByIds([parentExecutionId], {
+  const { items: parentItems } = await workflowExecutionsDataAccess.getByIds([parentExecutionId], {
     sourceIncludes: [...PARENT_SOURCE_INCLUDES],
   });
+  const parentDoc = parentItems[0]?.document;
 
   if (!parentDoc || parentDoc.spaceId !== spaceId) {
     return [];

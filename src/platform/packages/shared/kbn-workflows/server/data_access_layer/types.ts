@@ -113,9 +113,13 @@ export type StepExecutionSourceProjectionField =
 export type GetWorkflowExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflowExecution>;
 export type GetStepExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflowStepExecution>;
 
-export interface BulkItem<TDocument extends { id: string }> extends DocumentVersionFields {
+export interface BulkItem<TDocument extends { id: string }> {
   operation: 'create' | 'update' | 'upsert';
   document: Partial<TDocument> & { id: string };
+  /** Backing index; resolved by the data access implementation when omitted. */
+  index?: string;
+  seqNo?: number;
+  primaryTerm?: number;
   retryOnConflict?: number;
 }
 

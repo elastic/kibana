@@ -33,7 +33,8 @@ export class WorkflowExecutionRepository {
     workflowExecutionId: string,
     spaceId: string
   ): Promise<EsWorkflowExecution | null> {
-    const [doc] = await this.workflowExecutionsDataAccess.getByIds([workflowExecutionId]);
+    const { items } = await this.workflowExecutionsDataAccess.getByIds([workflowExecutionId]);
+    const doc = items[0]?.document;
 
     // Verify spaceId matches for security/multi-tenancy
     if (!doc || doc.spaceId !== spaceId) {

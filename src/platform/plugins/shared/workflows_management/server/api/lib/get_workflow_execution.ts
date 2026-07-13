@@ -44,7 +44,8 @@ export const getWorkflowExecution = async ({
   try {
     // Use mget by id for O(1) lookup performance instead of search
     // This is critical for reducing ES CPU load from frequent UI polling
-    const [doc] = await workflowExecutionsDataAccess.getByIds([workflowExecutionId]);
+    const { items } = await workflowExecutionsDataAccess.getByIds([workflowExecutionId]);
+    const doc = items[0]?.document;
 
     // Verify spaceId matches for security/multi-tenancy
     if (!doc || doc.spaceId !== spaceId) {

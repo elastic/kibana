@@ -13,7 +13,10 @@ import {
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
 import type { WorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
-import { createMockWorkflowExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import {
+  createMockGetExecutionsByIdsResponse,
+  createMockWorkflowExecutionsDataAccess,
+} from '@kbn/workflows/server/data_access_layer';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 
 const asBulkResponse = (value: unknown) => value as Awaited<ReturnType<WorkflowExecutionsDataAccess['bulk']>>;
@@ -148,9 +151,11 @@ describe('WorkflowExecutionRepository', () => {
         })
       );
 
-      workflowExecutionsDataAccess.getByIds.mockResolvedValueOnce([
-        { id: '1', workflowId: 'test-workflow', spaceId: 'space1' } as any,
-      ]);
+      workflowExecutionsDataAccess.getByIds.mockResolvedValueOnce(
+        createMockGetExecutionsByIdsResponse([
+          { id: '1', workflowId: 'test-workflow', spaceId: 'space1' } as any,
+        ])
+      );
 
       const result = await repository.getWorkflowExecutionById('1', 'space2');
 
@@ -160,7 +165,9 @@ describe('WorkflowExecutionRepository', () => {
 
     it('should return document when spaceId matches', async () => {
       const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
-      workflowExecutionsDataAccess.getByIds.mockResolvedValueOnce([workflowExecution as any]);
+      workflowExecutionsDataAccess.getByIds.mockResolvedValueOnce(
+        createMockGetExecutionsByIdsResponse([workflowExecution as any])
+      );
 
       const result = await repository.getWorkflowExecutionById('1', 'space1');
 
@@ -169,7 +176,9 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should return null when document is not found', async () => {
-      workflowExecutionsDataAccess.getByIds.mockResolvedValueOnce([]);
+      workflowExecutionsDataAccess.getByIds.mockResolvedValueOnce(
+        createMockGetExecutionsByIdsResponse([])
+      );
 
       const result = await repository.getWorkflowExecutionById('non-existent', 'space1');
 

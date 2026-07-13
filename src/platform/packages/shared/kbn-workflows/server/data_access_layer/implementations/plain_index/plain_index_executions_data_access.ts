@@ -14,8 +14,6 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { executeScriptUpdate } from '../../lib/execute_script_update';
 import { sharedBulk } from '../../lib/shared_bulk';
 import type {
-  BulkItem,
-  BulkItemResponse,
   BulkRequestOptions,
   BulkResponse,
   ExecutionsCountRequest,
@@ -116,7 +114,7 @@ export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
   public bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
     const itemsWithIndex = request.items.map((item) => ({
       ...item,
-      index: this.deps.indexName,
+      index: item.index ?? this.deps.indexName,
     }));
     return sharedBulk(this.deps.esClient, {
       ...request,

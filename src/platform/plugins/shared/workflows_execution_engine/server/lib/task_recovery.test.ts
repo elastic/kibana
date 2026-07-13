@@ -11,6 +11,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
+  createMockGetExecutionsByIdsResponse,
   createMockStepExecutionsDataAccess,
   createMockWorkflowExecutionsDataAccess,
 } from '@kbn/workflows/server/data_access_layer';
@@ -41,7 +42,9 @@ const mockExecutionLookup = (
   workflowExecutionsDataAccess: jest.Mocked<WorkflowExecutionsDataAccess>,
   execution: EsWorkflowExecution | null
 ) => {
-  workflowExecutionsDataAccess.getByIds.mockResolvedValue(execution ? [execution] : []);
+  workflowExecutionsDataAccess.getByIds.mockResolvedValue(
+    createMockGetExecutionsByIdsResponse(execution ? [execution] : [])
+  );
 };
 
 const expectFailedWorkflowUpdate = (

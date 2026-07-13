@@ -8,7 +8,10 @@
  */
 
 import type { StepExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
-import { createMockStepExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
+import {
+  createMockGetExecutionsByIdsResponse,
+  createMockStepExecutionsDataAccess,
+} from '@kbn/workflows/server/data_access_layer';
 import { StepExecutionRepository } from './step_execution_repository';
 
 describe('StepExecutionRepository', () => {
@@ -104,7 +107,9 @@ describe('StepExecutionRepository', () => {
         { id: 'step-1', stepId: 'test-step-1', status: 'completed' },
         { id: 'step-2', stepId: 'test-step-2', status: 'running' },
       ];
-      stepExecutionsDataAccess.getByIds.mockResolvedValue(stepExecutions as any);
+      stepExecutionsDataAccess.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse(stepExecutions as any)
+      );
 
       const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2']);
 
@@ -116,7 +121,7 @@ describe('StepExecutionRepository', () => {
     });
 
     it('should pass sourceIncludes and sourceExcludes to getByIds', async () => {
-      stepExecutionsDataAccess.getByIds.mockResolvedValue([]);
+      stepExecutionsDataAccess.getByIds.mockResolvedValue(createMockGetExecutionsByIdsResponse([]));
 
       await underTest.getStepExecutionsByIds(['step-1'], ['id', 'output'], ['error']);
 

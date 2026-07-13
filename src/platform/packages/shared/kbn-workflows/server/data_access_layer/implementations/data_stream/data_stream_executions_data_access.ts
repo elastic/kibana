@@ -16,7 +16,6 @@ import type {
   BulkRequestOptions,
   BulkResponse,
   DocumentVersionFields,
-  ExecutionDataStreamClient,
   ExecutionsCountRequest,
   ExecutionsDataAccess,
   ExecutionsDeleteByQueryRequest,
@@ -34,7 +33,6 @@ const notImplemented = (method: string): never => {
 export interface DataStreamExecutionsDataAccessDeps<TExecution extends { id: string }> {
   esClient: ElasticsearchClient;
   dataStreamName: string;
-  dataStreamClient: ExecutionDataStreamClient;
   logger?: Logger;
   normalizeExecutionOnGet?: (
     execution: TExecution,

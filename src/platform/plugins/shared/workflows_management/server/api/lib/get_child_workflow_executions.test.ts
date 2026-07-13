@@ -12,6 +12,8 @@ import type {
   WorkflowExecutionsDataAccess,
 } from '@kbn/workflows/server/data_access_layer';
 import {
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+  createMockGetExecutionsByIdsResponse,
   createMockStepExecutionsDataAccess,
   createMockWorkflowExecutionsDataAccess,
 } from '@kbn/workflows/server/data_access_layer';
@@ -20,6 +22,14 @@ import { getChildWorkflowExecutions } from './get_child_workflow_executions';
 describe('getChildWorkflowExecutions', () => {
   let mockWorkflowExecutionsDataAccess: jest.Mocked<WorkflowExecutionsDataAccess>;
   let mockStepExecutionsDataAccess: jest.Mocked<StepExecutionsDataAccess>;
+
+  const mockWorkflowGetByIds = (documents: unknown[]) =>
+    createMockGetExecutionsByIdsResponse(documents as any);
+
+  const mockStepGetByIds = (documents: unknown[]) =>
+    createMockGetExecutionsByIdsResponse(documents as any, {
+      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+    });
 
   const baseParams = {
     parentExecutionId: 'parent-exec-1',
@@ -71,7 +81,7 @@ describe('getChildWorkflowExecutions', () => {
   });
 
   it('should return empty array when parent execution is not found', async () => {
-    mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue([]);
+    mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(mockWorkflowGetByIds([]));
 
     const result = await getChildWorkflowExecutions({
       ...baseParams,
@@ -83,9 +93,9 @@ describe('getChildWorkflowExecutions', () => {
   });
 
   it('should return empty array when spaceId does not match', async () => {
-    mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue([
-      { ...parentDoc, spaceId: 'other-space' },
-    ] as any);
+    mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(
+      mockWorkflowGetByIds([{ ...parentDoc, spaceId: 'other-space' }])
+    );
 
     const result = await getChildWorkflowExecutions({
       ...baseParams,
@@ -97,11 +107,10 @@ describe('getChildWorkflowExecutions', () => {
   });
 
   it('should return empty array when no workflow.execute steps exist', async () => {
-    mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue([parentDoc] as any);
-    mockStepExecutionsDataAccess.getByIds.mockResolvedValue([
-      createRegularStep('step-1'),
-      createRegularStep('step-2'),
-    ] as any);
+    mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(mockWorkflowGetByIds([parentDoc]));
+    mockStepExecutionsDataAccess.getByIds.mockResolvedValue(
+      mockStepGetByIds([createRegularStep('step-1'), createRegularStep('step-2')])
+    );
 
     const result = await getChildWorkflowExecutions({
       ...baseParams,
@@ -114,10 +123,10 @@ describe('getChildWorkflowExecutions', () => {
   });
 
   it('should skip workflow.execute steps that are not in terminal status', async () => {
-    mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue([parentDoc] as any);
-    mockStepExecutionsDataAccess.getByIds.mockResolvedValue([
-      createWorkflowExecuteStep('step-1', 'child-exec-1', 'running'),
-    ] as any);
+    mockWorkflowExecutionsDataAccess.getByIds.mockResolvedValue(mockWorkflowGetByIds([parentDoc]));
+    mockStepExecutionsDataAccess.getByIds.mockResolvedValue(
+      mockStepGetByIds([createWorkflowExecuteStep('step-1', 'child-exec-1', 'running')])
+    );
 
     const result = await getChildWorkflowExecutions({
       ...baseParams,
@@ -130,35 +139,39 @@ describe('getChildWorkflowExecutions', () => {
 
   it('should fetch child executions and their steps', async () => {
     mockWorkflowExecutionsDataAccess.getByIds
-      .mockResolvedValueOnce([parentDoc] as any)
-      .mockResolvedValueOnce([
-        {
-          id: 'child-exec-1',
-          spaceId: 'default',
-          workflowId: 'child-wf-1',
-          workflowDefinition: { name: 'Child Workflow' },
-          status: 'completed',
-          stepExecutionIds: ['child-step-1', 'child-step-2'],
-        },
-      ] as any);
+      .mockResolvedValueOnce(mockWorkflowGetByIds([parentDoc]))
+      .mockResolvedValueOnce(
+        mockWorkflowGetByIds([
+          {
+            id: 'child-exec-1',
+            spaceId: 'default',
+            workflowId: 'child-wf-1',
+            workflowDefinition: { name: 'Child Workflow' },
+            status: 'completed',
+            stepExecutionIds: ['child-step-1', 'child-step-2'],
+          },
+        ])
+      );
     mockStepExecutionsDataAccess.getByIds
-      .mockResolvedValueOnce([createWorkflowExecuteStep('step-1', 'child-exec-1')] as any)
-      .mockResolvedValueOnce([
-        {
-          id: 'child-step-1',
-          stepId: 'do_something',
-          stepType: 'action',
-          status: 'completed',
-          workflowRunId: 'child-exec-1',
-          spaceId: 'default',
-          scopeStack: [],
-          globalExecutionIndex: 0,
-          stepExecutionIndex: 0,
-          topologicalIndex: 0,
-          startedAt: '2024-01-01T00:00:00Z',
-          workflowId: 'child-wf-1',
-        },
-      ] as any);
+      .mockResolvedValueOnce(mockStepGetByIds([createWorkflowExecuteStep('step-1', 'child-exec-1')]))
+      .mockResolvedValueOnce(
+        mockStepGetByIds([
+          {
+            id: 'child-step-1',
+            stepId: 'do_something',
+            stepType: 'action',
+            status: 'completed',
+            workflowRunId: 'child-exec-1',
+            spaceId: 'default',
+            scopeStack: [],
+            globalExecutionIndex: 0,
+            stepExecutionIndex: 0,
+            topologicalIndex: 0,
+            startedAt: '2024-01-01T00:00:00Z',
+            workflowId: 'child-wf-1',
+          },
+        ])
+      );
 
     const result = await getChildWorkflowExecutions({
       ...baseParams,
@@ -182,11 +195,11 @@ describe('getChildWorkflowExecutions', () => {
 
   it('should use sourceIncludes for parent and child workflow execution lookups', async () => {
     mockWorkflowExecutionsDataAccess.getByIds
-      .mockResolvedValueOnce([parentDoc] as any)
-      .mockResolvedValueOnce([]);
-    mockStepExecutionsDataAccess.getByIds.mockResolvedValue([
-      createWorkflowExecuteStep('step-1', 'child-exec-1'),
-    ] as any);
+      .mockResolvedValueOnce(mockWorkflowGetByIds([parentDoc]))
+      .mockResolvedValueOnce(mockWorkflowGetByIds([]));
+    mockStepExecutionsDataAccess.getByIds.mockResolvedValue(
+      mockStepGetByIds([createWorkflowExecuteStep('step-1', 'child-exec-1')])
+    );
 
     await getChildWorkflowExecutions({
       ...baseParams,
@@ -204,19 +217,21 @@ describe('getChildWorkflowExecutions', () => {
 
   it('should filter out child executions from a different space', async () => {
     mockWorkflowExecutionsDataAccess.getByIds
-      .mockResolvedValueOnce([parentDoc] as any)
-      .mockResolvedValueOnce([
-        {
-          id: 'child-exec-1',
-          spaceId: 'other-space',
-          workflowId: 'child-wf-1',
-          status: 'completed',
-          stepExecutionIds: [],
-        },
-      ] as any);
-    mockStepExecutionsDataAccess.getByIds.mockResolvedValue([
-      createWorkflowExecuteStep('step-1', 'child-exec-1'),
-    ] as any);
+      .mockResolvedValueOnce(mockWorkflowGetByIds([parentDoc]))
+      .mockResolvedValueOnce(
+        mockWorkflowGetByIds([
+          {
+            id: 'child-exec-1',
+            spaceId: 'other-space',
+            workflowId: 'child-wf-1',
+            status: 'completed',
+            stepExecutionIds: [],
+          },
+        ])
+      );
+    mockStepExecutionsDataAccess.getByIds.mockResolvedValue(
+      mockStepGetByIds([createWorkflowExecuteStep('step-1', 'child-exec-1')])
+    );
 
     const result = await getChildWorkflowExecutions({
       ...baseParams,
