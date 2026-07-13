@@ -16,8 +16,9 @@ project:
   channel: ''
   owner: '@elastic/kibana-presentation'
   sourceRoot: src/platform/packages/shared/as-code/export-utils
+dependsOn: []
 tags:
-  - shared-common
+  - shared-browser
   - package
   - prod
   - group-platform

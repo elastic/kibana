@@ -38,6 +38,9 @@ dependsOn:
   - '@kbn/core-lifecycle-browser'
   - '@kbn/visualizations-common'
   - '@kbn/react-kibana-context-render'
+  - '@kbn/share-plugin'
+  - '@kbn/as-code-export-utils'
+  - '@kbn/lens-common-2'
 tags:
   - plugin
   - prod
