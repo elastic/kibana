@@ -16,11 +16,11 @@ import { RedirectTo } from '../../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
+import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamOverview } from '../../../stream_detail_overview';
 import { Wrapper } from './wrapper';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { PendingRootDataStreamCallout } from './pending_root_data_stream_callout';
-import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { WiredStreamBadge } from '../../../stream_badges';
@@ -72,11 +72,7 @@ export function WiredStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
-
-  const { processing } = useStreamsDetailManagementTabs({
-    definition,
-    refreshDefinition,
-  });
+  const isProcessingEnabled = !definition.replicated;
   const {
     features: { canvas },
   } = useStreamsPrivileges();
@@ -213,7 +209,21 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Partitioning',
       }),
     },
-    ...(processing ? { processing } : {}),
+    ...(isProcessingEnabled
+      ? {
+          processing: {
+            content: (
+              <StreamDetailEnrichment
+                definition={definition}
+                refreshDefinition={refreshDefinition}
+              />
+            ),
+            label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+              defaultMessage: 'Processing',
+            }),
+          },
+        }
+      : {}),
     schema: {
       content: (
         <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />

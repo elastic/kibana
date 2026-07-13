@@ -18,10 +18,10 @@ import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
+import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../../stream_badges';
 import { StreamOverview } from '../../../stream_detail_overview';
-import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
@@ -77,10 +77,7 @@ export function ClassicStreamDetailManagement({
     features: { canvas, queryStreams },
   } = useStreamsPrivileges();
 
-  const { processing } = useStreamsDetailManagementTabs({
-    definition,
-    refreshDefinition,
-  });
+  const isProcessingEnabled = !definition.replicated;
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
     defaultMessage: 'Streams',
@@ -162,8 +159,15 @@ export function ClassicStreamDetailManagement({
     };
   }
 
-  if (processing && !definition.replicated) {
-    tabs.processing = processing;
+  if (isProcessingEnabled) {
+    tabs.processing = {
+      content: (
+        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+        defaultMessage: 'Processing',
+      }),
+    };
   }
 
   tabs.schema = {
