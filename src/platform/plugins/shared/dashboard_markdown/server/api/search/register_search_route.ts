@@ -44,7 +44,9 @@ export function registerSearchRoute(
       },
       validate: {
         request: {
-          query: schema.object({ ...omit(asCodeSearchRequestSchema.getPropSchemas(), 'tags') }),
+          query: schema.object({
+            ...omit(asCodeSearchRequestSchema.getPropSchemas(), ['tags', 'excluded_tags']),
+          }),
         },
         response: {
           200: {
