@@ -43,7 +43,12 @@ const waitForDataFederationWritesToSucceed = async (kbnClient: KbnClient): Promi
 };
 
 test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.classic }, () => {
-  test('creates, edits, and deletes a dataset', async ({ browserAuth, kbnClient, page, pageObjects }) => {
+  test('creates, edits, and deletes a dataset', async ({
+    browserAuth,
+    kbnClient,
+    page,
+    pageObjects,
+  }) => {
     const dataSourceName = `scout-data-source-${randomUUID().slice(0, 8)}`;
     const dataSetName = `scout-dataset-${randomUUID().slice(0, 8)}`;
     const initialResource = 's3://scout-bucket/path/**/*.parquet';
@@ -59,7 +64,10 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
 
     const cleanupDataSource = async () => {
       try {
-        await kbnClient.request({ method: 'DELETE', path: getDataSourceByIdApiPath(dataSourceName) });
+        await kbnClient.request({
+          method: 'DELETE',
+          path: getDataSourceByIdApiPath(dataSourceName),
+        });
       } catch {
         // ignore cleanup errors
       }
@@ -93,18 +101,21 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
       });
 
       await test.step('create a dataset', async () => {
-        await expect(pageObjects.dataFederation.createDataSetButton).toBeEnabled({ timeout: 30000 });
+        await expect(pageObjects.dataFederation.createDataSetButton).toBeEnabled({
+          timeout: 30000,
+        });
         await pageObjects.dataFederation.createDataSetButton.click();
 
         await expect(page.testSubj.locator('createDatasetFlyout')).toBeVisible();
 
-        await page
-          .testSubj
+        await page.testSubj
           .locator('createDatasetFlyoutDataSource')
           .selectOption({ value: dataSourceName });
         await page.testSubj.locator('createDatasetFlyoutName').fill(dataSetName);
         await page.testSubj.locator('createDatasetFlyoutResource').fill(initialResource);
-        await page.testSubj.locator('createDatasetFlyoutSettingsFormat').selectOption({ value: 'parquet' });
+        await page.testSubj
+          .locator('createDatasetFlyoutSettingsFormat')
+          .selectOption({ value: 'parquet' });
 
         await page.testSubj
           .locator('createDatasetFlyoutSubmit')
@@ -115,7 +126,9 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
         await expect(page.testSubj.locator('createDatasetFlyout')).toBeHidden({ timeout: 30000 });
       });
 
-      const row = pageObjects.dataFederation.dataSetsTable.locator('tr').filter({ hasText: dataSetName });
+      const row = pageObjects.dataFederation.dataSetsTable
+        .locator('tr')
+        .filter({ hasText: dataSetName });
 
       await test.step('dataset appears in the table', async () => {
         await expect(row).toBeVisible({ timeout: 30000 });
@@ -154,4 +167,3 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
     }
   });
 });
-
