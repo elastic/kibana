@@ -141,7 +141,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
 
   if (memoryConstrained) {
     options.logger.info(
-      'Kibana is running with a low memory limit, so upgrade migrations will take longer to complete. For faster upgrades, we recommend running Kibana with at least 2GB of memory.'
+      'Kibana is running below the recommended minimum of 2GB of memory. Upgrade migrations will still complete, but will take longer. We recommend running Kibana with at least 2GB of memory.'
     );
   }
 
