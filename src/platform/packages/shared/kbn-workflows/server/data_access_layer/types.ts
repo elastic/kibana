@@ -49,10 +49,29 @@ export interface GetExecutionsByIdsOptions<TExecution extends { id: string }> {
   sourceExcludes?: ExecutionSourceProjectionField<TExecution>[];
 }
 
+export interface DocumentVersionFields {
+  index: string;
+  seqNo?: number;
+  primaryTerm?: number;
+}
+
+export interface GetExecutionByIdsItem<TExecution extends { id: string }>
+  extends DocumentVersionFields {
+  document: TExecution;
+}
+
+export interface GetExecutionsByIdsResponse<TExecution extends { id: string }> {
+  items: GetExecutionByIdsItem<TExecution>[];
+  missing: string[];
+}
+
 export interface ReadonlyExecutionsDataAccess<TExecution extends { id: string }> {
   search(request: ExecutionsSearchRequest): Promise<estypes.SearchResponse<TExecution>>;
   count(request: ExecutionsCountRequest): Promise<estypes.CountResponse>;
-  getByIds(ids: string[], options?: GetExecutionsByIdsOptions<TExecution>): Promise<TExecution[]>;
+  getByIds(
+    ids: (string | { id: string; index: string })[],
+    options?: GetExecutionsByIdsOptions<TExecution>
+  ): Promise<GetExecutionsByIdsResponse<TExecution>>;
 }
 
 export interface WritableExecutionsDataAccess<TExecution extends { id: string }> {
@@ -67,12 +86,12 @@ export type ExecutionsDataAccess<TExecution extends { id: string }> =
 export type WorkflowExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowExecution>;
 export type StepExecutionsDataAccess = ExecutionsDataAccess<EsWorkflowStepExecution>;
 
-/** Pair of workflow/step DAL instances plus lifecycle hooks from `createExecutionsDal`. */
-export interface ExecutionsDalBundle {
+/** Pair of workflow/step data access instances plus lifecycle hooks from `createExecutionsDataAccess`. */
+export interface ExecutionsDataAccessBundle {
   initSetup: () => Promise<void>;
   initStart: () => Promise<void>;
-  createWorkflowExecutionsDal: () => Promise<WorkflowExecutionsDataAccess>;
-  createStepExecutionsDal: () => Promise<StepExecutionsDataAccess>;
+  createWorkflowExecutionsDataAccess: () => Promise<WorkflowExecutionsDataAccess>;
+  createStepExecutionsDataAccess: () => Promise<StepExecutionsDataAccess>;
 }
 
 export type WorkflowExecutionsSearchRequest = ExecutionsSearchRequest;
@@ -98,6 +117,8 @@ export type GetStepExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflow
 export interface BulkItem<TDocument extends { id: string }> {
   operation: 'create' | 'update' | 'upsert';
   document: Partial<TDocument> & { id: string };
+  /** Backing index; resolved by the data access implementation when omitted. */
+  index?: string;
   seqNo?: number;
   primaryTerm?: number;
   retryOnConflict?: number;
@@ -109,11 +130,9 @@ export interface BulkRequestOptions<TDocument extends { id: string }> {
 }
 
 /** Per-document outcome aligned with ES bulk item fields (update/index/create). */
-export interface BulkItemResponse {
+export interface BulkItemResponse extends DocumentVersionFields {
   id: string;
   error?: estypes.ErrorCause;
-  _seq_no?: number;
-  _primary_term?: number;
 }
 
 /** Always bulk-shaped: `items.length ===` normalized document count, input order preserved. */

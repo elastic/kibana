@@ -12,19 +12,19 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import {
-  createExecutionsDalJestMock,
-  mockExecutionsDalInitSetup,
-  mockExecutionsDalInitStart,
-} from './test_utils/executions_dal_jest_mock';
+  createExecutionsDataAccessJestMock,
+  mockExecutionsDataAccessInitSetup,
+  mockExecutionsDataAccessInitStart,
+} from './test_utils/executions_data_access_jest_mock';
 
 jest.mock('@kbn/workflows/server/data_access_layer', () => {
   const actual = jest.requireActual('@kbn/workflows/server/data_access_layer');
-  const { createExecutionsDalJestMock: createDalMock } = jest.requireActual(
-    './test_utils/executions_dal_jest_mock'
+  const { createExecutionsDataAccessJestMock: createDataAccessMock } = jest.requireActual(
+    './test_utils/executions_data_access_jest_mock'
   );
   return {
     ...actual,
-    createExecutionsDal: jest.fn(() => createDalMock()),
+    createExecutionsDataAccess: jest.fn(() => createDataAccessMock()),
   };
 });
 
@@ -41,8 +41,8 @@ const createPlugin = (): WorkflowsExecutionEnginePlugin => {
 describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockExecutionsDalInitSetup.mockResolvedValue(undefined);
-    mockExecutionsDalInitStart.mockResolvedValue(undefined);
+    mockExecutionsDataAccessInitSetup.mockResolvedValue(undefined);
+    mockExecutionsDataAccessInitStart.mockResolvedValue(undefined);
   });
 
   it('calls initSetup during setup', () => {
@@ -53,8 +53,8 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
     });
 
-    expect(mockExecutionsDalInitSetup).toHaveBeenCalledTimes(1);
-    expect(mockExecutionsDalInitStart).not.toHaveBeenCalled();
+    expect(mockExecutionsDataAccessInitSetup).toHaveBeenCalledTimes(1);
+    expect(mockExecutionsDataAccessInitStart).not.toHaveBeenCalled();
   });
 
   it('calls initStart during start', () => {
@@ -73,6 +73,6 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
       licensing: licensingMock.createStart(),
     });
 
-    expect(mockExecutionsDalInitStart).toHaveBeenCalledTimes(1);
+    expect(mockExecutionsDataAccessInitStart).toHaveBeenCalledTimes(1);
   });
 });

@@ -31,8 +31,8 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
-import type { ExecutionsDalBundle } from '@kbn/workflows/server/data_access_layer';
-import { createExecutionsDal } from '@kbn/workflows/server/data_access_layer';
+import type { ExecutionsDataAccessBundle } from '@kbn/workflows/server/data_access_layer';
+import { createExecutionsDataAccess } from '@kbn/workflows/server/data_access_layer';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import {
   maybeDrainConcurrencyQueueAfterTerminal,
@@ -147,17 +147,17 @@ export class WorkflowsExecutionEnginePlugin
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
 
-  private executionsDalBundle!: ExecutionsDalBundle;
+  private executionsDataAccessBundle!: ExecutionsDataAccessBundle;
 
   private async createScopedRepositories(): Promise<{
     workflowExecutionRepository: WorkflowExecutionRepository;
     stepExecutionRepository: StepExecutionRepository;
   }> {
-    const workflowExecutionsDal = await this.executionsDalBundle.createWorkflowExecutionsDal();
-    const stepExecutionsDal = await this.executionsDalBundle.createStepExecutionsDal();
+    const workflowExecutionsDataAccess = await this.executionsDataAccessBundle.createWorkflowExecutionsDataAccess();
+    const stepExecutionsDataAccess = await this.executionsDataAccessBundle.createStepExecutionsDataAccess();
     return {
-      workflowExecutionRepository: new WorkflowExecutionRepository(workflowExecutionsDal),
-      stepExecutionRepository: new StepExecutionRepository(stepExecutionsDal),
+      workflowExecutionRepository: new WorkflowExecutionRepository(workflowExecutionsDataAccess),
+      stepExecutionRepository: new StepExecutionRepository(stepExecutionsDataAccess),
     };
   }
 
@@ -182,12 +182,12 @@ export class WorkflowsExecutionEnginePlugin
 
     initializeLogsRepositoryDataStream(core.dataStreams);
     initializeTriggerEventsDataStream(core.dataStreams);
-    this.executionsDalBundle = createExecutionsDal({
+    this.executionsDataAccessBundle = createExecutionsDataAccess({
       source: 'system_index',
       coreSetup: core,
       logger: this.logger,
     });
-    void this.executionsDalBundle.initSetup();
+    void this.executionsDataAccessBundle.initSetup();
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -688,7 +688,7 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
 
-    void this.executionsDalBundle.initStart();
+    void this.executionsDataAccessBundle.initStart();
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);

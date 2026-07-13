@@ -12,22 +12,22 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { PlainIndexExecutionsDataAccess } from './plain_index_executions_data_access';
 
 describe('PlainIndexExecutionsDataAccess', () => {
-  const createDal = () => {
+  const createDataAccess = () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    const dal = new PlainIndexExecutionsDataAccess<{ id: string }>({
+    const dataAccess = new PlainIndexExecutionsDataAccess<{ id: string }>({
       esClient,
       indexName: '.workflows-executions',
       mappings: { properties: {} },
     });
-    return { esClient, dal };
+    return { esClient, dataAccess };
   };
 
   it('deleteByQuery targets the configured index', async () => {
-    const { esClient, dal } = createDal();
+    const { esClient, dataAccess } = createDataAccess();
     esClient.deleteByQuery.mockResolvedValue({ deleted: 2, total: 2 } as never);
 
     const query = { term: { workflowId: 'wf-1' } };
-    await dal.deleteByQuery({ query, refresh: true, conflicts: 'proceed' });
+    await dataAccess.deleteByQuery({ query, refresh: true, conflicts: 'proceed' });
 
     expect(esClient.deleteByQuery).toHaveBeenCalledWith({
       index: '.workflows-executions',
@@ -39,11 +39,11 @@ describe('PlainIndexExecutionsDataAccess', () => {
 
   describe('scriptUpdate', () => {
     it('returns updated when ES reports an update', async () => {
-      const { esClient, dal } = createDal();
+      const { esClient, dataAccess } = createDataAccess();
       esClient.update.mockResolvedValue({ result: 'updated' } as never);
 
       await expect(
-        dal.scriptUpdate({
+        dataAccess.scriptUpdate({
           id: 'step-1',
           script: 'ctx._source.status = params.status',
           params: { status: 'completed' },
@@ -66,11 +66,11 @@ describe('PlainIndexExecutionsDataAccess', () => {
     });
 
     it('returns noop when ES reports a noop', async () => {
-      const { esClient, dal } = createDal();
+      const { esClient, dataAccess } = createDataAccess();
       esClient.update.mockResolvedValue({ result: 'noop' } as never);
 
       await expect(
-        dal.scriptUpdate({
+        dataAccess.scriptUpdate({
           id: 'step-1',
           script: 'ctx.op = "noop"',
           params: {},
@@ -79,13 +79,13 @@ describe('PlainIndexExecutionsDataAccess', () => {
     });
 
     it('returns not_found when ES throws a 404', async () => {
-      const { esClient, dal } = createDal();
+      const { esClient, dataAccess } = createDataAccess();
       const notFoundError = new Error('Not Found');
       (notFoundError as { statusCode?: number }).statusCode = 404;
       esClient.update.mockRejectedValue(notFoundError);
 
       await expect(
-        dal.scriptUpdate({
+        dataAccess.scriptUpdate({
           id: 'missing-step',
           script: 'ctx.op = "noop"',
           params: {},
@@ -94,10 +94,10 @@ describe('PlainIndexExecutionsDataAccess', () => {
     });
 
     it('omits optional retry and refresh when not provided', async () => {
-      const { esClient, dal } = createDal();
+      const { esClient, dataAccess } = createDataAccess();
       esClient.update.mockResolvedValue({ result: 'updated' } as never);
 
-      await dal.scriptUpdate({
+      await dataAccess.scriptUpdate({
         id: 'step-1',
         script: 'ctx._source.status = params.status',
         params: { status: 'completed' },
@@ -115,11 +115,11 @@ describe('PlainIndexExecutionsDataAccess', () => {
     });
 
     it('rethrows unexpected ES failures', async () => {
-      const { esClient, dal } = createDal();
+      const { esClient, dataAccess } = createDataAccess();
       esClient.update.mockRejectedValue(new Error('cluster unavailable'));
 
       await expect(
-        dal.scriptUpdate({
+        dataAccess.scriptUpdate({
           id: 'step-1',
           script: 'ctx._source.status = params.status',
           params: { status: 'completed' },

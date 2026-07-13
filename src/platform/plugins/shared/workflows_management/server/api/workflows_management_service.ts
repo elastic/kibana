@@ -38,7 +38,7 @@ import type {
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import {
-  createExecutionsDal,
+  createExecutionsDataAccess,
   type WorkflowExecutionsDataAccess,
 } from '@kbn/workflows/server/data_access_layer';
 import type {
@@ -140,7 +140,7 @@ export class WorkflowsService {
   private workflowStorage!: WorkflowStorage;
   private taskScheduler!: WorkflowTaskScheduler;
   private esClient!: ElasticsearchClient;
-  private workflowExecutionsDal!: WorkflowExecutionsDataAccess;
+  private workflowExecutionsDataAccess!: WorkflowExecutionsDataAccess;
   private validationService!: WorkflowValidationService;
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
@@ -205,19 +205,19 @@ export class WorkflowsService {
       getActionsClientWithRequest: this.getActionsClientWithRequest,
     });
 
-    const executionsDalBundle = createExecutionsDal({
+    const executionsDataAccessBundle = createExecutionsDataAccess({
       source: 'system_index',
       coreSetup: core,
       logger: this.logger,
     });
-    this.workflowExecutionsDal = await executionsDalBundle.createWorkflowExecutionsDal();
-    const stepExecutionsDal = await executionsDalBundle.createStepExecutionsDal();
+    this.workflowExecutionsDataAccess = await executionsDataAccessBundle.createWorkflowExecutionsDataAccess();
+    const stepExecutionsDataAccess = await executionsDataAccessBundle.createStepExecutionsDataAccess();
 
     this.executionQueryService = new WorkflowExecutionQueryService({
       logger: this.logger,
       esClient: this.esClient,
-      workflowExecutionsDal: this.workflowExecutionsDal,
-      stepExecutionsDal,
+      workflowExecutionsDataAccess: this.workflowExecutionsDataAccess,
+      stepExecutionsDataAccess,
       workflowEventLoggerService: this.workflowsExecutionEngine.workflowEventLoggerService,
     });
 
@@ -225,7 +225,7 @@ export class WorkflowsService {
       logger: this.logger,
       workflowStorage: this.workflowStorage,
       esClient: this.esClient,
-      workflowExecutionsDal: this.workflowExecutionsDal,
+      workflowExecutionsDataAccess: this.workflowExecutionsDataAccess,
     });
 
     await this.initializeChangeHistoryService(coreStart);
@@ -240,8 +240,8 @@ export class WorkflowsService {
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
       changeHistoryService: this.changeHistoryService,
-      workflowExecutionsDal: this.workflowExecutionsDal,
-      stepExecutionsDal,
+      workflowExecutionsDataAccess: this.workflowExecutionsDataAccess,
+      stepExecutionsDataAccess,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
@@ -267,9 +267,9 @@ export class WorkflowsService {
     return this.coreStart;
   }
 
-  public async getWorkflowExecutionsDal(): Promise<WorkflowExecutionsDataAccess> {
+  public async getWorkflowExecutionsDataAccess(): Promise<WorkflowExecutionsDataAccess> {
     await this.ensureInitialized();
-    return this.workflowExecutionsDal;
+    return this.workflowExecutionsDataAccess;
   }
 
   public async getPluginsStart(): Promise<WorkflowsServerPluginStartDeps> {

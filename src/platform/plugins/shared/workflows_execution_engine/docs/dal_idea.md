@@ -132,8 +132,8 @@ or the reverse. A single `initExecutionStorage()` would incorrectly couple lifec
 
 ```typescript
 await Promise.all([
-  workflowExecutionsDal.init(),  // e.g. creates/updates .workflows-executions
-  stepExecutionsDal.init(),     // e.g. registers data stream + component template
+  workflowExecutionsDataAccess.init(),  // e.g. creates/updates .workflows-executions
+  stepExecutionsDataAccess.init(),     // e.g. registers data stream + component template
 ]);
 ```
 
@@ -315,13 +315,13 @@ export interface StepExecutionsDataAccess {
 
 ```typescript
 // Single step flush (StepIoService hot path)
-await stepExecutionsDal.bulkUpsert({ documents: stepDoc, refresh: false });
+await stepExecutionsDataAccess.bulkUpsert({ documents: stepDoc, refresh: false });
 
 // Batch persistence loop
-await stepExecutionsDal.bulkUpsert({ documents: stepDocs, refresh: false });
+await stepExecutionsDataAccess.bulkUpsert({ documents: stepDocs, refresh: false });
 
 // Workflow state flush
-await workflowExecutionsDal.bulkUpsert({
+await workflowExecutionsDataAccess.bulkUpsert({
   documents: { id: executionId, status, finishedAt },
   refresh: false,
 });
@@ -362,13 +362,13 @@ export const createStepExecutionsDataAccess = (
 **Plugin wiring (execution engine, phase 1):**
 
 ```typescript
-const workflowExecutionsDal = createWorkflowExecutionsDataAccess({
+const workflowExecutionsDataAccess = createWorkflowExecutionsDataAccess({
   source: 'system_index',
   esClient: coreStart.elasticsearch.client.asInternalUser,
   logger,
 });
 
-const stepExecutionsDal = createStepExecutionsDataAccess({
+const stepExecutionsDataAccess = createStepExecutionsDataAccess({
   source: 'system_index', // future: may differ, e.g. 'data_stream'
   esClient: coreStart.elasticsearch.client.asInternalUser,
   // dataStreamClient: ... when source is 'data_stream'
@@ -376,8 +376,8 @@ const stepExecutionsDal = createStepExecutionsDataAccess({
 });
 
 await Promise.all([
-  workflowExecutionsDal.init(),
-  stepExecutionsDal.init(),
+  workflowExecutionsDataAccess.init(),
+  stepExecutionsDataAccess.init(),
 ]);
 ```
 
@@ -490,8 +490,8 @@ async bulkUpsert(request: StepExecutionsBulkUpsertRequest): Promise<BulkUpsertRe
 
 `WorkflowExecutionRepository` and `StepExecutionRepository` remain **facades** for engine-specific operations (`hasRunningExecution`, CAS promote, concurrency queries, etc.). Simple persistence delegates to DAL:
 
-- `StepExecutionRepository.bulkUpsert` → `await stepExecutionsDal.bulkUpsert({ documents })` (DAL throws on failure)
-- `WorkflowExecutionRepository.updateWorkflowExecution` / `bulkUpdateWorkflowExecutions` / creates → `await workflowExecutionsDal.bulkUpsert(...)` (same)
+- `StepExecutionRepository.bulkUpsert` → `await stepExecutionsDataAccess.bulkUpsert({ documents })` (DAL throws on failure)
+- `WorkflowExecutionRepository.updateWorkflowExecution` / `bulkUpdateWorkflowExecutions` / creates → `await workflowExecutionsDataAccess.bulkUpsert(...)` (same)
 
 Domain queries that embed Painless scripts or specialized search shapes stay on the repository until a later extraction.
 
@@ -583,7 +583,7 @@ Mappings are exported for tests and tooling that assert mapping shape; not requi
 | Step | Work | Risk |
 |------|------|------|
 | 1 | Add DAL module with `system_index` impl; move mappings + init helpers | Low — additive |
-| 2 | Execution engine plugin: separate `workflowExecutionsDal.init()` + `stepExecutionsDal.init()` at startup | Low — same ES calls, decoupled lifecycle |
+| 2 | Execution engine plugin: separate `workflowExecutionsDataAccess.init()` + `stepExecutionsDataAccess.init()` at startup | Low — same ES calls, decoupled lifecycle |
 | 3 | Implement `bulkUpsert` (single-doc `update` vs multi-doc `bulk` routing) | Medium — parity tests with existing repo tests |
 | 4 | Engine repos: delegate upserts/reads to DAL | Medium |
 | 5 | Re-export index constants from DAL; thin re-exports in execution_engine `common` | Low — compat shims |

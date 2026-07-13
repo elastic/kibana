@@ -12,9 +12,9 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { executeScriptUpdate } from '../../lib/execute_script_update';
+import { getExecutionsByIds } from '../../lib/get_executions_by_ids';
+import { sharedBulk } from '../../lib/shared_bulk';
 import type {
-  BulkItem,
-  BulkItemResponse,
   BulkRequestOptions,
   BulkResponse,
   ExecutionsCountRequest,
@@ -22,25 +22,22 @@ import type {
   ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,
   GetExecutionsByIdsOptions,
+  GetExecutionsByIdsResponse,
   ScriptUpdateRequest,
   ScriptUpdateResponse,
 } from '../../types';
 
-export interface PlainIndexExecutionsDataAccessDeps<TExecution extends { id: string }> {
+export interface PlainIndexExecutionsDataAccessDeps {
   esClient: ElasticsearchClient;
   indexName: string;
   mappings: MappingTypeMapping;
   logger?: Logger;
-  normalizeExecutionOnGet?: (
-    execution: TExecution,
-    options?: GetExecutionsByIdsOptions<TExecution>
-  ) => TExecution;
 }
 
 export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
   implements ExecutionsDataAccess<TExecution>
 {
-  constructor(private readonly deps: PlainIndexExecutionsDataAccessDeps<TExecution>) {}
+  constructor(private readonly deps: PlainIndexExecutionsDataAccessDeps) {}
 
   public async search(
     request: ExecutionsSearchRequest
@@ -59,119 +56,28 @@ export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
   }
 
   public async getByIds(
-    ids: string[],
+    ids: (string | { id: string; index: string })[],
     options?: GetExecutionsByIdsOptions<TExecution>
-  ): Promise<TExecution[]> {
-    if (ids.length === 0) {
-      return [];
-    }
-
-    const { sourceIncludes, sourceExcludes } = options ?? {};
-    const response = await this.deps.esClient.mget<TExecution>({
-      index: this.deps.indexName,
-      ids,
-      ...(sourceIncludes?.length ? { _source_includes: sourceIncludes } : {}),
-      ...(sourceExcludes?.length ? { _source_excludes: sourceExcludes } : {}),
+  ): Promise<GetExecutionsByIdsResponse<TExecution>> {
+    return getExecutionsByIds({
+      esClient: this.deps.esClient,
+      ids: ids.map((id) =>
+        typeof id === 'string' ? { id, index: [this.deps.indexName] } : id
+      ) as (string | { id: string; index: string[] })[],
+      defaultIndex: this.deps.indexName,
+      options,
     });
-
-    const executionDocs: TExecution[] = [];
-    for (const doc of response.docs) {
-      if ('found' in doc && doc.found && doc._source) {
-        const source = doc._source as TExecution;
-        executionDocs.push(
-          this.deps.normalizeExecutionOnGet
-            ? this.deps.normalizeExecutionOnGet(source, options)
-            : source
-        );
-      }
-    }
-
-    return executionDocs;
   }
 
-  public async bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
-    if (request.items.length === 0) {
-      return {
-        items: [],
-        errors: false,
-      };
-    }
-
-    type BulkOperation = NonNullable<
-      estypes.BulkRequest<TExecution, Partial<TExecution> & { id: string }>['operations']
-    >[number];
-
-    const operations: BulkOperation[] = request.items.flatMap((item): BulkOperation[] => {
-      const actionMeta = {
-        _id: item.document.id,
-        ...(item.seqNo !== undefined ? { if_seq_no: item.seqNo } : {}),
-        ...(item.primaryTerm !== undefined ? { if_primary_term: item.primaryTerm } : {}),
-      };
-
-      switch (item.operation) {
-        case 'create':
-          return [{ create: actionMeta }, item.document as BulkOperation];
-
-        case 'update':
-          return [
-            {
-              update: {
-                ...actionMeta,
-                ...(item.retryOnConflict !== undefined
-                  ? { retry_on_conflict: item.retryOnConflict }
-                  : {}),
-              },
-            },
-            { doc: item.document },
-          ];
-
-        case 'upsert':
-          return [
-            {
-              update: {
-                ...actionMeta,
-                ...(item.retryOnConflict !== undefined
-                  ? { retry_on_conflict: item.retryOnConflict }
-                  : {}),
-              },
-            },
-            { doc: item.document, doc_as_upsert: true },
-          ];
-
-        default:
-          throw new Error(`Invalid operation: ${(item as BulkItem<TExecution>).operation}`);
-      }
+  public bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
+    const itemsWithIndex = request.items.map((item) => ({
+      ...item,
+      index: item.index ?? this.deps.indexName,
+    }));
+    return sharedBulk(this.deps.esClient, {
+      ...request,
+      items: itemsWithIndex,
     });
-
-    const response = await this.deps.esClient.bulk<
-      TExecution,
-      Partial<TExecution> & { id: string }
-    >({
-      index: this.deps.indexName,
-      refresh: request.refresh,
-      operations,
-    });
-
-    const items: BulkItemResponse[] = [];
-
-    response.items.forEach((item) => {
-      const result = item.create ?? item.update;
-      if (!result?._id) {
-        return;
-      }
-
-      items.push({
-        id: result?._id,
-        error: result?.error,
-        _seq_no: result?._seq_no,
-        _primary_term: result?._primary_term,
-      });
-    });
-
-    return {
-      items,
-      errors: response.errors,
-    };
   }
 
   public async scriptUpdate(request: ScriptUpdateRequest): Promise<ScriptUpdateResponse> {

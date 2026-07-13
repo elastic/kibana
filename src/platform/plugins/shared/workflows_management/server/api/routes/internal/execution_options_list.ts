@@ -116,7 +116,7 @@ export function registerExecutionOptionsListRoute({
           if (!hasWorkflowExecutionReadPrivilege(request)) {
             return response.forbidden();
           }
-          const workflowExecutionsDal = await workflowsService.getWorkflowExecutionsDal();
+          const workflowExecutionsDataAccess = await workflowsService.getWorkflowExecutionsDataAccess();
           const spaceId = spaces.getSpaceId(request);
           const optionsListRequest = request.body as OptionsListRequestBody;
 
@@ -124,7 +124,7 @@ export function registerExecutionOptionsListRoute({
           const optionsListFilters = optionsListRequest.filters ?? [];
           const selectedOptions = optionsListRequest.selectedOptions;
 
-          const esResponse = await workflowExecutionsDal.search({
+          const esResponse = await workflowExecutionsDataAccess.search({
             size: 0,
             query: {
               bool: {

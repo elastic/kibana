@@ -7,16 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PlainIndexExecutionsDalBundle } from './plain_index/create_plain_index_executions_dal';
+import { DataStreamExecutionsDataAccessBundle } from './data_stream/create_data_stream_executions_data_access';
+import { PlainIndexExecutionsDataAccessBundle } from './plain_index/create_plain_index_executions_data_access';
 import { createUnsupportedStorageSourceError } from '../lib/validate_factory_params';
-import type { CreateExecutionsDataAccessDeps, ExecutionsDalBundle } from '../types';
+import type { CreateExecutionsDataAccessDeps, ExecutionsDataAccessBundle } from '../types';
 
-export function createExecutionsDal(deps: CreateExecutionsDataAccessDeps): ExecutionsDalBundle {
+export function createExecutionsDataAccess(
+  deps: CreateExecutionsDataAccessDeps
+): ExecutionsDataAccessBundle {
+  return new DataStreamExecutionsDataAccessBundle(deps);
   switch (deps.source) {
     case 'system_index':
-      return new PlainIndexExecutionsDalBundle(deps);
+      return new PlainIndexExecutionsDataAccessBundle(deps);
     case 'data_stream':
-      throw createUnsupportedStorageSourceError('ExecutionsDataAccess', deps.source);
+      return new DataStreamExecutionsDataAccessBundle(deps);
     default: {
       const exhaustiveCheck: never = deps.source;
       throw createUnsupportedStorageSourceError('ExecutionsDataAccess', exhaustiveCheck);

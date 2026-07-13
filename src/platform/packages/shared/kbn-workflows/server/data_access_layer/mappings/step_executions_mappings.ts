@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-
+import type { MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 import { TOKEN_USAGE_MAPPING } from './token_usage_mapping';
 
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
+export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date(),
@@ -60,4 +59,4 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     // Per-step token usage, extracted from `output.metadata.usage`.
     usage: TOKEN_USAGE_MAPPING,
   },
-};
+} satisfies MappingsDefinition;
