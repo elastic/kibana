@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/reviewer_time_budget.mjs"
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/reviewer_time_budget.mjs"
           }
         ]
       }

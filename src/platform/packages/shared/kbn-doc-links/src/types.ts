@@ -425,6 +425,7 @@ export interface DocLinks {
     createApiKeyMetadata: string;
     createApiKeyRoleDescriptors: string;
     createCrossClusterApiKey: string;
+    crossClusterApiKeyStrongVerification: string;
     createPipeline: string;
     createTransformRequest: string;
     cronExpressions: string;
@@ -756,6 +757,9 @@ export interface DocLinks {
     readonly a2aServer: string;
     readonly limitationsKnownIssues: string;
     readonly learnMore: string;
+  };
+  readonly applicationConnections: {
+    readonly oauthClients: string;
   };
   readonly indexManagement: {
     readonly componentTemplate: string;

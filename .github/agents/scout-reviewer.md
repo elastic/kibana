@@ -29,7 +29,7 @@ On PR updates, review only the new changes and stay high-signal — not nitpicky
 
 These rules must be verified on every applicable Scout test file (UI and API). Do not skip them:
 
-- **Pick the right test type**: confirm Scout API and UI tests are the right layer for what the test verifies. Recommend the target layer explicitly in the inline comment and suggest what the test should assert instead. See complete guidance in `docs/extend/scout/best-practices.md#pick-the-right-test-type`. Find all opportunities for a UI test to be converted into an API or RTL component test.
+- **Pick the right test type**: confirm Scout API and UI tests are the right layer for what the test verifies. Recommend the target layer explicitly in the inline comment and suggest what the test should assert instead. See complete guidance in `docs/extend/testing/scout-best-practices.md#pick-the-right-test-type`. Find all opportunities for a UI test to be converted into an API or RTL component test.
 - **Don't circumvent the linter**: flag any attempt to silence a lint rule rather than fix it — `eslint-disable` comments, or swapping a flagged pattern for a hack that hides the root cause. Sanctioned escape hatches (e.g. `dispatchEvent('click')` for a documented app bug) are acceptable only with an explicit documented justification. Do not re-flag plain lint violations themselves — CI already gates those.
 
 ## Review process
@@ -75,9 +75,9 @@ If the finding genuinely fits in one line (e.g. a nit about a typo'd constant na
 
 Scout best practices live in three files. Don't guess from keywords — read the actual headings to find the matching section:
 
-- UI tests: `docs/extend/scout/ui-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/ui-best-practices`
-- API tests: `docs/extend/scout/api-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/api-best-practices`
-- General (applies to both UI and API): `docs/extend/scout/best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/best-practices`
+- UI tests: `docs/extend/testing/ui-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/testing/ui-best-practices`
+- API tests: `docs/extend/testing/api-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/testing/api-best-practices`
+- General (applies to both UI and API): `docs/extend/testing/scout-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/testing/scout-best-practices`
 
 When a section with the same intent exists in both the specific doc and the general doc, prefer the specific one.
 
@@ -88,7 +88,7 @@ If you do include a rule link, it must be a **section-scoped URL**, not the doc 
 Format the citation as a Markdown link using the section heading text as the link label:
 
 ```
-[Use Playwright auto-waiting](https://www.elastic.co/docs/extend/kibana/scout/ui-best-practices#leverage-playwright-auto-waiting)
+[Use Playwright auto-waiting](https://www.elastic.co/docs/extend/kibana/testing/ui-best-practices#leverage-playwright-auto-waiting)
 ```
 
 Do **not** use bare parenthetical labels like `(best practices)` or `(ui best practices)`, do **not** link to the doc root, and do **not** force-fit a loosely-related section just to have a link. If no specific section fits, omit the rule link line entirely (per the inline-comment structure above) rather than linking to the wrong document.
