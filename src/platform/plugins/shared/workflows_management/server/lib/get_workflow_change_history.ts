@@ -12,6 +12,10 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 
 import { mapWorkflowHistoryItem } from './map_workflow_history_item';
 import { WorkflowChangeHistoryDisabledError } from './workflow_change_history_disabled_error';
+import {
+  ES_MAX_RESULT_WINDOW,
+  WorkflowHistoryPaginationError,
+} from './workflow_history_pagination_error';
 import type { WorkflowChangesHistoryResponse } from '../../common/lib/workflow_change_history/types';
 import type { IWorkflowChangeHistoryService } from '../services/workflow_change_history_types';
 
@@ -38,6 +42,16 @@ export const assertWorkflowChangeHistoryEnabled = (
   }
 };
 
+export const assertWorkflowHistoryPaginationWithinWindow = (
+  page: number,
+  perPage: number
+): void => {
+  const from = (page - 1) * perPage;
+  if (from + perPage > ES_MAX_RESULT_WINDOW) {
+    throw new WorkflowHistoryPaginationError();
+  }
+};
+
 export const getHistoryForWorkflow = async (
   deps: GetWorkflowChangeHistoryDeps,
   {
@@ -48,6 +62,7 @@ export const getHistoryForWorkflow = async (
   }: GetHistoryForWorkflowParams
 ): Promise<WorkflowChangesHistoryResponse> => {
   assertWorkflowChangeHistoryEnabled(deps.changeHistoryService);
+  assertWorkflowHistoryPaginationWithinWindow(page, perPage);
 
   const workflow = await deps.getWorkflowSource(workflowId, spaceId);
   if (!workflow) {

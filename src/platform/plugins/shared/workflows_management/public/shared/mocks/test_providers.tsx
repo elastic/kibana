@@ -15,6 +15,7 @@ import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
 import { QueryClientProvider } from '@kbn/react-query';
+import { WorkflowsUiServicesProvider } from '@kbn/workflows-ui';
 import { WorkflowsContextProvider } from '../../common/context';
 import { createMockStore } from '../../entities/workflows/store/__mocks__/store.mock';
 import { createStartServicesMock, type StartServicesMock } from '../../mocks';
@@ -42,11 +43,13 @@ export const TestProvider: React.FC<PropsWithChildren<TestProviderProps>> = ({
       <KibanaContextProvider services={mockServices}>
         <QueryClientProvider client={testQueryClient}>
           <WorkflowsContextProvider>
-            <MemoryRouter initialEntries={initialEntries}>
-              <I18nProviderMock>
-                <Provider store={testStore}>{children}</Provider>
-              </I18nProviderMock>
-            </MemoryRouter>
+            <WorkflowsUiServicesProvider services={mockServices}>
+              <MemoryRouter initialEntries={initialEntries}>
+                <I18nProviderMock>
+                  <Provider store={testStore}>{children}</Provider>
+                </I18nProviderMock>
+              </MemoryRouter>
+            </WorkflowsUiServicesProvider>
           </WorkflowsContextProvider>
         </QueryClientProvider>
       </KibanaContextProvider>

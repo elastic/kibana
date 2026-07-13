@@ -13,6 +13,8 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { NotificationCenterConfig } from './config';
+import { registerNotificationDataStream } from './data_stream/notification_data_stream';
+import { registerNotificationUserStorage } from './user_storage';
 import type {
   NotificationCenterPluginSetup,
   NotificationCenterPluginStart,
@@ -36,10 +38,14 @@ export class NotificationCenterPlugin
   }
 
   public setup(
-    _core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>
+    core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>
   ): NotificationCenterPluginSetup {
-    // Gated by `xpack.notificationCenter.enabled` in kibana config
+    // core gates the plugin on xpack.notificationCenter.enabled;
     this.logger.debug('Setting up Notification Center plugin');
+
+    registerNotificationDataStream(core.dataStreams);
+    registerNotificationUserStorage(core.userStorage);
+
     return {};
   }
 

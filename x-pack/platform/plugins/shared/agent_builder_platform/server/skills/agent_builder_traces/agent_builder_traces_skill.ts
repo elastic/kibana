@@ -14,22 +14,26 @@ export const agentBuilderTracesSkill = defineSkillType({
   id: 'agent-builder-traces',
   name: 'agent-builder-traces',
   basePath: 'skills/platform/agent-builder',
-  experimental: true,
   uiSettingRequired: AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   description:
     'Answer questions about Agent Builder OTel (OpenTelemetry) traces and activity: token usage, ' +
-    'model and provider breakdowns, conversation and agent latency, tool-call volume, and error ' +
-    'rates. Use this whenever the user asks about Agent Builder OTel traces, tracing, or telemetry, ' +
-    'by querying the Agent Builder OpenTelemetry traces with ES|QL.',
+    'model and provider breakdowns, conversation and agent latency, tool-call volume, error rates, ' +
+    'and captured message content (user prompts, LLM responses, system prompts, tool results). ' +
+    'Use this when the user asks about Agent Builder traces, tracing, telemetry, conversations, ' +
+    'or what users prompted or said to the agent — including recent prompts or messages in trace data.',
   content: `## When to Use This Skill
 
 Use this skill when a user asks about Agent Builder's own OTel (OpenTelemetry) traces or
-runtime activity, for example:
+runtime activity — including **what users said in conversations** and **captured prompts or
+messages** — for example:
 - Token usage (input, output, total) overall or broken down by model/provider.
 - LLM request counts and which models or providers are most used.
 - Conversation, agent-execution, or tool-call latency (average, p95, max).
 - Tool-call volume, the most-used tools, and tool error/success rates.
 - Trends of any of the above over time.
+- User prompts, LLM responses, system prompts, tool results, or other message content captured
+  in trace span events (when privacy settings allow).
+- "What did users ask?" / "Show me recent prompts or conversations" about Agent Builder usage.
 
 ## Questions This Skill Can Answer
 
@@ -43,6 +47,7 @@ runtime activity, for example:
 - "What's the tool error rate / success rate?"
 - "Show me token usage (or tool calls) over time."
 - "Are there any errors in the Agent Builder OTel traces?"
+- "What did users ask the agent recently?" / "Show me recent user prompts in traces."
 
 Do **not** use this skill when:
 - The user wants to query their *own* data indices (use the general data-exploration tools).
@@ -50,22 +55,51 @@ Do **not** use this skill when:
 
 ## Data Source
 
-Agent Builder ships its traces as OpenTelemetry spans to a per-space ES|QL source:
+Agent Builder ships OTel data to two per-space ES|QL sources. The inline tool selects the right
+one via \`dataSource\` — always pass it explicitly:
 
-\`\`\`
-traces-agent_builder.otel-<space-id>
-\`\`\`
+| \`dataSource\` | Index pattern | Use for |
+|---|---|---|
+| \`"traces"\` | \`traces-agent_builder.otel-<space-id>\` | Spans: tokens, latency, tool calls, errors, model/provider breakdowns |
+| \`"logs"\` | \`logs-agent_builder.otel-<space-id>\` | Span events: user prompts, LLM responses, system prompts, tool results |
 
-Always use the \`${AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID}\` inline tool for trace questions.
-It resolves the current space's index automatically. Do not use a
-\`traces-agent_builder.otel-*\` wildcard, which would mix in other spaces' traces.
+Always use \`${AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID}\` for trace questions. It resolves the
+current space's indices automatically. Do not use \`traces-agent_builder.otel-*\` or
+\`logs-agent_builder.otel-*\` wildcards, which would mix in other spaces' data.
 
-If you need to run ES|QL manually, use the exact index returned by the inline tool.
+**Choosing \`dataSource\`:** pick based on what the user is asking for, not the word "traces" in
+their question. Message-content questions still use \`dataSource: "logs"\` even when the user says
+"prompts in traces".
+
+| Question type | \`dataSource\` | Examples |
+|---|---|---|
+| Span telemetry | \`"traces"\` | token usage, latency, tool-call volume, error rates, model/provider stats |
+| Message content | \`"logs"\` | user prompts, LLM responses, system prompts, tool result text |
+
+If you need to run ES|QL manually, use the exact indices returned by the inline tool.
 
 Always constrain the time range with \`@timestamp\` to the window the user asked about (default to
 the last 24 hours when they do not specify one).
 
-### Span names (\`span.name\` field)
+### Message content (span events in the logs index)
+
+User prompts, LLM responses, system prompts, and tool results are **not** stored as span attributes
+on the traces index. They are captured as OTel **span events** and routed by Elasticsearch to the
+logs index for the same space.
+
+Each event is a log document linked to its parent span via \`trace_id\` and \`span_id\`.
+
+| Event name | Content | Privacy setting (Gen AI Settings) |
+|---|---|---|
+| \`gen_ai.user.message\` | User prompt text in \`attributes.content\` | \`agentBuilder:tracing:includeUserPrompts\` (off by default) |
+| \`gen_ai.assistant.message\` / \`gen_ai.choice\` | LLM response | \`agentBuilder:tracing:includeLlmResponses\` (off by default) |
+| \`gen_ai.system.message\` | System prompt | \`agentBuilder:tracing:includeSystemPrompt\` (off by default) |
+| \`gen_ai.tool.message\` | Tool result | \`agentBuilder:tracing:includeToolDetails\` (off by default) |
+
+If a message-content query returns no rows, explain that the relevant privacy setting may be disabled
+or the time window may be empty. Do not fabricate message text.
+
+### Span names (\`span.name\` field, traces index)
 
 Span names follow the OTel \`{operation} {identifier}\` convention:
 
@@ -81,19 +115,33 @@ Span names follow the OTel \`{operation} {identifier}\` convention:
 - \`attributes.gen_ai.request.model\` — model name.
 - \`attributes.gen_ai.provider.name\` — provider name.
 - \`attributes.gen_ai.agent.id\` — agent id (hashed for custom agents in exported traces).
+- \`attributes.gen_ai.conversation.id\` — conversation id (hashed unless \`agentBuilder:tracing:includeRealIds\` is on).
 - \`duration\` — span duration in **nanoseconds**; divide by \`1000000000.0\` for seconds.
 - \`status.code\` — equals \`"Error"\` for failed spans.
 
+### Useful fields (logs index — span events)
+
+- \`event_name\` — event type (e.g. \`gen_ai.user.message\`).
+- \`attributes.content\` — message text for user, assistant, and system events.
+- \`trace_id\` / \`span_id\` — link back to the parent span in the traces index.
+
 ## How to Answer
 
-1. Call \`${AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID}\` with the user's question.
-2. Use ${platformCoreTools.executeEsql} only when you already have a validated ES|QL query from the inline tool.
-3. Prefer compact \`STATS\` aggregations over returning raw spans, and report the numbers in plain language.
+1. Decide \`dataSource\` from the question (see table above).
+2. Call \`${AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID}\` with \`prompt\` and \`dataSource\`:
+   - \`dataSource: "traces"\` — tokens, latency, tool calls, errors, and other span telemetry.
+   - \`dataSource: "logs"\` — user prompts, LLM responses, system prompts, and tool message content.
+3. Use ${platformCoreTools.executeEsql} only when you already have a validated ES|QL query from the inline tool.
+4. Prefer compact \`STATS\` aggregations over returning raw spans, and report the numbers in plain language.
+
+If a question needs both telemetry and message text, make separate tool calls with the appropriate
+\`dataSource\` for each part rather than defaulting to \`"traces"\`.
 
 ### Example query patterns
 
-These patterns assume the current space traces index. Replace \`<traces-index>\` with the index
-returned by the inline tool.
+These patterns assume the current space indices. Replace \`<traces-index>\` and \`<logs-index>\`
+with the indices returned by the inline tool. Use \`dataSource: "traces"\` for the traces examples
+and \`dataSource: "logs"\` for the logs example.
 
 Total tokens by model (last 24h):
 
@@ -149,10 +197,25 @@ FROM <traces-index>
 | LIMIT 15
 \`\`\`
 
+Recent user prompts (logs index; requires \`agentBuilder:tracing:includeUserPrompts\`):
+
+\`\`\`esql
+FROM <logs-index>
+| WHERE @timestamp >= NOW() - 24 hours
+| WHERE event_name == "gen_ai.user.message"
+| SORT @timestamp DESC
+| LIMIT 20
+| KEEP @timestamp, attributes.content, trace_id, span_id
+\`\`\`
+
 ## Edge Cases
 
 - If a query returns no rows, explain that the time window may be empty or that
   the \`${AGENT_BUILDER_TRACING_ENABLED_SETTING_ID}\` UI setting is not enabled. Do not fabricate values.
+- Using the wrong \`dataSource\` (e.g. \`"traces"\` for a user-prompt question) will query the wrong
+  index and return no message fields — always use \`"logs"\` for message content.
+- Message-content queries against the logs index return no rows when the corresponding privacy
+  setting is disabled (user prompts, LLM responses, system prompt, and tool details are all off by default).
 - Token fields can be missing on non-LLM spans; always filter to \`span.name LIKE "chat *"\`
   before aggregating token usage.
 - \`duration\` is in nanoseconds — never report it raw; convert to seconds (or ms) for the user.

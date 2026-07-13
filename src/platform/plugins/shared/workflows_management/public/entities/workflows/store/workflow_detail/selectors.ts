@@ -74,6 +74,11 @@ export const selectAiAssisted = createSelector(
 
 export const selectFocusedStepId = createSelector(selectDetail, (detail) => detail.focusedStepId);
 
+export const selectFocusedTriggerId = createSelector(
+  selectDetail,
+  (detail) => detail.focusedTriggerId
+);
+
 export const selectHighlightedStepId = createSelector(
   selectDetail,
   (detail) => detail.highlightedStepId
@@ -172,6 +177,17 @@ export const selectEditorFocusedStepInfo = createSelector(
   selectEditorWorkflowLookup,
   (focusedStepId, workflowLookup) =>
     focusedStepId && workflowLookup ? workflowLookup.steps[focusedStepId] : undefined
+);
+
+export const selectEditorFocusedTriggerInfo = createSelector(
+  selectFocusedTriggerId,
+  selectEditorWorkflowLookup,
+  (focusedTriggerId, workflowLookup) => {
+    if (!focusedTriggerId || !workflowLookup) return undefined;
+    const { triggersLineStart, triggersLineEnd } = workflowLookup;
+    if (triggersLineStart == null || triggersLineEnd == null) return undefined;
+    return { lineStart: triggersLineStart, lineEnd: triggersLineEnd };
+  }
 );
 
 export const selectEditorWorkflowGraph = createSelector(

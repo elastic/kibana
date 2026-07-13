@@ -156,9 +156,9 @@ export function getEuidDslFilterBasedOnDocument(
     })
     .map((evaluation) => ({ evaluation, spec: getSourceMatchSpec(doc, evaluation) }));
 
-  // For condition-based namespaces (e.g. local users identified by user.name + host.id from
-  // authentication events), the identity fields alone are sufficient — no higher-ranked field
-  // guards or source clause needed.
+  // Field guards (higher-ranked field exclusions from EUID ranking) are only needed when the
+  // namespace is source-value-based. Condition-based namespaces (e.g. local, cloud.provider
+  // mapping) skip the guards because the condition itself is the discriminator.
   const isConditionBased = evaluationSpecs.some(({ spec }) => spec.type === 'condition');
 
   if (!isConditionBased) {
@@ -172,14 +172,18 @@ export function getEuidDslFilterBasedOnDocument(
         must: [...priorMust, ...toBeFilteredOut.map(fieldMissingOrEmptyDsl)],
       };
     }
-
-    const currentBoolQuery = dsl.bool!;
-    const filterList = Array.isArray(currentBoolQuery.filter) ? currentBoolQuery.filter : [];
-    for (const { evaluation, spec } of evaluationSpecs) {
-      filterList.push(buildSourceClauseDsl(evaluation, spec) as QueryDslQueryContainer);
-    }
-    dsl.bool = { ...dsl.bool, filter: filterList };
   }
+
+  // Source clauses are always added regardless of isConditionBased.
+  // For condition specs (e.g. local namespace or cloud.provider field-mapping), buildSourceClauseDsl
+  // translates the condition to DSL via conditionToQueryDsl — this ensures that a filter for
+  // user:alice@aws also requires cloud.provider==aws and does not accidentally match alice@gcp.
+  const currentBoolQuery = dsl.bool!;
+  const filterList = Array.isArray(currentBoolQuery.filter) ? currentBoolQuery.filter : [];
+  for (const { evaluation, spec } of evaluationSpecs) {
+    filterList.push(buildSourceClauseDsl(evaluation, spec) as QueryDslQueryContainer);
+  }
+  dsl.bool = { ...dsl.bool, filter: filterList };
 
   return dsl;
 }
@@ -197,6 +201,12 @@ function fieldMissingOrEmptyDsl(field: string): QueryDslQueryContainer {
   };
 }
 
+/**
+ * Translates a field evaluation back to DSL source-field conditions using the known destination
+ * value. For condition-based when-clauses the condition is translated directly to DSL via
+ * `conditionToQueryDsl`, ensuring provider-specific filters (e.g. `cloud.provider == "aws"`)
+ * are included and not accidentally omitted.
+ */
 function buildSourceClauseDsl(
   evaluation: FieldEvaluation,
   spec: SourceMatchSpec

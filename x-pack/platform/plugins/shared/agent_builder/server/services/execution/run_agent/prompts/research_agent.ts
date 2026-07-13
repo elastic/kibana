@@ -13,17 +13,24 @@ import { convertPreviousRounds } from '../utils/to_langchain_messages';
 import { attachmentTypeInstructions, renderAttachmentPrompt } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
-import { formatDate } from './utils/helpers';
 import { getFileSystemInstructions } from './utils/filestore';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
+import { renderRenderersPrompt } from './utils/renderers';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
 export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { actions, cycleLimit, processedConversation, resultTransformer, toolManager } = params;
+  const {
+    actions,
+    cycleLimit,
+    processedConversation,
+    resultTransformer,
+    toolManager,
+    conversationTimestamp,
+  } = params;
 
   // Generate messages from the conversation's rounds, optionally
   // injecting a compaction summary for older compacted rounds.
@@ -33,6 +40,7 @@ export const getResearchAgentPrompt = async (
     conversation: processedConversation,
     resultTransformer,
     compactionSummary: processedConversation.compactionSummary,
+    conversationTimestamp,
   });
 
   return [
@@ -48,15 +56,13 @@ export const getResearchAgentPrompt = async (
 };
 
 const getAgentSystemMessage = async ({
-  configuration: {
-    research: { instructions: customInstructions },
-  },
-  conversationTimestamp,
+  configuration: { instructions: customInstructions },
   processedConversation: { attachmentTypes, versionedAttachmentPresentation },
   outputSchema,
   skills,
   experimentalFeatures,
   capabilities,
+  renderers,
 }: ResearchAgentPromptParams): Promise<string> => {
   const visEnabled = capabilities.visualizations;
 
@@ -129,10 +135,10 @@ ${attachmentTypeInstructions(attachmentTypes)}
 ${getConversationAttachmentsSection(versionedAttachmentPresentation)}
 
 ## SML @ REFERENCES
-When the user picks from the @ menu, the message includes markdown links: \`[@label](sml://CHUNK_ID)\`. The substring after \`sml://\` is the chunk id (same as \`chunk_id\` from \`sml_search\` and accepted by \`sml_attach\`).
-- For each distinct chunk id in \`sml://\` links in the **current** user message, call \`sml_attach\` with those ids **before** other tools that need that asset's content. When this applies, it overrides generic tool-order rules for tools that depend on those assets.
-- Skip \`sml_attach\` for a chunk id only if a **previous** turn already ran \`sml_attach\` successfully for that chunk id (see prior tool output text such as \`created from SML item '...'\`). Do **not** infer skip from conversation attachment XML: attachment \`id\` attributes are conversation attachment ids, not SML chunk ids.
-- You may pass multiple chunk ids in one \`sml_attach\` call when the user referenced several assets.
+When the user picks from the @ menu, the message includes markdown links: \`[@label](sml://ENTRY_ID)\`. The substring after \`sml://\` is the entry id (same as \`entry_id\` from \`sml_search\` and accepted by \`sml_attach\`).
+- For each distinct entry id in \`sml://\` links in the **current** user message, call \`sml_attach\` with those ids **before** other tools that need that asset's content. When this applies, it overrides generic tool-order rules for tools that depend on those assets.
+- Skip \`sml_attach\` for an entry id only if a **previous** turn already ran \`sml_attach\` successfully for that entry id (see prior tool output text such as \`created from SML item '...'\`). Do **not** infer skip from conversation attachment XML: attachment \`id\` attributes are conversation attachment ids, not SML entry ids.
+- You may pass multiple entry ids in one \`sml_attach\` call when the user referenced several assets.
 
 ## CUSTOM RENDERING
 
@@ -140,6 +146,5 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ${renderAttachmentPrompt()}
 
-## ADDITIONAL INFO
-- Current date: ${formatDate(conversationTimestamp)}`);
+${renderRenderersPrompt(renderers, { bashEnabled: experimentalFeatures.bash })}`);
 };

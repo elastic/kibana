@@ -117,6 +117,7 @@ const handleConversationExecution = async ({
     outputSchema,
     storeConversation = true,
     autoCreateConversationWithId = false,
+    source,
     nextInput,
     browserApiTools,
     configurationOverrides,
@@ -145,6 +146,7 @@ const handleConversationExecution = async ({
     autoCreateConversationWithId,
     conversationClient,
     accessControl,
+    source,
   });
 
   // Emit conversation ID for new conversations (only when persisting)
@@ -194,10 +196,6 @@ const handleConversationExecution = async ({
       })
     : EMPTY;
 
-  // Merge all event streams
-  const effectiveConversationId =
-    conversation.operation === 'CREATE' ? conversation.id : conversationId;
-
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
   const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
@@ -219,7 +217,7 @@ const handleConversationExecution = async ({
       agentId,
       agentName,
       providerName: connectorProvider,
-      conversationId: effectiveConversationId,
+      conversationId: conversation.id,
       spaceId,
       opikHeaders,
     },
@@ -237,7 +235,7 @@ const handleConversationExecution = async ({
               // metering
               meteringService
                 .reportExecution({
-                  conversationId: effectiveConversationId,
+                  conversationId: conversation.id,
                   executionId: execution.executionId,
                   roundCount: currentRoundCount,
                   agentId,
@@ -249,13 +247,11 @@ const handleConversationExecution = async ({
                 });
 
               // snapshot telemetry tracking
-              if (effectiveConversationId) {
-                trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
-              }
+              trackingService?.trackConversationRound(conversation.id, currentRoundCount);
 
               // EBT tracking
               analyticsService?.reportRoundComplete({
-                conversationId: effectiveConversationId,
+                conversationId: conversation.id,
                 executionId: execution.executionId,
                 roundCount: currentRoundCount,
                 agentId,
@@ -273,7 +269,7 @@ const handleConversationExecution = async ({
           analyticsService,
           trackingService,
           modelProvider: connectorProvider,
-          conversationId: effectiveConversationId,
+          conversationId: conversation.id,
           executionId: execution.executionId,
         })
       )
@@ -282,7 +278,7 @@ const handleConversationExecution = async ({
 
 /**
  * Subscribe to the event stream and append events to the execution document with 200ms batching.
- * Returns a promise that resolves when the observable completes and all events are flushed.
+ * Returns a promise that resolves with the collected events when the observable completes and all events are flushed.
  */
 export const collectAndWriteEvents = ({
   events$,
@@ -294,8 +290,9 @@ export const collectAndWriteEvents = ({
   execution: AgentExecution;
   executionClient: AgentExecutionClient;
   logger: Logger;
-}): Promise<void> => {
-  return new Promise<void>((resolve, reject) => {
+}): Promise<ChatEvent[]> => {
+  return new Promise<ChatEvent[]>((resolve, reject) => {
+    const collectedEvents: ChatEvent[] = [];
     let pendingEvents: ChatEvent[] = [];
     let flushTimer: ReturnType<typeof setTimeout> | undefined;
     let flushInProgress: Promise<void> | undefined;
@@ -331,6 +328,7 @@ export const collectAndWriteEvents = ({
 
     events$.subscribe({
       next: (event) => {
+        collectedEvents.push(event);
         pendingEvents.push(event);
         scheduleFlush();
       },
@@ -346,7 +344,7 @@ export const collectAndWriteEvents = ({
           }
           await flush();
         };
-        finalFlush().then(resolve, reject);
+        finalFlush().then(() => resolve(collectedEvents), reject);
       },
     });
   });
