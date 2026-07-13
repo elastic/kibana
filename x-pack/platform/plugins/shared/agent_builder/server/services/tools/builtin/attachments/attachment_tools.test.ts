@@ -13,6 +13,7 @@ import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachme
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { createResolveContextMock } from '../../../../test_utils';
 import { createAttachmentTools } from '.';
 
 describe('attachment tools', () => {
@@ -215,11 +216,7 @@ describe('attachment tools', () => {
       });
 
       // Add the attachment with origin — content is resolved during add()
-      const resolveContext = {
-        request: httpServerMock.createKibanaRequest(),
-        spaceId: 'default',
-        savedObjectsClient: {} as any,
-      };
+      const resolveContext = createResolveContextMock();
       const attachment = await resolveAttachmentManager.add(
         {
           type: VISUALIZATION_ATTACHMENT_TYPE,

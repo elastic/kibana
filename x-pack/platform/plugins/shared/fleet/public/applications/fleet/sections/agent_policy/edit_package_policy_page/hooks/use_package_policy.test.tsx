@@ -729,6 +729,9 @@ describe('usePackagePolicy - agentless', () => {
 
     // The fast-path agentless read effect must not run when the hint is missing.
     expect(sendGetAgentlessPolicy).not.toHaveBeenCalled();
+    // With the legacy-block flag off (default), the legacy dry-run still drives the upgrade
+    // preview and must keep running even for a detected-agentless policy.
+    expect(sendUpgradePackagePolicyDryRun).toHaveBeenCalledWith(['agentless-detect']);
 
     let saveResult: any;
     await act(async () => {
@@ -918,6 +921,48 @@ describe('usePackagePolicy - agentless', () => {
 
     // The superseded agentless response is discarded — the legacy load still wins.
     expect(result.current.packagePolicy?.name).toBe('nginx-1');
+  });
+});
+
+describe('usePackagePolicy - agentless with disableAgentlessLegacyAPI enabled', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // The legacy-block flag makes the package-policy upgrade dry-run 400 for agentless policies
+    // server-side. `enableAgentlessPoliciesUI` stays on (its default) so the save still routes
+    // through the agentless API.
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      ...allowedExperimentalValues,
+      disableAgentlessLegacyAPI: true,
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('skips the legacy upgrade dry-run for a detected-agentless policy read without the hint', async () => {
+    // A hint-less entry point (deep link, or the policies table's per-row upgrade action) reads
+    // via the package-policy API. With the flag on, the legacy dry-run would 400, so it must be
+    // skipped for the detected-agentless policy — the edit form loads instead of an error page.
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('agentless-detect', {})
+    );
+    await waitFor(() => expect(result.current.packagePolicy?.name).toBe('nginx-1'));
+
+    expect(sendGetAgentlessPolicy).not.toHaveBeenCalled();
+    expect(sendUpgradePackagePolicyDryRun).not.toHaveBeenCalled();
+  });
+
+  it('still runs the legacy dry-run for a non-agentless policy', async () => {
+    // The skip is scoped to agentless policies; regular policies keep their upgrade dry-run.
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('package-policy-1', {})
+    );
+    await waitFor(() => expect(result.current.packagePolicy?.name).toBe('nginx-1'));
+
+    expect(sendUpgradePackagePolicyDryRun).toHaveBeenCalledWith(['package-policy-1']);
   });
 });
 
