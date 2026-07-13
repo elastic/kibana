@@ -1,0 +1,15 @@
+prs:
+- https://github.com/elastic/kibana/pull/274792
+issues:
+- https://github.com/elastic/kibana/issues/265849
+type: breaking-change
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+areas:
+- Alerting and reporting
+- Dashboards and visualizations
+title: Simplify duration units
+description: "Changes expected types for `to` and `from` used for Lens visualization API configuration. Change is behind the `asCode.useGASchemas` feature flag which will be enabled by default and disabled for existing API users."
+impact: "Lens as Code duration format `from` and `to` values change from long-form unit names (for example `milliseconds`, `asSeconds`) to short-hand enumerations (for example `ms`, `s`). Configurations using the previous values fail validation when `asCode.useGASchemas` is enabled."
+action: "Update Lens visualization API configurations to use the new short-hand duration units."

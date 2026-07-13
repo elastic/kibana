@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/275996
+issues:
+- https://github.com/elastic/kibana-team/issues/3540
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+areas:
+- Kibana platform
+title: '"Use browser default" for all environments'
+description: Kibana now uses the browser’s `Accept-Language` preferences to select the UI language when no user profile language or locale cookie is available. If the browser’s preferred language is listed in `i18n.locales`, Kibana uses it; otherwise it falls back to `i18n.defaultLocale` and finally falls back to English. Users can still override the language in their profile; only locales listed in `i18n.locales` are available to choose from.
