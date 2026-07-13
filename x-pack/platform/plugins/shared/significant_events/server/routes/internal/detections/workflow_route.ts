@@ -6,9 +6,38 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { QueryLink } from '@kbn/significant-events-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import {
+  CRITICAL_RULE_INTERVAL,
+  DEFAULT_RULE_INTERVAL,
+  getRuleDetectionSchedule,
+  scheduleIntervalForQuery,
+  type RuleDetectionSchedule,
+} from '../../../lib/significant_events/rules/schedule';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+
+interface RuleScheduleGroup {
+  schedule: RuleDetectionSchedule;
+  queryLinks: QueryLink[];
+}
+
+const groupQueryLinksByRuleSchedule = (queryLinks: QueryLink[]): RuleScheduleGroup[] => {
+  const groups = new Map<number, RuleScheduleGroup>();
+
+  for (const queryLink of queryLinks) {
+    const schedule = getRuleDetectionSchedule(queryLink.query);
+    const group = groups.get(schedule.interval_minutes) ?? { schedule, queryLinks: [] };
+    group.queryLinks.push(queryLink);
+    groups.set(schedule.interval_minutes, group);
+  }
+
+  return Array.from(groups.values());
+};
+
+const countRulesForInterval = (queryLinks: QueryLink[], interval: string): number =>
+  queryLinks.filter((queryLink) => scheduleIntervalForQuery(queryLink.query) === interval).length;
 
 const countAlertsRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/detections/workflow/_count_alerts',
@@ -79,21 +108,35 @@ const changePointScanRoute = createServerRoute({
     const queryLinks = await kiClient.getRuleBackedQueryLinks();
 
     const startedAt = Date.now();
-    const { took, ...aggregations } = await sigEventsContext.alertsReader.runChangePointScan(
-      scopedClusterClient.asCurrentUser,
-      {
-        lookback: params.body.lookback,
-        bucketInterval: params.body.bucketInterval,
-        spaceId,
-      },
-      queryLinks
+    const scanResults = await Promise.all(
+      groupQueryLinksByRuleSchedule(queryLinks).map(({ schedule, queryLinks: groupedLinks }) => {
+        const criticalCadence = schedule.interval_minutes === 1;
+        return sigEventsContext.alertsReader.runChangePointScan(
+          scopedClusterClient.asCurrentUser,
+          {
+            lookback: criticalCadence ? params.body.lookback : schedule.lookback,
+            bucketInterval: criticalCadence ? params.body.bucketInterval : schedule.bucket_interval,
+            recentActivityMinutes: schedule.recent_activity_minutes,
+            ruleIds: groupedLinks.map((queryLink) => queryLink.rule_id),
+            spaceId,
+          },
+          groupedLinks
+        );
+      })
     );
     const durationMs = Date.now() - startedAt;
+    const took = scanResults.reduce((sum, result) => sum + (result.took ?? 0), 0);
+    const buckets = scanResults.flatMap((result) => result.by_rule.buckets);
+    const aggregations = { by_rule: { buckets } };
+    const criticalRuleCount = countRulesForInterval(queryLinks, CRITICAL_RULE_INTERVAL);
+    const defaultRuleCount = countRulesForInterval(queryLinks, DEFAULT_RULE_INTERVAL);
 
     telemetry.trackSignificantEventsDetectionScan({
-      took_ms: took ?? 0,
+      took_ms: took,
       duration_ms: durationMs,
-      rules_scanned: aggregations.by_rule.buckets.length,
+      rules_scanned: buckets.length,
+      critical_rule_count: criticalRuleCount,
+      default_rule_count: defaultRuleCount,
       alerting_engine: sigEventsContext.alertingV2Active ? 'v2' : 'v1',
       alerts_source_index: sigEventsContext.alertsReader.index,
       lookback: params.body.lookback,

@@ -74,4 +74,3 @@ test.describe('ES|QL Data Federation — Stack Management', { tag: tags.stateful
     });
   });
 });
-

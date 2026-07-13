@@ -22,4 +22,3 @@ export const CUSTOM_ROLES: Record<string, KibanaRole> = {
     ],
   },
 };
-
