@@ -60,11 +60,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
-    description:
-      'Generate an ES|QL query from a natural language query. Do NOT use this tool if a ' +
-      'more specific skill is available for the request (see the SKILLS section) — prefer ' +
-      'loading that skill first, since its dedicated tools are more accurate than a ' +
-      'generated general-purpose query for that domain.',
+    description: 'Generate an ES|QL query from a natural language query.',
     schema: nlToEsqlToolSchema,
     handler: async (
       {

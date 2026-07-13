@@ -49,17 +49,7 @@ function getPreconfiguredEisConnectorsArg(): string | undefined {
     // Preconfigured connectors do not expose `config` unless `exposeConfig: true` is set.
     // The inference plugin relies on `.inference` connector config (taskType, inferenceId, ...)
     // to validate compatibility.
-    // Older cache files wrote inferenceId with a leading dot, which the Kibana connector API now
-    // rejects. Normalize the id so cached connectors remain valid without manual editing.
-    const inferenceId =
-      typeof connector.config.inferenceId === 'string'
-        ? connector.config.inferenceId.replace(/^\.+/, '')
-        : connector.config.inferenceId;
-    eisConnectors[id] = {
-      ...connector,
-      exposeConfig: true,
-      config: { ...connector.config, inferenceId },
-    };
+    eisConnectors[id] = { ...connector, exposeConfig: true };
   }
 
   if (Object.keys(eisConnectors).length === 0) return;

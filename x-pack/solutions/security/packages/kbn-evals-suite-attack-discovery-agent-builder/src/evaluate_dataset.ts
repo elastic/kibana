@@ -198,11 +198,24 @@ const createWorkflowEvidenceEvaluator = (): Evaluator<
 
 const isString = (value: unknown): value is string => typeof value === 'string';
 
-const extractSkillNamesFromLoadSkillStep = (step: {
+type ToolCallStep = {
   tool_id?: string;
-  params?: Record<string, unknown>;
   results?: unknown[];
-}): string[] => {
+  params?: Record<string, unknown>;
+};
+
+const getToolCallStepsWithParams = (
+  output: AttackDiscoveryAgentBuilderTaskOutput
+): ToolCallStep[] =>
+  (output.steps ?? [])
+    .filter((step) => (step as { type?: string }).type === 'tool_call')
+    .map((step) => ({
+      tool_id: step.tool_id,
+      results: step.results,
+      params: (step as { params?: Record<string, unknown> }).params,
+    }));
+
+const extractSkillNamesFromLoadSkillStep = (step: ToolCallStep): string[] => {
   const names: string[] = [];
   if (step.tool_id !== 'load_skill') return names;
 
@@ -289,7 +302,7 @@ const createResponseSkillInvocationEvaluator = ({
       };
     }
 
-    const toolCalls = getToolCallSteps(output);
+    const toolCalls = getToolCallStepsWithParams(output);
     const invokedSkillNames = new Set(
       toolCalls.flatMap((step) => extractSkillNamesFromLoadSkillStep(step))
     );
