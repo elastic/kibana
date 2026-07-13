@@ -27,9 +27,88 @@ export const EDIT_TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.editTem
   defaultMessage: 'Edit template',
 });
 
+export const TEMPLATE_METADATA_SECTION_TITLE = i18n.translate(
+  'xpack.cases.templates.templateMetadataSectionTitle',
+  {
+    defaultMessage: 'Template details',
+  }
+);
+
+export const TEMPLATE_METADATA_SECTION_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.templateMetadataSectionDescription',
+  {
+    defaultMessage:
+      'Identifies this template in the templates list. Saved with the template and edited here — these details are not part of the YAML definition and do not change case defaults.',
+  }
+);
+
+export const TEMPLATE_NAME_LABEL = i18n.translate('xpack.cases.templates.templateNameLabel', {
+  defaultMessage: 'Template name',
+});
+
+export const TEMPLATE_DESCRIPTION_LABEL = i18n.translate(
+  'xpack.cases.templates.templateDescriptionLabel',
+  {
+    defaultMessage: 'Template description',
+  }
+);
+
+export const TEMPLATE_TAGS_LABEL = i18n.translate('xpack.cases.templates.templateTagsLabel', {
+  defaultMessage: 'Template tags',
+});
+
+export const TEMPLATE_TAGS_HELP_TEXT = i18n.translate(
+  'xpack.cases.templates.templateTagsHelpText',
+  {
+    defaultMessage: 'Used for filtering and discovery in the templates list.',
+  }
+);
+
+export const TEMPLATE_NAME_REQUIRED = i18n.translate('xpack.cases.templates.templateNameRequired', {
+  defaultMessage: 'Template name is required.',
+});
+
+export const TEMPLATE_NAME_MAX_LENGTH = (max: number) =>
+  i18n.translate('xpack.cases.templates.templateNameMaxLength', {
+    defaultMessage: 'Template name must be {max} characters or fewer.',
+    values: { max },
+  });
+
+export const TEMPLATE_DESCRIPTION_MAX_LENGTH = (max: number) =>
+  i18n.translate('xpack.cases.templates.templateDescriptionMaxLength', {
+    defaultMessage: 'Template description must be {max} characters or fewer.',
+    values: { max },
+  });
+
+export const TEMPLATE_TAG_MAX_LENGTH = (max: number) =>
+  i18n.translate('xpack.cases.templates.templateTagMaxLength', {
+    defaultMessage: 'Each tag must be {max} characters or fewer.',
+    values: { max },
+  });
+
+export const TEMPLATE_TAGS_MAX_COUNT = (max: number) =>
+  i18n.translate('xpack.cases.templates.templateTagsMaxCount', {
+    defaultMessage: 'A template can have up to {max} tags.',
+    values: { max },
+  });
 export const TEMPLATE_FIELDS_LABEL = i18n.translate('xpack.cases.templates.templateFieldsLabel', {
   defaultMessage: 'Fields',
 });
+
+export const CASE_DEFAULT_TITLE = i18n.translate('xpack.cases.templates.caseDefaultTitle', {
+  defaultMessage: 'Case title',
+});
+
+export const CASE_DEFAULT_ASSIGNEES = i18n.translate('xpack.cases.templates.caseDefaultAssignees', {
+  defaultMessage: 'Assignees',
+});
+
+export const CASE_DEFAULTS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.templates.caseDefaultsSectionTitle',
+  {
+    defaultMessage: 'Case defaults',
+  }
+);
 
 export const TEMPLATE_SAVED = i18n.translate('xpack.cases.templates.templateSaved', {
   defaultMessage: 'Saved',
@@ -757,6 +836,13 @@ export const INVALID_YAML_DEFINITION = i18n.translate(
   { defaultMessage: 'Invalid YAML definition' }
 );
 
+export const TEMPLATE_MISSING_REQUIRED_KEYS = (keys: string[]) =>
+  i18n.translate('xpack.cases.templates.missingRequiredKeys', {
+    defaultMessage:
+      'The template YAML must include these keys so they stay visible in the preview: {keys}. Restore them to continue.',
+    values: { keys: keys.join(', ') },
+  });
+
 export const CONNECTOR_TITLE = i18n.translate('xpack.cases.templates.preview.connectorTitle', {
   defaultMessage: 'Connector',
 });
@@ -769,6 +855,37 @@ export const SETTINGS_TAB_LABEL = i18n.translate('xpack.cases.templates.renderPa
   defaultMessage: 'Settings',
 });
 
+export const CONFIGURATION_TAB_LABEL = i18n.translate(
+  'xpack.cases.templates.renderPanel.configurationTab',
+  { defaultMessage: 'Configuration' }
+);
+
+export const CONFIGURATION_TAB_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.configuration.description',
+  {
+    defaultMessage:
+      'Saved on the template and applied to every case it creates — not part of the YAML definition.',
+  }
+);
+
+export const CONFIGURATION_CONNECTOR_GROUP_TITLE = i18n.translate(
+  'xpack.cases.templates.configuration.connectorGroupTitle',
+  { defaultMessage: 'Case settings & connector' }
+);
+
+export const CONFIGURATION_CONNECTOR_GROUP_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.configuration.connectorGroupDescription',
+  {
+    defaultMessage:
+      'Case behavior and the default external connector applied to every case created from this template.',
+  }
+);
+
+export const CONFIGURATION_TAB_NAME_REQUIRED = i18n.translate(
+  'xpack.cases.templates.configuration.nameRequiredIndicator',
+  { defaultMessage: 'A template name is required — set it on the Configuration tab.' }
+);
+
 export const SETTINGS_SECTION_TITLE = i18n.translate(
   'xpack.cases.templates.settings.sectionTitle',
   { defaultMessage: 'Case settings' }
@@ -778,7 +895,7 @@ export const SETTINGS_SECTION_DESCRIPTION = i18n.translate(
   'xpack.cases.templates.settings.sectionDescription',
   {
     defaultMessage:
-      'Defaults applied to cases created from this template. These are managed here, not in the YAML.',
+      'Defaults applied to cases created from this template. These values are also represented in YAML.',
   }
 );
 

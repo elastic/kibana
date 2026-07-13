@@ -14,6 +14,7 @@ import type {
   UiamOAuthClientResponse,
   UiamOAuthConnectionResponse,
   UiamOAuthType,
+  UiamResolvedUsersResponse,
   UpdateUiamOAuthClientParams,
   UpdateUiamOAuthConnectionParams,
 } from '@kbn/core-security-server';
@@ -44,6 +45,9 @@ export class UiamOAuth implements UiamOAuthType {
     params: CreateUiamOAuthClientParams
   ): Promise<UiamOAuthClientResponse | null> {
     if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth client creation: security features are disabled in Elasticsearch.'
+      );
       return null;
     }
 
@@ -66,6 +70,9 @@ export class UiamOAuth implements UiamOAuthType {
     projectId?: string
   ): Promise<{ clients: UiamOAuthClientResponse[] } | null> {
     if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth client listing: security features are disabled in Elasticsearch.'
+      );
       return null;
     }
 
@@ -88,6 +95,9 @@ export class UiamOAuth implements UiamOAuthType {
     params: UpdateUiamOAuthClientParams
   ): Promise<UiamOAuthClientResponse | null> {
     if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth client update: security features are disabled in Elasticsearch.'
+      );
       return null;
     }
 
@@ -110,6 +120,9 @@ export class UiamOAuth implements UiamOAuthType {
     reason?: string
   ): Promise<UiamOAuthClientResponse | null> {
     if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth client revocation: security features are disabled in Elasticsearch.'
+      );
       return null;
     }
 
@@ -132,6 +145,9 @@ export class UiamOAuth implements UiamOAuthType {
     connectionId?: string
   ): Promise<{ connections: UiamOAuthConnectionResponse[] } | null> {
     if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth connection listing: security features are disabled in Elasticsearch.'
+      );
       return null;
     }
 
@@ -155,6 +171,9 @@ export class UiamOAuth implements UiamOAuthType {
     params: UpdateUiamOAuthConnectionParams
   ): Promise<UiamOAuthConnectionResponse | null> {
     if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth connection update: security features are disabled in Elasticsearch.'
+      );
       return null;
     }
 
@@ -185,6 +204,9 @@ export class UiamOAuth implements UiamOAuthType {
     reason?: string
   ): Promise<UiamOAuthConnectionResponse | null> {
     if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping OAuth connection revocation: security features are disabled in Elasticsearch.'
+      );
       return null;
     }
 
@@ -206,6 +228,23 @@ export class UiamOAuth implements UiamOAuthType {
       );
       throw e;
     }
+  }
+
+  async resolveUsers(
+    request: KibanaRequest,
+    userIds: string[]
+  ): Promise<UiamResolvedUsersResponse | null> {
+    if (!this.license.isEnabled()) {
+      this.logger.debug(
+        'Skipping user resolution: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
+    const accessToken = UiamOAuth.getAccessToken(request);
+    this.logger.debug(`Attempting to resolve ${userIds.length} user(s)`);
+
+    return this.uiam.resolveUsers(accessToken, userIds);
   }
 
   /**
