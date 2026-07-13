@@ -49,10 +49,28 @@ export interface GetExecutionsByIdsOptions<TExecution extends { id: string }> {
   sourceExcludes?: ExecutionSourceProjectionField<TExecution>[];
 }
 
+export interface DocumentVersionFields {
+  index: string;
+  seqNo?: number;
+  primaryTerm?: number;
+}
+
+export interface GetExecutionByIdsItem<TExecution extends { id: string }> extends DocumentVersionFields {
+  document: TExecution;
+}
+
+export interface GetExecutionsByIdsResponse<TExecution extends { id: string }> {
+  items: GetExecutionByIdsItem<TExecution>[];
+  missing: (string | { id: string; index: string })[];
+}
+
 export interface ReadonlyExecutionsDataAccess<TExecution extends { id: string }> {
   search(request: ExecutionsSearchRequest): Promise<estypes.SearchResponse<TExecution>>;
   count(request: ExecutionsCountRequest): Promise<estypes.CountResponse>;
-  getByIds(ids: string[], options?: GetExecutionsByIdsOptions<TExecution>): Promise<TExecution[]>;
+  getByIds(
+    ids: (string | { id: string; index: string })[],
+    options?: GetExecutionsByIdsOptions<TExecution>
+  ): Promise<GetExecutionsByIdsResponse<TExecution>>;
 }
 
 export interface WritableExecutionsDataAccess<TExecution extends { id: string }> {
@@ -95,11 +113,9 @@ export type StepExecutionSourceProjectionField =
 export type GetWorkflowExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflowExecution>;
 export type GetStepExecutionsByIdsOptions = GetExecutionsByIdsOptions<EsWorkflowStepExecution>;
 
-export interface BulkItem<TDocument extends { id: string }> {
+export interface BulkItem<TDocument extends { id: string }> extends DocumentVersionFields {
   operation: 'create' | 'update' | 'upsert';
   document: Partial<TDocument> & { id: string };
-  seqNo?: number;
-  primaryTerm?: number;
   retryOnConflict?: number;
 }
 
@@ -109,11 +125,9 @@ export interface BulkRequestOptions<TDocument extends { id: string }> {
 }
 
 /** Per-document outcome aligned with ES bulk item fields (update/index/create). */
-export interface BulkItemResponse {
+export interface BulkItemResponse extends DocumentVersionFields {
   id: string;
   error?: estypes.ErrorCause;
-  _seq_no?: number;
-  _primary_term?: number;
 }
 
 /** Always bulk-shaped: `items.length ===` normalized document count, input order preserved. */

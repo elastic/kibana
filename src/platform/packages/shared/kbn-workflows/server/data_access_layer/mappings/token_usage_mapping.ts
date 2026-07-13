@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingsDefinition } from '@kbn/es-mappings';
+import { mappings } from '@kbn/es-mappings';
 
 // Normalized LLM token usage. Shared between the step-execution mapping (per-step
 // usage extracted from `output.metadata.usage`) and the execution mapping (the
 // aggregated per-execution total). Present only for token-consuming (`ai.*`) steps.
-export const TOKEN_USAGE_MAPPING: MappingProperty = {
-  type: 'object',
+export const TOKEN_USAGE_MAPPING = mappings.object({
   properties: {
-    inputTokens: { type: 'long' },
-    outputTokens: { type: 'long' },
-    cachedTokens: { type: 'long' },
-    totalTokens: { type: 'long' },
+    inputTokens: mappings.long(),
+    outputTokens: mappings.long(),
+    cachedTokens: mappings.long(),
+    totalTokens: mappings.long(),
   },
-};
+}) satisfies MappingsDefinition;
