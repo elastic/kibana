@@ -23,8 +23,6 @@ import type {
   ChangePointTypeMap,
   ChangePointScanParams,
   CountDetectionAlertsParams,
-  RuleActivityAggregations,
-  RuleAlertWindowAggregations,
   RuleChangePointAggregations,
   RuleMetadata,
 } from './alerts_reader';
@@ -186,7 +184,7 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
       },
     });
 
-    return { aggregations: (response.aggregations ?? {}) as RuleActivityAggregations };
+    return { aggregations: response.aggregations ?? {} };
   }
 
   async runRuleAlertWindows(
@@ -226,7 +224,7 @@ export class SignificantEventsAlertsReaderV1 implements ISignificantEventsAlerts
       },
     });
 
-    return { aggregations: (response.aggregations ?? {}) as RuleAlertWindowAggregations };
+    return { aggregations: response.aggregations ?? {} };
   }
 
   private buildChangePointScanBody({

@@ -35,38 +35,34 @@ import { getRuleDetectionSchedule } from '../rules/schedule';
 
 const EMPTY_CHANGE_POINT_TYPE: ChangePointTypeMap = {};
 
-interface SignalCountAggregation {
+interface RawSignalCountAggregation {
   value?: number;
 }
 
-interface SignalWindowAggregation {
+interface RawSignalWindowAggregation {
   doc_count?: number;
-  signal_count?: SignalCountAggregation;
+  signal_count?: RawSignalCountAggregation;
 }
 
 interface RawRuleBucket {
   key: string;
   doc_count: number;
-  signal_count?: SignalCountAggregation;
+  signal_count?: RawSignalCountAggregation;
   change_points?: { type?: ChangePointTypeMap };
-  last_5m?: SignalWindowAggregation;
-  last_floor_window?: SignalWindowAggregation;
-}
-
-interface CountAlertsAggregations {
-  signal_count?: SignalCountAggregation;
+  last_5m?: RawSignalWindowAggregation;
+  last_floor_window?: RawSignalWindowAggregation;
 }
 
 interface RawRuleActivityAggregations {
   activity_windows?: {
-    buckets?: Array<{ key: string | number; signal_count?: SignalCountAggregation }>;
+    buckets?: Array<{ key: string | number; signal_count?: RawSignalCountAggregation }>;
   };
   peak?: RuleActivityAggregations['peak'];
 }
 
 interface RawRuleAlertWindowAggregations {
-  current_window?: SignalWindowAggregation;
-  reference_window?: SignalWindowAggregation;
+  current_window?: RawSignalWindowAggregation;
+  reference_window?: RawSignalWindowAggregation;
 }
 
 export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlertsReader {
@@ -115,8 +111,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       },
     });
 
-    const aggregations = response.aggregations as CountAlertsAggregations | undefined;
-    return aggregations?.signal_count?.value ?? 0;
+    return response.aggregations?.signal_count?.value ?? 0;
   }
 
   async runChangePointScan(
@@ -353,7 +348,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
 
   private distinctSignalCount(window?: {
     doc_count?: number;
-    signal_count?: SignalCountAggregation;
+    signal_count?: RawSignalCountAggregation;
   }): number {
     return window?.signal_count?.value ?? window?.doc_count ?? 0;
   }
@@ -361,7 +356,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
   private normalizeWindowAggregations(
     aggregations: RawRuleAlertWindowAggregations
   ): RuleAlertWindowAggregations {
-    const normalizeWindow = (window: SignalWindowAggregation | undefined) => {
+    const normalizeWindow = (window: RawSignalWindowAggregation | undefined) => {
       if (!window) {
         return window;
       }
