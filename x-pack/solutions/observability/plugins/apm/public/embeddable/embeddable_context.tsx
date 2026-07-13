@@ -131,9 +131,11 @@ export function ApmEmbeddableContext({
     OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
     OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
   );
-  const cpsManager = isCpsEnabled ? deps.pluginsStart.cps?.cpsManager : undefined;
-  const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager });
-  setApmInternalServices({ callApmApi, cpsManager });
+  useMemo(() => {
+    const cpsManager = isCpsEnabled ? deps.pluginsStart.cps?.cpsManager : undefined;
+    const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager });
+    setApmInternalServices({ callApmApi, cpsManager });
+  }, [deps.coreStart, deps.pluginsStart.cps?.cpsManager, isCpsEnabled]);
 
   return (
     <I18nProvider>

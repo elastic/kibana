@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { TransactionDetailRedirectInfo } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { rangeRt } from '../../default_api_types';
+import { rangeSchema } from '../../default_api_types';
 
 export interface RootTransactionByTraceIdResponse {
   transaction?: TransactionDetailRedirectInfo;
@@ -15,10 +15,10 @@ export interface RootTransactionByTraceIdResponse {
 
 export const rootTransactionByTraceIdRoute = defineRoute<RootTransactionByTraceIdResponse>()({
   endpoint: 'GET /internal/apm/traces/{traceId}/root_transaction',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
+  params: z.object({
+    path: z.object({
+      traceId: z.string(),
     }),
-    query: rangeRt,
+    query: rangeSchema,
   }),
 });
