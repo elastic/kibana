@@ -250,7 +250,7 @@ export function CanvasZoomControls() {
       paddingSize="none"
       className={css`
         position: absolute;
-        right: 24px;
+        left: 24px;
         bottom: 24px;
         z-index: 5;
         display: flex;

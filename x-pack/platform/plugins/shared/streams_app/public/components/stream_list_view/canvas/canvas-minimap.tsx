@@ -72,7 +72,7 @@ export function CanvasMinimap({ hoveredFlow }: CanvasMinimapProps) {
         onClick={() => setCollapsed(false)}
         className={css`
           position: absolute;
-          left: 24px;
+          right: 24px;
           bottom: 24px;
           z-index: 5;
           display: flex;
@@ -102,7 +102,7 @@ export function CanvasMinimap({ hoveredFlow }: CanvasMinimapProps) {
       paddingSize="xs"
       className={css`
         position: absolute;
-        left: 24px;
+        right: 24px;
         bottom: 24px;
         z-index: 5;
         border-radius: ${euiTheme.border.radius.medium};
