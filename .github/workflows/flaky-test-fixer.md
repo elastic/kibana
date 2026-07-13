@@ -162,6 +162,61 @@ safe-outputs:
               }
               await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
+    # Requests the author of the PR that introduced the flaky test as a reviewer on the fix PR.
+    # Like link-fix-pr, this runs after safe_outputs because the fix PR's number isn't known
+    # while the agent runs. The agent passes the author's login; the request is best-effort —
+    # GitHub rejects a non-collaborator (or the PR author) with 422, which we swallow.
+    request-fix-review:
+      description: 'Request a review from the author of the PR that introduced the flaky test. Call this exactly once, only after you have opened a draft PR, and only with the real (non-bot) GitHub login of that PR''s author. GitHub ignores the request if the user cannot review the PR (e.g. they are not a repo collaborator), leaving the PR unaffected.'
+      runs-on: ubuntu-latest
+      needs: safe_outputs
+      if: needs.safe_outputs.outputs.created_pr_number != ''
+      permissions:
+        pull-requests: write
+      inputs:
+        author:
+          description: "GitHub login (no leading @) of the introducing PR's author to request as a reviewer on the fix PR."
+          required: true
+          type: string
+      env:
+        GH_AW_PR_NUMBER: ${{ needs.safe_outputs.outputs.created_pr_number }}
+      steps:
+        - name: Request review from the introducing PR author
+          uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+          with:
+            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+            script: |
+              const fs = require('fs');
+              const prNumber = Number(process.env.GH_AW_PR_NUMBER);
+              if (!Number.isInteger(prNumber)) {
+                core.info('No created PR number; nothing to do.');
+                return;
+              }
+              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
+              if (!outputPath || !fs.existsSync(outputPath)) {
+                core.info('No agent output found; nothing to do.');
+                return;
+              }
+              const parsed = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+              const item = (parsed.items || []).find((entry) => entry.type === 'request_fix_review');
+              const reviewer = ((item && item.author) || '').trim().replace(/^@/, '');
+              if (!reviewer) {
+                core.info('No reviewer supplied; nothing to do.');
+                return;
+              }
+              // Only a syntactically valid GitHub login can be requested — guards a bad or injected value.
+              if (!/^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/.test(reviewer)) {
+                core.warning(`Skipping review request: '${reviewer}' is not a valid GitHub login.`);
+                return;
+              }
+              const { owner, repo } = context.repo;
+              try {
+                await github.rest.pulls.requestReviewers({ owner, repo, pull_number: prNumber, reviewers: [reviewer] });
+                core.info(`Requested review from @${reviewer} on #${prNumber}.`);
+              } catch (err) {
+                // 422 when the user can't be requested (not a collaborator, is the PR author, etc.) — non-fatal.
+                core.warning(`Could not request review from @${reviewer} on #${prNumber}: ${err.status || ''} ${err.message}`);
+              }
 
 strict: false
 timeout-minutes: 90
@@ -189,6 +244,7 @@ Kibana is already bootstrapped for you.
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 7. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 8. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
+9. **Only if you opened a PR in step 5 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot or `kibanamachine`. Like `link_fix_pr` it runs after the PR is created; GitHub ignores the request if that user can't review the PR (e.g. not a repo collaborator), so it never blocks the PR.
 
 ## PR format
 
@@ -224,7 +280,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
 The first line attributes the flake:
 - **Introducing PR** (`#<introducing-pr>`): the PR that first introduced the failing test — find it with `git log` / `git blame` on the test file; if the investigator implicated a specific PR/commit as the cause of the flakiness, prefer that. If you cannot confidently identify it, omit the whole `— introduced by …` clause and keep just `Fixes #<issue-number>` — never guess.
-- **cc** (`@<introducing-pr-author>`): `@`-mention that PR's author so they're looped in on the fix; drop the `(cc @…)` if the author is a bot or `kibanamachine`.
+- **cc** (`@<introducing-pr-author>`): `@`-mention that PR's author so they're looped in on the fix; drop the `(cc @…)` if the author is a bot or `kibanamachine`. Request this same person as a reviewer via the `request_fix_review` tool (see Steps).
 - Add more `Fixes #<issue-number>` references if this fix resolves multiple issues.
 
 Add the following at the very end of the PR description (and outside of the details block):
