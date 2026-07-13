@@ -16,6 +16,7 @@ import type {
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import {
@@ -125,6 +126,9 @@ export class SecuritySolutionServerlessPlugin
       }
       if (!projectSettings.includes(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID)) {
         projectSettings.push(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID);
+      }
+      if (!projectSettings.includes(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID)) {
+        projectSettings.push(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
       }
     }
 
