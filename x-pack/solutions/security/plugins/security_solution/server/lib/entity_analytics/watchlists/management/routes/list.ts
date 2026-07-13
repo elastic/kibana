@@ -14,10 +14,14 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import type { ListWatchlistsResponse } from '../../../../../../common/api/entity_analytics/watchlists/management/list.gen';
 import { WatchlistConfigClient } from '../watchlist_config';
+import { getWatchlistSavedObjectClient } from '../../shared/utils';
+import { ensurePrebuiltWatchlists } from '../../migrations/install_prebuilt_watchlists';
 
 export const listWatchlistsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .get({
@@ -40,13 +44,30 @@ export const listWatchlistsRoute = (
           try {
             const secSol = await context.securitySolution;
             const core = await context.core;
+            const namespace = secSol.getSpaceId();
+            const soClient = getWatchlistSavedObjectClient(core);
+            const esClient = core.elasticsearch.client.asCurrentUser;
 
             const watchlistClient = new WatchlistConfigClient({
-              namespace: secSol.getSpaceId(),
-              soClient: core.savedObjects.client,
-              esClient: core.elasticsearch.client.asCurrentUser,
+              namespace,
+              soClient,
+              esClient,
+              internalEsClient: core.elasticsearch.client.asInternalUser,
               logger,
             });
+
+            // Lazily install prebuilt watchlists so spaces created after the
+            // startup migration ran (or that missed it) self-heal on first read.
+            await ensurePrebuiltWatchlists({
+              watchlistClient,
+              soClient,
+              namespace,
+              logger,
+              esClient,
+              getStartServices,
+              hasEncryptionKey,
+            });
+
             const body = await watchlistClient.list();
             return response.ok({ body });
           } catch (e) {
