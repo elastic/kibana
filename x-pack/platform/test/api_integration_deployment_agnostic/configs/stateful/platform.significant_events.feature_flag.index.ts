@@ -13,9 +13,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   // cannot run in the default deployment-agnostic configs (the flag defaults to false there and
   // those configs cannot set it on ECH), so they live in this dedicated feature-flag config.
   describe('apis', () => {
-    loadTestFile(require.resolve('../../apis/streams/significant_events'));
-    loadTestFile(require.resolve('../../apis/streams/queries'));
-    loadTestFile(require.resolve('../../apis/streams/features'));
+    loadTestFile(require.resolve('../../apis/significant_events'));
     loadTestFile(require.resolve('../../apis/streams/content'));
     loadTestFile(require.resolve('../../apis/streams/snapshot_restore'));
   });
