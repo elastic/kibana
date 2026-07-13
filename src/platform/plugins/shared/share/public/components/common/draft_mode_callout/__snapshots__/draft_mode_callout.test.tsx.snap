@@ -15,7 +15,7 @@ exports[`DraftModeCallout Custom content case renders a callout with custom cont
     >
       <span
         aria-hidden="true"
-        class="css-5neova-icon-l-icon"
+        class="css-1cmanx3-icon-l-icon"
         color="#966B03"
         data-euiicon-type="warning"
       />
@@ -64,7 +64,7 @@ exports[`DraftModeCallout Default case renders a default callout when custom pro
     >
       <span
         aria-hidden="true"
-        class="css-5neova-icon-l-icon"
+        class="css-1cmanx3-icon-l-icon"
         color="#966B03"
         data-euiicon-type="warning"
       />

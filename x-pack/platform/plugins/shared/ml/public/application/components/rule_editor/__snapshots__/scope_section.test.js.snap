@@ -58,7 +58,7 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
       >
         <span
           aria-hidden="true"
-          class="css-5neova-icon-l-icon"
+          class="css-1cmanx3-icon-l-icon"
           color="#0B64DD"
           data-euiicon-type="gear"
         />
@@ -433,7 +433,7 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
       >
         <span
           aria-hidden="true"
-          class="css-5neova-icon-l-icon"
+          class="css-1cmanx3-icon-l-icon"
           color="#0B64DD"
           data-euiicon-type="gear"
         />

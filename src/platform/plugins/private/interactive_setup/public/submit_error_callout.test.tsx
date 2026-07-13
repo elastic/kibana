@@ -46,7 +46,7 @@ describe('SubmitErrorCallout', () => {
             class="css-wlziyu-body"
           >
             <span
-              class="css-19b7t2f-icon"
+              class="css-1qkppnb-icon"
               data-euiicon-type="errorFill"
             />
             <div
@@ -100,7 +100,7 @@ describe('SubmitErrorCallout', () => {
             class="css-wlziyu-body"
           >
             <span
-              class="css-19b7t2f-icon"
+              class="css-1qkppnb-icon"
               data-euiicon-type="errorFill"
             />
             <div
@@ -154,7 +154,7 @@ describe('SubmitErrorCallout', () => {
             class="css-wlziyu-body"
           >
             <span
-              class="css-19b7t2f-icon"
+              class="css-1qkppnb-icon"
               data-euiicon-type="infoFill"
             />
             <div
@@ -225,7 +225,7 @@ describe('SubmitErrorCallout', () => {
             class="css-wlziyu-body"
           >
             <span
-              class="css-19b7t2f-icon"
+              class="css-1qkppnb-icon"
               data-euiicon-type="errorFill"
             />
             <div
@@ -284,7 +284,7 @@ describe('SubmitErrorCallout', () => {
             class="css-wlziyu-body"
           >
             <span
-              class="css-19b7t2f-icon"
+              class="css-1qkppnb-icon"
               data-euiicon-type="infoFill"
             />
             <div
@@ -356,7 +356,7 @@ describe('SubmitErrorCallout', () => {
             class="css-wlziyu-body"
           >
             <span
-              class="css-19b7t2f-icon"
+              class="css-1qkppnb-icon"
               data-euiicon-type="errorFill"
             />
             <div
@@ -411,7 +411,7 @@ describe('SubmitErrorCallout', () => {
             class="css-wlziyu-body"
           >
             <span
-              class="css-19b7t2f-icon"
+              class="css-1qkppnb-icon"
               data-euiicon-type="errorFill"
             />
             <div
@@ -470,7 +470,7 @@ describe('SubmitErrorCallout', () => {
             class="css-wlziyu-body"
           >
             <span
-              class="css-19b7t2f-icon"
+              class="css-1qkppnb-icon"
               data-euiicon-type="errorFill"
             />
             <div
@@ -529,7 +529,7 @@ describe('SubmitErrorCallout', () => {
             class="css-wlziyu-body"
           >
             <span
-              class="css-19b7t2f-icon"
+              class="css-1qkppnb-icon"
               data-euiicon-type="infoFill"
             />
             <div
@@ -599,7 +599,7 @@ describe('SubmitErrorCallout', () => {
             class="css-wlziyu-body"
           >
             <span
-              class="css-19b7t2f-icon"
+              class="css-1qkppnb-icon"
               data-euiicon-type="errorFill"
             />
             <div

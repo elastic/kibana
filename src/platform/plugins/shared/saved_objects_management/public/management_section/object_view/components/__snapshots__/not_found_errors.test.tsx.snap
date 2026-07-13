@@ -14,7 +14,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
     >
       <span
         aria-hidden="true"
-        class="css-5neova-icon-l-icon"
+        class="css-1cmanx3-icon-l-icon"
         color="#C61E25"
         data-euiicon-type="warning"
       />
@@ -76,7 +76,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
     >
       <span
         aria-hidden="true"
-        class="css-5neova-icon-l-icon"
+        class="css-1cmanx3-icon-l-icon"
         color="#C61E25"
         data-euiicon-type="warning"
       />
@@ -138,7 +138,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
     >
       <span
         aria-hidden="true"
-        class="css-5neova-icon-l-icon"
+        class="css-1cmanx3-icon-l-icon"
         color="#C61E25"
         data-euiicon-type="warning"
       />
@@ -200,7 +200,7 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
     >
       <span
         aria-hidden="true"
-        class="css-5neova-icon-l-icon"
+        class="css-1cmanx3-icon-l-icon"
         color="#C61E25"
         data-euiicon-type="warning"
       />

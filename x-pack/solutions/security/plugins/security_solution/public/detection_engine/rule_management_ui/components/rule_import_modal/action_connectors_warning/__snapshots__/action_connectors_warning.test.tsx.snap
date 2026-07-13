@@ -20,7 +20,7 @@ exports[`ActionConnectorWarnings should render if 1 connectors were imported and
       >
         <span
           aria-hidden="true"
-          class="css-5neova-icon-l-icon"
+          class="css-1cmanx3-icon-l-icon"
           color="#966B03"
           data-euiicon-type="warning"
         />
@@ -101,7 +101,7 @@ exports[`ActionConnectorWarnings should render if 2 connectors were imported and
       >
         <span
           aria-hidden="true"
-          class="css-5neova-icon-l-icon"
+          class="css-1cmanx3-icon-l-icon"
           color="#966B03"
           data-euiicon-type="warning"
         />
@@ -182,7 +182,7 @@ exports[`ActionConnectorWarnings should render if 2 connectors were imported and
       >
         <span
           aria-hidden="true"
-          class="css-5neova-icon-l-icon"
+          class="css-1cmanx3-icon-l-icon"
           color="#966B03"
           data-euiicon-type="warning"
         />
