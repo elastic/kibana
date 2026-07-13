@@ -20,17 +20,7 @@ export type ScoutTestChannelsDefinition = ScoutTestChannel[];
 
 export const testChannel = {
   fromString(raw: string): ScoutTestChannel {
-    try {
-      return ScoutTestChannelSchema.parse(raw);
-    } catch (e) {
-      if (e instanceof ZodError) {
-        const issues = e.issues.map((issue) => issue.message);
-        e.message = `Failed to parse the string '${raw}' as a Scout test channel:`;
-        e.message += `\n- ${issues.join('\n- ')}`;
-      }
-
-      throw e;
-    }
+    return ScoutTestChannelSchema.parse(raw);
   },
 };
 
