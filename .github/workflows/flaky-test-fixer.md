@@ -81,10 +81,7 @@ safe-outputs:
   mentions:
     allowed:
       - ${{ github.actor }}
-    # Lets the agent `cc` the author of the PR that introduced the flaky test. gh-aw resolves
-    # mentions against the repo's collaborators at run time (bots excluded, capped by `max`),
-    # so an arbitrary or injected handle is still neutralized to plain text; a non-collaborator
-    # author (e.g. someone who left) simply degrades to plain text instead of pinging.
+    # Lets the agent `cc` the author of the PR that introduced the flaky test.
     allowed-collaborators: true
   add-comment:
     max: 1
@@ -244,7 +241,7 @@ Kibana is already bootstrapped for you.
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 7. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 8. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
-9. **Only if you opened a PR in step 5 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot or `kibanamachine`. Like `link_fix_pr` it runs after the PR is created; GitHub ignores the request if that user can't review the PR (e.g. not a repo collaborator), so it never blocks the PR.
+9. **Only if you opened a PR in step 5 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created; GitHub ignores the request if that user can't review the PR (e.g. not a repo collaborator), so it never blocks the PR.
 
 ## PR format
 
@@ -280,7 +277,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
 The first line attributes the flake:
 - **Introducing PR** (`#<introducing-pr>`): the PR that first introduced the failing test — find it with `git log` / `git blame` on the test file; if the investigator implicated a specific PR/commit as the cause of the flakiness, prefer that. If you cannot confidently identify it, omit the whole `— introduced by …` clause and keep just `Fixes #<issue-number>` — never guess.
-- **cc** (`@<introducing-pr-author>`): `@`-mention that PR's author so they're looped in on the fix; drop the `(cc @…)` if the author is a bot or `kibanamachine`. Request this same person as a reviewer via the `request_fix_review` tool (see Steps).
+- **cc** (`@<introducing-pr-author>`): `@`-mention that PR's author so they're looped in on the fix; drop the `(cc @…)` if the author is a bot (includes `kibanamachine`). Request this same person as a reviewer via the `request_fix_review` tool (see Steps).
 - Add more `Fixes #<issue-number>` references if this fix resolves multiple issues.
 
 Add the following at the very end of the PR description (and outside of the details block):
