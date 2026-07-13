@@ -266,7 +266,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   </details>
 
   <details>
-  <summary>Backporting strategy</summary>
+  <summary>Backporting guidance</summary>
 
   <one or two sentences: which backport label(s) you applied — `backport:skip`, `backport:all-open`, or `backport:version` with the per-branch `vX.Y.Z` labels — or that you applied none because you weren't sure, and why. Say which open release branches (from `versions.json`) the failing test exists on and whether this patch applies there unchanged. If you left it unlabeled, note which versions a reviewer should consider.>
 
@@ -289,15 +289,17 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ## Backport label
 
-Only apply backport labels when you are **confident** about the decision. If you're unsure, apply **no** backport label at all and explain the uncertainty in the "Backporting strategy" section so a human can decide. Never guess.
+The guiding principle is to backport a fix to every older active version branch where it still applies — don't leave older branches flaky, so propagate the fix as widely as it safely fits.
 
-When you are confident, pick the backport policy and pass the matching label(s) in the `labels` field of the `create_pull_request` safe output (the `flaky-test-fixer` label is added automatically). First figure out which open `release` branches (listed in `versions.json`) the fix belongs on by confirming the failing test's file exists at each branch's `ref` (e.g. read the path at that ref via the GitHub API), then choose:
+Only apply backport labels when you are **confident** about the decision. If you're unsure, apply **no** backport label at all and explain the uncertainty in the "Backporting guidance" section so a human can decide. Never guess.
+
+When you are confident, pick the backport policy and pass the matching label(s) in the `labels` field of the `create_pull_request` safe output (the `flaky-test-fixer` label is added automatically). First figure out which open `release` branches (listed in `versions.json` at the repository root) the fix belongs on by confirming the failing test's file exists at each branch's `ref` (e.g. read the path at that ref via the GitHub API), then choose:
 
 - **`backport:skip`** — the fix is effectively main-only: the failing test (or the file you patched) doesn't exist on any open release branch, it was recently added, or the flakiness is specific to `main`.
 - **`backport:all-open`** — the same test exists on **every** open release branch and your patch applies there unchanged, so fixing it across all of them is safe.
 - **`backport:version` + one `vX.Y.Z` label per target branch** — only *some* open release branches need the fix. Pass `backport:version` **together with** the version label for each target branch, mapping the branch to its current version in `versions.json` (e.g. `9.4` → `v9.4.4`, `9.3` → `v9.3.8`). Include a branch's label only when you've confirmed the test exists there.
 
-Always explain the choice — including a deliberate no-label decision — in the "Backporting strategy" section.
+Always explain the choice — including a deliberate no-label decision — in the "Backporting guidance" section.
 
 ## Fix already on `main`
 
