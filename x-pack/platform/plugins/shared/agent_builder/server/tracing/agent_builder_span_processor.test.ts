@@ -445,11 +445,17 @@ describe('AgentBuilderSpanProcessor', () => {
       expect(msgs.map((m) => m.role)).toEqual(['assistant', 'tool']);
     });
 
-    it('strips gen_ai.output.messages when includeLlmResponses is false', () => {
+    it('strips gen_ai.output.messages and assistant messages from input when includeLlmResponses is false', () => {
       const exported = processAndGetExported({ includeLlmResponses: false });
 
       expect(GenAISemanticConventions.GenAIOutputMessages in exported.attributes).toBe(false);
-      expect(exported.attributes[GenAISemanticConventions.GenAIInputMessages]).toBeDefined();
+
+      const msgs = parseAttr<Array<{ role: string }>>(
+        exported,
+        GenAISemanticConventions.GenAIInputMessages
+      );
+      expect(msgs.every((m) => m.role !== 'assistant')).toBe(true);
+      expect(msgs.map((m) => m.role)).toEqual(['user', 'tool']);
     });
 
     it('strips tool messages and tool_call parts from input/output when includeToolDetails is false', () => {

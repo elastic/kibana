@@ -193,6 +193,12 @@ function applyMessageAttributePrivacy(
 
   if (!settings.includeLlmResponses) {
     delete result[GenAISemanticConventions.GenAIOutputMessages];
+    const raw = result[GenAISemanticConventions.GenAIInputMessages];
+    if (typeof raw === 'string') {
+      const msgs = JSON.parse(raw) as GenAIInputMessage[];
+      const filtered = msgs.filter((m) => m.role !== 'assistant');
+      result[GenAISemanticConventions.GenAIInputMessages] = JSON.stringify(filtered);
+    }
   }
 
   if (!settings.includeToolDetails) {
