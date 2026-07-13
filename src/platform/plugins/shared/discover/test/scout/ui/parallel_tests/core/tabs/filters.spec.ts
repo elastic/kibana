@@ -26,7 +26,7 @@ spaceTest.describe('Discover tabs - filters', { tag: '@local-stateful-classic' }
   });
 
   spaceTest(
-    'carries over filters as where clauses when switching to ES query mode',
+    'carries over filters as where clauses when switching to ES|QL mode',
     async ({ pageObjects }) => {
       const { discover, filterBar } = pageObjects;
 

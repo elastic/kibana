@@ -53,7 +53,7 @@ spaceTest.describe(
       await discoverScoutSpace.teardownDiscoverDefaults();
     });
 
-    spaceTest('restores ES query hide-null-values state per tab', async ({ page, pageObjects }) => {
+    spaceTest('restores hide-null-values state for ES|QL tab', async ({ page, pageObjects }) => {
       const { discover, docViewer, unifiedTabs } = pageObjects;
 
       await discover.selectTextBaseLang();

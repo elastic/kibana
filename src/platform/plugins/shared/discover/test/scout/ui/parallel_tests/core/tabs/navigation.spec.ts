@@ -40,7 +40,7 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
   });
 
   spaceTest(
-    'returns to the last active tab from Surrounding Docs',
+    'goes back to the last active tab when returning from Surrounding Docs page',
     async ({ page, pageObjects }) => {
       const { discover, docViewer, filterBar, unifiedTabs } = pageObjects;
 
@@ -94,7 +94,7 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
     }
   );
 
-  spaceTest('returns to the last active tab from Single Doc', async ({ page, pageObjects }) => {
+  spaceTest('returns to the last active tab from Single Doc page', async ({ page, pageObjects }) => {
     const { discover, docViewer, filterBar, unifiedTabs } = pageObjects;
 
     await unifiedTabs.createNewTab();
