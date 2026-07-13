@@ -14,7 +14,7 @@ import {
   ToolResultType,
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
-import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import { withExecuteToolSpan, markToolSpanAsError } from '@kbn/inference-tracing';
 import type {
   AfterToolCallHookContext,
   BeforeToolCallHookContext,
@@ -167,12 +167,8 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
 
   const toolReturn = await withExecuteToolSpan(
     tool.id,
-    {
-      tool: { input: toolParams, toolCallId, description: tool.description },
-      isToolError: (result) =>
-        isToolHandlerStandardReturn(result) ? hasOnlyErrorResults(result.results) : false,
-    },
-    async (): Promise<ToolHandlerReturn> => {
+    { tool: { input: toolParams, toolCallId, description: tool.description } },
+    async (span): Promise<ToolHandlerReturn> => {
       const schema = await tool.getSchema();
       const validation = schema.safeParse(toolParams);
       if (validation.error) {
@@ -187,8 +183,14 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
           validation.data as Record<string, unknown>,
           toolHandlerContext
         );
+        if (isToolHandlerStandardReturn(result) && hasOnlyErrorResults(result.results) && span) {
+          markToolSpanAsError(span);
+        }
         return result;
       } catch (err) {
+        if (span) {
+          markToolSpanAsError(span);
+        }
         return {
           results: [createErrorResult(err.message)],
         };

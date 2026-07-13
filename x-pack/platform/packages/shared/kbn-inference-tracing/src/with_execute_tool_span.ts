@@ -20,17 +20,17 @@ import { withActiveInferenceSpan } from './with_active_inference_span';
  */
 export const TOOL_ERROR_TYPE = 'tool_error';
 
-export interface WithExecuteToolSpanOptions<T = unknown> extends WithActiveSpanOptions {
-  tool: {
-    description?: string;
-    toolCallId?: string;
-    input?: unknown;
-  };
-  /**
-   * Returns `true` when the tool produced an error result.
-   */
-  isToolError: (result: Awaited<T>) => boolean;
-}
+/**
+ * Marks a tool span as errored per GenAI/MCP semantic conventions.
+ *
+ * Also ends the span so that downstream handlers (e.g. `handlePromise`
+ * in `withActiveSpan`) cannot override the status back to `OK`.
+ */
+export const markToolSpanAsError = (span: Span) => {
+  span.setAttribute('error.type', TOOL_ERROR_TYPE);
+  span.setStatus({ code: SpanStatusCode.ERROR, message: TOOL_ERROR_TYPE });
+  span.end();
+};
 
 /**
  * Wrapper around {@link withActiveInferenceSpan} that sets the right attributes for a execute_tool operation span.
@@ -39,7 +39,13 @@ export interface WithExecuteToolSpanOptions<T = unknown> extends WithActiveSpanO
  */
 export function withExecuteToolSpan<T>(
   toolName: string,
-  options: WithExecuteToolSpanOptions<T>,
+  options: WithActiveSpanOptions & {
+    tool: {
+      description?: string;
+      toolCallId?: string;
+      input?: unknown;
+    };
+  },
   cb: (span?: Span) => T
 ): T {
   const { description, toolCallId, input } = options.tool;
@@ -69,15 +75,9 @@ export function withExecuteToolSpan<T>(
 
       if (isPromise(res)) {
         return res.then((value) => {
-          if (options.isToolError?.(value as Awaited<T>)) {
-            span.setAttribute('error.type', TOOL_ERROR_TYPE);
-            span.setStatus({ code: SpanStatusCode.ERROR, message: TOOL_ERROR_TYPE });
-            span.end();
-          } else {
-            const stringified = safeJsonStringify(value);
-            if (stringified) {
-              span.setAttribute(GenAISemanticConventions.GenAIToolCallResult, stringified);
-            }
+          const stringified = safeJsonStringify(value);
+          if (stringified) {
+            span.setAttribute(GenAISemanticConventions.GenAIToolCallResult, stringified);
           }
           return value;
         }) as T;
