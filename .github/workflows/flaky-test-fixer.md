@@ -185,34 +185,26 @@ safe-outputs:
             script: |
               const fs = require('fs');
               const prNumber = Number(process.env.GH_AW_PR_NUMBER);
-              if (!Number.isInteger(prNumber)) {
-                core.info('No created PR number; nothing to do.');
-                return;
-              }
               const outputPath = process.env.GH_AW_AGENT_OUTPUT;
-              if (!outputPath || !fs.existsSync(outputPath)) {
-                core.info('No agent output found; nothing to do.');
+              if (!Number.isInteger(prNumber) || !outputPath || !fs.existsSync(outputPath)) {
+                core.info('Missing PR number or agent output; nothing to do.');
                 return;
               }
-              const parsed = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
-              const item = (parsed.items || []).find((entry) => entry.type === 'request_fix_review');
-              const reviewer = ((item && item.author) || '').trim().replace(/^@/, '');
-              if (!reviewer) {
+              // The agent's `author` tool parameter is delivered here (custom safe-jobs read inputs
+              // from GH_AW_AGENT_OUTPUT, not `${{ inputs.* }}`).
+              const { items = [] } = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+              const author = items.find((entry) => entry.type === 'request_fix_review')?.author?.trim().replace(/^@/, '');
+              if (!author) {
                 core.info('No reviewer supplied; nothing to do.');
-                return;
-              }
-              // Only a syntactically valid GitHub login can be requested — guards a bad or injected value.
-              if (!/^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/.test(reviewer)) {
-                core.warning(`Skipping review request: '${reviewer}' is not a valid GitHub login.`);
                 return;
               }
               const { owner, repo } = context.repo;
               try {
-                await github.rest.pulls.requestReviewers({ owner, repo, pull_number: prNumber, reviewers: [reviewer] });
-                core.info(`Requested review from @${reviewer} on #${prNumber}.`);
+                await github.rest.pulls.requestReviewers({ owner, repo, pull_number: prNumber, reviewers: [author] });
+                core.info(`Requested review from @${author} on #${prNumber}.`);
               } catch (err) {
-                // 422 when the user can't be requested (not a collaborator, is the PR author, etc.) — non-fatal.
-                core.warning(`Could not request review from @${reviewer} on #${prNumber}: ${err.status || ''} ${err.message}`);
+                // Non-fatal: GitHub 422s if the user can't review (not a collaborator, is the PR author, etc.).
+                core.warning(`Could not request review from @${author} on #${prNumber}: ${err.status || ''} ${err.message}`);
               }
 
 strict: false
