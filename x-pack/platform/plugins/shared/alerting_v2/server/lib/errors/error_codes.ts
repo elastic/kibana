@@ -61,6 +61,8 @@ export const ALERTING_V2_ERROR_CODES = {
   // ──────────────────────── Alert actions ────────────────────
   /** No alert event matched the supplied `group_hash` (and `episode_id`). */
   ALERT_EVENT_NOT_FOUND: 'ALERT_EVENT_NOT_FOUND',
+  /** The requested action is incompatible with the episode's current `episode.status`. */
+  INVALID_EPISODE_STATE_TRANSITION: 'INVALID_EPISODE_STATE_TRANSITION',
 
   // ──────────────────── Rule doctor insights ─────────────────
   /** A rule doctor insight with the given identifier does not exist. */

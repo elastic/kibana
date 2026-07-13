@@ -94,8 +94,15 @@ export interface RunRuleResult {
 }
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
-  apiKey: RawRule['apiKey'];
-  uiamApiKey?: RawRule['uiamApiKey'];
+  /**
+   * Resolved credential the rule run executes under, ready to use after
+   * `ApiKey ` in an `Authorization` header. For ES rules this is the
+   * base64-encoded `id:secret` stored on the rule SO as `apiKey`; for UIAM
+   * rules it is the decoded raw `essu_…` UIAM secret. Computed once by
+   * `validateRuleAndCreateFakeRequest` so the rest of the rule run never has
+   * to look at the raw `apiKey`/`uiamApiKey` fields again.
+   */
+  effectiveApiKey: string | null;
   fakeRequest: KibanaRequest;
   rule: SanitizedRule<Params> & { snoozedInstances: RawRuleSnoozedInstance[] };
   validatedParams: Params;

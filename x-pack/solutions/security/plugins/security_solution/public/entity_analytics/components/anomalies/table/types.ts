@@ -9,6 +9,7 @@ export interface TableRow {
   id: string;
   jobId: string;
   jobDisplayName: string;
+  recordId: string;
   mitreTactics: string[];
   timestamp: number;
   detectorIndex: number;

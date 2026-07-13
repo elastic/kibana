@@ -7,12 +7,10 @@
 import Boom from '@hapi/boom';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Artifact } from '@kbn/fleet-plugin/server';
-import { jsonRt, toNumberRt, stringFromBufferRt } from '@kbn/io-ts-utils';
-import * as t from 'io-ts';
+import { routeDefinitions, type ListSourceMapArtifactsResponse } from '@kbn/apm-api-shared';
 import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import type { ListSourceMapArtifactsResponse } from '../fleet/source_maps';
 import {
   createFleetSourceMapArtifact,
   deleteFleetSourcemapArtifact,
@@ -24,22 +22,6 @@ import { createApmSourceMap } from './create_apm_source_map';
 import { deleteApmSourceMap } from './delete_apm_sourcemap';
 import { runFleetSourcemapArtifactsMigration } from './schedule_source_map_migration';
 
-export const sourceMapRt = t.intersection([
-  t.type({
-    version: t.number,
-    sources: t.array(t.string),
-    mappings: t.string,
-  }),
-  t.partial({
-    names: t.array(t.string),
-    file: t.string,
-    sourceRoot: t.string,
-    sourcesContent: t.array(t.union([t.string, t.null])),
-  }),
-]);
-
-export type SourceMap = t.TypeOf<typeof sourceMapRt>;
-
 function throwNotImplementedIfSourceMapNotAvailable(featureFlags: ApmFeatureFlags): void {
   if (!featureFlags.sourcemapApiAvailable) {
     throw Boom.notImplemented();
@@ -47,14 +29,9 @@ function throwNotImplementedIfSourceMapNotAvailable(featureFlags: ApmFeatureFlag
 }
 
 const listSourceMapRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/sourcemaps 2023-10-31',
+  endpoint: routeDefinitions.sourceMaps.list.endpoint,
+  params: routeDefinitions.sourceMaps.list.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  params: t.partial({
-    query: t.partial({
-      page: toNumberRt,
-      perPage: toNumberRt,
-    }),
-  }),
   async handler({
     params,
     plugins,
@@ -82,7 +59,8 @@ const listSourceMapRoute = createApmServerRoute({
 });
 
 const uploadSourceMapRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
+  endpoint: routeDefinitions.sourceMaps.upload.endpoint,
+  params: routeDefinitions.sourceMaps.upload.params,
   options: {
     body: { accepts: ['multipart/form-data'] },
   },
@@ -91,14 +69,6 @@ const uploadSourceMapRoute = createApmServerRoute({
       requiredPrivileges: ['apm', 'apm_write'],
     },
   },
-  params: t.type({
-    body: t.type({
-      service_name: t.string,
-      service_version: t.string,
-      bundle_filepath: t.string,
-      sourcemap: t.union([t.string, stringFromBufferRt]).pipe(jsonRt).pipe(sourceMapRt),
-    }),
-  }),
   handler: async ({
     params,
     plugins,
@@ -161,17 +131,13 @@ const uploadSourceMapRoute = createApmServerRoute({
 });
 
 const deleteSourceMapRoute = createApmServerRoute({
-  endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
+  endpoint: routeDefinitions.sourceMaps.delete.endpoint,
+  params: routeDefinitions.sourceMaps.delete.params,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_write'],
     },
   },
-  params: t.type({
-    path: t.type({
-      id: t.string,
-    }),
-  }),
   handler: async ({ params, plugins, core, featureFlags }): Promise<void> => {
     throwNotImplementedIfSourceMapNotAvailable(featureFlags);
 
@@ -198,7 +164,7 @@ const deleteSourceMapRoute = createApmServerRoute({
 });
 
 const migrateFleetArtifactsSourceMapRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/sourcemaps/migrate_fleet_artifacts',
+  endpoint: routeDefinitions.sourceMaps.migrateFleetArtifacts.endpoint,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_write'],

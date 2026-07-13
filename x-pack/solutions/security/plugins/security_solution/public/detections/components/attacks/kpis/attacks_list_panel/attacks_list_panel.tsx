@@ -22,19 +22,14 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
-import { useStore } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details/constants/panel_keys';
 import { SeverityBar } from '../../../../../entity_analytics/components/severity/severity_bar';
 import { useAttacksListData } from './use_attacks_list_data';
 import type { AttacksListItem } from './types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
-import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
-import { AttackFlyoutWrapper } from '../../../../../flyout_v2/attack/main/attack_flyout_wrapper';
-import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 
 const PAGE_SIZE = 10;
 const TABLE_WIDTH = 385;
@@ -74,12 +69,9 @@ export interface AttacksListPanelProps {
 export const AttacksListPanel = React.memo<AttacksListPanelProps>(
   ({ filters, query, dataView }) => {
     const { openFlyout } = useExpandableFlyoutApi();
-    const { services } = useKibana();
-    const { telemetry, overlays } = services;
-    const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
-    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const store = useStore();
-    const history = useHistory();
+    const { telemetry } = useKibana().services;
+    const enableNewFlyout = useIsNewFlyoutEnabled();
+    const { openAttackFlyout } = useFlyoutApi();
 
     const { items, isLoading, pageIndex, setPageIndex, pageSize, setPageSize, total, refetch } =
       useAttacksListData({
@@ -103,26 +95,12 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
             <EuiLink
               className="eui-textTruncate"
               onClick={() => {
-                if (newFlyoutSystemEnabled) {
-                  overlays.openSystemFlyout(
-                    flyoutProviders({
-                      services,
-                      store,
-                      history,
-                      children: (
-                        <AttackFlyoutWrapper
-                          attackId={item.id}
-                          indexName={dataView.getIndexPattern()}
-                          onAttackUpdated={refetch}
-                        />
-                      ),
-                    }),
-                    {
-                      ...defaultFlyoutProperties,
-                      historyKey: documentFlyoutHistoryKey,
-                      session: 'start',
-                    }
-                  );
+                if (enableNewFlyout) {
+                  openAttackFlyout({
+                    attackId: item.id,
+                    indexName: dataView.getIndexPattern(),
+                    onAttackUpdated: refetch,
+                  });
                 } else {
                   openFlyout({
                     right: {
@@ -168,18 +146,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
           ),
         },
       ],
-      [
-        dataView,
-        defaultFlyoutProperties,
-        history,
-        newFlyoutSystemEnabled,
-        openFlyout,
-        overlays,
-        refetch,
-        services,
-        store,
-        telemetry,
-      ]
+      [dataView, enableNewFlyout, openAttackFlyout, openFlyout, refetch, telemetry]
     );
 
     const pagination = {

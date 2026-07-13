@@ -1,5 +1,5 @@
 {
-  "sha1": "f601eb9198e31163ca8ca05623619a5bb7f85789",
+  "sha1": "e81f521ca3219ffc3d2444c0c8ee3b814efde1a4",
   "tests": [
     {
       "id": "d18f81a84aa5c84-01def2558f31c21",
@@ -456,6 +456,34 @@
       }
     },
     {
+      "id": "5e1819ccd21625a-15831800091ed82",
+      "title": "Agent Builder — conversations access-control API public conversations require conversation access and agent use access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 407,
+        "column": 12
+      }
+    },
+    {
+      "id": "5e1819ccd21625a-38ea603d84caa81",
+      "title": "Agent Builder — conversations access-control API route-level privilege remains distinct from resource access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 712,
+        "column": 12
+      }
+    },
+    {
       "id": "908082c6d828973-6ddd6b9a8a0348d",
       "title": "Agent Builder — conversations API GET /conversations lists conversations with expected shape",
       "expectedStatus": "passed",
@@ -467,7 +495,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 87,
+        "line": 88,
         "column": 12
       }
     },
@@ -483,7 +511,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 110,
+        "line": 111,
         "column": 12
       }
     },
@@ -499,7 +527,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 128,
+        "line": 129,
         "column": 12
       }
     },
@@ -515,7 +543,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 154,
+        "line": 155,
         "column": 12
       }
     },
@@ -531,7 +559,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 171,
+        "line": 172,
         "column": 12
       }
     },
@@ -547,7 +575,39 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 188,
+        "line": 189,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-1bb0c1f810ae2fb",
+      "title": "Agent Builder — conversations API converse create exposes and stores conversation access mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 217,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-1c24d03c0a93c25",
+      "title": "Agent Builder — conversations API converse ignores access mode when continuing a conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 258,
         "column": 12
       }
     },
@@ -563,7 +623,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 216,
+        "line": 301,
         "column": 12
       }
     },
@@ -579,7 +639,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 225,
+        "line": 310,
         "column": 12
       }
     },
@@ -595,7 +655,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 245,
+        "line": 329,
         "column": 12
       }
     },
@@ -611,7 +671,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 254,
+        "line": 338,
         "column": 12
       }
     },
@@ -627,7 +687,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 273,
+        "line": 356,
         "column": 12
       }
     },
@@ -853,6 +913,70 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
         "line": 179,
         "column": 14
+      }
+    },
+    {
+      "id": "23808d62419391b-3869981e6c97b56",
+      "title": "Agent Builder - converse callback API delivers completed response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 81,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-edfb8df4e3d1793",
+      "title": "Agent Builder - converse callback API delivers failed response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 130,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-0dffc761e12b7ef",
+      "title": "Agent Builder - converse callback API delivers aborted response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 171,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-9c2526964eb5768",
+      "title": "Agent Builder - converse callback API continues conversation for repeated Slack source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 226,
+        "column": 12
       }
     },
     {
@@ -1141,6 +1265,22 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tool_calling_api.spec.ts",
         "line": 144,
         "column": 14
+      }
+    },
+    {
+      "id": "e4d863c37e81c3f-1121048c07532a3",
+      "title": "Agent Builder — tracing snapshot trace documents match snapshot after conversation with tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tracing_snapshot_api.spec.ts",
+        "line": 190,
+        "column": 12
       }
     },
     {

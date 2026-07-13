@@ -32,6 +32,19 @@ export const ENTITY_ANOMALIES_RECENT_TABLE_TITLE = i18n.translate(
   { defaultMessage: 'Recent anomalies' }
 );
 
+export const ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.missingThreatTacticsWarning',
+  {
+    defaultMessage:
+      'Some of the ML jobs powering this attack chain are missing MITRE ATT&CK tactic mappings.',
+  }
+);
+
+export const ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING_LINK = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.missingThreatTacticsWarningLink',
+  { defaultMessage: 'Update to the latest integration version' }
+);
+
 export const getEntityAnomaliesCountLabel = (count: number) =>
   i18n.translate(
     'xpack.securitySolution.entityAnalytics.entityAnomalies.overview.anomaliesCountLabel',
@@ -129,6 +142,31 @@ export const ENTITY_ANOMALY_TABLE_SCORE_COLUMN_TOOLTIP = i18n.translate(
   }
 );
 
+export const ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.actionsColumn',
+  { defaultMessage: 'Actions' }
+);
+
+export const ENTITY_ANOMALY_TABLE_ACTIONS_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.actionsColumnTooltip',
+  { defaultMessage: 'Row actions' }
+);
+
+export const ENTITY_ANOMALY_TABLE_ROW_ACTION_VIEW_IN_SMV = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.actionsColumn.rowAction.viewInSingleMetricViewer',
+  { defaultMessage: 'View in Single metric viewer' }
+);
+
+export const ENTITY_ANOMALY_TABLE_ROW_ACTION_VIEW_IN_DISCOVER = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.actionsColumn.rowAction.viewInDiscover',
+  { defaultMessage: 'View in Discover' }
+);
+
+export const ENTITY_ANOMALY_TABLE_ROW_ACTION_ADD_TO_TIMELINE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.actionsColumn.rowAction.addToTimeline',
+  { defaultMessage: 'Add to timeline' }
+);
+
 export const ENTITY_ANOMALY_TABLE_EXPANDED_ROW_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.expanded.description',
   { defaultMessage: 'Explainer' }
@@ -142,6 +180,16 @@ export const ENTITY_ANOMALY_TABLE_EXPANDED_ROW_COUNT = i18n.translate(
 export const ENTITY_ANOMALY_TABLE_EXPANDED_ROW_KEY_FIELDS = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.expanded.keyFields',
   { defaultMessage: 'Key fields' }
+);
+
+export const ENTITY_ANOMALY_TABLE_EMPTY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.emptyMessage',
+  { defaultMessage: 'No anomalies detected' }
+);
+
+export const ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.recentAnomaliesEmptyMessage',
+  { defaultMessage: 'No anomalies detected within last 30 days' }
 );
 
 export const ENTITY_ANOMALY_DATE_RANGE_LAST_15_MINUTES = i18n.translate(
@@ -190,4 +238,16 @@ export const ENTITY_ANOMALY_DATE_RANGE_TOO_OLD_ERROR = i18n.translate(
     defaultMessage:
       'Anomaly data is only available for the past year. Select a more recent start date.',
   }
+);
+
+export const ENTITY_ANOMALY_STATE_ERROR_BODY = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.stateErrorBody',
+  {
+    defaultMessage: 'An error occurred while retrieving anomaly data.',
+  }
+);
+
+export const ENTITY_ANOMALY_STATE_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.stateErrorTitle',
+  { defaultMessage: 'Unable to load behavioral anomalies' }
 );

@@ -127,16 +127,25 @@ Because a transition is recorded explicitly, "did a transition occur?" is a dire
 | --- | --- | --- |
 | `inactive` | `breached` | `pending` |
 | `inactive` | `recovered` | `inactive` |
-| `inactive` | `no_data` | `inactive` |
 | `pending` | `breached` | `active` |
 | `pending` | `recovered` | `inactive` |
-| `pending` | `no_data` | `pending` |
 | `active` | `breached` | `active` |
 | `active` | `recovered` | `recovering` |
-| `active` | `no_data` | `active` |
 | `recovering` | `breached` | `active` |
 | `recovering` | `recovered` | `inactive` |
-| `recovering` | `no_data` | `recovering` |
+
+`no_data` transitions depend on `rule.no_data_strategy`:
+
+| Current episode status | `no_data_strategy` | Next episode status |
+| --- | --- | --- |
+| any | `'emit'` | `active` |
+| any | `'last_known_status'` | (unchanged — preserve current status) |
+| `inactive` | `'recover'` | `inactive` |
+| `pending` | `'recover'` | `inactive` |
+| `active` | `'recover'` | `recovering` |
+| `recovering` | `'recover'` | `inactive` |
+
+For `'recover'`, the director applies the same FSM transitions as a `recovered` event would. No prior episode (null) always returns `pending`.
 
 ### `CountTimeframeStrategy`
 

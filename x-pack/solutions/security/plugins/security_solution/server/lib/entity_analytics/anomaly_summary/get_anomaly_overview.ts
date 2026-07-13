@@ -49,6 +49,7 @@ interface GetEntityAnomalyOverviewParams {
   threatTactics?: string[];
   logger: Logger;
   ml: MlPluginSetup;
+  request: KibanaRequest;
   soClient: SavedObjectsClientContract;
 }
 
@@ -73,6 +74,7 @@ interface AnomalyOverview {
   totalAnomaliesCount: number;
   from: number;
   to: number;
+  hasJobsMissingThreatTactics: boolean;
 }
 
 export const getEntityAnomalyOverview = async ({
@@ -85,6 +87,7 @@ export const getEntityAnomalyOverview = async ({
   threatTactics,
   logger,
   ml,
+  request,
   soClient,
 }: GetEntityAnomalyOverviewParams): Promise<AnomalyOverview> => {
   const effectiveToMs = toMs ?? Date.now();
@@ -97,14 +100,21 @@ export const getEntityAnomalyOverview = async ({
     totalAnomaliesCount: 0,
     from: effectiveFromMs,
     to: effectiveToMs,
+    hasJobsMissingThreatTactics: false,
   };
 
-  const mlSystem = ml.mlSystemProvider({} as KibanaRequest, soClient);
-  const allSecurityJobIds = await getSecurityMlJobIds({ ml, soClient });
+  const mlSystem = ml.mlSystemProvider(request, soClient);
+  const allSecurityJobIds = await getSecurityMlJobIds({ ml, request, soClient });
 
   if (allSecurityJobIds.length === 0) return empty;
 
-  const allJobConfigs = await getJobConfig({ jobIds: allSecurityJobIds, logger, ml, soClient });
+  const allJobConfigs = await getJobConfig({
+    jobIds: allSecurityJobIds,
+    logger,
+    ml,
+    request,
+    soClient,
+  });
 
   let resolvedJobIds = allSecurityJobIds;
   if (threatTactics && threatTactics.length > 0) {
@@ -168,7 +178,9 @@ export const getEntityAnomalyOverview = async ({
     );
 
     aggs = resp.aggregations as unknown as OverviewAggs | undefined;
-    rawHits = compact(resp.hits.hits.map((h) => h._source));
+    rawHits = compact(
+      resp.hits.hits.map((h) => (h._source ? { ...h._source, _id: h._id } : undefined))
+    );
     const total = resp.hits.total;
     totalAnomaliesCount = total == null ? 0 : typeof total === 'number' ? total : total.value;
   } catch (err) {
@@ -182,6 +194,10 @@ export const getEntityAnomalyOverview = async ({
   // Build jobId → tactics lookup once, reused per bucket.
   const tacticsByJob = new Map(
     presentJobIds.map((id) => [id, allJobConfigs.get(id)?.threatTactics ?? []])
+  );
+
+  const hasJobsMissingThreatTactics = presentJobIds.some(
+    (id) => !allJobConfigs.get(id)?.hasThreatTactics
   );
 
   const anomalyByTimeBucket: AnomalyOverviewEntry[] = (aggs?.by_time?.buckets ?? [])
@@ -215,6 +231,7 @@ export const getEntityAnomalyOverview = async ({
       : null;
 
     return {
+      recordId: anomaly._id ?? '',
       jobId: anomaly.job_id,
       jobName: jobConfig?.jobName ?? anomaly.job_id,
       timestamp: new Date(anomaly.timestamp).toISOString(),
@@ -229,5 +246,6 @@ export const getEntityAnomalyOverview = async ({
     totalAnomaliesCount,
     from: effectiveFromMs,
     to: effectiveToMs,
+    hasJobsMissingThreatTactics,
   };
 };

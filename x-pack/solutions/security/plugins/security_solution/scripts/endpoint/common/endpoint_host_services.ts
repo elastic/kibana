@@ -45,6 +45,7 @@ export interface CreateAndEnrollEndpointHostResponse {
 /**
  * Creates a new virtual machine (host) and enrolls that with Fleet
  */
+
 export const createAndEnrollEndpointHost = async ({
   kbnClient,
   log: _log,

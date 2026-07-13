@@ -12,6 +12,7 @@ import type {
   BulkActionActionPoliciesBody,
   CreateActionPolicyData,
   ActionPolicyResponse,
+  MatchActionPoliciesForRuleResponse,
   UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
@@ -57,6 +58,13 @@ export class ActionPoliciesApi {
         sortOrder: params.sortOrder,
       },
     });
+  }
+
+  public async matchActionPoliciesForRule(ruleId: string) {
+    return this.http.post<MatchActionPoliciesForRuleResponse>(
+      `${ALERTING_V2_ACTION_POLICY_API_PATH}/_match_for_rule`,
+      { body: JSON.stringify({ rule: { id: ruleId } }) }
+    );
   }
 
   public async createActionPolicy(data: CreateActionPolicyData) {

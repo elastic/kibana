@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/268397
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+title: Add warning callout for escaped wildcards in rule exception matches
+description: Adds a warning callout and confirmation modal to the rule exceptions form when a user enters escaped characters (e.g. `\*` or `\?`) with the matches operator, indicating they may have intended wildcards instead. The warning is non-blocking, users can acknowledge and save.
