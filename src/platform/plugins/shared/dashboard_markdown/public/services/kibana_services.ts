@@ -10,9 +10,11 @@
 import { BehaviorSubject } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { MarkdownStartDeps } from '../plugin';
 
 export let coreServices: CoreStart;
+export let shareServices: SharePluginStart | undefined;
 
 const servicesReady$ = new BehaviorSubject(false);
 
@@ -30,5 +32,6 @@ export const untilPluginStartServicesReady = () => {
 
 export const setKibanaServices = (kibanaCore: CoreStart, deps: MarkdownStartDeps) => {
   coreServices = kibanaCore;
+  shareServices = deps.share;
   servicesReady$.next(true);
 };

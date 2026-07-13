@@ -25,7 +25,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/core-lifecycle-browser",
     "@kbn/visualizations-common",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/share-plugin"
   ],
   "exclude": ["target/**/*"]
 }
