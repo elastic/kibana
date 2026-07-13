@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/apm-utils'
   - '@kbn/i18n'
   - '@kbn/traced-es-client'
+  - '@kbn/es-types'
 tags:
   - shared-server
   - package
