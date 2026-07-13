@@ -81,6 +81,11 @@ safe-outputs:
   mentions:
     allowed:
       - ${{ github.actor }}
+    # Lets the agent `cc` the author of the PR that introduced the flaky test. gh-aw resolves
+    # mentions against the repo's collaborators at run time (bots excluded, capped by `max`),
+    # so an arbitrary or injected handle is still neutralized to plain text; a non-collaborator
+    # author (e.g. someone who left) simply degrades to plain text instead of pinging.
+    allowed-collaborators: true
   add-comment:
     max: 1
     target: *issue_number
@@ -193,14 +198,13 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 - **Title**: `[<Plugin name>] <concise summary of the fix>`. Derive the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`).
 - **Body**:
   ```
-  Fixes #<issue-number> (add more issue numbers here if this fix resolves multiple issues)
+  Fixes #<issue-number> — introduced by #<introducing-pr> (cc @<introducing-pr-author>)
 
   ### Summary
   <a few bullet points: what was failing, and what this patch changes - keep it very concise, every bullet point must be earned>
 
   ### Context
   <a few bullet points of history around this flake, in the same concise, high-value style as the Summary — every bullet earned, and omit any you cannot back with real evidence (never guess a PR or attribution). Cover, where known:
-  - the PR that first introduced the failing test (find it via `git log` / `git blame` on the test file) as a link, plus — only if the investigator implicated a specific PR/commit as the cause of the flakiness — that one too
   - a link to the failed test investigator's comment on the issue, flagging whether this patch follows or departs from their proposed fix
   - a one-line recount of where the failures happened — e.g. the CI pipeline/lane and how often/recently — from the issue's CI data and the investigator's comment>
 
@@ -217,6 +221,11 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   </details>
   ```
+
+The first line attributes the flake:
+- **Introducing PR** (`#<introducing-pr>`): the PR that first introduced the failing test — find it with `git log` / `git blame` on the test file; if the investigator implicated a specific PR/commit as the cause of the flakiness, prefer that. If you cannot confidently identify it, omit the whole `— introduced by …` clause and keep just `Fixes #<issue-number>` — never guess.
+- **cc** (`@<introducing-pr-author>`): `@`-mention that PR's author so they're looped in on the fix; drop the `(cc @…)` if the author is a bot or `kibanamachine`.
+- Add more `Fixes #<issue-number>` references if this fix resolves multiple issues.
 
 Add the following at the very end of the PR description (and outside of the details block):
 
