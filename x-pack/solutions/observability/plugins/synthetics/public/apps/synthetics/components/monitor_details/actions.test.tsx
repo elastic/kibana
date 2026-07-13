@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import { Actions } from './actions';
+import { SyntheticsRefreshContext } from '../../contexts/synthetics_refresh_context';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -94,6 +95,23 @@ describe('Actions Component', () => {
     expect(screen.getByText('Edit monitor')).toBeInTheDocument();
     expect(screen.getByText('Refresh')).toBeInTheDocument();
     expect(screen.getByText('Run test manually')).toBeInTheDocument();
+  });
+
+  it('closes the actions popover after an action is selected', async () => {
+    const refreshApp = jest.fn();
+    render(
+      <SyntheticsRefreshContext.Provider value={{ refreshApp } as any}>
+        <Actions />
+      </SyntheticsRefreshContext.Provider>
+    );
+
+    fireEvent.click(screen.getByTestId('monitorDetailsHeaderControlActionsButton'));
+    expect(screen.getByTestId('syntheticsRefreshContextItem')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('syntheticsRefreshContextItem'));
+
+    expect(refreshApp).toHaveBeenCalled();
+    await waitForElementToBeRemoved(() => screen.queryByTestId('syntheticsRefreshContextItem'));
   });
 
   describe('remote (CCS) monitor', () => {

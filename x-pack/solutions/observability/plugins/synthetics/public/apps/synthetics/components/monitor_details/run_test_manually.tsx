@@ -27,7 +27,13 @@ import {
   manualTestRunInProgressSelector,
 } from '../../state/manual_test_runs';
 
-export const RunTestManuallyContextItem = ({ isRemote = false }: { isRemote?: boolean }) => {
+export const RunTestManuallyContextItem = ({
+  isRemote = false,
+  closePopover,
+}: {
+  isRemote?: boolean;
+  closePopover?: () => void;
+}) => {
   const dispatch = useDispatch();
 
   const { monitor } = useSelectedMonitor();
@@ -86,6 +92,7 @@ export const RunTestManuallyContextItem = ({ isRemote = false }: { isRemote?: bo
               })
             );
           }
+          closePopover?.();
         }}
       >
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

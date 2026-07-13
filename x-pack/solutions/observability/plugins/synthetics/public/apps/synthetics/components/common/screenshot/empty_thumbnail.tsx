@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme, EuiIcon, EuiText, EuiSkeletonRectangle } from '@elastic/eui';
+import { useEuiTheme, EuiIcon, EuiIconTip, EuiText, EuiSkeletonRectangle } from '@elastic/eui';
 
 import type { ScreenshotImageSize } from './screenshot_size';
 import { getConfinedScreenshotSize, THUMBNAIL_SCREENSHOT_SIZE } from './screenshot_size';
@@ -24,12 +24,14 @@ export const thumbnailStyle = {
 
 export const EmptyThumbnail = ({
   isLoading = false,
+  isPending = false,
   animateLoading,
   size = THUMBNAIL_SCREENSHOT_SIZE,
   unavailableMessage,
   borderRadius,
 }: {
   isLoading: boolean;
+  isPending?: boolean;
   animateLoading: boolean;
   size: ScreenshotImageSize | [number, number];
   unavailableMessage?: string;
@@ -38,14 +40,19 @@ export const EmptyThumbnail = ({
   const { euiTheme } = useEuiTheme();
   const { width, height } = getConfinedScreenshotSize(size);
   const noDataMessage = unavailableMessage ?? SCREENSHOT_NOT_AVAILABLE;
+  const ariaLabel = isPending
+    ? SCREENSHOT_PENDING_MESSAGE
+    : isLoading
+    ? SCREENSHOT_LOADING_ARIA_LABEL
+    : noDataMessage;
 
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       data-test-subj="stepScreenshotPlaceholder"
       role="img"
-      aria-label={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : noDataMessage}
-      title={isLoading ? SCREENSHOT_LOADING_ARIA_LABEL : noDataMessage}
+      aria-label={ariaLabel}
+      title={isPending ? undefined : ariaLabel}
       style={{
         ...thumbnailStyle,
         width,
@@ -64,7 +71,15 @@ export const EmptyThumbnail = ({
         e.stopPropagation();
       }}
     >
-      {isLoading && animateLoading ? (
+      {isPending ? (
+        <EuiIconTip
+          type="clock"
+          color={euiTheme.colors.textSubdued}
+          content={SCREENSHOT_PENDING_MESSAGE}
+          aria-label={SCREENSHOT_PENDING_MESSAGE}
+          iconProps={{ 'data-test-subj': 'stepScreenshotPending' }}
+        />
+      ) : isLoading && animateLoading ? (
         <EuiSkeletonRectangle
           data-test-subj="stepScreenshotPlaceholderLoading"
           isLoading={isLoading}
@@ -118,5 +133,12 @@ export const SCREENSHOT_NOT_AVAILABLE = i18n.translate(
   'xpack.synthetics.monitor.step.screenshot.notAvailable',
   {
     defaultMessage: 'Step screenshot is not available.',
+  }
+);
+
+export const SCREENSHOT_PENDING_MESSAGE = i18n.translate(
+  'xpack.synthetics.monitor.step.screenshot.pending',
+  {
+    defaultMessage: 'Screenshots become available after the journey has completed.',
   }
 );

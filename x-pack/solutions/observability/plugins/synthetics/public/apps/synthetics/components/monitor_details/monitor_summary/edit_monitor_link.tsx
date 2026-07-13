@@ -48,7 +48,13 @@ export const EditMonitorLink = () => {
   );
 };
 
-export const EditMonitorContextItem = ({ isRemote = false }: { isRemote?: boolean }) => {
+export const EditMonitorContextItem = ({
+  isRemote = false,
+  closePopover,
+}: {
+  isRemote?: boolean;
+  closePopover?: () => void;
+}) => {
   const { basePath } = useSyntheticsSettingsContext();
   const { monitorId } = useParams<{ monitorId: string }>();
   const { remoteName, spaceId } = useGetUrlParams();
@@ -77,6 +83,7 @@ export const EditMonitorContextItem = ({ isRemote = false }: { isRemote?: boolea
         data-test-subj="syntheticsEditMonitorContextItem"
         href={remoteEditUrl}
         target={remoteEditUrl ? '_blank' : undefined}
+        onClick={closePopover}
         disabled={hasUndefinedRemoteKibanaUrl}
         toolTipContent={
           hasUndefinedRemoteKibanaUrl
@@ -105,6 +112,7 @@ export const EditMonitorContextItem = ({ isRemote = false }: { isRemote?: boolea
       icon={'pencil'}
       data-test-subj="syntheticsEditMonitorContextItem"
       {...linkProps}
+      onClick={closePopover}
       disabled={isLinkDisabled}
     >
       {EDIT_MONITOR}

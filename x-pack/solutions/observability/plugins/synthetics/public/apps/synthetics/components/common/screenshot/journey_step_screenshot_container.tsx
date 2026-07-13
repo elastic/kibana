@@ -26,6 +26,8 @@ interface Props {
   retryFetchOnRevisit?: boolean; // Set to `true` for "Run Once" / "Test Now" modes
   size?: ScreenshotImageSize;
   testNowMode?: boolean;
+  /** Whether the journey run has concluded. Only relevant in "Run Once" / "Test Now" mode. */
+  isJourneyCompleted?: boolean;
   unavailableMessage?: string;
   borderRadius?: number | string;
 }
@@ -38,6 +40,7 @@ export const JourneyStepScreenshotContainer = ({
   initialStepNumber = 1,
   retryFetchOnRevisit = false,
   testNowMode,
+  isJourneyCompleted,
   size = THUMBNAIL_SCREENSHOT_SIZE,
   unavailableMessage,
   borderRadius,
@@ -71,10 +74,15 @@ export const JourneyStepScreenshotContainer = ({
     retryFetchOnRevisit,
     checkGroup,
     testNowMode,
+    isJourneyCompleted,
     timestamp,
   });
 
   const { url, loading, stepName, maxSteps } = imageResult?.[imgPath] ?? {};
+
+  // In Run Once / Test Now mode step screenshots are only indexed once the journey concludes.
+  // Until then show a calm "pending" state (not a spinner or the "unavailable" error). See issue #215222.
+  const isPending = Boolean(testNowMode && isJourneyCompleted === false && !url);
 
   return (
     <div ref={intersectionRef}>
@@ -85,7 +93,8 @@ export const JourneyStepScreenshotContainer = ({
         stepNumber={initialStepNumber}
         isStepFailed={stepStatus === 'failed'}
         maxSteps={maxSteps}
-        isLoading={Boolean(loading || !allStepsLoaded)}
+        isLoading={Boolean((loading || !allStepsLoaded) && !isPending)}
+        isPending={isPending}
         size={size}
         unavailableMessage={unavailableMessage}
         borderRadius={borderRadius}

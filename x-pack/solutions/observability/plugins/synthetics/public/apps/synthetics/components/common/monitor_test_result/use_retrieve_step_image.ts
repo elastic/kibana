@@ -35,6 +35,7 @@ export const useRetrieveStepImage = ({
   imgPath,
   testNowMode,
   retryFetchOnRevisit,
+  isJourneyCompleted,
 }: {
   timestamp?: string;
   checkGroup: string | undefined;
@@ -51,6 +52,14 @@ export const useRetrieveStepImage = ({
    *
    */
   retryFetchOnRevisit: boolean;
+
+  /**
+   * In "Run Once" / "Test Now" mode the agent only indexes step screenshots once the
+   * whole journey has concluded. A single backoff cycle can therefore expire before the
+   * images exist for long journeys (see issue #215222). When this flips to `true` we run
+   * one more fetch so the screenshot populates instead of getting stuck on the placeholder.
+   */
+  isJourneyCompleted?: boolean;
 }) => {
   const [imgState, setImgState] = useState<ImageDataResult>({});
   const skippedStep = stepStatus === 'skipped';
@@ -60,7 +69,17 @@ export const useRetrieveStepImage = ({
 
   const shouldFetch = useMemo(() => {
     const shouldRetry = retryFetchOnRevisit || !(imgState[imgPath]?.attempts ?? 0 > 0);
-    return !skippedStep && hasIntersected && !isImageUrlAvailable && shouldRetry && checkGroup;
+    // In Run Once / Test Now mode screenshots are only indexed once the journey concludes, so
+    // fetching earlier just produces guaranteed-404 backoff storms. Wait for completion instead.
+    const waitingForJourney = Boolean(testNowMode) && isJourneyCompleted === false;
+    return (
+      !skippedStep &&
+      hasIntersected &&
+      !isImageUrlAvailable &&
+      shouldRetry &&
+      !waitingForJourney &&
+      checkGroup
+    );
   }, [
     checkGroup,
     hasIntersected,
@@ -69,6 +88,8 @@ export const useRetrieveStepImage = ({
     isImageUrlAvailable,
     retryFetchOnRevisit,
     skippedStep,
+    testNowMode,
+    isJourneyCompleted,
   ]);
 
   useEffect(() => {
@@ -100,7 +121,9 @@ export const useRetrieveStepImage = ({
       }
     }
     run();
-  }, [imgPath, shouldFetch, testNowMode]);
+    // `isJourneyCompleted` is included so we re-attempt once the journey finishes, since
+    // screenshots for long journeys are only indexed after the run concludes.
+  }, [imgPath, shouldFetch, testNowMode, isJourneyCompleted]);
 
   return imageResult;
 };

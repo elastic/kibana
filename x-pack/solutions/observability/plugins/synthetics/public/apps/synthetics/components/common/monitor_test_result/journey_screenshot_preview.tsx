@@ -25,6 +25,7 @@ export interface StepImagePopoverProps {
   maxSteps: number | undefined;
   isStepFailed: boolean;
   isLoading: boolean;
+  isPending?: boolean;
   size: ScreenshotImageSize;
   unavailableMessage?: string;
   borderRadius?: string | number;
@@ -39,6 +40,7 @@ export const JourneyScreenshotPreview: React.FC<StepImagePopoverProps> = ({
   maxSteps,
   isStepFailed,
   isLoading,
+  isPending,
   size,
   unavailableMessage,
   borderRadius,
@@ -92,6 +94,7 @@ export const JourneyScreenshotPreview: React.FC<StepImagePopoverProps> = ({
       })}
       imgSrc={imgSrc}
       isLoading={isLoading}
+      isPending={isPending}
       size={screenshotSize}
       unavailableMessage={unavailableMessage}
       borderColor={isStepFailed ? euiTheme.colors.danger : undefined}

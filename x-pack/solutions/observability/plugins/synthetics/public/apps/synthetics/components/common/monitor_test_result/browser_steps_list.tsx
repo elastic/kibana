@@ -46,6 +46,8 @@ interface Props {
   showExpand?: boolean;
   testNowMode?: boolean;
   showLastSuccessful?: boolean;
+  /** Whether the journey run has concluded. Only relevant in "Run Once" / "Test Now" mode. */
+  isJourneyCompleted?: boolean;
 }
 
 export function isStepEnd(step: JourneyStep) {
@@ -70,6 +72,7 @@ function mapStepIds(steps: JourneyStep[]) {
 }
 
 const MAX_STEPS_TO_SHOW = 5;
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 export const BrowserStepsList = ({
   steps,
@@ -81,8 +84,10 @@ export const BrowserStepsList = ({
   compressed = true,
   showExpand = true,
   testNowMode = false,
+  isJourneyCompleted,
 }: Props) => {
   const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(MAX_STEPS_TO_SHOW);
 
   const allStepEnds: JourneyStep[] = steps.filter(isStepEnd);
   const failedStep = allStepEnds.find((step) => step.synthetics.step?.status === 'failed');
@@ -91,23 +96,25 @@ export const BrowserStepsList = ({
 
   const stepEnds = shouldPaginate
     ? allStepEnds.slice(
-        pageIndex * MAX_STEPS_TO_SHOW,
-        Math.min(pageIndex * MAX_STEPS_TO_SHOW + MAX_STEPS_TO_SHOW, allStepEnds.length)
+        pageIndex * pageSize,
+        Math.min(pageIndex * pageSize + pageSize, allStepEnds.length)
       )
     : allStepEnds;
 
   const pagination: Pagination | undefined = shouldPaginate
     ? {
         pageIndex,
-        pageSize: MAX_STEPS_TO_SHOW,
+        pageSize,
         totalItemCount: allStepEnds.length,
-        showPerPageOptions: false,
+        pageSizeOptions: PAGE_SIZE_OPTIONS,
+        showPerPageOptions: true,
       }
     : undefined;
 
   const onTableChange = ({ page }: Criteria<JourneyStep>) => {
     if (page) {
       setPageIndex(page.index);
+      setPageSize(page.size);
     }
   };
   /**
@@ -210,6 +217,7 @@ export const BrowserStepsList = ({
           retryFetchOnRevisit={true}
           size={screenshotImageSize}
           testNowMode={testNowMode}
+          isJourneyCompleted={isJourneyCompleted}
           timestamp={timestamp}
         />
       ),
@@ -222,6 +230,7 @@ export const BrowserStepsList = ({
             showLastSuccessful={showLastSuccessful}
             isExpanded={Boolean(expandedMap[step._id])}
             isTestNowMode={testNowMode}
+            isJourneyCompleted={isJourneyCompleted}
             euiTheme={euiTheme}
           />
         ),
@@ -375,6 +384,7 @@ const MobileRowDetails = ({
   stepsLoading,
   isExpanded,
   isTestNowMode,
+  isJourneyCompleted,
   euiTheme,
 }: {
   journeyStep: JourneyStep;
@@ -383,6 +393,7 @@ const MobileRowDetails = ({
   stepsLoading: boolean;
   isExpanded: boolean;
   isTestNowMode: boolean;
+  isJourneyCompleted?: boolean;
   euiTheme: EuiThemeComputed;
 }) => {
   return (
@@ -405,6 +416,8 @@ const MobileRowDetails = ({
           allStepsLoaded={!stepsLoading}
           retryFetchOnRevisit={true}
           size={THUMBNAIL_SCREENSHOT_SIZE_MOBILE}
+          testNowMode={isTestNowMode}
+          isJourneyCompleted={isJourneyCompleted}
           timestamp={journeyStep?.['@timestamp']}
         />
         <div>

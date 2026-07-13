@@ -23,13 +23,16 @@ export function RefreshButton() {
   );
 }
 
-export function RefreshContextItem() {
+export function RefreshContextItem({ closePopover }: { closePopover?: () => void }) {
   const { refreshApp } = useSyntheticsRefreshContext();
   return (
     <EuiContextMenuItem
       data-test-subj="syntheticsRefreshContextItem"
       icon="refresh"
-      onClick={() => refreshApp()}
+      onClick={() => {
+        refreshApp();
+        closePopover?.();
+      }}
     >
       {REFRESH_LABEL}
     </EuiContextMenuItem>
