@@ -81,7 +81,7 @@ safe-outputs:
   mentions:
     allowed:
       - ${{ github.actor }}
-    # Lets the agent `cc` the author of the PR that introduced the flaky test.
+    # Lets the agent `cc` the author of the PR that introduced the flaky test
     allowed-collaborators: true
   add-comment:
     max: 1
@@ -159,10 +159,7 @@ safe-outputs:
               }
               await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
-    # Requests the author of the PR that introduced the flaky test as a reviewer on the fix PR.
-    # Like link-fix-pr, this runs after safe_outputs because the fix PR's number isn't known
-    # while the agent runs. The agent passes the author's login; the request is best-effort —
-    # GitHub rejects a non-collaborator (or the PR author) with 422, which we swallow.
+    # Requests the author of the PR that introduced the flaky test as a reviewer on the fix PR
     request-fix-review:
       description: 'Request a review from the author of the PR that introduced the flaky test. Call this exactly once, only after you have opened a draft PR, and only with the real (non-bot) GitHub login of that PR''s author. GitHub ignores the request if the user cannot review the PR (e.g. they are not a repo collaborator), leaving the PR unaffected.'
       runs-on: ubuntu-latest
@@ -191,7 +188,7 @@ safe-outputs:
                 return;
               }
               // The agent's `author` tool parameter is delivered here (custom safe-jobs read inputs
-              // from GH_AW_AGENT_OUTPUT, not `${{ inputs.* }}`).
+              // from GH_AW_AGENT_OUTPUT, not from the job's inputs context).
               const { items = [] } = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
               const author = items.find((entry) => entry.type === 'request_fix_review')?.author?.trim().replace(/^@/, '');
               if (!author) {
@@ -233,7 +230,7 @@ Kibana is already bootstrapped for you.
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 7. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 8. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
-9. **Only if you opened a PR in step 5 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created; GitHub ignores the request if that user can't review the PR (e.g. not a repo collaborator), so it never blocks the PR.
+9. **Only if you opened a PR in step 5 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created.
 
 ## PR format
 
