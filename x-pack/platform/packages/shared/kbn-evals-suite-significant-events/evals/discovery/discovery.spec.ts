@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID } from '@kbn/significant-events-plugin/server';
+import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '@kbn/significant-events-plugin/server';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
-import type { Detection, Discovery } from '@kbn/significant-events-schema';
+import type { Detection } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   replayIntoManagedStream,
@@ -34,16 +34,16 @@ import {
   createDiscoveryEvaluators,
   createContinuationEvaluators,
 } from '../../src/evaluators/discovery';
-import { parseDiscoveries } from '../../src/evaluators/discovery/utils/parse_agent_output';
-import { buildDiscoveryInput } from '../../src/evaluators/discovery/discovery/build_agent_input';
-import {
-  toContinuationCandidate,
-  mergeContinuationCandidates,
-} from '../../src/evaluators/discovery/discovery/continuation/continuation_candidate';
-import type { ContinuationCycle } from '../../src/evaluators/discovery/discovery/continuation/continuation_stability';
 import { buildAvailableSnapshotsBySource } from '../shared';
+import { extractDiscoveriesFromToolCall } from '../../src/evaluators/discovery/utils/parse_agent_output';
+import { buildDiscoveryInput } from '../../src/evaluators/discovery/discovery/build_agent_input';
+import { toSignificantEventSeed } from '../../src/evaluators/discovery/discovery/continuation/continuation_candidate';
+import type { ContinuationCycle } from '../../src/evaluators/discovery/discovery/continuation/continuation_stability';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
+
+/** Events data stream — the same index the judge writes to via events_write. */
+const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
 
 evaluate.describe(
   'Significant Events Discovery - Discovery Agent',
@@ -251,20 +251,16 @@ evaluate.describe(
                     );
 
                     // Same message shape as the production batch.
-                    const agentInput = buildDiscoveryInput({
-                      episodeSuffix: Date.now().toString(36).slice(-8),
-                      detections,
-                      continuationCandidates: input.continuation_candidates ?? [],
-                    });
+                    const agentInput = buildDiscoveryInput({ detections });
 
                     const converseResult = await agentBuilderClient.converse({
-                      agentId: SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID,
+                      agentId: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
                       input: agentInput,
                     });
 
                     return {
-                      // Agent returns JSON in the final message (no emit tool on converse); parse it.
-                      discoveries: parseDiscoveries(converseResult.message),
+                      // Agent outputs via discovery_write tool calls; extract discoveries from steps.
+                      discoveries: extractDiscoveriesFromToolCall(converseResult.steps),
                       // Thread the input detections through so snapshot-mode evaluators can access them.
                       inputDetections: detections,
                       // Raw steps — trajectory/grounding evaluators read tool calls from these.
@@ -294,7 +290,7 @@ evaluate.describe(
           // per (scenario × path); each chain is ground truth, so slug reuse is the correct answer
           // and minting a new slug is the defect ("slug proliferation is a defect").
           evaluate(
-            'Discovery investigator — continuation over time',
+            'Discovery agent — continuation over time',
             async ({
               executorClient,
               evaluators,
@@ -411,47 +407,63 @@ evaluate.describe(
                     );
 
                     const cycles: ContinuationCycle[] = [];
-                    let continuationCandidates: Array<Partial<Discovery>> = [];
+                    // Tracks event_ids seeded by this run so they can be deleted after all cycles
+                    // complete. Without this cleanup the next run's cycle-0 event_search would
+                    // find the previous run's open episodes and either reuse a foreign slug or
+                    // produce spurious noise. Deleting by explicit IDs is safer than wiping the
+                    // entire stream and works correctly even when concurrency > 1.
+                    const seededEventIds: string[] = [];
 
-                    // Feed one detection per cycle, oldest first, threading prior discoveries back as
-                    // candidates. A fresh detection_id per firing simulates re-arrival (and lets the
-                    // rule-uuid path re-fire the same rule); a unique episode suffix per cycle makes any
-                    // wrongly-minted slug observable.
-                    for (let i = 0; i < run.sequence.length; i++) {
-                      const base = run.sequence[i];
-                      const detection: Detection = {
-                        ...base,
-                        detection_id: `${base.detection_id ?? base.rule_uuid}-fire-${i}`,
-                      };
-                      const agentInput = buildDiscoveryInput({
-                        episodeSuffix: `${Date.now().toString(36).slice(-6)}${i}`,
-                        detections: [detection],
-                        continuationCandidates,
-                      });
+                    try {
+                      // Feed one detection per cycle, oldest first. After each cycle, seed a
+                      // SignificantEvent into the events data stream for each produced discovery so the
+                      // next cycle's `event_search state: "open"` call finds it — mirroring what the
+                      // judge would write between discovery invocations in production.
+                      for (let i = 0; i < run.sequence.length; i++) {
+                        const base = run.sequence[i];
+                        const detection: Detection = {
+                          ...base,
+                          detection_id: `${base.detection_id ?? base.rule_uuid}-fire-${i}`,
+                        };
+                        const agentInput = buildDiscoveryInput({ detections: [detection] });
 
-                      const converseResult = await agentBuilderClient.converse({
-                        agentId: SIGNIFICANT_EVENTS_INVESTIGATOR_AGENT_ID,
-                        input: agentInput,
-                      });
+                        const converseResult = await agentBuilderClient.converse({
+                          agentId: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
+                          input: agentInput,
+                        });
 
-                      const discoveries = parseDiscoveries(converseResult.message);
-                      const producedSlugs = discoveries
-                        .map((discovery) => discovery.discovery_slug)
-                        .filter((slug): slug is string => Boolean(slug));
+                        const discoveries = extractDiscoveriesFromToolCall(converseResult.steps);
+                        const producedSlugs = discoveries
+                          .map((discovery) => discovery.discovery_slug)
+                          .filter((slug): slug is string => Boolean(slug));
 
-                      cycles.push({ ruleName: detection.rule_name, producedSlugs });
+                        cycles.push({ ruleName: detection.rule_name, producedSlugs });
 
-                      // Thread produced discoveries into the next cycle's candidates, latest per slug.
-                      const produced = discoveries.map((discovery, idx) =>
-                        toContinuationCandidate({
-                          discovery,
-                          discoveryId: `${discovery.discovery_slug ?? 'unknown'}-cycle-${i}-${idx}`,
-                        })
-                      );
-                      continuationCandidates = mergeContinuationCandidates([
-                        ...continuationCandidates,
-                        ...produced,
-                      ]);
+                        // Seed a SignificantEvent per produced discovery so event_search resolves it
+                        // as an open episode in subsequent cycles.
+                        for (const [idx, discovery] of discoveries.entries()) {
+                          if (!discovery.discovery_slug) continue;
+                          const eventId = `${discovery.discovery_slug}-cycle-${i}-${idx}`;
+                          await esClient.index({
+                            index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                            document: toSignificantEventSeed({ discovery, eventId }),
+                          });
+                          seededEventIds.push(eventId);
+                        }
+                        if (producedSlugs.length > 0) {
+                          await esClient.indices.refresh({
+                            index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                          });
+                        }
+                      }
+                    } finally {
+                      if (seededEventIds.length > 0) {
+                        await esClient.deleteByQuery({
+                          index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                          query: { terms: { event_id: seededEventIds } },
+                          refresh: true,
+                        });
+                      }
                     }
 
                     return { cycles, traceId: getCurrentTraceId() };

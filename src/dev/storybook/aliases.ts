@@ -17,6 +17,7 @@ export const storybookAliases = {
   cases: 'src/platform/packages/shared/kbn-cases-components/.storybook',
   cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',
   chart_icons: 'src/platform/packages/shared/kbn-chart-icons/.storybook',
+  change_history_ui: 'x-pack/platform/packages/shared/kbn-change-history-ui/.storybook',
   cloud_security_posture_graph:
     'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/.storybook',
   cloud: 'src/platform/packages/shared/cloud/.storybook',
