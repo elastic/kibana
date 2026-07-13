@@ -7,35 +7,11 @@
 
 import { renderHook } from '@testing-library/react';
 
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import {
-  fetchQueryAttacks,
-  fetchQueryUnifiedAlerts,
-} from '../../containers/detection_engine/alerts/api';
+import { fetchQueryAttacks } from '../../containers/detection_engine/alerts/api';
 import { useAttacksPageFetchMethod } from './use_attacks_page_fetch_method';
 
-jest.mock('../../../common/hooks/use_experimental_features');
-
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.MockedFunction<
-  typeof useIsExperimentalFeatureEnabled
->;
-
 describe('useAttacksPageFetchMethod', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('returns fetchQueryUnifiedAlerts when publicAttacksApiEnabled is false', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-
-    const { result } = renderHook(() => useAttacksPageFetchMethod());
-
-    expect(result.current).toBe(fetchQueryUnifiedAlerts);
-  });
-
-  it('returns fetchQueryAttacks when publicAttacksApiEnabled is true', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-
+  it('returns fetchQueryAttacks', () => {
     const { result } = renderHook(() => useAttacksPageFetchMethod());
 
     expect(result.current).toBe(fetchQueryAttacks);

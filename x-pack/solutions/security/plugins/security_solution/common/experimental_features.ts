@@ -299,11 +299,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Agents, Discover and Workflows external links in the classic Security Solution side navigation
    */
   securityClassicNavExternalLinks: true,
-  /**
-   * Enables public Detection Engine attacks REST APIs
-   * (`/api/detection_engine/attacks/*`).
-   */
-  publicAttacksApiEnabled: false,
 
   /**
    * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`

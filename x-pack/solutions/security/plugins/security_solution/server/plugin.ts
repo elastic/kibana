@@ -809,7 +809,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions, experimentalFeatures);
+      registerWorkflowSteps(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
 

@@ -8,10 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useAttackTimestamps } from './use_attack_timestamps';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
-import {
-  fetchQueryAttacks,
-  fetchQueryUnifiedAlerts,
-} from '../../../../containers/detection_engine/alerts/api';
+import { fetchQueryAttacks } from '../../../../containers/detection_engine/alerts/api';
 import { useAttacksPageFetchMethod } from '../../../../hooks/attacks/use_attacks_page_fetch_method';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useInspectButton } from '../../../alerts_kpis/common/hooks';
@@ -33,7 +30,7 @@ describe('useAttackTimestamps', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryUnifiedAlerts);
+    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryAttacks);
     (useGlobalTime as jest.Mock).mockReturnValue({
       deleteQuery: mockDeleteQuery,
       setQuery: mockSetGlobalQuery,
@@ -85,7 +82,7 @@ describe('useAttackTimestamps', () => {
     });
     expect(useQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
-        fetchMethod: fetchQueryUnifiedAlerts,
+        fetchMethod: fetchQueryAttacks,
         skip: false,
         query: expect.objectContaining({
           query: { ids: { values: ['attack-1', 'attack-2'] } },
@@ -109,17 +106,7 @@ describe('useAttackTimestamps', () => {
     expect(mockSetQuery).toHaveBeenCalled();
   });
 
-  it('uses fetchQueryAttacks when publicAttacksApiEnabled is on', () => {
-    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryAttacks);
-    (useQueryAlerts as jest.Mock).mockReturnValue({
-      data: undefined,
-      loading: false,
-      refetch: mockRefetch,
-      request: 'request',
-      response: 'response',
-      setQuery: mockSetQuery,
-    });
-
+  it('uses fetchQueryAttacks', () => {
     renderHook(() => useAttackTimestamps({ attackIds: ['attack-1'] }));
 
     expect(useQueryAlerts).toHaveBeenCalledWith(
