@@ -199,10 +199,8 @@ Kibana is already bootstrapped for you.
   ### Context
   <a few bullet points of history around this flake, in the same concise, high-value style as the Summary — every bullet earned, and omit any you cannot back with real evidence (never guess a PR or attribution). Cover, where known:
   - the PR that first introduced the failing test (find it via `git log` / `git blame` on the test file) as a link, plus — only if the investigator implicated a specific PR/commit as the cause of the flakiness — that one too
-  - a link to the failed test investigator's comment on the issue
+  - a link to the failed test investigator's comment on the issue, noting in a few words whether this patch matches their proposed fix or (if not) how it differs
   - a one-line recount of where the failures happened — e.g. the CI pipeline/lane and how often/recently — from the issue's CI data and the investigator's comment>
-
-  <if this fix matches what the failed test investigator already proposed in the issue, reference it instead of repeating it here; otherwise, explain how and why it differs>
 
   <details>
   <summary>Verification</summary>
