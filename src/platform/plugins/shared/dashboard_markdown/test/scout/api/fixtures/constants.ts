@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { PUBLIC_API_VERSION } from '../../../../server/api/constants';
+
 /** The base API path for markdown endpoints (no leading slash for apiClient). */
 export const MARKDOWN_API_PATH = 'api/markdowns';
 
@@ -14,5 +16,5 @@ export const MARKDOWN_API_PATH = 'api/markdowns';
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '2023-10-31', // include for versioned public APIs
+  'elastic-api-version': PUBLIC_API_VERSION,
 } as const;
