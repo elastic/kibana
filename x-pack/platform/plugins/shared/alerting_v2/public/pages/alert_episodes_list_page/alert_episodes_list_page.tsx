@@ -24,7 +24,6 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import type { RenderDocumentViewCallback, SortOrder } from '@kbn/unified-data-table';
 import {
   DataLoadingState,
-  ROWS_HEIGHT_OPTIONS,
   UnifiedDataTable,
   getRenderCustomToolbarWithElements,
   type CustomCellRenderer,
@@ -43,6 +42,7 @@ import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/cons
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
+import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
@@ -66,6 +66,7 @@ import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
+import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 
 const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
@@ -167,7 +168,7 @@ export const AlertEpisodesListPage = () => {
     'tags',
     'assignees',
   ]);
-  const [rowHeight, setRowHeight] = useState<number>(ROWS_HEIGHT_OPTIONS.default);
+  const { rowHeight, setRowHeight } = useEpisodesTableConfig(services.storage);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
 
@@ -217,6 +218,12 @@ export const AlertEpisodesListPage = () => {
   const { rulesCache, loading: isLoadingRules } = useAlertingRulesCache({
     ruleIds,
     services,
+  });
+
+  const sourceDataViewsByRule = useAlertingRuleSourceDataViews({
+    rules: rulesCache,
+    dataViews: services.dataViews,
+    http: services.http,
   });
 
   const ruleOptions = useMemo(
@@ -372,6 +379,7 @@ export const AlertEpisodesListPage = () => {
           rulesCache={rulesCache}
           isLoadingRules={isLoadingRules}
           rowHeight={rowHeight}
+          sourceDataViewsByRule={sourceDataViewsByRule}
         />
       ),
       assignees: (props) => {
@@ -381,7 +389,7 @@ export const AlertEpisodesListPage = () => {
         );
       },
     }),
-    [rulesCache, isLoadingRules, rowHeight, services.userProfile]
+    [rulesCache, isLoadingRules, rowHeight, services.userProfile, sourceDataViewsByRule]
   );
 
   const episodesMenu = useMemo(
