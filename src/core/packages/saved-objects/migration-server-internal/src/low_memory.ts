@@ -16,8 +16,6 @@ import v8 from 'v8';
  * Instances configured with a heap of 1GB or less are the ones observed to OOM
  * or time out while replaying bulk writes during ECH upgrades, so we make the
  * migration back off to reduce its peak memory usage.
- *
- * See https://github.com/elastic/incident-management/issues/1901
  */
 export const LOW_MEMORY_HEAP_SIZE_LIMIT_BYTES = 1 * 1024 * 1024 * 1024;
 

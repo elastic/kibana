@@ -130,7 +130,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
   // On memory-constrained instances, migrations are prone to OOM/timeout while
   // replaying bulk writes. Back off by running index migrators sequentially and
   // reducing the batch size, trading a longer migration for a lower memory
-  // footprint. See https://github.com/elastic/incident-management/issues/1901
+  // footprint.
   const memoryConstrained = isMemoryConstrained();
   const migrationConfig: SavedObjectsMigrationConfigType = memoryConstrained
     ? {
