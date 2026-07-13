@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -18,11 +17,10 @@ import { setAttacksTagsRoute } from './set_attacks_tags_route';
 export const registerAttacksRoutes = (
   router: SecuritySolutionPluginRouter,
   ruleDataClient: IRuleDataClient | null,
-  telemetrySender: ITelemetryEventsSender,
-  logger: Logger
+  telemetrySender: ITelemetryEventsSender
 ) => {
   searchAttacksRoute(router, telemetrySender);
-  setAttacksStatusRoute(router, ruleDataClient, telemetrySender, logger);
+  setAttacksStatusRoute(router, ruleDataClient, telemetrySender);
   setAttacksTagsRoute(router, ruleDataClient, telemetrySender);
   setAttacksAssigneesRoute(router, ruleDataClient, telemetrySender);
 };

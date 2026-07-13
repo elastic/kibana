@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '@kbn/elastic-assistant-common';
@@ -39,8 +38,7 @@ import {
 export const setAttacksStatusRoute = (
   router: SecuritySolutionPluginRouter,
   ruleDataClient: IRuleDataClient | null,
-  telemetrySender: ITelemetryEventsSender,
-  logger: Logger
+  telemetrySender: ITelemetryEventsSender
 ) => {
   router.versioned
     .post({
@@ -97,7 +95,6 @@ export const setAttacksStatusRoute = (
               DETECTION_ENGINE_ATTACKS_STATUS_URL,
               status
             );
-            logger.debug(() => `Sending Insights Payloads ${JSON.stringify(insightsPayloads)}`);
             await telemetrySender.sendOnDemand(INSIGHTS_CHANNEL, insightsPayloads);
           }
         }

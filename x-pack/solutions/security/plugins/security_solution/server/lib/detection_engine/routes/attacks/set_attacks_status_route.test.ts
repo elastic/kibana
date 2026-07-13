@@ -18,7 +18,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DETECTION_ENGINE_ATTACKS_STATUS_URL } from '../../../../../common/constants';
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
@@ -69,12 +68,10 @@ describe('set attacks workflow status', () => {
   let telemetrySenderMock: ITelemetryEventsSender;
   let reportEBT: jest.Mock;
   let sendOnDemand: jest.Mock;
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     server = serverMock.create();
-    logger = loggingSystemMock.createLogger();
     ({ context } = requestContextMock.createTools());
     context.core.uiSettings.client.get.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
@@ -92,7 +89,7 @@ describe('set attacks workflow status', () => {
       isTelemetryOptedIn: jest.fn().mockResolvedValue(true),
     } as unknown as ITelemetryEventsSender;
 
-    setAttacksStatusRoute(server.router, ruleDataClient, telemetrySenderMock, logger);
+    setAttacksStatusRoute(server.router, ruleDataClient, telemetrySenderMock);
   });
 
   afterEach(() => {
