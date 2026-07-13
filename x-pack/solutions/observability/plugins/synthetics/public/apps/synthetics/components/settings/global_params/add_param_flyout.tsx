@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiSpacer,
+  EuiScreenReaderLive,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
@@ -26,6 +27,8 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import { isEmpty } from 'lodash';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import {
+  ADD_PARAM_SUCCESS_MESSAGE,
+  EDIT_PARAM_SUCCESS_MESSAGE,
   addNewGlobalParamAction,
   editGlobalParamAction,
   getGlobalParamAction,
@@ -47,6 +50,10 @@ export const AddParamFlyout = ({
   setIsEditingItem: React.Dispatch<React.SetStateAction<ListParamItem | null>>;
 }) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+
+  // Announced by screen readers when a param is saved, since the toast that carries the
+  // success message is not reliably announced once the flyout closes and focus moves.
+  const [announcement, setAnnouncement] = useState('');
 
   const { id, ...dataToSave } = isEditingItem ?? {};
 
@@ -110,11 +117,21 @@ export const AddParamFlyout = ({
     }
   };
 
+  // Reset before a new save so an identical follow-up message still re-announces.
+  useEffect(() => {
+    if (isSaving) {
+      setAnnouncement('');
+    }
+  }, [isSaving]);
+
   useEffect(() => {
     if (savedData && !isSaving) {
+      setAnnouncement(isEditingItem ? EDIT_PARAM_SUCCESS_MESSAGE : ADD_PARAM_SUCCESS_MESSAGE);
       closeFlyout();
       dispatch(getGlobalParamAction.get());
     }
+    // isEditingItem is intentionally read at success time and reset by closeFlyout
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedData, isSaving, closeFlyout, dispatch]);
 
   useEffect(() => {
@@ -196,6 +213,7 @@ export const AddParamFlyout = ({
         </EuiButton>
       </NoPermissionsTooltip>
       {flyout}
+      <EuiScreenReaderLive>{announcement}</EuiScreenReaderLive>
     </div>
   );
 };
