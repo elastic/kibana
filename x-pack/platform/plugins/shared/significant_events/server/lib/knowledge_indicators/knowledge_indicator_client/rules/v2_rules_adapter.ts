@@ -12,19 +12,18 @@ import type { Logger } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { stripMetadata, deriveQueryType } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import {
-  MATCH_LOOKBACK_MINUTES,
-  MAX_ALERTS_PER_EXECUTION,
-} from '../../../significant_events/rules/esql/common';
+import { MAX_ALERTS_PER_EXECUTION } from '../../../significant_events/rules/esql/common';
+import { getRuleLookbackInterval } from '../../../significant_events/rules/schedule';
 import {
   STREAMS_RULE_CONSUMER,
   STREAMS_ESQL_RULE_TYPE_ID,
+  toStreamTag,
   type CreateRuleBody,
   type IRulesManagementClient,
   type UpdateRuleBody,
 } from './rules_management_client';
 
-const V2_MATCH_LOOKBACK = `${MATCH_LOOKBACK_MINUTES}m` as const;
+const FIND_PAGE_SIZE = 500;
 
 /**
  * Wraps alerting_v2 `RulesClientApi` to implement IRulesManagementClient.
@@ -68,6 +67,24 @@ export class RulesAdapterV2 implements IRulesManagementClient {
     }
   }
 
+  async findOwnedRuleIds(streamName: string): Promise<string[]> {
+    const ids: string[] = [];
+    let page = 1;
+    while (true) {
+      const result = await this.rulesClient.findRules({
+        filter: `metadata.tags: "${toStreamTag(streamName)}"`,
+        perPage: FIND_PAGE_SIZE,
+        page,
+      });
+      for (const rule of result.items) {
+        ids.push(rule.id);
+      }
+      if (ids.length >= result.total) break;
+      page++;
+    }
+    return ids;
+  }
+
   /**
    * Create variant used by `updateRule`'s 404 branch. A 409 here means a concurrent
    * writer (re)created the rule between our `updateRule` 404 and this create — that's
@@ -107,6 +124,10 @@ export class RulesNotInstalledAdapterV2 implements IRulesManagementClient {
       `Skipping v2 rule cleanup for ${ids.length} id(s): alerting v2 plugin is not available.`
     );
   }
+
+  async findOwnedRuleIds(streamName: string): Promise<string[]> {
+    return [];
+  }
 }
 
 /**
@@ -116,15 +137,15 @@ export class RulesNotInstalledAdapterV2 implements IRulesManagementClient {
  */
 function toV2Tags(v1Tags: string[]): string[] {
   const streamName = v1Tags.find((t) => t !== 'streams');
-  return streamName ? [`sigevents:stream:${streamName}`] : v1Tags;
+  return streamName ? [toStreamTag(streamName)] : v1Tags;
 }
 
 /**
  * v2 grouping fields for SigEvents MATCH queries.
  *
  * Each MATCH row corresponds to one source document; using `_id` makes the group hash
- * stable across overlapping evaluation windows (with `lookback: 2m` and `every: 1m`,
- * adjacent runs see the same documents). v1 additionally dedupes re-emissions via
+ * stable across overlapping evaluation windows (`lookback` is 2x `every`, so adjacent
+ * runs see the same documents). v1 additionally dedupes re-emissions via
  * executor state; v2 may index the same breached row on each run until recovery.
  * Without an explicit grouping, v2 falls
  * back to a per-row hash that includes the execution UUID, producing a fresh group on
@@ -165,7 +186,10 @@ function toV2CreateBody(body: CreateRuleBody) {
       tags: toV2Tags(body.tags),
     },
     time_field: body.params.timestampField,
-    schedule: { every: body.schedule.interval, lookback: V2_MATCH_LOOKBACK },
+    schedule: {
+      every: body.schedule.interval,
+      lookback: getRuleLookbackInterval(body.schedule.interval),
+    },
     grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
     query: {
       format: 'standalone' as const,
@@ -182,7 +206,10 @@ function toV2UpdateBody(body: UpdateRuleBody) {
       tags: toV2Tags(body.tags),
     },
     time_field: body.params.timestampField,
-    schedule: { every: body.schedule.interval, lookback: V2_MATCH_LOOKBACK },
+    schedule: {
+      every: body.schedule.interval,
+      lookback: getRuleLookbackInterval(body.schedule.interval),
+    },
     grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
     query: {
       format: 'standalone' as const,

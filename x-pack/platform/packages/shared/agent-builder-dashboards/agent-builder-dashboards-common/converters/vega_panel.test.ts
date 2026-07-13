@@ -12,7 +12,12 @@ import type { DashboardAttachmentData } from '../types';
 import { attachmentDataToDashboardState } from './from_attachment';
 import { dashboardStateToAttachmentData } from './to_attachment';
 
-const SPEC = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json","mark":"bar"}';
+const SPEC = JSON.stringify(
+  { $schema: 'https://vega.github.io/schema/vega-lite/v6.json', mark: 'bar' },
+  null,
+  2
+);
+const MINIFIED_SPEC = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json","mark":"bar"}';
 const grid = { x: 0, y: 0, w: 24, h: 15 };
 
 describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => {
@@ -43,7 +48,7 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
     ]);
   });
 
-  it('to_attachment normalizes a by-value legacy-vis Vega panel to the `vega` API shape', () => {
+  it('to_attachment normalizes a by-value legacy-vis Vega panel to the `vega` API shape, re-indenting a compact spec', () => {
     const state = {
       panels: [
         {
@@ -51,7 +56,11 @@ describe('Vega dashboard panel conversion (temporary legacy-vis bridge)', () => 
           id: 'p1',
           grid,
           config: {
-            savedVis: buildVegaSavedVis({ spec: SPEC, title: 'Chart', description: 'Desc' }),
+            savedVis: buildVegaSavedVis({
+              spec: MINIFIED_SPEC,
+              title: 'Chart',
+              description: 'Desc',
+            }),
           },
         },
       ],

@@ -31,6 +31,7 @@ const validTracking: WorkflowExecutionsTracking = {
       workflowRunId: 'alert-retrieval-run-id',
     },
   ],
+  gate: null,
   generation: {
     workflowId: 'workflow-generation',
     workflowRunId: 'generation-run-id',
@@ -170,8 +171,37 @@ describe('getWorkflowExecutionsTracking', () => {
             filter: expect.arrayContaining([
               { term: { 'event.provider': 'securitySolution.attackDiscovery' } },
               { term: { 'kibana.alert.rule.execution.uuid': executionId } },
+              { term: { 'kibana.space_ids': spaceId } },
+              { term: { 'user.name': username } },
               { exists: { field: 'event.reference' } },
             ]),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('scopes the query to the requesting principal via user.name (object-level authz)', async () => {
+    mockSearch.mockResolvedValue({
+      hits: {
+        hits: [],
+        total: { value: 0 },
+      },
+    });
+
+    await getWorkflowExecutionsTracking({
+      esClient,
+      eventLogIndex,
+      executionId,
+      spaceId,
+      username,
+    });
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([{ term: { 'user.name': username } }]),
           }),
         }),
       })
@@ -181,6 +211,7 @@ describe('getWorkflowExecutionsTracking', () => {
   it('returns tracking with null alertRetrieval', async () => {
     const trackingWithNullAlertRetrieval: WorkflowExecutionsTracking = {
       alertRetrieval: null,
+      gate: null,
       generation: {
         workflowId: 'workflow-generation',
         workflowRunId: 'generation-run-id',
@@ -226,6 +257,7 @@ describe('getWorkflowExecutionsTracking', () => {
           workflowRunId: 'custom-esql-run-id',
         },
       ],
+      gate: null,
       generation: {
         workflowId: 'workflow-generation',
         workflowRunId: 'generation-run-id',
@@ -314,6 +346,36 @@ describe('getWorkflowExecutionsTracking', () => {
       workflowId: 'workflow-validate',
       workflowRunId: 'validation-run-id',
     });
+  });
+
+  it('surfaces the generation-phase gate executions from event.reference', async () => {
+    const eventWithGate = {
+      alertRetrieval: [{ workflowId: 'workflow-default', workflowRunId: 'default-run-id' }],
+      gate: [{ workflowId: 'workflow-gate', workflowRunId: 'gate-run-id' }],
+      generation: { workflowId: 'workflow-generation', workflowRunId: 'generation-run-id' },
+      validation: null,
+    };
+
+    mockSearch.mockResolvedValue({
+      hits: {
+        hits: [{ _source: { event: { reference: JSON.stringify(eventWithGate) } } }],
+        total: { value: 1 },
+      },
+    });
+
+    const result = await getWorkflowExecutionsTracking({
+      esClient,
+      eventLogIndex,
+      executionId,
+      spaceId,
+      username,
+    });
+
+    expect(result?.gate).toEqual([{ workflowId: 'workflow-gate', workflowRunId: 'gate-run-id' }]);
+    // gate executions must NOT leak into alertRetrieval
+    expect(result?.alertRetrieval).toEqual([
+      { workflowId: 'workflow-default', workflowRunId: 'default-run-id' },
+    ]);
   });
 
   it('deduplicates alertRetrieval entries with the same workflowRunId across events', async () => {

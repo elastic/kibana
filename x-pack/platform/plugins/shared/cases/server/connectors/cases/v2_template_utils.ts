@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import type { Logger } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
@@ -26,7 +26,7 @@ export const parseTemplateDefinition = (
   definitionYaml: string
 ): ParsedTemplateDefinition | null => {
   try {
-    const raw = yaml.load(definitionYaml);
+    const raw = parseYaml(definitionYaml);
     const result = ParsedTemplateDefinitionSchema.safeParse(raw);
     return result.success ? result.data : null;
   } catch {
