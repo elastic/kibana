@@ -47,7 +47,7 @@ export type * from './src/routes/fleet';
 export type * from './src/routes/storage_explorer';
 export type * from './src/routes/source_maps';
 export type * from './src/routes/agent_configuration';
-export { sourceMapRt } from './src/routes/source_maps';
+export { sourceMapSchema } from './src/routes/source_maps';
 export { filterOptionsRt, payloadRt } from './src/routes/custom_links';
 export {
   rangeRt,

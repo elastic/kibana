@@ -10,22 +10,20 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { ChangeHistoryTrigger } from '@kbn/change-history-ui';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { WorkflowDetailEnabledSwitch } from './workflow_detail_enabled_switch';
-import { WorkflowDetailHeaderHistoryButton } from './workflow_detail_header_history_button';
 
 type EnabledSwitchConfig = NonNullable<AppMenuConfig['switch']>;
 
 export interface WorkflowDetailHeaderToolbarProps {
   switchConfig: EnabledSwitchConfig;
   showHistoryButton: boolean;
-  onOpenHistory: () => void;
 }
 
 export const WorkflowDetailHeaderToolbar = ({
   switchConfig,
   showHistoryButton,
-  onOpenHistory,
 }: WorkflowDetailHeaderToolbarProps) => (
   <EuiFlexGroup
     alignItems="center"
@@ -43,7 +41,7 @@ export const WorkflowDetailHeaderToolbar = ({
     </EuiFlexItem>
     {showHistoryButton && (
       <EuiFlexItem grow={false}>
-        <WorkflowDetailHeaderHistoryButton onClick={onOpenHistory} />
+        <ChangeHistoryTrigger data-test-subj="workflowDetailHistoryButton" />
       </EuiFlexItem>
     )}
   </EuiFlexGroup>

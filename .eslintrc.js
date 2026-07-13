@@ -2953,6 +2953,7 @@ module.exports = {
         '@kbn/eslint/scout_test_file_naming': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
         '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
+        '@kbn/eslint/scout_no_core_settings_in_space_test': 'warn',
         '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
         '@kbn/eslint/scout_expect_import': 'error',
         '@kbn/eslint/scout_no_deprecated_tags': 'error',

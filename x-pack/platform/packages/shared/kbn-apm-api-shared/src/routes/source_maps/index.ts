@@ -16,5 +16,5 @@ export const sourceMapsRouteDefinitions = {
   migrateFleetArtifacts: migrateFleetArtifactsRoute,
 };
 
-export { sourceMapRt, type SourceMap, type ApmSourceMapArtifactBody } from './source_map_types';
+export { sourceMapSchema, type SourceMap, type ApmSourceMapArtifactBody } from './source_map_types';
 export type { ListSourceMapArtifactsResponse } from './list_source_maps';
