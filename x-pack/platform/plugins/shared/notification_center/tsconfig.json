@@ -12,6 +12,8 @@
     "@kbn/std",
     "@kbn/core-data-streams-server",
     "@kbn/core-data-streams-server-mocks",
+    "@kbn/core-user-storage-server",
+    "@kbn/core-user-storage-server-mocks",
     "@kbn/es-mappings",
   ]
 }
