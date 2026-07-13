@@ -393,7 +393,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
                 path: customPath,
                 exists: true,
                 sha1: 'custom123',
-                testChannels: [],
                 tests: [
                   {
                     id: 'customTest1',
