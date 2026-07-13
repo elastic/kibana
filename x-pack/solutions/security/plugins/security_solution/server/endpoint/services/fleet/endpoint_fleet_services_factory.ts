@@ -199,8 +199,18 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       },
 
       set: (target, prop, value): boolean => {
-        // DO not forward internal wrapped properties to the target (the real AgentClient)
         switch (prop) {
+          // Jest tests need to be able to override these methods
+          case 'getAgent':
+            trapHandlers.getAgentInterceptor = value;
+            return true;
+          case 'getByIds':
+            trapHandlers.getByIdsInterceptor = value;
+            return true;
+          case 'listAgents':
+            trapHandlers.listAgentsInterceptor = value;
+            return true;
+          // DO not forward internal wrapped properties to the target (the real AgentClient)
           case HAS_JEST_SPY_MOCKS:
             hasJestSpyMocks = Boolean(value);
             return true;
