@@ -534,9 +534,7 @@ apiTest.describe(
       await getParam(apiClient, allHeaders, paramId, { statusCode: 404 });
     });
 
-    // Skipped in FTR too — duplicate keys are not yet rejected.
-    // Bug ticket https://github.com/elastic/kibana/issues/243894
-    apiTest.skip('returns a 409 conflict when creating a duplicate key', async ({ apiClient }) => {
+    apiTest('returns a 409 conflict when creating a duplicate key', async ({ apiClient }) => {
       const param = { key: 'duplicate-key', value: 'value1' };
       await createParam(apiClient, allHeaders, param);
       await createParam(apiClient, allHeaders, { ...param, value: 'value2' }, { statusCode: 409 });

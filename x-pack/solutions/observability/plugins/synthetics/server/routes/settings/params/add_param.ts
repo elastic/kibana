@@ -8,7 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObject,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsClientContract,
+} from '@kbn/core-saved-objects-api-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
@@ -53,6 +57,15 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         spaceId,
         request.body as SyntheticsParamRequest[] | SyntheticsParamRequest
       );
+
+      const conflictingKey = await findConflictingParamKey(savedObjectsClient, savedObjectsData);
+      if (conflictingKey) {
+        return response.conflict({
+          body: {
+            message: `A synthetics global parameter with the key "${conflictingKey}" already exists.`,
+          },
+        });
+      }
 
       const result = await savedObjectsClient.bulkCreate<Omit<SyntheticsParamSOAttributes, 'id'>>(
         savedObjectsData
@@ -103,6 +116,44 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     }
   },
 });
+
+// `synthetics-param` mappings are `dynamic: false`, so `key` cannot be queried
+// server-side; fetch the params visible in the target namespaces and compare in memory.
+const findConflictingParamKey = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsData: Array<SavedObjectsBulkCreateObject<Omit<SyntheticsParamSOAttributes, 'id'>>>
+): Promise<string | undefined> => {
+  const requestedKeys = savedObjectsData.map((obj) => obj.attributes.key);
+
+  const duplicateInRequest = requestedKeys.find(
+    (key, index) => requestedKeys.indexOf(key) !== index
+  );
+  if (duplicateInRequest) {
+    return duplicateInRequest;
+  }
+
+  const namespaces = Array.from(
+    new Set(savedObjectsData.flatMap((obj) => obj.initialNamespaces ?? []))
+  );
+
+  const finder = savedObjectsClient.createPointInTimeFinder<
+    Omit<SyntheticsParamSOAttributes, 'id'>
+  >({
+    type: syntheticsParamType,
+    perPage: 1000,
+    ...(namespaces.length ? { namespaces } : {}),
+  });
+
+  const existingKeys = new Set<string>();
+  for await (const { saved_objects: savedObjects } of finder.find()) {
+    for (const { attributes } of savedObjects) {
+      existingKeys.add(attributes.key);
+    }
+  }
+  await finder.close();
+
+  return requestedKeys.find((key) => existingKeys.has(key));
+};
 
 const toClientResponse = (savedObject: SavedObject<Omit<SyntheticsParamSOAttributes, 'id'>>) => {
   const { id, attributes: data, namespaces } = savedObject;
