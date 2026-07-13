@@ -10,6 +10,7 @@ import { omit } from 'lodash';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { ConfigKey } from '../../../../common/runtime_types';
+import { formatKibanaNamespace } from '../../../../common/formatters';
 import { apiTest, mergeSyntheticsApiHeaders, SYNTHETICS_MONITOR_SO_TYPES } from '../fixtures';
 import type { ScoutPrivateLocation } from '../services/synthetics_private_location_api_service';
 import {
@@ -315,5 +316,54 @@ apiTest.describe(
       });
       expect((updatedResponse2.body as { urls: string }).urls).toBe(toUpdate2.urls);
     });
+
+    apiTest(
+      'honors an explicitly provided namespace on edit and rejects invalid ones',
+      async ({ apiClient, apiServices, kbnClient }) => {
+        const SPACE_ID = `test-space-${uuidv4()}`;
+        const SPACE_NAME = `test-space-name ${uuidv4()}`;
+        await kbnClient.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+        spacesToCleanUp.push(SPACE_ID);
+
+        const spaceScopedPrivateLocation =
+          await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(SPACE_ID);
+
+        // Omit namespace so create falls back to the Kibana space namespace.
+        const { namespace: _omitNamespace, ...fixtureWithoutNamespace } = httpMonitorFixture;
+        const newMonitor = {
+          ...fixtureWithoutNamespace,
+          name: `namespace-edit ${uuidv4()}`,
+          locations: [spaceScopedPrivateLocation],
+          spaces: [],
+        };
+
+        const savedMonitor = await saveMonitor(apiClient, newMonitor, SPACE_ID);
+        const monitorId = savedMonitor[ConfigKey.CONFIG_ID] as string;
+        expect(savedMonitor[ConfigKey.NAMESPACE]).toBe(formatKibanaNamespace(SPACE_ID));
+
+        // An explicitly provided namespace (even "default") is honored on edit.
+        await editMonitorInternal(
+          apiClient,
+          editorHeaders,
+          monitorId,
+          { ...savedMonitor, [ConfigKey.NAMESPACE]: 'default' },
+          { spaceId: SPACE_ID }
+        );
+        const updated = await getMonitor(apiClient, editorHeaders, monitorId, {
+          space: SPACE_ID,
+          internal: true,
+        });
+        expect((updated.body as Record<string, unknown>)[ConfigKey.NAMESPACE]).toBe('default');
+
+        // An explicitly provided invalid namespace is rejected.
+        await editMonitorInternal(
+          apiClient,
+          editorHeaders,
+          monitorId,
+          { ...savedMonitor, [ConfigKey.NAMESPACE]: 'Invalid Namespace' },
+          { spaceId: SPACE_ID, statusCode: 400 }
+        );
+      }
+    );
   }
 );
