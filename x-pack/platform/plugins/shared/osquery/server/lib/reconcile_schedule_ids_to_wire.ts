@@ -179,7 +179,6 @@ export const reconcileScheduleIdsToWire = async ({
               const intendedPackBlock = {
                 ...(existingShard !== undefined ? { shard: existingShard } : {}),
                 pack_id: packSO.id,
-                // Human-readable name for scheduled result docs (see create route).
                 pack_name: packSO.attributes.name,
                 ...packDefaults,
                 queries: builtQueries,
