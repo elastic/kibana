@@ -13,6 +13,7 @@ import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { EisInferenceEndpoint, CspRegion } from '../../common/types';
 import { EisModelStatus } from '../../common/types';
+import type { PolicyMode } from '../types';
 import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
@@ -430,6 +431,8 @@ export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegio
 };
 
 export const regionKey = (region: CspRegion): string => `${region.csp}::${region.region}`;
+
+export const isPolicyMode = (id: string): id is PolicyMode => id === 'geo' || id === 'regions';
 
 /**
  * Returns all unique geo codes present in EIS endpoint metadata, ordered by `GEO_ORDER`

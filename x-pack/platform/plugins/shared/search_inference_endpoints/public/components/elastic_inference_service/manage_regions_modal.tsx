@@ -24,12 +24,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { regionKey } from '../../utils/eis_utils';
+import { regionKey, isPolicyMode } from '../../utils/eis_utils';
 import { useManageRegionsState } from './use_manage_regions_state';
 import { ConfirmRegionChangeModal } from './confirm_region_change_modal';
 import { GeoTabContent } from './geo_tab_content';
 import { RegionsTabContent } from './regions_tab_content';
-import type { PolicyMode } from '../../types';
 
 interface ManageRegionsModalProps {
   onClose: () => void;
@@ -106,7 +105,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
         ),
       },
       {
-        id: 'regions' as PolicyMode,
+        id: 'regions',
         name: i18n.translate('xpack.searchInferenceEndpoints.manageRegions.regionsTab', {
           defaultMessage: 'Regions',
         }),
@@ -232,7 +231,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           <EuiTabbedContent
             tabs={tabs}
             selectedTab={selectedTab}
-            onTabClick={(tab) => handleTabChange(tab.id as PolicyMode)}
+            onTabClick={(tab) => isPolicyMode(tab.id) && handleTabChange(tab.id)}
           />
         </EuiModalBody>
 

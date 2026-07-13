@@ -196,7 +196,7 @@ describe('ConfirmRegionChangeModal', () => {
         </Wrapper>
       );
 
-      expect(screen.getByText('Your pending allowed geo zones:')).toBeInTheDocument();
+      expect(screen.getByText('Your pending allowed geographies:')).toBeInTheDocument();
     });
 
     it('lists each selected geo display name in the modal body', () => {
