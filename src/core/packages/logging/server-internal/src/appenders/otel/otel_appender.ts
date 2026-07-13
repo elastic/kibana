@@ -230,14 +230,20 @@ export class OtelAppender implements DisposableAppender {
     fieldRenames: schema.maybe(
       schema.recordOf(
         schema.string(),
-        schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+        schema.oneOf([
+          schema.string(),
+          schema.arrayOf(schema.string(), { minSize: 1, maxSize: 20 }),
+        ])
       )
     ),
-    fieldDrops: schema.maybe(schema.arrayOf(schema.string())),
+    fieldDrops: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
     fieldDefaults: schema.maybe(
       schema.recordOf(
         schema.string(),
-        schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+        schema.oneOf([
+          schema.string(),
+          schema.arrayOf(schema.string(), { minSize: 1, maxSize: 20 }),
+        ])
       )
     ),
     ssl: schema.maybe(
