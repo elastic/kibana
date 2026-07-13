@@ -258,13 +258,17 @@ const createStrictTrajectoryEvaluator = ({
       };
     }
 
-    const score = expectedPath.length / actual.length;
+    // Natural routing always pays a load_skill call; exclude it from precision scoring.
+    const precisionDenominator = actual.filter((tool) => tool !== 'load_skill').length;
+    const score = expectedPath.length / Math.max(precisionDenominator, expectedPath.length);
     return {
       score,
-      explanation: `Expected path found in order. ${actual.length} total tool calls, ${
+      explanation: `Expected path found in order. ${
+        actual.length
+      } total tool calls (${precisionDenominator} excluding load_skill), ${
         expectedPath.length
       } expected. Precision: ${score.toFixed(3)}.`,
-      metadata: { actualPath: actual, expectedPath },
+      metadata: { actualPath: actual, expectedPath, precisionDenominator },
     };
   },
 });

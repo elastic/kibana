@@ -50,7 +50,7 @@ export class AttackDiscoveryAgentBuilderChatClient {
   async converse(
     question: string,
     attachments: Array<{ type: 'security.alerts'; data: { alertIds: string[] } }> = [],
-    expectedSkills?: string[]
+    _expectedSkills?: string[]
   ): Promise<AgentBuilderConverseResponse> {
     return pRetry(
       async () => {
@@ -61,19 +61,6 @@ export class AttackDiscoveryAgentBuilderChatClient {
           _execution_mode: 'local',
           attachments,
         };
-        // Harness-side routing aid: the default Agent Builder router is not yet deterministic
-        // enough to consistently pick the right skill for narrow eval scenarios (e.g. live
-        // retrieval of attack-discovery alerts). Passing explicit instructions via
-        // configuration_overrides keeps the golden path stable while the skill description and
-        // routing are tightened. This is a temporary harness aid, not a replacement for natural
-        // routing; see the eval suite README for the removal criteria.
-        if (expectedSkills && expectedSkills.length > 0) {
-          body.configuration_overrides = {
-            instructions: `Use the ${expectedSkills.join(
-              ', '
-            )} skill(s) to answer the request. Do not use other skills or tools unless the selected skill requires them.`,
-          };
-        }
 
         const response = (await this.fetch('/api/agent_builder/converse', {
           method: 'POST',

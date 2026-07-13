@@ -20,7 +20,9 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/core'
   - '@kbn/evals'
+  - '@kbn/evals-extensions'
   - '@kbn/scout'
+  - '@kbn/test'
   - '@kbn/tooling-log'
 tags:
   - functional-tests

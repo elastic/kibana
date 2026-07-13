@@ -37,7 +37,14 @@ export interface AttackDiscoveryAgentBuilderExpected extends Record<string, unkn
 
 export interface AttackDiscoveryAgentBuilderMetadata extends Record<string, unknown> {
   alertCount: number;
-  fixture: 'provided-alerts' | 'live-retrieval' | 'status-only' | 'multiple-alert-sets';
+  fixture:
+    | 'provided-alerts'
+    | 'live-retrieval'
+    | 'status-only'
+    | 'multiple-alert-sets'
+    | 'scenario-registry';
+  scenarioKey?: string;
+  seedProfile?: 'clean';
 }
 
 export type AttackDiscoveryAgentBuilderExample = Example<

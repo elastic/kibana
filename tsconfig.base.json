@@ -161,8 +161,6 @@
       "@kbn/apm-data-view/*": ["./src/platform/packages/shared/kbn-apm-data-view/*"],
       "@kbn/apm-embeddable-common": ["./x-pack/solutions/observability/packages/kbn-apm-embeddable-common"],
       "@kbn/apm-embeddable-common/*": ["./x-pack/solutions/observability/packages/kbn-apm-embeddable-common/*"],
-      "@kbn/apm-ftr-e2e": ["./x-pack/solutions/observability/plugins/apm/ftr_e2e"],
-      "@kbn/apm-ftr-e2e/*": ["./x-pack/solutions/observability/plugins/apm/ftr_e2e/*"],
       "@kbn/apm-plugin": ["./x-pack/solutions/observability/plugins/apm"],
       "@kbn/apm-plugin/*": ["./x-pack/solutions/observability/plugins/apm/*"],
       "@kbn/apm-sources-access-plugin": ["./x-pack/platform/plugins/shared/apm_sources_access"],
