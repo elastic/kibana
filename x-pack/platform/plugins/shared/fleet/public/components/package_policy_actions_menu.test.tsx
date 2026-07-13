@@ -7,12 +7,17 @@
 
 import React from 'react';
 
-import { waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
-import { useMultipleAgentPolicies, useLink, useGetOneAgentPolicy } from '../hooks';
+import {
+  useMultipleAgentPolicies,
+  useLink,
+  useGetOneAgentPolicy,
+  sendBulkUpgradeAgentlessPolicies,
+} from '../hooks';
 import { allowedExperimentalValues } from '../../common/experimental_features';
 import { ExperimentalFeaturesService } from '../services';
 
@@ -23,12 +28,13 @@ jest.mock('../hooks', () => {
     ...jest.requireActual('../hooks'),
     useMultipleAgentPolicies: jest.fn(),
     useGetOneAgentPolicy: jest.fn().mockReturnValue({ data: undefined, isLoading: false }),
+    sendBulkUpgradeAgentlessPolicies: jest.fn(),
     useStartServices: jest.fn().mockReturnValue({
       application: {
         navigateToApp: jest.fn(),
       },
       notifications: {
-        toasts: { addSuccess: jest.fn() },
+        toasts: { addSuccess: jest.fn(), addWarning: jest.fn(), addError: jest.fn() },
       },
       cloud: {
         isCloudEnabled: true,
@@ -88,11 +94,13 @@ function renderMenu({
   packagePolicy,
   showAddAgent = false,
   defaultIsOpen = true,
+  onUpgraded,
 }: {
   agentPolicies: AgentPolicy[];
   packagePolicy: InMemoryPackagePolicy;
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
+  onUpgraded?: () => void;
 }) {
   const renderer = createIntegrationsTestRendererMock();
 
@@ -103,6 +111,7 @@ function renderMenu({
       showAddAgent={showAddAgent}
       upgradePackagePolicyHref="/test/upgrade-link"
       defaultIsOpen={defaultIsOpen}
+      onUpgraded={onUpgraded}
       key="test1"
     />
   );
@@ -178,6 +187,70 @@ describe('PackagePolicyActionsMenu', () => {
       const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
       expect(upgradeButton).not.toBeDisabled();
     });
+  });
+
+  describe('agentless upgrade (disableAgentlessLegacyAPI enabled)', () => {
+    beforeEach(() => {
+      jest.mocked(sendBulkUpgradeAgentlessPolicies).mockReset();
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        ...allowedExperimentalValues,
+        disableAgentlessLegacyAPI: true,
+      });
+    });
+
+    afterEach(() => {
+      jest.mocked(ExperimentalFeaturesService.get).mockRestore();
+    });
+
+    it('upgrades an agentless policy through the agentless API and refreshes on confirm', async () => {
+      jest
+        .mocked(sendBulkUpgradeAgentlessPolicies)
+        .mockResolvedValue([
+          { id: 'some-uuid2', name: 'mock-package-policy', success: true },
+        ] as any);
+      const onUpgraded = jest.fn();
+      const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+      const packagePolicy = createMockPackagePolicy({ hasUpgrade: true, supports_agentless: true });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy, onUpgraded });
+
+      const upgradeButton = await utils.findByTestId('PackagePolicyActionsUpgradeItem');
+      // With the legacy API disabled, the agentless upgrade opens a confirm modal instead of
+      // linking to the (now-blocked) legacy edit route.
+      expect(upgradeButton).not.toHaveAttribute('href');
+
+      await act(async () => {
+        fireEvent.click(upgradeButton);
+      });
+
+      const confirmButton = await utils.findByTestId('confirmModalConfirmButton');
+      await act(async () => {
+        fireEvent.click(confirmButton);
+      });
+
+      await waitFor(() => {
+        expect(sendBulkUpgradeAgentlessPolicies).toHaveBeenCalledWith(['some-uuid2']);
+      });
+      expect(onUpgraded).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the legacy upgrade link for a non-agentless policy', async () => {
+      const agentPolicies = createMockAgentPolicies();
+      const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+
+      const upgradeButton = await utils.findByTestId('PackagePolicyActionsUpgradeItem');
+      expect(upgradeButton).toHaveAttribute('href', '/test/upgrade-link');
+    });
+  });
+
+  it('keeps the legacy upgrade link for an agentless policy while disableAgentlessLegacyAPI is off', async () => {
+    const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true, supports_agentless: true });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+
+    const upgradeButton = await utils.findByTestId('PackagePolicyActionsUpgradeItem');
+    // Flag off (default): the legacy edit-page upgrade still works, so the link is untouched.
+    expect(upgradeButton).toHaveAttribute('href', '/test/upgrade-link');
   });
 
   it('Should not be able to delete integration from a managed policy', async () => {

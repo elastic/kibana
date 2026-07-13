@@ -195,6 +195,16 @@ describe('scheduled Significant Events managed workflows', () => {
       });
     }
   );
+
+  it('uses per-rule schedule metadata for detection and recovery gates', () => {
+    const parsed = getParsedStaticWorkflowYaml(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID);
+    const yaml = JSON.stringify(parsed);
+
+    expect(yaml).toContain('foreach.item.rule_schedule.recent_activity_minutes');
+    expect(yaml).toContain('foreach.item.rule_schedule.quick_recovery_lookback');
+    expect(yaml).toContain('foreach.item.rule_schedule.quick_recovery_lookback_minutes');
+    expect(yaml).toContain('foreach.item.rule_schedule.quiet_stationary_peak_min_alert_count');
+  });
 });
 
 describe('SignificantEventsScheduledWorkflowsService', () => {
@@ -221,14 +231,17 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       },
     });
 
+    // Installs must disambiguate the shared managed workflow id per space via
+    // workflowIdSuffix; without it a second space collides on one document.
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
       SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-      { spaceId: 'space-a', values: { detectionIntervalMinutes: 30 } }
+      { spaceId: 'space-a', workflowIdSuffix: 'space-a', values: { detectionIntervalMinutes: 30 } }
     );
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
       SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
       {
         spaceId: 'space-a',
+        workflowIdSuffix: 'space-a',
         values: {
           reviewIntervalMinutes: 10,
           discoveryBatchSize: 3,
@@ -237,14 +250,15 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
         },
       }
     );
+    // Enable must target the same per-space document id, not the bare managed id.
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+      `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
       { enabled: true },
       'space-a',
       request
     );
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+      `${SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID}-space-a`,
       { enabled: true },
       'space-a',
       request
@@ -310,7 +324,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     });
 
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+      `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
       { enabled: false },
       'space-a',
       request
@@ -322,11 +336,11 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     );
     expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
       SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-      { spaceId: 'space-a' }
+      { spaceId: 'space-a', workflowIdSuffix: 'space-a' }
     );
     expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
       SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-      { spaceId: 'space-a' }
+      { spaceId: 'space-a', workflowIdSuffix: 'space-a' }
     );
   });
 });
