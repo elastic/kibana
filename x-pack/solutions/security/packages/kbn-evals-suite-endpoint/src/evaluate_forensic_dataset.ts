@@ -102,6 +102,27 @@ const wrapSkillInvocationFallback = (
   },
 });
 
+/** Distractor rows should pass when the skill is NOT invoked (invert 0/1 scores). */
+export const wrapSkillInvocationForDistractors = (
+  evaluator: Evaluator<ForensicDatasetExample, TaskOutput>
+): Evaluator<ForensicDatasetExample, TaskOutput> => ({
+  ...evaluator,
+  evaluate: async (args) => {
+    const result = await evaluator.evaluate(args);
+    if (args.metadata?.row_type !== 'distractor' || result.score === null) {
+      return result;
+    }
+
+    return {
+      ...result,
+      score: result.score === 1 ? 0 : 1,
+      explanation: `${
+        result.explanation ?? ''
+      } Distractor example — inverted so skill-not-invoked scores 1.`.trim(),
+    };
+  },
+});
+
 /**
  * Matrix L1–L5 baseline for endpoint-forensic-analysis (C3 Investigation).
  * Mirrors @kbn/evals-suite-alerts-rag evaluator stack: criteria + skill
@@ -129,12 +150,14 @@ export const buildForensicEvaluators = ({
     inputTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
     outputTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
     cachedTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
-    wrapSkillInvocationFallback(
-      createSkillInvocationEvaluator({
-        traceEsClient,
-        log,
-        skillName: ENDPOINT_FORENSIC_ANALYSIS_SKILL_NAME,
-      }) as Evaluator<ForensicDatasetExample, TaskOutput>
+    wrapSkillInvocationForDistractors(
+      wrapSkillInvocationFallback(
+        createSkillInvocationEvaluator({
+          traceEsClient,
+          log,
+          skillName: ENDPOINT_FORENSIC_ANALYSIS_SKILL_NAME,
+        }) as Evaluator<ForensicDatasetExample, TaskOutput>
+      )
     ),
     createForensicTrajectoryEvaluator(),
   ];

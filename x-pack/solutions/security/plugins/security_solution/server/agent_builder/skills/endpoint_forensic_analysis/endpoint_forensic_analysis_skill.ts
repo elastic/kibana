@@ -68,8 +68,8 @@ This skill MUST NOT invoke response actions. On response-action requests, hand o
 
 ## Process
 
-### 1. Discover telemetry scope
-Call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` first with host names and time window from the question.
+### 1. Discover telemetry scope (when hosts or time window need scoping)
+When the question names specific hosts or implies a lookback window, call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` to resolve Defend index patterns and scoped hosts before ES|QL. Skip when the question is already narrowly scoped and you can proceed directly to ES|QL on known \`logs-endpoint.events.*\` indices.
 
 ### 2. Query with ES|QL
 Use \`platform.core.generate_esql\` then \`platform.core.execute_esql\` against the recommended Defend indices.
@@ -91,7 +91,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
 
 ## Tool Selection Guardrails
 
-- **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL.
+- Call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` when host scope or time window is ambiguous — not required on every turn if ES|QL targets are already clear.
 - **Always** use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for forensic answers.
 - Do **not** use \`platform.core.search\`, \`relevance_search\`, or repeated \`platform.core.list_indices\` for reconstruction — they cannot replace scoped ES|QL on Defend telemetry.
 - Use \`platform.core.get_index_mapping\` only when field names are uncertain before generating ES|QL.

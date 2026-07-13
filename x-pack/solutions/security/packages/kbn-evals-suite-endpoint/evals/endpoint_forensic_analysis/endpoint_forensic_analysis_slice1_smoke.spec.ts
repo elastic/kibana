@@ -129,6 +129,33 @@ evaluate.describe(
       });
     });
 
+    evaluate('persistence happy path', async ({ evaluateForensicDataset }) => {
+      await evaluateForensicDataset({
+        dataset: {
+          name: 'security: endpoint-forensic-analysis-smoke-persistence',
+          description: 'Smoke: registry/run-key persistence enumeration on a named host.',
+          examples: [
+            {
+              input: {
+                question:
+                  'Enumerate persistence mechanisms on SRV-DC01 — run keys, scheduled tasks, and startup items from endpoint telemetry.',
+              },
+              output: {
+                criteria: [
+                  'Addresses persistence on SRV-DC01 (not a fleet-wide hunt)',
+                  'References registry run keys, scheduled tasks, services, or startup items',
+                  'Uses or references ES|QL or logs-endpoint.events.* telemetry',
+                  'Surfaces at least one concrete persistence indicator present in telemetry (e.g. Run\\Updater key, svc.exe path, or shadow-copy deletion context)',
+                ],
+                tool_sequence: [...SLICE1_FORENSIC_TOOL_SEQUENCE],
+              },
+              metadata: { golden_id: 'ef-009-persistence-enumeration', row_type: 'happy' },
+            },
+          ],
+        },
+      });
+    });
+
     evaluate('distractor weather', async ({ evaluateForensicDataset }) => {
       await evaluateForensicDataset({
         dataset: {
