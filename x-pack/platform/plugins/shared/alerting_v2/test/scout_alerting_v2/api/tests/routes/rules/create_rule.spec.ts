@@ -109,7 +109,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       const body = buildCreateRuleData();
       const invalidBody = {
         ...body,
-        metadta: { name: 'typo field' },
+        unknown_field: { name: 'typo field' },
       };
       const response = await apiClient.post(testData.RULE_API_PATH, {
         headers: writerHeaders,
