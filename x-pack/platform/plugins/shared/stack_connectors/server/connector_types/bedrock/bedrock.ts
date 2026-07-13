@@ -540,6 +540,14 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const currentModel = encodeURIComponent(decodeURIComponent(modelId));
     const path = `/model/${currentModel}/converse`;
 
+    const toolConfig =
+      tools !== undefined || toolChoice !== undefined
+        ? {
+            tools,
+            toolChoice: { auto: toolChoice },
+          }
+        : undefined;
+
     const request: ConverseRequest = {
       messages,
       inferenceConfig: {
@@ -547,10 +555,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
         stopSequences,
         maxTokens,
       },
-      toolConfig: {
-        tools,
-        toolChoice: { auto: toolChoice },
-      },
+      ...(toolConfig ? { toolConfig } : {}),
       system,
       modelId,
     };
@@ -590,6 +595,14 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const currentModel = encodeURIComponent(decodeURIComponent(modelId));
     const path = `/model/${currentModel}/converse-stream`;
 
+    const toolConfig =
+      tools !== undefined || toolChoice !== undefined
+        ? {
+            tools,
+            toolChoice,
+          }
+        : undefined;
+
     const request: ConverseStreamRequest = {
       messages,
       inferenceConfig: {
@@ -597,10 +610,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
         stopSequences,
         maxTokens,
       },
-      toolConfig: {
-        tools,
-        toolChoice,
-      },
+      ...(toolConfig ? { toolConfig } : {}),
       system,
       modelId,
     };
