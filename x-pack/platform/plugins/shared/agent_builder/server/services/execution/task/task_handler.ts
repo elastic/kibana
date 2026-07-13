@@ -106,7 +106,7 @@ class TaskHandlerImpl implements TaskHandler {
       // 7. Mark as completed
       await executionClient.updateStatus(executionId, ExecutionStatus.completed);
     } catch (error) {
-      await this.handleExecutionFailure({ executionId, execution, executionClient, error });
+      await this.handleExecutionFailure({ execution, executionClient, error });
     } finally {
       abortMonitor.stop();
     }
@@ -116,16 +116,15 @@ class TaskHandlerImpl implements TaskHandler {
    * Finalizes an execution after the runner throws, including callback delivery and status persistence.
    */
   private async handleExecutionFailure({
-    executionId,
     execution,
     executionClient,
     error,
   }: {
-    executionId: string;
     execution: AgentExecution;
     executionClient: AgentExecutionClient;
     error?: unknown;
   }): Promise<void> {
+    const { executionId } = execution;
     const message = error instanceof Error ? error.message : String(error);
     this.logger.error(`Execution ${executionId} failed: ${message}`);
 
@@ -142,7 +141,6 @@ class TaskHandlerImpl implements TaskHandler {
       };
 
       const finalFailureOutcome = await this.deliverFailureCallbackRequest({
-        executionId,
         execution,
         initialFailureOutcome,
       });
@@ -163,11 +161,9 @@ class TaskHandlerImpl implements TaskHandler {
    * Sends the failure callback request, and treats callback delivery failures as execution failures.
    */
   private async deliverFailureCallbackRequest({
-    executionId,
     execution,
     initialFailureOutcome,
   }: {
-    executionId: string;
     execution: AgentExecution;
     initialFailureOutcome: FailureOutcome;
   }): Promise<FailureOutcome> {
@@ -175,7 +171,7 @@ class TaskHandlerImpl implements TaskHandler {
       await this.deps.callbackDeliveryService.makeFailureCallbackRequestIfConfigured({
         execution,
         payload: {
-          execution_id: executionId,
+          execution_id: execution.executionId,
           ...initialFailureOutcome,
         },
       });

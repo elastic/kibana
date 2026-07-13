@@ -16,6 +16,7 @@ import {
   createBadRequestError,
   isRoundCompleteEvent,
   type ChatEvent,
+  type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -131,7 +132,7 @@ describe('handleAgentExecution', () => {
       user: sourceUser,
     };
 
-    const setup = ({ roundCompleteEvent }: { roundCompleteEvent: ChatEvent }) => {
+    const setup = ({ roundCompleteEvent }: { roundCompleteEvent: RoundCompleteEvent }) => {
       const conversation = createEmptyConversation({
         id: 'conversation-from-source',
         agent_id: 'test-agent',
