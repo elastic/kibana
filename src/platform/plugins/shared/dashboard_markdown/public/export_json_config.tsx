@@ -16,7 +16,7 @@ import type { ExportShareParameters } from '@kbn/share-plugin/public';
 import React from 'react';
 import { coreServices, shareServices } from './services/kibana_services';
 
-export const ExportJsonConfig: ExportShareParameters = {
+export const exportJsonConfig: ExportShareParameters = {
   label: ({ openFlyout }) => (
     <EuiButtonEmpty
       size="s"

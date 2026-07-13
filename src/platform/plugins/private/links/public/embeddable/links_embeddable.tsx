@@ -50,7 +50,6 @@ export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: EmbeddablePublicDefinition<LinksEmbeddableState, LinksApi> = {
     type: LINKS_EMBEDDABLE_TYPE,
     getPlacementHints,
-    apiPath: '/api/links',
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const refId = (initialState as LinksByReferenceState).ref_id;
       const intialLinksState = refId
