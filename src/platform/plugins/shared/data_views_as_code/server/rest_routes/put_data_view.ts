@@ -71,6 +71,9 @@ export const registerPutDataViewAsCodeRoute = (
             403: {
               description: 'forbidden',
             },
+            404: {
+              description: 'not found',
+            },
             409: {
               description: 'conflict',
             },
