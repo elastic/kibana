@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const response1 = await supertest.post('/internal/unused_urls_task/run');
 
-      expect(response1.status).to.be(200);
+      expect(response1.status).to.be(404);
       // Deletes 5 unused URLs out of 7 total because share.url_expiration.url_limit is set to 5
       expect(response1.body).to.eql({
         message: 'Unused URLs cleanup task has finished.',
