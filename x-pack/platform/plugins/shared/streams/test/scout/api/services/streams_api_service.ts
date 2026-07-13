@@ -15,6 +15,8 @@ import {
 } from '@kbn/management-settings-ids';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../../../../common/feature_flags';
+import { COMMON_API_HEADERS } from '../fixtures/constants';
 
 export interface StreamsTestApiService {
   enable: () => Promise<void>;
@@ -50,7 +52,8 @@ export interface StreamsTestApiService {
   getLifecycleStats: (streamName: string) => Promise<{ phases: unknown }>;
   enableQueryStreams: () => Promise<void>;
   disableQueryStreams: () => Promise<void>;
-
+  enableSignificantEventsAvailability: () => Promise<void>;
+  disableSignificantEventsAvailability: () => Promise<void>;
   enableWiredStreamViews: () => Promise<void>;
   disableWiredStreamViews: () => Promise<void>;
   enableDraftStreams: () => Promise<void>;
@@ -288,6 +291,44 @@ export function getStreamsTestApiService({
           'observability:streamsEnableQueryStreams': false,
         });
       });
+    },
+
+    async enableSignificantEventsAvailability() {
+      await measurePerformanceAsync(
+        log,
+        'streamsTestApi.enableSignificantEventsAvailability',
+        async () => {
+          await kbnClient.request({
+            path: '/internal/core/_settings',
+            method: 'PUT',
+            headers: COMMON_API_HEADERS,
+            body: {
+              'feature_flags.overrides': {
+                [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+              },
+            },
+          });
+        }
+      );
+    },
+
+    async disableSignificantEventsAvailability() {
+      await measurePerformanceAsync(
+        log,
+        'streamsTestApi.disableSignificantEventsAvailability',
+        async () => {
+          await kbnClient.request({
+            path: '/internal/core/_settings',
+            method: 'PUT',
+            headers: COMMON_API_HEADERS,
+            body: {
+              'feature_flags.overrides': {
+                [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: false,
+              },
+            },
+          });
+        }
+      );
     },
 
     async enableWiredStreamViews() {
