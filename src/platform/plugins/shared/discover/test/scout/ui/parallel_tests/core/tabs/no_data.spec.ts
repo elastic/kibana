@@ -29,24 +29,31 @@ const createDataViewFromPrompt = async (page: ScoutPage, name: string) => {
 
 const prepareDiscoverWithoutCustomDataViews = async ({
   browserAuth,
-  page,
   pageObjects,
   scoutSpace,
-  solutionView,
 }: {
   browserAuth: DiscoverTestFixtures['browserAuth'];
-  page: ScoutPage;
   pageObjects: DiscoverTestFixtures['pageObjects'];
   scoutSpace: DiscoverWorkerFixtures['scoutSpace'];
-  solutionView: SpaceSolutionView;
 }) => {
   await scoutSpace.savedObjects.cleanStandardList();
   await scoutSpace.uiSettings.unset('defaultIndex');
   await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
-  await scoutSpace.setSolutionView(solutionView);
 
   await browserAuth.loginAsPrivilegedUser();
   await pageObjects.discover.setQueryMode('classic');
+};
+
+const openDiscoverWithoutCustomDataViews = async ({
+  page,
+  scoutSpace,
+  solutionView,
+}: {
+  page: ScoutPage;
+  scoutSpace: DiscoverWorkerFixtures['scoutSpace'];
+  solutionView: SpaceSolutionView;
+}) => {
+  await scoutSpace.setSolutionView(solutionView);
   await page.gotoApp('discover');
 };
 
@@ -54,6 +61,14 @@ spaceTest.describe(
   'Discover tabs - no custom data view',
   { tag: '@local-stateful-classic' },
   () => {
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
+      await prepareDiscoverWithoutCustomDataViews({
+        browserAuth,
+        pageObjects,
+        scoutSpace,
+      });
+    });
+
     spaceTest.afterEach(async ({ scoutSpace }) => {
       await scoutSpace.setSolutionView('classic');
       await scoutSpace.savedObjects.cleanStandardList();
@@ -62,16 +77,10 @@ spaceTest.describe(
 
     spaceTest(
       'shows tabs bar by default in classic solution type',
-      async ({ browserAuth, page, pageObjects, scoutSpace }) => {
+      async ({ page, pageObjects, scoutSpace }) => {
         const { discover, unifiedTabs } = pageObjects;
 
-        await prepareDiscoverWithoutCustomDataViews({
-          browserAuth,
-          page,
-          pageObjects,
-          scoutSpace,
-          solutionView: 'classic',
-        });
+        await openDiscoverWithoutCustomDataViews({ page, scoutSpace, solutionView: 'classic' });
 
         await page.testSubj.locator('noDataViewsPrompt').waitFor({ state: 'hidden' });
         expect(await discover.getSelectedDataViewName()).toBe('All logs');
@@ -81,16 +90,10 @@ spaceTest.describe(
 
     spaceTest(
       'can create a new data view in non-classic solution type',
-      async ({ browserAuth, page, pageObjects, scoutSpace }) => {
+      async ({ page, pageObjects, scoutSpace }) => {
         const { dataGrid, discover, unifiedTabs } = pageObjects;
 
-        await prepareDiscoverWithoutCustomDataViews({
-          browserAuth,
-          page,
-          pageObjects,
-          scoutSpace,
-          solutionView: 'es',
-        });
+        await openDiscoverWithoutCustomDataViews({ page, scoutSpace, solutionView: 'es' });
 
         await page.testSubj.locator('noDataViewsPrompt').waitFor({ state: 'visible' });
         expect(await unifiedTabs.isTabsBarVisible()).toBe(false);
@@ -106,16 +109,10 @@ spaceTest.describe(
 
     spaceTest(
       'can enter ES query mode in non-classic solution type',
-      async ({ browserAuth, page, pageObjects, scoutSpace }) => {
+      async ({ page, pageObjects, scoutSpace }) => {
         const { dataGrid, discover, unifiedTabs } = pageObjects;
 
-        await prepareDiscoverWithoutCustomDataViews({
-          browserAuth,
-          page,
-          pageObjects,
-          scoutSpace,
-          solutionView: 'es',
-        });
+        await openDiscoverWithoutCustomDataViews({ page, scoutSpace, solutionView: 'es' });
 
         await page.testSubj.locator('noDataViewsPrompt').waitFor({ state: 'visible' });
         expect(await unifiedTabs.isTabsBarVisible()).toBe(false);
