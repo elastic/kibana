@@ -113,6 +113,26 @@ FROM .cases
 
 \`FIELD_EXTRACT\` is a **Technical Preview** function. It reads numeric and keyword sub-keys from the flattened \`case.extended_fields\`, but blank/unset custom fields are common, so **always report how many docs had the field populated** (\`COUNT(<extracted>)\`) alongside the metric. When precision matters or FIELD_EXTRACT returns nothing, fall back to the \`Case Analytics\` data view (see "KQL / the Case Analytics data view"), whose typed runtime field \`case.<name>_as_<type>\` reads the same values.
 
+## Resolving user UIDs to names
+
+Assignees are stored as **profile UIDs only** — \`case.assignees.uid\` (and \`action.assignees_changed\` on the activity stream). No tool resolves them and there is no user directory index to join. But every \`.cases-activity\` row carries the **acting** user's identity (\`actor.profile_uid\` + \`actor.full_name\` + \`actor.username\`), so you can build a best-effort UID→name directory from the activity stream and use it to label UIDs:
+
+\`\`\`esql
+FROM .cases-activity
+| WHERE actor.profile_uid IS NOT NULL
+| STATS BY actor.profile_uid, actor.full_name, actor.username
+| RENAME actor.profile_uid AS uid
+| KEEP uid, actor.full_name, actor.username
+\`\`\`
+
+Run this as a helper query, then map the UIDs in your result (e.g. \`case.assignees.uid\`) to names. Key points:
+- **Best-effort coverage** — the directory only knows users who have *performed* a case action. A user who was assigned but never acted won't appear; show their UID and say the display name isn't available rather than guessing.
+- **DLS-scoped** — you only see actors in the owners/spaces you can read, so the directory is naturally limited to authorized names.
+- **Not a \`LOOKUP JOIN\`** — \`.cases-activity\` is a fact index (not lookup-mode), so it can't be a join target. Build the directory table first, then annotate in a second step.
+- **Reporters need no resolution** — \`case.created_by\` / \`case.updated_by\` / \`case.closed_by\` already carry \`username\` / \`full_name\` / \`email\`.
+
+For a dashboard (where the two-step annotate isn't available), surface the same directory query as its own table/Lens panel so it acts as a UID→name key alongside the UID-keyed charts.
+
 ## Building visualizations
 
 Use \`${platformCoreTools.createVisualization}\`. Ground first (confirm the index and that referenced fields exist — use \`${platformCoreTools.getIndexMapping}\` if unsure), then pass an explicit \`index\` (\`.cases\`, \`.cases-activity\`, or \`.cases-attachments\`) so it doesn't have to auto-discover. Prefer letting it generate the ES|QL from a specific natural-language \`query\`; for complex aggregations/joins, pre-build with \`${platformCoreTools.generateEsql}\`, optionally validate with \`${platformCoreTools.executeEsql}\`, and pass it via \`esql\`. Render the returned attachment with \`<render_attachment id="..." version="..." />\`.
@@ -178,7 +198,17 @@ FROM .cases
 | STATS open_cases = COUNT(*) BY case.assignees.uid
 | SORT open_cases DESC
 \`\`\`
-Note: \`case.assignees.uid\` is a profile UID, and **no tool resolves it to a display name today** — the cases tools return assignees as UIDs. Present the UID and say the name isn't available rather than guessing. (The \`case.created_by\` / \`case.updated_by\` / \`case.closed_by\` fields, by contrast, do carry \`username\` / \`full_name\` / \`email\`.)`,
+Note: \`case.assignees.uid\` is a profile UID. Label it with the activity-derived UID→name directory (helper below) — best-effort, covering users who've performed an action; otherwise show the UID. Reporters (\`case.created_by\` / \`case.updated_by\` / \`case.closed_by\`) already carry \`username\` / \`full_name\` / \`email\`.
+
+## User UID → name directory (helper for labeling assignee UIDs)
+\`\`\`esql
+FROM .cases-activity
+| WHERE actor.profile_uid IS NOT NULL
+| STATS BY actor.profile_uid, actor.full_name, actor.username
+| RENAME actor.profile_uid AS uid
+| KEEP uid, actor.full_name, actor.username
+\`\`\`
+Best-effort: only users who have performed an action appear. Use it to label \`case.assignees.uid\` / \`action.assignees_changed\`; fall back to the UID when absent. \`.cases-activity\` is a fact index, so this is a build-then-annotate step, not a \`LOOKUP JOIN\`.`,
     },
     {
       relativePath: './analytics',
