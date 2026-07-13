@@ -73928,6 +73928,9 @@ components:
         is_system_action_type:
           description: Indicates whether the action is a system action.
           type: boolean
+        is_testable:
+          description: Indicates whether the connector type supports testing.
+          type: boolean
         minimum_license_required:
           description: The minimum license required to enable the connector.
           enum:
@@ -73969,6 +73972,7 @@ components:
         - is_system_action_type
         - is_deprecated
         - source
+        - is_testable
       title: connector_type_response
       type: object
     Kibana_HTTP_APIs_ContentPackIncludedObjects:
