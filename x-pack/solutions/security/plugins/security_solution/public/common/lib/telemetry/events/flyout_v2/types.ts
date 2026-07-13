@@ -19,7 +19,9 @@ export type FlyoutType =
   | 'host'
   | 'user'
   | 'service'
-  | 'generic';
+  | 'generic'
+  | 'misconfiguration'
+  | 'vulnerability';
 
 /**
  * Which "tool" (child) flyout was opened or closed.

@@ -9,7 +9,7 @@ import type { FlyoutV2TelemetryEvent } from './types';
 import { FlyoutV2EventTypes } from './types';
 
 const FLYOUT_TYPE_DESCRIPTION =
-  'Which v2 flyout this is (document|attack|ioc|network|rule|host|user|service|generic)';
+  'Which v2 flyout this is (document|attack|ioc|network|rule|host|user|service|generic|misconfiguration|vulnerability)';
 
 const SESSION_DESCRIPTION =
   'Whether the flyout started a new session or was nested inside the currently open one (start|inherit)';

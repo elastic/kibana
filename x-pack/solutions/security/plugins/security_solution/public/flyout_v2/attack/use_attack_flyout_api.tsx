@@ -10,6 +10,8 @@ import { noop } from 'lodash/fp';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
+import { cellActionRenderer } from '../shared/components/cell_actions';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
@@ -37,6 +39,8 @@ export interface OpenAttackFlyoutParams {
   indexName: string;
   /** Invoked after the attack is mutated inside the flyout, to let the caller refresh. Defaults to a no-op. */
   onAttackUpdated?: () => void;
+  /** Renderer for cell actions in nested alert flyouts. Defaults to the standard `cellActionRenderer`. */
+  renderCellActions?: CellActionRenderer;
   /** Which UI trigger opened this flyout, when known. */
   origin?: FlyoutOrigin;
 }
@@ -97,12 +101,19 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   const open = useOpenFlyout();
 
   const openAttackFlyout = useCallback(
-    ({ attackId, indexName, onAttackUpdated = noop, origin }: OpenAttackFlyoutParams) => {
+    ({
+      attackId,
+      indexName,
+      onAttackUpdated = noop,
+      renderCellActions = cellActionRenderer,
+      origin,
+    }: OpenAttackFlyoutParams) => {
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
           indexName={indexName}
           onAttackUpdated={onAttackUpdated}
+          renderCellActions={renderCellActions}
         />,
         { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' },
         { surface: 'flyout', flyoutType: 'attack', session: 'start', origin }
@@ -112,12 +123,19 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   );
 
   const openAttackFlyoutAsChild = useCallback(
-    ({ attackId, indexName, onAttackUpdated = noop, origin }: OpenAttackFlyoutParams) => {
+    ({
+      attackId,
+      indexName,
+      onAttackUpdated = noop,
+      renderCellActions = cellActionRenderer,
+      origin,
+    }: OpenAttackFlyoutParams) => {
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
           indexName={indexName}
           onAttackUpdated={onAttackUpdated}
+          renderCellActions={renderCellActions}
         />,
         { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' },
         { surface: 'flyout', flyoutType: 'attack', session: 'inherit', origin }

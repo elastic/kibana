@@ -11,7 +11,6 @@ import { noop } from 'lodash/fp';
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer, EuiFlyoutFooter } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -24,32 +23,14 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildUserNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import type { FlyoutOrigin, FlyoutTool } from '../../../../common/lib/telemetry';
+import type { FlyoutOrigin } from '../../../../common/lib/telemetry';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../../../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
-import { RiskInputs } from '../../shared/tools/risk_inputs';
-import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
-import { AlertsInsights } from '../../shared/tools/alerts_insights';
-import { AnomalyInsights } from '../../shared/tools/anomaly_insights';
-import { OktaInsights } from '../tools/okta_insights';
-import { EntraInsights } from '../tools/entra_insights';
-import { GraphView } from '../../shared/tools/graph_view';
-import { Resolution } from '../../shared/tools/resolution';
-import {
-  entityEngineTypeToFlyoutType,
-  renderEntityDetails,
-} from '../../shared/render_entity_details';
+import { useFlyoutApi } from '../../../use_flyout_api';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -113,7 +94,7 @@ const FIRST_RECORD_PAGINATION = {
 /**
  * Runs the same data hooks as the v1 `UserPanel`, but without the expandable-flyout
  * navigation or preview-mode handling. Detail panels (risk inputs, Okta, Entra, etc.)
- * open as separate system flyouts via `overlays.openSystemFlyout`.
+ * open as separate system flyouts via `useFlyoutApi`.
  */
 export const User: FC<UserProps> = memo(function User({
   userName,
@@ -122,9 +103,21 @@ export const User: FC<UserProps> = memo(function User({
   scopeId = '',
   contextID,
 }) {
-  const { uiSettings } = useKibana().services;
-  const open = useOpenFlyout();
+  const { services } = useKibana();
+  const { uiSettings } = services;
   const euidApi = useEntityStoreEuidApi();
+  const {
+    openUserFlyoutAsChild,
+    openEntityDetailsAsChild,
+    openEntityRiskInputs,
+    openEntityAnomalyInsights,
+    openEntityAlertsInsights,
+    openEntityMisconfigurationInsights,
+    openEntityGraphView,
+    openEntityResolution,
+    openEntityOktaInsights,
+    openEntityEntraInsights,
+  } = useFlyoutApi();
 
   const entityId = useMemo(
     () => (hit ? euidApi?.euid?.getEuidFromObject('user', hit.flattened) : entityIdProp),
@@ -132,9 +125,6 @@ export const User: FC<UserProps> = memo(function User({
   );
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
   const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
@@ -276,12 +266,14 @@ export const User: FC<UserProps> = memo(function User({
   ) : undefined;
 
   const onOpenUser = useCallback(() => {
-    open(
-      <User userName={userName} entityId={entityId} scopeId={scopeId} />,
-      { ...defaultDocumentFlyoutProperties, title: userName, historyKey, session: 'inherit' },
-      { surface: 'flyout', flyoutType: 'user', session: 'inherit', origin: 'tool_header_title' }
-    );
-  }, [open, historyKey, userName, entityId, scopeId, defaultDocumentFlyoutProperties]);
+    openUserFlyoutAsChild({
+      userName,
+      entityId,
+      scopeId,
+      title: userName,
+      origin: 'tool_header_title',
+    });
+  }, [openUserFlyoutAsChild, userName, entityId, scopeId]);
 
   const onShowRelatedEntity = useCallback(
     (
@@ -292,171 +284,135 @@ export const User: FC<UserProps> = memo(function User({
       },
       origin: FlyoutOrigin
     ) =>
-      open(
-        renderEntityDetails({ ...params, scopeId }),
-        {
-          ...defaultDocumentFlyoutProperties,
-          title: params.entityName ?? params.entityId,
-          historyKey,
-          session: 'inherit',
-        },
-        {
-          surface: 'flyout',
-          flyoutType: entityEngineTypeToFlyoutType(params.engineType),
-          session: 'inherit',
-          origin,
-        }
-      ),
-    [open, scopeId, historyKey, defaultDocumentFlyoutProperties]
-  );
-
-  const onShowRelatedEntityFromResolution = useCallback(
-    (params: {
-      engineType: string | undefined;
-      entityId: string;
-      entityName: string | undefined;
-    }) => onShowRelatedEntity(params, 'resolution_entity_link'),
-    [onShowRelatedEntity]
+      openEntityDetailsAsChild({
+        engineType: params.engineType,
+        entityId: params.entityId,
+        entityName: params.entityName,
+        scopeId,
+        title: params.entityName ?? params.entityId,
+        origin,
+      }),
+    [openEntityDetailsAsChild, scopeId]
   );
 
   const onShowRelatedEntityFromGraph = useCallback(
-    (params: {
-      engineType: string | undefined;
-      entityId: string;
-      entityName: string | undefined;
-    }) => onShowRelatedEntity(params, 'graph_node'),
+    (params: { engineType: string | undefined; entityId: string; entityName: string | undefined }) =>
+      onShowRelatedEntity(params, 'graph_node'),
+    [onShowRelatedEntity]
+  );
+
+  const onShowRelatedEntityFromResolution = useCallback(
+    (params: { engineType: string | undefined; entityId: string; entityName: string | undefined }) =>
+      onShowRelatedEntity(params, 'resolution_entity_link'),
     [onShowRelatedEntity]
   );
 
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
-      const common = {
-        ...defaultToolsFlyoutProperties,
-        title: userName,
-        historyKey,
-        session: 'start' as const,
-      };
-      const wrap = (children: React.ReactNode, tool: FlyoutTool, origin?: FlyoutOrigin) =>
-        open(children, common, {
-          surface: 'tool',
-          tool,
-          flyoutType: 'user',
-          session: 'start',
-          origin,
-        });
-
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
-          return wrap(
-            <RiskInputs
-              entityType={EntityType.user}
-              entityName={userName}
-              entityId={entityStoreEntityId}
-              onShowEntity={onOpenUser}
-            />,
-            'risk_inputs',
-            path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
-              ? 'risk_summary_resolution'
-              : 'risk_summary_entity'
-          );
+          return openEntityRiskInputs({
+            entityType: EntityType.user,
+            entityName: userName,
+            entityId: entityStoreEntityId,
+            onShowEntity: onOpenUser,
+            title: userName,
+            origin:
+              path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
+                ? 'risk_summary_resolution'
+                : 'risk_summary_entity',
+          });
         case EntityDetailsLeftPanelTab.ANOMALIES:
-          return wrap(
-            <AnomalyInsights
-              entityType={EntityType.user}
-              value={userName}
-              entityId={entityStoreEntityId}
-              onOpenEntity={onOpenUser}
-            />,
-            'anomaly_insights',
-            'anomalies_section'
-          );
+          return openEntityAnomalyInsights({
+            entityType: EntityType.user,
+            value: userName,
+            entityId: entityStoreEntityId,
+            onOpenEntity: onOpenUser,
+            title: userName,
+            origin: 'anomalies_section',
+          });
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
             case CspInsightLeftPanelSubTab.ALERTS:
-              return wrap(
-                <AlertsInsights
-                  entityType={EntityType.user}
-                  value={userName}
-                  entityId={panelDisplayEntityId}
-                  onShowEntity={onOpenUser}
-                />,
-                'alerts_insights',
-                'insights_alerts'
-              );
+              return openEntityAlertsInsights({
+                entityType: EntityType.user,
+                value: userName,
+                entityId: panelDisplayEntityId,
+                onShowEntity: onOpenUser,
+                title: userName,
+                origin: 'insights_alerts',
+              });
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
-              return wrap(
-                <MisconfigurationInsights
-                  entityType={EntityType.user}
-                  value={userName}
-                  entityId={panelDisplayEntityId}
-                  onShowEntity={onOpenUser}
-                />,
-                'misconfiguration_insights',
-                'insights_misconfiguration'
-              );
+              return openEntityMisconfigurationInsights({
+                entityType: EntityType.user,
+                value: userName,
+                entityId: panelDisplayEntityId,
+                onShowEntity: onOpenUser,
+                title: userName,
+                origin: 'insights_misconfiguration',
+              });
           }
           break;
         case EntityDetailsLeftPanelTab.GRAPH_VIEW:
           if (!entityStoreEntityId) return;
-          return wrap(
-            <GraphView
-              entityId={entityStoreEntityId}
-              scopeId={scopeId}
-              entityName={userName}
-              onShowEntity={onShowRelatedEntityFromGraph}
-              onShowOriginatingEntity={onOpenUser}
-            />,
-            'graph_view',
-            'visualizations_graph'
-          );
+          return openEntityGraphView({
+            entityId: entityStoreEntityId,
+            scopeId,
+            entityName: userName,
+            onShowEntity: onShowRelatedEntityFromGraph,
+            onShowOriginatingEntity: onOpenUser,
+            title: userName,
+            flyoutType: 'user',
+            origin: 'visualizations_graph',
+          });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
-          return wrap(
-            <Resolution
-              entityId={entityStoreEntityId}
-              entityType="user"
-              entityName={userName}
-              scopeId={scopeId}
-              onShowEntity={onOpenUser}
-              onShowRelatedEntity={onShowRelatedEntityFromResolution}
-            />,
-            'resolution',
-            'resolution_section'
-          );
+          return openEntityResolution({
+            entityId: entityStoreEntityId,
+            entityType: 'user',
+            entityName: userName,
+            scopeId,
+            onShowEntity: onOpenUser,
+            onShowRelatedEntity: onShowRelatedEntityFromResolution,
+            title: userName,
+            origin: 'resolution_section',
+          });
         // TODO: currently dead (v1 accessed through left pane tabs, need to perhaps add preview?)
         case EntityDetailsLeftPanelTab.OKTA: {
           const oktaManagedUser = managedUser.data?.[ManagedUserDatasetKey.OKTA];
           if (oktaManagedUser) {
-            return wrap(
-              <OktaInsights
-                managedUser={oktaManagedUser}
-                value={userName}
-                onOpenUser={onOpenUser}
-              />,
-              'okta_insights'
-            );
+            return openEntityOktaInsights({
+              managedUser: oktaManagedUser,
+              value: userName,
+              onOpenUser,
+              title: userName,
+            });
           }
           break;
         }
         case EntityDetailsLeftPanelTab.ENTRA: {
           const entraManagedUser = managedUser.data?.[ManagedUserDatasetKey.ENTRA];
           if (entraManagedUser) {
-            return wrap(
-              <EntraInsights
-                managedUser={entraManagedUser}
-                value={userName}
-                onOpenUser={onOpenUser}
-              />,
-              'entra_insights'
-            );
+            return openEntityEntraInsights({
+              managedUser: entraManagedUser,
+              value: userName,
+              onOpenUser,
+              title: userName,
+            });
           }
           break;
         }
       }
     },
     [
-      open,
-      historyKey,
+      openEntityRiskInputs,
+      openEntityAnomalyInsights,
+      openEntityAlertsInsights,
+      openEntityMisconfigurationInsights,
+      openEntityGraphView,
+      openEntityResolution,
+      openEntityOktaInsights,
+      openEntityEntraInsights,
       userName,
       scopeId,
       panelDisplayEntityId,

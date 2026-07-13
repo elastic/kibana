@@ -15,12 +15,9 @@ import {
 import { css } from '@emotion/react';
 import { EuiEmptyPrompt, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { buildEntityNameFilter } from '../../../../../common/search_strategy';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import type { Refetch } from '../../../../common/types';
-import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import type { FlyoutOrigin, FlyoutTool } from '../../../../common/lib/telemetry';
 import { FIRST_RECORD_PAGINATION } from '../../../../entity_analytics/common';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -40,16 +37,7 @@ import { GenericEntityFlyoutHeader } from '../../../../flyout/entity_details/gen
 import { GenericEntityFlyoutContent } from '../../../../flyout/entity_details/generic_right/content';
 import { GenericEntityFlyoutFooter } from '../../../../flyout/entity_details/generic_right/footer';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from '../../../../flyout/entity_details/generic_right/constants';
-import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../../../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
-import { FieldsTableTool } from '../../shared/tools/fields_table';
-import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
-import { AlertsInsights } from '../../shared/tools/alerts_insights';
-import { VulnerabilityInsights } from '../../host/tools/vulnerability_insights';
+import { useFlyoutApi } from '../../../use_flyout_api';
 
 export type GenericEntityProps = {
   scopeId: string;
@@ -57,19 +45,22 @@ export type GenericEntityProps = {
 } & UseGetGenericEntityParams;
 
 /**
- * Standalone generic-entity details flyout content (for use with `overlays.openSystemFlyout`).
+ * Standalone generic-entity details flyout content (for use with the entity flyout API).
  *
  * Runs the same data hooks as the v1 `GenericEntityPanel`, but without the expandable-flyout
  * navigation or preview-mode handling. Detail panels (fields table, CSP insights) open as separate
- * system flyouts via `overlays.openSystemFlyout`.
+ * system flyouts via `useFlyoutApi`.
  */
 export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity(params) {
   const { scopeId } = params;
   const { euiTheme } = useEuiTheme();
-  const open = useOpenFlyout();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const {
+    openGenericEntityFlyoutAsChild,
+    openEntityFieldsTable,
+    openEntityMisconfigurationInsights,
+    openEntityVulnerabilityInsights,
+    openEntityAlertsInsights,
+  } = useFlyoutApi();
 
   const { getGenericEntity } = useGetGenericEntity(params);
   const genericInsightsValue = getGenericEntity.data?._source?.entity.id;
@@ -120,82 +111,60 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
   }, [getGenericEntity.data?._id]);
 
   const onShowGeneric = useCallback(() => {
-    open(
-      <GenericEntity {...params} />,
-      { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' },
-      { surface: 'flyout', flyoutType: 'generic', session: 'inherit', origin: 'tool_header_title' }
-    );
-  }, [open, params, historyKey, defaultDocumentFlyoutProperties]);
+    openGenericEntityFlyoutAsChild({ ...params, origin: 'tool_header_title' });
+  }, [openGenericEntityFlyoutAsChild, params]);
 
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
-      const common = {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start' as const,
-      };
-      const wrap = (children: React.ReactNode, tool: FlyoutTool, origin: FlyoutOrigin) =>
-        open(children, common, {
-          surface: 'tool',
-          tool,
-          flyoutType: 'generic',
-          session: 'start',
-          origin,
-        });
-
       const value = genericInsightsValue || '';
 
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.FIELDS_TABLE:
-          return wrap(
-            <FieldsTableTool
-              document={(getGenericEntity.data?._source ?? {}) as Record<string, unknown>}
-              tableStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS}
-              entityName={value}
-              onShowEntity={onShowGeneric}
-            />,
-            'fields_table',
-            'fields_section'
-          );
+          return openEntityFieldsTable({
+            document: (getGenericEntity.data?._source ?? {}) as Record<string, unknown>,
+            tableStorageKey: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS,
+            entityName: value,
+            onShowEntity: onShowGeneric,
+            origin: 'fields_section',
+          });
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
-              return wrap(
-                <MisconfigurationInsights
-                  entityType={EntityType.generic}
-                  value={value}
-                  entityId={genericInsightsValue}
-                  onShowEntity={onShowGeneric}
-                />,
-                'misconfiguration_insights',
-                'insights_misconfiguration'
-              );
+              return openEntityMisconfigurationInsights({
+                entityType: EntityType.generic,
+                value,
+                entityId: genericInsightsValue,
+                onShowEntity: onShowGeneric,
+                origin: 'insights_misconfiguration',
+              });
             case CspInsightLeftPanelSubTab.VULNERABILITIES:
-              return wrap(
-                <VulnerabilityInsights
-                  value={value}
-                  entityId={genericInsightsValue}
-                  entityType={EntityType.generic}
-                  onShowHost={onShowGeneric}
-                />,
-                'vulnerability_insights',
-                'insights_vulnerability'
-              );
+              return openEntityVulnerabilityInsights({
+                value,
+                entityId: genericInsightsValue,
+                entityType: EntityType.generic,
+                onShowHost: onShowGeneric,
+                origin: 'insights_vulnerability',
+              });
             case CspInsightLeftPanelSubTab.ALERTS:
-              return wrap(
-                <AlertsInsights
-                  entityType={EntityType.generic}
-                  value={value}
-                  entityId={genericInsightsValue}
-                  onShowEntity={onShowGeneric}
-                />,
-                'alerts_insights',
-                'insights_alerts'
-              );
+              return openEntityAlertsInsights({
+                entityType: EntityType.generic,
+                value,
+                entityId: genericInsightsValue,
+                onShowEntity: onShowGeneric,
+                origin: 'insights_alerts',
+              });
           }
       }
     },
-    [open, historyKey, genericInsightsValue, getGenericEntity.data?._source, onShowGeneric]
+    [
+      openEntityFieldsTable,
+      openEntityMisconfigurationInsights,
+      openEntityVulnerabilityInsights,
+      openEntityAlertsInsights,
+      genericInsightsValue,
+      getGenericEntity.data?._source,
+      onShowGeneric,
+    ]
   );
 
   if (getGenericEntity.isLoading || getAssetCriticality.isLoading) {

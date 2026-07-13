@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/server-route-repository-utils'
   - '@kbn/apm-common'
-  - '@kbn/io-ts-utils'
   - '@kbn/core'
   - '@kbn/server-route-repository'
   - '@kbn/cps-utils'

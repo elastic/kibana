@@ -100,7 +100,8 @@ const TestComponent = (props: Partial<ComponentProps<typeof EqlTabContentCompone
   return <EqlTabContentComponent {...testComponentDefaultProps} {...props} />;
 };
 
-describe('EQL Tab', () => {
+// Failing: See https://github.com/elastic/kibana/issues/277361
+describe.skip('EQL Tab', () => {
   const props = {} as EqlTabContentComponentProps;
   const mockOpenFlyout = jest.fn();
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;

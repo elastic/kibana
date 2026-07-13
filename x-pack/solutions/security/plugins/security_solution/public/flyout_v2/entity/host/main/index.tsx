@@ -11,7 +11,6 @@ import { noop } from 'lodash/fp';
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer, EuiFlyoutFooter } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -23,31 +22,14 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildHostNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import type { FlyoutOrigin, FlyoutTool } from '../../../../common/lib/telemetry';
+import type { FlyoutOrigin } from '../../../../common/lib/telemetry';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../../../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
-import { RiskInputs } from '../../shared/tools/risk_inputs';
-import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
-import { VulnerabilityInsights } from '../tools/vulnerability_insights';
-import { AlertsInsights } from '../../shared/tools/alerts_insights';
-import { GraphView } from '../../shared/tools/graph_view';
-import { Resolution } from '../../shared/tools/resolution';
-import {
-  entityEngineTypeToFlyoutType,
-  renderEntityDetails,
-} from '../../shared/render_entity_details';
-import { AnomalyInsights } from '../../shared/tools/anomaly_insights';
+import { useFlyoutApi } from '../../../use_flyout_api';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -108,11 +90,11 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 /**
- * Standalone host details flyout content (for use with `overlays.openSystemFlyout`).
+ * Standalone host details flyout content (for use with the entity flyout API).
  *
  * Runs the same data hooks as the v1 `HostPanel`, but without the expandable-flyout
  * navigation or preview-mode handling. Detail panels (risk inputs, graph view, etc.)
- * open as separate system flyouts via `overlays.openSystemFlyout`.
+ * open as separate system flyouts via `useFlyoutApi`.
  */
 export const Host: FC<HostProps> = memo(function Host({
   hostName,
@@ -121,9 +103,20 @@ export const Host: FC<HostProps> = memo(function Host({
   scopeId = '',
   contextID,
 }) {
-  const { uiSettings } = useKibana().services;
-  const open = useOpenFlyout();
+  const { services } = useKibana();
+  const { uiSettings } = services;
   const euidApi = useEntityStoreEuidApi();
+  const {
+    openHostFlyoutAsChild,
+    openEntityDetailsAsChild,
+    openEntityRiskInputs,
+    openEntityAnomalyInsights,
+    openEntityVulnerabilityInsights,
+    openEntityAlertsInsights,
+    openEntityMisconfigurationInsights,
+    openEntityGraphView,
+    openEntityResolution,
+  } = useFlyoutApi();
 
   // Compute entityId from hit when provided, otherwise use the prop
   const entityId = useMemo(
@@ -132,9 +125,6 @@ export const Host: FC<HostProps> = memo(function Host({
   );
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
   const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
@@ -274,12 +264,14 @@ export const Host: FC<HostProps> = memo(function Host({
   ) : undefined;
 
   const onShowHost = useCallback(() => {
-    open(
-      <Host hostName={hostName} entityId={entityId} scopeId={scopeId} />,
-      { ...defaultDocumentFlyoutProperties, title: hostName, historyKey, session: 'inherit' },
-      { surface: 'flyout', flyoutType: 'host', session: 'inherit', origin: 'tool_header_title' }
-    );
-  }, [open, historyKey, hostName, entityId, scopeId, defaultDocumentFlyoutProperties]);
+    openHostFlyoutAsChild({
+      hostName,
+      entityId,
+      scopeId,
+      title: hostName,
+      origin: 'tool_header_title',
+    });
+  }, [openHostFlyoutAsChild, hostName, entityId, scopeId]);
 
   const onShowRelatedEntity = useCallback(
     (
@@ -290,152 +282,117 @@ export const Host: FC<HostProps> = memo(function Host({
       },
       origin: FlyoutOrigin
     ) =>
-      open(
-        renderEntityDetails({ ...params, scopeId }),
-        {
-          ...defaultDocumentFlyoutProperties,
-          title: params.entityName ?? params.entityId,
-          historyKey,
-          session: 'inherit',
-        },
-        {
-          surface: 'flyout',
-          flyoutType: entityEngineTypeToFlyoutType(params.engineType),
-          session: 'inherit',
-          origin,
-        }
-      ),
-    [open, scopeId, historyKey, defaultDocumentFlyoutProperties]
-  );
-
-  const onShowRelatedEntityFromResolution = useCallback(
-    (params: {
-      engineType: string | undefined;
-      entityId: string;
-      entityName: string | undefined;
-    }) => onShowRelatedEntity(params, 'resolution_entity_link'),
-    [onShowRelatedEntity]
+      openEntityDetailsAsChild({
+        engineType: params.engineType,
+        entityId: params.entityId,
+        entityName: params.entityName,
+        scopeId,
+        title: params.entityName ?? params.entityId,
+        origin,
+      }),
+    [openEntityDetailsAsChild, scopeId]
   );
 
   const onShowRelatedEntityFromGraph = useCallback(
-    (params: {
-      engineType: string | undefined;
-      entityId: string;
-      entityName: string | undefined;
-    }) => onShowRelatedEntity(params, 'graph_node'),
+    (params: { engineType: string | undefined; entityId: string; entityName: string | undefined }) =>
+      onShowRelatedEntity(params, 'graph_node'),
+    [onShowRelatedEntity]
+  );
+
+  const onShowRelatedEntityFromResolution = useCallback(
+    (params: { engineType: string | undefined; entityId: string; entityName: string | undefined }) =>
+      onShowRelatedEntity(params, 'resolution_entity_link'),
     [onShowRelatedEntity]
   );
 
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
-      const common = {
-        ...defaultToolsFlyoutProperties,
-        title: hostName,
-        historyKey,
-        session: 'start' as const,
-      };
-      const wrap = (children: React.ReactNode, tool: FlyoutTool, origin?: FlyoutOrigin) =>
-        open(children, common, {
-          surface: 'tool',
-          tool,
-          flyoutType: 'host',
-          session: 'start',
-          origin,
-        });
-
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
-          return wrap(
-            <RiskInputs
-              entityType={EntityType.host}
-              entityName={hostName}
-              entityId={entityStoreEntityId}
-              onShowEntity={onShowHost}
-            />,
-            'risk_inputs',
-            path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
-              ? 'risk_summary_resolution'
-              : 'risk_summary_entity'
-          );
+          return openEntityRiskInputs({
+            entityType: EntityType.host,
+            entityName: hostName,
+            entityId: entityStoreEntityId,
+            onShowEntity: onShowHost,
+            title: hostName,
+            origin:
+              path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
+                ? 'risk_summary_resolution'
+                : 'risk_summary_entity',
+          });
         case EntityDetailsLeftPanelTab.ANOMALIES:
-          return wrap(
-            <AnomalyInsights
-              entityType={EntityType.host}
-              value={hostName}
-              entityId={entityStoreEntityId}
-              onOpenEntity={onShowHost}
-            />,
-            'anomaly_insights',
-            'anomalies_section'
-          );
+          return openEntityAnomalyInsights({
+            entityType: EntityType.host,
+            value: hostName,
+            entityId: entityStoreEntityId,
+            onOpenEntity: onShowHost,
+            title: hostName,
+            origin: 'anomalies_section',
+          });
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
             case CspInsightLeftPanelSubTab.VULNERABILITIES:
-              return wrap(
-                <VulnerabilityInsights
-                  value={hostName}
-                  entityId={panelDisplayEntityId}
-                  onShowHost={onShowHost}
-                />,
-                'vulnerability_insights',
-                'insights_vulnerability'
-              );
+              return openEntityVulnerabilityInsights({
+                value: hostName,
+                entityId: panelDisplayEntityId,
+                onShowHost,
+                title: hostName,
+                origin: 'insights_vulnerability',
+              });
             case CspInsightLeftPanelSubTab.ALERTS:
-              return wrap(
-                <AlertsInsights
-                  entityType={EntityType.host}
-                  value={hostName}
-                  entityId={panelDisplayEntityId}
-                  onShowEntity={onShowHost}
-                />,
-                'alerts_insights',
-                'insights_alerts'
-              );
+              return openEntityAlertsInsights({
+                entityType: EntityType.host,
+                value: hostName,
+                entityId: panelDisplayEntityId,
+                onShowEntity: onShowHost,
+                title: hostName,
+                origin: 'insights_alerts',
+              });
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
-              return wrap(
-                <MisconfigurationInsights
-                  entityType={EntityType.host}
-                  value={hostName}
-                  entityId={panelDisplayEntityId}
-                  onShowEntity={onShowHost}
-                />,
-                'misconfiguration_insights',
-                'insights_misconfiguration'
-              );
+              return openEntityMisconfigurationInsights({
+                entityType: EntityType.host,
+                value: hostName,
+                entityId: panelDisplayEntityId,
+                onShowEntity: onShowHost,
+                title: hostName,
+                origin: 'insights_misconfiguration',
+              });
           }
           return;
         case EntityDetailsLeftPanelTab.GRAPH_VIEW:
           if (!entityStoreEntityId) return;
-          return wrap(
-            <GraphView
-              entityId={entityStoreEntityId}
-              scopeId={scopeId}
-              entityName={hostName}
-              onShowEntity={onShowRelatedEntityFromGraph}
-              onShowOriginatingEntity={onShowHost}
-            />,
-            'graph_view',
-            'visualizations_graph'
-          );
+          return openEntityGraphView({
+            entityId: entityStoreEntityId,
+            scopeId,
+            entityName: hostName,
+            onShowEntity: onShowRelatedEntityFromGraph,
+            onShowOriginatingEntity: onShowHost,
+            title: hostName,
+            flyoutType: 'host',
+            origin: 'visualizations_graph',
+          });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
-          return wrap(
-            <Resolution
-              entityId={entityStoreEntityId}
-              entityType="host"
-              entityName={hostName}
-              scopeId={scopeId}
-              onShowEntity={onShowHost}
-              onShowRelatedEntity={onShowRelatedEntityFromResolution}
-            />,
-            'resolution',
-            'resolution_section'
-          );
+          return openEntityResolution({
+            entityId: entityStoreEntityId,
+            entityType: 'host',
+            entityName: hostName,
+            scopeId,
+            onShowEntity: onShowHost,
+            onShowRelatedEntity: onShowRelatedEntityFromResolution,
+            title: hostName,
+            origin: 'resolution_section',
+          });
       }
     },
     [
-      open,
-      historyKey,
+      openEntityRiskInputs,
+      openEntityAnomalyInsights,
+      openEntityVulnerabilityInsights,
+      openEntityAlertsInsights,
+      openEntityMisconfigurationInsights,
+      openEntityGraphView,
+      openEntityResolution,
       hostName,
       scopeId,
       panelDisplayEntityId,
