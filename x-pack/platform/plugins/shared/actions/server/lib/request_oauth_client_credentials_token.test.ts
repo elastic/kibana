@@ -38,9 +38,9 @@ describe('requestOAuthClientCredentialsToken', () => {
     axiosInstanceMock.mockReturnValueOnce({
       status: 200,
       data: {
-        tokenType: 'Bearer',
-        accessToken: 'dfjsdfgdjhfgsjdf',
-        expiresIn: 123,
+        token_type: 'Bearer',
+        access_token: 'dfjsdfgdjhfgsjdf',
+        expires_in: 123,
       },
     });
     await requestOAuthClientCredentialsToken(
@@ -123,9 +123,9 @@ describe('requestOAuthClientCredentialsToken', () => {
     axiosInstanceMock.mockReturnValueOnce({
       status: 200,
       data: {
-        tokenType: 'Bearer',
-        accessToken: 'tokenwithfields',
-        expiresIn: 456,
+        token_type: 'Bearer',
+        access_token: 'tokenwithfields',
+        expires_in: 456,
       },
     });
 
