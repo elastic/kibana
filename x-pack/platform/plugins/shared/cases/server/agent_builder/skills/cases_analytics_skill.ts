@@ -57,7 +57,7 @@ The indices are named \`.cases\` / \`.cases-activity\` / \`.cases-attachments\` 
 
 | Index | Grain | Key fields |
 |-------|-------|-----------|
-| \`.cases\` | one doc per case (lookup-mode) | \`case.id\`, \`case.status\`, \`case.severity\`, \`case.owner\`, \`case.created_at\`, \`case.closed_at\`, \`case.in_progress_at\`, \`case.time_to_acknowledge\`, \`case.time_to_investigate\`, \`case.time_to_resolve\`, \`case.duration\`, \`case.total_alerts\`, \`case.total_comments\`, \`case.tags\`, \`case.category\`, \`case.assignees.uid\`, \`case.observables.<type>\`, \`case.extended_fields\` |
+| \`.cases\` | one doc per case (lookup-mode) | \`case.id\`, \`case.status\`, \`case.severity\`, \`case.owner\`, \`case.created_at\`, \`case.closed_at\`, \`case.in_progress_at\`, \`case.time_to_acknowledge\`, \`case.time_to_investigate\`, \`case.time_to_resolve\`, \`case.duration\`, \`case.total_alerts\`, \`case.total_comments\`, \`case.tags\`, \`case.category\`, \`case.assignees.uid\`, \`case.observables.observable-type-<x>\`, \`case.extended_fields\` |
 | \`.cases-activity\` | one doc per user action | \`case.id\`, \`action.type\`, \`action.verb\`, \`action.status_new\`, \`action.severity_new\`, \`action.assignees_changed\`, \`action.tags_changed\`, \`action.connector_id_new\`, \`action.attachment_reference_id\`, \`actor.*\`, \`@timestamp\` |
 | \`.cases-attachments\` | one doc per comment/attachment | \`case.id\`, \`attachment.type\`, \`attachment.comment\`, \`attachment.alert.rule.id\`, \`attachment.alert.rule.name\`, \`attachment.alert.indices\`, \`attachment.event.indices\`, \`attachment.attachment_id\`, \`created_at\` |
 
@@ -207,13 +207,14 @@ FROM .cases-activity
 | KEEP case.id, case.title, case.status, case.severity, actions
 \`\`\`
 
-## Connector adoption (pushes by connector)
+## Connector adoption (distinct cases per connector)
 \`\`\`esql
 FROM .cases-activity
 | WHERE action.type == "connector" AND action.connector_id_new IS NOT NULL
 | STATS case_count = COUNT_DISTINCT(case.id) BY action.connector_id_new
 | SORT case_count DESC
-\`\`\``,
+\`\`\`
+This counts cases that had a connector **assigned** (\`action.type == "connector"\`) — i.e. connector usage, not push volume. Actual pushes to the external service are a separate user action (\`action.type == "pushed"\`) and do not populate \`action.connector_id_new\`.`,
     },
     {
       relativePath: './analytics',
@@ -239,14 +240,15 @@ FROM .cases-attachments
 Filter on the presence of \`attachment.alert.*\` (populated only for alert subtypes) rather than a literal \`attachment.type\` string — the unified type value is owner-scoped and varies.
 
 ## Observable (IOC) frequency across cases — e.g. IPv4
+Observables are denormalized to one keyword array per type, keyed by the observable **type key** — \`observable-type-ipv4\`, \`observable-type-url\`, \`observable-type-domain\`, \`observable-type-file-hash\`, \`observable-type-hostname\`, \`observable-type-email\`, \`observable-type-ipv6\` (plus any custom types a tenant defines). The hyphens are not valid bare identifiers, so **backtick-quote the whole path** in ES|QL, as below:
 \`\`\`esql
 FROM .cases
-| MV_EXPAND case.observables.ipv4
-| WHERE case.observables.ipv4 IS NOT NULL
-| STATS occurrences = COUNT(*) BY case.observables.ipv4
+| MV_EXPAND \`case.observables.observable-type-ipv4\`
+| WHERE \`case.observables.observable-type-ipv4\` IS NOT NULL
+| STATS occurrences = COUNT(*) BY \`case.observables.observable-type-ipv4\`
 | SORT occurrences DESC
 \`\`\`
-Swap \`ipv4\` for the observable type of interest (e.g. \`url\`, \`domain\`, \`file-hash\`).
+Swap \`observable-type-ipv4\` for the type of interest. The set is open (custom observable types are allowed), so confirm which \`case.observables.*\` keys actually exist with \`${platformCoreTools.getIndexMapping}\` before relying on one.
 
 ## MTTD note
 The alert's original detection time is not stored on the attachment (only rule id/name and source indices). To compute MTTD, join out to the alerts indices in \`attachment.alert.indices\` using the alert ids in \`attachment.attachment_id\`, then compare the alert's original time to \`case.created_at\`.`,
