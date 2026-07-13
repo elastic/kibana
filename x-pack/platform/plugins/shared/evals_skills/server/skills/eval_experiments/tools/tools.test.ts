@@ -12,6 +12,7 @@ import type { EvalExperimentsToolDeps } from './deps';
 import { listEvalDatasetsTool } from './list_eval_datasets';
 import { listEvaluatorsTool } from './list_evaluators';
 import { listEvalTargetsTool } from './list_eval_targets';
+import { listConnectorsTool } from './list_eval_connectors';
 import { previewEvalExperimentTool } from './preview_eval_experiment';
 import { saveEvalExperimentTool } from './save_eval_experiment';
 import { runEvalExperimentTool } from './run_eval_experiment';
@@ -241,6 +242,38 @@ describe('discovery tools', () => {
 
     expect(result.data.evaluators).toHaveLength(1);
     expect(result.data.evaluators[0].needsJudgeConnector).toBe(true);
+  });
+
+  it('lists model connectors via the evals start contract', async () => {
+    const listModelConnectors = jest
+      .fn()
+      .mockResolvedValue([{ id: '.gen-ai-1', name: 'GPT', type: 'openai' }]);
+    const { deps } = createDeps({
+      getStartDependencies: jest.fn().mockResolvedValue({
+        evals: { listModelConnectors },
+        agentBuilder: {},
+      }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(await listConnectorsTool(deps).handler({}, createContext()));
+
+    expect(listModelConnectors).toHaveBeenCalledTimes(1);
+    expect(result.type).toBe(ToolResultType.other);
+    expect(result.data.total).toBe(1);
+    expect(result.data.connectors[0].id).toBe('.gen-ai-1');
+  });
+
+  it('returns an error result when connector listing is unavailable', async () => {
+    const { deps } = createDeps({
+      getStartDependencies: jest.fn().mockResolvedValue({
+        evals: {},
+        agentBuilder: {},
+      }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(await listConnectorsTool(deps).handler({}, createContext()));
+
+    expect(result.type).toBe(ToolResultType.error);
   });
 
   it('lists agent and tool targets from the agent builder registries', async () => {

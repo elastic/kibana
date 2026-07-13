@@ -177,7 +177,7 @@ export class EvalsPlugin
     };
   }
 
-  start(coreStart: CoreStart, _plugins: EvalsStartDependencies): EvalsPluginStart {
+  start(coreStart: CoreStart, plugins: EvalsStartDependencies): EvalsPluginStart {
     if (!this.config.enabled) {
       return {};
     }
@@ -221,6 +221,14 @@ export class EvalsPlugin
           needsJudgeConnector: def.kind === 'llm',
           supportsBareToolTrace: def.supportsBareToolTrace ?? true,
         })),
+      listModelConnectors: async (request) => {
+        const connectors = await plugins.inference.getConnectorList(request);
+        return connectors.map((connector) => ({
+          id: connector.connectorId,
+          name: connector.name,
+          type: connector.type,
+        }));
+      },
     };
   }
 

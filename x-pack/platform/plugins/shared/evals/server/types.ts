@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
+import type { CustomRequestHandlerContext, IRouter, KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -23,11 +23,6 @@ export interface EvalsPluginSetup {
   registerTaskProvider: (provider: EvalsTaskProvider) => void;
 }
 
-/**
- * Serializable summary of a registered evaluator, exposed on the start contract
- * for consumers (such as the evals Agent Builder skill) that need to discover
- * the available evaluators without pulling in the full registry definition.
- */
 export interface EvaluatorSummary {
   name: string;
   version: string;
@@ -37,10 +32,18 @@ export interface EvaluatorSummary {
   supportsBareToolTrace: boolean;
 }
 
+export interface ModelConnectorSummary {
+  id: string;
+  name: string;
+  type: string;
+}
+
 export interface EvalsPluginStart {
   datasetService?: DatasetService;
   evaluationScoreService?: EvaluationScoreService;
   listEvaluators?: () => EvaluatorSummary[];
+
+  listModelConnectors?: (request: KibanaRequest) => Promise<ModelConnectorSummary[]>;
 }
 
 export type EvalsWorkflowsManagementSetup = Pick<WorkflowsServerPluginSetup, 'management'>;

@@ -10,6 +10,7 @@ import type { EvalExperimentsToolDeps } from './deps';
 import { listEvalDatasetsTool } from './list_eval_datasets';
 import { listEvaluatorsTool } from './list_evaluators';
 import { listEvalTargetsTool } from './list_eval_targets';
+import { listConnectorsTool } from './list_eval_connectors';
 import { previewEvalExperimentTool } from './preview_eval_experiment';
 import { saveEvalExperimentTool } from './save_eval_experiment';
 import { runEvalExperimentTool } from './run_eval_experiment';
@@ -27,6 +28,7 @@ export const getEvalExperimentsInlineTools = (
   listEvalDatasetsTool(deps),
   listEvaluatorsTool(deps),
   listEvalTargetsTool(deps),
+  listConnectorsTool(deps),
   previewEvalExperimentTool(deps),
   saveEvalExperimentTool(deps),
   runEvalExperimentTool(deps),

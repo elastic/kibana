@@ -34,6 +34,9 @@ tools generate valid YAML deterministically from the configuration.
 1. **Discover** the building blocks (only fetch what you still need):
    - \`${evalsTools.listDatasets}\` - datasets and their ids.
    - \`${evalsTools.listTargets}\` - agents and tools to pick the \`agent_id\` or \`tool_id\`.
+   - \`${evalsTools.listConnectors}\` - model connectors and their ids. Use this to map a model name
+     the user mentioned (e.g. "Claude Opus 4.5") to a \`connector_id\`, for both the model under
+     evaluation and any llm evaluator judge.
    - \`${evalsTools.listEvaluators}\` - evaluators. Note two flags per evaluator:
      - \`needsJudgeConnector: true\` -> it is an \`llm\` evaluator and **requires** a \`connector_id\` per evaluator.
      - \`supportsBareToolTrace: false\` -> it only produces meaningful scores for an **agent** target, not a bare \`tool_id\`.
@@ -52,12 +55,20 @@ tools generate valid YAML deterministically from the configuration.
 
 - Provide exactly **one** of \`agent_id\` or \`tool_id\` (never both, never neither).
 - \`connector_ids\`, \`dataset_ids\`, and \`evaluators\` each need at least one entry.
+- Resolve every connector id (models under evaluation and judge connectors) from
+  \`${evalsTools.listConnectors}\`. Never guess connector ids or try to read them from system
+  indices or a throwaway workflow. If a name is ambiguous, ask the user to pick from the list.
 - For every evaluator with \`needsJudgeConnector: true\`, include a \`connector_id\`. Omit it for
   \`code\` evaluators.
 - When evaluating a bare \`tool_id\`, prefer evaluators with \`supportsBareToolTrace: true\`; warn the
   user if they ask for one that does not apply.
 - \`space_ids\` defaults to the current space. Only set it to share the results with additional
   spaces; assigning to all spaces ("*") is not supported yet.
+
+## Presenting to the User
+
+When you summarize a configuration or run plan for the user (e.g. before asking to run), use a
+short **bulleted list**, not a markdown table.
 
 ## After Running
 

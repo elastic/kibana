@@ -14,7 +14,12 @@ import type {
   EvalsStartDependencies,
 } from './types';
 
-export type { EvalsPluginSetup, EvalsPluginStart, EvaluatorSummary } from './types';
+export type {
+  EvalsPluginSetup,
+  EvalsPluginStart,
+  EvaluatorSummary,
+  ModelConnectorSummary,
+} from './types';
 
 export {
   generateExperimentRun,

@@ -22,6 +22,7 @@ export const evalsTools = {
   listDatasets: evalsTool('list_datasets'),
   listEvaluators: evalsTool('list_evaluators'),
   listTargets: evalsTool('list_targets'),
+  listConnectors: evalsTool('list_connectors'),
   previewExperiment: evalsTool('preview_experiment'),
   saveExperiment: evalsTool('save_experiment'),
   runExperiment: evalsTool('run_experiment'),

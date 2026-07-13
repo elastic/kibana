@@ -32,6 +32,7 @@ describe('createEvalExperimentsSkill', () => {
       evalsTools.listDatasets,
       evalsTools.listEvaluators,
       evalsTools.listTargets,
+      evalsTools.listConnectors,
       evalsTools.previewExperiment,
       evalsTools.saveExperiment,
       evalsTools.runExperiment,
