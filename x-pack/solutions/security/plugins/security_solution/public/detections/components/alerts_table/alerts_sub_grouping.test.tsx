@@ -20,12 +20,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { defaultGroupStatsAggregations } from './grouping_settings';
 import { PageScope } from '../../../data_view_manager/constants';
-import {
-  fetchQueryAlerts,
-  fetchQueryAttacks,
-  fetchQueryUnifiedAlerts,
-} from '../../containers/detection_engine/alerts/api';
-import { useAttacksPageFetchMethod } from '../../hooks/attacks/use_attacks_page_fetch_method';
+import { fetchQueryAlerts, fetchQueryUnifiedAlerts } from '../../containers/detection_engine/alerts/api';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
@@ -35,8 +30,6 @@ jest.mock('../../containers/detection_engine/alerts/api', () => ({
   fetchQueryAttacks: jest.fn(),
   fetchQueryUnifiedAlerts: jest.fn(),
 }));
-jest.mock('../../hooks/attacks/use_attacks_page_fetch_method');
-
 const mockedTelemetry = createTelemetryServiceMock();
 (useKibana as jest.Mock).mockReturnValue({
   services: {
@@ -57,7 +50,6 @@ const mockDate = {
 };
 
 const mockUseQueryAlerts = useQueryAlerts as jest.Mock;
-const mockUseAttacksPageFetchMethod = useAttacksPageFetchMethod as jest.Mock;
 const mockQueryResponse = {
   loading: false,
   data: {},
@@ -99,7 +91,6 @@ describe('GroupedSubLevelComponent', () => {
       status: 'ready',
       dataView,
     });
-    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryUnifiedAlerts);
     mockUseQueryAlerts.mockImplementation((i) => {
       if (i.skip) {
         return mockQueryResponse;
@@ -225,24 +216,6 @@ describe('GroupedSubLevelComponent', () => {
       expect(mockUseQueryAlerts).toHaveBeenCalledWith(
         expect.objectContaining({
           fetchMethod: fetchQueryUnifiedAlerts,
-        })
-      );
-    });
-  });
-
-  it('uses fetchQueryAttacks when pageScope is "attacks" and publicAttacksApiEnabled is on', async () => {
-    mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryAttacks);
-
-    render(
-      <TestProviders>
-        <GroupedSubLevelComponent {...testProps} pageScope={PageScope.attacks} />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(mockUseQueryAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({
-          fetchMethod: fetchQueryAttacks,
         })
       );
     });

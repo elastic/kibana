@@ -26,6 +26,8 @@ export interface UseAlertsAggregationProps {
   aggs: Record<string, estypes.AggregationsAggregationContainer>;
   /** Name of the query for APM tracking */
   queryName: AlertsQueryName;
+  /** Optional unique ID for global query registration (defaults to queryName) */
+  uniqueQueryId?: string;
   /** Optional size for the query (defaults to 0 as this is an aggregation query) */
   size?: number;
 }
@@ -40,6 +42,7 @@ export const useAlertsAggregation = <Aggs>({
   query,
   aggs,
   queryName,
+  uniqueQueryId,
   size = 0,
 }: UseAlertsAggregationProps) => {
   const { from, to, deleteQuery, setQuery } = useGlobalTime();
@@ -110,7 +113,7 @@ export const useAlertsAggregation = <Aggs>({
     setQuery,
     refetch,
     request,
-    uniqueQueryId: queryName,
+    uniqueQueryId: uniqueQueryId ?? queryName,
   });
 
   return {

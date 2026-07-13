@@ -40,8 +40,7 @@ import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_que
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
 import { getAlertsGroupingQuery } from './grouping_settings';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
-import { fetchQueryAlerts } from '../../containers/detection_engine/alerts/api';
-import { useAttacksPageFetchMethod } from '../../hooks/attacks/use_attacks_page_fetch_method';
+import { fetchQueryAlerts, fetchQueryUnifiedAlerts } from '../../containers/detection_engine/alerts/api';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 const DEFAULT_FILTERS: Filter[] = [];
@@ -249,11 +248,9 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     endDate: to,
   });
 
-  const attacksPageFetchMethod = useAttacksPageFetchMethod();
-
   const fetchMethod = useMemo(() => {
-    return pageScope === PageScope.attacks ? attacksPageFetchMethod : fetchQueryAlerts;
-  }, [pageScope, attacksPageFetchMethod]);
+    return pageScope === PageScope.attacks ? fetchQueryUnifiedAlerts : fetchQueryAlerts;
+  }, [pageScope]);
 
   const {
     data: alertsGroupsData,

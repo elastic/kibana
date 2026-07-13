@@ -162,6 +162,22 @@ describe('useAlertsAggregation', () => {
     );
   });
 
+  it('uses custom uniqueQueryId when provided', () => {
+    renderHook(() =>
+      useAlertsAggregation({
+        aggs: {},
+        queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
+        uniqueQueryId: 'attacks-kpi-attacks-list',
+      })
+    );
+
+    expect(useInspectButton).toHaveBeenCalledWith(
+      expect.objectContaining({
+        uniqueQueryId: 'attacks-kpi-attacks-list',
+      })
+    );
+  });
+
   it('uses fetchQueryAttacks when publicAttacksApiEnabled is on', () => {
     mockUseAttacksPageFetchMethod.mockReturnValue(fetchQueryAttacks);
 
