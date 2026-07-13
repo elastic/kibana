@@ -110,7 +110,9 @@ export const RunTestManuallyContextItem = ({
               <EuiIcon type="flask" size="s" aria-hidden={true} />
             )}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{<span>{RUN_TEST_LABEL}</span>}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <span>{testInProgress ? VIEW_TEST_RUN_LABEL : RUN_TEST_LABEL}</span>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiContextMenuItem>
     </NoPermissionsTooltip>
@@ -119,6 +121,10 @@ export const RunTestManuallyContextItem = ({
 
 const RUN_TEST_LABEL = i18n.translate('xpack.synthetics.monitorSummary.runTestManually', {
   defaultMessage: 'Run test manually',
+});
+
+const VIEW_TEST_RUN_LABEL = i18n.translate('xpack.synthetics.monitorSummary.viewTestRun', {
+  defaultMessage: 'View test run in progress',
 });
 
 const NOT_AVAILABLE_FOR_REMOTE_MONITORS = i18n.translate(
