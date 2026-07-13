@@ -34,6 +34,7 @@ export interface FrozenPhaseCardProps {
   hasDefaultSnapshotRepository: boolean;
   canCreateDefaultSnapshotRepository: boolean;
   createDefaultRepositoryUrl: string;
+  hasExistingRepositories?: boolean;
   enterprise: DlmPhasesSelectorEnterpriseConfig;
   onRefreshDefaultSnapshotRepository?: () => void | Promise<void>;
   onChange: (duration: DlmPhaseDuration) => void;
@@ -52,6 +53,7 @@ export const FrozenPhaseCard = ({
   hasDefaultSnapshotRepository,
   canCreateDefaultSnapshotRepository,
   createDefaultRepositoryUrl,
+  hasExistingRepositories = false,
   enterprise,
   onRefreshDefaultSnapshotRepository,
   onChange,
@@ -162,10 +164,13 @@ export const FrozenPhaseCard = ({
                   createDefaultRepositoryHref={
                     canCreateDefaultSnapshotRepository ? createDefaultRepositoryUrl : undefined
                   }
+                  manageRepositoriesUrl={manageRepositoriesHref}
+                  hasExistingRepositories={hasExistingRepositories}
                   onRefresh={refreshDefaultRepository}
                   isRefreshing={isRefreshingDefaultRepository}
                   calloutTestSubj="frozenDefaultRepositoryRequiredCallout"
                   createButtonTestSubj="frozenCreateDefaultRepositoryButton"
+                  manageRepositoriesButtonTestSubj="frozenManageRepositoriesButton"
                   refreshButtonTestSubj="frozenRefreshDefaultRepositoryButton"
                 />
               </>
@@ -203,6 +208,8 @@ export const FrozenPhaseCard = ({
       {openModal === 'defaultRepository' && (
         <DefaultSnapshotRepositoryRequiredModal
           createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+          manageRepositoriesUrl={manageRepositoriesHref}
+          hasExistingRepositories={hasExistingRepositories}
           isRefreshing={isRefreshingDefaultRepository}
           onCancel={closeModal}
           onRefresh={refreshDefaultRepository}

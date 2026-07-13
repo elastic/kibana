@@ -247,6 +247,12 @@ export const allowedExperimentalValues = Object.freeze({
   pciComplianceAgentBuilder: true,
 
   /**
+   * Enables the investigate-rule Agent Builder skill.
+   * Gates skill registration so the feature can ship dark and be enabled per environment.
+   */
+  investigateRuleSkill: false,
+
+  /**
    * Enables the find-security-rules Agent Builder skill.
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
@@ -312,10 +318,10 @@ export const allowedExperimentalValues = Object.freeze({
   riskScoreHistoryEnabled: false,
 
   /**
-   * Enables the Attacks page tour (welcome callout + guided tour).
-   * Release: 9.5
+   * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift
+   * from the locally stored kibana mappings after a MITRE version bump.
    */
-  attacksPageTourEnabled: false,
+  mitreAttackUpdatesUIEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

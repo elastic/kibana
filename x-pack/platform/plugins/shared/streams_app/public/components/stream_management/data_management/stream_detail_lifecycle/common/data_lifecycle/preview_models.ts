@@ -10,22 +10,19 @@ import type { SerializedPolicy } from '@kbn/index-lifecycle-management-common-sh
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { PHASE_ORDER, type IlmPhase } from '@kbn/data-lifecycle-phases';
 import { buildLifecyclePhases, getFrozenPhaseLabel } from './lifecycle_types';
-import { formatBytes } from '../../helpers/format_bytes';
 import { getIlmPhaseGrowValues, type GrowValue } from '../../../../../../util/ilm_policy_phases';
-
-const ZERO_SIZE_BYTES = 0;
-const ZERO_SIZE_LABEL = formatBytes(ZERO_SIZE_BYTES);
 
 export type IlmPhasesMap = Record<string, { color: string; description?: string }>;
 
+// The preview timeline is hypothetical (the lifecycle hasn't been applied yet), so per-phase size
+// and document counts — which describe the currently applied lifecycle's data distribution — are
+// intentionally omitted for the whole duration of the preview.
 export const buildIlmPreviewPhases = ({
   policy,
   ilmPhases,
-  stats,
 }: {
   policy: SerializedPolicy;
   ilmPhases: IlmPhasesMap;
-  stats?: { size?: string; sizeBytes?: number; totalDocs?: number };
 }) => {
   const phases: Array<{
     name: IlmPhase;
@@ -94,20 +91,9 @@ export const buildIlmPreviewPhases = ({
       isReadOnly: hasReadOnlyAction,
       searchableSnapshot: searchableSnapshotRepo,
       downsample,
-      // Hot uses stream stats when available; other non-delete phases use 0.0 B
-      size:
-        phaseName === 'delete'
-          ? undefined
-          : phaseName === 'hot'
-          ? stats?.size ?? ZERO_SIZE_LABEL
-          : ZERO_SIZE_LABEL,
-      sizeInBytes:
-        phaseName === 'delete'
-          ? undefined
-          : phaseName === 'hot'
-          ? stats?.sizeBytes ?? ZERO_SIZE_BYTES
-          : ZERO_SIZE_BYTES,
-      docsCount: phaseName === 'hot' ? stats?.totalDocs : undefined,
+      size: undefined,
+      sizeInBytes: undefined,
+      docsCount: undefined,
     };
   });
 };

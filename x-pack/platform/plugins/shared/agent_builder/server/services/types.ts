@@ -15,18 +15,22 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './execution/runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
 import type { ConversationService } from './conversation';
+import type { WorkspaceService } from './workspaces';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
 import type { RendererServiceSetup, RendererServiceStart } from './renderers';
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
@@ -36,6 +40,7 @@ import type { AuditLogService } from '../audit';
 import type { TaskHandler } from './execution';
 import type { MeteringService, ConsumptionServiceStart } from './metering';
 import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
+import type { CallbackDeliveryService } from './execution/callback_delivery_service';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -55,6 +60,7 @@ export interface InternalStartServices {
   renderers: RendererServiceStart;
   skills: SkillServiceStart;
   conversations: ConversationService;
+  workspaces: WorkspaceService;
   runnerFactory: RunnerFactory;
   hooks: HooksServiceStart;
   auditLogService: AuditLogService;
@@ -66,6 +72,8 @@ export interface InternalStartServices {
   taskHandler: TaskHandler;
   plugins: PluginsServiceStart;
   consumption: ConsumptionServiceStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  callbackDeliveryService: CallbackDeliveryService;
 }
 
 export interface ServiceSetupDeps {
@@ -74,6 +82,7 @@ export interface ServiceSetupDeps {
   trackingService?: TrackingService;
   cloud?: CloudSetup;
   usageApi?: UsageApiSetup;
+  actions: ActionsPluginSetup;
 }
 
 export interface ServicesStartDeps {
