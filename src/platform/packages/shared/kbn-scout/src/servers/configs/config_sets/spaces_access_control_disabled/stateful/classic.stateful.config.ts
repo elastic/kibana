@@ -20,7 +20,7 @@ import { defaultConfig } from '../../default/stateful/base.config';
  */
 const pluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
-  'x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin'
+  'x-pack/platform/test/spaces_access_control/plugins/access_control_test_plugin'
 )}`;
 
 export const servers: ScoutServerConfig = {

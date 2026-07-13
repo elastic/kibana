@@ -14,7 +14,7 @@
  * `.kibana*` indices by the plugin-local `common/es_archive` helper.
  */
 export const SPACES_ES_ARCHIVE =
-  'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces';
+  'x-pack/platform/plugins/shared/spaces/test/scout/api/fixtures/es_archiver/saved_objects/spaces';
 
 export const SPACES = {
   DEFAULT: {
