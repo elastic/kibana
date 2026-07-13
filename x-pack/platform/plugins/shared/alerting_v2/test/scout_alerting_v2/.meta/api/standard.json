@@ -1,5 +1,5 @@
 {
-  "sha1": "ebc396d0c378b6ae07c6fb42637326455c945498",
+  "sha1": "62aa2fd2658920cabd632205b75bdcb7dfff38e6",
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 10
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 10
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 135,
+        "line": 136,
         "column": 10
       }
     },
@@ -53,7 +53,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 198,
+        "line": 199,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-748690c3b1e4282",
+      "title": "Director holds an episode active across engine recoveries when the last lifecycle action is activate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 280,
         "column": 10
       }
     },
@@ -67,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 279,
+        "line": 405,
         "column": 10
       }
     },
@@ -81,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 337,
+        "line": 463,
         "column": 10
       }
     },
@@ -95,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 393,
+        "line": 519,
         "column": 10
       }
     },
@@ -109,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 481,
+        "line": 607,
         "column": 10
       }
     },
@@ -123,7 +137,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 532,
+        "line": 658,
         "column": 10
       }
     },
@@ -137,7 +151,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 593,
+        "line": 719,
         "column": 10
       }
     },
@@ -151,7 +165,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 648,
+        "line": 774,
         "column": 10
       }
     },
@@ -165,7 +179,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 696,
+        "line": 822,
         "column": 10
       }
     },
@@ -179,7 +193,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 802,
+        "line": 928,
         "column": 10
       }
     },
@@ -193,7 +207,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 859,
+        "line": 985,
         "column": 10
       }
     },
@@ -207,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 961,
+        "line": 1087,
         "column": 10
       }
     },
@@ -221,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1020,
+        "line": 1146,
         "column": 10
       }
     },
@@ -235,7 +249,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1087,
+        "line": 1213,
         "column": 10
       }
     },
@@ -249,7 +263,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1167,
+        "line": 1293,
         "column": 10
       }
     },
@@ -263,7 +277,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1237,
+        "line": 1363,
         "column": 10
       }
     },
@@ -277,7 +291,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1298,
+        "line": 1424,
         "column": 10
       }
     },
@@ -291,7 +305,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
-        "line": 1358,
+        "line": 1484,
         "column": 10
       }
     },
@@ -614,6 +628,286 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/end_to_end.spec.ts",
         "line": 130,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-f2ee7078b7d95b9",
+      "title": "Alerting v2 alerts implicit index privileges viewer: get-role surfaces read on both patterns with no DLS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 321,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-31b66ccc2aa5315",
+      "title": "Alerting v2 alerts implicit index privileges viewer: reads .rule-events and .alert-actions in every space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 327,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-6ed7a760dd19297",
+      "title": "Alerting v2 alerts implicit index privileges editor: get-role surfaces read on both patterns with no DLS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 339,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-edc4bbda9d981f1",
+      "title": "Alerting v2 alerts implicit index privileges editor: reads .rule-events and .alert-actions in every space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 345,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-a7ef8a1e224f557",
+      "title": "Alerting v2 alerts implicit index privileges kibana_admin: get-role surfaces read on both patterns with no DLS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 357,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-920b47b674e476a",
+      "title": "Alerting v2 alerts implicit index privileges kibana_admin: reads .rule-events and .alert-actions in every space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 366,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-ef34e7ebe714f4a",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:read in \"*\": get-role surfaces read with no DLS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 379,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-eb120af99a4fbd7",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:read in \"*\": reads .rule-events and .alert-actions in every space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 388,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-1b130d4be867897",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:all in \"*\": get-role surfaces read with no DLS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 400,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-759b5d579df8512",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:all in \"*\": reads .rule-events and .alert-actions in every space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 409,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-cc2b6e36c32bce1",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:read in marketing: get-role DLS is scoped to marketing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 422,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-6ecab2c2e0d1b1d",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:read in marketing: reads .rule-events and .alert-actions only in marketing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 431,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-edfde7baa7f49bf",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:all in marketing: get-role DLS is scoped to marketing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 443,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-0d0dfc34adf0d40",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:all in marketing: reads .rule-events and .alert-actions only in marketing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 452,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-6906f8a64321b1c",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:read in marketing+finance: get-role DLS covers both spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 465,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-6daacaaeea5dac5",
+      "title": "Alerting v2 alerts implicit index privileges custom alerts:read in marketing+finance: reads .rule-events and .alert-actions in both spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 476,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-1d051c53044a278",
+      "title": "Alerting v2 alerts implicit index privileges custom alerting_v2 rules only: get-role surfaces no implicit grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 497,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-52721214c15902f",
+      "title": "Alerting v2 alerts implicit index privileges custom alerting_v2 rules only: cannot read .rule-events or .alert-actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 506,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-57c07c9ec575998",
+      "title": "Alerting v2 alerts implicit index privileges custom role with no alerting_v2 privilege: get-role surfaces no implicit grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 518,
+        "column": 12
+      }
+    },
+    {
+      "id": "4bb98f4de174fed-e1d82179da16ae7",
+      "title": "Alerting v2 alerts implicit index privileges custom role with no alerting_v2 privilege: cannot read .rule-events or .alert-actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
+        "line": 527,
         "column": 12
       }
     },
