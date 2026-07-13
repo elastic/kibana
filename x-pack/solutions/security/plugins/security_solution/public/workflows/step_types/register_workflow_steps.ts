@@ -44,9 +44,7 @@ export const registerWorkflowSteps = (
     )
   );
   workflowsExtensions.registerStepDefinition(() =>
-    import('./set_attack_tags_step/set_attack_tags_step').then(
-      (m) => m.setAttackTagsStepDefinition
-    )
+    import('./set_attack_tags_step/set_attack_tags_step').then((m) => m.setAttackTagsStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
