@@ -122,7 +122,7 @@ export function registerReconciliationTask({
           const deps = await getRunnerDeps();
 
           // Cases first (the dimension table). A `LOOKUP JOIN .cases
-          // ON cases.id` from any post-fact-table walk consumer then
+          // ON case.id` from any post-fact-table walk consumer then
           // always sees the joined case row at least as up-to-date as
           // the activity / attachment row that referenced it.
           let casesError: unknown;

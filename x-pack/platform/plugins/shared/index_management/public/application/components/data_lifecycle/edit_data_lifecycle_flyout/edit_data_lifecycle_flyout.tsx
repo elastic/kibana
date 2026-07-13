@@ -91,6 +91,8 @@ export interface EditDataLifecycleFlyoutProps {
       selectedPolicyName?: string;
       onPolicySelect: (name: string) => void;
       onPolicyInspect?: (name: string) => void;
+      canManageIlm?: boolean;
+      hasExistingIlmPolicy?: boolean;
     };
   };
 
@@ -361,6 +363,8 @@ export const EditDataLifecycleFlyout = ({
                       selectedPolicyName: ilm.selectedPolicyName,
                       onSelect: ilm.onPolicySelect,
                       onInspect: ilm.onPolicyInspect,
+                      canManage: ilm.canManageIlm,
+                      hasExistingPolicy: ilm.hasExistingIlmPolicy,
                     }
                   : undefined
               }
