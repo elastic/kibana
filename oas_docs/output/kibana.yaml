@@ -122599,6 +122599,12 @@ components:
       additionalProperties: false
       description: Area-specific rendering settings
       properties:
+        fill:
+          description: 'Area fill type: solid or gradient'
+          enum:
+            - solid
+            - gradient
+          type: string
         fill_opacity:
           description: Area fill opacity (0-1 typical, max 2 for legacy)
           maximum: 2
