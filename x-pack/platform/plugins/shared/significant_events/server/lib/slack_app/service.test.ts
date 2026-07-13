@@ -108,7 +108,8 @@ describe('SlackAppService', () => {
           metadata: expect.objectContaining({ managed: true, managed_by: 'nightshift-relay' }),
           kibana_role_descriptors: {
             nightshift_relay_agent_builder: expect.objectContaining({
-              kibana: [{ spaces: ['*'], feature: { agentBuilder: ['read'] } }],
+              elasticsearch: { cluster: ['monitor_inference'], indices: [], run_as: [] },
+              kibana: [{ spaces: ['*'], feature: { agentBuilder: ['read'], actions: ['read'] } }],
             }),
           },
         })
