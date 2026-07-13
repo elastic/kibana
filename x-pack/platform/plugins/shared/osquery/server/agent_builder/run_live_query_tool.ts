@@ -16,10 +16,17 @@ import { createActionHandler } from '../handlers';
 import type { CreateLiveQueryRequestBodySchema } from '../../common/api';
 import { getUserInfo } from '../lib/get_user_info';
 import type { StartPlugins } from '../types';
+import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
+import { validateReadOnlyQuery } from './validate_read_only_query';
+import { pollActionResponses } from './poll_action_responses';
 
 const osqueryTool = (toolName: string): string => `${internalNamespaces.osquery}.${toolName}`;
 
 export const RUN_LIVE_QUERY_TOOL_ID = osqueryTool('run_live_query');
+
+/** Initial inline wait before returning action_id for osquery.get_live_query_results. */
+const POLL_BUDGET_MS = 30_000;
+const MAX_RESULT_ROWS = 100;
 
 const runLiveQuerySchema = z.object({
   query: z
@@ -50,6 +57,7 @@ export const runLiveQueryTool = (
   type: ToolType.builtin,
   description:
     'Run a read-only Osquery live query on specified agents. Returns the action ID for polling results. The query must be read-only (SELECT statements only). Results are returned inline when available; for long-running queries, poll using the returned action_id.',
+    'Run a read-only Osquery live query on specified agents and wait briefly for results. Enforces SchemaService catalog allowlist — only SELECT against known tables. Returns rows when agents respond within ~30s; otherwise returns action_id — call osquery.get_live_query_results to wait longer and display rows in chat.',
   schema: runLiveQuerySchema,
   availability: {
     cacheMode: 'space',
@@ -87,6 +95,23 @@ export const runLiveQueryTool = (
         space,
       });
 
+      const actionId = result.response.action_id as string;
+      const agentCount = result.response.agents?.length ?? result.fleetActionsCount;
+
+      const esClient = coreStart.elasticsearch.client.asInternalUser;
+      const pollResult = await pollActionResponses(esClient, actionId, {
+        budgetMs: POLL_BUDGET_MS,
+        maxRows: MAX_RESULT_ROWS,
+        logger,
+      });
+      const { rows, responded, status: pollStatus } = pollResult;
+      const status =
+        pollStatus === 'completed'
+          ? 'completed'
+          : pollStatus === 'partial'
+          ? 'partial'
+          : ('dispatched' as const);
+
       return {
         results: [
           {
@@ -100,6 +125,13 @@ export const runLiveQueryTool = (
               timeout_seconds: timeout ?? 60,
               guidance:
                 'Query dispatched to Fleet. Results will be collected from osquerybeat. The action_id can be used to poll for results.',
+              responded_agents: responded,
+              row_count: rows.length,
+              rows: rows.slice(0, MAX_RESULT_ROWS),
+              ...(status === 'dispatched' && {
+                guidance:
+                  'Agents have not responded within the initial poll budget. Call osquery.get_live_query_results with this action_id to wait longer and return rows for chat display.',
+              }),
             },
           },
         ],

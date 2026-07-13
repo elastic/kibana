@@ -16,6 +16,7 @@ import {
   ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
   ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID,
   ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID,
+  ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS,
   endpointForensicAnalysisSkill,
 } from './endpoint_forensic_analysis_skill';
 
@@ -27,7 +28,7 @@ describe('endpointForensicAnalysisSkill', () => {
   it('exposes ES|QL and index discovery platform registry tools only (read-only scope)', () => {
     const registryTools = endpointForensicAnalysisSkill.getRegistryTools?.() ?? [];
     expect(registryTools).toEqual([
-      platformCoreTools.listIndices,
+      ...ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS,
       platformCoreTools.getIndexMapping,
       platformCoreTools.generateEsql,
       platformCoreTools.executeEsql,
