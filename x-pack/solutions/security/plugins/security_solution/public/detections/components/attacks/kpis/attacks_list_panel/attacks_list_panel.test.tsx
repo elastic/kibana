@@ -15,27 +15,16 @@ import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
-import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
-}));
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
+jest.mock('../../../../../flyout_v2/use_flyout_api');
 jest.mock('./use_attacks_list_data');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../entity_analytics/components/severity/severity_bar', () => ({
   SeverityBar: () => <div data-test-subj="severity-bar" />,
-}));
-jest.mock('../../../../../flyout_v2/shared/hooks/use_default_flyout_properties');
-jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
-  flyoutProviders: jest.fn(({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="flyout-providers">{children}</div>
-  )),
-}));
-jest.mock('../../../../../flyout_v2/attack/main/attack_flyout_wrapper', () => ({
-  AttackFlyoutWrapper: (props: unknown) => (
-    <div data-test-subj="attack-flyout-wrapper">{JSON.stringify(props)}</div>
-  ),
 }));
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -53,11 +42,14 @@ describe('AttacksListPanel', () => {
   } as unknown as DataView;
 
   const mockOpenFlyout = jest.fn();
-  const mockOpenSystemFlyout = jest.fn();
   const reportEvent = jest.fn();
+
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
     jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
       openFlyout: mockOpenFlyout,
@@ -67,18 +59,7 @@ describe('AttacksListPanel', () => {
         telemetry: {
           reportEvent,
         },
-        overlays: {
-          openSystemFlyout: mockOpenSystemFlyout,
-        },
       },
-    });
-    (useDefaultDocumentFlyoutProperties as jest.Mock).mockReturnValue({
-      maxWidth: 1200,
-      minWidth: 400,
-      ownFocus: false,
-      paddingSize: 'm',
-      resizable: true,
-      size: 's',
     });
   });
 
@@ -163,14 +144,14 @@ describe('AttacksListPanel', () => {
         },
       },
     });
-    expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
+    expect(flyoutApi.openAttackFlyout).not.toHaveBeenCalled();
     expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.DetailsFlyoutOpened, {
       id: 'attack-1',
       source: 'attacks_page_summary_kpi',
     });
   });
 
-  it('calls openSystemFlyout with AttackFlyoutWrapper when enableNewFlyout setting is on', () => {
+  it('calls openAttackFlyout when enableNewFlyout setting is on', () => {
     jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
     const mockRefetch = jest.fn();
     const mockItems = [{ id: 'attack-1', name: 'Attack 1', alertsCount: 5, severityCount: {} }];
@@ -191,7 +172,12 @@ describe('AttacksListPanel', () => {
     const link = screen.getByText('Attack 1');
     link.click();
 
-    expect(mockOpenSystemFlyout).toHaveBeenCalled();
+    expect(flyoutApi.openAttackFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attackId: 'attack-1',
+        indexName: 'test-index-pattern',
+      })
+    );
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.DetailsFlyoutOpened, {
       id: 'attack-1',

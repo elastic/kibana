@@ -296,6 +296,7 @@ export class ActionTypeRegistry {
         allowMultipleSystemActions: actionType.allowMultipleSystemActions,
         description: actionType.description,
         isExperimental: actionType.isExperimental,
+        isTestable: Boolean(actionType.isTestable),
       }));
   }
 
