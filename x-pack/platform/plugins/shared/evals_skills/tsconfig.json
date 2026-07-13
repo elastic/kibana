@@ -8,7 +8,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
-    "@kbn/config-schema",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
     "@kbn/workflows-management-plugin",
@@ -16,7 +15,6 @@
     "@kbn/core-spaces-common",
     "@kbn/spaces-plugin",
     "@kbn/zod",
-    "@kbn/logging-mocks",
     "@kbn/core-http-server-mocks"
   ]
 }
