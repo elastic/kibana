@@ -278,6 +278,10 @@ Wrap **everything after the summary** in a single `<details>` block so the issue
 
 {content — see guidance below}
 
+#### Backporting strategy
+
+{content — only when a fix is proposed; see guidance below}
+
 #### Additional context
 
 {content — optional, omit the whole section if there is nothing high-signal to add}
@@ -318,6 +322,18 @@ Explain _why_ it failed in a few tight sentences or bullets, each anchored to a 
 - State the single root cause; don't re-walk the investigation or list every call in the test.
 - Use an ASCII timeline **only** for a genuine race condition, cascade, or multi-component state leak — never for a linear explanation.
 - Fold supporting evidence (missing `data-test-subj`, a failing request, screenshot state) into the narrative rather than listing it separately.
+
+#### Backporting strategy (only when a fix is proposed)
+
+Include this section **only** when you propose a fix; omit it entirely otherwise (e.g. inconclusive, or no concrete fix). It tells the fixer and reviewers which open branches need the fix, so the right `backport:*` label can be applied. Keep it to one or two lines — a branch list plus a recommendation.
+
+- **Open branches** come from `versions.json` (each entry's `branch`, `branchType` `release` or `development`). The fix lands on `main`; the real question is which open **release** branches also need it.
+- A release branch **benefits** when the failing test (or the code you'd patch) exists there and the same failure is possible. Decide per branch from evidence — e.g. check whether the test file exists on that branch (GitHub contents API with `?ref=<branch>`, or `git`) and whether your root cause applies there. **Never guess**; if you can't tell for a branch, say so and leave the call to a human.
+- Close with **one** concrete recommendation the fixer can act on:
+  - every open release branch is affected → `backport:all-open`
+  - `main`-only (e.g. the test/fix was recently added and isn't on any release branch) → `backport:skip`
+  - a subset → `backport:version` plus the `vX.Y.Z` label for each affected branch (map branch → current version via `versions.json`, e.g. `9.4` → `v9.4.4`)
+- **Special case — fix already on `main`:** if `main` is already patched (the failure is release-branch-only), say so instead: no fix is needed on `main`; name the PR that already fixed it (when known) and which release branch(es) still need it backported.
 
 #### Additional context (optional)
 
