@@ -103,6 +103,9 @@ describe('generateWorkflowTool', () => {
       expect.objectContaining({
         beforeYaml: '',
         proposalId: expect.any(String),
+        // Client keys agent edits to the workflow the conversation was started
+        // against using this stable attachment id — must always be present.
+        attachmentId: 'new-att',
       })
     );
 

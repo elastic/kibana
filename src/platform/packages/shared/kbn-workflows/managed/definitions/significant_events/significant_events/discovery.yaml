@@ -1,6 +1,6 @@
 version: '1'
 name: 'Significant Events Discovery'
-description: 'Correlates unhandled detections into discoveries using an investigator agent and propagates rule-level resolutions.'
+description: 'Correlates unhandled detections into discoveries using a discovery agent and propagates rule-level resolutions.'
 enabled: true
 settings:
   timeout: '20m'
@@ -21,26 +21,11 @@ triggers:
         default: 'now-4h'
         required: false
         description: 'Lookback window for unprocessed detections; older detections are considered stale and excluded from the batch.'
-      - name: activeDiscoveryLookback
-        type: string
-        default: 'now-24h'
-        required: false
-        description: 'Lookback window for active discoveries, events, and groups. Should match .significant_events-discoveries retention.'
       - name: detectionBatchMax
         type: number
         default: 10
         required: false
         description: 'Max rules per discovery invocation. Caps agent message size; remaining detections are picked up on the next cycle.'
-      - name: discoveryDedupWindow
-        type: string
-        default: 'now-1h'
-        required: false
-        description: 'ES date math expression controlling the minimum time between discovery re-writes for the same slug. Longer windows reduce LLM cost for stable incidents; shorter windows surface escalations faster. Must be a valid ES date math value (e.g. now-30m, now-2h, now-24h). Default 1h.'
-      - name: agentConnectorId
-        type: string
-        default: '.openai-gpt-5.2-chat_completion'
-        required: false
-        description: 'Connector ID for the investigator agent.'
 outputs:
   - name: candidateCount
     type: number
@@ -55,17 +40,12 @@ outputs:
   - name: noWork
     type: boolean
 consts:
-  CONTINUATION_BATCH_MAX: 20
   DETECTIONS_INDEX: '.significant_events-detections'
-  DISCOVERIES_INDEX: '.significant_events-discoveries'
-  EVENTS_INDEX: '.significant_events-events'
   KIND_CLEARANCE: 'clearance'
   KIND_DETECTION: 'detection'
   KIND_DISCOVERY: 'discovery'
   KIND_HANDLED: 'handled'
   KIND_QUIET: 'quiet'
-  STATUS_PROMOTED: 'promoted'
-  STATUS_ACKNOWLEDGED: 'acknowledged'
   SCAN_BATCH_SIZE: 100
 
 steps:
@@ -76,90 +56,7 @@ steps:
       spaceId: '{{ workflow.spaceId }}'
 
   # -----------------------------------------------------------------------
-  # Step 1: Fetch latest discovery state per slug.
-  # No kind filter — collapse by slug + sort desc returns the latest doc per
-  # episode. kind:discovery = still open; kind:handled/clearance = closed.
-  # -----------------------------------------------------------------------
-  - name: get_active_events
-    # Find slugs whose latest event is promoted or acknowledged — these episodes are
-    # still active even though triage stamped kind:handled in the discoveries index.
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: '/{{ consts.EVENTS_INDEX }}/_search?ignore_unavailable=true'
-      body:
-        size: '${{ consts.SCAN_BATCH_SIZE }}'
-        sort:
-          - '@timestamp':
-              order: desc
-        collapse:
-          field: discovery_slug
-        _source:
-          includes:
-            - discovery_slug
-        query:
-          bool:
-            filter:
-              - term:
-                  kibana.space_ids: '{{ variables.spaceId }}'
-              - terms:
-                  status:
-                    - '{{ consts.STATUS_PROMOTED }}'
-                    - '{{ consts.STATUS_ACKNOWLEDGED }}'
-              - range:
-                  '@timestamp':
-                    gte: '{{ inputs.activeDiscoveryLookback }}'
-    on-failure:
-      continue: true
-
-  - name: get_continuation_candidates
-    if: '${{ steps.get_active_events.output.hits.hits.size > 0 }}'
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: '/{{ consts.DISCOVERIES_INDEX }}/_search?ignore_unavailable=true'
-      body:
-        size: '${{ consts.SCAN_BATCH_SIZE }}'
-        sort:
-          - '@timestamp':
-              order: desc
-        collapse:
-          field: discovery_slug
-        _source:
-          includes:
-            - kind
-            - discovery_id
-            - discovery_slug
-            - detections
-            - summary
-            - root_cause
-            - title
-            - confidence
-            - criticality
-            - cause_kis
-            - stream_names
-            - dependency_edges
-            - infra_components
-        query:
-          bool:
-            filter:
-              - term:
-                  kibana.space_ids: '{{ variables.spaceId }}'
-              - terms:
-                  discovery_slug: "${{ steps.get_active_events.output.hits.hits | map: '_source' | map: 'discovery_slug' }}"
-              - range:
-                  '@timestamp':
-                    gte: '{{ inputs.activeDiscoveryLookback }}'
-    on-failure:
-      continue: true
-
-  - name: continuation_candidates
-    type: data.set
-    with:
-      hits: '${{ steps.get_continuation_candidates.output.hits.hits | default: [] | slice: 0, consts.CONTINUATION_BATCH_MAX  }}'
-
-  # -----------------------------------------------------------------------
-  # Step 2: Fetch unhandled detection batch (active + quiet rules).
+  # Step 1: Fetch unhandled detection batch (active + quiet rules).
   # -----------------------------------------------------------------------
   - name: get_detected_window
     type: elasticsearch.request
@@ -238,12 +135,16 @@ steps:
       hasRemaining: '${{ steps.compute_queue_sizes.output.candidateCount > steps.compute_queue_sizes.output.processedCount }}'
       queueEmpty: '${{ steps.compute_queue_sizes.output.candidateCount <= steps.compute_queue_sizes.output.processedCount }}'
 
-  - name: compute_stamp_rule_uuids
-    # Rules to mark handled this cycle: all rules in the investigated batch (active + quiet).
-    # Active rules beyond detectionBatchMax cap are excluded so they survive for the next cycle.
+  - name: compute_quiet_rule_uuids
+    # Quiet rules are always safe to stamp handled even when not written by the agent —
+    # a rule the pipeline already found quiet costs nothing to re-scan, and the investigator's
+    # own Quiet-without-episode gate intentionally skips discovery_write for many of them.
     type: data.set
     with:
-      stamp_rule_uuids: "${{ steps.compute_active_batch.output.hits | map: '_source' | map: 'rule_uuid' | compact | uniq | default: [] }}"
+      rule_uuids: >-
+        ${{ steps.compute_active_batch.output.hits
+        | where: '_source.kind', 'quiet'
+        | map: '_source' | map: 'rule_uuid' | compact | uniq | default: [] }}
 
   - name: output_no_detections
     type: workflow.output
@@ -257,296 +158,78 @@ steps:
       noWork: true
 
   # -----------------------------------------------------------------------
-  # Step 4: Correlate detections into discoveries.
+  # Step 2: Correlate detections into discoveries.
   # -----------------------------------------------------------------------
   - name: run_discovery_agent
     type: ai.agent
     agent-id: "platform.streams.sig-events.discovery"
-    connector-id: "${{ inputs.agentConnectorId }}"
-    # Keep plugin-id/aggregate-by in sync with @kbn/streams-schema inference_feature_ids.ts
-    # (SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID / SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
+    # Keep connector-id-by-feature/plugin-id/aggregate-by in sync with @kbn/significant-events-schema
+    # inference_feature_ids.ts (SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID /
+    # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
+    connector-id-by-feature: 'significant_events_discovery'
     plugin-id: 'significant_events_discovery'
     aggregate-by: 'significant_events'
     create-conversation: true
     with:
       message: |
-        ## New episode suffix
-        {{ execution.id | truncate: 8, '' }}
-
         ## Active batch
         {{ steps.compute_active_batch.output.hits | map: '_source' | json }}
-
-        {% if steps.continuation_candidates.output.hits.size > 0 %}
-        ## Continuation Candidates
-        {{ steps.continuation_candidates.output.hits | map: '_source' | json }}
-        {% endif %}
-
       schema:
         type: object
         properties:
-          discoveries:
+          written_rule_uuids:
             type: array
             items:
-              type: object
-              properties:
-                title:
-                  type: string
-                summary:
-                  type: string
-                root_cause:
-                  type: string
-                criticality:
-                  type: integer
-                  minimum: 0
-                  maximum: 100
-                confidence:
-                  type: integer
-                  minimum: 0
-                  maximum: 100
-                kind:
-                  type: string
-                  enum: [discovery, clearance]
-                  description: 'discovery: open or continuing incident. clearance: all rules in the group are quiet and an open episode was matched — episode resolved.'
-                parent_discovery_id:
-                  type: string
-                  description: 'Required when kind is clearance — discovery_id of the open episode being closed (from the matched continuation candidate).'
-                detections:
-                  type: array
-                  minItems: 1
-                  items:
-                    type: object
-                    required:
-                      - detection_id
-                      - rule_name
-                      - rule_uuid
-                    properties:
-                      detection_id:
-                        type: string
-                      kind:
-                        type: string
-                        enum: [detection, quiet, handled]
-                        description: 'Copy from the input detection doc. Required for continuation merge — newer entries carry updated kind.'
-                      rule_name:
-                        type: string
-                      rule_uuid:
-                        type: string
-                      stream_name:
-                        type: string
-                      change_point_type:
-                        type: string
-                      p_value:
-                        type: number
-                      alert_count:
-                        type: integer
-                dependency_edges:
-                  type: array
-                  items:
-                    type: object
-                    required: [source, target]
-                    properties:
-                      source:
-                        type: string
-                      target:
-                        type: string
-                      protocol:
-                        type: string
-                      exposure:
-                        type: string
-                        enum: ['exposed', 'not_exposed']
-                infra_components:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      title:
-                        type: string
-                      workloads:
-                        type: array
-                        items:
-                          type: string
-                      exposure:
-                        type: string
-                        enum: ['exposed', 'not_exposed']
-                cause_kis:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      stream_name:
-                        type: string
-                evidences:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      rule_name:
-                        anyOf:
-                          - type: string
-                          - type: 'null'
-                        description: 'Name of the rule this evidence targets.'
-                      rule_uuid:
-                        anyOf:
-                          - type: string
-                          - type: 'null'
-                        description: 'UUID of the rule this evidence targets.'
-                      result:
-                        type: string
-                        enum: [found, empty, error]
-                      description:
-                        type: string
-                      stream_name:
-                        type: string
-                      row_count:
-                        type: integer
-                      collected_at:
-                        type: string
-                      esql_query:
-                        anyOf:
-                          - type: string
-                          - type: 'null'
-                        description: 'The post-modification ES|QL snapshot executed.'
-                discovery_slug:
-                  type: string
-                  pattern: '^[a-z0-9-]+__[a-z0-9-]+$'
-                  description: "Format: '<service>__<rule-fragment>-<suffix>' for new episodes (suffix verbatim from '## New episode suffix'); verbatim from continuation candidate when continuing. Pattern: service and rule-fragment are lowercase alphanumeric with hyphens; double underscore separator."
-              required:
-                - kind
-                - title
-                - summary
-                - criticality
-                - confidence
-                - detections
-                - cause_kis
-                - discovery_slug
-                - dependency_edges
-                - infra_components
-                - evidences
-        required:
-          - discoveries
+              type: string
+            description: >-
+              rule_uuid of every entry across every detections[] array from every
+              discovery_write call made this cycle — including calls skipped by
+              discovery_write's own deduplication (written: false against an
+              existing episode still counts; the rule was accounted for). Used by
+              the workflow to verify active (kind:detection) rules were actually
+              handled before stamping them. Full discovery data is written via
+              the discovery_write tool — this is a compact summary only.
+        required: [written_rule_uuids]
     on-failure:
       continue: false
 
-  - name: snapshot_discoveries
+  # Eviction-safe snapshot — ai.agent outputs are evictable; data.set outputs are not.
+  # Mirrors triage.yaml's check_judge_agent_output/store_significant_events pattern:
+  # written_rule_uuids is a mechanical echo of what discovery_write already returned to
+  # the agent in-context this same turn, not a claim requiring independent verification.
+  - name: check_discovery_agent_output
+    type: if
+    condition: >-
+      ${{ steps.run_discovery_agent.error == null
+      and steps.run_discovery_agent.output.structured_output.written_rule_uuids != null }}
+    steps:
+      - name: store_discovery_written_rule_uuids
+        type: data.set
+        with:
+          rule_uuids: '${{ steps.run_discovery_agent.output.structured_output.written_rule_uuids }}'
+
+  - name: compute_written_rule_uuids
+    # rule_uuids the agent reported as accounted for by a discovery_write call this
+    # cycle. Empty when the agent errored or returned no structured output — in that
+    # case only quiet rules (compute_quiet_rule_uuids) get stamped, and active detection
+    # rules are left unhandled so they're retried next cycle instead of being lost.
     type: data.set
     with:
-      discoveries: "${{ steps.run_discovery_agent.output.structured_output.discoveries }}"
-      conversation_id: "{{ steps.run_discovery_agent.output.conversation_id }}"
+      rule_uuids: >-
+        ${{ steps.store_discovery_written_rule_uuids.output.rule_uuids
+        | compact | uniq | default: [] }}
 
-  - name: foreach_discovery
-    type: foreach
-    if: >-
-      ${{ steps.snapshot_discoveries.output != null
-      and steps.snapshot_discoveries.output.discoveries != null }}
-    foreach: '${{ steps.snapshot_discoveries.output.discoveries }}'
-    steps:
-      - name: compute_discovery_id
-        # Per-write id; the slug is the stable incident identity.
-        type: data.set
-        with:
-          discovery_id: '{{ foreach.item.discovery_slug }}-{{ execution.id }}'
-          discovery_slug: '{{ foreach.item.discovery_slug }}'
-
-      - name: check_recent_discoveries
-        if: "${{ foreach.item.kind == 'discovery' and foreach.item.detections != null and foreach.item.detections.size > 0 }}"
-        type: elasticsearch.request
-        with:
-          method: POST
-          path: '/{{ consts.DISCOVERIES_INDEX }}/_search?ignore_unavailable=true'
-          body:
-            size: 1
-            sort:
-              - '@timestamp':
-                  order: desc
-            _source:
-              includes:
-                - discovery_id
-            query:
-              bool:
-                filter:
-                  - term:
-                      kibana.space_ids: '{{ variables.spaceId }}'
-                  - term:
-                      kind: '{{ consts.KIND_DISCOVERY }}'
-                  - term:
-                      discovery_slug: '{{ steps.compute_discovery_id.output.discovery_slug }}'
-                  - range:
-                      '@timestamp':
-                        gte: '{{ inputs.discoveryDedupWindow }}'
-        on-failure:
-          continue: true
-
-      - name: check_recent_discoveries_processed
-        if: '${{ steps.check_recent_discoveries.error == null and steps.check_recent_discoveries.output.hits.total.value > 0 }}'
-        type: elasticsearch.request
-        with:
-          method: POST
-          path: '/{{ consts.DISCOVERIES_INDEX }}/_count?ignore_unavailable=true'
-          body:
-            query:
-              bool:
-                filter:
-                  - term:
-                      kibana.space_ids: '{{ variables.spaceId }}'
-                should:
-                  - bool:
-                      filter:
-                        - term:
-                            kind: '{{ consts.KIND_CLEARANCE }}'
-                        - term:
-                            parent_discovery_id: '${{ steps.check_recent_discoveries.output.hits.hits[0]._source.discovery_id }}'
-                  - bool:
-                      filter:
-                        - term:
-                            kind: '{{ consts.KIND_HANDLED }}'
-                        - term:
-                            discovery_id: '${{ steps.check_recent_discoveries.output.hits.hits[0]._source.discovery_id }}'
-                minimum_should_match: 1
-        on-failure:
-          continue: true
-
-      - name: compute_write_gate
-        type: data.set
-        with:
-          needs_new_discovery: >-
-            ${{ foreach.item.kind == 'clearance'
-            or steps.check_recent_discoveries.error != null
-            or steps.check_recent_discoveries.output.hits.total.value == 0
-            or steps.check_recent_discoveries_processed.error == null
-            and steps.check_recent_discoveries_processed.output.count > 0 }}
-
-      - name: write_discovery_doc
-        type: elasticsearch.request
-        if: '${{ steps.compute_write_gate.output.needs_new_discovery }}'
-        with:
-          method: POST
-          path: '/{{ consts.DISCOVERIES_INDEX }}/_doc'
-          body:
-            '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-            kibana:
-              space_ids:
-                - '{{ variables.spaceId }}'
-            kind: '{{ foreach.item.kind }}'
-            cause_kis: '${{ foreach.item.cause_kis }}'
-            confidence: '${{ foreach.item.confidence }}'
-            conversation_id: '{{ steps.snapshot_discoveries.output.conversation_id }}'
-            criticality: '${{ foreach.item.criticality }}'
-            dependency_edges: '${{ foreach.item.dependency_edges | default: [] }}'
-            detections: '${{ foreach.item.detections }}'
-            discovery_id: '{{ steps.compute_discovery_id.output.discovery_id }}'
-            discovery_slug: '{{ steps.compute_discovery_id.output.discovery_slug }}'
-            evidences: '${{ foreach.item.evidences | default: [] }}'
-            infra_components: '${{ foreach.item.infra_components | default: [] }}'
-            root_cause: '{{ foreach.item.root_cause }}'
-            rule_names: "${{ foreach.item.detections | map: 'rule_name' | compact | uniq | default: [] }}"
-            stream_names: "${{ foreach.item.detections | map: 'stream_name' | compact | uniq | default: [] }}"
-            summary: '{{ foreach.item.summary }}'
-            parent_discovery_id: '{{ foreach.item.parent_discovery_id }}'
-            title: '{{ foreach.item.title }}'
-            workflow_execution_id: '{{ execution.id }}'
-        on-failure:
-          continue: false
+  - name: compute_stamp_rule_uuids
+    # Final safe-to-stamp set: quiet rules (always safe, see compute_quiet_rule_uuids)
+    # plus only the rule_uuids the agent confirmed writing a discovery for this cycle.
+    # Active detection rules the agent silently dropped are excluded here, so they
+    # remain unhandled and are retried next cycle instead of being lost permanently.
+    type: data.set
+    with:
+      stamp_rule_uuids: >-
+        ${{ steps.compute_quiet_rule_uuids.output.rule_uuids
+        | concat: steps.compute_written_rule_uuids.output.rule_uuids
+        | compact | uniq | default: [] }}
 
   - name: get_unhandled_state_docs
     # Skip handled-stamping if the agent failed, so its detections are retried next cycle.
