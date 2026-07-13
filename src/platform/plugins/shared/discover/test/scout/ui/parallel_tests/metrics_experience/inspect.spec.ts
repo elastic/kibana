@@ -49,7 +49,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('switch to Requests view and verify statistics', async () => {
-          await inspector.switchToView('Requests');
+          await inspector.openInspectorView('Requests');
           await expect(inspector.requests.statisticsTab).toBeVisible();
           await expect(inspector.requests.timestamp).toBeVisible();
         });

@@ -17,6 +17,15 @@ const VIEW_CHOOSER_TEST_SUBJECTS: Record<InspectorView, string> = {
   Data: 'inspectorViewChooserData',
 };
 
+const waitForVisible = async (locator: Locator, timeout = 1000): Promise<boolean> => {
+  try {
+    await locator.waitFor({ state: 'visible', timeout });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export class Inspector {
   public readonly panel: Locator;
   public readonly closeButton: Locator;
@@ -63,16 +72,25 @@ export class Inspector {
     return this.requests.timestamp.innerText();
   }
 
-  async switchToView(view: InspectorView) {
-    await this.viewChooser.click();
-    await this.page.testSubj.locator(VIEW_CHOOSER_TEST_SUBJECTS[view]).click();
+  async openInspectorView(view: InspectorView) {
+    await this.panel.waitFor({ state: 'visible' });
+    const viewChooserOption = this.page.testSubj.locator(VIEW_CHOOSER_TEST_SUBJECTS[view]);
+
+    if (!(await waitForVisible(viewChooserOption))) {
+      await this.viewChooser.click();
+    }
+
+    await viewChooserOption.click();
   }
 
-  async selectDocumentsRequestStatistics() {
+  async openInspectorRequestsView() {
     await this.panel.waitFor({ state: 'visible' });
-    await this.requests.requestChooser.click();
-    await this.requests.documentsRequest.click();
-    await this.requests.statisticsTab.click();
+
+    if (!(await waitForVisible(this.viewChooser))) {
+      return;
+    }
+
+    await this.openInspectorView('Requests');
   }
 
   async getTableData(): Promise<string[][]> {

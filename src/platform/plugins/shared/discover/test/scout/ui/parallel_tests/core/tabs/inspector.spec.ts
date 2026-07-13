@@ -38,7 +38,10 @@ spaceTest.describe('Discover tabs - inspector', { tag: '@local-stateful-classic'
     const { inspector, unifiedTabs } = pageObjects;
 
     await unifiedTabs.openInspectorForActiveTab();
-    await inspector.selectDocumentsRequestStatistics();
+    await inspector.openInspectorRequestsView();
+    await inspector.requests.requestChooser.click();
+    await inspector.requests.documentsRequest.click();
+    await inspector.requests.statisticsTab.click();
 
     const requestStats = await inspector.getTableData();
     expect(requestStats.length).toBeGreaterThan(0);
