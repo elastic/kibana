@@ -161,7 +161,7 @@ safe-outputs:
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
     # Requests the author of the PR that introduced the flaky test as a reviewer on the fix PR
     request-fix-review:
-      description: 'Request a review from the author of the PR that introduced the flaky test. Call this exactly once, only after you have opened a draft PR, and only with the real (non-bot) GitHub login of that PR''s author. GitHub ignores the request if the user cannot review the PR (e.g. they are not a repo collaborator), leaving the PR unaffected.'
+      description: 'Request a review on the fix PR from the author of the PR that introduced the flaky test. Only pass a real, non-bot GitHub login.'
       runs-on: ubuntu-latest
       needs: safe_outputs
       if: needs.safe_outputs.outputs.created_pr_number != ''
@@ -240,7 +240,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 - **Title**: `[<Plugin name>] <concise summary of the fix>`. Derive the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`).
 - **Body**:
   ```
-  Fixes #<issue-number> — likely introduced by #<introducing-pr> (cc @<introducing-pr-author>)
+  Fixes #<issue-number> - likely introduced by #<introducing-pr> (cc @<introducing-pr-author>)
 
   ### Summary
   <a few bullet points: what was failing, and what this patch changes - keep it very concise, every bullet point must be earned>
@@ -265,7 +265,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   ```
 
 The first line attributes the flake:
-- **Introducing PR** (`#<introducing-pr>`): the PR you believe introduced the flake — find the PR that first added the failing test with `git log` / `git blame` on the test file, or prefer a specific PR/commit the investigator implicated as the cause. The `likely` hedge is intentional: this is an informed suspicion, not a proven cause, so keep it. If you can't identify a well-supported candidate, omit the whole `— likely introduced by …` clause and keep just `Fixes #<issue-number>` — never guess.
+- **Introducing PR** (`#<introducing-pr>`): the PR you believe introduced the flake — find the PR that first added the failing test with `git log` / `git blame` on the test file, or prefer a specific PR/commit the investigator implicated as the cause. The `likely` hedge is intentional: this is an informed suspicion, not a proven cause, so keep it. If you can't identify a well-supported candidate, omit the whole `- likely introduced by …` clause and keep just `Fixes #<issue-number>` — never guess.
 - **cc** (`@<introducing-pr-author>`): `@`-mention that PR's author so they're looped in on the fix; drop the `(cc @…)` if the author is a bot (includes `kibanamachine`). Request this same person as a reviewer via the `request_fix_review` tool (see Steps).
 - Add more `Fixes #<issue-number>` references if this fix resolves multiple issues.
 
