@@ -11,14 +11,6 @@ import type { EuiThemeComputed } from '@elastic/eui';
 export type EuiTheme = EuiThemeComputed;
 
 export const getRetentionSelectableRowStyles = ({ euiTheme }: { euiTheme: EuiTheme }) => ({
-  item: css`
-    /*
-     * Keep row-level styling minimal; list-level styling handles dividers so the
-     * separator spans both the main button and the optional extra action.
-     */
-    width: 100%;
-    padding: ${euiTheme.size.s} ${euiTheme.size.l};
-  `,
   nameColumn: css`
     min-width: 0;
   `,
@@ -39,22 +31,17 @@ export const getRetentionSelectorStyles = ({
   height?: number | 'full';
   nestedScrollHeight?: number;
 }) => ({
-  list: css`
-    /*
-     * Dividers + gutters live at the list level so the separator spans both the
-     * main button and the optional extra action button.
-     */
-    // Needed so the line doesn't get cut off
-    .euiListItemLayout__wrapper {
-      border-bottom: ${euiTheme.border.thin};
-      padding-right: ${euiTheme.size.l};
-    }
-    .euiListItemLayout__wrapper:last-child {
-      border-bottom: none;
-    }
-  `,
   paddedSection: css`
     padding: 0 ${euiTheme.size.l};
+  `,
+  selectable: css`
+    .euiSelectableListItem {
+      padding: ${euiTheme.size.s} ${euiTheme.size.l};
+    }
+
+    .euiSelectableListItem__text {
+      padding-block: 0;
+    }
   `,
   scrollContainer:
     typeof height === 'number'
