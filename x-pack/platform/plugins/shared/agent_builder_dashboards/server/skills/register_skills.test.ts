@@ -7,10 +7,11 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { dashboardManagementSkill } from './dashboard_management_skill';
+import { aiPanelAuthoringSkill } from './ai_panel_authoring_skill';
 import { registerSkills } from './register_skills';
 
 describe('registerSkills', () => {
-  it('registers the dashboard management skill', async () => {
+  it('registers the dashboard management and ai panel authoring skills', async () => {
     const register = jest.fn();
     const agentBuilder = {
       skills: { register },
@@ -18,8 +19,9 @@ describe('registerSkills', () => {
 
     await registerSkills(agentBuilder);
 
-    expect(register).toHaveBeenCalledTimes(1);
+    expect(register).toHaveBeenCalledTimes(2);
     expect(register).toHaveBeenCalledWith(dashboardManagementSkill);
+    expect(register).toHaveBeenCalledWith(aiPanelAuthoringSkill);
   });
 
   it('includes SML discovery instructions in the skill content', () => {

@@ -104,7 +104,7 @@ export const EditAiPanelFlyout = ({
   return (
     <EuiFlyout
       onClose={onClose}
-      size="s"
+      size={600}
       type="push"
       resizable
       minWidth={320}
