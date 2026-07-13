@@ -6,13 +6,17 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import { createTraceBasedEvaluator, type Evaluator } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Evaluator } from '../../types';
-import { createTraceBasedEvaluator } from './factory';
 
 const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
 
-export function createSkillInvocationEvaluator({
+/**
+ * Security Agent Builder eval suites use the runtime `load_skill` tool span
+ * (not only legacy `filestore.read` SKILL.md loads). Keep this evaluator in
+ * Security-owned eval packages rather than extending the platform evaluator.
+ */
+export function createSecuritySkillInvocationEvaluator({
   traceEsClient,
   log,
   skillName,
@@ -36,17 +40,16 @@ export function createSkillInvocationEvaluator({
 | WHERE trace.id == "${traceId}"
 | STATS
   total_spans = COUNT(*),
-  total_tool_spans = COUNT(
-    CASE(
-      attributes.elastic.inference.span.kind == "TOOL",
-      1,
-      NULL
-    )
-  ),
   skill_invoked = COUNT(
     CASE(
-      attributes.gen_ai.tool.name == "filestore.read"
-        AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*",
+      (
+        attributes.gen_ai.tool.name == "filestore.read"
+          AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"
+      )
+      OR (
+        attributes.gen_ai.tool.name == "load_skill"
+          AND attributes.gen_ai.tool.call.arguments LIKE "*${skillName}*"
+      ),
       1,
       NULL
     )
@@ -56,28 +59,21 @@ export function createSkillInvocationEvaluator({
         const totalSpansIndex = response.columns.findIndex(
           (column) => column.name === 'total_spans'
         );
-        const totalToolSpansIndex = response.columns.findIndex(
-          (column) => column.name === 'total_tool_spans'
-        );
         const skillInvokedIndex = response.columns.findIndex(
           (column) => column.name === 'skill_invoked'
         );
 
-        if (totalSpansIndex === -1 || totalToolSpansIndex === -1 || skillInvokedIndex === -1) {
+        if (totalSpansIndex === -1 || skillInvokedIndex === -1) {
           log.warning('Expected columns not found in trace query response');
           return null;
         }
 
         const totalSpans = row?.[totalSpansIndex] as number | undefined;
-        const totalToolSpans = row?.[totalToolSpansIndex] as number | undefined;
         const skillInvoked = row?.[skillInvokedIndex] as number | undefined;
 
+        // Retry only while the trace itself is not yet indexed (OTLP → ES lag).
         if (!totalSpans) {
           return null;
-        }
-
-        if (!totalToolSpans) {
-          return 0;
         }
 
         return (skillInvoked ?? 0) > 0 ? 1 : 0;

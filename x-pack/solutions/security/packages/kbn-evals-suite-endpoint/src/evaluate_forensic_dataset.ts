@@ -8,7 +8,6 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
-  createSkillInvocationEvaluator,
   createTrajectoryEvaluator,
   getToolCallSteps,
   type AgentBuilderClient,
@@ -21,6 +20,7 @@ import {
 } from '@kbn/evals';
 import { converseQuestionToTaskOutput } from './converse_task';
 import { createEndpointCriteriaEvaluator } from './evaluate_dataset';
+import { createSecuritySkillInvocationEvaluator } from './security_skill_invocation_evaluator';
 
 /** Must match defineSkillType({ name }) in endpoint_forensic_analysis_skill.ts */
 export const ENDPOINT_FORENSIC_ANALYSIS_SKILL_NAME = 'endpoint-forensic-analysis';
@@ -143,7 +143,7 @@ export const buildForensicEvaluators = ({
     outputTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
     cachedTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
     wrapSkillInvocationForDistractors(
-      createSkillInvocationEvaluator({
+      createSecuritySkillInvocationEvaluator({
         traceEsClient,
         log,
         skillName: ENDPOINT_FORENSIC_ANALYSIS_SKILL_NAME,
