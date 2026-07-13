@@ -181,6 +181,53 @@ describe('ScheduleSection', () => {
 
         expect(onChange).not.toHaveBeenCalled();
       });
+
+      // Regression (PR #276996 review, @szwarckonrad): round-tripping through
+      // Interval must not clobber a still-valid custom rrule startDate/stopAfter.
+      it('preserves a still-valid custom startDate/stopAfter across a round trip through Interval mode', () => {
+        const onChange = jest.fn();
+        const customStartDate = new Date('2026-06-25T00:00:00.000Z'); // in the future relative to NOW
+        const customStopAfter = new Date('2026-06-26T00:00:00.000Z');
+        const rruleState = recurrenceState({
+          startDate: customStartDate,
+          stopAfter: { enabled: true, date: customStopAfter },
+        });
+
+        const intervalAfterRoundTrip = { ...rruleState, scheduleType: 'interval' as const };
+        renderFlagOn(<ScheduleSection value={intervalAfterRoundTrip} onChange={onChange} />);
+
+        fireEvent.click(screen.getByTestId('osquery-schedule-type-rrule'));
+
+        expect(onChange).toHaveBeenCalledWith({
+          ...intervalAfterRoundTrip,
+          scheduleType: 'rrule',
+        });
+      });
+
+      it('still re-seeds when the custom startDate has gone stale while dwelling in Interval mode', () => {
+        const onChange = jest.fn();
+        const customStartDate = new Date('2026-06-19T13:00:00.000Z'); // valid when picked...
+        const rruleState = recurrenceState({ startDate: customStartDate });
+        const intervalAfterRoundTrip = { ...rruleState, scheduleType: 'interval' as const };
+
+        renderFlagOn(<ScheduleSection value={intervalAfterRoundTrip} onChange={onChange} />);
+
+        // Time passes while dwelling in Interval mode; startDate goes stale.
+        jest.setSystemTime(new Date('2026-06-19T14:00:00.000Z'));
+
+        fireEvent.click(screen.getByTestId('osquery-schedule-type-rrule'));
+
+        const expectedStartDate = roundUpTo30Min(new Date('2026-06-19T14:00:00.000Z'));
+        expect(onChange).toHaveBeenCalledWith({
+          ...intervalAfterRoundTrip,
+          scheduleType: 'rrule',
+          startDate: expectedStartDate,
+          stopAfter: {
+            ...intervalAfterRoundTrip.stopAfter,
+            date: new Date(expectedStartDate.getTime() + 24 * 60 * 60 * 1000),
+          },
+        });
+      });
     });
 
     it('propagates an interval change in interval mode', () => {

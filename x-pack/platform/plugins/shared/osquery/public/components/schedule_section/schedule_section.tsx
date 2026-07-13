@@ -15,7 +15,7 @@ import { ScheduleTypeSelector } from './schedule_type_selector';
 import { SplayTimeField } from './splay_time_field';
 import { StartDateField } from './start_date_field';
 import { StopAfterField } from './stop_after_field';
-import { ONE_DAY_MS, roundUpTo30Min } from './slot_utils';
+import { ONE_DAY_MS, floorTo30Min, roundUpTo30Min } from './slot_utils';
 import {
   ADVANCED_PARTS_ADVISORY_BODY,
   ADVANCED_PARTS_ADVISORY_TITLE,
@@ -63,9 +63,11 @@ export const ScheduleSection = ({
 }: ScheduleSectionProps) => {
   const handleTypeChange = useCallback(
     (scheduleType: ScheduleType) => {
-      // Re-seed startDate on transition into rrule mode so a stale
-      // interval-era value doesn't trip the past-start validation.
-      if (scheduleType === 'rrule' && value.scheduleType !== 'rrule') {
+      // Re-seed startDate only when it's stale, not just because we're entering
+      // rrule mode — otherwise a valid startDate from an earlier rrule session
+      // gets clobbered by an interval -> rrule round trip.
+      const isStale = value.startDate.getTime() < floorTo30Min(new Date()).getTime();
+      if (scheduleType === 'rrule' && value.scheduleType !== 'rrule' && isStale) {
         const startDate = roundUpTo30Min(new Date());
         onChange({
           ...value,
