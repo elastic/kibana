@@ -6,7 +6,7 @@
  */
 
 import { computeSeedState } from './compute_seed_state';
-import type { CspRegion } from '../../../common/types';
+import type { CspRegion } from '../../common/types';
 
 const usEast: CspRegion = { csp: 'aws', region: 'us-east-1', geo: 'us' };
 const euWest: CspRegion = { csp: 'gcp', region: 'europe-west1', geo: 'eu' };

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { regionKey } from '../../utils/eis_utils';
-import type { PolicyMode } from '../../types';
-import type { CspRegion, RegionPolicyResponse } from '../../../common/types';
+import { regionKey } from './eis_utils';
+import type { PolicyMode } from '../types';
+import type { CspRegion, RegionPolicyResponse } from '../../common/types';
 
 export interface SeedState {
   activeTab: PolicyMode;

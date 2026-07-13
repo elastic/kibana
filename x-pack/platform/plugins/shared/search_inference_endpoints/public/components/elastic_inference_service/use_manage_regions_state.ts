@@ -20,7 +20,7 @@ import { GEO_ORDER } from '../../types';
 import type { PolicyMode } from '../../types';
 import type { CspRegion } from '../../../common/types';
 import type { ZoneGroup } from './region_zone_list';
-import { computeSeedState } from './compute_seed_state';
+import { computeSeedState } from '../../utils/compute_seed_state';
 
 export const useManageRegionsState = (onClose: () => void) => {
   const { data: policy, isLoading: isPolicyLoading, isError: isPolicyError } = useRegionPolicy();
