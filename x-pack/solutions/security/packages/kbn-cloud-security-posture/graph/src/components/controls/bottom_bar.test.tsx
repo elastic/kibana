@@ -6,13 +6,16 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactFlow } from '@xyflow/react';
+import { EuiThemeProvider } from '@elastic/eui';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { BottomBar } from './bottom_bar';
 import { DEFAULT_GRAPH_FILTERS } from './apply_filters_popover';
 import { GraphInteractionToolContext } from './graph_interaction_tool_context';
 import { GraphSearchProvider } from './graph_search_context';
+import type { NodeViewModel } from '../types';
 import {
   GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID,
   GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID,
@@ -21,30 +24,72 @@ import {
   GRAPH_BOTTOM_BAR_SELECT_TOOL_ID,
 } from '../test_ids';
 
+jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue([false, jest.fn()]));
+
+const DISPLAY_STARTING_POINT_TOUR_TITLE = 'Your starting point is highlighted';
+
+const mockToursIsEnabled = jest.fn(() => true);
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const { notificationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+
+  return {
+    useKibana: () => ({
+      services: {
+        notifications: {
+          ...notificationServiceMock.createStartContract(),
+          tours: {
+            isEnabled: mockToursIsEnabled,
+          },
+        },
+      },
+    }),
+  };
+});
+
+const originNode: NodeViewModel = {
+  id: 'origin-entity',
+  label: 'Origin Entity',
+  color: 'primary',
+  shape: 'ellipse',
+  isOrigin: true,
+};
+
 const renderBottomBar = (
   interactionTool: 'select' | 'pan' = 'select',
   setInteractionTool = jest.fn(),
   registerApplyFiltersToggle = jest.fn(),
   registerSearchPanelToggle = jest.fn(),
-  registerFocusSearchInput = jest.fn()
+  registerFocusSearchInput = jest.fn(),
+  nodes: NodeViewModel[] = []
 ) =>
   render(
-    <ReactFlow>
-      <GraphSearchProvider>
-        <GraphInteractionToolContext.Provider
-          value={{
-            interactionTool,
-            setInteractionTool,
-            registerApplyFiltersToggle,
-            registerSearchPanelToggle,
-            registerFocusSearchInput,
-          }}
-        >
-          <BottomBar filtersState={DEFAULT_GRAPH_FILTERS} onFiltersChange={jest.fn()} nodes={[]} />
-        </GraphInteractionToolContext.Provider>
-      </GraphSearchProvider>
-    </ReactFlow>
+    <EuiThemeProvider>
+      <ReactFlow>
+        <GraphSearchProvider>
+          <GraphInteractionToolContext.Provider
+            value={{
+              interactionTool,
+              setInteractionTool,
+              registerApplyFiltersToggle,
+              registerSearchPanelToggle,
+              registerFocusSearchInput,
+            }}
+          >
+            <BottomBar
+              filtersState={DEFAULT_GRAPH_FILTERS}
+              onFiltersChange={jest.fn()}
+              nodes={nodes}
+            />
+          </GraphInteractionToolContext.Provider>
+        </GraphSearchProvider>
+      </ReactFlow>
+    </EuiThemeProvider>
   );
+
+beforeEach(() => {
+  mockToursIsEnabled.mockReturnValue(true);
+  (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
+});
 
 describe('BottomBar', () => {
   it('renders keyboard shortcuts, tools, search, and display controls', () => {
@@ -106,5 +151,60 @@ describe('BottomBar', () => {
     expect(registerApplyFiltersToggle).toHaveBeenCalledWith(expect.any(Function));
     expect(registerSearchPanelToggle).toHaveBeenCalledWith(expect.any(Function));
     expect(registerFocusSearchInput).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  describe('display starting point tour', () => {
+    it('opens the tour on first visit when origin nodes are present', () => {
+      let shouldShowDisplayTour = true;
+      const setShouldShowDisplayTourMock = jest.fn((value: boolean) => {
+        shouldShowDisplayTour = value;
+      });
+      (useLocalStorage as jest.Mock).mockImplementation(() => [
+        shouldShowDisplayTour,
+        setShouldShowDisplayTourMock,
+      ]);
+
+      renderBottomBar('select', jest.fn(), jest.fn(), jest.fn(), jest.fn(), [originNode]);
+
+      expect(screen.getByText(DISPLAY_STARTING_POINT_TOUR_TITLE)).toBeInTheDocument();
+    });
+
+    it('does not open the tour when there are no origin nodes', () => {
+      (useLocalStorage as jest.Mock).mockReturnValue([true, jest.fn()]);
+
+      renderBottomBar();
+
+      expect(screen.queryByText(DISPLAY_STARTING_POINT_TOUR_TITLE)).not.toBeInTheDocument();
+    });
+
+    it('does not open the tour when it was previously dismissed', () => {
+      (useLocalStorage as jest.Mock).mockReturnValue([false, jest.fn()]);
+
+      renderBottomBar('select', jest.fn(), jest.fn(), jest.fn(), jest.fn(), [originNode]);
+
+      expect(screen.queryByText(DISPLAY_STARTING_POINT_TOUR_TITLE)).not.toBeInTheDocument();
+    });
+
+    it('dismisses the tour when the display button is clicked', async () => {
+      let shouldShowDisplayTour = true;
+      const setShouldShowDisplayTourMock = jest.fn((value: boolean) => {
+        shouldShowDisplayTour = value;
+      });
+      (useLocalStorage as jest.Mock).mockImplementation(() => [
+        shouldShowDisplayTour,
+        setShouldShowDisplayTourMock,
+      ]);
+
+      renderBottomBar('select', jest.fn(), jest.fn(), jest.fn(), jest.fn(), [originNode]);
+
+      expect(screen.getByText(DISPLAY_STARTING_POINT_TOUR_TITLE)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId(GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID));
+
+      await waitFor(() => {
+        expect(screen.queryByText(DISPLAY_STARTING_POINT_TOUR_TITLE)).not.toBeInTheDocument();
+      });
+      expect(setShouldShowDisplayTourMock).toHaveBeenCalledWith(false);
+    });
   });
 });

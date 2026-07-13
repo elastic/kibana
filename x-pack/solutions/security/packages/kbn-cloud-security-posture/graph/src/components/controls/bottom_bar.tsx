@@ -10,12 +10,15 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTourStep,
   useEuiShadow,
   useEuiTheme,
   type CommonProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApplyFiltersPopover } from './apply_filters_popover';
 import type { GraphFiltersState } from './apply_filters_popover';
 import { useGraphInteractionTool } from './graph_interaction_tool_context';
@@ -36,6 +39,8 @@ import type { NodeViewModel } from '../types';
 import { hasActiveEntityFilters } from './graph_entity_filters';
 import { useGraphSearchContext } from './graph_search_context';
 import { GraphNotificationBadge } from '../graph_notification_badge';
+import { isOriginEntityOrEventNode } from '../graph/graph_origin_utils';
+import { DISPLAY_STARTING_POINT_TOUR_STORAGE_KEY } from '../../common/constants';
 import {
   GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID,
   GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID,
@@ -81,6 +86,19 @@ const displayAriaLabel = formatToolShortcutAriaLabel(displayLabel, DISPLAY_SHORT
 const interactionToolsLegend = i18n.translate(
   'securitySolutionPackages.csp.graph.controls.bottomBar.interactionToolsLegend',
   { defaultMessage: 'Graph interaction tools' }
+);
+
+const displayStartingPointTourTitle = i18n.translate(
+  'securitySolutionPackages.csp.graph.controls.bottomBar.displayStartingPoint.tour.title',
+  { defaultMessage: 'Your starting point is highlighted' }
+);
+
+const displayStartingPointTourContent = i18n.translate(
+  'securitySolutionPackages.csp.graph.controls.bottomBar.displayStartingPoint.tour.content',
+  {
+    defaultMessage:
+      'The dashed outline shows the entity or event you opened this graph from. Change this anytime in Display.',
+  }
 );
 
 const BOTTOM_BAR_HEIGHT = 48;
@@ -150,10 +168,17 @@ export const BottomBar = ({
 }: BottomBarProps) => {
   const { euiTheme } = useEuiTheme();
   const { entityFilters, setEntityFilters } = useGraphSearchContext();
+  const { notifications } = useKibana().services;
   const barShadow = useEuiShadow(BOTTOM_BAR_SHADOW);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false);
+  const [isDisplayTourOpen, setIsDisplayTourOpen] = useState(false);
+  const [shouldShowDisplayTour, setShouldShowDisplayTour] = useLocalStorage(
+    DISPLAY_STARTING_POINT_TOUR_STORAGE_KEY,
+    true
+  );
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
   const {
     interactionTool,
     setInteractionTool,
@@ -233,6 +258,19 @@ export const BottomBar = ({
     }
     return count;
   }, [entityFilters]);
+
+  const hasOriginNodes = useMemo(() => nodes.some(isOriginEntityOrEventNode), [nodes]);
+
+  const dismissDisplayTour = useCallback(() => {
+    setIsDisplayTourOpen(false);
+    setShouldShowDisplayTour(false);
+  }, [setShouldShowDisplayTour]);
+
+  useEffect(() => {
+    if (shouldShowDisplayTour && isTourEnabled && hasOriginNodes) {
+      setIsDisplayTourOpen(true);
+    }
+  }, [shouldShowDisplayTour, isTourEnabled, hasOriginNodes]);
 
   const barShellCss = css`
     height: ${BOTTOM_BAR_HEIGHT}px;
@@ -439,28 +477,42 @@ export const BottomBar = ({
               </GraphControlTooltip>
             </GraphSearchPanel>
 
-            <ApplyFiltersPopover
-              isOpen={isFiltersOpen}
-              onClose={() => setIsFiltersOpen(false)}
-              filtersState={filtersState}
-              onFiltersChange={onFiltersChange}
+            <EuiTourStep
+              anchorPosition="upCenter"
+              title={displayStartingPointTourTitle}
+              content={displayStartingPointTourContent}
+              isStepOpen={isDisplayTourOpen}
+              onFinish={dismissDisplayTour}
+              step={1}
+              stepsTotal={1}
+              maxWidth={350}
             >
-              <GraphControlTooltip
-                content={<ToolShortcutTooltip label={displayLabel} shortcut={DISPLAY_SHORTCUT} />}
-                position="top"
-                disableScreenReaderOutput
+              <ApplyFiltersPopover
+                isOpen={isFiltersOpen}
+                onClose={() => setIsFiltersOpen(false)}
+                filtersState={filtersState}
+                onFiltersChange={onFiltersChange}
               >
-                <EuiButtonIcon
-                  iconType="layers"
-                  aria-label={displayAriaLabel}
-                  size="m"
-                  color={isFiltersOpen ? 'primary' : 'text'}
-                  css={controlButtonCss}
-                  data-test-subj={GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID}
-                  onClick={toggleApplyFiltersPanel}
-                />
-              </GraphControlTooltip>
-            </ApplyFiltersPopover>
+                <GraphControlTooltip
+                  content={<ToolShortcutTooltip label={displayLabel} shortcut={DISPLAY_SHORTCUT} />}
+                  position="top"
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="layers"
+                    aria-label={displayAriaLabel}
+                    size="m"
+                    color={isFiltersOpen ? 'primary' : 'text'}
+                    css={controlButtonCss}
+                    data-test-subj={GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID}
+                    onClick={() => {
+                      toggleApplyFiltersPanel();
+                      dismissDisplayTour();
+                    }}
+                  />
+                </GraphControlTooltip>
+              </ApplyFiltersPopover>
+            </EuiTourStep>
           </div>
         </EuiFlexItem>
 

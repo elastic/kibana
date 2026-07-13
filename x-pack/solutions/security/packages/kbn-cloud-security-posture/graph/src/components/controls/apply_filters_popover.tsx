@@ -181,7 +181,7 @@ export const ApplyFiltersPopover = ({
 
   const highlightOriginsOnlyLabel = i18n.translate(
     'securitySolutionPackages.csp.graph.filters.highlightOriginsOnly',
-    { defaultMessage: 'Highlight origin entities and events' }
+    { defaultMessage: 'Highlight starting point' }
   );
 
   return (
