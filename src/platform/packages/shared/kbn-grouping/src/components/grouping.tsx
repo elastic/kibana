@@ -247,22 +247,10 @@ const GroupingComponent = <T,>({
 
   // the query backing this component never returns groups beyond
   // MAX_QUERY_SIZE, so pagination can never be allowed past that point
-  const maxPageCount = useMemo(
-    () => Math.max(1, Math.floor(MAX_QUERY_SIZE / itemsPerPage)),
-    [itemsPerPage]
-  );
-  const totalPageCount = useMemo(
-    () => (groupCount ? Math.ceil(groupCount / itemsPerPage) : 1),
-    [groupCount, itemsPerPage]
-  );
-  const revealedPageCount = useMemo(
-    () => Math.min(revealedBatches * PAGE_BATCH_SIZE, maxPageCount),
-    [revealedBatches, maxPageCount]
-  );
-  const pageCount = useMemo(
-    () => Math.min(totalPageCount, revealedPageCount),
-    [totalPageCount, revealedPageCount]
-  );
+  const maxPageCount = Math.max(1, Math.floor(MAX_QUERY_SIZE / itemsPerPage));
+  const totalPageCount = groupCount ? Math.ceil(groupCount / itemsPerPage) : 1;
+  const revealedPageCount = Math.min(revealedBatches * PAGE_BATCH_SIZE, maxPageCount);
+  const pageCount = Math.min(totalPageCount, revealedPageCount);
   const hasMoreBatchesToReveal = totalPageCount > pageCount && revealedPageCount < maxPageCount;
   const isLimitedByMaxQuerySize = groupCount > pageCount * itemsPerPage && !hasMoreBatchesToReveal;
   const clampedActivePage = Math.min(activePage, pageCount - 1);
