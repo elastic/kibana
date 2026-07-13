@@ -11,12 +11,13 @@ import { getCloudProductTier } from './cloud_security_metering';
 import {
   getCloudSecurityUsageRecord,
   getSearchQueryByCloudSecuritySolution,
+  getGcpComputeDurationFilter,
 } from './cloud_security_metering_task';
 
 import type { ServerlessSecurityConfig } from '../config';
 
 import type { ProductTier } from '../../common/product';
-import { CLOUD_SECURITY_TASK_TYPE, CSPM, KSPM, CNVM, BILLABLE_ASSETS_CONFIG } from './constants';
+import { CLOUD_SECURITY_TASK_TYPE, CSPM, KSPM, CNVM, BILLABLE_ASSETS_CONFIG, GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS, GCP_COMPUTE_INSTANCE_SUB_TYPE } from './constants';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -253,6 +254,7 @@ describe('getSearchQueryByCloudSecuritySolution', () => {
               'rule.benchmark.posture_type': 'cspm',
             },
           },
+          getGcpComputeDurationFilter(),
         ],
       },
     });
@@ -297,6 +299,52 @@ describe('getSearchQueryByCloudSecuritySolution', () => {
         ],
       },
     });
+  });
+});
+
+describe('getGcpComputeDurationFilter', () => {
+  it('should return a filter that passes non-gcp-compute-instance docs or gcp-compute-instance docs with sufficient running duration', () => {
+    const filter = getGcpComputeDurationFilter();
+    const minDurationMillis = GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS * 60 * 60 * 1000;
+
+    expect(filter).toEqual({
+      bool: {
+        should: [
+          {
+            bool: {
+              must_not: [{ term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } }],
+            },
+          },
+          {
+            bool: {
+              must: [
+                { term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } },
+                {
+                  script: {
+                    script: {
+                      source: expect.any(String),
+                      lang: 'painless',
+                      params: {
+                        minDurationMillis,
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('should use 24 hours as the minimum running duration', () => {
+    const filter = getGcpComputeDurationFilter();
+    const expectedMillis = 24 * 60 * 60 * 1000;
+
+    const scriptClause = (filter.bool.should as any[])[1].bool.must[1];
+    expect(scriptClause.script.script.params.minDurationMillis).toBe(expectedMillis);
   });
 });
 
