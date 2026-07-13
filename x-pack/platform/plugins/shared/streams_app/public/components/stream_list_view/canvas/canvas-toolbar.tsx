@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-// The floating bottom-center toolbar: Select/Pan mode toggle, Undo/Redo,
-// Source/Destination palette (drag or click-to-place), and the "..." overflow
-// menu holding Cleanup.
+// The floating bottom-center toolbar: Undo/Redo, Source/Destination palette
+// (drag or click-to-place), and the "..." overflow menu holding Cleanup.
 
 import React, { useCallback } from 'react';
 import {
@@ -24,8 +23,6 @@ import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useReactFlow } from '@xyflow/react';
 import { i18n } from '@kbn/i18n';
-import { SelectCursorIcon } from '../select_cursor_icon';
-import { HandCursorIcon } from '../hand_cursor_icon';
 import { DRAG_DATA_TYPE, type CanvasNodeType } from './constants';
 
 interface PaletteButtonProps {
@@ -89,8 +86,6 @@ export interface CanvasControlsProps {
   placementType: CanvasNodeType | null;
   onActivatePlacement: (type: CanvasNodeType) => void;
   onCleanup: () => void;
-  canvasMode: 'select' | 'pan';
-  onChangeMode: (mode: 'select' | 'pan') => void;
   onUndo: () => void;
   onRedo: () => void;
   canUndo: boolean;
@@ -100,8 +95,6 @@ export interface CanvasControlsProps {
 export function CanvasControls({
   placementType,
   onActivatePlacement,
-  canvasMode,
-  onChangeMode,
   onUndo,
   onRedo,
   canUndo,
@@ -150,27 +143,6 @@ export function CanvasControls({
       `}
     >
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          {toolButton(
-            SelectCursorIcon,
-            i18n.translate('xpack.streams.streamsCanvas.selectTool', {
-              defaultMessage: 'Select',
-            }),
-            { isActive: canvasMode === 'select', onClick: () => onChangeMode('select') }
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {toolButton(
-            HandCursorIcon,
-            i18n.translate('xpack.streams.streamsCanvas.panTool', {
-              defaultMessage: 'Pan',
-            }),
-            { isActive: canvasMode === 'pan', onClick: () => onChangeMode('pan') }
-          )}
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>{verticalRule}</EuiFlexItem>
-
         <EuiFlexItem grow={false}>
           {toolButton(
             'editorUndo',

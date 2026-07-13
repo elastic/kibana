@@ -118,6 +118,7 @@ import { initialEdges, initialNodes } from './canvas/seed-graph';
 import { canvasSignature, INITIAL_CANVAS_SIGNATURE } from './canvas/canvas-signature';
 import { computeCleanupLayout, straightenChains } from './canvas/auto-layout';
 import { flowDirectionFor, reachableFlow } from './canvas/connected-flow';
+import { computeReconnectingEdges } from './canvas/reconnect-edges';
 import { evaluateSearch } from './canvas/search';
 import { nodeTypes } from './canvas/nodes/node-types';
 import { UnconfiguredSourceContents } from './canvas/nodes/source-node';
@@ -228,13 +229,6 @@ function StreamsCanvasInner() {
   const connectingRef = useRef(false);
   const [placementType, setPlacementType] = useState<CanvasNodeType | null>(null);
   const [shadowPosition, setShadowPosition] = useState<XYPosition | null>(null);
-  // Canvas interaction mode:
-  //   - 'select' (mouse tool): left-drag on empty canvas draws a selection box;
-  //     selected nodes move together; individual nodes are draggable. Panning is
-  //     on middle/right mouse so left-drag stays free for selection.
-  //   - 'pan' (hand tool): left-drag pans the canvas (grab/grabbing cursor) and
-  //     nodes are locked in place.
-  const [canvasMode, setCanvasMode] = useState<'select' | 'pan'>('select');
   // Presentational search box for the canvas toolbar (mirrors the list tables).
   const [searchQuery, setSearchQuery] = useState('');
   const [flyoutDestination, setFlyoutDestination] = useState<string | null>(null);
@@ -753,12 +747,26 @@ function StreamsCanvasInner() {
     recordHistory();
   }, [recordHistory]);
 
-  // Snapshot before any deletion (toolbar trash, Backspace/Delete key) so the
-  // removed nodes/edges can be brought back with undo.
-  const onBeforeDelete = useCallback(async () => {
-    recordHistory();
-    return true;
-  }, [recordHistory]);
+  // Snapshot before any deletion (toolbar trash, Backspace/Delete key,
+  // context-menu, source flyout — all deletions funnel through here) so the
+  // removed nodes/edges can be brought back with undo. Also reconnect the flow
+  // across any deleted node that sat between two others, so the connection
+  // between its neighbours persists instead of leaving a gap.
+  const onBeforeDelete = useCallback(
+    async ({ nodes: deletedNodes }: { nodes: Node[]; edges: Edge[] }) => {
+      recordHistory();
+      const reconnecting = computeReconnectingEdges(
+        deletedNodes.map((node) => node.id),
+        getEdges(),
+        getNodes()
+      );
+      if (reconnecting.length) {
+        setEdges((current) => current.concat(reconnecting));
+      }
+      return true;
+    },
+    [recordHistory, getEdges, getNodes, setEdges]
+  );
 
   const onNodeDragStop = useCallback(
     (_event: React.MouseEvent, node: Node, draggedNodes?: Node[]) => {
@@ -1385,22 +1393,9 @@ function StreamsCanvasInner() {
                       border: none;
                       border-radius: ${euiTheme.border.radius.medium};
                       overflow: hidden;
-                      ${placementType ? 'cursor: copy;' : ''}
+                     ${placementType ? 'cursor: copy;' : ''}
 
-                      /* Hand (pan) mode: the empty canvas reads as draggable — a hand at
-             rest, a closed fist while panning. */
-          ${canvasMode === 'pan'
-                        ? `
-          .react-flow__pane {
-            cursor: grab;
-          }
-          .react-flow__pane.dragging {
-            cursor: grabbing;
-          }
-          `
-                        : ''}
-
-          /* React Flow's native edge reconnect anchors sit on top of the handle
+         /* React Flow's native edge reconnect anchors sit on top of the handle
              dots at each connector end; show a grab cursor over their hit area so
              the connection ends feel draggable. */
           .react-flow__edgeupdater {
@@ -1470,16 +1465,18 @@ function StreamsCanvasInner() {
                       zoomOnScroll={false}
                       nodesConnectable
                       edgesReconnectable
-                      // Mode-driven interaction. In 'select' mode left-drag is reserved for
-                      // the selection box and pan moves to the MIDDLE mouse button only —
-                      // the right button is left free so right-click opens the context menu
-                      // (incl. on a single node). In 'pan' mode left-drag pans and nodes are
-                      // locked.
-                      nodesDraggable={canvasMode === 'select'}
-                      selectionOnDrag={canvasMode === 'select'}
-                      selectNodesOnDrag={canvasMode === 'select'}
+                      // Standard React Flow interaction: left-drag on the pane pans the
+                      // canvas, dragging a node moves it, and a plain click selects a node
+                      // (and opens its flyout). Holding Shift switches left-drag to a
+                      // selection box and lets Shift+click add nodes to the selection, so
+                      // several nodes can be picked at once.
+                      nodesDraggable
+                      selectNodesOnDrag={false}
+                      selectionOnDrag={false}
                       selectionMode={SelectionMode.Partial}
-                      panOnDrag={canvasMode === 'pan' ? true : [1]}
+                      selectionKeyCode="Shift"
+                      multiSelectionKeyCode="Shift"
+                      panOnDrag
                       proOptions={{ hideAttribution: true }}
                     >
                       <Background gap={GRID_SIZE} color={euiTheme.colors.borderBasePlain} />
@@ -1524,8 +1521,6 @@ function StreamsCanvasInner() {
                       placementType={placementType}
                       onActivatePlacement={activatePlacement}
                       onCleanup={cleanup}
-                      canvasMode={canvasMode}
-                      onChangeMode={setCanvasMode}
                       onUndo={undo}
                       onRedo={redo}
                       canUndo={canUndo}

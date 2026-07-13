@@ -236,7 +236,7 @@ function ConfiguredDestinationContents({
             align-items: center;
             justify-content: center;
             padding: 0 ${euiTheme.size.base};
-            background-color: ${euiTheme.colors.backgroundBaseSubdued};
+            background-color: ${euiTheme.colors.backgroundBaseHighlighted};
             border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
             cursor: pointer;
 

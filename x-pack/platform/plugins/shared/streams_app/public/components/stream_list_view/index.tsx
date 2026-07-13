@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
+import { css } from '@emotion/css';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
@@ -174,6 +175,7 @@ export function StreamListView() {
     }
   }, [streamsListFetch.loading, streamsListFetch.value, onPageReady]);
 
+  const [isPrototypeCalloutVisible, setIsPrototypeCalloutVisible] = React.useState(true);
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
   const [isClassicStreamCreationFlyoutOpen, setIsClassicStreamCreationFlyoutOpen] =
     React.useState(false);
@@ -300,6 +302,20 @@ export function StreamListView() {
 
   return (
     <>
+      {isPrototypeCalloutVisible && (
+        <EuiCallOut
+          size="s"
+          color="primary"
+          iconType="info"
+          onDismiss={() => setIsPrototypeCalloutVisible(false)}
+          title={i18n.translate('xpack.streams.streamsListView.prototypeCalloutTitle', {
+            defaultMessage: 'This is a UX prototype. Scope and capabilities are limited.',
+          })}
+          className={css`
+            border-radius: 0;
+          `}
+        />
+      )}
       <StreamsAppHeader
         title={pageTitle}
         tabs={tabs}

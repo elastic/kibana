@@ -37,16 +37,18 @@ export function useCanvasSelection({ setNodes, recordHistory }: SelectionDeps) {
   const store = useStoreApi();
   const [contextMenu, setContextMenu] = useState<CanvasContextMenu | null>(null);
 
-  // Delete the given nodes and their connected edges. React Flow's
-  // deleteElements takes care of removing any edge attached to a removed node,
-  // so a deleted routing/pipeline node doesn't leave dangling connectors.
+  // Delete the given nodes. React Flow's deleteElements removes each node and
+  // its attached edges (so nothing is left dangling) and funnels through the
+  // canvas `onBeforeDelete`, which reconnects the flow across any node that sat
+  // between two others so their connection persists.
   const deleteNodes = useCallback(
     (ids: string[]) => {
       if (!ids.length) return;
-      recordHistory();
+      // History is snapshotted (and the flow reconnected) by the canvas
+      // `onBeforeDelete`, which deleteElements funnels through.
       void deleteElements({ nodes: ids.map((id) => ({ id })) });
     },
-    [deleteElements, recordHistory]
+    [deleteElements]
   );
 
   // Cleanup applied to only the selected nodes: lay them out among themselves,

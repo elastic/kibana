@@ -216,12 +216,28 @@ interface ConditionRow {
   field: string;
   operator: string;
   value: string;
+  /**
+   * Logical connector joining this condition to the previous one. Omitted on the
+   * first condition. `OR` starts a new AND-group, so `[a, b(AND), c(OR)]` reads
+   * as `( a AND b ) OR c`.
+   */
+  connector?: 'AND' | 'OR';
 }
 
 let conditionIdCounter = 0;
-function makeCondition(field = 'event.dataset', value = 'foo'): ConditionRow {
+function makeCondition(
+  field = 'event.dataset',
+  value = 'foo',
+  connector?: 'AND' | 'OR'
+): ConditionRow {
   conditionIdCounter += 1;
-  return { id: `condition-${conditionIdCounter}`, field, operator: 'equals', value };
+  return {
+    id: `condition-${conditionIdCounter}`,
+    field,
+    operator: 'equals',
+    value,
+    ...(connector ? { connector } : {}),
+  };
 }
 
 // A single row in the "Routing rules" list (the edge connector's "Add step"
@@ -983,11 +999,164 @@ function ConditionValueBadge({ field, value }: { field: string; value: string })
   );
 }
 
-// A single route's collapsed summary within the "Routing rules" list: its
-// name, either its condition (as AND-ed badges) or its catch-all destination
-// line, an edit affordance, and — for catch-all routes — the reminder that
+// A single leaf of a condition expression: `[token] field equals value`, with
+// the value rendered as a light pill (matching the routing summary design).
+function ConditionLeaf({ field, value }: { field: string; value: string }) {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiToken iconType="tokenKeyword" size="xs" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText
+          size="xs"
+          className={css`
+            font-family: ${euiTheme.font.familyCode};
+          `}
+        >
+          {field}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued">
+          {i18n.translate('xpack.streams.createRoutingFlyout.equals', {
+            defaultMessage: 'equals',
+          })}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <span
+          className={css`
+            background-color: ${euiTheme.colors.backgroundBasePrimary};
+            color: ${euiTheme.colors.textPrimary};
+            border-radius: ${euiTheme.border.radius.small};
+            padding: 0 ${euiTheme.size.xs};
+            font-family: ${euiTheme.font.familyCode};
+            font-size: ${euiTheme.size.m};
+          `}
+        >
+          {value}
+        </span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+// A bold structural token in a condition expression: WHERE, (, ), AND, OR.
+function ExpressionToken({ children }: { children: React.ReactNode }) {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiText
+      size="xs"
+      className={css`
+        font-weight: ${euiTheme.font.weight.bold};
+      `}
+    >
+      {children}
+    </EuiText>
+  );
+}
+
+// Renders a route's conditions as a boolean expression, e.g.
+// `WHERE ( event.dataset equals foo AND log.level equals info ) OR event.dataset
+// equals Adonis-dotnet-625`. Consecutive AND-connected conditions form a group
+// (wrapped in parentheses when it holds more than one), and OR separates groups.
+function ConditionExpression({ conditions }: { conditions: ConditionRow[] }) {
+  const { euiTheme } = useEuiTheme();
+  const groups: ConditionRow[][] = [];
+  conditions.forEach((condition, index) => {
+    if (index === 0 || condition.connector === 'OR') {
+      groups.push([condition]);
+    } else {
+      groups[groups.length - 1].push(condition);
+    }
+  });
+
+  return (
+    <div
+      className={css`
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        border-radius: ${euiTheme.border.radius.small};
+        padding: ${euiTheme.size.s};
+      `}
+    >
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        responsive={false}
+        wrap
+        className={css`
+          row-gap: ${euiTheme.size.xs};
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <ExpressionToken>
+            {i18n.translate('xpack.streams.createRoutingFlyout.where', {
+              defaultMessage: 'WHERE',
+            })}
+          </ExpressionToken>
+        </EuiFlexItem>
+        {groups.map((group, groupIndex) => {
+          const wrap = group.length > 1;
+          return (
+            <React.Fragment key={group[0].id}>
+              {groupIndex > 0 ? (
+                <EuiFlexItem grow={false}>
+                  <ExpressionToken>
+                    {i18n.translate('xpack.streams.createRoutingFlyout.or', {
+                      defaultMessage: 'OR',
+                    })}
+                  </ExpressionToken>
+                </EuiFlexItem>
+              ) : null}
+              {wrap ? (
+                <EuiFlexItem grow={false}>
+                  <ExpressionToken>(</ExpressionToken>
+                </EuiFlexItem>
+              ) : null}
+              {group.map((condition, conditionIndex) => (
+                <React.Fragment key={condition.id}>
+                  {conditionIndex > 0 ? (
+                    <EuiFlexItem grow={false}>
+                      <ExpressionToken>
+                        {i18n.translate('xpack.streams.createRoutingFlyout.and', {
+                          defaultMessage: 'AND',
+                        })}
+                      </ExpressionToken>
+                    </EuiFlexItem>
+                  ) : null}
+                  <EuiFlexItem grow={false}>
+                    <ConditionLeaf field={condition.field} value={condition.value} />
+                  </EuiFlexItem>
+                </React.Fragment>
+              ))}
+              {wrap ? (
+                <EuiFlexItem grow={false}>
+                  <ExpressionToken>)</ExpressionToken>
+                </EuiFlexItem>
+              ) : null}
+            </React.Fragment>
+          );
+        })}
+      </EuiFlexGroup>
+    </div>
+  );
+}
+
+// A single route's collapsed summary within the "Routing rules" list: a drag
+// handle, its name and destination line, edit/delete affordances, and then
+// either its condition expression or — for catch-all routes — the reminder that
 // they absorb everything not matched by a route above them.
-function RouteSummaryCard({ route, onEdit }: { route: RouteEntry; onEdit: () => void }) {
+function RouteSummaryCard({
+  route,
+  onEdit,
+  onDelete,
+}: {
+  route: RouteEntry;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
   const { euiTheme } = useEuiTheme();
   const hasNoCondition = route.conditions.length === 0;
   const isNewDestination = route.destination === 'new';
@@ -1008,58 +1177,40 @@ function RouteSummaryCard({ route, onEdit }: { route: RouteEntry; onEdit: () => 
         background-color: ${euiTheme.colors.backgroundBasePlain};
       `}
     >
-      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="grab" color="subdued" />
+        </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText
-            size="s"
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            responsive={false}
+            wrap
             className={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
+              row-gap: ${euiTheme.size.xs};
             `}
           >
-            {route.name}
-          </EuiText>
-          <EuiSpacer size="xs" />
-          {hasNoCondition ? (
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.streams.createRoutingFlyout.dataGoesExclusivelyTo"
-                defaultMessage="Data goes exclusively to {destination}"
-                values={{ destination: <EuiLink>{destinationLabel}</EuiLink> }}
-              />
-            </EuiText>
-          ) : (
-            <EuiFlexGroup
-              gutterSize="xs"
-              alignItems="center"
-              responsive={false}
-              wrap
-              className={css`
-                row-gap: ${euiTheme.size.xs};
-              `}
-            >
-              {route.conditions.map((condition, index) => (
-                <React.Fragment key={condition.id}>
-                  {index > 0 ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiText
-                        size="xs"
-                        className={css`
-                          font-weight: ${euiTheme.font.weight.bold};
-                        `}
-                      >
-                        {i18n.translate('xpack.streams.createRoutingFlyout.and', {
-                          defaultMessage: 'AND',
-                        })}
-                      </EuiText>
-                    </EuiFlexItem>
-                  ) : null}
-                  <EuiFlexItem grow={false}>
-                    <ConditionValueBadge field={condition.field} value={condition.value} />
-                  </EuiFlexItem>
-                </React.Fragment>
-              ))}
-            </EuiFlexGroup>
-          )}
+            <EuiFlexItem grow={false}>
+              <EuiText
+                size="s"
+                className={css`
+                  font-weight: ${euiTheme.font.weight.semiBold};
+                `}
+              >
+                {route.name}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.streams.createRoutingFlyout.dataGoesExclusivelyTo"
+                  defaultMessage="Data goes exclusively to {destination}"
+                  values={{ destination: <EuiLink>{destinationLabel}</EuiLink> }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
@@ -1072,20 +1223,31 @@ function RouteSummaryCard({ route, onEdit }: { route: RouteEntry; onEdit: () => 
             })}
           />
         </EuiFlexItem>
-      </EuiFlexGroup>
-      {hasNoCondition ? (
-        <>
-          <EuiSpacer size="s" />
-          <EuiCallOut
-            size="s"
-            color="primary"
-            iconType="info"
-            title={i18n.translate('xpack.streams.createRoutingFlyout.catchAllNotice', {
-              defaultMessage: 'A route with no condition catches everything left over.',
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            size="xs"
+            onClick={onDelete}
+            aria-label={i18n.translate('xpack.streams.createRoutingFlyout.deleteRoute', {
+              defaultMessage: 'Delete route',
             })}
           />
-        </>
-      ) : null}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      {hasNoCondition ? (
+        <EuiCallOut
+          size="s"
+          color="primary"
+          iconType="info"
+          title={i18n.translate('xpack.streams.createRoutingFlyout.catchAllNotice', {
+            defaultMessage: 'A route with no condition catches everything left over.',
+          })}
+        />
+      ) : (
+        <ConditionExpression conditions={route.conditions} />
+      )}
     </div>
   );
 }
@@ -1469,6 +1631,7 @@ function CreateRoutingCard({
 function RoutingRulesListPanel({
   routes,
   onEditRoute,
+  onDeleteRoute,
   onNewRoute,
   isFormOpen,
   editingRouteId,
@@ -1477,6 +1640,7 @@ function RoutingRulesListPanel({
 }: {
   routes: RouteEntry[];
   onEditRoute: (routeId: string) => void;
+  onDeleteRoute: (routeId: string) => void;
   onNewRoute: () => void;
   isFormOpen: boolean;
   editingRouteId: string | null;
@@ -1542,7 +1706,11 @@ function RoutingRulesListPanel({
               {editingRouteId === route.id ? (
                 editCard
               ) : (
-                <RouteSummaryCard route={route} onEdit={() => onEditRoute(route.id)} />
+                <RouteSummaryCard
+                  route={route}
+                  onEdit={() => onEditRoute(route.id)}
+                  onDelete={() => onDeleteRoute(route.id)}
+                />
               )}
             </EuiFlexItem>
           ))}
@@ -1791,11 +1959,25 @@ export function CreateRoutingFlyout({
   // the original single-route empty/form/applied flow untouched.
   const isRoutingListFlow = initialStep === 'empty' && !opinionated;
   const [step, setStep] = useState<RoutingStep>(isRoutingListFlow ? 'list' : initialStep);
-  // A route with no condition always exists by default — it's the catch-all
-  // that passes all data straight through until a more specific route is added
+  // The list flow opens with one already-created multi-condition route (Nginx)
+  // above the default catch-all route. A route with no condition always exists —
+  // it passes all data straight through until a more specific route is added
   // above it.
   const [routes, setRoutes] = useState<RouteEntry[]>(() =>
-    isRoutingListFlow ? [makeRoute()] : []
+    isRoutingListFlow
+      ? [
+          makeRoute({
+            name: 'Nginx',
+            destination: 'logs-nginx-default',
+            conditions: [
+              makeCondition('event.dataset', 'foo'),
+              makeCondition('log.level', 'info', 'AND'),
+              makeCondition('event.dataset', 'Adonis-dotnet-625', 'OR'),
+            ],
+          }),
+          makeRoute({ name: 'Route-1' }),
+        ]
+      : []
   );
   // Which route the form step is currently editing; null while creating a new
   // one via "New routing".
@@ -1834,6 +2016,15 @@ export function CreateRoutingFlyout({
   const startEditRoute = (routeId: string) => {
     setEditingRouteId(routeId);
     setStep('form');
+  };
+
+  // Removes a route from the list (its trash affordance).
+  const deleteRoute = (routeId: string) => {
+    setRoutes((current) => current.filter((route) => route.id !== routeId));
+    if (editingRouteId === routeId) {
+      setEditingRouteId(null);
+      setStep('list');
+    }
   };
 
   // Closes the inline card without saving, returning to the plain list.
@@ -1984,13 +2175,19 @@ export function CreateRoutingFlyout({
                 })}
           </h2>
         </EuiTitle>
-        {isRoutingListFlow ? (
+        {isRoutingListFlow || initialStep === 'applied' ? (
           <>
             <EuiSpacer size="xs" />
             <EuiText size="s" color="subdued">
-              {i18n.translate('xpack.streams.createRoutingFlyout.routeYourDataDescription', {
-                defaultMessage: 'Send incoming data to destinations based on what it has in common.',
-              })}{' '}
+              {initialStep === 'applied' && !isRoutingListFlow
+                ? i18n.translate('xpack.streams.createRoutingFlyout.editDescription', {
+                    defaultMessage:
+                      'Review and refine the conditions that decide which data flows into this destination.',
+                  })
+                : i18n.translate('xpack.streams.createRoutingFlyout.routeYourDataDescription', {
+                    defaultMessage:
+                      'Send incoming data to destinations based on what it has in common.',
+                  })}{' '}
               <EuiLink external target="_blank">
                 {i18n.translate('xpack.streams.createRoutingFlyout.seeOurDocs', {
                   defaultMessage: 'See our docs',
@@ -2035,6 +2232,7 @@ export function CreateRoutingFlyout({
               <RoutingRulesListPanel
                 routes={routes}
                 onEditRoute={startEditRoute}
+                onDeleteRoute={deleteRoute}
                 onNewRoute={startNewRoute}
                 isFormOpen={step === 'form'}
                 editingRouteId={step === 'form' ? editingRouteId : null}
