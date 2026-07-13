@@ -80,10 +80,40 @@ const extractArrayField =
   (payload) =>
     asStringArray(payload[field]);
 
+const extractFileNames = (files: unknown): string[] => {
+  if (!Array.isArray(files)) {
+    return [];
+  }
+
+  return files.flatMap((file) => {
+    const name = asString((file as Record<string, unknown> | undefined)?.name);
+    return name ? [name] : [];
+  });
+};
+
 const extractCommentContent: SearchableContentExtractor = (payload) => {
   const comment = payload.comment as Record<string, unknown> | undefined;
-  const text = asString(comment?.comment);
-  return text ? [text] : [];
+  const texts: string[] = [];
+
+  const legacyText = asString(comment?.comment);
+  if (legacyText) texts.push(legacyText);
+
+  const data = comment?.data as Record<string, unknown> | undefined;
+  const content = asString(data?.content);
+  if (content) texts.push(content);
+
+  // Unified file attachments (`payload.comment.type: 'file'`).
+  const metadata = comment?.metadata as Record<string, unknown> | undefined;
+  texts.push(...extractFileNames(metadata?.files));
+
+  // Legacy file attachments (`payload.comment.type: 'externalReference'`,
+  // `externalReferenceAttachmentTypeId: '.files'`).
+  const externalReferenceMetadata = comment?.externalReferenceMetadata as
+    | Record<string, unknown>
+    | undefined;
+  texts.push(...extractFileNames(externalReferenceMetadata?.files));
+
+  return texts;
 };
 
 const extractCustomFields: SearchableContentExtractor = (payload) =>
@@ -109,6 +139,10 @@ const combineExtractors =
  * content out of the payload. Types not present here (e.g. `connector`,
  * `pushed`, `settings`, `status`, `observables`, `template`) either carry no
  * meaningful free text or only reference IDs, so they're excluded from search.
+ *
+ * `comment` also covers file attachments (both the unified `file` type and
+ * the legacy `.files` externalReference type), whose file name(s) are
+ * included via `extractCommentContent`.
  */
 const SEARCHABLE_CONTENT_EXTRACTORS: Partial<Record<UserActionType, SearchableContentExtractor>> = {
   [UserActionTypes.comment]: extractCommentContent,

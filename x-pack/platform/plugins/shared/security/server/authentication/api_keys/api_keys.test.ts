@@ -293,6 +293,34 @@ describe('API Keys', () => {
         },
       });
     });
+
+    it('forwards `certificate_identity` when creating a cross-cluster API key', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        id: '123',
+        name: 'key-name',
+        api_key: 'abc123',
+      });
+      await apiKeys.create(httpServerMock.createKibanaRequest(), {
+        type: 'cross_cluster',
+        name: 'key-name',
+        access: {},
+        metadata: {},
+        certificate_identity: 'CN=host,OU=engineering,DC=example,DC=com',
+      });
+      expect(mockScopedClusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/cross_cluster/api_key',
+        body: {
+          name: 'key-name',
+          expiration: undefined,
+          access: {},
+          metadata: {},
+          certificate_identity: 'CN=host,OU=engineering,DC=example,DC=com',
+        },
+      });
+    });
   });
 
   describe('update()', () => {
@@ -410,6 +438,30 @@ describe('API Keys', () => {
         body: {
           access: {},
           metadata: {},
+        },
+      });
+    });
+
+    it('forwards `certificate_identity` when updating a cross-cluster API key', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+
+      mockScopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        updated: true,
+      });
+      await apiKeys.update(httpServerMock.createKibanaRequest(), {
+        type: 'cross_cluster',
+        id: '123',
+        access: {},
+        metadata: {},
+        certificate_identity: 'CN=host,OU=engineering,DC=example,DC=com',
+      });
+      expect(mockScopedClusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'PUT',
+        path: '/_security/cross_cluster/api_key/123',
+        body: {
+          access: {},
+          metadata: {},
+          certificate_identity: 'CN=host,OU=engineering,DC=example,DC=com',
         },
       });
     });
@@ -840,8 +892,8 @@ describe('API Keys', () => {
         body: {
           api_key: apiKeyCredentials,
           name: 'cloned-key',
-          expiration: null,
           metadata: { managed: true },
+          expiration: null,
         },
       });
 

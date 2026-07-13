@@ -369,4 +369,42 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
     expect(mockReassignBatch).toHaveBeenCalled();
     expect(mockReassignActionRunner).not.toHaveBeenCalled();
   });
+
+  it('dry run (kuery) returns count without writing', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    mockGetAgentsByKuery.mockResolvedValue({ agents: [], total: 25, page: 1, perPage: 0 });
+
+    const result = await reassignAgents(
+      soClient,
+      esClient,
+      { kuery: 'status:online', dryRun: true },
+      regularAgentPolicySO2.id
+    );
+
+    expect(result).toEqual({ count: 25 });
+    expect(mockReassignBatch).not.toHaveBeenCalled();
+    expect(mockReassignActionRunner).not.toHaveBeenCalled();
+  });
+
+  it('dry run (agentIds) returns count of found agents only', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    const mockGetAgentsById = jest
+      .spyOn(crud, 'getAgentsById')
+      .mockResolvedValue([
+        { id: 'agent-1' } as any,
+        { notFound: true, id: 'missing-1' },
+        { id: 'agent-2' } as any,
+      ] as any);
+
+    const result = await reassignAgents(
+      soClient,
+      esClient,
+      { agentIds: ['agent-1', 'missing-1', 'agent-2'], dryRun: true },
+      regularAgentPolicySO2.id
+    );
+
+    expect(result).toEqual({ count: 2 });
+    expect(mockReassignBatch).not.toHaveBeenCalled();
+    mockGetAgentsById.mockRestore();
+  });
 });
