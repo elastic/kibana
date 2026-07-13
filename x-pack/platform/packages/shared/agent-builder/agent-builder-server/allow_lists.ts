@@ -11,6 +11,7 @@ import {
   platformSignificantEventsTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
+import { chatAgentTypeId } from '@kbn/agent-builder-common';
 
 /**
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
@@ -116,6 +117,18 @@ export const isAllowedBuiltinTool = (toolName: string) => {
 
 export const isAllowedBuiltinAgent = (agentName: string) => {
   return (AGENT_BUILDER_BUILTIN_AGENTS as readonly string[]).includes(agentName);
+};
+
+/**
+ * This is a manually maintained list of all agent types registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new agent type.
+ */
+export const AGENT_BUILDER_AGENT_TYPES = [chatAgentTypeId] as const;
+
+export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
+
+export const isAllowedAgentType = (typeId: string) => {
+  return (AGENT_BUILDER_AGENT_TYPES as readonly string[]).includes(typeId);
 };
 
 /**

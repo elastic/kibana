@@ -191,6 +191,7 @@ export class AgentBuilderPlugin
       },
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
+        registerType: serviceSetups.agents.registerType.bind(serviceSetups.agents),
       },
       attachments: {
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
