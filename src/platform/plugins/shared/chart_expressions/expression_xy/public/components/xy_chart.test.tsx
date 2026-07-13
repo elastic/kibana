@@ -944,9 +944,11 @@ describe('XYChart component', () => {
     const getAreaStyle = ({
       areaFill,
       fillOpacity,
+      isStacked = false,
     }: {
       areaFill?: 'solid' | 'gradient';
       fillOpacity?: number;
+      isStacked?: boolean;
     }) => {
       const { args } = sampleArgs();
       const component = shallow(
@@ -956,7 +958,7 @@ describe('XYChart component', () => {
             ...args,
             areaFill,
             fillOpacity,
-            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'area' }],
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'area', isStacked }],
           }}
         />
       );
@@ -964,17 +966,19 @@ describe('XYChart component', () => {
       return (areaSeries.prop('areaSeriesStyle') as AreaSeriesStyle).area;
     };
 
+    const gradientStyle = {
+      type: 'linear',
+      stops: [
+        { offset: 0, opacity: 0, color: ColorVariant.Series },
+        { offset: 0.7, opacity: 0.9, color: ColorVariant.Series },
+        { offset: 1, opacity: 1, color: ColorVariant.Series },
+      ],
+    };
+
     test('applies gradient fill when areaFill is gradient', () => {
       const areaStyle = getAreaStyle({ areaFill: 'gradient', fillOpacity: 0.5 });
 
-      expect(areaStyle?.gradient).toEqual({
-        type: 'linear',
-        stops: [
-          { offset: 0, opacity: 0, color: ColorVariant.Series },
-          { offset: 0.7, opacity: 0.9, color: ColorVariant.Series },
-          { offset: 1, opacity: 1, color: ColorVariant.Series },
-        ],
-      });
+      expect(areaStyle?.gradient).toEqual(gradientStyle);
       expect(areaStyle?.opacity).toBe(0.5);
     });
 

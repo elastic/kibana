@@ -23,7 +23,7 @@ import type {
 import { getColorMappingDefaults } from '../../utils';
 import type { XYVisualizationState, XYLayerConfig, XYDataLayerConfig, SeriesType } from './types';
 import { visualizationSubtypes, defaultSeriesType } from './types';
-import { flipSeriesType, getIconForSeries } from './state_helpers';
+import { flipSeriesType, getDefaultAreaFill, getIconForSeries } from './state_helpers';
 import { getDefaultPalette } from './default_palette';
 import { getDataLayers, isDataLayer, isDateHistogramOperation } from './visualization_helpers';
 
@@ -647,7 +647,7 @@ function buildSuggestion({
     fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,
     fillOpacity: currentState?.fillOpacity,
-    areaFill: currentState?.areaFill,
+    areaFill: currentState ? currentState.areaFill : getDefaultAreaFill(seriesType),
     pointVisibility: currentState?.pointVisibility,
     xTitle: currentState?.xTitle,
     yTitle: currentState?.yTitle,

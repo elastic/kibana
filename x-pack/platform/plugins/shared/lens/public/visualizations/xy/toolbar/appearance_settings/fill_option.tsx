@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
-import type { AreaFillOption } from '@kbn/expression-xy-plugin/common';
+import type { AreaFillOption as AreaFillOptionValue } from '@kbn/expression-xy-plugin/common';
 import { AreaFillOptions } from '@kbn/expression-xy-plugin/public';
 
 const fillLabel = i18n.translate('xpack.lens.xyChart.fillLabel', {
@@ -17,7 +17,7 @@ const fillLabel = i18n.translate('xpack.lens.xyChart.fillLabel', {
 
 const areaFillOptions: Array<{
   id: string;
-  value: AreaFillOption;
+  value: AreaFillOptionValue;
   label: string;
 }> = [
   {
@@ -37,8 +37,8 @@ const areaFillOptions: Array<{
 ];
 
 export interface AreaFillOptionProps {
-  selectedAreaFillOption?: AreaFillOption;
-  onChange: (value: AreaFillOption) => void;
+  selectedAreaFillOption?: AreaFillOptionValue;
+  onChange: (value: AreaFillOptionValue) => void;
 }
 
 export const AreaFillOption: React.FC<AreaFillOptionProps> = ({

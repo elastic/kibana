@@ -152,6 +152,7 @@ describe(`VegaParser._setDefaultColors`, () => {
         mark: { color: VegaThemeColors.borealis.light.default },
         area: {
           fill: getDefaultAreaGradientFill(VegaThemeColors.borealis.light.default),
+          fillOpacity: 0.3,
           line: true,
         },
         view: { stroke: null },
@@ -188,6 +189,7 @@ describe(`VegaParser._setDefaultColors`, () => {
         arc: { fill: VegaThemeColors.borealis.light.default },
         area: {
           fill: getDefaultAreaGradientFill(VegaThemeColors.borealis.light.default),
+          fillOpacity: 0.3,
           line: true,
         },
         line: { stroke: VegaThemeColors.borealis.light.default },

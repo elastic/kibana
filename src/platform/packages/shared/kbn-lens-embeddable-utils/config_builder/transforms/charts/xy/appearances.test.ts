@@ -12,6 +12,7 @@ import {
   convertStylingToAPIFormat,
   convertStylingToStateFormat,
   type LayerPresence,
+  type XYLensAppearanceState,
 } from './appearances';
 import {
   DEFAULT_AREAS_FILL,

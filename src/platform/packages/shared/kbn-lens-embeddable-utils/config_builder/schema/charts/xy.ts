@@ -453,7 +453,7 @@ const xyStylingSchema = schema.object(
           fill: schema.maybe(
             schema.oneOf([schema.literal('solid'), schema.literal('gradient')], {
               defaultValue: DEFAULT_AREAS_FILL,
-              meta: { description: 'Area fill type, solid or gradient' },
+              meta: { description: 'Area fill type: solid or gradient' },
             })
           ),
         },

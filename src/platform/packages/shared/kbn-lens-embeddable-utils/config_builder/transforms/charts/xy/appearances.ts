@@ -25,7 +25,7 @@ import {
 } from './defaults';
 
 type XYStyling = NonNullable<XYConfig['styling']>;
-type XYLensAppearanceState = Pick<
+export type XYLensAppearanceState = Pick<
   XYVisualizationState,
   | 'valueLabels'
   | 'curveType'

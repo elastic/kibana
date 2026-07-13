@@ -296,13 +296,17 @@ export const getXyVisualization = ({
     const switchLayer = (layer: XYLayerConfig): XYLayerConfig =>
       applySeriesDefaultsIfNeeded(layer, compatibleSeriesType);
 
-    return {
-      ...state,
-      preferredSeriesType: compatibleSeriesType,
-      layers: layerId
-        ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
-        : state.layers.map(switchLayer),
-    };
+    return applyChartDefaultsIfNeeded(
+      {
+        ...state,
+        preferredSeriesType: compatibleSeriesType,
+        layers: layerId
+          ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
+          : state.layers.map(switchLayer),
+      },
+      dataLayer.seriesType,
+      compatibleSeriesType
+    );
   },
 
   getSuggestions,
@@ -810,7 +814,13 @@ export const getXyVisualization = ({
       <SubtypeSwitch
         layer={layer}
         setLayerState={(newLayer: XYDataLayerConfig) =>
-          setState(updateLayer(state, newLayer, index))
+          setState(
+            applyChartDefaultsIfNeeded(
+              updateLayer(state, newLayer, index),
+              layer.seriesType,
+              newLayer.seriesType
+            )
+          )
         }
       />
     );
@@ -1307,6 +1317,21 @@ function applySeriesDefaultsIfNeeded(
   }
   return updated;
 }
+
+export const applyChartDefaultsIfNeeded = (
+  state: XYVisualizationState,
+  seriesType: SeriesType,
+  toSeriesType: SeriesType
+): XYVisualizationState => {
+  if (!AREA_SERIES.includes(toSeriesType)) {
+    return state;
+  }
+
+  return {
+    ...state,
+    areaFill: resolveAreaFill(seriesType, toSeriesType, state.areaFill),
+  };
+};
 
 /**
  * Resolves the default palette when switching between series types.

@@ -994,6 +994,23 @@ describe('xy_suggestions', () => {
     expect(suggestion.state.preferredSeriesType).toBe('area');
   });
 
+  test('defaults areaFill to "gradient" for a new unstacked area chart', () => {
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+        layerId: 'first',
+        changeType: 'reduced',
+      },
+      keptLayerIds: [],
+      subVisualizationId: 'area',
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.state.preferredSeriesType).toBe('area');
+    expect(suggestion.state.areaFill).toBe('gradient');
+  });
+
   test('keeps existing seriesType for initial tables', () => {
     const currentState: XYVisualizationState = {
       legend: { isVisible: true, position: 'bottom' },

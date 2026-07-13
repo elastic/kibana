@@ -8,6 +8,7 @@
  */
 
 import type { Fit, Position } from '@elastic/charts';
+import type { AreaFillOption } from '@kbn/expression-xy-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { Style, Labels } from '@kbn/charts-plugin/public';
 import type { SchemaConfig } from '@kbn/visualizations-plugin/public';
@@ -139,6 +140,7 @@ export interface VisParams {
   detailedTooltip?: boolean;
   palette: PaletteOutput;
   fillOpacity?: number;
+  areaFill?: AreaFillOption;
   fittingFunction?: Exclude<Fit, 'explicit'>;
   ariaLabel?: string;
 }

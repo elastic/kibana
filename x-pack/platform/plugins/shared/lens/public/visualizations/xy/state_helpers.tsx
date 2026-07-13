@@ -15,6 +15,8 @@ import { isQueryAnnotationConfig } from '@kbn/event-annotation-components';
 import { i18n } from '@kbn/i18n';
 import fastIsEqual from 'fast-deep-equal';
 import { validateQuery } from '@kbn/visualization-ui-components';
+import type { AreaFillOption } from '@kbn/expression-xy-plugin/common';
+import { AreaFillOptions } from '@kbn/expression-xy-plugin/public';
 import type {
   DataViewsState,
   FramePublicAPI,
@@ -356,3 +358,26 @@ export function getAnnotationLayerErrors(
 
   return invalidMessages;
 }
+
+export const getDefaultAreaFill = (seriesType: SeriesType): AreaFillOption | undefined => {
+  switch (seriesType) {
+    case 'area':
+      return AreaFillOptions.GRADIENT;
+    case 'area_stacked':
+    case 'area_percentage_stacked':
+      return AreaFillOptions.SOLID;
+    default:
+      return undefined;
+  }
+};
+
+export const resolveAreaFill = (
+  prevSeriesType: SeriesType,
+  nextSeriesType: SeriesType,
+  currentAreaFill: AreaFillOption | undefined
+): AreaFillOption | undefined => {
+  const nextDefault = getDefaultAreaFill(nextSeriesType);
+  return nextDefault !== undefined && nextDefault !== getDefaultAreaFill(prevSeriesType)
+    ? nextDefault
+    : currentAreaFill;
+};

@@ -6,6 +6,7 @@
  */
 
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
+import { resolveAreaFill } from './state_helpers';
 import { LegendValue, Position } from '@elastic/charts';
 import type {
   Operation,
@@ -4587,6 +4588,46 @@ describe('xy_visualization', () => {
       expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual(newType);
       expect((newState.layers[1] as XYDataLayerConfig).seriesType).toEqual('area');
       expect((newState.layers[2] as XYDataLayerConfig).seriesType).toEqual('area');
+    });
+
+    describe('areaFill defaulting', () => {
+      it('applies the gradient default when an unstacked area is introduced', () => {
+        const state = exampleState();
+        (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
+        expect(state.areaFill).toBeUndefined();
+        const newState = xyVisualization.switchVisualizationType!('area', state);
+        expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual('area');
+        expect(newState.areaFill).toEqual('gradient');
+      });
+
+      it('applies the solid default when a stacked area is introduced', () => {
+        const state = exampleState();
+        (state.layers[0] as XYDataLayerConfig).seriesType = 'bar_stacked';
+        const newState = xyVisualization.switchVisualizationType!('area', state);
+        expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual('area_stacked');
+        expect(newState.areaFill).toEqual('solid');
+      });
+    });
+  });
+
+  describe('resolveAreaFill', () => {
+    it('applies gradient for unstacked and solid for stacked/percentage areas', () => {
+      expect(resolveAreaFill('bar', 'area', undefined)).toEqual('gradient');
+      expect(resolveAreaFill('bar', 'area_stacked', undefined)).toEqual('solid');
+      expect(resolveAreaFill('bar', 'area_percentage_stacked', undefined)).toEqual('solid');
+    });
+
+    it('overrides a prior fill when the stacking category changes', () => {
+      expect(resolveAreaFill('area', 'area_stacked', 'gradient')).toEqual('solid');
+      expect(resolveAreaFill('area_stacked', 'area', 'solid')).toEqual('gradient');
+    });
+
+    it('preserves the current value when the stacking default is unchanged', () => {
+      expect(resolveAreaFill('area_stacked', 'area_percentage_stacked', 'gradient')).toEqual(
+        'gradient'
+      );
+      expect(resolveAreaFill('area', 'bar', 'gradient')).toEqual('gradient');
+      expect(resolveAreaFill('area', 'bar', undefined)).toBeUndefined();
     });
   });
 });
