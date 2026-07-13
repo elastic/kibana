@@ -12,12 +12,14 @@ import {
   METRICS_TEST_INDEX_NAME,
   METRICS_TEST_INDEX_NAME_OTHER,
 } from '../fixtures/metrics_experience/constants';
+import { METRICS_EXPERIENCE_SORT_ENABLED_FEATURE_FLAG_KEY } from '../../../../public/constants';
 
 globalTeardownHook('Teardown Discover tests data', async ({ esClient, apiServices, log }) => {
-  log.debug('[teardown:discover] resetting isEsqlDefault feature flag');
+  log.debug('[teardown:discover][teardown:metrics] resetting feature flag overrides');
   await apiServices.core.settings({
     'feature_flags.overrides': {
       'discover.isEsqlDefault': null,
+      [METRICS_EXPERIENCE_SORT_ENABLED_FEATURE_FLAG_KEY]: null,
     },
   });
 

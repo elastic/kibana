@@ -22,6 +22,7 @@ import {
   minimalTraceCorrelatedLogs,
   deepTrace,
 } from '../fixtures/traces_experience';
+import { METRICS_EXPERIENCE_SORT_ENABLED_FEATURE_FLAG_KEY } from '../../../../public/constants';
 
 globalSetupHook(
   'Setup Discover tests data',
@@ -104,6 +105,14 @@ globalSetupHook(
     await createMetricsTestIndexIfNeeded(esClient, PARTIAL_DIM_FULL_CONFIG);
     await createMetricsTestIndexIfNeeded(esClient, PARTIAL_DIM_ONLY_CONFIG);
     log.debug('[setup:metrics] partial-dimension metrics test indices ready');
+
+    // Configure feature flag overwrites
+    log.debug('[setup:metrics] enabling metricsExperienceSortEnabled feature flag');
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        [METRICS_EXPERIENCE_SORT_ENABLED_FEATURE_FLAG_KEY]: true,
+      },
+    });
 
     // Traces Experience setup (not supported in serverless security or search - no Fleet/APM privileges)
     const hasFleetSupport = !config.serverless || config.projectType === 'oblt';

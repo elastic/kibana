@@ -9,8 +9,8 @@
 
 /**
  * Sort control tests: the sort selector is gated behind the
- * `discover.metricsExperienceSortEnabled` feature flag, which is enabled here
- * via the dynamic config override route.
+ * `discover.metricsExperienceSortEnabled` feature flag, which is enabled once
+ * for the whole parallel suite in `parallel_tests/global.setup.ts`.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -20,7 +20,6 @@ import {
   DEFAULT_TIME_RANGE,
   DEFAULT_CONFIG,
 } from '../../fixtures/metrics_experience';
-import { METRICS_EXPERIENCE_SORT_ENABLED_FEATURE_FLAG_KEY } from '../../../../../public/constants';
 
 const ALPHABETICALLY_SORTED_METRICS = [...DEFAULT_CONFIG.metrics].sort((a, b) =>
   a.name.localeCompare(b.name)
@@ -36,11 +35,7 @@ spaceTest.describe(
     tag: testData.METRICS_EXPERIENCE_TAGS,
   },
   () => {
-    spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { [METRICS_EXPERIENCE_SORT_ENABLED_FEATURE_FLAG_KEY]: true },
-      });
-
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME);
       await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
@@ -51,10 +46,7 @@ spaceTest.describe(
       await pageObjects.discover.goto({ queryMode: 'esql' });
     });
 
-    spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { [METRICS_EXPERIENCE_SORT_ENABLED_FEATURE_FLAG_KEY]: false },
-      });
+    spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
     });
