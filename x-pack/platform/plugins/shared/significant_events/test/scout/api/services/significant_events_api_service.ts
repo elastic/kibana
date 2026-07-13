@@ -9,7 +9,10 @@ import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
-import { SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../../../../common';
+import {
+  SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
+  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+} from '../../../../common';
 
 export interface SignificantEventsTestApiService {
   runSignificantEventsDiscovery: () => Promise<{ executionId: string }>;
@@ -18,6 +21,8 @@ export interface SignificantEventsTestApiService {
     status: string;
     executionId: string | null;
   }>;
+  enableSignificantEventsAvailability: () => Promise<void>;
+  disableSignificantEventsAvailability: () => Promise<void>;
   enableSignificantEvents: () => Promise<void>;
   disableSignificantEvents: () => Promise<void>;
   enableMemory: () => Promise<void>;
@@ -32,6 +37,44 @@ export function getSignificantEventsTestApiService({
   log: ScoutLogger;
 }): SignificantEventsTestApiService {
   return {
+    async enableSignificantEventsAvailability() {
+      await measurePerformanceAsync(
+        log,
+        'significantEventsTestApi.enableSignificantEventsAvailability',
+        async () => {
+          await kbnClient.request({
+            path: '/internal/core/_settings',
+            method: 'PUT',
+            headers: COMMON_API_HEADERS,
+            body: {
+              'feature_flags.overrides': {
+                [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+              },
+            },
+          });
+        }
+      );
+    },
+
+    async disableSignificantEventsAvailability() {
+      await measurePerformanceAsync(
+        log,
+        'significantEventsTestApi.disableSignificantEventsAvailability',
+        async () => {
+          await kbnClient.request({
+            path: '/internal/core/_settings',
+            method: 'PUT',
+            headers: COMMON_API_HEADERS,
+            body: {
+              'feature_flags.overrides': {
+                [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: false,
+              },
+            },
+          });
+        }
+      );
+    },
+
     async enableSignificantEvents() {
       await measurePerformanceAsync(
         log,
