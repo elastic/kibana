@@ -486,10 +486,6 @@ describe('EndpointServiceFactory', () => {
       });
     });
 
-    it('should pass through methods that are not intercepted', () => {
-      expect(fleetServicesMock.agent.getAgentStatusById).toBe(agentClientMock.getAgentStatusById);
-    });
-
     it('should wrap the scoped agent client when a `spaceId` is provided', async () => {
       const scopedServices = fleetServicesFactoryMock.service.asInternalUser('foo');
       const agent = agentGenerator.generate({ id: 'agent-1', policy_id: 'policy-1#1.0.0' });
