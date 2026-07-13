@@ -46,6 +46,9 @@ describe('EndpointServiceFactory', () => {
       'getIntegrationNamespaces',
       'getSoClient',
       'isEndpointPackageInstalled',
+      'fetchAgent',
+      'fetchAgentsById',
+      'fetchAgentList',
     ]);
   });
 
