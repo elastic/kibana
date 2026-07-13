@@ -11,6 +11,7 @@ jest.mock('../../../telemetry/insights', () => ({
 }));
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { AuthenticatedUser } from '@kbn/core/server';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
@@ -60,6 +61,7 @@ const getRequest = (body: Record<string, unknown>) =>
   });
 
 const defaultBody = { ids: ['attack1', 'attack2'], status: 'acknowledged' };
+const mockCurrentUser = { username: 'testuser' } as AuthenticatedUser;
 
 describe('set attacks workflow status', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -330,7 +332,7 @@ describe('set attacks workflow status', () => {
 
     test('sends insights telemetry when opted in', async () => {
       jest.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
-      context.core.security.authc.getCurrentUser.mockReturnValue({ username: 'testuser' });
+      context.core.security.authc.getCurrentUser.mockReturnValue(mockCurrentUser);
 
       await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
 
@@ -353,7 +355,7 @@ describe('set attacks workflow status', () => {
     test('does not send insights telemetry when opted out', async () => {
       jest.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
       telemetrySenderMock.isTelemetryOptedIn = jest.fn().mockResolvedValue(false);
-      context.core.security.authc.getCurrentUser.mockReturnValue({ username: 'testuser' });
+      context.core.security.authc.getCurrentUser.mockReturnValue(mockCurrentUser);
 
       await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
 
@@ -362,7 +364,7 @@ describe('set attacks workflow status', () => {
 
     test('does not send insights telemetry when closing reason validation fails', async () => {
       jest.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
-      context.core.security.authc.getCurrentUser.mockReturnValue({ username: 'testuser' });
+      context.core.security.authc.getCurrentUser.mockReturnValue(mockCurrentUser);
 
       await server.inject(
         getRequest({ ids: ['attack1'], status: 'closed', reason: 'invalid_reason' }),
@@ -374,7 +376,7 @@ describe('set attacks workflow status', () => {
 
     test('sends insights telemetry before ES update even when update fails', async () => {
       jest.mocked(insights.getSessionIDfromKibanaRequest).mockReturnValue('test-session-id');
-      context.core.security.authc.getCurrentUser.mockReturnValue({ username: 'testuser' });
+      context.core.security.authc.getCurrentUser.mockReturnValue(mockCurrentUser);
       context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
         new Error('Test error')
       );
