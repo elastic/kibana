@@ -182,22 +182,6 @@ entries:
   issues:
   - https://github.com/elastic/kibana/issues/267914
 - file:
-    name: 268951.yaml
-    checksum: c2086e46e4fcd27de6bd0845f1fa3267c9a541f9
-  type: breaking-change
-  title: Align Dashboard API search endpoint schema with As Code schemas
-  products:
-  - product: cloud-serverless
-    target: 2026-07-07
-  impact: Dashboard API search request and response schemas change when `asCode.useGASchemas` is enabled. Requests are limited to a `per_page` of 1000, and responses use a `data` and `meta` structure instead of `dashboards`, `page`, and `total`.
-  action: Update Dashboard API clients to use the `data` and `meta` response fields and respect the `per_page` limit. Test integrations against the new schema before the `asCode.useGASchemas` flag is enabled for your deployment.
-  areas:
-  - Dashboards and visualizations
-  prs:
-  - https://github.com/elastic/kibana/pull/268951
-  issues:
-  - https://github.com/elastic/kibana/issues/267607
-- file:
     name: 271793.yaml
     checksum: 039f18039456ea28a36c1674dafa44ba07672824
   type: enhancement
