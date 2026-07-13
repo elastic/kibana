@@ -19,16 +19,15 @@ import type { CreateLiveQueryRequestBodySchema } from '../../common/api';
 import { getUserInfo } from '../lib/get_user_info';
 import type { StartPlugins } from '../types';
 import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
-import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../common/constants';
 import { validateReadOnlyQuery } from './validate_read_only_query';
+import { pollActionResponses } from './poll_action_responses';
 
 const osqueryTool = (toolName: string): string => `${internalNamespaces.osquery}.${toolName}`;
 
 export const RUN_LIVE_QUERY_TOOL_ID = osqueryTool('run_live_query');
 
-/** Max wall-clock time the tool will wait for agent responses before returning dispatched status. */
-const POLL_BUDGET_MS = 15_000;
-const POLL_INTERVAL_MS = 1_500;
+/** Initial inline wait before returning action_id for osquery.get_live_query_results. */
+const POLL_BUDGET_MS = 30_000;
 const MAX_RESULT_ROWS = 100;
 
 const runLiveQuerySchema = z.object({
@@ -52,8 +51,6 @@ const runLiveQuerySchema = z.object({
     .describe('Query timeout in seconds (passed to osquerybeat). Default 60.'),
 });
 
-const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
-
 export const runLiveQueryTool = (
   osqueryContext: OsqueryAppContext,
   logger: Logger,
@@ -62,7 +59,7 @@ export const runLiveQueryTool = (
   id: RUN_LIVE_QUERY_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Run a read-only Osquery live query on specified agents and wait briefly for results. Enforces SchemaService catalog allowlist — only SELECT against known tables. Returns rows when agents respond within ~15s; otherwise returns action_id for later polling.',
+    'Run a read-only Osquery live query on specified agents and wait briefly for results. Enforces SchemaService catalog allowlist — only SELECT against known tables. Returns rows when agents respond within ~30s; otherwise returns action_id — call osquery.get_live_query_results to wait longer and display rows in chat.',
   schema: runLiveQuerySchema,
   availability: {
     cacheMode: 'space',
@@ -150,46 +147,19 @@ export const runLiveQueryTool = (
       const actionId = result.response.action_id as string;
       const agentCount = result.response.agents?.length ?? result.fleetActionsCount;
 
-      // Awaitable-step: poll action responses briefly so the tool can return rows inline
       const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const deadline = Date.now() + POLL_BUDGET_MS;
-      let rows: Array<Record<string, unknown>> = [];
-      let responded = 0;
-
-      while (Date.now() < deadline) {
-        await sleep(POLL_INTERVAL_MS);
-        try {
-          const searchResult = await esClient.search({
-            index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
-            size: MAX_RESULT_ROWS,
-            ignore_unavailable: true,
-            query: {
-              bool: {
-                filter: [{ term: { action_id: actionId } }],
-              },
-            },
-          });
-          const hits = searchResult.hits.hits;
-          responded = hits.length;
-          if (responded > 0) {
-            rows = hits.map((hit) => {
-              const source = (hit._source ?? {}) as Record<string, unknown>;
-              // Prefer the nested osquery result payload when present
-              const nested =
-                (source.osquery as Record<string, unknown> | undefined) ??
-                (source['osquery.result'] as Record<string, unknown> | undefined);
-
-              return nested ?? source;
-            });
-            break;
-          }
-        } catch (pollErr) {
-          logger.debug(`Live-query poll error (will retry): ${pollErr}`);
-        }
-      }
-
+      const pollResult = await pollActionResponses(esClient, actionId, {
+        budgetMs: POLL_BUDGET_MS,
+        maxRows: MAX_RESULT_ROWS,
+        logger,
+      });
+      const { rows, responded, status: pollStatus } = pollResult;
       const status =
-        rows.length > 0 ? 'completed' : responded > 0 ? 'partial' : ('dispatched' as const);
+        pollStatus === 'completed'
+          ? 'completed'
+          : pollStatus === 'partial'
+          ? 'partial'
+          : ('dispatched' as const);
 
       return {
         results: [
@@ -207,7 +177,7 @@ export const runLiveQueryTool = (
               rows: rows.slice(0, MAX_RESULT_ROWS),
               ...(status === 'dispatched' && {
                 guidance:
-                  'Agents have not responded within the poll budget. Use the action_id to retrieve results later via GET /api/osquery/live_queries/{id}/results/{actionId}.',
+                  'Agents have not responded within the initial poll budget. Call osquery.get_live_query_results with this action_id to wait longer and return rows for chat display.',
               }),
             },
           },

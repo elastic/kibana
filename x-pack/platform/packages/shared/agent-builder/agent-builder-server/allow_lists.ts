@@ -98,6 +98,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.osquery}.list_saved_queries`,
   `${internalNamespaces.osquery}.get_table_schema`,
   `${internalNamespaces.osquery}.run_live_query`,
+  `${internalNamespaces.osquery}.get_live_query_results`,
   `${internalNamespaces.osquery}.list_packs`,
 ] as const;
 
