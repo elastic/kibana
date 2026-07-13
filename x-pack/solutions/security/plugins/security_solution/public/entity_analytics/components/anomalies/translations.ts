@@ -32,6 +32,19 @@ export const ENTITY_ANOMALIES_RECENT_TABLE_TITLE = i18n.translate(
   { defaultMessage: 'Recent anomalies' }
 );
 
+export const ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.missingThreatTacticsWarning',
+  {
+    defaultMessage:
+      'Some of the ML jobs powering this attack chain are missing MITRE ATT&CK tactic mappings.',
+  }
+);
+
+export const ENTITY_ANOMALIES_MISSING_THREAT_TACTICS_WARNING_LINK = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.missingThreatTacticsWarningLink',
+  { defaultMessage: 'Update to the latest integration version' }
+);
+
 export const getEntityAnomaliesCountLabel = (count: number) =>
   i18n.translate(
     'xpack.securitySolution.entityAnalytics.entityAnomalies.overview.anomaliesCountLabel',
@@ -169,6 +182,16 @@ export const ENTITY_ANOMALY_TABLE_EXPANDED_ROW_KEY_FIELDS = i18n.translate(
   { defaultMessage: 'Key fields' }
 );
 
+export const ENTITY_ANOMALY_TABLE_EMPTY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.emptyMessage',
+  { defaultMessage: 'No anomalies detected' }
+);
+
+export const ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.recentAnomaliesEmptyMessage',
+  { defaultMessage: 'No anomalies detected within last 30 days' }
+);
+
 export const ENTITY_ANOMALY_DATE_RANGE_LAST_15_MINUTES = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.dateRangePicker.last15MinutesLabel',
   { defaultMessage: 'Last 15 minutes' }
@@ -215,4 +238,16 @@ export const ENTITY_ANOMALY_DATE_RANGE_TOO_OLD_ERROR = i18n.translate(
     defaultMessage:
       'Anomaly data is only available for the past year. Select a more recent start date.',
   }
+);
+
+export const ENTITY_ANOMALY_STATE_ERROR_BODY = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.stateErrorBody',
+  {
+    defaultMessage: 'An error occurred while retrieving anomaly data.',
+  }
+);
+
+export const ENTITY_ANOMALY_STATE_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.stateErrorTitle',
+  { defaultMessage: 'Unable to load behavioral anomalies' }
 );
