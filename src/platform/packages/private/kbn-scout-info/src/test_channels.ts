@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, ZodError } from '@kbn/zod';
+import { z } from '@kbn/zod';
 
 export const ScoutTestChannelSchema = z.enum([
   'ci-on-commit', // Immediate feedback, as soon as the change is committed.
