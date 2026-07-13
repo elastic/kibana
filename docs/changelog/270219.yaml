@@ -4,4 +4,4 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-07-09
-title: Allow close all alerts checkbox when creating an exception from runtime fields
+title: Allow "Close all alerts that match this exception" checkbox when creating an exception from runtime fields

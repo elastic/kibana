@@ -10,6 +10,6 @@ areas:
 - Alerting and reporting
 - Dashboards and visualizations
 title: Simplify duration units
-description: "Changes expected types for `to` and `from` used for Lens visualization API configuration. Change is behind the `asCode.useGASchemas` feature flag which will be enabled by default and disabled for existing API users."
-impact: "Lens as Code duration format `from` and `to` values change from long-form unit names (for example `milliseconds`, `asSeconds`) to short-hand enumerations (for example `ms`, `s`). Configurations using the previous values fail validation when `asCode.useGASchemas` is enabled."
-action: "Update Lens visualization API configurations to use the new short-hand duration units."
+description: "Changes expected types for `to` and `from` in Lens visualization API duration format configuration. The change applies when the `asCode.useGASchemas` feature flag is enabled. The flag defaults to enabled for new deployments and stays disabled for existing API users to preserve backward compatibility."
+impact: "Lens as Code duration format `from` and `to` values change from long-form unit names (for example, `milliseconds`, `asSeconds`) to short-hand enumerations (for example, `ms`, `s`). Configurations using the previous values fail validation when `asCode.useGASchemas` is enabled."
+action: "Update Lens visualization API configurations to use short-hand duration units (for example, `ms`, `s`) instead of long-form names (for example, `milliseconds`, `asSeconds`)."
