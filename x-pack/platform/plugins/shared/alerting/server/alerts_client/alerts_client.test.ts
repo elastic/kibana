@@ -41,6 +41,7 @@ import {
   ALERT_START,
   ALERT_STATE_NAMESPACE,
   ALERT_STATUS,
+  ALERT_STATUS_DELAYED,
   ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
   ALERT_UUID,
@@ -4043,10 +4044,15 @@ describe('Alerts Client', () => {
       });
 
       describe('isTrackedAlert()', () => {
-        test('should return true if alert was active in a previous execution, false otherwise', async () => {
+        test('should return true for active or delayed alerts, false otherwise', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
+
+          const delayedAlert = {
+            ...fetchedAlert2,
+            [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+          };
 
           clusterClient.search.mockResolvedValue({
             took: 10,
@@ -4067,7 +4073,7 @@ describe('Alerts Client', () => {
                   _index: '.internal.alerts-test.alerts-default-000002',
                   _seq_no: 42,
                   _primary_term: 666,
-                  _source: fetchedAlert2,
+                  _source: delayedAlert,
                 },
               ],
             },
@@ -4078,8 +4084,8 @@ describe('Alerts Client', () => {
             activeAlertsFromState: { '1': trackedAlert1Raw, '2': trackedAlert2Raw },
           });
 
-          expect(alertsClient.isTrackedAlert('1')).toBe(true);
-          expect(alertsClient.isTrackedAlert('2')).toBe(true);
+          expect(alertsClient.isTrackedAlert('1')).toBe(true); // active
+          expect(alertsClient.isTrackedAlert('2')).toBe(true); // delayed
           expect(alertsClient.isTrackedAlert('3')).toBe(false);
         });
       });

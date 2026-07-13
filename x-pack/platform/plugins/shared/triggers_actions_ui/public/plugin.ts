@@ -75,7 +75,12 @@ import type { AlertSummaryWidgetDependencies } from './application/sections/aler
 import type { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 import type { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
 
-import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID, PLUGIN_ID } from './common/constants';
+import {
+  ALERTS_PAGE_ID,
+  CONNECTORS_PLUGIN_ID,
+  PLUGIN_ID,
+  RULES_CAPABILITY_ID,
+} from './common/constants';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
@@ -319,6 +324,7 @@ export class Plugin
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: PLUGIN_ID,
         title: featureTitle,
+        capabilitiesId: RULES_CAPABILITY_ID,
         order: 1,
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
@@ -429,7 +435,7 @@ export class Plugin
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: ALERTS_PAGE_ID,
         title: alertsFeatureTitle,
-        capabilitiesId: PLUGIN_ID,
+        capabilitiesId: ALERTS_PAGE_ID,
         order: 0,
         async mount(params: ManagementAppMountParams) {
           const { renderApp } = await import('./application/alerts_app');

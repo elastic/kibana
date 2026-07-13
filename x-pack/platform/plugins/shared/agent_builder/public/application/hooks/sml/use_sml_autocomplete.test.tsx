@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { SmlSearchFilterType } from '@kbn/agent-context-layer-plugin/public';
+import { SmlSearchFilterType } from '@kbn/agent-builder-sml-plugin/public';
 import { SML_SEARCH_DEFAULT_SIZE } from '../../../services/sml/constants';
 import { useSmlAutocomplete } from './use_sml_autocomplete';
 

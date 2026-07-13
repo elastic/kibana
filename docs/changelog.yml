@@ -317,6 +317,7 @@ bundle:
   # Use YAML literal block scalar (|) for multiline descriptions. See docs/contribute/changelog.md for examples.
   # description: |
   #   This release includes new features and bug fixes.
+  use_local_changelogs: true
 
   # Named bundle profiles for different release scenarios
   profiles:
