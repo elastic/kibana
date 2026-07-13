@@ -16,11 +16,6 @@ jest.mock('../../containers/api', () => ({
   patchCase: (...args: unknown[]) => mockPatchCase(...args),
 }));
 
-const mockRefresh = jest.fn();
-jest.mock('./use_on_refresh_case_view_page', () => ({
-  useRefreshCaseViewPage: () => mockRefresh,
-}));
-
 const mockShowSuccessToast = jest.fn();
 const mockShowErrorToast = jest.fn();
 jest.mock('../../common/use_cases_toast', () => ({
@@ -29,6 +24,19 @@ jest.mock('../../common/use_cases_toast', () => ({
     showErrorToast: mockShowErrorToast,
   }),
 }));
+
+// The hook reloads the page on success; jsdom doesn't implement reload, so stub it.
+const originalLocation = window.location;
+const mockReload = jest.fn();
+beforeAll(() => {
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: { ...originalLocation, reload: mockReload },
+  });
+});
+afterAll(() => {
+  Object.defineProperty(window, 'location', { configurable: true, value: originalLocation });
+});
 
 const caseWithTemplate = {
   ...basicCase,
@@ -136,9 +144,68 @@ describe('useChangeAppliedTemplate', () => {
         })
       );
     });
+
+    // Applying a template must never reassign an existing case's connector.
+    expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
   });
 
-  it('calls patchCase with template: null and empty extended_fields when removing a template', async () => {
+  it('applies the template settings without touching the connector', async () => {
+    const { result } = renderHook(() => useChangeAppliedTemplate(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({
+        caseData: caseWithTemplate,
+        newTemplate: {
+          id: 'tmpl-2',
+          version: 5,
+          fields: templateFields,
+          settings: { syncAlerts: true },
+        },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockPatchCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedCase: expect.objectContaining({
+            // declared syncAlerts kept, omitted extractObservables defaults to off
+            settings: { syncAlerts: true, extractObservables: false },
+          }),
+        })
+      );
+    });
+
+    expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
+  });
+
+  it('turns settings off when the template declares none', async () => {
+    const { result } = renderHook(() => useChangeAppliedTemplate(), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate({
+        caseData: caseWithTemplate,
+        newTemplate: { id: 'tmpl-2', version: 5, fields: templateFields },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockPatchCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedCase: expect.objectContaining({
+            settings: { syncAlerts: false, extractObservables: false },
+          }),
+        })
+      );
+    });
+
+    expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
+  });
+
+  it('calls patchCase with template: null, empty extended_fields, and reset settings when removing a template', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,
     });
@@ -153,13 +220,16 @@ describe('useChangeAppliedTemplate', () => {
           updatedCase: expect.objectContaining({
             template: null,
             extended_fields: {},
+            settings: { syncAlerts: false, extractObservables: false },
           }),
         })
       );
     });
+
+    expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
   });
 
-  it('calls refreshCaseViewPage and shows success toast on success', async () => {
+  it('reloads the page on success so all components reflect the applied template', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,
     });
@@ -169,12 +239,11 @@ describe('useChangeAppliedTemplate', () => {
     });
 
     await waitFor(() => {
-      expect(mockRefresh).toHaveBeenCalled();
-      expect(mockShowSuccessToast).toHaveBeenCalled();
+      expect(mockReload).toHaveBeenCalled();
     });
   });
 
-  it('shows error toast on failure', async () => {
+  it('shows error toast on failure and does not reload', async () => {
     mockPatchCase.mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
@@ -189,6 +258,6 @@ describe('useChangeAppliedTemplate', () => {
       expect(mockShowErrorToast).toHaveBeenCalled();
     });
 
-    expect(mockRefresh).not.toHaveBeenCalled();
+    expect(mockReload).not.toHaveBeenCalled();
   });
 });

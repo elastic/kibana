@@ -24,7 +24,8 @@ export function getDashboardCRUResponseBody(
   operation: Operation,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   isDashboardAppRequest: boolean = false,
-  serverTiming?: RequestTiming
+  serverTiming?: RequestTiming,
+  useGASchemas?: boolean
 ) {
   const timer = serverTiming?.start('transform-dashboard-out');
 
@@ -36,7 +37,8 @@ export function getDashboardCRUResponseBody(
       savedObject.attributes,
       savedObject.references,
       isDashboardAppRequest,
-      strictValidationSchema
+      strictValidationSchema,
+      useGASchemas
     ));
     warnings.push(...dashboardStateWarnings);
     if (!isDashboardAppRequest && operation === 'read') {

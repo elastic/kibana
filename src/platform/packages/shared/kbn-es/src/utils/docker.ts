@@ -647,8 +647,18 @@ export function resolveEsArgs(
 
     args.forEach((arg) => {
       const [key, ...value] = arg.split('=');
+      const trimmedKey = key.trim();
+      const trimmedValue = value.join('=').trim();
 
-      esArgs.set(key.trim(), value.join('=').trim());
+      if (trimmedKey.startsWith('es.')) {
+        // es.-prefixed settings are JVM system properties, not ES cluster settings.
+        // They must be passed via ES_JAVA_OPTS as -Des.xxx=yyy flags, same as
+        // ES_REFRESH_INTERVAL_OVERRIDE_FLAG. Appending here preserves any existing JVM args.
+        const existing = esArgs.get('ES_JAVA_OPTS') ?? '';
+        esArgs.set('ES_JAVA_OPTS', `${existing} -D${trimmedKey}=${trimmedValue}`.trim());
+      } else {
+        esArgs.set(trimmedKey, trimmedValue);
+      }
     });
   }
 
@@ -1241,7 +1251,8 @@ const REMOTE_CLUSTER_SERVER_PORT = 9400;
  * Updates the origin cluster's operator settings.json to register the linked project,
  * so ES can discover it for Cross Project Search via the /_project/tags API.
  *
- * The file is bind-mounted from the host, so writing it triggers an ES config reload.
+ * The file is bind-mounted from the host. Writing it triggers an ES config reload on
+ * native Linux (CI) and Docker Desktop, but NOT on colima — see the note below.
  */
 async function registerLinkedProjectInOriginSettings(log: ToolingLog, options: ServerlessOptions) {
   const { linkedProject } = options;
@@ -1280,6 +1291,13 @@ async function registerLinkedProjectInOriginSettings(log: ToolingLog, options: S
     },
   };
 
+  // NOTE: ES's FileSettingsService reloads operator settings when it receives a
+  // `MOVED_TO` inotify event on the operator directory. On native Linux (CI) and
+  // Docker Desktop, this host-side write propagates that event into the container
+  // and ES reloads on its own. On colima's virtiofs mount it does NOT, so ES never
+  // registers the linked project and cross-project queries fail with
+  // `no_matching_project_exception: No such project: [linked_local_project]`. Run
+  // the local CPS stack on Docker Desktop (or Linux), not colima.
   await Fsp.writeFile(settingsPath, JSON.stringify(currentJson, null, 2));
   log.success(`Linked project registered: ${linkedProject.projectId} -> ${linkedEndpoint}`);
 }

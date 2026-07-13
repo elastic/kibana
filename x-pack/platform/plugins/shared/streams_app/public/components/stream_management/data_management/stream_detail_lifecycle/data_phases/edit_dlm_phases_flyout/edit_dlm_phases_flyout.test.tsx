@@ -318,11 +318,14 @@ describe('EditDlmPhasesFlyout', () => {
     expect(frozenPanel.queryByText(/Must occur before the .* phase/i)).not.toBeInTheDocument();
   });
 
-  it('shows a default repository required callout in frozen searchable snapshot section when default repo is missing', async () => {
+  it('shows a direct create-repository link in frozen searchable snapshot section when default repo is missing', async () => {
+    const onMissingDefaultRepository = jest.fn();
+    const createDefaultRepositoryHref = '/app/management/data/snapshot_restore/add_repository';
     renderDlmFlyout(
       {
         defaultRepositoryName: undefined,
-        onMissingDefaultRepository: jest.fn(),
+        createDefaultRepositoryHref,
+        onMissingDefaultRepository,
         onRefreshDefaultRepository: jest.fn(),
         isRefreshingDefaultRepository: true,
       },
@@ -337,13 +340,48 @@ describe('EditDlmPhasesFlyout', () => {
     expect(
       frozenPanel.getByTestId(`${DATA_TEST_SUBJ}FrozenDefaultRepositoryRequiredCallout`)
     ).toBeVisible();
-    expect(frozenPanel.getByTestId(`${DATA_TEST_SUBJ}CreateDefaultRepositoryButton`)).toBeVisible();
+    const createRepositoryButton = frozenPanel.getByTestId(
+      `${DATA_TEST_SUBJ}CreateDefaultRepositoryButton`
+    );
+    expect(createRepositoryButton).toBeVisible();
+    expect(createRepositoryButton).toHaveAttribute('href', createDefaultRepositoryHref);
+
+    fireEvent.click(createRepositoryButton);
+    expect(onMissingDefaultRepository).not.toHaveBeenCalled();
+
     expect(
       frozenPanel.getByTestId(`${DATA_TEST_SUBJ}RefreshDefaultRepositoryButton`)
     ).toBeVisible();
 
     expect(frozenPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`)).toBeDisabled();
     expect(frozenPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterUnit`)).toBeDisabled();
+  });
+
+  it('shows a manage-repositories link in frozen searchable snapshot section when other repositories already exist', async () => {
+    renderDlmFlyout(
+      {
+        defaultRepositoryName: undefined,
+        createDefaultRepositoryHref: '/app/management/data/snapshot_restore/add_repository',
+        manageRepositoriesHref: '/app/management/data/snapshot_restore/repositories',
+        hasExistingRepositories: true,
+        onRefreshDefaultRepository: jest.fn(),
+      },
+      { initialSelectedPhase: 'frozen' }
+    );
+    await tick();
+
+    const frozenPanel = withinPhase('frozen');
+    const manageRepositoriesButton = frozenPanel.getByTestId(
+      `${DATA_TEST_SUBJ}ManageRepositoriesButton`
+    );
+    expect(manageRepositoriesButton).toBeVisible();
+    expect(manageRepositoriesButton).toHaveAttribute(
+      'href',
+      '/app/management/data/snapshot_restore/repositories'
+    );
+    expect(
+      frozenPanel.queryByTestId(`${DATA_TEST_SUBJ}CreateDefaultRepositoryButton`)
+    ).not.toBeInTheDocument();
   });
 
   it('shows only the delete-after field for delete and a remove button', async () => {

@@ -24,7 +24,7 @@ import type { AttachmentTypeDefinition } from './type_definition';
 
 describe('AttachmentStateManager', () => {
   let manager: AttachmentStateManager;
-  const mockContext = { request: {} as any, spaceId: 'default' };
+  const mockContext = { request: {} as any, spaceId: 'default', savedObjectsClient: {} as any };
 
   let resolvedByRefPayload: Record<string, unknown> = { value: 'resolved-1' };
   let isStaleResult: boolean = false;
