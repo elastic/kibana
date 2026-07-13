@@ -29,11 +29,16 @@ export type Environment = t.TypeOf<typeof environmentRt>['environment'];
  * migrated (elastic/kibana#243355).
  */
 
+// Bounds the free-form branch to satisfy the CodeQL "unbounded string in route
+// validation" rule (DoS hardening); generous enough not to reject real
+// environment names.
+const MAX_ENVIRONMENT_LENGTH = 1_024;
+
 // nonEmptyStringRt omitted: unreachable in the io-ts union too (t.string matches first).
 export const environmentStringSchema = z.union([
   z.literal(ENVIRONMENT_NOT_DEFINED.value),
   z.literal(ENVIRONMENT_ALL.value),
-  z.string(),
+  z.string().max(MAX_ENVIRONMENT_LENGTH),
 ]);
 
 export const environmentSchema = z.object({
