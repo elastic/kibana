@@ -18,12 +18,6 @@ import { ProjectPicker } from './project_picker';
 export default {
   component: ProjectPicker,
   title: 'Project Picker/Picker',
-  argTypes: {
-    size: {
-      control: 'select',
-      options: ['s', 'm', 'l'],
-    },
-  },
 } satisfies Meta<typeof ProjectPicker>;
 
 export const ProjectPickerStory: StoryObj<ComponentProps<typeof ProjectPicker>> = {
