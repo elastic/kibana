@@ -64,6 +64,7 @@ describe('extractErrors()', () => {
             "type": "conflict",
           },
           "id": "2",
+          "managed": false,
           "meta": Object {
             "title": "My Dashboard 2",
           },
@@ -77,6 +78,7 @@ describe('extractErrors()', () => {
             "type": "unknown",
           },
           "id": "3",
+          "managed": false,
           "meta": Object {
             "title": "My Dashboard 3",
           },
@@ -88,6 +90,7 @@ describe('extractErrors()', () => {
             "type": "conflict",
           },
           "id": "4",
+          "managed": false,
           "meta": Object {
             "title": "My Dashboard 4",
           },
@@ -182,6 +185,7 @@ describe('extractErrors()', () => {
             "type": "conflict",
           },
           "id": "2",
+          "managed": false,
           "meta": Object {
             "title": "My Dashboard 2",
           },

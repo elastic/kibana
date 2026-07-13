@@ -50,6 +50,7 @@ export function extractErrors(
             type: 'conflict',
             ...(destinationId && { destinationId }),
           },
+          managed: originalSavedObject?.managed ?? false,
         });
         continue;
       }
@@ -61,6 +62,7 @@ export function extractErrors(
           ...savedObject.error,
           type: 'unknown',
         },
+        managed: originalSavedObject?.managed ?? false,
       });
     }
   }
