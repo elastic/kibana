@@ -79,7 +79,10 @@
     "@kbn/deeplinks-security",
     "@kbn/deeplinks-shared",
     "@kbn/deeplinks-workplace-ai",
-    "@kbn/core-user-profile-server"
+    "@kbn/core-user-profile-server",
+    "@kbn/repo-info",
+    "@kbn/test",
+    "@kbn/test-es-server"
   ],
   "exclude": ["target/**/*"]
 }
