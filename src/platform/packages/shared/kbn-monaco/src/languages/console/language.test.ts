@@ -44,6 +44,9 @@ const mockConsoleParsedRequestsProvider = jest.fn<
 
 jest.mock('@kbn/esql-language', () => ({
   suggest: (...args: Parameters<typeof mockSuggest>) => mockSuggest(...args),
+  // esql_lexer_rules.ts reads this eagerly at module-load time to build its keyword list, so
+  // it needs a stub here even though this suite doesn't exercise highlighting.
+  esqlCommandRegistry: { getAllCommandNames: () => [] },
 }));
 
 jest.mock('../esql/lib/converters/suggestions', () => ({
