@@ -8,7 +8,6 @@
 import {
   deriveQueryType,
   ensureMetadata,
-  insertSampleAfterFrom,
   stripMetadata,
   extractBucketColumnName,
   extractBucketIntervalMs,
@@ -65,65 +64,6 @@ describe('ensureMetadata', () => {
 
   it('returns the original string if there is no FROM command', () => {
     expect(ensureMetadata('SHOW INFO')).toBe('SHOW INFO');
-  });
-});
-
-describe('insertSampleAfterFrom', () => {
-  it('inserts SAMPLE immediately after FROM, before user pipeline operators', () => {
-    const result = insertSampleAfterFrom(
-      'FROM logs* | WHERE status == "error" | STATS c = COUNT(*)',
-      0.001
-    );
-    expect(result).toBe('FROM logs* | SAMPLE 0.001 | WHERE status == "error" | STATS c = COUNT(*)');
-  });
-
-  it('inserts SAMPLE after FROM when the query has no other commands', () => {
-    expect(insertSampleAfterFrom('FROM logs*', 0.01)).toBe('FROM logs* | SAMPLE 0.01');
-  });
-
-  it('preserves METADATA on the FROM command', () => {
-    const result = insertSampleAfterFrom(
-      'FROM logs* METADATA _id, _source | STATS c = COUNT(*)',
-      0.005
-    );
-    expect(result).toBe('FROM logs* METADATA _id, _source | SAMPLE 0.005 | STATS c = COUNT(*)');
-  });
-
-  it('handles multi-index FROM clauses', () => {
-    const result = insertSampleAfterFrom(
-      'FROM logs.child, logs.child.* | STATS c = COUNT(*) BY host.name',
-      0.001
-    );
-    expect(result).toContain('logs.child');
-    expect(result).toContain('logs.child.*');
-    expect(result).toContain('| SAMPLE 0.001 |');
-    expect(result).toContain('STATS c = COUNT(*) BY host.name');
-  });
-
-  it('sits before STATS so aggregation input is throttled', () => {
-    const result = insertSampleAfterFrom('FROM logs* | STATS c = COUNT(*) BY level', 0.001);
-    const samplePos = result.indexOf('SAMPLE');
-    const statsPos = result.indexOf('STATS');
-    expect(samplePos).toBeGreaterThan(-1);
-    expect(statsPos).toBeGreaterThan(samplePos);
-  });
-
-  it.each([0, 1, -0.1, 1.1, Number.NaN, Number.POSITIVE_INFINITY])(
-    'returns the input unchanged when probability=%p (not in (0,1))',
-    (probability) => {
-      const query = 'FROM logs* | STATS c = COUNT(*)';
-      expect(insertSampleAfterFrom(query, probability)).toBe(query);
-    }
-  );
-
-  it('returns the input unchanged when the query has no FROM (SHOW/ROW)', () => {
-    expect(insertSampleAfterFrom('SHOW INFO', 0.001)).toBe('SHOW INFO');
-    expect(insertSampleAfterFrom('ROW a = 1', 0.001)).toBe('ROW a = 1');
-  });
-
-  it('returns the input unchanged when the query cannot be parsed', () => {
-    const garbage = 'this is not esql at all { }';
-    expect(insertSampleAfterFrom(garbage, 0.001)).toBe(garbage);
   });
 });
 
