@@ -870,7 +870,7 @@ describe('AlertingAuthorization', () => {
         })
       ).filter;
 
-      expect(securityStart.authz.checkPrivilegesWithRequest).toBeCalledTimes(1);
+      expect(checkPrivileges).toBeCalledTimes(1);
       expect(atSpacesMock).toHaveBeenCalledWith([spaceId], {
         kibana: [
           'rule-type-id-1/alerts/rule/find',
