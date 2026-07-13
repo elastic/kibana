@@ -294,7 +294,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     const policyInfo: LogsEndpointAction['agent']['policy'] = [];
 
     // Get a list of Agent records so we can identify the Agent Policy ID
-    const agents = await fleetServices.agent.getByIds(agentIds).catch(catchAndWrapError);
+    const agents = await fleetServices.fetchAgentsById(agentIds).catch(catchAndWrapError);
 
     this.log.debug(
       () => `Fleet agent records for agent IDs [${agentIds.join(' | ')}]:\n${stringify(agents, 2)}`

@@ -31,9 +31,6 @@ import { stringify } from '../../utils/stringify';
 import { NotFoundError } from '../../errors';
 import type { SavedObjectsClientFactory } from '../saved_objects';
 
-export const PROXY_TRAP_HANDLERS = Symbol('_PROXY_TRAP_HANDLERS_');
-export const HAS_JEST_SPY_MOCKS = Symbol('HAS_JEST_SPY_MOCKS');
-
 /**
  * The set of Fleet services used by Endpoint
  */
@@ -193,6 +190,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
         agentService: agent,
         agentPolicyService: agentPolicy,
         packagePolicyService: packagePolicy,
+        logger: this.logger,
         options,
         integrationPolicyIds,
         agentPolicyIds,
@@ -266,6 +264,7 @@ interface CheckInCurrentSpaceOptions {
   agentService: AgentClient;
   agentPolicyService: AgentPolicyServiceInterface;
   packagePolicyService: PackagePolicyClient;
+  logger: Logger;
   options?: {
     /**
      * Ensures that all IDs passed on input MUST be accessible in active space. When set to `false`,
@@ -299,6 +298,7 @@ const checkInCurrentSpace = async ({
   agentService,
   agentPolicyService,
   packagePolicyService,
+  logger,
   integrationPolicyIds = [],
   agentPolicyIds = [],
   agentIds = [],
@@ -319,8 +319,7 @@ const checkInCurrentSpace = async ({
 
   await Promise.all([
     agentIds.length
-      ? agentService
-          .getByIds(agentIds, { ignoreMissing: !matchAll })
+      ? fetchFleetAgentsById(agentService, logger, agentIds, { ignoreMissing: !matchAll })
           .catch(handlePromiseErrors)
           .then((response) => {
             // When `matchAll` is false, the results must have at least matched 1 id
