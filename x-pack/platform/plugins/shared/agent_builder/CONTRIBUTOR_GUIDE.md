@@ -1158,7 +1158,7 @@ attach them to a conversation.
 │  │  SmlTypeDefinition         │ ← you provide this           │
 │  │  • id                      │                              │
 │  │  • list()                  │                              │
-│  │  • getSmlData()            │                              │
+│  │  • getSmlEntry()           │                              │
 │  │  • toAttachment()          │                              │
 │  └────────────────────────────┘                              │
 └──────────────────────────────────────────────────────────────┘
@@ -1186,32 +1186,32 @@ attach them to a conversation.
 | Concept | Description |
 |---|---|
 | **SML Type** | A category of content you expose (e.g. `visualization`, `dashboard`). You implement `SmlTypeDefinition`. |
-| **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlData()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
-| **SML Document** | A single indexed chunk stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
+| **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlEntry()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
+| **SML Document** | A single indexed entry stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
 | **`sml_search` tool** | A built-in Agent Builder tool the AI uses to keyword-search SML documents. Results are filtered by the requesting user's space and permissions. |
-| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert SML search hits into conversation attachments. It accepts `chunk_ids` from `sml_search`;  `chunk_id` format is `attachment_type:origin_id:uuid`. |
+| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert SML search hits into conversation attachments. It accepts `entry_ids` from `sml_search`;  `entry_id` format is `attachment_type:origin_id:uuid`. |
 | **Origin ID** | The unique identifier for the source asset (typically a saved object ID). Used to link SML documents back to their source. |
 
 #### Data flow
 
 1. **Crawl**: The crawler runs on a configurable interval (default 10 min).
    For each registered SML type it calls `list()` to enumerate items, detects
-   changes via timestamps, and calls `getSmlData()` for new/updated items.
+   changes via timestamps, and calls `getSmlEntry()` for new/updated items.
 2. **Index**: Results are written to the `.chat-sml-data` system index.
    Crawler state (which items have been seen) is stored in a separate
    `.chat-sml-crawler-state` index.
 3. **Search**: When the AI agent calls `sml_search`, the SML service queries
    the data index, filtering by the user's current space and checking Kibana
    privileges against each result's `permissions` array.
-4. **Attach**: When the AI agent calls `sml_attach` with `chunk_ids`, the service loads each chunk, resolves the saved object via your `toAttachment()` hook, and adds the result as a conversation attachment (with `origin` when applicable).
+4. **Attach**: When the AI agent calls `sml_attach` with `entry_ids`, the service loads each entry, resolves the saved object via your `toAttachment()` hook, and adds the result as a conversation attachment (with `origin` when applicable).
 
 #### Security model
 
 - The crawler runs with **internal credentials** (`asInternalUser`) — it indexes
   content from all spaces.
 - Access control is enforced at **query time**: results are filtered by space
-  and by Kibana feature privileges (the `permissions` array you set in
-  `getSmlData`).
+  and by Kibana feature privileges (the `permissions` your optional
+  `getPermissions` hook returns).
 
 ---
 
@@ -1223,7 +1223,8 @@ Create a file in your plugin (e.g.
 `server/sml_types/my_asset.ts`). You need to implement four things:
 
 ```typescript
-import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
 
 export const myAssetSmlType: SmlTypeDefinition = {
   // Unique identifier — lowercase, alphanumeric, hyphens, underscores.
@@ -1258,37 +1259,30 @@ export const myAssetSmlType: SmlTypeDefinition = {
     }
   },
 
-  // Fetch the full data for a single item to index.
-  // Return undefined to skip the item (e.g. if it was deleted).
-  getSmlData: async (originId, context) => {
+  // Fetch the data to index for a single origin. Every SML type produces
+  // exactly one entry per originId — return undefined to skip the item
+  // (e.g. if it was deleted).
+  getSmlEntry: async (originId, context) => {
     try {
       const so = await context.savedObjectsClient.get('my-saved-object-type', originId);
       const attrs = so.attributes as { title?: string; description?: string };
 
       return {
-        chunks: [
-          {
-            type: 'my-asset',
-            title: attrs.title ?? originId,
-            content: [attrs.title, attrs.description].filter(Boolean).join('\n'),
-            // Permissions required to access this item.
-            // - `kibana.privileges[]` lists Kibana feature privileges (e.g.,
-            //   `saved_object:my-saved-object-type/get`).
-            // - `elasticsearch.indices[]` lists concrete ES index/alias/data
-            //   stream names
-            // Users without all listed privileges/indices won't see the item
-            // in search results.
-            permissions: {
-              kibana: { privileges: [{ name: 'saved_object:my-saved-object-type/get' }] },
-              elasticsearch: { indices: [] },
-            },
-          },
-        ],
+        type: 'my-asset',
+        title: attrs.title ?? originId,
+        content: [attrs.title, attrs.description].filter(Boolean).join('\n'),
       };
     } catch {
       return undefined;
     }
   },
+
+  // Optional: compute the permissions that gate access to the entry.
+  // Omit for resources that are intentionally public within the space.
+  // Prefer `kibanaSavedObjectPermissions` for saved-object-backed types
+  // instead of hand-writing the privilege string.
+  getPermissions: () =>
+    kibanaSavedObjectPermissions({ savedObjectType: 'my-saved-object-type' }),
 
   // Convert an SML document back into a conversation attachment.
   // Called when the AI agent wants to "attach" a search result.
@@ -1340,19 +1334,22 @@ memory, so even types with millions of items won't cause OOM.
 Use `createPointInTimeFinder` with `namespaces: ['*']` to enumerate across
 all spaces. The crawler indexes everything; access control happens at query time.
 
-##### `getSmlData()` — Chunks and permissions
+##### `getSmlEntry()` and `getPermissions()` — One entry, explicit permissions
 
-You can return multiple chunks per item (e.g. if a dashboard has multiple
-panels). Each chunk gets its own document in the SML index.
+`getSmlEntry` returns exactly one entry per originId (e.g. a dashboard with
+many panels is still a single entry — its panel titles just become part of
+`content`, as in the example above).
 
-The `permissions` array should list the Kibana saved object privileges
+The optional `getPermissions` hook returns the Kibana saved object privileges
 required to access the underlying asset. Common patterns:
 
-- `['saved_object:lens/get']` for Lens visualizations
-- `['saved_object:dashboard/get']` for dashboards
-- `['saved_object:search/get']` for saved searches
+- `kibanaSavedObjectPermissions({ savedObjectType: 'lens' })` for Lens visualizations
+- `kibanaSavedObjectPermissions({ savedObjectType: 'dashboard' })` for dashboards
+- `kibanaSavedObjectPermissions({ savedObjectType: 'search' })` for saved searches
 
 Users without the listed privileges won't see the item in `sml_search` results.
+Omit `getPermissions` only when the resource is intentionally public within
+the space.
 
 ##### `toAttachment()` — Resolving saved objects
 
