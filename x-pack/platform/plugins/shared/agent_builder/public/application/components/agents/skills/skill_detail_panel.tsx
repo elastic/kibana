@@ -23,6 +23,7 @@ import { DetailPanelLayout } from '../common/detail_panel_layout';
 import { RenderMarkdownReadOnly } from '../common/render_markdown_read_only';
 import { ToolReadOnlyFlyout } from '../tools/tool_readonly_flyout';
 import { SkillTools } from './skill_tools';
+import { SkillReferencedFiles } from './skill_referenced_files';
 
 interface SkillDetailPanelProps {
   skillId: string;
@@ -99,6 +100,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
           content={skill?.content ?? ''}
         />
         <SkillTools skillToolIds={skill?.tool_ids ?? []} onToolClick={setSelectedToolId} />
+        <SkillReferencedFiles items={skill?.referenced_content ?? []} />
       </DetailPanelLayout>
       {selectedToolId && (
         <ToolReadOnlyFlyout toolId={selectedToolId} onClose={() => setSelectedToolId(null)} />
