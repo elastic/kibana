@@ -6,44 +6,13 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { getDataSourceByIdApiPath } from '../../../../common';
+import { getDataSourceByIdApiPath } from '../fixtures/api_paths';
 import { test, CUSTOM_ROLES } from '../fixtures';
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const S3_ACCESS_KEY = 'AKIAIOSFODNN7EXAMPLE';
 const S3_SECRET_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY';
-
-const waitForDataFederationWritesToSucceed = async (kbnClient: KbnClient): Promise<void> => {
-  const probeId = `scout-data-fed-probe-${randomUUID().slice(0, 8)}`;
-
-  for (let attempt = 1; attempt <= 30; attempt++) {
-    try {
-      await kbnClient.request({
-        method: 'PUT',
-        path: getDataSourceByIdApiPath(probeId),
-        body: {
-          type: 's3',
-          description: 'Scout readiness probe',
-          settings: { region: 'us-east-1', auth: 'anonymous' },
-        },
-      });
-      await kbnClient.request({ method: 'DELETE', path: getDataSourceByIdApiPath(probeId) });
-      return;
-    } catch (error) {
-      const message = String(error);
-      if (!message.includes('encryption_key_not_yet_available_exception')) {
-        throw error;
-      }
-      await delay(500 * attempt);
-    }
-  }
-
-  throw new Error('Timed out waiting for data federation writes to succeed');
-};
 
 test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.stateful.classic }, () => {
   test('creates, edits, and deletes a data source', async ({
@@ -70,10 +39,6 @@ test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.statefu
     await browserAuth.loginWithCustomRole(CUSTOM_ROLES.data_federation_manager);
 
     try {
-      await test.step('wait for the cluster encryption key to become available', async () => {
-        await waitForDataFederationWritesToSucceed(kbnClient);
-      });
-
       await test.step('navigate to the Data Federation management app', async () => {
         await pageObjects.dataFederation.goto();
       });

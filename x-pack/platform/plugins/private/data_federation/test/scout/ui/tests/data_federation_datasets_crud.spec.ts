@@ -6,44 +6,18 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { getDataSetByIdApiPath, getDataSourceByIdApiPath } from '../../../../common';
+import { getDataSetByIdApiPath, getDataSourceByIdApiPath } from '../fixtures/api_paths';
 import { test, CUSTOM_ROLES } from '../fixtures';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const waitForDataFederationWritesToSucceed = async (kbnClient: KbnClient): Promise<void> => {
-  const probeId = `scout-data-fed-probe-${randomUUID().slice(0, 8)}`;
-
-  for (let attempt = 1; attempt <= 30; attempt++) {
-    try {
-      await kbnClient.request({
-        method: 'PUT',
-        path: getDataSourceByIdApiPath(probeId),
-        body: {
-          type: 's3',
-          description: 'Scout readiness probe',
-          settings: { region: 'us-east-1', auth: 'anonymous' },
-        },
-      });
-      await kbnClient.request({ method: 'DELETE', path: getDataSourceByIdApiPath(probeId) });
-      return;
-    } catch (error) {
-      const message = String(error);
-      if (!message.includes('encryption_key_not_yet_available_exception')) {
-        throw error;
-      }
-      await delay(500 * attempt);
-    }
-  }
-
-  throw new Error('Timed out waiting for data federation writes to succeed');
-};
-
 test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.classic }, () => {
-  test('creates, edits, and deletes a dataset', async ({ browserAuth, kbnClient, page, pageObjects }) => {
+  test('creates, edits, and deletes a dataset', async ({
+    browserAuth,
+    kbnClient,
+    page,
+    pageObjects,
+  }) => {
     const dataSourceName = `scout-data-source-${randomUUID().slice(0, 8)}`;
     const dataSetName = `scout-dataset-${randomUUID().slice(0, 8)}`;
     const initialResource = 's3://scout-bucket/path/**/*.parquet';
@@ -59,7 +33,10 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
 
     const cleanupDataSource = async () => {
       try {
-        await kbnClient.request({ method: 'DELETE', path: getDataSourceByIdApiPath(dataSourceName) });
+        await kbnClient.request({
+          method: 'DELETE',
+          path: getDataSourceByIdApiPath(dataSourceName),
+        });
       } catch {
         // ignore cleanup errors
       }
@@ -68,10 +45,6 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
     await browserAuth.loginWithCustomRole(CUSTOM_ROLES.data_federation_manager);
 
     try {
-      await test.step('wait for the cluster encryption key to become available', async () => {
-        await waitForDataFederationWritesToSucceed(kbnClient);
-      });
-
       await test.step('ensure a data source exists (setup)', async () => {
         await kbnClient.request({
           method: 'PUT',
@@ -93,18 +66,21 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
       });
 
       await test.step('create a dataset', async () => {
-        await expect(pageObjects.dataFederation.createDataSetButton).toBeEnabled({ timeout: 30000 });
+        await expect(pageObjects.dataFederation.createDataSetButton).toBeEnabled({
+          timeout: 30000,
+        });
         await pageObjects.dataFederation.createDataSetButton.click();
 
         await expect(page.testSubj.locator('createDatasetFlyout')).toBeVisible();
 
-        await page
-          .testSubj
+        await page.testSubj
           .locator('createDatasetFlyoutDataSource')
           .selectOption({ value: dataSourceName });
         await page.testSubj.locator('createDatasetFlyoutName').fill(dataSetName);
         await page.testSubj.locator('createDatasetFlyoutResource').fill(initialResource);
-        await page.testSubj.locator('createDatasetFlyoutSettingsFormat').selectOption({ value: 'parquet' });
+        await page.testSubj
+          .locator('createDatasetFlyoutSettingsFormat')
+          .selectOption({ value: 'parquet' });
 
         await page.testSubj
           .locator('createDatasetFlyoutSubmit')
@@ -115,7 +91,9 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
         await expect(page.testSubj.locator('createDatasetFlyout')).toBeHidden({ timeout: 30000 });
       });
 
-      const row = pageObjects.dataFederation.dataSetsTable.locator('tr').filter({ hasText: dataSetName });
+      const row = pageObjects.dataFederation.dataSetsTable
+        .locator('tr')
+        .filter({ hasText: dataSetName });
 
       await test.step('dataset appears in the table', async () => {
         await expect(row).toBeVisible({ timeout: 30000 });
@@ -154,4 +132,3 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
     }
   });
 });
-
