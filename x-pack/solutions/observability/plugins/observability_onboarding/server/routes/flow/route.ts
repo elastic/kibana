@@ -16,7 +16,14 @@ import { stringify } from 'yaml';
 import { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
 import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
-import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
+import {
+  assertFlowOwnership,
+  createObservabilityOnboardingInternalRepository,
+  getCurrentUsername,
+  getObservabilityOnboardingFlow,
+  ONBOARDING_SESSION_NOT_FOUND_MESSAGE,
+  saveObservabilityOnboardingFlow,
+} from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
@@ -52,6 +59,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
         path: { id, name },
         body: { status, message, payload },
       },
+      context,
       core,
     } = resources;
 
@@ -62,7 +70,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
      */
     const decodedMessage = Buffer.from(message ?? '', 'base64').toString('utf-8');
     const coreStart = await core.start();
-    const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
+    const savedObjectsClient = createObservabilityOnboardingInternalRepository(coreStart);
 
     const savedObservabilityOnboardingState = await getObservabilityOnboardingFlow({
       savedObjectsClient,
@@ -70,8 +78,10 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
     });
 
     if (!savedObservabilityOnboardingState) {
-      throw Boom.notFound('Unable to report setup progress - onboarding session not found.');
+      throw Boom.notFound(ONBOARDING_SESSION_NOT_FOUND_MESSAGE);
     }
+
+    await assertFlowOwnership({ context, flow: savedObservabilityOnboardingState });
 
     const {
       id: savedObjectId,
@@ -121,26 +131,34 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
       params: {
         path: { onboardingId },
       },
+      context,
       core,
       request,
     } = resources;
     const coreStart = await core.start();
-    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const savedObjectsClient = createObservabilityOnboardingInternalRepository(coreStart);
     const savedObservabilityOnboardingState = await getObservabilityOnboardingFlow({
       savedObjectsClient,
       savedObjectId: onboardingId,
     });
 
     if (!savedObservabilityOnboardingState) {
-      throw Boom.notFound('Unable to report setup progress - onboarding session not found.');
+      throw Boom.notFound(ONBOARDING_SESSION_NOT_FOUND_MESSAGE);
     }
+
+    await assertFlowOwnership({ context, flow: savedObservabilityOnboardingState });
 
     const progress = { ...savedObservabilityOnboardingState?.progress };
 
     const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
-    if (progress['ea-status']?.status === 'complete') {
-      const { agentId } = progress['ea-status']?.payload as ElasticAgentStepPayload;
+    const elasticAgentPayload = progress['ea-status']?.payload;
+    if (
+      progress['ea-status']?.status === 'complete' &&
+      elasticAgentPayload &&
+      'agentId' in elasticAgentPayload
+    ) {
+      const { agentId } = elasticAgentPayload as ElasticAgentStepPayload;
       try {
         const hasLogs = await getHasLogs(esClient, agentId);
         progress['logs-ingest'] = { status: hasLogs ? 'complete' : 'loading' };
@@ -169,12 +187,16 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow',
   options: { tags: [] },
   async handler(resources) {
-    const { context, core, request, plugins, kibanaVersion } = resources;
+    const { context, core, plugins, kibanaVersion } = resources;
     const coreStart = await core.start();
     const {
       elasticsearch: { client },
     } = await context.core;
-    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const savedObjectsClient = createObservabilityOnboardingInternalRepository(coreStart);
+    const createdBy = await getCurrentUsername(context);
+    if (!createdBy) {
+      throw Boom.forbidden('Unable to create onboarding session.');
+    }
 
     const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
     if (!hasPrivileges) {
@@ -189,6 +211,7 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
           savedObjectsClient,
           observabilityOnboardingState: {
             type: 'autoDetect',
+            createdBy,
             state: undefined,
             progress: {},
           },
@@ -280,9 +303,7 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
   }),
   async handler({ context, request, response, params, core, plugins, services }) {
     const coreStart = await core.start();
-    const fleetStart = await plugins.fleet.start();
-    const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
-    const packageClient = fleetStart.packageService.asScoped(request);
+    const savedObjectsClient = createObservabilityOnboardingInternalRepository(coreStart);
 
     const savedObservabilityOnboardingState = await getObservabilityOnboardingFlow({
       savedObjectsClient,
@@ -291,6 +312,14 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     if (!savedObservabilityOnboardingState) {
       throw Boom.notFound(`Onboarding session '${params.path.onboardingId}' not found.`);
     }
+    await assertFlowOwnership({
+      context,
+      flow: savedObservabilityOnboardingState,
+      notFoundMessage: `Onboarding session '${params.path.onboardingId}' not found.`,
+    });
+
+    const fleetStart = await plugins.fleet.start();
+    const packageClient = fleetStart.packageService.asScoped(request);
 
     const outputClient = await fleetStart.createOutputClient(request);
     const defaultOutputId = await outputClient.getDefaultDataOutputId();
