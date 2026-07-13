@@ -52,9 +52,11 @@ export class KibanaA2AAdapter {
     const { agents, tools } = this.getInternalServices();
     const agentRegistry = await agents.getRegistry({ request: kibanaRequest });
     const agent = await agentRegistry.get(agentId);
+    const configuration = await agents.resolveAgentConfiguration({ agent, request: kibanaRequest });
 
     const agentCard = await createAgentCard({
       agent,
+      configuration,
       baseUrl: await this.getBaseUrl(kibanaRequest),
       toolsService: tools,
       request: kibanaRequest,
