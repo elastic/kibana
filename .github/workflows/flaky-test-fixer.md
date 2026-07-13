@@ -97,10 +97,6 @@ safe-outputs:
     draft: true
     max: 1
     labels: [flaky-test-fixer]
-    # `flaky-test-fixer` is always applied; the agent additionally sets the backport
-    # label(s) per "Backport label" below. Gate what it may set: the three backport:*
-    # options plus the per-release `vX.Y.Z` labels (`v9.*`/`v8.*`) that pair with
-    # `backport:version`.
     allowed-labels: ['backport:skip', 'backport:all-open', 'backport:version', 'v9.*', 'v8.*']
     # Request whoever triggered the fix as reviewer. A bot actor (rare) can't be a
     # reviewer, so the handler just logs a warning and the PR is still created.
@@ -304,12 +300,12 @@ Always explain the choice — including a deliberate no-label decision — in th
 
 ## Fix already on `main`
 
-Sometimes the failure is on a **version branch** (e.g. `9.3`) while `main` already carries the fix — it was fixed on `main` and never backported. The tell: the root cause the investigator flagged is already resolved on `main` (the anti-pattern is gone, or the test already passes there), so there's nothing to change on `main`. This only applies to a version-branch failure — determine the failing branch from the issue's CI data or the investigator's comment; a `main` failure is the normal flow above.
+Sometimes the failure is on a **version branch** (e.g. `9.3`) while `main` already carries the fix — it was fixed on `main` and never backported. The tell: the root cause the investigator flagged is already resolved on `main` (the anti-pattern the fix would remove is already gone), so there's nothing to change on `main`. This only applies to a version-branch failure — determine the failing branch from the issue's CI data or the investigator's comment; a `main` failure is the normal flow above.
 
 When it happens, do **not** open a normal `main` PR. Find the `main` PR that already fixed it (`git log` / `git blame`, or the PR the investigator implicated), then:
 
 - **Contained `main` PR** (small and single-purpose — essentially just the fix and its test, no unrelated refactors, so it backports cleanly): do **not** open a PR. Post the "Backport the existing fix" outcome comment naming that PR and the release branch(es) that still need it. When unsure whether it backports cleanly, prefer this — a recommendation beats an unverified PR.
-- **Not-contained `main` PR** (bundles unrelated changes, so a whole-PR backport isn't safe): open a **best-effort draft PR against the failing version branch** — pass `base: <version-branch>` to `create_pull_request` (the allowed base branches already include `9.*`/`8.*`) with just the extracted fix. You're bootstrapped on `main`, so you can't lint or type-check against the version branch: craft the patch from that branch's copy of the file(s) so it applies onto `base`, and list the skipped checks under "Not verified locally" (note it targets `<branch>` and relies on that branch's CI). Don't add a backport label; instead ask the developer, in the PR body, to backport the fix to the other affected release branches.
+- **Not-contained `main` PR** (bundles unrelated changes, so a whole-PR backport isn't safe): open a **best-effort draft PR against the failing version branch** — pass `base: <version-branch>` to `create_pull_request` (the allowed base branches already include `9.*`/`8.*`) with just the extracted fix. You're bootstrapped on `main`, so you can't lint or type-check against the version branch: craft the patch from that branch's copy of the file(s) so it applies onto `base`, and list the skipped checks under "Not verified locally" (note it targets `<branch>` and relies on that branch's CI). If other release branches still need the fix too, apply the matching `backport:version` + `vX.Y.Z` labels (per "Backport label", but leave out `main` and any branch already fixed) so it propagates there on merge.
 
 ## Outcome comment
 
@@ -342,7 +338,7 @@ Follow this format:
   Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified.
 - **Backport the existing fix** (fix already on `main`, contained PR — no PR opened):
   ```markdown
-  ### 🍒 The fix is already on `main` — it needs backporting
+  ### The fix is already on `main` — it needs backporting
 
   #<main-PR> already fixed this on `main`; please backport it to <branch(es)>. cc @<github-handle-here>
   ```
