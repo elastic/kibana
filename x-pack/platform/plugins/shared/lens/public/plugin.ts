@@ -402,9 +402,21 @@ export class LensPlugin {
         core.getStartServices().then(async ([{ featureFlags }]) => {
           // This loads the feature flags async to allow synchronous access to flags via getLensFeatureFlags
           const flags = await setLensFeatureFlags(featureFlags);
-
+          console.log({ flags });
           // This loads the builder async to allow synchronous access to builder via getLensBuilder
           await setLensBuilder(flags.apiFormat);
+
+          if (share && flags.apiFormat) {
+            share.registerShareIntegration<ExportShareDerivatives>(LENS_EMBEDDABLE_TYPE, {
+              id: 'exportJson',
+              groupId: 'exportDerivatives',
+              getShareIntegrationConfig: async () => {
+                const services = await getStartServicesForEmbeddable();
+                const { getExportJsonConfig } = await import('./export_json_config');
+                return getExportJsonConfig({ core: services.coreStart, share: services.share });
+              },
+            });
+          }
 
           embeddable.registerLegacyURLTransform(
             LENS_EMBEDDABLE_TYPE,
@@ -471,16 +483,6 @@ export class LensPlugin {
           },
         })
       );
-
-      share.registerShareIntegration<ExportShareDerivatives>(LENS_EMBEDDABLE_TYPE, {
-        id: 'exportJson',
-        groupId: 'exportDerivatives',
-        getShareIntegrationConfig: async () => {
-          const services = await getStartServicesForEmbeddable();
-          const { getExportJsonConfig } = await import('./export_json_config');
-          return getExportJsonConfig({ core: services.coreStart, share: services.share });
-        },
-      });
     }
 
     visualizations.registerAlias(lensVisTypeAlias);

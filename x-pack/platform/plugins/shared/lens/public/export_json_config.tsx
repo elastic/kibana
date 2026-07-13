@@ -38,7 +38,10 @@ export const getExportJsonConfig = (services: {
   flyoutContent: ({ closeFlyout }) => {
     return (
       <ExportJsonFlyoutContext.Provider value={{ services }}>
-        <ExportJsonFlyout<LensWireAPIConfig> closeFlyout={closeFlyout} apiPath={'/api/lens'} />
+        <ExportJsonFlyout<LensWireAPIConfig>
+          closeFlyout={closeFlyout}
+          apiPath={'/api/visualizations'}
+        />
       </ExportJsonFlyoutContext.Provider>
     );
   },

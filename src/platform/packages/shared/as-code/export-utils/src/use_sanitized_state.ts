@@ -25,9 +25,7 @@ export function useSanitizedState<State extends object, SanitizedState extends o
 }): UseSanitizedStateResult<SanitizedState | State> {
   const [status, setStatus] = useState<ExportJsonStatus>('loading');
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [data, setData] = useState<SanitizedState | State | undefined>(
-    sanitizeState ? undefined : state
-  );
+  const [data, setData] = useState<SanitizedState | State | undefined>(undefined);
   const [warnings, setWarnings] = useState<string[]>([]);
   // reloadCount is used to trigger a reload of the state when retry is called
   const [reloadCount, setReloadCount] = useState(0);
@@ -38,7 +36,10 @@ export function useSanitizedState<State extends object, SanitizedState extends o
 
   useEffect(() => {
     if (!sanitizeState) {
-      return; // if we don't have to await sanitization, then just use the value initialized above
+      // if a sanitization function was not provided, then just return the raw state
+      setData(state);
+      setStatus('success');
+      return;
     }
 
     let isMounted = true;
