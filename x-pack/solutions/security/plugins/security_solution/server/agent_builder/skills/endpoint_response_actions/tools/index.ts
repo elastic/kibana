@@ -11,4 +11,5 @@ export { getEndpointStatusTool } from './get_endpoint_status';
 export { listEndpointsTool } from './list_endpoints';
 export { getRunningProcessesTool } from './get_running_processes';
 export { scanHostTool } from './scan_host';
+export { getResponseActionStatusTool } from './get_response_action_status';
 export type { EndpointNotFoundResult, HostLookupReason } from './types';

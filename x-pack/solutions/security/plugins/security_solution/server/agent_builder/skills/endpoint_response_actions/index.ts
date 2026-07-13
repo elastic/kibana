@@ -16,6 +16,7 @@ import {
   listEndpointsTool,
   getRunningProcessesTool,
   scanHostTool,
+  getResponseActionStatusTool,
 } from './tools';
 
 const ID = 'endpoint-response-actions';
@@ -30,6 +31,7 @@ export const GET_ENDPOINT_STATUS_TOOL_ID = toolName('get_endpoint_status');
 export const LIST_ENDPOINTS_TOOL_ID = toolName('list_endpoints');
 export const RUNNING_PROCESSES_TOOL_ID = toolName('running_processes');
 export const SCAN_TOOL_ID = toolName('scan');
+export const GET_RESPONSE_ACTION_STATUS_TOOL_ID = toolName('get_response_action_status');
 
 const SYSTEM_INSTRUCTIONS = `# Endpoint Response Actions Skill
 
@@ -41,6 +43,7 @@ Use this skill when the analyst requests any of the following in natural languag
 - Check the status of a host (isolation state, last seen, online/offline)
 - List the running processes on a host (read-only inspection)
 - Scan a file or folder path on a host for malware (uses the existing Defend policy)
+- Look up the status of a previously dispatched response action by its action ID
 
 This is Slice 1 of the Endpoint Response Actions skill: containment, read-only,
 and low-risk inspection only. High-risk execution actions (execute, kill-process,
@@ -57,6 +60,7 @@ Identify the action type from the analyst's message:
 - **status** / **check** / **is isolated** → use \`get_endpoint_status\` tool (read-only)
 - **processes** / **running processes** / **what is running** → use \`running_processes\` tool (read-only)
 - **scan** / **scan for malware** / **check path** → use \`scan\` tool (WRITE — platform-confirmed)
+- **action status** / **check action** / **previous scan status** / **action ID** → use \`get_response_action_status\` tool (read-only)
 
 ### 2. Write Actions Are Confirmed by the Platform
 Write actions (\`isolate_host\`, \`unisolate_host\`, \`scan\`) are gated by an
@@ -67,8 +71,14 @@ for a "yes" in chat — call the tool directly with the resolved host (and, for
 \`scan\`, the path), and let the platform gate the dispatch. If the analyst
 declines, report that the action was cancelled.
 
-Read-only actions (\`list_endpoints\`, \`get_endpoint_status\`, \`running_processes\`)
-are not gated and execute immediately.
+Read-only actions (\`list_endpoints\`, \`get_endpoint_status\`, \`running_processes\`,
+\`get_response_action_status\`) are not gated and execute immediately.
+
+When a write action returns \`pending\`, tell the analyst the action is still running and
+they can ask again later with the action ID. For follow-up questions like "check the
+status of the previous scan" or "what happened to action <id>", call
+\`get_response_action_status\` with that action ID. Do **not** use
+\`platform.core.search\` or raw Elasticsearch queries for response action status.
 
 ### 3. Execute and Report
 - Call the appropriate tool
@@ -87,6 +97,8 @@ are not gated and execute immediately.
 | Already isolated/unisolated | Report current status from \`get_endpoint_status\` |
 | Action timeout | "Action timed out. Check status in Response Console." |
 | Action failed | Report error message and action ID |
+| Action still pending | Report pending status and action ID; offer to check again with \`get_response_action_status\` |
+| Action not found | Ask analyst to verify the action ID from Response Actions history |
 | Insufficient privileges | Inform analyst they lack permission |
 
 ## Best Practices
@@ -103,7 +115,7 @@ export const createEndpointResponseActionsSkill = (
     name: NAME,
     basePath: BASE_PATH,
     description:
-      'Execute endpoint response actions (isolate, release, check status, list running processes, scan for malware) from chat conversations. Resolves hostnames to endpoint identities and dispatches actions through the Elastic Defend Response Actions service. Write actions require analyst confirmation.',
+      'Execute endpoint response actions (isolate, release, check status, list running processes, scan for malware, look up prior action status) from chat conversations. Resolves hostnames to endpoint identities and dispatches actions through the Elastic Defend Response Actions service. Write actions require analyst confirmation.',
     content: SYSTEM_INSTRUCTIONS,
     getInlineTools: () => [
       listEndpointsTool(endpointAppContextService),
@@ -112,6 +124,7 @@ export const createEndpointResponseActionsSkill = (
       getEndpointStatusTool(endpointAppContextService),
       getRunningProcessesTool(endpointAppContextService),
       scanHostTool(endpointAppContextService),
+      getResponseActionStatusTool(endpointAppContextService),
     ],
   });
 };
