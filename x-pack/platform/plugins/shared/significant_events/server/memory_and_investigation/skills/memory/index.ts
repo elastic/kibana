@@ -9,3 +9,6 @@ export { createMemorySynthesisSkill } from './memory_synthesis_skill';
 export { createMemoryConsolidationSkill } from './memory_consolidation_skill';
 export { createConversationScraperSkill } from './conversation_scraper_skill';
 export { createGapDetectionSkill } from './gap_detection_skill';
+export { createSignificantEventsMemorySkill } from './significant_events_memory_skill';
+export { createSignificantEventsOnboardingSkill } from './significant_events_onboarding_skill';
+export { registerStreamsMemoryAgentBuilder } from './register';

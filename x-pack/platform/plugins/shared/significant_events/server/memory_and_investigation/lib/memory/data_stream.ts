@@ -8,7 +8,7 @@
 import type { DataStreamDefinition } from '@kbn/data-streams';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
-import { MEMORIES_DATA_STREAM } from '../../../common/constants';
+import { MEMORIES_DATA_STREAM } from '../../../../common/memory_and_investigation';
 
 export const memoriesMappings = {
   dynamic: false,

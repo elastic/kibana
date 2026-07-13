@@ -10,7 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { MemoryEntry } from './types';
 import { MemoryServiceImpl } from './memory_service';
-import { MEMORIES_DATA_STREAM } from '../../../common/constants';
+import { MEMORIES_DATA_STREAM } from '../../../../common/memory_and_investigation';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(),

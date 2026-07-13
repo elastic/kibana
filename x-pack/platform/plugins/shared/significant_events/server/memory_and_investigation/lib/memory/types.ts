@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import type { SearchMode } from '../../../common/queries';
+import type { SearchMode } from '../../../../common/queries';
 
 /**
  * A memory page as stored in the main memory index.

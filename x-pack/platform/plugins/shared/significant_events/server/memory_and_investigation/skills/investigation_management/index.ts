@@ -7,7 +7,7 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
-import { SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID } from '../../tools/register_tools';
+import { SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID } from '../../../agent_builder/tools/register_tools';
 import content from './skill.md.text';
 
 export const streamsInvestigationManagementSkill = defineSkillType({

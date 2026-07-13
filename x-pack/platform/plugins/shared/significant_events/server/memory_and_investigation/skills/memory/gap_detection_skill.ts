@@ -10,7 +10,7 @@ import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
 import { STREAMS_INSPECT_STREAMS_TOOL_ID } from '@kbn/streams-plugin/server';
 import { createMemoryTools } from '../../tools/memory';
 import type { MemoryToolsOptions } from '../../tools/memory';
-import { createSearchKnowledgeIndicatorsTool } from '../../tools/search_knowledge_indicators/tool';
+import { createSearchKnowledgeIndicatorsTool } from '../../../agent_builder/tools/search_knowledge_indicators/tool';
 
 import description from './gap_detection.description.text';
 import content from './gap_detection.skill.md.text';

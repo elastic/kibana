@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import type { MemoryService } from '../../../lib/memory';
+import type { MemoryService } from '../../lib/memory';
 import type { GetScopedClients } from '../../../routes/types';
 
 export interface MemoryToolsOptions {
