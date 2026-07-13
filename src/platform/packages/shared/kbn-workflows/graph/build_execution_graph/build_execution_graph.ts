@@ -281,13 +281,15 @@ function createLeafStepGraph(
 ): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
+  // `nodeType`/`configuration` are runtime-polymorphic across leaf step types, so this
+  // object can't be narrowed to a single `GraphNodeUnion` member statically.
   graph.setNode(stepId, {
     id: stepId,
     type: nodeType,
     stepId,
     stepType: currentStep.type,
     configuration: { ...currentStep },
-  });
+  } as GraphNodeUnion);
   return graph;
 }
 
@@ -708,7 +710,7 @@ function handleTimeout(
     stepId,
     stepType,
   };
-  const graph = new graphlib.Graph<GraphNodeUnion>({ directed: true });
+  const graph = createTypedGraph({ directed: true });
   graph.setNode(enterTimeoutZone.id, enterTimeoutZone);
   graph.setNode(exitTimeoutZone.id, exitTimeoutZone);
   context.stack.push(enterTimeoutZone);
