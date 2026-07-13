@@ -219,6 +219,8 @@ export async function internalBulkResolve<T>(
         resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
       }
 
+      // `saved_object` is always successful here; guard is required because
+      // `SavedObjectsResolveResponse.saved_object` is typed as `SavedObjectBulkResult`.
       if (result && securityExtension && !isSavedObjectErrorResult(result.saved_object)) {
         (result.saved_object as WithAuditName<SavedObject>).name = SavedObjectsUtils.getName(
           registry.getNameAttribute(type),

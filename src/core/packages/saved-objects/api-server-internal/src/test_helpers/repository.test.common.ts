@@ -54,6 +54,7 @@ import {
   type GetFindRedactTypeMapParams,
   type AuthorizationTypeMap,
   SavedObjectsErrorHelpers,
+  isSavedObjectErrorResult,
 } from '@kbn/core-saved-objects-server';
 import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
@@ -513,7 +514,7 @@ export const getMockMgetResponse = (
 
 expect.extend({
   toBeDocumentWithoutError(received, type, id) {
-    if (received.type === type && received.id === id && !received.error) {
+    if (received.type === type && received.id === id && !isSavedObjectErrorResult(received)) {
       return { message: () => `expected type and id not to match without error`, pass: true };
     } else {
       return { message: () => `expected type and id to match without error`, pass: false };
