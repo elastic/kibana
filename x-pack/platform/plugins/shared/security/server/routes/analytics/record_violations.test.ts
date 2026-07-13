@@ -86,7 +86,7 @@ describe('POST /internal/security/analytics/_record_violations', () => {
       expect(routeParamsMock.analyticsService.reportCSPViolation).not.toHaveBeenCalled();
     });
 
-    it('reports CSP violation with null optional fields (as sent by real browsers)', async () => {
+    it('reports CSP violation with null optional fields', async () => {
       const cspViolationWithNulls: CSPViolationReport = {
         type: 'csp-violation',
         url: 'http://localhost:5601/app/home',
