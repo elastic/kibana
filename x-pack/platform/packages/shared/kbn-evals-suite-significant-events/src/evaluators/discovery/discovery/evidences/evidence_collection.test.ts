@@ -11,7 +11,6 @@ import { evidenceCollectionEvaluator } from './evidence_collection';
 const evaluate = (discoveries: Partial<Discovery>[]) =>
   evidenceCollectionEvaluator.evaluate({
     input: {
-      episodeSuffix: 'test',
       detections: discoveries.flatMap((d) => d.detections ?? []) as Detection[],
     },
     output: { discoveries: discoveries as Discovery[], steps: [] },
