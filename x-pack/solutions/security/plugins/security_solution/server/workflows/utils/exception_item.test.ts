@@ -6,10 +6,12 @@
  */
 
 import { ExecutionError } from '@kbn/workflows/server';
+import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionEntryInput } from '../../../common/workflows/step_types/common/exception_item_schemas';
 import { toApiEntries, toCreateExceptionItemBody, toExceptionItemOutput } from './exception_item';
 
 describe('toApiEntries', () => {
-  it.each([
+  it.each<[ExceptionEntryInput, EntriesArray[number]]>([
     [
       { field: 'host.name', operator: 'is', value: 'my-host' },
       { type: 'match', field: 'host.name', operator: 'included', value: 'my-host' },
@@ -50,7 +52,7 @@ describe('toApiEntries', () => {
       { field: 'source.ip', operator: 'is_not_in_list', list: { id: 'ips', type: 'ip' } },
       { type: 'list', field: 'source.ip', operator: 'excluded', list: { id: 'ips', type: 'ip' } },
     ],
-  ] as const)('maps %j onto the exceptions API union', (input, expected) => {
+  ])('maps %j onto the exceptions API union', (input, expected) => {
     expect(toApiEntries([input])).toEqual([expected]);
   });
 
