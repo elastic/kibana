@@ -23,6 +23,7 @@ import type { CPSProject } from '../../../../../types';
 
 export interface ProjectPickerListItemProps {
   isSelected: boolean;
+  isToggleDisabled?: boolean;
   project: CPSProject;
   onContextMenu: (project: CPSProject, evt: React.MouseEvent<HTMLAnchorElement>) => void;
   onToggle: (project: CPSProject, checked: boolean) => void;
@@ -30,11 +31,23 @@ export interface ProjectPickerListItemProps {
 
 export function ProjectPickerListItem({
   isSelected,
+  isToggleDisabled = false,
   project,
   onContextMenu,
   onToggle,
 }: ProjectPickerListItemProps) {
-  const id = useGeneratedHtmlId();
+  const contextMenuTooltipId = useGeneratedHtmlId();
+  const toggleTooltipId = useGeneratedHtmlId();
+
+  const switchControl = (
+    <EuiSwitch
+      showLabel={false}
+      checked={isSelected}
+      disabled={isToggleDisabled}
+      onChange={(evt) => onToggle(project, evt.target.checked)}
+      label={null}
+    />
+  );
 
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
@@ -67,16 +80,22 @@ export function ProjectPickerListItem({
       <EuiFlexItem grow={false}>
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiSwitch
-              showLabel={false}
-              checked={isSelected}
-              onChange={(evt) => onToggle(project, evt.target.checked)}
-              label={null}
-            />
+            {isToggleDisabled ? (
+              <EuiToolTip
+                id={toggleTooltipId}
+                content={i18n.translate('cpsUtils.projectPicker.listItem.lastIncludedProject', {
+                  defaultMessage: 'You must be searching a minimum of one project.',
+                })}
+              >
+                {switchControl}
+              </EuiToolTip>
+            ) : (
+              switchControl
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiToolTip
-              id={id}
+              id={contextMenuTooltipId}
               content={i18n.translate('cpsUtils.projectPicker.listItem.contextMenu', {
                 defaultMessage: 'Show context menu',
               })}
@@ -84,7 +103,7 @@ export function ProjectPickerListItem({
               <EuiButtonIcon
                 iconType="ellipsis"
                 onClick={onContextMenu.bind(null, project)}
-                aria-labelledby={id}
+                aria-labelledby={contextMenuTooltipId}
               />
             </EuiToolTip>
           </EuiFlexItem>

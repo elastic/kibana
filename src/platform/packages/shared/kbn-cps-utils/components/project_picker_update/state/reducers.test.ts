@@ -171,4 +171,64 @@ describe('createStoreReducers', () => {
     expect(nextState.includedOverrides).toEqual(['p1']);
     expect(nextState.excludedOverrides).toEqual([]);
   });
+
+  it('does not clear project filters when there are no filter expressions', () => {
+    const state = createState({
+      includedOverrides: ['p1'],
+      excludedOverrides: ['p2'],
+    });
+
+    const nextState = reducers.clearProjectFilters(state);
+
+    expect(nextState).toBe(state);
+  });
+
+  it('does not exclude the last included visible project', () => {
+    const state = createState({
+      availableProjects: new Map([
+        ['p1', createProject({ _id: 'p1' })],
+        ['p2', createProject({ _id: 'p2' })],
+      ]),
+      visibleProjectIds: ['p1', 'p2'],
+      selectedProjects: ['p1'],
+      includedOverrides: ['p1'],
+    });
+
+    const nextState = reducers.excludeSelectedProjects(state, { projects: ['p1'] });
+
+    expect(nextState).toBe(state);
+  });
+
+  it('excludes a visible project when more than one visible project is included', () => {
+    const state = createState({
+      availableProjects: new Map([
+        ['p1', createProject({ _id: 'p1' })],
+        ['p2', createProject({ _id: 'p2' })],
+      ]),
+      visibleProjectIds: ['p1', 'p2'],
+      selectedProjects: ['p1', 'p2'],
+      includedOverrides: ['p1', 'p2'],
+    });
+
+    const nextState = reducers.excludeSelectedProjects(state, { projects: ['p1'] });
+
+    expect(nextState.excludedOverrides).toEqual(['p1']);
+    expect(nextState.includedOverrides).toEqual(['p2']);
+  });
+
+  it('does not exclude all visible projects when at least one visible project is included', () => {
+    const state = createState({
+      availableProjects: new Map([
+        ['p1', createProject({ _id: 'p1' })],
+        ['p2', createProject({ _id: 'p2' })],
+      ]),
+      visibleProjectIds: ['p1', 'p2'],
+      selectedProjects: ['p1', 'p2'],
+      includedOverrides: ['p1', 'p2'],
+    });
+
+    const nextState = reducers.excludeAllVisibleProjects(state);
+
+    expect(nextState).toBe(state);
+  });
 });

@@ -79,6 +79,13 @@ export const computeVisibleProjectIds = (
   return state.filteredProjectIds;
 };
 
+export const getIncludedVisibleProjectIds = (
+  state: Pick<ProjectPickerState, 'visibleProjectIds' | 'selectedProjects'>
+): string[] => {
+  const selected = new Set(state.selectedProjects);
+  return state.visibleProjectIds.filter((id) => selected.has(id));
+};
+
 export const computeSelectedProjects = (
   state: Pick<
     ProjectPickerState,

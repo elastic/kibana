@@ -10,7 +10,7 @@
 import { uniq } from 'lodash';
 import type { CPSProject } from '../../../types';
 import { FilterOperator, filterExpressionCodec } from '../utils/codec';
-import { computeVisibleProjectIds } from './derivatives';
+import { computeVisibleProjectIds, getIncludedVisibleProjectIds } from './derivatives';
 
 export interface FilterEntry {
   expression: string;
@@ -52,11 +52,19 @@ export function createStoreReducers() {
     /**
      * Excludes the provided project ids from the selected projects list.
      */
-    excludeSelectedProjects: (state: ProjectPickerState, payload: { projects: string[] }) => ({
-      ...state,
-      excludedOverrides: addOverrides(state.excludedOverrides, payload.projects),
-      includedOverrides: removeOverrides(state.includedOverrides, payload.projects),
-    }),
+    excludeSelectedProjects: (state: ProjectPickerState, payload: { projects: string[] }) => {
+      const includedVisible = getIncludedVisibleProjectIds(state);
+      const toExclude = payload.projects.filter((id) => includedVisible.includes(id));
+      if (includedVisible.length - toExclude.length < 1) {
+        return state;
+      }
+
+      return {
+        ...state,
+        excludedOverrides: addOverrides(state.excludedOverrides, payload.projects),
+        includedOverrides: removeOverrides(state.includedOverrides, payload.projects),
+      };
+    },
     /**
      * Sets the available projects map.
      */
@@ -70,12 +78,18 @@ export function createStoreReducers() {
       includedOverrides: [],
       excludedOverrides: [],
     }),
-    clearProjectFilters: (state: ProjectPickerState) => ({
-      ...state,
-      filterExpressions: new Map(),
-      includedOverrides: [],
-      excludedOverrides: [],
-    }),
+    clearProjectFilters: (state: ProjectPickerState) => {
+      if (state.filterExpressions.size === 0) {
+        return state;
+      }
+
+      return {
+        ...state,
+        filterExpressions: new Map(),
+        includedOverrides: [],
+        excludedOverrides: [],
+      };
+    },
     includeAllVisibleProjects: (state: ProjectPickerState) => {
       const visibleProjectIds = computeVisibleProjectIds(state);
 
@@ -89,6 +103,10 @@ export function createStoreReducers() {
      * Excludes all visible projects.
      */
     excludeAllVisibleProjects: (state: ProjectPickerState) => {
+      if (getIncludedVisibleProjectIds(state).length >= 1) {
+        return state;
+      }
+
       const visibleProjectIds = computeVisibleProjectIds(state);
 
       return {

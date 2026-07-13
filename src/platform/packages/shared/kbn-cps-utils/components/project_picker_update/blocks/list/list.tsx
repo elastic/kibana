@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import type { CPSProject } from '../../../../types';
 import { ProjectPickerListItem, type ProjectPickerListItemProps } from './list_item';
 import { useProjectPickerActions, useProjectPickerState } from '../../state';
+import { getIncludedVisibleProjectIds } from '../../state/derivatives';
 import { projectPickerListStyles } from './list.styles';
 
 export interface ProjectPickerListProps {
@@ -27,7 +28,8 @@ export interface ProjectPickerListProps {
 }
 
 const getProjectPickerListContextMenuConfig = (
-  actions: ReturnType<typeof useProjectPickerActions>
+  actions: ReturnType<typeof useProjectPickerActions>,
+  includedVisibleProjectCount: number
 ) => {
   return [
     {
@@ -41,6 +43,7 @@ const getProjectPickerListContextMenuConfig = (
         defaultMessage: 'Exclude all other visible projects',
       }),
       onClick: actions.excludeAllVisibleProjects.bind(actions),
+      disabled: includedVisibleProjectCount >= 1,
     },
   ];
 };
@@ -53,9 +56,11 @@ export function ProjectPickerList() {
   const { euiTheme } = useEuiTheme();
   const styles = projectPickerListStyles({ euiTheme });
 
+  const includedVisibleProjectIds = useMemo(() => getIncludedVisibleProjectIds(state), [state]);
+
   const projectPickerListContextMenuConfig = useMemo(() => {
-    return getProjectPickerListContextMenuConfig(actions);
-  }, [actions]);
+    return getProjectPickerListContextMenuConfig(actions, includedVisibleProjectIds.length);
+  }, [actions, includedVisibleProjectIds.length]);
 
   const visibleProjects = useMemo(
     () =>
@@ -81,15 +86,26 @@ export function ProjectPickerList() {
     [activeProject, setActiveProject, projectContextMenuButtonRef]
   );
 
-  const onToggle = (project: CPSProject, checked: boolean) => {
-    if (checked) {
-      actions.setSelectedProjects({ projects: [project._id] });
-    } else {
-      actions.excludeSelectedProjects({
-        projects: [project._id],
-      });
-    }
-  };
+  const onToggle = useCallback(
+    (project: CPSProject, checked: boolean) => {
+      if (
+        !checked &&
+        includedVisibleProjectIds.length === 1 &&
+        includedVisibleProjectIds[0] === project._id
+      ) {
+        return;
+      }
+
+      if (checked) {
+        actions.setSelectedProjects({ projects: [project._id] });
+      } else {
+        actions.excludeSelectedProjects({
+          projects: [project._id],
+        });
+      }
+    },
+    [actions, includedVisibleProjectIds]
+  );
 
   return (
     <>
@@ -106,7 +122,7 @@ export function ProjectPickerList() {
         >
           <EuiContextMenuPanel
             items={projectPickerListContextMenuConfig.map((item) => (
-              <EuiContextMenuItem key={item.label} onClick={item.onClick}>
+              <EuiContextMenuItem key={item.label} onClick={item.onClick} disabled={item.disabled}>
                 {item.label}
               </EuiContextMenuItem>
             ))}
@@ -118,6 +134,10 @@ export function ProjectPickerList() {
           <EuiFlexItem key={project._id} css={styles.listItemContainer}>
             <ProjectPickerListItem
               isSelected={state.selectedProjects.includes(project._id)}
+              isToggleDisabled={
+                state.selectedProjects.includes(project._id) &&
+                includedVisibleProjectIds.length === 1
+              }
               project={project}
               onContextMenu={onContextMenu}
               onToggle={onToggle}
