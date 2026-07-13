@@ -58,7 +58,7 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
     try {
       const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
 
-      return extractIndexPatternsFromSpec(spec);
+      return await extractIndexPatternsFromSpec(spec);
     } catch (e) {
       // spec is invalid
     }
