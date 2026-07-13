@@ -1130,7 +1130,7 @@
     "@xstate/react": "3.2.2",
     "@xstate5/react": "npm:@xstate/react@^5.0.3",
     "@xyflow/react": "12.4.2",
-    "adm-zip": "0.5.9",
+    "adm-zip": "0.5.18",
     "ai": "5.0.190",
     "ajv": "8.20.0",
     "antlr4": "4.13.1-patch-1",
