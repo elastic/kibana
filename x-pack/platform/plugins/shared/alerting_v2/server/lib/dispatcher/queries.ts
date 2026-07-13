@@ -114,8 +114,8 @@ export const getAlertEpisodeSuppressionsQueries = (
         | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
         | EVAL _snooze_action = CASE(
             action_type == "unsnooze", "unsnooze",
-            expiry IS NULL OR expiry > ${minLastEventTimestamp}::datetime, "snooze",
-            "snooze_expired"
+            action_type == "snooze" AND (expiry IS NULL OR expiry > ${minLastEventTimestamp}::datetime), "snooze",
+            action_type == "snooze", "snooze_expired"
           )
         | INLINE STATS
             last_snooze_action = LAST(_snooze_action, @timestamp) WHERE action_type IN ("snooze", "unsnooze")

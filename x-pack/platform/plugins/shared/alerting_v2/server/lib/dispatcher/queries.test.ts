@@ -249,7 +249,7 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     // Expired snoozes must stay in the row set so LAST() still sees them: dropping them before
     // LAST() would resurrect an older snooze (e.g. an indefinite one) as the latest snooze action.
     expect(requests[0].query).not.toContain('action_type != "snooze"');
-    expect(requests[0].query).toContain('"snooze_expired"');
+    expect(requests[0].query).toContain('action_type == "snooze", "snooze_expired"');
     expect(requests[0].query).toContain('LAST(_snooze_action, @timestamp)');
   });
 
