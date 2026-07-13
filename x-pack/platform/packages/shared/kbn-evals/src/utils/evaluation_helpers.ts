@@ -51,17 +51,22 @@ export const extractAllStrings = (
 
 export const getToolCallSteps = (
   output: TaskOutput
-): Array<{ tool_id?: string; results?: unknown[] }> => {
+): Array<{ tool_id?: string; results?: unknown[]; params?: Record<string, unknown> }> => {
   const steps =
     (
       output as {
-        steps?: Array<{ type?: string; tool_id?: string; results?: unknown[] }>;
+        steps?: Array<{
+          type?: string;
+          tool_id?: string;
+          results?: unknown[];
+          params?: Record<string, unknown>;
+        }>;
       }
     )?.steps ?? [];
 
   return steps
     .filter((s) => s?.type === 'tool_call')
-    .map((s) => ({ tool_id: s.tool_id, results: s.results }));
+    .map((s) => ({ tool_id: s.tool_id, results: s.results, params: s.params }));
 };
 
 export const getFinalAssistantMessage = (output: TaskOutput): string => {
