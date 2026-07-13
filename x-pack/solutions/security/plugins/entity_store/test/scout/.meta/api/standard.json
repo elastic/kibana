@@ -1,5 +1,5 @@
 {
-  "sha1": "0132b650bce0dfd3af3327bde56367fedc3b5e75",
+  "sha1": "691356ec78e9db9ff7beb97914a915aa452241dd",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -3037,7 +3037,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 107,
+        "line": 108,
         "column": 12
       }
     },
@@ -3053,7 +3053,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 186,
+        "line": 204,
         "column": 12
       }
     },
@@ -3069,7 +3069,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 219,
+        "line": 237,
         "column": 12
       }
     },

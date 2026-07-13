@@ -20,12 +20,12 @@ jest.mock('../../../../../../common/lib/kibana');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const deleteScheduleMock = jest.fn();
+const requestDeleteScheduleMock = jest.fn();
 
 const renderComponent = () => {
   const column = createActionsColumn({
     isDisabled: false,
-    deleteSchedule: deleteScheduleMock,
+    requestDeleteSchedule: requestDeleteScheduleMock,
   }) as EuiTableFieldDataColumnType<AttackDiscoverySchedule>;
 
   render(<TestProviders>{column.render?.('', mockAttackDiscoverySchedule)}</TestProviders>);
@@ -56,13 +56,13 @@ describe('Actions Column', () => {
     expect(screen.getByTestId('deleteButton')).toBeInTheDocument();
   });
 
-  it('should invoke `deleteSchedule` when the delete button is clicked', async () => {
+  it('should invoke `requestDeleteSchedule` when the delete button is clicked', async () => {
     renderComponent();
 
     const deleteButton = screen.getByTestId('deleteButton');
     fireEvent.click(deleteButton);
 
-    expect(deleteScheduleMock).toHaveBeenCalledWith(mockAttackDiscoverySchedule.id);
+    expect(requestDeleteScheduleMock).toHaveBeenCalledWith(mockAttackDiscoverySchedule.id);
   });
 
   describe('when disabled update capability', () => {
@@ -88,13 +88,13 @@ describe('Actions Column', () => {
       expect(screen.getByTestId('deleteButton')).toBeDisabled();
     });
 
-    it('should not invoke `deleteSchedule` when the delete button is clicked', async () => {
+    it('should not invoke `requestDeleteSchedule` when the delete button is clicked', async () => {
       renderComponent();
 
       const deleteButton = screen.getByTestId('deleteButton');
       fireEvent.click(deleteButton);
 
-      expect(deleteScheduleMock).not.toHaveBeenCalled();
+      expect(requestDeleteScheduleMock).not.toHaveBeenCalled();
     });
 
     it('should render missing privileges tooltip', async () => {

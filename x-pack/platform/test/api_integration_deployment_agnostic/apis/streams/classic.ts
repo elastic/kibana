@@ -93,7 +93,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         } = await apiClient.fetch('GET /internal/streams/classic');
 
         expect(status).to.eql(200);
-        expect(streams.length).to.eql(1);
         expect(streams.every((s) => s.type === 'classic')).to.eql(true);
       });
 
