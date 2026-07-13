@@ -345,4 +345,4 @@ Follow this format:
 
   #<main-PR> already fixed this on `main`; add the `backport:version` + `<vX.Y.Z>` label(s) to it to backport to <branch(es)>. cc @<github-handle-here>
   ```
-  Fill `<vX.Y.Z>` from the branch → version mapping in "Backport label" (only the branches that still need the fix). Adding these labels to the merged PR triggers the backport.
+  Fill `<vX.Y.Z>` from the branch → version mapping in "Backport label" (only the branches that still need the fix).
