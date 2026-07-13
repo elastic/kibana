@@ -25,6 +25,7 @@ import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import {
   manualTestMonitorAction,
   manualTestRunInProgressSelector,
+  toggleTestNowFlyoutAction,
 } from '../../state/manual_test_runs';
 
 export const RunTestManuallyContextItem = ({
@@ -83,14 +84,20 @@ export const RunTestManuallyContextItem = ({
         disabled={!canUsePublicLocations || !canSave}
         onClick={() => {
           if (monitor) {
-            const spaceId = 'spaceId' in monitor ? (monitor.spaceId as string) : undefined;
-            dispatch(
-              manualTestMonitorAction.get({
-                configId: monitor.config_id,
-                name: monitor.name,
-                ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
-              })
-            );
+            // A run is already in progress for this monitor: re-open its flyout instead of
+            // kicking off a second run (the user likely closed it while the test was running).
+            if (testInProgress) {
+              dispatch(toggleTestNowFlyoutAction(monitor.config_id));
+            } else {
+              const spaceId = 'spaceId' in monitor ? (monitor.spaceId as string) : undefined;
+              dispatch(
+                manualTestMonitorAction.get({
+                  configId: monitor.config_id,
+                  name: monitor.name,
+                  ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+                })
+              );
+            }
           }
           closePopover?.();
         }}

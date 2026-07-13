@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
+  EuiEmptyPrompt,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -66,12 +66,15 @@ export function TestNowModeFlyout({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <KibanaSectionErrorBoundary sectionName="xpack.synthetics.monitorManagement.testNowFlyout.body">
-          {isPushing && (
-            <EuiCallOut announceOnMount color="primary">
-              {PushingLabel} <EuiLoadingSpinner />
-            </EuiCallOut>
-          )}
-          {testRun ? (
+          {isPushing ? (
+            <EuiEmptyPrompt
+              data-test-subj="syntheticsTestRunStarting"
+              icon={<EuiLoadingSpinner size="xl" aria-label={STARTING_TEST_LABEL} />}
+              title={<h3>{STARTING_TEST_LABEL}</h3>}
+              titleSize="xs"
+              body={<p>{STARTING_TEST_DESCRIPTION}</p>}
+            />
+          ) : testRun ? (
             <TestNowMode
               isPushing={isPushing}
               errors={errors}
@@ -80,7 +83,7 @@ export function TestNowModeFlyout({
               onDone={onDone}
             />
           ) : (
-            !isPushing && <LoadingState />
+            <LoadingState />
           )}
         </KibanaSectionErrorBoundary>
       </EuiFlyoutBody>
@@ -112,6 +115,10 @@ const CLOSE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.closeButt
   defaultMessage: 'Close',
 });
 
-const PushingLabel = i18n.translate('xpack.synthetics.testRun.pushing.description', {
-  defaultMessage: 'Pushing the monitor to service...',
+const STARTING_TEST_LABEL = i18n.translate('xpack.synthetics.testRun.starting.title', {
+  defaultMessage: 'Starting test run',
+});
+
+const STARTING_TEST_DESCRIPTION = i18n.translate('xpack.synthetics.testRun.starting.description', {
+  defaultMessage: 'Scheduling your monitor to run. This may take a few moments.',
 });

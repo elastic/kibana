@@ -53260,7 +53260,6 @@
     "xpack.synthetics.testRun.description": "请在保存前测试您的监测并验证结果",
     "xpack.synthetics.testRun.invalid": "监测必须有效才能运行测试，请修复以上必填字段。",
     "xpack.synthetics.testRun.pushError": "当前无法执行此测试。请稍后重试。",
-    "xpack.synthetics.testRun.pushing.description": "正在推送监测到服务......",
     "xpack.synthetics.testRun.runErrorLabel": "现在无法运行该测试",
     "xpack.synthetics.testRun.runErrorLocation.reason": "无法在位置 {locationName} 运行测试。{reason}",
     "xpack.synthetics.testRun.testErrorLabel": "运行测试时出错",

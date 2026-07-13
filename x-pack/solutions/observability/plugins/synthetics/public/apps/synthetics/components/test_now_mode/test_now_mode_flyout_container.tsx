@@ -65,8 +65,8 @@ export function TestNowModeFlyoutContainer() {
   }, [flyoutOpenTestRun, monitor]);
 
   // Open the flyout as soon as the run is initiated (status `loading`) so it shows the
-  // "Pushing the monitor to service..." state immediately, rather than waiting for the
-  // trigger-test API to return a `testRunId`. `TestNowModeFlyout` handles the missing `testRun`.
+  // "Starting test run" state immediately, rather than waiting for the trigger-test API to
+  // return a `testRunId`. `TestNowModeFlyout` handles the missing `testRun`.
   const flyout =
     flyoutOpenTestRun && monitor ? (
       <TestNowModeFlyout
