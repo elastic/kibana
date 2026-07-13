@@ -47,6 +47,7 @@ plugins:
     - kibana_overview
     - kql
     - lens
+    - links
     - logstash
     - management
     - maps
