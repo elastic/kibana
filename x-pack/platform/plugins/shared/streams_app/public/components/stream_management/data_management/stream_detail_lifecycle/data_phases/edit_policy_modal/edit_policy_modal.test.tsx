@@ -91,7 +91,7 @@ describe('EditPolicyModal', () => {
       const description = screen.getByTestId('editPolicyModal-description');
       expect(description).toHaveTextContent(policyName);
       expect(description).toHaveTextContent('is managed by Elastic and currently used in');
-      expect(description).toHaveTextContent('3 streams and 2 indices');
+      expect(description).toHaveTextContent('3 streams and 2 indices besides this stream');
 
       expect(screen.getByTestId('editPolicyModal-affectedResourcesTitle')).toHaveTextContent(
         'Affected data sources'
@@ -120,7 +120,9 @@ describe('EditPolicyModal', () => {
 
       const description = screen.getByTestId('editPolicyModal-description');
       expect(description).toHaveTextContent(policyName);
-      expect(description).toHaveTextContent('is currently used in 3 streams and 2 indices');
+      expect(description).toHaveTextContent(
+        'is currently used in 3 streams and 2 indices besides this stream'
+      );
       expect(description).not.toHaveTextContent('is managed by Elastic');
 
       expect(screen.getByTestId('editPolicyModal-affectedResourcesList')).toBeInTheDocument();
@@ -141,7 +143,7 @@ describe('EditPolicyModal', () => {
       );
 
       expect(screen.getByTestId('editPolicyModal-description')).toHaveTextContent(
-        'is currently used in 2 streams'
+        'is currently used in 2 streams besides this stream'
       );
     });
 
@@ -160,7 +162,26 @@ describe('EditPolicyModal', () => {
       );
 
       expect(screen.getByTestId('editPolicyModal-description')).toHaveTextContent(
-        'is currently used in 2 indices'
+        'is currently used in 2 indices besides this stream'
+      );
+    });
+
+    it('renders singular usage for one other stream and one other index', () => {
+      renderWithI18n(
+        <EditPolicyModal
+          policyName={policyName}
+          affectedResources={[
+            { name: 'stream-1', type: 'stream' },
+            { name: 'index-1', type: 'index' },
+          ]}
+          onCancel={() => {}}
+          onOverwrite={() => {}}
+          onSaveAsNew={() => {}}
+        />
+      );
+
+      expect(screen.getByTestId('editPolicyModal-description')).toHaveTextContent(
+        'is currently used in 1 stream and 1 index besides this stream'
       );
     });
   });
