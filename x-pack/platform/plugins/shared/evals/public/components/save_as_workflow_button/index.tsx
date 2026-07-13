@@ -7,10 +7,10 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { RunExperimentRequest } from '../../../common/experiments/run_experiment';
 import { useSaveExperimentWorkflow } from '../../hooks/use_experiments_api';
+import { ERROR, LABEL, OPEN_SAVED, success } from './translations';
 
 export interface SaveAsWorkflowButtonProps {
   request: RunExperimentRequest;
@@ -32,18 +32,11 @@ export const SaveAsWorkflowButton: React.FC<SaveAsWorkflowButtonProps> = ({
       {
         onSuccess: (result) => {
           setSavedWorkflowId(result.workflow_id);
-          toasts?.addSuccess(
-            i18n.translate('xpack.evals.saveAsWorkflowButton.success', {
-              defaultMessage: 'Saved workflow "{name}".',
-              values: { name: result.name },
-            })
-          );
+          toasts?.addSuccess(success(result.name));
         },
         onError: (error) => {
           toasts?.addError(error as Error, {
-            title: i18n.translate('xpack.evals.saveAsWorkflowButton.error', {
-              defaultMessage: 'Failed to save workflow',
-            }),
+            title: ERROR,
           });
         },
       }
@@ -62,9 +55,7 @@ export const SaveAsWorkflowButton: React.FC<SaveAsWorkflowButtonProps> = ({
         target="_blank"
         data-test-subj="evalsSaveAsWorkflowSaved"
       >
-        {i18n.translate('xpack.evals.saveAsWorkflowButton.openSaved', {
-          defaultMessage: 'Open saved workflow',
-        })}
+        {OPEN_SAVED}
       </EuiButton>
     );
   }
@@ -77,9 +68,7 @@ export const SaveAsWorkflowButton: React.FC<SaveAsWorkflowButtonProps> = ({
       isLoading={saveWorkflow.isLoading}
       data-test-subj="evalsSaveAsWorkflowButton"
     >
-      {i18n.translate('xpack.evals.saveAsWorkflowButton.label', {
-        defaultMessage: 'Save as workflow',
-      })}
+      {LABEL}
     </EuiButton>
   );
 };

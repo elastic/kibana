@@ -312,7 +312,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       width: '160px',
       render: (exampleId: string, row: ExampleScoreRow) => {
         // Numeric-only IDs (auto-generated) get a 1-based "#N" label for readability.
-        // Descriptive/string IDs (e.g. content hashes) are shown in full; long ids
+        // Descriptive/string IDs (e.g. content hashes) are shown in full. Long ids
         // wrap within the column rather than being truncated.
         const isNumericFallback = /^\d+$/.test(exampleId);
         const label = isNumericFallback

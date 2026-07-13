@@ -47,11 +47,9 @@ const splitCsv = (value: string | null): string[] =>
   value ? value.split(',').filter(Boolean) : [];
 
 /**
- * Landing page for a cross-model "Run now": each selected model was launched as
- * its own experiment (its own execution id / list row), so there is no single
- * experiment to land on. This page polls every launched execution, shows per-model
- * progress, links to each model's detail once scores land, and offers a compare
- * action for two-model runs.
+ * Landing page for a cross-model "Run now" (one experiment per model, so no
+ * single detail page): polls each execution, shows per-model progress, and links
+ * to each detail once scores land, with a compare action for two-model runs.
  */
 export const RunOverviewPage: React.FC = () => {
   const history = useHistory();

@@ -20,7 +20,7 @@ describe('createEvalExperimentsSkill', () => {
   it('produces a schema-valid skill definition', async () => {
     const skill = createEvalExperimentsSkill(deps);
     await expect(validateSkillDefinition(skill)).resolves.toBeDefined();
-    expect(skill.id).toBe('eval-experiments');
+    expect(skill.id).toBe('eval-experiment-authoring');
     expect(skill.basePath).toBe('skills/platform/evals');
   });
 

@@ -11,7 +11,7 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
 
 /**
- * Shared, server-safe definitions for the evals workflow steps. Held in `common`
+ * Shared definitions for the evals workflow steps. Held in `common`
  * so the server handlers and the public editor metadata stay locked together.
  *
  * All step ids use the (non-reserved) `evals.` namespace and a camelCase action.

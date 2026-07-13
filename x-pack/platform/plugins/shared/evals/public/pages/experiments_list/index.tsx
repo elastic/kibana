@@ -20,7 +20,6 @@ import {
   EuiPopover,
   EuiSelect,
   EuiSpacer,
-  EuiText,
   EuiToolTip,
   copyToClipboard,
   useEuiTheme,
@@ -34,86 +33,17 @@ import type { EvaluationExperimentSummary } from '@kbn/evals-common';
 import { useEvaluationExperiments } from '../../hooks/use_evals_api';
 import { NewExperimentFlyout } from '../../components/new_experiment_flyout/new_experiment_flyout';
 import { resolvePrUrl } from '../../utils/pr_url';
+import { CopyableDetail } from './copyable_detail';
+import { LinkDetail } from './link_detail';
 import * as i18n from './translations';
 
-const CopyableDetail: React.FC<{
-  label: string;
-  value: string;
-  onCopy: (value: string) => void;
-  dataTestSubj?: string;
-}> = ({ label, value, onCopy, dataTestSubj }) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <div>
-      <EuiText size="xs" color="subdued">
-        {label}
-      </EuiText>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem css={{ minWidth: 0 }}>
-          <EuiText
-            size="s"
-            css={{ fontFamily: euiTheme.font.familyCode, wordBreak: 'break-all' }}
-            data-test-subj={dataTestSubj ? `${dataTestSubj}Value` : undefined}
-          >
-            {value}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="copyClipboard"
-            color="text"
-            aria-label={i18n.getCopyAriaLabel(label)}
-            onClick={(event: React.MouseEvent) => {
-              event.stopPropagation();
-              onCopy(value);
-            }}
-            data-test-subj={dataTestSubj}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
-  );
-};
-
-/** A labelled external link (opens in a new tab). */
-const LinkDetail: React.FC<{
-  label: string;
-  href: string;
-  text: string;
-  dataTestSubj?: string;
-}> = ({ label, href, text, dataTestSubj }) => (
-  <div>
-    <EuiText size="xs" color="subdued">
-      {label}
-    </EuiText>
-    <EuiLink
-      href={href}
-      target="_blank"
-      external
-      onClick={(event: React.MouseEvent) => event.stopPropagation()}
-      data-test-subj={dataTestSubj}
-    >
-      {text}
-    </EuiLink>
-  </div>
-);
-
-/**
- * Per-row "internal ergonomics" popover: shows the id you need to look a run up
- * in Elasticsearch / correlate traces, plus the git branch, pull request, and CI
- * build when the run originated from CI. The listing groups by execution, so the
- * id is the execution id; it is only meaningfully a single "experiment id" when
- * the row holds exactly one experiment.
- */
 const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({ item }) => {
   const { services } = useKibana();
   const toasts = services.notifications?.toasts;
   const [isOpen, setIsOpen] = useState(false);
 
-  // In the listing `experiment_id === execution_id` (both are the grouping key).
-  // With multiple experiments under the row, calling it an "experiment id" is
-  // misleading, so label it "Execution ID"; a single-experiment row is a genuine
-  // experiment id.
+  // experiment_id === execution_id (the grouping key). Multi-experiment rows are
+  // labeled "Execution ID" (an experiment id would mislead); single rows are one.
   const runId = item.execution_id ?? item.experiment_id;
   const isMultiExperiment = (item.experiment_count ?? 1) > 1;
   const idLabel = isMultiExperiment ? i18n.DETAIL_EXECUTION_ID : i18n.DETAIL_EXPERIMENT_ID;
@@ -388,11 +318,8 @@ export const ExperimentsListPage: React.FC = () => {
   const handleCompare = useCallback(() => {
     if (!canCompare) return;
     const [a, b] = selectedExperiments;
-    // The listing aggregates by execution id (one row per execution), and the
-    // row's `experiment_id` mirrors that execution id — not the per-run
-    // experiment id stored on the score docs. So every comparison here is
-    // execution-vs-execution; comparing by `experiment_id` would filter on an id
-    // that doesn't exist in the score docs and 404. Always compare by execution.
+    // Rows are aggregated by execution id, so always compare execution-vs-execution;
+    // the row's `experiment_id` isn't on the score docs and would filter to a 404.
     const baselineId = a.execution_id ?? a.experiment_id;
     const targetId = b.execution_id ?? b.experiment_id;
     const params = new URLSearchParams({

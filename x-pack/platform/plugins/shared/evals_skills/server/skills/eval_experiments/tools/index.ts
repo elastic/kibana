@@ -18,7 +18,7 @@ export { evalsTools } from './common';
 export type { EvalExperimentsToolDeps } from './deps';
 
 /**
- * The inline tools exposed by the eval-experiments skill, in the recommended
+ * The inline tools exposed by the eval-experiment-authoring skill, in the recommended
  * order of use: discover -> preview -> save/run.
  */
 export const getEvalExperimentsInlineTools = (

@@ -11,7 +11,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
-  EuiEmptyPrompt,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
@@ -30,7 +29,6 @@ import {
   useGeneratedHtmlId,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -51,94 +49,14 @@ import {
   usePreviewExperiment,
 } from '../../hooks/use_experiments_api';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
-import { YamlPreview } from '../yaml_preview';
+import { WorkflowYamlPreview } from '../workflow_yaml_preview';
+import { SavedWorkflowSuccess } from './saved_workflow_success';
+import { newExperimentStrings } from './translations';
 
 const BUILT_IN_TARGETS = ['inference', 'agentBuilder.converse', 'agentBuilder.tool'] as const;
 type BuiltInTarget = (typeof BUILT_IN_TARGETS)[number];
 const isBuiltInTarget = (value: string): value is BuiltInTarget =>
   (BUILT_IN_TARGETS as readonly string[]).includes(value);
-
-const strings = {
-  title: i18n.translate('xpack.evals.newExperiment.title', { defaultMessage: 'New experiment' }),
-  nameLabel: i18n.translate('xpack.evals.newExperiment.nameLabel', {
-    defaultMessage: 'Experiment name',
-  }),
-  namePlaceholder: i18n.translate('xpack.evals.newExperiment.namePlaceholder', {
-    defaultMessage: 'Optional — a default is derived from the task target',
-  }),
-  connectorsLabel: i18n.translate('xpack.evals.newExperiment.connectorsLabel', {
-    defaultMessage: 'Model connector(s)',
-  }),
-  connectorsHelp: i18n.translate('xpack.evals.newExperiment.connectorsHelp', {
-    defaultMessage: 'Select two or more connectors to run a cross-model comparison.',
-  }),
-  taskTargetLabel: i18n.translate('xpack.evals.newExperiment.taskTargetLabel', {
-    defaultMessage: 'What to evaluate',
-  }),
-  agentIdLabel: i18n.translate('xpack.evals.newExperiment.agentIdLabel', {
-    defaultMessage: 'Agent Builder agent ID',
-  }),
-  agentIdHelp: i18n.translate('xpack.evals.newExperiment.agentIdHelp', {
-    defaultMessage: 'Pick an existing agent or type a custom agent ID.',
-  }),
-  toolIdLabel: i18n.translate('xpack.evals.newExperiment.toolIdLabel', {
-    defaultMessage: 'Agent Builder tool ID',
-  }),
-  toolIdHelp: i18n.translate('xpack.evals.newExperiment.toolIdHelp', {
-    defaultMessage: 'Pick an existing tool or type a custom tool ID.',
-  }),
-  datasetsLabel: i18n.translate('xpack.evals.newExperiment.datasetsLabel', {
-    defaultMessage: 'Dataset(s)',
-  }),
-  evaluatorsLabel: i18n.translate('xpack.evals.newExperiment.evaluatorsLabel', {
-    defaultMessage: 'Evaluators',
-  }),
-  judgeConnectorLabel: i18n.translate('xpack.evals.newExperiment.judgeConnectorLabel', {
-    defaultMessage: 'Judge connector',
-  }),
-  repetitionsLabel: i18n.translate('xpack.evals.newExperiment.repetitionsLabel', {
-    defaultMessage: 'Repetitions',
-  }),
-  concurrencyLabel: i18n.translate('xpack.evals.newExperiment.concurrencyLabel', {
-    defaultMessage: 'Concurrency',
-  }),
-  spacesLabel: i18n.translate('xpack.evals.newExperiment.spacesLabel', {
-    defaultMessage: 'Spaces',
-  }),
-  spacesHelp: i18n.translate('xpack.evals.newExperiment.spacesHelp', {
-    defaultMessage:
-      'Spaces this experiment is visible in. Defaults to the current space, but you can add others to share the results with them.',
-  }),
-  showYaml: i18n.translate('xpack.evals.newExperiment.showYaml', {
-    defaultMessage: 'Show workflow YAML',
-  }),
-  compareLabel: i18n.translate('xpack.evals.newExperiment.compareLabel', {
-    defaultMessage: 'Add model comparison step',
-  }),
-  compareHelp: i18n.translate('xpack.evals.newExperiment.compareHelp', {
-    defaultMessage:
-      'Adds a step to the saved workflow (shown in the YAML preview) that compares results across the selected models. "Run now" doesn\'t need this step — you can compare models from the run overview instead.',
-  }),
-  runNow: i18n.translate('xpack.evals.newExperiment.runNow', { defaultMessage: 'Run now' }),
-  saveAsWorkflow: i18n.translate('xpack.evals.newExperiment.saveAsWorkflow', {
-    defaultMessage: 'Save as workflow',
-  }),
-  savedBody: i18n.translate('xpack.evals.newExperiment.savedBody', {
-    defaultMessage:
-      'Your experiment is saved as a reusable workflow. Run it now to see results here, or open it in Workflows to run it later, schedule it, or edit it.',
-  }),
-  savedRunIt: i18n.translate('xpack.evals.newExperiment.savedRunIt', {
-    defaultMessage: 'Run it now',
-  }),
-  savedOpen: i18n.translate('xpack.evals.newExperiment.savedOpen', {
-    defaultMessage: 'Open in Workflows',
-  }),
-  savedClose: i18n.translate('xpack.evals.newExperiment.savedClose', { defaultMessage: 'Close' }),
-  cancel: i18n.translate('xpack.evals.newExperiment.cancel', { defaultMessage: 'Cancel' }),
-  chooseConnectorTitle: i18n.translate('xpack.evals.newExperiment.chooseConnectorTitle', {
-    defaultMessage: 'Task target',
-  }),
-};
 
 interface SelectedEvaluator {
   name: string;
@@ -147,27 +65,15 @@ interface SelectedEvaluator {
   connectorId?: string;
 }
 
-/** Combo-box option carrying the extra tool metadata surfaced in {@link renderToolOption}. */
 type ToolOption = EuiComboBoxOptionOption<string> & {
   toolType?: string;
   description?: string;
 };
 
-// The eval-experiments skill's own tools live under this namespace; they are not
+// The eval-experiment-authoring skill's own tools live under this namespace. They are not
 // meaningful evaluation targets, so they are excluded from the tool picker.
 const EVALS_OWN_TOOL_PREFIX = 'platform.evals.';
 
-const toolDescriptionCss = css`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-
-/**
- * Renders a tool option as its id (with the search term highlighted), a badge for
- * its type, and a truncated description — so `generate_esql` is distinguishable
- * from `get_document` at a glance.
- */
 const renderToolOption = (
   option: EuiComboBoxOptionOption<string>,
   searchValue: string,
@@ -175,7 +81,7 @@ const renderToolOption = (
 ) => {
   const { label, toolType, description } = option as ToolOption;
   return (
-    <span className={contentClassName}>
+    <span className={contentClassName} title={description}>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiHighlight search={searchValue}>{label}</EuiHighlight>
@@ -186,11 +92,6 @@ const renderToolOption = (
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {description && (
-        <EuiText size="xs" color="subdued" className={toolDescriptionCss}>
-          {description}
-        </EuiText>
-      )}
     </span>
   );
 };
@@ -199,11 +100,6 @@ export interface NewExperimentFlyoutProps {
   onClose: () => void;
 }
 
-/**
- * The "New experiment" form. Users describe *what* to evaluate (connectors,
- * task target, datasets, evaluators) and the server infers the workflow shape.
- * Supports "Run now", "Save as workflow", and a live YAML preview.
- */
 export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClose }) => {
   const history = useHistory();
   const { services } = useKibana();
@@ -241,9 +137,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     activeSpaceId,
     spaces,
   } = useAccessibleSpaces();
-  // Default the picker to the current space once it resolves. A ref (not the
-  // selection itself) guards the one-time default so the user can later clear the
-  // field without it snapping back.
+
   const spacesInitialized = useRef(false);
   useEffect(() => {
     if (!spacesInitialized.current && activeSpaceId) {
@@ -253,6 +147,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   }, [activeSpaceId]);
 
   const isCrossModel = connectorIds.length >= 2;
+
   // A bare tool run is a single `execute_tool` span, so evaluators that only make
   // sense on a conversation trace (e.g. groundedness) are hidden for this target.
   const isBareToolTarget = taskTarget === 'agentBuilder.tool';
@@ -260,6 +155,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const { data: agentsData, isLoading: agentsLoading } = useAgentBuilderAgents({
     enabled: taskTarget === 'agentBuilder.converse',
   });
+
   const { data: toolsData, isLoading: toolsLoading } = useAgentBuilderTools({
     enabled: isBareToolTarget,
   });
@@ -268,10 +164,12 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     () => (connectorsData ?? []).map((c) => ({ label: c.name, value: c.id })),
     [connectorsData]
   );
+
   const datasetOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () => (datasetsData?.datasets ?? []).map((d) => ({ label: d.name, value: d.id })),
     [datasetsData]
   );
+
   const evaluatorOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () =>
       (evaluatorsData?.evaluators ?? [])
@@ -300,6 +198,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
       return next.length === prev.length ? prev : next;
     });
   }, [isBareToolTarget, evaluatorsData]);
+
   const agentOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () =>
       (agentsData ?? []).map((agent) => ({
@@ -453,10 +352,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     !missingAgent &&
     !missingTool;
 
-  // Keep the YAML preview live: while the toggle is on and the form is valid,
-  // (re)generate it whenever any field changes — debounced so we don't hit the
-  // preview endpoint on every keystroke. This also covers turning the toggle on
-  // before the form is complete: the preview appears as soon as it becomes valid.
   const { mutate: mutatePreview } = preview;
   useEffect(() => {
     if (!showYaml || !isValid) {
@@ -503,9 +398,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const onRunNow = useCallback(() => {
     const requestBody: RunExperimentRequest = {
       ...buildRequestBody(),
-      // When launching a just-saved workflow ("Run it now"), correlate the run
-      // with it so it shows up under the saved workflow and updates its "Last
-      // run". Plain "Run now" (no saved workflow yet) stays ad-hoc.
       ...(savedWorkflow ? { workflow_id: savedWorkflow.workflow_id } : {}),
     };
     runExperiment.mutate(requestBody, {
@@ -583,9 +475,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const onSave = useCallback(() => {
     saveWorkflow.mutate(buildRequestBody(), {
       onSuccess: (result) => {
-        // Don't dead-end on an auto-dismissing toast: keep the flyout open and
-        // switch to a success state that lets the user open the saved workflow
-        // (to run/schedule/edit) or run it right away.
         setSavedWorkflow(result);
       },
       onError: (error) => {
@@ -615,8 +504,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     : [];
   const selectedSpaceOptions = spaceOptions.filter((o) => spaceIds.includes(o.value as string));
 
-  // Deep-link to the saved workflow's detail page in the Workflows app, where it
-  // can be run, scheduled, edited, and its execution history reviewed.
   const savedWorkflowHref =
     savedWorkflow && services.http
       ? services.http.basePath.prepend(
@@ -626,67 +513,13 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
 
   if (savedWorkflow) {
     return (
-      <EuiFlyout
+      <SavedWorkflowSuccess
+        savedWorkflow={savedWorkflow}
+        savedWorkflowHref={savedWorkflowHref}
+        isRunning={runExperiment.isLoading}
+        onRunNow={onRunNow}
         onClose={onClose}
-        size="m"
-        ownFocus
-        aria-labelledby={flyoutTitleId}
-        data-test-subj="evalsNewExperimentFlyout"
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id={flyoutTitleId}>{strings.title}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiEmptyPrompt
-            iconType="checkInCircleFilled"
-            iconColor="success"
-            title={
-              <h2>
-                {i18n.translate('xpack.evals.newExperiment.savedTitle', {
-                  defaultMessage: 'Saved workflow "{name}"',
-                  values: { name: savedWorkflow.name },
-                })}
-              </h2>
-            }
-            body={<p>{strings.savedBody}</p>}
-            actions={[
-              <EuiButton
-                key="run"
-                fill
-                iconType="play"
-                onClick={onRunNow}
-                isLoading={runExperiment.isLoading}
-                data-test-subj="evalsSavedRunItButton"
-              >
-                {strings.savedRunIt}
-              </EuiButton>,
-              ...(savedWorkflowHref
-                ? [
-                    <EuiButton
-                      key="open"
-                      iconType="popout"
-                      href={savedWorkflowHref}
-                      data-test-subj="evalsSavedOpenWorkflowButton"
-                    >
-                      {strings.savedOpen}
-                    </EuiButton>,
-                  ]
-                : []),
-            ]}
-          />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} data-test-subj="evalsSavedCloseButton">
-                {strings.savedClose}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+      />
     );
   }
 
@@ -700,22 +533,26 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>{strings.title}</h2>
+          <h2 id={flyoutTitleId}>{newExperimentStrings.title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="form">
-          <EuiFormRow label={strings.nameLabel} fullWidth>
+          <EuiFormRow label={newExperimentStrings.nameLabel} fullWidth>
             <EuiFieldText
               fullWidth
               value={name}
-              placeholder={strings.namePlaceholder}
+              placeholder={newExperimentStrings.namePlaceholder}
               onChange={(e) => setName(e.target.value)}
               data-test-subj="evalsExperimentName"
             />
           </EuiFormRow>
 
-          <EuiFormRow label={strings.connectorsLabel} helpText={strings.connectorsHelp} fullWidth>
+          <EuiFormRow
+            label={newExperimentStrings.connectorsLabel}
+            helpText={newExperimentStrings.connectorsHelp}
+            fullWidth
+          >
             <EuiComboBox<string>
               fullWidth
               isLoading={connectorsLoading}
@@ -726,7 +563,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
             />
           </EuiFormRow>
 
-          <EuiFormRow label={strings.taskTargetLabel} fullWidth>
+          <EuiFormRow label={newExperimentStrings.taskTargetLabel} fullWidth>
             <EuiComboBox<string>
               fullWidth
               singleSelection={{ asPlainText: true }}
@@ -742,7 +579,11 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
           </EuiFormRow>
 
           {taskTarget === 'agentBuilder.converse' && (
-            <EuiFormRow label={strings.agentIdLabel} helpText={strings.agentIdHelp} fullWidth>
+            <EuiFormRow
+              label={newExperimentStrings.agentIdLabel}
+              helpText={newExperimentStrings.agentIdHelp}
+              fullWidth
+            >
               <EuiComboBox<string>
                 fullWidth
                 singleSelection={{ asPlainText: true }}
@@ -758,7 +599,11 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
           )}
 
           {taskTarget === 'agentBuilder.tool' && (
-            <EuiFormRow label={strings.toolIdLabel} helpText={strings.toolIdHelp} fullWidth>
+            <EuiFormRow
+              label={newExperimentStrings.toolIdLabel}
+              helpText={newExperimentStrings.toolIdHelp}
+              fullWidth
+            >
               <EuiComboBox<string>
                 fullWidth
                 singleSelection={{ asPlainText: true }}
@@ -774,7 +619,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
             </EuiFormRow>
           )}
 
-          <EuiFormRow label={strings.datasetsLabel} fullWidth>
+          <EuiFormRow label={newExperimentStrings.datasetsLabel} fullWidth>
             <EuiComboBox<string>
               fullWidth
               isLoading={datasetsLoading}
@@ -785,7 +630,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
             />
           </EuiFormRow>
 
-          <EuiFormRow label={strings.evaluatorsLabel} fullWidth>
+          <EuiFormRow label={newExperimentStrings.evaluatorsLabel} fullWidth>
             <EuiComboBox<string>
               fullWidth
               isLoading={evaluatorsLoading}
@@ -831,7 +676,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
           <EuiSpacer size="m" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow label={strings.repetitionsLabel}>
+              <EuiFormRow label={newExperimentStrings.repetitionsLabel}>
                 <EuiFieldNumber
                   min={1}
                   value={repetitions ?? ''}
@@ -843,7 +688,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormRow label={strings.concurrencyLabel}>
+              <EuiFormRow label={newExperimentStrings.concurrencyLabel}>
                 <EuiFieldNumber
                   min={1}
                   value={concurrency ?? ''}
@@ -859,7 +704,11 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
           {spacesEnabled && (
             <>
               <EuiSpacer size="m" />
-              <EuiFormRow label={strings.spacesLabel} helpText={strings.spacesHelp} fullWidth>
+              <EuiFormRow
+                label={newExperimentStrings.spacesLabel}
+                helpText={newExperimentStrings.spacesHelp}
+                fullWidth
+              >
                 <EuiComboBox<string>
                   fullWidth
                   isLoading={spacesLoading}
@@ -876,21 +725,21 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
             <>
               <EuiSpacer size="m" />
               <EuiSwitch
-                label={strings.compareLabel}
+                label={newExperimentStrings.compareLabel}
                 checked={compare}
                 onChange={(e) => onToggleCompare(e.target.checked)}
                 data-test-subj="evalsCompareToggle"
               />
               <EuiText size="xs" color="subdued">
                 <EuiSpacer size="xs" />
-                {strings.compareHelp}
+                {newExperimentStrings.compareHelp}
               </EuiText>
             </>
           )}
 
           <EuiSpacer size="m" />
           <EuiSwitch
-            label={strings.showYaml}
+            label={newExperimentStrings.showYaml}
             checked={showYaml}
             onChange={(e) => onToggleYaml(e.target.checked)}
             data-test-subj="evalsShowYamlToggle"
@@ -899,11 +748,8 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
             <>
               <EuiSpacer size="s" />
               {isValid ? (
-                <YamlPreview
+                <WorkflowYamlPreview
                   yaml={preview.data?.yaml}
-                  // The form is valid here, so treat the pre-first-result window
-                  // (debounce + in-flight request) as loading rather than flashing
-                  // the "complete the form" empty state.
                   isLoading={preview.isLoading || (!preview.data && !preview.error)}
                   error={
                     preview.error
@@ -927,7 +773,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={onClose}>
-              {strings.cancel}
+              {newExperimentStrings.cancel}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -940,7 +786,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
                   onClick={onSave}
                   data-test-subj="evalsSaveWorkflowButton"
                 >
-                  {strings.saveAsWorkflow}
+                  {newExperimentStrings.saveAsWorkflow}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -952,7 +798,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
                   onClick={onRunNow}
                   data-test-subj="evalsRunNowButton"
                 >
-                  {strings.runNow}
+                  {newExperimentStrings.runNow}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

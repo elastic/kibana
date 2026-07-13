@@ -21,7 +21,7 @@ import type {
   IngestScoresResponse,
   Model,
 } from '@kbn/evals-common';
-import { buildScoreDocuments, mapWithConcurrency } from '@kbn/evals-runner';
+import { buildScoreDocuments, mapWithConcurrency, ConcurrencyAbortError } from '@kbn/evals-runner';
 import type { EvaluatorResult, RunnerExample } from '@kbn/evals-runner';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { BUILT_IN_TASK_PROVIDERS } from '../task_providers/types';
@@ -502,6 +502,8 @@ export interface BatchEvaluationResult {
   scoresIngested: number;
   /** Failure messages collected from the examples that failed in this batch. */
   errors: string[];
+  /** True when the batch stopped early because the run was cancelled. */
+  cancelled?: boolean;
 }
 
 /**
@@ -520,33 +522,44 @@ export const evaluateWorkBatch = async (
   let completed = 0;
   let failed = 0;
   let scoresIngested = 0;
+  let cancelled = false;
   const errors: string[] = [];
 
-  await mapWithConcurrency(
-    batch,
-    async ({ dataset, example }) => {
-      const result = await runExampleEvaluation(registry, runtime, {
-        ...config,
-        dataset,
-        example,
-        // Reference data is derived from each example's persisted `output` inside
-        // `runExampleEvaluation`, so reference-based evaluators (e.g. correctness)
-        // receive ground truth without a separate per-item override here.
-      });
-      scoresIngested += result.scoresIngested;
-      // Surface every captured message, including partial (evaluator-level) failures on an
-      // example that otherwise completed and ingested scores.
-      errors.push(...result.errors);
-      if (result.failed > 0) {
-        failed += 1;
-      } else {
-        completed += 1;
-      }
-    },
-    { concurrency, signal: runtime.abortSignal }
-  );
+  try {
+    await mapWithConcurrency(
+      batch,
+      async ({ dataset, example }) => {
+        const result = await runExampleEvaluation(registry, runtime, {
+          ...config,
+          dataset,
+          example,
+          // Reference data is derived from each example's persisted `output` inside
+          // `runExampleEvaluation`, so reference-based evaluators (e.g. correctness)
+          // receive ground truth without a separate per-item override here.
+        });
+        scoresIngested += result.scoresIngested;
+        // Surface every captured message, including partial (evaluator-level) failures on an
+        // example that otherwise completed and ingested scores.
+        errors.push(...result.errors);
+        if (result.failed > 0) {
+          failed += 1;
+        } else {
+          completed += 1;
+        }
+      },
+      { concurrency, signal: runtime.abortSignal }
+    );
+  } catch (error) {
+    if (!(error instanceof ConcurrencyAbortError)) {
+      throw error;
+    }
+    // On cancellation, keep the counts accumulated for examples that finished
+    // before the abort (their scores were ingested idempotently) and report a
+    // clean cancelled result instead of throwing, so the caller can normalize it.
+    cancelled = true;
+  }
 
-  return { completed, failed, scoresIngested, errors };
+  return { completed, failed, scoresIngested, errors, cancelled };
 };
 
 export interface EvaluateDatasetParams extends DatasetEvaluationConfig {

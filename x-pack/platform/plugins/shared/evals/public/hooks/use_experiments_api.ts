@@ -28,7 +28,6 @@ import type {
   ExperimentExecutionStatus,
 } from '../../common/experiments/run_experiment';
 
-/** A generative-AI/model action connector, as returned by the actions API. */
 export interface ModelConnector {
   id: string;
   name: string;
@@ -45,7 +44,6 @@ interface RawActionConnector {
   is_missing_secrets?: boolean;
 }
 
-/** Action connector types that represent a model that can be evaluated. */
 export const MODEL_CONNECTOR_TYPE_IDS = ['.inference', '.gen-ai', '.bedrock', '.gemini'] as const;
 
 const retryOnServerError = (_failureCount: number, error: unknown) => {
@@ -124,14 +122,12 @@ interface ListAgentBuilderAgentsResponse {
   results: AgentBuilderAgent[];
 }
 
-/** Public Agent Builder HTTP API for listing agents. */
 const AGENT_BUILDER_AGENTS_URL = '/api/agent_builder/agents';
 const AGENT_BUILDER_PUBLIC_API_VERSION = '2023-10-31';
 
 /**
  * Lists Agent Builder agents (including built-in ones) so the experiment form can
- * suggest them. Agent Builder may be disabled in some deployments, so callers should
- * treat an error or empty result as "no suggestions" and still allow free-form ids.
+ * suggest them.
  */
 export const useAgentBuilderAgents = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { services } = useKibana();
@@ -162,14 +158,11 @@ interface ListAgentBuilderToolsResponse {
   results: AgentBuilderTool[];
 }
 
-/** Public Agent Builder HTTP API for listing tools. */
 const AGENT_BUILDER_TOOLS_URL = '/api/agent_builder/tools';
 
 /**
  * Lists Agent Builder tools (including built-in ones) so the experiment form can
- * suggest them for the "Agent Builder tool" target. Agent Builder may be disabled
- * in some deployments, so callers should treat an error or empty result as "no
- * suggestions" and still allow free-form ids.
+ * suggest them for the "Agent Builder tool" target.
  */
 export const useAgentBuilderTools = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { services } = useKibana();
@@ -249,15 +242,12 @@ const TERMINAL_EXECUTION_STATUSES = new Set([
   'skipped',
 ]);
 
-/** Whether a workflow execution status is final (no further progress expected). */
 export const isTerminalExecutionStatus = (status: string): boolean =>
   TERMINAL_EXECUTION_STATUSES.has(status);
 
-/** Poll interval (ms) for a still-running workflow execution. */
 const WORKFLOW_EXECUTION_POLL_MS = 2000;
 const DATASET_STEP_TYPE = 'evals.evaluateDataset';
 
-/** The per-execution view the run-progress UI renders. */
 export interface WorkflowExecutionView {
   id: string;
   data?: ExperimentExecutionStatus;
@@ -265,17 +255,12 @@ export interface WorkflowExecutionView {
 }
 
 export interface WorkflowExecutionsState {
-  /** One entry per requested id, preserving order. */
   executions: WorkflowExecutionView[];
-  /** True once every provided execution has reached a terminal status. */
   allSettled: boolean;
-  /** True while at least one execution status has not loaded yet. */
   isLoading: boolean;
-  /** Total scores ingested across every execution's dataset step(s) so far. */
   scoresIngested: number;
 }
 
-/** Total scores ingested across an execution's dataset step(s). */
 export const sumScoresIngested = (execution?: ExperimentExecutionStatus): number =>
   (execution?.steps ?? []).reduce(
     (sum, step) =>
@@ -284,13 +269,10 @@ export const sumScoresIngested = (execution?: ExperimentExecutionStatus): number
   );
 
 /**
- * Polls every launched workflow execution from a single place and derives the
- * signals the detail page needs: the per-execution status (for the run-progress
- * UI), whether all runs have settled, and how many scores have been ingested so
- * far. Centralizing the poll here (instead of also polling per progress card)
- * avoids duplicate requests and the resulting render churn/flicker, and lets the
- * page defer querying the (initially non-existent) experiment document until
- * scores actually land — which is what stops the continuous 404s.
+ * Polls all launched workflow executions in one place, deriving per-execution
+ * status, whether all runs have settled, and the scores ingested so far.
+ * Centralizing avoids duplicate polls (and render churn) and lets the page defer
+ * the experiment-document query until scores land, which stops the 404s.
  */
 export const useWorkflowExecutions = (workflowExecutionIds: string[]): WorkflowExecutionsState => {
   const { services } = useKibana();
@@ -319,10 +301,13 @@ export const useWorkflowExecutions = (workflowExecutionIds: string[]): WorkflowE
     data: results[index]?.data,
     isError: !!results[index]?.isError,
   }));
+
   const isLoading = results.some((result) => result.isLoading);
+
   const allSettled =
     workflowExecutionIds.length > 0 &&
     results.every((result) => !!result.data && isTerminalExecutionStatus(result.data.status));
+
   const scoresIngested = executions.reduce((sum, view) => sum + sumScoresIngested(view.data), 0);
 
   return { executions, allSettled, isLoading, scoresIngested };

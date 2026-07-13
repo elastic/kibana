@@ -7,8 +7,7 @@ Offline evaluation framework for LLM-based workflows in Kibana. Requires the `ev
 - **Local** - `node scripts/evals start` (interactive CLI, see [CLI.md](./CLI.md) for the full command reference)
 - **CI on PRs** - GitHub labels (`evals:<suite-id>`, `models:<model-group>`)
 - **On-demand** - [Buildkite pipeline](https://buildkite.com/elastic/kibana-evals-on-demand)
-
-> **Looking to run experiments from a UI or version-controlled YAML instead of the CLI?** The `evals` plugin can also execute experiments **server-side via Kibana Workflows** (Enterprise license). That path reuses the same datasets, evaluators, and score ingestion as this framework, but is driven by the in-Kibana "New experiment" form or a workflow file rather than Scout/Playwright. It is additive and does not change CLI/CI behavior. See the plugin's [Workflow-based experiment execution](../../../plugins/shared/evals/README.md#workflow-based-experiment-execution) docs. Server-safe runtime primitives shared by both paths live in [`@kbn/evals-runner`](../kbn-evals-runner).
+- **UI or Workflows** - run experiments server-side via Kibana Workflows, driven by the "New experiment" form or a version-controlled workflow file instead of the CLI (see [Workflow-based experiment execution](../../../plugins/shared/evals/README.md#workflow-based-experiment-execution))
 
 ---
 

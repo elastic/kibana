@@ -404,9 +404,6 @@ export const ExperimentDetailPage: React.FC = () => {
     []
   );
 
-  // Full-page spinner only for the normal detail view's initial load; during a
-  // launch we render a stable layout (config + run progress) instead of swapping
-  // between a spinner and the 404 branch, which caused flicker.
   if (experimentLoading && !isLaunching) {
     return (
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
@@ -416,13 +413,8 @@ export const ExperimentDetailPage: React.FC = () => {
   }
 
   const isNotFound = isHttpFetchError(experimentError) && experimentError.response?.status === 404;
-  // While a launch is in flight the experiment document appears only once scores
-  // are ingested, so "no experiment yet" is an expected transient state, not an
-  // error.
   const showLaunchView = isLaunching && !experimentDetail;
 
-  // Hard error: a genuine load failure, or a "not found" outside a launch flow.
-  // The launch view below owns the "preparing" and "no results" outcomes.
   if (experimentError && !showLaunchView) {
     return (
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
@@ -457,11 +449,8 @@ export const ExperimentDetailPage: React.FC = () => {
         </EuiTitle>
         <EuiSpacer size="l" />
 
-        {/* While a run is launching we show a summary of the launched config as a
-            stand-in for the not-yet-existent experiment document. Once the real
-            experiment detail loads (`showLaunchView` flips to false) we drop this
-            summary so its metadata doesn't render alongside the canonical stat
-            cards below. */}
+        {/* While launching, stand in for the not-yet-existent experiment document.
+        Dropped once the real detail loads so it doesn't duplicate the stat cards below. */}
         {showLaunchView && launchedConfig && (
           <>
             <LaunchedConfigSummary config={launchedConfig} />
@@ -585,10 +574,7 @@ export const ExperimentDetailPage: React.FC = () => {
               ]}
             />
           ) : anyScoresIngested ? (
-            // Scores have landed but the experiment document hasn't been fetched
-            // yet. Show a loading state (never "no results") so the yellow
-            // "no results" prompt doesn't flash as the run settles just before the
-            // detail query resolves.
+            // Scores landed but the experiment document isn't fetched yet
             <EuiEmptyPrompt
               color="subdued"
               icon={<EuiLoadingSpinner size="xl" />}

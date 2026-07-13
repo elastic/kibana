@@ -160,8 +160,8 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Workflows
   'workflow-authoring',
 
-  // Platform – Evals
-  'eval-experiments',
+  // Evals
+  'eval-experiment-authoring',
 
   // Security Solution
   'entity-analytics-leads',

@@ -8,7 +8,7 @@
 import { evalsTools } from './tools/common';
 
 /**
- * Guidance shown to the agent when the eval-experiments skill is loaded. It
+ * Guidance shown to the agent when the eval-experiment-authoring skill is loaded. It
  * documents the tools and the recommended discover -> preview -> save/run flow.
  */
 export const EVAL_EXPERIMENTS_SKILL_CONTENT = `## When to Use This Skill

@@ -13,39 +13,19 @@ import {
   EuiText,
   type EuiDescriptionListProps,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { LaunchedExperimentConfig } from '../../../common/experiments/run_experiment';
-
-const SECTION_CONFIGURATION = i18n.translate('xpack.evals.experimentDetail.section.configuration', {
-  defaultMessage: 'Configuration',
-});
-const CONFIG_NAME = i18n.translate('xpack.evals.experimentDetail.config.name', {
-  defaultMessage: 'Name',
-});
-const CONFIG_TARGET = i18n.translate('xpack.evals.experimentDetail.config.target', {
-  defaultMessage: 'What to evaluate',
-});
-const CONFIG_AGENT = i18n.translate('xpack.evals.experimentDetail.config.agent', {
-  defaultMessage: 'Agent ID',
-});
-const CONFIG_TOOL = i18n.translate('xpack.evals.experimentDetail.config.tool', {
-  defaultMessage: 'Tool ID',
-});
-const CONFIG_MODELS = i18n.translate('xpack.evals.experimentDetail.config.models', {
-  defaultMessage: 'Model connector(s)',
-});
-const CONFIG_DATASETS = i18n.translate('xpack.evals.experimentDetail.config.datasets', {
-  defaultMessage: 'Dataset(s)',
-});
-const CONFIG_EVALUATORS = i18n.translate('xpack.evals.experimentDetail.config.evaluators', {
-  defaultMessage: 'Evaluators',
-});
-const CONFIG_REPETITIONS = i18n.translate('xpack.evals.experimentDetail.config.repetitions', {
-  defaultMessage: 'Repetitions',
-});
-const CONFIG_CONCURRENCY = i18n.translate('xpack.evals.experimentDetail.config.concurrency', {
-  defaultMessage: 'Concurrency',
-});
+import {
+  SECTION_CONFIGURATION,
+  CONFIG_NAME,
+  CONFIG_TARGET,
+  CONFIG_AGENT,
+  CONFIG_TOOL,
+  CONFIG_MODELS,
+  CONFIG_DATASETS,
+  CONFIG_EVALUATORS,
+  CONFIG_REPETITIONS,
+  CONFIG_CONCURRENCY,
+} from './translations';
 
 /** Read-only summary of the submitted form, shown while a launched run is in flight. */
 export const LaunchedConfigSummary: React.FC<{ config: LaunchedExperimentConfig }> = ({

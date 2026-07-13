@@ -9,29 +9,30 @@ import React from 'react';
 import { EuiCallOut, EuiCodeBlock, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const emptyLabel = i18n.translate('xpack.evals.yamlPreview.empty', {
-  defaultMessage: 'Complete the form to preview the generated workflow YAML.',
-});
-
-const loadingLabel = i18n.translate('xpack.evals.yamlPreview.loading', {
-  defaultMessage: 'Generating workflow YAML…',
-});
-
-export interface YamlPreviewProps {
+export interface WorkflowYamlPreviewProps {
   yaml?: string;
   isLoading?: boolean;
-  /** API or generation failure — shown as a compact error callout. */
   error?: string;
 }
 
 /**
  * Read-only, syntax-highlighted view of the workflow YAML that the server would
- * generate for the current experiment form. Used by the "Show YAML" toggle.
+ * generate for the current experiment form. Used by the "Show workflow YAML" toggle.
  */
-export const YamlPreview: React.FC<YamlPreviewProps> = ({ yaml, isLoading, error }) => {
+export const WorkflowYamlPreview: React.FC<WorkflowYamlPreviewProps> = ({
+  yaml,
+  isLoading,
+  error,
+}) => {
   if (error) {
     return (
-      <EuiCallOut color="danger" iconType="alert" size="s" data-test-subj="evalsYamlPreviewError">
+      <EuiCallOut
+        announceOnMount
+        color="danger"
+        iconType="alert"
+        size="s"
+        data-test-subj="evalsWorkflowYamlPreviewError"
+      >
         <p>{error}</p>
       </EuiCallOut>
     );
@@ -40,7 +41,10 @@ export const YamlPreview: React.FC<YamlPreviewProps> = ({ yaml, isLoading, error
   if (isLoading) {
     return (
       <EuiText size="s" color="subdued">
-        <EuiLoadingSpinner size="s" /> {loadingLabel}
+        <EuiLoadingSpinner size="s" />
+        {i18n.translate('xpack.evals.workflowYamlPreview.loading', {
+          defaultMessage: 'Generating workflow YAML…',
+        })}
       </EuiText>
     );
   }
@@ -48,7 +52,9 @@ export const YamlPreview: React.FC<YamlPreviewProps> = ({ yaml, isLoading, error
   if (!yaml) {
     return (
       <EuiText size="s" color="subdued">
-        {emptyLabel}
+        {i18n.translate('xpack.evals.workflowYamlPreview.empty', {
+          defaultMessage: 'Complete the form to preview the generated workflow YAML.',
+        })}
       </EuiText>
     );
   }
@@ -60,7 +66,7 @@ export const YamlPreview: React.FC<YamlPreviewProps> = ({ yaml, isLoading, error
       paddingSize="m"
       isCopyable
       overflowHeight={400}
-      data-test-subj="evalsYamlPreview"
+      data-test-subj="evalsWorkflowYamlPreview"
     >
       {yaml}
     </EuiCodeBlock>

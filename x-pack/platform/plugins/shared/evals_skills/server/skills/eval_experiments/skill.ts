@@ -16,8 +16,8 @@ import type { EvalExperimentsToolDeps } from './tools/deps';
  */
 export const createEvalExperimentsSkill = (deps: EvalExperimentsToolDeps) =>
   defineSkillType({
-    id: 'eval-experiments',
-    name: 'eval-experiments',
+    id: 'eval-experiment-authoring',
+    name: 'eval-experiment-authoring',
     basePath: 'skills/platform/evals',
     description:
       'Compose, preview, save, and run evaluation (evals) experiments for Agent Builder agents and tools: discover datasets/evaluators/targets, generate the experiment workflow, and launch or persist it.',

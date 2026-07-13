@@ -11,9 +11,7 @@ import type { EvaluatorResult, ScoreDocumentMetadata } from './types';
 export interface BuildScoreDocumentsParams {
   experimentId: string;
   experimentName?: string;
-  /** The model under evaluation (the task's connector/model). */
   taskModel: Model;
-  /** The model used by LLM judges. Use the task model for code-only evaluators. */
   evaluatorModel: Model;
   metadata: ScoreDocumentMetadata;
   example: {
@@ -27,26 +25,17 @@ export interface BuildScoreDocumentsParams {
     repetitionIndex: number;
     output?: Record<string, unknown>;
   };
-  /** Results from one or more evaluators, each of which may emit many scores. */
   evaluatorResults: EvaluatorResult[];
 }
 
 /**
- * Composes the score-document `evaluator.name` from an evaluator name and one of
- * its named scores. Single-score evaluators (where the score shares the
- * evaluator's name) keep the bare evaluator name; multi-score evaluators are
- * namespaced (e.g. `correctness.factuality`). Distinct names are required so the
- * ingest layer produces one idempotent document per (evaluator, score).
+ * Builds the score-document `evaluator.name`: the bare evaluator name for
+ * single-score evaluators, else `evaluator.score` (e.g. `correctness.factuality`)
+ * so each (evaluator, score) ingests as its own idempotent document.
  */
 export const composeScoreName = (evaluatorName: string, scoreName: string): string =>
   scoreName === evaluatorName ? evaluatorName : `${evaluatorName}.${scoreName}`;
 
-/**
- * Fans each (evaluator, score) pair from a single (example, repetition) into its
- * own score document and assembles the `POST /internal/evals/scores` request
- * body. This is the shared shape used by both offline and online evaluation
- * paths so score persistence stays consistent.
- */
 export const buildScoreDocuments = (params: BuildScoreDocumentsParams): IngestScoresRequestBody => {
   const {
     experimentId,

@@ -146,8 +146,6 @@ const ExperimentHeader: React.FC<{
   const timestamp = experimentData?.timestamp;
   const taskModel = experimentData?.task_model?.id;
   const evaluatorModel = experimentData?.evaluator_model?.id;
-  // Prefer the human-readable experiment name; fall back to the id (e.g. before
-  // the detail query resolves, or for runs that never got an explicit name).
   const displayName = experimentData?.experiment_name || experimentId;
   const detailLocation = {
     pathname: `/experiments/${encodeURIComponent(experimentId)}`,

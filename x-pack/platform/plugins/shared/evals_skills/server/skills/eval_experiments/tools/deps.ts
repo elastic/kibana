@@ -9,7 +9,7 @@ import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/se
 import type { EvalsSkillsStartDependencies } from '../../../types';
 
 /**
- * Services shared by every inline tool of the eval-experiments skill.
+ * Services shared by every inline tool of the eval-experiment-authoring skill.
  *
  * `workflowsApi` and `serverBasePath` are resolved at plugin setup, while the
  * `evals` and `agentBuilder` start contracts are resolved lazily per tool call

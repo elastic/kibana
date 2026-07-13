@@ -458,12 +458,6 @@ export function registerToolsRoutes({
         return response.ok<ExecuteToolResponse>({
           body: {
             results: toolResult.results ?? [],
-            // Surface the trace id (when tracing is enabled) so callers such as the evals
-            // framework can correlate this execution with its exported trace. Prefer the
-            // execution's own trace id: inference operations detach onto their own root
-            // trace, so `getCurrentTraceId()` here would return the ambient HTTP request
-            // trace, which does not contain the tool/gen_ai spans. Falls back to the
-            // request trace for tools that never opened an execute_tool span.
             trace_id: toolResult.traceId ?? getCurrentTraceId(),
           },
         });

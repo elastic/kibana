@@ -345,6 +345,13 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
         concurrency
       );
 
+      // Normalize a mid-batch cancellation to the same clean result as the
+      // between-polls guard above, so cancelling produces one step outcome
+      // regardless of timing.
+      if (batchResult.cancelled) {
+        return { error: new Error('Dataset evaluation was cancelled') };
+      }
+
       const cursor = state.cursor + batch.length;
       const nextState = {
         work: state.work,

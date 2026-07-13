@@ -21,11 +21,18 @@ import {
   EuiText,
   type EuiBadgeProps,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ExperimentExecutionStepStatus } from '../../../common/experiments/run_experiment';
 import { useCancelWorkflowExecution } from '../../hooks/use_experiments_api';
 import type { WorkflowExecutionView } from '../../hooks/use_experiments_api';
+import {
+  CANCEL,
+  CANCEL_ERROR,
+  datasetCounts,
+  loadError,
+  stepFailed,
+  viewFailures,
+} from './translations';
 
 const TERMINAL_STATUSES = new Set(['completed', 'failed', 'cancelled', 'timed_out', 'skipped']);
 const EVALUATE_DATASET_STEP_TYPE = 'evals.evaluateDataset';
@@ -53,10 +60,6 @@ const statusColor = (status: string): EuiBadgeProps['color'] => {
       return 'hollow';
   }
 };
-
-const cancelLabel = i18n.translate('xpack.evals.runProgress.cancel', {
-  defaultMessage: 'Cancel run',
-});
 
 const DatasetStepProgress: React.FC<{
   step: ExperimentExecutionStepStatus;
@@ -88,15 +91,7 @@ const DatasetStepProgress: React.FC<{
   return (
     <div data-test-subj="evalsDatasetStepProgress">
       <EuiText size="xs" color="subdued">
-        {i18n.translate('xpack.evals.runProgress.datasetCounts', {
-          defaultMessage: '{done} / {total} examples · {failed} failed · {scores} scores ingested',
-          values: {
-            done,
-            total: total ?? '?',
-            failed: progress?.failed ?? 0,
-            scores,
-          },
-        })}
+        {datasetCounts({ done, total: total ?? '?', failed: progress?.failed ?? 0, scores })}
       </EuiText>
       <EuiSpacer size="xs" />
       <EuiProgress
@@ -113,10 +108,7 @@ const DatasetStepProgress: React.FC<{
             data-test-subj="evalsStepErrorsAccordion"
             buttonContent={
               <EuiText size="xs" color="danger">
-                {i18n.translate('xpack.evals.runProgress.viewFailures', {
-                  defaultMessage: 'View {count, plural, one {# failure} other {# failures}}',
-                  values: { count: errors.length },
-                })}
+                {viewFailures(errors.length)}
               </EuiText>
             }
           >
@@ -151,9 +143,7 @@ const WorkflowExecutionCard: React.FC<{
     cancelMutation.mutate(workflowExecutionId, {
       onError: (cancelError) => {
         toasts?.addError(cancelError as Error, {
-          title: i18n.translate('xpack.evals.runProgress.cancelError', {
-            defaultMessage: 'Failed to cancel run',
-          }),
+          title: CANCEL_ERROR,
         });
       },
     });
@@ -161,15 +151,7 @@ const WorkflowExecutionCard: React.FC<{
 
   if (isError) {
     return (
-      <EuiCallOut
-        announceOnMount
-        color="danger"
-        size="s"
-        title={i18n.translate('xpack.evals.runProgress.loadError', {
-          defaultMessage: 'Could not load execution {id}',
-          values: { id: workflowExecutionId },
-        })}
-      />
+      <EuiCallOut announceOnMount color="danger" size="s" title={loadError(workflowExecutionId)} />
     );
   }
 
@@ -233,7 +215,7 @@ const WorkflowExecutionCard: React.FC<{
               onClick={onCancel}
               data-test-subj="evalsCancelRunButton"
             >
-              {cancelLabel}
+              {CANCEL}
             </EuiButton>
           </EuiFlexItem>
         )}
@@ -261,15 +243,7 @@ const WorkflowExecutionCard: React.FC<{
       {failedSteps.map((step) => (
         <React.Fragment key={`err-${step.step_id}`}>
           <EuiSpacer size="s" />
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            size="s"
-            title={i18n.translate('xpack.evals.runProgress.stepFailed', {
-              defaultMessage: 'Step "{stepId}" failed',
-              values: { stepId: step.step_id },
-            })}
-          >
+          <EuiCallOut announceOnMount color="danger" size="s" title={stepFailed(step.step_id)}>
             <EuiText size="xs">{step.error}</EuiText>
           </EuiCallOut>
         </React.Fragment>
@@ -284,12 +258,8 @@ export interface WorkflowRunProgressProps {
   /** Optional human label (e.g. model name) rendered on each card, by execution id. */
   getLabel?: (workflowExecutionId: string) => string | undefined;
   /**
-   * Live counts derived from the scores already aggregated in Elasticsearch. The
-   * step's own counters advance only per batch and read 0 during a single
-   * in-flight batch, so the displayed counters are floored with these to stay
-   * consistent with the streamed results. Only applied when the run has exactly
-   * one dataset step (the unambiguous common case); dataset fan-out runs fall
-   * back to per-step counters.
+   * ES-derived live counts used to floor the step's own counters, which read 0
+   * during an in-flight batch. Applied only to single-dataset-step runs.
    */
   progressFloor?: DatasetProgressFloor;
 }

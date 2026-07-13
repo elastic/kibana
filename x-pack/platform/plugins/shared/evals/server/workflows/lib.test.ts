@@ -299,4 +299,37 @@ describe('evaluateWorkBatch reference data', () => {
     expect(result.errors.join('\n')).toContain('ex-1');
     expect(result.errors.join('\n')).toContain('ex-2');
   });
+
+  it('returns a cancelled result with partial counts instead of throwing on abort', async () => {
+    const recorded: RecordedCall[] = [];
+    const controller = new AbortController();
+    let runs = 0;
+    const registry = createRegistry(async () => {
+      runs += 1;
+      // Cancel once the first example is in flight; it still finishes, but the
+      // next one must not be started.
+      controller.abort();
+      return { output: { content: 'Paris' }, traceId: VALID_TRACE_ID };
+    });
+    const runtime: StepRuntime = { ...createRuntime(recorded), abortSignal: controller.signal };
+    const config: DatasetEvaluationConfig = {
+      experimentId: 'exp-1',
+      taskModel: { id: 'conn-1' },
+      evaluatorModel: { id: 'conn-1' },
+      target: { connectorId: 'conn-1' },
+      evaluators: [{ name: 'correctness', connector_id: 'conn-1' }],
+      repetitions: 1,
+    };
+    const batch: DatasetWorkItem[] = [
+      { dataset: { id: 'ds-1', name: 'ds' }, example: { id: 'ex-1', index: 0, input: {} } },
+      { dataset: { id: 'ds-1', name: 'ds' }, example: { id: 'ex-2', index: 1, input: {} } },
+    ];
+
+    const result = await evaluateWorkBatch(registry, runtime, config, batch, 1);
+
+    expect(result.cancelled).toBe(true);
+    // ex-1 finished before the abort; ex-2 was never started.
+    expect(result.completed).toBe(1);
+    expect(runs).toBe(1);
+  });
 });

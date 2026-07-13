@@ -8,10 +8,9 @@
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
 /**
- * Registers the editor-facing evals step definitions so the Workflows YAML editor
- * offers autocomplete/validation for all eight `evals.*` steps. Called
- * synchronously from the evals public plugin `setup()` (so the loaders are queued
- * before the editor reads the registry) only when `workflowsExtensions` exists.
+ * Registers the `evals.*` step definitions that give the Workflows YAML editor
+ * autocomplete/validation. Called synchronously from `setup()` so the loaders are
+ * queued before the editor reads the registry.
  */
 export const registerEvalsPublicWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup

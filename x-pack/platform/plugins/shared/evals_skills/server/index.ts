@@ -6,7 +6,6 @@
  */
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
-import type { EvalsSkillsConfig } from './config';
 import type {
   EvalsSkillsSetupDependencies,
   EvalsSkillsStartDependencies,
@@ -19,9 +18,7 @@ export const plugin: PluginInitializer<
   EvalsSkillsPluginStart,
   EvalsSkillsSetupDependencies,
   EvalsSkillsStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<EvalsSkillsConfig>) => {
+> = async (pluginInitializerContext: PluginInitializerContext) => {
   const { EvalsSkillsPlugin } = await import('./plugin');
   return new EvalsSkillsPlugin(pluginInitializerContext);
 };
-
-export { config } from './config';

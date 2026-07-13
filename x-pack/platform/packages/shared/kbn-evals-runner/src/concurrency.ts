@@ -7,41 +7,43 @@
 
 /** Thrown by {@link mapWithConcurrency} when the provided `AbortSignal` fires. */
 export class ConcurrencyAbortError extends Error {
-  constructor(message = 'Operation aborted') {
-    super(message);
+  constructor(message = 'Operation aborted', options?: { cause?: unknown }) {
+    super(message, options);
     this.name = 'AbortError';
   }
 }
 
 export interface MapWithConcurrencyOptions {
-  /** Maximum number of `fn` invocations running at any one time. */
   concurrency: number;
-  /** Optional signal to stop scheduling new work and reject in-flight waits. */
   signal?: AbortSignal;
 }
 
 /**
- * Runs `fn` over `items` with a bounded worker pool, preserving input order in
- * the returned results. This is a dependency-free, server-safe alternative to
- * `p-limit` so the package stays `shared-common` (no node-only imports).
+ * Runs `fn` over `items` with a bounded worker pool, preserving input order.
+ * Dependency-free and server-safe so the package stays `shared-common` (p-map's
+ * `signal` support needs v5; `@kbn/std` exposes no `signal`).
  *
- * If `signal` aborts, scheduling stops and the returned promise rejects with a
- * {@link ConcurrencyAbortError}; work already in flight is allowed to settle.
+ * `fn` must handle its own errors — it is treated as non-throwing. On abort,
+ * scheduling stops, in-flight calls are awaited (not abandoned), then the
+ * promise rejects with {@link ConcurrencyAbortError} (with `signal.reason` as
+ * its `cause`). Throws `RangeError` if `concurrency` is not a finite number >= 1.
  */
 export const mapWithConcurrency = async <TItem, TResult>(
   items: readonly TItem[],
   fn: (item: TItem, index: number) => Promise<TResult>,
   { concurrency, signal }: MapWithConcurrencyOptions
 ): Promise<TResult[]> => {
-  const limit = Math.max(1, Math.floor(concurrency));
+  if (!Number.isFinite(concurrency) || concurrency < 1) {
+    throw new RangeError(`concurrency must be a finite number >= 1, received ${concurrency}`);
+  }
+  const limit = Math.floor(concurrency);
   const results = new Array<TResult>(items.length);
   let nextIndex = 0;
 
   const worker = async (): Promise<void> => {
-    while (true) {
-      if (signal?.aborted) {
-        throw new ConcurrencyAbortError();
-      }
+    // Stop pulling new work once aborted; any in-flight `fn` still resolves so
+    // `Promise.allSettled` below can drain it before we reject.
+    while (!signal?.aborted) {
       const current = nextIndex;
       nextIndex += 1;
       if (current >= items.length) {
@@ -52,7 +54,18 @@ export const mapWithConcurrency = async <TItem, TResult>(
   };
 
   const workerCount = Math.min(limit, items.length);
-  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  const settled = await Promise.allSettled(Array.from({ length: workerCount }, () => worker()));
+
+  if (signal?.aborted) {
+    throw new ConcurrencyAbortError(undefined, { cause: signal.reason });
+  }
+  // `fn` is contractually non-throwing. Surface a stray rejection instead of
+  // returning a partially-filled array.
+  for (const outcome of settled) {
+    if (outcome.status === 'rejected') {
+      throw outcome.reason;
+    }
+  }
 
   return results;
 };

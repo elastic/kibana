@@ -91,11 +91,9 @@ export interface EvalsPublicStart {
 
 export interface EvalsSetupDependencies {
   management?: ManagementSetup;
-  /** Optional: register editor metadata for the evals workflow steps. */
   workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface EvalsStartDependencies {
-  /** Optional: lists accessible spaces so an experiment can target other spaces. */
   spaces?: SpacesPluginStart;
 }

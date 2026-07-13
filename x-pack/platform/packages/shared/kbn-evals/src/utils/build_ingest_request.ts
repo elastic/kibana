@@ -12,6 +12,11 @@ import type { BuildkiteCiMetadata } from './ci_metadata';
 import type { GitMetadata } from './git_metadata';
 import type { EvaluationCompleteEvent, DatasetRunResult } from '../types';
 
+// TODO: Keep this in sync with `buildScoreDocuments` in `@kbn/evals-runner`, the
+// workflow/plugin implementation of the same score-ingestion contract. The two are
+// separate builders that can drift silently and already differ in evaluator naming
+// (`Factuality` here vs `correctness.factuality` there); the intended fix is to
+// converge this SDK path onto `buildScoreDocuments`.
 const MAX_INGEST_BATCH_SIZE = 1000;
 
 type IngestScore = IngestScoresRequestBodyInput['scores'][number];
@@ -29,7 +34,6 @@ interface BuildIngestRequestArgs {
   suiteId?: string;
   executionId?: string;
   buildkiteMetadata?: BuildkiteCiMetadata;
-  /** Spaces to assign the experiment to. When omitted, the target Kibana's active/default space is used. */
   spaceIds?: string[];
   log?: Pick<SomeDevLog, 'warning'>;
   source: BuildIngestRequestSource;

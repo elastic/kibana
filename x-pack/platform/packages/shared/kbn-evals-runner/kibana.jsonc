@@ -1,10 +1,8 @@
 {
   "type": "shared-common",
   "id": "@kbn/evals-runner",
-  "owner": [
-    "@elastic/nightshift-context-and-research-team"
-  ],
-  "description": "Server-safe runtime primitives shared by the @kbn/evals SDK and the evals plugin workflow steps.",
+  "owner": ["@elastic/nightshift-context-and-research-team"],
+  "description": "Server-safe runtime primitives for the evals plugin's workflow steps and server. Intended to also back the dev-only @kbn/evals SDK's score ingestion.",
   "group": "platform",
   "visibility": "shared"
 }

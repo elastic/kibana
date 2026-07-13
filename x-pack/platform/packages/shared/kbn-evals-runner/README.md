@@ -1,13 +1,13 @@
 # @kbn/evals-runner
 
-Server-safe runtime primitives for running LLM evaluations, shared between the `evals` plugin server routes and its custom Kibana Workflows steps.
+Server-safe runtime primitives for running LLM evaluations, shared across the evals plugin server (task providers and its custom Kibana Workflows steps).
 
 ## Why this package exists
 
-`@kbn/evals` is **dev-only** (CLI/Scout tooling) and therefore cannot be imported from production server code. `@kbn/evals-runner` holds the small, dependency-light pieces that the server and the workflow steps both need at runtime:
+`@kbn/evals` is **dev-only** (CLI/Scout tooling) and therefore cannot be imported from production server code. `@kbn/evals-runner` is the shared home for the runtime pieces that path needs. It is a _package_ (rather than plugin `server/` code) so the dev-only SDK and the production plugin can eventually converge on one implementation of the score-ingestion contract. Today only the plugin server consumes it. Converging the SDK's `buildIngestRequest` onto `buildScoreDocuments` is a known follow-up; until then the SDK builds the same document shape independently (see the sync note in `build_ingest_request.ts`).
 
-- **`mapWithConcurrency`** — bounded concurrent `map` (a tiny, dependency-free stand-in for `p-limit`) used by `evals.evaluateDataset` to evaluate examples in parallel without one worker per example.
-- **`buildScoreDocuments` / `composeScoreName`** — turn a multi-score `EvaluatorResult` (one LLM-judge invocation → many named scores) into the documents accepted by the score-ingestion API, fanning each named score into its own document.
+- **`mapWithConcurrency`** — bounded concurrent `map` used by `evals.evaluateDataset` to evaluate examples in parallel without one worker per example. It exists rather than reusing `@kbn/std`'s `asyncMapWithLimit` (or `p-map`) specifically for **`AbortSignal` support**: on cancellation it stops scheduling and rejects with `ConcurrencyAbortError` once in-flight work has settled. `fn` is treated as non-throwing — if it throws, remaining scheduled work still drains, then the map rejects with the first error and results are discarded, so callers wanting continue-on-error semantics must catch inside `fn`.
+- **`buildScoreDocuments` / `composeScoreName`** — turn a multi-score `EvaluatorResult` (one LLM-judge invocation → many named scores) into the documents accepted by the score-ingestion API, fanning each named score into its own document. `composeScoreName` sets `evaluator.name` to the bare evaluator name for single-score evaluators, else `evaluator.score` (e.g. `correctness.factuality`) — an external contract that downstream queries and dashboards depend on.
 - **Runner types** — `RunnerExample`, `TaskResult`, `EvaluatorScore`, `EvaluatorResult`, and score-document metadata shared across the server.
 
 ## Usage
@@ -15,8 +15,11 @@ Server-safe runtime primitives for running LLM evaluations, shared between the `
 ```ts
 import { mapWithConcurrency, buildScoreDocuments } from '@kbn/evals-runner';
 
-// Evaluate up to 5 examples at a time.
-const results = await mapWithConcurrency(examples, 5, async (example) => evaluate(example));
+// Evaluate up to 5 examples at a time. Cancellable via an AbortSignal.
+const results = await mapWithConcurrency(examples, async (example) => evaluate(example), {
+  concurrency: 5,
+  signal: abortSignal,
+});
 
 // Fan a multi-score evaluator result into ingest-ready score documents.
 const body = buildScoreDocuments({

@@ -13,7 +13,6 @@ interface ExperimentFilterOptions {
   suiteId?: string;
   modelId?: string;
   filterField?: 'experiment_id' | 'metadata.execution_id';
-  /** Active space to scope results to. Omit to skip space filtering. */
   spaceId?: string;
 }
 
@@ -21,12 +20,10 @@ interface ExperimentsListingFilterOptions {
   suiteId?: string;
   modelId?: string;
   branch?: string;
-  /** Free-text term matched (case-insensitively) against experiment name or git branch. */
   search?: string;
   datasetId?: string;
   datasetName?: string;
   buildId?: string;
-  /** Active space to scope results to. Omit to skip space filtering. */
   spaceId?: string;
 }
 
@@ -89,16 +86,12 @@ export interface ExperimentsListingResult {
 // ---------------------------------------------------------------------------
 // Space filtering
 // ---------------------------------------------------------------------------
-
-// Mirror of the Kibana space conventions (kept local to avoid a cross-package
-// dependency from this schema/query package).
 const DEFAULT_SPACE_ID = 'default';
 const ALL_SPACES_ID = '*';
 
 /**
  * Builds a filter that matches score documents visible in the given space: those
- * assigned to the space (or to all spaces via `*`), plus — only in the default
- * space — legacy documents that predate `space_ids` and therefore have none.
+ * assigned to the space (or to all spaces via `*`)
  */
 export const buildSpaceFilter = (spaceId: string): Record<string, unknown> => {
   const should: Array<Record<string, unknown>> = [
@@ -241,8 +234,6 @@ export const buildExperimentsListingFilterQuery = (
     });
   }
   if (options?.search) {
-    // A single search box in the UI matches either the human-readable experiment
-    // name or the git branch, so users don't have to know which field they want.
     const pattern = `*${options.search}*`;
     filters.push({
       bool: {

@@ -7,16 +7,11 @@
 
 import type { BuildkiteMetadata } from '@kbn/evals-common';
 
-/**
- * A single example (row) of a dataset that a task is executed against. This is a
- * runtime-friendly, server-safe shape that mirrors the persisted dataset example
- * without the Playwright/Scout coupling of the `@kbn/evals` SDK types.
- */
+/** A single example (row) of a dataset that a task is executed against. */
 export interface RunnerExample {
   id: string;
   index: number;
   input?: Record<string, unknown>;
-  /** Expected output / ground truth, when available (offline evaluation). */
   output?: unknown;
   metadata?: Record<string, unknown> | null;
 }
@@ -24,7 +19,6 @@ export interface RunnerExample {
 /** The result of executing a task against a single example. */
 export interface TaskResult {
   output: Record<string, unknown>;
-  /** OTel trace id that correlates the task execution with its evaluation. */
   traceId?: string;
 }
 
@@ -39,9 +33,8 @@ export interface EvaluatorScore {
 }
 
 /**
- * The result of running one evaluator. A single evaluator can emit multiple
- * named scores (e.g. `correctness` -> factuality/relevance/sequence_accuracy),
- * mirroring the trace-based evaluator API contract.
+ * The result of running one evaluator, which can emit multiple named scores
+ * (e.g. `correctness` -> factuality/relevance/sequence_accuracy).
  */
 export interface EvaluatorResult {
   evaluator: {

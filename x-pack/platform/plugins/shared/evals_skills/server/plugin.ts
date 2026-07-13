@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { EvalsSkillsConfig } from './config';
 import type {
   EvalsSkillsSetupDependencies,
   EvalsSkillsStartDependencies,
@@ -18,16 +17,10 @@ import { createEvalExperimentsSkill } from './skills/eval_experiments/skill';
 import type { EvalExperimentsToolDeps } from './skills/eval_experiments/tools/deps';
 
 /**
- * "Glue" plugin that registers evals-domain Agent Builder skills.
+ * "Glue" plugin that registers evals-domain Agent Builder skills. It depends on
+ * both `agentBuilder` and `evals` to avoid a cyclic dependency between them.
  *
- * It depends on both `agentBuilder` and `evals` so the two feature plugins never
- * have to depend on each other (`agentBuilder` already optionally depends on
- * `evals`, so a direct `evals -> agentBuilder` edge would be a cycle).
- *
- * Everything it registers is gated on `xpack.evals.enabled`: when the evals
- * feature is disabled, core disables this required-dependent plugin as well, and
- * the extra `evals.enabled` guard below covers the `forceEnableAllPlugins` /
- * direct-instantiation (test) cases.
+ * It has no enabled flag of its own. It follows `xpack.evals.enabled` (off by default).
  */
 export class EvalsSkillsPlugin
   implements
@@ -40,7 +33,7 @@ export class EvalsSkillsPlugin
 {
   private readonly logger: Logger;
 
-  constructor(context: PluginInitializerContext<EvalsSkillsConfig>) {
+  constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
   }
 
@@ -50,7 +43,7 @@ export class EvalsSkillsPlugin
   ): EvalsSkillsPluginSetup {
     if (!evals.enabled) {
       this.logger.debug(
-        'The evals plugin is disabled; skipping registration of evals Agent Builder skills.'
+        'The evals feature is disabled; skipping registration of evals Agent Builder skills.'
       );
       return {};
     }

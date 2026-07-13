@@ -8,7 +8,6 @@
     "id": "evalsSkills",
     "server": true,
     "browser": false,
-    "configPath": ["xpack", "evalsSkills"],
     "requiredPlugins": ["agentBuilder", "workflowsManagement", "evals"]
   }
 }
