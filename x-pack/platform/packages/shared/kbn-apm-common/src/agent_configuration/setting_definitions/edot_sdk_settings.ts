@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { RawSettingDefinition } from './types';
-import { loggingLevelRt } from '../runtime_types/logging_level_rt';
+import { loggingLevelRt, loggingLevelSchema } from '../runtime_types/logging_level_rt';
 
 export const edotSDKSettings: RawSettingDefinition[] = [
   {
@@ -79,6 +79,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
   {
     key: 'logging_level',
     validation: loggingLevelRt,
+    zodValidation: loggingLevelSchema,
     type: 'select',
     defaultValue: 'info',
     label: i18n.translate('apmCommon.agentConfig.loggingLevel.label', {

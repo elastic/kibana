@@ -15,6 +15,8 @@ import {
   type EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import type { OAuthClient } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { McpClientLogo } from '@kbn/agent-builder-browser';
@@ -51,6 +53,11 @@ export const useMcpClientsTableColumns = (): Array<EuiBasicTableColumn<OAuthClie
             <EuiLink
               onClick={() => viewClientDetails(client, 'flyout')}
               data-test-subj={`mcpClientsListNameLink-${client.id}`}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_VIEW_DETAILS,
+                detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
+              })}
             >
               {name}
             </EuiLink>

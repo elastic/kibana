@@ -12,22 +12,42 @@ import { EuiCallOut, EuiSpacer, EuiSplitButton, EuiText } from '@elastic/eui';
 export interface FrozenDefaultRepositoryRequiredCalloutProps {
   onCreateDefaultRepository?: () => void;
   createDefaultRepositoryHref?: string;
+  /**
+   * URL to the Snapshot and Restore repositories list. When the user already has repositories
+   * configured (see `hasExistingRepositories`) the primary action links here so they can pick one
+   * as the default instead of creating a new repository.
+   */
+  manageRepositoriesUrl?: string;
+  /**
+   * Whether the user already has at least one snapshot repository configured. When `true` (and a
+   * `manageRepositoriesUrl` is provided) the callout directs the user to the repositories list to
+   * select a default; otherwise it directs them to create a new default repository.
+   */
+  hasExistingRepositories?: boolean;
   onRefresh?: () => void;
   isRefreshing?: boolean;
   calloutTestSubj?: string;
   createButtonTestSubj?: string;
+  manageRepositoriesButtonTestSubj?: string;
   refreshButtonTestSubj?: string;
 }
 
 export const FrozenDefaultRepositoryRequiredCallout = ({
   onCreateDefaultRepository,
   createDefaultRepositoryHref,
+  manageRepositoriesUrl,
+  hasExistingRepositories = false,
   onRefresh,
   isRefreshing,
   calloutTestSubj,
   createButtonTestSubj,
+  manageRepositoriesButtonTestSubj,
   refreshButtonTestSubj,
 }: FrozenDefaultRepositoryRequiredCalloutProps) => {
+  // When the user already has repositories but none is set as the default, send them to the
+  // repositories list to pick one. Otherwise send them to create a new default repository.
+  const shouldManageExisting = hasExistingRepositories && Boolean(manageRepositoriesUrl);
+
   return (
     <EuiCallOut
       size="s"
@@ -48,22 +68,38 @@ export const FrozenDefaultRepositoryRequiredCallout = ({
         })}
       </EuiText>
 
-      {(onCreateDefaultRepository || createDefaultRepositoryHref || onRefresh) && (
+      {(onCreateDefaultRepository ||
+        createDefaultRepositoryHref ||
+        shouldManageExisting ||
+        onRefresh) && (
         <>
           <EuiSpacer size="m" />
           <EuiSplitButton size="s" color="warning">
-            <EuiSplitButton.ActionPrimary
-              data-test-subj={createButtonTestSubj}
-              isDisabled={!onCreateDefaultRepository && !createDefaultRepositoryHref}
-              href={createDefaultRepositoryHref}
-              target={createDefaultRepositoryHref ? '_blank' : undefined}
-              onClick={createDefaultRepositoryHref ? undefined : onCreateDefaultRepository}
-            >
-              {i18n.translate(
-                'xpack.dataLifecyclePhases.frozen.defaultRepositoryRequiredCallout.createButton',
-                { defaultMessage: 'Create default repository' }
-              )}
-            </EuiSplitButton.ActionPrimary>
+            {shouldManageExisting ? (
+              <EuiSplitButton.ActionPrimary
+                data-test-subj={manageRepositoriesButtonTestSubj}
+                href={manageRepositoriesUrl}
+                target="_blank"
+              >
+                {i18n.translate(
+                  'xpack.dataLifecyclePhases.frozen.defaultRepositoryRequiredCallout.manageRepositories',
+                  { defaultMessage: 'Manage repositories' }
+                )}
+              </EuiSplitButton.ActionPrimary>
+            ) : (
+              <EuiSplitButton.ActionPrimary
+                data-test-subj={createButtonTestSubj}
+                isDisabled={!onCreateDefaultRepository && !createDefaultRepositoryHref}
+                href={createDefaultRepositoryHref}
+                target={createDefaultRepositoryHref ? '_blank' : undefined}
+                onClick={createDefaultRepositoryHref ? undefined : onCreateDefaultRepository}
+              >
+                {i18n.translate(
+                  'xpack.dataLifecyclePhases.frozen.defaultRepositoryRequiredCallout.createButton',
+                  { defaultMessage: 'Create default repository' }
+                )}
+              </EuiSplitButton.ActionPrimary>
+            )}
             <EuiSplitButton.ActionSecondary
               iconType="refresh"
               isLoading={Boolean(isRefreshing)}

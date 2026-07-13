@@ -87,6 +87,7 @@ dependsOn:
   - '@kbn/product-doc-common'
   - '@kbn/kbn-client'
   - '@kbn/apm-types'
+  - '@kbn/apm-api-shared'
 tags:
   - test-helper
   - package

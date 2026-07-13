@@ -885,6 +885,38 @@ describe('StepIoService', () => {
       expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
     });
 
+    it('does not re-evict an output that was re-written after rehydration', async () => {
+      // Regression: a re-entrant aggregator (e.g. `parallel`) finishes on a
+      // resume tick and writes its real output via setStepOutput AFTER the
+      // value had been transiently rehydrated on an earlier tick. The fresh
+      // write is authoritative, so the deferred transient release must not
+      // re-evict it (doing so forced a stale ES re-read that returned the
+      // pre-flush value, surfacing as an empty `steps.x.output.*` downstream).
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      const staleOutput = { restored: true, data: 'x'.repeat(200) };
+      seedCompletedStepWithSize(state, service, 'step-1', 'myStep', staleOutput, 250, 'connector');
+
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+      expect(service.getStepOutput('step-1')).toBeUndefined();
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'step-1', output: staleOutput } as unknown as EsWorkflowStepExecution,
+      ]);
+      await service.rehydrateOutputs(['step-1']);
+      expect(service.getStepOutput('step-1')).toEqual(staleOutput);
+
+      const freshOutput = { restored: true, data: 'y'.repeat(200), final: true };
+      service.setStepOutput('step-1', freshOutput, 260);
+
+      service.releaseTransientlyRehydratedOutputs();
+
+      expect(service.getStepOutput('step-1')).toEqual(freshOutput);
+      expect(service.hasEvictedOutputs()).toBe(false);
+    });
+
     it('is a no-op when nothing was transiently rehydrated', () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       createCompletedStep(state, service, 'step-1', 'myStep', { data: 'x' }, 'connector');

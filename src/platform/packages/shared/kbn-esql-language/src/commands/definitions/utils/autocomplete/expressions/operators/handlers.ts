@@ -47,7 +47,10 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
   // No list yet: suggest opening parenthesis
   if (shouldSuggestRightOperandStart(rightOperand)) {
     if (allowSubqueryOperand) {
-      return [listCompleteItem, ...buildSubqueryCompleteItems()];
+      return [
+        listCompleteItem,
+        ...buildSubqueryCompleteItems({ previewCommands: ['from', 'row', 'ts'] }),
+      ];
     }
 
     return [listCompleteItem];

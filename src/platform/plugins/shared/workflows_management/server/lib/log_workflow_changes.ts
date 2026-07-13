@@ -30,8 +30,8 @@ export interface LogWorkflowChangesParams {
   workflows: Array<{ id: string; document: WorkflowProperties }>;
   changeHistoryService: Pick<IWorkflowChangeHistoryService, 'isInitialized'> | undefined;
   scopedChangeHistory: IScopedWorkflowChangeHistoryService | undefined;
-  workflowVersioningEnabled: boolean;
-  action: WorkflowChangeHistoryActionType;
+  action?: WorkflowChangeHistoryActionType;
+  getAction?: (id: string) => WorkflowChangeHistoryActionType;
   spaceId: string;
   timestamp: string | Date;
   correlationId?: string;
@@ -65,43 +65,54 @@ const toObjectChanges = (
   });
 };
 
-/**
- * Appends workflow definition changes to change-history after a successful primary write.
- * Uses `document.version` as `object.sequence` when present; otherwise history falls back to `@timestamp` ordering.
- * Retries transient failures; never throws to the mutation caller.
- */
-export const logWorkflowChanges = async ({
-  workflows,
-  changeHistoryService,
-  scopedChangeHistory,
-  workflowVersioningEnabled,
+const groupWorkflowsByAction = (
+  workflows: Array<{ id: string; document: WorkflowProperties }>,
+  action: WorkflowChangeHistoryActionType | undefined,
+  getAction: ((id: string) => WorkflowChangeHistoryActionType) | undefined
+): Map<WorkflowChangeHistoryActionType, Array<{ id: string; document: WorkflowProperties }>> => {
+  const groups = new Map<
+    WorkflowChangeHistoryActionType,
+    Array<{ id: string; document: WorkflowProperties }>
+  >();
+
+  for (const workflow of workflows) {
+    const resolvedAction = getAction ? getAction(workflow.id) : action;
+    if (!resolvedAction) {
+      throw new Error('logWorkflowChanges requires action or getAction');
+    }
+
+    const group = groups.get(resolvedAction) ?? [];
+    group.push(workflow);
+    groups.set(resolvedAction, group);
+  }
+
+  return groups;
+};
+
+const logWorkflowChangesForAction = async ({
+  changes,
   action,
+  scopedChangeHistory,
   spaceId,
-  timestamp,
   correlationId,
   restoreMetadata,
   logger,
-  maxRetries = DEFAULT_MAX_RETRIES,
-  retryDelayMs = DEFAULT_RETRY_DELAY_MS,
-}: LogWorkflowChangesParams): Promise<void> => {
-  if (!changeHistoryService?.isInitialized() || !scopedChangeHistory) {
-    return;
-  }
-
-  if (!workflowVersioningEnabled) {
-    return;
-  }
-
-  if (workflows.length === 0) {
-    return;
-  }
-
-  const changes = toObjectChanges(workflows, timestamp, logger);
-
+  maxRetries,
+  retryDelayMs,
+}: {
+  changes: ObjectChange[];
+  action: WorkflowChangeHistoryActionType;
+  scopedChangeHistory: IScopedWorkflowChangeHistoryService;
+  spaceId: string;
+  correlationId?: string;
+  restoreMetadata?: WorkflowRestoreMetadata;
+  logger: Logger;
+  maxRetries: number;
+  retryDelayMs: number;
+}): Promise<void> => {
   const logOpts: ScopedLogChangeHistoryOptions = {
     action,
     spaceId,
-    // Restore is interactive: wait until this history row is searchable without forcing a shard refresh.
     ...(action === WorkflowChangeHistoryAction.workflowRestore ? { refresh: 'wait_for' } : {}),
     ...(correlationId ? { correlationId } : {}),
     ...(restoreMetadata
@@ -141,5 +152,55 @@ export const logWorkflowChanges = async ({
       );
       await delayMs(retryDelayMs);
     }
+  }
+};
+
+/**
+ * Appends workflow definition changes to change-history after a successful primary write.
+ * Uses `document.version` as `object.sequence` when present; otherwise history falls back to `@timestamp` ordering.
+ * Retries transient failures; never throws to the mutation caller.
+ */
+export const logWorkflowChanges = async ({
+  workflows,
+  changeHistoryService,
+  scopedChangeHistory,
+  action,
+  getAction,
+  spaceId,
+  timestamp,
+  correlationId,
+  restoreMetadata,
+  logger,
+  maxRetries = DEFAULT_MAX_RETRIES,
+  retryDelayMs = DEFAULT_RETRY_DELAY_MS,
+}: LogWorkflowChangesParams): Promise<void> => {
+  if (!changeHistoryService?.isInitialized() || !scopedChangeHistory) {
+    return;
+  }
+
+  if (workflows.length === 0) {
+    return;
+  }
+
+  if (!getAction && action == null) {
+    throw new Error('logWorkflowChanges requires action or getAction');
+  }
+
+  const actionGroups = groupWorkflowsByAction(workflows, action, getAction);
+
+  for (const [groupAction, groupWorkflows] of actionGroups) {
+    const changes = toObjectChanges(groupWorkflows, timestamp, logger);
+    await logWorkflowChangesForAction({
+      changes,
+      action: groupAction,
+      scopedChangeHistory,
+      spaceId,
+      correlationId,
+      restoreMetadata:
+        groupAction === WorkflowChangeHistoryAction.workflowRestore ? restoreMetadata : undefined,
+      logger,
+      maxRetries,
+      retryDelayMs,
+    });
   }
 };

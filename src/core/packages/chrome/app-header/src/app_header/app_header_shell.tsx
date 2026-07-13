@@ -52,8 +52,8 @@ const resolvePadding = (
 
   // `{ bleed }`: pull the header out to its padded container's top/left/right edges (negative margin)
   // and re-inset the content by the same amount so it stays aligned with the page gutter. The value
-  // mirrors the container's symmetric padding, so it applies equally to the sides and the top.
-  const value = resolved.bleed === 'l' ? euiTheme.size.l : euiTheme.size.m;
+  // mirrors the container's symmetric EUI `paddingSize`: `'m'` → 16px (`size.base`), `'l'` → 24px.
+  const value = { m: euiTheme.size.base, l: euiTheme.size.l }[resolved.bleed];
   return { paddingInline: value, bleedMargin: value };
 };
 

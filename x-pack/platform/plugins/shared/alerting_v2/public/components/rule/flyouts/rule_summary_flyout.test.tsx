@@ -40,7 +40,7 @@ jest.mock('../../../pages/rules_list_page/rule_actions_menu', () => ({
   ),
 }));
 
-jest.mock('../../rule_details/rule_header_description', () => ({
+jest.mock('../../rule_details/rule_summary_header', () => ({
   RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
   RuleTitleWithBadges: ({ variant }: { variant?: string }) => (
     <span data-test-subj="mockRuleTitleWithBadges" data-variant={variant}>
