@@ -120,13 +120,15 @@ Assignees are stored as **profile UIDs only** — \`case.assignees.uid\` (and \`
 \`\`\`esql
 FROM .cases-activity
 | WHERE actor.profile_uid IS NOT NULL
-| STATS BY actor.profile_uid, actor.full_name, actor.username
+| STATS latest = MAX(@timestamp) BY actor.profile_uid, actor.full_name, actor.username
+| SORT latest DESC
 | RENAME actor.profile_uid AS uid
 | KEEP uid, actor.full_name, actor.username
 \`\`\`
 
 Run this as a helper query, then map the UIDs in your result (e.g. \`case.assignees.uid\`) to names. Key points:
 - **Best-effort coverage** — the directory only knows users who have *performed* a case action. A user who was assigned but never acted won't appear; show their UID and say the display name isn't available rather than guessing.
+- **Renamed users** — a user whose name/username changed may appear on more than one row; the most recent (top, by \`latest\`) is current.
 - **DLS-scoped** — you only see actors in the owners/spaces you can read, so the directory is naturally limited to authorized names.
 - **Not a \`LOOKUP JOIN\`** — \`.cases-activity\` is a fact index (not lookup-mode), so it can't be a join target. Build the directory table first, then annotate in a second step.
 - **Reporters need no resolution** — \`case.created_by\` / \`case.updated_by\` / \`case.closed_by\` already carry \`username\` / \`full_name\` / \`email\`.
@@ -204,11 +206,12 @@ Note: \`case.assignees.uid\` is a profile UID. Label it with the activity-derive
 \`\`\`esql
 FROM .cases-activity
 | WHERE actor.profile_uid IS NOT NULL
-| STATS BY actor.profile_uid, actor.full_name, actor.username
+| STATS latest = MAX(@timestamp) BY actor.profile_uid, actor.full_name, actor.username
+| SORT latest DESC
 | RENAME actor.profile_uid AS uid
 | KEEP uid, actor.full_name, actor.username
 \`\`\`
-Best-effort: only users who have performed an action appear. Use it to label \`case.assignees.uid\` / \`action.assignees_changed\`; fall back to the UID when absent. \`.cases-activity\` is a fact index, so this is a build-then-annotate step, not a \`LOOKUP JOIN\`.`,
+Best-effort: only users who have performed an action appear. Use it to label \`case.assignees.uid\` / \`action.assignees_changed\`; fall back to the UID when absent (a renamed user's most recent row, by \`latest\`, is current). \`.cases-activity\` is a fact index, so this is a build-then-annotate step, not a \`LOOKUP JOIN\`.`,
     },
     {
       relativePath: './analytics',
