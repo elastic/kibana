@@ -11,6 +11,7 @@ import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import { toStoredTab } from '../../../common/embeddable/transform_utils';
@@ -25,7 +26,71 @@ import { transformVisContextIn } from './transform_vis_context';
 const isEsqlTab = (tab: DiscoverSessionApiTab): tab is DiscoverSessionApiEsqlTab =>
   tab.data_source.type === AS_CODE_ESQL_DATA_SOURCE_TYPE;
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * Extracts the ES|QL data view fingerprint from a Lens chart configuration blob.
+ * The extraction follows the chart's actual data view linkage (textBased layer `index`
+ * pointing into `adHocDataViews`) and bails out to `undefined` on any ambiguity, so
+ * unrecognized blobs fall back to the tab-based derivation.
+ */
+const extractEsqlFingerprint = (
+  attributes: Record<string, unknown>
+): { dataViewId: string; timeField?: string } | undefined => {
+  const state = attributes.state;
+  if (!isRecord(state)) return undefined;
+  const datasourceStates = state.datasourceStates;
+  if (!isRecord(datasourceStates)) return undefined;
+  const textBased = datasourceStates.textBased;
+  if (!isRecord(textBased)) return undefined;
+  const layers = textBased.layers;
+  if (!isRecord(layers)) return undefined;
+
+  const layerIndexes = new Set<string>();
+
+  for (const layer of Object.values(layers)) {
+    if (isRecord(layer) && typeof layer.index === 'string' && layer.index.length > 0) {
+      layerIndexes.add(layer.index);
+    }
+  }
+
+  if (layerIndexes.size !== 1) return undefined;
+
+  const [dataViewId] = layerIndexes;
+  const adHocDataViews = state.adHocDataViews;
+
+  if (!isRecord(adHocDataViews)) return undefined;
+  const dataViewSpec = adHocDataViews[dataViewId];
+
+  if (!isRecord(dataViewSpec) || dataViewSpec.type !== ESQL_TYPE) {
+    return undefined;
+  }
+
+  return {
+    dataViewId,
+    ...(typeof dataViewSpec.timeFieldName === 'string' &&
+      dataViewSpec.timeFieldName !== '' && { timeField: dataViewSpec.timeFieldName }),
+  };
+};
+
 const getVisContextRequestData = (tab: DiscoverSessionApiTab) => {
+  const esqlFingerprint = tab.vis_context
+    ? extractEsqlFingerprint(tab.vis_context.attributes)
+    : undefined;
+
+  if (esqlFingerprint) {
+    // The fingerprint describes the chart blob it accompanies, so it must be entirely
+    // ES|QL-shaped regardless of the current tab type: no timeInterval (ES|QL charts
+    // compute it as undefined at render time)
+    return {
+      dataViewId: esqlFingerprint.dataViewId,
+      ...(esqlFingerprint.timeField !== undefined && { timeField: esqlFingerprint.timeField }),
+      ...(tab.breakdown_field !== undefined &&
+        tab.breakdown_field !== '' && { breakdownField: tab.breakdown_field }),
+    };
+  }
+
   const dataViewId =
     tab.data_source.type !== AS_CODE_DATA_VIEW_SPEC_TYPE && 'ref_id' in tab.data_source
       ? tab.data_source.ref_id
@@ -40,7 +105,8 @@ const getVisContextRequestData = (tab: DiscoverSessionApiTab) => {
     ...(timeField !== undefined && { timeField }),
     ...(!isEsqlTab(tab) &&
       tab.chart_interval !== undefined && { timeInterval: tab.chart_interval }),
-    ...(tab.breakdown_field !== undefined && { breakdownField: tab.breakdown_field }),
+    ...(tab.breakdown_field !== undefined &&
+      tab.breakdown_field !== '' && { breakdownField: tab.breakdown_field }),
   };
 };
 
