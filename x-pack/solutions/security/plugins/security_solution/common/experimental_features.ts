@@ -318,12 +318,6 @@ export const allowedExperimentalValues = Object.freeze({
   riskScoreHistoryEnabled: false,
 
   /**
-   * Enables the Attacks page tour (welcome callout + guided tour).
-   * Release: 9.5
-   */
-  attacksPageTourEnabled: false,
-
-  /**
    * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift
    * from the locally stored kibana mappings after a MITRE version bump.
    */
