@@ -16,7 +16,7 @@ import { WorkflowGraphSetupError } from './workflow_graph_setup_error';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 
 import '../workflow_event_logger/mocks';
 jest.mock('../repositories/workflow_execution_repository');
