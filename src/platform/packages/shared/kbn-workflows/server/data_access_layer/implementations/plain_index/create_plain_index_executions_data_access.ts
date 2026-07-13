@@ -8,7 +8,6 @@
  */
 
 import { createOrUpdateIndex } from './helpers';
-import { normalizeStepExecutionOnGet } from './normalize_step_execution_on_get';
 import { PlainIndexExecutionsDataAccess } from './plain_index_executions_data_access';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '../../../../types/v1';
 import {
@@ -78,7 +77,6 @@ export class PlainIndexExecutionsDataAccessBundle implements ExecutionsDataAcces
       logger: this.deps.logger,
       indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-      normalizeExecutionOnGet: normalizeStepExecutionOnGet,
     });
   }
 }

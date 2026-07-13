@@ -31,7 +31,6 @@ export const getExecutionsByIds = async <TExecution extends { id: string }>({
   ids,
   defaultIndex,
   options,
-  normalizeExecutionOnGet,
 }: GetExecutionsByIdsParams<TExecution>): Promise<GetExecutionsByIdsResponse<TExecution>> => {
   if (ids.length === 0) {
     return {
@@ -65,7 +64,7 @@ export const getExecutionsByIds = async <TExecution extends { id: string }>({
     if ('found' in doc && doc.found && doc._source) {
       const source = doc._source as TExecution;
       items.push({
-        document: normalizeExecutionOnGet ? normalizeExecutionOnGet(source, options) : source,
+        document: source,
         index: doc._index,
         seqNo: doc._seq_no,
         primaryTerm: doc._primary_term,

@@ -37,10 +37,6 @@ export interface DataStreamExecutionsDataAccessDeps<TExecution extends { id: str
   esClient: ElasticsearchClient;
   dataStreamName: string;
   logger?: Logger;
-  normalizeExecutionOnGet?: (
-    execution: TExecution,
-    options?: GetExecutionsByIdsOptions<TExecution>
-  ) => TExecution;
 }
 
 export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>

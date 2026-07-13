@@ -32,10 +32,6 @@ export interface PlainIndexExecutionsDataAccessDeps<TExecution extends { id: str
   indexName: string;
   mappings: MappingTypeMapping;
   logger?: Logger;
-  normalizeExecutionOnGet?: (
-    execution: TExecution,
-    options?: GetExecutionsByIdsOptions<TExecution>
-  ) => TExecution;
 }
 
 export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
@@ -68,7 +64,6 @@ export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
       ids,
       defaultIndex: this.deps.indexName,
       options,
-      normalizeExecutionOnGet: this.deps.normalizeExecutionOnGet,
     });
   }
 
