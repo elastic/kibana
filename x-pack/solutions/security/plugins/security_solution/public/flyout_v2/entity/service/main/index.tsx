@@ -195,14 +195,20 @@ export const Service: FC<ServiceProps> = memo(function Service({
   );
 
   const onShowRelatedEntityFromGraph = useCallback(
-    (params: { engineType: string | undefined; entityId: string; entityName: string | undefined }) =>
-      onShowRelatedEntity(params, 'graph_node'),
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, 'graph_node'),
     [onShowRelatedEntity]
   );
 
   const onShowRelatedEntityFromResolution = useCallback(
-    (params: { engineType: string | undefined; entityId: string; entityName: string | undefined }) =>
-      onShowRelatedEntity(params, 'resolution_entity_link'),
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, 'resolution_entity_link'),
     [onShowRelatedEntity]
   );
 

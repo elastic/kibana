@@ -102,7 +102,12 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
     ): OpenFindingInSystemFlyoutHandle => {
       const ref = open(
         <Misconfiguration {...params} />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit', title: options?.title },
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: 'inherit',
+          title: options?.title,
+        },
         {
           surface: 'flyout',
           flyoutType: 'misconfiguration',
@@ -134,7 +139,12 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
     ): OpenFindingInSystemFlyoutHandle => {
       const ref = open(
         <Vulnerability {...params} />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit', title: options?.title },
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: 'inherit',
+          title: options?.title,
+        },
         {
           surface: 'flyout',
           flyoutType: 'vulnerability',
