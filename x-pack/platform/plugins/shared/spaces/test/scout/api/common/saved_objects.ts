@@ -52,8 +52,9 @@ interface SpaceCountAggregate extends estypes.AggregationsMultiBucketAggregateBa
 
 /**
  * Aggregates saved objects by normalized namespace and type. Ported from the FTR
- * `getAggregatedSpaceData` helper and used by the delete suite to assert that a
- * deleted space's objects were fully cascaded.
+ * `getAggregatedSpaceData` helper. Shared contract: the delete suite asserts a deleted
+ * space's objects were fully cascaded, and the copy_to_space suite asserts per-space
+ * counts before/after copies — both compare the exact bucket shapes returned here.
  */
 export const getAggregatedSpaceData = (es: Client, objectTypes: string[]) =>
   es.search<unknown, { count: SpaceCountAggregate }>({

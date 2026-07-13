@@ -83,10 +83,10 @@ export const getTestScenariosForSpace = (spaceId: string) => {
   return [explicitScenario];
 };
 
-const createSpace = (kbnClient: KbnClient, body: Record<string, unknown>) =>
+export const createSpace = (kbnClient: KbnClient, body: Record<string, unknown>) =>
   kbnClient.request({ method: 'POST', path: '/api/spaces/space', body });
 
-const deleteSpace = (kbnClient: KbnClient, id: string) =>
+export const deleteSpace = (kbnClient: KbnClient, id: string) =>
   kbnClient.request({
     method: 'DELETE',
     path: `/api/spaces/space/${encodeURIComponent(id)}`,
