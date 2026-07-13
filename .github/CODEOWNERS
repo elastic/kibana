@@ -826,6 +826,7 @@ src/platform/packages/shared/shared-ux/toolbar_selector @elastic/obs-exploration
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/private/deferred_init_example @elastic/kibana-core
 src/platform/plugins/private/deferred_init_example_consumer @elastic/kibana-core
+src/platform/plugins/private/deferred_init_example_dependency @elastic/kibana-core
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
 src/platform/plugins/private/files_management @elastic/appex-sharedux
