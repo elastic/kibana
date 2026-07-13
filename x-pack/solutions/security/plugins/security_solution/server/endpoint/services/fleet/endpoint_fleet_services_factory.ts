@@ -149,9 +149,21 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       }
     };
 
-    const getAgentMethod = agentClient.getAgent.bind(agentClient);
-    const getByIdsMethod = agentClient.getByIds.bind(agentClient);
-    const listAgentsMethod = agentClient.listAgents.bind(agentClient);
+    // All original methods of Agent Client need to be `.bind` so that when calling them from
+    // the interceptors below, they are called with the correct `this` context (important because
+    // AgentClient is a class that executes private class methods).
+    const boundMethods: AgentClient = {
+      getAgent: agentClient.getAgent.bind(agentClient),
+      getByIds: agentClient.getByIds.bind(agentClient),
+      listAgents: agentClient.listAgents.bind(agentClient),
+      getAgentStatusForAgentPolicy: agentClient.getAgentStatusForAgentPolicy.bind(agentClient),
+      getAgentStatusById: agentClient.getAgentStatusById.bind(agentClient),
+      getLatestAgentAvailableBaseVersion:
+        agentClient.getLatestAgentAvailableBaseVersion.bind(agentClient),
+      getLatestAgentAvailableDockerImageVersion:
+        agentClient.getLatestAgentAvailableDockerImageVersion.bind(agentClient),
+      getLatestAgentAvailableVersion: agentClient.getLatestAgentAvailableVersion.bind(agentClient),
+    };
 
     interface AgentClientTrapHandlers {
       getAgentInterceptor: AgentClient['getAgent'];
@@ -160,19 +172,19 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     }
     const trapHandlers: AgentClientTrapHandlers = {
       getAgentInterceptor: async (...props) => {
-        const agent = await getAgentMethod(...props);
+        const agent = await boundMethods.getAgent(...props);
         adjustAgentData(agent, 'getAgent');
         return agent;
       },
 
       getByIdsInterceptor: async (...props) => {
-        const agents = await getByIdsMethod(...props);
+        const agents = await boundMethods.getByIds(...props);
         adjustAgentData(agents, 'getByIds');
         return agents;
       },
 
       listAgentsInterceptor: async (...props) => {
-        const agents = await listAgentsMethod(...props);
+        const agents = await boundMethods.listAgents(...props);
         adjustAgentData(agents.agents, 'listAgents');
         return agents;
       },
@@ -193,6 +205,10 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
             return hasJestSpyMocks;
           case PROXY_TRAP_HANDLERS:
             return trapHandlers;
+        }
+
+        if (prop in boundMethods) {
+          return boundMethods[prop as keyof AgentClient];
         }
 
         return Reflect.get(target, prop, receiver);
@@ -216,6 +232,11 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
             return true;
           case PROXY_TRAP_HANDLERS:
             return true;
+        }
+
+        if (prop in boundMethods) {
+          boundMethods[prop as keyof AgentClient] = value;
+          return true;
         }
 
         return Reflect.set(target, prop, value);
