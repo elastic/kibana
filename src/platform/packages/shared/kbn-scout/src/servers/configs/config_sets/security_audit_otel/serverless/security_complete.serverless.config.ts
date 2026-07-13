@@ -8,24 +8,13 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { securityAuditOtelServerlessConfig } from './serverless.base.config';
+import { servers as defaultConfig } from '../../default/serverless/security_complete.serverless.config';
+import { securityAuditOtelServerArgs } from '../shared';
 
 export const servers: ScoutServerConfig = {
-  ...securityAuditOtelServerlessConfig,
-  esTestCluster: {
-    ...securityAuditOtelServerlessConfig.esTestCluster,
-    serverArgs: [
-      ...securityAuditOtelServerlessConfig.esTestCluster.serverArgs,
-      'xpack.security.authc.api_key.cache.max_keys=70000',
-    ],
-  },
+  ...defaultConfig,
   kbnTestServer: {
-    ...securityAuditOtelServerlessConfig.kbnTestServer,
-    serverArgs: [
-      ...securityAuditOtelServerlessConfig.kbnTestServer.serverArgs,
-      '--serverless=security',
-      '--coreApp.allowDynamicConfigOverrides=true',
-      `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
-    ],
+    ...defaultConfig.kbnTestServer,
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...securityAuditOtelServerArgs],
   },
 };

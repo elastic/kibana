@@ -8,9 +8,13 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { securityAuditConfig } from './base.config';
+import { servers as defaultConfig } from '../../default/stateful/classic.stateful.config';
+import { securityAuditServerArgs } from '../shared';
 
 export const servers: ScoutServerConfig = {
-  ...securityAuditConfig,
-  http2: true,
+  ...defaultConfig,
+  kbnTestServer: {
+    ...defaultConfig.kbnTestServer,
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...securityAuditServerArgs],
+  },
 };

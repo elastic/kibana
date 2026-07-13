@@ -7,23 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../default/stateful/base.config';
+// Must match the fileName in the test file (audit_log.spec.ts)
+export const AUDIT_LOG_PATH = '/tmp/kibana-scout-security-audit.log';
 
-const AUDIT_LOG_PATH = '/tmp/kibana-scout-security-audit.log';
-
-const kbnServerArgs = [
-  ...defaultConfig.kbnTestServer.serverArgs,
+export const securityAuditServerArgs = [
   '--xpack.security.audit.enabled=true',
   '--xpack.security.audit.appender.type=file',
   `--xpack.security.audit.appender.fileName=${AUDIT_LOG_PATH}`,
   '--xpack.security.audit.appender.layout.type=json',
 ];
-
-export const securityAuditConfig: ScoutServerConfig = {
-  ...defaultConfig,
-  kbnTestServer: {
-    ...defaultConfig.kbnTestServer,
-    serverArgs: kbnServerArgs,
-  },
-};
