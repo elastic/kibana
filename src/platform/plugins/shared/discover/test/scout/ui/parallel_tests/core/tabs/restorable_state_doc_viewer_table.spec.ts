@@ -42,30 +42,39 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         const { discover, docViewer, unifiedTabs } = pageObjects;
 
-        await openTableDocViewer(pageObjects);
-        await docViewer.findFieldByNameOrValue('geo');
-        await expect(docViewer.getFieldNames()).toHaveCount(4);
+        await spaceTest.step('tab 0: search fields and pin geo.src', async () => {
+          await openTableDocViewer(pageObjects);
+          await docViewer.findFieldByNameOrValue('geo');
+          await expect(docViewer.getFieldNames()).toHaveCount(4);
 
-        await docViewer.togglePinAction('geo.src');
-        expect(await docViewer.isFieldPinned('geo.src')).toBe(true);
+          await docViewer.togglePinAction('geo.src');
+          expect(await docViewer.isFieldPinned('geo.src')).toBe(true);
+        });
 
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await openTableDocViewer(pageObjects);
-        await docViewer.findFieldByNameOrValue('.sr');
-        await expect(docViewer.getFieldNames()).toHaveCount(2);
+        await spaceTest.step('tab 1: search fields and pin geo.srcdest', async () => {
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+          await openTableDocViewer(pageObjects);
+          await docViewer.findFieldByNameOrValue('.sr');
+          await expect(docViewer.getFieldNames()).toHaveCount(2);
 
-        await docViewer.togglePinAction('geo.src');
-        await docViewer.togglePinAction('geo.srcdest');
-        expect(await docViewer.isFieldPinned('geo.src')).toBe(false);
-        expect(await docViewer.isFieldPinned('geo.srcdest')).toBe(true);
+          await docViewer.togglePinAction('geo.src');
+          await docViewer.togglePinAction('geo.srcdest');
+          expect(await docViewer.isFieldPinned('geo.src')).toBe(false);
+          expect(await docViewer.isFieldPinned('geo.srcdest')).toBe(true);
+        });
 
-        await unifiedTabs.selectTab(0);
-        await discover.waitUntilTabIsLoaded();
-        await docViewer.getFlyout().waitFor({ state: 'visible' });
-        expect(await docViewer.getFieldSearchValue()).toBe('geo');
-        expect(await docViewer.getFieldNameCount()).toBe(4);
-        expect(await docViewer.isFieldPinned('geo.src')).toBe(true);
+        await spaceTest.step(
+          'return to tab 0 and restore its field search and pinned field',
+          async () => {
+            await unifiedTabs.selectTab(0);
+            await discover.waitUntilTabIsLoaded();
+            await docViewer.getFlyout().waitFor({ state: 'visible' });
+            expect(await docViewer.getFieldSearchValue()).toBe('geo');
+            expect(await docViewer.getFieldNameCount()).toBe(4);
+            expect(await docViewer.isFieldPinned('geo.src')).toBe(true);
+          }
+        );
       }
     );
 
@@ -74,43 +83,52 @@ spaceTest.describe(
       async ({ page, pageObjects }) => {
         const { discover, docViewer, unifiedFieldList, unifiedTabs } = pageObjects;
 
-        await openTableDocViewer(pageObjects);
-        await docViewer.openFieldTypeFilter();
-        await page.testSubj.locator('typeFilter-date').click();
-        await expect(page.testSubj.locator('typeFilter-date')).toHaveAttribute(
-          'aria-checked',
-          'true'
+        await spaceTest.step('tab 0: filter date fields and add utc_time to the grid', async () => {
+          await openTableDocViewer(pageObjects);
+          await docViewer.openFieldTypeFilter();
+          await page.testSubj.locator('typeFilter-date').click();
+          await expect(page.testSubj.locator('typeFilter-date')).toHaveAttribute(
+            'aria-checked',
+            'true'
+          );
+          await docViewer.closeFieldTypeFilter();
+          expect(await docViewer.getFieldTypeFilterCount()).toBe('1');
+
+          await unifiedFieldList.clickFieldListItemAdd('utc_time');
+          await discover.waitUntilTabIsLoaded();
+          await docViewer.expectShowOnlySelectedFields(false);
+        });
+
+        await spaceTest.step(
+          'tab 1: filter number fields and enable selected-only mode',
+          async () => {
+            await unifiedTabs.createNewTab();
+            await discover.waitUntilTabIsLoaded();
+            await openTableDocViewer(pageObjects);
+            await docViewer.openFieldTypeFilter();
+            await page.testSubj.locator('typeFilter-number').click();
+            await expect(page.testSubj.locator('typeFilter-number')).toHaveAttribute(
+              'aria-checked',
+              'true'
+            );
+            await docViewer.closeFieldTypeFilter();
+            expect(await docViewer.getFieldTypeFilterCount()).toBe('2');
+
+            await unifiedFieldList.clickFieldListItemAdd('utc_time');
+            await discover.waitUntilTabIsLoaded();
+            await docViewer.expectShowOnlySelectedFields(false);
+            await docViewer.clickShowOnlySelectedFieldsSwitch();
+            await docViewer.expectShowOnlySelectedFields(true);
+          }
         );
-        await docViewer.closeFieldTypeFilter();
-        expect(await docViewer.getFieldTypeFilterCount()).toBe('1');
 
-        await unifiedFieldList.clickFieldListItemAdd('utc_time');
-        await discover.waitUntilTabIsLoaded();
-        await docViewer.expectShowOnlySelectedFields(false);
-
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await openTableDocViewer(pageObjects);
-        await docViewer.openFieldTypeFilter();
-        await page.testSubj.locator('typeFilter-number').click();
-        await expect(page.testSubj.locator('typeFilter-number')).toHaveAttribute(
-          'aria-checked',
-          'true'
-        );
-        await docViewer.closeFieldTypeFilter();
-        expect(await docViewer.getFieldTypeFilterCount()).toBe('2');
-
-        await unifiedFieldList.clickFieldListItemAdd('utc_time');
-        await discover.waitUntilTabIsLoaded();
-        await docViewer.expectShowOnlySelectedFields(false);
-        await docViewer.clickShowOnlySelectedFieldsSwitch();
-        await docViewer.expectShowOnlySelectedFields(true);
-
-        await unifiedTabs.selectTab(0);
-        await discover.waitUntilTabIsLoaded();
-        await docViewer.getFlyout().waitFor({ state: 'visible' });
-        expect(await docViewer.getFieldTypeFilterCount()).toBe('1');
-        await docViewer.expectShowOnlySelectedFields(false);
+        await spaceTest.step('return to tab 0 and restore its field filters', async () => {
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+          await docViewer.getFlyout().waitFor({ state: 'visible' });
+          expect(await docViewer.getFieldTypeFilterCount()).toBe('1');
+          await docViewer.expectShowOnlySelectedFields(false);
+        });
       }
     );
 
@@ -119,24 +137,33 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         const { dataGrid, discover, docViewer, unifiedTabs } = pageObjects;
 
-        await openTableDocViewer(pageObjects);
-        await dataGrid.changeRowsPerPageTo(50, 'docViewer');
-        expect(await dataGrid.getCurrentRowsPerPage('docViewer')).toBe(50);
-        expect(await dataGrid.getCurrentPageNumber('docViewer')).toBe('1');
+        await spaceTest.step('tab 0: set the DocViewer table to 50 rows per page', async () => {
+          await openTableDocViewer(pageObjects);
+          await dataGrid.changeRowsPerPageTo(50, 'docViewer');
+          expect(await dataGrid.getCurrentRowsPerPage('docViewer')).toBe(50);
+          expect(await dataGrid.getCurrentPageNumber('docViewer')).toBe('1');
+        });
 
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await openTableDocViewer(pageObjects);
-        await dataGrid.changeRowsPerPageTo(25, 'docViewer');
-        expect(await dataGrid.getCurrentRowsPerPage('docViewer')).toBe(25);
-        await dataGrid.getPageButton(1, 'docViewer').click();
-        await expect(dataGrid.getCurrentPageButton('docViewer')).toHaveText('2');
+        await spaceTest.step('tab 1: set the DocViewer table to 25 rows and page 2', async () => {
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+          await openTableDocViewer(pageObjects);
+          await dataGrid.changeRowsPerPageTo(25, 'docViewer');
+          expect(await dataGrid.getCurrentRowsPerPage('docViewer')).toBe(25);
+          await dataGrid.getPageButton(1, 'docViewer').click();
+          await expect(dataGrid.getCurrentPageButton('docViewer')).toHaveText('2');
+        });
 
-        await unifiedTabs.selectTab(0);
-        await discover.waitUntilTabIsLoaded();
-        await docViewer.getFlyout().waitFor({ state: 'visible' });
-        expect(await dataGrid.getCurrentRowsPerPage('docViewer')).toBe(50);
-        expect(await dataGrid.getCurrentPageNumber('docViewer')).toBe('1');
+        await spaceTest.step(
+          'return to tab 0 and restore its DocViewer table pagination',
+          async () => {
+            await unifiedTabs.selectTab(0);
+            await discover.waitUntilTabIsLoaded();
+            await docViewer.getFlyout().waitFor({ state: 'visible' });
+            expect(await dataGrid.getCurrentRowsPerPage('docViewer')).toBe(50);
+            expect(await dataGrid.getCurrentPageNumber('docViewer')).toBe('1');
+          }
+        );
       }
     );
   }
