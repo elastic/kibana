@@ -53,16 +53,20 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.editTabLabel(1, SECOND_TAB_LABEL);
       await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpg' });
+      // Close the filter tooltip; it can overlap the tabs and block clicks.
       await page.keyboard.press('Escape');
       await discover.waitUntilTabIsLoaded();
 
       expect(await discover.getHitCountInt()).toBe(9_109);
       expect(await unifiedTabs.getTabLabels()).toStrictEqual([FIRST_TAB_LABEL, SECOND_TAB_LABEL]);
 
+      // Re-select the active tab to ensure tooltips do not block further clicks.
+      await unifiedTabs.selectTab(1);
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.editTabLabel(2, THIRD_TAB_LABEL);
       await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'png' });
+      // Close the filter tooltip; it can overlap the tabs and block clicks.
       await page.keyboard.press('Escape');
       await discover.waitUntilTabIsLoaded();
 
