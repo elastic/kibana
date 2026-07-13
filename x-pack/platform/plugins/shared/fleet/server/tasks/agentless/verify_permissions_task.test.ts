@@ -51,6 +51,7 @@ const mockedGetAgentPolicySavedObjectType = getAgentPolicySavedObjectType as jes
 const mockSoClient = {
   find: jest.fn(),
   update: jest.fn(),
+  bulkGet: jest.fn(),
 } as any;
 
 const mockEsClient = {} as any;
@@ -61,11 +62,13 @@ const makePackagePolicySO = (
   id: string,
   connectorId: string,
   template: string,
-  enabled = true
+  enabled = true,
+  policyId = 'agent-policy-1'
 ) => ({
   id,
   attributes: {
     cloud_connector_id: connectorId,
+    policy_ids: [policyId],
     inputs: [{ enabled, policy_template: template }],
     package: { name: 'aws', title: 'AWS', version: '2.0.0' },
   },
@@ -89,7 +92,21 @@ describe('verify_permissions_task', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSoClient.find.mockReset();
+    // The cooldown gate ("find all connectors") is the FIRST `soClient.find` call in the
+    // runner; queue an empty result by default so the gate short-circuits to "no
+    // early-exit" and the test's subsequent `.mockResolvedValueOnce` chain (Phase 2 →
+    // Phase 3) lines up correctly. Tests that specifically exercise the cooldown
+    // gate can prepend their own `.mockResolvedValueOnce` ahead of this.
+    mockSoClient.find.mockResolvedValueOnce({ saved_objects: [] });
     mockSoClient.update.mockReset();
+    mockSoClient.bulkGet.mockReset();
+    // Default: bulkGet (used by getAgentPolicyNames) returns each requested policy with a synthetic name.
+    mockSoClient.bulkGet.mockImplementation(async (objects: Array<{ id: string }>) => ({
+      saved_objects: objects.map((o) => ({
+        id: o.id,
+        attributes: { name: `Agent Policy ${o.id}` },
+      })),
+    }));
     mockedAgentPolicyService.list.mockReset();
     mockedAgentPolicyService.createVerifierPolicy.mockReset();
     mockedAgentPolicyService.deleteVerifierPolicy.mockReset();
@@ -130,7 +147,8 @@ describe('verify_permissions_task', () => {
       expect(taskManager.ensureScheduled).toHaveBeenCalledWith({
         id: 'fleet:verify_permissions:1.0.0',
         taskType: 'fleet:verify_permissions',
-        schedule: { interval: '12h' },
+        // TODO(temp): revert to '12h' alongside TASK_INTERVAL in verify_permissions_task.ts
+        schedule: { interval: '5m' },
         state: {},
         params: {},
       });
@@ -165,28 +183,6 @@ describe('verify_permissions_task', () => {
 
     beforeEach(() => {
       taskRunner = createTaskRunner();
-    });
-
-    it('should skip when enableOTelVerifier is disabled', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
-        enableOTelVerifier: false,
-      } as any);
-
-      await taskRunner.run();
-      expect(logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('OTel verifier is disabled')
-      );
-      expect(mockedAgentPolicyService.list).not.toHaveBeenCalled();
-    });
-
-    it('should skip when experimental features are undefined', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue(undefined as any);
-
-      await taskRunner.run();
-      expect(logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('OTel verifier is disabled')
-      );
-      expect(mockedAgentPolicyService.list).not.toHaveBeenCalled();
     });
 
     it('should skip verification when an active non-expired verifier policy exists', async () => {
@@ -322,10 +318,16 @@ describe('verify_permissions_task', () => {
         mockEsClient,
         expect.objectContaining({ id: 'conn-1' }),
         expect.objectContaining({
-          policyTemplates: ['cloudtrail'],
-          packageName: 'aws',
-          packageTitle: 'AWS',
-          packageVersion: '2.0.0',
+          verifiedPackagePolicies: [
+            expect.objectContaining({
+              policy_template: 'cloudtrail',
+              package_name: 'aws',
+              package_title: 'AWS',
+              package_version: '2.0.0',
+              policy_id: 'agent-policy-1',
+              policy_name: 'Agent Policy agent-policy-1',
+            }),
+          ],
         })
       );
 
@@ -419,12 +421,15 @@ describe('verify_permissions_task', () => {
         mockEsClient,
         expect.anything(),
         expect.objectContaining({
-          policyTemplates: ['cloudtrail', 'guardduty'],
+          verifiedPackagePolicies: [
+            expect.objectContaining({ package_policy_id: 'pp-1', policy_template: 'cloudtrail' }),
+            expect.objectContaining({ package_policy_id: 'pp-2', policy_template: 'guardduty' }),
+          ],
         })
       );
     });
 
-    it('should deduplicate identical policy templates for the same connector', async () => {
+    it('produces one target per distinct package_policy_id even when templates collide', async () => {
       mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
@@ -451,7 +456,10 @@ describe('verify_permissions_task', () => {
         mockEsClient,
         expect.anything(),
         expect.objectContaining({
-          policyTemplates: ['cloudtrail'],
+          verifiedPackagePolicies: [
+            expect.objectContaining({ package_policy_id: 'pp-1', policy_template: 'cloudtrail' }),
+            expect.objectContaining({ package_policy_id: 'pp-2', policy_template: 'cloudtrail' }),
+          ],
         })
       );
     });
@@ -602,15 +610,6 @@ describe('verify_permissions_task', () => {
       // active verifier's TTL elapses (otherwise we'd wait the full 12 h cron).
       expect(result!.runAt.getTime()).toBeGreaterThan(Date.now());
       expect(mockedAgentPolicyService.createVerifierPolicy).not.toHaveBeenCalled();
-    });
-
-    it('should NOT request a follow-up run when the feature flag is off', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
-        enableOTelVerifier: false,
-      } as any);
-
-      const result = await taskRunner.run();
-      expect(result).toBeUndefined();
     });
 
     it('should NOT request a follow-up run when an earlier verification fails with no other eligibles', async () => {

@@ -114,10 +114,11 @@ export const useGetCloudConnectors = (filterOptions?: CloudConnectorQueryFilterO
           .join(' AND ')
       : undefined;
 
-  // Determine the current integration's policy group
+  // Determine the current integration's policy group. Requires all three discriminators —
+  // provider, package, and policy template — to match the data's primary key shape.
   const currentPolicyGroup =
-    packageName && policyTemplate
-      ? getPolicyGroupForIntegration(packageName, policyTemplate)
+    packageName && policyTemplate && filterOptions?.cloudProvider
+      ? getPolicyGroupForIntegration(filterOptions.cloudProvider, packageName, policyTemplate)
       : undefined;
 
   return useQuery(
