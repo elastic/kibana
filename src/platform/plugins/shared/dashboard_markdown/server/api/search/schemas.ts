@@ -11,8 +11,6 @@ import { schema } from '@kbn/config-schema';
 import {
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
-  MAX_DESCRIPTION_LENGTH,
-  MAX_TITLE_LENGTH,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 
@@ -25,12 +23,10 @@ export const searchResponseBodySchema = schema.object({
       data: schema.object({
         description: schema.maybe(
           schema.string({
-            maxLength: MAX_DESCRIPTION_LENGTH,
             meta: { description: 'A short description of the markdown library item.' },
           })
         ),
         title: schema.string({
-          maxLength: MAX_TITLE_LENGTH,
           meta: { description: 'The markdown library item title.' },
         }),
       }),
