@@ -11,6 +11,7 @@ import {
   splitVersionSuffixFromPolicyId,
   buildVersionVariantsKueryFragment,
   buildPolicyIdOrVariantsKuery,
+  buildPolicyIdsOrVariantsKuery,
   buildVersionVariantsEsFilter,
   buildPolicyIdOrVariantsEsFilter,
   buildPolicyIdsOrVariantsEsFilter,
@@ -141,6 +142,26 @@ describe('buildPolicyIdOrVariantsKuery', () => {
   it('should escape quotes in both the exact-match and variant clauses', () => {
     expect(buildPolicyIdOrVariantsKuery('my"policy')).toBe(
       '(policy_id:"my\\"policy" or policy_id:my\\"policy#*)'
+    );
+  });
+});
+
+describe('buildPolicyIdsOrVariantsKuery', () => {
+  it('should build a kuery matching any of the exact ids or their version-suffixed variants', () => {
+    expect(buildPolicyIdsOrVariantsKuery(['policy-1', 'policy-2'])).toBe(
+      '(policy_id:(policy-1 or policy-2) or policy_id:policy-1#* or policy_id:policy-2#*)'
+    );
+  });
+
+  it('should work with a single id', () => {
+    expect(buildPolicyIdsOrVariantsKuery(['policy-1'])).toBe(
+      '(policy_id:(policy-1) or policy_id:policy-1#*)'
+    );
+  });
+
+  it('should use the provided field name', () => {
+    expect(buildPolicyIdsOrVariantsKuery(['policy-1'], 'fleet-agents.policy_id')).toBe(
+      '(fleet-agents.policy_id:(policy-1) or fleet-agents.policy_id:policy-1#*)'
     );
   });
 });

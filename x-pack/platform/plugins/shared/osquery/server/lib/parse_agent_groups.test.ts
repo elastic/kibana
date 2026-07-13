@@ -484,6 +484,33 @@ describe('parseAgentSelection', () => {
       const callArgs = mockAgentService.listAgents.mock.calls[0][0];
       expect(callArgs.showInactive).toBe(false);
     });
+
+    it('should also match agents on version-specific variants of osquery-enabled policies', async () => {
+      mockAgentService.listAgents = createSimpleMockResponse(['agent-1']);
+
+      await parseAgentSelection(mockSoClient, mockElasticsearchClient, mockContextWithServices, {
+        allAgentsSelected: true,
+        spaceId: 'default',
+      });
+
+      const kueryCall = mockAgentService.listAgents.mock.calls[0][0].kuery;
+      expect(kueryCall).toContain('policy_id:policy-1#*');
+      expect(kueryCall).toContain('policy_id:policy-2#*');
+      expect(kueryCall).toContain('policy_id:policy-3#*');
+    });
+
+    it('should also match agents on version-specific variants of explicitly selected policies', async () => {
+      mockAgentService.listAgents = createSimpleMockResponse(['agent-1']);
+
+      await parseAgentSelection(mockSoClient, mockElasticsearchClient, mockContextWithServices, {
+        policiesSelected: ['policy-1'],
+        spaceId: 'default',
+      });
+
+      const kueryCall = mockAgentService.listAgents.mock.calls[0][0].kuery;
+      expect(kueryCall).toContain('policy_id:(policy-1)');
+      expect(kueryCall).toContain('policy_id:policy-1#*');
+    });
   });
 
   describe('explicitly provided agent IDs', () => {

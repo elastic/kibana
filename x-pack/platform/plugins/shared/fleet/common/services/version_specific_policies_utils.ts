@@ -63,6 +63,21 @@ export function buildPolicyIdOrVariantsKuery(
 }
 
 /**
+ * Same as {@link buildPolicyIdOrVariantsKuery}, for multiple base policy ids at once, e.g.
+ * `(policy_id:(policy-1 or policy-2) or policy_id:policy-1#* or policy_id:policy-2#*)`.
+ */
+export function buildPolicyIdsOrVariantsKuery(
+  baseIds: string[],
+  fieldName: string = DEFAULT_POLICY_ID_FIELD
+): string {
+  const exactClause = `${fieldName}:(${baseIds.map((baseId) => escapeKuery(baseId)).join(' or ')})`;
+  const variantClauses = baseIds.map((baseId) =>
+    buildVersionVariantsKueryFragment(baseId, fieldName)
+  );
+  return `(${[exactClause, ...variantClauses].join(' or ')})`;
+}
+
+/**
  * ES query DSL fragment matching only the version-specific variants of a base policy id —
  * NOT the base id itself.
  */
