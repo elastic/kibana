@@ -288,3 +288,4 @@ export {
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
 
 export { apiPublishesESQLQuery, type PublishesESQLQuery } from './interfaces/publishes_esql_query';
+export { apiPublishesEsqlUsage, type PublishesEsqlUsage } from './interfaces/publishes_esql_usage';
