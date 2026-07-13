@@ -10,9 +10,9 @@
 import { of } from 'rxjs';
 import type { FeatureFlagsStart } from '@kbn/core/public';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
-import type { MetricsFeatureFlag } from '../common/constants';
+import type { FeatureFlag } from '../common/constants';
 
-export type FeatureFlagOverrides = Partial<Record<MetricsFeatureFlag, boolean>>;
+export type FeatureFlagOverrides = Partial<Record<FeatureFlag, boolean>>;
 
 /**
  * Builds a `FeatureFlagsStart` mock for unit tests, scoped by flag name.
@@ -20,7 +20,7 @@ export type FeatureFlagOverrides = Partial<Record<MetricsFeatureFlag, boolean>>;
  *
  * @example
  * const featureFlags = createFeatureFlagsMock({
- *   [METRICS_FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
+ *   [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
  * });
  */
 export const createFeatureFlagsMock = (
@@ -28,7 +28,7 @@ export const createFeatureFlagsMock = (
 ): jest.Mocked<FeatureFlagsStart> => {
   const featureFlags = coreFeatureFlagsMock.createStart();
   const resolve = (flagName: string, fallbackValue: boolean) =>
-    flagName in overrides ? overrides[flagName as MetricsFeatureFlag]! : fallbackValue;
+    flagName in overrides ? overrides[flagName as FeatureFlag]! : fallbackValue;
 
   featureFlags.getBooleanValue$.mockImplementation((flagName, fallbackValue) =>
     of(resolve(flagName, fallbackValue))

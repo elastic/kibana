@@ -38,7 +38,7 @@ import type {
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../flyout/metrics_grid_settings_flyout/constants';
-import { METRICS_FEATURE_FLAGS } from '../../../common/constants';
+import { FEATURE_FLAGS } from '../../../common/constants';
 import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags_mock';
 
 jest.mock('./context/metrics_experience_state_provider');
@@ -215,7 +215,7 @@ const TestWrapper = ({
 // The "Edit grid of metrics" button is gated behind a feature flag (disabled by
 // default); this mock resolves it to `true` for tests that exercise the button.
 const editGridSettingsEnabledFeatureFlags = createFeatureFlagsMock({
-  [METRICS_FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
+  [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
 });
 
 const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];

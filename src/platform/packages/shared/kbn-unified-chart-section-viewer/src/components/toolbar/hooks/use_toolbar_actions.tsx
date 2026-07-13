@@ -14,7 +14,7 @@ import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
-import { MAX_DIMENSIONS_SELECTIONS, METRICS_FEATURE_FLAGS } from '../../../common/constants';
+import { MAX_DIMENSIONS_SELECTIONS, FEATURE_FLAGS } from '../../../common/constants';
 import { useFeatureFlag } from './use_feature_flag';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
@@ -42,10 +42,7 @@ export const useToolbarActions = ({
     useMetricsExperienceState();
   const onDimensionsSelectionChange = onDimensionsChangeProp ?? onDimensionsChange;
 
-  const isEditGridEnabled = useFeatureFlag(
-    METRICS_FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED,
-    false
-  );
+  const isEditGridEnabled = useFeatureFlag(FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED, false);
 
   const isSmallScreen = useIsWithinMaxBreakpoint(isFullscreen ? 'm' : 'l');
 

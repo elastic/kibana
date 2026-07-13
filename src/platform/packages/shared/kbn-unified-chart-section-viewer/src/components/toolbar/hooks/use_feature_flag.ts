@@ -10,16 +10,16 @@
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
-import type { MetricsFeatureFlag } from '../../../common/constants';
+import type { FeatureFlag } from '../../../common/constants';
 import { useExternalServices } from '../../../context/external_services';
 
 /**
  * Reactively evaluates a boolean feature flag from the host's `featureFlags` service
- * (see {@link METRICS_FEATURE_FLAGS} for the available keys). Falls back to
+ * (see {@link FEATURE_FLAGS} for the available keys). Falls back to
  * `fallbackValue` when the host hasn't provided a `featureFlags` service (e.g. in
  * tests) so consumers don't have to special-case its absence.
  */
-export const useFeatureFlag = (flagName: MetricsFeatureFlag, fallbackValue: boolean): boolean => {
+export const useFeatureFlag = (flagName: FeatureFlag, fallbackValue: boolean): boolean => {
   const featureFlags = useExternalServices()?.featureFlags;
 
   const value$ = useMemo(

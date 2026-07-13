@@ -14,7 +14,7 @@ import { useToolbarActions } from './use_toolbar_actions';
 import { ExternalServicesProvider } from '../../../context/external_services';
 import type { ExternalServices } from '../../../context/external_services';
 import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags_mock';
-import { METRICS_FEATURE_FLAGS } from '../../../common/constants';
+import { FEATURE_FLAGS } from '../../../common/constants';
 import * as metricsExperienceStateProvider from '../../observability/metrics/context/metrics_experience_state_provider';
 
 jest.mock('../../observability/metrics/context/metrics_experience_state_provider');
@@ -64,7 +64,7 @@ describe('useToolbarActions', () => {
   it('shows the Edit grid of metrics button when the feature flag resolves to true', () => {
     const { result } = renderToolbarActionsHook({
       featureFlags: createFeatureFlagsMock({
-        [METRICS_FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
+        [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
       }),
     });
 
@@ -74,7 +74,7 @@ describe('useToolbarActions', () => {
   it('hides the Edit grid of metrics button when the feature flag resolves to false', () => {
     const { result } = renderToolbarActionsHook({
       featureFlags: createFeatureFlagsMock({
-        [METRICS_FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: false,
+        [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: false,
       }),
     });
 
