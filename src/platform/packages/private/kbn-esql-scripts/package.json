@@ -13,7 +13,6 @@
     "lint:fix:docs": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/private/kbn-language-documentation/src/sections/generated"
   },
   "devDependencies": {
-    "ts-node": "^10.9.2",
     "typescript": "5.9.3"
   }
 }

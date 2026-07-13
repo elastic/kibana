@@ -2023,7 +2023,6 @@
     "@typescript-eslint/parser": "8.46.3",
     "@typescript-eslint/typescript-estree": "8.46.3",
     "@wojtekmaj/enzyme-adapter-react-17": "0.6.7",
-    "@yarnpkg/lockfile": "1.1.0",
     "aggregate-error": "3.1.0",
     "ajv": "8.20.0",
     "ajv-draft-04": "1.0.0",
@@ -2203,8 +2202,7 @@
     "xml-crypto": "6.1.2",
     "xmlbuilder": "15.1.1",
     "yaml-language-server": "1.23.0",
-    "yargs": "15.4.1",
-    "yarn-deduplicate": "6.0.2"
+    "yargs": "15.4.1"
   },
   "packageManager": "pnpm@9.15.9",
   "pnpm": {
