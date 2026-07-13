@@ -155,9 +155,6 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
       references,
     });
 
-    // TODO: Handle properly
-    if (savedObject.error) throw internal(savedObject.error.message);
-
     return injectReferences(savedObject);
   };
 
@@ -177,9 +174,6 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
         references,
       }
     );
-
-    // TODO: Handle properly
-    if (savedObject.error) throw internal(savedObject.error.message);
 
     return injectReferences({ id, attributes, references, namespaces: savedObject.namespaces });
   };
