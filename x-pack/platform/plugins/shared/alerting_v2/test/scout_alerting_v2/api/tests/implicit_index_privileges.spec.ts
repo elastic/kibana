@@ -229,12 +229,7 @@ apiTest.describe(
     apiTest.beforeAll(async ({ esClient, kbnClient, apiServices }) => {
       // Pre-create spaces.
       for (const id of EXTRA_SPACES) {
-        await kbnClient.request({
-          method: 'POST',
-          path: '/api/spaces/space',
-          body: { id, name: id },
-          ignoreErrors: [409],
-        });
+        await apiServices.spaces.create({ id });
       }
 
       // Pre-create custom roles.
@@ -279,8 +274,8 @@ apiTest.describe(
           })
         )
       );
-      await apiServices.alertingV2.alertActions.cleanUp();
-      await apiServices.alertingV2.alertActions.seed(
+      await apiServices.alertingV2.alertActionsEvents.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.seed(
         SEEDED_SPACES.map((space) => ({
           '@timestamp': now,
           last_series_event_timestamp: now,
@@ -294,9 +289,9 @@ apiTest.describe(
       );
     });
 
-    apiTest.afterAll(async ({ esClient, kbnClient, apiServices }) => {
+    apiTest.afterAll(async ({ esClient, apiServices }) => {
       await apiServices.alertingV2.ruleEvents.cleanUp();
-      await apiServices.alertingV2.alertActions.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.cleanUp();
 
       // Delete custom user and roles.
       for (const key of PERSONA_KEYS) {
@@ -309,11 +304,7 @@ apiTest.describe(
 
       // Delete custom spaces.
       for (const id of EXTRA_SPACES) {
-        await kbnClient.request({
-          method: 'DELETE',
-          path: `/api/spaces/space/${id}`,
-          ignoreErrors: [404],
-        });
+        await apiServices.spaces.delete(id);
       }
     });
 
