@@ -25,8 +25,7 @@ export class NotificationValidationError extends Error {
 
 /**
  * Builds the `submit` producer API: validate the draft, stamp `@timestamp`, and
- * append one doc. Re-pushing an existing `notification_id` appends another doc —
- * data streams have no upsert; query-time collapse dedups, cleanup is the backstop.
+ * append one document.
  */
 export const buildSubmitNotification =
   (
@@ -44,8 +43,8 @@ export const buildSubmitNotification =
     };
 
     // Core caches one client per data stream name, so resolve it at the write site.
-    const [coreStart] = await core.getStartServices();
-    const client = await getNotificationDataStreamClient(coreStart.dataStreams);
+    const [{ dataStreams }] = await core.getStartServices();
+    const client = await getNotificationDataStreamClient(dataStreams);
 
     const response = await client.create({ documents: [document] });
     if (response.errors) {

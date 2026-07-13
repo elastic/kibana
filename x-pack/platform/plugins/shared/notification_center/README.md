@@ -146,86 +146,55 @@ Two conventions are provided in [`notification_id.ts`](./common/notification_id.
 
 The server **setup** contract exposes `submitNotification(draft)`. It validates the draft
 against `notificationWriteSchema`, stamps `@timestamp`, and appends one document to the
-data stream. There is no HTTP creation path — producers call `submitNotification` in-process.
+data stream. There is no HTTP creation path — plugins call `submitNotification` in-process.
 
-Re-pushing the same `notification_id` appends another document (data streams have no
-upsert); duplicates collapse at query time and the cleanup task is the backstop.
+Re-pushing the same `notification_id` appends another document; at display/query time,
+duplicates are collapsed and a separate cleanup-task keeps the index size under control.
 Invalid drafts throw `NotificationValidationError` and nothing is written.
 
-### Worked consumer example
+### Example usage
 
-A producer owns its own Task Manager task, evaluates its own state, and calls
-`submitNotification` with a deterministic id. It never registers with the Notification Center.
+A plugin declares `notificationCenter` in `requiredPlugins` and calls `submitNotification`
+wherever its own logic lives.
+
+```jsonc
+// kibana.jsonc
+{ "plugin": { "requiredPlugins": ["notificationCenter"] } }
+```
 
 ```ts
-// In the producer plugin, which lists `notificationCenter` in requiredPlugins.
+// plugin.ts
 class InferencePlugin {
-  setup(core, { notificationCenter, taskManager }) {
-    taskManager.registerTaskDefinitions({
-      'inference:model-status-check': {
-        title: 'Inference model status check',
-        createTaskRunner: () => ({
-          run: async () => {
-            const deprecated = await this.findDeprecatedEndpoints();
-            for (const endpoint of deprecated) {
-              await notificationCenter.submitNotification({
-                // static-state id: re-push while still deprecated collapses to one entry
-                notification_id: buildStaticStateNotificationId({
-                  producer: 'inference',
-                  entity: endpoint.id,
-                  state: 'deprecated',
-                }),
-                event_timestamp: endpoint.deprecatedAt,
-                type: 'modelStatus',
-                title: `${endpoint.name} is deprecated`,
-                description: 'This model is deprecated and will reach EOL soon.',
-                source_app_id: 'inference',
-                severity: 'warning',
-                cta: { link: `/app/ml/trained_models/${endpoint.id}`, linkText: 'Review model' },
-              });
-            }
-          },
-        }),
-      },
-    });
+  setup(core, { notificationCenter }) {
+    registerDeprecationCheck(notificationCenter);
   }
 }
 ```
 
-## Manual verification
+```ts
+// deprecation_check.ts
+export async function registerDeprecationCheck(notificationCenter: NotificationCenterPluginSetup) {
+  const endpoint = await findDeprecatedEndpoint();
+  await notificationCenter.submitNotification({
+    notification_id: buildStaticStateNotificationId({
+      producer: 'inference',
+      entity: endpoint.id,
+      state: 'deprecated',
+    }),
+    type: 'modelStatus',
+    title: `${endpoint.name} is deprecated`,
+    source_app_id: 'inference',
+    // ...plus `description`, `severity`, `cta` — see common/notification_schema.ts
+  });
+}
+```
 
-Spin up Kibana with the plugin enabled and watch a document land in the data stream.
+### Checking it landed
 
-1. Enable the plugin in `kibana.dev.yml`:
-   ```yaml
-   xpack.notificationCenter.enabled: true
-   ```
-2. Because there is no HTTP creation path, submit through a consumer. The quickest
-   throwaway is to add `notificationCenter` to any running plugin's `requiredPlugins`
-   (`kibana.jsonc`) and drop a one-shot call into its `start`:
-   ```ts
-   start(core, { notificationCenter }) {
-     void notificationCenter.submitNotification({
-       notification_id: 'inference:manual-test:deprecated',
-       event_timestamp: new Date().toISOString(),
-       type: 'modelStatus',
-       title: 'Manual test',
-       description: 'Submitted by hand for verification.',
-       source_app_id: 'inference',
-     });
-   }
-   ```
-3. Read it back from ES (Dev Tools → Console, or `curl` against Elasticsearch):
-   ```
-   GET /.kibana-notification-center/_search
-   ```
-   You should see the document with a server-stamped `@timestamp` and `severity: "info"`.
+Read it back from ES (Dev Tools → Console, or `curl` against Elasticsearch):
 
-For a self-contained end-to-end check that needs no live Kibana, the integration test
-boots Elasticsearch, submits, and reads the document back:
-
-```bash
-node scripts/jest_integration --config x-pack/platform/plugins/shared/notification_center/jest.integration.config.js
+```
+GET /.kibana-notification-center/_search
 ```
 
 ## Running tests
