@@ -93,31 +93,33 @@ export const PhasePanel = ({
       <EuiText size="s" color="subdued" css={descriptionStyles}>
         {ilmPhases[phase].description}
       </EuiText>
-      {(!isHotPhase || !isDownsampleEnabled) && (
-        <EuiFlexGroup direction="column" gutterSize="m" responsive={false} css={sectionStyles}>
-          {!isHotPhase && (
-            <EuiFlexItem grow={false}>
-              <MinAgeField
-                phaseName={phase}
-                dataTestSubj={dataTestSubj}
-                timeUnitOptions={TIME_UNIT_OPTIONS}
-              />
-            </EuiFlexItem>
-          )}
+      <EuiFlexGroup direction="column" gutterSize="m" responsive={false} css={sectionStyles}>
+        {!isHotPhase && (
+          <EuiFlexItem grow={false}>
+            <MinAgeField
+              phaseName={phase}
+              dataTestSubj={dataTestSubj}
+              timeUnitOptions={TIME_UNIT_OPTIONS}
+            />
+          </EuiFlexItem>
+        )}
 
-          {(isHotPhase || isWarmPhase || isColdPhase) && !isDownsampleEnabled && (
-            <EuiFlexItem grow={false}>
-              <ReadOnlyToggleField phaseName={phase} dataTestSubj={dataTestSubj} />
-            </EuiFlexItem>
-          )}
+        {(isHotPhase || isWarmPhase || isColdPhase) && (
+          <EuiFlexItem grow={false}>
+            <ReadOnlyToggleField
+              phaseName={phase}
+              dataTestSubj={dataTestSubj}
+              isDownsampleEnabled={isDownsampleEnabled}
+            />
+          </EuiFlexItem>
+        )}
 
-          {isDeletePhase && (
-            <EuiFlexItem grow={false}>
-              <DeleteSearchableSnapshotToggleField phaseName={phase} dataTestSubj={dataTestSubj} />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      )}
+        {isDeletePhase && (
+          <EuiFlexItem grow={false}>
+            <DeleteSearchableSnapshotToggleField phaseName={phase} dataTestSubj={dataTestSubj} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
 
       {(isHotPhase || isWarmPhase || isColdPhase) && (
         <>
