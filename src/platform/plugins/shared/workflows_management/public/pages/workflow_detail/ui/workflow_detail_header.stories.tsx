@@ -12,6 +12,9 @@ import moment from 'moment';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { ChangeHistoryProvider } from '@kbn/change-history-ui';
+import type { ChangeHistoryAdapter, ChangeHistoryDetail } from '@kbn/change-history-ui';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import { WorkflowDetailHeader } from './workflow_detail_header';
@@ -23,6 +26,11 @@ import {
   WorkflowDetailStoreProvider,
 } from '../../../entities/workflows/store';
 import type { AppDispatch } from '../../../entities/workflows/store/store';
+
+const mockChangeHistoryAdapter: ChangeHistoryAdapter = {
+  listChanges: async () => ({ items: [], total: 0 }),
+  getChange: async () => ({} as unknown as ChangeHistoryDetail),
+};
 
 const defaultWorkflow: WorkflowDetailDto = {
   id: 'test-workflow-123',
@@ -74,7 +82,19 @@ const StoryProviders: Decorator = (story, { parameters }: StoryContext) => {
         <Routes>
           <Route
             path="/:id"
-            render={() => <StoryWrapper story={story} initialDispatch={initialDispatch} />}
+            render={() => (
+              <MockAppHeaderProvider>
+                <ChangeHistoryProvider
+                  objectId="test-workflow-123"
+                  adapter={mockChangeHistoryAdapter}
+                  renderPreview={() => <></>}
+                  labels={{ previewBackLabel: 'Back', previewTitle: 'Preview' }}
+                  scope={{ module: 'workflows', dataset: 'workflows', objectType: 'workflow' }}
+                >
+                  <StoryWrapper story={story} initialDispatch={initialDispatch} />
+                </ChangeHistoryProvider>
+              </MockAppHeaderProvider>
+            )}
           />
         </Routes>
       </MemoryRouter>

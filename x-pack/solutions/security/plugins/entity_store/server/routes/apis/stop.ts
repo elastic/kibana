@@ -54,7 +54,12 @@ export function registerStop(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManagerClient: assetManager } = entityStoreCtx;
+        const {
+          logger,
+          assetManagerClient: assetManager,
+          entityMaintainersClient,
+          preferencesClient,
+        } = entityStoreCtx;
         const { entityTypes } = req.body;
 
         logger.debug('Stop API invoked');
@@ -66,6 +71,16 @@ export function registerStop(router: EntityStorePluginRouter) {
         const toStop = entityTypes.filter((type) => startedTypes.has(type));
 
         await Promise.all(toStop.map((type) => assetManager.stop(type)));
+
+        if (toStop.length > 0) {
+          const { engines: remainingEngines } = await assetManager.getStatus();
+          const anyStarted = remainingEngines.some((e) => e.status === ENGINE_STATUS.STARTED);
+          if (!anyStarted) {
+            await entityMaintainersClient.stopAll(req);
+          }
+        }
+
+        await preferencesClient.update({ autoInstall: false });
 
         return res.ok({
           body: {

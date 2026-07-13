@@ -7,16 +7,27 @@
 
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import {
   RelatedAlertEpisode,
   type RelatedAlertEpisodeProps,
 } from '../../related/related_alert_episode';
 import type { AlertEpisode } from '../../../queries/episodes_query';
+import { isRuleLoaded, type RuleState } from '../../../types/rule_state';
+import { useAlertingEpisodeSourceDataView } from '../../../hooks/use_alerting_episode_source_data_view';
+import { getRelatedEpisodeMissingRuleTitle } from './translations';
+
+interface RelatedAlertEpisodesListServices {
+  http: HttpStart;
+  dataViews: DataViewsContract;
+}
 
 export interface RelatedAlertEpisodesListProps {
   rows: AlertEpisode[];
-  rule: RuleResponse;
+  ruleState: RuleState;
   getEpisodeAction: (episodeId: string) => RelatedAlertEpisodeProps['episodeAction'];
   getGroupAction: (groupHash: string) => RelatedAlertEpisodeProps['groupAction'];
   getEpisodeDetailsHref: (episodeId: string) => string;
@@ -27,24 +38,56 @@ export interface RelatedAlertEpisodesListProps {
   compressed?: boolean;
 }
 
+const getRuleDisplayFromState = (ruleState: RuleState, episodeId: string | undefined) => {
+  if (isRuleLoaded(ruleState)) {
+    return {
+      ruleName: ruleState.rule.metadata.name,
+      groupingFields: ruleState.rule.grouping?.fields ?? [],
+    };
+  }
+
+  return {
+    ruleName: episodeId ? getRelatedEpisodeMissingRuleTitle(episodeId) : '',
+    groupingFields: [],
+  };
+};
+
 export function RelatedAlertEpisodesList({
   rows,
-  rule,
+  ruleState,
   getEpisodeAction,
   getGroupAction,
   getEpisodeDetailsHref,
   compressed = false,
 }: RelatedAlertEpisodesListProps) {
+  const {
+    services: { http, dataViews },
+  } = useKibana<RelatedAlertEpisodesListServices>();
+
+  // All related episodes in the list share the same rule, so its source data view is resolved once here.
+  const sourceQuery =
+    isRuleLoaded(ruleState) && ruleState.rule.query
+      ? getRootEsqlQuery(ruleState.rule.query)
+      : undefined;
+  const { value: sourceDataView } = useAlertingEpisodeSourceDataView({
+    query: sourceQuery,
+    dataViews,
+    http,
+  });
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="alertingV2RelatedEpisodesList">
       {rows.map((row) => {
         const relatedId = row['episode.id'];
         const relatedGroupHash = row.group_hash;
+        const { ruleName, groupingFields } = getRuleDisplayFromState(ruleState, relatedId);
         return (
           <RelatedAlertEpisode
             key={relatedId}
             episode={row}
-            rule={rule}
+            ruleName={ruleName}
+            groupingFields={groupingFields}
+            groupingDataView={sourceDataView}
             episodeAction={getEpisodeAction(relatedId)}
             groupAction={relatedGroupHash ? getGroupAction(relatedGroupHash) : undefined}
             href={getEpisodeDetailsHref(relatedId)}

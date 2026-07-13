@@ -6,7 +6,6 @@
  */
 
 import apm from 'elastic-apm-node';
-import { v4 as uuidv4 } from 'uuid';
 import type { ISavedObjectsRepository, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
@@ -54,14 +53,16 @@ import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { ActionScheduler } from './action_scheduler';
 import { transformAdHocRunToAdHocRunData } from '../application/backfill/transforms/transform_ad_hoc_run_to_backfill_result';
 
-interface ConstructorParams {
+export interface AdHocTaskRunnerConstructorParams {
   context: TaskRunnerContext;
   internalSavedObjectsRepository: ISavedObjectsRepository;
   taskInstance: ConcreteTaskInstance;
+  executionUuid: string;
 }
 
 interface RunParams {
   adHocRunData: AdHocRun;
+  effectiveApiKey: string | null;
   fakeRequest: KibanaRequest;
   scheduleToRun: AdHocRunSchedule | null;
   validatedParams: RuleTypeParams;
@@ -101,11 +102,16 @@ export class AdHocTaskRunner implements CancellableTask {
   private stackTraceLog: RuleRunnerErrorStackTraceLog | null = null;
   private taskRunning: AdHocTaskRunningHandler;
   private timer: TaskRunnerTimer;
-  private apiKeyToUse: string | null = null;
+  private fakeRequest: KibanaRequest | null = null;
 
-  constructor({ context, internalSavedObjectsRepository, taskInstance }: ConstructorParams) {
+  constructor({
+    context,
+    internalSavedObjectsRepository,
+    taskInstance,
+    executionUuid,
+  }: AdHocTaskRunnerConstructorParams) {
     this.context = context;
-    this.executionId = uuidv4();
+    this.executionId = executionUuid;
     this.internalSavedObjectsRepository = internalSavedObjectsRepository;
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.taskInstance = taskInstance;
@@ -167,6 +173,7 @@ export class AdHocTaskRunner implements CancellableTask {
 
   private async runRule({
     adHocRunData,
+    effectiveApiKey,
     fakeRequest,
     scheduleToRun,
     validatedParams: params,
@@ -176,7 +183,7 @@ export class AdHocTaskRunner implements CancellableTask {
       return ruleRunMetricsStore.getMetrics();
     }
 
-    const { rule, apiKeyToUse, apiKeyId } = adHocRunData;
+    const { rule, apiKeyId } = adHocRunData;
     const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
 
     const ruleLabel = `${ruleType.id}:${rule.id}: '${rule.name}'`;
@@ -283,7 +290,7 @@ export class AdHocTaskRunner implements CancellableTask {
       taskRunnerContext: this.context,
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
-      apiKey: apiKeyToUse,
+      apiKey: effectiveApiKey,
       apiKeyId,
       ruleConsumer: rule.consumer,
       executionId: this.executionId,
@@ -378,8 +385,7 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      const { rule, apiKeyToUse, schedule, start, end } = adHocRunData;
-      this.apiKeyToUse = apiKeyToUse;
+      const { rule, apiKeyToUse, uiamApiKey, schedule, start, end } = adHocRunData;
       this.adHocRunData = adHocRunData;
 
       let ruleType: UntypedNormalizedRuleType;
@@ -468,11 +474,27 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      // Generate fake request with API key
-      const fakeRequest = getFakeKibanaRequest(this.context, spaceId, apiKeyToUse);
+      // Generate fake request with API key. Threading the UIAM key (and owner
+      // metadata) mirrors the regular rule runner so backfills authenticate with
+      // the UIAM key in UIAM deployments instead of falling back to the ES key.
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(
+        this.context,
+        spaceId,
+        apiKeyToUse,
+        {
+          uiamApiKey,
+          apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
+          apiKeyOwner: rule.apiKeyOwner,
+          ruleId: rule.id,
+        }
+      );
+      // Stash the built request so the cleanup path (updateGapsAfterBackfillComplete)
+      // reuses the exact same credentials instead of rebuilding it from scratch.
+      this.fakeRequest = fakeRequest;
 
       return {
         adHocRunData,
+        effectiveApiKey,
         fakeRequest,
         scheduleToRun:
           this.scheduleToRunIndex > -1 ? this.adHocRunSchedule[this.scheduleToRunIndex] : null,
@@ -691,16 +713,12 @@ export class AdHocTaskRunner implements CancellableTask {
   }
 
   private async updateGapsAfterBackfillComplete() {
-    if (this.scheduleToRunIndex < 0 || !this.adHocRange) return null;
+    if (this.scheduleToRunIndex < 0 || !this.adHocRange || !this.fakeRequest) return null;
 
-    const fakeRequest = getFakeKibanaRequest(
-      this.context,
-      this.taskInstance.params.spaceId,
-      this.apiKeyToUse
+    const eventLogClient = await this.context.getEventLogClient(this.fakeRequest);
+    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(
+      this.fakeRequest
     );
-
-    const eventLogClient = await this.context.getEventLogClient(fakeRequest);
-    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
     return updateGaps({
       ruleId: this.ruleId,
       start: new Date(this.adHocRange.start),

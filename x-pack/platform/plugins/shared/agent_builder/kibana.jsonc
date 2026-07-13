@@ -17,6 +17,7 @@
       "aiAssistantManagementSelection",
       "data",
       "dataViews",
+      "embeddable",
       "uiActions",
       "esql",
       "features",
@@ -25,6 +26,7 @@
       "lens",
       "licensing",
       "management",
+      "presentationUtil",
       "agentContextLayer",
       "share",
       "spaces",
@@ -44,6 +46,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "cps",
       "evals",
       "licenseManagement",
       "security",

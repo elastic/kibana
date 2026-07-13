@@ -235,6 +235,7 @@ export interface LensSharedProps {
   viewMode?: ViewMode;
   forceDSL?: boolean;
   esqlVariables?: ESQLControlVariable[];
+  isApproximate?: boolean;
 }
 
 export interface LensRequestHandlersProps {

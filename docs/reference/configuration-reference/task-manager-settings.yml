@@ -43,7 +43,7 @@ groups:
 
       - setting: xpack.task_manager.max_workers
         description: |
-          The maximum number of tasks that this Kibana instance will run simultaneously. Starting in 8.0, it will not be possible to set the value greater than 100.
+          The maximum number of tasks that this Kibana instance will run simultaneously. The maximum value is 100.
         datatype: int
         default: 10
         applies_to:

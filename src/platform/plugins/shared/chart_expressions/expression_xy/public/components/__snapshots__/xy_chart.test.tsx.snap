@@ -543,6 +543,7 @@ exports[`XYChart component it renders area 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -1044,6 +1045,7 @@ exports[`XYChart component it renders area 1`] = `
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -2011,6 +2013,7 @@ exports[`XYChart component it renders bar 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -2512,6 +2515,7 @@ exports[`XYChart component it renders bar 1`] = `
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -3479,6 +3483,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -3980,6 +3985,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -4949,6 +4955,7 @@ exports[`XYChart component it renders line 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -5450,6 +5457,7 @@ exports[`XYChart component it renders line 1`] = `
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -6417,6 +6425,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -6918,6 +6927,7 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -7885,6 +7895,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -8386,6 +8397,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -9353,6 +9365,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -9854,6 +9867,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -10842,6 +10856,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -11343,6 +11358,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -12400,6 +12416,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -12901,6 +12918,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",
@@ -13951,6 +13969,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               },
             ]
           }
+          footer="default"
           headerFormatter={[Function]}
           type="vertical"
         />
@@ -14452,6 +14471,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
+                "spacing": "small",
                 "textDarkColor": "#111C2C",
                 "textExtraDarkColor": "#1D2A3E",
                 "textExtraLightColor": "#CAD3E2",

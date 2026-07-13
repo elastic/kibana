@@ -25,7 +25,7 @@ describe('logBulkRuleChanges', () => {
     changeTrackingService = createMockChangeTrackingService();
   });
 
-  it('logs every successful saved object in a single bulk call', async () => {
+  it('logs every successful rule change in a single bulk call', async () => {
     const context = buildContext({ changeTrackingService });
     const ruleSOs = [buildRuleSO('rule-1'), buildRuleSO('rule-2')];
 
@@ -46,14 +46,14 @@ describe('logBulkRuleChanges', () => {
         objectId: 'rule-1',
         objectType: RULE_SAVED_OBJECT_TYPE,
         module: 'stack',
-        snapshot: { attributes: expect.objectContaining({ name: 'rule rule-1' }), references: [] },
+        snapshot: expect.objectContaining({ id: 'rule-1', name: 'rule rule-1' }),
       },
       {
         timestamp: REFERENCE_TIMESTAMP_ISO,
         objectId: 'rule-2',
         objectType: RULE_SAVED_OBJECT_TYPE,
         module: 'stack',
-        snapshot: { attributes: expect.objectContaining({ name: 'rule rule-2' }), references: [] },
+        snapshot: expect.objectContaining({ id: 'rule-2', name: 'rule rule-2' }),
       },
     ]);
     expect(opts).toEqual({
@@ -62,7 +62,7 @@ describe('logBulkRuleChanges', () => {
     });
   });
 
-  it('skips saved objects that have an error (e.g. partial bulk failures)', async () => {
+  it('skips rule change that have an error (e.g. partial bulk failures)', async () => {
     const context = buildContext({ changeTrackingService });
     const ruleSOs = [
       buildRuleSO('rule-1'),
@@ -134,7 +134,62 @@ describe('logBulkRuleChanges', () => {
     ]);
   });
 
-  it('does not call logBulk when every saved object failed', async () => {
+  it('skips security solution rule changes when the securitySolution:enableRuleChangesHistory advanced setting is disabled', async () => {
+    const context = buildContext(
+      {
+        changeTrackingService,
+        uiSettings: createMockUiSettings(false) as unknown as RulesClientContext['uiSettings'],
+      },
+      {
+        '123': { solution: 'stack', trackChanges: true },
+        '456': { solution: 'security', trackChanges: true },
+      }
+    );
+    const ruleSOs = [buildRuleSO('rule-stack', '123'), buildRuleSO('rule-sec', '456')];
+
+    await logRuleChanges({
+      rulesClientContext: context,
+      ruleSOs,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleUpdate,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      },
+    });
+
+    expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+    const [changes] = changeTrackingService.logBulk.mock.calls[0];
+    expect(changes.map((c) => c.objectId)).toEqual(['rule-stack']);
+  });
+
+  it('reads the ENABLE_RULE_CHANGES_HISTORY_SETTING advanced setting at most once per call, scoped to the space', async () => {
+    const uiSettings = createMockUiSettings(true);
+    const context = buildContext(
+      {
+        changeTrackingService,
+        uiSettings: uiSettings as unknown as RulesClientContext['uiSettings'],
+      },
+      {
+        '456': { solution: 'security', trackChanges: true },
+        '789': { solution: 'security', trackChanges: true },
+      }
+    );
+    const ruleSOs = [buildRuleSO('rule-sec-1', '456'), buildRuleSO('rule-sec-2', '789')];
+
+    await logRuleChanges({
+      rulesClientContext: context,
+      ruleSOs,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleUpdate,
+        timestamp: REFERENCE_TIMESTAMP_MS,
+      },
+    });
+
+    expect(uiSettings.asScopedToClient).toHaveBeenCalledTimes(1);
+    const uiSettingsClient = uiSettings.asScopedToClient.mock.results[0].value;
+    expect(uiSettingsClient.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call logBulk when every rule change failed', async () => {
     const context = buildContext({ changeTrackingService });
     const ruleSOs = [buildErroredRuleSO('rule-1'), buildErroredRuleSO('rule-2')];
 
@@ -199,7 +254,7 @@ describe('logBulkRuleChanges', () => {
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
   });
 
-  it('falls back to an empty references array when a saved object omits references', async () => {
+  it('succeeds when a rule saved object omits references (treats them as empty)', async () => {
     const context = buildContext({ changeTrackingService });
     const ruleSOWithoutRefs = buildRuleSO('rule-1');
     delete (ruleSOWithoutRefs as Partial<SavedObject<RawRule>>).references;
@@ -214,7 +269,7 @@ describe('logBulkRuleChanges', () => {
     });
 
     const [changes] = changeTrackingService.logBulk.mock.calls[0];
-    expect(changes[0].snapshot.references).toEqual([]);
+    expect(changes[0].snapshot).toEqual(expect.objectContaining({ id: 'rule-1', actions: [] }));
   });
 
   it('swallows registry errors', async () => {
@@ -319,6 +374,80 @@ describe('logBulkRuleChanges', () => {
       expect(changes[0].timestamp).toBe(expected);
     });
 
+    it('uses so.updated_at when no explicit timestamp is provided', async () => {
+      const SO_UPDATED_AT = '2026-03-01T10:00:00.000Z';
+      const context = buildContext({ changeTrackingService });
+      const ruleSOs = [buildRuleSO('rule-1', '123', { updated_at: SO_UPDATED_AT })];
+
+      await logRuleChanges({
+        rulesClientContext: context,
+        ruleSOs,
+        changesContext: { action: RuleChangeTrackingAction.ruleUpdate },
+      });
+
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes[0].timestamp).toBe(SO_UPDATED_AT);
+    });
+
+    it('uses each so.updated_at independently per rule when no explicit timestamp is provided', async () => {
+      const SO_UPDATED_AT_1 = '2026-03-01T10:00:00.000Z';
+      const SO_UPDATED_AT_2 = '2026-03-01T11:00:00.000Z';
+      const context = buildContext({ changeTrackingService });
+      const ruleSOs = [
+        buildRuleSO('rule-1', '123', { updated_at: SO_UPDATED_AT_1 }),
+        buildRuleSO('rule-2', '123', { updated_at: SO_UPDATED_AT_2 }),
+      ];
+
+      await logRuleChanges({
+        rulesClientContext: context,
+        ruleSOs,
+        changesContext: { action: RuleChangeTrackingAction.ruleUpdate },
+      });
+
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes.map((c) => c.timestamp)).toEqual([SO_UPDATED_AT_1, SO_UPDATED_AT_2]);
+    });
+
+    it('falls back to current time when neither timestamp nor so.updated_at is available', async () => {
+      const FALLBACK_NOW = '2026-06-01T08:00:00.000Z';
+      jest.useFakeTimers({ now: new Date(FALLBACK_NOW).getTime() });
+
+      try {
+        const context = buildContext({ changeTrackingService });
+        const ruleSOWithoutUpdatedAt = buildRuleSO('rule-1');
+        delete (ruleSOWithoutUpdatedAt as Partial<SavedObject<RawRule>>).updated_at;
+
+        await logRuleChanges({
+          rulesClientContext: context,
+          ruleSOs: [ruleSOWithoutUpdatedAt as SavedObject<RawRule>],
+          changesContext: { action: RuleChangeTrackingAction.ruleUpdate },
+        });
+
+        const [changes] = changeTrackingService.logBulk.mock.calls[0];
+        expect(changes[0].timestamp).toBe(FALLBACK_NOW);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('uses explicit timestamp over so.updated_at when both are present', async () => {
+      const SO_UPDATED_AT = '2026-03-01T10:00:00.000Z';
+      const context = buildContext({ changeTrackingService });
+      const ruleSOs = [buildRuleSO('rule-1', '123', { updated_at: SO_UPDATED_AT })];
+
+      await logRuleChanges({
+        rulesClientContext: context,
+        ruleSOs,
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleDelete,
+          timestamp: REFERENCE_TIMESTAMP_MS,
+        },
+      });
+
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes[0].timestamp).toBe(REFERENCE_TIMESTAMP_ISO);
+    });
+
     it('uses the same timestamp for every change in a multi-rule call (single operation snapshot)', async () => {
       const context = buildContext({ changeTrackingService });
 
@@ -380,7 +509,13 @@ const buildRuleSO = (
 ): SavedObject<RawRule> => ({
   id,
   type: RULE_SAVED_OBJECT_TYPE,
-  attributes: { alertTypeId, name: `rule ${id}` } as RawRule,
+  updated_at: REFERENCE_TIMESTAMP_ISO,
+  attributes: {
+    alertTypeId,
+    name: `rule ${id}`,
+    createdAt: new Date().toDateString(),
+    updatedAt: new Date().toDateString(),
+  } as RawRule,
   references: [],
   ...overrides,
 });
@@ -403,6 +538,11 @@ interface RuleTypeStub {
   solution: string;
   trackChanges: boolean;
 }
+
+const createMockUiSettings = (securityRuleChangesHistoryEnabled = true) => {
+  const uiSettingsClient = { get: jest.fn().mockResolvedValue(securityRuleChangesHistoryEnabled) };
+  return { asScopedToClient: jest.fn().mockReturnValue(uiSettingsClient) };
+};
 
 const buildContext = (
   overrides: Partial<RulesClientContext> = {},
@@ -428,6 +568,9 @@ const buildContext = (
     logger: loggingSystemMock.createLogger(),
     spaceId: 'default',
     ruleTypeRegistry,
+    isSystemAction: jest.fn().mockReturnValue(false),
+    uiSettings: createMockUiSettings(),
+    unsecuredSavedObjectsClient: {},
     ...overrides,
   } as unknown as RulesClientContext;
 };

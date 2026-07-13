@@ -668,12 +668,13 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async expectDocTableToBeLoaded() {
-    const renderComplete = await this.testSubjects.getAttribute(
-      'discoverDocTable',
-      'data-render-complete'
-    );
-
-    expect(renderComplete).to.be('true');
+    await this.retry.waitFor('doc table to finish rendering', async () => {
+      const renderComplete = await this.testSubjects.getAttribute(
+        'discoverDocTable',
+        'data-render-complete'
+      );
+      return renderComplete === 'true';
+    });
   }
 
   public async findFieldByNameOrValueInDocViewer(name: string) {
