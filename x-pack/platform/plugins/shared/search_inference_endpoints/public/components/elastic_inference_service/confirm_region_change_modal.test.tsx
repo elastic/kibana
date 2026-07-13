@@ -58,7 +58,7 @@ describe('ConfirmRegionChangeModal', () => {
         </Wrapper>
       );
 
-      expect(screen.getByText('Confirm geo zone change')).toBeInTheDocument();
+      expect(screen.getByText('Confirm geographies change')).toBeInTheDocument();
     });
 
     it('calls onConfirm when Save button is clicked', () => {
