@@ -7,6 +7,10 @@
 
 export const STREAMS_RULE_CONSUMER = 'streams' as const;
 export const STREAMS_ESQL_RULE_TYPE_ID = 'streams.rules.esql' as const;
+export const STREAMS_RULE_STREAM_TAG_PREFIX = 'sigevents:stream:' as const;
+
+export const toStreamTag = (streamName: string): string =>
+  `${STREAMS_RULE_STREAM_TAG_PREFIX}${streamName}`;
 
 /**
  * Narrow interface that decouples QueryClient from the concrete alerting framework.
@@ -24,6 +28,8 @@ export interface IRulesManagementClient {
 
   /** Best-effort bulk delete: implementations should swallow 404/400 for missing rules. */
   bulkDeleteRules(ids: string[]): Promise<void>;
+
+  findOwnedRuleIds(streamName: string): Promise<string[]>;
 }
 
 /** Rule creation payload, v1-shaped. V2 adapters translate internally. */

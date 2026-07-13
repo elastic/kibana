@@ -7,9 +7,5 @@
   "scripts": {
     "openapi:generate": "node scripts/openapi/generate",
     "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate"
-  },
-  "dependencies": {
-    "@kbn/zod": "link:../../../../../src/platform/packages/shared/kbn-zod",
-    "@kbn/zod-helpers": "link:../../../../../src/platform/packages/shared/kbn-zod-helpers"
   }
 }
