@@ -43,10 +43,14 @@ export const useSortSelector = ({
     [sortBy]
   );
 
-  const buttonLabel = i18n.translate('metricsExperience.sortSelector.buttonLabel', {
-    defaultMessage: 'Sort: {field}',
-    values: { field: SORT_BY_LABELS[sortBy] },
-  });
+  const buttonLabel = useMemo(
+    () =>
+      i18n.translate('metricsExperience.sortSelector.buttonLabel', {
+        defaultMessage: 'Sort: {field}',
+        values: { field: SORT_BY_LABELS[sortBy] },
+      }),
+    [sortBy]
+  );
 
   const handleSortByChange = useCallback(
     (chosenOption?: SelectableEntry) => {

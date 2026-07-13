@@ -27,7 +27,6 @@ export const SortSelector = ({ sort, onChange, fullWidth = false }: SortSelector
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      {/* Grows so the selector button fills the row when the toolbar stacks on small screens. */}
       <EuiFlexItem grow={fullWidth}>
         <ToolbarSelector
           data-test-subj="metricsExperienceSortSelector"

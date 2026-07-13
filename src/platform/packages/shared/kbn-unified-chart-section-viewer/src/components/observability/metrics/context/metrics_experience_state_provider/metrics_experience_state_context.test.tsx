@@ -241,6 +241,7 @@ describe('MetricsExperienceStateProvider', () => {
     it('updates metricsSort', () => {
       const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
 
+      // Use other option when become available
       act(() => {
         result.current.onMetricsSortChange([
           METRICS_SORT_BY.alphabetically,
