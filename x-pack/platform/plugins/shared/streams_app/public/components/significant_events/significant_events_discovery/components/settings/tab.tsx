@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiBadge,
   EuiBottomBar,
@@ -37,6 +38,7 @@ import {
 import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
+  STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
@@ -55,6 +57,7 @@ import {
   SignificantEventsTuningConfigEditor,
   configToAnnotatedYaml,
 } from './significant_events_tuning_config_editor';
+import { AppsSection } from './apps_section';
 
 const clampNumber = (value: string, min: number, max: number) => {
   const parsed = Number(value);
@@ -77,6 +80,15 @@ export function SettingsTab() {
   const canManageStreams = streamsUiPrivileges.manage;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditSettings = canManageStreams && canSaveAdvancedSettings;
+
+  // getBooleanValue$ builds a new observable on every call, so memoize it —
+  // otherwise useObservable re-subscribes (and re-evaluates the flag) on every
+  // render of this settings tab, not just when the flag actually changes.
+  const isAppsEnabledObservable = useMemo(
+    () => core.featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG, false),
+    [core.featureFlags]
+  );
+  const isAppsEnabled = useObservable(isAppsEnabledObservable, false);
 
   const [savedIndexPatterns, setSavedIndexPatterns] = useState<string>(() =>
     core.settings.client.get<string>(
@@ -760,6 +772,8 @@ export function SettingsTab() {
           />
         </EuiPanel>
       </EuiPanel>
+
+      {isAppsEnabled && <AppsSection canEdit={canEditSettings} />}
 
       {hasChanges && (
         <EuiBottomBar data-test-subj="streams-significant-events-settings-bottom-bar">

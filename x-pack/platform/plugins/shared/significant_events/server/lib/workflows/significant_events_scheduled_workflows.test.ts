@@ -195,6 +195,16 @@ describe('scheduled Significant Events managed workflows', () => {
       });
     }
   );
+
+  it('uses per-rule schedule metadata for detection and recovery gates', () => {
+    const parsed = getParsedStaticWorkflowYaml(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID);
+    const yaml = JSON.stringify(parsed);
+
+    expect(yaml).toContain('foreach.item.rule_schedule.recent_activity_minutes');
+    expect(yaml).toContain('foreach.item.rule_schedule.quick_recovery_lookback');
+    expect(yaml).toContain('foreach.item.rule_schedule.quick_recovery_lookback_minutes');
+    expect(yaml).toContain('foreach.item.rule_schedule.quiet_stationary_peak_min_alert_count');
+  });
 });
 
 describe('SignificantEventsScheduledWorkflowsService', () => {

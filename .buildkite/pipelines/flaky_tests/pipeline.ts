@@ -60,7 +60,7 @@ function defaultCypressFlakyAgentOptions(pathHint: string): {
   const defendWorkflows = pathHint.includes('defend_workflows');
   return {
     agentQueue: defendWorkflows ? 'n2-4-virt' : 'n2-4-spot',
-    diskSizeGb: defendWorkflows ? 120 : undefined,
+    diskSizeGb: defendWorkflows ? 120 : 110,
   };
 }
 

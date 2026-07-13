@@ -28,21 +28,30 @@ import type { GetAnomalyOverviewResponse } from '../../../../common/api/entity_a
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { AnomaliesOverview } from './anomalies_overview';
 
+export const EMPTY_ANOMALY_OVERVIEW: GetAnomalyOverviewResponse = {
+  entityId: '',
+  anomalyByTimeBucket: [],
+  recentAnomalies: [],
+  tacticCounts: {},
+  totalAnomaliesCount: 0,
+  from: 0,
+  to: 0,
+  hasJobsMissingThreatTactics: false,
+};
+
 interface AnomaliesSectionProps {
   data: GetAnomalyOverviewResponse;
   entityId: string;
   isPreviewMode?: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   hideHeaderIcons?: boolean;
+  isLoading?: boolean;
+  isError?: boolean;
 }
 
 export const AnomaliesSection: React.FC<AnomaliesSectionProps> = (props) => {
   const { euiTheme } = useEuiTheme();
-  const xsFontSize = useEuiFontSize('xs').fontSize;
-
-  if (props.data.totalAnomaliesCount === 0) {
-    return null;
-  }
+  const updatedAtFontSize = useEuiFontSize('xxs').fontSize;
 
   return (
     <>
@@ -65,8 +74,7 @@ export const AnomaliesSection: React.FC<AnomaliesSectionProps> = (props) => {
           <span
             data-test-subj={ANOMALIES_SECTION_ACCORDION_TIMEFRAME_TEST_ID}
             css={css`
-              font-size: ${xsFontSize};
-              color: ${euiTheme.colors.textSubdued};
+              font-size: ${updatedAtFontSize};
             `}
           >
             {ENTITY_ANOMALIES_OVERVIEW_TIMEFRAME}

@@ -49,12 +49,14 @@ export function buildChangePointTimeSeriesAggs(
   {
     useDistinctSignalCount,
     includeFloorWindow = false,
+    recentActivityMinutes = RECENT_ACTIVITY_MINUTES,
     extendedBounds,
   }: {
     // Scope note: this toggles the `signal_count` (group_hash cardinality) sub-agg ONLY on the
     // recency windows (`last_5m`, `last_floor_window`) — it does NOT affect the change_point input.
     useDistinctSignalCount: boolean;
     includeFloorWindow?: boolean;
+    recentActivityMinutes?: number;
     extendedBounds: AggregationsExtendedBounds<AggregationsFieldDateMath>;
   }
 ): Record<string, AggregationsAggregationContainer> {
@@ -63,8 +65,8 @@ export function buildChangePointTimeSeriesAggs(
   // change_point of variance.
   const overTime = buildDateHistogramAgg(bucketInterval, extendedBounds);
   const last5m: AggregationsAggregationContainer = useDistinctSignalCount
-    ? { filter: timestampGteFilter(RECENT_ACTIVITY_MINUTES), aggs: SIGNAL_COUNT_CARDINALITY }
-    : { filter: timestampGteFilter(RECENT_ACTIVITY_MINUTES) };
+    ? { filter: timestampGteFilter(recentActivityMinutes), aggs: SIGNAL_COUNT_CARDINALITY }
+    : { filter: timestampGteFilter(recentActivityMinutes) };
 
   const aggs: Record<string, AggregationsAggregationContainer> = {
     over_time: overTime,
