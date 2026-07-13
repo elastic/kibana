@@ -6,6 +6,7 @@
  */
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { BulkCreateOperationError } from '../query_utils';
 import { EventClient } from './event_client';
 import type { SignificantEvent } from './data_stream';
@@ -37,6 +38,53 @@ const createClient = (response: BulkResponse) => {
       space: 'default',
     }),
     dataStreamClient,
+  };
+};
+
+const sourceResponse = (docs: SignificantEvent[]): ESQLSearchResponse =>
+  ({
+    columns: [{ name: '_source', type: 'object' }],
+    values: docs.map((doc) => [doc]),
+  } as unknown as ESQLSearchResponse);
+
+const countResponse = (total: number): ESQLSearchResponse =>
+  ({
+    columns: [{ name: 'total', type: 'long' }],
+    values: [[total]],
+  } as unknown as ESQLSearchResponse);
+
+const createSearchClient = ({
+  openHits,
+  closedHits,
+  allHits = [],
+  total,
+}: {
+  openHits: SignificantEvent[];
+  closedHits: SignificantEvent[];
+  allHits?: SignificantEvent[];
+  total: number;
+}) => {
+  const query = jest.fn(async (request: { query: string }) => {
+    const { query: q } = request;
+    if (q.includes('STATS total')) {
+      return countResponse(total);
+    }
+    if (q.includes('status NOT IN')) {
+      return sourceResponse(closedHits);
+    }
+    if (q.includes('status IN')) {
+      return sourceResponse(openHits);
+    }
+    return sourceResponse(allHits);
+  });
+
+  return {
+    client: new EventClient({
+      dataStreamClient: {} as never,
+      esClient: { esql: { query } } as never,
+      space: 'default',
+    }),
+    query,
   };
 };
 
@@ -86,6 +134,43 @@ describe('EventClient', () => {
       await expect(client.bulkCreate([createEvent()], { throwOnFail: true })).resolves.toBe(
         response
       );
+    });
+  });
+
+  describe('findLatestByCurrentStatePaginated', () => {
+    it('filters open state after latest-per-slug reduction', async () => {
+      const resolvedLatest = { ...createEvent(), status: 'resolved' as const };
+      const { client, query } = createSearchClient({
+        openHits: [],
+        closedHits: [resolvedLatest],
+        total: 0,
+      });
+
+      const result = await client.findLatestByCurrentStatePaginated({ state: 'open' });
+
+      expect(result.hits).toEqual([]);
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('status IN');
+      expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
+        dataQuery!.indexOf('status IN')
+      );
+    });
+
+    it('treats closed as latest status not in open set', async () => {
+      const resolvedLatest = { ...createEvent(), status: 'resolved' as const };
+      const { client } = createSearchClient({
+        openHits: [],
+        closedHits: [resolvedLatest],
+        total: 1,
+      });
+
+      const result = await client.findLatestByCurrentStatePaginated({ state: 'closed' });
+
+      expect(result.hits).toHaveLength(1);
+      expect(result.hits[0].status).toBe('resolved');
+      expect(result.total).toBe(1);
     });
   });
 });

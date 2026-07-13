@@ -26,11 +26,6 @@ triggers:
         default: 10
         required: false
         description: 'Max discoveries per judge invocation. Caps agent message size; remaining discoveries are picked up on the next cycle.'
-      - name: agentConnectorId
-        type: string
-        default: '.anthropic-claude-4.6-sonnet-chat_completion'
-        required: false
-        description: 'Connector ID for the judge agent.'
 
 outputs:
   - name: candidateCount
@@ -172,10 +167,12 @@ steps:
   - name: run_judge_agent
     type: ai.agent
     agent-id: "platform.streams.sig-events.discovery-judge"
-    connector-id: "${{ inputs.agentConnectorId }}"
-    # Keep plugin-id/aggregate-by in sync with @kbn/streams-schema inference_feature_ids.ts
-    # (SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID / SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
-    plugin-id: 'significant_events_discovery'
+    # Keep connector-id-by-feature/plugin-id/aggregate-by in sync with @kbn/significant-events-schema
+    # inference_feature_ids.ts (SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID /
+    # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID). Own feature — judge is a lighter,
+    # cheaper classification step than discovery and should default to its own model tier.
+    connector-id-by-feature: 'significant_events_triage'
+    plugin-id: 'significant_events_triage'
     aggregate-by: 'significant_events'
     create-conversation: true
     with:
@@ -188,86 +185,33 @@ steps:
         properties:
           significant_events:
             type: array
+            description: 'Compact summary of each processed discovery — used by the workflow to gate trigger_investigation. Full event data is written by the judge via events_write and discovery_write tools.'
             items:
               type: object
               properties:
-                discovery_id:
-                  type: string
-                  description: 'Echo verbatim from the input discovery doc. READ-ONLY.'
                 discovery_slug:
                   type: string
-                  description: 'Echo verbatim from the input discovery doc. READ-ONLY.'
+                  description: 'Echo verbatim from the input discovery.'
+                event_id:
+                  type: string
+                  description: 'event_id returned by events_write. Required for trigger_investigation context.'
                 status:
                   type: string
                   enum: [promoted, acknowledged, demoted, resolved]
-                  description: 'promoted: active incident requiring immediate action. acknowledged: real issue, not critical enough for immediate escalation. demoted: insignificant or confirmed false positive. resolved: alerts genuinely stopped (kind:clearance inputs only).'
-                criticality:
-                  type: integer
-                  minimum: 0
-                  maximum: 100
-                  description: "Judge's own severity assessment from 0 to 100."
-                confidence:
-                  type: integer
-                  minimum: 0
-                  maximum: 100
-                  description: 'Confidence in this verdict from 0 to 100.'
-                summary:
-                  type: string
-                  description: 'Operator notification - always emit for promoted and acknowledged. Lead with service + operator-visible symptom; name the exposed path when dependency_edges has exposed entries; close with the single most time-sensitive on-call action. One to two sentences. For demoted/resolved: omit unless you have a material correction.'
-                root_cause:
-                  type: string
-                  description: 'Corrected probable-cause hypothesis. Omit when nothing contradicts the discovery. Must cite KI name + row_count and keep the causal chain coherent.'
-                recommendations:
-                  type: array
-                  items:
-                    type: string
-                  description: '3 candidate stop-the-bleeding actions ranked by likelihood of stopping user impact. These are operational attempts - not a guaranteed fix sequence. Order from most reversible and most targeted to broader interventions. Each must name the specific service or error code observed in evidences and include the exact operational command (kubectl, helm, systemctl, CLI). No ES|QL or diagnostic queries - investigation is complete. Required for promoted and acknowledged.'
-                assessment_note:
-                  type: string
-                  description: 'Adversarial reasoning trace: what was independently verified, what signals confirmed or contradicted the discovery, and how criticality and status were calibrated. Not operator-facing. Required for promoted and acknowledged; brief for demoted and resolved.'
-                evidences:
-                  type: array
-                  description: 'Merged evidence trail — input discovery evidences updated with judge verification. Apply Step 8 merge protocol. Required on every output; echo input verbatim when no tool calls were made.'
-                  items:
-                    type: object
-                    properties:
-                      rule_name:
-                        type: string
-                      rule_uuid:
-                        type: string
-                      stream_name:
-                        type: string
-                      result:
-                        type: string
-                        enum: [found, empty, error]
-                      row_count:
-                        type: integer
-                      esql_query:
-                        type: string
-                        nullable: true
-                      description:
-                        type: string
-                      collected_at:
-                        type: string
-                      confirmed:
-                        type: boolean
-                        description: 'true only on entries verified by judge execute_esql this cycle. Omit when not verified.'
-              required:
-                [
-                  discovery_id,
-                  discovery_slug,
-                  status,
-                  criticality,
-                  confidence,
-                  assessment_note,
-                  evidences,
-                ]
+                  description: 'Status decision.'
+                written:
+                  type: boolean
+                  description: 'true when events_write created a new event version, false when status was unchanged.'
+              required: [discovery_slug, status, written]
         required: [significant_events]
     on-failure:
       continue: false
 
   # -----------------------------------------------------------------------
-  # Step 5: Process each significant event — write to events index.
+  # Step 5: Trigger root-cause investigation for newly-promoted events.
+  # The judge writes events (events_write) and stamps discoveries
+  # (discovery_write kind:handled) directly via tools. The workflow only
+  # needs to fire the async investigation for promoted events.
   # -----------------------------------------------------------------------
 
   # Eviction-safe snapshot — ai.agent outputs are evictable; data.set outputs are not.
@@ -279,7 +223,6 @@ steps:
         type: data.set
         with:
           significant_events: '${{ steps.run_judge_agent.output.structured_output.significant_events }}'
-          conversation_id: '{{ steps.run_judge_agent.output.conversation_id }}'
 
   - name: foreach_significant_event
     type: foreach
@@ -288,115 +231,6 @@ steps:
       and steps.store_significant_events.output.significant_events != null }}
     foreach: '${{ steps.store_significant_events.output.significant_events }}'
     steps:
-      - name: check_existing_event
-        type: elasticsearch.request
-        with:
-          method: POST
-          path: '/{{ consts.EVENTS_INDEX }}/_search?ignore_unavailable=true'
-          body:
-            size: 1
-            sort:
-              - '@timestamp':
-                  order: desc
-            _source:
-              includes:
-                - event_id
-                - status
-                - created_at
-                - previous_event_id
-            query:
-              bool:
-                filter:
-                  - term:
-                      kibana.space_ids: '{{ variables.spaceId }}'
-                  - term:
-                      discovery_slug: '${{ foreach.item.discovery_slug }}'
-        on-failure:
-          continue: true
-
-      - name: compute_write_gate
-        type: data.set
-        with:
-          should_write: >-
-            ${{ steps.check_existing_event.output.hits.hits[0]._source.status != foreach.item.status }}
-          event_id: '{{ foreach.item.discovery_slug }}-{{ execution.id }}'
-          created_at: "{% if steps.check_existing_event.output.hits.total.value > 0 and steps.check_existing_event.output.hits.hits[0]._source.status != 'resolved' %}{{ steps.check_existing_event.output.hits.hits[0]._source.created_at }}{% else %}{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}{% endif %}"
-          previous_event_id: '{% if steps.check_existing_event.output.hits.total.value > 0 %}{{ steps.check_existing_event.output.hits.hits[0]._source.event_id }}{% endif %}'
-
-      # Resolve the source discovery for the Liquid join.
-      - name: resolve_discovery
-        type: data.set
-        with:
-          discovery: "${{ steps.collect_discoveries.output.findings | where: 'discovery_id', foreach.item.discovery_id | first }}"
-
-      - name: write_event_doc
-        type: elasticsearch.request
-        if: '${{ steps.compute_write_gate.output.should_write }}'
-        with:
-          method: POST
-          path: '/{{ consts.EVENTS_INDEX }}/_doc'
-          body:
-            '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-            kibana:
-              space_ids:
-                - '{{ variables.spaceId }}'
-            event_id: '{{ steps.compute_write_gate.output.event_id }}'
-            created_at: '{{ steps.compute_write_gate.output.created_at }}'
-            previous_event_id: '{{ steps.compute_write_gate.output.previous_event_id }}'
-            discovery_id: '{{ foreach.item.discovery_id }}'
-            discovery_slug: '{{ foreach.item.discovery_slug }}'
-            status: '${{ foreach.item.status }}'
-            criticality: '${{ foreach.item.criticality }}'
-            confidence: '${{ foreach.item.confidence }}'
-            summary: '{{ foreach.item.summary | default: steps.resolve_discovery.output.discovery.summary }}'
-            title: '{{ steps.resolve_discovery.output.discovery.title }}'
-            root_cause: '{{ foreach.item.root_cause | default: steps.resolve_discovery.output.discovery.root_cause }}'
-            cause_kis: '${{ steps.resolve_discovery.output.discovery.cause_kis | default: [] }}'
-            dependency_edges: '${{ steps.resolve_discovery.output.discovery.dependency_edges | default: [] }}'
-            infra_components: '${{ steps.resolve_discovery.output.discovery.infra_components | default: [] }}'
-            evidences: '${{ foreach.item.evidences | default: steps.resolve_discovery.output.discovery.evidences | default: [] }}'
-            stream_names: '${{ steps.resolve_discovery.output.discovery.stream_names | default: [] }}'
-            recommendations: '${{ foreach.item.recommendations | default: [] }}'
-            assessment_note: '{{ foreach.item.assessment_note }}'
-            analysis_source: judge_agent
-            conversation_id: '{{ steps.store_significant_events.output.conversation_id }}'
-            workflow_execution_id: '{{ execution.id }}'
-        on-failure:
-          continue: false
-
-      # Write kind:handled to the discoveries index after write_event_doc succeeds.
-      # Carries the full discovery payload plus event_id lineage pointer.
-      # This closes the slug for re-assessment by the next triage run.
-      - name: write_handled_discovery
-        type: elasticsearch.request
-        if: '${{ steps.compute_write_gate.output.should_write and steps.write_event_doc.error == null }}'
-        with:
-          method: POST
-          path: '/{{ consts.DISCOVERIES_INDEX }}/_doc'
-          body:
-            '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-            kibana:
-              space_ids:
-                - '{{ variables.spaceId }}'
-            kind: '{{ consts.KIND_HANDLED }}'
-            workflow_execution_id: '{{ execution.id }}'
-            discovery_id: '{{ steps.resolve_discovery.output.discovery.discovery_id }}'
-            discovery_slug: '{{ steps.resolve_discovery.output.discovery.discovery_slug }}'
-            title: '{{ steps.resolve_discovery.output.discovery.title }}'
-            summary: '{{ steps.resolve_discovery.output.discovery.summary }}'
-            root_cause: '{{ steps.resolve_discovery.output.discovery.root_cause }}'
-            criticality: '${{ steps.resolve_discovery.output.discovery.criticality }}'
-            confidence: '${{ steps.resolve_discovery.output.discovery.confidence }}'
-            rule_names: '${{ steps.resolve_discovery.output.discovery.rule_names | default: [] }}'
-            stream_names: '${{ steps.resolve_discovery.output.discovery.stream_names | default: [] }}'
-            cause_kis: '${{ steps.resolve_discovery.output.discovery.cause_kis | default: [] }}'
-            evidences: '${{ foreach.item.evidences | default: steps.resolve_discovery.output.discovery.evidences | default: [] }}'
-            detections: '${{ steps.resolve_discovery.output.discovery.detections | default: [] }}'
-            dependency_edges: '${{ steps.resolve_discovery.output.discovery.dependency_edges | default: [] }}'
-            infra_components: '${{ steps.resolve_discovery.output.discovery.infra_components | default: [] }}'
-        on-failure:
-          continue: true
-
       # Fire-and-forget a root-cause investigation for each newly-promoted event.
       # Async so triage (30m) never blocks on the investigation (60m).
       # concurrency_key per slug ensures a re-promotion cancels the prior in-progress
@@ -404,33 +238,14 @@ steps:
       # investigation workflow).
       - name: trigger_investigation
         type: workflow.executeAsync
-        if: >-
-          ${{ steps.compute_write_gate.output.should_write
-          and steps.write_event_doc.error == null
-          and foreach.item.status == 'promoted' }}
+        if: '${{ foreach.item.status == "promoted" and foreach.item.written }}'
         with:
           workflow-id: 'system-significant-events-investigation'
           inputs:
             concurrency_key: '{{ foreach.item.discovery_slug }}'
-            stream_names: '${{ steps.resolve_discovery.output.discovery.stream_names | default: [] }}'
-            message: |
-              {{ steps.resolve_discovery.output.discovery.title }}
-
-              {{ foreach.item.summary | default: steps.resolve_discovery.output.discovery.summary }}
-
-              Probable cause: {{ foreach.item.root_cause | default: steps.resolve_discovery.output.discovery.root_cause }}
             context:
-              event_id: '{{ steps.compute_write_gate.output.event_id }}'
-              discovery_id: '{{ foreach.item.discovery_id }}'
+              event_id: '{{ foreach.item.event_id }}'
               discovery_slug: '{{ foreach.item.discovery_slug }}'
-              criticality: '${{ foreach.item.criticality }}'
-              confidence: '${{ foreach.item.confidence }}'
-              root_cause: '{{ foreach.item.root_cause | default: steps.resolve_discovery.output.discovery.root_cause }}'
-              cause_kis: '${{ steps.resolve_discovery.output.discovery.cause_kis | default: [] }}'
-              dependency_edges: '${{ steps.resolve_discovery.output.discovery.dependency_edges | default: [] }}'
-              infra_components: '${{ steps.resolve_discovery.output.discovery.infra_components | default: [] }}'
-              evidences: '${{ steps.resolve_discovery.output.discovery.evidences | default: [] }}'
-              recommendations: '${{ foreach.item.recommendations | default: [] }}'
         on-failure:
           continue: true
 
