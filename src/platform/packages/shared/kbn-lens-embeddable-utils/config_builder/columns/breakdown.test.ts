@@ -83,12 +83,7 @@ test('forwards secondaryFields and orderBy for topValues breakdown', () => {
 test('forwards more than Lens UI MAX_MULTI_FIELDS_SIZE secondary fields', () => {
   // Lens interactive editor caps secondary fields at 3 (4 fields total).
   // Programmatic config builder is not subject to that UI-only gate.
-  const secondaryFields = [
-    'container.id',
-    'event.module',
-    'labels.groupId',
-    'labels.scenario',
-  ];
+  const secondaryFields = ['container.id', 'event.module', 'labels.groupId', 'labels.scenario'];
   expect(secondaryFields.length).toBeGreaterThan(3);
 
   const column = getBreakdownColumn({

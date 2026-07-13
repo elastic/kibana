@@ -146,25 +146,14 @@ describe('Rule condition chart', () => {
     // Custom threshold does not enforce that cap; chart config should still include all fields.
     await setup({
       chartDataView: dataView,
-      groupBy: [
-        'host.name',
-        'container.id',
-        'event.module',
-        'labels.groupId',
-        'labels.scenario',
-      ],
+      groupBy: ['host.name', 'container.id', 'event.module', 'labels.groupId', 'labels.scenario'],
     });
 
     expect(getSeriesBreakdown()).toEqual({
       type: 'topValues',
       field: 'host.name',
       size: 3,
-      secondaryFields: [
-        'container.id',
-        'event.module',
-        'labels.groupId',
-        'labels.scenario',
-      ],
+      secondaryFields: ['container.id', 'event.module', 'labels.groupId', 'labels.scenario'],
       accuracyMode: false,
       orderBy: expect.objectContaining({
         orderDirection: 'desc',
