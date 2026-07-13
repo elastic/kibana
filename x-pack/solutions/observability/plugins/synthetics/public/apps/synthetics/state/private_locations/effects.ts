@@ -72,7 +72,13 @@ export function* deletePrivateLocationEffect() {
     fetchEffectFactory(
       deleteSyntheticsPrivateLocation,
       deletePrivateLocationAction.success,
-      deletePrivateLocationAction.fail
+      deletePrivateLocationAction.fail,
+      i18n.translate('xpack.synthetics.deletePrivateLocationSuccess', {
+        defaultMessage: 'Successfully deleted private location.',
+      }),
+      i18n.translate('xpack.synthetics.deletePrivateLocationFailure', {
+        defaultMessage: 'Failed to delete private location.',
+      })
     )
   );
 }
