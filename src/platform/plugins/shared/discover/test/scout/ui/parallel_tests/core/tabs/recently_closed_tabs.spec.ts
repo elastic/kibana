@@ -67,12 +67,10 @@ spaceTest.describe(
       await discover.waitUntilTabIsLoaded();
     };
 
-    spaceTest('starts with no recently closed tabs', async ({ pageObjects }) => {
-      expect(await pageObjects.unifiedTabs.getRecentlyClosedRootTitles()).toStrictEqual([]);
-    });
-
     spaceTest('restores a tab after it was closed manually', async ({ pageObjects }) => {
       const { discover, filterBar, queryBar, unifiedTabs } = pageObjects;
+
+      expect(await unifiedTabs.getRecentlyClosedRootTitles()).toStrictEqual([]);
 
       await createClosedKqlTab(pageObjects);
 
