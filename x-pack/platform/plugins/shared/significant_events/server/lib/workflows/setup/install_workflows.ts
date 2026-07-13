@@ -19,7 +19,7 @@ import {
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import { installMemoryWorkflows } from '../../memory/install_managed_workflows';
+import { installMemoryWorkflows } from '../../../memory_and_investigation/lib/memory/install_managed_workflows';
 
 // These are all non-templated workflows, so they install without template `values`.
 const WORKFLOWS_TO_INSTALL: Array<{
