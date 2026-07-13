@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
+import { resolveSecurityEvalAgentId } from '../../src/converse_task';
 import { waitForEndpointPackage } from '../../src/data_generators/endpoint_data';
 import { seedForensicTimeline } from '../../src/data_generators/forensic_data';
 import { cleanupSeededData } from '../../src/data_generators/cleanup';
@@ -29,13 +30,16 @@ evaluate.describe(
     // returns rows the model can sort into a real timeline. Without seeded events the
     // "produces a chronological narrative or ordered event list" criterion is
     // unsatisfiable and pins the timeline example at partial credit.
-    evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, chatClient, log }) => {
+    evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
       await waitForEndpointPackage(kbnClient, esClient, log);
       await cleanupSeededData({ esClient, internalEsClient });
       await seedForensicTimeline({ esClient }, log);
 
       try {
-        await chatClient.converse({ message: 'hello' });
+        await agentBuilderClient.converse({
+          agentId: resolveSecurityEvalAgentId(),
+          input: 'hello',
+        });
       } catch (e) {
         log.warning(`Warmup failed: ${e}`);
       }
@@ -145,7 +149,7 @@ evaluate.describe(
                   'Addresses persistence on SRV-DC01 (not a fleet-wide hunt)',
                   'References registry run keys, scheduled tasks, services, or startup items',
                   'Uses or references ES|QL or logs-endpoint.events.* telemetry',
-                  'Surfaces at least one concrete persistence indicator present in telemetry (e.g. Run\\Updater key, svc.exe path, or shadow-copy deletion context)',
+                  'Surfaces at least one concrete persistence indicator from telemetry (e.g. Run\\Updater registry key or C:\\ProgramData\\svc.exe run-key path)',
                 ],
                 tool_sequence: [...SLICE1_FORENSIC_TOOL_SEQUENCE],
               },

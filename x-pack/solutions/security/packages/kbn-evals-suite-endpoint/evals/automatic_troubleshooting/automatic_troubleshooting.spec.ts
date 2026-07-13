@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import { METADATA_UNITED_TRANSFORM } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { evaluate } from '../../src/evaluate';
+import { resolveSecurityEvalAgentId } from '../../src/converse_task';
 import {
   waitForEndpointPackage,
   waitForTransformPropagation,
@@ -194,7 +195,7 @@ const P0_EVALS = [
 evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, () => {
   let unitedTransformId: string;
 
-  evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, chatClient, log }) => {
+  evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
     await waitForEndpointPackage(kbnClient, esClient, log);
 
     const { transforms } = await esClient.transform.getTransformStats({
@@ -203,7 +204,10 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
     unitedTransformId = transforms[0].id;
 
     try {
-      await chatClient.converse({ message: 'hello' });
+      await agentBuilderClient.converse({
+        agentId: resolveSecurityEvalAgentId(),
+        input: 'hello',
+      });
     } catch (e) {
       log.warning(`Warmup failed: ${e}`);
     }

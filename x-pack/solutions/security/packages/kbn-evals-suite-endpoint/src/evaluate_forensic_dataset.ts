@@ -11,6 +11,7 @@ import {
   createSkillInvocationEvaluator,
   createTrajectoryEvaluator,
   getToolCallSteps,
+  type AgentBuilderClient,
   type DefaultEvaluators,
   type EvaluationDataset,
   type Evaluator,
@@ -18,7 +19,7 @@ import {
   type Example,
   type TaskOutput,
 } from '@kbn/evals';
-import type { SecurityEvalChatClient } from './chat_client';
+import { converseQuestionToTaskOutput } from './converse_task';
 import { createEndpointCriteriaEvaluator } from './evaluate_dataset';
 
 /** Must match defineSkillType({ name }) in endpoint_forensic_analysis_skill.ts */
@@ -166,13 +167,13 @@ export const buildForensicEvaluators = ({
 export function createEvaluateForensicDataset({
   evaluators,
   executorClient,
-  chatClient,
+  agentBuilderClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
-  chatClient: SecurityEvalChatClient;
+  agentBuilderClient: AgentBuilderClient;
   traceEsClient: EsClient;
   log: ToolingLog;
 }): EvaluateForensicDataset {
@@ -194,16 +195,7 @@ export function createEvaluateForensicDataset({
     await executorClient.runExperiment(
       {
         datasets: [dataset],
-        task: async ({ input }) => {
-          const response = await chatClient.converse({ message: input.question });
-
-          return {
-            messages: response.messages,
-            steps: response.steps,
-            errors: response.errors,
-            traceId: response.traceId,
-          };
-        },
+        task: async ({ input }) => converseQuestionToTaskOutput(agentBuilderClient, input.question),
       },
       buildForensicEvaluators({ evaluators, traceEsClient, log })
     );
