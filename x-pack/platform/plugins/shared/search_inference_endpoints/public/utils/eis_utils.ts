@@ -430,3 +430,29 @@ export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegio
 };
 
 export const regionKey = (region: CspRegion): string => `${region.csp}::${region.region}`;
+
+/**
+ * Returns all unique geo codes present in EIS endpoint metadata, ordered by `GEO_ORDER`
+ * with any unknown codes appended alphabetically. Handles future geo codes gracefully.
+ */
+export const getAvailableGeos = (endpoints: EisInferenceEndpoint[]): string[] => {
+  const seen = new Set<string>();
+
+  for (const ep of endpoints) {
+    if (!isInferenceEndpointWithMetadata(ep)) continue;
+    const regions = ep.metadata.regions;
+    if (!regions) continue;
+
+    for (const region of regions) {
+      if (!region || typeof region !== 'object') continue;
+      if (typeof region.geo === 'string' && region.geo.length > 0) {
+        seen.add(region.geo);
+      }
+    }
+  }
+
+  const geoOrderList: readonly string[] = GEO_ORDER;
+  const knownOrdered = geoOrderList.filter((g) => seen.has(g));
+  const unknownSorted = [...seen].filter((g) => !geoOrderList.includes(g)).sort();
+  return [...knownOrdered, ...unknownSorted];
+};

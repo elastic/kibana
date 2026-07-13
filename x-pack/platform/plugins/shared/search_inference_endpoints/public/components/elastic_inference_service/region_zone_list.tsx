@@ -21,7 +21,6 @@ interface RegionZoneListProps {
   checkedKeys: Set<string>;
   expandedZones: Set<string>;
   onToggleRegion: (key: string) => void;
-  onToggleZone: (zone: ZoneGroup) => void;
   onToggleExpand: (zoneId: string, isOpen: boolean) => void;
 }
 
@@ -30,7 +29,6 @@ export const RegionZoneList: React.FC<RegionZoneListProps> = ({
   checkedKeys,
   expandedZones,
   onToggleRegion,
-  onToggleZone,
   onToggleExpand,
 }) => {
   return (
@@ -42,7 +40,6 @@ export const RegionZoneList: React.FC<RegionZoneListProps> = ({
           checkedKeys={checkedKeys}
           expandedZones={expandedZones}
           onToggleRegion={onToggleRegion}
-          onToggleZone={onToggleZone}
           onToggleExpand={onToggleExpand}
         />
       ))}

@@ -15,6 +15,7 @@ import {
   isModelEndOfLifeReached,
   getGeoDisplayName,
   getAvailableRegions,
+  getAvailableGeos,
   getRegionZoneCounts,
 } from './eis_utils';
 
@@ -312,5 +313,64 @@ describe('getRegionZoneCounts', () => {
     const us = result.find((r) => r.geo === 'us');
     expect(us?.modelCount).toBe(1);
     expect(us?.totalCount).toBe(1);
+  });
+});
+
+describe('getAvailableGeos', () => {
+  it('returns an empty array when there are no endpoints', () => {
+    expect(getAvailableGeos([])).toEqual([]);
+  });
+
+  it('collects unique geo codes from CspRegion entries', () => {
+    const ep = makeEndpoint('model', [
+      { csp: 'aws', region: 'us-east-1', geo: 'us' },
+      { csp: 'gcp', region: 'europe-west1', geo: 'eu' },
+    ]);
+    const result = getAvailableGeos([ep]);
+    expect(result).toContain('us');
+    expect(result).toContain('eu');
+  });
+
+  it('deduplicates geo codes across regions and endpoints', () => {
+    const ep1 = makeEndpoint('model-a', [
+      { csp: 'aws', region: 'us-east-1', geo: 'us' },
+      { csp: 'gcp', region: 'us-central1', geo: 'us' },
+    ]);
+    const ep2 = makeEndpoint('model-b', [{ csp: 'aws', region: 'us-west-2', geo: 'us' }]);
+    const result = getAvailableGeos([ep1, ep2]);
+    expect(result.filter((g) => g === 'us')).toHaveLength(1);
+  });
+
+  it('orders known geos by GEO_ORDER and appends unknown geos alphabetically', () => {
+    const ep = makeEndpoint('model', [
+      { csp: 'aws', region: 'us-east-1', geo: 'us' },
+      { csp: 'aws', region: 'eu-west-1', geo: 'eu' },
+      { csp: 'aws', region: 'ap-southeast-1', geo: 'apac' },
+      { csp: 'aws', region: 'me-central-1', geo: 'mea' },
+    ]);
+    const result = getAvailableGeos([ep]);
+    // GEO_ORDER: apac, eu, us, other → present geos: apac, eu, us (in GEO_ORDER order)
+    // unknown: mea (appended alphabetically)
+    expect(result).toEqual(['apac', 'eu', 'us', 'mea']);
+  });
+
+  it('places multiple unknown geos in alphabetical order after known geos', () => {
+    const ep = makeEndpoint('model', [
+      { csp: 'aws', region: 'us-east-1', geo: 'us' },
+      { csp: 'aws', region: 'za-north-1', geo: 'ssa' },
+      { csp: 'aws', region: 'me-central-1', geo: 'mea' },
+    ]);
+    const result = getAvailableGeos([ep]);
+    expect(result).toEqual(['us', 'mea', 'ssa']);
+  });
+
+  it('returns an empty array when no endpoints have metadata', () => {
+    const bare = {
+      inference_id: '.bare',
+      task_type: 'text_embedding',
+      service: 'elastic',
+      service_settings: { model_id: 'bare' },
+    } as unknown as EisInferenceEndpoint;
+    expect(getAvailableGeos([bare])).toEqual([]);
   });
 });
