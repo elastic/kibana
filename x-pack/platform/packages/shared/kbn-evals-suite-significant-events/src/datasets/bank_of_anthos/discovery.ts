@@ -244,13 +244,18 @@ export const discovery: DatasetConfig['discovery'] = [
           score: 3,
         },
         {
-          id: 'cascade-grouping',
-          text: 'Collapses the SQL connection failure, HikariCP pool init, cache-layer errors (transaction history + balance reader), the frontend→transactionhistory read timeout, and the ledgerwriter balance-retrieval failure into a single cascading discovery rather than separate unrelated incidents.',
+          id: 'cascade-transactionhistory-cluster',
+          text: 'Groups the SQL connection failure, HikariCP pool init, transaction history cache errors, and the frontend→transactionhistory read timeout into a single discovery (transactionhistory service cluster).',
+          score: 1,
+        },
+        {
+          id: 'cascade-full-grouping',
+          text: 'Further collapses balancereader cache errors and ledgerwriter balance-retrieval failure into the same cascading discovery as the transactionhistory cluster — all six detections linked under the shared ledger-db root cause rather than split into separate service-scoped discoveries.',
           score: 2,
         },
         {
           id: 'separate-benign-auth',
-          text: 'Keeps the benign authentication activity (successful logins, new account creation) as its own discovery, separate from the failure cascade — does not lump it into the database incident.',
+          text: 'Keeps the benign authentication activity (successful logins, new account creation) grouped together in a single discovery, separate from the failure cascade — does not lump them into the database incident, and does not emit login and account creation as two separate discoveries.',
           score: 2,
         },
         {
