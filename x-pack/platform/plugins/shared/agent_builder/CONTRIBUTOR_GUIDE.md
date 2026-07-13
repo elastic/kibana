@@ -350,7 +350,7 @@ for the full list of available configuration options.
 
 #### Adding the attachment type to the allow list
 
-Similar to tools and agents, we keep an hardcoded list of registered attachment types to trigger a code review from the team when
+Similar to tools and agents, we keep a hardcoded list of registered attachment types to trigger a code review from the team when
 attachment types are added.
 
 To add an attachment type to the allow list, simply add the attachment type's id to the `AGENT_BUILDER_BUILTIN_ATTACHMENTS` array,
