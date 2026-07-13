@@ -95,6 +95,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       cloud: setupDeps.cloud,
       usageApi: setupDeps.usageApi,
+      actions: setupDeps.actions,
     });
 
     registerTaskDefinitions({

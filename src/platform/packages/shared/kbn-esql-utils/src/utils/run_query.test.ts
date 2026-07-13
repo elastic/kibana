@@ -7,9 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import { getStartEndParams, getNamedParams } from './run_query';
+import { getStartEndParams, getNamedParams, formatESQLColumns } from './run_query';
 
 describe('run query helpers', () => {
+  describe('formatESQLColumns', () => {
+    it('carries the column _meta over as esMeta', () => {
+      const columns = formatESQLColumns([
+        { name: 'COUNT()', type: 'long' },
+        {
+          name: '_approximation_certified(COUNT())',
+          type: 'keyword',
+          _meta: { approximation: { type: 'count', column: 'COUNT()' } },
+        },
+      ]);
+      expect(columns[0].meta.esMeta).toBeUndefined();
+      expect(columns[1].meta.esMeta).toEqual({
+        approximation: { type: 'count', column: 'COUNT()' },
+      });
+    });
+  });
+
   describe('getStartEndParams', () => {
     it('should return an empty array if there are no time params', () => {
       const time = { from: 'now-15m', to: 'now' };
