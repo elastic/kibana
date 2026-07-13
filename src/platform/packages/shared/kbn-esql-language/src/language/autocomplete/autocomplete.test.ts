@@ -1239,6 +1239,24 @@ describe('autocomplete', () => {
         undefined,
         [[{ name: 'field.name.foo', type: 'double', userDefined: false }]]
       );
+      testSuggestions(
+        'FROM numeric_index | KEEP /',
+        [{ text: 'system.cpu.load_average.`1`' }],
+        undefined,
+        [
+          [{ name: 'system.cpu.load_average.1', type: 'double', userDefined: false }],
+          [{ name: 'numeric_index', hidden: false }],
+        ]
+      );
+      testSuggestions(
+        'FROM numeric_index | EVAL system.cpu.load_average.`1` < 0 | KEEP /',
+        [{ text: '`system.cpu.load_average.``1`` < 0`' }, { text: 'system.cpu.load_average.`1`' }],
+        undefined,
+        [
+          [{ name: 'system.cpu.load_average.1', type: 'double', userDefined: false }],
+          [{ name: 'numeric_index', hidden: false }],
+        ]
+      );
       // whitespace — we can't support this case yet because
       // we are relying on string checking instead of the AST :(
       testSuggestions.skip(

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Builder, isColumn, LeafPrinter, synth } from '@elastic/esql';
 import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
 import type { ICommandContext, ESQLColumnData } from '../../registry/types';
 import { commandsMetadata } from '../generated/commands/commands';
@@ -50,6 +51,34 @@ export function columnIsPresent(node: ESQLColumn | ESQLIdentifier, columns: Set<
 export function getColumnName(node: ESQLColumn | ESQLIdentifier): string {
   return node.type === 'identifier' ? node.name : node.parts.join('.');
 }
+
+/**
+ * Escapes a field name into a valid ES|QL column reference,
+ * backtick-quoting the segments that need it (digits, keywords, symbols).
+ * Existing ES|QL column quoting is preserved.
+ */
+export const escapeEsqlColumnName = (columnName: string): string => {
+  if (columnName.includes('`')) {
+    try {
+      // A column name can be a whole expression (e.g. the implicit name of `EVAL a.`1` < 0`), so parse it as one.
+      const expression = synth.exp(columnName);
+
+      // Preserve existing ES|QL quoting instead of escaping its backticks again.
+      if (isColumn(expression)) {
+        return LeafPrinter.column(expression);
+      }
+
+      return LeafPrinter.identifier(Builder.identifier({ name: columnName }));
+    } catch {
+      // A backtick can also be part of a raw column name. Let the printer escape it below.
+    }
+  }
+
+  return columnName
+    .split('.')
+    .map((part) => LeafPrinter.identifier(Builder.identifier({ name: part })))
+    .join('.');
+};
 
 /** Reads the generated output schema for a command from the command definitions. */
 export const getCommandOutput = (

@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { appendCommandToSuggestionItem } from './helpers';
+import { appendCommandToSuggestionItem, getSafeInsertText } from './helpers';
 import type { ISuggestionItem } from '../../../registry/types';
+
+describe('getSafeInsertText', () => {
+  it('escapes invalid segments in a column path', () => {
+    expect(getSafeInsertText('system.cpu.load_average.1')).toBe('system.cpu.load_average.`1`');
+  });
+
+  it('preserves dashes in contexts that support them', () => {
+    expect(getSafeInsertText('my-policy', { dashSupported: true })).toBe('my-policy');
+  });
+});
 
 describe('appendCommandToSuggestionItem', () => {
   it('should add a command to a suggestion item without a command', () => {
