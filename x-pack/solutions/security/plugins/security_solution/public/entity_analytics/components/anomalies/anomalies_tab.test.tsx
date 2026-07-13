@@ -541,6 +541,130 @@ describe('AnomaliesTab', () => {
     });
   });
 
+  describe('filter-triggered loading state', () => {
+    it('shows loading for the timeline and table immediately after a tactic is clicked', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+      });
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+
+      act(() => {
+        onSelectTactic!('Initial Access');
+      });
+
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'true');
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'true');
+    });
+
+    it('shows loading for the timeline and table immediately after the severity selection changes', () => {
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+
+      act(() => {
+        onSeverityChange!([MAJOR] as unknown as SeverityOption[]);
+      });
+
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'true');
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'true');
+    });
+
+    it('clears the filter-triggered loading state once both queries finish fetching', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+      });
+      const { rerender } = render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+
+      act(() => {
+        onSelectTactic!('Initial Access');
+      });
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'true');
+
+      // Simulate the tactic-triggered refetch actually starting.
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isFetching: true,
+      });
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isFetching: true });
+      rerender(<AnomaliesTab {...defaultProps} />);
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'true');
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'true');
+
+      // Once both queries settle, the filter-triggered loading state clears.
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isFetching: false,
+      });
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isFetching: false });
+      rerender(<AnomaliesTab {...defaultProps} />);
+
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'false');
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'false');
+    });
+
+    it('clears the timeline loading state as soon as the overview settles, even while the summary is still fetching', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+      });
+      const { rerender } = render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+
+      act(() => {
+        onSelectTactic!('Initial Access');
+      });
+
+      // Both refetches start.
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isFetching: true,
+      });
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isFetching: true });
+      rerender(<AnomaliesTab {...defaultProps} />);
+
+      // The overview settles first, but the summary is still fetching.
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isFetching: false,
+      });
+      rerender(<AnomaliesTab {...defaultProps} />);
+
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'false');
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'true');
+    });
+
+    it('clears the table loading state as soon as the summary settles, even while the overview is still fetching', () => {
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+      });
+      const { rerender } = render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+
+      act(() => {
+        onSelectTactic!('Initial Access');
+      });
+
+      // Both refetches start.
+      mockUseAnomalyOverview.mockReturnValue({
+        ...emptyOverview,
+        data: { ...emptyOverview.data, tacticCounts: { 'Initial Access': 1 } },
+        isFetching: true,
+      });
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isFetching: true });
+      rerender(<AnomaliesTab {...defaultProps} />);
+
+      // The summary settles first, but the overview is still fetching.
+      mockUseAnomalySummary.mockReturnValue({ ...emptySummary, isFetching: false });
+      rerender(<AnomaliesTab {...defaultProps} />);
+
+      expect(screen.getByTestId('mock-timeline')).toHaveAttribute('data-is-loading', 'true');
+      expect(screen.getByTestId('mock-table')).toHaveAttribute('data-is-loading', 'false');
+    });
+  });
+
   describe('tab error state', () => {
     it('shows the error prompt and hides the attack chain, timeline, and table when the overview errors', () => {
       mockUseAnomalyOverview.mockReturnValue({ ...emptyOverview, data: undefined, isError: true });

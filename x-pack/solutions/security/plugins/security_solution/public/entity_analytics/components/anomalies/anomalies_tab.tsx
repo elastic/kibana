@@ -124,11 +124,20 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     [start, end]
   );
 
+  // Track filter-triggered refetches explicitly so the swimlane and table can
+  // show a loading state when the user clicks a tactic or a score range, not just on mount.
+  // Each is tracked independently so whichever query finishes first can render immediately,
+  // without waiting on the other.
+  const [isOverviewFilterPending, setIsOverviewFilterPending] = useState(false);
+  const [isSummaryFilterPending, setIsSummaryFilterPending] = useState(false);
+
   const severityOptions = useSeverityOptions();
   const [selectedSeverities, setSelectedSeverities] = useState<SeverityOption[]>(severityOptions);
   const handleSeverityChange = useCallback((next: SeverityOption[]) => {
     setSelectedSeverities(next);
     setTablePageIndex(0);
+    setIsOverviewFilterPending(true);
+    setIsSummaryFilterPending(true);
   }, []);
 
   const scoreRanges = useMemo<AnomalyScoreRange[] | undefined>(() => {
@@ -152,6 +161,8 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
     (tactic: string) => {
       setSelectedTactic((current) => (current === tactic ? null : tactic));
       setTablePageIndex(0);
+      setIsOverviewFilterPending(true);
+      setIsSummaryFilterPending(true);
     },
     [setSelectedTactic]
   );
@@ -200,6 +211,18 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
       sort: [{ field: tableSortField, order: tableSortDirection }],
     },
   });
+  useEffect(() => {
+    if (!anomalyOverview.isFetching) {
+      setIsOverviewFilterPending(false);
+    }
+  }, [anomalyOverview.isFetching]);
+
+  useEffect(() => {
+    if (!anomalySummary.isFetching) {
+      setIsSummaryFilterPending(false);
+    }
+  }, [anomalySummary.isFetching]);
+
   const anomalySummaryAnomalies = useMemo(
     () => anomalySummary.data?.anomalies ?? [],
     [anomalySummary.data?.anomalies]
@@ -339,7 +362,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
             anomalies={anomalyByTimeBucket}
             selectedTactic={selectedTactic}
             timeRangeMs={timeRangeMs}
-            isLoading={anomalyOverview.isLoading}
+            isLoading={anomalyOverview.isLoading || isOverviewFilterPending}
             isEmpty={anomalyByTimeBucket.length === 0}
           />
           <EuiSpacer size="l" />
@@ -353,7 +376,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityType
             sortDirection={tableSortDirection}
             timeRange={{ from: start, to: end }}
             total={anomalySummary.data?.total ?? 0}
-            isLoading={anomalySummary.isLoading}
+            isLoading={anomalySummary.isLoading || isSummaryFilterPending}
           />
         </>
       )}
