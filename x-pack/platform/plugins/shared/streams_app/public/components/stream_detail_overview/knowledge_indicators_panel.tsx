@@ -49,8 +49,7 @@ function KnowledgeIndicatorCount({
   'data-test-subj': dataTestSubj,
 }: KnowledgeIndicatorCountProps) {
   const showSpinner = isLoading && (count === undefined || isFetching);
-  const showUnavailable =
-    count === undefined && (isError || (!isLoading && !isFetching));
+  const showUnavailable = count === undefined && (isError || (!isLoading && !isFetching));
 
   return (
     <EuiFlexItem grow={false} data-test-subj={dataTestSubj}>
@@ -89,10 +88,11 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
   const streamName = definition.stream.name;
   const streamOnboardingResult = useStreamOnboardingStatus(streamName);
 
-  const { features, featuresLoading, error: featuresError } = useStreamFeatures(
-    definition.stream,
-    [streamOnboardingResult]
-  );
+  const {
+    features,
+    featuresLoading,
+    error: featuresError,
+  } = useStreamFeatures(definition.stream, [streamOnboardingResult]);
   const queriesFetchState = useFetchDiscoveryQueries(
     {
       name: streamName,
@@ -134,10 +134,13 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
 
   const ariaLabel =
     featuresIsLoading || queriesIsLoading
-      ? i18n.translate('xpack.streams.streamOverview.knowledgeIndicatorsPanel.linkAriaLabelLoading', {
-          defaultMessage: 'View knowledge indicators for {streamName}: loading counts',
-          values: { streamName },
-        })
+      ? i18n.translate(
+          'xpack.streams.streamOverview.knowledgeIndicatorsPanel.linkAriaLabelLoading',
+          {
+            defaultMessage: 'View knowledge indicators for {streamName}: loading counts',
+            values: { streamName },
+          }
+        )
       : i18n.translate('xpack.streams.streamOverview.knowledgeIndicatorsPanel.linkAriaLabel', {
           defaultMessage:
             'View knowledge indicators for {streamName}: {featuresCount, plural, one {# feature} other {# features}}, {queriesCount, plural, one {# query} other {# queries}}',
