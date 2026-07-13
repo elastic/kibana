@@ -28,7 +28,7 @@ export class NotificationValidationError extends Error {
  * append one doc. Re-pushing an existing `notification_id` appends another doc —
  * data streams have no upsert; query-time collapse dedups, cleanup is the backstop.
  */
-export const createSubmitNotification =
+export const buildSubmitNotification =
   (
     core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>
   ): NotificationCenterPluginSetup['submitNotification'] =>

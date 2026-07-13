@@ -36,7 +36,6 @@ export const notificationDataStreamMappings = {
   },
 } satisfies MappingsDefinition;
 
-/** The registered definition; exported so tests can bind a client to a real ES cluster. */
 export const notificationDataStreamDefinition = {
   name: NOTIFICATION_DATA_STREAM_NAME,
   // bump on any mapping or lifecycle change

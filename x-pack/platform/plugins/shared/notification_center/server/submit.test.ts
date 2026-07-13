@@ -8,7 +8,7 @@
 import type { CoreSetup } from '@kbn/core/server';
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 import type { NotificationInput } from '../common/types';
-import { createSubmitNotification, NotificationValidationError } from './submit';
+import { buildSubmitNotification, NotificationValidationError } from './submit';
 import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from './types';
 
 const validDraft: NotificationInput = {
@@ -27,7 +27,7 @@ const setup = () => {
   const core = {
     getStartServices: jest.fn().mockResolvedValue([{ dataStreams }]),
   } as unknown as CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>;
-  return { submit: createSubmitNotification(core), create };
+  return { submit: buildSubmitNotification(core), create };
 };
 
 describe('createSubmit', () => {

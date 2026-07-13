@@ -17,7 +17,7 @@ import {
   NOTIFICATION_DATA_STREAM_NAME,
   notificationDataStreamDefinition,
 } from '../data_stream/notification_data_stream';
-import { createSubmitNotification, NotificationValidationError } from '../submit';
+import { buildSubmitNotification, NotificationValidationError } from '../submit';
 import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
 
 const draft = (overrides: Partial<NotificationInput> = {}): NotificationInput => ({
@@ -62,14 +62,14 @@ describe('notificationCenter submit() [integration]', () => {
       throw new Error('Failed to initialize the notification data stream client');
     }
 
-    // submit() resolves its client via core.getStartServices().dataStreams; back that
-    // with the real client bound to the test ES cluster.
+    // submit() resolves its client via core.getStartServices().dataStreams;
+    // mock the start service to return the test client bound to the test ES cluster.
     const dataStreams = { initializeClient: async () => client } as unknown as DataStreamsStart;
     const core = { getStartServices: async () => [{ dataStreams }] } as unknown as CoreSetup<
       NotificationCenterStartDependencies,
       NotificationCenterPluginStart
     >;
-    submit = createSubmitNotification(core);
+    submit = buildSubmitNotification(core);
   });
 
   afterAll(async () => {
