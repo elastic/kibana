@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableApiContext,
   HasLibraryTransforms,
-  HasParentApi,
   HasSerializableState,
   HasType,
   HasTypeDisplayName,
@@ -21,11 +20,9 @@ import type {
 } from '@kbn/presentation-publishing';
 import {
   apiHasLibraryTransforms,
-  apiHasParentApi,
   apiHasSerializableState,
   apiHasType,
   apiHasUniqueId,
-  apiIsOfType,
   apiPublishesTitle,
 } from '@kbn/presentation-publishing';
 import type { ShareActionIntents, ShareIntegration } from '@kbn/share-plugin/public/types';
@@ -40,17 +37,11 @@ export type ExportJSONActionApi = HasLibraryTransforms &
   HasType &
   PublishesTitle &
   Partial<HasTypeDisplayName> &
-  HasSerializableState &
-  HasParentApi<HasUniqueId & HasType<'dashboard'>>;
+  HasSerializableState;
 
 const isApiCompatible = (api: unknown | null): api is ExportJSONActionApi =>
   Boolean(
-    apiHasUniqueId(api) &&
-      apiHasType(api) &&
-      apiPublishesTitle(api) &&
-      apiHasSerializableState(api) &&
-      apiHasParentApi(api) &&
-      apiIsOfType(api.parentApi, 'dashboard')
+    apiHasUniqueId(api) && apiHasType(api) && apiPublishesTitle(api) && apiHasSerializableState(api)
   );
 
 export class ExportJSONAction implements Action<EmbeddableApiContext> {

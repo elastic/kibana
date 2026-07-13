@@ -51,7 +51,6 @@ export function useSanitizedState<State extends object, SanitizedState extends o
 
     sanitizeState(state)
       .then(({ data: responseData, warnings: responseWarnings }) => {
-        // console.log({ data, responseWarnings });
         if (!isMounted) return;
         setWarnings(responseWarnings.map(({ message }) => message));
         setData(responseData);
