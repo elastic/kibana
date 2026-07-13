@@ -13,6 +13,8 @@ import { i18n } from '@kbn/i18n';
 
 import type { MitreTactic, MitreTechnique, MitreSubTechnique } from './types';
 
+export { MITRE_ATTACK_VERSION } from './mitre_version';
+
 export const tactics: MitreTactic[] = [
   {
     id: 'TA0009',

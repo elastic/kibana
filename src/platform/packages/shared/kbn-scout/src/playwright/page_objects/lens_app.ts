@@ -56,8 +56,17 @@ export class LensApp {
     await expect(this.lensApp).toBeVisible();
   }
 
-  async switchToVisualization(visType: string) {
+  /**
+   * Switches the active visualization via the chart switcher.
+   *
+   * @param visType Chart switcher test-subj suffix (e.g. `lnsMetric`, `bar`), not the display label.
+   * @param options.search Optional filter text when the target chart is easier to find by label.
+   */
+  async switchToVisualization(visType: string, options?: { search?: string }) {
     await this.openChartSwitchPopover();
+    if (options?.search) {
+      await this.page.testSubj.locator('lnsChartSwitchSearch').fill(options.search);
+    }
     await this.page.testSubj.locator(`lnsChartSwitchPopover_${visType}`).click();
   }
 
@@ -233,8 +242,7 @@ export class LensApp {
   }
 
   async setPalette(paletteId: string, isLegacy: boolean) {
-    await this.page.testSubj.click('lns_colorEditing_trigger');
-    await expect(this.page.testSubj.locator('lns-palettePanelFlyout')).toBeVisible();
+    await this.openPalettePanelFlyout();
 
     const paletteModeToggle = this.page.testSubj.locator('lns_colorMappingOrLegacyPalette_switch');
     const targetValue = isLegacy ? 'true' : 'false';
@@ -250,10 +258,10 @@ export class LensApp {
       await this.page.testSubj.click(`kbnColoring_ColorMapping_Palette-${paletteId}`);
     }
 
-    await this.closePaletteEditor();
+    await this.closePalettePanelFlyout();
   }
 
-  private async closePaletteEditor() {
+  async closePalettePanelFlyout() {
     await this.page.testSubj.click('lns-indexPattern-SettingWithSiblingFlyoutBack');
     await expect(
       this.page.testSubj.locator('lns-indexPattern-SettingWithSiblingFlyoutBack')
@@ -497,8 +505,8 @@ export class LensApp {
     return data;
   }
 
-  /** Opens the palette panel for the currently active dimension. */
-  async openPalettePanel() {
+  /** Opens the palette panel flyout for the currently active dimension. */
+  async openPalettePanelFlyout() {
     await this.page.testSubj.click('lns_colorEditing_trigger');
     await this.page.testSubj.locator('lns-palettePanelFlyout').waitFor({
       state: 'visible',
@@ -507,7 +515,7 @@ export class LensApp {
   }
 
   /** Reads color-stop values and colors from the currently open palette panel. */
-  async getPaletteColorStops() {
+  async getPaletteColorStops(expectedStopsCount?: number) {
     const palettePanel = this.page.testSubj.locator('lns-palettePanelFlyout');
     const stopInputsLocator = palettePanel.locator(
       '[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]'
@@ -541,6 +549,9 @@ export class LensApp {
       .poll(
         async () => {
           const stopCount = await stopInputsLocator.count();
+          if (expectedStopsCount !== undefined && stopCount !== expectedStopsCount) {
+            return false;
+          }
           if (stopCount === 0) {
             return false;
           }

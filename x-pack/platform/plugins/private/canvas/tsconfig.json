@@ -84,7 +84,8 @@
     "@kbn/lens-common",
     "@kbn/core-http-browser",
     "@kbn/scout",
-    "@kbn/rison"
+    "@kbn/rison",
+    "@kbn/as-code-shared-schemas"
   ],
   "exclude": ["target/**/*"]
 }

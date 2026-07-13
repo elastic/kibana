@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { ID_MAX_LENGTH } from './constants';
 
 export const POLICY_EXECUTION_HISTORY_MAX_PER_PAGE = 100;
 export const POLICY_EXECUTION_HISTORY_SEARCH_MAX_LENGTH = 200;
@@ -25,6 +26,15 @@ const sharedFilterFields = {
     .optional()
     .describe(
       'Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).'
+    ),
+  ruleIds: z
+    .preprocess(
+      (v) => (v === undefined || Array.isArray(v) ? v : [v]),
+      z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(50)
+    )
+    .optional()
+    .describe(
+      'Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided. Max 50 ids.'
     ),
   outcome: policyExecutionOutcomeFilterSchema
     .optional()
@@ -60,16 +70,30 @@ const namedRefSchema = z.object({
   name: z.string().nullable().optional(),
 });
 
-// Defensive upper bound to keep response payloads sane.
+// Defensive upper bounds to keep response payloads sane.
 const MAX_WORKFLOWS_PER_ITEM = 100;
+// Cap for the embedded `rules` array in each item. A broad Action Policy can
+// emit one event referencing thousands of rules; the response only carries a
+// bounded sample and clients rely on `totalRuleCount` for the true count.
+export const MAX_EMBEDDED_RULES_PER_ITEM = 20;
 
 export const policyExecutionHistoryItemSchema = z.object({
   '@timestamp': z.string(),
   policy: namedRefSchema,
-  rule: namedRefSchema,
   outcome: policyExecutionOutcomeSchema,
   episode_count: z.number(),
   action_group_count: z.number(),
+  rules: z
+    .array(namedRefSchema)
+    .max(MAX_EMBEDDED_RULES_PER_ITEM)
+    .describe(
+      'Rules referenced by this event, bounded to MAX_EMBEDDED_RULES_PER_ITEM. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `totalRuleCount` for the full count.'
+    ),
+  totalRuleCount: z
+    .number()
+    .describe(
+      'Total number of rules referenced by this event after search / rule-filter narrowing. May exceed `rules.length` when the embedded array is truncated to the cap.'
+    ),
   workflows: z.array(namedRefSchema).max(MAX_WORKFLOWS_PER_ITEM),
 });
 export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryItemSchema>;

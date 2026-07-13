@@ -52,8 +52,8 @@ evaluate.describe(
       });
     });
 
-    evaluate.afterAll(async ({ log, quickApiClient }) => {
-      await deleteEntityEngines({ quickApiClient, log });
+    evaluate.afterAll(async ({ log, supertest }) => {
+      await deleteEntityEngines({ supertest, log });
     });
 
     evaluate('entity store v2: attachment side-effects', async ({ evaluateDataset }) => {
