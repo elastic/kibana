@@ -985,9 +985,14 @@ describe('XYChart component', () => {
       expect(areaStyle?.opacity).toBe(0.5);
     });
 
-    test('does not apply area styling when areaFill is omitted', () => {
+    test('applies fill opacity', () => {
       const areaStyle = getAreaStyle({ fillOpacity: 0.5 });
+      expect(areaStyle?.gradient).toBeUndefined();
+      expect(areaStyle?.opacity).toBe(0.5);
+    });
 
+    test('does not apply area styling when both areaFill and fillOpacity are omitted', () => {
+      const areaStyle = getAreaStyle({});
       expect(areaStyle).toBeUndefined();
     });
   });

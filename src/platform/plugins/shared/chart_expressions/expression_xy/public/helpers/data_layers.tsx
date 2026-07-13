@@ -527,32 +527,26 @@ export const getSeriesProps: GetSeriesPropsFn = ({
             singleTable
           );
 
-  const areaStyle: AreaSeriesStyle['area'] | undefined = (() => {
-    const style = {} satisfies AreaSeriesStyle['area'];
+  const areaStyle: Partial<AreaSeriesStyle['area']> | undefined = (() => {
+    const style: Partial<AreaSeriesStyle['area']> = {};
 
     if (fillOpacity) {
       style.opacity = fillOpacity;
     }
 
-    switch (areaFill) {
-      case AreaFillOptions.SOLID:
-        return style;
-        break;
-      case AreaFillOptions.GRADIENT:
-        const gradient: LinearGradient = {
-          type: 'linear',
-          stops: [
-            { offset: 0, opacity: 0, color: ColorVariant.Series },
-            { offset: 0.7, opacity: 0.9, color: ColorVariant.Series },
-            { offset: 1, opacity: 1, color: ColorVariant.Series },
-          ],
-        };
-        style.gradient = gradient;
-        return style;
-        break;
+    if (areaFill === AreaFillOptions.GRADIENT) {
+      const gradient: LinearGradient = {
+        type: 'linear',
+        stops: [
+          { offset: 0, opacity: 0, color: ColorVariant.Series },
+          { offset: 0.7, opacity: 0.9, color: ColorVariant.Series },
+          { offset: 1, opacity: 1, color: ColorVariant.Series },
+        ],
+      };
+      style.gradient = gradient;
     }
 
-    return undefined;
+    return Object.keys(style).length > 0 ? style : undefined;
   })();
 
   return {

@@ -113,7 +113,6 @@ export const XyAppearanceSettings: React.FC<VisualizationToolbarProps<XYVisualiz
             }}
           />
           <AreaFillOption
-            enabled={true}
             selectedAreaFillOption={state?.areaFill ?? AreaFillOptions.SOLID}
             onChange={(newValue) => {
               setState({

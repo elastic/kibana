@@ -11,6 +11,10 @@ import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import type { AreaFillOption } from '@kbn/expression-xy-plugin/common';
 import { AreaFillOptions } from '@kbn/expression-xy-plugin/public';
 
+const fillLabel = i18n.translate('xpack.lens.xyChart.fillLabel', {
+  defaultMessage: 'Fill',
+});
+
 const areaFillOptions: Array<{
   id: string;
   value: AreaFillOption;
@@ -33,33 +37,26 @@ const areaFillOptions: Array<{
 ];
 
 export interface AreaFillOptionProps {
-  enabled: boolean;
   selectedAreaFillOption?: AreaFillOption;
   onChange: (value: AreaFillOption) => void;
 }
 
 export const AreaFillOption: React.FC<AreaFillOptionProps> = ({
-  enabled = true,
   selectedAreaFillOption = AreaFillOptions.SOLID,
   onChange,
 }) => {
-  return enabled ? (
-    <EuiFormRow
-      display="columnCompressed"
-      label={i18n.translate('xpack.lens.xyChart.fillLabel', {
-        defaultMessage: 'Fill',
-      })}
-      fullWidth
-    >
+  const selectedOption =
+    areaFillOptions.find(({ value }) => value === selectedAreaFillOption) ?? areaFillOptions[0];
+
+  return (
+    <EuiFormRow display="columnCompressed" label={fillLabel} fullWidth>
       <EuiButtonGroup
         isFullWidth
-        legend={i18n.translate('xpack.lens.xyChart.fillLabel', {
-          defaultMessage: 'Fill',
-        })}
+        legend={fillLabel}
         data-test-subj="lnsAreaFillOption"
         buttonSize="compressed"
         options={areaFillOptions}
-        idSelected={areaFillOptions.find(({ value }) => value === selectedAreaFillOption)!.id}
+        idSelected={selectedOption.id}
         onChange={(optionId) => {
           const newAreaFillOption = areaFillOptions.find(({ id }) => id === optionId);
           if (newAreaFillOption) {
@@ -68,5 +65,5 @@ export const AreaFillOption: React.FC<AreaFillOptionProps> = ({
         }}
       />
     </EuiFormRow>
-  ) : null;
+  );
 };
