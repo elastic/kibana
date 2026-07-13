@@ -10,6 +10,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -101,7 +102,14 @@ export const EditAiPanelFlyout = ({
   };
 
   return (
-    <EuiFlyout onClose={onClose} size="s" type="push" aria-labelledby="editAiPanelFlyoutTitle">
+    <EuiFlyout
+      onClose={onClose}
+      size="s"
+      type="push"
+      resizable
+      minWidth={320}
+      aria-labelledby="editAiPanelFlyoutTitle"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="editAiPanelFlyoutTitle">
@@ -117,6 +125,22 @@ export const EditAiPanelFlyout = ({
           label={i18n.translate('xpack.aiPanel.editFlyout.panelInstructionsLabel', {
             defaultMessage: 'Panel instructions',
           })}
+          labelAppend={
+            <EuiCopy textToCopy={prompt}>
+              {(copy) => (
+                <EuiButtonEmpty
+                  css={{ blockSize: 'auto' }}
+                  size="xs"
+                  iconType="copy"
+                  onClick={copy}
+                >
+                  {i18n.translate('xpack.aiPanel.editFlyout.copyLabel', {
+                    defaultMessage: 'Copy',
+                  })}
+                </EuiButtonEmpty>
+              )}
+            </EuiCopy>
+          }
           fullWidth
         >
           <EuiTextArea value={prompt} disabled rows={5} fullWidth />
@@ -224,8 +248,7 @@ export const EditAiPanelFlyout = ({
                 size="s"
                 color="warning"
                 title={i18n.translate('xpack.aiPanel.editFlyout.templateWarning', {
-                  defaultMessage:
-                    'Advanced: editing the template directly may produce unexpected results if placeholder syntax is broken.',
+                  defaultMessage: 'Editing the template directly may produce unexpected results',
                 })}
               />
               <EuiSpacer size="s" />

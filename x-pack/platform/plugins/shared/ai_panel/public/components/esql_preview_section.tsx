@@ -126,7 +126,6 @@ export const EsqlPreviewSection = ({
 
       <EuiButton
         size="s"
-        fill
         color={isStale ? 'success' : 'primary'}
         iconType="play"
         onClick={onPreview}
