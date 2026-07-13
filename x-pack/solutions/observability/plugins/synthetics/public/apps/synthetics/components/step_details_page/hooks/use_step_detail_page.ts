@@ -28,7 +28,7 @@ export const useStepDetailPage = () => {
   const selectedLocation = useSelectedLocation();
   const spaceId = useUrlSpaceId();
 
-  const { data: journey, stepEnds } = useJourneySteps(checkGroupId);
+  const { data: journey, stepEnds } = useJourneySteps({ checkGroup: checkGroupId });
 
   const memoized = useMemo(
     () => ({

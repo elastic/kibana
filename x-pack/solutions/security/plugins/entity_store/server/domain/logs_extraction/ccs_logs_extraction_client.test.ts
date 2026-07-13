@@ -52,7 +52,16 @@ const emptyProbeResponse: ESQLSearchResponse = { columns: [], values: [] };
 const FIXED_NOW = new Date('2026-01-01T12:00:00.000Z');
 // '3h' lookbackPeriod → fresh fromDateISO = FIXED_NOW - 10 800 000 ms
 const EXPECTED_FROM_DATE_ISO = '2026-01-01T09:00:00.000Z';
+// '1m' delay → effectiveWindowEnd = FIXED_NOW - 60 000 ms. This is the `toDateISO` the outer
+// loop sweeps `sliceEnd` to whenever a slice resolves as the last page (see
+// `runLogsPaginationOuterLoop` in remote_logs_extraction_client.ts) — sampling means the last
+// page's real boundary is no longer trustworthy, so the sweep always goes to the window top
+// instead of the probe's own (possibly undershooting) MAX(@timestamp).
+const EXPECTED_WINDOW_END = '2026-01-01T11:59:00.000Z';
 
+// pickSampleProbability(10000) = min(1, max(0.1, 2500/10000)) = 0.25 (escalated above the 0.1
+// target since 10000 < LOG_EXTRACTION_SAMPLE_MIN_RETAINED's implied threshold of 25000).
+// scaledProbeLimit(DEFAULT_MAX_LOGS_PER_PAGE, 0.25) = round(10000 * 0.25) = 2500
 const DEFAULT_MAX_LOGS_PER_PAGE = 10000;
 
 describe('CcsLogsExtractionClient', () => {
@@ -126,7 +135,8 @@ describe('CcsLogsExtractionClient', () => {
     const result = await client.extractToUpdates(defaultExtractParams);
 
     expect(result).toEqual({ count: 2, pages: 1 });
-    // probe + entity page; total_logs=2 < maxLogsPerPage=10000 → isLastLogsPage=true, no second probe
+    // probe + entity page; total_logs=2 < scaledProbeLimit(10000)=2500 → isLastLogsPage=true,
+    // sweep extraction runs once (over the swept window) and no second probe is needed
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
     expect(mockIngestEntities).toHaveBeenCalledTimes(1);
     expect(mockIngestEntities).toHaveBeenCalledWith({
@@ -217,7 +227,8 @@ describe('CcsLogsExtractionClient', () => {
     const result = await client.extractToUpdates({ ...defaultExtractParams, docsLimit });
 
     expect(result).toEqual({ count: 3, pages: 2 });
-    // probe + 2 entity pages; total_logs=3 < maxLogsPerPage=10000 → isLastLogsPage=true, no second probe
+    // probe + 2 entity pages; total_logs=3 < scaledProbeLimit(10000)=2500 → isLastLogsPage=true,
+    // no second probe
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
     expect(mockIngestEntities).toHaveBeenCalledTimes(2);
     expect(mockIngestEntities).toHaveBeenNthCalledWith(
@@ -233,9 +244,10 @@ describe('CcsLogsExtractionClient', () => {
       checkpointTimestamp: '2024-06-15T10:00:00.000Z',
       paginationRecoveryId: 'host:h2',
     });
-    // Outer loop advance after slice completes
+    // Outer loop advance after slice completes: last-page slices are swept all the way to the
+    // window top (EXPECTED_WINDOW_END), not the probe's own (sampled) MAX(@timestamp).
     expect(mockCcsStateClient.update).toHaveBeenCalledWith('host', {
-      checkpointTimestamp: '2024-06-15T11:00:00.000Z',
+      checkpointTimestamp: EXPECTED_WINDOW_END,
       paginationRecoveryId: null,
     });
     // count > 0 → no clearRecoveryId
@@ -244,7 +256,11 @@ describe('CcsLogsExtractionClient', () => {
 
   it('should paginate across outer (log-slice) loop when probe signals more slices', async () => {
     const docsLimit = 5;
-    const maxLogsPerPage = 2;
+    // pickSampleProbability(20) = min(1, max(0.1, 2500/20)) = 1: below LOG_EXTRACTION_SAMPLE_MIN_RETAINED
+    // (2500), maxLogsPerPage=20 is too small for sampling to be accurate, so it escalates to an
+    // exact, unsampled probe (p=1). scaledProbeLimit(20, 1) = 20, same as the original
+    // pre-sampling LIMIT — total_logs below is compared directly against 20.
+    const maxLogsPerPage = 20;
 
     const slice1EntityPage: ESQLSearchResponse = {
       columns: [
@@ -265,12 +281,13 @@ describe('CcsLogsExtractionClient', () => {
       ],
     };
 
-    // Probe 1: total_logs=2 = maxLogsPerPage=2 → full page, isLastLogsPage=false → not last
-    // Probe 2: total_logs=1 < maxLogsPerPage=2 → partial page, isLastLogsPage=true → last slice
+    // Probe 1: total_logs=20 = scaledProbeLimit(20)=20 → saturated, isLastLogsPage=false → not last
+    // Probe 2: total_logs=5 < scaledProbeLimit(20)=20 → not saturated, isLastLogsPage=true → last
+    //   slice; sliceEnd is swept to EXPECTED_WINDOW_END rather than the probe's own timestamp.
     mockExecuteEsqlQuery
-      .mockResolvedValueOnce(makeProbeResponse('2024-06-15T10:00:00.000Z', 2))
+      .mockResolvedValueOnce(makeProbeResponse('2024-06-15T10:00:00.000Z', 20))
       .mockResolvedValueOnce(slice1EntityPage)
-      .mockResolvedValueOnce(makeProbeResponse('2024-06-15T11:00:00.000Z', 1))
+      .mockResolvedValueOnce(makeProbeResponse('2024-06-15T11:00:00.000Z', 5))
       .mockResolvedValueOnce(slice2EntityPage);
 
     const result = await client.extractToUpdates({
@@ -280,7 +297,8 @@ describe('CcsLogsExtractionClient', () => {
     });
 
     expect(result).toEqual({ count: 4, pages: 2 });
-    // 2 probes + 2 entity pages
+    // 2 probes + 2 entity pages; the last slice resolves from a present (non-empty) probe row,
+    // so no extra sweep probe/call is needed beyond the extraction that already ran for it.
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
     expect(mockIngestEntities).toHaveBeenCalledTimes(2);
 
@@ -289,8 +307,9 @@ describe('CcsLogsExtractionClient', () => {
       checkpointTimestamp: '2024-06-15T10:00:00.000Z',
       paginationRecoveryId: null,
     });
+    // Last slice: swept to the window top, not the probe's own MAX(@timestamp).
     expect(mockCcsStateClient.update).toHaveBeenCalledWith('host', {
-      checkpointTimestamp: '2024-06-15T11:00:00.000Z',
+      checkpointTimestamp: EXPECTED_WINDOW_END,
       paginationRecoveryId: null,
     });
     // count > 0 → no clearRecoveryId
@@ -334,19 +353,71 @@ describe('CcsLogsExtractionClient', () => {
       checkpointTimestamp: '2024-06-15T10:00:00.000Z',
       paginationRecoveryId: null,
     });
-    mockExecuteEsqlQuery.mockResolvedValueOnce(emptyProbeResponse);
+    // An empty (zero-row) probe no longer short-circuits the loop: it is treated like a
+    // non-saturated last page and triggers a follow-up sweep extraction over the full
+    // remaining window, so a second (empty) response is needed here.
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(emptyProbeResponse)
+      .mockResolvedValueOnce({ columns: [], values: [] });
 
     const result = await client.extractToUpdates(defaultExtractParams);
 
     expect(result).toEqual({ count: 0, pages: 0 });
-    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
     expect(mockIngestEntities).not.toHaveBeenCalled();
-    // clearRecoveryId called to clean up any stale recovery id; checkpoint unchanged
+    // clearRecoveryId called to clean up any stale recovery id (totalCount stayed 0)
     expect(mockCcsStateClient.clearRecoveryId).toHaveBeenCalledWith('host');
-    expect(mockCcsStateClient.update).not.toHaveBeenCalledWith(
-      'host',
-      expect.objectContaining({ checkpointTimestamp: null })
+    // The sweep still persists the swept slice end (window top), even though nothing was found
+    expect(mockCcsStateClient.update).toHaveBeenCalledWith('host', {
+      checkpointTimestamp: EXPECTED_WINDOW_END,
+      paginationRecoveryId: null,
+    });
+  });
+
+  it('does not drop real docs when the sampled probe finds nothing (follow-up sweep extraction still ingests them)', async () => {
+    // Core correctness guarantee of the SAMPLE-based probe: a probe reporting zero sampled rows
+    // does NOT prove the real window is empty (e.g. 1-2 real docs left, ~90% chance none get
+    // sampled at p=0.1). `hasLogsToProcess: false` must still trigger a follow-up sweep
+    // extraction over the full [fromDateISO, toDateISO] window so those real docs are ingested
+    // instead of being silently skipped.
+    mockCcsStateClient.findOrInit.mockResolvedValue({
+      checkpointTimestamp: '2024-06-15T10:00:00.000Z',
+      paginationRecoveryId: null,
+    });
+
+    const sweepExtractionResponse: ESQLSearchResponse = {
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD, type: 'date' },
+        { name: 'entity.id', type: 'keyword' },
+      ],
+      values: [['2024-06-15T10:30:00.000Z', '2024-06-15T10:30:00.000Z', 'host:h-tail']],
+    };
+
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(emptyProbeResponse) // probe samples 0 rows despite real docs existing
+      .mockResolvedValueOnce(sweepExtractionResponse); // sweep extraction still finds the real doc
+
+    const result = await client.extractToUpdates(defaultExtractParams);
+
+    expect(result).toEqual({ count: 1, pages: 1 });
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+    expect(mockIngestEntities).toHaveBeenCalledTimes(1);
+    expect(mockIngestEntities).toHaveBeenCalledWith(
+      expect.objectContaining({ esqlResponse: sweepExtractionResponse })
     );
+
+    // The sweep extraction covers the whole remaining window — swept to the window top rather
+    // than being bounded by the (undershooting/empty) sampled probe boundary.
+    const sweepQuery = mockExecuteEsqlQuery.mock.calls[1][0].query as string;
+    expect(sweepQuery).toContain(EXPECTED_WINDOW_END);
+
+    // count > 0 → no clearRecoveryId, and the swept slice-end is persisted as usual.
+    expect(mockCcsStateClient.clearRecoveryId).not.toHaveBeenCalled();
+    expect(mockCcsStateClient.update).toHaveBeenCalledWith('host', {
+      checkpointTimestamp: EXPECTED_WINDOW_END,
+      paginationRecoveryId: null,
+    });
   });
 
   it('should resume from mid entity-page recovery state (paginationRecoveryId set)', async () => {
@@ -417,7 +488,10 @@ describe('CcsLogsExtractionClient', () => {
       checkpointTimestamp: null,
       paginationRecoveryId: null,
     });
-    mockExecuteEsqlQuery.mockResolvedValueOnce(emptyProbeResponse);
+    // Empty probe now runs a follow-up sweep extraction instead of short-circuiting the loop.
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(emptyProbeResponse)
+      .mockResolvedValueOnce({ columns: [], values: [] });
 
     await client.extractToUpdates(defaultExtractParams);
 
@@ -433,7 +507,10 @@ describe('CcsLogsExtractionClient', () => {
       checkpointTimestamp: checkpoint,
       paginationRecoveryId: null,
     });
-    mockExecuteEsqlQuery.mockResolvedValueOnce(emptyProbeResponse);
+    // Empty probe now runs a follow-up sweep extraction instead of short-circuiting the loop.
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(emptyProbeResponse)
+      .mockResolvedValueOnce({ columns: [], values: [] });
 
     await client.extractToUpdates(defaultExtractParams);
 
@@ -495,8 +572,10 @@ describe('CcsLogsExtractionClient', () => {
         checkpointTimestamp: checkpoint,
         paginationRecoveryId: null,
       });
-      // Each sub-window probe returns empty (no logs), so the inner outer-loop terminates
-      // immediately and never persists per-slice checkpoints. No state updates occur.
+      // Each sub-window probe returns empty (no logs). Under the new sweep semantics this no
+      // longer breaks the inner outer-loop immediately — each sub-window still runs one
+      // follow-up sweep extraction (also empty here) over its full span, and persists that
+      // swept slice-end as the sub-window's checkpoint.
       mockExecuteEsqlQuery.mockResolvedValue(emptyProbeResponse);
 
       const result = await client.extractToUpdates({
@@ -505,11 +584,14 @@ describe('CcsLogsExtractionClient', () => {
       });
 
       expect(result).toEqual({ count: 0, pages: 0 });
-      // 6 sub-windows × 1 probe each.
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(6);
-      // No per-sub-window checkpoint persistence — inner per-slice persistence is the only
-      // mechanism, and it didn't fire because every probe was empty.
-      expect(mockCcsStateClient.update).not.toHaveBeenCalled();
+      // 6 sub-windows × (1 probe + 1 follow-up sweep extraction).
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(12);
+      // Each sub-window's empty probe still sweeps to (and persists) its own window end.
+      expect(mockCcsStateClient.update).toHaveBeenCalledTimes(6);
+      expect(mockCcsStateClient.update).toHaveBeenLastCalledWith('host', {
+        checkpointTimestamp: EXPECTED_WINDOW_END,
+        paginationRecoveryId: null,
+      });
       // count=0 across all sub-windows → clearRecoveryId
       expect(mockCcsStateClient.clearRecoveryId).toHaveBeenCalledWith('host');
     });
@@ -521,23 +603,34 @@ describe('CcsLogsExtractionClient', () => {
         checkpointTimestamp: checkpoint,
         paginationRecoveryId: null,
       });
-      mockExecuteEsqlQuery.mockResolvedValueOnce(emptyProbeResponse);
+      // Empty probe now triggers one follow-up sweep extraction (also empty) instead of ending
+      // the loop immediately.
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(emptyProbeResponse)
+        .mockResolvedValueOnce({ columns: [], values: [] });
 
       await client.extractToUpdates({
         ...defaultExtractParams,
         maxTimeWindowSize: '5m',
       });
 
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
-      // Empty probe → no per-slice state updates either.
-      expect(mockCcsStateClient.update).not.toHaveBeenCalled();
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+      // The sweep still persists the swept (empty) slice-end as the checkpoint.
+      expect(mockCcsStateClient.update).toHaveBeenCalledWith('host', {
+        checkpointTimestamp: EXPECTED_WINDOW_END,
+        paginationRecoveryId: null,
+      });
     });
 
     it('bypasses the sub-window cap when windowOverride is provided', async () => {
       const overrideFrom = '2024-01-01T00:00:00.000Z';
       const overrideTo = '2024-12-31T23:59:00.000Z'; // ~1y, exceeds the 5m cap
 
-      mockExecuteEsqlQuery.mockResolvedValueOnce(emptyProbeResponse);
+      // Empty probe now triggers one follow-up sweep extraction (also empty). Override runs
+      // skip state updates regardless.
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(emptyProbeResponse)
+        .mockResolvedValueOnce({ columns: [], values: [] });
 
       await client.extractToUpdates({
         ...defaultExtractParams,
@@ -545,8 +638,9 @@ describe('CcsLogsExtractionClient', () => {
         windowOverride: { fromDateISO: overrideFrom, toDateISO: overrideTo },
       });
 
-      // Single probe over the full user-supplied window — no sub-window splitting.
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      // Single probe + sweep extraction over the full user-supplied window — no sub-window
+      // splitting.
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
       const probeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query as string;
       expect(probeQuery).toContain(overrideFrom);
       expect(probeQuery).toContain(overrideTo);
@@ -568,17 +662,19 @@ describe('CcsLogsExtractionClient', () => {
         maxTimeWindowSize: '5m',
       });
 
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
+      // 3 sub-windows × (1 probe + 1 follow-up sweep extraction, since every probe is empty).
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(6);
 
+      // Calls interleave probe/sweep per sub-window: [probe1, sweep1, probe2, sweep2, probe3, sweep3].
       const subWindow1 = mockExecuteEsqlQuery.mock.calls[0][0].query as string;
       expect(subWindow1).toContain('2026-01-01T11:44:00.000Z');
       expect(subWindow1).toContain('2026-01-01T11:49:00.000Z');
 
-      const subWindow2 = mockExecuteEsqlQuery.mock.calls[1][0].query as string;
+      const subWindow2 = mockExecuteEsqlQuery.mock.calls[2][0].query as string;
       expect(subWindow2).toContain('2026-01-01T11:49:00.000Z');
       expect(subWindow2).toContain('2026-01-01T11:54:00.000Z');
 
-      const subWindow3 = mockExecuteEsqlQuery.mock.calls[2][0].query as string;
+      const subWindow3 = mockExecuteEsqlQuery.mock.calls[4][0].query as string;
       expect(subWindow3).toContain('2026-01-01T11:54:00.000Z');
       expect(subWindow3).toContain('2026-01-01T11:59:00.000Z');
     });
@@ -587,7 +683,9 @@ describe('CcsLogsExtractionClient', () => {
   describe('stall detection', () => {
     // `sliceStart` starts undefined; it is only set after the first slice completes (line ~332).
     // Stall detection (`!!sliceStart && ...`) therefore requires at least two slice iterations.
-    // After the stall, a terminal empty probe ends the loop (full-page count no longer signals last page).
+    // After the stall, a terminal empty probe resolves as the last page and runs one follow-up
+    // sweep extraction over the remaining window before the loop ends (it no longer breaks
+    // immediately) — every "terminal empty probe" sequence below mocks one extra response for it.
 
     it('logs warn and bumps checkpointTimestamp by 1ms when timestamp unchanged and page is full', async () => {
       const stalledTs = '2024-06-15T10:00:00.000Z';
@@ -598,21 +696,28 @@ describe('CcsLogsExtractionClient', () => {
         paginationRecoveryId: null,
       });
 
-      // Slice 1: ends at stalledTs (full page → not last, loop continues).
-      // Slice 2: same stalledTs + full page → stall fires, extraction skipped, cursor bumped.
-      // Probe 3 (with bumpedTs): empty → loop ends.
+      // Slice 1: ends at stalledTs (saturated → not last, loop continues).
+      // Slice 2: same stalledTs + saturated page → stall fires, extraction skipped, cursor bumped.
+      // Probe 3 (with bumpedTs): empty → resolves as last page, runs one follow-up sweep
+      // extraction over the remaining window, then the loop ends.
       mockExecuteEsqlQuery
         .mockResolvedValueOnce(makeProbeResponse(stalledTs, DEFAULT_MAX_LOGS_PER_PAGE)) // slice 1, not last
         .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 1
         .mockResolvedValueOnce(makeProbeResponse(stalledTs, DEFAULT_MAX_LOGS_PER_PAGE)) // slice 2: stall fires, extraction skipped
-        .mockResolvedValueOnce(emptyProbeResponse); // probe 3 with bumpedTs → loop ends
+        .mockResolvedValueOnce(emptyProbeResponse) // probe 3 with bumpedTs → last page
+        .mockResolvedValueOnce({ columns: [], values: [] }); // follow-up sweep extraction → loop ends
 
       const result = await client.extractToUpdates(defaultExtractParams);
 
       expect(result.error).toBeUndefined();
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      // The stall message no longer includes a doc count — it now describes a "saturated page"
+      // rather than "a full page (${n} docs)", since a saturated sampled page no longer maps to
+      // an exact doc count.
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining(`CCS log-slice probe stalled at ${stalledTs}`)
+        expect.stringContaining(
+          `CCS log-slice probe stalled at ${stalledTs} with a saturated page; advancing cursor by 1ms. Docs sharing this timestamp beyond the configured per-page limit (${DEFAULT_MAX_LOGS_PER_PAGE}) will be dropped.`
+        )
       );
       // The outer loop persists the bumped value as checkpointTimestamp after the stalled slice.
       expect(mockCcsStateClient.update).toHaveBeenCalledWith('host', {
@@ -631,13 +736,15 @@ describe('CcsLogsExtractionClient', () => {
       });
 
       // Slice 1: sliceStart becomes ts1. Slice 2: advances to ts2 (different) → no stall.
-      // Full page (total=max) → isLastLogsPage=false → loop continues; terminal empty probe ends it.
+      // Saturated page (total >= scaledProbeLimit) → isLastLogsPage=false → loop continues;
+      // a terminal empty probe then resolves last and runs one follow-up sweep extraction.
       mockExecuteEsqlQuery
         .mockResolvedValueOnce(makeProbeResponse(ts1, DEFAULT_MAX_LOGS_PER_PAGE)) // slice 1, not last
         .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 1
-        .mockResolvedValueOnce(makeProbeResponse(ts2, DEFAULT_MAX_LOGS_PER_PAGE)) // full page, different ts → not last
+        .mockResolvedValueOnce(makeProbeResponse(ts2, DEFAULT_MAX_LOGS_PER_PAGE)) // saturated, different ts → not last
         .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 2
-        .mockResolvedValueOnce(emptyProbeResponse); // terminal probe → loop ends
+        .mockResolvedValueOnce(emptyProbeResponse) // terminal probe → last page
+        .mockResolvedValueOnce({ columns: [], values: [] }); // follow-up sweep extraction → loop ends
 
       const result = await client.extractToUpdates(defaultExtractParams);
 
@@ -653,12 +760,15 @@ describe('CcsLogsExtractionClient', () => {
         paginationRecoveryId: null,
       });
 
-      // Slice 1: sliceStart becomes ts1 (full page, not last). Slice 2: same ts but only 5 docs (partial) → no stall.
+      // Slice 1: sliceStart becomes ts1 (saturated, not last). Slice 2: same ts but only 5
+      // sampled docs (well below scaledProbeLimit=2500) → isLastLogsPage=true, so sliceEnd is
+      // swept to EXPECTED_WINDOW_END (not ts1) before reaching the stall check — no stall
+      // regardless, since the swept sliceEnd never equals sliceStart's ts1.
       mockExecuteEsqlQuery
         .mockResolvedValueOnce(makeProbeResponse(ts1, DEFAULT_MAX_LOGS_PER_PAGE)) // slice 1, not last
         .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 1
         .mockResolvedValueOnce(makeProbeResponse(ts1, 5)) // same ts, partial page → no stall, isLastLogsPage=true
-        .mockResolvedValueOnce({ columns: [], values: [] }); // entity extraction 2
+        .mockResolvedValueOnce({ columns: [], values: [] }); // entity extraction 2 (sliceEnd = EXPECTED_WINDOW_END)
 
       const result = await client.extractToUpdates(defaultExtractParams);
 
@@ -674,16 +784,63 @@ describe('CcsLogsExtractionClient', () => {
       });
 
       const someTs = '2024-06-15T10:00:00.000Z';
-      // Full page (total=max → isLastLogsPage=false): loop continues; terminal empty probe ends it.
+      // Saturated page (isLastLogsPage=false): loop continues; a terminal empty probe then
+      // resolves last and runs one follow-up sweep extraction before the loop ends.
       mockExecuteEsqlQuery
         .mockResolvedValueOnce(makeProbeResponse(someTs, DEFAULT_MAX_LOGS_PER_PAGE)) // slice 1, not last
         .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction
-        .mockResolvedValueOnce(emptyProbeResponse); // terminal probe → loop ends
+        .mockResolvedValueOnce(emptyProbeResponse) // terminal probe → last page
+        .mockResolvedValueOnce({ columns: [], values: [] }); // follow-up sweep extraction → loop ends
 
       const result = await client.extractToUpdates(defaultExtractParams);
 
       expect(result.error).toBeUndefined();
       expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('adaptive sampleProbability', () => {
+    it('escalates above the 0.1 target and emits a SAMPLE stage when maxLogsPerPage=10000', async () => {
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(makeProbeResponse('2024-06-15T23:59:59.000Z', 2))
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      await client.extractToUpdates({ ...defaultExtractParams, maxLogsPerPage: 10000 });
+
+      const probeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query as string;
+      // pickSampleProbability(10000) = min(1, max(0.1, 2500/10000)) = 0.25
+      expect(probeQuery).toContain('| SAMPLE 0.25');
+    });
+
+    it('falls back to an exact, unsampled probe (no SAMPLE stage) when maxLogsPerPage is too small to sample accurately', async () => {
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(makeProbeResponse('2024-06-15T23:59:59.000Z', 2))
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      await client.extractToUpdates({ ...defaultExtractParams, maxLogsPerPage: 20 });
+
+      const probeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query as string;
+      // pickSampleProbability(20) = 1 (20 <= LOG_EXTRACTION_SAMPLE_MIN_RETAINED / 1 threshold)
+      expect(probeQuery).not.toContain('SAMPLE');
+      expect(probeQuery).toContain('| LIMIT 20');
+    });
+
+    it('does not run a sweep extraction when an exact (unsampled) probe finds nothing', async () => {
+      // maxLogsPerPage=20 → pickSampleProbability(20)=1: too small for sampling to help, so
+      // the probe is exact. An empty result from an exact probe is definitive (no real docs can
+      // be missed the way a sampled probe can miss them), so the loop should stop immediately
+      // instead of running a redundant sweep extraction.
+      mockExecuteEsqlQuery.mockResolvedValueOnce(emptyProbeResponse);
+
+      const result = await client.extractToUpdates({ ...defaultExtractParams, maxLogsPerPage: 20 });
+
+      expect(result).toEqual({ count: 0, pages: 0 });
+      // Only the single (empty) probe call — no follow-up sweep extraction.
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockIngestEntities).not.toHaveBeenCalled();
+      expect(mockCcsStateClient.clearRecoveryId).toHaveBeenCalledWith('host');
+      // No slice-end was ever swept/persisted, unlike the sampled-probe case.
+      expect(mockCcsStateClient.update).not.toHaveBeenCalled();
     });
   });
 });

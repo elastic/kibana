@@ -7,6 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SyntheticsEsClient } from '../lib';
+import { getCheckGroupTimeRangeFilter } from '../../common/constants/client_defaults';
 import type { RefResult, FullScreenshot } from '../../common/runtime_types/ping/synthetics';
 
 interface ResultType {
@@ -21,9 +22,11 @@ export const getJourneyScreenshot = async ({
   checkGroup,
   stepIndex,
   syntheticsEsClient,
+  timestamp,
 }: {
   checkGroup: string;
   stepIndex: number;
+  timestamp?: string;
 } & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<ScreenshotReturnTypesUnion> => {
@@ -43,6 +46,7 @@ export const getJourneyScreenshot = async ({
               'synthetics.type': ['step/screenshot', 'step/screenshot_ref'],
             },
           },
+          ...(timestamp ? [getCheckGroupTimeRangeFilter(timestamp)] : []),
         ] as QueryDslQueryContainer[],
       },
     },
