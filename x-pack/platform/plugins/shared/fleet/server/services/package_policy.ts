@@ -3557,7 +3557,7 @@ function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
   const throwAgentless = () => {
     throw new PackagePolicyValidationError(
       i18n.translate('xpack.fleet.packagePolicyConditionNotAllowedAgentless', {
-        defaultMessage: '`condition` is not supported on agentless package policies.',
+        defaultMessage: '`condition` is not supported on managed integrations.',
       })
     );
   };

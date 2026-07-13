@@ -14,6 +14,7 @@ import {
 } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { PREBUILT_RULES_BULK_CREATE_BATCH_SIZE } from '../../../prebuilt_rules/constants';
 import { getCreateRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
@@ -109,6 +110,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
 
     expect(rulesClient.bulkCreateRules).toHaveBeenCalledWith(
       expect.objectContaining({
+        batchSize: PREBUILT_RULES_BULK_CREATE_BATCH_SIZE,
         rules: [
           expect.objectContaining({
             data: expect.objectContaining({

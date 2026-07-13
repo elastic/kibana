@@ -216,10 +216,10 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ```markdown
 > [!NOTE]
-> Created by the Flaky Test Fixer workflow, requested by @${{ env.REQUESTED_BY }}. Share feedback or questions in #kibana-qa.
+> Requested by @${{ env.REQUESTED_BY }}. Share feedback in #kibana-qa.
 ```
 
-(Per "Requester mention", drop `requested by @${{ env.REQUESTED_BY }}` from the NOTE if the requester is a bot or `kibanamachine`.)
+(Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving just `Share feedback in #kibana-qa.`)
 
 ## Outcome comment
 

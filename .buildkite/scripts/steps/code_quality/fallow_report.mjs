@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 // --- CODEOWNERS resolution ---
@@ -106,6 +106,20 @@ function gradeEmoji(grade) {
   }
 }
 
+function scoreTrendEmoji(delta) {
+  if (delta > 0.05) return '↑';
+  if (delta < -0.05) return '↓';
+  return '→';
+}
+
+function metricTrendEmoji(delta, lowerIsBetter) {
+  const improving = lowerIsBetter ? delta < -0.05 : delta > 0.05;
+  const declining = lowerIsBetter ? delta > 0.05 : delta < -0.05;
+  if (improving) return '↑';
+  if (declining) return '↓';
+  return '→';
+}
+
 // --- Main ---
 
 const args = process.argv.slice(2);
@@ -115,12 +129,25 @@ const targetOwners =
   ownersIdx !== -1
     ? args.slice(ownersIdx + 1).map((o) => o.replace('@', '').replace('elastic/', 'elastic/'))
     : [];
+const prevSnapshotIdx = args.indexOf('--prev-snapshot');
+const prevSnapshotPath = prevSnapshotIdx !== -1 ? args[prevSnapshotIdx + 1] : null;
+const saveSnapshotIdx = args.indexOf('--save-owner-snapshot');
+const saveSnapshotPath = saveSnapshotIdx !== -1 ? args[saveSnapshotIdx + 1] : null;
 
 if (!jsonPath) {
   console.error(
-    'Usage: node fallow_report.mjs <fallow.json> --owners @elastic/team1 @elastic/team2'
+    'Usage: node fallow_report.mjs <fallow.json> --owners @elastic/team1 @elastic/team2 [--prev-snapshot <path>] [--save-owner-snapshot <path>]'
   );
   process.exit(1);
+}
+
+let prevSnapshot = null;
+if (prevSnapshotPath) {
+  try {
+    prevSnapshot = JSON.parse(readFileSync(prevSnapshotPath, 'utf8'));
+  } catch {
+    // no previous snapshot — first run
+  }
 }
 
 const data = JSON.parse(readFileSync(jsonPath, 'utf8'));
@@ -165,6 +192,7 @@ const filteredOwners = targetOwners.length
 
 const lines = [];
 const annotationLines = ['**Code Quality**\n'];
+const currentSnapshot = { timestamp: new Date().toISOString(), owners: {} };
 
 // Summary table
 lines.push('--- Per-owner summary');
@@ -218,12 +246,71 @@ for (const owner of filteredOwners) {
     }
   }
 
-  // Annotation
-  annotationLines.push(
-    `- **${teamShort}**: ${emoji} ${grade} (${score.toFixed(1)}/100) · density ${density.toFixed(
-      2
-    )} · ${critical.length} critical`
-  );
+  // Save current metrics for snapshot
+  currentSnapshot.owners[owner] = {
+    score: parseFloat(score.toFixed(2)),
+    density: parseFloat(density.toFixed(3)),
+    critical: critical.length,
+    hotspots: d.hotspots.length,
+  };
+
+  // Per-owner trend vs previous snapshot
+  const prev = prevSnapshot?.owners?.[owner];
+  if (prev) {
+    const scoreDelta = score - prev.score;
+    const densityDelta = density - prev.density;
+    const criticalDelta = critical.length - prev.critical;
+    const prevDate = prevSnapshot.timestamp.slice(0, 10);
+    const [, mm, dd] = prevDate.split('-');
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    const shortDate = `${monthNames[parseInt(mm, 10) - 1]} ${parseInt(dd, 10)}`;
+
+    const scoreArrow = scoreTrendEmoji(scoreDelta);
+    const densityArrow = metricTrendEmoji(densityDelta, true);
+    const criticalArrow = metricTrendEmoji(criticalDelta, true);
+
+    const deltaStr = [
+      `${scoreArrow} score: ${prev.score.toFixed(1)}→${score.toFixed(1)} (${
+        scoreDelta >= 0 ? '+' : ''
+      }${scoreDelta.toFixed(1)})`,
+      `${densityArrow} density: ${prev.density.toFixed(3)}→${density.toFixed(3)}`,
+      `${criticalArrow} critical: ${prev.critical}→${critical.length}`,
+    ].join(' · ');
+
+    lines.push(`  Trend vs ${prevDate}: ${deltaStr}`);
+
+    annotationLines.push(
+      `- **${teamShort}**: ${emoji} ${grade} (${score.toFixed(1)}/100) · density ${density.toFixed(
+        2
+      )} · ${critical.length} critical · Δ ${scoreArrow}${
+        scoreDelta >= 0 ? '+' : ''
+      }${scoreDelta.toFixed(1)} (${shortDate})`
+    );
+  } else {
+    annotationLines.push(
+      `- **${teamShort}**: ${emoji} ${grade} (${score.toFixed(1)}/100) · density ${density.toFixed(
+        2
+      )} · ${critical.length} critical`
+    );
+  }
+}
+
+// Save owner snapshot if requested
+if (saveSnapshotPath) {
+  writeFileSync(saveSnapshotPath, JSON.stringify(currentSnapshot, null, 2));
 }
 
 // Print sections

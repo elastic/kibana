@@ -49,7 +49,7 @@ import { StepDefineRule } from '../../components/step_define_rule';
 import { useExperimentalFeatureFieldsTransform } from '../../components/step_define_rule/use_experimental_feature_fields_transform';
 import { StepScheduleRule } from '../../components/step_schedule_rule';
 import { StepRuleActions } from '../../../rule_creation/components/step_rule_actions';
-import { formatRule } from '../rule_creation/helpers';
+import { formatRule, getApiOnlyThreatMatchFields } from '../rule_creation/helpers';
 import {
   getActionMessageParams,
   getStepsData,
@@ -420,8 +420,9 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
     const updatedRule = await updateRule({
       ...formattedRule,
+      ...getApiOnlyThreatMatchFields(rule),
       ...(ruleId ? { id: ruleId } : {}),
-    });
+    } as RuleUpdateProps);
 
     const aiSession = aiRuleCreation.getSession();
     const isAiEdited = isAiRuleUpdateRef.current;
