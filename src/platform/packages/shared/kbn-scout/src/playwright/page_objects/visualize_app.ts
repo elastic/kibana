@@ -167,7 +167,7 @@ export class VisualizeApp {
     await this.editInLensButton.click();
   }
 
-  async expectEditInLensButtonVisible() {
-    await expect(this.editInLensButton).toBeVisible();
+  getEditInLensButton() {
+    return this.editInLensButton;
   }
 }

@@ -97,7 +97,7 @@ export class LensApp {
   }
 
   async confirmDiscardChangesModal() {
-    await expect(this.discardChangesModal).toBeVisible();
+    await this.discardChangesModal.waitFor({ state: 'visible' });
     await this.confirmModalConfirmButton.click();
   }
 

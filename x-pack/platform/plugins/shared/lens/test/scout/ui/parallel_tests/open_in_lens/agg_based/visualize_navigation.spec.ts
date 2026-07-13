@@ -7,7 +7,11 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { setupLogstashOpenInLensDefaults, testData } from '../../../fixtures';
+import {
+  cleanupLogstashOpenInLensDefaults,
+  setupLogstashOpenInLensDefaults,
+  testData,
+} from '../../../fixtures';
 
 const TIMESTAMP_X_AXIS_DIMENSION = {
   dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -37,7 +41,7 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
+      await cleanupLogstashOpenInLensDefaults(scoutSpace);
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
@@ -49,7 +53,7 @@ spaceTest.describe(
         expect(await lens.getLayerCount()).toBe(1);
 
         await lens.goBackToPreviousApp();
-        await visualize.expectEditInLensButtonVisible();
+        await expect(visualize.getEditInLensButton()).toBeVisible();
       }
     );
 
@@ -64,7 +68,7 @@ spaceTest.describe(
 
         await lens.goBackToPreviousApp();
         await lens.confirmDiscardChangesModal();
-        await visualize.expectEditInLensButtonVisible();
+        await expect(visualize.getEditInLensButton()).toBeVisible();
       }
     );
 
@@ -79,7 +83,7 @@ spaceTest.describe(
 
         await lens.save(`Migrated Viz saved in Lens ${scoutSpace.id}`, { addToDashboard: 'none' });
         await lens.goBackToPreviousApp();
-        await visualize.expectEditInLensButtonVisible();
+        await expect(visualize.getEditInLensButton()).toBeVisible();
       }
     );
   }
