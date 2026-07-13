@@ -12,6 +12,7 @@ import { ConnectorTokenClient } from './connector_token_client';
 import type { Logger } from '@kbn/core/server';
 import type { ConnectorToken } from '../types';
 import * as allRetry from './retry_if_conflicts';
+import { actionsConfigMock } from '../actions_config.mock';
 
 const rootLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const logger = {
@@ -30,6 +31,7 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
 
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
+const configurationUtilities = actionsConfigMock.create();
 
 let connectorTokenClient: ConnectorTokenClient;
 
@@ -46,6 +48,7 @@ beforeEach(() => {
     unsecuredSavedObjectsClient,
     encryptedSavedObjectsClient,
     logger,
+    configurationUtilities,
   });
 });
 afterAll(() => clock.restore());

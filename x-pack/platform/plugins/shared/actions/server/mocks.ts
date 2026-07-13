@@ -21,6 +21,7 @@ import { renderActionParameterTemplates } from './plugin';
 import type { Services, UnsecuredServices } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 import { ConnectorTokenClient } from './lib/connector_token_client';
+import { actionsConfigMock } from './actions_config.mock';
 import { unsecuredActionsClientMock } from './unsecured_actions_client/unsecured_actions_client.mock';
 export { actionsAuthorizationMock };
 export { actionsClientMock };
@@ -100,6 +101,7 @@ const createServicesMock = () => {
       unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       logger,
+      configurationUtilities: actionsConfigMock.create(),
     }),
   });
   return mock;
@@ -117,6 +119,7 @@ const createUnsecuredServicesMock = () => {
       unsecuredSavedObjectsClient: savedObjectsRepositoryMock.create(),
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       logger,
+      configurationUtilities: actionsConfigMock.create(),
     }),
   });
   return mock;

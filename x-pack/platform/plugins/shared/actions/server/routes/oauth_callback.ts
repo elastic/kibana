@@ -644,12 +644,13 @@ export const oauthCallbackRoute = (
 
           const userConnectorTokenClient = new UserConnectorTokenClient({
             encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-              includedHiddenTypes: ['user_connector_token'],
+              includedHiddenTypes: ['action', 'user_connector_token'],
             }),
             unsecuredSavedObjectsClient: core.savedObjects.getClient({
               includedHiddenTypes: ['user_connector_token'],
             }),
             logger: routeLogger,
+            configurationUtilities,
           });
 
           await userConnectorTokenClient.deleteConnectorTokens({

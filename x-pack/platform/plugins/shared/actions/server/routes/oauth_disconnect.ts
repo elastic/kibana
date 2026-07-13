@@ -13,14 +13,16 @@ import { disconnectOAuthPathParamsSchema } from '../../common/routes/connector/a
 import type { ActionsRequestHandlerContext } from '../types';
 import type { ActionsPluginsStart } from '../plugin';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
+import { ConnectorTokenClient } from '../lib/connector_token_client';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 import { OAUTH_API_TAG } from '../feature';
 
 export const oauthDisconnectRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState,
   logger: Logger,
-  coreSetup: CoreSetup<ActionsPluginsStart>
+  coreSetup: CoreSetup<ActionsPluginsStart>,
+  configurationUtilities: ActionsConfigurationUtilities
 ) => {
   router.post(
     {
@@ -89,17 +91,18 @@ export const oauthDisconnectRoute = (
 
         const core = await context.core;
         const [, { encryptedSavedObjects }] = await coreSetup.getStartServices();
-        const userConnectorTokenClient = new UserConnectorTokenClient({
+        const connectorTokenClient = new ConnectorTokenClient({
           encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-            includedHiddenTypes: ['user_connector_token'],
+            includedHiddenTypes: ['action', 'user_connector_token'],
           }),
           unsecuredSavedObjectsClient: core.savedObjects.getClient({
             includedHiddenTypes: ['user_connector_token'],
           }),
           logger: routeLogger,
+          configurationUtilities,
         });
 
-        await userConnectorTokenClient.deleteConnectorTokens({ connectorId, profileUid });
+        await connectorTokenClient.deleteConnectorTokens({ connectorId, profileUid });
 
         routeLogger.info(`OAuth tokens deleted for connector: ${connectorId}`);
 

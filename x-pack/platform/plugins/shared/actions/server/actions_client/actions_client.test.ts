@@ -1959,7 +1959,7 @@ describe('delete()', () => {
       connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
       await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(
-        `Failed to delete auth tokens for connector "1" after delete: Fail`
+        `Failed to delete auth tokens for connector "1": Fail`
       );
     });
   });
@@ -3298,6 +3298,7 @@ describe('isPreconfigured()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3344,6 +3345,7 @@ describe('isPreconfigured()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3392,6 +3394,7 @@ describe('isSystemAction()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,
@@ -3438,6 +3441,7 @@ describe('isSystemAction()', () => {
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
       encryptedSavedObjectsClient,

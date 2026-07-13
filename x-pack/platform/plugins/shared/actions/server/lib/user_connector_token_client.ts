@@ -10,13 +10,19 @@ import { z } from '@kbn/zod/v4';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { Logger, SavedObjectsClientContract, SavedObjectAttributes } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import { EARS_AUTH_ID } from '@kbn/connector-specs';
 import { retryIfConflicts } from './retry_if_conflicts';
+import { revokeEarsCredentials } from './ears/revoke_ears_credentials';
 import type {
   UserConnectorToken,
   OAuthPersonalCredentials,
   UserConnectorOAuthToken,
 } from '../types';
-import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
+import {
+  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  ACTION_SAVED_OBJECT_TYPE,
+} from '../constants/saved_objects';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 
 export const MAX_TOKENS_RETURNED = 1;
 const MAX_RETRY_ATTEMPTS = 3;
@@ -25,6 +31,7 @@ interface ConstructorOptions {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
 }
 
 interface CreateOptions {
@@ -71,14 +78,17 @@ export class UserConnectorTokenClient {
   private readonly logger: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  private readonly configurationUtilities: ActionsConfigurationUtilities;
 
   constructor({
     unsecuredSavedObjectsClient,
     encryptedSavedObjectsClient,
     logger,
+    configurationUtilities,
   }: ConstructorOptions) {
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
+    this.configurationUtilities = configurationUtilities;
     this.logger = logger;
   }
 
@@ -109,6 +119,30 @@ export class UserConnectorTokenClient {
     if (connectorId) parts.push(`connectorId "${connectorId}"`);
     if (credentialType) parts.push(`credentialType: "${credentialType}"`);
     return parts.join(', ');
+  }
+
+  /**
+   * Connector's OAuth authType/provider, decrypted from its secrets. Best-effort.
+   */
+  private async getOAuthConnectorAuthInfo(
+    connectorId: string
+  ): Promise<{ authType?: string; provider?: string }> {
+    try {
+      const decryptedAction = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<{
+        secrets: { authType?: string; provider?: string };
+      }>(ACTION_SAVED_OBJECT_TYPE, connectorId, {
+        namespace: this.unsecuredSavedObjectsClient.getCurrentNamespace(),
+      });
+      return {
+        authType: decryptedAction.attributes.secrets.authType,
+        provider: decryptedAction.attributes.secrets.provider,
+      };
+    } catch (err) {
+      this.logger.error(
+        `Failed to read OAuth configuration for connector "${connectorId}": ${err.message}`
+      );
+      return {};
+    }
   }
 
   private parseOAuthPerUserCredentials(credentials: unknown): OAuthPersonalCredentials | null {
@@ -403,20 +437,116 @@ export class UserConnectorTokenClient {
   }
 
   /**
-   * Delete all per-user connector tokens
+   * Decrypted OAuth credentials for every user connected to a connector.
    */
+  public async listOAuthTokensForConnector({
+    connectorId,
+  }: {
+    connectorId: string;
+  }): Promise<Array<{ profileUid: string; credentials: OAuthPersonalCredentials }>> {
+    const context = this.getContextString(undefined, connectorId, 'oauth');
+
+    let connectorTokensResult;
+    try {
+      connectorTokensResult = (
+        await this.unsecuredSavedObjectsClient.find<UserConnectorToken>({
+          type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+          filter: `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}" AND ${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.credentialType: "oauth"`,
+        })
+      ).saved_objects;
+    } catch (err) {
+      this.logger.error(
+        `Failed to fetch user_connector_token records for ${context}. Error: ${err.message}`
+      );
+      return [];
+    }
+
+    const tokens: Array<{ profileUid: string; credentials: OAuthPersonalCredentials }> = [];
+    for (const so of connectorTokensResult) {
+      try {
+        const decrypted =
+          await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<UserConnectorToken>(
+            USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+            so.id
+          );
+        const parsedCredentials = this.parseOAuthPerUserCredentials(
+          decrypted.attributes.credentials
+        );
+        if (!parsedCredentials) {
+          this.logger.error(`Invalid OAuth credentials shape for ${context}, id "${so.id}".`);
+          continue;
+        }
+        tokens.push({
+          profileUid: decrypted.attributes.profileUid,
+          credentials: parsedCredentials,
+        });
+      } catch (err) {
+        this.logger.error(
+          `Failed to decrypt user_connector_token for ${context}, id "${so.id}". Error: ${err.message}`
+        );
+      }
+    }
+
+    return tokens;
+  }
+
+  /**
+   * Revokes the EARS grant before deletion; called from deleteConnectorTokens so it can't be skipped.
+   */
+  private async revokeOAuthTokens({
+    connectorId,
+    profileUid,
+  }: {
+    connectorId: string;
+    profileUid?: string;
+  }): Promise<void> {
+    const { authType, provider } = await this.getOAuthConnectorAuthInfo(connectorId);
+
+    if (authType === EARS_AUTH_ID && provider) {
+      try {
+        const credentialsList = profileUid
+          ? await this.getOAuthPersonalToken({ profileUid, connectorId }).then(
+              ({ connectorToken }) =>
+                connectorToken ? [{ credentials: connectorToken.credentials }] : []
+            )
+          : await this.listOAuthTokensForConnector({ connectorId });
+
+        await Promise.all(
+          credentialsList.map(({ credentials }) =>
+            revokeEarsCredentials({
+              provider,
+              credentials,
+              configurationUtilities: this.configurationUtilities,
+              logger: this.logger,
+            })
+          )
+        );
+      } catch (err) {
+        this.logger.error(
+          `Failed to revoke EARS OAuth tokens for connectorId "${connectorId}": ${err.message}`
+        );
+      }
+    } else if (authType && authType !== EARS_AUTH_ID) {
+      this.logger.debug(
+        `No revoke endpoint available for authType "${authType}"; skipping provider-side revocation for connectorId "${connectorId}".`
+      );
+    }
+  }
+
   public async deleteConnectorTokens({
     profileUid,
     connectorId,
     tokenType,
     credentialType,
   }: {
-    profileUid: string;
+    profileUid?: string;
     connectorId: string;
     tokenType?: string;
     credentialType?: string;
   }): Promise<void> {
     const context = this.getContextString(profileUid, connectorId);
+
+    await this.revokeOAuthTokens({ connectorId, profileUid });
 
     const credentialTypeFilter = credentialType
       ? ` AND ${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.credentialType: "${credentialType}"`

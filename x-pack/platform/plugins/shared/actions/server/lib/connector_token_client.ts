@@ -10,6 +10,7 @@ import type { Logger, SavedObjectsClientContract, SavedObjectAttributes } from '
 import { SharedConnectorTokenClient } from './shared_connector_token_client';
 import type { ConnectorToken, UserConnectorToken } from '../types';
 import { UserConnectorTokenClient } from './user_connector_token_client';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 
 export const MAX_TOKENS_RETURNED = 1;
 
@@ -23,6 +24,7 @@ interface ConstructorOptions {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
 }
 
 interface CreateOptions {
