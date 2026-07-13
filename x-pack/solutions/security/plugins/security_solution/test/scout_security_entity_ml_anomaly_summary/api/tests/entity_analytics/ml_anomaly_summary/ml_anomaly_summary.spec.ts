@@ -22,6 +22,7 @@ import {
   DAVID_EUID,
   WIN_APP01_EUID,
   NO_BEHAVIORS_EUID,
+  OR_SEMANTICS_HOST_EUID,
   sourceTestData,
   anomalyTestData,
   entityTestData,
@@ -506,8 +507,9 @@ apiTest.describe(
     apiTest(
       'Anomaly summary API: multiple score_ranges are combined with OR semantics, not collapsed into one span',
       async ({ apiClient }) => {
-        // WIN_APP01 has two anomalies: scores 5.65 and 31.06.
-        const response = await apiClient.post(buildUrl(WIN_APP01_EUID, 'host'), {
+        // The OR-semantics host has three anomalies: scores 5 (low), 50 (gap), and 90 (high).
+        // [0,10) and [75,∞) each match one of the outer scores.
+        const response = await apiClient.post(buildUrl(OR_SEMANTICS_HOST_EUID, 'host'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 10 }, { min_score: 75 }] },
@@ -515,8 +517,9 @@ apiTest.describe(
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
-        expect(body.anomalies).toHaveLength(1);
-        expect(body.anomalies[0].recordScore).toBeLessThan(10);
+        expect(body.anomalies).toHaveLength(2);
+        const scores = body.anomalies.map((a) => a.recordScore).sort((a, b) => a - b);
+        expect(scores).toStrictEqual([5, 90]);
       }
     );
 
@@ -766,8 +769,9 @@ apiTest.describe(
     apiTest(
       'Anomaly overview API: multiple score_ranges are combined with OR semantics, not collapsed into one span',
       async ({ apiClient }) => {
-        // WIN_APP01 has two anomalies: scores 5.65 and 31.06.
-        const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
+        // The OR-semantics host has three anomalies: scores 5 (low), 50 (gap), and 90 (high).
+        // [0,10) and [75,∞) each match one of the outer scores.
+        const response = await apiClient.post(buildOverviewUrl(OR_SEMANTICS_HOST_EUID, 'host'), {
           headers: { ...defaultHeaders, 'elastic-api-version': '1' },
           responseType: 'json',
           body: { score_ranges: [{ min_score: 0, max_score: 10 }, { min_score: 75 }] },
@@ -775,10 +779,7 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(200);
         const body = response.body as AnomalyOverviewResponse;
-        expect(body.totalAnomaliesCount).toBe(1);
-        for (const entry of body.anomalyByTimeBucket) {
-          expect(entry.maxScore).toBeLessThan(10);
-        }
+        expect(body.totalAnomaliesCount).toBe(2);
       }
     );
 
