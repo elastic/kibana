@@ -216,6 +216,22 @@ export const AGENT_API_ROUTES = {
   GENERATE_REPORT_PATTERN: `${INTERNAL_ROOT}/agents/reporting/generate`,
 };
 
+// Canonical managed integrations API (formerly "agentless policies"). New code should use these.
+export const MANAGED_INTEGRATIONS_ROUTES = {
+  CREATE_PATTERN: `${API_ROOT}/managed_integrations`,
+  LIST_PATTERN: `${API_ROOT}/managed_integrations`,
+  GET_PATTERN: `${API_ROOT}/managed_integrations/{policyId}`,
+  UPDATE_PATTERN: `${API_ROOT}/managed_integrations/{policyId}`,
+  DELETE_PATTERN: `${API_ROOT}/managed_integrations/{policyId}`,
+  UPGRADE_PATTERN: `${API_ROOT}/managed_integrations/_upgrade`,
+  UPGRADE_DRYRUN_PATTERN: `${API_ROOT}/managed_integrations/_upgrade/dryrun`,
+  SYNC_PATTERN: `${INTERNAL_ROOT}/managed_integrations/_sync`,
+  BULK_THROUGHPUT_PATTERN: `${INTERNAL_ROOT}/managed_integrations/bulk_throughput`,
+};
+
+// Deprecated public aliases retained for backward compatibility: they are registered against the
+// same handlers as MANAGED_INTEGRATIONS_ROUTES so existing clients keep working. Only the public
+// routes are aliased — the internal `_sync`/`bulk_throughput` routes moved without an alias.
 export const AGENTLESS_POLICIES_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agentless_policies`,
   LIST_PATTERN: `${API_ROOT}/agentless_policies`,
@@ -224,8 +240,6 @@ export const AGENTLESS_POLICIES_ROUTES = {
   DELETE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
   UPGRADE_PATTERN: `${API_ROOT}/agentless_policies/_upgrade`,
   UPGRADE_DRYRUN_PATTERN: `${API_ROOT}/agentless_policies/_upgrade/dryrun`,
-  SYNC_PATTERN: `${INTERNAL_ROOT}/agentless_policies/_sync`,
-  BULK_THROUGHPUT_PATTERN: `${INTERNAL_ROOT}/agentless_policies/bulk_throughput`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
