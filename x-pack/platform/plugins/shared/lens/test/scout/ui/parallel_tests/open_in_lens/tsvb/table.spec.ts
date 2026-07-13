@@ -85,6 +85,23 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
   });
 
   spaceTest(
+    'should convert basic count aggregation table to Lens',
+    async ({ page, pageObjects }) => {
+      const { dashboard, lens } = pageObjects;
+      await dashboard.clickPanelAction(
+        testData.DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION,
+        'Table - Basic'
+      );
+      await lens.waitForVisualization('lnsDataTable');
+
+      const dimensions = page.testSubj
+        .locator('lnsDatatable_metrics')
+        .locator('[data-test-subj="lns-dimensionTrigger"]');
+      await expect(dimensions.filter({ hasText: 'Count of records' })).toBeVisible();
+    }
+  );
+
+  spaceTest(
     'should convert last value mode to reduced time range',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
