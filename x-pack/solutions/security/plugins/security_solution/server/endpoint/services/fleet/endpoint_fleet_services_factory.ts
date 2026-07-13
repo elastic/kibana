@@ -25,6 +25,10 @@ import {
   PackagePolicyNotFoundError,
 } from '@kbn/fleet-plugin/server/errors';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+} from '@kbn/fleet-plugin/common/services/version_specific_policies_utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { catchAndWrapError } from '../../utils';
 import { stringify } from '../../utils/stringify';
@@ -555,8 +559,8 @@ const adjustAgentData = (data: Agent | Agent[], methodName: string, _logger: Log
   for (const agentRecord of agentsData) {
     // Remove version suffix from `policy_id` field
     // Issue caused by: https://github.com/elastic/package-spec/issues/165
-    if (agentRecord.policy_id && /#.*$/.test(agentRecord.policy_id)) {
-      const updatedPolicyId = agentRecord.policy_id.replace(/#.*$/i, '');
+    if (hasVersionSuffix(agentRecord.policy_id)) {
+      const updatedPolicyId = removeVersionSuffixFromPolicyId(agentRecord.policy_id);
 
       updatesDone.push(
         `Agent [${agentRecord.id}][${agentRecord.local_metadata?.host?.hostname}]: adjusted 'policy_id' property value from [${agentRecord.policy_id}] to [${updatedPolicyId}]`

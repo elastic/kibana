@@ -11,6 +11,10 @@ import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+} from '@kbn/fleet-plugin/common/services/version_specific_policies_utils';
 import { stringify } from '../../utils/stringify';
 import type {
   HostInfo,
@@ -115,9 +119,10 @@ export class EndpointMetadataService {
 
     for (const hit of hits) {
       // If `united.agent.policy_id` includes a suffix, remove it
-      if (hit._source?.united?.agent?.policy_id?.match(/#.*$/i)) {
+      if (hasVersionSuffix(hit._source?.united?.agent?.policy_id ?? '')) {
         const existingPolicyId = hit._source.united.agent.policy_id;
-        const adjustedPolicyId = existingPolicyId.replace(/#.*$/i, '');
+        const adjustedPolicyId = removeVersionSuffixFromPolicyId(existingPolicyId);
+
         recordsAltered.push(
           `Agent [${hit._source?.united?.agent?.agent?.id}]: adjusted 'policy_id' property value from [${existingPolicyId}] to [${adjustedPolicyId}]`
         );
