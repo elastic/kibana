@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/275453
+issues:
+- https://github.com/elastic/kibana/issues/272243
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+areas:
+- Search and data
+title: Fix Logstash output client SSL certificate/key incorrectly required
+description: Fixed a bug where the Fleet UI incorrectly required Client SSL certificate and Client SSL certificate key for Logstash outputs when SSL was enabled, preventing users from configuring server-only TLS. The client cert and key are now optional but required together (both or neither) to support correct mTLS configuration.
