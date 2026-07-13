@@ -46,8 +46,6 @@ describe('useAllAgents', () => {
     await waitFor(() => expect(httpGet).toHaveBeenCalled());
 
     const [, { query }] = httpGet.mock.calls[0];
-    expect(query.kuery).toBe(
-      'policy_id:("policy-1" or policy-1#* or "policy-2" or policy-2#*)'
-    );
+    expect(query.kuery).toBe('policy_id:("policy-1" or policy-1#* or "policy-2" or policy-2#*)');
   });
 });
