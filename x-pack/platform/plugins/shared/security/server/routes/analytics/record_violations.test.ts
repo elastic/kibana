@@ -85,6 +85,42 @@ describe('POST /internal/security/analytics/_record_violations', () => {
       expect(response.status).toBe(200);
       expect(routeParamsMock.analyticsService.reportCSPViolation).not.toHaveBeenCalled();
     });
+
+    it('reports CSP violation with null optional fields (as sent by real browsers)', async () => {
+      const cspViolationWithNulls: CSPViolationReport = {
+        type: 'csp-violation',
+        url: 'http://localhost:5601/app/home',
+        age: null,
+        user_agent: null,
+        body: {
+          blockedURL: null,
+          disposition: 'report',
+          documentURL: 'http://localhost:5601/app/home',
+          effectiveDirective: 'script-src-elem',
+          originalPolicy: 'script-src none; report-to violations-endpoint',
+          sample: null,
+          referrer: null,
+          sourceFile: null,
+          statusCode: 200,
+          lineNumber: null,
+          columnNumber: null,
+        },
+      };
+
+      const request = httpServerMock.createKibanaRequest({
+        body: [cspViolationWithNulls],
+        auth: { isAuthenticated: true },
+      });
+      const response = await routeHandler(getMockContext(), request, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+      expect(routeParamsMock.analyticsService.reportCSPViolation).toHaveBeenCalledWith({
+        url: cspViolationWithNulls.url,
+        user_agent: undefined,
+        created: '1698019200000',
+        ...cspViolationWithNulls.body,
+      });
+    });
   });
 
   describe('Permissions Policy violations', () => {
@@ -128,6 +164,39 @@ describe('POST /internal/security/analytics/_record_violations', () => {
       expect(
         routeParamsMock.analyticsService.reportPermissionsPolicyViolation
       ).not.toHaveBeenCalled();
+    });
+
+    it('reports permissions policy violation with null optional fields (as sent by real browsers)', async () => {
+      const permissionsPolicyViolationWithNulls: PermissionsPolicyViolationReport = {
+        type: 'permissions-policy-violation',
+        url: 'http://localhost:5601/app/home',
+        age: null,
+        user_agent: null,
+        body: {
+          disposition: 'enforce',
+          policyId: null,
+          featureId: null,
+          sourceFile: null,
+          lineNumber: null,
+          columnNumber: null,
+        },
+      };
+
+      const request = httpServerMock.createKibanaRequest({
+        body: [permissionsPolicyViolationWithNulls],
+        auth: { isAuthenticated: true },
+      });
+      const response = await routeHandler(getMockContext(), request, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+      expect(
+        routeParamsMock.analyticsService.reportPermissionsPolicyViolation
+      ).toHaveBeenCalledWith({
+        url: permissionsPolicyViolationWithNulls.url,
+        user_agent: undefined,
+        created: '1698019200000',
+        ...permissionsPolicyViolationWithNulls.body,
+      });
     });
   });
 });

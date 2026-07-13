@@ -80,7 +80,7 @@ export interface AuthenticationTypeAnalyticsEvent {
  */
 interface CommonReportFields {
   type: string;
-  age?: number;
+  age?: number | null;
   body: {};
 }
 
