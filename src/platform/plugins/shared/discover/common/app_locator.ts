@@ -135,6 +135,10 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Optionally add some ESQL controls
    */
   esqlControls?: ControlPanelsState<OptionsListESQLControlState> & SerializableRecord;
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   */
+  isApproximate?: boolean;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
