@@ -83,34 +83,25 @@ export const createForensicTrajectoryEvaluator = (): Evaluator<
   } as Evaluator<ForensicDatasetExample, TaskOutput>;
 };
 
-/** After OTLP retries exhaust, missing tool spans ⇒ skill not detected (score 0). */
-const wrapSkillInvocationFallback = (
-  evaluator: Evaluator<ForensicDatasetExample, TaskOutput>
-): Evaluator<ForensicDatasetExample, TaskOutput> => ({
-  ...evaluator,
-  evaluate: async (args) => {
-    const result = await evaluator.evaluate(args);
-    if (result.score === null && result.label === 'potentially_incomplete') {
-      return {
-        ...result,
-        score: 0,
-        explanation: `${
-          result.explanation ?? ''
-        } No tool spans in trace after retries — scoring skill not invoked.`,
-      };
-    }
-    return result;
-  },
-});
-
-/** Distractor rows should pass when the skill is NOT invoked (invert 0/1 scores). */
+/** Distractor rows should pass when the skill is NOT invoked (invert definitive 0/1 only). */
 export const wrapSkillInvocationForDistractors = (
   evaluator: Evaluator<ForensicDatasetExample, TaskOutput>
 ): Evaluator<ForensicDatasetExample, TaskOutput> => ({
   ...evaluator,
   evaluate: async (args) => {
     const result = await evaluator.evaluate(args);
-    if (args.metadata?.row_type !== 'distractor' || result.score === null) {
+    if (args.metadata?.row_type !== 'distractor') {
+      return result;
+    }
+
+    // Indexing gaps / missing traceId are not evidence the skill stayed dormant.
+    if (
+      result.score === null ||
+      result.label === 'potentially_incomplete' ||
+      result.label === 'error' ||
+      result.label === 'unavailable' ||
+      result.metadata?.incomplete === true
+    ) {
       return result;
     }
 
@@ -152,13 +143,11 @@ export const buildForensicEvaluators = ({
     outputTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
     cachedTokens as Evaluator<ForensicDatasetExample, TaskOutput>,
     wrapSkillInvocationForDistractors(
-      wrapSkillInvocationFallback(
-        createSkillInvocationEvaluator({
-          traceEsClient,
-          log,
-          skillName: ENDPOINT_FORENSIC_ANALYSIS_SKILL_NAME,
-        }) as Evaluator<ForensicDatasetExample, TaskOutput>
-      )
+      createSkillInvocationEvaluator({
+        traceEsClient,
+        log,
+        skillName: ENDPOINT_FORENSIC_ANALYSIS_SKILL_NAME,
+      }) as Evaluator<ForensicDatasetExample, TaskOutput>
     ),
     createForensicTrajectoryEvaluator(),
   ];

@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
+import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { securityTool } from '../../tools/constants';
 
@@ -22,6 +23,11 @@ const ENDPOINT_TELEMETRY_INDEX_PATTERNS = [
   'logs-endpoint.events.file-*',
   'logs-endpoint.events.registry-*',
 ] as const;
+
+const ENDPOINT_TELEMETRY_RESOLVE_PATTERN = 'logs-endpoint.events.*';
+
+/** Bounded resolveIndex lookup — same path as platform.core.list_indices. */
+const DISCOVER_TELEMETRY_SOURCE_LIMIT = 50;
 
 const discoverTelemetrySchema = z.object({
   hosts: z
@@ -81,7 +87,7 @@ Return earliest host, timestamp, indicator, and delivery-vector hypothesis.
 
 ### 4. Attack timeline
 Merge process, file, network, and registry events for the host in the time window; sort by \`@timestamp\` ascending.
-Present the answer as an explicit chronological timeline — an ordered, timestamp-labeled sequence of events scoped to the named host — not a prose paragraph. If telemetry is sparse or unavailable, still lay out the ordered reconstruction as a timeline skeleton (the sequence of stages to expect for that host), so the response remains a scoped chronological narrative.
+Present the answer as an explicit chronological timeline — an ordered, timestamp-labeled sequence of events scoped to the named host — not a prose paragraph. **Only include events supported by query results.** If telemetry is sparse or unavailable, state the data gap explicitly and optionally provide a clearly labeled investigation plan (suggested ES|QL queries / indices to check) — do **not** present an expected attack sequence as that host's chronology.
 
 ### 5. Lateral movement
 Trace outbound internal connections from source host; correlate with process creation on destinations.
@@ -113,15 +119,22 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
         const { hosts, time_window_hours: timeWindowHours } = discoverTelemetrySchema.parse(args);
 
         let availableIndices: string[] = [];
+        let resolutionWarnings: string[] = [];
         try {
-          const catResponse = await context.esClient.asCurrentUser.cat.indices({
-            index: 'logs-endpoint.events.*',
-            format: 'json',
-            h: 'index',
+          const sources = await listSearchSources({
+            pattern: ENDPOINT_TELEMETRY_RESOLVE_PATTERN,
+            perTypeLimit: DISCOVER_TELEMETRY_SOURCE_LIMIT,
+            includeHidden: false,
+            excludeIndicesRepresentedAsAlias: true,
+            excludeIndicesRepresentedAsDatastream: true,
+            includeDatasets: false,
+            esClient: context.esClient.asCurrentUser,
           });
-          availableIndices = (catResponse as Array<{ index?: string }>)
-            .map((row) => row.index)
-            .filter((index): index is string => Boolean(index));
+          availableIndices = [
+            ...sources.data_streams.map((dataStream) => dataStream.name),
+            ...sources.indices.map((index) => index.name),
+          ];
+          resolutionWarnings = sources.warnings ?? [];
         } catch {
           availableIndices = [];
         }
@@ -135,6 +148,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
                 available_indices: availableIndices,
                 scoped_hosts: hosts ?? [],
                 time_window_hours: timeWindowHours,
+                resolution_warnings: resolutionWarnings,
                 guidance:
                   'Next: platform.core.generate_esql then platform.core.execute_esql scoped to @timestamp and host.name.',
               },

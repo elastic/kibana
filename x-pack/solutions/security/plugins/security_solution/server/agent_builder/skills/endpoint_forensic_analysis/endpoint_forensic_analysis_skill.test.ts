@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
+import { EsResourceType, ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
+import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
@@ -16,12 +17,19 @@ import {
   endpointForensicAnalysisSkill,
 } from './endpoint_forensic_analysis_skill';
 
+jest.mock('@kbn/agent-builder-genai-utils', () => ({
+  listSearchSources: jest.fn(),
+}));
+
+const mockListSearchSources = listSearchSources as jest.MockedFunction<typeof listSearchSources>;
+
 interface DiscoverTelemetryData {
   recommended_indices: string[];
   available_indices: string[];
   scoped_hosts: string[];
   time_window_hours: number;
   guidance: string;
+  resolution_warnings?: string[];
 }
 
 const getDiscoverData = (result: ToolHandlerStandardReturn): DiscoverTelemetryData =>
@@ -63,17 +71,34 @@ describe('endpointForensicAnalysisSkill', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       ) as Promise<ToolHandlerStandardReturn>;
 
-    it('returns recommended indices, scoped hosts, and available indices from cat.indices', async () => {
-      mockEsClient.asCurrentUser.cat.indices.mockResolvedValue([
-        { index: 'logs-endpoint.events.process-default' },
-        { index: 'logs-endpoint.events.network-default' },
-      ] as never);
+    it('returns recommended indices, scoped hosts, and resolved sources via listSearchSources', async () => {
+      mockListSearchSources.mockResolvedValue({
+        data_streams: [
+          {
+            type: EsResourceType.dataStream,
+            name: 'logs-endpoint.events.process-default',
+            indices: ['.ds-logs-endpoint.events.process-default-001'],
+            timestamp_field: '@timestamp',
+          },
+        ],
+        indices: [{ type: EsResourceType.index, name: 'logs-endpoint.events.network-default' }],
+        aliases: [],
+        datasets: [],
+        warnings: [],
+      });
 
       const result = await callHandler({
         hosts: ['WKSTN-RECV01'],
         time_window_hours: 24,
       });
 
+      expect(mockListSearchSources).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pattern: 'logs-endpoint.events.*',
+          perTypeLimit: 50,
+          esClient: mockEsClient.asCurrentUser,
+        })
+      );
       expect(result.results[0].type).toBe(ToolResultType.other);
       const data = getDiscoverData(result);
       expect(data.scoped_hosts).toEqual(['WKSTN-RECV01']);
@@ -91,8 +116,8 @@ describe('endpointForensicAnalysisSkill', () => {
       expect(data.guidance).toContain('platform.core.generate_esql');
     });
 
-    it('returns empty available_indices when cat.indices throws', async () => {
-      mockEsClient.asCurrentUser.cat.indices.mockRejectedValue(new Error('cat unavailable'));
+    it('returns empty available_indices when listSearchSources throws', async () => {
+      mockListSearchSources.mockRejectedValue(new Error('resolve unavailable'));
 
       const result = await callHandler({ hosts: ['SRV-DC01'] });
       const data = getDiscoverData(result);

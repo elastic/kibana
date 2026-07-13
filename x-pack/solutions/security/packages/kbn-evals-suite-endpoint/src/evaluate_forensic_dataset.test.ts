@@ -58,7 +58,7 @@ describe('wrapSkillInvocationForDistractors', () => {
     expect(result.score).toBe(0);
   });
 
-  it('preserves null scores (N/A)', async () => {
+  it('preserves null scores for distractors (N/A)', async () => {
     const na: Evaluator<ForensicDatasetExample, TaskOutput> = {
       ...inner,
       evaluate: async () => ({ score: null, label: 'N/A' }),
@@ -72,5 +72,27 @@ describe('wrapSkillInvocationForDistractors', () => {
     });
 
     expect(result.score).toBeNull();
+  });
+
+  it('does not invert potentially_incomplete distractor scores', async () => {
+    const incomplete: Evaluator<ForensicDatasetExample, TaskOutput> = {
+      ...inner,
+      evaluate: async () => ({
+        score: 0,
+        label: 'potentially_incomplete',
+        metadata: { incomplete: true },
+        explanation: 'trace indexing lag',
+      }),
+    };
+    const wrapped = wrapSkillInvocationForDistractors(incomplete);
+    const result = await wrapped.evaluate({
+      input: { question: 'weather?' },
+      output: { messages: [], steps: [], errors: [] },
+      expected: { criteria: [] },
+      metadata: { row_type: 'distractor' },
+    });
+
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('potentially_incomplete');
   });
 });
