@@ -241,10 +241,6 @@ export const discoverSessionApiResponseSchema = schema.object({
   meta: asCodeMetaSchema,
 });
 
-export const discoverSessionApiRequestBodySchema = schema.object({
-  data: discoverSessionApiDataSchema,
-});
-
 export type DiscoverSessionApiData = TypeOf<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = TypeOf<typeof discoverSessionApiResponseSchema>;
 export type DiscoverSessionApiClassicTab = TypeOf<typeof discoverSessionClassicTabSchema>;

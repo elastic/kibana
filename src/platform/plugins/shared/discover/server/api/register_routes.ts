@@ -11,7 +11,7 @@ import { writeErrorHandler } from '@kbn/as-code-utils';
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
 import { createDiscoverSession } from './session_create';
 import { getRouteConfig } from './get_route_config';
-import { discoverSessionApiRequestBodySchema, discoverSessionApiResponseSchema } from './schema';
+import { discoverSessionApiDataSchema, discoverSessionApiResponseSchema } from './schema';
 
 export const registerRoutes = (http: HttpServiceSetup, logger: Logger) => {
   const { versioned } = http.createRouter();
@@ -28,7 +28,7 @@ export const registerRoutes = (http: HttpServiceSetup, logger: Logger) => {
         version: routeVersion,
         validate: {
           request: {
-            body: discoverSessionApiRequestBodySchema,
+            body: discoverSessionApiDataSchema,
           },
           response: {
             201: {
@@ -42,7 +42,7 @@ export const registerRoutes = (http: HttpServiceSetup, logger: Logger) => {
       },
       async (context, request, response) => {
         try {
-          const body = await createDiscoverSession(context, request.body.data);
+          const body = await createDiscoverSession(context, request.body);
 
           return response.created({ body });
         } catch (error) {

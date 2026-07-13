@@ -12,35 +12,31 @@ import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, DISCOVER_SESSION_API_BASE_PATH } from '../fixtures/constants';
 
 const createRequestBody = (title: string) => ({
-  data: {
-    title,
-    tabs: [
-      {
-        id: 'main',
-        label: 'Main',
-        data_source: {
-          type: 'esql',
-          query: 'FROM logs-* | LIMIT 10',
-        },
+  title,
+  tabs: [
+    {
+      id: 'main',
+      label: 'Main',
+      data_source: {
+        type: 'esql',
+        query: 'FROM logs-* | LIMIT 10',
       },
-    ],
-  },
+    },
+  ],
 });
 
 const createUnresolvedReferenceRequestBody = (title: string) => ({
-  data: {
-    title,
-    tabs: [
-      {
-        id: 'main',
-        label: 'Main',
-        data_source: {
-          type: 'data_view_reference',
-          ref_id: 'missing-data-view',
-        },
+  title,
+  tabs: [
+    {
+      id: 'main',
+      label: 'Main',
+      data_source: {
+        type: 'data_view_reference',
+        ref_id: 'missing-data-view',
       },
-    ],
-  },
+    },
+  ],
 });
 
 apiTest.describe('POST /api/discover_sessions', { tag: tags.deploymentAgnostic }, () => {
