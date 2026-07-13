@@ -15,16 +15,30 @@ import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shar
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../data_view_manager/hooks/__mocks__/use_data_view';
+import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../flyout_v2/use_flyout_api.mock';
+import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
 
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../flyout_v2/use_flyout_api');
+jest.mock('../../common/hooks/use_is_new_flyout_enabled');
 
 const mockEventId = 'eventId';
 const mockTimelineId = 'timelineId';
 
 describe('OpenFlyoutButtonIcon', () => {
-  it('should render the chevron icon', () => {
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout: jest.fn() });
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+    flyoutApi = createFlyoutApiMock();
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout: jest.fn() });
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
+    jest.mocked(useDataView).mockReturnValue(withIndices(['test1', 'test2']));
+  });
+
+  it('should render the chevron icon', () => {
     const { getByTestId } = render(
       <TestProviders>
         <OpenFlyoutButtonIcon
@@ -38,10 +52,9 @@ describe('OpenFlyoutButtonIcon', () => {
     expect(getByTestId(OPEN_FLYOUT_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should call the expandable flyout api when the button is clicked', () => {
+  it('should open the legacy expandable flyout when the new flyout is disabled', () => {
     const openFlyout = jest.fn();
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openFlyout });
-    jest.mocked(useDataView).mockReturnValue(withIndices(['test1', 'test2']));
 
     const { getByTestId } = render(
       <TestProviders>
@@ -53,8 +66,7 @@ describe('OpenFlyoutButtonIcon', () => {
       </TestProviders>
     );
 
-    const button = getByTestId(OPEN_FLYOUT_BUTTON_TEST_ID);
-    button.click();
+    getByTestId(OPEN_FLYOUT_BUTTON_TEST_ID).click();
 
     expect(openFlyout).toHaveBeenCalledWith({
       right: {
@@ -65,6 +77,28 @@ describe('OpenFlyoutButtonIcon', () => {
           scopeId: TableId.alertsOnAlertsPage,
         },
       },
+    });
+    expect(flyoutApi.openDocumentFlyoutFromPattern).not.toHaveBeenCalled();
+  });
+
+  it('should open the new document flyout (from pattern) when the new flyout is enabled', () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <OpenFlyoutButtonIcon
+          eventId={mockEventId}
+          timelineId={mockTimelineId}
+          iconType="chevronSingleRight"
+        />
+      </TestProviders>
+    );
+
+    getByTestId(OPEN_FLYOUT_BUTTON_TEST_ID).click();
+
+    expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith({
+      documentId: mockEventId,
+      indexName: 'test1,test2',
     });
   });
 });
