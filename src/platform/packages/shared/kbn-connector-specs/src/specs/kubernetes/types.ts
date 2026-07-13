@@ -22,7 +22,8 @@ const API_VERSION_DESCRIPTION =
 const RESOURCE_DESCRIPTION =
   'The lowercase plural resource name as it appears in the Kubernetes REST API path — NOT the Kind. ' +
   'For example: "pods" (not "Pod"), "deployments" (not "Deployment"), "services", "configmaps", "secrets", ' +
-  '"namespaces", "nodes", "jobs", "cronjobs", "ingresses", "persistentvolumeclaims".';
+  '"namespaces", "nodes", "jobs", "cronjobs", "ingresses", "persistentvolumeclaims". ' +
+  'The field name is "resource", not "resourceType" or "kind".';
 
 const NAMESPACE_DESCRIPTION =
   'The namespace to operate in. Omit for cluster-scoped resources (e.g. namespaces, nodes, ' +
