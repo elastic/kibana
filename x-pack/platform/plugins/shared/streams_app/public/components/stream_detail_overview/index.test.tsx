@@ -128,6 +128,50 @@ describe('StreamOverview', () => {
     expect(screen.queryByTestId('mockKnowledgeIndicatorsPanel')).not.toBeInTheDocument();
   });
 
+  it('does not render knowledge indicators panel while privileges are loading', () => {
+    mockUseStreamsPrivileges.mockReturnValue({
+      features: {
+        contentPacks: { enabled: false },
+        significantEventsDiscovery: { enabled: true, available: true },
+      },
+      isLoading: true,
+    });
+    mockUseSignificantEventsAvailability.mockReturnValue({
+      availability: { available: true },
+      isLoading: false,
+    });
+    mockUseStreamDetail.mockReturnValue({
+      definition: createMockWiredStreamDefinition(),
+      refresh: jest.fn(),
+    });
+
+    renderWithI18n(<StreamOverview />);
+
+    expect(screen.queryByTestId('mockKnowledgeIndicatorsPanel')).not.toBeInTheDocument();
+  });
+
+  it('does not render knowledge indicators panel while availability is loading', () => {
+    mockUseStreamsPrivileges.mockReturnValue({
+      features: {
+        contentPacks: { enabled: false },
+        significantEventsDiscovery: { enabled: true, available: true },
+      },
+      isLoading: false,
+    });
+    mockUseSignificantEventsAvailability.mockReturnValue({
+      availability: undefined,
+      isLoading: true,
+    });
+    mockUseStreamDetail.mockReturnValue({
+      definition: createMockWiredStreamDefinition(),
+      refresh: jest.fn(),
+    });
+
+    renderWithI18n(<StreamOverview />);
+
+    expect(screen.queryByTestId('mockKnowledgeIndicatorsPanel')).not.toBeInTheDocument();
+  });
+
   it('does not render knowledge indicators panel when significant events is unavailable', () => {
     mockUseStreamsPrivileges.mockReturnValue({
       features: {

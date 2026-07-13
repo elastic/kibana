@@ -282,6 +282,15 @@ export function WiredStreamDetailManagement({
     );
   }
 
+  if (tab === 'significantEvents') {
+    return (
+      <RedirectTo
+        path="/_discovery/{tab}"
+        params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
+      />
+    );
+  }
+
   if (isValidManagementSubTab(tab)) {
     if (tab === 'canvas' && !canvas.enabled) {
       return (

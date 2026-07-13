@@ -13,7 +13,6 @@ export interface StreamsAppLocationParams extends SerializableRecord {
     | 'retention'
     | 'partitioning'
     | 'processing'
-    | 'significantEvents'
     | 'canvas'
     | string;
 }

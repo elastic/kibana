@@ -22,18 +22,19 @@ import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useFetchDiscoveryQueries } from '../../hooks/significant_events/use_fetch_discovery_queries';
 import { useStreamFeatures } from '../../hooks/significant_events/use_stream_features';
-import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
-const QUERIES_PER_PAGE = 1000;
 const ACTIVE_DRAFT_STATUS = ['active', 'draft'] as const;
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 interface KnowledgeIndicatorsPanelProps {
   definition: Streams.all.GetResponse;
 }
 
 interface KnowledgeIndicatorCountProps {
-  count: number;
+  count: number | undefined;
   isLoading: boolean;
+  isFetching?: boolean;
+  isError: boolean;
   label: string;
   'data-test-subj'?: string;
 }
@@ -41,19 +42,26 @@ interface KnowledgeIndicatorCountProps {
 function KnowledgeIndicatorCount({
   count,
   isLoading,
+  isFetching = false,
+  isError,
   label,
   'data-test-subj': dataTestSubj,
 }: KnowledgeIndicatorCountProps) {
+  const showSpinner = isLoading && (count === undefined || isFetching);
+  const showUnavailable = isError && count === undefined;
+
   return (
     <EuiFlexItem grow={false} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems="flexEnd" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
             <span>
-              {isLoading ? (
+              {showSpinner ? (
                 <EuiLoadingSpinner size="m" data-test-subj="knowledgeIndicatorsCountLoading" />
+              ) : showUnavailable ? (
+                <span data-test-subj="knowledgeIndicatorsCountUnavailable">—</span>
               ) : (
-                <EuiI18nNumber value={count} />
+                <EuiI18nNumber value={count ?? 0} />
               )}
             </span>
           </EuiTitle>
@@ -78,18 +86,22 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
   const router = useStreamsAppRouter();
   const streamName = definition.stream.name;
 
-  const { features, featuresLoading } = useStreamFeatures(definition.stream);
+  const { features, featuresLoading, error: featuresError } = useStreamFeatures(definition.stream);
   const queriesFetchState = useFetchDiscoveryQueries({
     name: streamName,
     query: '',
     page: 1,
-    perPage: QUERIES_PER_PAGE,
+    perPage: 1,
     status: [...ACTIVE_DRAFT_STATUS],
   });
+  const queriesCount = queriesFetchState.data?.total;
+  const queriesLoading = queriesFetchState.isLoading;
+  const queriesFetching = queriesFetchState.isFetching;
+  const queriesError = queriesFetchState.isError;
 
-  const queriesCount = queriesFetchState.data?.total ?? queriesFetchState.data?.queries.length ?? 0;
   const featuresCount = features.length;
-  const isLoading = featuresLoading || queriesFetchState.isLoading;
+  const featuresIsLoading = featuresLoading;
+  const queriesIsLoading = queriesLoading || queriesFetching;
 
   const href = router.link('/_discovery/{tab}', {
     path: { tab: 'knowledge_indicators' },
@@ -107,22 +119,27 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
     'xpack.streams.streamOverview.knowledgeIndicatorsPanel.queriesLabel',
     {
       defaultMessage: '{count, plural, one {query} other {queries}}',
-      values: { count: queriesCount },
+      values: { count: queriesCount ?? 0 },
     }
   );
+
+  const ariaLabel =
+    featuresIsLoading || queriesIsLoading
+      ? i18n.translate('xpack.streams.streamOverview.knowledgeIndicatorsPanel.linkAriaLabelLoading', {
+        defaultMessage: 'View knowledge indicators for {streamName}: loading counts',
+        values: { streamName },
+      })
+    : i18n.translate('xpack.streams.streamOverview.knowledgeIndicatorsPanel.linkAriaLabel', {
+        defaultMessage:
+          'View knowledge indicators for {streamName}: {featuresCount, plural, one {# feature} other {# features}}, {queriesCount, plural, one {# query} other {# queries}}',
+        values: { streamName, featuresCount, queriesCount: queriesCount ?? 0 },
+      });
 
   return (
     <EuiLink
       href={href}
       data-test-subj="streamsAppKnowledgeIndicatorsPanelLink"
-      aria-label={i18n.translate(
-        'xpack.streams.streamOverview.knowledgeIndicatorsPanel.linkAriaLabel',
-        {
-          defaultMessage:
-            'View knowledge indicators for {streamName}: {featuresCount, plural, one {# feature} other {# features}}, {queriesCount, plural, one {# query} other {# queries}}',
-          values: { streamName, featuresCount, queriesCount },
-        }
-      )}
+      aria-label={ariaLabel}
       css={css`
         text-decoration: none;
 
@@ -145,14 +162,17 @@ export function KnowledgeIndicatorsPanel({ definition }: KnowledgeIndicatorsPane
 
         <EuiFlexGroup gutterSize="l" responsive={false}>
           <KnowledgeIndicatorCount
-            count={featuresCount}
-            isLoading={isLoading}
+            count={featuresError || featuresIsLoading ? undefined : featuresCount}
+            isLoading={featuresIsLoading}
+            isError={!!featuresError}
             label={featuresLabel}
             data-test-subj="streamsAppKnowledgeIndicatorsFeaturesCount"
           />
           <KnowledgeIndicatorCount
-            count={queriesCount}
-            isLoading={isLoading}
+            count={queriesError ? undefined : queriesCount}
+            isLoading={queriesIsLoading}
+            isFetching={queriesFetching}
+            isError={queriesError}
             label={queriesLabel}
             data-test-subj="streamsAppKnowledgeIndicatorsQueriesCount"
           />

@@ -39,10 +39,13 @@ describe('KnowledgeIndicatorsPanel', () => {
     mockUseStreamFeatures.mockReturnValue({
       features: [{ id: 'feature-1' }, { id: 'feature-2' }],
       featuresLoading: false,
+      error: undefined,
     });
     mockUseFetchDiscoveryQueries.mockReturnValue({
-      data: { total: 8, queries: Array.from({ length: 8 }, (_, index) => ({ id: index })) },
+      data: { total: 8, queries: [{ id: 0 }] },
       isLoading: false,
+      isFetching: false,
+      isError: false,
     });
   });
 
@@ -64,10 +67,13 @@ describe('KnowledgeIndicatorsPanel', () => {
     mockUseStreamFeatures.mockReturnValue({
       features: [{ id: 'feature-1' }],
       featuresLoading: false,
+      error: undefined,
     });
     mockUseFetchDiscoveryQueries.mockReturnValue({
       data: { total: 1, queries: [{ id: 0 }] },
       isLoading: false,
+      isFetching: false,
+      isError: false,
     });
 
     renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
@@ -97,14 +103,62 @@ describe('KnowledgeIndicatorsPanel', () => {
     mockUseStreamFeatures.mockReturnValue({
       features: [],
       featuresLoading: true,
+      error: undefined,
     });
     mockUseFetchDiscoveryQueries.mockReturnValue({
       data: undefined,
       isLoading: true,
+      isFetching: false,
+      isError: false,
     });
 
     renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
 
     expect(screen.getAllByTestId('knowledgeIndicatorsCountLoading')).toHaveLength(2);
+    expect(screen.getByTestId('streamsAppKnowledgeIndicatorsPanelLink')).toHaveAttribute(
+      'aria-label',
+      `View knowledge indicators for ${definition.stream.name}: loading counts`
+    );
+  });
+
+  it('shows unavailable state when a count fetch fails', () => {
+    mockUseStreamFeatures.mockReturnValue({
+      features: [],
+      featuresLoading: false,
+      error: new Error('features failed'),
+    });
+    mockUseFetchDiscoveryQueries.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+    });
+
+    renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
+
+    expect(screen.getAllByTestId('knowledgeIndicatorsCountUnavailable')).toHaveLength(2);
+  });
+
+  it('shows loading spinner for queries while refetching after time range changes', () => {
+    mockUseStreamFeatures.mockReturnValue({
+      features: [{ id: 'feature-1' }],
+      featuresLoading: false,
+      error: undefined,
+    });
+    mockUseFetchDiscoveryQueries.mockReturnValue({
+      data: { total: 3, queries: [{ id: 0 }] },
+      isLoading: false,
+      isFetching: true,
+      isError: false,
+    });
+
+    renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
+
+    expect(screen.getByTestId('streamsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent('1');
+    expect(
+      screen.getByTestId('streamsAppKnowledgeIndicatorsQueriesCount').querySelector(
+        '[data-test-subj="knowledgeIndicatorsCountLoading"]'
+      )
+    ).toBeInTheDocument();
   });
 });

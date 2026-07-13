@@ -220,6 +220,15 @@ export function ClassicStreamDetailManagement({
     );
   }
 
+  if (tab === 'significantEvents') {
+    return (
+      <RedirectTo
+        path="/_discovery/{tab}"
+        params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
+      />
+    );
+  }
+
   if (isValidManagementSubTab(tab)) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
