@@ -52,7 +52,8 @@ export const useManageRegionsState = (onClose: () => void) => {
 
   // Seed state once both queries finish loading.
   useEffect(() => {
-    if (!isPolicyLoading && !isEndpointsLoading && !syncedFromInitial) {
+    const shouldSeed = !isPolicyLoading && !isEndpointsLoading && !syncedFromInitial;
+    if (shouldSeed) {
       const seedState = computeSeedState(policy, availableRegions, availableGeos);
       setActiveTab(seedState.activeTab);
       setIsNewPolicy(seedState.isNewPolicy);
