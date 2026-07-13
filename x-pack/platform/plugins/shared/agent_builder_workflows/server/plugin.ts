@@ -57,7 +57,7 @@ export class AgentBuilderWorkflowsPlugin
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderWorkflowsPluginStart>,
     setupDeps: PluginSetupDependencies
   ): AgentBuilderWorkflowsPluginSetup {
-    const { agentBuilder, agentContextLayer, workflowsManagement } = setupDeps;
+    const { agentBuilder, agentBuilderSml, workflowsManagement } = setupDeps;
     const api = workflowsManagement.management;
     this.api = api;
 
@@ -81,7 +81,7 @@ export class AgentBuilderWorkflowsPlugin
     agentBuilder.skills.register(workflowAuthoringSkill);
 
     // Workflow SML type for the agent context layer
-    agentContextLayer.registerType(createWorkflowSmlType(api));
+    agentBuilderSml.registerType(createWorkflowSmlType(api));
 
     // Platform-level workflow execution tools
     const platformTools: Array<BuiltinToolDefinition<any>> = [
@@ -103,7 +103,7 @@ export class AgentBuilderWorkflowsPlugin
     this.security = startDeps.security;
     if (this.api) {
       this.api.setSmlIndexAttachment(
-        startDeps.agentContextLayer.indexAttachment,
+        startDeps.agentBuilderSml.indexAttachment,
         this.logger.get('sml')
       );
     }

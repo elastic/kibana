@@ -1,5 +1,5 @@
 {
-  "sha1": "6d3d100e3f9e629f30da88125358182a2a89f847",
+  "sha1": "76f593de568a3be8d5b34a495bce3c511d26d1bc",
   "tests": [
     {
       "id": "b24d1ecdbd533dc-9b4248bf82e44c0",
@@ -1594,6 +1594,22 @@
       }
     },
     {
+      "id": "e0eb65a41d5f693-35707d9b1cdbad6",
+      "title": "Mobile Service Overview - Contextual service map renders the contextual service map section with controls and focal service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/mobile_service_overview_contextual_service_map.spec.ts",
+        "line": 21,
+        "column": 9
+      }
+    },
+    {
       "id": "e2b5cbd964753d1-a075ca8194c0ad2",
       "title": "Service Overview - AWS Lambda displays cold start rate chart and not transaction breakdown chart",
       "expectedStatus": "passed",
@@ -1653,7 +1669,39 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_components.spec.ts",
-        "line": 70,
+        "line": 74,
+        "column": 9
+      }
+    },
+    {
+      "id": "9e3e33081ada713-079eb3ce768808d",
+      "title": "Service Overview - Contextual service map renders the contextual service map section with controls and focal service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_contextual_service_map.spec.ts",
+        "line": 25,
+        "column": 9
+      }
+    },
+    {
+      "id": "9e3e33081ada713-d1824802ee46158",
+      "title": "Service Overview - Contextual service map reveals hidden dependencies when hops are reduced and expand is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_contextual_service_map.spec.ts",
+        "line": 59,
         "column": 9
       }
     },
