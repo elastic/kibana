@@ -26,6 +26,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const FIELD_NAME = 'machine.os.raw';
 
+  /**
+   * Purpose: Input control options smoke test
+   *
+   * Migration: migrate to scout - move to legacy control vis plugin
+   */
   describe('input control options', () => {
     before(async () => {
       await visualize.initTests();

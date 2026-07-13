@@ -1,0 +1,78 @@
+openapi: 3.0.0
+info:
+  title: Default Validation Workflow Step
+  version: '2023-10-31'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    DefaultValidationInput:
+      type: object
+      description: Input for the default validation workflow step
+      required:
+        - alerts_context_count
+        - anonymized_alerts
+        - api_config
+        - attack_discoveries
+        - connector_name
+        - generation_uuid
+      properties:
+        alerts_context_count:
+          type: integer
+          description: The number of alerts provided as context to the LLM
+        alerts_index_pattern:
+          type: string
+          description: The Elasticsearch index pattern for alerts (used for hallucination detection)
+          default: '.alerts-security.alerts-*'
+        anonymized_alerts:
+          type: array
+          description: The anonymized alerts that were used to generate the attack discovery
+          items:
+            type: object
+            required:
+              - metadata
+              - page_content
+            properties:
+              id:
+                type: string
+              metadata:
+                type: object
+              page_content:
+                type: string
+        api_config:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/ApiConfig'
+          description: LLM API configuration
+        attack_discoveries:
+          type: array
+          description: The generated Attack discoveries to validate
+          items:
+            $ref: '../attack_discovery/attack_discovery.schema.yaml#/components/schemas/AttackDiscovery'
+        connector_name:
+          type: string
+          description: The name of the connector that generated the attack discovery
+        generation_uuid:
+          type: string
+          description: The generation ID of the run that created the attack discovery
+        replacements:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/Replacements'
+          description: Replacements enable anonymization of data sent to the LLM
+        enable_field_rendering:
+          type: boolean
+          description: Enables markdown syntax for pivot fields
+          default: true
+        with_replacements:
+          type: boolean
+          description: Return discoveries with text replacements applied
+          default: false
+
+    DefaultValidationOutput:
+      type: object
+      description: Output from the default validation workflow step
+      required:
+        - validated_discoveries
+      properties:
+        validated_discoveries:
+          type: array
+          description: Successfully validated attack discovery alerts
+          items:
+            $ref: '../attack_discovery/attack_discovery_api_alert.schema.yaml#/components/schemas/AttackDiscoveryApiAlert'
