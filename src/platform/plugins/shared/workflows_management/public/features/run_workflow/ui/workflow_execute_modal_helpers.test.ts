@@ -169,6 +169,15 @@ describe('getVisibleWorkflowTriggerTabs', () => {
     ]);
   });
 
+  it('omits historical when previous executions are not available', () => {
+    expect(getVisibleWorkflowTriggerTabs(null, { includeHistorical: false })).toEqual([
+      'alert',
+      'index',
+      'event',
+      'manual',
+    ]);
+  });
+
   it('returns alert, manual, and historical for alert-only workflows', () => {
     expect(
       getVisibleWorkflowTriggerTabs({ ...baseDefinition, triggers: [{ type: 'alert' }] })

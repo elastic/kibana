@@ -6,7 +6,6 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt/ui';
 import { EXTENDED_TIMEOUT } from '../constants';
 
 export class ServiceFlyoutPage {
@@ -14,12 +13,18 @@ export class ServiceFlyoutPage {
   public readonly content: Locator;
   public readonly title: Locator;
   public readonly actions: Locator;
+  public readonly transactionsSection: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.flyout = page.testSubj.locator('serviceFlyout');
     this.content = page.testSubj.locator('serviceFlyoutOverview');
     this.title = page.testSubj.locator('serviceFlyoutTitleLink');
     this.actions = page.testSubj.locator('serviceFlyoutActionsButton');
+    this.transactionsSection = page.testSubj.locator('serviceFlyoutSection-transactions-loaded');
+  }
+
+  getChartLocator(id: string): Locator {
+    return this.page.testSubj.locator(`serviceFlyoutLensChart-${id}`);
   }
 
   async getTitle(): Promise<string | null> {
@@ -41,14 +46,5 @@ export class ServiceFlyoutPage {
   async clickAction(action: string) {
     await this.actions.click();
     await this.page.testSubj.click(`serviceFlyoutActionsMenuItem-${action}`);
-  }
-
-  async expectChartsRendered(ids: string[]) {
-    for (const id of ids) {
-      const chart = this.page.testSubj.locator(`serviceFlyoutLensChart-${id}`);
-      await expect(chart).toBeVisible();
-      await expect(chart.locator('[data-render-complete="true"]')).toBeVisible();
-      await expect(chart.locator('[data-test-subj="embeddable-lens-failure"]')).toBeHidden();
-    }
   }
 }

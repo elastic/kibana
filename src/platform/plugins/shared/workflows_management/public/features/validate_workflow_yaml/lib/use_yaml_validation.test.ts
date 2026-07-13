@@ -18,6 +18,20 @@ jest.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_es
   validateEsqlSteps: (...args: unknown[]) => mockValidateEsqlSteps(...args),
 }));
 
+jest.mock('./use_workflow_yaml_validation_context', () => {
+  const mockValidationContext = {
+    connectorTypes: {},
+    connectorsManagementUrl: 'http://test/connectors',
+    workflows: { workflows: {}, totalWorkflows: 0 },
+    getPropertyHandler: () => undefined,
+    esqlCallbacks: {},
+  };
+
+  return {
+    useWorkflowYamlValidationContext: jest.fn(() => mockValidationContext),
+  };
+});
+
 jest.mock(
   '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks',
   () => ({
@@ -534,5 +548,40 @@ steps:
       },
       { timeout: 3000 }
     );
+  });
+
+  it('completes validation when validateEsqlSteps throws a non-abort error', async () => {
+    mockValidateEsqlSteps.mockRejectedValueOnce(new Error('ES|QL region mapping failed'));
+
+    const yamlContent = `
+version: "1"
+name: "ES|QL Workflow"
+enabled: true
+triggers:
+  - type: manual
+    enabled: true
+steps:
+  - name: esql_step
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-* | LIMIT 10
+`;
+    const mockEditor = createMockEditor(yamlContent);
+    const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
+
+    await waitFor(
+      () => {
+        expect(result.current.isLoading).toBe(false);
+      },
+      { timeout: 3000 }
+    );
+
+    expect(result.current.error).toBeNull();
+    expect(
+      result.current.validationResults.some(
+        (validationResult) => validationResult.owner === 'esql-validation'
+      )
+    ).toBe(false);
   });
 });

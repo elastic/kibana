@@ -7,11 +7,13 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { OverviewTab } from '../../flyout_v2/attack/main/tabs/overview_tab';
+import { DataViewManagerBootstrap } from '../alert_flyout_overview_tab_component/data_view_manager_bootstrap';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 
 export interface AttackFlyoutOverviewTabProps {
   hit: DataTableRecord;
@@ -70,10 +72,15 @@ interface AttackFlyoutOverviewTabContentProps {
  * Rendered inside flyoutProviders so it has access to Redux store and services.
  */
 const AttackFlyoutOverviewTabContent = ({ hit }: AttackFlyoutOverviewTabContentProps) => {
+  // In Discover there is no parent attack flyout to refresh after alert mutations.
+  const onAttackUpdated = useCallback(() => {}, []);
+  const isInSecurityApp = useIsInSecurityApp();
+
   return (
     <>
+      {!isInSecurityApp && <DataViewManagerBootstrap />}
       <EuiSpacer size="m" />
-      <OverviewTab hit={hit} />
+      <OverviewTab hit={hit} onAttackUpdated={onAttackUpdated} />
     </>
   );
 };

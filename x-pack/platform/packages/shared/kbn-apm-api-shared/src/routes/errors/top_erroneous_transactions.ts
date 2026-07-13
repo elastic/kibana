@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
-import { environmentRt } from '@kbn/apm-types';
+import { z } from '@kbn/zod/v4';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt, offsetRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
 
 export interface TopErroneousTransactionsResponse {
   topErroneousTransactions: Array<{
@@ -22,14 +21,12 @@ export interface TopErroneousTransactionsResponse {
 
 export const topErroneousTransactionsRoute = defineRoute<TopErroneousTransactionsResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions',
-  params: t.type({
-    path: t.type({ serviceName: t.string, groupId: t.string }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      offsetRt,
-      t.type({ numBuckets: toNumberRt }),
-    ]),
+  params: z.object({
+    path: z.object({ serviceName: z.string(), groupId: z.string() }),
+    query: environmentSchema
+      .merge(kuerySchema)
+      .merge(rangeSchema)
+      .merge(offsetSchema)
+      .merge(z.object({ numBuckets: z.coerce.number() })),
   }),
 });

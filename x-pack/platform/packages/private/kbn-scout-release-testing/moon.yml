@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/scout'
   - '@kbn/test'
+  - '@kbn/unified-doc-viewer'
 tags:
   - functional-tests
   - package

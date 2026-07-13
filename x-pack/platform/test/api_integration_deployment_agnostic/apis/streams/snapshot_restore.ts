@@ -12,12 +12,11 @@ import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
+import { bulkQueries, getQueries } from '../significant_events/helpers/requests';
 import {
-  bulkQueries,
   disableStreams,
   enableStreams,
   forkStream,
-  getQueries,
   getStream,
   indexAndAssertTargetStream,
 } from './helpers/requests';
