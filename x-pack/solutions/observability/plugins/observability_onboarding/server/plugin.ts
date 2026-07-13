@@ -26,6 +26,7 @@ import type {
 } from './types';
 import { observabilityOnboardingFlow } from './saved_objects/observability_onboarding_status';
 import { EsLegacyConfigService } from './services/es_legacy_config_service';
+import { createVerificationStore } from './lib/api_endpoints/verification_store';
 import type { ObservabilityOnboardingConfig } from './config';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
 import { ObservabilityOnboardingPricingFeature } from '../common/pricing_features';
@@ -74,6 +75,7 @@ export class ObservabilityOnboardingPlugin
     }) as ObservabilityOnboardingRouteHandlerResources['plugins'];
 
     const config = this.initContext.config.get<ObservabilityOnboardingConfig>();
+    const verificationStore = createVerificationStore();
 
     const dependencies: Omit<
       ObservabilityOnboardingRouteHandlerResources,
@@ -84,6 +86,7 @@ export class ObservabilityOnboardingPlugin
       plugins: resourcePlugins,
       services: {
         esLegacyConfigService: this.esLegacyConfigService,
+        verificationStore,
       },
       core: {
         setup: core,

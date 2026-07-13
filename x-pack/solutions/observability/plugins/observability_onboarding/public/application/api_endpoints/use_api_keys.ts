@@ -12,30 +12,74 @@ import { useKibana } from '../../hooks/use_kibana';
 import { callObservabilityOnboardingApi } from '../../services/rest/create_call_api';
 import type { ApiEndpointId } from '../../../common/api_endpoints';
 
+export interface ApiEndpointKeyState {
+  encodedApiKey: string;
+  apiKeyId: string;
+  verificationId: string;
+  status: 'waiting' | 'accepted' | 'expired';
+  detectionActive: boolean;
+}
+
 export interface UseApiKeysResult {
-  encodedApiKeys: Partial<Record<ApiEndpointId, string>>;
+  keys: Partial<Record<ApiEndpointId, ApiEndpointKeyState>>;
   creatingEndpointId?: ApiEndpointId;
   createApiKey: (endpointId: ApiEndpointId) => Promise<void>;
+  setVerification: (
+    endpointId: ApiEndpointId,
+    update: { status: 'waiting' | 'accepted' | 'expired'; signal?: string; lastSeen?: string }
+  ) => void;
 }
 
 export function useApiKeys(): UseApiKeysResult {
   const {
     services: { notifications },
   } = useKibana();
-  const [encodedApiKeys, setEncodedApiKeys] = useState<Partial<Record<ApiEndpointId, string>>>({});
+  const [keys, setKeys] = useState<Partial<Record<ApiEndpointId, ApiEndpointKeyState>>>({});
   const [creatingEndpointId, setCreatingEndpointId] = useState<ApiEndpointId | undefined>(
     undefined
+  );
+
+  const setVerification = useCallback(
+    (
+      endpointId: ApiEndpointId,
+      update: { status: 'waiting' | 'accepted' | 'expired'; signal?: string; lastSeen?: string }
+    ) => {
+      setKeys((previous) => {
+        const existing = previous[endpointId];
+        if (!existing) {
+          return previous;
+        }
+        return {
+          ...previous,
+          [endpointId]: {
+            ...existing,
+            status: update.status,
+          },
+        };
+      });
+    },
+    []
   );
 
   const createApiKey = useCallback(
     async (endpointId: ApiEndpointId) => {
       setCreatingEndpointId(endpointId);
       try {
-        const { encodedApiKey } = await callObservabilityOnboardingApi(
-          'POST /internal/observability_onboarding/api_endpoints/create_key/{id}',
-          { signal: null, params: { path: { id: endpointId } } }
-        );
-        setEncodedApiKeys((previous) => ({ ...previous, [endpointId]: encodedApiKey }));
+        const { encodedApiKey, apiKeyId, verificationId, detectionActive } =
+          await callObservabilityOnboardingApi(
+            'POST /internal/observability_onboarding/api_endpoints/create_key/{id}',
+            { signal: null, params: { path: { id: endpointId } } }
+          );
+        setKeys((previous) => ({
+          ...previous,
+          [endpointId]: {
+            encodedApiKey,
+            apiKeyId,
+            verificationId,
+            status: 'waiting',
+            detectionActive,
+          },
+        }));
         notifications?.toasts.addSuccess({
           title: i18n.translate('xpack.observability_onboarding.apiEndpoints.createKeySuccess', {
             defaultMessage: 'API key created successfully',
@@ -61,5 +105,5 @@ export function useApiKeys(): UseApiKeysResult {
     [notifications]
   );
 
-  return { encodedApiKeys, creatingEndpointId, createApiKey };
+  return { keys, creatingEndpointId, createApiKey, setVerification };
 }

@@ -27,6 +27,13 @@ import {
   IS_MANAGED_OTLP_SERVICE_ENABLED,
   IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
 } from '../../../common/feature_flags';
+import { createVerificationForKey } from '../../lib/api_endpoints/create_verification_for_key';
+import { registerCollectorWatch } from '../../lib/api_endpoints/register_collector_watch';
+import { handleReceipt } from '../../lib/api_endpoints/handle_receipt';
+import {
+  handleVerification,
+  type ApiEndpointVerificationResponse,
+} from '../../lib/api_endpoints/handle_verification';
 
 export interface ApiEndpointsRouteResponse {
   elasticsearchUrl: string;
@@ -35,6 +42,9 @@ export interface ApiEndpointsRouteResponse {
 
 export interface ApiEndpointApiKeyResponse {
   encodedApiKey: string;
+  apiKeyId: string;
+  verificationId: string;
+  detectionActive: boolean;
 }
 
 function hasRequiredPrivileges(
@@ -142,13 +152,117 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     }
 
     const createApiKey = resolveApiKeyFactory(id, apiKeyFactoryContext);
-    const { encoded } = await createApiKey(client.asCurrentUser, `onboarding-${id}-api`);
+    const { id: apiKeyId, encoded } = await createApiKey(
+      client.asCurrentUser,
+      `onboarding-${id}-api`
+    );
 
-    return { encodedApiKey: encoded };
+    const { verificationId, detectionActive } = await createVerificationForKey(
+      {
+        store: resources.services.verificationStore,
+        registerWatch: registerCollectorWatch,
+        logger: resources.logger,
+      },
+      {
+        apiKeyId,
+        endpointId: id,
+        apiEndpointsConfig: config.apiEndpoints,
+        cloudSetup: plugins.cloud?.setup,
+      }
+    );
+
+    return { encodedApiKey: encoded, apiKeyId, verificationId, detectionActive };
+  },
+});
+
+const receiptRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'POST /internal/observability_onboarding/api_endpoints/receipt',
+  options: {
+    xsrfRequired: false,
+  },
+  security: {
+    authc: {
+      enabled: false,
+      reason: 'Receipt calls are authenticated with a plugin-level bearer token.',
+    },
+    authz: {
+      enabled: false,
+      reason:
+        'Receipt calls are authenticated with a plugin-level bearer token and do not access user-scoped resources.',
+    },
+  },
+  params: t.type({
+    body: t.intersection([
+      t.type({
+        verificationId: t.string,
+        apiKeyId: t.string,
+        endpointId: t.string,
+        ingestPath: t.string,
+        status: t.literal('accepted'),
+      }),
+      t.partial({
+        signal: t.string,
+        receivedAt: t.string,
+      }),
+    ]),
+  }),
+  async handler(resources): Promise<{}> {
+    const {
+      config,
+      request,
+      services: { verificationStore },
+      params: { body },
+    } = resources;
+
+    const authorizationHeader =
+      typeof request.headers.authorization === 'string' ? request.headers.authorization : undefined;
+
+    const result = handleReceipt({
+      store: verificationStore,
+      collectorToKibanaToken: config.apiEndpoints.collectorToKibanaToken,
+      authorizationHeader,
+      body,
+    });
+
+    if (result.statusCode === 503) {
+      throw Boom.serverUnavailable('Receipt verification is not configured');
+    }
+    if (result.statusCode === 401) {
+      throw Boom.unauthorized('Invalid receipt token');
+    }
+    return {};
+  },
+});
+
+const verificationRoute = createObservabilityOnboardingServerRoute({
+  endpoint: 'GET /internal/observability_onboarding/api_endpoints/verification/{verificationId}',
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'Returns only opaque verification status keyed by an unguessable verificationId and accesses no user-scoped resources',
+    },
+  },
+  params: t.type({
+    path: t.type({
+      verificationId: t.string,
+    }),
+  }),
+  async handler(resources): Promise<ApiEndpointVerificationResponse> {
+    const {
+      services: { verificationStore },
+      params: {
+        path: { verificationId },
+      },
+    } = resources;
+
+    return handleVerification({ store: verificationStore, verificationId });
   },
 });
 
 export const apiEndpointsRouteRepository = {
   ...apiEndpointsRoute,
   ...createApiKeyRoute,
+  ...receiptRoute,
+  ...verificationRoute,
 };

@@ -19,6 +19,13 @@ const configSchema = schema.object({
       options: { defaultValue: schema.contextRef('serverless') },
     }),
   }),
+  apiEndpoints: schema.object({
+    collectorWatchUrl: schema.maybe(schema.string()),
+    kibanaToCollectorToken: schema.maybe(schema.string()),
+    collectorToKibanaToken: schema.maybe(schema.string()),
+    targetType: schema.maybe(schema.string()),
+    targetId: schema.maybe(schema.string()),
+  }),
 });
 
 export type ObservabilityOnboardingConfig = TypeOf<typeof configSchema>;
