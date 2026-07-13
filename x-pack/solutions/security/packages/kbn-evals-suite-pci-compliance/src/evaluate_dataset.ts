@@ -13,6 +13,7 @@ import type {
   Evaluator,
   EvalsExecutorClient,
   Example,
+  TaskOutput,
 } from '@kbn/evals';
 import { createSkillInvocationEvaluator } from '@kbn/evals';
 import type { PciEvalChatClient } from './chat_client';
@@ -98,6 +99,9 @@ export function createEvaluatePciDataset({
       examples,
     } satisfies EvaluationDataset;
 
+    const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+      evaluators.traceBasedEvaluators;
+
     await executorClient.runExperiment(
       {
         datasets: [dataset],
@@ -119,6 +123,11 @@ export function createEvaluatePciDataset({
           log,
           skillName: 'pci-compliance',
         }),
+        toolCalls as Evaluator<PciDatasetExample, TaskOutput>,
+        latency as Evaluator<PciDatasetExample, TaskOutput>,
+        inputTokens as Evaluator<PciDatasetExample, TaskOutput>,
+        outputTokens as Evaluator<PciDatasetExample, TaskOutput>,
+        cachedTokens as Evaluator<PciDatasetExample, TaskOutput>,
       ]
     );
   };

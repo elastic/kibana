@@ -162,6 +162,7 @@ export async function executeUntilValid(
       toolCalls: response.toolCalls,
       tokens: response.tokens,
       input: prevMessages,
+      traceId: response.traceId,
     };
   }
 

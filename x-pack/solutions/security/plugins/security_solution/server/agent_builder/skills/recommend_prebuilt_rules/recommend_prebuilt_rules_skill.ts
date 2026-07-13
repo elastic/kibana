@@ -24,12 +24,30 @@ interface RecommendPrebuiltRulesSkillDeps {
 
 const RECOMMEND_PREBUILT_RULES_CONTENT = `# Recommend Prebuilt Rules
 
+> **FIRST ACTION — before you write any prose, you MUST emit a tool call.**
+> - Install / recommend intent -> call \`security.get_user_data_inventory\` first.
+> - Browse / count / "how many" intent -> call \`security.find_prebuilt_rules\` with \`perPage: 1\` first.
+> - Coverage / "which MITRE am I missing" intent -> call \`security.get_installed_rules_mitre_coverage\` first.
+> A response with no tool call in this turn is a failure — do not answer from memory.
+
 ## Use This Skill
 
 Use this skill to discover and recommend Elastic **prebuilt** detection rules to **install** on this deployment, and to answer **browse** and **coverage** questions about the installable catalog — by tag, MITRE tactic/technique, rule type, integration, severity, or keyword. Two intents:
 
 - **Install** — "what rules should I install?", "recommend rules for my Okta data", "fill my coverage gaps".
 - **Browse / count / coverage** — "what LLM rules can I install?", "how many critical ES|QL rules are available?", "which MITRE tactics am I missing?".
+
+## Tool-Call Contract (mandatory)
+
+**Every answer from this skill MUST be backed by at least one \`security.find_prebuilt_rules\` tool call made in this conversation.** The \`FIRST ACTION\` block at the top of this skill names which tool to call first for each intent. This section expands the rule; it does not soften it.
+
+- **Install recommendations** -> call \`security.get_user_data_inventory\` then \`security.find_prebuilt_rules\` (at minimum) before recommending anything. If you skip \`security.find_prebuilt_rules\`, the recommendation is invalid.
+- **Browse / count / "how many"** -> call \`security.find_prebuilt_rules\` with \`perPage: 1\` and read the answer from \`total\`. Do not state a count you did not fetch.
+- **Coverage / "which MITRE am I missing"** -> call \`security.get_installed_rules_mitre_coverage\`. To recommend gap-fillers, follow with \`security.find_prebuilt_rules\`.
+
+If a tool call fails or returns zero results, say so plainly — do **not** fall back to recommending rules from memory. An honest "no results for that filter, try X" is always correct; a memory-based recommendation is never correct.
+
+**Why this is non-negotiable:** rule names, \`rule_id\`s, tag values, counts, and MITRE mappings are all catalog-specific and versioned. Inventing them produces a recommendation the user cannot act on (the rule may not exist, or may already be installed, or may be named differently in their version). Only tool results in *this* conversation are ground truth.
 
 ## Boundaries
 
@@ -237,6 +255,14 @@ Each maps a user request to the tool call(s). These are patterns for you, not sc
 - "Which MITRE tactics am I missing?" -> \`security.get_installed_rules_mitre_coverage\`, then diff against the canonical 14.
 - "Recommend rules to fill those gaps" -> \`security.find_prebuilt_rules { filter: { mitreTactic: ["<TA-ID-1>", "<TA-ID-2>", ...] } }\` for the missing tactics in one call (or one call per tactic if you want balanced coverage of each), prioritizing rules whose related integrations are already installed.
 
+## Common Mistakes
+
+Each ❌ below is an ungrounded filter value that produces an invalid recommendation. Do the ✅ instead.
+
+- ❌ \`find_prebuilt_rules { filter: { tags: ["Windows"] } }\` — \`Windows\` is not a catalog tag value. ✅ Call \`security.get_installable_catalog_overview\` **first**, then pass the exact value it returned, e.g. \`tags: ["OS: Windows"]\`. Never pass a \`tags\` value you have not seen in an overview result this conversation.
+- ❌ \`find_prebuilt_rules { filter: { tags: ["Credential Access"] } }\` — a MITRE tactic does not belong in \`tags\`. ✅ Route it through \`mitreTactic\` as the canonical ID: \`mitreTactic: ["TA0006"]\`.
+- ❌ \`find_prebuilt_rules { filter: { mitreTactic: ["CredentialAccess"] } }\` or \`["TA9999"]\` — invented / non-canonical tactic. ✅ Use only the 14 canonical IDs from the MITRE ATT&CK Routing table (TA0001–TA0043). If a tactic name is uncertain, map it via that table; if still unsure, use \`keywords\` — never guess an ID.
+
 ## No Actions
 
 This skill is read-only — never claim to have installed, enabled, edited, or deleted a rule. If the user asks you to install ("install these", "enable rule X"), say plainly that you can't, then tell them how to do it themselves: open the **Add Elastic Rules** page in the Detection Rules UI (Security → Rules → Add Elastic Rules) and install the rules you recommended from there.
@@ -256,9 +282,17 @@ export const createRecommendPrebuiltRulesSkill = ({
     name: 'recommend-prebuilt-rules',
     basePath: 'skills/security/rules',
     description:
-      'Discover and recommend Elastic prebuilt detection rules to install on this deployment. ' +
-      'Handles install recommendations and browse/coverage questions about the installable ' +
-      'catalog (by tag, MITRE, rule type, integration, or keyword). Read-only.',
+      'Recommend Elastic prebuilt detection rules to INSTALL — rules not yet installed on this ' +
+      'deployment that the user can add. Activate for: "what rules should I install", "which ' +
+      'prebuilt rules can I add for <integration/data source>", "how many <severity/type> rules ' +
+      'are available to install", "which MITRE tactics am I missing and what can I install to ' +
+      'close the gaps", "are there machine-learning prebuilt rules I can install", and browsing ' +
+      'the installable catalog (by tag, MITRE tactic/technique, rule type including ' +
+      'machine-learning, integration, severity, or keyword). Read-only — recommends what to ' +
+      'install, never installs. Do NOT use for rules already installed (listing/counting/' +
+      'filtering installed rules -> find-security-rules), for creating or editing one specific ' +
+      'rule -> detection-rule-edit, nor for configured ML jobs -> find-security-ml-jobs ' +
+      '(installable ML prebuilt rules belong here).',
     content: RECOMMEND_PREBUILT_RULES_CONTENT,
     getInlineTools: () => [
       createFindPrebuiltRulesInlineTool({ getStartServices, logger, ml }),

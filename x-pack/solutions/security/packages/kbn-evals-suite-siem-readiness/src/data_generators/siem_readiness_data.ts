@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { DataQualityResultDocument } from '@kbn/siem-readiness';
+import pRetry from 'p-retry';
 
 /**
  * Seed data for the SIEM Readiness eval suite — four dimensions:
@@ -64,10 +65,57 @@ type Doc = Record<string, unknown>;
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function bulkIndex(esClient: Client, index: string, docs: Doc[]): Promise<void> {
+const RETRIES = 5;
+const MIN_TIMEOUT = 2000;
+
+// A boot-time index/ILM install storm (~200 plugins) can saturate ES's master
+// cluster-state-update queue for several seconds, during which admin calls
+// (createDataStream, putIndexTemplate, bulk, ...) can 503/408/504/time out
+// before their shard-started task is processed (observed live:
+// "Entity Store V2 install failed (500)" and "TimeoutError: Request timed
+// out" from this exact seeder during concurrent multi-worker boots). None of
+// this file's ~20 esClient calls had retry logic. Wrap every one with the same
+// exponential-backoff pRetry pattern already used for HTTP calls elsewhere in
+// kbn-evals (see kbn-evals-suite-endpoint/src/chat_client.ts) rather than
+// picking and choosing which calls are "boot-time-adjacent" — all of them run
+// inside the same post-boot contention window.
+async function withRetry<T>(log: ToolingLog, label: string, fn: () => Promise<T>): Promise<T> {
+  return pRetry(fn, {
+    retries: RETRIES,
+    minTimeout: MIN_TIMEOUT,
+    onFailedAttempt: (error) => {
+      const isLastAttempt = error.retriesLeft === 0;
+      if (isLastAttempt) {
+        log.error(
+          new Error(`[siem-readiness] ${label} failed after ${error.attemptNumber} attempts`, {
+            cause: error,
+          })
+        );
+      } else {
+        log.warning(
+          new Error(
+            `[siem-readiness] ${label} failed on attempt ${error.attemptNumber}; retrying...`,
+            {
+              cause: error,
+            }
+          )
+        );
+      }
+    },
+  });
+}
+
+async function bulkIndex(
+  esClient: Client,
+  index: string,
+  docs: Doc[],
+  log: ToolingLog
+): Promise<void> {
   if (docs.length === 0) return;
   const operations = docs.flatMap((doc) => [{ create: { _index: index } }, doc]);
-  const response = await esClient.bulk({ refresh: true, operations });
+  const response = await withRetry(log, `bulkIndex(${index})`, () =>
+    esClient.bulk({ refresh: true, operations })
+  );
   if (response.errors) {
     const firstError = response.items.find((item) => {
       const op = Object.values(item)[0];
@@ -326,10 +374,10 @@ export const seedSiemReadinessData = async ({
   log.info('[siem-readiness] Seeding coverage indices');
 
   await Promise.all([
-    bulkIndex(esClient, SIEM_READINESS_INDICES.endpoint, buildEndpointDocs()),
-    bulkIndex(esClient, SIEM_READINESS_INDICES.identity, buildIdentityDocs()),
-    bulkIndex(esClient, SIEM_READINESS_INDICES.network, buildNetworkDocs()),
-    bulkIndex(esClient, SIEM_READINESS_INDICES.cloud, buildCloudDocs()),
+    bulkIndex(esClient, SIEM_READINESS_INDICES.endpoint, buildEndpointDocs(), log),
+    bulkIndex(esClient, SIEM_READINESS_INDICES.identity, buildIdentityDocs(), log),
+    bulkIndex(esClient, SIEM_READINESS_INDICES.network, buildNetworkDocs(), log),
+    bulkIndex(esClient, SIEM_READINESS_INDICES.cloud, buildCloudDocs(), log),
   ]);
 
   log.info(
@@ -344,23 +392,27 @@ export const seedSiemReadinessData = async ({
 
   // Use esClient.index (not bulk) to trigger auto-creation of the quality index.
   // The quality results index is a data stream — must include @timestamp.
-  await esClient.index({
-    index: DATA_QUALITY_INDEX,
-    refresh: true,
-    document: {
-      ...buildQualityDoc(SIEM_READINESS_INDICES.identity, 2),
-      '@timestamp': recentTimestamp(1),
-    },
-  });
+  await withRetry(log, 'index quality doc (identity)', () =>
+    esClient.index({
+      index: DATA_QUALITY_INDEX,
+      refresh: true,
+      document: {
+        ...buildQualityDoc(SIEM_READINESS_INDICES.identity, 2),
+        '@timestamp': recentTimestamp(1),
+      },
+    })
+  );
 
-  await esClient.index({
-    index: DATA_QUALITY_INDEX,
-    refresh: true,
-    document: {
-      ...buildQualityDoc(SIEM_READINESS_INDICES.endpoint, 0),
-      '@timestamp': recentTimestamp(2),
-    },
-  });
+  await withRetry(log, 'index quality doc (endpoint)', () =>
+    esClient.index({
+      index: DATA_QUALITY_INDEX,
+      refresh: true,
+      document: {
+        ...buildQualityDoc(SIEM_READINESS_INDICES.endpoint, 0),
+        '@timestamp': recentTimestamp(2),
+      },
+    })
+  );
 
   log.info(
     `[siem-readiness] Quality docs seeded: identity index (incompatible=2), endpoint index (incompatible=0)`
@@ -372,64 +424,74 @@ export const seedSiemReadinessData = async ({
   log.info('[siem-readiness] Setting up ingest pipelines');
 
   // Create the failing pipeline — the `fail` processor fires only when fail_me == true.
-  await esClient.ingest.putPipeline({
-    id: SIEM_READINESS_PIPELINE_NAME,
-    description: 'SIEM readiness eval — deliberate failures for continuity dimension testing',
-    processors: [
-      {
-        fail: {
-          message: 'deliberate test failure for siem-readiness evals',
-          if: 'ctx?.fail_me == true',
+  await withRetry(log, 'putPipeline (failing)', () =>
+    esClient.ingest.putPipeline({
+      id: SIEM_READINESS_PIPELINE_NAME,
+      description: 'SIEM readiness eval — deliberate failures for continuity dimension testing',
+      processors: [
+        {
+          fail: {
+            message: 'deliberate test failure for siem-readiness evals',
+            if: 'ctx?.fail_me == true',
+          },
         },
-      },
-      {
-        set: {
-          field: 'processed',
-          value: true,
+        {
+          set: {
+            field: 'processed',
+            value: true,
+          },
         },
-      },
-    ],
-  });
+      ],
+    })
+  );
 
   // Create the healthy pipeline — no failure logic.
-  await esClient.ingest.putPipeline({
-    id: SIEM_READINESS_PIPELINE_OK_NAME,
-    description: 'SIEM readiness eval — healthy pipeline for continuity dimension testing',
-    processors: [
-      {
-        set: {
-          field: 'processed',
-          value: true,
+  await withRetry(log, 'putPipeline (healthy)', () =>
+    esClient.ingest.putPipeline({
+      id: SIEM_READINESS_PIPELINE_OK_NAME,
+      description: 'SIEM readiness eval — healthy pipeline for continuity dimension testing',
+      processors: [
+        {
+          set: {
+            field: 'processed',
+            value: true,
+          },
         },
-      },
-    ],
-  });
+      ],
+    })
+  );
 
   // continuityBad must match logs-* (fetch_pipelines discovers pipelines via logs-* index settings).
   // logs-* matches the Fleet data-stream-only template — indices.create is rejected.
   // Create a dedicated template with default_pipeline set so the backing index has it,
   // then create the data stream explicitly.
-  await esClient.indices.putIndexTemplate({
-    name: CONTINUITY_BAD_TEMPLATE_NAME,
-    index_patterns: [SIEM_READINESS_INDICES.continuityBad],
-    data_stream: {},
-    priority: 500,
-    template: {
-      settings: { index: { default_pipeline: SIEM_READINESS_PIPELINE_NAME } },
-      mappings: {
-        properties: {
-          '@timestamp': { type: 'date' },
+  await withRetry(log, 'putIndexTemplate (continuity-bad)', () =>
+    esClient.indices.putIndexTemplate({
+      name: CONTINUITY_BAD_TEMPLATE_NAME,
+      index_patterns: [SIEM_READINESS_INDICES.continuityBad],
+      data_stream: {},
+      priority: 500,
+      template: {
+        settings: { index: { default_pipeline: SIEM_READINESS_PIPELINE_NAME } },
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+          },
         },
       },
-    },
-  });
-  await esClient.indices.createDataStream({ name: SIEM_READINESS_INDICES.continuityBad });
+    })
+  );
+  await withRetry(log, 'createDataStream (continuity-bad)', () =>
+    esClient.indices.createDataStream({ name: SIEM_READINESS_INDICES.continuityBad })
+  );
 
   // Attach the healthy pipeline to the network index as default_pipeline.
-  await esClient.indices.putSettings({
-    index: SIEM_READINESS_INDICES.network,
-    settings: { index: { default_pipeline: SIEM_READINESS_PIPELINE_OK_NAME } },
-  });
+  await withRetry(log, 'putSettings (network default_pipeline)', () =>
+    esClient.indices.putSettings({
+      index: SIEM_READINESS_INDICES.network,
+      settings: { index: { default_pipeline: SIEM_READINESS_PIPELINE_OK_NAME } },
+    })
+  );
 
   // Index 100 normal docs through the failing pipeline — these succeed.
   const normalDocs = buildContinuityNormalDocs();
@@ -437,15 +499,21 @@ export const seedSiemReadinessData = async ({
     { create: { _index: SIEM_READINESS_INDICES.continuityBad } },
     doc,
   ]);
-  await esClient.bulk({
-    refresh: true,
-    pipeline: SIEM_READINESS_PIPELINE_NAME,
-    operations: normalOperations,
-  });
+  await withRetry(log, 'bulk (continuity normal docs)', () =>
+    esClient.bulk({
+      refresh: true,
+      pipeline: SIEM_READINESS_PIPELINE_NAME,
+      operations: normalOperations,
+    })
+  );
 
   // Index 3 docs with fail_me: true — these trigger the pipeline's fail processor.
   // The pipeline's failed counter increments even though the docs are rejected.
-  // We catch errors because bulk will return 500 for the failed items.
+  // We catch errors because bulk will return 500 for the failed items. Note: a
+  // deliberate-fail bulk response (HTTP 200 with per-item errors, or a 500 from
+  // the fail processor) is NOT a transient ES error, so it's intentionally
+  // NOT wrapped in withRetry — retrying it would just burn 5 attempts for no
+  // benefit before falling through to this same catch anyway.
   const failDocs = buildContinuityFailDocs();
   const failOperations = failDocs.flatMap((doc) => [
     { create: { _index: SIEM_READINESS_INDICES.continuityBad } },
@@ -479,37 +547,47 @@ export const seedSiemReadinessData = async ({
   // Create a dedicated index template so the data streams can be created
   // independently of the Fleet logs-* template (which may not be present in
   // all test cluster configurations).
-  await esClient.indices.putIndexTemplate({
-    name: RETENTION_INDEX_TEMPLATE_NAME,
-    index_patterns: [RETENTION_SHORT_DS, RETENTION_LONG_DS],
-    data_stream: {},
-    priority: 500,
-    template: {
-      mappings: {
-        properties: {
-          '@timestamp': { type: 'date' },
-          event: { properties: { category: { type: 'keyword' } } },
-          cloud: { properties: { provider: { type: 'keyword' } } },
+  await withRetry(log, 'putIndexTemplate (retention)', () =>
+    esClient.indices.putIndexTemplate({
+      name: RETENTION_INDEX_TEMPLATE_NAME,
+      index_patterns: [RETENTION_SHORT_DS, RETENTION_LONG_DS],
+      data_stream: {},
+      priority: 500,
+      template: {
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            event: { properties: { category: { type: 'keyword' } } },
+            cloud: { properties: { provider: { type: 'keyword' } } },
+          },
         },
       },
-    },
-  });
-  await esClient.indices.createDataStream({ name: RETENTION_SHORT_DS });
-  await esClient.indices.createDataStream({ name: RETENTION_LONG_DS });
-  await bulkIndex(esClient, RETENTION_SHORT_DS, buildRetentionDocs(5));
-  await bulkIndex(esClient, RETENTION_LONG_DS, buildRetentionDocs(5));
+    })
+  );
+  await withRetry(log, 'createDataStream (retention-short)', () =>
+    esClient.indices.createDataStream({ name: RETENTION_SHORT_DS })
+  );
+  await withRetry(log, 'createDataStream (retention-long)', () =>
+    esClient.indices.createDataStream({ name: RETENTION_LONG_DS })
+  );
+  await bulkIndex(esClient, RETENTION_SHORT_DS, buildRetentionDocs(5), log);
+  await bulkIndex(esClient, RETENTION_LONG_DS, buildRetentionDocs(5), log);
 
   // Apply DSL retention: 180d (non-compliant — below 365d threshold)
-  await esClient.indices.putDataLifecycle({
-    name: RETENTION_SHORT_DS,
-    data_retention: '180d',
-  });
+  await withRetry(log, 'putDataLifecycle (retention-short)', () =>
+    esClient.indices.putDataLifecycle({
+      name: RETENTION_SHORT_DS,
+      data_retention: '180d',
+    })
+  );
 
   // Apply DSL retention: 400d (compliant — above 365d threshold)
-  await esClient.indices.putDataLifecycle({
-    name: RETENTION_LONG_DS,
-    data_retention: '400d',
-  });
+  await withRetry(log, 'putDataLifecycle (retention-long)', () =>
+    esClient.indices.putDataLifecycle({
+      name: RETENTION_LONG_DS,
+      data_retention: '400d',
+    })
+  );
 
   log.info(
     `[siem-readiness] Retention data streams seeded: ` +

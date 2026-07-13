@@ -99,7 +99,12 @@ export {
 } from './src/evaluators/correctness/scoring';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
-export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
+export {
+  withEvaluatorSpan,
+  withTaskSpan,
+  getCurrentTraceId,
+  resolveEvaluationTraceId,
+} from './src/utils/tracing';
 export { withRetry, type RetryOptions } from './src/utils/retry_utils';
 export {
   containsAllTerms,
@@ -132,7 +137,12 @@ export { EvaluatorApiClient, type MapContextFn } from './src/utils/evaluator_api
 export { getBuildkiteCiMetadataFromEnv, type BuildkiteCiMetadata } from './src/utils/ci_metadata';
 export { buildIngestRequest } from './src/utils/build_ingest_request';
 
-export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
+export {
+  parseSelectedEvaluators,
+  selectEvaluators,
+  isCodeOnlyMode,
+  filterEvaluatorsByKind,
+} from './src/evaluators/filter';
 /**
  * Trace-based evaluators — the preferred pattern for non-functional metrics.
  *
@@ -148,6 +158,8 @@ export {
   type TraceBasedEvaluatorConfig,
   createSpanLatencyEvaluator,
   createSkillInvocationEvaluator,
+  createExampleScopedSkillInvocationEvaluator,
+  buildSkillInvokedCaseExpression,
   createToolCallsEvaluator,
 } from './src/evaluators/trace_based';
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';

@@ -226,7 +226,7 @@ describe('chunksIntoMessage', () => {
     });
   });
 
-  it('validates tool calls', async () => {
+  it('drops tool calls with invalid arguments instead of throwing', async () => {
     async function getMessage() {
       return await lastValueFrom(
         chunksIntoMessage({
@@ -267,9 +267,16 @@ describe('chunksIntoMessage', () => {
       );
     }
 
-    await expect(async () => getMessage()).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Tool call arguments for myFunction (001) were invalid"`
-    );
+    // validateToolCalls now filters out tool calls whose arguments fail schema
+    // validation rather than throwing (models under token pressure emit
+    // malformed calls; throwing 500-ed the whole converse request). The
+    // malformed call is dropped and the message resolves with no tool calls.
+    const message = await getMessage();
+    expect(message).toEqual({
+      content: '',
+      toolCalls: [],
+      type: ChatCompletionEventType.ChatCompletionMessage,
+    });
   });
 
   it('concatenates multiple tool calls into a single message', async () => {

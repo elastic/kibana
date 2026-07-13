@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder
 dependsOn:
   - '@kbn/evals'
+  - '@kbn/evals-extensions'
   - '@kbn/evals-phoenix-executor'
   - '@kbn/agent-builder-common'
   - '@kbn/tooling-log'
@@ -25,6 +26,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/inference-common'
   - '@kbn/test'
+  - '@kbn/kbn-client'
 tags:
   - functional-tests
   - package

@@ -8,6 +8,15 @@
 /** How often (ms) the abort monitor polls the execution status to detect abort requests. */
 export const ABORT_POLL_INTERVAL_MS = 2000;
 
+/**
+ * Max retries the underlying InferenceChatModel will attempt for transient
+ * inference-endpoint failures (503, socket reset, fetch abort, etc.) before
+ * surfacing the error. The InferenceChatModel already implements bounded
+ * retry with exponential backoff via completionWithRetry — this just enables it.
+ * Total attempts = maxRetries + 1 (the initial call).
+ */
+export const CHAT_MODEL_MAX_RETRIES = 2;
+
 /** How often (ms) followExecution polls for new events. */
 export const FOLLOW_POLL_INTERVAL_MS = 500;
 

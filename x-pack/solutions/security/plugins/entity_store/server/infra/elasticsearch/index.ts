@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient as EsClient } from '@kbn/core/server';
+import type { ElasticsearchClient as EsClient, Logger } from '@kbn/core/server';
 import type {
   IndicesPutIndexTemplateRequest,
   IndexName,
@@ -13,6 +13,7 @@ import type {
   ClusterPutComponentTemplateRequest,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
+import { retryTransientEsErrors } from '@kbn/index-adapter';
 
 export { reindex } from './reindex';
 export type { ReindexOptions } from './reindex';
@@ -24,7 +25,19 @@ export type { WaitForTaskOptions } from './wait_for_task';
 export interface CreateOptions {
   throwIfExists?: boolean;
   aliases?: Record<string, object>;
+  logger?: Logger;
 }
+
+// A boot-time index/ILM install storm (~200 plugins) can saturate ES's
+// master cluster-state-update queue for several seconds, during which a
+// freshly created system index 503s with NoShardAvailableActionException
+// before its shard-started task is processed. Callers with a boot-time
+// dependency on these installs pass a logger to opt into exponential
+// backoff (2s, 4s, 8s...) on transient errors (503/408/429/504/connection/
+// timeout) via the shared @kbn/index-adapter helper; callers without a
+// logger keep today's fail-fast behavior unchanged.
+const withRetry = <T>(esCall: () => Promise<T>, logger?: Logger): Promise<T> =>
+  logger ? retryTransientEsErrors(esCall, { logger }) : esCall();
 
 export const createIndex = async (
   esClient: EsClient,
@@ -32,7 +45,10 @@ export const createIndex = async (
   options: CreateOptions = { throwIfExists: true }
 ) => {
   try {
-    await esClient.indices.create({ index, aliases: options.aliases });
+    await withRetry(
+      () => esClient.indices.create({ index, aliases: options.aliases }),
+      options.logger
+    );
   } catch (error) {
     if (
       !options.throwIfExists &&
@@ -44,21 +60,25 @@ export const createIndex = async (
   }
 };
 
-export const deleteIndex = (esClient: EsClient, index: IndexName) =>
-  esClient.indices.delete({ index }, { ignore: [404] });
+export const deleteIndex = (esClient: EsClient, index: IndexName, logger?: Logger) =>
+  withRetry(() => esClient.indices.delete({ index }, { ignore: [404] }), logger);
 
 export const putComponentTemplate = async (
   esClient: EsClient,
-  request: ClusterPutComponentTemplateRequest
+  request: ClusterPutComponentTemplateRequest,
+  logger?: Logger
 ) => {
-  await esClient.cluster.putComponentTemplate(request);
+  await withRetry(() => esClient.cluster.putComponentTemplate(request), logger);
 };
 
-export const deleteComponentTemplate = (esClient: EsClient, name: Names) =>
-  esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
+export const deleteComponentTemplate = (esClient: EsClient, name: Names, logger?: Logger) =>
+  withRetry(() => esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] }), logger);
 
-export const putIndexTemplate = (esClient: EsClient, template: IndicesPutIndexTemplateRequest) =>
-  esClient.indices.putIndexTemplate(template);
+export const putIndexTemplate = (
+  esClient: EsClient,
+  template: IndicesPutIndexTemplateRequest,
+  logger?: Logger
+) => withRetry(() => esClient.indices.putIndexTemplate(template), logger);
 
 // Applies mappings in place to an index or data stream (its write index and future
 // backing indices). Adding fields is allowed; changing an existing field's type throws.
@@ -77,8 +97,8 @@ export const rolloverDataStream = async (esClient: EsClient, name: IndexName): P
   await esClient.indices.rollover({ alias: name });
 };
 
-export const deleteIndexTemplate = (esClient: EsClient, name: Names) =>
-  esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
+export const deleteIndexTemplate = (esClient: EsClient, name: Names, logger?: Logger) =>
+  withRetry(() => esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] }), logger);
 
 export const createDataStream = async (
   esClient: EsClient,
@@ -86,7 +106,7 @@ export const createDataStream = async (
   options: CreateOptions = { throwIfExists: true }
 ) => {
   try {
-    await esClient.indices.createDataStream({ name });
+    await withRetry(() => esClient.indices.createDataStream({ name }), options.logger);
   } catch (error) {
     if (
       !options.throwIfExists &&
@@ -98,5 +118,5 @@ export const createDataStream = async (
   }
 };
 
-export const deleteDataStream = (esClient: EsClient, name: IndexName) =>
-  esClient.indices.deleteDataStream({ name }, { ignore: [404] });
+export const deleteDataStream = (esClient: EsClient, name: IndexName, logger?: Logger) =>
+  withRetry(() => esClient.indices.deleteDataStream({ name }, { ignore: [404] }), logger);

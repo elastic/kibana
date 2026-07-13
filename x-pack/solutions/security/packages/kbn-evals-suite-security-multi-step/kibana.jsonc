@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-security-multi-step",
+  "owner": "@elastic/security-generative-ai",
+  "group": "security",
+  "visibility": "private"
+}

@@ -1,0 +1,7 @@
+category,query_intent,query,expected_skill,should_not_activate_skill,expected_only_tool_id,tool_sequence,dataset_split,is_distractor,reference,notes
+find-rules,Rule Discovery,List all enabled detection rules tagged with MITRE.,find-security-rules,,security.find_rules,"security.find_rules",base,,Found enabled detection rules with the MITRE tag using discover_rule_tags and find_rules with enabled set to true.,
+find-rules,MITRE Technique Query,Show me detection rules covering MITRE technique T1059.,find-security-rules,,security.find_rules,"security.find_rules",base,,Found detection rules mapped to MITRE technique T1059 using find_rules with mitreTechnique set to T1059.,
+find-rules,Rule Count,"How many custom (non-prebuilt) detection rules do I have enabled?",find-security-rules,,security.find_rules,"security.find_rules",base,,There are enabled custom detection rules. The find_rules tool was called with enabled set to true and ruleSource set to custom.,
+find-rules,Rule Discovery,Show me my critical severity detection rules.,find-security-rules,,security.find_rules,"security.find_rules",base,,Found critical severity detection rules using find_rules filtered by severity critical.,
+distractor,Platform,Show me the available dashboards in Kibana.,,find-security-rules,,,distractor,true,I will search for available dashboards. This is a platform query, not a security skill task.,
+distractor,Observability,What is the current status of my APM services?,,find-security-rules,,,distractor,true,I will check APM service status. This is an observability query.,

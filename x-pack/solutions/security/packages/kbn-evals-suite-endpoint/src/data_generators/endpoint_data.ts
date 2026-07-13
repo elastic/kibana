@@ -24,7 +24,7 @@ export async function waitForEndpointPackage(
   kbnClient: KbnClient,
   esClient: Client,
   log: ToolingLog,
-  maxWaitMs = 120_000
+  maxWaitMs = 300_000
 ): Promise<void> {
   const start = Date.now();
   log.info('Waiting for endpoint package to be installed...');

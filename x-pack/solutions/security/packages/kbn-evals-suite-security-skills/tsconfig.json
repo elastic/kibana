@@ -1,0 +1,17 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/agent-builder-common",
+    "@kbn/core",
+    "@kbn/evals",
+    "@kbn/evals-extensions",
+    "@kbn/test",
+    "@kbn/tooling-log"
+  ]
+}

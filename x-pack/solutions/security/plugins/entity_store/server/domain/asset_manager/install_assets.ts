@@ -76,6 +76,7 @@ export async function installIndicesAndDataStreams(
       await createIndex(esClient, getLatestEntitiesIndexName(namespace), {
         throwIfExists: false,
         aliases: { [getEntitiesAlias(ENTITY_LATEST, namespace)]: {} },
+        logger,
       });
       logger.debug(`created latest entity index in ${namespace}`);
     })(),
@@ -83,6 +84,7 @@ export async function installIndicesAndDataStreams(
     (async () => {
       await createDataStream(esClient, getUpdatesEntitiesDataStreamName(namespace), {
         throwIfExists: false,
+        logger,
       });
       logger.debug(`created updates entity data stream in ${namespace}`);
     })(),
@@ -90,6 +92,7 @@ export async function installIndicesAndDataStreams(
     (async () => {
       await createDataStream(esClient, getMetadataEntitiesDataStreamName(namespace), {
         throwIfExists: false,
+        logger,
       });
       logger.debug(`created metadata entity data stream in ${namespace}`);
     })(),
@@ -103,22 +106,22 @@ async function installIndexTemplates(
 ) {
   await Promise.all([
     (async () => {
-      await putIndexTemplate(esClient, getLatestEntityIndexTemplateConfig(namespace));
+      await putIndexTemplate(esClient, getLatestEntityIndexTemplateConfig(namespace), logger);
       logger.debug(`installed latest index template in ${namespace}`);
     })(),
 
     (async () => {
-      await putIndexTemplate(esClient, getUpdatesEntityIndexTemplateConfig(namespace));
+      await putIndexTemplate(esClient, getUpdatesEntityIndexTemplateConfig(namespace), logger);
       logger.debug(`installed updates index template in ${namespace}`);
     })(),
 
     (async () => {
-      await putIndexTemplate(esClient, getHistorySnapshotIndexTemplateConfig(namespace));
+      await putIndexTemplate(esClient, getHistorySnapshotIndexTemplateConfig(namespace), logger);
       logger.debug(`installed history snapshot index template in ${namespace}`);
     })(),
 
     (async () => {
-      await putIndexTemplate(esClient, getMetadataEntityIndexTemplateConfig(namespace));
+      await putIndexTemplate(esClient, getMetadataEntityIndexTemplateConfig(namespace), logger);
       logger.debug(`installed metadata index template in ${namespace}`);
     })(),
   ]);
@@ -135,14 +138,16 @@ async function installAllComponentTemplates(
       (async () => {
         await putComponentTemplate(
           esClient,
-          getEntityDefinitionComponentTemplate(definition, namespace)
+          getEntityDefinitionComponentTemplate(definition, namespace),
+          logger
         );
         logger.debug(`installed latest component template for: ${definition.type} in ${namespace}`);
       })(),
       (async () => {
         await putComponentTemplate(
           esClient,
-          getUpdatesEntityDefinitionComponentTemplate(definition, namespace)
+          getUpdatesEntityDefinitionComponentTemplate(definition, namespace),
+          logger
         );
         logger.debug(
           `installed updates component template for: ${definition.type} in ${namespace}`
@@ -150,13 +155,12 @@ async function installAllComponentTemplates(
       })(),
     ]),
     (async () => {
-      await putComponentTemplate(esClient, getMetadataComponentTemplate(namespace));
+      await putComponentTemplate(esClient, getMetadataComponentTemplate(namespace), logger);
       logger.debug(`installed metadata component template in ${namespace}`);
     })(),
   ]);
 }
 
-// TODO: add retry
 export async function uninstallElasticsearchAssets({
   esClient,
   logger,
@@ -181,15 +185,15 @@ async function uninstallIndicesAndDataStreams(
 ) {
   await Promise.all([
     (async () => {
-      await deleteIndex(esClient, getLatestEntitiesIndexName(namespace));
+      await deleteIndex(esClient, getLatestEntitiesIndexName(namespace), logger);
       logger.debug(`deleted entity index`);
     })(),
     (async () => {
-      await deleteDataStream(esClient, getUpdatesEntitiesDataStreamName(namespace));
+      await deleteDataStream(esClient, getUpdatesEntitiesDataStreamName(namespace), logger);
       logger.debug(`deleted entity updates data stream`);
     })(),
     (async () => {
-      await deleteDataStream(esClient, getMetadataEntitiesDataStreamName(namespace));
+      await deleteDataStream(esClient, getMetadataEntitiesDataStreamName(namespace), logger);
       logger.debug(`deleted entity metadata data stream`);
     })(),
   ]);

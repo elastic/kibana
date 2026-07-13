@@ -1393,7 +1393,11 @@ module.exports = {
     },
     // Allow node.js imports for security solution test packages
     {
-      files: ['x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}'],
+      files: [
+        'x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}',
+        // Eval datasets are parsed from CSV files at Node.js runtime (Playwright test runner), never bundled for the browser.
+        'x-pack/solutions/security/packages/kbn-evals-suite-security-skills/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
         'import/no-nodejs-modules': 'off',
       },

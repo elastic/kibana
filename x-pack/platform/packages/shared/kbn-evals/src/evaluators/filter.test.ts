@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { selectEvaluators, parseSelectedEvaluators } from './filter';
+import {
+  selectEvaluators,
+  parseSelectedEvaluators,
+  isCodeOnlyMode,
+  filterEvaluatorsByKind,
+} from './filter';
 import type { Evaluator } from '../types';
 
 describe('evaluator filter', () => {
@@ -157,6 +162,53 @@ describe('evaluator filter', () => {
         const result = selectEvaluators(evaluatorsWithInvalidNames);
         expect(result.map((e) => e.name)).toEqual(['Precision@5', 'Precision@10', 'Precision@20']);
       });
+    });
+  });
+
+  describe('isCodeOnlyMode / filterEvaluatorsByKind', () => {
+    const originalEnv = process.env.KBN_EVALS_CODE_ONLY;
+    const createEvaluator = (name: string, kind: Evaluator['kind']): Evaluator => ({
+      name,
+      kind,
+      evaluate: jest.fn(),
+    });
+    const mixedEvaluators = [
+      createEvaluator('ExpectedToolCalled', 'CODE'),
+      createEvaluator('Factuality', 'LLM'),
+      createEvaluator('Relevance', 'LLM'),
+      createEvaluator('Trajectory', 'CODE'),
+    ];
+
+    afterEach(() => {
+      if (originalEnv !== undefined) {
+        process.env.KBN_EVALS_CODE_ONLY = originalEnv;
+      } else {
+        delete process.env.KBN_EVALS_CODE_ONLY;
+      }
+    });
+
+    it('isCodeOnlyMode is false when KBN_EVALS_CODE_ONLY is unset', () => {
+      delete process.env.KBN_EVALS_CODE_ONLY;
+      expect(isCodeOnlyMode()).toBe(false);
+    });
+
+    it('isCodeOnlyMode is true only for the literal string "true"', () => {
+      process.env.KBN_EVALS_CODE_ONLY = 'true';
+      expect(isCodeOnlyMode()).toBe(true);
+      process.env.KBN_EVALS_CODE_ONLY = '1';
+      expect(isCodeOnlyMode()).toBe(false);
+    });
+
+    it('filterEvaluatorsByKind returns evaluators unchanged when code-only mode is off', () => {
+      delete process.env.KBN_EVALS_CODE_ONLY;
+      expect(filterEvaluatorsByKind(mixedEvaluators)).toEqual(mixedEvaluators);
+    });
+
+    it('filterEvaluatorsByKind drops LLM-kind evaluators when code-only mode is on', () => {
+      process.env.KBN_EVALS_CODE_ONLY = 'true';
+      const result = filterEvaluatorsByKind(mixedEvaluators);
+      expect(result.map((e) => e.name)).toEqual(['ExpectedToolCalled', 'Trajectory']);
+      expect(result.every((e) => e.kind === 'CODE')).toBe(true);
     });
   });
 });

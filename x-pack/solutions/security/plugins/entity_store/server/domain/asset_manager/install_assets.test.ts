@@ -36,7 +36,8 @@ describe('uninstallElasticsearchAssets', () => {
 
     expect(deleteIndex).toHaveBeenCalledWith(
       expect.anything(),
-      getLatestEntitiesIndexName(namespace)
+      getLatestEntitiesIndexName(namespace),
+      expect.anything()
     );
   });
 
@@ -49,7 +50,8 @@ describe('uninstallElasticsearchAssets', () => {
 
     expect(deleteDataStream).toHaveBeenCalledWith(
       expect.anything(),
-      getUpdatesEntitiesDataStreamName(namespace)
+      getUpdatesEntitiesDataStreamName(namespace),
+      expect.anything()
     );
   });
 
@@ -62,7 +64,8 @@ describe('uninstallElasticsearchAssets', () => {
 
     expect(deleteDataStream).toHaveBeenCalledWith(
       expect.anything(),
-      getMetadataEntitiesDataStreamName(namespace)
+      getMetadataEntitiesDataStreamName(namespace),
+      expect.anything()
     );
     // Verify the resolved name matches the entity metadata datastream that
     // relationship maintainers write to.
