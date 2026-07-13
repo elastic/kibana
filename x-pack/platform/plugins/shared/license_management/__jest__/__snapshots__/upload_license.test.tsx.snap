@@ -167,7 +167,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                 class="css-wlziyu-body"
               >
                 <span
-                  class="css-19b7t2f-icon"
+                  class="css-1qkppnb-icon"
                   data-euiicon-type="errorFill"
                 />
                 <div
@@ -326,7 +326,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                 class="css-wlziyu-body"
               >
                 <span
-                  class="css-19b7t2f-icon"
+                  class="css-1qkppnb-icon"
                   data-euiicon-type="errorFill"
                 />
                 <div
@@ -485,7 +485,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                 class="css-wlziyu-body"
               >
                 <span
-                  class="css-19b7t2f-icon"
+                  class="css-1qkppnb-icon"
                   data-euiicon-type="errorFill"
                 />
                 <div
@@ -644,7 +644,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                 class="css-wlziyu-body"
               >
                 <span
-                  class="css-19b7t2f-icon"
+                  class="css-1qkppnb-icon"
                   data-euiicon-type="errorFill"
                 />
                 <div

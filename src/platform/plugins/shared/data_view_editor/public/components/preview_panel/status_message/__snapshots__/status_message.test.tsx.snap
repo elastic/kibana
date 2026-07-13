@@ -14,7 +14,7 @@ exports[`StatusMessage should render normally 1`] = `
       class="css-wlziyu-body"
     >
       <span
-        class="css-19b7t2f-icon"
+        class="css-1qkppnb-icon"
         data-euiicon-type="infoFill"
       />
       <div
