@@ -159,7 +159,6 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/use-observable'
   - '@kbn/core-security-server'
-  - '@kbn/core-test-helpers-test-utils'
 tags:
   - plugin
   - prod
