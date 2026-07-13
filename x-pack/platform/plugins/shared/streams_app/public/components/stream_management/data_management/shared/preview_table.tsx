@@ -363,15 +363,18 @@ export function PreviewTable({
     return canonicalColumnOrder.map((column) => {
       // Special handling for summary column
       if (column === SUMMARY_COLUMN_ID) {
+        const summaryLabel = i18n.translate(
+          'xpack.streams.resultPanel.euiDataGrid.summaryColumnLabel',
+          {
+            defaultMessage: 'Summary',
+          }
+        );
         return {
           id: column,
-          display: (
-            <ColumnHeaderTruncateContainer>
-              {i18n.translate('xpack.streams.resultPanel.euiDataGrid.summaryColumnLabel', {
-                defaultMessage: 'Summary',
-              })}
-            </ColumnHeaderTruncateContainer>
-          ),
+          display: <ColumnHeaderTruncateContainer>{summaryLabel}</ColumnHeaderTruncateContainer>,
+          // Provide a plain-text accessible name so screen readers announce a clean
+          // column header (and cell) name instead of the decorative header markup.
+          displayAsText: summaryLabel,
           actions: false as false,
           isResizable: true,
           initialWidth:
@@ -397,7 +400,7 @@ export function PreviewTable({
         display: (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <FieldIcon type={fieldType || 'unknown'} size="s" />
+              <FieldIcon type={fieldType || 'unknown'} size="s" aria-hidden />
             </EuiFlexItem>
             <EuiFlexItem>
               <ColumnHeaderTruncateContainer wordBreak="normal">
@@ -406,6 +409,10 @@ export function PreviewTable({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
+        // Provide a plain-text accessible name so screen readers announce the field
+        // name for both the header cell and its data cells, rather than the decorative
+        // header markup (which otherwise leaks the field type icon label, e.g. "unknown").
+        displayAsText: column,
         actions:
           Boolean(setVisibleColumns) || Boolean(setSorting)
             ? {
