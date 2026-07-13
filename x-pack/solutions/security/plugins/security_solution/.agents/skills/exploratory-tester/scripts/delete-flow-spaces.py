@@ -52,7 +52,7 @@ for sid in spaces_to_delete:
         capture_output=True, text=True
     )
 
-    lines     = result.stdout.strip().rsplit('\n', 1)
+    lines     = result.stdout.rsplit('\n', 1)
     http_code = lines[-1] if len(lines) > 1 else '000'
 
     if http_code in ('200', '204', '404'):   # 404 = already gone, fine
