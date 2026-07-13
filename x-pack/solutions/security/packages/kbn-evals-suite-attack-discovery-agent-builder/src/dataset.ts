@@ -96,7 +96,9 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
       triageType: 'multiple-alert-sets',
       expectedSkills: ['attack-discovery-generator'],
       expectedToolPath: ['security.attack-discovery.run'],
-      attachments: [{ type: 'security.alerts', data: { alertIds: [...multipleAlertSetsFixture.ids] } }],
+      attachments: [
+        { type: 'security.alerts', data: { alertIds: [...multipleAlertSetsFixture.ids] } },
+      ],
     },
     output: {
       expectedToolPath: ['security.attack-discovery.run'],
