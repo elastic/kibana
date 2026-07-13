@@ -218,6 +218,31 @@ describe('TaskPool', () => {
       expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
     });
 
+    test('should serialize the error when running a Task rejects with a non-Error value', async () => {
+      const pool = new TaskPool({
+        capacity$: of(3),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
+
+      const taskFailedToRun = mockTask();
+      const nonErrorRejection = { statusCode: 500, error: {} };
+      taskFailedToRun.run.mockImplementation(async () => {
+        throw nonErrorRejection;
+      });
+
+      const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);
+
+      expect((logger as jest.Mocked<Logger>).warn.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "Task TaskType \\"shooooo\\" failed in attempt to run: {\\"statusCode\\":500,\\"error\\":{}}",
+        ]
+      `);
+
+      expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
+    });
+
     test('should not log when running a Task fails due to the Task SO having been deleted while in flight', async () => {
       const pool = new TaskPool({
         capacity$: of(3),

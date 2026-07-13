@@ -287,6 +287,7 @@ describe('settingDefinitions', () => {
             'includeAgents',
             'label',
             'validation',
+            'zodValidation',
           ]),
           validationName: def.validation.name,
         };

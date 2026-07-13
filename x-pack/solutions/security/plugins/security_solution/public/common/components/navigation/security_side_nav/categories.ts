@@ -46,7 +46,7 @@ export const getNavCategories = (
               SecurityPageName.externalLinkWorkflows,
             ]
           : []),
-        SecurityPageName.attackDiscovery,
+        ...(enableAlertsAndAttacksAlignment ? [] : [SecurityPageName.attackDiscovery]),
         SecurityPageName.cloudSecurityPostureFindings,
         SecurityPageName.case,
       ],

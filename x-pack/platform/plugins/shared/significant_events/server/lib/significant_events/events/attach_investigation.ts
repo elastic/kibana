@@ -41,14 +41,16 @@ export const attachInvestigationToEvent = async ({
 
   /**
    * cancel-in-progress (keyed on discovery_slug, max 1) guarantees only one run per slug is ever
-   * active, so any *other* entry still marked `pending` belongs to a superseded/cancelled run that
-   * will never reach its terminal step. Resolve it to `failed` so it stops driving the "Running"
-   * UI state (hasPendingInvestigation) and the flyout's 5s poll loop.
+   * active, so any *other* entry still without a `completed_at` belongs to a superseded/cancelled
+   * run that will never reach its terminal step. Stamp `completed_at` so it stops driving the
+   * "Running" UI state (hasRunningInvestigation) and the flyout's 5s poll loop. There's no status
+   * to resolve here — the workflow execution document is the source of truth for what actually
+   * happened to that run.
    */
   const reconciled = existing.map((entry) =>
     entry.workflow_execution_id !== investigation.workflow_execution_id &&
-    entry.status === 'pending'
-      ? { ...entry, status: 'failed' as const, completed_at: entry.completed_at ?? now }
+    entry.completed_at == null
+      ? { ...entry, completed_at: now }
       : entry
   );
 

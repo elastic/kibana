@@ -9,8 +9,9 @@ import { parse as parseYaml } from 'yaml';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
 import {
-  splitTemplateDefinition,
+  getTemplateSettingsAndConnectorFromYaml,
   mergeTemplateDefinition,
+  stripTemplateConfigBlocks,
   normalizeTemplateSettings,
   normalizeTemplateConnector,
 } from './template_settings_yaml';
@@ -22,8 +23,8 @@ const jiraConnector = {
 } as CaseConnectorWithoutName;
 
 describe('template_settings_yaml', () => {
-  describe('splitTemplateDefinition', () => {
-    it('extracts connector and settings and strips them from the fields YAML', () => {
+  describe('getTemplateSettingsAndConnectorFromYaml', () => {
+    it('reads connector and settings from a full definition YAML', () => {
       const yaml = [
         'name: My template',
         'settings:',
@@ -34,11 +35,9 @@ describe('template_settings_yaml', () => {
         '  id: jira-1',
         '  fields:',
         '    issueType: "10001"',
-        'fields:',
-        '  - $ref: affected_host',
       ].join('\n');
 
-      const result = splitTemplateDefinition(yaml);
+      const result = getTemplateSettingsAndConnectorFromYaml(yaml);
 
       expect(result.settings).toEqual({ syncAlerts: true, extractObservables: false });
       expect(result.connector).toEqual({
@@ -46,39 +45,13 @@ describe('template_settings_yaml', () => {
         id: 'jira-1',
         fields: { issueType: '10001' },
       });
-      // stripped from the buffer
-      expect(result.fieldsYaml).not.toContain('settings:');
-      expect(result.fieldsYaml).not.toContain('connector:');
-      // fields content preserved
-      const reparsed = parseYaml(result.fieldsYaml);
-      expect(reparsed.name).toBe('My template');
-      expect(reparsed.fields).toEqual([{ $ref: 'affected_host' }]);
     });
 
-    it('preserves comments on the remaining fields content', () => {
-      const yaml = ['# top comment', 'name: My template', 'settings:', '  syncAlerts: true'].join(
-        '\n'
-      );
-
-      const result = splitTemplateDefinition(yaml);
-
-      expect(result.fieldsYaml).toContain('# top comment');
-      expect(result.settings).toEqual({ syncAlerts: true });
-    });
-
-    it('returns undefined connector/settings when absent', () => {
-      const yaml = 'name: My template\nfields: []';
-      const result = splitTemplateDefinition(yaml);
-
-      expect(result.connector).toBeUndefined();
-      expect(result.settings).toBeUndefined();
-      expect(result.fieldsYaml).toBe(yaml);
-    });
-
-    it('returns the input untouched for empty or invalid YAML', () => {
-      expect(splitTemplateDefinition('').fieldsYaml).toBe('');
-      const invalid = 'name: : :';
-      expect(splitTemplateDefinition(invalid).fieldsYaml).toBe(invalid);
+    it('returns empty result for invalid YAML or malformed blocks', () => {
+      expect(getTemplateSettingsAndConnectorFromYaml('name: : :')).toEqual({});
+      expect(
+        getTemplateSettingsAndConnectorFromYaml('name: T\nsettings: not-an-object\nconnector: nope')
+      ).toEqual({});
     });
   });
 
@@ -101,7 +74,7 @@ describe('template_settings_yaml', () => {
       expect(parsed.fields).toEqual([{ $ref: 'affected_host' }]);
     });
 
-    it('omits an empty settings block and a none/absent connector', () => {
+    it('writes an explicit settings block but OMITS the .none connector (implicit default)', () => {
       const fieldsYaml = 'name: My template\nfields: []';
 
       const merged = mergeTemplateDefinition(fieldsYaml, {
@@ -113,11 +86,38 @@ describe('template_settings_yaml', () => {
         settings: {},
       });
 
-      expect(merged).not.toContain('settings:');
-      expect(merged).not.toContain('connector:');
+      const parsed = parseYaml(merged);
+      expect(parsed.settings).toEqual({ syncAlerts: false, extractObservables: false });
+      expect(parsed).not.toHaveProperty('connector');
     });
 
-    it('round-trips split -> merge back to an equivalent definition', () => {
+    it('removes a stale connector block when merging with no real connector', () => {
+      const fieldsYaml = [
+        'name: My template',
+        'connector:',
+        '  type: .jira',
+        '  id: jira-1',
+        '  fields: null',
+        'fields: []',
+      ].join('\n');
+
+      const merged = mergeTemplateDefinition(fieldsYaml, { connector: undefined, settings: {} });
+
+      expect(parseYaml(merged)).not.toHaveProperty('connector');
+    });
+
+    it('keeps explicit false settings values in YAML', () => {
+      const fieldsYaml = 'name: My template\nfields: []';
+
+      const merged = mergeTemplateDefinition(fieldsYaml, {
+        settings: { syncAlerts: false, extractObservables: false },
+      });
+
+      const parsed = parseYaml(merged);
+      expect(parsed.settings).toEqual({ syncAlerts: false, extractObservables: false });
+    });
+
+    it('re-applies extracted settings and connector to a definition', () => {
       const original = [
         'name: My template',
         'severity: high',
@@ -134,14 +134,55 @@ describe('template_settings_yaml', () => {
         'fields:',
         '  - $ref: affected_host',
       ].join('\n');
+      const fieldsYaml = [
+        'name: My template',
+        'severity: high',
+        'fields:',
+        '  - $ref: affected_host',
+      ].join('\n');
 
-      const split = splitTemplateDefinition(original);
-      const merged = mergeTemplateDefinition(split.fieldsYaml, {
-        connector: split.connector,
-        settings: split.settings,
-      });
+      const extracted = getTemplateSettingsAndConnectorFromYaml(original);
+      const merged = mergeTemplateDefinition(fieldsYaml, extracted);
 
       expect(parseYaml(merged)).toEqual(parseYaml(original));
+    });
+  });
+
+  describe('stripTemplateConfigBlocks', () => {
+    it('removes connector and settings, preserving the rest of the blueprint', () => {
+      const yaml = [
+        'name: My template',
+        'severity: high',
+        'settings:',
+        '  syncAlerts: true',
+        '  extractObservables: false',
+        'connector:',
+        '  type: .jira',
+        '  id: jira-1',
+        '  fields:',
+        '    issueType: "10001"',
+        'fields:',
+        '  - $ref: affected_host',
+      ].join('\n');
+
+      const parsed = parseYaml(stripTemplateConfigBlocks(yaml));
+
+      expect(parsed).not.toHaveProperty('connector');
+      expect(parsed).not.toHaveProperty('settings');
+      expect(parsed).toMatchObject({
+        name: 'My template',
+        severity: 'high',
+        fields: [{ $ref: 'affected_host' }],
+      });
+    });
+
+    it('returns the input verbatim when there is nothing to strip', () => {
+      const yaml = 'name: My template\nfields: []\n';
+      expect(stripTemplateConfigBlocks(yaml)).toBe(yaml);
+    });
+
+    it('is safe on malformed YAML', () => {
+      expect(stripTemplateConfigBlocks('name: : :')).toBe('name: : :');
     });
   });
 
