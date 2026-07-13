@@ -36,6 +36,9 @@ export const editDataLifecycleFlyoutStrings = {
   ilmSearchPlaceholder: i18n.translate(`${PREFIX}.ilmSearchPlaceholder`, {
     defaultMessage: 'Search by policy name',
   }),
+  ilmNoManagePrivilegeTooltip: i18n.translate(`${PREFIX}.ilmNoManagePrivilegeTooltip`, {
+    defaultMessage: 'You need the manage_ilm cluster privilege to view ILM policies.',
+  }),
   inspectPolicyAriaLabel: (policyName: string) =>
     i18n.translate(`${PREFIX}.inspectPolicyAriaLabel`, {
       defaultMessage: "Inspect policy ''{policyName}''",

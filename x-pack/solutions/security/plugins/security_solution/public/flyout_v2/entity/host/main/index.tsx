@@ -15,6 +15,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
+import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../../common/types';
 import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
@@ -40,6 +41,10 @@ import { RiskInputs } from '../../shared/tools/risk_inputs';
 import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
 import { VulnerabilityInsights } from '../tools/vulnerability_insights';
 import { AlertsInsights } from '../../shared/tools/alerts_insights';
+import { GraphView } from '../../shared/tools/graph_view';
+import { Resolution } from '../../shared/tools/resolution';
+import { renderEntityDetails } from '../../shared/render_entity_details';
+import { AnomalyInsights } from '../../shared/tools/anomaly_insights';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -205,6 +210,8 @@ export const Host: FC<HostProps> = memo(function Host({
     onSuccess: onAssetCriticalityChanged,
   });
 
+  const assetCriticalityPrivileges = useAssetCriticalityPrivileges(entityId ?? hostName);
+
   const panelDisplayEntityId = useMemo(
     () => (entityStoreV2Enabled ? observedHost.entityRecord?.entity?.id : entityId),
     [entityId, entityStoreV2Enabled, observedHost.entityRecord?.entity?.id]
@@ -239,7 +246,9 @@ export const Host: FC<HostProps> = memo(function Host({
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
 
   const onCriticalitySave =
-    entityFromStoreResult.entityRecord && observedHost.entityRecord
+    !!assetCriticalityPrivileges.data?.has_write_permissions &&
+    entityFromStoreResult.entityRecord &&
+    observedHost.entityRecord
       ? (level: CriticalityLevelWithUnassigned) =>
           updateAssetCriticalityLevel(level, observedHost.entityRecord)
       : undefined;
@@ -285,6 +294,29 @@ export const Host: FC<HostProps> = memo(function Host({
     defaultDocumentFlyoutProperties,
   ]);
 
+  const onShowRelatedEntity = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) =>
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: renderEntityDetails({ ...params, scopeId }),
+        }),
+        {
+          ...defaultDocumentFlyoutProperties,
+          title: params.entityName ?? params.entityId,
+          historyKey,
+          session: 'inherit',
+        }
+      ),
+    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
+  );
+
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
       const common = {
@@ -304,6 +336,15 @@ export const Host: FC<HostProps> = memo(function Host({
               entityName={hostName}
               entityId={entityStoreEntityId}
               onShowEntity={onShowHost}
+            />
+          );
+        case EntityDetailsLeftPanelTab.ANOMALIES:
+          return wrap(
+            <AnomalyInsights
+              entityType={EntityType.host}
+              value={hostName}
+              entityId={entityStoreEntityId}
+              onOpenEntity={onShowHost}
             />
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
@@ -335,6 +376,30 @@ export const Host: FC<HostProps> = memo(function Host({
                 />
               );
           }
+          return;
+        case EntityDetailsLeftPanelTab.GRAPH_VIEW:
+          if (!entityStoreEntityId) return;
+          return wrap(
+            <GraphView
+              entityId={entityStoreEntityId}
+              scopeId={scopeId}
+              entityName={hostName}
+              onShowEntity={onShowRelatedEntity}
+              onShowOriginatingEntity={onShowHost}
+            />
+          );
+        case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
+          if (!entityStoreEntityId) return;
+          return wrap(
+            <Resolution
+              entityId={entityStoreEntityId}
+              entityType="host"
+              entityName={hostName}
+              scopeId={scopeId}
+              onShowEntity={onShowHost}
+              onShowRelatedEntity={onShowRelatedEntity}
+            />
+          );
       }
     },
     [
@@ -344,9 +409,11 @@ export const Host: FC<HostProps> = memo(function Host({
       history,
       historyKey,
       hostName,
+      scopeId,
       panelDisplayEntityId,
       entityStoreEntityId,
       onShowHost,
+      onShowRelatedEntity,
     ]
   );
 
@@ -394,11 +461,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
-            // The v2 flyout does not yet wire up the graph view / resolution group tabs, so hide
-            // their navigation here. v1 HostPanel and the agent-builder canvas keep it (default).
-            // TODO: remove this prop (and `enableGraphAndResolutionNavigation` in content.tsx) once
-            // `openDetailsPanel` handles the GRAPH_VIEW and RESOLUTION_GROUP tabs in this flyout.
-            enableGraphAndResolutionNavigation={false}
+            onShowEntity={onShowRelatedEntity}
             hideHeaderIcons
           />
         )}

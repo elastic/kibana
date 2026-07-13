@@ -61,9 +61,13 @@ export const ENTITY_STORE_ROUTES = {
     RESOLUTION_LINK: `${PUBLIC_BASE_ROUTE}/resolution/link`,
     RESOLUTION_UNLINK: `${PUBLIC_BASE_ROUTE}/resolution/unlink`,
     RESOLUTION_GROUP: `${PUBLIC_BASE_ROUTE}/resolution/group`,
+    RESOLUTION_RULES_LIST: `${PUBLIC_BASE_ROUTE}/resolution/rules`,
+    RESOLUTION_RULES_ENABLE: `${PUBLIC_BASE_ROUTE}/resolution/rules/{id}/enable`,
+    RESOLUTION_RULES_DISABLE: `${PUBLIC_BASE_ROUTE}/resolution/rules/{id}/disable`,
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE_ROUTE}/check_privileges`,
+    PREFERENCES: `${INTERNAL_BASE_ROUTE}/preferences`,
     FORCE_LOG_EXTRACTION: `${INTERNAL_BASE_ROUTE}/{entityType}/force_log_extraction`,
     FORCE_REMOTE_EXTRACT_TO_UPDATES: `${INTERNAL_BASE_ROUTE}/{entityType}/force_remote_extract_to_updates`,
     FORCE_HISTORY_SNAPSHOT: `${INTERNAL_BASE_ROUTE}/force_history_snapshot`,
@@ -81,8 +85,8 @@ export {
   GetEntityMaintainersResponse,
 } from './entity_maintainers';
 
-export { RESOLUTION_RULE_IDS } from './domain/resolution_rules/constants';
-export type { ResolutionRuleId } from './domain/resolution_rules/constants';
+export { RESOLUTION_RULE_IDS, RESOLUTION_RULE_KINDS } from './domain/resolution_rules/constants';
+export type { ResolutionRuleId, ResolutionRuleKind } from './domain/resolution_rules/constants';
 
 export const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
@@ -110,6 +114,26 @@ export type {
   EngineMetadata,
   Asset,
 } from './domain/definitions/entity.gen';
+export type {
+  EntitySummaryHighlight,
+  EntitySummaryStaleness,
+  EntitySummaryStalenessSignal,
+  EntitySummaryStalenessSnapshot,
+  EntitySummaryStalenessEntitySnapshot,
+  EntitySummaryStalenessReason,
+  SaveEntityAiSummaryParams,
+  SaveEntityAiSummarySummary,
+  PersistedEntityAiSummary,
+  GetPersistedAiSummaryResponse,
+} from './domain/definitions/entity_summary_staleness';
+// Entity AI summary runtime helpers (staleness detection, structural caps, request-length
+// caps) intentionally live behind the `@kbn/entity-store/common/entity_summary` subpath, NOT
+// this page-load barrel, so they only ship in the chunks that use them (lazy flyout / server)
+// rather than on every page load. Only the erased-at-build-time types stay in the barrel.
+export type {
+  EntitySummaryContent,
+  CappedEntitySummaryContent,
+} from './domain/definitions/entity_summary_limits';
 
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). */
@@ -154,3 +178,10 @@ export type {
   RelationshipMetadataDoc,
   RelationshipMetadataMaintainer,
 } from './domain/entity_metadata/relationship_metadata';
+export { AI_SUMMARY_EVENT_ACTION } from './domain/entity_metadata/ai_summary_metadata';
+export type {
+  AiSummaryMetadataDoc,
+  AiSummaryHighlightItem,
+  AiSummaryMetadataStaleness,
+  AiSummaryMetadataStalenessSnapshot,
+} from './domain/entity_metadata/ai_summary_metadata';
