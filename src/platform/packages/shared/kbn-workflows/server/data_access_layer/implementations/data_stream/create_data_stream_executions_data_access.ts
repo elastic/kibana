@@ -45,7 +45,11 @@ export class DataStreamExecutionsDataAccessBundle implements ExecutionsDataAcces
   }
 
   async initStart(): Promise<void> {
-    return Promise.resolve();
+    // const dataStreams = await this.deps.coreSetup
+    //   .getStartServices()
+    //   .then(([coreStart]) => coreStart.dataStreams);
+    // await dataStreams.initializeClient(WORKFLOWS_EXECUTIONS_DATA_STREAM);
+    // await dataStreams.initializeClient(WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM);
   }
 
   async createWorkflowExecutionsDataAccess(): Promise<WorkflowExecutionsDataAccess> {

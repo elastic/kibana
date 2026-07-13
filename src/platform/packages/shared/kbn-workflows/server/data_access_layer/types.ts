@@ -55,13 +55,14 @@ export interface DocumentVersionFields {
   primaryTerm?: number;
 }
 
-export interface GetExecutionByIdsItem<TExecution extends { id: string }> extends DocumentVersionFields {
+export interface GetExecutionByIdsItem<TExecution extends { id: string }>
+  extends DocumentVersionFields {
   document: TExecution;
 }
 
 export interface GetExecutionsByIdsResponse<TExecution extends { id: string }> {
   items: GetExecutionByIdsItem<TExecution>[];
-  missing: (string | { id: string; index: string })[];
+  missing: string[];
 }
 
 export interface ReadonlyExecutionsDataAccess<TExecution extends { id: string }> {

@@ -14,7 +14,7 @@ import type { BulkItem, BulkItemResponse, BulkRequestOptions, BulkResponse } fro
 export interface SharedBulkItem<TExecution extends { id: string }> extends BulkItem<TExecution> {
   operation: 'create' | 'update' | 'upsert';
   document: Partial<TExecution> & { id: string };
-  index: string;
+  index?: string;
   seqNo?: number;
   primaryTerm?: number;
   retryOnConflict?: number;

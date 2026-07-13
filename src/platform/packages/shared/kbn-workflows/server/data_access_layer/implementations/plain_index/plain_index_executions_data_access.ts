@@ -12,6 +12,7 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { executeScriptUpdate } from '../../lib/execute_script_update';
+import { getExecutionsByIds } from '../../lib/get_executions_by_ids';
 import { sharedBulk } from '../../lib/shared_bulk';
 import type {
   BulkRequestOptions,
@@ -20,7 +21,6 @@ import type {
   ExecutionsDataAccess,
   ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,
-  GetExecutionByIdsItem,
   GetExecutionsByIdsOptions,
   GetExecutionsByIdsResponse,
   ScriptUpdateRequest,
@@ -63,52 +63,13 @@ export class PlainIndexExecutionsDataAccess<TExecution extends { id: string }>
     ids: (string | { id: string; index: string })[],
     options?: GetExecutionsByIdsOptions<TExecution>
   ): Promise<GetExecutionsByIdsResponse<TExecution>> {
-    if (ids.length === 0) {
-      return {
-        items: [],
-        missing: [],
-      };
-    }
-
-    const { sourceIncludes, sourceExcludes } = options ?? {};
-
-    const sourceFilter =
-      sourceIncludes?.length || sourceExcludes?.length
-        ? {
-            _source: {
-              ...(sourceIncludes?.length ? { includes: sourceIncludes } : {}),
-              ...(sourceExcludes?.length ? { excludes: sourceExcludes } : {}),
-            },
-          }
-        : {};
-
-    const docs = ids.map((item) =>
-      typeof item === 'string'
-        ? { _index: this.deps.indexName, _id: item, ...sourceFilter }
-        : { _index: item.index, _id: item.id, ...sourceFilter }
-    );
-    const response = await this.deps.esClient.mget<TExecution>({ docs });
-
-    const executionDocs: GetExecutionByIdsItem<TExecution>[] = [];
-
-    for (const doc of response.docs) {
-      if ('found' in doc && doc.found && doc._source) {
-        const source = doc._source as TExecution;
-        executionDocs.push({
-          document: this.deps.normalizeExecutionOnGet
-            ? this.deps.normalizeExecutionOnGet(source, options)
-            : source,
-          index: doc._index,
-          seqNo: doc._seq_no,
-          primaryTerm: doc._primary_term,
-        });
-      }
-    }
-
-    return {
-      items: executionDocs,
-      missing: response.docs.filter((doc) => !('found' in doc && doc.found)).map((doc) => doc._id),
-    };
+    return getExecutionsByIds({
+      esClient: this.deps.esClient,
+      ids,
+      defaultIndex: this.deps.indexName,
+      options,
+      normalizeExecutionOnGet: this.deps.normalizeExecutionOnGet,
+    });
   }
 
   public bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
