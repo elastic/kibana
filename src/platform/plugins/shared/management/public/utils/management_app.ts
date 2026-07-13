@@ -14,12 +14,14 @@ export interface RegisterManagementAppArgs extends CreateManagementItemArgs {
   mount: Mount;
   basePath: string;
   keywords?: string[];
+  mainPaddingSize?: 'none' | 's' | 'm' | 'l';
 }
 
 export class ManagementApp extends ManagementItem {
   public readonly mount: Mount;
   public readonly basePath: string;
   public readonly keywords: string[];
+  public readonly mainPaddingSize: 'none' | 's' | 'm' | 'l';
 
   constructor(args: RegisterManagementAppArgs) {
     super(args);
@@ -27,5 +29,6 @@ export class ManagementApp extends ManagementItem {
     this.mount = args.mount;
     this.basePath = args.basePath;
     this.keywords = args.keywords || [];
+    this.mainPaddingSize = args.mainPaddingSize ?? 'm';
   }
 }
