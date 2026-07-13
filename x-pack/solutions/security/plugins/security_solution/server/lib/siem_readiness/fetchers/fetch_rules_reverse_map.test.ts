@@ -183,6 +183,9 @@ describe('fetchRulesReverseMap', () => {
 
       expect(result.indexToRules.has('logs-endpoint-default')).toBe(true);
       expect(result.indexToRules.has('threat-intel-iocs')).toBe(true);
+      // ruleQueryIndices contains only event indices — not threat-intel (required_fields scope).
+      expect(result.ruleQueryIndices.get('rule-3')).toEqual(['logs-endpoint-default']);
+      expect(result.ruleNames.get('rule-3')).toBe('Threat Match Rule');
     });
   });
 

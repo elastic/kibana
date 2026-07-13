@@ -7,6 +7,8 @@
 
 export { getCoverageStatus } from './get_coverage_status';
 export { getQualityStatus } from './get_quality_status';
+export { getQualityVerdict, QUALITY_RULES_PARTIAL_CAVEAT } from './get_quality_verdict';
+export type { QualityVerdict, QualityVerdictInput } from './get_quality_verdict';
 export { getContinuityStatus } from './get_continuity_status';
 export { getRetentionStatus } from './get_retention_status';
 export {

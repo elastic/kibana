@@ -43,6 +43,15 @@ const recommendedActionSchema = z.object({
 
 const actionableFindingSchema = z.object({
   category: z.string().max(100).optional(),
+  type: z
+    .enum([
+      'missing_field',
+      'pipeline_failure',
+      'silence',
+      'volume_drop_warning',
+      'volume_drop_critical',
+    ])
+    .optional(),
   severity: z.enum(['CRITICAL', 'WARNING', 'INFORMATIONAL']),
   message: z.string().max(5000),
   resource: z.string().max(500),
@@ -70,6 +79,18 @@ export const siemReadinessCoverageDataSchema = securityAttachmentDataSchema.exte
 
 // ---- Quality ----
 
+const missingFieldDetailSchema = z.object({
+  name: z.string().max(200),
+  status: z.enum(['missing', 'partial']),
+  unmappedIn: z.array(z.string().max(500)).optional(),
+});
+
+const missingFieldsEntrySchema = z.object({
+  ruleId: z.string().max(100),
+  ruleName: z.string().max(500),
+  fields: z.array(missingFieldDetailSchema),
+});
+
 export const siemReadinessQualityDataSchema = securityAttachmentDataSchema.extend({
   dimension: z.literal('quality'),
   status: z.enum(['healthy', 'actionsRequired', 'noData']),
@@ -84,6 +105,7 @@ export const siemReadinessQualityDataSchema = securityAttachmentDataSchema.exten
     })
   ),
   actionableFindings: z.array(actionableFindingSchema),
+  missingFieldsByRule: z.array(missingFieldsEntrySchema).optional(),
 });
 
 // ---- Continuity ----
@@ -224,6 +246,16 @@ const formatQualityForAgent = (data: QualityPayload & { dimension: 'quality' }):
       lines.push(...formatFindingWithBlastRadius(finding));
     });
   }
+  if (data.missingFieldsByRule?.length) {
+    lines.push('Rules with unmapped required fields:');
+    data.missingFieldsByRule.forEach((entry) => {
+      lines.push(`  ${entry.ruleName}:`);
+      entry.fields.forEach((f) => {
+        const detail = f.unmappedIn?.length ? ` (unmapped in: ${f.unmappedIn.join(', ')})` : '';
+        lines.push(`    ${f.name} — ${f.status}${detail}`);
+      });
+    });
+  }
   return lines.join('\n');
 };
 
@@ -314,11 +346,19 @@ The attachment contains:
 
 Each actionable finding includes:
 - category, severity (CRITICAL | WARNING | INFORMATIONAL), message, resource
-- type (continuity only): pipeline_failure | silence | volume_drop_warning | volume_drop_critical
+- type (optional): 'missing_field' for Quality findings about unmapped required fields; for Continuity findings: pipeline_failure | silence | volume_drop_warning | volume_drop_critical
 - affectedRules: detection rules impacted by this finding
 - affectedTactics: MITRE ATT&CK tactics with rule counts (total vs affected)
 - affectedPlatform: primary platform impacted (e.g., AWS, Endpoint, Azure)
 - recommendedActions: links to relevant Kibana pages and case creation
+
+Quality attachments include an additional missingFieldsByRule array:
+- Each entry: { ruleId, ruleName, fields: [{ name, status: 'missing' | 'partial', unmappedIn?: string[] }] }
+- A rule appears here when its declared required_fields are not fully mapped across all indices it queries
+- required_fields is an informational property (it documents what the rule expects; it does not itself drive the query), so an unmapped required field is a strong signal — not a guarantee — that the rule under-matches
+- status 'missing': field is unmapped in every queried index — the rule may silently fail to match events it is meant to detect
+- status 'partial': field is mapped in some indices but unmapped in others — the rule may match only partially; unmappedIn lists the affected indices/data streams
+- Distinct from sparse fields: missing/partial = not in the mapping (fully or in some indices); sparse = in the mapping but rarely populated in actual data
 
 Continuity pipeline items include silence and volume health fields:
 - silenceMs: milliseconds since the last event (null if stream never received events)

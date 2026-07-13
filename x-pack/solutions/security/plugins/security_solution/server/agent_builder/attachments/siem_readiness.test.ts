@@ -40,9 +40,24 @@ const qualityData = {
   actionableFindings: [
     {
       category: 'Endpoint',
+      type: 'missing_field' as const,
       severity: 'WARNING' as const,
       message: '3 incompatible fields',
       resource: 'logs-endpoint-default',
+    },
+  ],
+  missingFieldsByRule: [
+    {
+      ruleId: 'rule-1',
+      ruleName: 'My Detection Rule',
+      fields: [
+        { name: 'event.category', status: 'missing' as const },
+        {
+          name: 'process.name',
+          status: 'partial' as const,
+          unmappedIn: ['logs-endpoint-000001'],
+        },
+      ],
     },
   ],
 };
@@ -102,8 +117,15 @@ describe('siemReadinessAttachmentDataSchema', () => {
     expect(siemReadinessAttachmentDataSchema.safeParse(coverageData).success).toBe(true);
   });
 
-  it('validates quality data', () => {
-    expect(siemReadinessAttachmentDataSchema.safeParse(qualityData).success).toBe(true);
+  it('validates quality data including type on findings and missingFieldsByRule', () => {
+    const result = siemReadinessAttachmentDataSchema.safeParse(qualityData);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      const parsed = result.data as typeof qualityData;
+      expect(parsed.actionableFindings[0]).toMatchObject({ type: 'missing_field' });
+      expect(parsed.missingFieldsByRule).toHaveLength(1);
+      expect(parsed.missingFieldsByRule![0].fields).toHaveLength(2);
+    }
   });
 
   it('validates continuity data', () => {
@@ -172,6 +194,10 @@ describe('createSiemReadinessAttachmentType', () => {
       expect(rep?.type).toBe('text');
       expect(rep?.value).toContain('Actions Required'); // not 'actionsRequired'
       expect(rep?.value).toContain('3 incompatible fields');
+      expect(rep?.value).toContain('My Detection Rule');
+      expect(rep?.value).toContain('event.category — missing');
+      expect(rep?.value).toContain('process.name — partial');
+      expect(rep?.value).toContain('logs-endpoint-000001');
     });
 
     it('formats continuity as text containing human-readable status and pipeline info', async () => {

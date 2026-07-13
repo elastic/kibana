@@ -12,6 +12,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type {
   RuleIndexEntry,
+  RequiredField,
   IndexToRulesMap,
   PipelineToIndicesMap,
   CategoryToIndicesMap,
@@ -144,6 +145,8 @@ const resolveRuleIndices = async (
 
 interface ProcessRuleContext {
   indexToRules: IndexToRulesMap;
+  ruleQueryIndices: Map<string, string[]>;
+  ruleNames: Map<string, string>;
   tacticTotals: TacticTotals;
   mlRules: MachineLearningRuleIndex;
   esClient: ElasticsearchClient;
@@ -171,6 +174,8 @@ const processRule = async (ruleData: unknown, ctx: ProcessRuleContext): Promise<
 
   const ruleType = rule.params.type;
 
+  ctx.ruleNames.set(entry.id, entry.name);
+
   if (ruleType === 'machine_learning') {
     ctx.mlRules.push(entry);
   } else {
@@ -186,6 +191,13 @@ const processRule = async (ruleData: unknown, ctx: ProcessRuleContext): Promise<
       const existing = ctx.indexToRules.get(index) ?? [];
       existing.push(entry);
       ctx.indexToRules.set(index, existing);
+    }
+
+    // required_fields describe the event/query indices only — not threat_match indicator indices.
+    if (indices.length > 0) {
+      const existingQueryIndices = ctx.ruleQueryIndices.get(entry.id) ?? [];
+      const merged = [...new Set([...existingQueryIndices, ...indices])];
+      ctx.ruleQueryIndices.set(entry.id, merged);
     }
 
     if (ruleType === 'threat_match') {
@@ -221,6 +233,9 @@ export const fetchRulesReverseMap = async ({
   const categoryToIndices: CategoryToIndicesMap = new Map();
   const tacticTotals: TacticTotals = new Map();
   const mlRules: MachineLearningRuleIndex = [];
+  const ruleRequiredFields: Map<string, RequiredField[]> = new Map();
+  const ruleQueryIndices = new Map<string, string[]>();
+  const ruleNames = new Map<string, string>();
   const errors: ReverseMapErrors = { pipelineMap: false, categoryMap: false, rulesPartial: false };
 
   // 1. Build pipeline -> indices map from index settings
@@ -272,6 +287,8 @@ export const fetchRulesReverseMap = async ({
   const maxPages = 100;
   const ruleCtx: ProcessRuleContext = {
     indexToRules,
+    ruleQueryIndices,
+    ruleNames,
     tacticTotals,
     mlRules,
     esClient,
@@ -297,6 +314,11 @@ export const fetchRulesReverseMap = async ({
       });
 
       for (const ruleData of result.data) {
+        // Capture required_fields so fetch_rule_field_caps can check mapping coverage.
+        // findRules returns FindResult<RuleParams>, so params.requiredFields is already
+        // typed here (requiredFields lives on the shared BaseRuleParams).
+        ruleRequiredFields.set(ruleData.id, ruleData.params.requiredFields ?? []);
+
         const anyFailed = await processRule(ruleData, ruleCtx);
         if (anyFailed) {
           errors.rulesPartial = true;
@@ -317,5 +339,15 @@ export const fetchRulesReverseMap = async ({
     throw err;
   }
 
-  return { indexToRules, pipelineToIndices, categoryToIndices, tacticTotals, mlRules, errors };
+  return {
+    indexToRules,
+    pipelineToIndices,
+    categoryToIndices,
+    tacticTotals,
+    mlRules,
+    ruleRequiredFields,
+    ruleQueryIndices,
+    ruleNames,
+    errors,
+  };
 };

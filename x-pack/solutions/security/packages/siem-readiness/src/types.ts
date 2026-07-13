@@ -146,12 +146,15 @@ export interface IndexDocCount {
 // Blast radius types for finding enrichment
 export type FindingSeverity = 'CRITICAL' | 'WARNING' | 'INFORMATIONAL';
 
-/** Finding sub-type — currently only emitted by the Continuity dimension. */
+/** Finding sub-type emitted by the Continuity dimension. */
 export type ContinuityFindingType =
   | 'pipeline_failure'
   | 'silence'
   | 'volume_drop_warning'
   | 'volume_drop_critical';
+
+/** Finding sub-type across all SIEM readiness dimensions. Used to route recommended actions. */
+export type SiemReadinessFindingType = ContinuityFindingType | 'missing_field';
 
 export interface AffectedRule {
   id: string;
@@ -170,12 +173,26 @@ export interface RecommendedAction {
   href: string;
 }
 
+export interface MissingFieldDetail {
+  name: string;
+  status: 'missing' | 'partial';
+  /** Data streams / indices where the field is unmapped. For 'partial' this is the subset
+   *  that lacks the field; for 'missing' it is all queried indices (may be omitted). */
+  unmappedIn?: string[];
+}
+
+export interface MissingFieldsEntry {
+  ruleId: string;
+  ruleName: string;
+  fields: MissingFieldDetail[];
+}
+
 export interface ActionableFinding {
   category?: MainCategories;
   severity: FindingSeverity;
   message: string;
   resource: string;
-  type?: ContinuityFindingType;
+  type?: SiemReadinessFindingType;
   affectedRules?: AffectedRule[];
   affectedTactics?: AffectedTactic[];
   affectedPlatform?: string;
@@ -203,6 +220,11 @@ export interface QualityPayload {
   summary: string;
   items: DataQualityResultDocument[];
   actionableFindings: ActionableFinding[];
+  /** Rules that declare required_fields not mapped in their queried indices. */
+  missingFieldsByRule: MissingFieldsEntry[];
+  /** True when the required-field coverage list may be incomplete — either rule index
+   * resolution failed (reverse map) or a fieldCaps call failed for some rules. */
+  rulesPartial: boolean;
 }
 
 export interface ContinuityPayload {
