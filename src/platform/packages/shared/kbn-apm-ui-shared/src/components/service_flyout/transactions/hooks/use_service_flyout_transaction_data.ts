@@ -10,11 +10,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { HttpStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core/public';
-import type { LatencyAggregationType } from '@kbn/apm-types';
+import type { Coordinate, LatencyAggregationType } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { TransactionGroup } from '../../../transactions_table/types';
-import { usePreferredTransactionDataSource } from './use_preferred_transaction_data_source';
+import {
+  parseIntervalSeconds,
+  usePreferredTransactionDataSource,
+} from './use_preferred_transaction_data_source';
+
+const NUM_BUCKETS = 20;
 
 // TODO: replace with typed callApmApi once it lives in a package outside of APM (https://github.com/elastic/kibana/issues/271155)
 interface MainStatisticsResponse {
@@ -31,7 +36,25 @@ interface MainStatisticsResponse {
   hasActiveAlerts: boolean;
 }
 
-export function useServiceFlyoutTransactions({
+// TODO: replace with typed callApmApi once it lives in a package outside of APM (https://github.com/elastic/kibana/issues/271155)
+interface ServiceTransactionGroupDetailedStat {
+  transactionName: string;
+  latency: Coordinate[];
+  throughput: Coordinate[];
+  errorRate: Coordinate[];
+  impact: number;
+}
+
+interface DetailedStatisticsResponse {
+  currentPeriod: Record<string, ServiceTransactionGroupDetailedStat>;
+  previousPeriod: Record<string, ServiceTransactionGroupDetailedStat>;
+}
+
+function toPoints(coords: Array<{ x: number; y: number | null | undefined }>) {
+  return coords.map(({ x, y }) => ({ x, y: y ?? null }));
+}
+
+export function useServiceFlyoutTransactionData({
   http,
   notifications,
   serviceName,
@@ -42,6 +65,7 @@ export function useServiceFlyoutTransactions({
   latencyAggregationType,
   searchQuery,
   refreshToken,
+  offset,
 }: {
   http: HttpStart;
   notifications: NotificationsStart;
@@ -53,18 +77,17 @@ export function useServiceFlyoutTransactions({
   latencyAggregationType?: LatencyAggregationType;
   searchQuery: string;
   refreshToken?: number;
+  offset?: string;
 }) {
   const enabled = !!transactionType && !!latencyAggregationType;
 
+  // Single call — shared across both fetches below so GET /internal/apm/time_range_metadata
+  // fires exactly once per (start, end) pair regardless of how many fetches are in flight.
   const {
     dataSource,
     isLoading: isDataSourceLoading,
     error: dataSourceError,
-  } = usePreferredTransactionDataSource({
-    http,
-    start,
-    end,
-  });
+  } = usePreferredTransactionDataSource({ http, start, end });
 
   useEffect(() => {
     if (
@@ -99,7 +122,7 @@ export function useServiceFlyoutTransactions({
 
   const serverSearchQuery = maxCountExceeded ? searchQuery : '';
 
-  const { value: response, loading: isLoading } = useAbortableAsync(
+  const { value: mainResponse, loading: isMainLoading } = useAbortableAsync(
     async ({ signal }) => {
       if (!enabled || !dataSource) return undefined;
       const result = await http.get<MainStatisticsResponse>(
@@ -141,9 +164,9 @@ export function useServiceFlyoutTransactions({
   );
 
   const items: TransactionGroup[] = useMemo(() => {
-    const groups = response?.transactionGroups ?? [];
+    const groups = mainResponse?.transactionGroups ?? [];
     const filtered =
-      !response?.maxCountExceeded && searchQuery
+      !mainResponse?.maxCountExceeded && searchQuery
         ? groups.filter((g) => g.name.toLowerCase().includes(searchQuery.toLowerCase()))
         : groups;
     return filtered.map((group) => ({
@@ -155,13 +178,103 @@ export function useServiceFlyoutTransactions({
       alertsCount: group.alertsCount,
       impact: group.impact != null ? { value: group.impact } : undefined,
     }));
-  }, [response, searchQuery]);
+  }, [mainResponse, searchQuery]);
+
+  const transactionNames = useMemo(() => items.map(({ name }) => name), [items]);
+
+  const { value: detailedResponse, loading: isDetailedLoading } = useAbortableAsync(
+    async ({ signal }) => {
+      if (!enabled || !dataSource || transactionNames.length === 0) return undefined;
+
+      const rawBucketSize = Math.ceil(
+        (new Date(end).getTime() - new Date(start).getTime()) / 1000 / NUM_BUCKETS
+      );
+      const bucketSizeInSeconds = Math.max(
+        rawBucketSize,
+        parseIntervalSeconds(dataSource.rollupInterval)
+      );
+
+      return http.get<DetailedStatisticsResponse>(
+        `/internal/apm/services/${encodeURIComponent(
+          serviceName
+        )}/transactions/groups/detailed_statistics`,
+        {
+          signal,
+          query: {
+            environment,
+            kuery: '',
+            start,
+            end,
+            transactionType,
+            latencyAggregationType,
+            documentType: dataSource.documentType,
+            rollupInterval: dataSource.rollupInterval,
+            bucketSizeInSeconds,
+            useDurationSummary: false,
+            transactionNames: JSON.stringify(transactionNames),
+            ...(offset !== undefined ? { offset } : {}),
+          },
+        }
+      );
+    },
+    [
+      http,
+      serviceName,
+      environment,
+      start,
+      end,
+      transactionType,
+      latencyAggregationType,
+      transactionNames,
+      offset,
+      enabled,
+      dataSource,
+    ]
+  );
+
+  const itemsWithSparklines = useMemo(() => {
+    const currentPeriod = detailedResponse?.currentPeriod ?? {};
+    const previousPeriod = detailedResponse?.previousPeriod ?? {};
+    if (!Object.keys(currentPeriod).length) return items;
+
+    return items.map((item) => {
+      const stat = currentPeriod[item.name];
+      const comparisonStat = previousPeriod[item.name];
+      if (!stat) return item;
+
+      return {
+        ...item,
+        latency: {
+          ...item.latency,
+          series: {
+            value: toPoints(stat.latency),
+            ...(comparisonStat ? { comparison: toPoints(comparisonStat.latency) } : {}),
+          },
+        },
+        throughput: {
+          ...item.throughput,
+          series: {
+            value: toPoints(stat.throughput),
+            ...(comparisonStat ? { comparison: toPoints(comparisonStat.throughput) } : {}),
+          },
+        },
+        errorRate: {
+          ...item.errorRate,
+          series: {
+            value: toPoints(stat.errorRate),
+            ...(comparisonStat ? { comparison: toPoints(comparisonStat.errorRate) } : {}),
+          },
+        },
+      };
+    });
+  }, [items, detailedResponse]);
 
   return {
-    items,
-    isLoading: isLoading || isDataSourceLoading,
+    items: itemsWithSparklines,
+    isLoading: isMainLoading || isDataSourceLoading,
+    isSparklineLoading: isDetailedLoading,
     maxCountExceeded,
-    hasActiveAlerts: response?.hasActiveAlerts ?? false,
+    hasActiveAlerts: mainResponse?.hasActiveAlerts ?? false,
     error: dataSourceError,
   };
 }
