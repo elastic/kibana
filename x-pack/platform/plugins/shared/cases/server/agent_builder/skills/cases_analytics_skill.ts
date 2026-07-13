@@ -9,11 +9,11 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import { platformCoreTools } from '@kbn/agent-builder-common';
 
 /**
- * Analytics/reporting skill for Elastic Cases. Distinct from the
- * `cases-management` skill (per-case CRUD via the Cases API): this skill runs
- * ES|QL over the three cluster-level analytics indices — `.cases`,
- * `.cases-activity`, `.cases-attachments` — and builds visualizations /
- * dashboards from the results.
+ * Aggregate analytics and reporting for Elastic Cases: runs ES|QL over the
+ * three cluster-level analytics indices (`.cases`, `.cases-activity`,
+ * `.cases-attachments`) and builds visualizations / dashboards from the
+ * results. Read-only and aggregate — the sibling `cases-management` skill
+ * covers reading and writing individual cases.
  *
  * Registered only when `xpack.cases.analyticsV2.enabled` is true (the indices
  * don't exist otherwise). All queries run as the requesting user, so
