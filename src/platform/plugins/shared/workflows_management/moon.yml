@@ -119,6 +119,7 @@ dependsOn:
   - '@kbn/controls-plugin'
   - '@kbn/controls-schemas'
   - '@kbn/app-header'
+  - '@kbn/deeplinks-workflows'
   - '@kbn/core-chrome-app-menu-components'
 tags:
   - plugin

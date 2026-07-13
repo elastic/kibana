@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiBadgeGroup, EuiFlexGroup } from '@elastic/eui';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -18,7 +18,7 @@ import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
-import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
+import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../../stream_badges';
 import { StreamOverview } from '../../../stream_detail_overview';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
@@ -83,20 +83,32 @@ export function ClassicStreamDetailManagement({
     refreshDefinition,
   });
 
+  const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
+    defaultMessage: 'Streams',
+  });
+
   if (!definition.data_stream_exists) {
+    const classicErrorBadges: AppHeaderBadge[] = [
+      {
+        label: i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
+          defaultMessage: 'Classic',
+        }),
+        renderCustomBadge: () => <ClassicStreamBadge />,
+      },
+      {
+        label: i18n.translate('xpack.streams.badges.lifecycle.title', {
+          defaultMessage: 'Data Retention',
+        }),
+        renderCustomBadge: () => <LifecycleBadge lifecycle={definition.effective_lifecycle} />,
+      },
+    ];
     return (
       <>
-        <StreamsAppPageTemplate.Header
-          bottomBorder="extended"
-          pageTitle={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {key}
-              <EuiBadgeGroup gutterSize="s">
-                <ClassicStreamBadge />
-                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
-              </EuiBadgeGroup>
-            </EuiFlexGroup>
-          }
+        <StreamsAppHeader
+          title={key}
+          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          badges={classicErrorBadges}
+          padding="m"
         />
         <StreamsAppPageTemplate.Body>
           <MissingDataStreamCallout
