@@ -90,7 +90,7 @@ export async function getAgentStatusForAgentPolicy(
     );
     clauses.push(kueryAsElasticsearchQuery);
   }
-  // If agentPolicyIds is provided, we filter by those, otherwise we filter by depreciated agentPolicyId.
+  // If agentPolicyIds is provided, we filter by those, otherwise we filter by deprecated agentPolicyId.
   // Also matches agents on version-specific variants of the given policies (e.g. `id#9.2`).
   if (agentPolicyIds) {
     clauses.push(buildPolicyIdsOrVariantsEsFilter(agentPolicyIds));

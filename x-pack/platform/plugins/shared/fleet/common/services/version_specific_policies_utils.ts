@@ -70,8 +70,16 @@ export function buildPolicyIdsOrVariantsKuery(
   baseIds: string[],
   fieldName: string = DEFAULT_POLICY_ID_FIELD
 ): string {
-  const exactClause = `${fieldName}:(${baseIds.map((baseId) => escapeKuery(baseId)).join(' or ')})`;
-  const variantClauses = baseIds.map((baseId) =>
+  const uniqueIds = Array.from(new Set(baseIds));
+  if (uniqueIds.length === 0) {
+    // No ids to match. `${fieldName}:()` is invalid KQL syntax (parse error), so return a
+    // valid kuery that never matches instead — a real policy_id is never an empty string.
+    return `${fieldName}:""`;
+  }
+  const exactClause = `${fieldName}:(${uniqueIds
+    .map((baseId) => escapeKuery(baseId))
+    .join(' or ')})`;
+  const variantClauses = uniqueIds.map((baseId) =>
     buildVersionVariantsKueryFragment(baseId, fieldName)
   );
   return `(${[exactClause, ...variantClauses].join(' or ')})`;
@@ -112,11 +120,15 @@ export function buildPolicyIdsOrVariantsEsFilter(
   baseIds: string[],
   fieldName: string = DEFAULT_POLICY_ID_FIELD
 ) {
+  const uniqueIds = Array.from(new Set(baseIds));
+  if (uniqueIds.length === 0) {
+    return { match_none: {} };
+  }
   return {
     bool: {
       should: [
-        { terms: { [fieldName]: baseIds } },
-        ...baseIds.map((baseId) => buildVersionVariantsEsFilter(baseId, fieldName)),
+        { terms: { [fieldName]: uniqueIds } },
+        ...uniqueIds.map((baseId) => buildVersionVariantsEsFilter(baseId, fieldName)),
       ],
       minimum_should_match: 1,
     },

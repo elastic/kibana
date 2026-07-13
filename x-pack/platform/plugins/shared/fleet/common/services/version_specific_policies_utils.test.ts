@@ -164,6 +164,16 @@ describe('buildPolicyIdsOrVariantsKuery', () => {
       '(fleet-agents.policy_id:(policy-1) or fleet-agents.policy_id:policy-1#*)'
     );
   });
+
+  it('should de-duplicate repeated ids', () => {
+    expect(buildPolicyIdsOrVariantsKuery(['policy-1', 'policy-1', 'policy-2'])).toBe(
+      '(policy_id:(policy-1 or policy-2) or policy_id:policy-1#* or policy_id:policy-2#*)'
+    );
+  });
+
+  it('should return a valid, never-matching kuery for an empty array instead of invalid syntax', () => {
+    expect(buildPolicyIdsOrVariantsKuery([])).toBe('policy_id:""');
+  });
 });
 
 describe('buildVersionVariantsEsFilter', () => {
@@ -224,5 +234,18 @@ describe('buildPolicyIdsOrVariantsEsFilter', () => {
         minimum_should_match: 1,
       },
     });
+  });
+
+  it('should de-duplicate repeated ids', () => {
+    expect(buildPolicyIdsOrVariantsEsFilter(['policy-a', 'policy-a'])).toEqual({
+      bool: {
+        should: [{ terms: { policy_id: ['policy-a'] } }, { prefix: { policy_id: 'policy-a#' } }],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('should return match_none for an empty array instead of an empty terms clause', () => {
+    expect(buildPolicyIdsOrVariantsEsFilter([])).toEqual({ match_none: {} });
   });
 });
