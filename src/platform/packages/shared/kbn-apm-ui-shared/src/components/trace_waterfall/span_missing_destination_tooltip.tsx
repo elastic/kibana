@@ -19,7 +19,7 @@ const title = i18n.translate(
 );
 
 const content = i18n.translate(
-  'apmCommon.trace.barDetails.euiIconTip.spanMissingDestinationContent',
+  'apmUiShared.trace.barDetails.euiIconTip.spanMissingDestinationContent',
   {
     defaultMessage:
       'This exit span is missing the span.destination.service.resource field which might prevent linking it to downstream transactions on features that depend on this information. i.e.: Service map. Make sure the instrumentation of this exit span follows OTel Semantic Conventions',

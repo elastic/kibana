@@ -25,7 +25,7 @@ export function Loading() {
       <EuiFlexItem grow={false}>
         <EuiText>
           {i18n.translate(
-            'apmCommon.traceWaterfallEmbeddable.loadingTraceWaterfallSkeletonTextLabel',
+            'apmUiShared.traceWaterfallEmbeddable.loadingTraceWaterfallSkeletonTextLabel',
             { defaultMessage: 'Loading trace waterfall' }
           )}
         </EuiText>

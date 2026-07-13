@@ -34,7 +34,7 @@ export function WaterfallSizeWarning({
       title={
         discoverHref ? (
           <FormattedMessage
-            id="apmCommon.waterfall.exceedsMax.withDiscoverLink"
+            id="apmUiShared.waterfall.exceedsMax.withDiscoverLink"
             defaultMessage="The number of items in this trace is {traceDocsTotal} which is higher than the current limit of {maxTraceItems}. Please increase the limit via apmCommon.ui.maxTraceItems to see the full trace, or {discoverLink}."
             values={{
               traceDocsTotal,
@@ -42,7 +42,7 @@ export function WaterfallSizeWarning({
               discoverLink: (
                 <EuiLink data-test-subj={`${dataTestSubj}DiscoverLink`} href={discoverHref}>
                   <FormattedMessage
-                    id="apmCommon.waterfall.exceedsMax.discoverLinkText"
+                    id="apmUiShared.waterfall.exceedsMax.discoverLinkText"
                     defaultMessage="view the full trace in Discover"
                   />
                 </EuiLink>
@@ -51,7 +51,7 @@ export function WaterfallSizeWarning({
           />
         ) : (
           <FormattedMessage
-            id="apmCommon.waterfall.exceedsMax"
+            id="apmUiShared.waterfall.exceedsMax"
             defaultMessage="The number of items in this trace is {traceDocsTotal} which is higher than the current limit of {maxTraceItems}. Please increase the limit via apmCommon.ui.maxTraceItems to see the full trace."
             values={{ traceDocsTotal, maxTraceItems }}
           />

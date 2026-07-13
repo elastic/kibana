@@ -251,7 +251,7 @@
     "@kbn/apm-data-view": "link:src/platform/packages/shared/kbn-apm-data-view",
     "@kbn/apm-embeddable-common": "link:x-pack/solutions/observability/packages/kbn-apm-embeddable-common",
     "@kbn/apm-plugin": "link:x-pack/solutions/observability/plugins/apm",
-    "@kbn/apm-shared": "link:src/platform/plugins/shared/apm-shared",
+    "@kbn/apm-shared": "link:src/platform/plugins/shared/apm_shared",
     "@kbn/apm-sources-access-plugin": "link:x-pack/platform/plugins/shared/apm_sources_access",
     "@kbn/apm-types": "link:x-pack/platform/packages/shared/kbn-apm-types",
     "@kbn/apm-types-shared": "link:src/platform/packages/shared/kbn-apm-types-shared",

@@ -34,7 +34,7 @@ const ORPHAN_TITLE = i18n.translate('apmUiShared.trace.barDetails.euiIconTip.orp
   defaultMessage: 'Orphan',
 });
 const ORPHAN_CONTENT = i18n.translate(
-  'apmCommon.trace.barDetails.euiIconTip.orphanSpanContentLabel',
+  'apmUiShared.trace.barDetails.euiIconTip.orphanSpanContentLabel',
   {
     defaultMessage:
       'This span is orphaned due to missing trace context and has been reparented to the root to restore the execution flow',
@@ -49,7 +49,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
   const errorCount = item.errors.length;
 
   const viewRelatedErrorsLabel = i18n.translate(
-    'apmCommon.waterfall.embeddableRelatedErrors.unifedErrorCount',
+    'apmUiShared.waterfall.embeddableRelatedErrors.unifedErrorCount',
     {
       defaultMessage: '{count, plural, one {View error} other {View # errors}}',
       values: {

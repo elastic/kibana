@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/apm-shared
   channel: ''
   owner: '@elastic/obs-presentation-team'
-  sourceRoot: src/platform/plugins/shared/apm-shared
+  sourceRoot: src/platform/plugins/shared/apm_shared
 dependsOn:
   - '@kbn/core'
   - '@kbn/apm-api-shared'
