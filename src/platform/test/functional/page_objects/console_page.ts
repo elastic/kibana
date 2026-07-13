@@ -248,10 +248,12 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickPlayAndWaitForResults() {
-    // Retry the Play click until the request demonstrably starts. A single click can be a no-op if
-    // the editor hasn't finished registering the current request, leaving the output panel in its
-    // empty "Enter a new request" state and dispatching nothing (see issue #240147). Any of the
-    // in-flight indicators or the output panel appearing proves the request was actually sent.
+    // Clear stale output so consoleMonacoOutput only reappears once the current click sends a
+    // request; otherwise a leftover panel makes the retry below think the click already started.
+    await this.clickClearOutput();
+
+    // Retry the Play click until the request starts, since a single click can be a no-op before the
+    // editor has registered the request (see issue #240147).
     await this.retry.try(async () => {
       await this.clickPlay();
       const started =
