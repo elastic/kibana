@@ -14,6 +14,7 @@ import {
   EXCEPTION_LIST_NAMESPACE_AWARE,
 } from '@kbn/securitysolution-list-constants';
 import type {
+  SavedObjectsBulkDeleteObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
@@ -313,6 +314,15 @@ export const getExceptionListSavedObjectClientMock = (
       saved_objects: importObjects.map((item) => {
         return getExceptionListItemSavedObject(item.attributes);
       }),
+    };
+  });
+
+  // Mock `.bulkDelete()` (used in bulk delete item cascades)
+  soClient.bulkDelete.mockImplementation(async (...args) => {
+    const [objects] = args as [SavedObjectsBulkDeleteObject[]];
+
+    return {
+      statuses: objects.map(({ id, type }) => ({ id, success: true, type })),
     };
   });
 

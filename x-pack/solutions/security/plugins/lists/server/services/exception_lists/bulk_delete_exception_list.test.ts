@@ -12,12 +12,10 @@ import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
 
 import { bulkDeleteExceptionList } from './bulk_delete_exception_list';
-import { getExceptionListItemIds } from './delete_exception_list_items_by_list';
-import { bulkDeleteExceptionListItems } from './bulk_delete_exception_list_items';
+import { deleteExceptionListItemsByListStreamed } from './delete_exception_list_items_by_list';
 import { resolveExceptionListIds } from './resolve_exception_list_ids';
 
 jest.mock('./delete_exception_list_items_by_list');
-jest.mock('./bulk_delete_exception_list_items');
 jest.mock('./resolve_exception_list_ids');
 
 const getListMock = (
@@ -71,7 +69,7 @@ describe('bulkDeleteExceptionList', () => {
   });
 
   describe('ids path', () => {
-    test('it validates and deletes ids via a single bulkGet call, without resolving any list_ids', async () => {
+    test('it validates via a single bulkGet call, then deletes each list items followed by its container', async () => {
       const list1 = getListMock({ id: 'so-1', list_id: 'list-1' });
       const list2 = getListMock({ id: 'so-2', list_id: 'list-2' });
 
@@ -79,15 +77,16 @@ describe('bulkDeleteExceptionList', () => {
       savedObjectsClient.bulkGet.mockResolvedValue({
         saved_objects: [savedObjectFor(list1), savedObjectFor(list2)],
       });
-      savedObjectsClient.bulkDelete.mockResolvedValue({
-        statuses: [
-          { id: 'so-1', success: true, type: 'exception-list' },
-          { id: 'so-2', success: true, type: 'exception-list' },
-        ],
+      const callOrder: string[] = [];
+      savedObjectsClient.delete.mockImplementation(async (_type, id) => {
+        callOrder.push(`delete container ${id}`);
+        return {} as never;
       });
-      (getExceptionListItemIds as jest.Mock)
-        .mockResolvedValueOnce(['item-1', 'item-2'])
-        .mockResolvedValueOnce(['item-3']);
+      (deleteExceptionListItemsByListStreamed as jest.Mock).mockImplementation(
+        async ({ listId }) => {
+          callOrder.push(`delete items ${listId}`);
+        }
+      );
 
       const result = await bulkDeleteExceptionList({
         ids: ['so-1', 'so-2'],
@@ -104,17 +103,20 @@ describe('bulkDeleteExceptionList', () => {
       ]);
       expect(result.deleted).toEqual([list1, list2]);
       expect(result.errors).toEqual([]);
-      expect(bulkDeleteExceptionListItems).toHaveBeenCalledTimes(1);
-      expect(bulkDeleteExceptionListItems).toHaveBeenCalledWith({
-        ids: ['item-1', 'item-2', 'item-3'],
-        namespaceType: 'single',
-        savedObjectsClient,
-      });
-      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith([
-        { id: 'so-1', type: 'exception-list' },
-        { id: 'so-2', type: 'exception-list' },
-      ]);
+      expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      expect(savedObjectsClient.delete).toHaveBeenCalledTimes(2);
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('exception-list', 'so-1');
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('exception-list', 'so-2');
+      // Each list's items must be fully cascaded before that same list's container
+      // is deleted, otherwise a slow item cascade racing a fast container delete
+      // can leave orphaned items with no parent list to retry the cascade against.
+      // Different lists may still interleave with each other (bounded concurrency).
+      expect(callOrder.indexOf('delete items list-1')).toBeLessThan(
+        callOrder.indexOf('delete container so-1')
+      );
+      expect(callOrder.indexOf('delete items list-2')).toBeLessThan(
+        callOrder.indexOf('delete container so-2')
+      );
     });
 
     test('it reports a 404 error for ids that bulkGet cannot find', async () => {
@@ -124,10 +126,7 @@ describe('bulkDeleteExceptionList', () => {
       savedObjectsClient.bulkGet.mockResolvedValue({
         saved_objects: [savedObjectFor(list1), notFoundSavedObject('so-2')],
       });
-      savedObjectsClient.bulkDelete.mockResolvedValue({
-        statuses: [{ id: 'so-1', success: true, type: 'exception-list' }],
-      });
-      (getExceptionListItemIds as jest.Mock).mockResolvedValueOnce([]);
+      (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
 
       const result = await bulkDeleteExceptionList({
         ids: ['so-1', 'so-2'],
@@ -146,22 +145,51 @@ describe('bulkDeleteExceptionList', () => {
       ]);
     });
 
-    test('it reports a per-list error when the saved objects bulkDelete call fails for that list', async () => {
+    test('it reports a per-list error and skips the container delete when the item cascade fails for that list, without affecting other lists', async () => {
+      const list1 = getListMock({ id: 'so-1', list_id: 'list-1' });
+      const list2 = getListMock({ id: 'so-2', list_id: 'list-2' });
+
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [savedObjectFor(list1), savedObjectFor(list2)],
+      });
+      (deleteExceptionListItemsByListStreamed as jest.Mock).mockImplementation(
+        async ({ listId }) => {
+          if (listId === 'list-1') {
+            throw new Error('boom');
+          }
+        }
+      );
+
+      const result = await bulkDeleteExceptionList({
+        ids: ['so-1', 'so-2'],
+        listIds: [],
+        namespaceType: 'single',
+        savedObjectsClient,
+      });
+
+      expect(result.deleted).toEqual([list2]);
+      expect(result.errors).toEqual([
+        {
+          error: { message: 'boom', status_code: 500 },
+          id: 'so-1',
+          list_id: 'list-1',
+        },
+      ]);
+      // The list whose item cascade failed must not have its container deleted.
+      expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('exception-list', 'so-2');
+    });
+
+    test('it reports a per-list error when the container delete fails for that list', async () => {
       const list1 = getListMock({ id: 'so-1', list_id: 'list-1' });
 
       const savedObjectsClient = savedObjectsClientMock.create();
       savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [savedObjectFor(list1)] });
-      savedObjectsClient.bulkDelete.mockResolvedValue({
-        statuses: [
-          {
-            error: { error: 'Conflict', message: 'conflict deleting object', statusCode: 409 },
-            id: 'so-1',
-            success: false,
-            type: 'exception-list',
-          },
-        ],
-      });
-      (getExceptionListItemIds as jest.Mock).mockResolvedValueOnce([]);
+      savedObjectsClient.delete.mockRejectedValue(
+        Object.assign(new Error('conflict deleting object'), { statusCode: 409 })
+      );
+      (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
 
       const result = await bulkDeleteExceptionList({
         ids: ['so-1'],
@@ -179,6 +207,35 @@ describe('bulkDeleteExceptionList', () => {
         },
       ]);
     });
+
+    test('it never runs more than the configured concurrency of list pipelines at once', async () => {
+      const lists = Array.from({ length: 6 }, (_, index) =>
+        getListMock({ id: `so-${index}`, list_id: `list-${index}` })
+      );
+
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: lists.map((list) => savedObjectFor(list)),
+      });
+
+      let active = 0;
+      let maxActive = 0;
+      (deleteExceptionListItemsByListStreamed as jest.Mock).mockImplementation(async () => {
+        active += 1;
+        maxActive = Math.max(maxActive, active);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        active -= 1;
+      });
+
+      await bulkDeleteExceptionList({
+        ids: lists.map((list) => list.id),
+        listIds: [],
+        namespaceType: 'single',
+        savedObjectsClient,
+      });
+
+      expect(maxActive).toBeLessThanOrEqual(3);
+    });
   });
 
   describe('list_ids path', () => {
@@ -189,12 +246,9 @@ describe('bulkDeleteExceptionList', () => {
         listIds: [],
         lists: [list1],
       });
-      (getExceptionListItemIds as jest.Mock).mockResolvedValueOnce([]);
+      (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
 
       const savedObjectsClient = savedObjectsClientMock.create();
-      savedObjectsClient.bulkDelete.mockResolvedValue({
-        statuses: [{ id: 'so-1', success: true, type: 'exception-list' }],
-      });
 
       const result = await bulkDeleteExceptionList({
         ids: [],
@@ -209,11 +263,12 @@ describe('bulkDeleteExceptionList', () => {
         savedObjectsClient,
       });
       expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('exception-list', 'so-1');
       expect(result.deleted).toEqual([list1]);
       expect(result.errors).toEqual([]);
     });
 
-    test('it reports a 404 error for list_ids that fail to resolve, without calling bulkGet or bulkDelete', async () => {
+    test('it reports a 404 error for list_ids that fail to resolve, without calling bulkGet or deleting anything', async () => {
       (resolveExceptionListIds as jest.Mock).mockResolvedValue({
         listIds: ['missing-list'],
         lists: [],
@@ -240,10 +295,10 @@ describe('bulkDeleteExceptionList', () => {
         },
       ]);
       expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
-      expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      expect(savedObjectsClient.delete).not.toHaveBeenCalled();
     });
 
-    test('it does not call bulkDelete or the item cascade when every list_id fails to resolve', async () => {
+    test('it does not delete anything or run the item cascade when every list_id fails to resolve', async () => {
       (resolveExceptionListIds as jest.Mock).mockResolvedValue({
         listIds: ['missing-1', 'missing-2'],
         lists: [],
@@ -260,12 +315,12 @@ describe('bulkDeleteExceptionList', () => {
 
       expect(result.deleted).toEqual([]);
       expect(result.errors).toHaveLength(2);
-      expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
-      expect(getExceptionListItemIds).not.toHaveBeenCalled();
+      expect(savedObjectsClient.delete).not.toHaveBeenCalled();
+      expect(deleteExceptionListItemsByListStreamed).not.toHaveBeenCalled();
     });
   });
 
-  test('it does not call bulkGet, resolveExceptionListIds, or bulkDelete when no ids or list_ids are given', async () => {
+  test('it does not call bulkGet, resolveExceptionListIds, or delete anything when no ids or list_ids are given', async () => {
     const savedObjectsClient = savedObjectsClientMock.create();
 
     const result = await bulkDeleteExceptionList({
@@ -287,7 +342,7 @@ describe('bulkDeleteExceptionList', () => {
     });
     expect(resolveExceptionListIds).not.toHaveBeenCalled();
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
-    expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
-    expect(getExceptionListItemIds).not.toHaveBeenCalled();
+    expect(savedObjectsClient.delete).not.toHaveBeenCalled();
+    expect(deleteExceptionListItemsByListStreamed).not.toHaveBeenCalled();
   });
 });

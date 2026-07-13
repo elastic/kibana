@@ -11,9 +11,13 @@ import type {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+
+import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { bulkDeleteExceptionListItems } from './bulk_delete_exception_list_items';
+import { getExceptionListsItemFilter } from './utils/get_exception_lists_item_filter';
 
 interface DeleteExceptionListItemByListOptions {
   listId: ListId;
@@ -28,6 +32,50 @@ export const deleteExceptionListItemByList = async ({
 }: DeleteExceptionListItemByListOptions): Promise<void> => {
   const ids = await getExceptionListItemIds({ listId, namespaceType, savedObjectsClient });
   await bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
+};
+
+/**
+ * Deletes all exception list items belonging to a single list, one page
+ * (1,000 items) at a time via a saved objects PIT finder, instead of
+ * accumulating every item id for the list into memory before deleting.
+ * Bounds peak memory usage to a single page's worth of ids, regardless of
+ * how many items the list contains.
+ */
+export const deleteExceptionListItemsByListStreamed = async ({
+  listId,
+  namespaceType,
+  savedObjectsClient,
+}: DeleteExceptionListItemByListOptions): Promise<void> => {
+  const savedObjectType = getSavedObjectType({ namespaceType });
+  const filter = getExceptionListsItemFilter({
+    filter: [],
+    listId: [listId],
+    savedObjectType: [savedObjectType],
+  });
+
+  const finder = savedObjectsClient.createPointInTimeFinder<ExceptionListSoSchema>({
+    filter,
+    perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
+    sortField: 'tie_breaker_id',
+    sortOrder: 'desc',
+    type: [savedObjectType],
+  });
+
+  for await (const { saved_objects: savedObjects } of finder.find()) {
+    const ids = savedObjects.map((savedObject) => savedObject.id);
+    if (ids.length > 0) {
+      await bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
+    }
+  }
+
+  try {
+    await finder.close();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (exception) {
+    // This is just a pre-caution in case the finder does a throw we don't want to blow up
+    // the response. We have seen this within e2e test containers but nothing happen in normal
+    // operational conditions which is why this try/catch is here.
+  }
 };
 
 export const getExceptionListItemIds = async ({

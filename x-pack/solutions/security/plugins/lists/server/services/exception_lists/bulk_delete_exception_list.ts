@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   ExceptionListSchema,
   Id,
@@ -16,12 +18,12 @@ import type {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import type { SavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 import { getErrorMessageExceptionList } from '../../routes/utils/get_error_message_exception_list';
 
-import { getExceptionListItemIds } from './delete_exception_list_items_by_list';
-import { bulkDeleteExceptionListItems } from './bulk_delete_exception_list_items';
+import { deleteExceptionListItemsByListStreamed } from './delete_exception_list_items_by_list';
 import { resolveExceptionListIds } from './resolve_exception_list_ids';
 import { transformSavedObjectToExceptionList } from './utils';
 
@@ -46,11 +48,102 @@ export interface BulkDeleteExceptionListResult {
   errors: BulkDeleteExceptionListError[];
 }
 
+// Caps how many lists have their item-cascade + container delete running at
+// once. Each list's item cascade can itself involve several sequential PIT
+// pages, so fanning out to all lists in a batch (up to 100) at once would be
+// an unbounded burst of concurrent ES load; a small, fixed concurrency keeps
+// that bounded regardless of batch size.
+const BULK_DELETE_LIST_CONCURRENCY = 3;
+
+interface DeleteListWithItemsResult {
+  list: ExceptionListSchema;
+  error?: BulkDeleteExceptionListError;
+}
+
+/**
+ * Deletes a single list end-to-end: its items first, then the list container
+ * itself, mirroring the sequential order of the existing single-delete path
+ * (deleteExceptionList: items first, then the list). Deleting the container
+ * first would risk orphaned items that can never be cleaned up, since
+ * list_id no longer resolves to anything once the list is gone.
+ *
+ * Each list is handled as an independent unit: an error deleting one list's
+ * items or container is reported back as that list's error and does not
+ * affect any other list in the batch.
+ */
+const deleteListWithItems = async ({
+  list,
+  namespaceType,
+  savedObjectsClient,
+  savedObjectType,
+}: {
+  list: ExceptionListSchema;
+  namespaceType: NamespaceType;
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectType: SavedObjectType;
+}): Promise<DeleteListWithItemsResult> => {
+  try {
+    await deleteExceptionListItemsByListStreamed({
+      listId: list.list_id,
+      namespaceType,
+      savedObjectsClient,
+    });
+  } catch (err) {
+    const { message, statusCode } = transformError(err);
+    return {
+      error: { error: { message, status_code: statusCode }, id: list.id, list_id: list.list_id },
+      list,
+    };
+  }
+
+  try {
+    await savedObjectsClient.delete(savedObjectType, list.id);
+    return { list };
+  } catch (err) {
+    const { message, statusCode } = transformError(err);
+    return {
+      error: { error: { message, status_code: statusCode }, id: list.id, list_id: list.list_id },
+      list,
+    };
+  }
+};
+
+const deleteListsWithItems = async ({
+  foundLists,
+  namespaceType,
+  savedObjectsClient,
+  savedObjectType,
+}: {
+  foundLists: ExceptionListSchema[];
+  namespaceType: NamespaceType;
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectType: SavedObjectType;
+}): Promise<BulkDeleteExceptionListResult> => {
+  const results = await pMap(
+    foundLists,
+    (list) => deleteListWithItems({ list, namespaceType, savedObjectType, savedObjectsClient }),
+    { concurrency: BULK_DELETE_LIST_CONCURRENCY }
+  );
+
+  const deleted: ExceptionListSchema[] = [];
+  const deleteErrors: BulkDeleteExceptionListError[] = [];
+
+  results.forEach(({ list, error }) => {
+    if (error) {
+      deleteErrors.push(error);
+    } else {
+      deleted.push(list);
+    }
+  });
+
+  return { deleted, errors: deleteErrors };
+};
+
 /**
  * Full, self-contained pipeline for bulk-deleting lists identified by saved
- * object id: validate existence via a single bulkGet call, cascade-delete
- * their items via a single bulk call, then delete the list containers via a
- * single bulkDelete call.
+ * object id: validate existence via a single bulkGet call, then delete each
+ * found list (items, then container) as an independent, concurrency-limited
+ * unit.
  */
 const bulkDeleteExceptionListsByIds = async ({
   ids,
@@ -87,65 +180,22 @@ const bulkDeleteExceptionListsByIds = async ({
     return { deleted: [], errors: notFoundErrors };
   }
 
-  // Fetching all of the associated exception list items, to queue for deletion as well
-  const itemIdsByList = await Promise.all(
-    foundLists.map((list) =>
-      getExceptionListItemIds({ listId: list.list_id, namespaceType, savedObjectsClient })
-    )
-  );
-  // KNOWN LIMITATION: allItemIds is unbounded. A list can hold up to
-  // MAX_EXCEPTION_LIST_SIZE (10,000) items, and up to MAX_BULK_DELETE_EXCEPTION_LISTS
-  // (100) lists can be deleted per request, so this array (and the single
-  // bulkDeleteExceptionListItems call built from it) can reach up to ~1,000,000
-  // entries in the worst case. That risks a large transient memory footprint and
-  // a single savedObjectsClient.bulkDelete() request big enough to hit ES/Kibana
-  // payload limits before it hits a memory ceiling. Needs either chunking this
-  // array into safe-sized batches before deletion, or a total-item cap across the
-  // batch (mirroring the combined-object cap used by the bulk export endpoint).
-  // Tracked in the issue tracker; not yet fixed.
-  const allItemIds = itemIdsByList.flat();
-
-  // Item cascade and list-container deletion touch different saved object
-  // types and neither is gated on the other's outcome (no rollback either
-  // way, matching existing single-delete semantics), so they run concurrently
-  // instead of one after the other.
-  const [, { statuses }] = await Promise.all([
-    allItemIds.length > 0
-      ? bulkDeleteExceptionListItems({ ids: allItemIds, namespaceType, savedObjectsClient })
-      : Promise.resolve(),
-    savedObjectsClient.bulkDelete(
-      foundLists.map((list) => ({ id: list.id, type: savedObjectType }))
-    ),
-  ]);
-
-  const deleted: ExceptionListSchema[] = [];
-  const deleteErrors: BulkDeleteExceptionListError[] = [];
-
-  statuses.forEach((status, index) => {
-    const list = foundLists[index];
-    if (status.success) {
-      deleted.push(list);
-    } else {
-      deleteErrors.push({
-        error: {
-          message: status.error?.message ?? 'Unknown error',
-          status_code: status.error?.statusCode ?? 500,
-        },
-        id: list.id,
-        list_id: list.list_id,
-      });
-    }
+  const { deleted, errors } = await deleteListsWithItems({
+    foundLists,
+    namespaceType,
+    savedObjectType,
+    savedObjectsClient,
   });
 
-  return { deleted, errors: [...notFoundErrors, ...deleteErrors] };
+  return { deleted, errors: [...notFoundErrors, ...errors] };
 };
 
 /**
  * Full, self-contained pipeline for bulk-deleting lists identified by
  * list_id: resolve each list_id to its exception list (this already fetches
- * and validates it, so there is no separate bulkGet step), cascade-delete
- * their items via a single bulk call, then delete the list containers via a
- * single bulkDelete call.
+ * and validates it, so there is no separate bulkGet step), then delete each
+ * resolved list (items, then container) as an independent, concurrency-limited
+ * unit.
  */
 const bulkDeleteExceptionListsByListIds = async ({
   listIds,
@@ -173,61 +223,19 @@ const bulkDeleteExceptionListsByListIds = async ({
     return { deleted: [], errors: notFoundErrors };
   }
 
-  const itemIdsByList = await Promise.all(
-    foundLists.map((list) =>
-      getExceptionListItemIds({ listId: list.list_id, namespaceType, savedObjectsClient })
-    )
-  );
-  // KNOWN LIMITATION: allItemIds is unbounded. A list can hold up to
-  // MAX_EXCEPTION_LIST_SIZE (10,000) items, and up to MAX_BULK_DELETE_EXCEPTION_LISTS
-  // (100) lists can be deleted per request, so this array (and the single
-  // bulkDeleteExceptionListItems call built from it) can reach up to ~1,000,000
-  // entries in the worst case. That risks a large transient memory footprint and
-  // a single savedObjectsClient.bulkDelete() request big enough to hit ES/Kibana
-  // payload limits before it hits a memory ceiling. Needs either chunking this
-  // array into safe-sized batches before deletion, or a total-item cap across the
-  // batch (mirroring the combined-object cap used by the bulk export endpoint).
-  // Tracked in the issue tracker; not yet fixed.
-  const allItemIds = itemIdsByList.flat();
-
-  // Item cascade and list-container deletion touch different saved object
-  // types and neither is gated on the other's outcome (no rollback either
-  // way, matching existing single-delete semantics), so they run concurrently
-  // instead of one after the other.
-  const [, { statuses }] = await Promise.all([
-    allItemIds.length > 0
-      ? bulkDeleteExceptionListItems({ ids: allItemIds, namespaceType, savedObjectsClient })
-      : Promise.resolve(),
-    savedObjectsClient.bulkDelete(
-      foundLists.map((list) => ({ id: list.id, type: savedObjectType }))
-    ),
-  ]);
-
-  const deleted: ExceptionListSchema[] = [];
-  const deleteErrors: BulkDeleteExceptionListError[] = [];
-
-  statuses.forEach((status, index) => {
-    const list = foundLists[index];
-    if (status.success) {
-      deleted.push(list);
-    } else {
-      deleteErrors.push({
-        error: {
-          message: status.error?.message ?? 'Unknown error',
-          status_code: status.error?.statusCode ?? 500,
-        },
-        id: list.id,
-        list_id: list.list_id,
-      });
-    }
+  const { deleted, errors } = await deleteListsWithItems({
+    foundLists,
+    namespaceType,
+    savedObjectType,
+    savedObjectsClient,
   });
 
-  return { deleted, errors: [...notFoundErrors, ...deleteErrors] };
+  return { deleted, errors: [...notFoundErrors, ...errors] };
 };
 
 /**
- * Bulk deletes exception list containers. Callers provide either ids or
- * list_ids, never both (enforced at the route level), so this simply
+ * Bulk deletes exception lists (and their items). Callers provide either ids
+ * or list_ids, never both (enforced at the route level), so this simply
  * dispatches to whichever path's full, independent implementation applies.
  */
 export const bulkDeleteExceptionList = async ({
