@@ -14,7 +14,6 @@ import {
   ConversationAccessControlMode,
   ConversationSourceType,
   createBadRequestError,
-  isRoundCompleteEvent,
   type ChatEvent,
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
@@ -198,7 +197,7 @@ describe('handleAgentExecution', () => {
       return lastValueFrom(events$.pipe(toArray()));
     };
 
-    it('stamps source type and user on the completed round and resolves the conversation by external id', async () => {
+    it('resolves the conversation by external id only and forwards the full source to the agent run', async () => {
       const { conversationClient, deps } = setup({
         roundCompleteEvent: {
           type: ChatEventType.roundComplete,
@@ -206,57 +205,12 @@ describe('handleAgentExecution', () => {
         },
       });
 
-      const events = await runExecution({ deps, executionSource: source });
+      await runExecution({ deps, executionSource: source });
 
-      const roundCompleteEvent = events.find(isRoundCompleteEvent);
-      expect(roundCompleteEvent?.data.round.source).toEqual({
-        type: ConversationSourceType.Slack,
-      });
-      expect(roundCompleteEvent?.data.round.input.source).toEqual({ user: sourceUser });
       expect(conversationClient.getBySource).toHaveBeenCalledWith({
         external_conversation_id: source.external_conversation_id,
       });
-      expect(conversationClient.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          rounds: [roundCompleteEvent?.data.round],
-        }),
-        expect.anything()
-      );
-    });
-
-    it('keeps the original attribution when the round already has a source', async () => {
-      const originalUser = { id: 'U999', name: 'John Roe', handle: 'john' };
-      const { deps } = setup({
-        roundCompleteEvent: {
-          type: ChatEventType.roundComplete,
-          data: {
-            round: createRound({
-              source: { type: ConversationSourceType.Slack },
-              input: { message: 'user message', source: { user: originalUser } },
-            }),
-          },
-        },
-      });
-
-      const events = await runExecution({ deps, executionSource: source });
-
-      const roundCompleteEvent = events.find(isRoundCompleteEvent);
-      expect(roundCompleteEvent?.data.round.input.source).toEqual({ user: originalUser });
-    });
-
-    it('leaves rounds untouched when the execution has no source', async () => {
-      const { deps } = setup({
-        roundCompleteEvent: {
-          type: ChatEventType.roundComplete,
-          data: { round: createRound({}) },
-        },
-      });
-
-      const events = await runExecution({ deps, executionSource: undefined });
-
-      const roundCompleteEvent = events.find(isRoundCompleteEvent);
-      expect(roundCompleteEvent?.data.round.source).toBeUndefined();
-      expect(roundCompleteEvent?.data.round.input.source).toBeUndefined();
+      expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ source }));
     });
   });
 });

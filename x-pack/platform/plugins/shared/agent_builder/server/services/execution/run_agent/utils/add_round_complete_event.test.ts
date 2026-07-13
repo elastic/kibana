@@ -33,6 +33,46 @@ describe('addRoundCompleteEvent', () => {
     } as unknown as AttachmentStateManager,
   });
 
+  it('stamps source type on the round and source user on the input for new rounds', async () => {
+    const source = {
+      type: ConversationSourceType.Slack,
+      external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      user: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+    };
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: {
+        message_id: 'message-1',
+        message_content: 'Done',
+      },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 0, errorCount: 0 } as never) as ConvertedEvents,
+        messageCompleteEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          pendingRound: undefined,
+          userInput: { message: '@agent summarize this' },
+          source,
+          startTime: new Date('2026-01-01T00:00:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+
+    expect(roundCompleteEvent?.data.round.source).toEqual({
+      type: ConversationSourceType.Slack,
+    });
+    expect(roundCompleteEvent?.data.round.input.source).toEqual({
+      user: { id: 'U123', name: 'Jane Doe', handle: 'jane' },
+    });
+  });
+
   it('preserves the original round source when resuming a pending round', async () => {
     const pendingRound = createRound({
       status: ConversationRoundStatus.awaitingPrompt,
@@ -59,6 +99,11 @@ describe('addRoundCompleteEvent', () => {
           ...createDeps(),
           pendingRound,
           userInput: { message: 'continue' },
+          source: {
+            type: ConversationSourceType.Slack,
+            external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+            user: { id: 'U999', name: 'John Roe', handle: 'john' },
+          },
           startTime: new Date('2026-01-01T00:00:00.000Z'),
         }),
         toArray()

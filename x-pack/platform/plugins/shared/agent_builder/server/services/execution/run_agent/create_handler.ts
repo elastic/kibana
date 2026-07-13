@@ -25,6 +25,7 @@ export const createAgentHandler = ({
       agentParams: {
         nextInput,
         conversation,
+        source,
         capabilities,
         browserApiTools,
         structuredOutput,
@@ -42,6 +43,7 @@ export const createAgentHandler = ({
       {
         nextInput,
         conversation,
+        source,
         capabilities,
         runId,
         abortSignal,
