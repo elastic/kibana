@@ -12,13 +12,12 @@ import { GRAPH_INTEGRATION_ENRICHMENT_ENABLED_SETTING } from '../common/constant
 
 export const cspUiSettings: Record<string, UiSettingsParams> = {
   [GRAPH_INTEGRATION_ENRICHMENT_ENABLED_SETTING]: {
-    name: i18n.translate(
-      'xpack.cloudSecurityPosture.uiSettings.graphIntegrationEnrichmentEnabledName',
-      { defaultMessage: 'Cloud Security graph integration enrichment' }
-    ),
+    name: i18n.translate('xpack.csp.uiSettings.graphIntegrationEnrichmentEnabledName', {
+      defaultMessage: 'Cloud Security graph integration enrichment',
+    }),
     value: true,
     description: i18n.translate(
-      'xpack.cloudSecurityPosture.uiSettings.graphIntegrationEnrichmentEnabledDescription',
+      'xpack.csp.uiSettings.graphIntegrationEnrichmentEnabledDescription',
       {
         defaultMessage:
           'When enabled, the Security graph enriches event nodes with integration-specific entity classification (actor sub-type, target identity, display names). Disable this setting if the graph returns errors after adding new integrations.',
