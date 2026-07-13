@@ -9,10 +9,17 @@
 
 import { uniq } from 'lodash';
 import type { CPSProject } from '../../../types';
+import { FilterOperator, filterExpressionCodec } from '../utils/codec';
+import { computeVisibleProjectIds } from './derivatives';
+
+export interface FilterEntry {
+  expression: string;
+  enabled: boolean;
+}
 
 export interface ProjectPickerStoredState {
   filteringDimensions: string[];
-  filterExpression: string[];
+  filterExpressions: Map<string, FilterEntry>;
   availableProjects: Map<CPSProject['_id'], CPSProject>;
   includedOverrides: string[];
   excludedOverrides: string[];
@@ -20,6 +27,7 @@ export interface ProjectPickerStoredState {
 
 export interface ProjectPickerState extends ProjectPickerStoredState {
   filteredProjectIds: string[];
+  visibleProjectIds: string[];
   selectedProjects: string[];
 }
 
@@ -58,18 +66,18 @@ export function createStoreReducers() {
     }),
     revertToSpaceDefaults: (state: ProjectPickerState) => ({
       ...state,
-      filterExpression: [],
+      filterExpressions: new Map(),
       includedOverrides: [],
       excludedOverrides: [],
     }),
     clearProjectFilters: (state: ProjectPickerState) => ({
       ...state,
-      filterExpression: [],
+      filterExpressions: new Map(),
       includedOverrides: [],
       excludedOverrides: [],
     }),
     includeAllVisibleProjects: (state: ProjectPickerState) => {
-      const visibleProjectIds = Array.from(state.availableProjects.keys());
+      const visibleProjectIds = computeVisibleProjectIds(state);
 
       return {
         ...state,
@@ -77,8 +85,11 @@ export function createStoreReducers() {
         excludedOverrides: removeOverrides(state.excludedOverrides, visibleProjectIds),
       };
     },
+    /**
+     * Excludes all visible projects.
+     */
     excludeAllVisibleProjects: (state: ProjectPickerState) => {
-      const visibleProjectIds = Array.from(state.availableProjects.keys());
+      const visibleProjectIds = computeVisibleProjectIds(state);
 
       return {
         ...state,
@@ -86,9 +97,95 @@ export function createStoreReducers() {
         includedOverrides: removeOverrides(state.includedOverrides, visibleProjectIds),
       };
     },
-    setFilterExpression: (state: ProjectPickerState, payload: { filterExpression: string }) => ({
-      ...state,
-      filterExpression: state.filterExpression.concat(payload.filterExpression),
-    }),
+    /**
+     * Adds a new filter expression.
+     */
+    addFilterExpression: (state: ProjectPickerState, payload: { expression: string }) => {
+      const id = window.crypto.randomUUID();
+      const filterExpressions = new Map(state.filterExpressions);
+      filterExpressions.set(id, { expression: payload.expression, enabled: true });
+
+      return {
+        ...state,
+        filterExpressions,
+      };
+    },
+    /**
+     * Updates the definition of an existing filter expression in-place.
+     */
+    updateFilterExpression: (
+      state: ProjectPickerState,
+      payload: { id: string; expression: string }
+    ) => {
+      const existing = state.filterExpressions.get(payload.id);
+      if (!existing) {
+        return state;
+      }
+
+      const filterExpressions = new Map(state.filterExpressions);
+      filterExpressions.set(payload.id, { ...existing, expression: payload.expression });
+
+      return {
+        ...state,
+        filterExpressions,
+      };
+    },
+    /**
+     * Removes the filter expression.
+     */
+    removeFilterExpression: (state: ProjectPickerState, payload: { id: string }) => {
+      const filterExpressions = new Map(state.filterExpressions);
+      filterExpressions.delete(payload.id);
+
+      return {
+        ...state,
+        filterExpressions,
+      };
+    },
+    /**
+     * Toggles the enabled state of the filter expression.
+     */
+    toggleFilterExpression: (state: ProjectPickerState, payload: { id: string }) => {
+      const filterExpressions = new Map(state.filterExpressions);
+      const existing = filterExpressions.get(payload.id);
+
+      if (!existing) {
+        return state;
+      }
+
+      filterExpressions.set(payload.id, { ...existing, enabled: !existing.enabled });
+
+      return {
+        ...state,
+        filterExpressions,
+      };
+    },
+    /**
+     * Inverts the operator of the filter expression.
+     */
+    invertFilterExpressionOperator: (state: ProjectPickerState, payload: { id: string }) => {
+      const filterExpressions = new Map(state.filterExpressions);
+      const existing = filterExpressions.get(payload.id);
+
+      if (!existing) {
+        return state;
+      }
+
+      const { operator, ...rest } = filterExpressionCodec.decode(existing.expression);
+
+      filterExpressions.set(payload.id, {
+        ...existing,
+        expression: filterExpressionCodec.encode({
+          ...rest,
+          operator:
+            operator === FilterOperator.EQUALS ? FilterOperator.NOT_EQUALS : FilterOperator.EQUALS,
+        })!,
+      });
+
+      return {
+        ...state,
+        filterExpressions,
+      };
+    },
   } as const;
 }

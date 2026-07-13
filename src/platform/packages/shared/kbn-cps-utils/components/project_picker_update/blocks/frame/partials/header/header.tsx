@@ -79,8 +79,8 @@ export function ProjectPickerFrameHeader() {
   // TODO: this definition of space defaults is not correct but suffices for now,
   // it should be based on the space defaults set in the space picker
   const isUsingSpaceDefaults = useMemo(
-    () => state.filterExpression.length === 0,
-    [state.filterExpression]
+    () => state.filterExpressions.size === 0,
+    [state.filterExpressions]
   );
 
   const closePopover = useCallback(() => setIsOpen(false), []);

@@ -8,10 +8,11 @@
  */
 
 import type { CPSProject } from '../../../types';
-import type { ProjectPickerState } from './reducers';
+import type { FilterEntry, ProjectPickerState } from './reducers';
 import {
   applyFilterExpressions,
   computeSelectedProjects,
+  computeVisibleProjectIds,
   projectPickerDerivatives,
 } from './derivatives';
 
@@ -23,15 +24,22 @@ const createProject = (overrides: Partial<CPSProject> & Pick<CPSProject, '_id'>)
   ...overrides,
 });
 
+const createFilterExpressions = (
+  entries: Array<[string, string, boolean?]>
+): Map<string, FilterEntry> =>
+  new Map(entries.map(([id, expression, enabled = true]) => [id, { expression, enabled }]));
+
 const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => {
   const availableProjects = overrides.availableProjects ?? new Map<string, CPSProject>();
 
   return {
-    filterExpression: [],
+    filterExpressions: new Map(),
+    filteringDimensions: [],
     availableProjects,
     includedOverrides: [],
     excludedOverrides: [],
     filteredProjectIds: [],
+    visibleProjectIds: [],
     selectedProjects: [],
     ...overrides,
   };
@@ -44,7 +52,7 @@ describe('applyFilterExpressions', () => {
       ['p2', createProject({ _id: 'p2', _type: 'observability' })],
     ]);
 
-    expect(applyFilterExpressions(availableProjects, [])).toEqual([]);
+    expect(applyFilterExpressions(availableProjects, new Map())).toEqual([]);
   });
 
   it('filters projects by tag name and value', () => {
@@ -53,7 +61,12 @@ describe('applyFilterExpressions', () => {
       ['p2', createProject({ _id: 'p2', _type: 'observability' })],
     ]);
 
-    expect(applyFilterExpressions(availableProjects, ['_type:security'])).toEqual(['p1']);
+    expect(
+      applyFilterExpressions(
+        availableProjects,
+        createFilterExpressions([['f1', 'is:_type:security']])
+      )
+    ).toEqual(['p1']);
   });
 
   it('excludes projects when the filter operator is negated', () => {
@@ -62,7 +75,26 @@ describe('applyFilterExpressions', () => {
       ['p2', createProject({ _id: 'p2', _type: 'observability' })],
     ]);
 
-    expect(applyFilterExpressions(availableProjects, ['-_type:security'])).toEqual(['p2']);
+    expect(
+      applyFilterExpressions(
+        availableProjects,
+        createFilterExpressions([['f1', 'not:_type:security']])
+      )
+    ).toEqual(['p2']);
+  });
+
+  it('skips disabled filter expressions', () => {
+    const availableProjects = new Map([
+      ['p1', createProject({ _id: 'p1', _type: 'security' })],
+      ['p2', createProject({ _id: 'p2', _type: 'observability' })],
+    ]);
+
+    expect(
+      applyFilterExpressions(
+        availableProjects,
+        createFilterExpressions([['f1', 'is:_type:security', false]])
+      )
+    ).toEqual(['p1', 'p2']);
   });
 });
 
@@ -132,6 +164,76 @@ describe('computeSelectedProjects', () => {
   });
 });
 
+describe('computeVisibleProjectIds', () => {
+  it('returns all available project ids when there are no active filters', () => {
+    const availableProjects = new Map([
+      ['p1', createProject({ _id: 'p1' })],
+      ['p2', createProject({ _id: 'p2' })],
+    ]);
+
+    expect(
+      computeVisibleProjectIds(
+        createState({
+          availableProjects,
+          filterExpressions: new Map(),
+          filteredProjectIds: [],
+        })
+      )
+    ).toEqual(['p1', 'p2']);
+  });
+
+  it('returns filtered project ids when active filters exist', () => {
+    const availableProjects = new Map([
+      ['p1', createProject({ _id: 'p1', _type: 'security' })],
+      ['p2', createProject({ _id: 'p2', _type: 'observability' })],
+    ]);
+
+    expect(
+      computeVisibleProjectIds(
+        createState({
+          availableProjects,
+          filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+          filteredProjectIds: ['p1'],
+        })
+      )
+    ).toEqual(['p1']);
+  });
+
+  it('returns an empty list when active filters match no projects', () => {
+    const availableProjects = new Map([
+      ['p1', createProject({ _id: 'p1', _type: 'security' })],
+      ['p2', createProject({ _id: 'p2', _type: 'observability' })],
+    ]);
+
+    expect(
+      computeVisibleProjectIds(
+        createState({
+          availableProjects,
+          filterExpressions: createFilterExpressions([['f1', 'is:_type:missing']]),
+          filteredProjectIds: [],
+        })
+      )
+    ).toEqual([]);
+  });
+
+  it('returns all available project ids when all filter expressions are disabled', () => {
+    const availableProjects = new Map([
+      ['p1', createProject({ _id: 'p1', _type: 'security' })],
+      ['p2', createProject({ _id: 'p2', _type: 'observability' })],
+    ]);
+
+    expect(
+      computeVisibleProjectIds(
+        createState({
+          availableProjects,
+          filterExpressions: createFilterExpressions([['f1', 'is:_type:security', false]]),
+          filteredProjectIds: ['p1', 'p2'],
+        })
+      )
+    ).toEqual(['p1', 'p2']);
+  });
+});
+
 describe('projectPickerDerivatives', () => {
   it('computes filteredProjectIds before selectedProjects', () => {
     const availableProjects = new Map([
@@ -141,7 +243,7 @@ describe('projectPickerDerivatives', () => {
 
     const state = createState({
       availableProjects,
-      filterExpression: ['_type:security'],
+      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
     });
 
     const afterFiltered = {
@@ -150,6 +252,25 @@ describe('projectPickerDerivatives', () => {
     };
 
     expect(afterFiltered.filteredProjectIds).toEqual(['p1']);
+    expect(projectPickerDerivatives[2].compute(afterFiltered)).toEqual(['p1']);
+  });
+
+  it('computes visibleProjectIds from active filters', () => {
+    const availableProjects = new Map([
+      ['p1', createProject({ _id: 'p1', _type: 'security' })],
+      ['p2', createProject({ _id: 'p2', _type: 'observability' })],
+    ]);
+
+    const state = createState({
+      availableProjects,
+      filterExpressions: createFilterExpressions([['f1', 'is:_type:security']]),
+    });
+
+    const afterFiltered = {
+      ...state,
+      filteredProjectIds: projectPickerDerivatives[0].compute(state),
+    };
+
     expect(projectPickerDerivatives[1].compute(afterFiltered)).toEqual(['p1']);
   });
 });

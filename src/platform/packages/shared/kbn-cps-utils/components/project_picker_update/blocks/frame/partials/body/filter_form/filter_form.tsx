@@ -28,7 +28,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useForm, useController, type Control, useWatch } from 'react-hook-form';
 import { useProjectPickerActions, useProjectPickerState } from '../../../../../state';
-import { filterExpressionCodec } from '../../../../../utils/codec';
+import {
+  filterExpressionCodec,
+  FilterOperator,
+  type FilterOperatorLiteral,
+} from '../../../../../utils/codec';
 import { filterFormStyles } from './filter_form.styles';
 
 interface ProjectPickerFilterFormProps {
@@ -38,14 +42,13 @@ interface ProjectPickerFilterFormProps {
    */
   defaultFilterExpression?: string | null;
   /**
+   * When set, saving updates the existing filter instead of creating a new one.
+   */
+  filterId?: string;
+  /**
    * Callback to be called when the filter form should be closed.
    */
   onCloseFilterFormRequested?: () => void;
-}
-
-enum FilterOperator {
-  EQUALS = 'is',
-  NOT_EQUALS = 'is not',
 }
 
 interface FilterSelectProps {
@@ -126,16 +129,31 @@ function FilterSelect({ options, control, name, disabled }: FilterSelectProps) {
   );
 }
 
-function toSelectableOptions(values: string[], selectedValue: string | undefined) {
+function toSelectableOptions(
+  values: string[],
+  selectedValue: string | undefined,
+  valueToLabelMapper?: (value: string) => string
+) {
   return values.map((value) => ({
-    label: value,
+    key: value,
+    label: valueToLabelMapper?.(value) ?? value,
     value,
-    checked: value === selectedValue ? 'on' : undefined,
+    checked: value === selectedValue ? ('on' as const) : undefined,
   }));
 }
 
+const operatorDisplayMap: Record<FilterOperatorLiteral, string> = {
+  [FilterOperator.EQUALS]: i18n.translate('projectPicker.filterBox.operator.equals', {
+    defaultMessage: 'is',
+  }),
+  [FilterOperator.NOT_EQUALS]: i18n.translate('projectPicker.filterBox.operator.notEquals', {
+    defaultMessage: 'is not',
+  }),
+};
+
 export function ProjectPickerFilterForm({
   defaultFilterExpression,
+  filterId,
   onCloseFilterFormRequested,
 }: ProjectPickerFilterFormProps) {
   const { euiTheme } = useEuiTheme();
@@ -149,7 +167,7 @@ export function ProjectPickerFilterForm({
 
   const form = useForm<{
     tagName: string;
-    operator: FilterOperator;
+    operator: FilterOperatorLiteral;
     tagValue: string;
   }>({
     progressive: true,
@@ -173,7 +191,10 @@ export function ProjectPickerFilterForm({
   );
 
   const filterOperators = useMemo(
-    () => toSelectableOptions(Object.values(FilterOperator), filteringOperator),
+    () =>
+      toSelectableOptions(Object.values(FilterOperator), filteringOperator, (operator) => {
+        return operatorDisplayMap[operator as FilterOperatorLiteral];
+      }),
     [filteringOperator]
   );
 
@@ -199,12 +220,17 @@ export function ProjectPickerFilterForm({
         // TODO: show error to user
         return;
       }
-      actions.setFilterExpression({ filterExpression });
+
+      if (filterId) {
+        actions.updateFilterExpression({ id: filterId, expression: filterExpression });
+      } else {
+        actions.addFilterExpression({ expression: filterExpression });
+      }
       onCloseFilterFormRequested?.();
     } catch (error) {
       // TODO: handle error
     }
-  }, [form, actions, onCloseFilterFormRequested]);
+  }, [form, actions, filterId, onCloseFilterFormRequested]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">

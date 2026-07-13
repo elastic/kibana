@@ -12,6 +12,17 @@ import type { UseEuiTheme } from '@elastic/eui';
 
 export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
   filterBoxWrapper: css({
+    position: 'sticky',
+    top: 0,
+    zIndex: euiTheme.levels.header,
     borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+    backgroundColor: euiTheme.components.headerBackground,
+  }),
+  bodyContainer: css({
+    maxHeight: '500px',
+    overflowY: 'auto',
+    overflowAnchor: 'none',
+    scrollbarGutter: 'auto',
+    scrollbarWidth: 'thin',
   }),
 });

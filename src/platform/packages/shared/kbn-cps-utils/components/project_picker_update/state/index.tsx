@@ -56,11 +56,13 @@ export const ProjectPickerProvider = ({
 
   const store = useCreateStore<ProjectPickerState, typeof projectPickerReducers>({
     initialState: {
-      filterExpression: [],
+      filterExpressions: new Map(),
+      filteringDimensions: [],
       availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
       includedOverrides: [],
       excludedOverrides: [],
       filteredProjectIds: [],
+      visibleProjectIds: [],
       selectedProjects: [],
     },
     reducers: projectPickerReducers,

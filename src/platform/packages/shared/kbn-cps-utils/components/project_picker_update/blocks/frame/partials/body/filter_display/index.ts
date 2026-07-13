@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProjectPickerFilterDisplay } from './filter_display';
+export { ProjectPickerFilterDisplay, type EditingFilter } from './filter_display';

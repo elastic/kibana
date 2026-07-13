@@ -11,7 +11,7 @@ import type { PropsWithChildren } from 'react';
 import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { ProjectPickerFilterForm } from './filter_form';
-import { ProjectPickerFilterDisplay } from './filter_display';
+import { ProjectPickerFilterDisplay, type EditingFilter } from './filter_display/filter_display';
 import { bodyStyles } from './body.styles';
 
 interface ProjectPickerFrameBodyProps {
@@ -29,26 +29,28 @@ export function ProjectPickerFrameBody({
   const { euiTheme } = useEuiTheme();
   const styles = bodyStyles({ euiTheme });
   const [filterViewMode, setFilterViewMode] = useState<FilterViewMode>(FilterViewMode.VIEW);
-  const [filterExpression, setFilterExpression] = useState<string | null>(null);
-  const handleEditFilterRequest = useCallback((filter: string) => {
+  const [editingFilter, setEditingFilter] = useState<EditingFilter | null>(null);
+
+  const handleEditFilterRequest = useCallback((filter: EditingFilter | null) => {
     setFilterViewMode(FilterViewMode.EDIT);
-    setFilterExpression(filter);
+    setEditingFilter(filter);
   }, []);
 
   const handleCloseFilterFormRequested = useCallback(() => {
     setFilterViewMode(FilterViewMode.VIEW);
-    setFilterExpression(null);
+    setEditingFilter(null);
   }, []);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none" css={styles.bodyContainer}>
       <EuiFlexItem css={styles.filterBoxWrapper}>
         {filterViewMode === FilterViewMode.VIEW ? (
           <ProjectPickerFilterDisplay onEditFilter={handleEditFilterRequest} />
         ) : null}
         {filterViewMode === FilterViewMode.EDIT ? (
           <ProjectPickerFilterForm
-            defaultFilterExpression={filterExpression}
+            filterId={editingFilter?.id}
+            defaultFilterExpression={editingFilter?.expression ?? null}
             onCloseFilterFormRequested={handleCloseFilterFormRequested}
           />
         ) : null}

@@ -9,9 +9,9 @@
 
 import { uniq } from 'lodash';
 import type { CPSProject } from '../../../types';
-import { filterExpressionCodec } from '../utils/codec';
+import { filterExpressionCodec, FilterOperator } from '../utils/codec';
 import type { StoreDerivative } from './store';
-import type { ProjectPickerState } from './reducers';
+import type { FilterEntry, ProjectPickerState } from './reducers';
 
 const getProjectFieldValue = (project: CPSProject, tagName: string): string | undefined => {
   const normalizedKey = tagName.startsWith('_') ? tagName : `_${tagName}`;
@@ -19,21 +19,25 @@ const getProjectFieldValue = (project: CPSProject, tagName: string): string | un
 };
 
 const isNegatedFilterOperator = (operator: string | undefined): boolean => {
-  return operator === '-' || operator === 'is not';
+  return operator === FilterOperator.NOT_EQUALS || operator === '-' || operator === 'is not';
 };
 
 export const applyFilterExpressions = (
   availableProjects: Map<CPSProject['_id'], CPSProject>,
-  filterExpression: string[]
+  filterExpressions: Map<string, FilterEntry>
 ): string[] => {
-  if (filterExpression.length === 0) {
+  if (filterExpressions.size === 0) {
     return [];
   }
 
   let matchingIds = Array.from(availableProjects.keys());
 
-  for (const expression of filterExpression) {
-    const { operator, tagName, tagValue } = filterExpressionCodec.decode(expression);
+  for (const entry of filterExpressions.values()) {
+    if (!entry.enabled) {
+      continue;
+    }
+
+    const { operator, tagName, tagValue } = filterExpressionCodec.decode(entry.expression);
 
     if (!tagName || !tagValue) {
       continue;
@@ -55,6 +59,26 @@ export const applyFilterExpressions = (
   return matchingIds;
 };
 
+export const hasActiveFilterExpressions = (
+  filterExpressions: Map<string, FilterEntry>
+): boolean => {
+  for (const entry of filterExpressions.values()) {
+    if (entry.enabled) {
+      return true;
+    }
+  }
+  return false;
+};
+
+export const computeVisibleProjectIds = (
+  state: Pick<ProjectPickerState, 'availableProjects' | 'filterExpressions' | 'filteredProjectIds'>
+): string[] => {
+  if (!hasActiveFilterExpressions(state.filterExpressions)) {
+    return Array.from(state.availableProjects.keys());
+  }
+  return state.filteredProjectIds;
+};
+
 export const computeSelectedProjects = (
   state: Pick<
     ProjectPickerState,
@@ -72,11 +96,19 @@ export const computeSelectedProjects = (
   ]);
 };
 
+/**
+ * Derivatives are computed values that are derived from the state of the project picker.
+ * Order is important here, when derivations depend on other derivations, they should be computed after the dependent derivations.
+ */
 export const projectPickerDerivatives = [
   {
     key: 'filteredProjectIds',
     compute: (state: ProjectPickerState) =>
-      applyFilterExpressions(state.availableProjects, state.filterExpression),
+      applyFilterExpressions(state.availableProjects, state.filterExpressions),
+  },
+  {
+    key: 'visibleProjectIds',
+    compute: (state: ProjectPickerState) => computeVisibleProjectIds(state),
   },
   {
     key: 'selectedProjects',

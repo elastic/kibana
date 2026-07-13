@@ -29,7 +29,7 @@ export default {
 export const ProjectPickerStory: StoryObj<ComponentProps<typeof ProjectPicker>> = {
   name: 'ProjectPicker',
   args: {
-    availableProjects: Array.from({ length: 10 }, () => ({
+    availableProjects: Array.from({ length: 100 }, () => ({
       _id: faker.string.uuid(),
       _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
       _alias: faker.company.name(),

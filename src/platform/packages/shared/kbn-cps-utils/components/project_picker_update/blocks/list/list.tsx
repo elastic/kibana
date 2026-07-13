@@ -57,6 +57,14 @@ export function ProjectPickerList() {
     return getProjectPickerListContextMenuConfig(actions);
   }, [actions]);
 
+  const visibleProjects = useMemo(
+    () =>
+      state.visibleProjectIds
+        .map((id) => state.availableProjects.get(id))
+        .filter((project): project is CPSProject => project != null),
+    [state.visibleProjectIds, state.availableProjects]
+  );
+
   const onContextMenu = useCallback<ProjectPickerListItemProps['onContextMenu']>(
     (project, evt) => {
       evt.preventDefault();
@@ -106,7 +114,7 @@ export function ProjectPickerList() {
         </EuiWrappingPopover>
       ) : null}
       <EuiFlexGroup direction="column" gutterSize="none">
-        {Array.from(state.availableProjects.values()).map((project) => (
+        {visibleProjects.map((project) => (
           <EuiFlexItem key={project._id} css={styles.listItemContainer}>
             <ProjectPickerListItem
               isSelected={state.selectedProjects.includes(project._id)}

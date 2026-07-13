@@ -21,27 +21,40 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { filterExpressionCodec } from '../../../../../utils/codec';
+import { FilterOperator } from '../../../../../utils/codec';
+import type { ProjectPickerState } from '../../../../../state/reducers';
 import { useProjectPickerState, useProjectPickerActions } from '../../../../../state';
 import { filterDisplayStyles } from './filter_display.styles';
 
+/**
+ * Describes a filter that is being edited in the filter form.
+ */
+export interface EditingFilter {
+  id: string;
+  expression: string;
+}
+
 interface GetFilterBadgeContextMenuItemsProps {
   closePopover: () => void;
-  onEditFilter: (filter: ReturnType<typeof filterExpressionCodec.encode>) => void;
+  onEditFilter: (filter: EditingFilter) => void;
   actions: ReturnType<typeof useProjectPickerActions>;
 }
 
-interface FilterBadgeClickActionContext {
-  filter: string;
+interface FilterBadgeClickActionContext extends EditingFilter {
+  projectPickerState: ProjectPickerState;
+}
+
+interface FilterBadgeContextMenuItemProps
+  extends Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'external' | 'disabled'> {
+  label: string;
+  isEnabled?: (props: FilterBadgeClickActionContext) => boolean;
 }
 
 const getFilterBadgeContextMenuItems = ({
   onEditFilter,
   actions,
   closePopover,
-}: GetFilterBadgeContextMenuItemsProps): Array<
-  Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'external' | 'disabled'> & { label: string }
-> => {
+}: GetFilterBadgeContextMenuItemsProps): Array<FilterBadgeContextMenuItemProps> => {
   return [
     {
       icon: 'pencil',
@@ -50,27 +63,67 @@ const getFilterBadgeContextMenuItems = ({
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
         e.preventDefault();
-        onEditFilter(this.filter);
+        onEditFilter({ id: this.id, expression: this.expression });
       },
     },
     {
       icon: 'filterExclude',
-      label: i18n.translate('projectPicker.filterDisplay.removeFilter', {
+      label: i18n.translate('projectPicker.filterDisplay.convertToExclusion', {
         defaultMessage: 'Convert to exclusion',
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
         e.preventDefault();
-        // TODO: Implement
+        actions.invertFilterExpressionOperator({ id: this.id });
+        closePopover();
+      },
+      isEnabled: ({ projectPickerState, id }) => {
+        return projectPickerState.filterExpressions
+          .get(id)!
+          .expression.includes(FilterOperator.EQUALS);
+      },
+    },
+    {
+      icon: 'filterInclude',
+      label: i18n.translate('projectPicker.filterDisplay.convertToInclusion', {
+        defaultMessage: 'Convert to inclusion',
+      }),
+      onClick(this: FilterBadgeClickActionContext, e) {
+        e.preventDefault();
+        actions.invertFilterExpressionOperator({ id: this.id });
+        closePopover();
+      },
+      isEnabled: ({ projectPickerState, id }) => {
+        return projectPickerState.filterExpressions
+          .get(id)!
+          .expression.includes(FilterOperator.NOT_EQUALS);
       },
     },
     {
       icon: 'eyeSlash',
-      label: i18n.translate('projectPicker.filterDisplay.removeFilter', {
+      label: i18n.translate('projectPicker.filterDisplay.disableFilter', {
         defaultMessage: 'Disable',
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
         e.preventDefault();
-        // TODO: Implement
+        actions.toggleFilterExpression({ id: this.id });
+        closePopover();
+      },
+      isEnabled: ({ projectPickerState, id }) => {
+        return projectPickerState.filterExpressions.get(id)!.enabled;
+      },
+    },
+    {
+      icon: 'eye',
+      label: i18n.translate('projectPicker.filterDisplay.enableFilter', {
+        defaultMessage: 'Enable',
+      }),
+      onClick(this: FilterBadgeClickActionContext, e) {
+        e.preventDefault();
+        actions.toggleFilterExpression({ id: this.id });
+        closePopover();
+      },
+      isEnabled: ({ projectPickerState, id }) => {
+        return projectPickerState.filterExpressions.get(id)!.enabled === false;
       },
     },
     {
@@ -80,7 +133,7 @@ const getFilterBadgeContextMenuItems = ({
       }),
       onClick(this: FilterBadgeClickActionContext, e) {
         e.preventDefault();
-        actions.removeFilterExpression({ filterExpression: this.filter });
+        actions.removeFilterExpression({ id: this.id });
         closePopover();
       },
     },
@@ -88,7 +141,7 @@ const getFilterBadgeContextMenuItems = ({
 };
 
 export interface ProjectPickerFilterDisplayProps {
-  onEditFilter: (filter: ReturnType<typeof filterExpressionCodec.encode>) => void;
+  onEditFilter: (filter: EditingFilter | null) => void;
 }
 
 export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilterDisplayProps) {
@@ -97,10 +150,28 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
   const { euiTheme } = useEuiTheme();
   const styles = filterDisplayStyles({ euiTheme });
   const selectedFilterBadgeRef = useRef<HTMLButtonElement | null>(null);
-  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [selectedFilterId, setSelectedFilterId] = useState<string | null>(null);
   const closePopover = useCallback(() => {
-    setSelectedFilter(null);
+    setSelectedFilterId(null);
   }, []);
+
+  const filterEntries = useMemo(
+    () => Array.from(state.filterExpressions.entries()),
+    [state.filterExpressions]
+  );
+
+  const selectedFilter = useMemo(() => {
+    if (!selectedFilterId) {
+      return null;
+    }
+
+    const entry = state.filterExpressions.get(selectedFilterId);
+    if (!entry) {
+      return null;
+    }
+
+    return { id: selectedFilterId, expression: entry.expression };
+  }, [selectedFilterId, state.filterExpressions]);
 
   const filterBadgeContextMenuItems = useMemo(() => {
     return getFilterBadgeContextMenuItems({ onEditFilter, actions, closePopover });
@@ -110,34 +181,46 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
     return selectedFilter ? (
       <EuiWrappingPopover
         button={selectedFilterBadgeRef.current!}
-        isOpen={selectedFilter !== null}
+        isOpen={selectedFilterId !== null}
         closePopover={closePopover}
         panelPaddingSize="none"
         aria-label={i18n.translate('projectPicker.filterDisplay.filterBadgeContextMenuAriaLabel', {
           defaultMessage: 'Filter actions for {filter}',
-          values: { filter: selectedFilter },
+          values: { filter: selectedFilter.expression },
         })}
       >
         <EuiContextMenuPanel
-          items={filterBadgeContextMenuItems.map((contextMenuItemConfig) => (
-            <EuiContextMenuItem
-              key={contextMenuItemConfig.label}
-              icon={contextMenuItemConfig.icon}
-              onClick={contextMenuItemConfig.onClick?.bind({
-                filter: selectedFilter,
-              })}
-            >
-              {contextMenuItemConfig.label}
-            </EuiContextMenuItem>
-          ))}
+          items={filterBadgeContextMenuItems
+            .map((contextMenuItemConfig) => {
+              const ctx = {
+                ...selectedFilter,
+                projectPickerState: state,
+              };
+
+              const isEnabled = contextMenuItemConfig.isEnabled?.(ctx) ?? true;
+
+              return isEnabled ? (
+                <EuiContextMenuItem
+                  key={contextMenuItemConfig.label}
+                  icon={contextMenuItemConfig.icon}
+                  onClick={contextMenuItemConfig.onClick?.bind({
+                    id: selectedFilter.id,
+                    expression: selectedFilter.expression,
+                  })}
+                >
+                  {contextMenuItemConfig.label}
+                </EuiContextMenuItem>
+              ) : null;
+            })
+            .filter(Boolean)}
         />
       </EuiWrappingPopover>
     ) : null;
-  }, [closePopover, filterBadgeContextMenuItems, selectedFilter]);
+  }, [closePopover, filterBadgeContextMenuItems, selectedFilter, selectedFilterId, state]);
 
   const handleFilterBadgeClick = useCallback(
-    (filter: string, evt: React.MouseEvent<HTMLButtonElement>) => {
-      setSelectedFilter(filter);
+    (filterId: string, evt: React.MouseEvent<HTMLButtonElement>) => {
+      setSelectedFilterId(filterId);
       selectedFilterBadgeRef.current = evt.currentTarget;
     },
     []
@@ -151,15 +234,18 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
     <>
       {renderFilterBadgeContextMenu()}
       <EuiFlexGroup direction="column" gutterSize="none" css={styles.container}>
-        {state.filterExpression.length > 0 ? (
+        {filterEntries.length > 0 ? (
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s">
-              {state.filterExpression.map((filter) => (
-                <EuiFlexItem key={filter} grow={false}>
+              {filterEntries.map(([id, entry]) => (
+                <EuiFlexItem key={id} grow={false}>
                   <EuiBadge
                     color="hollow"
-                    onClick={handleFilterBadgeClick.bind(null, filter)}
-                    style={{ width: 'fit-content' }}
+                    onClick={handleFilterBadgeClick.bind(null, id)}
+                    style={{
+                      width: 'fit-content',
+                      opacity: entry.enabled ? 1 : 0.5,
+                    }}
                     onClickAriaLabel={i18n.translate(
                       'projectPicker.filterDisplay.filterBadgeClickAriaLabel',
                       {
@@ -167,7 +253,7 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
                       }
                     )}
                   >
-                    {filter}
+                    {entry.expression}
                   </EuiBadge>
                 </EuiFlexItem>
               ))}
