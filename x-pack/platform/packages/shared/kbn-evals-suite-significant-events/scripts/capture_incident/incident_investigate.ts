@@ -8,6 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { z } from '@kbn/zod';
 import type { IncidentAgentClient } from './incident_agent_client';
+import type { IncidentMetadataClient } from './incident_metadata_client';
 
 const MAX_ATTEMPTS = 4;
 
@@ -25,8 +26,8 @@ const queryDslSchema = z
 const metadataSchema = z.object({
   title: z.string().min(1),
   publicTitle: z.string().optional(),
-  // Incident start date as YYYY-MM-DD. Models often return a full ISO datetime, so
-  // accept that and keep the date portion rather than rejecting real data.
+  // Incident start date as YYYY-MM-DD. `rootly.started_at` is a full ISO datetime
+  // (with offset), so accept that and keep the date portion.
   date: z
     .string()
     .min(1)
@@ -91,38 +92,6 @@ const metadataSchema = z.object({
 });
 
 export type IncidentMetadata = z.infer<typeof metadataSchema>;
-
-const METADATA_RULES = `You are gathering the FACTS about a production incident so a second agent (on the logs cluster) can locate its symptom in the real logs. Return facts only — do NOT build any query.
-
-Use your tools:
-- Read rootly_incidents by rootly.sequential_id: title/public_title, status, severity, the full timeline (created/started/detected/mitigated/resolved), the narratives (summary, mitigation_message, resolution_message), customer impact, products, environments, region, services (names) + causal-service, causes (root-cause categories), reporting-source, slack channel, and the external links (google_drive RCA, jira, pagerduty, slack).
-- Cross-reference pagerduty_incidents via rootly.pagerduty_incident_id: the PD title, service summary, and especially first_trigger_log_entry.summary (the alert text — often the exact error).
-
-Then produce:
-- errorSignatures: the LITERAL error strings / status codes / exception names / camelCase state identifiers that appear in the narratives and the PD alert, copied VERBATIM (e.g. "ImagePullBackOff", "circuit_breaking_exception", "502 Bad Gateway"). Do NOT paraphrase the summary; extract the real tokens. Omit high-cardinality ids (project/request/trace id). Do NOT include component / service / deployment / pod / container / provisioner NAMES (e.g. "topolvm-provisioner", "api-gateway") — those appear in many unrelated logs and are NOT error signatures.
-- datasetHints: candidate log data streams for the affected services (e.g. api-gateway -> "logs-api-gateway*", an Elasticsearch/Kibana cluster -> "cluster-*-filebeat*" or "logs-elasticsearch.*"). Best-effort; the logs cluster verifies them.
-- DATES ARE CRITICAL and must be COPIED VERBATIM from the document — never infer, approximate, or guess a year. Read rootly.started_at (fall back to rootly.created_at) and copy it EXACTLY into timeline.started (ISO-8601 UTC). Set "date" to the first 10 characters of that SAME timestamp (YYYY-MM-DD). Copy detected/mitigated/resolved verbatim from their rootly fields. If a timestamp field is absent, omit it — do NOT fabricate one. A wrong date makes the whole capture miss the logs.
-
-Respond with ONLY a single fenced JSON code block matching this shape (omit unknown optional fields):
-
-\`\`\`json
-{
-  "title": "string",
-  "date": "YYYY-MM-DD",
-  "severity": "SEV2",
-  "status": "resolved",
-  "timeline": { "started": "ISO", "detected": "ISO", "mitigated": "ISO", "resolved": "ISO" },
-  "cloud": "aws", "region": "ap-southeast-2",
-  "environments": ["production"], "productsImpacted": ["..."], "customerImpact": "...",
-  "services": ["..."], "causalService": "...", "causes": ["..."], "reportingSource": "...",
-  "summary": "...", "mitigationMessage": "...", "resolutionMessage": "...",
-  "pagerduty": { "title": "...", "serviceSummary": "...", "firstTriggerLogEntrySummary": "..." },
-  "errorSignatures": ["...", "..."],
-  "datasetHints": ["logs-...*"],
-  "slackChannel": "#incident-...",
-  "links": { "rcaUrl": "...", "slackChannel": "...", "jiraUrl": "...", "pagerdutyUrl": "..." }
-}
-\`\`\``;
 
 // ---------------------------------------------------------------------------
 // Step 2 — log-grounded derivation (LOGS cluster: verify against real logs)
@@ -317,102 +286,333 @@ async function converseForJson<T>({
 // Public API
 // ---------------------------------------------------------------------------
 
-/** Step 1: pull the rich incident metadata from the INCIDENT cluster's Agent Builder. */
+/**
+ * Reads a value at a dotted path, tolerating BOTH nested objects and flat dotted
+ * keys in `_source` (we don't know which the rootly ingestion used), e.g.
+ * `{ rootly: { title } }` and `{ 'rootly.title': … }` both resolve `rootly.title`.
+ */
+function getField(source: Record<string, unknown>, path: string): unknown {
+  if (path in source) {
+    return source[path];
+  }
+  const parts = path.split('.');
+  let current: unknown = source;
+  for (let index = 0; index < parts.length; index++) {
+    if (current === null || typeof current !== 'object' || Array.isArray(current)) {
+      return undefined;
+    }
+    const record = current as Record<string, unknown>;
+    const remaining = parts.slice(index).join('.');
+    if (remaining in record) {
+      return record[remaining];
+    }
+    current = record[parts[index]];
+  }
+  return current;
+}
+
+/** First non-empty string across the given candidate paths (unwrapping single-value arrays). */
+function firstString(source: Record<string, unknown>, ...paths: string[]): string | undefined {
+  for (const path of paths) {
+    const value = getField(source, path);
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return value.trim();
+    }
+    if (Array.isArray(value)) {
+      const hit = value.find((entry) => typeof entry === 'string' && entry.trim().length > 0);
+      if (typeof hit === 'string') {
+        return hit.trim();
+      }
+    }
+  }
+  return undefined;
+}
+
+/** Collects `name`s from a value that may be a string, an array of strings, or an array of `{ name }`. */
+function collectNames(value: unknown): string[] {
+  const items = Array.isArray(value) ? value : value == null ? [] : [value];
+  const names = items
+    .map((item) => {
+      if (typeof item === 'string') {
+        return item.trim();
+      }
+      if (item && typeof item === 'object') {
+        const name = (item as Record<string, unknown>).name;
+        return typeof name === 'string' ? name.trim() : undefined;
+      }
+      return undefined;
+    })
+    .filter((name): name is string => Boolean(name));
+  return [...new Set(names)];
+}
+
+/** First non-empty name list across the given candidate paths. */
+function namesFrom(source: Record<string, unknown>, ...paths: string[]): string[] {
+  for (const path of paths) {
+    const names = collectNames(getField(source, path));
+    if (names.length > 0) {
+      return names;
+    }
+  }
+  return [];
+}
+
+// Cloud tokens used to split a `<cloud>.<region>` value (e.g. `aws.ap-southeast-2`)
+// into a bare region (what step 2 keys the remote on) + a cloud label.
+const CLOUD_TOKENS = new Set(['aws', 'gcp', 'azure', 'ibm']);
+
+/**
+ * Extracts the human values from a Rootly CUSTOM FORM FIELD. These are stored as
+ * an array of objects that carry the value under `value`, or nested under one of
+ * the `selected_*` arrays (`selected_options`, `selected_services`, …), e.g.
+ * `rootly.region[].selected_options[].value = "aws.ap-southeast-2"` or
+ * `rootly.causal-service[].selected_services[].name = "Docker Registry"`. Returns
+ * every distinct value/name found, in document order.
+ */
+function formFieldValues(node: unknown): string[] {
+  const items = Array.isArray(node) ? node : node == null ? [] : [node];
+  const out: string[] = [];
+  const push = (value: unknown): void => {
+    if (typeof value === 'string' && value.trim().length > 0) {
+      out.push(value.trim());
+    }
+  };
+  const selectedKeys = [
+    'selected_options',
+    'selected_services',
+    'selected_functionalities',
+    'selected_groups',
+    'selected_catalog_entities',
+    'selected_users',
+  ];
+  for (const item of items) {
+    if (typeof item === 'string') {
+      push(item);
+      continue;
+    }
+    if (!item || typeof item !== 'object') {
+      continue;
+    }
+    const record = item as Record<string, unknown>;
+    push(record.value);
+    push(record.name);
+    for (const key of selectedKeys) {
+      const sub = record[key];
+      if (Array.isArray(sub)) {
+        for (const entry of sub) {
+          if (entry && typeof entry === 'object') {
+            push((entry as Record<string, unknown>).value);
+            push((entry as Record<string, unknown>).name);
+          }
+        }
+      }
+    }
+  }
+  return [...new Set(out)];
+}
+
+/** First value of the Rootly custom form field at `path`. */
+function formFieldFirst(source: Record<string, unknown>, path: string): string | undefined {
+  return formFieldValues(getField(source, path))[0];
+}
+
+/** Fetches the incident document from `rootly_incidents` (or its staging index) by sequential id. */
+async function fetchRootlyIncident({
+  client,
+  incidentId,
+}: {
+  client: IncidentMetadataClient;
+  incidentId: string;
+}): Promise<Record<string, unknown>> {
+  const sequentialId = Number(incidentId);
+  const idValue = Number.isInteger(sequentialId) ? sequentialId : incidentId;
+  const sources = await client.search('rootly_incidents,rootly_incidents-staging-001', {
+    size: 1,
+    query: { term: { 'rootly.sequential_id': idValue } },
+  });
+  const rootly = sources[0];
+  if (!rootly) {
+    throw new Error(
+      `Incident ${incidentId} not found in rootly_incidents (searched by rootly.sequential_id). ` +
+        `Verify the id and that INCIDENT_KIBANA_API_KEY can read that index on the incident cluster.`
+    );
+  }
+  return rootly;
+}
+
+/**
+ * Best-effort cross-reference into `pagerduty_incidents` via the rootly incident's
+ * `pagerduty_incident_id`. The PD alert text is often the exact error, but it is
+ * enrichment only — any failure or miss just drops the `pagerduty` block.
+ */
+async function fetchPagerdutyIncident({
+  client,
+  rootly,
+  log,
+}: {
+  client: IncidentMetadataClient;
+  rootly: Record<string, unknown>;
+  log: ToolingLog;
+}): Promise<Record<string, unknown> | undefined> {
+  // The reliable join is the numeric `pagerduty.incident_number` (== rootly's
+  // `pagerduty_incident_number`). The string `pagerduty.id` is analyzed text, so a
+  // `term` misses it — use `match` for that fallback. `should` tries both.
+  const incidentNumber = getField(rootly, 'rootly.pagerduty_incident_number');
+  const pdId = firstString(rootly, 'rootly.pagerduty_incident_id');
+  const should: Array<Record<string, unknown>> = [];
+  if (typeof incidentNumber === 'number') {
+    should.push({ term: { 'pagerduty.incident_number': incidentNumber } });
+  }
+  if (pdId) {
+    should.push({ match: { 'pagerduty.id': pdId } });
+  }
+  if (should.length === 0) {
+    return undefined;
+  }
+
+  try {
+    const sources = await client.search('pagerduty_incidents', {
+      size: 1,
+      query: { bool: { should, minimum_should_match: 1 } },
+    });
+    if (sources[0]) {
+      return sources[0];
+    }
+    log.debug(`No pagerduty_incidents document matched incident_number=${String(incidentNumber)}.`);
+  } catch (error) {
+    log.warning(
+      `Could not read pagerduty_incidents (${
+        error instanceof Error ? error.message : String(error)
+      }); continuing without PagerDuty enrichment.`
+    );
+  }
+  return undefined;
+}
+
+/**
+ * Step 1: read the incident FACTS directly from the INCIDENT cluster's
+ * Elasticsearch (`rootly_incidents` + `pagerduty_incidents`) — no Agent Builder.
+ * Every field the old converse path returned is a raw document field, so reading
+ * them is deterministic and cheaper. The date (which anchors the whole capture
+ * window) comes straight from the incident's `started_at`/`created_at`, which is
+ * exactly what the old path had to override the LLM for. `errorSignatures` /
+ * `datasetHints` are intentionally left empty: the logs-cluster agent (step 2)
+ * extracts + VERIFIES error tokens from the raw narratives against the real logs.
+ */
 export async function investigateIncidentMetadata({
-  agentClient,
+  client,
   incidentId,
   log,
 }: {
-  agentClient: IncidentAgentClient;
+  client: IncidentMetadataClient;
   incidentId: string;
   log: ToolingLog;
 }): Promise<IncidentMetadata> {
-  const metadata = await converseForJson({
-    agentClient,
-    schema: metadataSchema,
-    systemRules: METADATA_RULES,
-    firstInput: `Gather the metadata for incident ${incidentId}.`,
-    label: `Investigating incident ${incidentId} metadata (incident cluster)`,
-    log,
-  });
+  const rootly = await fetchRootlyIncident({ client, incidentId });
+  const pagerduty = await fetchPagerdutyIncident({ client, rootly, log });
 
-  // The date/timeline anchor the whole capture window, but the LLM is unreliable
-  // here — it tends to copy a nested service `created_at` instead of the incident's
-  // own start time. Read the real timestamps deterministically and override.
-  await overrideIncidentDates({ agentClient, incidentId, metadata, log });
+  const started = firstString(rootly, 'rootly.started_at', 'rootly.created_at');
+
+  // Region is a custom form field, e.g. `aws.ap-southeast-2`. Split the leading
+  // cloud token off so `region` is the bare `ap-southeast-2` that step 2 keys the
+  // remote on (`serverless-logging-<region>`), and surface the cloud separately.
+  const regionRaw = formFieldFirst(rootly, 'rootly.region');
+  let region = regionRaw;
+  let cloud: string | undefined;
+  if (regionRaw && regionRaw.includes('.')) {
+    const [head, ...rest] = regionRaw.split('.');
+    if (CLOUD_TOKENS.has(head.toLowerCase())) {
+      cloud = head.toLowerCase();
+      region = rest.join('.');
+    }
+  }
+  // Fall back to the CSP name (`rootly.environments[].name` = "AWS") for cloud.
+  if (!cloud) {
+    const csp = namesFrom(rootly, 'rootly.environments.name', 'rootly.environments')[0];
+    if (csp && CLOUD_TOKENS.has(csp.toLowerCase())) {
+      cloud = csp.toLowerCase();
+    }
+  }
+
+  const raw: Record<string, unknown> = {
+    title: firstString(rootly, 'rootly.title', 'rootly.public_title') ?? `incident-${incidentId}`,
+    publicTitle: firstString(rootly, 'rootly.public_title'),
+    // Deterministic date from the real incident timestamp (the schema trims it to
+    // YYYY-MM-DD). A wrong year here makes the symptom match 0 logs.
+    date: started ?? firstString(rootly, 'rootly.date') ?? '',
+    // Severity is a nested relationship document: rootly.severity.data.attributes.name.
+    severity: firstString(
+      rootly,
+      'rootly.severity.data.attributes.name',
+      'rootly.severity.data.attributes.severity'
+    ),
+    status: firstString(rootly, 'rootly.status'),
+    timeline: {
+      started,
+      detected: firstString(rootly, 'rootly.detected_at'),
+      mitigated: firstString(rootly, 'rootly.mitigated_at', 'rootly.acknowledged_at'),
+      resolved: firstString(rootly, 'rootly.resolved_at'),
+    },
+    cloud,
+    region,
+    // Real environment ("Production") is the `environment` custom field; the
+    // `environments[]` relationship is the CSP (AWS), used for `cloud` above.
+    environments: formFieldValues(getField(rootly, 'rootly.environment')),
+    productsImpacted: formFieldValues(getField(rootly, 'rootly.product-s-impacted')),
+    customerImpact: formFieldFirst(rootly, 'rootly.customer-impact'),
+    // No top-level services relationship; the causal service ("Docker Registry")
+    // is the strongest WHERE-to-look signal.
+    services: formFieldValues(getField(rootly, 'rootly.causal-service')),
+    causalService: formFieldFirst(rootly, 'rootly.causal-service'),
+    causes: namesFrom(rootly, 'rootly.causes.name', 'rootly.causes'),
+    reportingSource:
+      formFieldFirst(rootly, 'rootly.reporting-source') ?? firstString(rootly, 'rootly.source'),
+    summary: firstString(rootly, 'rootly.summary'),
+    mitigationMessage: firstString(rootly, 'rootly.mitigation_message'),
+    resolutionMessage: firstString(rootly, 'rootly.resolution_message'),
+    slackChannel: firstString(rootly, 'rootly.slack_channel_name'),
+    links: {
+      rcaUrl: firstString(rootly, 'rootly.google_drive_url'),
+      slackChannel: firstString(
+        rootly,
+        'rootly.slack_channel_url',
+        'rootly.slack_channel_short_url'
+      ),
+      jiraUrl: firstString(rootly, 'rootly.jira_issue_url'),
+      pagerdutyUrl: firstString(rootly, 'rootly.pagerduty_incident_url'),
+    },
+    ...(pagerduty
+      ? {
+          pagerduty: {
+            title: firstString(pagerduty, 'pagerduty.description', 'pagerduty.summary'),
+            serviceSummary: firstString(pagerduty, 'pagerduty.service.summary'),
+            firstTriggerLogEntrySummary: firstString(
+              pagerduty,
+              'pagerduty.first_trigger_log_entry.summary'
+            ),
+          },
+        }
+      : {}),
+  };
+
+  const result = metadataSchema.safeParse(raw);
+  if (!result.success) {
+    const issues = result.error.issues
+      .map((issue) => `  - ${issue.path.join('.') || '(root)'}: ${issue.message}`)
+      .join('\n');
+    throw new Error(
+      `Could not assemble usable metadata for incident ${incidentId} from rootly_incidents ` +
+        `(missing title or a valid start date?):\n${issues}`
+    );
+  }
+  const metadata = result.data;
 
   log.info(
     `Incident metadata: "${metadata.title}" (${metadata.date}), region=${
       metadata.region ?? 'n/a'
-    }, services=[${metadata.services.join(', ')}], ${
-      metadata.errorSignatures.length
-    } error signature(s).`
+    }, services=[${metadata.services.join(', ')}]${pagerduty ? ', +pagerduty' : ''}.`
   );
   return metadata;
-}
-
-/**
- * Overwrites `metadata.date` / `metadata.timeline` with the incident's REAL
- * timestamps read straight from `rootly_incidents` via ES|QL. Best-effort: on any
- * failure it leaves the LLM-provided values in place (with a warning).
- */
-async function overrideIncidentDates({
-  agentClient,
-  incidentId,
-  metadata,
-  log,
-}: {
-  agentClient: IncidentAgentClient;
-  incidentId: string;
-  metadata: IncidentMetadata;
-  log: ToolingLog;
-}): Promise<void> {
-  const sequentialId = Number(incidentId);
-  if (!Number.isInteger(sequentialId)) {
-    return;
-  }
-  try {
-    const { columns, values } = await agentClient.queryEsql(
-      `FROM rootly_incidents,rootly_incidents-staging-001 ` +
-        `| WHERE rootly.sequential_id == ${sequentialId} ` +
-        `| KEEP rootly.started_at, rootly.created_at, rootly.detected_at, rootly.mitigated_at, rootly.resolved_at ` +
-        `| LIMIT 1`
-    );
-    const row = values[0];
-    if (!row) {
-      log.warning(`Could not read real timestamps for incident ${incidentId}; keeping LLM dates.`);
-      return;
-    }
-    const at = (field: string): string | undefined => {
-      const idx = columns.findIndex((column) => column.name === field);
-      const value = idx >= 0 ? row[idx] : undefined;
-      return typeof value === 'string' && value.length > 0 ? value : undefined;
-    };
-    const started = at('rootly.started_at') ?? at('rootly.created_at');
-    if (!started) {
-      log.warning(`No started_at/created_at for incident ${incidentId}; keeping LLM dates.`);
-      return;
-    }
-    const previousDate = metadata.date;
-    metadata.date = started.slice(0, 10);
-    metadata.timeline = {
-      started,
-      detected: at('rootly.detected_at'),
-      mitigated: at('rootly.mitigated_at'),
-      resolved: at('rootly.resolved_at'),
-    };
-    if (previousDate !== metadata.date) {
-      log.info(
-        `Corrected incident date ${previousDate} → ${metadata.date} (from rootly_incidents).`
-      );
-    }
-  } catch (error) {
-    log.warning(
-      `Failed to read real timestamps for incident ${incidentId} (${
-        error instanceof Error ? error.message : String(error)
-      }); keeping LLM dates.`
-    );
-  }
 }
 
 /** Step 2: derive + verify the symptom / remote / entity on the LOGS cluster's Agent Builder. */

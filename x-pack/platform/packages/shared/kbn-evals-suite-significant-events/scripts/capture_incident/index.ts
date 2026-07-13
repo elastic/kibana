@@ -10,7 +10,12 @@ import { run } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { captureIncidentSnapshot } from './incident_snapshot';
 import { writeIncidentConfigFromId } from './incident_autoconfig';
-import { AGENT_KIBANA_URL, LOCAL_ES_URL, LOGS_KIBANA_URL, OVERVIEW_ES_URL } from './constants';
+import {
+  INCIDENT_KIBANA_URL,
+  LOCAL_ES_URL,
+  OVERVIEW_KIBANA_URL,
+  OVERVIEW_ES_URL,
+} from './constants';
 
 /** Builds an ES client from a URL, using credentials embedded in the URL. */
 const createEsClientFromUrl = (esUrl: string): Client => {
@@ -23,26 +28,29 @@ const createEsClientFromUrl = (esUrl: string): Client => {
 };
 
 /**
- * Investigates an incident id via the platform-logging Agent Builder, confirms it
- * against the Overview source cluster, and writes the derived `<id>.incident.yml`.
- * Returns the path so the capture reads the config back from that file. Cluster
- * endpoints are fixed constants; only the API keys come from the environment.
+ * Reads the incident metadata directly from the platform-logging (INCIDENT)
+ * cluster's `rootly_incidents` / `pagerduty_incidents`, derives + verifies the
+ * symptom on the logs cluster, confirms it against the Overview source cluster,
+ * and writes the derived `<id>.incident.yml`. Returns the path so the capture
+ * reads the config back from that file. Cluster endpoints are fixed constants;
+ * only the API keys come from the environment.
  */
 const deriveConfigForIncident = async (incidentId: string, log: ToolingLog): Promise<string> => {
-  const agentApiKey = process.env.AGENT_KIBANA_API_KEY;
-  const logsApiKey = process.env.LOGS_KIBANA_API_KEY;
+  const incidentApiKey = process.env.INCIDENT_KIBANA_API_KEY;
+  const overviewKibanaApiKey = process.env.OVERVIEW_KIBANA_API_KEY;
   const overviewApiKey = process.env.OVERVIEW_ES_API_KEY || process.env.OVERVIEW_API_KEY;
 
-  if (!agentApiKey) {
+  if (!incidentApiKey) {
     throw new Error(
-      `Missing AGENT_KIBANA_API_KEY. Set it in secrets.env to a Kibana API key with the ` +
-        `agentBuilder:read privilege on the INCIDENT cluster (see the README).`
+      `Missing INCIDENT_KIBANA_API_KEY. Set it in secrets.env to a Kibana API key on the INCIDENT ` +
+        `cluster with Elasticsearch read on rootly_incidents / pagerduty_incidents (+ Console ` +
+        `access). Agent Builder privileges are no longer required (see the README).`
     );
   }
-  if (!logsApiKey) {
+  if (!overviewKibanaApiKey) {
     throw new Error(
-      `Missing LOGS_KIBANA_API_KEY. Set it in secrets.env to a Kibana API key with the ` +
-        `agentBuilder:read privilege on the LOGS cluster (see the README).`
+      `Missing OVERVIEW_KIBANA_API_KEY. Set it in secrets.env to a Kibana API key with the ` +
+        `agentBuilder:read privilege on the OVERVIEW cluster (see the README).`
     );
   }
 
@@ -50,10 +58,10 @@ const deriveConfigForIncident = async (incidentId: string, log: ToolingLog): Pro
     log,
     signal: new AbortController().signal,
     incidentId,
-    agentKibanaUrl: AGENT_KIBANA_URL,
-    agentApiKey,
-    logsKibanaUrl: LOGS_KIBANA_URL,
-    logsApiKey,
+    incidentKibanaUrl: INCIDENT_KIBANA_URL,
+    incidentApiKey,
+    overviewKibanaUrl: OVERVIEW_KIBANA_URL,
+    overviewKibanaApiKey,
     overviewEsUrl: OVERVIEW_ES_URL,
     overviewApiKey,
   });
@@ -107,20 +115,22 @@ run(
         Manual (hand-written config):
           node scripts/capture_incident_snapshot.js --config <path> [--dry-run]
 
-      --incident-id       Investigate this incident via Agent Builder, write
+      --incident-id       Look up this incident (rootly/pagerduty read on the incident
+                          cluster + symptom derivation on the logs cluster), write
                           <id>.incident.yml, and capture from it
       --config            Path to a hand-written incident config file (.yml/.yaml/.json)
 
       --dry-run           Validate config + prerequisites and print the reindex/snapshot
                           request bodies without mutating anything
 
-      Cluster endpoints are fixed in constants.ts (local ES, the two Agent Builder
-      clusters, and the Overview source). Only the API keys come from env variables
-      (set them in secrets.env):
-        AGENT_KIBANA_API_KEY
-          INCIDENT cluster Agent Builder key (rootly metadata; needs agentBuilder:read).
-        LOGS_KIBANA_API_KEY
-          LOGS cluster Agent Builder key (log-grounded symptom; needs agentBuilder:read).
+      Cluster endpoints are fixed in constants.ts (local ES, the incident +
+      overview clusters, and the Overview source). Only the API keys come from env
+      variables (set them in secrets.env):
+        INCIDENT_KIBANA_API_KEY
+          INCIDENT cluster Kibana key (rootly metadata read directly, no agent);
+          needs ES read on rootly_incidents / pagerduty_incidents + Console access.
+        OVERVIEW_KIBANA_API_KEY
+          OVERVIEW cluster Agent Builder key (log-grounded symptom; needs agentBuilder:read).
         OVERVIEW_ES_API_KEY
           Overview source cluster key for the probe. Falls back to OVERVIEW_API_KEY.
         OVERVIEW_API_KEY

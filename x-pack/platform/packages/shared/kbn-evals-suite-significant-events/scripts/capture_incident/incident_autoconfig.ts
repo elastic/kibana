@@ -17,6 +17,7 @@ import {
   type QueryDsl,
 } from './incident_config';
 import { IncidentAgentClient } from './incident_agent_client';
+import { IncidentMetadataClient } from './incident_metadata_client';
 import { investigateIncidentMetadata, deriveSymptomFromLogs } from './incident_investigate';
 import { createOverviewClient, probeOverview } from './incident_probe';
 import { INCIDENT_AUTO_GCS_FOLDER } from './constants';
@@ -217,13 +218,13 @@ export interface AutoConfigOptions {
   log: ToolingLog;
   signal?: AbortSignal;
   incidentId: string;
-  /** INCIDENT cluster Agent Builder (rootly metadata). */
-  agentKibanaUrl: string;
-  agentApiKey: string;
-  /** LOGS cluster Agent Builder (log-grounded symptom derivation). */
-  logsKibanaUrl: string;
-  logsApiKey: string;
-  /** Overview/logs source cluster ES: reindex `source.host` + probe target. */
+  /** INCIDENT cluster Kibana (rootly/pagerduty metadata, read directly). */
+  incidentKibanaUrl: string;
+  incidentApiKey: string;
+  /** OVERVIEW cluster Kibana Agent Builder (log-grounded symptom derivation). */
+  overviewKibanaUrl: string;
+  overviewKibanaApiKey: string;
+  /** Overview source cluster ES: reindex `source.host` + probe target. */
   overviewEsUrl: string;
   overviewApiKey?: string;
 }
@@ -233,7 +234,8 @@ export interface AutoConfigOptions {
  * `<id>.incident.yml`, returning that path. The capture then reads the config
  * back from disk, so the written file is the single source of truth for the run.
  *
- *  1. Investigate the incident via the platform-logging Agent Builder.
+ *  1. Read the incident metadata directly from the platform-logging (INCIDENT)
+ *     cluster's rootly_incidents / pagerduty_incidents.
  *  2. Confirm the entity + compute expected counts against the Overview source.
  *  3. Assemble + validate an `IncidentConfig`, then write it to disk.
  */
@@ -242,33 +244,35 @@ export async function writeIncidentConfigFromId(options: AutoConfigOptions): Pro
     log,
     signal,
     incidentId,
-    agentKibanaUrl,
-    agentApiKey,
-    logsKibanaUrl,
-    logsApiKey,
+    incidentKibanaUrl,
+    incidentApiKey,
+    overviewKibanaUrl,
+    overviewKibanaApiKey,
     overviewEsUrl,
     overviewApiKey,
   } = options;
 
-  // 1a. Gather rich incident metadata from the INCIDENT cluster's Agent Builder.
-  const incidentAgent = new IncidentAgentClient({
-    kibanaUrl: agentKibanaUrl,
-    apiKey: agentApiKey,
+  // 1a. Read the incident FACTS directly from the INCIDENT cluster's Elasticsearch
+  //     (rootly_incidents + pagerduty_incidents) via Kibana's Console proxy — no
+  //     Agent Builder. Every field is a raw document field, so this is deterministic.
+  const incidentMetadataClient = new IncidentMetadataClient({
+    kibanaUrl: incidentKibanaUrl,
+    apiKey: incidentApiKey,
     log,
     signal,
   });
   const metadata = await investigateIncidentMetadata({
-    agentClient: incidentAgent,
+    client: incidentMetadataClient,
     incidentId,
     log,
   });
 
-  // 1b. Derive + verify the symptom/remote/entity on the LOGS cluster's Agent
+  // 1b. Derive + verify the symptom/remote/entity on the OVERVIEW cluster's Agent
   //     Builder, grounded in the real logs (execute_esql). This is what fixes the
   //     cross-cluster mismatch — the derivation is done where the data lives.
   const logsAgent = new IncidentAgentClient({
-    kibanaUrl: logsKibanaUrl,
-    apiKey: logsApiKey,
+    kibanaUrl: overviewKibanaUrl,
+    apiKey: overviewKibanaApiKey,
     log,
     signal,
   });

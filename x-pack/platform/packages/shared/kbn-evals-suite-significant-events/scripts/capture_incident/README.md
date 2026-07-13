@@ -15,13 +15,14 @@ One incident == one snapshot. Run the command once per incident.
 
 ## Two ways to run
 
-- **Auto (`--incident-id`)** — give just an incident id. The script asks the
-  platform-logging cluster's **Agent Builder** to investigate the incident (look
-  it up in `rootly_incidents`, cross-reference PagerDuty, surface the Slack/Drive
-  links) and return the portable derivation: the time window, a symptom
-  `query_string`, the affected entity, and the region. It then **confirms** that
-  entity against the Overview source cluster and computes the expected doc counts,
-  **writes `<id>.incident.yml`**, and runs the capture by reading that file back.
+- **Auto (`--incident-id`)** — give just an incident id. The script reads the
+  incident's facts **directly** from the platform-logging cluster's
+  `rootly_incidents` (cross-referencing `pagerduty_incidents`) — no agent, just a
+  `_search` — then asks the **logs** cluster's **Agent Builder** to derive the
+  portable symptom against the real logs: the time window, the symptom query, the
+  affected entity, and the region. It then **confirms** that entity against the
+  Overview source cluster and computes the expected doc counts, **writes
+  `<id>.incident.yml`**, and runs the capture by reading that file back.
 - **Manual (`--config`)** — hand-write (or edit an auto-generated) config file and
   pass it via `--config`. See [`example.incident.yml`](./example.incident.yml).
 
@@ -74,43 +75,50 @@ overridden by env vars or flags. Only the API keys come from the environment (co
 `source` it). There are no auto-mode flags — each Agent Builder cluster picks its
 own default connector.
 
-Auto mode uses TWO Agent Builder clusters: the **incident** cluster
-(`rootly_incidents`) supplies the incident metadata, and the **logs** (Overview)
-cluster derives + verifies the symptom against the real logs.
+Auto mode involves two clusters. The **incident** cluster (`rootly_incidents` /
+`pagerduty_incidents`) supplies the incident metadata — read **directly** via a
+`_search` through Kibana's Console proxy, no Agent Builder. Only the **overview**
+cluster uses Agent Builder, to derive + verify the symptom against the real logs.
 
-| Env var                | Purpose                                                                        |
-| ---------------------- | ------------------------------------------------------------------------------ |
-| `AGENT_KIBANA_API_KEY` | INCIDENT cluster Agent Builder key (`agentBuilder:read`) — rootly metadata     |
-| `LOGS_KIBANA_API_KEY`  | LOGS cluster Agent Builder key (`agentBuilder:read`) — log-grounded symptom    |
-| `OVERVIEW_ES_API_KEY`  | Overview/logs ES probe key (falls back to `OVERVIEW_API_KEY`)                  |
-| `OVERVIEW_API_KEY`     | Source key for the remote reindex (`cluster:["monitor"]` + `read` on `logs-*`) |
+| Env var                   | Purpose                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| `INCIDENT_KIBANA_API_KEY` | INCIDENT cluster Kibana key — ES `read` on rootly/pagerduty + Console access    |
+| `OVERVIEW_KIBANA_API_KEY` | OVERVIEW cluster Agent Builder key (`agentBuilder:read`) — log-grounded symptom |
+| `OVERVIEW_ES_API_KEY`     | Overview ES probe key (falls back to `OVERVIEW_API_KEY`)                        |
+| `OVERVIEW_API_KEY`        | Source key for the remote reindex (`cluster:["monitor"]` + `read` on `logs-*`)  |
 
-To point at different clusters, edit the `AGENT_KIBANA_URL`, `LOGS_KIBANA_URL`,
+To point at different clusters, edit the `INCIDENT_KIBANA_URL`, `OVERVIEW_KIBANA_URL`,
 `OVERVIEW_ES_URL`, and `LOCAL_ES_URL` constants in [`constants.ts`](./constants.ts).
 
 Auto-mode prerequisites (in addition to the manual-mode ones below):
 
-- Both the incident cluster and the logs (Overview) cluster have **Agent Builder
-  enabled** with the `elastic-ai-agent` agent + an inference connector, on an
-  Enterprise/trial license.
+- The logs (Overview) cluster has **Agent Builder enabled** with the
+  `elastic-ai-agent` agent + an inference connector, on an Enterprise/trial
+  license. (The incident cluster no longer needs Agent Builder — its metadata is
+  read directly from `rootly_incidents` / `pagerduty_incidents`.)
+- The incident cluster key can read `rootly_incidents` / `pagerduty_incidents` and
+  reach Kibana's Console proxy (Dev Tools).
 - The Overview `source.host` is in the local ES `reindex.remote.whitelist`.
 
 ### Creating the API keys
 
 There are three API-key variables to fill in, across two deployments:
 
-- `AGENT_KIBANA_API_KEY` — the **incident** cluster (its own deployment).
-- `LOGS_KIBANA_API_KEY`, `OVERVIEW_ES_API_KEY`, `OVERVIEW_API_KEY` — the **logs /
-  Overview** cluster. Its Kibana (`overview.elastic-cloud.com`) is the Agent Builder
-  endpoint and its Elasticsearch (`...found.io`) is the reindex source + probe —
-  **the same deployment**.
+- `INCIDENT_KIBANA_API_KEY` — the **incident** cluster (its own deployment). This
+  key only reads `rootly_incidents` / `pagerduty_incidents` through Kibana's Console
+  proxy, so it just needs Elasticsearch `read` on those indices + Console (Dev
+  Tools) access — **no Agent Builder** (see the incident-cluster key below).
+- `OVERVIEW_KIBANA_API_KEY`, `OVERVIEW_ES_API_KEY`, `OVERVIEW_API_KEY` — the
+  **overview** cluster. Its Kibana (`overview.elastic-cloud.com`) is the Agent
+  Builder endpoint and its Elasticsearch (`...found.io`) is the reindex source +
+  probe — **the same deployment**.
 
 Even on that one deployment you need **two different privilege types**, so you
 cannot reuse a plain Elasticsearch key for everything:
 
 | Use                                                                    | Called on     | Privilege needed                                 |
 | ---------------------------------------------------------------------- | ------------- | ------------------------------------------------ |
-| Agent Builder `converse` (`LOGS_KIBANA_API_KEY`)                       | Kibana        | **Agent Builder: Read** Kibana feature privilege |
+| Agent Builder `converse` (`OVERVIEW_KIBANA_API_KEY`)                   | Kibana        | **Agent Builder: Read** Kibana feature privilege |
 | Probe + remote `_reindex` (`OVERVIEW_ES_API_KEY` / `OVERVIEW_API_KEY`) | Elasticsearch | `cluster: ["monitor"]` + `read` on `logs-*`      |
 
 A plain ES API key (like the `OVERVIEW_*` key you may already have) has NO Kibana
@@ -118,13 +126,55 @@ feature privilege, so it 401s on `converse`. You have two options:
 
 Option 1 — recommended (keep your ES key, add one Kibana key). Keep the existing
 `OVERVIEW_ES_API_KEY` / `OVERVIEW_API_KEY` (the ES key), and create a separate
-Kibana key for `LOGS_KIBANA_API_KEY`.
+Kibana key for `OVERVIEW_KIBANA_API_KEY`.
 
-Option 2 — one combined key for all three logs-cluster vars. Create a single key
-through Kibana's API that carries BOTH privilege types (only a Kibana-created key
-can), then set all three logs-cluster vars to it.
+Option 2 — one combined key for all three overview-cluster vars. Create a single
+key through Kibana's API that carries BOTH privilege types (only a Kibana-created
+key can), then set all three overview-cluster vars to it.
 
-#### Create a Kibana Agent-Builder key (incident cluster, and logs cluster for Option 1)
+#### Create the incident-cluster key (`INCIDENT_KIBANA_API_KEY`)
+
+This key no longer talks to Agent Builder. Step 1 does exactly two reads through
+Kibana's Console proxy (`POST /api/console/proxy`):
+
+- `rootly_incidents,rootly_incidents-staging-001/_search` — the incident doc by
+  `rootly.sequential_id` (title, dates, severity, status, summary/resolution,
+  region/services/causes custom fields, slack channel, links, PagerDuty ids).
+- `pagerduty_incidents/_search` — cross-referenced by `pagerduty.incident_number`
+  (== the incident's `rootly.pagerduty_incident_number`), for the PD description +
+  first-trigger text.
+
+So the key needs Elasticsearch `read` + `view_index_metadata` on
+`rootly_incidents*` / `pagerduty_incidents*`, plus **Console (Dev Tools)** access
+in Kibana so the proxy accepts it. Create it in the incident cluster's Kibana
+**Dev Tools** (the `kbn:` prefix + internal route `/internal/security/api_key`,
+NOT `/api/...`):
+
+```
+POST kbn:/internal/security/api_key
+{
+  "name": "incident-metadata-reader",
+  "expiration": "30d",
+  "kibana_role_descriptors": {
+    "incident-metadata-reader": {
+      "elasticsearch": {
+        "indices": [
+          { "names": ["rootly_incidents*", "pagerduty_incidents*"], "privileges": ["read", "view_index_metadata"] }
+        ]
+      },
+      "kibana": [ { "feature": { "dev_tools": ["all"] }, "spaces": ["*"] } ]
+    }
+  }
+}
+```
+
+Copy the `encoded` value and set it as `INCIDENT_KIBANA_API_KEY`. The `dev_tools`
+feature grants Console-proxy access at least privilege; a broader `base: ["all"]`
+key (e.g. one you already have) also works. Note this key needs **no** Agent
+Builder / connector / `cluster:monitor` privileges — that's the win of dropping
+the incident-cluster agent.
+
+#### Create a Kibana Agent-Builder key (overview cluster, for Option 1)
 
 `converse` needs more than the `agentBuilder` privilege:
 
@@ -140,24 +190,23 @@ can), then set all three logs-cluster vars to it.
   with `action [indices:admin/mappings/get] is unauthorized`).
 
 Feature-scoping every dependency is fiddly, so for a short-lived eval key just
-grant Kibana `base: ["all"]` + ES `monitor` and `read`. The **same recipe works on
-both clusters** — run it once per cluster.
+grant Kibana `base: ["all"]` + ES `monitor` and `read` on the **overview** cluster.
 
-UI: on that cluster's Kibana, **Stack Management → API keys → Create API key** →
+UI: on the overview cluster's Kibana, **Stack Management → API keys → Create API key** →
 enable **Control security privileges** → grant Kibana **All** and ES cluster
 `monitor` + `read` on indices. Copy the **Base64 / `encoded`** value.
 
-Or in that cluster's Kibana **Dev Tools** — the `kbn:` prefix calls Kibana's own
+Or in the overview cluster's Kibana **Dev Tools** — the `kbn:` prefix calls Kibana's own
 APIs (and sends the internal-origin header). Note this is an INTERNAL route
 (`/internal/security/api_key`), NOT `/api/...` (that path 404s):
 
 ```
 POST kbn:/internal/security/api_key
 {
-  "name": "incident-agent-reader",
+  "name": "logs-agent-reader",
   "expiration": "30d",
   "kibana_role_descriptors": {
-    "incident-agent-reader": {
+    "logs-agent-reader": {
       "elasticsearch": {
         "cluster": ["monitor"],
         "indices": [ { "names": ["*"], "privileges": ["read", "view_index_metadata"] } ]
@@ -168,12 +217,11 @@ POST kbn:/internal/security/api_key
 }
 ```
 
-Set the incident cluster's key as `AGENT_KIBANA_API_KEY`, and (Option 1) the logs
-cluster's key as `LOGS_KIBANA_API_KEY`.
+Set this overview cluster's key as `OVERVIEW_KIBANA_API_KEY` (Option 1).
 
-#### Create one combined key for the logs cluster (Option 2)
+#### Create one combined key for the overview cluster (Option 2)
 
-Run against the **logs / Overview** cluster's Kibana; the same key gets Kibana
+Run against the **overview** cluster's Kibana; the same key gets Kibana
 `base: ["all"]` (Agent Builder converse needs Agent Builder write + _Actions and
 Connectors_ execute — see the note above) plus ES `monitor` + `read` on ALL
 indices (local and, via `remote_indices`, the CCS remotes the reindex federates to
@@ -198,11 +246,11 @@ POST kbn:/internal/security/api_key
 }
 ```
 
-Copy the `encoded` value and set all three logs-cluster vars to it:
+Copy the `encoded` value and set all three overview-cluster vars to it:
 
 ```bash
 # in scripts/capture_incident/secrets.env
-export LOGS_KIBANA_API_KEY="<the encoded value>"
+export OVERVIEW_KIBANA_API_KEY="<the encoded value>"
 export OVERVIEW_ES_API_KEY="<the encoded value>"
 export OVERVIEW_API_KEY="<the encoded value>"
 ```
@@ -436,18 +484,19 @@ against the restored indices.
 
 ## Files
 
-| File                                                     | Purpose                                                           |
-| -------------------------------------------------------- | ----------------------------------------------------------------- |
-| [`constants.ts`](./constants.ts)                         | GCS bucket / ES repo name, env var names, Agent Builder constants |
-| [`incident_config.ts`](./incident_config.ts)             | Config schema (zod), JSON/YAML loader, query + YAML builders      |
-| [`incident_agent_client.ts`](./incident_agent_client.ts) | Thin client for `POST /api/agent_builder/converse`                |
-| [`incident_investigate.ts`](./incident_investigate.ts)   | Agent prompt + parse/validate of the derived capture spec         |
-| [`incident_probe.ts`](./incident_probe.ts)               | Overview source probe (confirm entity + count) via Query DSL aggs |
-| [`incident_autoconfig.ts`](./incident_autoconfig.ts)     | `--incident-id` orchestrator (investigate → probe → build config) |
-| [`incident_gcs.ts`](./incident_gcs.ts)                   | GCS repo registration, snapshot-with-metadata, manifest upload    |
-| [`incident_snapshot.ts`](./incident_snapshot.ts)         | Orchestration (prereq → reindex → verify → snapshot → manifest)   |
-| [`index.ts`](./index.ts)                                 | CLI entry (flags + ES client) for the command                     |
-| [`example.incident.yml`](./example.incident.yml)         | Copy-paste config template                                        |
+| File                                                           | Purpose                                                                      |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [`constants.ts`](./constants.ts)                               | GCS bucket / ES repo name, env var names, Agent Builder constants            |
+| [`incident_config.ts`](./incident_config.ts)                   | Config schema (zod), JSON/YAML loader, query + YAML builders                 |
+| [`incident_agent_client.ts`](./incident_agent_client.ts)       | Thin client for `POST /api/agent_builder/converse` (logs cluster)            |
+| [`incident_metadata_client.ts`](./incident_metadata_client.ts) | Thin `_search` client for reading rootly/pagerduty (incident cluster)        |
+| [`incident_investigate.ts`](./incident_investigate.ts)         | Step 1 direct rootly/pagerduty read + step 2 log-grounded symptom derivation |
+| [`incident_probe.ts`](./incident_probe.ts)                     | Overview source probe (confirm entity + count) via Query DSL aggs            |
+| [`incident_autoconfig.ts`](./incident_autoconfig.ts)           | `--incident-id` orchestrator (investigate → probe → build config)            |
+| [`incident_gcs.ts`](./incident_gcs.ts)                         | GCS repo registration, snapshot-with-metadata, manifest upload               |
+| [`incident_snapshot.ts`](./incident_snapshot.ts)               | Orchestration (prereq → reindex → verify → snapshot → manifest)              |
+| [`index.ts`](./index.ts)                                       | CLI entry (flags + ES client) for the command                                |
+| [`example.incident.yml`](./example.incident.yml)               | Copy-paste config template                                                   |
 
 The command runs through the root launcher
 [`scripts/capture_incident_snapshot.js`](../../../../../../../scripts/capture_incident_snapshot.js),

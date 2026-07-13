@@ -7,7 +7,6 @@
 
 import { Agent } from 'undici';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { AGENT_BUILDER_API_VERSION, DEFAULT_AGENT_ID } from './constants';
 
 // A full agent round (rootly lookup, PagerDuty, ES|QL probes, …) can take several
 // minutes. The synchronous `/converse` endpoint holds the response until the round
@@ -29,7 +28,6 @@ interface ConverseStep {
 
 /** The distilled result of one conversation turn. */
 export interface AgentTurn {
-  conversationId: string;
   message: string;
   steps: ConverseStep[];
 }
@@ -47,8 +45,7 @@ type ChatStreamData = Record<string, unknown>;
  * streaming `POST /api/agent_builder/converse/async` endpoint (Server-Sent Events)
  * and reduces the stream to the final assistant message plus the steps the agent
  * took. Streaming is required because a full round can outlast the sync endpoint's
- * proxy/await-headers timeout. Multi-turn conversations are supported by threading
- * the `conversationId` from one turn back into the next.
+ * proxy/await-headers timeout.
  *
  * Auth is a Kibana API key (needs `agentBuilder:read`) sent as `Authorization:
  * ApiKey <key>`. The public versioned route also requires `kbn-xsrf` and the
@@ -61,21 +58,18 @@ export class IncidentAgentClient {
   private readonly agentId: string;
   private readonly log: ToolingLog;
   private readonly signal?: AbortSignal;
-  private readonly explicitConnectorId?: string;
   private connectorIdPromise?: Promise<string | undefined>;
 
   constructor({
     kibanaUrl,
     apiKey,
-    agentId = DEFAULT_AGENT_ID,
-    connectorId,
+    agentId = 'elastic-ai-agent',
     log,
     signal,
   }: {
     kibanaUrl: string;
     apiKey: string;
     agentId?: string;
-    connectorId?: string;
     log: ToolingLog;
     signal?: AbortSignal;
   }) {
@@ -83,126 +77,74 @@ export class IncidentAgentClient {
     this.baseUrl = kibanaUrl.replace(/\/+$/, '');
     this.apiKey = apiKey;
     this.agentId = agentId;
-    this.explicitConnectorId = connectorId;
     this.log = log;
     this.signal = signal;
   }
 
   /**
-   * Resolves the inference connector to route the model to. An agent's own default
-   * connector can go stale (a preconfigured `.inference` endpoint gets rotated /
-   * removed on shared clusters), which surfaces as `No connector or inference
-   * endpoint found for ID …`. Pinning a LIVE connector per request via
-   * `connector_id` self-heals against that. Model choice matters: weaker models
-   * mis-format the strict JSON contract and the metadata degrades to placeholders,
-   * so prefer a strong instruction-follower (Claude Sonnet → Claude Opus → any
-   * Claude → GPT-5 → any chat_completion → any inference), cached after the first
-   * lookup. Returns `undefined` to fall back to the agent default when the
-   * connector list can't be read.
+   * Resolves (and memoizes) the inference connector to route the model to. An
+   * agent's own default connector can go stale (a preconfigured `.inference`
+   * endpoint gets rotated / removed on shared clusters), which surfaces as `No
+   * connector or inference endpoint found for ID …`. Pinning a LIVE connector per
+   * request via `connector_id` self-heals against that. Model choice matters:
+   * weaker models mis-format the strict JSON contract and the metadata degrades to
+   * placeholders, so prefer a strong instruction-follower (Claude Sonnet → Claude
+   * Opus → any Claude → GPT-5 → any chat_completion → any inference), cached after
+   * the first lookup. Returns `undefined` to fall back to the agent default when
+   * the connector list can't be read.
    */
-  private async resolveConnectorId(): Promise<string | undefined> {
-    if (this.explicitConnectorId) {
-      return this.explicitConnectorId;
-    }
-    if (!this.connectorIdPromise) {
-      this.connectorIdPromise = this.pickConnector();
-    }
+  private resolveConnectorId(): Promise<string | undefined> {
+    this.connectorIdPromise ??= (async (): Promise<string | undefined> => {
+      const url = `${this.baseUrl}/api/actions/connectors`;
+      let connectors: Array<{ id: string; connector_type_id?: string; name?: string }> = [];
+      try {
+        const response = await fetch(url, {
+          headers: { Authorization: `ApiKey ${this.apiKey}`, 'kbn-xsrf': 'true' },
+          signal: this.signal,
+        } as RequestInit);
+        if (!response.ok) {
+          return undefined;
+        }
+        connectors = (await response.json()) as typeof connectors;
+      } catch {
+        return undefined;
+      }
+
+      const inference = connectors.filter((c) => c.connector_type_id === '.inference');
+      // Prefer a full chat-completion Claude endpoint first (higher output budget than
+      // the named EIS endpoints, which truncated the large metadata JSON), then any
+      // Claude, then GPT-5, then any chat-completion endpoint.
+      const preferences = [
+        /claude.*chat_completion/i,
+        /opus/i,
+        /sonnet/i,
+        /claude/i,
+        /gpt-5/i,
+        /chat_completion/i,
+      ];
+      for (const pattern of preferences) {
+        const hit = inference.find((c) => pattern.test(c.id) || pattern.test(c.name ?? ''));
+        if (hit) {
+          this.log.debug(`Routing Agent Builder to inference connector "${hit.id}".`);
+          return hit.id;
+        }
+      }
+      const fallback = inference[0]?.id;
+      if (fallback) {
+        this.log.debug(`Routing Agent Builder to inference connector "${fallback}" (fallback).`);
+      }
+      return fallback;
+    })();
     return this.connectorIdPromise;
   }
 
-  private async pickConnector(): Promise<string | undefined> {
-    const url = `${this.baseUrl}/api/actions/connectors`;
-    let connectors: Array<{ id: string; connector_type_id?: string; name?: string }> = [];
-    try {
-      const response = await fetch(url, {
-        headers: { Authorization: `ApiKey ${this.apiKey}`, 'kbn-xsrf': 'true' },
-        signal: this.signal,
-      } as RequestInit);
-      if (!response.ok) {
-        return undefined;
-      }
-      connectors = (await response.json()) as typeof connectors;
-    } catch {
-      return undefined;
-    }
-
-    const inference = connectors.filter((c) => c.connector_type_id === '.inference');
-    // Prefer a full chat-completion Claude endpoint first (higher output budget than
-    // the named EIS endpoints, which truncated the large metadata JSON), then any
-    // Claude, then GPT-5, then any chat-completion endpoint.
-    const preferences = [
-      /claude.*chat_completion/i,
-      /opus/i,
-      /sonnet/i,
-      /claude/i,
-      /gpt-5/i,
-      /chat_completion/i,
-    ];
-    for (const pattern of preferences) {
-      const hit = inference.find((c) => pattern.test(c.id) || pattern.test(c.name ?? ''));
-      if (hit) {
-        this.log.debug(`Routing Agent Builder to inference connector "${hit.id}".`);
-        return hit.id;
-      }
-    }
-    const fallback = inference[0]?.id;
-    if (fallback) {
-      this.log.debug(`Routing Agent Builder to inference connector "${fallback}" (fallback).`);
-    }
-    return fallback;
-  }
-
-  /**
-   * Runs an ES|QL query on this cluster via Kibana's Console proxy, authenticated
-   * with the key's own ES privileges. Used to read structured facts (e.g. incident
-   * timestamps) deterministically instead of trusting the LLM to transcribe them.
-   */
-  async queryEsql(
-    query: string
-  ): Promise<{ columns: Array<{ name: string; type: string }>; values: unknown[][] }> {
-    const url = `${this.baseUrl}/api/console/proxy?path=${encodeURIComponent(
-      '_query'
-    )}&method=POST`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `ApiKey ${this.apiKey}`,
-        'kbn-xsrf': 'true',
-        'x-elastic-internal-origin': 'kibana',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query }),
-      signal: this.signal,
-    } as RequestInit);
-    if (!response.ok) {
-      const text = await response.text().catch(() => '');
-      throw new Error(`ES|QL query failed (${response.status}) at ${url}: ${text || '<no body>'}`);
-    }
-    return (await response.json()) as {
-      columns: Array<{ name: string; type: string }>;
-      values: unknown[][];
-    };
-  }
-
-  /**
-   * Sends one user message and consumes the streamed agent round. Pass
-   * `conversationId` (from a previous turn) to continue the same conversation.
-   */
-  async converse({
-    input,
-    conversationId,
-  }: {
-    input: string;
-    conversationId?: string;
-  }): Promise<AgentTurn> {
+  /** Sends one user message and consumes the streamed agent round. */
+  async converse({ input }: { input: string }): Promise<AgentTurn> {
     const url = `${this.baseUrl}/api/agent_builder/converse/async`;
     const body: Record<string, unknown> = {
       input,
       agent_id: this.agentId,
     };
-    if (conversationId) {
-      body.conversation_id = conversationId;
-    }
     const connectorId = await this.resolveConnectorId();
     if (connectorId) {
       body.connector_id = connectorId;
@@ -213,7 +155,7 @@ export class IncidentAgentClient {
       headers: {
         Authorization: `ApiKey ${this.apiKey}`,
         'kbn-xsrf': 'true',
-        'elastic-api-version': AGENT_BUILDER_API_VERSION,
+        'elastic-api-version': '2023-10-31',
         'Content-Type': 'application/json',
         Accept: 'text/event-stream',
       },
@@ -244,10 +186,9 @@ export class IncidentAgentClient {
     const reader = body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
-    let conversationId = '';
     let message = '';
     let chunks = '';
-    const steps: ConverseStep[] = [];
+    let steps: ConverseStep[] = [];
     let pausedForPrompt = false;
     let streamError: string | undefined;
 
@@ -264,13 +205,6 @@ export class IncidentAgentClient {
             JSON.stringify(data);
           break;
         }
-        case 'conversation_id_set':
-        case 'conversation_created':
-        case 'conversation_updated':
-          if (typeof data.conversation_id === 'string') {
-            conversationId = data.conversation_id;
-          }
-          break;
         case 'tool_call':
           steps.push({ type: 'tool_call', tool_id: data.tool_id as string | undefined });
           break;
@@ -296,10 +230,18 @@ export class IncidentAgentClient {
           if (!message && typeof round?.response?.message === 'string') {
             message = round.response.message;
           }
+          // round_complete carries the authoritative step list (which already
+          // includes tool calls), so replace the incrementally collected steps to
+          // avoid counting tool calls twice. Keep the incremental steps as a
+          // fallback when this frame carries none.
+          const roundSteps: ConverseStep[] = [];
           for (const step of round?.steps ?? []) {
             if (step?.type) {
-              steps.push({ type: step.type, tool_id: step.tool_id });
+              roundSteps.push({ type: step.type, tool_id: step.tool_id });
             }
+          }
+          if (roundSteps.length > 0) {
+            steps = roundSteps;
           }
           break;
         }
@@ -380,6 +322,6 @@ export class IncidentAgentClient {
       );
     }
 
-    return { conversationId, message, steps };
+    return { message, steps };
   }
 }
