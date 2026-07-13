@@ -278,10 +278,6 @@ Wrap **everything after the summary** in a single `<details>` block so the issue
 
 {content — see guidance below}
 
-#### Backporting strategy
-
-{content — only when a fix is proposed; see guidance below}
-
 #### Additional context
 
 {content — optional, omit the whole section if there is nothing high-signal to add}
@@ -323,14 +319,6 @@ Explain _why_ it failed in a few tight sentences or bullets, each anchored to a 
 - Use an ASCII timeline **only** for a genuine race condition, cascade, or multi-component state leak — never for a linear explanation.
 - Fold supporting evidence (missing `data-test-subj`, a failing request, screenshot state) into the narrative rather than listing it separately.
 - When evidence points to a specific PR as the likely source of the flakiness, name it here with an inline link and its merge date in a readable format (e.g. [#262449](https://github.com/elastic/kibana/pull/262449), merged August 12, 2025). Follow **Attribution** — only when strongly implicated, never as a fallback for weak evidence.
-
-#### Backporting strategy (only when a fix is proposed)
-
-Include this section **only** when you propose a fix; omit it otherwise. Keep it dead simple — just where the fix lands and which open branches to backport it to.
-
-- Lead with one line — "Open the fix on `<branch>` (usually `main`) and backport to:" — then one bullet per target branch.
-- List a branch only when the failing test / patched code exists there (check the open branches in `versions.json`) so the fix actually applies. **Never guess** — skip any branch you can't confirm.
-- If `main` is already fixed (the failure is release-branch-only), say so instead, and list the release branch(es) that still need it along with the PR that should be backported to them.
 
 #### Additional context (optional)
 
