@@ -53,9 +53,8 @@ export const getWorkflowChangeHistoryRowDisplay = (
     return {
       kind: 'current',
       version,
-      ...(version == null
-        ? { badgeLabel: CURRENT_VERSION_ONLY_BADGE, badgeColor: 'hollow' as const }
-        : {}),
+      badgeLabel: CURRENT_VERSION_ONLY_BADGE,
+      badgeColor: 'hollow',
     };
   }
 
