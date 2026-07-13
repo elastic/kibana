@@ -20,8 +20,8 @@ const toInputDetections = (discoveries: Array<Partial<Discovery>>): Array<Partia
     }));
 
 /**
- * Canonical cascade discovery — the lean ground truth shared by the investigator (expected output)
- * and the judge (input). Evidences carry the `esql_query` to re-run but are deliberately NOT
+ * Canonical cascade discovery — the lean ground truth shared by the discovery (expected output)
+ * and the judge (input) agents. Evidences carry the `esql_query` to re-run but are deliberately NOT
  * pre-stamped `confirmed` — the judge must re-verify each query via execute_esql and stamp
  * `confirmed: true` itself before promoting (Critical Rule 5). Every field here is seeded by one of
  * the cascade `detections`, so the canonical input and this expected answer stay self-consistent.
@@ -211,7 +211,7 @@ const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
   ],
 };
 
-export const discoveryInvestigator: DatasetConfig['discoveryInvestigator'] = [
+export const discovery: DatasetConfig['discovery'] = [
   {
     input: {
       scenario_id: 'ledger-db-disconnect',
@@ -244,13 +244,18 @@ export const discoveryInvestigator: DatasetConfig['discoveryInvestigator'] = [
           score: 3,
         },
         {
-          id: 'cascade-grouping',
-          text: 'Collapses the SQL connection failure, HikariCP pool init, cache-layer errors (transaction history + balance reader), the frontend→transactionhistory read timeout, and the ledgerwriter balance-retrieval failure into a single cascading discovery rather than separate unrelated incidents.',
+          id: 'cascade-transactionhistory-cluster',
+          text: 'Groups the SQL connection failure, HikariCP pool init, transaction history cache errors, and the frontend→transactionhistory read timeout into a single discovery (transactionhistory service cluster).',
+          score: 1,
+        },
+        {
+          id: 'cascade-full-grouping',
+          text: 'Further collapses balancereader cache errors and ledgerwriter balance-retrieval failure into the same cascading discovery as the transactionhistory cluster — all six detections linked under the shared ledger-db root cause rather than split into separate service-scoped discoveries.',
           score: 2,
         },
         {
           id: 'separate-benign-auth',
-          text: 'Keeps the benign authentication activity (successful logins, new account creation) as its own discovery, separate from the failure cascade — does not lump it into the database incident.',
+          text: 'Keeps the benign authentication activity (successful logins, new account creation) grouped together in a single discovery, separate from the failure cascade — does not lump them into the database incident, and does not emit login and account creation as two separate discoveries.',
           score: 2,
         },
         {

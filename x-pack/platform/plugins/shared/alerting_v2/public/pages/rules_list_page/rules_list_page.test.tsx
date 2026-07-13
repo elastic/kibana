@@ -710,8 +710,8 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    const statusHeader = screen.getByRole('columnheader', { name: /^status$/i });
-    fireEvent.click(within(statusHeader).getByRole('button'));
+    const enabledHeader = screen.getByRole('columnheader', { name: /^enabled$/i });
+    fireEvent.click(within(enabledHeader).getByRole('button'));
 
     await waitFor(() => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
@@ -735,8 +735,8 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    const statusHeader = screen.getByRole('columnheader', { name: /^status$/i });
-    fireEvent.click(within(statusHeader).getByRole('button'));
+    const enabledHeader = screen.getByRole('columnheader', { name: /^enabled$/i });
+    fireEvent.click(within(enabledHeader).getByRole('button'));
 
     await waitFor(() => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith(
@@ -744,7 +744,7 @@ describe('RulesListPage', () => {
       );
     });
 
-    fireEvent.click(within(statusHeader).getByRole('button'));
+    fireEvent.click(within(enabledHeader).getByRole('button'));
 
     await waitFor(() => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith(
@@ -976,7 +976,7 @@ describe('RulesListPage', () => {
     );
   });
 
-  it('renders the Status column with Enabled and Disabled badges', () => {
+  it('renders the Enabled column with switches reflecting each rule state', () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
@@ -986,11 +986,11 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByText('Enabled')).toBeInTheDocument();
-    expect(screen.getByText('Disabled')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toHaveAttribute('aria-checked', 'false');
   });
 
-  it('shows "Disable" action for enabled rules and "Enable" for disabled rules', async () => {
+  it('calls toggleEnabledMutation when the Enabled switch is clicked', async () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
@@ -1000,29 +1000,8 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    // Open the context menu for the enabled rule (rule-1)
-    fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('toggleEnabledRule-rule-1')).toHaveTextContent('Disable');
-    });
-  });
-
-  it('calls toggleEnabledMutation when toggle action is clicked', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
-    renderPage();
-
-    // Open the context menu for the enabled rule (rule-1)
-    fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-
-    // Click the toggle action — should disable the enabled rule
-    fireEvent.click(screen.getByTestId('toggleEnabledRule-rule-1'));
+    // Click the switch for the enabled rule (rule-1) — should disable it
+    fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
 
     expect(mockToggleEnabledMutate).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
   });
