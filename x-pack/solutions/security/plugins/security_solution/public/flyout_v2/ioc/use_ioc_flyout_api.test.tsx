@@ -13,6 +13,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import { FlyoutV2EventTypes } from '../../common/lib/telemetry';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -33,6 +34,7 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
 }));
 
 const mockOpenSystemFlyout = jest.fn();
+const mockReportEvent = jest.fn();
 const indicator = {
   _id: 'ioc-1',
   fields: { 'threat.indicator.type': ['url'] },
@@ -41,8 +43,12 @@ const indicator = {
 describe('useIocFlyoutApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     (useKibana as jest.Mock).mockReturnValue({
-      services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } },
+      services: {
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        telemetry: { reportEvent: mockReportEvent },
+      },
     });
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
   });
@@ -56,6 +62,13 @@ describe('useIocFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 's', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: 'flyout',
+      flyoutType: 'ioc',
+      tool: undefined,
+      session: 'start',
+      origin: undefined,
+    });
   });
 
   it('openIocFlyoutAsChild opens a system flyout that inherits the current session', () => {
@@ -71,6 +84,13 @@ describe('useIocFlyoutApi', () => {
         historyKey: documentFlyoutHistoryKey,
       })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: 'flyout',
+      flyoutType: 'ioc',
+      tool: undefined,
+      session: 'inherit',
+      origin: undefined,
+    });
   });
 
   it('uses the doc-viewer history key when outside the security app', () => {

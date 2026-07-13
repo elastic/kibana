@@ -8,8 +8,6 @@
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { noop } from 'lodash/fp';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer, EuiFlyoutFooter } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
@@ -26,24 +24,28 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildHostNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import type { FlyoutTool } from '../../../../common/lib/telemetry';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
+import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
 import { RiskInputs } from '../../shared/tools/risk_inputs';
 import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
 import { VulnerabilityInsights } from '../tools/vulnerability_insights';
 import { AlertsInsights } from '../../shared/tools/alerts_insights';
 import { GraphView } from '../../shared/tools/graph_view';
 import { Resolution } from '../../shared/tools/resolution';
-import { renderEntityDetails } from '../../shared/render_entity_details';
+import {
+  entityEngineTypeToFlyoutType,
+  renderEntityDetails,
+} from '../../shared/render_entity_details';
 import { AnomalyInsights } from '../../shared/tools/anomaly_insights';
 import { Header } from './header';
 import { Content } from './content';
@@ -118,10 +120,8 @@ export const Host: FC<HostProps> = memo(function Host({
   scopeId = '',
   contextID,
 }) {
-  const { services } = useKibana();
-  const { uiSettings, overlays } = services;
-  const store = useStore();
-  const history = useHistory();
+  const { uiSettings } = useKibana().services;
+  const open = useOpenFlyout();
   const euidApi = useEntityStoreEuidApi();
 
   // Compute entityId from hit when provided, otherwise use the prop
@@ -273,26 +273,12 @@ export const Host: FC<HostProps> = memo(function Host({
   ) : undefined;
 
   const onShowHost = useCallback(() => {
-    overlays.openSystemFlyout(
-      flyoutProviders({
-        services,
-        store,
-        history,
-        children: <Host hostName={hostName} entityId={entityId} scopeId={scopeId} />,
-      }),
-      { ...defaultDocumentFlyoutProperties, title: hostName, historyKey, session: 'inherit' }
+    open(
+      <Host hostName={hostName} entityId={entityId} scopeId={scopeId} />,
+      { ...defaultDocumentFlyoutProperties, title: hostName, historyKey, session: 'inherit' },
+      { surface: 'flyout', flyoutType: 'host', session: 'inherit', origin: 'related_entity' }
     );
-  }, [
-    overlays,
-    services,
-    store,
-    history,
-    historyKey,
-    hostName,
-    entityId,
-    scopeId,
-    defaultDocumentFlyoutProperties,
-  ]);
+  }, [open, historyKey, hostName, entityId, scopeId, defaultDocumentFlyoutProperties]);
 
   const onShowRelatedEntity = useCallback(
     (params: {
@@ -300,21 +286,22 @@ export const Host: FC<HostProps> = memo(function Host({
       entityId: string;
       entityName: string | undefined;
     }) =>
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: renderEntityDetails({ ...params, scopeId }),
-        }),
+      open(
+        renderEntityDetails({ ...params, scopeId }),
         {
           ...defaultDocumentFlyoutProperties,
           title: params.entityName ?? params.entityId,
           historyKey,
           session: 'inherit',
+        },
+        {
+          surface: 'flyout',
+          flyoutType: entityEngineTypeToFlyoutType(params.engineType),
+          session: 'inherit',
+          origin: 'related_entity',
         }
       ),
-    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
+    [open, scopeId, historyKey, defaultDocumentFlyoutProperties]
   );
 
   const openDetailsPanel = useCallback(
@@ -325,8 +312,8 @@ export const Host: FC<HostProps> = memo(function Host({
         historyKey,
         session: 'start' as const,
       };
-      const wrap = (children: React.ReactNode) =>
-        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), common);
+      const wrap = (children: React.ReactNode, tool: FlyoutTool) =>
+        open(children, common, { surface: 'tool', tool, flyoutType: 'host', session: 'start' });
 
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
@@ -336,7 +323,8 @@ export const Host: FC<HostProps> = memo(function Host({
               entityName={hostName}
               entityId={entityStoreEntityId}
               onShowEntity={onShowHost}
-            />
+            />,
+            'risk_inputs'
           );
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return wrap(
@@ -345,7 +333,8 @@ export const Host: FC<HostProps> = memo(function Host({
               value={hostName}
               entityId={entityStoreEntityId}
               onOpenEntity={onShowHost}
-            />
+            />,
+            'anomaly_insights'
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -355,7 +344,8 @@ export const Host: FC<HostProps> = memo(function Host({
                   value={hostName}
                   entityId={panelDisplayEntityId}
                   onShowHost={onShowHost}
-                />
+                />,
+                'vulnerability_insights'
               );
             case CspInsightLeftPanelSubTab.ALERTS:
               return wrap(
@@ -364,7 +354,8 @@ export const Host: FC<HostProps> = memo(function Host({
                   value={hostName}
                   entityId={panelDisplayEntityId}
                   onShowEntity={onShowHost}
-                />
+                />,
+                'alerts_insights'
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return wrap(
@@ -373,7 +364,8 @@ export const Host: FC<HostProps> = memo(function Host({
                   value={hostName}
                   entityId={panelDisplayEntityId}
                   onShowEntity={onShowHost}
-                />
+                />,
+                'misconfiguration_insights'
               );
           }
           return;
@@ -386,7 +378,8 @@ export const Host: FC<HostProps> = memo(function Host({
               entityName={hostName}
               onShowEntity={onShowRelatedEntity}
               onShowOriginatingEntity={onShowHost}
-            />
+            />,
+            'graph_view'
           );
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -398,15 +391,13 @@ export const Host: FC<HostProps> = memo(function Host({
               scopeId={scopeId}
               onShowEntity={onShowHost}
               onShowRelatedEntity={onShowRelatedEntity}
-            />
+            />,
+            'resolution'
           );
       }
     },
     [
-      overlays,
-      services,
-      store,
-      history,
+      open,
       historyKey,
       hostName,
       scopeId,

@@ -15,14 +15,12 @@ import {
 import { css } from '@emotion/react';
 import { EuiEmptyPrompt, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { buildEntityNameFilter } from '../../../../../common/search_strategy';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import type { Refetch } from '../../../../common/types';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import type { FlyoutTool } from '../../../../common/lib/telemetry';
 import { FIRST_RECORD_PAGINATION } from '../../../../entity_analytics/common';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -42,12 +40,12 @@ import { GenericEntityFlyoutHeader } from '../../../../flyout/entity_details/gen
 import { GenericEntityFlyoutContent } from '../../../../flyout/entity_details/generic_right/content';
 import { GenericEntityFlyoutFooter } from '../../../../flyout/entity_details/generic_right/footer';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from '../../../../flyout/entity_details/generic_right/constants';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
+import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
 import { FieldsTableTool } from '../../shared/tools/fields_table';
 import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
 import { AlertsInsights } from '../../shared/tools/alerts_insights';
@@ -68,10 +66,7 @@ export type GenericEntityProps = {
 export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity(params) {
   const { scopeId } = params;
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
+  const open = useOpenFlyout();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
@@ -125,16 +120,12 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
   }, [getGenericEntity.data?._id]);
 
   const onShowGeneric = useCallback(() => {
-    overlays.openSystemFlyout(
-      flyoutProviders({
-        services,
-        store,
-        history,
-        children: <GenericEntity {...params} />,
-      }),
-      { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' }
+    open(
+      <GenericEntity {...params} />,
+      { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' },
+      { surface: 'flyout', flyoutType: 'generic', session: 'inherit', origin: 'related_entity' }
     );
-  }, [overlays, services, store, history, params, historyKey, defaultDocumentFlyoutProperties]);
+  }, [open, params, historyKey, defaultDocumentFlyoutProperties]);
 
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
@@ -143,8 +134,8 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
         historyKey,
         session: 'start' as const,
       };
-      const wrap = (children: React.ReactNode) =>
-        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), common);
+      const wrap = (children: React.ReactNode, tool: FlyoutTool) =>
+        open(children, common, { surface: 'tool', tool, flyoutType: 'generic', session: 'start' });
 
       const value = genericInsightsValue || '';
 
@@ -156,7 +147,8 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
               tableStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS}
               entityName={value}
               onShowEntity={onShowGeneric}
-            />
+            />,
+            'fields_table'
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -167,7 +159,8 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
                   value={value}
                   entityId={genericInsightsValue}
                   onShowEntity={onShowGeneric}
-                />
+                />,
+                'misconfiguration_insights'
               );
             case CspInsightLeftPanelSubTab.VULNERABILITIES:
               return wrap(
@@ -176,7 +169,8 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
                   entityId={genericInsightsValue}
                   entityType={EntityType.generic}
                   onShowHost={onShowGeneric}
-                />
+                />,
+                'vulnerability_insights'
               );
             case CspInsightLeftPanelSubTab.ALERTS:
               return wrap(
@@ -185,21 +179,13 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
                   value={value}
                   entityId={genericInsightsValue}
                   onShowEntity={onShowGeneric}
-                />
+                />,
+                'alerts_insights'
               );
           }
       }
     },
-    [
-      overlays,
-      services,
-      store,
-      history,
-      historyKey,
-      genericInsightsValue,
-      getGenericEntity.data?._source,
-      onShowGeneric,
-    ]
+    [open, historyKey, genericInsightsValue, getGenericEntity.data?._source, onShowGeneric]
   );
 
   if (getGenericEntity.isLoading || getAssetCriticality.isLoading) {

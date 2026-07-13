@@ -57,6 +57,7 @@ export const IOCDetails: FC<IOCDetailsProps> = memo(({ hit, renderCellActions })
   const { selectedTabId, setSelectedTabId } = useTabs<RightPanelPaths>({
     validTabIds,
     storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
+    flyoutType: 'ioc',
   });
 
   const onViewAllFieldsInTable = useCallback(() => {

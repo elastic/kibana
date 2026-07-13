@@ -17,17 +17,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
-import { useStore } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
-import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
 import { cellActionRenderer } from '../../shared/components/cell_actions';
 import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { NotesDetails } from '../../shared/tools/notes';
-import { useKibana } from '../../../common/lib/kibana';
+import { useOpenFlyout } from '../../shared/hooks/use_open_flyout';
 import { useTabs } from '../../shared/hooks/use_tabs';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
@@ -79,10 +76,7 @@ export interface AttackFlyoutProps {
  * header, overview tab, and footer.
  */
 export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyoutProps) => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
+  const open = useOpenFlyout();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
@@ -91,19 +85,16 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
   const { selectedTabId, setSelectedTabId } = useTabs<AttackFlyoutTabId>({
     validTabIds: VALID_TAB_IDS,
     storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
+    flyoutType: 'attack',
   });
 
   const onShowNotes = useCallback(() => {
-    overlays.openSystemFlyout(
-      flyoutProviders({
-        services,
-        store,
-        history,
-        children: <NotesDetails hit={hit} />,
-      }),
-      { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+    open(
+      <NotesDetails hit={hit} />,
+      { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+      { surface: 'tool', tool: 'notes', flyoutType: 'attack', session: 'start' }
     );
-  }, [history, historyKey, hit, overlays, services, store]);
+  }, [historyKey, hit, open]);
 
   return (
     <>

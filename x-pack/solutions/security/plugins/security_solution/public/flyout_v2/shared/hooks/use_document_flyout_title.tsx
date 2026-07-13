@@ -22,6 +22,7 @@ import { noopCellActionRenderer } from '../components/cell_actions';
 import { flyoutProviders } from '../components/flyout_provider';
 import { DocumentFlyout } from '../../document/main';
 import { useDefaultDocumentFlyoutProperties } from './use_default_flyout_properties';
+import { useFlyoutTelemetry } from './use_flyout_telemetry';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 import { DocumentSeverity } from '../../document/main/components/severity';
 import { Timestamp } from '../components/timestamp';
@@ -62,6 +63,7 @@ export const useDocumentFlyoutTitle = ({
   const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { reportOpened, reportClosed } = useFlyoutTelemetry();
 
   const isAlert = useMemo(
     () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -72,7 +74,7 @@ export const useDocumentFlyoutTitle = ({
   const iconType = isAlert ? 'warning' : 'analyzeEvent';
 
   const onTitleClick = useCallback(() => {
-    services.overlays?.openSystemFlyout(
+    const ref = services.overlays?.openSystemFlyout(
       flyoutProviders({
         services,
         store,
@@ -87,6 +89,16 @@ export const useDocumentFlyoutTitle = ({
       }),
       { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
     );
+    if (!ref) return;
+    const meta = {
+      surface: 'flyout' as const,
+      flyoutType: 'document' as const,
+      session: 'inherit' as const,
+      origin: 'title' as const,
+    };
+    const openedAt = Date.now();
+    reportOpened(meta);
+    ref.onClose.then(() => reportClosed(meta, Date.now() - openedAt));
   }, [
     defaultFlyoutProperties,
     history,
@@ -94,6 +106,8 @@ export const useDocumentFlyoutTitle = ({
     hit,
     onAlertUpdated,
     renderCellActions,
+    reportClosed,
+    reportOpened,
     services,
     store,
   ]);

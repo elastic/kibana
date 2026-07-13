@@ -9,19 +9,16 @@ import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import {
   GraphGroupedNodePreviewPanel,
   type GraphGroupedNodePreviewPanelProps,
 } from '@kbn/cloud-security-posture-graph';
 import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
+import { useOpenFlyout } from '../../../../shared/hooks/use_open_flyout';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
@@ -55,10 +52,7 @@ export interface GraphViewProps {
  */
 export const GraphView = memo(
   ({ entityId, scopeId, entityName, onShowEntity, onShowOriginatingEntity }: GraphViewProps) => {
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
+    const open = useOpenFlyout();
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
@@ -87,33 +81,17 @@ export const GraphView = memo(
           'scopeId' | 'showLoadingState' | 'onShowDocument' | 'onShowEntity'
         >
       ) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <GraphGroupedNodePreviewPanel
-                {...params}
-                scopeId={scopeId}
-                onShowDocument={onShowDocument}
-                onShowEntity={onShowEntity}
-              />
-            ),
-          }),
-          { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+        open(
+          <GraphGroupedNodePreviewPanel
+            {...params}
+            scopeId={scopeId}
+            onShowDocument={onShowDocument}
+            onShowEntity={onShowEntity}
+          />,
+          { ...defaultFlyoutProperties, historyKey, session: 'inherit' },
+          { surface: 'tool', tool: 'graph_view', session: 'inherit' }
         ),
-      [
-        overlays,
-        services,
-        store,
-        history,
-        scopeId,
-        onShowDocument,
-        onShowEntity,
-        defaultFlyoutProperties,
-        historyKey,
-      ]
+      [scopeId, onShowDocument, onShowEntity, defaultFlyoutProperties, historyKey, open]
     );
 
     return (

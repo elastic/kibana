@@ -8,8 +8,6 @@
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { noop } from 'lodash/fp';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer, EuiFlyoutFooter } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
@@ -27,17 +25,18 @@ import { buildUserNamesFilter, type RiskSeverity } from '../../../../../common/s
 import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import type { FlyoutTool } from '../../../../common/lib/telemetry';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
+import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
 import { RiskInputs } from '../../shared/tools/risk_inputs';
 import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
 import { AlertsInsights } from '../../shared/tools/alerts_insights';
@@ -46,7 +45,10 @@ import { OktaInsights } from '../tools/okta_insights';
 import { EntraInsights } from '../tools/entra_insights';
 import { GraphView } from '../../shared/tools/graph_view';
 import { Resolution } from '../../shared/tools/resolution';
-import { renderEntityDetails } from '../../shared/render_entity_details';
+import {
+  entityEngineTypeToFlyoutType,
+  renderEntityDetails,
+} from '../../shared/render_entity_details';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -119,10 +121,8 @@ export const User: FC<UserProps> = memo(function User({
   scopeId = '',
   contextID,
 }) {
-  const { services } = useKibana();
-  const { uiSettings, overlays } = services;
-  const store = useStore();
-  const history = useHistory();
+  const { uiSettings } = useKibana().services;
+  const open = useOpenFlyout();
   const euidApi = useEntityStoreEuidApi();
 
   const entityId = useMemo(
@@ -275,26 +275,12 @@ export const User: FC<UserProps> = memo(function User({
   ) : undefined;
 
   const onOpenUser = useCallback(() => {
-    overlays.openSystemFlyout(
-      flyoutProviders({
-        services,
-        store,
-        history,
-        children: <User userName={userName} entityId={entityId} scopeId={scopeId} />,
-      }),
-      { ...defaultDocumentFlyoutProperties, title: userName, historyKey, session: 'inherit' }
+    open(
+      <User userName={userName} entityId={entityId} scopeId={scopeId} />,
+      { ...defaultDocumentFlyoutProperties, title: userName, historyKey, session: 'inherit' },
+      { surface: 'flyout', flyoutType: 'user', session: 'inherit', origin: 'related_entity' }
     );
-  }, [
-    overlays,
-    services,
-    store,
-    history,
-    historyKey,
-    userName,
-    entityId,
-    scopeId,
-    defaultDocumentFlyoutProperties,
-  ]);
+  }, [open, historyKey, userName, entityId, scopeId, defaultDocumentFlyoutProperties]);
 
   const onShowRelatedEntity = useCallback(
     (params: {
@@ -302,21 +288,22 @@ export const User: FC<UserProps> = memo(function User({
       entityId: string;
       entityName: string | undefined;
     }) =>
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: renderEntityDetails({ ...params, scopeId }),
-        }),
+      open(
+        renderEntityDetails({ ...params, scopeId }),
         {
           ...defaultDocumentFlyoutProperties,
           title: params.entityName ?? params.entityId,
           historyKey,
           session: 'inherit',
+        },
+        {
+          surface: 'flyout',
+          flyoutType: entityEngineTypeToFlyoutType(params.engineType),
+          session: 'inherit',
+          origin: 'related_entity',
         }
       ),
-    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
+    [open, scopeId, historyKey, defaultDocumentFlyoutProperties]
   );
 
   const openDetailsPanel = useCallback(
@@ -327,8 +314,8 @@ export const User: FC<UserProps> = memo(function User({
         historyKey,
         session: 'start' as const,
       };
-      const wrap = (children: React.ReactNode) =>
-        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), common);
+      const wrap = (children: React.ReactNode, tool: FlyoutTool) =>
+        open(children, common, { surface: 'tool', tool, flyoutType: 'user', session: 'start' });
 
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
@@ -338,7 +325,8 @@ export const User: FC<UserProps> = memo(function User({
               entityName={userName}
               entityId={entityStoreEntityId}
               onShowEntity={onOpenUser}
-            />
+            />,
+            'risk_inputs'
           );
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return wrap(
@@ -347,7 +335,8 @@ export const User: FC<UserProps> = memo(function User({
               value={userName}
               entityId={entityStoreEntityId}
               onOpenEntity={onOpenUser}
-            />
+            />,
+            'anomaly_insights'
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -358,7 +347,8 @@ export const User: FC<UserProps> = memo(function User({
                   value={userName}
                   entityId={panelDisplayEntityId}
                   onShowEntity={onOpenUser}
-                />
+                />,
+                'alerts_insights'
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return wrap(
@@ -367,7 +357,8 @@ export const User: FC<UserProps> = memo(function User({
                   value={userName}
                   entityId={panelDisplayEntityId}
                   onShowEntity={onOpenUser}
-                />
+                />,
+                'misconfiguration_insights'
               );
           }
           break;
@@ -380,7 +371,8 @@ export const User: FC<UserProps> = memo(function User({
               entityName={userName}
               onShowEntity={onShowRelatedEntity}
               onShowOriginatingEntity={onOpenUser}
-            />
+            />,
+            'graph_view'
           );
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -392,7 +384,8 @@ export const User: FC<UserProps> = memo(function User({
               scopeId={scopeId}
               onShowEntity={onOpenUser}
               onShowRelatedEntity={onShowRelatedEntity}
-            />
+            />,
+            'resolution'
           );
         // TODO: currently dead (v1 accessed through left pane tabs, need to perhaps add preview?)
         case EntityDetailsLeftPanelTab.OKTA: {
@@ -403,7 +396,8 @@ export const User: FC<UserProps> = memo(function User({
                 managedUser={oktaManagedUser}
                 value={userName}
                 onOpenUser={onOpenUser}
-              />
+              />,
+              'okta_insights'
             );
           }
           break;
@@ -416,7 +410,8 @@ export const User: FC<UserProps> = memo(function User({
                 managedUser={entraManagedUser}
                 value={userName}
                 onOpenUser={onOpenUser}
-              />
+              />,
+              'entra_insights'
             );
           }
           break;
@@ -424,10 +419,7 @@ export const User: FC<UserProps> = memo(function User({
       }
     },
     [
-      overlays,
-      services,
-      store,
-      history,
+      open,
       historyKey,
       userName,
       scopeId,

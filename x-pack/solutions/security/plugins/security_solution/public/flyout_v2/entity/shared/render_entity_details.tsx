@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { GRAPH_SCOPE_ID } from '@kbn/cloud-security-posture-graph';
+import type { FlyoutType } from '../../../common/lib/telemetry';
 import { Host } from '../host/main';
 import { User } from '../user/main';
 import { Service } from '../service/main';
@@ -43,5 +44,23 @@ export const renderEntityDetails = ({
       return <Service serviceName={entityName ?? ''} entityId={entityId} scopeId={scopeId} />;
     default:
       return <GenericEntity entityId={entityId} scopeId={scopeId} />;
+  }
+};
+
+/**
+ * Maps an Entity Store engine type to the v2 flyout telemetry `FlyoutType`, mirroring the
+ * component mapping in `renderEntityDetails` above. Used by the entity `main` components to tag
+ * `onShowRelatedEntity` opens (which can resolve to any entity type) with the right `flyoutType`.
+ */
+export const entityEngineTypeToFlyoutType = (engineType: string | undefined): FlyoutType => {
+  switch (engineType) {
+    case 'host':
+      return 'host';
+    case 'user':
+      return 'user';
+    case 'service':
+      return 'service';
+    default:
+      return 'generic';
   }
 };

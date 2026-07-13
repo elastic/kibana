@@ -6,25 +6,20 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import React, { lazy, useCallback, useMemo } from 'react';
 import { noop } from 'lodash/fp';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { PrevalenceDetailsProps } from './tools/prevalence';
-import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
-import { flyoutProviders } from '../shared/components/flyout_provider';
-import { FlyoutLoading } from '../shared/components/flyout_loading';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 
 // Tools are lazy-loaded so consumers of this hook don't statically pull the whole document-flyout
 // tool graph into their bundle; the chunk only loads when a flyout is actually opened.
@@ -187,8 +182,9 @@ export interface DocumentFlyoutApi {
 /**
  * Developer-facing API to open the new (EUI-based) document flyout and its tool flyouts, in the
  * same mindset as `useExpandableFlyoutApi`. It encapsulates the provider wiring
- * (`flyoutProviders` + `overlays.openSystemFlyout`) and the per-tool flyout properties so call
- * sites don't have to repeat them.
+ * (`flyoutProviders` + `overlays.openSystemFlyout`, via `useOpenFlyout`) and the per-tool flyout
+ * properties so call sites don't have to repeat them. `useOpenFlyout` also reports open/close
+ * telemetry for every method below.
  *
  * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
  * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
@@ -197,28 +193,10 @@ export interface DocumentFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-
-  const open = useCallback(
-    (children: ReactNode, properties: OverlaySystemFlyoutOpenOptions) => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>,
-        }),
-        properties
-      );
-    },
-    [overlays, services, store, history]
-  );
+  const open = useOpenFlyout();
 
   // Builds the document flyout content (resolved from a concrete `_index`), shared by both the main
   // and child open methods. Only the `session` differs between them, so it is kept private here and
@@ -242,22 +220,22 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
 
   const openDocumentFlyoutFromIndex = useCallback(
     (params: OpenDocumentFlyoutParams) => {
-      open(buildFromIndexContent(params), {
-        ...defaultDocumentFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        buildFromIndexContent(params),
+        { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'flyout', flyoutType: 'document', session: 'start' }
+      );
     },
     [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey]
   );
 
   const openDocumentFlyoutFromIndexAsChild = useCallback(
     (params: OpenDocumentFlyoutParams) => {
-      open(buildFromIndexContent(params), {
-        ...defaultDocumentFlyoutProperties,
-        historyKey,
-        session: 'inherit',
-      });
+      open(
+        buildFromIndexContent(params),
+        { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' },
+        { surface: 'flyout', flyoutType: 'document', session: 'inherit' }
+      );
     },
     [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey]
   );
@@ -276,7 +254,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'flyout', flyoutType: 'document', session: 'start' }
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey]
@@ -284,7 +263,11 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
 
   const openNotes = useCallback(
     ({ hit }: OpenNotesParams) => {
-      open(<NotesDetails hit={hit} />, { ...defaultToolsFlyoutProperties, historyKey });
+      open(
+        <NotesDetails hit={hit} />,
+        { ...defaultToolsFlyoutProperties, historyKey },
+        { surface: 'tool', tool: 'notes', flyoutType: 'document', session: 'start' }
+      );
     },
     [open, historyKey]
   );
@@ -301,7 +284,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'tool', tool: 'analyzer', flyoutType: 'document', session: 'start' }
       );
     },
     [open, historyKey]
@@ -323,7 +307,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'tool', tool: 'session_view', flyoutType: 'document', session: 'start' }
       );
     },
     [open, historyKey]
@@ -331,11 +316,11 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
 
   const openDocumentEntities = useCallback(
     ({ hit, scopeId }: OpenDocumentEntitiesParams) => {
-      open(<EntityDetails hit={hit} scopeId={scopeId} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        <EntityDetails hit={hit} scopeId={scopeId} />,
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'tool', tool: 'entities', flyoutType: 'document', session: 'start' }
+      );
     },
     [open, historyKey]
   );
@@ -356,7 +341,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onShowAlert={onShowAlert}
           onShowAttack={onShowAttack}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'tool', tool: 'correlations', flyoutType: 'document', session: 'start' }
       );
     },
     [open, historyKey]
@@ -364,22 +350,22 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
 
   const openDocumentResponse = useCallback(
     ({ hit }: OpenDocumentResponseParams) => {
-      open(<ResponseDetails hit={hit} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        <ResponseDetails hit={hit} />,
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'tool', tool: 'response', flyoutType: 'document', session: 'start' }
+      );
     },
     [open, historyKey]
   );
 
   const openDocumentThreatIntelligence = useCallback(
     ({ hit }: OpenDocumentThreatIntelligenceParams) => {
-      open(<ThreatIntelligenceDetails hit={hit} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        <ThreatIntelligenceDetails hit={hit} />,
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'tool', tool: 'threat_intelligence', flyoutType: 'document', session: 'start' }
+      );
     },
     [open, historyKey]
   );
@@ -393,7 +379,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           scopeId={scopeId}
           columns={columns}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'tool', tool: 'prevalence', flyoutType: 'document', session: 'start' }
       );
     },
     [open, historyKey]
@@ -401,11 +388,11 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
 
   const openDocumentInvestigationGuide = useCallback(
     ({ hit }: OpenDocumentInvestigationGuideParams) => {
-      open(<InvestigationGuide hit={hit} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        <InvestigationGuide hit={hit} />,
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'tool', tool: 'investigation_guide', flyoutType: 'document', session: 'start' }
+      );
     },
     [open, historyKey]
   );
@@ -422,7 +409,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'tool', tool: 'graph', flyoutType: 'document', session: 'start' }
       );
     },
     [open, historyKey]

@@ -112,6 +112,7 @@ export const DocumentFlyout = memo(
     const { selectedTabId, setSelectedTabId } = useTabs<DocumentFlyoutTabId>({
       validTabIds: VALID_TAB_IDS,
       storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
+      flyoutType: 'document',
     });
 
     // The rule flyout is keyed by the rule UUID, but the table/highlighted fields display the rule

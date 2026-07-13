@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import React, { lazy, useCallback, useMemo } from 'react';
 import { noop } from 'lodash/fp';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
-import { flyoutProviders } from '../shared/components/flyout_provider';
-import { FlyoutLoading } from '../shared/components/flyout_loading';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 
 // Lazy-loaded so consumers of this hook don't statically pull the attack flyout graph into their
 // bundle; the chunk only loads when the flyout (or one of its tools) is actually opened.
@@ -90,31 +84,10 @@ export interface AttackFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useAttackFlyoutApi = (): AttackFlyoutApi => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-
-  // The main/child flyout and the tools differ only in their properties (base size + session). Both
-  // are kept private here so callers never reason about them: they pick the method they want and
-  // this helper opens the system flyout with the given properties.
-  const open = useCallback(
-    (children: ReactNode, properties: OverlaySystemFlyoutOpenOptions) => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>,
-        }),
-        properties
-      );
-    },
-    [overlays, services, store, history]
-  );
+  const open = useOpenFlyout();
 
   const openAttackFlyout = useCallback(
     ({ attackId, indexName, onAttackUpdated = noop }: OpenAttackFlyoutParams) => {
@@ -124,7 +97,8 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           indexName={indexName}
           onAttackUpdated={onAttackUpdated}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'flyout', flyoutType: 'attack', session: 'start' }
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey]
@@ -138,7 +112,8 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           indexName={indexName}
           onAttackUpdated={onAttackUpdated}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' }
+        { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' },
+        { surface: 'flyout', flyoutType: 'attack', session: 'inherit' }
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey]
@@ -146,22 +121,22 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
 
   const openAttackCorrelations = useCallback(
     ({ hit, alertIds, onShowAlert }: OpenAttackCorrelationsParams) => {
-      open(<CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        <CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />,
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'tool', tool: 'correlations', flyoutType: 'attack', session: 'start' }
+      );
     },
     [open, historyKey]
   );
 
   const openAttackEntities = useCallback(
     ({ hit, alertIds }: OpenAttackEntitiesParams) => {
-      open(<EntitiesDetails hit={hit} alertIds={alertIds} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-      });
+      open(
+        <EntitiesDetails hit={hit} alertIds={alertIds} />,
+        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+        { surface: 'tool', tool: 'entities', flyoutType: 'attack', session: 'start' }
+      );
     },
     [open, historyKey]
   );

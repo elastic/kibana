@@ -8,18 +8,15 @@
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import {
   EntityIdentifierFields,
   EntityType,
 } from '../../../../../../common/entity_analytics/types';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import { flyoutProviders } from '../../../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
+import { useOpenFlyout } from '../../../../shared/hooks/use_open_flyout';
 import { Misconfiguration } from '../../../../csp/misconfiguration';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
@@ -59,27 +56,20 @@ export interface MisconfigurationInsightsProps {
  */
 export const MisconfigurationInsights = memo(
   ({ entityType, value, entityId, onShowEntity }: MisconfigurationInsightsProps) => {
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
+    const open = useOpenFlyout();
     const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
     const onShowFinding = useCallback(
       (resourceId: string, ruleId: string) => {
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: <Misconfiguration resourceId={resourceId} ruleId={ruleId} />,
-          }),
-          { ...defaultDocumentFlyoutProperties, title: value, historyKey, session: 'inherit' }
+        open(
+          <Misconfiguration resourceId={resourceId} ruleId={ruleId} />,
+          { ...defaultDocumentFlyoutProperties, title: value, historyKey, session: 'inherit' },
+          { surface: 'tool', tool: 'misconfiguration_insights', session: 'inherit' }
         );
       },
-      [overlays, services, store, history, defaultDocumentFlyoutProperties, value, historyKey]
+      [open, defaultDocumentFlyoutProperties, value, historyKey]
     );
 
     return (

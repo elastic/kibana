@@ -13,8 +13,6 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
@@ -28,20 +26,23 @@ import {
 } from '../../../../flyout/document_details/left/components/entities_details';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import { CspInsightLeftPanelSubTab } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
+import type { FlyoutTool, FlyoutType } from '../../../../common/lib/telemetry';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { User } from '../../../entity/user/main';
 import { Host } from '../../../entity/host/main';
 import { AlertsInsights } from '../../../entity/shared/tools/alerts_insights';
 import { MisconfigurationInsights } from '../../../entity/shared/tools/misconfiguration_insights';
 import { VulnerabilityInsights } from '../../../entity/host/tools/vulnerability_insights';
-import { buildFlyoutContent } from '../../../shared/utils/build_flyout_content';
+import {
+  buildFlyoutContent,
+  getFlyoutTypeForField,
+} from '../../../shared/utils/build_flyout_content';
 import { ENTITIES_TOOL_TEST_ID } from './test_ids';
 
 export interface EntityDetailsProps {
@@ -94,35 +95,36 @@ export const EntityDetails = memo(
       [hit.id, hit.raw, scopeId, dataAsNestedObject, getFieldsData]
     );
 
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
+    const open = useOpenFlyout();
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     const openEntityFlyout = useCallback(
-      (children: ReactNode) => {
-        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), {
-          ...defaultDocumentFlyoutProperties,
-          historyKey,
-          session: 'inherit',
-          outsideClickCloses: false,
-        });
+      (children: ReactNode, flyoutType: FlyoutType) => {
+        open(
+          children,
+          {
+            ...defaultDocumentFlyoutProperties,
+            historyKey,
+            session: 'inherit',
+            outsideClickCloses: false,
+          },
+          { surface: 'flyout', flyoutType, session: 'inherit', origin: 'related_entity' }
+        );
       },
-      [overlays, services, store, history, defaultDocumentFlyoutProperties, historyKey]
+      [open, defaultDocumentFlyoutProperties, historyKey]
     );
 
     const openToolFlyout = useCallback(
-      (children: ReactNode) => {
-        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        });
+      (children: ReactNode, tool: FlyoutTool) => {
+        open(
+          children,
+          { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
+          { surface: 'tool', tool, flyoutType: 'document', session: 'start' }
+        );
       },
-      [overlays, services, store, history, historyKey]
+      [open, historyKey]
     );
 
     // Ref keeps the latest openEntityFlyout without changing the LinkRenderer reference.
@@ -132,9 +134,10 @@ export const EntityDetails = memo(
     const LinkRenderer = useCallback(
       ({ field, value, children }: { field: string; value: string; children?: ReactNode }) => {
         const flyoutContent = buildFlyoutContent(field, value);
-        if (!flyoutContent) return <>{children}</>;
+        const flyoutType = getFlyoutTypeForField(field);
+        if (!flyoutContent || !flyoutType) return <>{children}</>;
         return (
-          <EuiLink onClick={() => openEntityFlyoutRef.current(flyoutContent)}>
+          <EuiLink onClick={() => openEntityFlyoutRef.current(flyoutContent, flyoutType)}>
             {children ?? value}
           </EuiLink>
         );
@@ -146,13 +149,15 @@ export const EntityDetails = memo(
       ({ name, entityId }: { name: string; entityId?: string }): EntitySectionOverrides => ({
         onPreviewEntity: () =>
           openEntityFlyout(
-            <User userName={name} entityId={entityId} scopeId={scopeId} hit={hit} />
+            <User userName={name} entityId={entityId} scopeId={scopeId} hit={hit} />,
+            'user'
           ),
         onShowDetailsPanel: (subTab) => {
           switch (subTab) {
             case CspInsightLeftPanelSubTab.ALERTS:
               return openToolFlyout(
-                <AlertsInsights entityType={EntityType.user} value={name} entityId={entityId} />
+                <AlertsInsights entityType={EntityType.user} value={name} entityId={entityId} />,
+                'alerts_insights'
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return openToolFlyout(
@@ -160,7 +165,8 @@ export const EntityDetails = memo(
                   entityType={EntityType.user}
                   value={name}
                   entityId={entityId}
-                />
+                />,
+                'misconfiguration_insights'
               );
           }
         },
@@ -173,13 +179,15 @@ export const EntityDetails = memo(
       ({ name, entityId }: { name: string; entityId?: string }): EntitySectionOverrides => ({
         onPreviewEntity: () =>
           openEntityFlyout(
-            <Host hostName={name} entityId={entityId} scopeId={scopeId} hit={hit} />
+            <Host hostName={name} entityId={entityId} scopeId={scopeId} hit={hit} />,
+            'host'
           ),
         onShowDetailsPanel: (subTab) => {
           switch (subTab) {
             case CspInsightLeftPanelSubTab.ALERTS:
               return openToolFlyout(
-                <AlertsInsights entityType={EntityType.host} value={name} entityId={entityId} />
+                <AlertsInsights entityType={EntityType.host} value={name} entityId={entityId} />,
+                'alerts_insights'
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return openToolFlyout(
@@ -187,7 +195,8 @@ export const EntityDetails = memo(
                   entityType={EntityType.host}
                   value={name}
                   entityId={entityId}
-                />
+                />,
+                'misconfiguration_insights'
               );
             case CspInsightLeftPanelSubTab.VULNERABILITIES:
               return openToolFlyout(
@@ -196,10 +205,12 @@ export const EntityDetails = memo(
                   entityId={entityId}
                   onShowHost={() =>
                     openEntityFlyout(
-                      <Host hostName={name} entityId={entityId} scopeId={scopeId} hit={hit} />
+                      <Host hostName={name} entityId={entityId} scopeId={scopeId} hit={hit} />,
+                      'host'
                     )
                   }
-                />
+                />,
+                'vulnerability_insights'
               );
           }
         },

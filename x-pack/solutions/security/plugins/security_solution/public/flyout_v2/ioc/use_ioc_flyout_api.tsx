@@ -6,21 +6,18 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import React, { lazy, useCallback, useMemo } from 'react';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
-import { useKibana } from '../../common/lib/kibana';
+import type { FlyoutSessionKind } from '../../common/lib/telemetry';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
-import { flyoutProviders } from '../shared/components/flyout_provider';
-import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 
 // Lazy-loaded so consumers of this hook don't statically pull the IOC flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
@@ -59,35 +56,24 @@ export interface IocFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useIocFlyoutApi = (): IocFlyoutApi => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const openFlyout = useOpenFlyout();
 
   // `session` is the only thing that differs between a main and a child flyout. It is kept private
   // here so callers never have to reason about it: they pick `openIocFlyout` (main) or
   // `openIocFlyoutAsChild` (child) and this helper maps that to the right session.
   const open = useCallback(
-    (children: ReactNode, session: OverlaySystemFlyoutOpenOptions['session']) => {
+    (children: ReactNode, session: FlyoutSessionKind) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
       };
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>,
-        }),
-        properties
-      );
+      openFlyout(children, properties, { surface: 'flyout', flyoutType: 'ioc', session });
     },
-    [overlays, services, store, history, defaultDocumentFlyoutProperties, historyKey]
+    [openFlyout, defaultDocumentFlyoutProperties, historyKey]
   );
 
   // Builds the flyout content (an `IOCDetails` element with a record derived from the indicator),

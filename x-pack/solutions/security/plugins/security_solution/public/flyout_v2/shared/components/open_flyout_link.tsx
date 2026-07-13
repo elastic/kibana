@@ -8,20 +8,17 @@
 import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { flyoutProviders } from './flyout_provider';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../hooks/use_default_flyout_properties';
-import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
+import { useOpenFlyout } from '../hooks/use_open_flyout';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
-import { buildFlyoutContent } from '../utils/build_flyout_content';
+import { buildFlyoutContent, getFlyoutTypeForField } from '../utils/build_flyout_content';
 
 export interface OpenFlyoutLinkProps {
   /**
@@ -72,46 +69,32 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   children,
   'data-test-subj': dataTestSubj = OPEN_FLYOUT_LINK_TEST_ID,
 }) => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
+  const open = useOpenFlyout();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
+  const flyoutType = useMemo(() => getFlyoutTypeForField(field), [field]);
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
       const baseFlyoutProperties = asParent
         ? defaultToolsFlyoutProperties
         : defaultDocumentFlyoutProperties;
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: flyoutContent,
-        }),
+      const session = asParent ? 'start' : 'inherit';
+      open(
+        flyoutContent,
         {
           ...baseFlyoutProperties,
           historyKey,
-          session: asParent ? 'start' : 'inherit',
+          session,
           outsideClickCloses: asParent,
-        }
+        },
+        flyoutType ? { surface: 'flyout', flyoutType, session, origin: 'field_link' } : undefined
       );
     }
-  }, [
-    defaultDocumentFlyoutProperties,
-    overlays,
-    services,
-    store,
-    history,
-    flyoutContent,
-    asParent,
-    historyKey,
-  ]);
+  }, [defaultDocumentFlyoutProperties, open, flyoutContent, flyoutType, asParent, historyKey]);
 
   if (!flyoutContent) {
     return <>{children}</>;

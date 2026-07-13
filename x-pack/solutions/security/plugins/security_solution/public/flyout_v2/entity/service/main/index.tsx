@@ -7,8 +7,6 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import { css } from '@emotion/react';
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
@@ -18,8 +16,8 @@ import type { ESQuery } from '../../../../../common/typed_json';
 import { buildEntityNameFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { Refetch } from '../../../../common/types';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import type { FlyoutTool } from '../../../../common/lib/telemetry';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -47,16 +45,19 @@ import { ServicePanelContent } from '../../../../flyout/entity_details/service_r
 import { ServicePanelHeader } from '../../../../flyout/entity_details/service_right/header';
 import { ServicePanelFooter } from '../../../../flyout/entity_details/service_right/footer';
 import { useObservedService } from '../../../../flyout/entity_details/service_right/hooks/use_observed_service';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
+import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
 import { RiskInputs } from '../../shared/tools/risk_inputs';
 import { GraphView } from '../../shared/tools/graph_view';
 import { Resolution } from '../../shared/tools/resolution';
-import { renderEntityDetails } from '../../shared/render_entity_details';
+import {
+  entityEngineTypeToFlyoutType,
+  renderEntityDetails,
+} from '../../shared/render_entity_details';
 
 export interface ServiceProps {
   /** Display name from the source row / document (typically `service.name`). */
@@ -88,10 +89,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
   contextID,
 }) {
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
+  const open = useOpenFlyout();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
@@ -177,26 +175,12 @@ export const Service: FC<ServiceProps> = memo(function Service({
     : undefined;
 
   const onShowService = useCallback(() => {
-    overlays.openSystemFlyout(
-      flyoutProviders({
-        services,
-        store,
-        history,
-        children: <Service serviceName={serviceName} entityId={entityId} scopeId={scopeId} />,
-      }),
-      { ...defaultDocumentFlyoutProperties, title: serviceName, historyKey, session: 'inherit' }
+    open(
+      <Service serviceName={serviceName} entityId={entityId} scopeId={scopeId} />,
+      { ...defaultDocumentFlyoutProperties, title: serviceName, historyKey, session: 'inherit' },
+      { surface: 'flyout', flyoutType: 'service', session: 'inherit', origin: 'related_entity' }
     );
-  }, [
-    overlays,
-    services,
-    store,
-    history,
-    serviceName,
-    entityId,
-    scopeId,
-    historyKey,
-    defaultDocumentFlyoutProperties,
-  ]);
+  }, [open, serviceName, entityId, scopeId, historyKey, defaultDocumentFlyoutProperties]);
 
   const onShowRelatedEntity = useCallback(
     (params: {
@@ -204,21 +188,22 @@ export const Service: FC<ServiceProps> = memo(function Service({
       entityId: string;
       entityName: string | undefined;
     }) =>
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: renderEntityDetails({ ...params, scopeId }),
-        }),
+      open(
+        renderEntityDetails({ ...params, scopeId }),
         {
           ...defaultDocumentFlyoutProperties,
           title: params.entityName ?? params.entityId,
           historyKey,
           session: 'inherit',
+        },
+        {
+          surface: 'flyout',
+          flyoutType: entityEngineTypeToFlyoutType(params.engineType),
+          session: 'inherit',
+          origin: 'related_entity',
         }
       ),
-    [overlays, services, store, history, scopeId, historyKey, defaultDocumentFlyoutProperties]
+    [open, scopeId, historyKey, defaultDocumentFlyoutProperties]
   );
 
   const openDetailsPanel = useCallback(
@@ -229,8 +214,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
         historyKey,
         session: 'start' as const,
       };
-      const wrap = (children: React.ReactNode) =>
-        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), common);
+      const wrap = (children: React.ReactNode, tool: FlyoutTool) =>
+        open(children, common, { surface: 'tool', tool, flyoutType: 'service', session: 'start' });
 
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
@@ -240,7 +225,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
               entityName={serviceName}
               entityId={entityStoreEntityId}
               onShowEntity={onShowService}
-            />
+            />,
+            'risk_inputs'
           );
         case EntityDetailsLeftPanelTab.GRAPH_VIEW:
           if (!entityStoreEntityId) return;
@@ -251,7 +237,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
               entityName={serviceName}
               onShowEntity={onShowRelatedEntity}
               onShowOriginatingEntity={onShowService}
-            />
+            />,
+            'graph_view'
           );
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -263,15 +250,13 @@ export const Service: FC<ServiceProps> = memo(function Service({
               scopeId={scopeId}
               onShowEntity={onShowService}
               onShowRelatedEntity={onShowRelatedEntity}
-            />
+            />,
+            'resolution'
           );
       }
     },
     [
-      overlays,
-      services,
-      store,
-      history,
+      open,
       serviceName,
       scopeId,
       entityStoreEntityId,

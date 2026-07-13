@@ -13,6 +13,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import { FlyoutV2EventTypes } from '../../common/lib/telemetry';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -33,13 +34,18 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
 }));
 
 const mockOpenSystemFlyout = jest.fn();
+const mockReportEvent = jest.fn();
 const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTableRecord;
 
 describe('useAttackFlyoutApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     (useKibana as jest.Mock).mockReturnValue({
-      services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } },
+      services: {
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        telemetry: { reportEvent: mockReportEvent },
+      },
     });
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
   });
@@ -53,6 +59,13 @@ describe('useAttackFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 's', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: 'flyout',
+      flyoutType: 'attack',
+      tool: undefined,
+      session: 'start',
+      origin: undefined,
+    });
   });
 
   it('openAttackFlyoutAsChild opens a system flyout that inherits the current session', () => {
@@ -68,6 +81,13 @@ describe('useAttackFlyoutApi', () => {
         historyKey: documentFlyoutHistoryKey,
       })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: 'flyout',
+      flyoutType: 'attack',
+      tool: undefined,
+      session: 'inherit',
+      origin: undefined,
+    });
   });
 
   it('openAttackCorrelations opens the correlations tool flyout with the tools properties', () => {
@@ -78,6 +98,13 @@ describe('useAttackFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 'm', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: 'tool',
+      tool: 'correlations',
+      flyoutType: 'attack',
+      session: 'start',
+      origin: undefined,
+    });
   });
 
   it('openAttackEntities opens the entities tool flyout with the tools properties', () => {
@@ -88,6 +115,13 @@ describe('useAttackFlyoutApi', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 'm', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: 'tool',
+      tool: 'entities',
+      flyoutType: 'attack',
+      session: 'start',
+      origin: undefined,
+    });
   });
 
   it('uses the doc-viewer history key when outside the security app', () => {

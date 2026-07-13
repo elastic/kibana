@@ -97,6 +97,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       overlays: { openSystemFlyout: mockOpenSystemFlyout },
+      telemetry: { reportEvent: jest.fn() },
     },
   }),
 }));
@@ -104,6 +105,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
 describe('<MisconfigurationInsights /> host', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
   });
 
   it('renders the header with the title, host label and storage icon', () => {

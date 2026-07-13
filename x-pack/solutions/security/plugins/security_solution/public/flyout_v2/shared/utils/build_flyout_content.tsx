@@ -16,6 +16,7 @@ import {
   USER_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import type { FlyoutType } from '../../../common/lib/telemetry';
 import { FlyoutLoading } from '../components/flyout_loading';
 
 const Host = lazy(() => import('../../entity/host/main').then((m) => ({ default: m.Host })));
@@ -79,4 +80,27 @@ export const buildFlyoutContent = (
   }
 
   return null;
+};
+
+/**
+ * Returns the `FlyoutType` that `buildFlyoutContent` would open for the given field, or
+ * `undefined` if the field is not supported. Kept in sync with `buildFlyoutContent`'s branching so
+ * callers can tag open/close telemetry without threading a discriminant through the built content.
+ */
+export const getFlyoutTypeForField = (field: string): FlyoutType | undefined => {
+  const ecsField = getEcsField(field);
+
+  if (ecsField?.type === IP_FIELD_TYPE) {
+    return 'network';
+  }
+  if (field === SIGNAL_RULE_NAME_FIELD_NAME || field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME) {
+    return 'rule';
+  }
+  if (field === HOST_NAME_FIELD_NAME) {
+    return 'host';
+  }
+  if (field === USER_NAME_FIELD_NAME) {
+    return 'user';
+  }
+  return undefined;
 };

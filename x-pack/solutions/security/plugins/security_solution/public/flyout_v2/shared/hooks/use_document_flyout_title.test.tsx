@@ -13,6 +13,7 @@ import { useDocumentFlyoutTitle } from './use_document_flyout_title';
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
+import { FlyoutV2EventTypes } from '../../../common/lib/telemetry';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -60,13 +61,16 @@ describe('useDocumentFlyoutTitle', () => {
   const mockUseKibana = jest.mocked(useKibana);
   const mockUseIsInSecurityApp = jest.mocked(useIsInSecurityApp);
   const openSystemFlyout = jest.fn();
+  const reportEvent = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    openSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
     mockUseIsInSecurityApp.mockReturnValue(true);
     mockUseKibana.mockReturnValue({
       services: {
         overlays: { openSystemFlyout },
+        telemetry: { reportEvent },
       },
     } as unknown as ReturnType<typeof useKibana>);
   });
@@ -100,6 +104,13 @@ describe('useDocumentFlyoutTitle', () => {
         session: 'inherit',
       })
     );
+    expect(reportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: 'flyout',
+      flyoutType: 'document',
+      tool: undefined,
+      session: 'inherit',
+      origin: 'title',
+    });
   });
 
   it('uses DOC_VIEWER_FLYOUT_HISTORY_KEY when not in the Security app', () => {
