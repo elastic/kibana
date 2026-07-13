@@ -10,11 +10,12 @@ import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
-import { documentFlyoutHistoryKey } from '../../../../flyout_v2/shared/constants/flyout_history';
-import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
-import { DocumentFlyoutWrapper } from '../../../../flyout_v2/document/main/document_flyout_wrapper';
+import { TableId } from '@kbn/securitysolution-data-table';
+import {
+  casesCellActionRenderer,
+  cellActionRenderer,
+} from '../../../../flyout_v2/shared/components/cell_actions';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../hooks/use_is_new_flyout_enabled';
@@ -32,8 +33,6 @@ import { type ColumnHeaderOptions, type OnRowSelected } from '../../../../../com
 import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
-import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
-import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -85,14 +84,11 @@ const RowActionComponent = ({
     [esHitRecord]
   );
 
-  const { services } = useKibana();
-  const { telemetry, overlays } = services;
-  const store = useStore();
-  const history = useHistory();
+  const { telemetry } = useKibana().services;
 
   const { openFlyout } = useExpandableFlyoutApi();
   const enableNewFlyout = useIsNewFlyoutEnabled();
-  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const { openDocumentFlyoutFromIndex, openNotes } = useFlyoutApi();
 
   const columnValues = useMemo(
     () =>
@@ -121,26 +117,13 @@ const RowActionComponent = ({
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
     if (enableNewFlyout && hit) {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <DocumentFlyoutWrapper
-              documentId={eventId}
-              indexName={indexName ?? undefined}
-              renderCellActions={cellActionRenderer}
-              onAlertUpdated={handleAlertUpdated}
-            />
-          ),
-        }),
-        {
-          ...defaultFlyoutProperties,
-          historyKey: documentFlyoutHistoryKey,
-          session: 'start',
-        }
-      );
+      openDocumentFlyoutFromIndex({
+        documentId: eventId,
+        indexName: indexName ?? undefined,
+        renderCellActions:
+          tableId === TableId.alertsOnCasePage ? casesCellActionRenderer : cellActionRenderer,
+        onAlertUpdated: handleAlertUpdated,
+      });
     } else {
       openFlyout({
         right: {
@@ -158,13 +141,9 @@ const RowActionComponent = ({
       });
     }
   }, [
-    defaultFlyoutProperties,
     enableNewFlyout,
     hit,
-    overlays,
-    services,
-    store,
-    history,
+    openDocumentFlyoutFromIndex,
     eventId,
     indexName,
     handleAlertUpdated,
@@ -174,27 +153,31 @@ const RowActionComponent = ({
   ]);
 
   const toggleShowNotes = useCallback(() => {
-    openFlyout({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: eventId,
-          indexName,
-          scopeId: tableId,
+    if (enableNewFlyout && hit) {
+      openNotes({ hit });
+    } else {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
         },
-      },
-      left: {
-        id: DocumentDetailsLeftPanelKey,
-        path: {
-          tab: LeftPanelNotesTab,
+        left: {
+          id: DocumentDetailsLeftPanelKey,
+          path: {
+            tab: LeftPanelNotesTab,
+          },
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
         },
-        params: {
-          id: eventId,
-          indexName,
-          scopeId: tableId,
-        },
-      },
-    });
+      });
+    }
     telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
       location: tableId,
     });
@@ -202,7 +185,7 @@ const RowActionComponent = ({
       location: tableId,
       panel: 'left',
     });
-  }, [eventId, indexName, openFlyout, tableId, telemetry]);
+  }, [enableNewFlyout, hit, openNotes, openFlyout, eventId, indexName, tableId, telemetry]);
 
   const Action = controlColumn.rowCellRender;
 
