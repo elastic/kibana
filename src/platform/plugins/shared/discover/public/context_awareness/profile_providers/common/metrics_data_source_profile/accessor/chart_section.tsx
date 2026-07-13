@@ -8,7 +8,9 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { useObservable } from '@kbn/use-observable';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import type { MetricsGridSettings } from '@kbn/unified-chart-section-viewer';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
 import {
   internalStateActions,
@@ -20,18 +22,36 @@ import { useDiscoverServices } from '../../../../../hooks/use_discover_services'
 import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
+import type { ProfileStateAdapter } from '../../../../profile_state';
+import { METRICS_GRID_SETTINGS_STATE_DEF } from '../profile_state';
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 /**
  * Wrapper component that reads breakdownField from Discover's app state
  * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector.
  */
 const MetricsExperienceGridWrapper = (
-  props: ChartSectionProps & { actions: ContextAwarenessToolkitActions }
+  props: ChartSectionProps & {
+    actions: ContextAwarenessToolkitActions;
+    gridSettingsStateAdapter: ProfileStateAdapter<MetricsGridSettings>;
+  }
 ) => {
+  const { gridSettingsStateAdapter } = props;
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const { discoverShared, dataViews, notifications, docLinks, logger } = useDiscoverServices();
+
+  const gridSettings = useObservable(
+    gridSettingsStateAdapter.getState$(),
+    gridSettingsStateAdapter.getState()
+  );
+
+  const onGridSettingsChange = useCallback(
+    (update: Partial<MetricsGridSettings>) => {
+      gridSettingsStateAdapter.updateState(update);
+    },
+    [gridSettingsStateAdapter]
+  );
 
   const onBreakdownFieldChange = useCallback(
     (nextBreakdownField?: string) => {
@@ -59,6 +79,8 @@ const MetricsExperienceGridWrapper = (
       breakdownField={breakdownField}
       onBreakdownFieldChange={onBreakdownFieldChange}
       externalServices={externalServices}
+      gridSettings={gridSettings}
+      onGridSettingsChange={onGridSettingsChange}
     />
   );
 };
@@ -67,10 +89,17 @@ export const createChartSection =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
   (prev, { toolkit }) =>
   () => {
+    const gridSettingsStateAdapter = toolkit.getStateAdapter(METRICS_GRID_SETTINGS_STATE_DEF);
     return {
       ...prev(),
       renderChartSection: (props) => {
-        return <MetricsExperienceGridWrapper {...props} actions={toolkit.actions} />;
+        return (
+          <MetricsExperienceGridWrapper
+            {...props}
+            actions={toolkit.actions}
+            gridSettingsStateAdapter={gridSettingsStateAdapter}
+          />
+        );
       },
       replaceDefaultChart: true,
       localStorageKeyPrefix: 'discover:metricsExperience',

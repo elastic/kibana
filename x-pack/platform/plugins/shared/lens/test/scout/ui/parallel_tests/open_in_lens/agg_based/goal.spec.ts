@@ -7,33 +7,19 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData, convertToLensByTitle, getImportedDashboardId } from '../../../fixtures';
+import { testData, convertToLensByTitle, createOpenInLensSuiteSetup } from '../../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.stateful.classic }, () => {
-  let goalDashboardId: string;
-
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVES.OPEN_IN_LENS_AGG_BASED.GOAL
-    );
-    goalDashboardId = getImportedDashboardId(imported, testData.OPEN_IN_LENS_DASHBOARDS.GOAL);
-
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-    await scoutSpace.uiSettings.set({
-      'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
-    });
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.GOAL,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.GOAL,
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.openDashboardWithIdInEditMode(goalDashboardId);
-  });
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
+
+  spaceTest.afterAll(openInLensSuite.afterAll);
 
   spaceTest('should convert to Lens', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
@@ -197,7 +183,7 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.stateful.
       ]);
 
     await dimensions[0].click();
-    await lens.openPalettePanel();
+    await lens.openPalettePanelFlyout();
     const colorStops = await lens.getPaletteColorStops();
     expect(colorStops).toStrictEqual([
       { color: 'rgba(0, 104, 55, 1)', stop: '0' },
