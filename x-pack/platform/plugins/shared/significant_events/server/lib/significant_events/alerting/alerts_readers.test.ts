@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryLink } from '@kbn/significant-events-schema';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
   RULES_BUCKET_SIZE,
   buildChangePointHistogramBounds,
   buildChangePointTimeSeriesAggs,
 } from './change_point_scan_shared';
 import { ALERTS_READER_V1, ALERTS_READER_V2 } from './alerts_reader';
+import { getRuleDetectionSchedule } from '../rules/schedule';
 
 const SPACE_ID = 'default';
 const RULE_UUID = 'rule-abc';
@@ -38,27 +39,40 @@ const makeQueryLink = (
 
 function createEsClient() {
   const search = jest.fn();
-  const count = jest.fn();
   return {
     search,
-    count,
-    client: { search, count } as unknown as ElasticsearchClient,
+    client: { search } as unknown as TracedElasticsearchClient,
   };
 }
 
 describe('SignificantEventsAlertsReaderV1', () => {
   const reader = ALERTS_READER_V1;
 
-  it('counts alerts with a document count query', async () => {
-    const { client, count } = createEsClient();
-    count.mockResolvedValue({ count: 17 });
+  it('builds the occurrences ES|QL request scoped by rule uuid', () => {
+    const request = reader.buildOccurrencesEsqlRequest({
+      ruleIds: [RULE_UUID],
+      value: 30,
+      esqlUnit: 'minutes',
+      limit: 100,
+      spaceId: SPACE_ID,
+    });
+
+    expect(request.query).toContain(`kibana.alert.rule.uuid IN ("${RULE_UUID}")`);
+    expect(request.query).not.toContain('space_id');
+  });
+
+  it('counts alerts with a size 0 search', async () => {
+    const { client, search } = createEsClient();
+    search.mockResolvedValue({ hits: { total: { value: 17 } } });
 
     const result = await reader.countAlerts(client, { lookback: LOOKBACK, spaceId: SPACE_ID });
 
     expect(result).toBe(17);
-    expect(count).toHaveBeenCalledWith({
+    expect(search).toHaveBeenCalledWith('significant_events_alerts_v1_count_alerts', {
       index: '.alerts-streams.alerts-default',
       ignore_unavailable: true,
+      size: 0,
+      track_total_hits: true,
       query: {
         bool: {
           filter: [
@@ -71,8 +85,8 @@ describe('SignificantEventsAlertsReaderV1', () => {
   });
 
   it('scopes countAlerts to a single rule when ruleUuid is provided', async () => {
-    const { client, count } = createEsClient();
-    count.mockResolvedValue({ count: 3 });
+    const { client, search } = createEsClient();
+    search.mockResolvedValue({ hits: { total: { value: 3 } } });
 
     await reader.countAlerts(client, {
       lookback: LOOKBACK,
@@ -80,7 +94,8 @@ describe('SignificantEventsAlertsReaderV1', () => {
       ruleUuid: RULE_UUID,
     });
 
-    expect(count).toHaveBeenCalledWith(
+    expect(search).toHaveBeenCalledWith(
+      'significant_events_alerts_v1_count_alerts',
       expect.objectContaining({
         query: {
           bool: {
@@ -121,8 +136,10 @@ describe('SignificantEventsAlertsReaderV1', () => {
     );
 
     expect(search).toHaveBeenCalledWith(
+      'significant_events_alerts_v1_change_point_scan',
       expect.objectContaining({
         index: '.alerts-streams.alerts-default',
+        track_total_hits: false,
         aggs: {
           by_rule: {
             terms: { field: 'kibana.alert.rule.uuid', size: RULES_BUCKET_SIZE },
@@ -159,6 +176,7 @@ describe('SignificantEventsAlertsReaderV1', () => {
         change_points: { type: { mean_shift: { p_value: 0.01 } } },
         last_5m: { doc_count: 5 },
         last_floor_window: { doc_count: 8 },
+        rule_schedule: getRuleDetectionSchedule({ severity_score: 60 }),
       },
     ]);
   });
@@ -189,6 +207,7 @@ describe('SignificantEventsAlertsReaderV1', () => {
         change_points: { type: {} },
         last_5m: { doc_count: 0 },
         last_floor_window: { doc_count: 0 },
+        rule_schedule: getRuleDetectionSchedule({ severity_score: 60 }),
       })
     );
   });
@@ -211,7 +230,9 @@ describe('SignificantEventsAlertsReaderV1', () => {
     });
 
     expect(search).toHaveBeenCalledWith(
+      'significant_events_alerts_v1_rule_activity',
       expect.objectContaining({
+        track_total_hits: false,
         aggs: {
           activity_windows: {
             date_histogram: {
@@ -246,7 +267,9 @@ describe('SignificantEventsAlertsReaderV1', () => {
     });
 
     expect(search).toHaveBeenCalledWith(
+      'significant_events_alerts_v1_rule_alert_windows',
       expect.objectContaining({
+        track_total_hits: false,
         aggs: {
           current_window: {
             filter: { range: { '@timestamp': { gte: 'now-5m' } } },
@@ -266,6 +289,20 @@ describe('SignificantEventsAlertsReaderV1', () => {
 describe('SignificantEventsAlertsReaderV2', () => {
   const reader = ALERTS_READER_V2;
 
+  it('scopes the occurrences ES|QL request by type == "signal" and space_id', () => {
+    const request = reader.buildOccurrencesEsqlRequest({
+      ruleIds: [RULE_UUID],
+      value: 30,
+      esqlUnit: 'minutes',
+      limit: 100,
+      spaceId: SPACE_ID,
+    });
+
+    expect(request.query).toContain('type == "signal"');
+    expect(request.query).toContain(`space_id == "${SPACE_ID}"`);
+    expect(request.query).toContain(`rule.id IN ("${RULE_UUID}")`);
+  });
+
   it('counts alerts with a distinct group_hash cardinality aggregation', async () => {
     const { client, search } = createEsClient();
     search.mockResolvedValue({ aggregations: { signal_count: { value: 21 } } });
@@ -273,10 +310,11 @@ describe('SignificantEventsAlertsReaderV2', () => {
     const result = await reader.countAlerts(client, { lookback: LOOKBACK, spaceId: SPACE_ID });
 
     expect(result).toBe(21);
-    expect(search).toHaveBeenCalledWith({
+    expect(search).toHaveBeenCalledWith('significant_events_alerts_v2_count_alerts', {
       index: '.rule-events',
       ignore_unavailable: true,
       size: 0,
+      track_total_hits: false,
       query: {
         bool: {
           filter: [
@@ -305,6 +343,7 @@ describe('SignificantEventsAlertsReaderV2', () => {
     });
 
     expect(search).toHaveBeenCalledWith(
+      'significant_events_alerts_v2_count_alerts',
       expect.objectContaining({
         query: {
           bool: {
@@ -342,8 +381,10 @@ describe('SignificantEventsAlertsReaderV2', () => {
     );
 
     expect(search).toHaveBeenCalledWith(
+      'significant_events_alerts_v2_change_point_scan',
       expect.objectContaining({
         index: '.rule-events',
+        track_total_hits: false,
         aggs: {
           by_rule: {
             terms: { field: 'rule.id', size: RULES_BUCKET_SIZE },
@@ -373,8 +414,52 @@ describe('SignificantEventsAlertsReaderV2', () => {
         change_points: { type: { mean_shift: { p_value: 0.02 } } },
         last_5m: { doc_count: 5 },
         last_floor_window: { doc_count: 8 },
+        rule_schedule: getRuleDetectionSchedule({ severity_score: 60 }),
       },
     ]);
+  });
+
+  it('filters change-point scans to the provided rule IDs and recent activity window', async () => {
+    const { client, search } = createEsClient();
+    search.mockResolvedValue({ aggregations: { by_rule: { buckets: [] } } });
+
+    await reader.runChangePointScan(
+      client,
+      {
+        lookback: 'now-110m',
+        bucketInterval: '5m',
+        recentActivityMinutes: 10,
+        ruleIds: [RULE_UUID],
+        spaceId: SPACE_ID,
+      },
+      [makeQueryLink()]
+    );
+
+    expect(search).toHaveBeenCalledWith(
+      'significant_events_alerts_v2_change_point_scan',
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'signal' } },
+              { term: { space_id: SPACE_ID } },
+              { range: { '@timestamp': { gte: 'now-110m' } } },
+              { terms: { 'rule.id': [RULE_UUID] } },
+            ],
+          },
+        },
+        aggs: expect.objectContaining({
+          by_rule: expect.objectContaining({
+            aggs: expect.objectContaining({
+              last_5m: {
+                filter: { range: { '@timestamp': { gte: 'now-10m' } } },
+                aggs: { signal_count: { cardinality: { field: 'group_hash' } } },
+              },
+            }),
+          }),
+        }),
+      })
+    );
   });
 
   it('normalizes rule activity windows to doc_count from signal_count', async () => {
@@ -399,7 +484,9 @@ describe('SignificantEventsAlertsReaderV2', () => {
     });
 
     expect(search).toHaveBeenCalledWith(
+      'significant_events_alerts_v2_rule_activity',
       expect.objectContaining({
+        track_total_hits: false,
         aggs: {
           activity_windows: {
             date_histogram: {
@@ -448,7 +535,9 @@ describe('SignificantEventsAlertsReaderV2', () => {
     });
 
     expect(search).toHaveBeenCalledWith(
+      'significant_events_alerts_v2_rule_alert_windows',
       expect.objectContaining({
+        track_total_hits: false,
         aggs: {
           current_window: {
             filter: { range: { '@timestamp': { gte: 'now-5m' } } },

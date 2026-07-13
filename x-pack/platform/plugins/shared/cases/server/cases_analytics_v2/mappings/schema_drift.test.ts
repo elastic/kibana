@@ -30,10 +30,10 @@ import { CASE_INDEX_MAPPING } from './case';
  * resolves in `CASE_INDEX_MAPPING`. Catches a field added to the
  * doc-builder without a matching mapping update.
  *
- * Layer 2 (SO mapping ⊆ CASE_INDEX_MAPPING via `cases.<path>`).
+ * Layer 2 (SO mapping ⊆ CASE_INDEX_MAPPING via `case.<path>`).
  * Every field in the cases SO mapping at
  * `server/saved_object_types/cases/cases.ts` has a corresponding
- * entry in `CASE_INDEX_MAPPING` under `cases.<path>` (or is
+ * entry in `CASE_INDEX_MAPPING` under `case.<path>` (or is
  * explicitly allowlisted as an intentional divergence). Catches a
  * field added to the SO mapping without a mirror in v2.
  *
@@ -45,9 +45,9 @@ import { CASE_INDEX_MAPPING } from './case';
  * about what (or whether) `buildCaseDoc` should emit for it.
  *
  * Excluded from Layer 1:
- *   - `cases.extended_fields.*`: lands via the dynamic_template,
+ *   - `case.extended_fields.*`: lands via the dynamic_template,
  *     not static properties.
- *   - `cases.observables.*`: lands via the dynamic_template
+ *   - `case.observables.*`: lands via the dynamic_template
  *     (denormalized per-typeKey keys are dynamic).
  */
 
@@ -193,11 +193,11 @@ describe('case mapping covers every doc-builder field', () => {
   });
 });
 
-// ----- Layer 2: SO mapping ⊆ v2 mapping (via `cases.<path>` prefix rule) -----
+// ----- Layer 2: SO mapping ⊆ v2 mapping (via `case.<path>` prefix rule) -----
 
 /**
  * Fields present in the cases SO mapping that intentionally don't
- * appear at the parallel `cases.<path>` location in v2 *and* aren't
+ * appear at the parallel `case.<path>` location in v2 *and* aren't
  * covered by an `enabled: false` / `dynamic: true` ancestor (which
  * `isCovered` handles via prefix-match).
  *
@@ -206,17 +206,17 @@ describe('case mapping covers every doc-builder field', () => {
  * exactly what this layer exists to prevent.
  */
 const OMITTED_FROM_ANALYTICS_V2_MIRROR: ReadonlyMap<string, string> = new Map([
-  // Empty. (`owner` is mirrored at `cases.owner` in addition to its
+  // Empty. (`owner` is mirrored at `case.owner` in addition to its
   // top-level DLS copy, so it satisfies the Layer 2 mirror directly.)
   // The intentional divergences are all covered by an opaque
   // (`enabled: false`) or `dynamic: true` parent in v2 and caught by
   // the `isCovered` rule:
-  //  - cases.settings.{syncAlerts,extractObservables}
-  //    → v2 cases.settings is `enabled: false` (per-case config,
+  //  - case.settings.{syncAlerts,extractObservables}
+  //    → v2 case.settings is `enabled: false` (per-case config,
   //      not an analytics dimension).
-  //  - cases.observables.{typeKey,value,description}
-  //    → v2 cases.observables is `dynamic: true` (denormalized to
-  //      `cases.observables.<typeKey>` via dynamic_template;
+  //  - case.observables.{typeKey,value,description}
+  //    → v2 case.observables is `dynamic: true` (denormalized to
+  //      `case.observables.<typeKey>` via dynamic_template;
   //      description dropped).
 ]);
 
@@ -229,8 +229,8 @@ describe('cases SO mapping is mirrored in CASE_INDEX_MAPPING', () => {
   const soPaths = collectMappedPaths(soMapping);
   const v2Paths = collectMappedPaths(CASE_INDEX_MAPPING);
 
-  it('every SO mapping field exists at cases.<path> in v2 (or is covered / allowlisted)', () => {
-    // Mechanical rule: SO field `foo.bar` is expected at `cases.foo.bar` in
+  it('every SO mapping field exists at case.<path> in v2 (or is covered / allowlisted)', () => {
+    // Mechanical rule: SO field `foo.bar` is expected at `case.foo.bar` in
     // v2. `isCovered` also accepts a match on any prefix — so SO subfields
     // of an opaque (`enabled: false`) or `dynamic: true` v2 parent are
     // implicitly covered without needing an allowlist entry. Anything that
@@ -238,7 +238,7 @@ describe('cases SO mapping is mirrored in CASE_INDEX_MAPPING', () => {
     // with a documented reason.
     const missing = [...soPaths].filter((soPath) => {
       if (OMITTED_FROM_ANALYTICS_V2_MIRROR.has(soPath)) return false;
-      const expected = `cases.${soPath}`;
+      const expected = `case.${soPath}`;
       return !isCovered(expected, v2Paths);
     });
     expect(missing).toEqual([]);
@@ -248,9 +248,9 @@ describe('cases SO mapping is mirrored in CASE_INDEX_MAPPING', () => {
 // ----- Snake-key collision guard (runtime field naming invariant) -----
 
 /**
- * Typed runtime fields are published at `cases.<snakeKey>` (e.g.
- * `cases.score_as_long`) — direct children of `cases`. The strict
- * collision is at the exact full path `cases.<snake>`. The check
+ * Typed runtime fields are published at `case.<snakeKey>` (e.g.
+ * `case.score_as_long`) — direct children of `case`. The strict
+ * collision is at the exact full path `case.<snake>`. The check
  * scans the leaf segment everywhere as broader defense against
  * naming-confusion foot-guns and future widening of the runtime
  * publication scheme.
