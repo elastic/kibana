@@ -30,20 +30,22 @@ evaluate.describe(
     // returns rows the model can sort into a real timeline. Without seeded events the
     // "produces a chronological narrative or ordered event list" criterion is
     // unsatisfiable and pins the timeline example at partial credit.
-    evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
-      await waitForEndpointPackage(kbnClient, esClient, log);
-      await cleanupSeededData({ esClient, internalEsClient });
-      await seedForensicTimeline({ esClient }, log);
+    evaluate.beforeAll(
+      async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
+        await waitForEndpointPackage(kbnClient, esClient, log);
+        await cleanupSeededData({ esClient, internalEsClient });
+        await seedForensicTimeline({ esClient }, log);
 
-      try {
-        await agentBuilderClient.converse({
-          agentId: resolveSecurityEvalAgentId(),
-          input: 'hello',
-        });
-      } catch (e) {
-        log.warning(`Warmup failed: ${e}`);
+        try {
+          await agentBuilderClient.converse({
+            agentId: resolveSecurityEvalAgentId(),
+            input: 'hello',
+          });
+        } catch (e) {
+          log.warning(`Warmup failed: ${e}`);
+        }
       }
-    });
+    );
 
     evaluate.afterAll(async ({ esClient, internalEsClient }) => {
       await cleanupSeededData({ esClient, internalEsClient });
