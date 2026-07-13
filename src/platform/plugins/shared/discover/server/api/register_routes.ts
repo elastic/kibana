@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { writeErrorHandler } from '@kbn/as-code-utils';
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { createDiscoverSession } from './session_create';
 import { getRouteConfig } from './get_route_config';
 import { discoverSessionApiDataSchema, discoverSessionApiResponseSchema } from './schema';
 
-export const registerRoutes = (http: HttpServiceSetup, logger: Logger) => {
+export const registerRoutes = (
+  http: HttpServiceSetup,
+  logger: Logger,
+  usageCounter: UsageCounter | undefined
+) => {
   const { versioned } = http.createRouter();
   const { basePath, routeConfig, routeVersion } = getRouteConfig();
 
@@ -40,14 +46,15 @@ export const registerRoutes = (http: HttpServiceSetup, logger: Logger) => {
           },
         },
       },
-      async (context, request, response) => {
-        try {
-          const body = await createDiscoverSession(context, request.body);
+      async (context, request, response) =>
+        telemetryHandler(request, usageCounter, async () => {
+          try {
+            const body = await createDiscoverSession(context, request.body);
 
-          return response.created({ body });
-        } catch (error) {
-          return writeErrorHandler(error, response, logger, request);
-        }
-      }
+            return response.created({ body });
+          } catch (error) {
+            return writeErrorHandler(error, response, logger, request);
+          }
+        })
     );
 };
