@@ -132,4 +132,33 @@ describe('useEntityForAttachment', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(mockFetch).not.toHaveBeenCalled();
   });
+
+  // Elasticsearch serialises a single-value `keyword` field as a bare string,
+  // so an entity in exactly one watchlist comes back as a string, not an array.
+  // Before the fix this reached `WatchlistsCell.map(...)` and crashed the UI.
+  it('normalises a single-string watchlists value into a one-element array', async () => {
+    mockFetch.mockResolvedValue({
+      records: [
+        {
+          entity: {
+            id: 'host:server1',
+            name: 'server1',
+            attributes: { watchlists: '4be6078f-d987-471d-bd8f-41dd280437fb' },
+          },
+        },
+      ],
+    });
+
+    const identifier: EntityAttachmentIdentifier = {
+      identifierType: 'host',
+      identifier: 'server1',
+    };
+
+    const { result } = renderHook(() => useEntityForAttachment(identifier), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.data?.isEntityInStore).toBe(true));
+    expect(result.current.data?.watchlistIds).toEqual(['4be6078f-d987-471d-bd8f-41dd280437fb']);
+  });
 });

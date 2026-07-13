@@ -57,7 +57,7 @@ export const PlaygroundMoreOptionsMenu = ({
   const menuItems = [
     <EuiContextMenuItem
       key="savePlaygroundAs"
-      icon={<EuiIcon type="save" aria-hidden={true} />}
+      icon={<EuiIcon type="save" aria-hidden />}
       onClick={onOpenSaveAs}
       data-test-subj="moreOptionsSavePlaygroundAs"
       disabled={hasFormErrors}
@@ -71,7 +71,7 @@ export const PlaygroundMoreOptionsMenu = ({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="deletePlayground"
-      icon={<EuiIcon color="danger" type="trash" aria-hidden={true} />}
+      icon={<EuiIcon color="danger" type="trash" aria-hidden />}
       onClick={onOpenDeleteConfirm}
       data-test-subj="moreOptionsDeletePlayground"
     >

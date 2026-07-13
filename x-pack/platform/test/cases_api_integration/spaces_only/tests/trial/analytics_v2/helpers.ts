@@ -10,6 +10,7 @@ import type SuperTest from 'supertest';
 
 export const CASE_INDEX = '.cases';
 export const ACTIVITY_INDEX = '.cases-activity';
+export const ATTACHMENTS_INDEX = '.cases-attachments';
 export const DATA_VIEW_ID_PREFIX = 'cases-analytics-managed-';
 
 const POLL_INTERVAL_MS = 200;
@@ -47,6 +48,10 @@ export const waitForCaseIndexExists = (es: Client, timeoutMs?: number): Promise<
 /** Activity-surface companion used by the `.cases-activity` tests. */
 export const waitForActivityIndexExists = (es: Client, timeoutMs?: number): Promise<void> =>
   waitForIndexExists(es, ACTIVITY_INDEX, timeoutMs);
+
+/** Attachments-surface companion used by the `.cases-attachments` tests. */
+export const waitForAttachmentsIndexExists = (es: Client, timeoutMs?: number): Promise<void> =>
+  waitForIndexExists(es, ATTACHMENTS_INDEX, timeoutMs);
 
 /**
  * Poll `.cases` until the analytics doc for the given caseId reaches
@@ -310,6 +315,73 @@ export async function waitForActivityAbsent(
   );
 }
 
+/**
+ * Poll `.cases-attachments` until the count of docs matching
+ * `cases.id = caseId` reaches at least `minCount`. Same fire-and-forget
+ * caveat as `waitForActivityForCase`: the analytics writer runs on a
+ * separate code path from the SO write, so tests must poll-with-refresh.
+ */
+export async function waitForAttachmentForCase(
+  es: Client,
+  caseId: string,
+  minCount: number,
+  timeoutMs = DEFAULT_TIMEOUT_MS
+): Promise<AttachmentDocSource[]> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      await es.indices.refresh({ index: ATTACHMENTS_INDEX });
+    } catch {
+      // Index may have been dropped mid-test — poll again.
+    }
+    try {
+      const search = await es.search<AttachmentDocSource>({
+        index: ATTACHMENTS_INDEX,
+        size: 100,
+        sort: [{ '@timestamp': { order: 'asc' } }],
+        query: { term: { 'cases.id': caseId } },
+      });
+      const hits = search.hits.hits.map((h) => h._source!).filter(Boolean);
+      if (hits.length >= minCount) return hits;
+    } catch {
+      // Index doesn't exist yet, etc.
+    }
+    await sleep(POLL_INTERVAL_MS);
+  }
+  throw new Error(
+    `Timed out waiting for ${minCount}+ attachment docs for case=${caseId} in ${ATTACHMENTS_INDEX}`
+  );
+}
+
+/**
+ * Poll `.cases-attachments` until ZERO docs match `cases.id = caseId`.
+ * Used after a cases delete to assert the cascade-delete fired against
+ * BOTH source SO types (legacy + unified).
+ */
+export async function waitForAttachmentsAbsent(
+  es: Client,
+  caseId: string,
+  timeoutMs = DEFAULT_TIMEOUT_MS
+): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      await es.indices.refresh({ index: ATTACHMENTS_INDEX });
+      const count = await es.count({
+        index: ATTACHMENTS_INDEX,
+        query: { term: { 'cases.id': caseId } },
+      });
+      if ((count.count ?? 0) === 0) return;
+    } catch {
+      // Treat missing index / search errors as "no docs".
+    }
+    await sleep(POLL_INTERVAL_MS);
+  }
+  throw new Error(
+    `Timed out waiting for attachment docs for case=${caseId} to be removed from ${ATTACHMENTS_INDEX}`
+  );
+}
+
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
 // ----- Response shape types (subset asserted against in tests) -----
@@ -343,12 +415,14 @@ export interface V2StateBody {
   surfaces: {
     cases: { index: string; index_exists: boolean };
     activity: { index: string; index_exists: boolean };
+    attachments: { index: string; index_exists: boolean };
   };
   reconciliation: {
     task_type: string;
     last_run: {
       cases_last_run_at?: string;
       activity_last_run_at?: string;
+      attachments_last_run_at?: string;
       /**
        * Single-cursor compatibility field used as a one-time seed
        * for `cases_last_run_at` when the per-surface field isn't
@@ -365,7 +439,7 @@ export interface V2StateBody {
    * is scheduled, or when the most recent reset succeeded (Task
    * Manager auto-removes one-shot tasks on success). A non-null
    * snapshot with `status: 'failed'` is the administrator's signal that
-   * the backfill walk threw on both surfaces.
+   * every surface's walk threw (total failure).
    */
   active_reset: {
     task_id: string;
@@ -375,26 +449,30 @@ export interface V2StateBody {
     /**
      * Mirrors `ResetTaskState` in `reset_task.ts`. Updated live by
      * the reset task's wall-clock-throttled progress writer (every
-     * ~30s during the walk): `phase`, `cases_processed`,
-     * `activity_processed`, and `started_at` populate
-     * progressively. `cases_cursor`, `activity_cursor`,
-     * `completed_at`, `cases_error`, and `activity_error` only land
-     * in the final write at task completion.
+     * ~30s during the walk): `phase: 'running'`, `started_at`, and the
+     * three `*_processed` counts populate progressively. The surfaces
+     * walk concurrently, so the three counts advance together rather
+     * than one at a time. The `*_cursor` fields, `completed_at`, and
+     * the `*_error` fields only land in the final write at task
+     * completion.
      */
     state: ActiveResetState;
   } | null;
 }
 
 export interface ActiveResetState {
-  phase?: 'cases' | 'activity' | 'completed' | null;
+  phase?: 'running' | 'completed' | null;
   cases_processed?: number | null;
   activity_processed?: number | null;
+  attachments_processed?: number | null;
   cases_cursor?: string | null;
   activity_cursor?: string | null;
+  attachments_cursor?: string | null;
   started_at?: string;
   completed_at?: string | null;
   cases_error?: string | null;
   activity_error?: string | null;
+  attachments_error?: string | null;
 }
 
 /**
@@ -422,5 +500,40 @@ export interface ActivityDocSource {
     assignees_changed?: string[];
     tags_changed?: string[];
     connector_id_new?: string;
+  };
+}
+
+/**
+ * Subset of the attachments doc shape the integration tests assert
+ * against. Mirrors `AttachmentAnalyticsDoc` in
+ * `writer/attachments_doc_builder.ts`. Both legacy `cases-comments`
+ * and unified `cases-attachments` SO writes flow through the same
+ * doc-builder, so this single type covers both source paths.
+ */
+export interface AttachmentDocSource {
+  '@timestamp': string;
+  // Top-level singular scoping field, matching the cases + activity surfaces (DLS).
+  space_id: string;
+  cases: { id: string };
+  owner: string;
+  created_at: string;
+  created_by: {
+    username?: string | null;
+    full_name?: string | null;
+    email?: string | null;
+    profile_uid?: string;
+  };
+  updated_at?: string | null;
+  attachment: {
+    type: string;
+    attachment_id?: string[];
+    data_json?: string;
+    metadata_json?: string;
+    comment?: string;
+    alert?: {
+      rule?: { id?: string | null; name?: string | null };
+      indices?: string[];
+    };
+    event?: { indices?: string[] };
   };
 }

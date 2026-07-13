@@ -34,10 +34,12 @@ export interface DiscoverTestFixtures extends ScoutParallelTestFixtures {
 
 export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWorkerFixtures>({
   pageObjects: async ({ pageObjects, page }, use) => {
-    await use({
+    const discoverPageObjects: DiscoverTestFixtures['pageObjects'] = {
       ...pageObjects,
       inspector: createLazyPageObject(Inspector, page),
-    });
+    };
+
+    await use(discoverPageObjects);
   },
   discoverScoutSpace: [
     async ({ scoutSpace }, use) => {
@@ -65,3 +67,4 @@ export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWork
 
 export { testData };
 export { tags };
+export { countMatchingRequests } from './network';

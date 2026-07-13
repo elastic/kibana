@@ -29,6 +29,8 @@ interface MonacoEditorInstance {
   setPosition(pos: unknown): void;
   focus(): void;
   trigger(source: string, handlerId: string, payload: unknown): void;
+  setScrollTop(scrollTop: number): void;
+  getScrollTop(): number;
 }
 
 /**
@@ -229,6 +231,35 @@ export class KibanaCodeEditorWrapper {
         throw new Error('No Monaco editor instance found');
       }
       editor.trigger('scout-test', 'toggleSuggestionDetails', {});
+    }, editorIndex);
+  }
+
+  async setScrollTop(scrollTop: number, editorIndex: number = 0): Promise<void> {
+    await this.page.evaluate(
+      ({ index, scrollAmount }) => {
+        const monacoEnv = (window as any).MonacoEnvironment;
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+        const editors = monacoEnv.monaco.editor.getEditors() as MonacoEditorInstance[];
+        const editor = editors[index] ?? editors[0];
+        if (!editor) {
+          throw new Error('No Monaco editor instance found');
+        }
+        editor.setScrollTop(scrollAmount);
+      },
+      { index: editorIndex, scrollAmount: scrollTop }
+    );
+  }
+
+  async getScrollTop(editorIndex: number = 0): Promise<number> {
+    return this.page.evaluate((index) => {
+      const monacoEnv = (window as any).MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+      const editors = monacoEnv.monaco.editor.getEditors() as MonacoEditorInstance[];
+      return editors[index]?.getScrollTop() ?? editors[0]?.getScrollTop() ?? 0;
     }, editorIndex);
   }
 }

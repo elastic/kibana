@@ -35,6 +35,7 @@ export class StreamsApp {
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
   public readonly concatLiteralInput;
+  public readonly createStreamButton;
   public readonly createQueryStreamButton;
   public readonly childStreamTypeSelector;
   public readonly queryStreamFlyout;
@@ -86,6 +87,7 @@ export class StreamsApp {
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
     this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
+    this.createStreamButton = this.page.getByTestId('streamsAppCreateStreamButton');
     this.createQueryStreamButton = this.page.getByTestId('streamsAppCreateQueryStreamButton');
     this.childStreamTypeSelector = this.page.getByTestId('streamsAppChildStreamTypeSelector');
     this.queryStreamFlyout = this.page.getByTestId('streamsAppQueryStreamFlyout');
@@ -352,10 +354,21 @@ export class StreamsApp {
   }
 
   // Streams header utility methods
+
+  /**
+   * The shared app header only renders the first two badges inline and collapses the rest into a
+   * "Show N more badges" overflow popover (overflow triggers at more than three badges). Call this
+   * from tests that drive a stream with enough badges to overflow (e.g. TSDB streams) so overflowed
+   * badges like the lifecycle badge become assertable.
+   */
+  async openBadgesOverflow() {
+    await this.page.testSubj.click('appHeaderBadgesOverflow');
+  }
+
   async verifyLifecycleBadge(streamName: string, expectedLabel: string) {
-    await expect(
-      this.page.locator(`[data-test-subj="lifecycleBadge-${streamName}"]`)
-    ).toContainText(expectedLabel);
+    await expect(this.page.testSubj.locator(`lifecycleBadge-${streamName}`)).toContainText(
+      expectedLabel
+    );
   }
 
   async verifyClassicBadge() {
@@ -1219,8 +1232,13 @@ export class StreamsApp {
 
   async selectAllAttachmentsInFlyout() {
     const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
-    // Click the header checkbox to select all
     await flyoutTable.locator('thead input[type="checkbox"]').click();
+  }
+
+  async selectAttachmentInFlyout(attachmentTitle: string) {
+    const flyoutTable = this.page.getByTestId('streamsAppAddAttachmentFlyoutAttachmentsTable');
+    const row = flyoutTable.getByRole('row', { name: attachmentTitle });
+    await row.locator('input[type="checkbox"]').click();
   }
 
   async clickAddToStreamButton() {
@@ -1325,7 +1343,17 @@ export class StreamsApp {
     await this.concatLiteralInput.fill(value);
   }
 
+  async openCreateStreamPopover() {
+    await this.createStreamButton.click();
+  }
+
+  async openStreamsSettings() {
+    await this.page.getByTestId('app-menu-overflow-button').click();
+    await this.page.getByTestId('streamsAppSettingsButton').click();
+  }
+
   async clickCreateQueryStreamButton() {
+    await this.openCreateStreamPopover();
     await this.createQueryStreamButton.click();
   }
 

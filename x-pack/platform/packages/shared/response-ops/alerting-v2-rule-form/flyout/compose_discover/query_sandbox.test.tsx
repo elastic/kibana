@@ -173,7 +173,12 @@ describe('QuerySandbox', () => {
   });
 
   it('shows loading spinner when loading after a run', () => {
-    mockExecutionResult = { ...defaultExecutionResult, hasRun: true, isLoading: true };
+    mockExecutionResult = {
+      ...defaultExecutionResult,
+      hasRun: true,
+      isLoading: true,
+      lastExecutedQuery: defaultProps.query,
+    };
     renderSandbox();
     const spinners = screen.getAllByRole('progressbar');
     expect(spinners.length).toBeGreaterThanOrEqual(2);
@@ -185,14 +190,51 @@ describe('QuerySandbox', () => {
       hasRun: true,
       isError: true,
       error: 'Something went wrong',
+      lastExecutedQuery: defaultProps.query,
     };
     renderSandbox();
     expect(screen.getByText('Query error')).toBeInTheDocument();
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
   });
 
+  it('keeps showing an error after the query is edited, until the next run', () => {
+    mockExecutionResult = {
+      ...defaultExecutionResult,
+      hasRun: true,
+      isError: true,
+      error: 'Something went wrong',
+      /*
+       * The executed query differs from the current query prop, matching Discover's
+       * behavior of leaving the error up until the user re-runs the query.
+       */
+      lastExecutedQuery: 'FROM logs-* | STATS count() BY host.name (edited)',
+    };
+    renderSandbox();
+    expect(screen.getByText('Query error')).toBeInTheDocument();
+    expect(screen.queryByText('Run your query to see results')).not.toBeInTheDocument();
+  });
+
+  it('hides the stale execution error callout when a validation error is also showing', () => {
+    mockExecutionResult = {
+      ...defaultExecutionResult,
+      hasRun: true,
+      isError: true,
+      error: 'Something went wrong',
+      lastExecutedQuery: defaultProps.query,
+    };
+    renderSandbox({ validationError: ['bad query'] });
+    expect(screen.getByTestId('querySandboxValidationError')).toBeInTheDocument();
+    expect(screen.queryByText('Query error')).not.toBeInTheDocument();
+    expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
+  });
+
   it('shows "No results" when query returns empty rows', () => {
-    mockExecutionResult = { ...defaultExecutionResult, hasRun: true, rows: [] };
+    mockExecutionResult = {
+      ...defaultExecutionResult,
+      hasRun: true,
+      rows: [],
+      lastExecutedQuery: defaultProps.query,
+    };
     renderSandbox();
     expect(screen.getByText('No results')).toBeInTheDocument();
   });
@@ -204,7 +246,7 @@ describe('QuerySandbox', () => {
       columns: [{ id: 'host.name', displayAsText: 'host.name', esType: 'keyword' }],
       rows: [{ 'host.name': 'server-01' }],
       totalRowCount: 1,
-      lastExecutedQuery: 'FROM logs-*',
+      lastExecutedQuery: defaultProps.query,
     };
     renderSandbox();
     expect(screen.getByTestId('mockComposeDiscoverChart')).toBeInTheDocument();
@@ -218,7 +260,7 @@ describe('QuerySandbox', () => {
       columns: [{ id: 'host.name', displayAsText: 'host.name', esType: 'keyword' }],
       rows: [{ 'host.name': 'server-01' }, { 'host.name': 'server-02' }],
       totalRowCount: 2,
-      lastExecutedQuery: 'FROM logs-*',
+      lastExecutedQuery: defaultProps.query,
     };
     renderSandbox();
     expect(screen.getByText('2 results')).toBeInTheDocument();
@@ -286,6 +328,20 @@ describe('QuerySandbox', () => {
       });
 
       expect(onTabChange).toHaveBeenCalledWith('base');
+    });
+  });
+
+  describe('headerActions', () => {
+    it('renders headerActions in the query header row when provided', () => {
+      renderSandbox({
+        headerActions: <button data-test-subj="customHeaderAction">Split</button>,
+      });
+      expect(screen.getByTestId('customHeaderAction')).toBeInTheDocument();
+    });
+
+    it('does not render a headerActions slot when absent', () => {
+      renderSandbox({});
+      expect(screen.queryByTestId('customHeaderAction')).not.toBeInTheDocument();
     });
   });
 });
