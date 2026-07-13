@@ -16,6 +16,10 @@
     "requiredPlugins": [
       "cloud"
     ],
+    "optionalPlugins": [
+      "inference",
+      "features"
+    ],
     "requiredBundles": [
       "kibanaReact"
     ]
