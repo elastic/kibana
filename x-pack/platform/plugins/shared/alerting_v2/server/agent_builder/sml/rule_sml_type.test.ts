@@ -231,7 +231,7 @@ describe('createRuleSmlType', () => {
     it('returns undefined without reading the saved object when alerting v2 is disabled', async () => {
       getIsAlertingV2Enabled.mockResolvedValue(false);
 
-      const result = await buildDefinition().getSmlData('rule-1', buildSmlContext());
+      const result = await buildDefinition().getSmlEntry('rule-1', buildSmlContext());
 
       expect(result).toBeUndefined();
       expect(getRepoSo).not.toHaveBeenCalled();
