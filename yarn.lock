@@ -4514,6 +4514,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-sml-plugin@link:x-pack/platform/plugins/shared/agent_builder_sml":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-builder-tools-base@link:x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base":
   version "0.0.0"
   uid ""
@@ -4539,10 +4543,6 @@
   uid ""
 
 "@kbn/agent-builder-workflows-plugin@link:x-pack/platform/plugins/shared/agent_builder_workflows":
-  version "0.0.0"
-  uid ""
-
-"@kbn/agent-context-layer-plugin@link:x-pack/platform/plugins/shared/agent_context_layer":
   version "0.0.0"
   uid ""
 
