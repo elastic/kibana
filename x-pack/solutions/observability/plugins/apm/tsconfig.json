@@ -42,7 +42,6 @@
     "@kbn/task-manager-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/fleet-plugin",
-    "@kbn/io-ts-utils",
     "@kbn/i18n",
     "@kbn/es-query",
     "@kbn/ui-theme",
