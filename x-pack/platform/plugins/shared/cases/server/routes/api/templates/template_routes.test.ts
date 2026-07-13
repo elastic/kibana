@@ -8,6 +8,10 @@
 import type { schema } from '@kbn/config-schema';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import type { Template } from '../../../../common/types/domain/template/v1';
+import {
+  MAX_TEMPLATE_DESCRIPTION_LENGTH,
+  MAX_TAGS_PER_TEMPLATE,
+} from '../../../../common/constants';
 import { mockTemplates } from './mock_data';
 import { getTemplatesRoute } from './get_templates_route';
 import { getTemplateRoute } from './get_template_route';
@@ -661,16 +665,64 @@ describe('Template Routes', () => {
       // @ts-expect-error: mocking necessary properties for handler logic only
       await patchTemplateRoute.handler({ context, request, response });
 
+      // Under the Fields/Configuration split, template identity (name) is independent of the
+      // definition's case-default title. Patching only the definition must PRESERVE the identity
+      // name (not re-derive it from the definition), while the definition itself is updated.
       expect(response.ok).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.objectContaining({
             templateId: 'template-1',
-            name: 'Patched Template',
+            name: 'Template One',
             owner: 'securitySolution',
             templateVersion: 2,
           }),
         })
       );
+    });
+
+    it('rejects a description longer than the limit with 400 (before touching the template)', async () => {
+      const context = createMockContext();
+      const request = {
+        params: { template_id: 'template-1' },
+        body: { description: 'x'.repeat(MAX_TEMPLATE_DESCRIPTION_LENGTH + 1) },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await patchTemplateRoute.handler({ context, request, response });
+
+      expect(response.badRequest).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
+    });
+
+    it('rejects more tags than the limit with 400', async () => {
+      const context = createMockContext();
+      const request = {
+        params: { template_id: 'template-1' },
+        body: { tags: Array.from({ length: MAX_TAGS_PER_TEMPLATE + 1 }, (_, i) => `tag-${i}`) },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await patchTemplateRoute.handler({ context, request, response });
+
+      expect(response.badRequest).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
+    });
+
+    it('rejects an empty-string tag with 400', async () => {
+      const context = createMockContext();
+      const request = {
+        params: { template_id: 'template-1' },
+        body: { tags: [''] },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await patchTemplateRoute.handler({ context, request, response });
+
+      expect(response.badRequest).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
     });
 
     it('returns 404 for a non-existent template', async () => {
