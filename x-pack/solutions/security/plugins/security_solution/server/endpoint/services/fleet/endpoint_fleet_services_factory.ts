@@ -559,8 +559,8 @@ const adjustAgentData = (data: Agent | Agent[], methodName: string, _logger: Log
   for (const agentRecord of agentsData) {
     // Remove version suffix from `policy_id` field
     // Issue caused by: https://github.com/elastic/package-spec/issues/165
-    if (hasVersionSuffix(agentRecord.policy_id)) {
-      const updatedPolicyId = removeVersionSuffixFromPolicyId(agentRecord.policy_id);
+    if (hasVersionSuffix(agentRecord.policy_id ?? '')) {
+      const updatedPolicyId = removeVersionSuffixFromPolicyId(agentRecord.policy_id ?? '');
 
       updatesDone.push(
         `Agent [${agentRecord.id}][${agentRecord.local_metadata?.host?.hostname}]: adjusted 'policy_id' property value from [${agentRecord.policy_id}] to [${updatedPolicyId}]`

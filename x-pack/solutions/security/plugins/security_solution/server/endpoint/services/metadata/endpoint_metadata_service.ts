@@ -119,7 +119,10 @@ export class EndpointMetadataService {
 
     for (const hit of hits) {
       // If `united.agent.policy_id` includes a suffix, remove it
-      if (hasVersionSuffix(hit._source?.united?.agent?.policy_id ?? '')) {
+      if (
+        hit._source?.united?.agent?.policy_id &&
+        hasVersionSuffix(hit._source?.united?.agent?.policy_id)
+      ) {
         const existingPolicyId = hit._source.united.agent.policy_id;
         const adjustedPolicyId = removeVersionSuffixFromPolicyId(existingPolicyId);
 
