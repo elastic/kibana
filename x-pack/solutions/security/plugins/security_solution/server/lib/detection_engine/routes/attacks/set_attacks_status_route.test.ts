@@ -25,6 +25,7 @@ import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_response
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { ATTACKS_API_CALL_EVENT } from '../../../telemetry/event_based/events';
+import { ATTACKS_INVALID_CLOSING_REASON_ERROR } from './attacks_ebt_helpers';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
@@ -309,7 +310,7 @@ describe('set attacks workflow status', () => {
         ATTACKS_API_CALL_EVENT,
         expect.objectContaining({
           operation: 'status',
-          error: expect.any(String),
+          error: ATTACKS_INVALID_CLOSING_REASON_ERROR,
         })
       );
     });

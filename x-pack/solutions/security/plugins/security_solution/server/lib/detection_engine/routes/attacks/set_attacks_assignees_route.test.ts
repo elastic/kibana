@@ -19,6 +19,7 @@ import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_response
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { ATTACKS_API_CALL_EVENT } from '../../../telemetry/event_based/events';
+import { ATTACKS_DUPLICATE_ASSIGNEES_VALIDATION_ERROR } from './attacks_ebt_helpers';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { setAttacksAssigneesRoute } from './set_attacks_assignees_route';
@@ -297,7 +298,7 @@ describe('set attacks assignees', () => {
         ATTACKS_API_CALL_EVENT,
         expect.objectContaining({
           operation: 'assignees',
-          error: expect.any(String),
+          error: ATTACKS_DUPLICATE_ASSIGNEES_VALIDATION_ERROR,
         })
       );
     });

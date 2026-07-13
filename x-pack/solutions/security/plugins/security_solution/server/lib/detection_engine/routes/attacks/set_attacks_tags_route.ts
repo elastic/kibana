@@ -24,6 +24,7 @@ import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts
 import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
 import { buildSiemResponse } from '../utils';
 import {
+  ATTACKS_DUPLICATE_TAGS_VALIDATION_ERROR,
   buildAttacksTagsApiCallFields,
   reportAttacksApiCallError,
   withSiemErrorHandlingAndAttacksTelemetry,
@@ -61,7 +62,11 @@ export const setAttacksTagsRoute = (
 
         const validationErrors = validateAlertTagsArrays(tags, ids);
         if (validationErrors.length) {
-          reportAttacksApiCallError(telemetrySender, telemetryFields, validationErrors.join(', '));
+          reportAttacksApiCallError(
+            telemetrySender,
+            telemetryFields,
+            ATTACKS_DUPLICATE_TAGS_VALIDATION_ERROR
+          );
           return buildSiemResponse(response).error({ statusCode: 400, body: validationErrors });
         }
 

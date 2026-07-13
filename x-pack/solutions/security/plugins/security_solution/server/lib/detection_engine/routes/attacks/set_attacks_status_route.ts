@@ -30,6 +30,7 @@ import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts
 import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
 import { buildSiemResponse } from '../utils';
 import {
+  ATTACKS_INVALID_CLOSING_REASON_ERROR,
   buildAttacksStatusApiCallFields,
   reportAttacksApiCallError,
   withSiemErrorHandlingAndAttacksTelemetry,
@@ -70,7 +71,11 @@ export const setAttacksStatusRoute = (
 
         const closingReason = await validateClosingReason({ core, status, reason });
         if (!closingReason.valid) {
-          reportAttacksApiCallError(telemetrySender, telemetryFields, closingReason.message);
+          reportAttacksApiCallError(
+            telemetrySender,
+            telemetryFields,
+            ATTACKS_INVALID_CLOSING_REASON_ERROR
+          );
           return buildSiemResponse(response).error({
             statusCode: 400,
             body: closingReason.message,

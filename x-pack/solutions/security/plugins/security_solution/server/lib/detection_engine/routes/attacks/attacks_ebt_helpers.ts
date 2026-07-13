@@ -21,6 +21,11 @@ import { buildSiemResponse } from '../utils';
  * follow the legacy signals status route pattern in open_close_signals_route.ts.
  */
 
+/** Static validation error codes for EBT — never include user-controlled strings. */
+export const ATTACKS_DUPLICATE_TAGS_VALIDATION_ERROR = 'duplicate_tags';
+export const ATTACKS_DUPLICATE_ASSIGNEES_VALIDATION_ERROR = 'duplicate_assignees';
+export const ATTACKS_INVALID_CLOSING_REASON_ERROR = 'invalid_closing_reason';
+
 export interface AttacksApiCallEventFields {
   endpoint: string;
   operation: AttacksApiCallOperation;
