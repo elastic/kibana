@@ -11,6 +11,7 @@
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "public/**/*",
+    "test/scout/**/*",
     "test/scout_alerting_v2/**/*"
   ],
   "kbn_references": [
