@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               {
                 error_type: 'none',
                 name: 'logstash-*',
-                stall_time_seconds: 30,
+                stall_time_seconds: 120,
               },
             ],
           },
