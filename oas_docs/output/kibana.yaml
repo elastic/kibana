@@ -42916,6 +42916,95 @@ components:
           $ref: '#/components/schemas/Machine_learning_APIs_mlSyncResponseSuccess'
       title: Sync API response for trained models
       type: object
+    Observability_AI_Assistant_API_Function:
+      type: object
+      properties:
+        description:
+          description: The description of the function.
+          type: string
+        name:
+          description: The name of the function.
+          type: string
+        parameters:
+          description: The parameters of the function.
+          type: object
+    Observability_AI_Assistant_API_FunctionCall:
+      description: Details of the function call within the message.
+      type: object
+      properties:
+        arguments:
+          description: The arguments for the function call.
+          type: string
+        name:
+          description: The name of the function.
+          type: string
+        trigger:
+          description: The trigger of the function call.
+          enum:
+            - assistant
+            - user
+            - elastic
+          type: string
+      required:
+        - name
+        - trigger
+    Observability_AI_Assistant_API_Instruction:
+      oneOf:
+        - description: A simple instruction represented as a string.
+          type: string
+        - description: A detailed instruction with an ID and text.
+          type: object
+          properties:
+            id:
+              description: A unique identifier for the instruction.
+              type: string
+            text:
+              description: The text of the instruction.
+              type: string
+          required:
+            - id
+            - text
+    Observability_AI_Assistant_API_Message:
+      properties:
+        '@timestamp':
+          description: The timestamp when the message was created.
+          type: string
+        message:
+          description: The main content of the message.
+          type: object
+          properties:
+            content:
+              description: The content of the message.
+              type: string
+            data:
+              description: Additional data associated with the message.
+              type: string
+            event:
+              description: The event related to the message.
+              type: string
+            function_call:
+              $ref: '#/components/schemas/Observability_AI_Assistant_API_FunctionCall'
+            name:
+              description: The name associated with the message.
+              type: string
+            role:
+              $ref: '#/components/schemas/Observability_AI_Assistant_API_MessageRoleEnum'
+          required:
+            - role
+      required:
+        - '@timestamp'
+        - message
+      title: Message
+      type: object
+    Observability_AI_Assistant_API_MessageRoleEnum:
+      description: The role of the message sender.
+      enum:
+        - system
+        - assistant
+        - function
+        - user
+        - elastic
+      type: string
     Saved_objects_400_response:
       title: Bad request
       type: object
