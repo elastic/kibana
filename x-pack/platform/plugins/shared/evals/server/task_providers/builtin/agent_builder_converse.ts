@@ -7,7 +7,7 @@
 
 import { BUILT_IN_TASK_PROVIDERS } from '../types';
 import type { EvalsTaskProvider } from '../types';
-import { normalizeTraceId } from '../tracing';
+import { normalizeTraceId, withEvalsTaskSpan } from '../tracing';
 
 const CONVERSE_PATH = '/api/agent_builder/converse';
 const AGENT_BUILDER_API_VERSION = '2023-10-31';
@@ -34,9 +34,13 @@ interface ConverseApiResponse {
 
 /**
  * Built-in provider that evaluates an Agent Builder agent through the public
- * `converse` API. The agent is run inline (`_execution_mode: 'local'`) so the
- * agent's server-side spans nest under the caller's trace, and the returned
- * `trace_id` is used to correlate scores.
+ * `converse` API. The call is wrapped in a fresh per-example root span
+ * ({@link withEvalsTaskSpan}); the agent runs inline (`_execution_mode: 'local'`)
+ * so its server-side spans nest under that root and share its trace id. Without
+ * the root, a run launched from a chat would inherit the chat's active trace, so
+ * every example (plus the judge calls) would collapse into one trace and
+ * trace-based metrics would be scored against the wrong, shared trace. The
+ * returned `trace_id` correlates the scores.
  */
 export const createAgentBuilderConverseTaskProvider = (): EvalsTaskProvider => ({
   name: BUILT_IN_TASK_PROVIDERS.agentBuilderConverse,
@@ -46,30 +50,32 @@ export const createAgentBuilderConverseTaskProvider = (): EvalsTaskProvider => (
       throw new Error('The "agentBuilder.converse" task provider requires an agent_id');
     }
 
-    const { body } = await callKibanaApi<ConverseApiResponse>({
-      method: 'POST',
-      path: CONVERSE_PATH,
-      headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
-      body: {
-        agent_id: agentId,
-        connector_id: connectorId,
-        input: extractInput(input),
-        _execution_mode: 'local',
-      },
+    return withEvalsTaskSpan('task · agent', async () => {
+      const { body } = await callKibanaApi<ConverseApiResponse>({
+        method: 'POST',
+        path: CONVERSE_PATH,
+        headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
+        body: {
+          agent_id: agentId,
+          connector_id: connectorId,
+          input: extractInput(input),
+          _execution_mode: 'local',
+        },
+      });
+
+      const traceId = Array.isArray(body.trace_id) ? body.trace_id[0] : body.trace_id;
+
+      return {
+        output: {
+          message: body.response?.message ?? '',
+          ...(body.response?.structured_output !== undefined
+            ? { structured_output: body.response.structured_output }
+            : {}),
+          ...(body.steps ? { steps: body.steps } : {}),
+          ...(body.conversation_id ? { conversation_id: body.conversation_id } : {}),
+        },
+        traceId: normalizeTraceId(traceId),
+      };
     });
-
-    const traceId = Array.isArray(body.trace_id) ? body.trace_id[0] : body.trace_id;
-
-    return {
-      output: {
-        message: body.response?.message ?? '',
-        ...(body.response?.structured_output !== undefined
-          ? { structured_output: body.response.structured_output }
-          : {}),
-        ...(body.steps ? { steps: body.steps } : {}),
-        ...(body.conversation_id ? { conversation_id: body.conversation_id } : {}),
-      },
-      traceId: normalizeTraceId(traceId),
-    };
   },
 });

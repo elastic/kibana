@@ -99,12 +99,14 @@ describe('trace metrics evaluators', () => {
     });
   });
 
-  it('returns tool call count from filter aggregation doc_count', async () => {
+  it('returns distinct TOOL span count from the cardinality sub-aggregation', async () => {
     const { esClient, searchMock } = createEsClient();
+    // The same TOOL span is mirror-written to multiple data streams, so `doc_count`
+    // (6) over-counts; the distinct span-id cardinality (3) is the real tool count.
     searchMock.mockResolvedValue({
       hits: { hits: [] },
       aggregations: {
-        tool_calls: { doc_count: 3 },
+        tool_calls: { doc_count: 6, distinct_spans: { value: 3 } },
       },
     });
 
@@ -117,6 +119,16 @@ describe('trace metrics evaluators', () => {
     ).resolves.toEqual({
       scores: [{ name: 'tool_calls', score: 3 }],
     });
+    expect(searchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: {
+          tool_calls: {
+            filter: { term: { 'attributes.elastic.inference.span.kind': 'TOOL' } },
+            aggs: { distinct_spans: { cardinality: { field: 'span_id' } } },
+          },
+        },
+      })
+    );
   });
 
   it('returns unavailable when a metric aggregation is missing', async () => {

@@ -7,7 +7,7 @@
 
 import { BUILT_IN_TASK_PROVIDERS } from '../types';
 import type { EvalsTaskProvider } from '../types';
-import { normalizeTraceId } from '../tracing';
+import { normalizeTraceId, withEvalsTaskSpan } from '../tracing';
 
 const TOOL_EXECUTE_PATH = '/api/agent_builder/tools/_execute';
 const AGENT_BUILDER_API_VERSION = '2023-10-31';
@@ -31,20 +31,25 @@ export const createAgentBuilderToolTaskProvider = (): EvalsTaskProvider => ({
         ? (params.tool_params as Record<string, unknown>)
         : input;
 
-    const { body } = await callKibanaApi<ExecuteToolApiResponse>({
-      method: 'POST',
-      path: TOOL_EXECUTE_PATH,
-      headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
-      body: {
-        tool_id: toolId,
-        tool_params: toolParams,
-        connector_id: connectorId,
-      },
-    });
+    // Wrap in a fresh per-example root span so the tool's server-side spans share
+    // one isolated trace id, even when the run was launched from a chat that has its
+    // own active trace (otherwise every example would collapse into the caller's trace).
+    return withEvalsTaskSpan('task · tool', async () => {
+      const { body } = await callKibanaApi<ExecuteToolApiResponse>({
+        method: 'POST',
+        path: TOOL_EXECUTE_PATH,
+        headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
+        body: {
+          tool_id: toolId,
+          tool_params: toolParams,
+          connector_id: connectorId,
+        },
+      });
 
-    return {
-      output: { results: body.results ?? [] },
-      traceId: normalizeTraceId(body.trace_id),
-    };
+      return {
+        output: { results: body.results ?? [] },
+        traceId: normalizeTraceId(body.trace_id),
+      };
+    });
   },
 });
