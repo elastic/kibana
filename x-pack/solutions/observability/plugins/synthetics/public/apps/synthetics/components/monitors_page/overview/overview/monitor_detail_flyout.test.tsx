@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import * as reduxHooks from 'react-redux-v7';
 import { render } from '../../../../utils/testing/rtl_helpers';
 import { fireEvent } from '@testing-library/react';
-import { MonitorDetailFlyout } from './monitor_detail_flyout';
+import { MonitorDetailFlyout, getDurationChartTimeRange } from './monitor_detail_flyout';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import * as monitorDetail from '../../../../hooks/use_monitor_detail';
 import * as statusByLocation from '../../../../hooks/use_status_by_location';
@@ -697,6 +698,40 @@ describe('Monitor Detail Flyout', () => {
       unmount();
 
       expect(mockClearChatConfig).toHaveBeenCalledTimes(1);
+    });
+  });
+});
+
+describe('getDurationChartTimeRange', () => {
+  const now = moment('2026-07-13T12:00:00.000Z');
+
+  it('uses the default 12h window with a previous-period comparison when no created_at is provided', () => {
+    expect(getDurationChartTimeRange(undefined, now)).toEqual({
+      from: 'now-12h',
+      showPreviousPeriod: true,
+    });
+  });
+
+  it('keeps the default window for monitors older than the look-back window', () => {
+    const createdAt = now.clone().subtract(3, 'days').toISOString();
+    expect(getDurationChartTimeRange(createdAt, now)).toEqual({
+      from: 'now-12h',
+      showPreviousPeriod: true,
+    });
+  });
+
+  it('anchors the lower bound at creation time and hides the previous period for young monitors', () => {
+    const createdAt = now.clone().subtract(2, 'hours').toISOString();
+    expect(getDurationChartTimeRange(createdAt, now)).toEqual({
+      from: createdAt,
+      showPreviousPeriod: false,
+    });
+  });
+
+  it('falls back to the default window for an invalid created_at', () => {
+    expect(getDurationChartTimeRange('not-a-date', now)).toEqual({
+      from: 'now-12h',
+      showPreviousPeriod: true,
     });
   });
 });

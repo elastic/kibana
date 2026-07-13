@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
@@ -83,6 +84,24 @@ const DEFAULT_CURRENT_DURATION_CHART_TO = 'now';
 const DEFAULT_PREVIOUS_DURATION_CHART_FROM = 'now-24h';
 const DEFAULT_PREVIOUS_DURATION_CHART_TO = 'now-12h';
 
+/**
+ * For monitors younger than the 12h window, anchor the lower bound at creation
+ * time and drop the previous-period comparison — otherwise the mostly-empty
+ * window collapses each series to a single point and the chart looks empty (#221399).
+ */
+export const getDurationChartTimeRange = (
+  createdAt?: string,
+  now: moment.Moment = moment()
+): { from: string; showPreviousPeriod: boolean } => {
+  if (createdAt) {
+    const created = moment(createdAt);
+    if (created.isValid() && created.isAfter(now.clone().subtract(12, 'hours'))) {
+      return { from: created.toISOString(), showPreviousPeriod: false };
+    }
+  }
+  return { from: DEFAULT_DURATION_CHART_FROM, showPreviousPeriod: true };
+};
+
 const VIS_COLORS = [
   'euiColorVis0',
   'euiColorVis1',
@@ -101,11 +120,13 @@ function DetailFlyoutDurationChart({
   location,
   allLocations,
   remoteName,
+  createdAt,
 }: {
   id: string;
   location: string;
   allLocations: Array<{ id: string; label: string }>;
   remoteName?: string;
+  createdAt?: string;
 }) {
   const { euiTheme } = useEuiTheme();
   const [showAllLocations, setShowAllLocations] = useState(false);
@@ -113,6 +134,11 @@ function DetailFlyoutDurationChart({
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
+
+  const { from: chartFrom, showPreviousPeriod } = useMemo(
+    () => getDurationChartTimeRange(createdAt),
+    [createdAt]
+  );
 
   const attributes = useMemo(() => {
     if (showAllLocations) {
@@ -122,7 +148,7 @@ function DetailFlyoutDurationChart({
           seriesType: 'line' as const,
           color: euiTheme.colors.vis[VIS_COLORS[idx % VIS_COLORS.length]],
           time: {
-            from: DEFAULT_DURATION_CHART_FROM,
+            from: chartFrom,
             to: DEFAULT_CURRENT_DURATION_CHART_TO,
           },
           reportDefinitions: {
@@ -143,7 +169,7 @@ function DetailFlyoutDurationChart({
         seriesType: 'area' as const,
         color: euiTheme.colors.vis.euiColorVis1,
         time: {
-          from: DEFAULT_DURATION_CHART_FROM,
+          from: chartFrom,
           to: DEFAULT_CURRENT_DURATION_CHART_TO,
         },
         reportDefinitions: {
@@ -156,25 +182,37 @@ function DetailFlyoutDurationChart({
         name: DURATION_SERIES_NAME,
         operationType: 'average' as const,
       },
-      {
-        seriesType: 'line' as const,
-        color: euiTheme.colors.vis.euiColorVis7,
-        time: {
-          from: DEFAULT_PREVIOUS_DURATION_CHART_FROM,
-          to: DEFAULT_PREVIOUS_DURATION_CHART_TO,
-        },
-        reportDefinitions: {
-          'monitor.id': [id],
-          ...reportDefinition,
-        },
-        filters,
-        dataType: 'synthetics' as const,
-        selectedMetricField: 'monitor.duration.us',
-        name: PREVIOUS_PERIOD_SERIES_NAME,
-        operationType: 'average' as const,
-      },
+      ...(showPreviousPeriod
+        ? [
+            {
+              seriesType: 'line' as const,
+              color: euiTheme.colors.vis.euiColorVis7,
+              time: {
+                from: DEFAULT_PREVIOUS_DURATION_CHART_FROM,
+                to: DEFAULT_PREVIOUS_DURATION_CHART_TO,
+              },
+              reportDefinitions: {
+                'monitor.id': [id],
+                ...reportDefinition,
+              },
+              filters,
+              dataType: 'synthetics' as const,
+              selectedMetricField: 'monitor.duration.us',
+              name: PREVIOUS_PERIOD_SERIES_NAME,
+              operationType: 'average' as const,
+            },
+          ]
+        : []),
     ];
-  }, [showAllLocations, allLocations, id, location, euiTheme.colors.vis]);
+  }, [
+    showAllLocations,
+    allLocations,
+    id,
+    location,
+    euiTheme.colors.vis,
+    chartFrom,
+    showPreviousPeriod,
+  ]);
 
   const dataTypesIndexPatterns = useMemo(
     () => (remoteName ? { synthetics: getSyntheticsCcsIndex(remoteName) } : undefined),
@@ -542,6 +580,7 @@ export function MonitorDetailFlyout(props: Props) {
             location={props.location}
             allLocations={monitor?.locations ?? []}
             remoteName={monitor?.remote?.remoteName}
+            createdAt={monitorObject?.created_at}
           />
         )}
         {selectedTab === 'details' &&
