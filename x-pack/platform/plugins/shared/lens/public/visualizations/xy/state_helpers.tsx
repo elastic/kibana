@@ -111,6 +111,14 @@ export function isLineSeries(seriesType: SeriesType) {
   return seriesType === 'line';
 }
 
+export function isAreaSeries(seriesType: SeriesType) {
+  return AREA_SERIES.includes(seriesType);
+}
+
+export function usesLineOptimizedPalette(seriesType: SeriesType) {
+  return isLineSeries(seriesType) || (isAreaSeries(seriesType) && !isStackedChart(seriesType));
+}
+
 export function isStackedChart(seriesType: SeriesType) {
   return seriesType.includes('stacked');
 }

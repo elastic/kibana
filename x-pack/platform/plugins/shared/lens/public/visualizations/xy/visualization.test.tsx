@@ -2785,12 +2785,12 @@ describe('xy_visualization', () => {
       });
 
       it('should query palette to fill in colors for other dimensions', () => {
-        const palette = paletteServiceMock.get('default');
+        // The example state uses an unstacked area layer, which defaults to the line-optimized palette.
+        const palette = paletteServiceMock.get(KbnPalette.ElasticLineOptimized);
         (palette.getCategoricalColor as jest.Mock).mockClear();
         const accessorConfig = callConfigAndFindYConfig({}, 'c');
         expect(accessorConfig.triggerIconType).toEqual('color');
-        // black is the color returned from the palette mock
-        expect(accessorConfig.color).toEqual('black');
+        expect(accessorConfig.color).toEqual('blue');
         expect(palette.getCategoricalColor).toHaveBeenCalledWith(
           [
             {
@@ -2810,7 +2810,7 @@ describe('xy_visualization', () => {
         (datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
           label: 'Overwritten label',
         });
-        const palette = paletteServiceMock.get('default');
+        const palette = paletteServiceMock.get(KbnPalette.ElasticLineOptimized);
         (palette.getCategoricalColor as jest.Mock).mockClear();
         callConfigAndFindYConfig({}, 'c');
         expect(palette.getCategoricalColor).toHaveBeenCalledWith(
@@ -4572,6 +4572,39 @@ describe('xy_visualization', () => {
       (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
       (state.layers[0] as XYDataLayerConfig).colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
       const newState = xyVisualization.switchVisualizationType!('bar_stacked', state);
+      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
+        KbnPalette.Default
+      );
+    });
+
+    it('should change palette from default to line-optimized when switching to unstacked area', () => {
+      const state = exampleState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
+      (state.layers[0] as XYDataLayerConfig).colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+      const newState = xyVisualization.switchVisualizationType!('area', state);
+      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
+        KbnPalette.ElasticLineOptimized
+      );
+    });
+
+    it('should keep the default palette when switching to stacked area', () => {
+      const state = exampleState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'bar';
+      (state.layers[0] as XYDataLayerConfig).colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+      const newState = xyVisualization.switchVisualizationType!('area_stacked', state);
+      expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
+        KbnPalette.Default
+      );
+    });
+
+    it('should switch palette from line-optimized to default when switching from unstacked area to stacked area', () => {
+      const state = exampleState();
+      (state.layers[0] as XYDataLayerConfig).seriesType = 'area';
+      (state.layers[0] as XYDataLayerConfig).colorMapping = {
+        ...DEFAULT_COLOR_MAPPING_CONFIG,
+        paletteId: KbnPalette.ElasticLineOptimized,
+      };
+      const newState = xyVisualization.switchVisualizationType!('area_stacked', state);
       expect((newState.layers[0] as XYDataLayerConfig).colorMapping?.paletteId).toEqual(
         KbnPalette.Default
       );

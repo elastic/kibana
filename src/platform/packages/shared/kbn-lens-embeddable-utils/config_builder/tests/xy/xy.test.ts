@@ -1053,6 +1053,64 @@ describe('XY', () => {
       );
     });
 
+    it('should emit elastic_line_optimized palette on breakdown_by for unstacked area charts', () => {
+      const config = {
+        type: 'xy',
+        title: 'Area breakdown color default test',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query: 'FROM logs | STATS count = count() BY product',
+            },
+            type: 'area',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ column: 'count' }],
+            breakdown_by: { column: 'product' },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
+
+      const dataLayer = apiOutput.layers[0];
+      expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toEqual(
+        DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
+      );
+    });
+
+    it('should emit default categorical palette on breakdown_by for stacked area charts', () => {
+      const config = {
+        type: 'xy',
+        title: 'Stacked area breakdown color default test',
+        layers: [
+          {
+            data_source: {
+              type: 'esql',
+              query: 'FROM logs | STATS count = count() BY product',
+            },
+            type: 'area_stacked',
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ column: 'count' }],
+            breakdown_by: { column: 'product' },
+          },
+        ],
+      } satisfies XYConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as XYConfig;
+
+      const dataLayer = apiOutput.layers[0];
+      expect('breakdown_by' in dataLayer && dataLayer.breakdown_by?.color).toEqual(
+        DEFAULT_CATEGORICAL_COLOR_MAPPING
+      );
+    });
+
     it('should emit AUTO_COLOR on reference line when no color is specified', () => {
       const config = {
         type: 'xy',

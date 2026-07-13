@@ -83,8 +83,10 @@ import {
   getAnnotationLayerErrors,
   isHorizontalChart,
   isHorizontalSeries,
-  isLineSeries,
+  usesLineOptimizedPalette,
   getColumnToLabelMap,
+  AREA_SERIES,
+  resolveAreaFill,
 } from './state_helpers';
 import {
   getGroupsAvailableInData,
@@ -1318,6 +1320,9 @@ function applySeriesDefaultsIfNeeded(
   return updated;
 }
 
+/**
+ * Applies chart-type-specific defaults to a state after a type switch.
+ */
 export const applyChartDefaultsIfNeeded = (
   state: XYVisualizationState,
   seriesType: SeriesType,
@@ -1336,22 +1341,25 @@ export const applyChartDefaultsIfNeeded = (
 /**
  * Resolves the default palette when switching between series types.
  * Uses direction-specific matching so that user-chosen palettes are preserved:
- *  - Switching TO line: only replaces 'default' with 'elastic_line_optimized'
- *  - Switching FROM line: only replaces 'elastic_line_optimized' with 'default'
+ *  - Switching TO a line-optimized type (line/unstacked area): only replaces 'default' with 'elastic_line_optimized'
+ *  - Switching FROM a line-optimized type: only replaces 'elastic_line_optimized' with 'default'
  */
 function resolveDefaultPaletteForSeriesType(
   colorMapping: NonNullable<XYDataLayerConfig['colorMapping']>,
   fromSeriesType: SeriesType,
   toSeriesType: SeriesType
 ): NonNullable<XYDataLayerConfig['colorMapping']> {
-  if (isLineSeries(fromSeriesType) === isLineSeries(toSeriesType)) {
+  if (usesLineOptimizedPalette(fromSeriesType) === usesLineOptimizedPalette(toSeriesType)) {
     return colorMapping;
   }
 
-  if (isLineSeries(toSeriesType) && colorMapping.paletteId === KbnPalette.Default) {
+  if (usesLineOptimizedPalette(toSeriesType) && colorMapping.paletteId === KbnPalette.Default) {
     return { ...colorMapping, paletteId: KbnPalette.ElasticLineOptimized };
   }
-  if (isLineSeries(fromSeriesType) && colorMapping.paletteId === KbnPalette.ElasticLineOptimized) {
+  if (
+    usesLineOptimizedPalette(fromSeriesType) &&
+    colorMapping.paletteId === KbnPalette.ElasticLineOptimized
+  ) {
     return { ...colorMapping, paletteId: KbnPalette.Default };
   }
 
