@@ -10,16 +10,13 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { TestProviders } from '../../common/mock';
-import {
-  ATTACK_DISCOVERY_PATH,
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-  SECURITY_FEATURE_ID,
-} from '../../../common/constants';
+import { ATTACK_DISCOVERY_PATH, SECURITY_FEATURE_ID } from '../../../common/constants';
+import { useIsAlertsAndAttacksAlignmentEnabled } from '../../common/hooks/use_is_alerts_and_attacks_alignment_enabled';
 import { mockHistory } from '../../common/utils/route/mocks';
 import { AttackDiscoveryPage } from '.';
 import { mockTimelines } from '../../common/mock/mock_timelines_plugin';
@@ -102,6 +99,10 @@ jest.mock('./use_attack_discovery', () => ({
     fetchAttackDiscoveries: jest.fn(),
     isLoading: false,
   }),
+}));
+
+jest.mock('../../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => ({
+  useIsAlertsAndAttacksAlignmentEnabled: jest.fn().mockReturnValue(true),
 }));
 
 jest.mock('./moving_attacks_callout/use_moving_attacks_callout');
@@ -321,34 +322,8 @@ describe('AttackDiscovery', () => {
   });
 
   describe('`enableAlertsAndAttacksAlignment` feature', () => {
-    it('renders callout about new Attacks page when feature is enabled', () => {
-      mockUseKibanaReturnValue.services.uiSettings.get.mockImplementation((key) => {
-        if (key === ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) {
-          return true;
-        }
-        return false;
-      });
-
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId(CALLOUT_TEST_DATA_ID)).toBeInTheDocument();
-    });
-
     it('does not render callout about new Attacks page when feature is disabled', () => {
-      mockUseKibanaReturnValue.services.uiSettings.get.mockImplementation((key) => {
-        if (key === ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING) {
-          return false;
-        }
-        return false;
-      });
+      (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(false);
 
       render(
         <TestProviders>
@@ -361,6 +336,46 @@ describe('AttackDiscovery', () => {
       );
 
       expect(screen.queryByTestId(CALLOUT_TEST_DATA_ID)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('workflows insufficient privileges callout', () => {
+    afterEach(() => {
+      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
+    });
+
+    it('renders the insufficient privileges callout when workflows are enabled but privileges are missing', async () => {
+      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(true);
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Insufficient privileges')).toBeInTheDocument();
+      });
+    });
+
+    it('does not render the insufficient privileges callout when workflows are disabled', () => {
+      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+
+      expect(screen.queryByText('Insufficient privileges')).not.toBeInTheDocument();
     });
   });
 });
