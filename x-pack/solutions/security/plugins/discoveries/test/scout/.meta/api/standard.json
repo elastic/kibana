@@ -1,0 +1,21 @@
+{
+  "sha1": "d5d00ec6225ced75dda4a4a3db45a1f609aa6eb0",
+  "tests": [
+    {
+      "id": "e7343167cc7b951-b282f1b777835c5",
+      "title": "Workflow schedule API - scaffold verification scaffold: can import test utilities without errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/discoveries/test/scout/api/tests/scaffold_verification.spec.ts",
+        "line": 37,
+        "column": 10
+      }
+    }
+  ]
+}

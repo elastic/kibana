@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import { either } from 'fp-ts/Either';
+import { z } from '@kbn/zod/v4';
 import { amountAndUnitToObject } from '../amount_and_unit';
 import { getRangeTypeMessage } from './get_range_type_message';
 
@@ -49,5 +50,20 @@ export function getBytesRt({ min, max }: { min?: string; max?: string }) {
       });
     },
     t.identity
+  );
+}
+
+// zod equivalent, additive (io-ts -> zod migration, elastic/kibana#243355).
+export function getBytesSchema({ min, max }: { min?: string; max?: string }) {
+  const minAsBytes = amountAndUnitToBytes(min) ?? -Infinity;
+  const maxAsBytes = amountAndUnitToBytes(max) ?? Infinity;
+  const message = getRangeTypeMessage(min, max);
+
+  return z.string().refine(
+    (inputAsString) => {
+      const inputAsBytes = amountAndUnitToBytes(inputAsString);
+      return inputAsBytes !== undefined && inputAsBytes >= minAsBytes && inputAsBytes <= maxAsBytes;
+    },
+    { message }
   );
 }
