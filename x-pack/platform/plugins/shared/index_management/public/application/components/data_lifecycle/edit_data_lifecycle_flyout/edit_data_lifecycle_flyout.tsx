@@ -91,6 +91,8 @@ export interface EditDataLifecycleFlyoutProps {
       selectedPolicyName?: string;
       onPolicySelect: (name: string) => void;
       onPolicyInspect?: (name: string) => void;
+      canManageIlm?: boolean;
+      hasExistingIlmPolicy?: boolean;
     };
   };
 
@@ -157,7 +159,7 @@ export const EditDataLifecycleFlyout = ({
     const nextValue = mergeDefaultValue(successfulData.dlm.defaultValue);
     setDlmValue(nextValue);
     dlmSerializedRef.current = serializeDlmPhases(nextValue);
-    setIsDlmValid(validateDurations(nextValue).isValid);
+    setIsDlmValid(validateDurations(nextValue, successfulData.dlm.maximumRetentionPeriod).isValid);
   }, [dlmDefaultValueKey, successfulData.dlm]);
 
   const failedDeletePhaseDefaultValueKey = useMemo(
@@ -361,6 +363,8 @@ export const EditDataLifecycleFlyout = ({
                       selectedPolicyName: ilm.selectedPolicyName,
                       onSelect: ilm.onPolicySelect,
                       onInspect: ilm.onPolicyInspect,
+                      canManage: ilm.canManageIlm,
+                      hasExistingPolicy: ilm.hasExistingIlmPolicy,
                     }
                   : undefined
               }

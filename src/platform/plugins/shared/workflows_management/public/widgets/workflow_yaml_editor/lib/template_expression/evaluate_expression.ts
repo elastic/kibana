@@ -8,7 +8,7 @@
  */
 
 import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
-import { createWorkflowLiquidEngine } from '@kbn/workflows';
+import { createWorkflowLiquidEngine, pickObjectFields } from '@kbn/workflows';
 import { resolvePathValue } from './resolve_path_value';
 import type { ExecutionContext } from '../execution_context/build_execution_context';
 
@@ -35,6 +35,14 @@ liquidEngine.registerFilter('entries', (value: unknown): unknown => {
     return value;
   }
   return Object.entries(value).map(([k, v]) => ({ key: k, value: v }));
+});
+
+liquidEngine.registerFilter('pick', (value: unknown, ...args: unknown[]): unknown => {
+  const paths = args.length === 1 && Array.isArray(args[0]) ? args[0] : args;
+  return pickObjectFields(
+    value,
+    paths.filter((path): path is string => typeof path === 'string')
+  );
 });
 
 export interface EvaluateExpressionOptions {

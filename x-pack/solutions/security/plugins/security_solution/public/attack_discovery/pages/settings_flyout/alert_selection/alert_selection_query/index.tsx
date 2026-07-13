@@ -150,6 +150,65 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
           .uniSearchBar {
             padding: 0;
           }
+
+          .kbnQueryBar__wrap {
+            height: ${euiTheme.size.xxl};
+          }
+
+          && .kbnQueryBar__textarea {
+            height: ${euiTheme.size.xxl};
+            min-height: ${euiTheme.size.xxl};
+            padding-bottom: 10px;
+            padding-top: 10px;
+          }
+
+          .kbnQueryBar__textareaWrap > .euiFormControlLayoutIcons {
+            max-height: ${euiTheme.size.xxl};
+          }
+
+          .kbnQueryBar__filterButtonGroup .kbnFilterButtonGroup {
+            align-items: center;
+            display: flex;
+            height: ${euiTheme.size.xxl};
+          }
+
+          .kbnQueryBar__filterButtonGroup .euiButtonIcon {
+            align-items: center;
+            background-color: ${euiTheme.colors.lightestShade};
+            block-size: ${euiTheme.size.xxl};
+            display: inline-flex;
+            inline-size: ${euiTheme.size.xxl};
+            justify-content: center;
+          }
+
+          && .kbnQueryBar__filterButtonGroup [data-test-subj='showQueryBarMenu'] {
+            color: ${euiTheme.colors.textSubdued};
+          }
+
+          && .kbnQueryBar__filterButtonGroup [data-test-subj='addFilter'] {
+            color: ${euiTheme.colors.emptyShade};
+            position: relative;
+          }
+
+          && .kbnQueryBar__filterButtonGroup [data-test-subj='addFilter']::before {
+            background-color: ${euiTheme.colors.primary};
+            block-size: ${euiTheme.size.base};
+            border-radius: 50%;
+            content: '';
+            inline-size: ${euiTheme.size.base};
+            inset: 0;
+            margin: auto;
+            pointer-events: none;
+            position: absolute;
+          }
+
+          &&
+            .kbnQueryBar__filterButtonGroup
+            [data-test-subj='addFilter']
+            svg[data-icon-type='plusInCircleFilled']
+            path:nth-of-type(2) {
+            display: none;
+          }
         `}
         grow={2}
       >
@@ -176,12 +235,21 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
       <EuiFlexItem
         css={css`
           min-width: 308px;
+
+          [data-test-subj='alertSelectionDatePicker'] .euiFormControlLayout__prepend {
+            background-color: ${euiTheme.colors.lightestShade};
+          }
+
+          [data-test-subj='alertSelectionDatePicker']
+            .euiFormControlLayout__prepend
+            button.euiFormPrepend {
+            background-color: ${euiTheme.colors.lightestShade};
+          }
         `}
         grow={1}
       >
         <EuiSuperDatePicker
           commonlyUsedRanges={commonlyUsedRanges}
-          compressed={true}
           data-test-subj="alertSelectionDatePicker"
           end={settings.end}
           isDisabled={false}
