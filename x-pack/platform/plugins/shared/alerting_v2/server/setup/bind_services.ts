@@ -31,6 +31,7 @@ import {
   EsServiceInternalToken,
   EsServiceScopedToken,
   EsServiceScopedSpaceRoutingToken,
+  TaskManagerEsClientsToken,
 } from '../lib/services/es_service/tokens';
 import { EventLogService } from '../lib/services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
@@ -145,6 +146,9 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
+  // Request-scoped current-user client for the HTTP route path (matcher suggestions, resource
+  // reset, alert action writes). Built from the live user request — Task Manager is not involved
+  // in the HTTP request lifecycle, so this stays here.
   bind(EsServiceScopedToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
@@ -153,13 +157,19 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inRequestScope();
 
+  // API-key-scoped current-user client for rule execution (user-data ES|QL). This client is now
+  // built by Task Manager from the task's API key and handed to us on the run context, so
+  // alerting_v2 no longer constructs it via `elasticsearch.client.asScoped(...)`. It is only
+  // resolvable during task execution, where Task Manager binds `TaskManagerEsClientsToken`.
   bind(EsServiceScopedSpaceRoutingToken)
     .toDynamicValue(({ get }) => {
-      const request = get(Request);
-      const elasticsearch = get(CoreStart('elasticsearch'));
-      // `projectRouting: 'space'` scopes rule-execution queries to the originating space/project
-      // when CPS is enabled, matching alerting v1 behavior. Only `asCurrentUser` honors the option.
-      return elasticsearch.client.asScoped(request, { projectRouting: 'space' }).asCurrentUser;
+      const taskManagerEsClients = get(TaskManagerEsClientsToken, { optional: true });
+      if (!taskManagerEsClients) {
+        throw new Error(
+          'EsServiceScopedSpaceRoutingToken is only available during task execution, where Task Manager provides the API-key-scoped Elasticsearch clients.'
+        );
+      }
+      return taskManagerEsClients.scopedWithSpaceRouting.asCurrentUser;
     })
     .inRequestScope();
 

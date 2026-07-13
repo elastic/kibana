@@ -466,6 +466,7 @@ export class TaskManagerPlugin
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
+        elasticsearchClient: elasticsearch.client,
       });
     }
 

@@ -10,7 +10,7 @@
 import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
@@ -79,6 +79,30 @@ export const getTaskCostFromInstance = (cost?: InstanceTaskCost): number | undef
 type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
 
 /**
+ * Elasticsearch cluster clients built by Task Manager for a single task execution and
+ * authenticated with the task's API key (via its `fakeRequest`). Handed to task runners on
+ * the {@link RunContext} so consumers no longer have to call
+ * `elasticsearch.client.asScoped(fakeRequest)` themselves.
+ *
+ * Only present when the task has an API key (i.e. `fakeRequest` is set on the run context).
+ */
+export interface TaskScopedClusterClients {
+  /**
+   * Scoped cluster client authenticated with the task's API key using origin-only routing.
+   * Use `asCurrentUser` to query as the originating user and `asInternalUser` for the Kibana
+   * system user.
+   */
+  scoped: IScopedClusterClient;
+
+  /**
+   * Same as {@link TaskScopedClusterClients.scoped} but with CPS space project-routing enabled
+   * (reads `request.spaceId`), matching alerting rule-execution behavior in CPS-enabled
+   * Serverless environments. Falls back to local routing when CPS is disabled.
+   */
+  scopedWithSpaceRouting: IScopedClusterClient;
+}
+
+/**
  * The run context is passed into a task's run function as its sole argument.
  */
 export interface RunContext {
@@ -92,6 +116,14 @@ export interface RunContext {
    * is generated using the API key and passed as part of the run context.
    */
   fakeRequest?: KibanaRequest;
+
+  /**
+   * Elasticsearch clients scoped to the task's API key, built by Task Manager. Present only
+   * when the task has an API key (same condition as {@link RunContext.fakeRequest}). Lets task
+   * runners query Elasticsearch as the originating user without building scoped clients from
+   * `fakeRequest` themselves. See {@link TaskScopedClusterClients}.
+   */
+  esClient?: TaskScopedClusterClients;
   abortController: AbortController;
 
   /**

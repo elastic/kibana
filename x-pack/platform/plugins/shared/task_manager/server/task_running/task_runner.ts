@@ -16,11 +16,12 @@ import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
-import type { ExecutionContextStart, Logger } from '@kbn/core/server';
+import type { ExecutionContextStart, IClusterClient, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
+import { buildTaskEsClients } from './es_client_factory';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import {
@@ -133,6 +134,7 @@ type Opts = {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  elasticsearchClient: IClusterClient;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -191,6 +193,7 @@ export class TaskManagerRunner implements TaskRunner {
   private eventLogger: TaskEventLogger;
   private isCancelled = false;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
+  private readonly elasticsearchClient: IClusterClient;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -220,6 +223,7 @@ export class TaskManagerRunner implements TaskRunner {
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    elasticsearchClient,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -243,6 +247,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
     this.enrichFakeRequest = enrichFakeRequest;
+    this.elasticsearchClient = elasticsearchClient;
   }
 
   /**
@@ -458,6 +463,14 @@ export class TaskManagerRunner implements TaskRunner {
             enrichFakeRequest: this.enrichFakeRequest,
           });
 
+          // Build the Elasticsearch clients scoped to the task's API key here, so task runners
+          // receive ready-to-use clients on the run context instead of having to call
+          // `elasticsearch.client.asScoped(fakeRequest)` themselves.
+          const esClient = buildTaskEsClients({
+            clusterClient: this.elasticsearchClient,
+            fakeRequest,
+          });
+
           const enrichRequest = buildChildRequestEnricher({
             userProfileId,
             userName,
@@ -469,6 +482,7 @@ export class TaskManagerRunner implements TaskRunner {
           this.task = definition.createTaskRunner({
             taskInstance: sanitizedTaskInstance,
             fakeRequest,
+            esClient,
             abortController,
             enrichRequest,
             executionUuid: this.uuid,

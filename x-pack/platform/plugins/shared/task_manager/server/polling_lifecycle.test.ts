@@ -26,6 +26,7 @@ import type { Err, Ok } from './lib/result_type';
 import { asOk, isErr, isOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { TaskCost } from './task';
 import type { TaskEventLogger } from './task';
 import { ApiKeyType, CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
@@ -139,6 +140,7 @@ describe('TaskPollingLifecycle', () => {
     }),
     apiKeyStrategy: new EsApiKeyStrategy(),
     eventLogger: eventLoggerMock,
+    elasticsearchClient: elasticsearchServiceMock.createClusterClient(),
   };
 
   beforeEach(() => {
