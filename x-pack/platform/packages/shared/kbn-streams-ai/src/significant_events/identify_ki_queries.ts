@@ -13,7 +13,6 @@ import {
   ensureMetadata,
   getSourcesForStream,
   getStatsQueryHints,
-  insertSampleAfterFrom,
   normalizeEsqlSafe,
   replaceFromSources,
 } from '@kbn/streams-schema';
@@ -46,45 +45,8 @@ export const DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
 
 export const DEFAULT_QUERY_VALIDATION_TIMEOUT_MS = 10_000;
 
-export const MAX_VALIDATION_SAMPLE_DOCS = 100_000;
-
-const VALIDATION_SAMPLE_COUNT_TIMEOUT_MS = 5_000;
-
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
-}
-
-async function computeValidationSampleProbability({
-  esClient,
-  index,
-  signal,
-  logger,
-}: {
-  esClient: ElasticsearchClient;
-  index: string[];
-  signal: AbortSignal;
-  logger: Logger;
-}): Promise<number> {
-  if (index.length === 0) return 1;
-  try {
-    const { count } = await esClient.count(
-      { index, allow_no_indices: true, ignore_unavailable: true },
-      {
-        signal: AbortSignal.any([signal, AbortSignal.timeout(VALIDATION_SAMPLE_COUNT_TIMEOUT_MS)]),
-      }
-    );
-    if (count <= 0) return 1;
-    const probability = MAX_VALIDATION_SAMPLE_DOCS / count;
-    return probability < 0.5 ? probability : 1;
-  } catch (error) {
-    logger.debug(
-      () =>
-        `Failed to compute validation sample probability for [${index.join(
-          ', '
-        )}]; falling back to no SAMPLE: ${getErrorMessage(error)}`
-    );
-    return 1;
-  }
 }
 
 export interface ExistingQuerySummary {
@@ -165,21 +127,6 @@ export async function identifyKIQueries({
 
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt, additionalTools });
   const targetSources = getSourcesForStream(stream);
-
-  const validationSampleProbability = await computeValidationSampleProbability({
-    esClient,
-    index: targetSources,
-    signal,
-    logger,
-  });
-  if (validationSampleProbability < 1) {
-    logger.debug(
-      () =>
-        `Using SAMPLE ${validationSampleProbability} for query validation on [${targetSources.join(
-          ', '
-        )}]`
-    );
-  }
 
   const existingQueriesList = existingQueries ?? [];
 
@@ -333,19 +280,20 @@ export async function identifyKIQueries({
 
                 const hints = getStatsQueryHints(rewritten);
 
-                const validationQuery = insertSampleAfterFrom(
-                  rewritten,
-                  validationSampleProbability
-                );
-
                 await esClient.esql.query(
                   {
-                    query: `${validationQuery}\n| LIMIT 0`,
+                    query: `${rewritten}\n| LIMIT 0`,
+                    filter: {
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-10m',
+                          lte: 'now',
+                        },
+                      },
+                    },
                     format: 'json',
                   },
-                  {
-                    requestTimeout: queryValidationTimeoutMs,
-                  }
+                  { signal, requestTimeout: queryValidationTimeoutMs }
                 );
 
                 validatedQueries.push({
