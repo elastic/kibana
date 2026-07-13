@@ -8,8 +8,13 @@
  */
 
 import type * as t from 'io-ts';
+import type { z } from '@kbn/zod/v4';
 
-export type MaybeOutputOf<T> = T extends t.Type<any> ? [t.OutputOf<T>] : [];
+export type MaybeOutputOf<T> = T extends t.Type<any>
+  ? [t.OutputOf<T>]
+  : T extends z.ZodType
+  ? [z.input<T>]
+  : [];
 export type NormalizePath<T extends string> = T extends `//${infer TRest}`
   ? NormalizePath<`/${TRest}`>
   : T extends '/'
@@ -20,6 +25,8 @@ export type NormalizePath<T extends string> = T extends `//${infer TRest}`
 export type DeeplyMutableRoutes<T> = T extends React.ReactElement
   ? T
   : T extends t.Type<any>
+  ? T
+  : T extends z.ZodType
   ? T
   : T extends readonly [infer U]
   ? [DeeplyMutableRoutes<U>]
