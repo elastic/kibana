@@ -17,7 +17,15 @@ import {
 import type { ServerlessSecurityConfig } from '../config';
 
 import type { ProductTier } from '../../common/product';
-import { CLOUD_SECURITY_TASK_TYPE, CSPM, KSPM, CNVM, BILLABLE_ASSETS_CONFIG, GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS, GCP_COMPUTE_INSTANCE_SUB_TYPE } from './constants';
+import {
+  CLOUD_SECURITY_TASK_TYPE,
+  CSPM,
+  KSPM,
+  CNVM,
+  BILLABLE_ASSETS_CONFIG,
+  GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS,
+  GCP_COMPUTE_INSTANCE_SUB_TYPE,
+} from './constants';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
@@ -326,6 +334,7 @@ describe('getGcpComputeDurationFilter', () => {
                       lang: 'painless',
                       params: {
                         minDurationMillis,
+                        nowMillis: expect.any(Number),
                       },
                     },
                   },
@@ -345,6 +354,16 @@ describe('getGcpComputeDurationFilter', () => {
 
     const scriptClause = (filter.bool.should as any[])[1].bool.must[1];
     expect(scriptClause.script.script.params.minDurationMillis).toBe(expectedMillis);
+  });
+
+  it('should pass current time as nowMillis parameter', () => {
+    const before = Date.now();
+    const filter = getGcpComputeDurationFilter();
+    const after = Date.now();
+
+    const scriptClause = (filter.bool.should as any[])[1].bool.must[1];
+    expect(scriptClause.script.script.params.nowMillis).toBeGreaterThanOrEqual(before);
+    expect(scriptClause.script.script.params.nowMillis).toBeLessThanOrEqual(after);
   });
 });
 
