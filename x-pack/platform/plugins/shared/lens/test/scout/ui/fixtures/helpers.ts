@@ -45,13 +45,19 @@ export async function openNewEsqlDashboardWithInlineEditor(
   { dashboard, lens }: DashboardAndLens,
   page: ScoutPage
 ) {
-  // navigate to dashboard and click Try ES|QL
   await dashboard.goto();
   await expect(page.testSubj.locator('noDataViewsPrompt')).toBeVisible();
-  await page.testSubj.click('tryESQLLink');
-  await dashboard.waitForRenderComplete();
 
-  // open inline editor
+  // The "Try ES|QL" button depends on an async Lens helper hook that may not
+  // have resolved yet when the button becomes clickable. Retry until the click
+  // actually triggers navigation.
+  await expect(async () => {
+    if (await page.testSubj.locator('tryESQLLink').isVisible()) {
+      await page.testSubj.click('tryESQLLink');
+    }
+    await expect(page.testSubj.locator('dshDashboardViewport')).toBeVisible({ timeout: 5_000 });
+  }).toPass({ timeout: 60_000 });
+
   await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
   await expect(lens.getInlineEditor()).toBeVisible();
   await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
