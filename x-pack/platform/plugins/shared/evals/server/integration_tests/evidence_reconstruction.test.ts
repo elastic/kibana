@@ -143,18 +143,9 @@ const indexFixtures = async (esClient: ElasticsearchClient) => {
       trace_id: OTEL_EVENTS_TRACE_ID,
       event_name: 'gen_ai.choice',
       '@timestamp': '2026-07-10T09:01:02.000Z',
-      // Keep default readiness checks satisfied while still forcing non-default mapping recommendation.
-      attributes: { 'message.content': 'Fallback response for readiness only.' },
       body: {
         structured: { message: { content: 'There were 5 checkout errors in the last hour.' } },
       },
-    },
-    {
-      // Set C intentionally has no attributes.content to validate unmapped-field handling.
-      trace_id: OTEL_ATTRIBUTES_TRACE_ID,
-      event_name: 'gen_ai.choice',
-      '@timestamp': '2026-07-10T09:02:02.000Z',
-      attributes: { 'message.content': 'Readiness response from logs.' },
     },
   ];
 
@@ -374,9 +365,26 @@ describe('trace evidence reconstruction integration', () => {
     expect((eventsResponse.payload as ResolveMappingsResponse).recommended_mapping).toEqual({
       profile: 'otel-genai-events',
     });
+    expect((eventsResponse.payload as ResolveMappingsResponse).profiles).toContainEqual(
+      expect.objectContaining({
+        profile: 'elastic-inference',
+        evidence: expect.objectContaining({
+          agent_response: expect.objectContaining({ status: 'content_redacted' }),
+        }),
+      })
+    );
     expect((attributesResponse.payload as ResolveMappingsResponse).recommended_mapping).toEqual({
       profile: 'otel-genai-attributes',
     });
+    expect((attributesResponse.payload as ResolveMappingsResponse).profiles).toContainEqual(
+      expect.objectContaining({
+        profile: 'elastic-inference',
+        evidence: expect.objectContaining({
+          user_query: expect.objectContaining({ status: 'not_found' }),
+          agent_response: expect.objectContaining({ status: 'not_found' }),
+        }),
+      })
+    );
   });
 
   it('validates evaluator readiness for all conventions using profile-specific mappings', async () => {
@@ -443,7 +451,10 @@ describe('trace evidence reconstruction integration', () => {
       context,
       {
         body: {
-          subject: { traces: [{ trace_id: ELASTIC_CONVENTION_TRACE_ID }] },
+          subject: {
+            traces: [{ trace_id: ELASTIC_CONVENTION_TRACE_ID }],
+            evidence_mapping: { profile: 'elastic-inference' },
+          },
           evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
         },
       } as unknown as Parameters<typeof evaluateHandler>[1],

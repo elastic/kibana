@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import { normalizeEvidence } from '../evidence/evidence_service';
-import { resolveEvidenceMapping } from '../evidence/resolve_mapping';
+import { getEvidenceMapping } from '../evidence/resolve_mapping';
 import type { TraceAccessor } from '../types';
 
 interface GroundednessEvidence {
@@ -28,7 +28,7 @@ export class IncompleteGroundednessEvidenceError extends Error {
   }
 }
 
-const DEFAULT_EVIDENCE_MAPPING = resolveEvidenceMapping({ profile: 'elastic-inference' });
+const DEFAULT_EVIDENCE_MAPPING = getEvidenceMapping('elastic-inference');
 
 export const extractGroundednessEvidence = async (
   traceAccessor: TraceAccessor,

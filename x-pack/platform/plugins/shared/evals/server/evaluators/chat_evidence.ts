@@ -7,14 +7,12 @@
 
 import type { TraceAccessor } from './types';
 import { normalizeEvidence } from './evidence/evidence_service';
-import { resolveEvidenceMapping } from './evidence/resolve_mapping';
-
-const DEFAULT_EVIDENCE_MAPPING = resolveEvidenceMapping({ profile: 'elastic-inference' });
+import { getEvidenceMapping } from './evidence/resolve_mapping';
 
 export const extractChatEvidence = async (
   traceAccessor: TraceAccessor
 ): Promise<{ user_query: string; agent_response: string }> => {
-  const round = await normalizeEvidence(traceAccessor, DEFAULT_EVIDENCE_MAPPING);
+  const round = await normalizeEvidence(traceAccessor, getEvidenceMapping('elastic-inference'));
   if (!round.input.message) {
     throw new Error(`No user message span events found for trace ${traceAccessor.traceId}`);
   }

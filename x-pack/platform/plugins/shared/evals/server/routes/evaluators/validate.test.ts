@@ -9,7 +9,12 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { API_VERSIONS, EVALS_VALIDATE_URL, type ValidateResponse } from '@kbn/evals-common';
+import {
+  API_VERSIONS,
+  EVALS_VALIDATE_URL,
+  ValidateRequestBody,
+  type ValidateResponse,
+} from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -298,5 +303,17 @@ describe('POST /internal/evals/evaluators/_validate', () => {
     expect(response.payload).toEqual({
       evaluators: [{ name: 'latency', version: '1.0.0', ready: true, unmet: [] }],
     });
+  });
+
+  it('rejects unknown evidence_mapping profiles at request validation', () => {
+    const result = ValidateRequestBody.safeParse({
+      subject: {
+        traces: [{ trace_id: FULL_TRACE_ID }],
+        evidence_mapping: { profile: 'unknown-profile' },
+      },
+      evaluators: [{ name: 'groundedness' }],
+    });
+
+    expect(result.success).toBe(false);
   });
 });

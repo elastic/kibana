@@ -5,60 +5,16 @@
  * 2.0.
  */
 
-import { resolveEvidenceMapping, EvidenceMappingResolutionError } from './resolve_mapping';
+import { getEvidenceMapping } from './resolve_mapping';
 
-describe('resolveEvidenceMapping', () => {
-  it('applies caller overrides with higher precedence than profile defaults', () => {
-    const mapping = resolveEvidenceMapping({
-      profile: 'otel-genai-events',
-      overrides: {
-        user_query: {
-          fields: {
-            content: 'attributes.content',
-          },
-        },
-      },
-    });
-
-    expect(mapping.user_query.fields.content).toBe('attributes.content');
-    expect(mapping.agent_response.fields.content).toBe('body.structured.message.content');
-  });
-
-  it('rejects override field paths outside the allowed prefix set', () => {
-    expect(() =>
-      resolveEvidenceMapping({
-        profile: 'otel-genai-events',
-        overrides: {
-          user_query: {
-            fields: {
-              content: '_source.password',
-            },
-          },
-        },
-      })
-    ).toThrow(EvidenceMappingResolutionError);
-
-    expect(() =>
-      resolveEvidenceMapping({
-        profile: 'otel-genai-events',
-        overrides: {
-          user_query: {
-            fields: {
-              content: '_source.password',
-            },
-          },
-        },
-      })
-    ).toThrow('Invalid override field path for user_query: _source.password');
-  });
-
+describe('getEvidenceMapping', () => {
   it('resolves elastic-inference to the current Kibana field paths and filters', () => {
-    const mapping = resolveEvidenceMapping({ profile: 'elastic-inference' });
+    const mapping = getEvidenceMapping('elastic-inference');
 
     expect(mapping.user_query).toEqual({
       source: 'logs',
       filter: [{ field: 'event_name', value: 'gen_ai.user.message' }],
-      fields: { content: 'attributes.content' },
+      contentField: 'attributes.content',
       select: 'first',
       parse: 'string',
     });
@@ -66,7 +22,7 @@ describe('resolveEvidenceMapping', () => {
     expect(mapping.agent_response).toEqual({
       source: 'logs',
       filter: [{ field: 'event_name', value: 'gen_ai.choice' }],
-      fields: { content: 'attributes.message.content' },
+      contentField: 'attributes.message.content',
       select: 'last',
       parse: 'string',
     });
@@ -80,16 +36,11 @@ describe('resolveEvidenceMapping', () => {
         arguments: 'attributes.gen_ai.tool.call.arguments',
         result: 'attributes.gen_ai.tool.call.result',
       },
-      select: 'all',
-      parse: 'json',
     });
   });
 
-  it('throws typed error when profile is unknown', () => {
-    expect(() => resolveEvidenceMapping({ profile: 'does-not-exist' })).toThrow(
-      EvidenceMappingResolutionError
-    );
-    expect(() => resolveEvidenceMapping({ profile: 'does-not-exist' })).toThrow(
+  it('throws when profile is unknown', () => {
+    expect(() => getEvidenceMapping('does-not-exist')).toThrow(
       'Unknown evidence mapping profile: does-not-exist'
     );
   });

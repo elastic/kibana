@@ -15,28 +15,9 @@ import {
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
-import { probeProfiles } from '../../evaluators/evidence/evidence_service';
+import { hasTraceDocuments, probeProfiles } from '../../evaluators/evidence/evidence_service';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import type { RouteDependencies } from '../register_routes';
-
-const hasTraceDocuments = async (
-  traceAccessor: ReturnType<typeof createTraceAccessor>
-): Promise<boolean> => {
-  const [logs, traces] = await Promise.all([
-    traceAccessor.runSearch('logs', {
-      fields: ['@timestamp'],
-      size: 1,
-      sort: { field: '@timestamp', order: 'desc' },
-    }),
-    traceAccessor.runSearch('traces', {
-      fields: ['@timestamp'],
-      size: 1,
-      sort: { field: '@timestamp', order: 'desc' },
-    }),
-  ]);
-
-  return logs.documents.length > 0 || traces.documents.length > 0;
-};
 
 const getRecommendedMapping = (
   profiles: ResolveMappingsResponse['profiles']

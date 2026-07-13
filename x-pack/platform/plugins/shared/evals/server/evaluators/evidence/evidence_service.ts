@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { createTraceAccessor, type TraceFilter } from '../trace_accessor';
+import {
+  createTraceAccessor,
+  type TraceAccessorWithSearch,
+  type TraceFilter,
+} from '../trace_accessor';
 import type { TraceAccessor } from '../types';
 import { EVIDENCE_MAPPING_PROFILES } from './profiles';
-import { resolveEvidenceMapping } from './resolve_mapping';
+import { getEvidenceMapping } from './resolve_mapping';
 import type {
   EvidenceItemKey,
-  EvidenceItemSpec,
   EvidenceMapping,
+  EvidenceMessageItemSpec,
   EvidenceRound,
+  EvidenceToolCallsItemSpec,
   ToolCallEvidence,
 } from './types';
 
@@ -34,6 +39,24 @@ export interface EvidenceProfileProbeResult {
   profile: string;
   evidence: Record<EvidenceItemKey, EvidenceItemProbeResult>;
 }
+
+export const hasTraceDocuments = async (traceAccessor: TraceAccessor): Promise<boolean> => {
+  const accessor = createTraceAccessor(traceAccessor);
+  const [logs, traces] = await Promise.all([
+    accessor.runSearch('logs', {
+      fields: ['@timestamp'],
+      size: 1,
+      sort: { field: '@timestamp', order: 'desc' },
+    }),
+    accessor.runSearch('traces', {
+      fields: ['@timestamp'],
+      size: 1,
+      sort: { field: '@timestamp', order: 'desc' },
+    }),
+  ]);
+
+  return logs.documents.length > 0 || traces.documents.length > 0;
+};
 
 const parseJsonIfPossible = (value: unknown): unknown => {
   if (typeof value !== 'string') {
@@ -78,7 +101,7 @@ const getFieldValue = (document: Record<string, unknown>, fieldPath: string): un
   resolveFieldValue(document, fieldPath.split('.'));
 
 const toTraceFilters = (
-  spec: EvidenceItemSpec,
+  spec: EvidenceMessageItemSpec | EvidenceToolCallsItemSpec,
   includeContentPresenceFilter: boolean
 ): TraceFilter[] => {
   const filters: TraceFilter[] = spec.filter.map(({ field, value }) => ({
@@ -87,18 +110,15 @@ const toTraceFilters = (
     value,
   }));
 
-  if (includeContentPresenceFilter && spec.parse === 'genai_messages') {
-    const [messagesFieldPath] = Object.values(spec.fields);
-    if (messagesFieldPath) {
-      filters.push({ type: 'exists', field: messagesFieldPath });
-    }
+  if (includeContentPresenceFilter && 'contentField' in spec && spec.parse === 'genai_messages') {
+    filters.push({ type: 'exists', field: spec.contentField });
   }
 
   return filters;
 };
 
-const getSearchParams = (
-  spec: EvidenceItemSpec,
+const getMessageSearchParams = (
+  spec: EvidenceMessageItemSpec,
   includeContentPresenceFilter: boolean
 ): {
   filter: TraceFilter[];
@@ -107,13 +127,34 @@ const getSearchParams = (
   size: number;
 } => ({
   filter: toTraceFilters(spec, includeContentPresenceFilter),
-  fields: ['@timestamp', ...Object.values(spec.fields)],
+  fields: ['@timestamp', spec.contentField],
   sort: {
     field: '@timestamp',
     order: spec.select === 'last' ? 'desc' : 'asc',
   },
-  size: spec.select === 'all' ? MAX_EVIDENCE_DOCS : 1,
+  size: 1,
 });
+
+const getToolCallsSearchParams = (
+  spec: EvidenceToolCallsItemSpec,
+  includeContentPresenceFilter: boolean
+): {
+  filter: TraceFilter[];
+  fields: string[];
+  sort: { field: string; order: 'asc' | 'desc' };
+  size: number;
+} => {
+  const { tool_call_id, tool_id, arguments: toolArguments, result } = spec.fields;
+  return {
+    filter: toTraceFilters(spec, includeContentPresenceFilter),
+    fields: ['@timestamp', tool_call_id, tool_id, toolArguments, result],
+    sort: {
+      field: '@timestamp',
+      order: 'asc',
+    },
+    size: MAX_EVIDENCE_DOCS,
+  };
+};
 
 const firstStringValue = (value: unknown): string | undefined => {
   if (typeof value === 'string') {
@@ -157,30 +198,31 @@ const getGenAiMessageText = (
   return undefined;
 };
 
-const parseItemValue = (
-  itemKey: EvidenceItemKey,
-  itemSpec: EvidenceItemSpec,
+const parseMessageValue = (
+  itemKey: 'user_query' | 'agent_response',
+  itemSpec: EvidenceMessageItemSpec,
   documents: Array<Record<string, unknown>>
-): string | ToolCallEvidence[] | undefined => {
+): string | undefined => {
   if (itemSpec.parse === 'string') {
-    const [fieldPath] = Object.values(itemSpec.fields);
-    if (!fieldPath || documents.length === 0) {
+    if (documents.length === 0) {
       return undefined;
     }
-    return firstStringValue(getFieldValue(documents[0], fieldPath));
+    return firstStringValue(getFieldValue(documents[0], itemSpec.contentField));
   }
 
-  if (itemSpec.parse === 'genai_messages') {
-    const [fieldPath] = Object.values(itemSpec.fields);
-    if (!fieldPath || documents.length === 0) {
-      return undefined;
-    }
-
-    const messages = toMessageArray(getFieldValue(documents[0], fieldPath));
-    const role = itemKey === 'agent_response' ? 'assistant' : 'user';
-    return getGenAiMessageText(messages, role);
+  if (documents.length === 0) {
+    return undefined;
   }
 
+  const messages = toMessageArray(getFieldValue(documents[0], itemSpec.contentField));
+  const role = itemKey === 'agent_response' ? 'assistant' : 'user';
+  return getGenAiMessageText(messages, role);
+};
+
+const parseToolCallsValue = (
+  itemSpec: EvidenceToolCallsItemSpec,
+  documents: Array<Record<string, unknown>>
+): ToolCallEvidence[] | undefined => {
   const entries = documents
     .map((document) => {
       const evidence: ToolCallEvidence = {};
@@ -246,20 +288,30 @@ const stringifySample = (value: unknown): string | undefined => {
 };
 
 const probeItem = async (
-  traceAccessor: TraceAccessor,
+  accessor: TraceAccessorWithSearch,
   itemKey: EvidenceItemKey,
-  itemSpec: EvidenceItemSpec
+  itemSpec: EvidenceMessageItemSpec | EvidenceToolCallsItemSpec
 ): Promise<EvidenceItemProbeResult> => {
-  const accessor = createTraceAccessor(traceAccessor);
-  const searchParams = getSearchParams(itemSpec, true);
+  const isToolCallsItem = itemKey === 'tool_calls';
+  const searchParams = isToolCallsItem
+    ? getToolCallsSearchParams(itemSpec as EvidenceToolCallsItemSpec, false)
+    : getMessageSearchParams(itemSpec as EvidenceMessageItemSpec, true);
   const { documents } = await accessor.runSearch(itemSpec.source, searchParams);
-  const [firstFieldPath] = Object.values(itemSpec.fields);
+  const firstFieldPath = isToolCallsItem
+    ? (itemSpec as EvidenceToolCallsItemSpec).fields.tool_call_id
+    : (itemSpec as EvidenceMessageItemSpec).contentField;
 
   if (documents.length === 0) {
     return { status: 'not_found', field: firstFieldPath };
   }
 
-  const parsedValue = parseItemValue(itemKey, itemSpec, documents);
+  const parsedValue = isToolCallsItem
+    ? parseToolCallsValue(itemSpec as EvidenceToolCallsItemSpec, documents)
+    : parseMessageValue(
+        itemKey as 'user_query' | 'agent_response',
+        itemSpec as EvidenceMessageItemSpec,
+        documents
+      );
   const sample = stringifySample(parsedValue);
   if (!sample || !sample.trim()) {
     return { status: 'content_redacted', field: firstFieldPath };
@@ -279,21 +331,24 @@ export const normalizeEvidence = async (
   const accessor = createTraceAccessor(traceAccessor);
 
   const [userSearch, agentSearch, toolSearch] = await Promise.all([
-    accessor.runSearch(mapping.user_query.source, getSearchParams(mapping.user_query, true)),
+    accessor.runSearch(mapping.user_query.source, getMessageSearchParams(mapping.user_query, true)),
     accessor.runSearch(
       mapping.agent_response.source,
-      getSearchParams(mapping.agent_response, true)
+      getMessageSearchParams(mapping.agent_response, true)
     ),
-    accessor.runSearch(mapping.tool_calls.source, getSearchParams(mapping.tool_calls, false)),
+    accessor.runSearch(
+      mapping.tool_calls.source,
+      getToolCallsSearchParams(mapping.tool_calls, false)
+    ),
   ]);
 
-  const userMessage = parseItemValue('user_query', mapping.user_query, userSearch.documents);
-  const agentMessage = parseItemValue(
+  const userMessage = parseMessageValue('user_query', mapping.user_query, userSearch.documents);
+  const agentMessage = parseMessageValue(
     'agent_response',
     mapping.agent_response,
     agentSearch.documents
   );
-  const toolCalls = parseItemValue('tool_calls', mapping.tool_calls, toolSearch.documents);
+  const toolCalls = parseToolCallsValue(mapping.tool_calls, toolSearch.documents);
 
   return {
     input: { message: typeof userMessage === 'string' ? userMessage : '' },
@@ -305,26 +360,27 @@ export const normalizeEvidence = async (
 export const probeProfiles = async (
   traceAccessor: TraceAccessor
 ): Promise<EvidenceProfileProbeResult[]> => {
+  const accessor = createTraceAccessor(traceAccessor);
   const profileNames = Object.keys(EVIDENCE_MAPPING_PROFILES);
-  const profileResults: EvidenceProfileProbeResult[] = [];
+  const profileResults = await Promise.all(
+    profileNames.map(async (profile): Promise<EvidenceProfileProbeResult> => {
+      const mapping = getEvidenceMapping(profile);
+      const [userQueryProbe, agentResponseProbe, toolCallsProbe] = await Promise.all([
+        probeItem(accessor, 'user_query', mapping.user_query),
+        probeItem(accessor, 'agent_response', mapping.agent_response),
+        probeItem(accessor, 'tool_calls', mapping.tool_calls),
+      ]);
 
-  for (const profile of profileNames) {
-    const mapping = resolveEvidenceMapping({ profile });
-    const [userQueryProbe, agentResponseProbe, toolCallsProbe] = await Promise.all([
-      probeItem(traceAccessor, 'user_query', mapping.user_query),
-      probeItem(traceAccessor, 'agent_response', mapping.agent_response),
-      probeItem(traceAccessor, 'tool_calls', mapping.tool_calls),
-    ]);
-
-    profileResults.push({
-      profile,
-      evidence: {
-        user_query: userQueryProbe,
-        agent_response: agentResponseProbe,
-        tool_calls: toolCallsProbe,
-      },
-    });
-  }
+      return {
+        profile,
+        evidence: {
+          user_query: userQueryProbe,
+          agent_response: agentResponseProbe,
+          tool_calls: toolCallsProbe,
+        },
+      };
+    })
+  );
 
   return profileResults;
 };

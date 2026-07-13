@@ -18,10 +18,7 @@ import { z } from '@kbn/zod/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import { normalizeEvidence } from '../../evaluators/evidence/evidence_service';
-import {
-  EvidenceMappingResolutionError,
-  resolveEvidenceMapping,
-} from '../../evaluators/evidence/resolve_mapping';
+import { getEvidenceMapping } from '../../evaluators/evidence/resolve_mapping';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import { awaitTraceReady } from '../../evaluators/trace_readiness';
 import type { EvaluatorDefinition } from '../../evaluators/types';
@@ -127,24 +124,13 @@ export const registerEvaluateRoute = ({
           esClient: coreContext.elasticsearch.client.asInternalUser,
         });
 
+        const activeProfile = subject.evidence_mapping?.profile ?? 'elastic-inference';
+        const resolvedMapping = getEvidenceMapping(activeProfile);
+
         try {
-          await awaitTraceReady(traceAccessor, logger);
+          await awaitTraceReady(traceAccessor, resolvedMapping, activeProfile, logger);
         } catch (error) {
           return response.notFound({ body: { message: String(error) } });
-        }
-
-        let resolvedMapping;
-        try {
-          resolvedMapping = resolveEvidenceMapping(
-            subject.evidence_mapping ?? {
-              profile: 'elastic-inference',
-            }
-          );
-        } catch (error) {
-          if (error instanceof EvidenceMappingResolutionError) {
-            return response.badRequest({ body: { message: error.message } });
-          }
-          throw error;
         }
 
         const round = await normalizeEvidence(traceAccessor, resolvedMapping);

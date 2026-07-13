@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { normalizeEvidence } from './evidence_service';
-import { resolveEvidenceMapping } from './resolve_mapping';
+import { getEvidenceMapping } from './resolve_mapping';
 
 describe('normalizeEvidence', () => {
   const traceId = '0af7651916cd43dd8448eb211c80319c';
@@ -21,7 +21,7 @@ describe('normalizeEvidence', () => {
   };
 
   it('normalizes elastic-inference docs stored with dotted attribute keys', async () => {
-    const mapping = resolveEvidenceMapping({ profile: 'elastic-inference' });
+    const mapping = getEvidenceMapping('elastic-inference');
     const { esClient, searchMock } = createEsClient();
 
     // Mirrors the real `_source` shape returned by ES: a nested `attributes`
@@ -84,7 +84,7 @@ describe('normalizeEvidence', () => {
   });
 
   it('resolves fields regardless of flattened, nested, or dotted-key document shape', async () => {
-    const mapping = resolveEvidenceMapping({ profile: 'elastic-inference' });
+    const mapping = getEvidenceMapping('elastic-inference');
     const { esClient, searchMock } = createEsClient();
 
     searchMock
@@ -139,7 +139,7 @@ describe('normalizeEvidence', () => {
   });
 
   it('normalizes otel-genai-attributes chat span messages', async () => {
-    const mapping = resolveEvidenceMapping({ profile: 'otel-genai-attributes' });
+    const mapping = getEvidenceMapping('otel-genai-attributes');
     const { esClient, searchMock } = createEsClient();
 
     searchMock

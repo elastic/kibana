@@ -9,7 +9,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { API_VERSIONS, EVALS_EVALUATE_URL } from '@kbn/evals-common';
+import { API_VERSIONS, EVALS_EVALUATE_URL, EvaluateRequestBody } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -17,6 +17,7 @@ import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
 import { awaitTraceReady } from '../../evaluators/trace_readiness';
+import { getEvidenceMapping } from '../../evaluators/evidence/resolve_mapping';
 import { registerEvaluateRoute } from './evaluate';
 
 jest.mock('../../evaluators/trace_readiness');
@@ -289,7 +290,7 @@ describe('POST /internal/evals/_evaluate', () => {
           hits: [],
         },
       });
-    const { handler } = setup({
+    const { handler, logger } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([
         buildEvaluator({
           name: 'latency',
@@ -323,40 +324,24 @@ describe('POST /internal/evals/_evaluate', () => {
         },
       })
     );
+    expect(awaitTraceReadyMock).toHaveBeenCalledWith(
+      expect.objectContaining({ traceId: '0af7651916cd43dd8448eb211c80319c' }),
+      getEvidenceMapping('otel-genai-attributes'),
+      'otel-genai-attributes',
+      logger
+    );
   });
 
-  it('returns 400 for invalid evidence_mapping override field paths', async () => {
-    const { handler } = setup({
-      evaluatorRegistry: buildEvaluatorRegistry([
-        buildEvaluator({ name: 'latency', kind: 'code' }),
-      ]),
+  it('rejects unknown evidence_mapping profiles at request validation', () => {
+    const result = EvaluateRequestBody.safeParse({
+      subject: {
+        traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
+        evidence_mapping: { profile: 'unknown-profile' },
+      },
+      evaluators: [{ name: 'latency' }],
     });
 
-    const response = await handler(
-      buildContext() as unknown as Parameters<typeof handler>[0],
-      {
-        body: {
-          subject: {
-            traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
-            evidence_mapping: {
-              profile: 'elastic-inference',
-              overrides: {
-                user_query: {
-                  filter: [{ field: '_source.password', value: 'secret' }],
-                },
-              },
-            },
-          },
-          evaluators: [{ name: 'latency' }],
-        },
-      } as unknown as Parameters<typeof handler>[1],
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(400);
-    expect(response.payload).toEqual({
-      message: 'Invalid override field path for user_query: _source.password',
-    });
+    expect(result.success).toBe(false);
   });
 
   it('returns evidence_unmet without inference calls when evaluator evidence requirements fail', async () => {

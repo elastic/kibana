@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { awaitTraceReady } from './trace_readiness';
 import * as evidenceServiceModule from './evidence/evidence_service';
+import { getEvidenceMapping } from './evidence/resolve_mapping';
 import type { TraceAccessor } from './types';
 
 jest.mock('./evidence/evidence_service');
@@ -15,13 +16,13 @@ jest.mock('./evidence/evidence_service');
 describe('awaitTraceReady', () => {
   const traceId = '0af7651916cd43dd8448eb211c80319c';
   const logger = loggingSystemMock.createLogger();
-  const searchMock = jest.fn();
   const traceAccessor: TraceAccessor = {
     traceId,
     esClient: {
-      search: searchMock,
+      search: jest.fn(),
     } as unknown as TraceAccessor['esClient'],
   };
+  const hasTraceDocumentsMock = evidenceServiceModule.hasTraceDocuments as jest.Mock;
   const normalizeEvidenceMock = evidenceServiceModule.normalizeEvidence as jest.Mock;
   const probeProfilesMock = evidenceServiceModule.probeProfiles as jest.Mock;
 
@@ -29,12 +30,8 @@ describe('awaitTraceReady', () => {
     jest.clearAllMocks();
   });
 
-  it('fails fast without retries when docs exist but mapping does not resolve evidence', async () => {
-    searchMock
-      .mockResolvedValueOnce({
-        hits: { hits: [{ _source: { '@timestamp': '2026-07-10T10:00:00.000Z' } }] },
-      })
-      .mockResolvedValueOnce({ hits: { hits: [] } });
+  it('fails fast without retries when docs exist but requested mapping does not resolve evidence', async () => {
+    hasTraceDocumentsMock.mockResolvedValueOnce(true);
     normalizeEvidenceMock.mockResolvedValueOnce({
       input: { message: '' },
       response: { message: '' },
@@ -51,29 +48,58 @@ describe('awaitTraceReady', () => {
       },
     ]);
 
-    await expect(awaitTraceReady(traceAccessor, logger)).rejects.toThrow(
-      `Trace ${traceId} has documents but evidence is unresolvable for profile "elastic-inference"`
+    await expect(
+      awaitTraceReady(
+        traceAccessor,
+        getEvidenceMapping('otel-genai-attributes'),
+        'otel-genai-attributes',
+        logger
+      )
+    ).rejects.toThrow(
+      `Trace ${traceId} has documents but evidence is unresolvable for profile "otel-genai-attributes"`
     );
     expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('retries only while trace documents are still absent', async () => {
-    searchMock
-      .mockResolvedValueOnce({ hits: { hits: [] } })
-      .mockResolvedValueOnce({ hits: { hits: [] } })
-      .mockResolvedValueOnce({
-        hits: { hits: [{ _source: { '@timestamp': '2026-07-10T10:00:01.000Z' } }] },
-      })
-      .mockResolvedValueOnce({ hits: { hits: [] } });
+    hasTraceDocumentsMock.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
     normalizeEvidenceMock.mockResolvedValueOnce({
       input: { message: 'hello' },
       response: { message: 'world' },
       steps: [],
     });
 
-    await expect(awaitTraceReady(traceAccessor, logger)).resolves.toBeUndefined();
+    await expect(
+      awaitTraceReady(
+        traceAccessor,
+        getEvidenceMapping('elastic-inference'),
+        'elastic-inference',
+        logger
+      )
+    ).resolves.toBeUndefined();
     expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('returns ready when requested profile resolves agent response from existing docs', async () => {
+    hasTraceDocumentsMock.mockResolvedValueOnce(true);
+    normalizeEvidenceMock.mockResolvedValueOnce({
+      input: { message: '' },
+      response: { message: 'Found via otel-genai-attributes' },
+      steps: [],
+    });
+
+    await expect(
+      awaitTraceReady(
+        traceAccessor,
+        getEvidenceMapping('otel-genai-attributes'),
+        'otel-genai-attributes',
+        logger
+      )
+    ).resolves.toBeUndefined();
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
+    expect(probeProfilesMock).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });
