@@ -16,6 +16,12 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
@@ -26,7 +32,19 @@ import {
 } from '@kbn/significant-events-schema';
 import type { SignificantEventsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
-import { DEFAULT_EXTRACTION_INTERVAL_HOURS } from '../common/constants';
+import {
+  DEFAULT_EXTRACTION_INTERVAL_HOURS,
+  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
+  DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
+  DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
+  DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
+  DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
+  MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+  MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
+  MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+  MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
+  MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
+} from '../common/constants';
 
 const sigEventsTuningConfigSchema = schema.object(
   Object.fromEntries(
@@ -113,6 +131,154 @@ export function registerFeatureFlags(
             type: 'boolean',
             schema: schema.boolean(),
             requiresPageReload: true,
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+            readonly: true,
+            readonlyMode: 'ui',
+          },
+        });
+
+        core.uiSettings.register({
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: {
+            category: ['observability'],
+            name: i18n.translate('xpack.significantEvents.scheduledSigEventsDiscoveryEnabledName', {
+              defaultMessage: 'Scheduled Significant Events discovery enabled',
+            }) as string,
+            value: false,
+            description: i18n.translate(
+              'xpack.significantEvents.scheduledSigEventsDiscoveryEnabledDescription',
+              {
+                defaultMessage:
+                  'When enabled, Significant Events detection, discovery, and triage run automatically in this Kibana space.',
+              }
+            ),
+            type: 'boolean',
+            schema: schema.boolean(),
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+            readonly: true,
+            readonlyMode: 'ui',
+          },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]:
+            {
+              category: ['observability'],
+              name: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionIntervalMinutesName',
+                {
+                  defaultMessage: 'Scheduled Significant Events detection interval (minutes)',
+                }
+              ) as string,
+              value: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
+              description: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionIntervalMinutesDescription',
+                {
+                  defaultMessage:
+                    'How often scheduled Significant Events detection runs in this Kibana space.',
+                }
+              ),
+              type: 'number',
+              schema: schema.number({ min: MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES }),
+              solutionViews: ['classic', 'oblt'],
+              technicalPreview: true,
+              readonly: true,
+              readonlyMode: 'ui',
+            },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: {
+            category: ['observability'],
+            name: i18n.translate(
+              'xpack.significantEvents.scheduledSigEventsDiscoveryReviewIntervalMinutesName',
+              {
+                defaultMessage: 'Scheduled Significant Events review interval (minutes)',
+              }
+            ) as string,
+            value: DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
+            description: i18n.translate(
+              'xpack.significantEvents.scheduledSigEventsDiscoveryReviewIntervalMinutesDescription',
+              {
+                defaultMessage:
+                  'How often scheduled Significant Events discovery and triage review runs in this Kibana space.',
+              }
+            ),
+            type: 'number',
+            schema: schema.number({ min: MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES }),
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+            readonly: true,
+            readonlyMode: 'ui',
+          },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: {
+            category: ['observability'],
+            name: i18n.translate(
+              'xpack.significantEvents.scheduledSigEventsDiscoveryDiscoveryBatchSizeName',
+              {
+                defaultMessage: 'Scheduled Significant Events discovery batch size',
+              }
+            ) as string,
+            value: DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
+            description: i18n.translate(
+              'xpack.significantEvents.scheduledSigEventsDiscoveryDiscoveryBatchSizeDescription',
+              {
+                defaultMessage:
+                  'Maximum detections sent to each scheduled discovery pass in this Kibana space.',
+              }
+            ),
+            type: 'number',
+            schema: schema.number({
+              min: MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+              max: MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+            }),
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+            readonly: true,
+            readonlyMode: 'ui',
+          },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: {
+            category: ['observability'],
+            name: i18n.translate(
+              'xpack.significantEvents.scheduledSigEventsDiscoveryTriageBatchSizeName',
+              {
+                defaultMessage: 'Scheduled Significant Events triage batch size',
+              }
+            ) as string,
+            value: DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
+            description: i18n.translate(
+              'xpack.significantEvents.scheduledSigEventsDiscoveryTriageBatchSizeDescription',
+              {
+                defaultMessage:
+                  'Maximum discoveries sent to each scheduled triage pass in this Kibana space.',
+              }
+            ),
+            type: 'number',
+            schema: schema.number({
+              min: MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+              max: MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+            }),
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+            readonly: true,
+            readonlyMode: 'ui',
+          },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: {
+            category: ['observability'],
+            name: i18n.translate(
+              'xpack.significantEvents.scheduledSigEventsDiscoveryMaxReviewPassesName',
+              {
+                defaultMessage: 'Scheduled Significant Events review passes',
+              }
+            ) as string,
+            value: DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
+            description: i18n.translate(
+              'xpack.significantEvents.scheduledSigEventsDiscoveryMaxReviewPassesDescription',
+              {
+                defaultMessage:
+                  'Maximum discovery and triage pass pairs to run during one scheduled review execution in this Kibana space.',
+              }
+            ),
+            type: 'number',
+            schema: schema.number({
+              min: MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
+              max: MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
+            }),
             solutionViews: ['classic', 'oblt'],
             technicalPreview: true,
             readonly: true,
