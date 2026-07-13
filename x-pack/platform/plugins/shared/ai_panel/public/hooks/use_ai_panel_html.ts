@@ -137,6 +137,12 @@ export function useAiPanelHtml({
     let dataDone = !esqlQuery;
     let hasFailed = false;
 
+    // Only content-quality failures (invalid/unsupported output) are worth retrying — the LLM
+    // gets a concrete reason and a chance to fix it. Transport/connector/data errors are not,
+    // since regenerating the same content wouldn't address them.
+    const MAX_CONTENT_RETRIES = 1;
+    let retryCount = 0;
+
     let intervalRef: ReturnType<typeof setInterval> | undefined;
     const stopInterval = () => {
       if (intervalRef) {
@@ -152,6 +158,18 @@ export function useAiPanelHtml({
       }, 300);
     }
 
+    const retryOrFail = (retryReason: string, fallbackMessage: string) => {
+      if (retryCount < MAX_CONTENT_RETRIES) {
+        retryCount++;
+        templateDone = false;
+        accRef.current = '';
+        runLlmGeneration(retryReason);
+      } else {
+        setError(fallbackMessage);
+        setIsLoading(false);
+      }
+    };
+
     const tryFinish = () => {
       if (!templateDone || !dataDone || hasFailed || controller.signal.aborted) return;
       stopInterval();
@@ -161,13 +179,17 @@ export function useAiPanelHtml({
       if (esqlQuery && esqlData) {
         const cleaned = stripMarkdownFences(accRef.current);
         if (!isValidTemplate(cleaned)) {
-          setError('Failed to generate panel: LLM returned invalid template');
-          setIsLoading(false);
+          retryOrFail(
+            'the generated template was not valid HTML',
+            'Failed to generate panel: LLM returned invalid template'
+          );
           return;
         }
         if (containsScript(cleaned)) {
-          setError(SCRIPT_ERROR_MESSAGE);
-          setIsLoading(false);
+          retryOrFail(
+            'the generated template used JavaScript, which this panel type does not support',
+            SCRIPT_ERROR_MESSAGE
+          );
           return;
         }
         try {
@@ -175,21 +197,23 @@ export function useAiPanelHtml({
         } catch (err) {
           // eslint-disable-next-line no-console
           console.error('[ai_panel] failed to render template', err);
-          setError(
+          retryOrFail(
+            `the template failed to render: ${err instanceof Error ? err.message : String(err)}`,
             i18n.translate('xpack.aiPanel.error.templateRender', {
               defaultMessage:
                 "Couldn't render the panel. Try simplifying the request — for example, asking for one visualization at a time.",
             })
           );
-          setIsLoading(false);
           return;
         }
         selfWriteCountRef.current++;
         onTemplateChangeRef.current(cleaned);
       } else if (!esqlQuery) {
         if (containsScript(accRef.current)) {
-          setError(SCRIPT_ERROR_MESSAGE);
-          setIsLoading(false);
+          retryOrFail(
+            'the generated HTML used JavaScript, which this panel type does not support',
+            SCRIPT_ERROR_MESSAGE
+          );
           return;
         }
         rendered = prepareHtml(accRef.current);
@@ -219,32 +243,40 @@ export function useAiPanelHtml({
         });
     }
 
-    streamGenerate(
-      core.http,
-      { prompt, esqlQuery, timeRange, colorMode },
-      (token) => {
-        accRef.current += token;
-      },
-      controller.signal
-    )
-      .catch((err: Error) => {
-        if (err.name !== 'AbortError') {
-          hasFailed = true;
-          stopInterval();
-          if (err.message.toLowerCase().includes('no inference connector')) {
-            setIsAiUnavailable(true);
-            setIsLoading(false);
-          } else {
-            setError(err instanceof Error ? err.message : String(err));
-            setIsLoading(false);
+    const runLlmGeneration = (retryReason?: string) => {
+      const promptForLlm = retryReason
+        ? `${prompt}\n\nNote: the previous attempt failed because ${retryReason}. Fix this and regenerate.`
+        : prompt;
+
+      streamGenerate(
+        core.http,
+        { prompt: promptForLlm, esqlQuery, timeRange, colorMode },
+        (token) => {
+          accRef.current += token;
+        },
+        controller.signal
+      )
+        .catch((err: Error) => {
+          if (err.name !== 'AbortError') {
+            hasFailed = true;
+            stopInterval();
+            if (err.message.toLowerCase().includes('no inference connector')) {
+              setIsAiUnavailable(true);
+              setIsLoading(false);
+            } else {
+              setError(err instanceof Error ? err.message : String(err));
+              setIsLoading(false);
+            }
           }
-        }
-      })
-      .finally(() => {
-        if (hasFailed || controller.signal.aborted) return;
-        templateDone = true;
-        tryFinish();
-      });
+        })
+        .finally(() => {
+          if (hasFailed || controller.signal.aborted) return;
+          templateDone = true;
+          tryFinish();
+        });
+    };
+
+    runLlmGeneration();
 
     return () => {
       stopInterval();

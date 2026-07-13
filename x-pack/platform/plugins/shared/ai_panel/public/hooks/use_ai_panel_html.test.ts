@@ -193,6 +193,48 @@ describe('useAiPanelHtml', () => {
       await waitFor(() => expect(result.current.error).toMatch(/javascript/i));
       expect(result.current.html).toBe('');
     });
+
+    it('retries once with the failure reason and succeeds on the second attempt (static panel)', async () => {
+      (streamGenerate as jest.Mock)
+        .mockImplementationOnce(
+          (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
+            onToken('<html><body><script>doStuff()</script></body></html>');
+            return Promise.resolve();
+          }
+        )
+        .mockImplementationOnce(
+          (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
+            onToken('<html><body><p>fixed</p></body></html>');
+            return Promise.resolve();
+          }
+        );
+
+      const { result } = renderHook(() => useAiPanelHtml({ ...baseParams, esqlQuery: undefined }));
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.error).toBeUndefined();
+      expect(result.current.html).toContain('fixed');
+      expect(streamGenerate).toHaveBeenCalledTimes(2);
+      expect((streamGenerate as jest.Mock).mock.calls[1][1].prompt).toContain(
+        'the previous attempt failed'
+      );
+    });
+
+    it('gives up after one retry and surfaces the error (esqlQuery panel)', async () => {
+      (streamGenerate as jest.Mock).mockImplementation(
+        (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
+          onToken('just plain text, no html elements');
+          return Promise.resolve();
+        }
+      );
+
+      const { result } = renderHook(() =>
+        useAiPanelHtml({ ...baseParams, esqlQuery: 'FROM logs | STATS count()' })
+      );
+
+      await waitFor(() => expect(result.current.error).toMatch(/invalid template/i));
+      expect(streamGenerate).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('abort on unmount', () => {
