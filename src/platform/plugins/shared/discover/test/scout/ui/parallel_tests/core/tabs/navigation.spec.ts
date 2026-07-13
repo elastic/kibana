@@ -94,31 +94,34 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
     }
   );
 
-  spaceTest('returns to the last active tab from Single Doc page', async ({ page, pageObjects }) => {
-    const { discover, docViewer, filterBar, unifiedTabs } = pageObjects;
+  spaceTest(
+    'returns to the last active tab from Single Doc page',
+    async ({ page, pageObjects }) => {
+      const { discover, docViewer, filterBar, unifiedTabs } = pageObjects;
 
-    await unifiedTabs.createNewTab();
-    await discover.waitUntilTabIsLoaded();
-    await unifiedTabs.editTabLabel(1, SECOND_TAB_LABEL);
-    await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpg' });
-    await discover.waitUntilTabIsLoaded();
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
+      await unifiedTabs.editTabLabel(1, SECOND_TAB_LABEL);
+      await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpg' });
+      await discover.waitUntilTabIsLoaded();
 
-    expect(await discover.getHitCountInt()).toBe(9_109);
-    expect(await unifiedTabs.getTabLabels()).toStrictEqual([FIRST_TAB_LABEL, SECOND_TAB_LABEL]);
+      expect(await discover.getHitCountInt()).toBe(9_109);
+      expect(await unifiedTabs.getTabLabels()).toStrictEqual([FIRST_TAB_LABEL, SECOND_TAB_LABEL]);
 
-    await docViewer.openSingleDocument(0);
-    await page.waitForURL(/#\/doc/);
-    await page.testSubj.locator('doc-hit').waitFor({ state: 'visible' });
+      await docViewer.openSingleDocument(0);
+      await page.waitForURL(/#\/doc/);
+      await page.testSubj.locator('doc-hit').waitFor({ state: 'visible' });
 
-    await goBackToDiscover(page);
-    await discover.waitUntilTabIsLoaded();
+      await goBackToDiscover(page);
+      await discover.waitUntilTabIsLoaded();
 
-    expect(await discover.getHitCountInt()).toBe(9_109);
-    expect(await unifiedTabs.getTabLabels()).toStrictEqual([FIRST_TAB_LABEL, SECOND_TAB_LABEL]);
-    await expect(getFilterBadge(page, 'extension', 'jpg')).toHaveCount(1);
-    expect(await unifiedTabs.getSelectedTabLabel()).toBe(SECOND_TAB_LABEL);
-    await expect(page.testSubj.locator('breadcrumb first last')).toHaveCount(1);
-  });
+      expect(await discover.getHitCountInt()).toBe(9_109);
+      expect(await unifiedTabs.getTabLabels()).toStrictEqual([FIRST_TAB_LABEL, SECOND_TAB_LABEL]);
+      await expect(getFilterBadge(page, 'extension', 'jpg')).toHaveCount(1);
+      expect(await unifiedTabs.getSelectedTabLabel()).toBe(SECOND_TAB_LABEL);
+      await expect(page.testSubj.locator('breadcrumb first last')).toHaveCount(1);
+    }
+  );
 
   spaceTest(
     'restores the latest tabs when returning via app navigation',
