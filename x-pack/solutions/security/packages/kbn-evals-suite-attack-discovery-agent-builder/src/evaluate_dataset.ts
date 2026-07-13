@@ -198,11 +198,11 @@ const createWorkflowEvidenceEvaluator = (): Evaluator<
 
 const isString = (value: unknown): value is string => typeof value === 'string';
 
-type ToolCallStep = {
+interface ToolCallStep {
   tool_id?: string;
   results?: unknown[];
   params?: Record<string, unknown>;
-};
+}
 
 const getToolCallStepsWithParams = (
   output: AttackDiscoveryAgentBuilderTaskOutput
