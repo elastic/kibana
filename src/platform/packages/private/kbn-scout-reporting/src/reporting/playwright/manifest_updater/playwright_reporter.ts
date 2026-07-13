@@ -31,8 +31,17 @@ export class ScoutManifestUpdater implements Reporter {
 
   onBegin(config: FullConfig, suite: Suite) {
     this.scoutConfig = testConfig.fromPath(config.configFile!);
-    this.scoutConfig.manifest.testChannels =
-      config.metadata?.scout?.testChannels ?? testChannels.default;
+
+    const testChannelsFromConfig = config.metadata?.scout?.testChannels;
+
+    if (testChannelsFromConfig instanceof Array && testChannelsFromConfig.length === 0) {
+      throw new Error(
+        'Invalid test channels definition in test config;' +
+          ' if test channels are provided in metadata, at least one test channel must be specified'
+      );
+    }
+
+    this.scoutConfig.manifest.testChannels = testChannelsFromConfig ?? testChannels.default;
     this.scoutConfig.manifest.tests = suite.allTests().map((test) => {
       // Title path
       //  [0] Root suite
