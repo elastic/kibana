@@ -208,6 +208,40 @@ describe('buildFieldDefinitionYaml', () => {
       const parsed = parse(yaml);
       expect(parsed.metadata).toBeUndefined();
     });
+
+    it('maps the string "false" default to boolean false (no truthy coercion)', () => {
+      const { yaml } = buildFieldDefinitionYaml({
+        key: 'cf_toggle',
+        label: 'Toggle Field',
+        type: CustomFieldTypes.TOGGLE,
+        required: false,
+        // Persisted config allows string defaults; a naive Boolean('false') would wrongly yield true.
+        defaultValue: 'false',
+      });
+      expect(parse(yaml).metadata?.default).toBe(false);
+    });
+
+    it('maps the string "true" default to boolean true', () => {
+      const { yaml } = buildFieldDefinitionYaml({
+        key: 'cf_toggle',
+        label: 'Toggle Field',
+        type: CustomFieldTypes.TOGGLE,
+        required: false,
+        defaultValue: 'true',
+      });
+      expect(parse(yaml).metadata?.default).toBe(true);
+    });
+
+    it('omits metadata when the toggle default is an unrecognized value', () => {
+      const { yaml } = buildFieldDefinitionYaml({
+        key: 'cf_toggle',
+        label: 'Toggle Field',
+        type: CustomFieldTypes.TOGGLE,
+        required: false,
+        defaultValue: 'maybe',
+      });
+      expect(parse(yaml).metadata).toBeUndefined();
+    });
   });
 
   describe('unknown type', () => {

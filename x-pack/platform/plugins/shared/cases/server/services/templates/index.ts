@@ -531,6 +531,19 @@ export class TemplatesService {
     this.dependencies.refreshAnalyticsV2DataView();
   }
 
+  /**
+   * Enforces that a template's identity `name` is unique per owner within the space, comparing
+   * case-insensitively against the latest, non-deleted version of every other template. The
+   * case-default title inside the YAML definition is intentionally NOT constrained here — only the
+   * template's metadata name.
+   *
+   * NOTE: This is a best-effort read-then-write check, not an atomic constraint. Saved objects have
+   * no unique index on `name`, so two concurrent creates/renames racing on the same name can both
+   * pass this check and persist. That is an accepted trade-off: template create/rename is a
+   * low-frequency administrative action, and the check reads the latest committed state (`refresh`
+   * writes are used on create/update), so the practical collision window is small. Enforcing true
+   * atomicity would require a dedicated uniqueness SO or an alias/lock, which is out of scope here.
+   */
   private async assertTemplateNameIsUnique({
     name,
     owner,
@@ -542,25 +555,25 @@ export class TemplatesService {
   }): Promise<void> {
     const escapedOwner = escapeKuery(owner);
     const soType = CASE_TEMPLATE_SAVED_OBJECT;
-    const latestTemplatesForOwner = await this.dependencies.unsecuredSavedObjectsClient.find<Template>({
-      type: soType,
-      namespaces: [this.dependencies.namespace],
-      page: 1,
-      perPage: 10000,
-      sortField: 'name',
-      sortOrder: 'asc',
-      filter: fromKueryExpression(
-        `${soType}.attributes.owner: "${escapedOwner}" AND ` +
-          `${soType}.attributes.isLatest: true AND NOT ${soType}.attributes.deletedAt: *`
-      ),
-    });
+    const latestTemplatesForOwner =
+      await this.dependencies.unsecuredSavedObjectsClient.find<Template>({
+        type: soType,
+        namespaces: [this.dependencies.namespace],
+        page: 1,
+        perPage: 10000,
+        sortField: 'name',
+        sortOrder: 'asc',
+        // Only the identity name is needed for the comparison — avoid loading full YAML definitions.
+        fields: ['name', 'templateId', 'owner', 'isLatest', 'deletedAt'],
+        filter: fromKueryExpression(
+          `${soType}.attributes.owner: "${escapedOwner}" AND ` +
+            `${soType}.attributes.isLatest: true AND NOT ${soType}.attributes.deletedAt: *`
+        ),
+      });
 
     const normalizedRequestedName = name.trim().toLocaleLowerCase();
     const hasNameConflict = latestTemplatesForOwner.saved_objects.some((template) => {
-      if (
-        excludeTemplateId !== undefined &&
-        template.attributes.templateId === excludeTemplateId
-      ) {
+      if (excludeTemplateId !== undefined && template.attributes.templateId === excludeTemplateId) {
         return false;
       }
 
