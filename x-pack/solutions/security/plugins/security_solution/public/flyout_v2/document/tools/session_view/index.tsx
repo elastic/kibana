@@ -90,6 +90,7 @@ export const SessionView: FC<SessionViewProps> = memo(
           indexName: alertIndex,
           renderCellActions,
           onAlertUpdated,
+          origin: 'session_view_alert',
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
@@ -143,7 +144,13 @@ export const SessionView: FC<SessionViewProps> = memo(
             ...defaultFlyoutProperties,
             session: 'inherit',
           },
-          { surface: 'tool', tool: 'session_view', flyoutType: 'document', session: 'inherit' }
+          {
+            surface: 'tool',
+            tool: 'session_view',
+            flyoutType: 'document',
+            session: 'inherit',
+            origin: 'session_view_process',
+          }
         );
       },
       [

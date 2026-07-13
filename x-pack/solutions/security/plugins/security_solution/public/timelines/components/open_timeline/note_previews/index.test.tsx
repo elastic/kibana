@@ -380,6 +380,7 @@ describe('NotePreviews', () => {
       expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith({
         documentId: 'event1',
         indexName: 'test1,test2',
+        origin: 'note_preview',
       });
     });
   });

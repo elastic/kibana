@@ -104,6 +104,7 @@ describe('ShowAlertButton', () => {
       documentId: 'alert-id',
       indexName: 'alert-index',
       renderCellActions: casesCellActionRenderer,
+      origin: 'case_attachment',
     });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(mockReportEvent).toHaveBeenCalled();

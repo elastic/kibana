@@ -77,6 +77,7 @@ export const SessionViewDetails = memo(
           indexName: alertIndex,
           renderCellActions,
           onAlertUpdated,
+          origin: 'session_view_alert',
         });
       },
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]

@@ -86,6 +86,7 @@ describe('NetworkDetails', () => {
     expect(flyoutApi.openNetworkFlyout).toHaveBeenCalledWith({
       ip: '1.2.3.4',
       flowTarget: FlowTargetSourceDest.source,
+      origin: 'table_field_link',
     });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
   });

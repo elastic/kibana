@@ -188,6 +188,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               attackId: eventData._id,
               indexName: eventData.ecs._index ?? '',
               onAttackUpdated: refetch,
+              origin: 'timeline',
             });
           } else {
             openDocumentFlyoutFromIndex({
@@ -195,6 +196,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               indexName: eventData.ecs._index,
               renderCellActions: cellActionRenderer,
               onAlertUpdated: refetch,
+              origin: 'timeline',
             });
           }
         } else {

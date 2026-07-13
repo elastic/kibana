@@ -150,8 +150,12 @@ export const DocumentFlyout = memo(
       [ruleId]
     );
 
-    const onShowNotes = useCallback(() => {
-      openNotes({ hit });
+    const onShowNotesFromHeader = useCallback(() => {
+      openNotes({ hit, origin: 'flyout_header' });
+    }, [openNotes, hit]);
+
+    const onShowNotesFromFooter = useCallback(() => {
+      openNotes({ hit, origin: 'footer_take_action' });
     }, [openNotes, hit]);
 
     if (isAlert && loading) {
@@ -170,7 +174,7 @@ export const DocumentFlyout = memo(
             hit={hit}
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}
-            onShowNotes={onShowNotes}
+            onShowNotes={onShowNotesFromHeader}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -219,7 +223,7 @@ export const DocumentFlyout = memo(
           )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter css={footerStyles}>
-          <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotes} />
+          <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotesFromFooter} />
         </EuiFlyoutFooter>
       </>
     );

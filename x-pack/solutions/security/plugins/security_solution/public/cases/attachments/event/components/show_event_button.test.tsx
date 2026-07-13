@@ -92,6 +92,7 @@ describe('ShowEventButton', () => {
       documentId: 'event-id',
       indexName: 'event-index',
       renderCellActions: casesCellActionRenderer,
+      origin: 'case_attachment',
     });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(mockReportEvent).toHaveBeenCalled();

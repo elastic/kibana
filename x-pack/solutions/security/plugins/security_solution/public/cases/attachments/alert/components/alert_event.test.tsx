@@ -93,7 +93,10 @@ describe('AlertEvent', () => {
 
     fireEvent.click(screen.getByTestId(ruleLinkTestId));
 
-    expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+    expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({
+      ruleId: 'rule-1',
+      origin: 'case_attachment',
+    });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
   });
 

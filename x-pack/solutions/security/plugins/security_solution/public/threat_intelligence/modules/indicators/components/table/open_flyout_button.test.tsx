@@ -78,7 +78,10 @@ describe('<OpenIndicatorFlyoutButton />', () => {
 
     fireEvent.click(getByTestId(BUTTON_TEST_ID));
 
-    expect(flyoutApi.openIocFlyout).toHaveBeenCalledWith({ indicator: mockIndicator });
+    expect(flyoutApi.openIocFlyout).toHaveBeenCalledWith({
+      indicator: mockIndicator,
+      origin: 'threat_intel_table',
+    });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
   });
 });

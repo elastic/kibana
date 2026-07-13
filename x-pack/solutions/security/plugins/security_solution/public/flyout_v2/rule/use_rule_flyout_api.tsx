@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import React, { lazy, useCallback, useMemo } from 'react';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
-import type { FlyoutSessionKind } from '../../common/lib/telemetry';
+import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
@@ -22,6 +22,8 @@ const RuleDetails = lazy(() => import('./main').then((m) => ({ default: m.RuleDe
 export interface OpenRuleFlyoutParams {
   /** The unique identifier of the rule to display. */
   ruleId: string;
+  /** Which UI trigger opened this flyout, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface RuleFlyoutApi {
@@ -60,27 +62,27 @@ export const useRuleFlyoutApi = (): RuleFlyoutApi => {
   // here so callers never have to reason about it: they pick `openRuleFlyout` (main) or
   // `openRuleFlyoutAsChild` (child) and this helper maps that to the right session.
   const open = useCallback(
-    (children: ReactNode, session: FlyoutSessionKind) => {
+    (children: ReactNode, session: FlyoutSessionKind, origin?: FlyoutOrigin) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
       };
-      openFlyout(children, properties, { surface: 'flyout', flyoutType: 'rule', session });
+      openFlyout(children, properties, { surface: 'flyout', flyoutType: 'rule', session, origin });
     },
     [openFlyout, defaultDocumentFlyoutProperties, historyKey]
   );
 
   const openRuleFlyout = useCallback(
-    ({ ruleId }: OpenRuleFlyoutParams) => {
-      open(<RuleDetails ruleId={ruleId} />, 'start');
+    ({ ruleId, origin }: OpenRuleFlyoutParams) => {
+      open(<RuleDetails ruleId={ruleId} />, 'start', origin);
     },
     [open]
   );
 
   const openRuleFlyoutAsChild = useCallback(
-    ({ ruleId }: OpenRuleFlyoutParams) => {
-      open(<RuleDetails ruleId={ruleId} />, 'inherit');
+    ({ ruleId, origin }: OpenRuleFlyoutParams) => {
+      open(<RuleDetails ruleId={ruleId} />, 'inherit', origin);
     },
     [open]
   );

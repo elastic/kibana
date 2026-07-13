@@ -94,7 +94,7 @@ export const useDocumentFlyoutTitle = ({
       surface: 'flyout' as const,
       flyoutType: 'document' as const,
       session: 'inherit' as const,
-      origin: 'title' as const,
+      origin: 'tool_header_title' as const,
     };
     const openedAt = Date.now();
     reportOpened(meta);

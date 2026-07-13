@@ -63,7 +63,8 @@ export const VisualizationsSection = memo(
     });
 
     const onShowAnalyzer = useCallback(
-      () => openAnalyzer({ hit, renderCellActions, onAlertUpdated }),
+      () =>
+        openAnalyzer({ hit, renderCellActions, onAlertUpdated, origin: 'visualizations_analyzer' }),
       [openAnalyzer, hit, renderCellActions, onAlertUpdated]
     );
 
@@ -75,6 +76,7 @@ export const VisualizationsSection = memo(
           jumpToEntityId: sessionViewConfig?.jumpToEntityId,
           renderCellActions,
           onAlertUpdated,
+          origin: 'visualizations_session_view',
         }),
       [
         openSessionView,
@@ -87,7 +89,13 @@ export const VisualizationsSection = memo(
     );
 
     const onShowGraph = useCallback(
-      () => openDocumentGraph({ hit, renderCellActions, onAlertUpdated }),
+      () =>
+        openDocumentGraph({
+          hit,
+          renderCellActions,
+          onAlertUpdated,
+          origin: 'visualizations_graph',
+        }),
       [openDocumentGraph, hit, renderCellActions, onAlertUpdated]
     );
 

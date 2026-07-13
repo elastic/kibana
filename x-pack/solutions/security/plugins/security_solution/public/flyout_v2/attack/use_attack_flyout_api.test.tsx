@@ -68,6 +68,23 @@ describe('useAttackFlyoutApi', () => {
     });
   });
 
+  it('openAttackFlyout forwards the given origin', () => {
+    const { result } = renderHook(() => useAttackFlyoutApi());
+    result.current.openAttackFlyout({
+      attackId: 'attack-1',
+      indexName: '.alerts-security',
+      origin: 'attacks_table',
+    });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: 'flyout',
+      flyoutType: 'attack',
+      tool: undefined,
+      session: 'start',
+      origin: 'attacks_table',
+    });
+  });
+
   it('openAttackFlyoutAsChild opens a system flyout that inherits the current session', () => {
     const { result } = renderHook(() => useAttackFlyoutApi());
     result.current.openAttackFlyoutAsChild({ attackId: 'attack-1', indexName: '.alerts-security' });

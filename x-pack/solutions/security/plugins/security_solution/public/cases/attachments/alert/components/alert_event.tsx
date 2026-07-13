@@ -78,7 +78,7 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   const onRuleClick = useCallback(() => {
     if (resolvedRuleId && canReadRules) {
       if (enableNewFlyout) {
-        openRuleFlyout({ ruleId: resolvedRuleId });
+        openRuleFlyout({ ruleId: resolvedRuleId, origin: 'case_attachment' });
       } else {
         openFlyout({ right: { id: RulePanelKey, params: { ruleId: resolvedRuleId } } });
       }

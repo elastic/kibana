@@ -16,6 +16,7 @@ import {
 } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
+import type { FlyoutOrigin } from '../../common/lib/telemetry';
 
 // Lazy-loaded so consumers of this hook don't statically pull the attack flyout graph into their
 // bundle; the chunk only loads when the flyout (or one of its tools) is actually opened.
@@ -36,6 +37,8 @@ export interface OpenAttackFlyoutParams {
   indexName: string;
   /** Invoked after the attack is mutated inside the flyout, to let the caller refresh. Defaults to a no-op. */
   onAttackUpdated?: () => void;
+  /** Which UI trigger opened this flyout, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenAttackCorrelationsParams {
@@ -45,6 +48,8 @@ export interface OpenAttackCorrelationsParams {
   alertIds: string[];
   /** Optional callback to open one of the correlated alerts. */
   onShowAlert?: (id: string, indexName: string) => void;
+  /** Which UI trigger opened the correlations tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenAttackEntitiesParams {
@@ -52,6 +57,8 @@ export interface OpenAttackEntitiesParams {
   hit: DataTableRecord;
   /** Ids of the alerts correlated to the attack. */
   alertIds: string[];
+  /** Which UI trigger opened the entities tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface AttackFlyoutApi {
@@ -90,7 +97,7 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   const open = useOpenFlyout();
 
   const openAttackFlyout = useCallback(
-    ({ attackId, indexName, onAttackUpdated = noop }: OpenAttackFlyoutParams) => {
+    ({ attackId, indexName, onAttackUpdated = noop, origin }: OpenAttackFlyoutParams) => {
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
@@ -98,14 +105,14 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           onAttackUpdated={onAttackUpdated}
         />,
         { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'flyout', flyoutType: 'attack', session: 'start' }
+        { surface: 'flyout', flyoutType: 'attack', session: 'start', origin }
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey]
   );
 
   const openAttackFlyoutAsChild = useCallback(
-    ({ attackId, indexName, onAttackUpdated = noop }: OpenAttackFlyoutParams) => {
+    ({ attackId, indexName, onAttackUpdated = noop, origin }: OpenAttackFlyoutParams) => {
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
@@ -113,29 +120,29 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           onAttackUpdated={onAttackUpdated}
         />,
         { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' },
-        { surface: 'flyout', flyoutType: 'attack', session: 'inherit' }
+        { surface: 'flyout', flyoutType: 'attack', session: 'inherit', origin }
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey]
   );
 
   const openAttackCorrelations = useCallback(
-    ({ hit, alertIds, onShowAlert }: OpenAttackCorrelationsParams) => {
+    ({ hit, alertIds, onShowAlert, origin }: OpenAttackCorrelationsParams) => {
       open(
         <CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />,
         { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'correlations', flyoutType: 'attack', session: 'start' }
+        { surface: 'tool', tool: 'correlations', flyoutType: 'attack', session: 'start', origin }
       );
     },
     [open, historyKey]
   );
 
   const openAttackEntities = useCallback(
-    ({ hit, alertIds }: OpenAttackEntitiesParams) => {
+    ({ hit, alertIds, origin }: OpenAttackEntitiesParams) => {
       open(
         <EntitiesDetails hit={hit} alertIds={alertIds} />,
         { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'entities', flyoutType: 'attack', session: 'start' }
+        { surface: 'tool', tool: 'entities', flyoutType: 'attack', session: 'start', origin }
       );
     },
     [open, historyKey]

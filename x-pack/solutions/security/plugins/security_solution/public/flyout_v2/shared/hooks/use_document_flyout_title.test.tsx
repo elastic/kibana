@@ -109,7 +109,7 @@ describe('useDocumentFlyoutTitle', () => {
       flyoutType: 'document',
       tool: undefined,
       session: 'inherit',
-      origin: 'title',
+      origin: 'tool_header_title',
     });
   });
 

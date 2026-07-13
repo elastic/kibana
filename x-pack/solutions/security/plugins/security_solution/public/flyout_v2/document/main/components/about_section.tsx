@@ -63,7 +63,7 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
 
   const onShowRuleSummary = useCallback(() => {
     if (ruleId) {
-      openRuleFlyout({ ruleId });
+      openRuleFlyout({ ruleId, origin: 'about_section' });
     }
   }, [openRuleFlyout, ruleId]);
 

@@ -110,7 +110,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   const handleClick = useCallback(() => {
     startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
     if (enableNewFlyout && hit) {
-      openAnalyzer({ hit, onAlertUpdated: () => refetch?.() });
+      openAnalyzer({ hit, onAlertUpdated: () => refetch?.(), origin: 'row_action' });
     } else {
       navigateToAnalyzer();
     }

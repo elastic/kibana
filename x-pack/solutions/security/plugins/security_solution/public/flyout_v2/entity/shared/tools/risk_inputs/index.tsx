@@ -45,6 +45,7 @@ export const RiskInputs = memo(
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
+          origin: 'risk_inputs_alert',
         });
       },
       [openDocumentFlyoutFromIndexAsChild]

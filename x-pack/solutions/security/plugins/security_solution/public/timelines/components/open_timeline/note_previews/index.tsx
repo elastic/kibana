@@ -64,7 +64,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   const handleClick = useCallback(() => {
     const indexName = selectedPatterns.join(',');
     if (enableNewFlyout) {
-      openDocumentFlyoutFromPattern({ documentId: eventId, indexName });
+      openDocumentFlyoutFromPattern({ documentId: eventId, indexName, origin: 'note_preview' });
     } else {
       openFlyout({
         right: {

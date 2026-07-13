@@ -144,7 +144,10 @@ describe('attachment_children initComponent', () => {
 
     fireEvent.click(getByTestId(INDICATOR_NAME_TEST_ID));
 
-    expect(flyoutApi.openIocFlyout).toHaveBeenCalledWith({ indicator });
+    expect(flyoutApi.openIocFlyout).toHaveBeenCalledWith({
+      indicator,
+      origin: 'case_attachment',
+    });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
   });
 });

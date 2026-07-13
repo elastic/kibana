@@ -86,6 +86,7 @@ export const TableFieldValueCell = memo(
             isObjectArray={data.isObjectArray}
             value={value}
             truncate={false}
+            origin="field_link"
           />
         </EuiFlexItem>
       );

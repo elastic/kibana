@@ -26,7 +26,7 @@ import {
 } from '../../../../flyout/document_details/left/components/entities_details';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import { CspInsightLeftPanelSubTab } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { FlyoutTool, FlyoutType } from '../../../../common/lib/telemetry';
+import type { FlyoutOrigin, FlyoutTool, FlyoutType } from '../../../../common/lib/telemetry';
 import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
@@ -101,7 +101,7 @@ export const EntityDetails = memo(
     const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     const openEntityFlyout = useCallback(
-      (children: ReactNode, flyoutType: FlyoutType) => {
+      (children: ReactNode, flyoutType: FlyoutType, origin: FlyoutOrigin) => {
         open(
           children,
           {
@@ -110,18 +110,18 @@ export const EntityDetails = memo(
             session: 'inherit',
             outsideClickCloses: false,
           },
-          { surface: 'flyout', flyoutType, session: 'inherit', origin: 'related_entity' }
+          { surface: 'flyout', flyoutType, session: 'inherit', origin }
         );
       },
       [open, defaultDocumentFlyoutProperties, historyKey]
     );
 
     const openToolFlyout = useCallback(
-      (children: ReactNode, tool: FlyoutTool) => {
+      (children: ReactNode, tool: FlyoutTool, origin: FlyoutOrigin) => {
         open(
           children,
           { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-          { surface: 'tool', tool, flyoutType: 'document', session: 'start' }
+          { surface: 'tool', tool, flyoutType: 'document', session: 'start', origin }
         );
       },
       [open, historyKey]
@@ -137,7 +137,9 @@ export const EntityDetails = memo(
         const flyoutType = getFlyoutTypeForField(field);
         if (!flyoutContent || !flyoutType) return <>{children}</>;
         return (
-          <EuiLink onClick={() => openEntityFlyoutRef.current(flyoutContent, flyoutType)}>
+          <EuiLink
+            onClick={() => openEntityFlyoutRef.current(flyoutContent, flyoutType, 'field_link')}
+          >
             {children ?? value}
           </EuiLink>
         );
@@ -150,14 +152,16 @@ export const EntityDetails = memo(
         onPreviewEntity: () =>
           openEntityFlyout(
             <User userName={name} entityId={entityId} scopeId={scopeId} hit={hit} />,
-            'user'
+            'user',
+            'entities_list'
           ),
         onShowDetailsPanel: (subTab) => {
           switch (subTab) {
             case CspInsightLeftPanelSubTab.ALERTS:
               return openToolFlyout(
                 <AlertsInsights entityType={EntityType.user} value={name} entityId={entityId} />,
-                'alerts_insights'
+                'alerts_insights',
+                'insights_alerts'
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return openToolFlyout(
@@ -166,7 +170,8 @@ export const EntityDetails = memo(
                   value={name}
                   entityId={entityId}
                 />,
-                'misconfiguration_insights'
+                'misconfiguration_insights',
+                'insights_misconfiguration'
               );
           }
         },
@@ -180,14 +185,16 @@ export const EntityDetails = memo(
         onPreviewEntity: () =>
           openEntityFlyout(
             <Host hostName={name} entityId={entityId} scopeId={scopeId} hit={hit} />,
-            'host'
+            'host',
+            'entities_list'
           ),
         onShowDetailsPanel: (subTab) => {
           switch (subTab) {
             case CspInsightLeftPanelSubTab.ALERTS:
               return openToolFlyout(
                 <AlertsInsights entityType={EntityType.host} value={name} entityId={entityId} />,
-                'alerts_insights'
+                'alerts_insights',
+                'insights_alerts'
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return openToolFlyout(
@@ -196,7 +203,8 @@ export const EntityDetails = memo(
                   value={name}
                   entityId={entityId}
                 />,
-                'misconfiguration_insights'
+                'misconfiguration_insights',
+                'insights_misconfiguration'
               );
             case CspInsightLeftPanelSubTab.VULNERABILITIES:
               return openToolFlyout(
@@ -206,11 +214,13 @@ export const EntityDetails = memo(
                   onShowHost={() =>
                     openEntityFlyout(
                       <Host hostName={name} entityId={entityId} scopeId={scopeId} hit={hit} />,
-                      'host'
+                      'host',
+                      'tool_header_title'
                     )
                   }
                 />,
-                'vulnerability_insights'
+                'vulnerability_insights',
+                'insights_vulnerability'
               );
           }
         },

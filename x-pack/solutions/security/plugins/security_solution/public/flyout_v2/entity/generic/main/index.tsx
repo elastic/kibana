@@ -20,7 +20,7 @@ import { buildEntityNameFilter } from '../../../../../common/search_strategy';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import type { Refetch } from '../../../../common/types';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import type { FlyoutTool } from '../../../../common/lib/telemetry';
+import type { FlyoutOrigin, FlyoutTool } from '../../../../common/lib/telemetry';
 import { FIRST_RECORD_PAGINATION } from '../../../../entity_analytics/common';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -123,7 +123,7 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
     open(
       <GenericEntity {...params} />,
       { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' },
-      { surface: 'flyout', flyoutType: 'generic', session: 'inherit', origin: 'related_entity' }
+      { surface: 'flyout', flyoutType: 'generic', session: 'inherit', origin: 'tool_header_title' }
     );
   }, [open, params, historyKey, defaultDocumentFlyoutProperties]);
 
@@ -134,8 +134,14 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
         historyKey,
         session: 'start' as const,
       };
-      const wrap = (children: React.ReactNode, tool: FlyoutTool) =>
-        open(children, common, { surface: 'tool', tool, flyoutType: 'generic', session: 'start' });
+      const wrap = (children: React.ReactNode, tool: FlyoutTool, origin: FlyoutOrigin) =>
+        open(children, common, {
+          surface: 'tool',
+          tool,
+          flyoutType: 'generic',
+          session: 'start',
+          origin,
+        });
 
       const value = genericInsightsValue || '';
 
@@ -148,7 +154,8 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
               entityName={value}
               onShowEntity={onShowGeneric}
             />,
-            'fields_table'
+            'fields_table',
+            'fields_section'
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -160,7 +167,8 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
                   entityId={genericInsightsValue}
                   onShowEntity={onShowGeneric}
                 />,
-                'misconfiguration_insights'
+                'misconfiguration_insights',
+                'insights_misconfiguration'
               );
             case CspInsightLeftPanelSubTab.VULNERABILITIES:
               return wrap(
@@ -170,7 +178,8 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
                   entityType={EntityType.generic}
                   onShowHost={onShowGeneric}
                 />,
-                'vulnerability_insights'
+                'vulnerability_insights',
+                'insights_vulnerability'
               );
             case CspInsightLeftPanelSubTab.ALERTS:
               return wrap(
@@ -180,7 +189,8 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
                   entityId={genericInsightsValue}
                   onShowEntity={onShowGeneric}
                 />,
-                'alerts_insights'
+                'alerts_insights',
+                'insights_alerts'
               );
           }
       }

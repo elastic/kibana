@@ -238,7 +238,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         (isAttackRow ? eventData.ecs._index : undefined) ?? selectedPatterns.join(',');
 
       if (enableNewFlyout && eventData) {
-        openNotes({ hit: eventData });
+        openNotes({ hit: eventData, origin: 'timeline' });
       } else if (isAttackRow) {
         openFlyout({
           right: {

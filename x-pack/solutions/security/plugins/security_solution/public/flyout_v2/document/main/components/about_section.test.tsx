@@ -135,7 +135,10 @@ describe('AboutSection', () => {
     });
 
     expect(flyoutApi.openRuleFlyout).toHaveBeenCalledTimes(1);
-    expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({ ruleId: 'rule-uuid-123' });
+    expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({
+      ruleId: 'rule-uuid-123',
+      origin: 'about_section',
+    });
   });
 
   it('renders EventCategoryDescription and EventRenderer for event.kind === event', async () => {

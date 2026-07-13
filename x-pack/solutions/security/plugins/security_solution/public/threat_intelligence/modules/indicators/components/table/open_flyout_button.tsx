@@ -32,7 +32,7 @@ export const OpenIndicatorFlyoutButton = memo(({ indicator }: OpenIndicatorFlyou
 
   const open = useCallback(() => {
     if (enableNewFlyout) {
-      openIocFlyout({ indicator });
+      openIocFlyout({ indicator, origin: 'threat_intel_table' });
     } else {
       openFlyout({
         right: {

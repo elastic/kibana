@@ -67,6 +67,23 @@ describe('useNetworkFlyoutApi', () => {
     });
   });
 
+  it('openNetworkFlyout forwards the given origin', () => {
+    const { result } = renderHook(() => useNetworkFlyoutApi());
+    result.current.openNetworkFlyout({
+      ip,
+      flowTarget: FlowTargetSourceDest.source,
+      origin: 'field_link',
+    });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: 'flyout',
+      flyoutType: 'network',
+      tool: undefined,
+      session: 'start',
+      origin: 'field_link',
+    });
+  });
+
   it('openNetworkFlyoutAsChild opens a system flyout that inherits the current session', () => {
     const { result } = renderHook(() => useNetworkFlyoutApi());
     result.current.openNetworkFlyoutAsChild({ ip, flowTarget: FlowTargetSourceDest.source });

@@ -25,11 +25,12 @@ import { buildUserNamesFilter, type RiskSeverity } from '../../../../../common/s
 import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import type { FlyoutTool } from '../../../../common/lib/telemetry';
+import type { FlyoutOrigin, FlyoutTool } from '../../../../common/lib/telemetry';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   defaultToolsFlyoutProperties,
@@ -278,16 +279,19 @@ export const User: FC<UserProps> = memo(function User({
     open(
       <User userName={userName} entityId={entityId} scopeId={scopeId} />,
       { ...defaultDocumentFlyoutProperties, title: userName, historyKey, session: 'inherit' },
-      { surface: 'flyout', flyoutType: 'user', session: 'inherit', origin: 'related_entity' }
+      { surface: 'flyout', flyoutType: 'user', session: 'inherit', origin: 'tool_header_title' }
     );
   }, [open, historyKey, userName, entityId, scopeId, defaultDocumentFlyoutProperties]);
 
   const onShowRelatedEntity = useCallback(
-    (params: {
-      engineType: string | undefined;
-      entityId: string;
-      entityName: string | undefined;
-    }) =>
+    (
+      params: {
+        engineType: string | undefined;
+        entityId: string;
+        entityName: string | undefined;
+      },
+      origin: FlyoutOrigin
+    ) =>
       open(
         renderEntityDetails({ ...params, scopeId }),
         {
@@ -300,10 +304,28 @@ export const User: FC<UserProps> = memo(function User({
           surface: 'flyout',
           flyoutType: entityEngineTypeToFlyoutType(params.engineType),
           session: 'inherit',
-          origin: 'related_entity',
+          origin,
         }
       ),
     [open, scopeId, historyKey, defaultDocumentFlyoutProperties]
+  );
+
+  const onShowRelatedEntityFromResolution = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, 'resolution_entity_link'),
+    [onShowRelatedEntity]
+  );
+
+  const onShowRelatedEntityFromGraph = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, 'graph_node'),
+    [onShowRelatedEntity]
   );
 
   const openDetailsPanel = useCallback(
@@ -314,8 +336,14 @@ export const User: FC<UserProps> = memo(function User({
         historyKey,
         session: 'start' as const,
       };
-      const wrap = (children: React.ReactNode, tool: FlyoutTool) =>
-        open(children, common, { surface: 'tool', tool, flyoutType: 'user', session: 'start' });
+      const wrap = (children: React.ReactNode, tool: FlyoutTool, origin?: FlyoutOrigin) =>
+        open(children, common, {
+          surface: 'tool',
+          tool,
+          flyoutType: 'user',
+          session: 'start',
+          origin,
+        });
 
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
@@ -326,7 +354,10 @@ export const User: FC<UserProps> = memo(function User({
               entityId={entityStoreEntityId}
               onShowEntity={onOpenUser}
             />,
-            'risk_inputs'
+            'risk_inputs',
+            path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
+              ? 'risk_summary_resolution'
+              : 'risk_summary_entity'
           );
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return wrap(
@@ -336,7 +367,8 @@ export const User: FC<UserProps> = memo(function User({
               entityId={entityStoreEntityId}
               onOpenEntity={onOpenUser}
             />,
-            'anomaly_insights'
+            'anomaly_insights',
+            'anomalies_section'
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -348,7 +380,8 @@ export const User: FC<UserProps> = memo(function User({
                   entityId={panelDisplayEntityId}
                   onShowEntity={onOpenUser}
                 />,
-                'alerts_insights'
+                'alerts_insights',
+                'insights_alerts'
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return wrap(
@@ -358,7 +391,8 @@ export const User: FC<UserProps> = memo(function User({
                   entityId={panelDisplayEntityId}
                   onShowEntity={onOpenUser}
                 />,
-                'misconfiguration_insights'
+                'misconfiguration_insights',
+                'insights_misconfiguration'
               );
           }
           break;
@@ -369,10 +403,11 @@ export const User: FC<UserProps> = memo(function User({
               entityId={entityStoreEntityId}
               scopeId={scopeId}
               entityName={userName}
-              onShowEntity={onShowRelatedEntity}
+              onShowEntity={onShowRelatedEntityFromGraph}
               onShowOriginatingEntity={onOpenUser}
             />,
-            'graph_view'
+            'graph_view',
+            'visualizations_graph'
           );
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -383,9 +418,10 @@ export const User: FC<UserProps> = memo(function User({
               entityName={userName}
               scopeId={scopeId}
               onShowEntity={onOpenUser}
-              onShowRelatedEntity={onShowRelatedEntity}
+              onShowRelatedEntity={onShowRelatedEntityFromResolution}
             />,
-            'resolution'
+            'resolution',
+            'resolution_section'
           );
         // TODO: currently dead (v1 accessed through left pane tabs, need to perhaps add preview?)
         case EntityDetailsLeftPanelTab.OKTA: {
@@ -427,7 +463,8 @@ export const User: FC<UserProps> = memo(function User({
       entityStoreEntityId,
       managedUser,
       onOpenUser,
-      onShowRelatedEntity,
+      onShowRelatedEntityFromGraph,
+      onShowRelatedEntityFromResolution,
     ]
   );
 
@@ -476,7 +513,7 @@ export const User: FC<UserProps> = memo(function User({
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
-            onShowEntity={onShowRelatedEntity}
+            onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
           />
         )}

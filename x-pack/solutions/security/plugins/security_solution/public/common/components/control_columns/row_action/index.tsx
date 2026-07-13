@@ -123,6 +123,7 @@ const RowActionComponent = ({
         renderCellActions:
           tableId === TableId.alertsOnCasePage ? casesCellActionRenderer : cellActionRenderer,
         onAlertUpdated: handleAlertUpdated,
+        origin: 'alerts_table',
       });
     } else {
       openFlyout({
@@ -154,7 +155,7 @@ const RowActionComponent = ({
 
   const toggleShowNotes = useCallback(() => {
     if (enableNewFlyout && hit) {
-      openNotes({ hit });
+      openNotes({ hit, origin: 'alerts_table' });
     } else {
       openFlyout({
         right: {

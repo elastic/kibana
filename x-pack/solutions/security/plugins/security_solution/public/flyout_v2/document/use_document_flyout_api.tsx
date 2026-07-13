@@ -11,6 +11,7 @@ import { noop } from 'lodash/fp';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { PrevalenceDetailsProps } from './tools/prevalence';
+import type { FlyoutOrigin } from '../../common/lib/telemetry';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
@@ -72,11 +73,15 @@ export interface OpenDocumentFlyoutParams {
   renderCellActions?: CellActionRenderer;
   /** Invoked after an alert is mutated inside the flyout, to let the caller refresh. Defaults to a no-op. */
   onAlertUpdated?: () => void;
+  /** Which UI trigger opened this flyout, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenNotesParams {
   /** The document record whose notes should be shown. */
   hit: DataTableRecord;
+  /** Which UI trigger opened the notes tool (e.g. the header badge vs. the footer take-action menu). */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenAnalyzerParams {
@@ -84,6 +89,8 @@ export interface OpenAnalyzerParams {
   hit: DataTableRecord;
   renderCellActions?: CellActionRenderer;
   onAlertUpdated?: () => void;
+  /** Which UI trigger opened the analyzer tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenSessionViewParams {
@@ -93,6 +100,8 @@ export interface OpenSessionViewParams {
   jumpToEntityId?: string;
   renderCellActions?: CellActionRenderer;
   onAlertUpdated?: () => void;
+  /** Which UI trigger opened the session view tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenDocumentEntitiesParams {
@@ -100,6 +109,8 @@ export interface OpenDocumentEntitiesParams {
   hit: DataTableRecord;
   /** Scope id for the entity links opened from the tool. */
   scopeId?: string;
+  /** Which UI trigger opened the entities tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenDocumentCorrelationsParams {
@@ -113,31 +124,47 @@ export interface OpenDocumentCorrelationsParams {
   onShowAlert: (id: string, indexName: string) => void;
   /** Optional callback to open a correlated attack; when omitted the attack column is hidden. */
   onShowAttack?: (id: string, indexName: string) => void;
+  /** Which UI trigger opened the correlations tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenDocumentResponseParams {
   /** The alert document whose response actions should be shown. */
   hit: DataTableRecord;
+  /** Which UI trigger opened the response tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenDocumentThreatIntelligenceParams {
   /** The document whose threat intelligence matches should be shown. */
   hit: DataTableRecord;
+  /** Which UI trigger opened the threat intelligence tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface OpenDocumentInvestigationGuideParams {
   /** The alert document whose investigation guide should be shown. */
   hit: DataTableRecord;
+  /** Which UI trigger opened the investigation guide tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
-/** Parameters for the prevalence tool. Mirrors the tool's own props (the caller builds `columns`). */
-export type OpenDocumentPrevalenceParams = PrevalenceDetailsProps;
+/**
+ * Parameters for the prevalence tool. Mirrors the tool's own props (the caller builds `columns`),
+ * plus the UI trigger that opened it.
+ */
+export type OpenDocumentPrevalenceParams = PrevalenceDetailsProps & {
+  /** Which UI trigger opened the prevalence tool, when known. */
+  origin?: FlyoutOrigin;
+};
 
 export interface OpenDocumentGraphParams {
   /** The document to render the graph for. */
   hit: DataTableRecord;
   renderCellActions?: CellActionRenderer;
   onAlertUpdated?: () => void;
+  /** Which UI trigger opened the graph tool, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface DocumentFlyoutApi {
@@ -223,7 +250,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       open(
         buildFromIndexContent(params),
         { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'flyout', flyoutType: 'document', session: 'start' }
+        { surface: 'flyout', flyoutType: 'document', session: 'start', origin: params.origin }
       );
     },
     [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey]
@@ -234,7 +261,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       open(
         buildFromIndexContent(params),
         { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' },
-        { surface: 'flyout', flyoutType: 'document', session: 'inherit' }
+        { surface: 'flyout', flyoutType: 'document', session: 'inherit', origin: params.origin }
       );
     },
     [open, buildFromIndexContent, defaultDocumentFlyoutProperties, historyKey]
@@ -246,6 +273,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       indexName,
       renderCellActions = cellActionRenderer,
       onAlertUpdated = noop,
+      origin,
     }: OpenDocumentFlyoutParams) => {
       open(
         <DocumentFlyoutWrapperFromPattern
@@ -255,18 +283,18 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onAlertUpdated={onAlertUpdated}
         />,
         { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'flyout', flyoutType: 'document', session: 'start' }
+        { surface: 'flyout', flyoutType: 'document', session: 'start', origin }
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey]
   );
 
   const openNotes = useCallback(
-    ({ hit }: OpenNotesParams) => {
+    ({ hit, origin }: OpenNotesParams) => {
       open(
         <NotesDetails hit={hit} />,
         { ...defaultToolsFlyoutProperties, historyKey },
-        { surface: 'tool', tool: 'notes', flyoutType: 'document', session: 'start' }
+        { surface: 'tool', tool: 'notes', flyoutType: 'document', session: 'start', origin }
       );
     },
     [open, historyKey]
@@ -277,6 +305,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       hit,
       renderCellActions = cellActionRenderer,
       onAlertUpdated = noop,
+      origin,
     }: OpenAnalyzerParams) => {
       open(
         <AnalyzerGraph
@@ -285,7 +314,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onAlertUpdated={onAlertUpdated}
         />,
         { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'analyzer', flyoutType: 'document', session: 'start' }
+        { surface: 'tool', tool: 'analyzer', flyoutType: 'document', session: 'start', origin }
       );
     },
     [open, historyKey]
@@ -298,6 +327,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       jumpToEntityId,
       renderCellActions = cellActionRenderer,
       onAlertUpdated = noop,
+      origin,
     }: OpenSessionViewParams) => {
       open(
         <SessionView
@@ -308,18 +338,18 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onAlertUpdated={onAlertUpdated}
         />,
         { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'session_view', flyoutType: 'document', session: 'start' }
+        { surface: 'tool', tool: 'session_view', flyoutType: 'document', session: 'start', origin }
       );
     },
     [open, historyKey]
   );
 
   const openDocumentEntities = useCallback(
-    ({ hit, scopeId }: OpenDocumentEntitiesParams) => {
+    ({ hit, scopeId, origin }: OpenDocumentEntitiesParams) => {
       open(
         <EntityDetails hit={hit} scopeId={scopeId} />,
         { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'entities', flyoutType: 'document', session: 'start' }
+        { surface: 'tool', tool: 'entities', flyoutType: 'document', session: 'start', origin }
       );
     },
     [open, historyKey]
@@ -332,6 +362,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       isRulePreview,
       onShowAlert,
       onShowAttack,
+      origin,
     }: OpenDocumentCorrelationsParams) => {
       open(
         <CorrelationsDetails
@@ -342,36 +373,42 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onShowAttack={onShowAttack}
         />,
         { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'correlations', flyoutType: 'document', session: 'start' }
+        { surface: 'tool', tool: 'correlations', flyoutType: 'document', session: 'start', origin }
       );
     },
     [open, historyKey]
   );
 
   const openDocumentResponse = useCallback(
-    ({ hit }: OpenDocumentResponseParams) => {
+    ({ hit, origin }: OpenDocumentResponseParams) => {
       open(
         <ResponseDetails hit={hit} />,
         { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'response', flyoutType: 'document', session: 'start' }
+        { surface: 'tool', tool: 'response', flyoutType: 'document', session: 'start', origin }
       );
     },
     [open, historyKey]
   );
 
   const openDocumentThreatIntelligence = useCallback(
-    ({ hit }: OpenDocumentThreatIntelligenceParams) => {
+    ({ hit, origin }: OpenDocumentThreatIntelligenceParams) => {
       open(
         <ThreatIntelligenceDetails hit={hit} />,
         { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'threat_intelligence', flyoutType: 'document', session: 'start' }
+        {
+          surface: 'tool',
+          tool: 'threat_intelligence',
+          flyoutType: 'document',
+          session: 'start',
+          origin,
+        }
       );
     },
     [open, historyKey]
   );
 
   const openDocumentPrevalence = useCallback(
-    ({ hit, investigationFields, scopeId, columns }: OpenDocumentPrevalenceParams) => {
+    ({ hit, investigationFields, scopeId, columns, origin }: OpenDocumentPrevalenceParams) => {
       open(
         <PrevalenceDetails
           hit={hit}
@@ -380,18 +417,24 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           columns={columns}
         />,
         { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'prevalence', flyoutType: 'document', session: 'start' }
+        { surface: 'tool', tool: 'prevalence', flyoutType: 'document', session: 'start', origin }
       );
     },
     [open, historyKey]
   );
 
   const openDocumentInvestigationGuide = useCallback(
-    ({ hit }: OpenDocumentInvestigationGuideParams) => {
+    ({ hit, origin }: OpenDocumentInvestigationGuideParams) => {
       open(
         <InvestigationGuide hit={hit} />,
         { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'investigation_guide', flyoutType: 'document', session: 'start' }
+        {
+          surface: 'tool',
+          tool: 'investigation_guide',
+          flyoutType: 'document',
+          session: 'start',
+          origin,
+        }
       );
     },
     [open, historyKey]
@@ -402,6 +445,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       hit,
       renderCellActions = cellActionRenderer,
       onAlertUpdated = noop,
+      origin,
     }: OpenDocumentGraphParams) => {
       open(
         <GraphDetails
@@ -410,7 +454,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           onAlertUpdated={onAlertUpdated}
         />,
         { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-        { surface: 'tool', tool: 'graph', flyoutType: 'document', session: 'start' }
+        { surface: 'tool', tool: 'graph', flyoutType: 'document', session: 'start', origin }
       );
     },
     [open, historyKey]

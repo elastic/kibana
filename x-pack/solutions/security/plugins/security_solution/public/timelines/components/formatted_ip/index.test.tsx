@@ -132,6 +132,7 @@ describe('FormattedIp', () => {
       expect(flyoutApi.openNetworkFlyout).toHaveBeenCalledWith({
         ip: props.value,
         flowTarget: FlowTargetSourceDest.source,
+        origin: 'table_field_link',
       });
       expect(mockOpenFlyout).not.toHaveBeenCalled();
     });

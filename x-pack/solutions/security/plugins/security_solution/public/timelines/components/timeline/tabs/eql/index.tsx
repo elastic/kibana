@@ -169,7 +169,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       const indexName = selectedPatterns.join(',');
 
       if (enableNewFlyout && eventData) {
-        openNotes({ hit: eventData });
+        openNotes({ hit: eventData, origin: 'timeline' });
       } else if (isAttackRow) {
         openFlyout({
           right: {

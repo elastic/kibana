@@ -50,7 +50,7 @@ export const flyoutOpenedEvent: FlyoutV2TelemetryEvent = {
       type: 'keyword',
       _meta: {
         description:
-          'Where the open action originated from, when known (e.g. alerts_table|graph|correlations|field_link|related_entity|session_view|title)',
+          'The specific UI trigger the open action originated from, when known (e.g. flyout_header|footer_take_action|insights_alerts|risk_summary_entity|graph_node|resolution_entity_link|tool_header_title|entities_list|field_link|alerts_table|timeline|case_attachment). See FlyoutOrigin for the full set',
         optional: true,
       },
     },

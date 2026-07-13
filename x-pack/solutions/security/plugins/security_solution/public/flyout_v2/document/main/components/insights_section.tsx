@@ -92,7 +92,7 @@ export const InsightsSection = memo(
     );
 
     const onShowThreatIntelligenceDetails = useCallback(() => {
-      openDocumentThreatIntelligence({ hit });
+      openDocumentThreatIntelligence({ hit, origin: 'insights_threat_intel' });
     }, [openDocumentThreatIntelligence, hit]);
 
     const onShowAlert = useCallback(
@@ -102,17 +102,25 @@ export const InsightsSection = memo(
           indexName,
           renderCellActions,
           onAlertUpdated,
+          origin: 'correlations_alert',
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
 
     const onShowEntitiesDetails = useCallback(
-      () => openDocumentEntities({ hit }),
+      () => openDocumentEntities({ hit, origin: 'insights_entities' }),
       [openDocumentEntities, hit]
     );
 
     const onShowCorrelationsDetails = useCallback(
-      () => openDocumentCorrelations({ hit, scopeId: '', isRulePreview: false, onShowAlert }),
+      () =>
+        openDocumentCorrelations({
+          hit,
+          scopeId: '',
+          isRulePreview: false,
+          onShowAlert,
+          origin: 'insights_correlations',
+        }),
       [openDocumentCorrelations, hit, onShowAlert]
     );
 
@@ -129,6 +137,7 @@ export const InsightsSection = memo(
         investigationFields,
         scopeId: '',
         columns: getColumns(renderCellActions, isInSecurityApp, '', renderFlyoutLink),
+        origin: 'insights_prevalence',
       });
     }, [
       openDocumentPrevalence,

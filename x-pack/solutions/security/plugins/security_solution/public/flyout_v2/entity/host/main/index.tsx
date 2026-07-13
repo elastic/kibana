@@ -24,11 +24,12 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildHostNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import type { FlyoutTool } from '../../../../common/lib/telemetry';
+import type { FlyoutOrigin, FlyoutTool } from '../../../../common/lib/telemetry';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   defaultToolsFlyoutProperties,
@@ -276,16 +277,19 @@ export const Host: FC<HostProps> = memo(function Host({
     open(
       <Host hostName={hostName} entityId={entityId} scopeId={scopeId} />,
       { ...defaultDocumentFlyoutProperties, title: hostName, historyKey, session: 'inherit' },
-      { surface: 'flyout', flyoutType: 'host', session: 'inherit', origin: 'related_entity' }
+      { surface: 'flyout', flyoutType: 'host', session: 'inherit', origin: 'tool_header_title' }
     );
   }, [open, historyKey, hostName, entityId, scopeId, defaultDocumentFlyoutProperties]);
 
   const onShowRelatedEntity = useCallback(
-    (params: {
-      engineType: string | undefined;
-      entityId: string;
-      entityName: string | undefined;
-    }) =>
+    (
+      params: {
+        engineType: string | undefined;
+        entityId: string;
+        entityName: string | undefined;
+      },
+      origin: FlyoutOrigin
+    ) =>
       open(
         renderEntityDetails({ ...params, scopeId }),
         {
@@ -298,10 +302,28 @@ export const Host: FC<HostProps> = memo(function Host({
           surface: 'flyout',
           flyoutType: entityEngineTypeToFlyoutType(params.engineType),
           session: 'inherit',
-          origin: 'related_entity',
+          origin,
         }
       ),
     [open, scopeId, historyKey, defaultDocumentFlyoutProperties]
+  );
+
+  const onShowRelatedEntityFromResolution = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, 'resolution_entity_link'),
+    [onShowRelatedEntity]
+  );
+
+  const onShowRelatedEntityFromGraph = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, 'graph_node'),
+    [onShowRelatedEntity]
   );
 
   const openDetailsPanel = useCallback(
@@ -312,8 +334,14 @@ export const Host: FC<HostProps> = memo(function Host({
         historyKey,
         session: 'start' as const,
       };
-      const wrap = (children: React.ReactNode, tool: FlyoutTool) =>
-        open(children, common, { surface: 'tool', tool, flyoutType: 'host', session: 'start' });
+      const wrap = (children: React.ReactNode, tool: FlyoutTool, origin?: FlyoutOrigin) =>
+        open(children, common, {
+          surface: 'tool',
+          tool,
+          flyoutType: 'host',
+          session: 'start',
+          origin,
+        });
 
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
@@ -324,7 +352,10 @@ export const Host: FC<HostProps> = memo(function Host({
               entityId={entityStoreEntityId}
               onShowEntity={onShowHost}
             />,
-            'risk_inputs'
+            'risk_inputs',
+            path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
+              ? 'risk_summary_resolution'
+              : 'risk_summary_entity'
           );
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return wrap(
@@ -334,7 +365,8 @@ export const Host: FC<HostProps> = memo(function Host({
               entityId={entityStoreEntityId}
               onOpenEntity={onShowHost}
             />,
-            'anomaly_insights'
+            'anomaly_insights',
+            'anomalies_section'
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -345,7 +377,8 @@ export const Host: FC<HostProps> = memo(function Host({
                   entityId={panelDisplayEntityId}
                   onShowHost={onShowHost}
                 />,
-                'vulnerability_insights'
+                'vulnerability_insights',
+                'insights_vulnerability'
               );
             case CspInsightLeftPanelSubTab.ALERTS:
               return wrap(
@@ -355,7 +388,8 @@ export const Host: FC<HostProps> = memo(function Host({
                   entityId={panelDisplayEntityId}
                   onShowEntity={onShowHost}
                 />,
-                'alerts_insights'
+                'alerts_insights',
+                'insights_alerts'
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return wrap(
@@ -365,7 +399,8 @@ export const Host: FC<HostProps> = memo(function Host({
                   entityId={panelDisplayEntityId}
                   onShowEntity={onShowHost}
                 />,
-                'misconfiguration_insights'
+                'misconfiguration_insights',
+                'insights_misconfiguration'
               );
           }
           return;
@@ -376,10 +411,11 @@ export const Host: FC<HostProps> = memo(function Host({
               entityId={entityStoreEntityId}
               scopeId={scopeId}
               entityName={hostName}
-              onShowEntity={onShowRelatedEntity}
+              onShowEntity={onShowRelatedEntityFromGraph}
               onShowOriginatingEntity={onShowHost}
             />,
-            'graph_view'
+            'graph_view',
+            'visualizations_graph'
           );
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -390,9 +426,10 @@ export const Host: FC<HostProps> = memo(function Host({
               entityName={hostName}
               scopeId={scopeId}
               onShowEntity={onShowHost}
-              onShowRelatedEntity={onShowRelatedEntity}
+              onShowRelatedEntity={onShowRelatedEntityFromResolution}
             />,
-            'resolution'
+            'resolution',
+            'resolution_section'
           );
       }
     },
@@ -404,7 +441,8 @@ export const Host: FC<HostProps> = memo(function Host({
       panelDisplayEntityId,
       entityStoreEntityId,
       onShowHost,
-      onShowRelatedEntity,
+      onShowRelatedEntityFromGraph,
+      onShowRelatedEntityFromResolution,
     ]
   );
 
@@ -452,7 +490,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
-            onShowEntity={onShowRelatedEntity}
+            onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
           />
         )}

@@ -93,7 +93,7 @@ export const InvestigationSection = memo(
     });
 
     const onShowInvestigationGuide = useCallback(() => {
-      openDocumentInvestigationGuide({ hit });
+      openDocumentInvestigationGuide({ hit, origin: 'investigation_guide' });
     }, [openDocumentInvestigationGuide, hit]);
 
     const renderFlyoutLink = useCallback(

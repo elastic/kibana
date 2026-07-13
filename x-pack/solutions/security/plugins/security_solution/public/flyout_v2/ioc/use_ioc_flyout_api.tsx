@@ -11,7 +11,7 @@ import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
-import type { FlyoutSessionKind } from '../../common/lib/telemetry';
+import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
@@ -28,6 +28,8 @@ export interface OpenIocFlyoutParams {
   indicator: Indicator;
   /** Renderer for cell actions in the flyout. Defaults to the standard `cellActionRenderer`. */
   renderCellActions?: CellActionRenderer;
+  /** Which UI trigger opened this flyout, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface IocFlyoutApi {
@@ -65,13 +67,13 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
   // here so callers never have to reason about it: they pick `openIocFlyout` (main) or
   // `openIocFlyoutAsChild` (child) and this helper maps that to the right session.
   const open = useCallback(
-    (children: ReactNode, session: FlyoutSessionKind) => {
+    (children: ReactNode, session: FlyoutSessionKind, origin?: FlyoutOrigin) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
       };
-      openFlyout(children, properties, { surface: 'flyout', flyoutType: 'ioc', session });
+      openFlyout(children, properties, { surface: 'flyout', flyoutType: 'ioc', session, origin });
     },
     [openFlyout, defaultDocumentFlyoutProperties, historyKey]
   );
@@ -91,12 +93,12 @@ export const useIocFlyoutApi = (): IocFlyoutApi => {
   );
 
   const openIocFlyout = useCallback(
-    (params: OpenIocFlyoutParams) => open(buildContent(params), 'start'),
+    (params: OpenIocFlyoutParams) => open(buildContent(params), 'start', params.origin),
     [open, buildContent]
   );
 
   const openIocFlyoutAsChild = useCallback(
-    (params: OpenIocFlyoutParams) => open(buildContent(params), 'inherit'),
+    (params: OpenIocFlyoutParams) => open(buildContent(params), 'inherit', params.origin),
     [open, buildContent]
   );
 

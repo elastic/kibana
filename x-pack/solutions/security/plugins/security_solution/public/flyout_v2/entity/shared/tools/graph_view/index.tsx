@@ -65,12 +65,18 @@ export const GraphView = memo(
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
+          origin: 'graph_document_node',
         }),
       [openDocumentFlyoutFromIndexAsChild]
     );
 
     const onShowNetwork = useCallback(
-      (ip: string) => openNetworkFlyoutAsChild({ ip, flowTarget: FlowTargetSourceDest.source }),
+      (ip: string) =>
+        openNetworkFlyoutAsChild({
+          ip,
+          flowTarget: FlowTargetSourceDest.source,
+          origin: 'graph_network_node',
+        }),
       [openNetworkFlyoutAsChild]
     );
 
@@ -89,7 +95,12 @@ export const GraphView = memo(
             onShowEntity={onShowEntity}
           />,
           { ...defaultFlyoutProperties, historyKey, session: 'inherit' },
-          { surface: 'tool', tool: 'graph_view', session: 'inherit' }
+          {
+            surface: 'tool',
+            tool: 'graph_view',
+            session: 'inherit',
+            origin: 'graph_grouped_node',
+          }
         ),
       [scopeId, onShowDocument, onShowEntity, defaultFlyoutProperties, historyKey, open]
     );

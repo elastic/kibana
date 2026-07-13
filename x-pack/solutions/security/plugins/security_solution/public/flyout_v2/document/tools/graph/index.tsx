@@ -66,12 +66,18 @@ export const GraphDetails = memo(
           indexName,
           renderCellActions,
           onAlertUpdated,
+          origin: 'graph_document_node',
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
 
     const onShowNetwork = useCallback(
-      (ip: string) => openNetworkFlyoutAsChild({ ip, flowTarget: FlowTargetSourceDest.source }),
+      (ip: string) =>
+        openNetworkFlyoutAsChild({
+          ip,
+          flowTarget: FlowTargetSourceDest.source,
+          origin: 'graph_network_node',
+        }),
       [openNetworkFlyoutAsChild]
     );
 
@@ -101,7 +107,7 @@ export const GraphDetails = memo(
             surface: 'flyout',
             flyoutType: entityEngineTypeToFlyoutType(engineType),
             session: 'inherit',
-            origin: 'graph',
+            origin: 'graph_node',
           }
         );
       },
@@ -123,7 +129,13 @@ export const GraphDetails = memo(
             onShowEntity={onShowEntity}
           />,
           { ...defaultFlyoutProperties, historyKey, session: 'inherit' },
-          { surface: 'tool', tool: 'graph', flyoutType: 'document', session: 'inherit' }
+          {
+            surface: 'tool',
+            tool: 'graph',
+            flyoutType: 'document',
+            session: 'inherit',
+            origin: 'graph_grouped_node',
+          }
         ),
       [defaultFlyoutProperties, historyKey, onShowDocument, onShowEntity, open]
     );

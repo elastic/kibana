@@ -149,6 +149,7 @@ export const ResolverWithoutProviders = React.memo(
             indexName,
             renderCellActions,
             onAlertUpdated: handleAlertUpdated,
+            origin: 'resolver_node',
           }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, handleAlertUpdated]
     );

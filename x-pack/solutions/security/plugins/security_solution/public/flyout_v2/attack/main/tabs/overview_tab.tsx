@@ -45,17 +45,18 @@ export const OverviewTab = memo(({ hit, onAttackUpdated }: OverviewTabProps) => 
         indexName,
         renderCellActions: noopCellActionRenderer,
         onAlertUpdated: onAttackUpdated,
+        origin: 'correlations_alert',
       }),
     [openDocumentFlyoutFromIndexAsChild, onAttackUpdated]
   );
 
   const onShowCorrelations = useCallback(
-    () => openAttackCorrelations({ hit, alertIds, onShowAlert }),
+    () => openAttackCorrelations({ hit, alertIds, onShowAlert, origin: 'insights_correlations' }),
     [openAttackCorrelations, hit, alertIds, onShowAlert]
   );
 
   const onShowEntities = useCallback(
-    () => openAttackEntities({ hit, alertIds }),
+    () => openAttackEntities({ hit, alertIds, origin: 'insights_entities' }),
     [openAttackEntities, hit, alertIds]
   );
 

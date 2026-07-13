@@ -73,7 +73,9 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         : FlowTargetSourceDest.source;
 
       if (enableNewFlyout) {
-        openNetworkFlyout({ ip, flowTarget });
+        // This branch only renders when `Component` is provided, i.e. from the alerts/timeline
+        // table's `EuiDataGrid` cell (see the `content` memo below) — not from inside a flyout.
+        openNetworkFlyout({ ip, flowTarget, origin: 'table_field_link' });
       } else if (eventContext) {
         openFlyout({
           right: {

@@ -17,7 +17,7 @@ import { buildEntityNameFilter, type RiskSeverity } from '../../../../../common/
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { Refetch } from '../../../../common/types';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import type { FlyoutTool } from '../../../../common/lib/telemetry';
+import type { FlyoutOrigin, FlyoutTool } from '../../../../common/lib/telemetry';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -28,6 +28,7 @@ import { ENTITY_ANALYTICS_TABLE_ID } from '../../../../entity_analytics/componen
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import {
   EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
   type EntityDetailsPath,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
@@ -178,7 +179,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
     open(
       <Service serviceName={serviceName} entityId={entityId} scopeId={scopeId} />,
       { ...defaultDocumentFlyoutProperties, title: serviceName, historyKey, session: 'inherit' },
-      { surface: 'flyout', flyoutType: 'service', session: 'inherit', origin: 'related_entity' }
+      { surface: 'flyout', flyoutType: 'service', session: 'inherit', origin: 'tool_header_title' }
     );
   }, [open, serviceName, entityId, scopeId, historyKey, defaultDocumentFlyoutProperties]);
 
@@ -187,6 +188,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
       engineType: string | undefined;
       entityId: string;
       entityName: string | undefined;
+      origin: FlyoutOrigin;
     }) =>
       open(
         renderEntityDetails({ ...params, scopeId }),
@@ -200,10 +202,28 @@ export const Service: FC<ServiceProps> = memo(function Service({
           surface: 'flyout',
           flyoutType: entityEngineTypeToFlyoutType(params.engineType),
           session: 'inherit',
-          origin: 'related_entity',
+          origin: params.origin,
         }
       ),
     [open, scopeId, historyKey, defaultDocumentFlyoutProperties]
+  );
+
+  const onShowRelatedEntityFromGraph = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity({ ...params, origin: 'graph_node' }),
+    [onShowRelatedEntity]
+  );
+
+  const onShowRelatedEntityFromResolution = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity({ ...params, origin: 'resolution_entity_link' }),
+    [onShowRelatedEntity]
   );
 
   const openDetailsPanel = useCallback(
@@ -214,8 +234,14 @@ export const Service: FC<ServiceProps> = memo(function Service({
         historyKey,
         session: 'start' as const,
       };
-      const wrap = (children: React.ReactNode, tool: FlyoutTool) =>
-        open(children, common, { surface: 'tool', tool, flyoutType: 'service', session: 'start' });
+      const wrap = (children: React.ReactNode, tool: FlyoutTool, origin: FlyoutOrigin) =>
+        open(children, common, {
+          surface: 'tool',
+          tool,
+          flyoutType: 'service',
+          session: 'start',
+          origin,
+        });
 
       switch (path.tab) {
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
@@ -226,7 +252,10 @@ export const Service: FC<ServiceProps> = memo(function Service({
               entityId={entityStoreEntityId}
               onShowEntity={onShowService}
             />,
-            'risk_inputs'
+            'risk_inputs',
+            path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
+              ? 'risk_summary_resolution'
+              : 'risk_summary_entity'
           );
         case EntityDetailsLeftPanelTab.GRAPH_VIEW:
           if (!entityStoreEntityId) return;
@@ -235,10 +264,11 @@ export const Service: FC<ServiceProps> = memo(function Service({
               entityId={entityStoreEntityId}
               scopeId={scopeId}
               entityName={serviceName}
-              onShowEntity={onShowRelatedEntity}
+              onShowEntity={onShowRelatedEntityFromGraph}
               onShowOriginatingEntity={onShowService}
             />,
-            'graph_view'
+            'graph_view',
+            'visualizations_graph'
           );
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -249,9 +279,10 @@ export const Service: FC<ServiceProps> = memo(function Service({
               entityName={serviceName}
               scopeId={scopeId}
               onShowEntity={onShowService}
-              onShowRelatedEntity={onShowRelatedEntity}
+              onShowRelatedEntity={onShowRelatedEntityFromResolution}
             />,
-            'resolution'
+            'resolution',
+            'resolution_section'
           );
       }
     },
@@ -262,7 +293,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
       entityStoreEntityId,
       historyKey,
       onShowService,
-      onShowRelatedEntity,
+      onShowRelatedEntityFromGraph,
+      onShowRelatedEntityFromResolution,
     ]
   );
 
@@ -323,7 +355,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={false}
             entityStoreEntityId={entityStoreEntityId}
-            onShowEntity={onShowRelatedEntity}
+            onShowEntity={onShowRelatedEntityFromResolution}
           />
         )}
       </FlyoutBody>

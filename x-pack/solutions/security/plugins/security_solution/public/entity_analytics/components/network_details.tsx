@@ -27,7 +27,11 @@ const NetworkDetailsComponent: React.FC<Props> = ({ ip }) => {
   const openNetworkDetailsSidePanel = useCallback(() => {
     if (enableNewFlyout) {
       if (ip) {
-        openNetworkFlyout({ ip, flowTarget: FlowTargetSourceDest.source });
+        openNetworkFlyout({
+          ip,
+          flowTarget: FlowTargetSourceDest.source,
+          origin: 'table_field_link',
+        });
       }
     } else {
       openFlyout({

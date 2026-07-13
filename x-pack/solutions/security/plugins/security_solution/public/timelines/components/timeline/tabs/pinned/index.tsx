@@ -196,7 +196,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       }
 
       if (enableNewFlyout && eventData) {
-        openNotes({ hit: eventData });
+        openNotes({ hit: eventData, origin: 'timeline' });
       } else {
         const indexName = selectedPatterns.join(',');
         openFlyout({

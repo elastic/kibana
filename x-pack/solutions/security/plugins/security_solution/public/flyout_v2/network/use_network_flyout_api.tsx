@@ -10,7 +10,7 @@ import React, { lazy, useCallback, useMemo } from 'react';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy/security_solution/network';
-import type { FlyoutSessionKind } from '../../common/lib/telemetry';
+import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
@@ -25,6 +25,8 @@ export interface OpenNetworkFlyoutParams {
   ip: string;
   /** Whether the IP is the source or destination of the flow. */
   flowTarget: FlowTargetSourceDest;
+  /** Which UI trigger opened this flyout, when known. */
+  origin?: FlyoutOrigin;
 }
 
 export interface NetworkFlyoutApi {
@@ -63,27 +65,32 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
   // here so callers never have to reason about it: they pick `openNetworkFlyout` (main) or
   // `openNetworkFlyoutAsChild` (child) and this helper maps that to the right session.
   const open = useCallback(
-    (children: ReactNode, session: FlyoutSessionKind) => {
+    (children: ReactNode, session: FlyoutSessionKind, origin?: FlyoutOrigin) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
       };
-      openFlyout(children, properties, { surface: 'flyout', flyoutType: 'network', session });
+      openFlyout(children, properties, {
+        surface: 'flyout',
+        flyoutType: 'network',
+        session,
+        origin,
+      });
     },
     [openFlyout, defaultDocumentFlyoutProperties, historyKey]
   );
 
   const openNetworkFlyout = useCallback(
-    ({ ip, flowTarget }: OpenNetworkFlyoutParams) => {
-      open(<Network ip={ip} flowTarget={flowTarget} />, 'start');
+    ({ ip, flowTarget, origin }: OpenNetworkFlyoutParams) => {
+      open(<Network ip={ip} flowTarget={flowTarget} />, 'start', origin);
     },
     [open]
   );
 
   const openNetworkFlyoutAsChild = useCallback(
-    ({ ip, flowTarget }: OpenNetworkFlyoutParams) => {
-      open(<Network ip={ip} flowTarget={flowTarget} />, 'inherit');
+    ({ ip, flowTarget, origin }: OpenNetworkFlyoutParams) => {
+      open(<Network ip={ip} flowTarget={flowTarget} />, 'inherit', origin);
     },
     [open]
   );

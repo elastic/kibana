@@ -29,7 +29,7 @@ export const ResponseSection = memo<ResponseSectionProps>(({ hit, isRulePreview 
   const { openDocumentResponse } = useFlyoutApi();
 
   const onShowResponseDetails = useCallback(() => {
-    openDocumentResponse({ hit });
+    openDocumentResponse({ hit, origin: 'response_section' });
   }, [openDocumentResponse, hit]);
 
   return (

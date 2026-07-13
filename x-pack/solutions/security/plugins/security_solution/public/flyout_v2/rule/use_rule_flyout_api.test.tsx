@@ -66,6 +66,19 @@ describe('useRuleFlyoutApi', () => {
     });
   });
 
+  it('openRuleFlyout forwards the given origin', () => {
+    const { result } = renderHook(() => useRuleFlyoutApi());
+    result.current.openRuleFlyout({ ruleId, origin: 'field_link' });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: 'flyout',
+      flyoutType: 'rule',
+      tool: undefined,
+      session: 'start',
+      origin: 'field_link',
+    });
+  });
+
   it('openRuleFlyoutAsChild opens a system flyout that inherits the current session', () => {
     const { result } = renderHook(() => useRuleFlyoutApi());
     result.current.openRuleFlyoutAsChild({ ruleId });

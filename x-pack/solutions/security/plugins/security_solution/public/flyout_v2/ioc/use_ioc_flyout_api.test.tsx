@@ -71,6 +71,19 @@ describe('useIocFlyoutApi', () => {
     });
   });
 
+  it('openIocFlyout forwards the given origin', () => {
+    const { result } = renderHook(() => useIocFlyoutApi());
+    result.current.openIocFlyout({ indicator, origin: 'threat_intel_table' });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: 'flyout',
+      flyoutType: 'ioc',
+      tool: undefined,
+      session: 'start',
+      origin: 'threat_intel_table',
+    });
+  });
+
   it('openIocFlyoutAsChild opens a system flyout that inherits the current session', () => {
     const { result } = renderHook(() => useIocFlyoutApi());
     result.current.openIocFlyoutAsChild({ indicator });

@@ -92,7 +92,13 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
     open(
       <NotesDetails hit={hit} />,
       { ...defaultToolsFlyoutProperties, historyKey, session: 'start' },
-      { surface: 'tool', tool: 'notes', flyoutType: 'attack', session: 'start' }
+      {
+        surface: 'tool',
+        tool: 'notes',
+        flyoutType: 'attack',
+        session: 'start',
+        origin: 'flyout_header',
+      }
     );
   }, [historyKey, hit, open]);
 

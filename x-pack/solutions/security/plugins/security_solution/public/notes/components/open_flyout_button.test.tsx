@@ -99,6 +99,7 @@ describe('OpenFlyoutButtonIcon', () => {
     expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith({
       documentId: mockEventId,
       indexName: 'test1,test2',
+      origin: 'note_preview',
     });
   });
 });

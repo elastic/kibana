@@ -66,10 +66,16 @@ export const MisconfigurationInsights = memo(
         open(
           <Misconfiguration resourceId={resourceId} ruleId={ruleId} />,
           { ...defaultDocumentFlyoutProperties, title: value, historyKey, session: 'inherit' },
-          { surface: 'tool', tool: 'misconfiguration_insights', session: 'inherit' }
+          {
+            surface: 'tool',
+            tool: 'misconfiguration_insights',
+            flyoutType: entityType,
+            session: 'inherit',
+            origin: 'misconfiguration_finding',
+          }
         );
       },
-      [open, defaultDocumentFlyoutProperties, value, historyKey]
+      [open, defaultDocumentFlyoutProperties, value, historyKey, entityType]
     );
 
     return (

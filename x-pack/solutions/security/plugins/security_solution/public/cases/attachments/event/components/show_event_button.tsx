@@ -41,6 +41,7 @@ const ShowEventButtonComponent = ({ id, eventId, index }: ShowEventButtonProps) 
           documentId: eventId,
           indexName: index,
           renderCellActions: casesCellActionRenderer,
+          origin: 'case_attachment',
         });
       } else {
         openFlyout({

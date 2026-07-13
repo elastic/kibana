@@ -51,7 +51,7 @@ export const CommentChildren: FC<CommentChildrenProps> = ({ id, metadata }) => {
   const open = useCallback(() => {
     if (enableNewFlyout) {
       if (indicator) {
-        openIocFlyout({ indicator });
+        openIocFlyout({ indicator, origin: 'case_attachment' });
       }
     } else {
       openFlyout({

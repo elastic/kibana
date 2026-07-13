@@ -248,6 +248,7 @@ describe('PinnedTabContent', () => {
         await waitFor(() => {
           expect(flyoutApi.openNotes).toHaveBeenCalledWith({
             hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
+            origin: 'timeline',
           });
         });
         expect(mockOpenFlyout).not.toHaveBeenCalled();

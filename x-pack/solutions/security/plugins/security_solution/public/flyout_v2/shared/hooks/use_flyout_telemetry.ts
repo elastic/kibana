@@ -31,6 +31,8 @@ export interface ToolOpenMeta {
   /** The parent flyout type, when known. */
   flyoutType?: FlyoutType;
   session: FlyoutSessionKind;
+  /** Where the open action originated from, when known. */
+  origin?: FlyoutOrigin;
 }
 
 /**
@@ -67,7 +69,7 @@ export const useFlyoutTelemetry = (): UseFlyoutTelemetryResult => {
         flyoutType: meta.flyoutType,
         tool: meta.surface === 'tool' ? meta.tool : undefined,
         session: meta.session,
-        origin: meta.surface === 'flyout' ? meta.origin : undefined,
+        origin: meta.origin,
       });
     },
     [telemetry]

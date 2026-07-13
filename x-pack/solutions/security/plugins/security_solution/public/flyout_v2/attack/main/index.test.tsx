@@ -15,6 +15,7 @@ import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { FlyoutV2EventTypes } from '../../../common/lib/telemetry';
 
 jest.mock('../../../common/hooks/is_in_security_app');
 
@@ -174,6 +175,14 @@ describe('<AttackFlyout />', () => {
         size: 'm',
         session: 'start',
         historyKey: documentFlyoutHistoryKey,
+      })
+    );
+    expect(startServices.telemetry.reportEvent).toHaveBeenCalledWith(
+      FlyoutV2EventTypes.FlyoutOpened,
+      expect.objectContaining({
+        tool: 'notes',
+        flyoutType: 'attack',
+        origin: 'flyout_header',
       })
     );
   });

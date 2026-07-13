@@ -62,6 +62,7 @@ export const ShowAlertButton = ({ id, alertId, index }: ShowAlertButtonProps) =>
             documentId: alertId,
             indexName: index,
             renderCellActions: casesCellActionRenderer,
+            origin: 'case_attachment',
           });
         } else {
           openFlyout({
