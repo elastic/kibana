@@ -13,12 +13,13 @@ import type {
   AppMenuItemType,
   AppMenuStaticItem,
 } from '@kbn/core-chrome-app-menu-components';
-import { APP_MENU_SHARE_ID, getTooltip } from '@kbn/core-chrome-app-menu-components';
+import { APP_MENU_SHARE_ID, getTooltip, isDisabled } from '@kbn/core-chrome-app-menu-components';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';
 
 import { useBasePath } from './chrome';
+import { APP_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
 const createIntegrationsMenuItem = (href: string): AppMenuStaticItem => ({
   label: i18n.translate('core.chrome.appHeader.addIntegrationsMenuItemLabel', {
@@ -28,6 +29,7 @@ const createIntegrationsMenuItem = (href: string): AppMenuStaticItem => ({
   iconType: 'indexOpen',
   order: 0,
   href,
+  testId: APP_HEADER_TEST_SUBJECTS.menuAddIntegrations,
 });
 
 const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuStaticItem => ({
@@ -39,6 +41,7 @@ const createFeedbackMenuItem = (feedbackHandler: () => void): AppMenuStaticItem 
   order: 1,
   run: feedbackHandler,
   global: true,
+  testId: APP_HEADER_TEST_SUBJECTS.menuFeedback,
 });
 
 const createDocumentationMenuItem = (href: string): AppMenuStaticItem => ({
@@ -50,6 +53,7 @@ const createDocumentationMenuItem = (href: string): AppMenuStaticItem => ({
   order: 2,
   href,
   target: '_blank',
+  testId: APP_HEADER_TEST_SUBJECTS.menuDocumentation,
 });
 
 interface ResolvedAppMenu {
@@ -136,6 +140,7 @@ export interface ShareAction {
   tooltipContent?: string;
   tooltipTitle?: string;
   testId?: string;
+  isDisabled?: boolean;
 }
 
 export function useShareAction(pageAppMenu: AppMenuConfig | undefined): ShareAction | undefined {
@@ -143,7 +148,7 @@ export function useShareAction(pageAppMenu: AppMenuConfig | undefined): ShareAct
 
   return useMemo(() => {
     if (!shareItem) return undefined;
-    const { run, tooltipContent, tooltipTitle, testId } = shareItem;
+    const { run, tooltipContent, tooltipTitle, testId, disableButton } = shareItem;
     if (!run) return undefined;
 
     const { content, title } = getTooltip({
@@ -158,6 +163,7 @@ export function useShareAction(pageAppMenu: AppMenuConfig | undefined): ShareAct
       tooltipContent: content,
       tooltipTitle: title,
       testId,
+      isDisabled: isDisabled(disableButton),
     };
   }, [shareItem]);
 }

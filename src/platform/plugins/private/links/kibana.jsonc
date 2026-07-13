@@ -20,7 +20,7 @@
       "visualizations",
       "share"
     ],
-    "optionalPlugins": ["triggersActionsUi", "usageCollection"],
+    "optionalPlugins": ["triggersActionsUi", "usageCollection", "savedObjectsTaggingOss"],
     "requiredBundles": ["savedObjects"]
   }
 }

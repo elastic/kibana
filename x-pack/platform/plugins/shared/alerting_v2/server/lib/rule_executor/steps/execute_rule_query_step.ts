@@ -6,7 +6,11 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { appendLimitToQuery } from '@kbn/esql-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { PluginInitializer } from '@kbn/core-di-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { isEsqlUserError } from '../../errors/esql_user_error';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
@@ -15,27 +19,25 @@ import {
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
-import { QueryServiceScopedToken } from '../../services/query_service/tokens';
+import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
 import { guardedExpandStep } from '../stream_utils';
-
-/**
- * Returns the query to execute for this rule.
- *
- * Uses `evaluation.query.base` which contains the full ES|QL query
- * including any trigger condition (e.g. a trailing WHERE clause).
- */
-function buildEffectiveQuery(evaluationQuery: { base: string }): string {
-  return evaluationQuery.base.trimEnd();
-}
+import type { PluginConfig } from '../../../config';
 
 @injectable()
 export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public readonly name = 'execute_rule_query';
 
+  private readonly maxAlertsPerRun: number;
+
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(QueryServiceScopedToken) private readonly queryService: QueryServiceContract
-  ) {}
+    @inject(QueryServiceScopedSpaceRoutingToken)
+    private readonly queryService: QueryServiceContract,
+    @inject(PluginInitializer('config'))
+    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+  ) {
+    this.maxAlertsPerRun = pluginConfigAccessor.get<PluginConfig>().rules.run.alerts.max;
+  }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
@@ -43,7 +45,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
     return guardedExpandStep(streamState, ['rule'], async function* (state) {
       const { input, rule } = state;
 
-      const effectiveQuery = buildEffectiveQuery(rule.evaluation.query);
+      const effectiveQuery = getBreachEsqlQuery(rule.query);
       const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
       const timeField = rule.time_field;
 
@@ -53,10 +55,12 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         lookbackWindow,
       });
 
+      const boundedQuery = appendLimitToQuery(effectiveQuery, step.maxAlertsPerRun);
+
       step.logger.debug({
         message: () =>
           `[${step.name}] Executing ES|QL query for rule ${input.ruleId} - ${JSON.stringify({
-            query: effectiveQuery,
+            query: boundedQuery,
             filter: queryPayload.filter,
             params: queryPayload.params,
           })}`,
@@ -64,7 +68,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
       try {
         const esqlRowBatchStream = step.queryService.executeQueryStream({
-          query: effectiveQuery,
+          query: boundedQuery,
           filter: queryPayload.filter,
           params: queryPayload.params,
           abortSignal: input.executionContext.signal,

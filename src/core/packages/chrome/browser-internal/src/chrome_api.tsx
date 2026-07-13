@@ -79,6 +79,11 @@ export function createChromeApi({
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
     getProjectHome$: () => projectNavigation.getProjectHome$(),
+    setNavigationCustomization: (customization) =>
+      projectNavigation.setNavigationCustomization(customization),
+    getCustomizeNavigationHandler$: () => projectNavigation.getCustomizeNavigationHandler$(),
+    registerCustomizeNavigationHandler: (handler) =>
+      projectNavigation.registerCustomizeNavigationHandler(handler),
   };
 
   let appHeaderRegistrationId = 0;
@@ -222,6 +227,10 @@ export function createChromeApi({
             }
           };
         },
+      },
+      userMenu: {
+        get$: () => state.userMenu.$,
+        set: (content) => state.userMenu.set(content),
       },
       registerFeedbackHandler: (handler: () => void) => {
         state.feedbackHandler.set(handler);

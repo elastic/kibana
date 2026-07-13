@@ -27,6 +27,11 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/cloud_security_posture/cspm_agentless_scout.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/cloud_security_posture/cspm_agentless_scout.yml
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: true
         build_pull_requests: true
@@ -36,8 +41,7 @@ spec:
         trigger_mode: none
         filter_enabled: true
         filter_condition: >
-          build.pull_request.id != null &&
-          (
+          build.pull_request.id != null && (
             build.pull_request.labels includes "ci:cloud-security-posture-scout" ||
             build.pull_request.base_branch == "main"
           )
@@ -56,4 +60,3 @@ spec:
         - kibana
         - cloud-security
         - scout
-

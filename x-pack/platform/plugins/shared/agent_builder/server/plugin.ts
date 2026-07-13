@@ -95,6 +95,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       cloud: setupDeps.cloud,
       usageApi: setupDeps.usageApi,
+      actions: setupDeps.actions,
     });
 
     registerTaskDefinitions({
@@ -163,11 +164,11 @@ export class AgentBuilderPlugin
     });
 
     const smlTools = createSmlTools({
-      getAgentContextLayer: () => {
+      getAgentBuilderSml: () => {
         if (!this.startDeps) {
-          throw new Error('Agent Context Layer not available — plugin has not started');
+          throw new Error('Agent Builder SML not available — plugin has not started');
         }
-        return this.startDeps.agentContextLayer;
+        return this.startDeps.agentBuilderSml;
       },
     });
     smlTools.forEach((tool) => {
@@ -190,9 +191,13 @@ export class AgentBuilderPlugin
       },
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
+        registerType: serviceSetups.agents.registerType.bind(serviceSetups.agents),
       },
       attachments: {
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
+      },
+      renderers: {
+        register: serviceSetups.renderers.register.bind(serviceSetups.renderers),
       },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),

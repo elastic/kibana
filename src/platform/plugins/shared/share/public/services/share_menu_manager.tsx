@@ -9,6 +9,7 @@
 
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { createRef } from 'react';
@@ -141,6 +142,11 @@ export class ShareMenuManager {
                 size: 's',
                 ownFocus: true,
                 container: null, // "global" flyout,
+                'aria-label':
+                  exportConfig.flyoutAriaLabel ??
+                  i18n.translate('share.export.flyoutAriaLabel', {
+                    defaultMessage: 'Export',
+                  }),
               },
             };
           }
@@ -197,6 +203,11 @@ export class ShareMenuManager {
                 'data-test-subj': `exportDerivativeFlyout-${derivativeId}`,
                 ownFocus: true,
                 container: null, // "global" flyout,
+                'aria-label':
+                  derivativeConfig.flyoutAriaLabel ??
+                  i18n.translate('share.export.flyoutAriaLabel', {
+                    defaultMessage: 'Export',
+                  }),
                 ...(derivativeConfig.flyoutSizing || {}),
               },
             };

@@ -46,6 +46,9 @@ export enum ReadOperations {
   GetCasesMetrics = 'getCasesMetrics',
   GetUserActionMetrics = 'getUserActionMetrics',
   GetUserActionUsers = 'getUserActionUsers',
+  GetFieldDefinitions = 'getFieldDefinitions',
+  GetTemplate = 'getTemplate',
+  FindTemplates = 'findTemplates',
 }
 
 /**

@@ -13,15 +13,18 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { CoreStart } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { CONTENT_ID } from '../../common';
+
+import { LINKS_LIBRARY_TYPE } from '../../common';
 import type { LinksStartDependencies } from '../plugin';
 
-export let contentManagement: ContentManagementPublicStart;
 export let coreServices: CoreStart;
 export let dashboardServices: DashboardStart;
 export let embeddableService: EmbeddableStart;
 export let shareServices: SharePluginStart | undefined;
+export let contentManagement: ContentManagementPublicStart;
+export let savedObjectsTaggingService: SavedObjectTaggingOssPluginStart | undefined;
 export let trackUiMetric: (
   type: string,
   eventNames: string | string[],
@@ -48,8 +51,14 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: LinksStartDepende
   dashboardServices = deps.dashboard;
   embeddableService = deps.embeddable;
   shareServices = deps.share;
+  contentManagement = deps.contentManagement;
+  savedObjectsTaggingService = deps.savedObjectsTaggingOss;
+
   if (deps.usageCollection)
-    trackUiMetric = deps.usageCollection.reportUiCounter.bind(deps.usageCollection, CONTENT_ID);
+    trackUiMetric = deps.usageCollection.reportUiCounter.bind(
+      deps.usageCollection,
+      LINKS_LIBRARY_TYPE
+    );
 
   servicesReady$.next(true);
 };

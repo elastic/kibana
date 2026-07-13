@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/269633
+issues:
+- https://github.com/elastic/obs-ai-team/issues/549
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+title: Fix observability index discovery for Streams data

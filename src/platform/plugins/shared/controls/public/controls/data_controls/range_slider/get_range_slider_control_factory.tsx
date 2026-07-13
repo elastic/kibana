@@ -13,8 +13,10 @@ import { BehaviorSubject, combineLatest, debounceTime, map, merge, of, skip } fr
 import {
   apiHasPinnedPanels,
   apiHasSections,
+  panelIsRelatedByGlobalFilters,
   apiPublishesViewMode,
   fetch$,
+  initializeRelatedPanels,
   initializeStateApi,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -101,9 +103,16 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         },
       });
 
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        ...panelIsRelatedByGlobalFilters(dataControlManager.api.useGlobalFilters$),
+      });
+
       const api = finalizeApi({
         ...stateApi,
         ...dataControlManager.api,
+        ...relatedPanelsApi,
         dataLoading$,
         clearSelections: () => {
           selections.setValue(undefined);
@@ -142,6 +151,8 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         controlFetch$,
         dataViews$: dataControlManager.api.dataViews$,
         fieldName$: dataControlManager.api.fieldName$,
+        esqlQuery$: dataControlManager.api.esqlQuery$,
+        valuesSource$: dataControlManager.api.valuesSource$,
         useGlobalFilters$: dataControlManager.api.useGlobalFilters$,
         setIsLoading: (isLoading: boolean) => {
           // clear previous loading error on next loading start
@@ -254,7 +265,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
 
           return (
             <RangeSliderControl
-              fieldName={fieldName}
+              fieldName={fieldName ?? ''}
               fieldFormatter={fieldFormatter}
               isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}

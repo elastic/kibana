@@ -8,6 +8,7 @@
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { ContinuityPayload, CategoriesResponse } from '@kbn/siem-readiness';
+import { filterPipelinesByCategories } from '@kbn/siem-readiness';
 import {
   createToolTestMocks,
   createToolHandlerContext,
@@ -15,14 +16,16 @@ import {
 } from '../../__mocks__/test_helpers';
 import { getContinuityTool } from './get_continuity_tool';
 import { getContinuity } from '../../../lib/siem_readiness/dimensions';
-import { fetchCategories } from '../../../lib/siem_readiness/fetchers';
-import { filterPipelinesByCategories } from '@kbn/siem-readiness';
+import { getSiemReadinessSharedContext } from '../../../lib/siem_readiness/fetchers';
 
 jest.mock('../../../lib/siem_readiness/dimensions', () => ({ getContinuity: jest.fn() }));
-jest.mock('../../../lib/siem_readiness/fetchers', () => ({ fetchCategories: jest.fn() }));
+jest.mock('../../../lib/siem_readiness/fetchers', () => ({
+  getSiemReadinessSharedContext: jest.fn(),
+  fetchSiemReadinessSharedContext: jest.fn(),
+}));
 
 const mockGetContinuity = getContinuity as jest.Mock;
-const mockFetchCategories = fetchCategories as jest.Mock;
+const mockGetSharedContext = getSiemReadinessSharedContext as jest.Mock;
 
 const ENDPOINT_INDEX = '.ds-logs-endpoint.events-2024.01.01-000001';
 const NETWORK_INDEX = '.ds-logs-network.traffic-2024.01.01-000001';
@@ -34,6 +37,18 @@ const mockCategories: CategoriesResponse = {
     { category: 'Endpoint', indices: [{ indexName: ENDPOINT_INDEX, docs: 1000 }] },
     { category: 'Network', indices: [{ indexName: NETWORK_INDEX, docs: 500 }] },
   ],
+};
+
+const mockSharedContext = {
+  reverseMapResult: {
+    indexToRules: new Map(),
+    pipelineToIndices: new Map(),
+    categoryToIndices: new Map(),
+    tacticTotals: new Map(),
+    mlRules: [],
+  },
+  categoriesResult: mockCategories,
+  indexToPlatform: new Map(),
 };
 
 const makePayload = (overrides: Partial<ContinuityPayload> = {}): ContinuityPayload => ({
@@ -51,7 +66,7 @@ describe('getContinuityTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
-    mockFetchCategories.mockResolvedValue(mockCategories);
+    mockGetSharedContext.mockResolvedValue(mockSharedContext);
   });
 
   describe('handler — category filtering', () => {
@@ -126,7 +141,7 @@ describe('getContinuityTool', () => {
             },
           ],
           actionableFindings: [
-            { severity: 'critical', message: 'critical failure', resource: 'endpoint-pipeline' },
+            { severity: 'CRITICAL', message: 'critical failure', resource: 'endpoint-pipeline' },
           ],
         })
       );
@@ -146,7 +161,7 @@ describe('getContinuityTool', () => {
           items: [],
           actionableFindings: [
             {
-              severity: 'critical',
+              severity: 'CRITICAL',
               message: 'unknown pipeline failure',
               resource: 'ghost-pipeline',
             },
