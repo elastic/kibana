@@ -226,7 +226,7 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
     return writeIndex;
   }
 
-  public async getByIdsInternal(
+  private async getByIdsInternal(
     ids: (string | { id: string; index: string })[],
     options?: GetExecutionsByIdsOptions<TExecution>,
     writeIndex?: string
