@@ -159,9 +159,9 @@ describe('KnowledgeIndicatorsPanel', () => {
     renderWithI18n(<KnowledgeIndicatorsPanel definition={definition} />);
 
     expect(
-      screen.getByTestId('streamsAppKnowledgeIndicatorsQueriesCount').querySelector(
-        '[data-test-subj="knowledgeIndicatorsCountUnavailable"]'
-      )
+      screen
+        .getByTestId('streamsAppKnowledgeIndicatorsQueriesCount')
+        .querySelector('[data-test-subj="knowledgeIndicatorsCountUnavailable"]')
     ).toBeInTheDocument();
   });
 
@@ -182,9 +182,9 @@ describe('KnowledgeIndicatorsPanel', () => {
 
     expect(screen.getByTestId('streamsAppKnowledgeIndicatorsFeaturesCount')).toHaveTextContent('1');
     expect(
-      screen.getByTestId('streamsAppKnowledgeIndicatorsQueriesCount').querySelector(
-        '[data-test-subj="knowledgeIndicatorsCountLoading"]'
-      )
+      screen
+        .getByTestId('streamsAppKnowledgeIndicatorsQueriesCount')
+        .querySelector('[data-test-subj="knowledgeIndicatorsCountLoading"]')
     ).toBeInTheDocument();
   });
 });
