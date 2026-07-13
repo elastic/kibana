@@ -133,6 +133,7 @@ dependsOn:
   - '@kbn/as-code-filters-transforms'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-shared-transforms'
+  - '@kbn/as-code-utils'
   - '@kbn/scout'
   - '@kbn/scout-synthtrace'
   - '@kbn/synthtrace-client'
@@ -157,6 +158,8 @@ dependsOn:
   - '@kbn/react-hooks'
   - '@kbn/app-header'
   - '@kbn/use-observable'
+  - '@kbn/core-security-server'
+  - '@kbn/core-test-helpers-test-utils'
 tags:
   - plugin
   - prod
