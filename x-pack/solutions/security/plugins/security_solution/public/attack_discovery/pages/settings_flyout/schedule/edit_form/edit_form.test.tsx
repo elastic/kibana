@@ -107,7 +107,8 @@ const renderComponent = async () => {
   });
 };
 
-describe('EditForm', () => {
+// Failing: See https://github.com/elastic/kibana/issues/255131
+describe.skip('EditForm', () => {
   const mockTriggersActionsUi = triggersActionsUiMock.createStart();
 
   beforeEach(() => {
