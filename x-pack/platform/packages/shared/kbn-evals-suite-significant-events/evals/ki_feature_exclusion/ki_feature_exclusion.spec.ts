@@ -147,7 +147,7 @@ evaluate.describe(
                 evaluators.traceBasedEvaluators.inputTokens,
                 evaluators.traceBasedEvaluators.outputTokens,
                 evaluators.traceBasedEvaluators.cachedTokens,
-                createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+                createSpanLatencyEvaluator({ traceEsClient, log, operationName: 'chat' }),
               ]
             );
           }

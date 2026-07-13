@@ -53,6 +53,7 @@ import { useSnoozeActionPolicy } from '../../hooks/use_snooze_action_policy';
 import { useUnsnoozeActionPolicy } from '../../hooks/use_unsnooze_action_policy';
 import { useUpdateActionPolicyApiKey } from '../../hooks/use_update_action_policy_api_key';
 import { resolveDisplayName } from '../../utils/resolve_display_name';
+import { UserCapabilities } from '../../services/user_capabilities';
 import { ActionPoliciesBulkActions } from './components/action_policies_bulk_actions';
 import { ActionPoliciesSearchBar } from './components/action_policies_search_bar';
 import { ActionPolicyActionsCell } from './components/action_policy_actions_cell';
@@ -69,18 +70,22 @@ const ACTION_POLICIES_LIST_PAGE_TITLE = i18n.translate(
 
 const getActionPoliciesListMenu = ({
   navigateToCreate,
+  canWrite,
 }: {
   navigateToCreate: () => void;
+  canWrite: boolean;
 }): AppHeaderMenu => ({
-  primaryActionItem: {
-    id: 'createActionPolicy',
-    label: i18n.translate('xpack.alertingV2.actionPoliciesList.createPolicyButton', {
-      defaultMessage: 'Create policy',
-    }),
-    iconType: 'plusInCircle',
-    run: navigateToCreate,
-    testId: 'createActionPolicyButton',
-  },
+  ...(canWrite && {
+    primaryActionItem: {
+      id: 'createActionPolicy',
+      label: i18n.translate('xpack.alertingV2.actionPoliciesList.createPolicyButton', {
+        defaultMessage: 'Create policy',
+      }),
+      iconType: 'plusInCircle',
+      run: navigateToCreate,
+      testId: 'createActionPolicyButton',
+    },
+  }),
 });
 
 const descriptionTextStyle = css`
@@ -110,6 +115,7 @@ export const ListActionPoliciesPage = () => {
   const { basePath } = useService(CoreStart('http'));
   const settings = useService(CoreStart('settings'));
   const dateTimeFormat = settings.client.get<string>('dateFormat');
+  const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
 
   const { mutate: createActionPolicy } = useCreateActionPolicy();
   const { mutate: deleteActionPolicy, isLoading: isDeleting } = useDeleteActionPolicy();
@@ -406,7 +412,7 @@ export const ListActionPoliciesPage = () => {
       ),
       width: '50px',
       render: (_snoozedUntil: string | undefined, policy: ActionPolicyResponse) => {
-        if (!policy.enabled) {
+        if (!policy.enabled || !canWrite) {
           return null;
         }
         return (
@@ -431,6 +437,7 @@ export const ListActionPoliciesPage = () => {
       render: (policy: ActionPolicyResponse) => (
         <ActionPolicyActionsCell
           policy={policy}
+          canWrite={canWrite}
           onViewDetails={(p) => setPolicyToViewId(p.id)}
           onEdit={navigateToEdit}
           onClone={clonePolicy}
@@ -453,8 +460,8 @@ export const ListActionPoliciesPage = () => {
   const errorMessage = isError && error ? error.message : null;
 
   const actionPoliciesMenu = useMemo(
-    () => getActionPoliciesListMenu({ navigateToCreate }),
-    [navigateToCreate]
+    () => getActionPoliciesListMenu({ navigateToCreate, canWrite }),
+    [navigateToCreate, canWrite]
   );
 
   return (
@@ -541,7 +548,7 @@ export const ListActionPoliciesPage = () => {
             items={items}
             columns={columns}
             itemId="id"
-            selection={selection}
+            selection={canWrite ? selection : undefined}
             loading={isFetching}
             pagination={pagination}
             responsiveBreakpoint={false}
@@ -597,6 +604,7 @@ export const ListActionPoliciesPage = () => {
       {policyToView && (
         <ActionPolicyDetailsFlyout
           policy={policyToView}
+          canWrite={canWrite}
           onClose={() => setPolicyToViewId(null)}
           onEdit={(id) => {
             setPolicyToViewId(null);
