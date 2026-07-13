@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { RetentionSelector, RetentionSelectorSearch } from './retention_selector';
-export type { RetentionSelectorProps, RetentionSelectorSearchProps } from './retention_selector';
-export type { RetentionOption } from './types';
+export const IMPORT_METHOD_DLM = 'dlm';
+export const IMPORT_METHOD_ILM = 'ilm';
+
+export type ImportLifecycleMethod = typeof IMPORT_METHOD_DLM | typeof IMPORT_METHOD_ILM;

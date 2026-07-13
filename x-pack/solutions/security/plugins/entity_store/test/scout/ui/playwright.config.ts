@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { RetentionSelector, RetentionSelectorSearch } from './retention_selector';
-export type { RetentionSelectorProps, RetentionSelectorSearchProps } from './retention_selector';
-export type { RetentionOption } from './types';
+import { createPlaywrightConfig } from '@kbn/scout-security';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
