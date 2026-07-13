@@ -240,7 +240,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 - **Title**: `[<Plugin name>] <concise summary of the fix>`. Derive the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`).
 - **Body**:
   ```
-  Fixes #<issue-number> — introduced by #<introducing-pr> (cc @<introducing-pr-author>)
+  Fixes #<issue-number> — likely introduced by #<introducing-pr> (cc @<introducing-pr-author>)
 
   ### Summary
   <a few bullet points: what was failing, and what this patch changes - keep it very concise, every bullet point must be earned>
@@ -265,7 +265,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   ```
 
 The first line attributes the flake:
-- **Introducing PR** (`#<introducing-pr>`): the PR that first introduced the failing test — find it with `git log` / `git blame` on the test file; if the investigator implicated a specific PR/commit as the cause of the flakiness, prefer that. If you cannot confidently identify it, omit the whole `— introduced by …` clause and keep just `Fixes #<issue-number>` — never guess.
+- **Introducing PR** (`#<introducing-pr>`): the PR you believe introduced the flake — find the PR that first added the failing test with `git log` / `git blame` on the test file, or prefer a specific PR/commit the investigator implicated as the cause. The `likely` hedge is intentional: this is an informed suspicion, not a proven cause, so keep it. If you can't identify a well-supported candidate, omit the whole `— likely introduced by …` clause and keep just `Fixes #<issue-number>` — never guess.
 - **cc** (`@<introducing-pr-author>`): `@`-mention that PR's author so they're looped in on the fix; drop the `(cc @…)` if the author is a bot (includes `kibanamachine`). Request this same person as a reviewer via the `request_fix_review` tool (see Steps).
 - Add more `Fixes #<issue-number>` references if this fix resolves multiple issues.
 
@@ -273,10 +273,10 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ```markdown
 > [!NOTE]
-> Requested by @${{ env.REQUESTED_BY }}. Share feedback in #kibana-qa.
+> Requested by @${{ env.REQUESTED_BY }}. Share feedback in #kibana-qa. Need to make quick changes? Ask `@copilot` to do them for you.
 ```
 
-(Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving just `Share feedback in #kibana-qa.`)
+(Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving the rest of the NOTE.)
 
 ## Outcome comment
 
