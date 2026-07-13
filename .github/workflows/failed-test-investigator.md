@@ -322,18 +322,16 @@ Explain _why_ it failed in a few tight sentences or bullets, each anchored to a 
 - State the single root cause; don't re-walk the investigation or list every call in the test.
 - Use an ASCII timeline **only** for a genuine race condition, cascade, or multi-component state leak — never for a linear explanation.
 - Fold supporting evidence (missing `data-test-subj`, a failing request, screenshot state) into the narrative rather than listing it separately.
+- When evidence points to a specific PR as the likely source of the flakiness, name it here with an inline link and its merge date (e.g. [#262449](https://github.com/elastic/kibana/pull/262449), merged 2025-08-12). Follow **Attribution** — only when strongly implicated, never as a fallback for weak evidence.
 
 #### Backporting strategy (only when a fix is proposed)
 
-Include this section **only** when you propose a fix; omit it entirely otherwise (e.g. inconclusive, or no concrete fix). It tells the fixer and reviewers which open branches need the fix, so the right `backport:*` label can be applied. Keep it to one or two lines — a branch list plus a recommendation.
+Include this section **only** when you propose a fix; omit it otherwise. Keep it dead simple — just where the fix lands and which open branches to backport it to. Backport fixes wherever they apply; later workflows (e.g. the Flaky Test Fixer) handle the labels and tooling, so don't mention those here.
 
-- **Open branches** come from `versions.json` (each entry's `branch`, `branchType` `release` or `development`). The fix lands on `main`; the real question is which open **release** branches also need it.
-- A release branch **benefits** when the failing test (or the code you'd patch) exists there and the same failure is possible. Decide per branch from evidence — e.g. check whether the test file exists on that branch (GitHub contents API with `?ref=<branch>`, or `git`) and whether your root cause applies there. **Never guess**; if you can't tell for a branch, say so and leave the call to a human.
-- Close with **one** concrete recommendation the fixer can act on:
-  - every open release branch is affected → `backport:all-open`
-  - `main`-only (e.g. the test/fix was recently added and isn't on any release branch) → `backport:skip`
-  - a subset → `backport:version` plus the `vX.Y.Z` label for each affected branch (map branch → current version via `versions.json`, e.g. `9.4` → `v9.4.4`)
-- **Special case — fix already on `main`:** if `main` is already patched (the failure is release-branch-only), say so instead: no fix is needed on `main`; name the PR that already fixed it (when known) and which release branch(es) still need it backported.
+- Lead with one line ("Open the fix on `main` and backport to:"), then one bullet per target branch.
+- List a branch only when the failing test / patched code exists there (check the open branches in `versions.json`) so the fix actually applies. **Never guess** — skip any branch you can't confirm.
+- Note the backport complexity next to each branch when you can, e.g. "`9.4` — clean" or "`9.3` — likely conflicts (helper was refactored)".
+- If `main` is already fixed (the failure is release-branch-only), say so and list only the release branch(es) that still need it.
 
 #### Additional context (optional)
 
