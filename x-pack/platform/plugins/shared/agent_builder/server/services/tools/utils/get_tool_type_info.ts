@@ -12,8 +12,13 @@ import { isBuiltinDefinition, isEnabledDefinition } from '../tool_types/definiti
 
 export interface GetToolTypeInfoOptions {
   /**
-   * Whether the current user can create workflow tools
-   * (i.e. holds `workflowsManagement:read`).
+   * Whether the current user can create workflow tools.
+   *
+   * A workflow tool only references an existing workflow (by id), so creating one
+   * requires being able to *read* the referenced workflow rather than to author
+   * workflows. This therefore maps to `workflowsManagement:read`, not
+   * `workflowsManagement:create`/`:update`. Tool creation itself is still gated by
+   * the Agent Builder create privilege.
    */
   workflowToolsCreatable?: boolean;
 }
