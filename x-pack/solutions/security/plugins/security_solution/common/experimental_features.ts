@@ -248,9 +248,9 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
-   * DEMO BRANCH ONLY — re-enable to false before merge. Enabled here for PR cloud QA demo.
+   * Shipped dark by default; enable per environment via config.
    */
-  endpointForensicAnalysisSkill: true,
+  endpointForensicAnalysisSkill: false,
 
   /**
    * Enables the investigate-rule Agent Builder skill.
