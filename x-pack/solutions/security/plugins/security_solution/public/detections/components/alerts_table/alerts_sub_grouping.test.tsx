@@ -30,7 +30,6 @@ jest.mock('../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api', () => ({
   fetchQueryAlerts: jest.fn(),
-  fetchQueryAttacks: jest.fn(),
   fetchQueryUnifiedAlerts: jest.fn(),
 }));
 const mockedTelemetry = createTelemetryServiceMock();
@@ -208,7 +207,7 @@ describe('GroupedSubLevelComponent', () => {
     expect(groupTakeActionItems).toHaveBeenCalled();
   });
 
-  it('uses attacks page fetch method when pageScope is "attacks"', async () => {
+  it('uses fetchQueryUnifiedAlerts when pageScope is "attacks"', async () => {
     render(
       <TestProviders>
         <GroupedSubLevelComponent {...testProps} pageScope={PageScope.attacks} />
