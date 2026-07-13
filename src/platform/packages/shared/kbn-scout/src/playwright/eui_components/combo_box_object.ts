@@ -21,12 +21,12 @@ const SEARCH_INPUT_TEST_SUBJ = 'comboBoxSearchInput';
  * sites use the same method names, so they won't change.
  *
  * - Overrides {@link setSelectedOptions} to **type-to-filter, then select by
- *   accessible name**. The base implementation never types (it matches an
+ *   accessible name** (or, with `create`, commit the typed value via
+ *   `onCreateOption`). The base implementation never types (it matches an
  *   unfiltered `getByTitle`), so it times out on the many Kibana combo boxes whose
  *   options are filterable / virtualized / async — the option is not in the DOM
  *   until you type. Kept as the same method name on purpose: when this behavior
  *   lands in the EUI helper, deleting this override needs no test changes.
- * - Adds {@link createOptions} — free-text creation via `onCreateOption`.
  * - Adds {@link getAvailableOptions} — read the available dropdown options.
  */
 export class KbnComboBoxObject extends EuiComboBoxObject {
@@ -48,26 +48,6 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
   }
 
   /**
-   * Create free-text options via the combo box's `onCreateOption` handler by
-   * typing each label and pressing Enter. Use only for combos whose value
-   * cannot pre-exist as a selectable option (tags, custom field names, date
-   * formats). For a single-selection `asPlainText` combo, pass a single label.
-   */
-  async createOptions(labels: string[]): Promise<void> {
-    await this.inputWrapper.click();
-    for (const label of labels) {
-      await this.searchField.fill(label);
-      await this.searchField.press('Enter');
-    }
-    await this.searchField.blur();
-
-    const selected = await this.getSelectedOptions();
-    for (const label of labels) {
-      expect(selected).toContain(label);
-    }
-  }
-
-  /**
    * Smart replacement for the base {@link EuiComboBoxObject.setSelectedOptions}:
    * type each label to filter, then select the option matched by its **accessible
    * name**.
@@ -78,8 +58,14 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
    * resolves reliably where a text/title match would not. Being a poll, it also
    * waits out async / server-side filtering (it only passes once the real match
    * renders, never a stale pre-filter suggestion). A single match is clicked; a
-   * keyboard fallback (`ArrowDown` + `Enter`) handles duplicate labels. Pass
-   * `create` for `onCreateOption` combos to commit the typed value directly.
+   * keyboard fallback (`ArrowDown` + `Enter`) handles duplicate labels.
+   *
+   * Pass `create` for `onCreateOption` combos (tags, custom field names, date
+   * formats): each label is committed as a typed value via Enter, then the
+   * selection is verified so a silently-rejected value fails loudly. Do NOT fall
+   * through to option selection in this mode — on an async combo the pre-filter
+   * (stale) options are still present right after typing, so we'd pick a wrong
+   * suggestion.
    */
   async setSelectedOptions(
     labels: string[],
@@ -90,9 +76,6 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
       await this.searchField.fill(label);
 
       if (create) {
-        // onCreateOption combo — commit the typed value directly. Do NOT fall
-        // through to selection: on an async combo the pre-filter (stale) options
-        // are still present right after typing, so we'd select a wrong suggestion.
         await this.searchField.press('Enter');
         await this.searchField.blur();
         continue;
@@ -109,6 +92,16 @@ export class KbnComboBoxObject extends EuiComboBoxObject {
         await this.searchField.press('Enter');
       }
       await this.searchField.blur();
+    }
+
+    if (create) {
+      // The typed value equals the pill/input label for onCreateOption combos,
+      // so this exact check is safe (a filter-and-pick selection could resolve to
+      // a longer option label, which is why we only verify in create mode).
+      const selected = await this.getSelectedOptions();
+      for (const label of labels) {
+        expect(selected).toContain(label);
+      }
     }
   }
 

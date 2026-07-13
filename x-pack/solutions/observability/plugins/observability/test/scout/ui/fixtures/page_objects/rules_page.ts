@@ -531,7 +531,7 @@ export class RulesPage {
   async addRuleTag(tag: string) {
     await this.page.components
       .comboBox(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.RULE_TAGS_INPUT)
-      .createOptions([tag]);
+      .setSelectedOptions([tag], { create: true });
   }
 
   /**

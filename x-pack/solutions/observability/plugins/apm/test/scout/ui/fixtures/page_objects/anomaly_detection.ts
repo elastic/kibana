@@ -37,7 +37,7 @@ export class AnomalyDetectionPage {
   async selectEnvironment(environmentName: string) {
     await this.page.components
       .comboBox('apmAnomalyDetectionEnvironmentsComboBox')
-      .createOptions([environmentName]);
+      .setSelectedOptions([environmentName], { create: true });
   }
 
   async clickCreateJobsButton() {

@@ -427,10 +427,10 @@ export class StreamsApp {
     operator?: string;
   }) {
     if (field) {
-      await this.conditionEditorFieldComboBox.createOptions([field]);
+      await this.conditionEditorFieldComboBox.setSelectedOptions([field], { create: true });
     }
     if (value) {
-      await this.conditionEditorValueComboBox.createOptions([value]);
+      await this.conditionEditorValueComboBox.setSelectedOptions([value], { create: true });
     }
     if (operator) {
       await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
@@ -732,7 +732,7 @@ export class StreamsApp {
   async fillProcessorFieldInput(value: string, options?: { isCustomValue: boolean }) {
     const isCustomValue = options?.isCustomValue || false;
     if (isCustomValue) {
-      return await this.processorFieldComboBox.createOptions([value]);
+      return await this.processorFieldComboBox.setSelectedOptions([value], { create: true });
     }
     await this.processorFieldComboBox.setSelectedOptions([value]);
   }
@@ -760,11 +760,11 @@ export class StreamsApp {
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
-    await this.processorFieldComboBox.createOptions([value]);
+    await this.processorFieldComboBox.setSelectedOptions([value], { create: true });
   }
 
   async fillDateProcessorFormatInput(value: string) {
-    await this.dateProcessorFormatsComboBox.createOptions([value]);
+    await this.dateProcessorFormatsComboBox.setSelectedOptions([value], { create: true });
   }
 
   async fillDateProcessorTargetFieldInput(value: string) {
@@ -800,9 +800,9 @@ export class StreamsApp {
   }
 
   async fillCondition(field: string, operator: string, value: string) {
-    await this.conditionEditorFieldComboBox.createOptions([field]);
+    await this.conditionEditorFieldComboBox.setSelectedOptions([field], { create: true });
     await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
-    await this.conditionEditorValueComboBox.createOptions([value]);
+    await this.conditionEditorValueComboBox.setSelectedOptions([value], { create: true });
   }
 
   async removeProcessor(pos: number) {
