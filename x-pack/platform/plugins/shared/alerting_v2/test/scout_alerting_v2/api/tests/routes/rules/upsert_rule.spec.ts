@@ -212,6 +212,17 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
+    'validation: should reject body with unknown top-level keys (strict schema)',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(getRuleUrl('any-id'), {
+        headers: writerHeaders,
+        body: { ...buildCreateRuleData(), unknownField: 'nope' },
+      });
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
     'validation: should reject body when metadata.description exceeds MAX_DESCRIPTION_LENGTH',
     async ({ apiClient }) => {
       const response = await apiClient.put(getRuleUrl('any-id'), {

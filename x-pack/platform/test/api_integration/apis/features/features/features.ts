@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
             'actions',
             'anonymization',
             'agentBuilder',
-            'agentContextLayer',
+            'agentBuilderSml',
             'alerting_v2_action_policies',
             'alerting_v2_alerts',
             'alerting_v2_execution_history',

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { LicenseType } from '@kbn/licensing-types';
+
 /**
  * Request/response contracts mirror relay-service `src/contracts/http/slack.ts`
  * (see relay-service#78). Deployment identity is asserted at the transport layer
@@ -18,6 +20,12 @@ export interface RelayInstallRequest {
    * commit ff5d067, `StartInstallRequest`).
    */
   kibana_api_key: string;
+  /** The public URL of the connecting Kibana deployment. */
+  kibana_url: string;
+  /** The Kibana version of the connecting deployment, e.g. `9.2.0`. */
+  kibana_version: string;
+  /** Deployment license type, used by the Relay to gate tenant features. */
+  license_info: LicenseType;
   /** Optional audit marker for who initiated the install. */
   created_by_user_key?: string;
 }
