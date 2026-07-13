@@ -51,9 +51,9 @@ export const ExportJsonFlyout = ({ closeFlyout }: { closeFlyout: () => void }) =
   );
 
   const typedSharingData = sharingData as unknown as ReturnType<typeof buildExportSharingData>;
-  const { title, exportJson } = typedSharingData;
+  const { title, getExportJson } = typedSharingData;
 
-  const dashboardState = useMemo(() => exportJson(), [exportJson]);
+  const dashboardState = useMemo(() => getExportJson(), [getExportJson]);
   const { status, data, warnings, error, retry } = useSanitizedDashboardState({
     dashboardState,
   });

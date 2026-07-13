@@ -70,7 +70,7 @@ describe('useDashboardMenuItems', () => {
           if (groupId === 'exportDerivatives') {
             return [
               {
-                id: 'exportJson',
+                id: EXPORT_JSON_SHARE_ID,
                 shareType: 'integration',
                 groupId: 'exportDerivatives',
                 config: async () => ({}),

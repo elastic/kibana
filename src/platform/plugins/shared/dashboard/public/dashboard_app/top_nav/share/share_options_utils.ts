@@ -24,6 +24,7 @@ import { dataService, shareService } from '../../../services/kibana_services';
 import { logger } from '../../../services/logger';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
+import { EXPORT_JSON_SHARE_ID } from './export_json/setup_export_json';
 
 /**
  * Builds common share options used by both the share modal and export items.
@@ -108,7 +109,7 @@ export function getExportObjectTypeMeta() {
     config: {
       integration: {
         export: {
-          exportJson: {},
+          [EXPORT_JSON_SHARE_ID]: {},
           pdfReports: { draftModeCallOut: true },
           imageReports: { draftModeCallOut: true },
         },
@@ -131,7 +132,7 @@ export function buildExportSharingData(
       id: DASHBOARD_APP_LOCATOR,
       params: locatorParams,
     },
-    exportJson: () => {
+    getExportJson: () => {
       const dashboardState = dashboardApi.getSerializedState().attributes;
       return dashboardState.title.length ? dashboardState : { ...dashboardState, title };
     },

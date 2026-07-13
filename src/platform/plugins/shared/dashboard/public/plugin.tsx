@@ -84,6 +84,7 @@ import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/telemetry/dashboard_duration_start_mark';
 import type { DashboardApi } from './dashboard_api/types';
+import { setupExportJson } from './dashboard_app/top_nav/share/export_json/setup_export_json';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -187,14 +188,7 @@ export class DashboardPlugin
           },
         })
       );
-      share.registerShareIntegration<ExportShareDerivatives>('dashboard', {
-        id: 'exportJson',
-        groupId: 'exportDerivatives',
-        getShareIntegrationConfig: async () => {
-          const { exportJsonConfig } = await import('./dashboard_renderer/dashboard_module');
-          return exportJsonConfig;
-        },
-      });
+      setupExportJson(share);
     }
 
     const {
