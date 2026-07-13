@@ -54,10 +54,11 @@ describe('buildVegaConfig', () => {
     >);
   });
 
-  const run = (esql?: string) =>
+  const run = (esql?: string, regenerateInvalidEsql?: boolean) =>
     buildVegaConfig({
       nlQuery: 'small multiples by region',
       esql,
+      regenerateInvalidEsql,
       modelProvider,
       logger,
       events,
@@ -81,6 +82,16 @@ describe('buildVegaConfig', () => {
 
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('bad query'));
+  });
+
+  it('throws for invalid provided ES|QL when regeneration is disabled', async () => {
+    mockedValidateEsqlQuery.mockResolvedValue('line 1, column 1: bad query');
+
+    await expect(run(PROVIDED_ESQL, false)).rejects.toThrow(
+      'Provided ES|QL failed validation: line 1, column 1: bad query'
+    );
+
+    expect(invoke).not.toHaveBeenCalled();
   });
 
   it('keeps the provided ES|QL when validation itself fails (inconclusive)', async () => {

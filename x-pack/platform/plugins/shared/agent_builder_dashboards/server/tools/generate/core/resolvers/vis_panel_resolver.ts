@@ -8,6 +8,8 @@
 import {
   buildLensConfig,
   buildVegaConfig,
+  extractEsqlFromSpec,
+  getEsqlDataSourceCarriers,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
 import {
@@ -59,6 +61,88 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
   return typeof spec === 'string' ? spec : undefined;
 };
 
+type EditEsqlResolution = { esql: string | undefined } | { error: string };
+
+/**
+ * Decide which ES|QL query backs a Lens panel edit (decision: pin by default).
+ *
+ * - `newEsql` — the agent explicitly replaces the query.
+ * - `changeData` — the agent explicitly wants regeneration from the
+ *   natural-language request, seeded with the existing queries.
+ * - neither — the existing query is PINNED from state: validated, passed
+ *   through byte-identical, and never regenerated.
+ *
+ * Panels that are not exclusively ES|QL-backed, or that contain multiple
+ * distinct queries, cannot be restyled safely and fail closed.
+ */
+const resolveEditEsql = ({
+  newEsql,
+  changeData,
+  existingConfig,
+}: {
+  newEsql?: string;
+  changeData?: boolean;
+  existingConfig: VisualizationConfig | undefined;
+}): EditEsqlResolution => {
+  if (newEsql) {
+    return { esql: newEsql };
+  }
+  if (changeData) {
+    return { esql: undefined };
+  }
+
+  const carriers = getEsqlDataSourceCarriers(existingConfig);
+  const esqlCarriers = carriers.filter(
+    (carrier): carrier is { data_source: { type: string; query: string } } =>
+      carrier.data_source?.type === 'esql' &&
+      typeof carrier.data_source.query === 'string' &&
+      carrier.data_source.query.trim().length > 0
+  );
+  if (carriers.length === 0 || esqlCarriers.length !== carriers.length) {
+    return {
+      error:
+        'The existing panel is not exclusively ES|QL-based, so a visual-only edit cannot preserve its data semantics. Skip it or retry with change_data: true.',
+    };
+  }
+
+  const queries = esqlCarriers.map(({ data_source: dataSource }) => dataSource.query);
+  const distinctQueries = [...new Set(queries)];
+  if (distinctQueries.length !== 1) {
+    return {
+      error:
+        'The existing panel contains multiple distinct ES|QL queries, so a visual-only edit cannot preserve them through the single-query editor. Skip it or retry with change_data: true.',
+    };
+  }
+
+  return { esql: distinctQueries[0] };
+};
+
+const resolveVegaEditEsql = ({
+  newEsql,
+  changeData,
+  existingSpec,
+}: {
+  newEsql?: string;
+  changeData?: boolean;
+  existingSpec: string | undefined;
+}): EditEsqlResolution => {
+  if (newEsql) {
+    return { esql: newEsql };
+  }
+  if (changeData) {
+    return { esql: undefined };
+  }
+
+  const pinnedQuery = extractEsqlFromSpec(existingSpec);
+  if (!pinnedQuery) {
+    return {
+      error:
+        'The existing Vega panel does not contain an ES|QL query, so a visual-only edit cannot preserve its data semantics. Skip it or retry with change_data: true.',
+    };
+  }
+  return { esql: pinnedQuery };
+};
+
 /**
  * Default implementation of the generate core's `ResolvePanelContent` seam for
  * `vis` panels.
@@ -84,11 +168,14 @@ export const createVisPanelResolver = ({
   return async ({
     operationType,
     identifier,
+    failureId,
     nlQuery,
     index,
     chartType,
     esql,
     renderer: requestedRenderer,
+    newEsql,
+    changeData,
     existingPanel,
   }: VisPanelResolutionRequest): Promise<PanelContentAttempt> => {
     try {
@@ -97,16 +184,28 @@ export const createVisPanelResolver = ({
         return createPanelFailureResult(
           operationType,
           identifier,
-          `Panel "${identifier}" with type "${existingPanel?.type}" is not supported for inline visualization editing.`
+          `Panel "${identifier}" with type "${existingPanel?.type}" is not supported for inline visualization editing.`,
+          failureId
         );
       }
 
       if (renderer === 'vega') {
+        const existingSpec = getExistingVegaSpec(existingPanel);
+        const resolution = existingPanel
+          ? resolveVegaEditEsql({ newEsql, changeData, existingSpec })
+          : { esql };
+        if ('error' in resolution) {
+          return createPanelFailureResult(operationType, identifier, resolution.error, failureId);
+        }
+
         const { spec } = await buildVegaConfig({
           nlQuery,
           index,
-          esql,
-          existingSpec: getExistingVegaSpec(existingPanel),
+          esql: resolution.esql,
+          existingSpec,
+          ...(existingPanel && {
+            regenerateInvalidEsql: changeData === true && !newEsql,
+          }),
           chartType,
           modelProvider,
           logger,
@@ -132,11 +231,27 @@ export const createVisPanelResolver = ({
           ? (existingPanel?.config as VisualizationConfig)
           : undefined;
 
+      let effectiveEsql = esql;
+      if (existingPanel) {
+        const resolution = resolveEditEsql({
+          newEsql,
+          changeData,
+          existingConfig,
+        });
+        if ('error' in resolution) {
+          return createPanelFailureResult(operationType, identifier, resolution.error, failureId);
+        }
+        effectiveEsql = resolution.esql;
+      }
+
       const result = await buildLensConfig({
         nlQuery,
         index,
         chartType,
-        esql,
+        esql: effectiveEsql,
+        ...(existingPanel && {
+          regenerateInvalidEsql: changeData === true && !newEsql,
+        }),
         existingConfig: existingConfig ? JSON.stringify(existingConfig) : undefined,
         parsedExistingConfig: existingConfig,
         includeTimeRange: false,
@@ -154,7 +269,19 @@ export const createVisPanelResolver = ({
         },
       };
     } catch (error) {
-      return createPanelFailureResult(operationType, identifier, getErrorMessage(error));
+      const result = createPanelFailureResult(
+        operationType,
+        identifier,
+        getErrorMessage(error),
+        failureId
+      );
+      return {
+        ...result,
+        failure: {
+          ...result.failure,
+          failureKind: 'visualization_generation',
+        },
+      };
     }
   };
 };

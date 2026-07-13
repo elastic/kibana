@@ -34,6 +34,8 @@
     "@kbn/data-views-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/esql-utils",
+    "@kbn/agent-builder-genai-utils",
+    "@kbn/inference-tracing",
   ],
   "exclude": ["target/**/*"]
 }

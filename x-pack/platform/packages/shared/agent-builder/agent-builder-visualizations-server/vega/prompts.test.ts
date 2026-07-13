@@ -6,7 +6,11 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
+import {
+  createAuthorVegaSpecPrompt,
+  getVegaAuthoringGuidance,
+  vegaEsqlAdditionalInstructions,
+} from './prompts';
 
 const systemText = (nlQuery: string): string => {
   const [system] = createAuthorVegaSpecPrompt({ nlQuery, esqlQuery: 'FROM logs-*' });
@@ -84,6 +88,20 @@ describe('createAuthorVegaSpecPrompt', () => {
       chartType: SupportedChartType.XY,
     });
     expect(String((system as [string, string])[1])).toContain('Suggested chart style: "xy"');
+  });
+});
+
+describe('getVegaAuthoringGuidance', () => {
+  it('includes the title, axis, and theme-aware color rules used for authoring', () => {
+    const guidance = getVegaAuthoringGuidance();
+
+    expect(guidance).toContain('Provide a clear, self-explanatory "title"');
+    expect(guidance).toContain('"labelAngle": 0');
+    expect(guidance).toContain('"title": null');
+    expect(guidance).toContain('Do NOT hardcode colors');
+    expect(guidance).toContain('theme-aware Elastic palette');
+    expect(guidance).toContain('WHERE <time field> >= ?_tstart AND <time field> < ?_tend');
+    expect(guidance).toContain('RENAME host.name AS host');
   });
 });
 

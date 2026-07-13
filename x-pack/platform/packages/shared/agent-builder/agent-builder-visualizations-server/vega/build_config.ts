@@ -18,6 +18,8 @@ export interface BuildVegaConfigParams {
   nlQuery: string;
   index?: string;
   esql?: string;
+  /** Whether an invalid caller-provided query may be replaced by generation. Defaults to true. */
+  regenerateInvalidEsql?: boolean;
   /** Existing serialized Vega spec to edit, if any. */
   existingSpec?: string;
   /** Optional chart-type hint for the intended visual form (Vega authors free-form). */
@@ -37,15 +39,17 @@ export interface BuildVegaConfigResult {
 
 /**
  * Orchestrate Vega-Lite spec generation: optionally reuse a caller-provided
- * ES|QL query (dropped if it fails validation so the graph regenerates one), on
+ * ES|QL query (normally dropped if it fails validation so the graph regenerates one), on
  * edits seed generation with the query recovered from the existing spec so the
  * graph can modify it when the instruction needs different data, run the
- * generation graph, and surface a clear error if no spec is produced.
+ * generation graph, and surface a clear error if no spec is produced. Callers
+ * pinning an existing query can disable invalid-query regeneration.
  */
 export const buildVegaConfig = async ({
   nlQuery,
   index,
   esql,
+  regenerateInvalidEsql = true,
   existingSpec,
   chartType,
   modelProvider,
@@ -67,6 +71,9 @@ export const buildVegaConfig = async ({
       // Couldn't validate, keep it.
     }
     if (validationError) {
+      if (!regenerateInvalidEsql) {
+        throw new Error(`Provided ES|QL failed validation: ${validationError}`);
+      }
       logger.warn(
         `Provided ES|QL failed validation; regenerating from the natural-language query. Error: ${validationError}`
       );
@@ -92,6 +99,7 @@ export const buildVegaConfig = async ({
     index,
     existingSpec,
     existingEsql,
+    regenerateInvalidEsql,
     chartType,
     esqlQuery: providedEsql || '',
     currentAttempt: 0,

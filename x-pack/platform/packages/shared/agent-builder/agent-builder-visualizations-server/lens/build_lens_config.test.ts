@@ -75,11 +75,12 @@ describe('buildLensConfig', () => {
     >);
   });
 
-  const run = (esql?: string) =>
+  const run = (esql?: string, regenerateInvalidEsql?: boolean) =>
     buildLensConfig({
       nlQuery: 'count of logs',
       chartType: SupportedChartType.Metric, // pass a chartType so guessChartType is skipped
       esql,
+      regenerateInvalidEsql,
       modelProvider,
       logger,
       events,
@@ -105,6 +106,16 @@ describe('buildLensConfig', () => {
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('bad query'));
+  });
+
+  it('throws for invalid provided ES|QL when regeneration is disabled', async () => {
+    mockedValidateEsqlQuery.mockResolvedValue('line 1, column 1: bad query');
+
+    await expect(run(PROVIDED_ESQL, false)).rejects.toThrow(
+      'Provided ES|QL failed validation: line 1, column 1: bad query'
+    );
+
+    expect(invoke).not.toHaveBeenCalled();
   });
 
   it('keeps the provided ES|QL when validation itself fails (inconclusive)', async () => {

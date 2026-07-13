@@ -37,6 +37,8 @@ export interface PanelResolutionRequestBase {
   operationType: InlinePanelOperationType;
   /** Human-facing identifier for failure attribution (panelId or the query). */
   identifier: string;
+  /** Existing terminal failure this resolution attempt is trying to recover. */
+  failureId?: string;
   /** Present when editing an existing panel; resolvers validate compatibility. */
   existingPanel?: AttachmentPanel;
 }
@@ -44,10 +46,12 @@ export interface PanelResolutionRequestBase {
 export const createPanelFailureResult = (
   type: PanelFailure['type'],
   identifier: string,
-  error: string
+  error: string,
+  failureId?: string
 ): Extract<PanelContentAttempt, { type: 'failure' }> => ({
   type: 'failure',
   failure: {
+    ...(failureId ? { failureId } : {}),
     type,
     identifier,
     error,

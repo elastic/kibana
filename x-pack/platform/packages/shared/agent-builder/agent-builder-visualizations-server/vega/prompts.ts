@@ -33,56 +33,9 @@ const formatColumns = (columns: EsqlEsqlColumnInfo[] | undefined): string => {
   return columns.map((column) => `- "${column.name}" (${column.type})`).join('\n');
 };
 
-export const createAuthorVegaSpecPrompt = ({
-  nlQuery,
-  esqlQuery,
-  columns,
-  existingSpec,
-  chartType,
-  referenceExamples,
-  additionalContext,
-}: {
-  nlQuery: string;
-  esqlQuery: string;
-  columns?: EsqlEsqlColumnInfo[];
-  existingSpec?: string;
-  chartType?: SupportedChartType;
-  /** Pre-selected, pre-loaded reference-example block (see `reference_examples`). */
-  referenceExamples?: string;
-  additionalContext?: string;
-}): BaseMessageLike[] => {
-  const esqlQueryJson = JSON.stringify(esqlQuery);
-  const chartTypeHint = chartType
-    ? `\nSuggested chart style: "${chartType}". Treat it as a hint for the visual form; adapt if the data or request calls for something else.`
-    : '';
+const VEGA_AUTHORING_INTRODUCTION = `Author Vega-Lite ONLY — never raw Vega (v5). Use Vega-Lite for charts a standard Lens chart cannot express, for example faceted charts / small multiples, layered or combination charts (e.g. bars with an overlaid line), or scatter/bubble plots with an encoded size. If the request needs a diagram Vega-Lite cannot express (e.g. Sankey / flow, network, chord), build the closest chart Vega-Lite supports (such as a sorted bar chart of the top combinations) rather than attempting an unsupported diagram.`;
 
-  return [
-    [
-      'system',
-      `You are a Vega-Lite visualization expert. Author a single valid Vega-Lite (v6) specification for the user's request.
-
-Author Vega-Lite ONLY — never raw Vega (v5). Use Vega-Lite for charts a standard Lens chart cannot express, for example faceted charts / small multiples, layered or combination charts (e.g. bars with an overlaid line), or scatter/bubble plots with an encoded size. If the request needs a diagram Vega-Lite cannot express (e.g. Sankey / flow, network, chord), build the closest chart Vega-Lite supports (such as a sorted bar chart of the top combinations) rather than attempting an unsupported diagram.
-${chartTypeHint}
-${
-  existingSpec
-    ? `Existing specification to modify (keep what still applies, change only what the request asks for):
-<existing_specification>
-${existingSpec}
-</existing_specification>
-`
-    : ''
-}
-DATA SOURCE RULES:
-1. Bind the data with Kibana's inline ES|QL source: a top-level "data": { "url": { "%type%": "esql", "query": <the exact query below> } }. Use the query verbatim — do not modify it; the system re-binds and validates it.
-2. The spec is built around this ES|QL query; its result columns are the only fields you may reference in encodings: ${esqlQueryJson}
-3. Reference each column by its exact name as produced by the query. If the query uses the time-picker params (?_tstart / ?_tend), add "%timefield%": "@timestamp" to the url so Kibana binds the time range.
-
-Columns available in the data (reference these EXACT names):
-<columns>
-${formatColumns(columns)}
-</columns>
-
-ENCODING TYPES:
+const VEGA_AUTHORING_RULES = `ENCODING TYPES:
 - Pick the correct "type" for every encoded field: "nominal" (unordered categories), "ordinal" (ordered categories), "quantitative" (continuous numbers), "temporal" (dates/times).
 
 CHART CHOICE:
@@ -113,7 +66,62 @@ FACETING / SMALL MULTIPLES:
 - Only facet a low-cardinality field. If the field can take many values, pre-limit the ES|QL query (e.g. keep the top-N with SORT + LIMIT, or a WHERE filter) so the grid stays readable instead of producing hundreds of tiny cells.
 
 DOTS IN FIELD NAMES:
-- Vega treats an unescaped dot in a field name as nested-object access, but ES|QL columns are flat. For a column whose name contains a dot (e.g. "geo.dest"), backslash-escape every dot in "field" strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']).
+- Vega treats an unescaped dot in a field name as nested-object access, but ES|QL columns are flat. For a column whose name contains a dot (e.g. "geo.dest"), backslash-escape every dot in "field" strings ("geo\\.dest") and use bracket access in expressions (datum['geo.dest']).`;
+
+/** Returns the reusable Vega-Lite spec and ES|QL guidance needed to review a panel. */
+export const getVegaAuthoringGuidance = (): string =>
+  `${VEGA_AUTHORING_INTRODUCTION}\n\n${VEGA_AUTHORING_RULES}\n\n${vegaEsqlAdditionalInstructions}`;
+
+export const createAuthorVegaSpecPrompt = ({
+  nlQuery,
+  esqlQuery,
+  columns,
+  existingSpec,
+  chartType,
+  referenceExamples,
+  additionalContext,
+}: {
+  nlQuery: string;
+  esqlQuery: string;
+  columns?: EsqlEsqlColumnInfo[];
+  existingSpec?: string;
+  chartType?: SupportedChartType;
+  /** Pre-selected, pre-loaded reference-example block (see `reference_examples`). */
+  referenceExamples?: string;
+  additionalContext?: string;
+}): BaseMessageLike[] => {
+  const esqlQueryJson = JSON.stringify(esqlQuery);
+  const chartTypeHint = chartType
+    ? `\nSuggested chart style: "${chartType}". Treat it as a hint for the visual form; adapt if the data or request calls for something else.`
+    : '';
+
+  return [
+    [
+      'system',
+      `You are a Vega-Lite visualization expert. Author a single valid Vega-Lite (v6) specification for the user's request.
+
+${VEGA_AUTHORING_INTRODUCTION}
+${chartTypeHint}
+${
+  existingSpec
+    ? `Existing specification to modify (keep what still applies, change only what the request asks for):
+<existing_specification>
+${existingSpec}
+</existing_specification>
+`
+    : ''
+}
+DATA SOURCE RULES:
+1. Bind the data with Kibana's inline ES|QL source: a top-level "data": { "url": { "%type%": "esql", "query": <the exact query below> } }. Use the query verbatim — do not modify it; the system re-binds and validates it.
+2. The spec is built around this ES|QL query; its result columns are the only fields you may reference in encodings: ${esqlQueryJson}
+3. Reference each column by its exact name as produced by the query. If the query uses the time-picker params (?_tstart / ?_tend), add "%timefield%": "@timestamp" to the url so Kibana binds the time range.
+
+Columns available in the data (reference these EXACT names):
+<columns>
+${formatColumns(columns)}
+</columns>
+
+${VEGA_AUTHORING_RULES}
 ${referenceExamples ?? ''}
 Your task is to author the visualization specification for the following request:
 

@@ -5,17 +5,30 @@
  * 2.0.
  */
 
-import type { DashboardOperation } from './operations';
 import { type DashboardOperationFailureType } from './failure_types';
 
 /**
  * Failure record for tracking panel operation errors.
  */
 export interface PanelFailure {
+  /** Stable recovery id while the inner dashboard agent is handling this terminal failure. */
+  failureId?: string;
+  /** Only terminal visualization-generation failures are tracked beyond the current tool call. */
+  failureKind?: 'visualization_generation';
   type: DashboardOperationFailureType;
   identifier: string;
   error: string;
 }
+
+export type TrackedPanelFailure = PanelFailure & {
+  failureId: string;
+  failureKind: 'visualization_generation';
+};
+
+export const isVisualizationGenerationFailure = (
+  failure: PanelFailure
+): failure is PanelFailure & { failureKind: 'visualization_generation' } =>
+  failure.failureKind === 'visualization_generation';
 
 /**
  * Type-safe extraction of error message from unknown error.
@@ -23,23 +36,3 @@ export interface PanelFailure {
 export const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
 };
-
-const hasNonEmptyValue = (value: string | undefined): value is string =>
-  value !== undefined && value.trim().length > 0;
-
-const hasRequiredCreateTitleOperation = (operations: DashboardOperation[]): boolean =>
-  operations.some(
-    (operation) => operation.operation === 'set_metadata' && hasNonEmptyValue(operation.title)
-  );
-
-const hasBlankTitleUpdate = (operations: DashboardOperation[]): boolean =>
-  operations.some((operation) => {
-    if (operation.operation !== 'set_metadata') {
-      return false;
-    }
-
-    return operation.title !== undefined && !hasNonEmptyValue(operation.title);
-  });
-
-export const hasValidCreateMetadataOperations = (operations: DashboardOperation[]): boolean =>
-  hasRequiredCreateTitleOperation(operations) && !hasBlankTitleUpdate(operations);

@@ -131,6 +131,7 @@ export const resolvePanelCreationRequests = async ({
                 type: request.panelInput.type,
                 operationType: request.operationType,
                 identifier: request.panelInput.query,
+                failureId: request.panelInput.resolvesFailureId,
                 nlQuery: request.panelInput.query,
                 index: request.panelInput.index,
                 chartType: request.panelInput.chartType,

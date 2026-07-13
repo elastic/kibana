@@ -77,6 +77,8 @@ const VegaStateAnnotation = Annotation.Root({
   existingSpec: Annotation<string | undefined>(),
   /** Query recovered from the spec being edited, used as context to (re)generate. */
   existingEsql: Annotation<string | undefined>(),
+  /** Whether a caller-provided query that fails execution may be regenerated. */
+  regenerateInvalidEsql: Annotation<boolean | undefined>(),
   chartType: Annotation<SupportedChartType | undefined>(),
   // internal
   /**
@@ -145,6 +147,19 @@ export const createVegaGraph = async (
         } catch (providedError) {
           const message =
             providedError instanceof Error ? providedError.message : String(providedError);
+          if (state.regenerateInvalidEsql === false) {
+            logger.warn(`Provided ES|QL query failed to execute (${message}); failing as pinned`);
+            return {
+              esqlQuery: state.esqlQuery,
+              actions: [
+                {
+                  type: 'generate_esql',
+                  success: false,
+                  error: `Provided ES|QL query failed to execute: ${message}`,
+                },
+              ],
+            };
+          }
           logger.warn(
             `Provided ES|QL query failed to execute (${message}); regenerating a corrected query`
           );

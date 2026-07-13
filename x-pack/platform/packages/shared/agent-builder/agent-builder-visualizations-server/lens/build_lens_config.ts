@@ -21,6 +21,8 @@ export interface BuildLensConfigParams {
   index?: string;
   chartType?: SupportedChartType;
   esql?: string;
+  /** Whether an invalid caller-provided query may be replaced by generation. Defaults to true. */
+  regenerateInvalidEsql?: boolean;
   existingConfig?: string;
   parsedExistingConfig?: VisualizationConfig | null;
   includeTimeRange?: boolean;
@@ -43,6 +45,7 @@ export const buildLensConfig = async ({
   index,
   chartType,
   esql,
+  regenerateInvalidEsql = true,
   existingConfig,
   parsedExistingConfig = null,
   includeTimeRange = true,
@@ -87,6 +90,9 @@ export const buildLensConfig = async ({
       // Couldn't validate, keep it.
     }
     if (validationError) {
+      if (!regenerateInvalidEsql) {
+        throw new Error(`Provided ES|QL failed validation: ${validationError}`);
+      }
       logger.warn(
         `Provided ES|QL failed validation; regenerating from the natural-language query. Error: ${validationError}`
       );

@@ -38,17 +38,24 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega visualization panels (source: "request", which keep their existing renderer) and markdown panels (source: "config", type: "markdown"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based panels instead.'
+      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega visualization panels (source: "request", which keep their existing renderer) and markdown panels (source: "config", type: "markdown"). By default a Lens edit keeps the panel\'s existing ES|QL query pinned (visual restyling only); set change_data or new_esql to change the data. DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing and should be recreated as new ES|QL-based panels instead.'
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;
 
-    const recordFailure = (panelId: string, error: string): void => {
+    const recordFailure = (panelId: string, error: string, failureId?: string): void => {
       context.failures.push(
-        createPanelFailureResult(DASHBOARD_OPERATION_FAILURE_TYPES.editPanels, panelId, error)
-          .failure
+        createPanelFailureResult(
+          DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+          panelId,
+          error,
+          failureId
+        ).failure
       );
     };
+
+    const getRecoveryFailureId = (panelInput: EditPanelItem): string | undefined =>
+      panelInput.source === 'request' ? panelInput.resolvesFailureId : undefined;
 
     const hasPanelRequestEdits = operation.panels.some(
       (panelInput): panelInput is EditPanelRequestInput => panelInput.source === 'request'
@@ -71,14 +78,19 @@ export const editPanelsOperation = defineOperation({
       if ((occurrences.get(panelInput.panelId) ?? 0) > 1) {
         recordFailure(
           panelInput.panelId,
-          `Panel "${panelInput.panelId}" appears multiple times in this edit_panels operation. Edit each panel at most once per operation.`
+          `Panel "${panelInput.panelId}" appears multiple times in this edit_panels operation. Edit each panel at most once per operation.`,
+          getRecoveryFailureId(panelInput)
         );
         continue;
       }
 
       const existingPanel = panelIndex.get(panelInput.panelId);
       if (!existingPanel) {
-        recordFailure(panelInput.panelId, `Panel "${panelInput.panelId}" not found.`);
+        recordFailure(
+          panelInput.panelId,
+          `Panel "${panelInput.panelId}" not found.`,
+          getRecoveryFailureId(panelInput)
+        );
         continue;
       }
 
@@ -117,10 +129,13 @@ export const editPanelsOperation = defineOperation({
             type: panelInput.type,
             operationType: operation.operation,
             identifier: panelInput.panelId,
+            failureId: panelInput.resolvesFailureId,
             nlQuery: panelInput.query,
+            index: panelInput.index,
             chartType: panelInput.chartType,
-            esql: panelInput.esql,
             renderer: panelInput.renderer,
+            newEsql: panelInput.new_esql,
+            changeData: panelInput.change_data,
             existingPanel,
           })
         )
@@ -169,7 +184,11 @@ export const editPanelsOperation = defineOperation({
       });
 
       if (!updateResult.updated) {
-        recordFailure(panelInput.panelId, `Panel "${panelInput.panelId}" not found.`);
+        recordFailure(
+          panelInput.panelId,
+          `Panel "${panelInput.panelId}" not found.`,
+          panelInput.resolvesFailureId
+        );
         continue;
       }
 

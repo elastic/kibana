@@ -80,7 +80,12 @@ describe('createVegaGraph', () => {
   });
 
   const run = async (
-    input: { esqlQuery?: string; existingSpec?: string; existingEsql?: string } = {}
+    input: {
+      esqlQuery?: string;
+      existingSpec?: string;
+      existingEsql?: string;
+      regenerateInvalidEsql?: boolean;
+    } = {}
   ) => {
     const graph = await createVegaGraph(modelProvider, logger, events, esClient);
     return graph.invoke({
@@ -88,6 +93,7 @@ describe('createVegaGraph', () => {
       index: undefined,
       existingSpec: input.existingSpec,
       existingEsql: input.existingEsql,
+      regenerateInvalidEsql: input.regenerateInvalidEsql,
       esqlQuery: input.esqlQuery ?? '',
       currentAttempt: 0,
       actions: [],
@@ -297,6 +303,19 @@ describe('createVegaGraph', () => {
     expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
     expect(state.error).toBeNull();
     expect(JSON.parse(state.spec!).data.url.query).toBe(GENERATED_ESQL);
+  });
+
+  it('fails instead of regenerating when a provided ES|QL query is pinned', async () => {
+    mockedExecuteEsql.mockRejectedValue(
+      new Error('verification_exception: pinned query no longer executes')
+    );
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL, regenerateInvalidEsql: false });
+
+    expect(mockedGenerateEsql).not.toHaveBeenCalled();
+    expect(invoke).not.toHaveBeenCalled();
+    expect(state.spec).toBeNull();
+    expect(state.error).toContain('pinned query no longer executes');
   });
 
   it('aborts only after both the provided query and regeneration fail to execute', async () => {

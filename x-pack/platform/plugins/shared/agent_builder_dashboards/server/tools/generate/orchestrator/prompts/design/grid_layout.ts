@@ -33,22 +33,21 @@ Prefer \`w\` values that divide 48 evenly: **8, 12, 16, 24, 48**.
 
 **Grid Packing Rules:**
 
-- **Eliminate Dead Space:** Always calculate the bottom edge (\`y + h\`) of every panel. When starting a new row or
-  placing panels below a row, set the new row's \`y\` to **previous row's \`y + max(h)\`** across all panels in that row — do not use only one neighbor's \`y + h\`.
-- **Align Row Heights:** If multiple panels are placed side-by-side in a row (e.g., sharing the same \`y\` coordinate),
-  they should generally have the exact same height (\`h\`). If they do not, you must fill the resulting empty vertical
-  space before placing the next full-width panel.
+- **Compose in full-width horizontal bands.** A band is one row of panels of the same kind that all share the same \`y\` and the same \`h\` (a KPI band of metrics, a trends band of XY charts, a full-width table band). Finish one band, then start the next directly below it.
+- **Eliminate Dead Space between bands:** the next band's \`y\` = previous band's \`y + h\`. Never leave a full-width empty strip between bands.
+- **Keep bands homogeneous.** Never mix panel kinds of different heights in one band — in particular, never place a taller chart beside KPI metrics to fill out their row. The two-column "masonry" look (independent left/right stacks with different heights) is wrong; bands must span the layout horizontally.
+- **Trailing space inside a band is fine.** If a band's panels do not fill all 48 columns, leave the remaining columns empty. Prefer adding one more genuinely useful panel of the same kind (e.g. another KPI metric) when the data supports it — but NEVER stretch panels beyond their recommended width, and NEVER fill the remainder with a different panel kind.
 
 ### Positioning rules
 
-Always set \`x\` and \`y\` so panels tile with **no gaps**:
+Always set \`x\` and \`y\` so bands stack with **no vertical gaps**:
 
-1. **Fill rows left to right.** Start at \`x: 0\`. The next panel's \`x\` = previous panel's \`x + w\`. When a panel would exceed column 48, start a new row.
-2. **New row \`y\`** = previous row's \`y + max(h)\` of all panels in that row.
-3. **Same \`h\` per row** when possible, so rows align cleanly.
+1. **Fill bands left to right.** Start at \`x: 0\`. The next panel's \`x\` = previous panel's \`x + w\`. When a panel would exceed column 48, start a new band.
+2. **New band \`y\`** = previous band's \`y + h\`.
+3. **Same \`h\` for every panel in a band**, so bands align cleanly.
 4. Panels' \`x + w\` must never exceed 48.
-5. **When updating a dashboard**, inspect the existing panels' \`grid\` from the previous tool result. If there is empty space (a gap where a panel was removed, or unused columns beside a tall panel), place the new panel in that gap instead of appending below. Choose \`w\` and \`h\` to fit the available space.
-6. **Markdown panels** use agent-specified \`grid\` like any other panel. Size based on content length (\`w: 24–48, h: 4–9\`). Account for their height when positioning subsequent panels.
+5. **When updating a dashboard**, inspect the existing panels' \`grid\` from the previous tool result. If a removal left a hole in a band, place a new panel of the same kind there instead of appending below. Do not slot an unrelated panel kind into a hole just to fill it.
+6. **Markdown panels** use agent-specified \`grid\` like any other panel. Size based on content length (\`w: 24–48, h: 4–9\`). Account for their height when positioning subsequent bands.
 
 ### Reflow after removals
 
@@ -75,4 +74,15 @@ metric  (x:36, y:0,  w:12, h:5)
 xy-line (x:0,  y:5,  w:24, h:10)
 xy-line (x:24, y:5,  w:24, h:10)
 xy-bar  (x:0,  y:15, w:48, h:10)
+\`\`\`
+
+### Example: only 2 KPI metrics available — leave the band's remainder empty
+
+\`\`\`
+metric  (x:0,  y:0,  w:12, h:5)
+metric  (x:12, y:0,  w:12, h:5)
+(columns 24–48 of the KPI band stay empty — do NOT stretch the metrics and do NOT
+place a chart beside them)
+xy-line (x:0,  y:5,  w:24, h:10)
+xy-line (x:24, y:5,  w:24, h:10)
 \`\`\``;

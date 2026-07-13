@@ -92,6 +92,31 @@ const createAttachment = (
 });
 
 describe('createDashboardAttachmentType', () => {
+  it('uses dashboardAttachmentId in agent guidance and formatted content', async () => {
+    const definition = createDashboardAttachmentType({
+      logger: createLogger(),
+      getDashboardClient: async () => createDashboardClient(),
+    });
+
+    expect(definition.getAgentDescription?.()).toContain('dashboardAttachmentId');
+    expect(definition.getAgentDescription?.()).not.toContain('dashboard_attachment_id');
+
+    const formatted = await definition.format(
+      {
+        id: 'att-1',
+        type: DASHBOARD_ATTACHMENT_TYPE,
+        data: dashboardAttachmentData,
+      },
+      { request: {} as never, spaceId: 'default' }
+    );
+    if (!formatted.getRepresentation) {
+      throw new Error('Expected a formatted dashboard representation.');
+    }
+    const representation = await formatted.getRepresentation();
+
+    expect(representation.value).toContain('dashboardAttachmentId: "att-1"');
+  });
+
   it('resolve should return dashboard attachement', async () => {
     const dashboardClient = createDashboardClient();
     const savedObjectsClient = createSavedObjectsClient();

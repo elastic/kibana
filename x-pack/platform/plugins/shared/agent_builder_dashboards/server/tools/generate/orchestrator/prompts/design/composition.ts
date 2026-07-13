@@ -14,10 +14,10 @@ A well-composed dashboard tells a coherent story about the data:
 2. **Lead with high-level metrics** (Metric or Gauge panels): total counts, averages, key performance indicators that give an at-a-glance summary.
 3. **Follow with time-series trends** (XY line/area panels): how the key metrics change over time.
 4. **Add breakdowns and distributions** (XY bar, Heatmap, Tagcloud panels): top-N rankings, categorical splits, and density views.
-5. **Include as many panels as are valuable for the underlying data and user intent.** Let the richness and diversity of the available fields drive the panel count instead of a fixed numeric target.
-6. **Every panel should serve a clear purpose.** Do not add panels just to fill space, but do not artificially limit the dashboard when more panels would provide genuine insight.
+5. **Prefer a focused dashboard: typically 6–14 panels.** Every panel must serve a clear purpose — pick the panels a user would actually monitor, not one per available field. Only exceed this budget when the user explicitly asks for exhaustive coverage, and never pad the dashboard just because more fields exist.
+6. **Do not add panels just to fill space.** A smaller dashboard that answers the user's question beats a larger one that buries it.
 
-When the user's request is vague (e.g., "create a dashboard for my logs"), explore the discovered index mapping thoroughly and compose a rich dashboard that covers the breadth of the available data — overview metrics, time-series trends, breakdowns, and distributions. Let the fields drive the panel count rather than defaulting to a minimal set.
+When the user's request is vague (e.g., "create a dashboard for my logs"), compose a dashboard that covers the breadth of the available data — overview metrics, time-series trends, breakdowns, and distributions — while staying within the panel budget: choose the most informative field per theme instead of charting every candidate field.
 
 ### When to use sections
 

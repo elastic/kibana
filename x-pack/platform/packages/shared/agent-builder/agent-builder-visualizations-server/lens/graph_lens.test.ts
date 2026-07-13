@@ -145,6 +145,40 @@ describe('createVisualizationGraph', () => {
     );
   });
 
+  it('fails fast when ES|QL generation fails, instead of burning config retries on a doomed validation', async () => {
+    // No query produced: config generation cannot succeed (the prompt bans
+    // emitting data_source and injection is skipped without a query, so every
+    // validation would fail with a misleading data_source.type error).
+    mockedGenerateEsql.mockResolvedValue({
+      error: 'index "logs-*" not found',
+    } as Awaited<ReturnType<typeof generateEsql>>);
+
+    const model = createMockModel();
+    const graph = await createVisualizationGraph(model as never, logger, events, esClient, false);
+
+    const finalState = await graph.invoke({
+      nlQuery: 'total requests',
+      index: 'logs-*',
+      chartType: SupportedChartType.Metric,
+      schema: {},
+      existingConfig: undefined,
+      parsedExistingConfig: null,
+      esqlQuery: '',
+      currentAttempt: 0,
+      actions: [],
+      validatedConfig: null,
+      error: null,
+    });
+
+    expect(finalState.validatedConfig).toBeNull();
+    expect(finalState.error).toContain('ES|QL generation failed');
+    expect(finalState.error).toContain('index "logs-*" not found');
+
+    // The config LLM must never have been invoked.
+    const scopedModel = await model.getDefaultModel();
+    expect(scopedModel.chatModel.invoke).not.toHaveBeenCalled();
+  });
+
   it('injects the validated esql query, overwriting any query emitted by the config LLM', async () => {
     const canonicalQuery = 'TS metrics-* | STATS avg = AVG(cpu) BY host';
     // The config LLM corrupts the query (TS -> FROM) in the data_source it emits.

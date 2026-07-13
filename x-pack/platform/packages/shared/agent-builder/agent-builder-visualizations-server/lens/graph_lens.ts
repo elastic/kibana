@@ -407,9 +407,17 @@ What is the most appropriate time range for this visualization?`,
       .reverse()
       .find((action): action is GenerateTimeRangeAction => action.type === 'generate_time_range');
 
+    // A failed ES|QL generation finalizes without any validate action; surface
+    // its error rather than reporting nothing.
+    const failureError =
+      lastValidateAction?.error ??
+      (lastGenerateEsqlAction && !lastGenerateEsqlAction.success
+        ? `ES|QL generation failed: ${lastGenerateEsqlAction.error ?? 'no query generated'}`
+        : null);
+
     return {
       validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
-      error: lastValidateAction?.success ? null : lastValidateAction?.error || null,
+      error: lastValidateAction?.success ? null : failureError,
       esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
       timeRange: lastTimeRangeAction?.timeRange ?? null,
     };
@@ -456,6 +464,23 @@ What is the most appropriate time range for this visualization?`,
     return GENERATE_ESQL_NODE;
   };
 
+  // Router: config generation is pointless without a query — the prompt bans
+  // the model from emitting `data_source`, the injection that adds it is
+  // skipped for an empty query, and schema validation then fails every
+  // attempt with a misleading `data_source.type` error. Fail fast with the
+  // real ES|QL error instead of burning the config retry budget.
+  const afterGenerateESQLRouter = (state: VisualizationState): string => {
+    const lastGenerateEsqlAction = [...state.actions]
+      .reverse()
+      .find((action): action is GenerateEsqlAction => action.type === 'generate_esql');
+
+    if (!lastGenerateEsqlAction?.success || !lastGenerateEsqlAction.query) {
+      logger.warn('ES|QL generation failed; finalizing without config generation');
+      return 'finalize';
+    }
+    return GENERATE_CONFIG_NODE;
+  };
+
   // Build and compile the graph
   const graph = new StateGraph(VisualizationStateAnnotation)
     // Add nodes
@@ -469,7 +494,10 @@ What is the most appropriate time range for this visualization?`,
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
       [GENERATE_ESQL_NODE]: GENERATE_ESQL_NODE,
     })
-    .addEdge(GENERATE_ESQL_NODE, GENERATE_CONFIG_NODE)
+    .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateESQLRouter, {
+      [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,
+      finalize: 'finalize',
+    })
     .addEdge(GENERATE_CONFIG_NODE, VALIDATE_CONFIG_NODE)
     .addConditionalEdges(VALIDATE_CONFIG_NODE, shouldRetryRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,

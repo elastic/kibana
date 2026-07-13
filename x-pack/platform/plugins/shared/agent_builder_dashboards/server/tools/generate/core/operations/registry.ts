@@ -19,7 +19,7 @@ import type { OperationExecutionContext } from './types';
 import { updatePanelLayoutsOperation } from './update_panel_layouts';
 import { resolvePanelCreationRequests } from './panel_creation';
 
-const operationDefinitions = [
+export const operationDefinitions = [
   setMetadataOperation,
   addPanelsOperation,
   editPanelsOperation,

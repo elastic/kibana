@@ -41,7 +41,7 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
   index?: string;
   /** Preferred chart type; the LLM suggests one when omitted. */
   chartType?: SupportedChartType;
-  /** ES|QL query to back the visualization; generated when omitted. */
+  /** ES|QL query to back the visualization; generated when omitted. Creates only. */
   esql?: string;
   /**
    * Which engine renders the panel. Honored when adding a new panel (defaults to
@@ -49,6 +49,16 @@ export interface VisPanelResolutionRequest extends PanelResolutionRequestBase {
    * renderer.
    */
   renderer?: VisualizationRenderer;
+  /**
+   * Edits only: explicit replacement ES|QL query. Without this (and without
+   * `changeData`) an edit pins the existing panel's query from state.
+   */
+  newEsql?: string;
+  /**
+   * Edits only: the edit intends a data change — regenerate the query from the
+   * natural-language request, seeded with the existing queries.
+   */
+  changeData?: boolean;
 }
 
 const visPanelConfigSchema = z.record(z.string().max(256), z.unknown()).check((ctx) => {
@@ -124,6 +134,13 @@ export const panelRequestSchema = z.object({
     .string()
     .max(2048)
     .describe('A natural language query describing the desired visualization.'),
+  resolvesFailureId: z
+    .string()
+    .max(256)
+    .optional()
+    .describe(
+      'Set only when retrying or replacing a panel after a terminal generation failure. Copy failureId from that failure exactly. A successful panel clears it; another failure updates it with the latest error.'
+    ),
   renderer: z
     .enum(['lens', 'vega'])
     .optional()
@@ -158,15 +175,32 @@ export type PanelRequestInput = z.infer<typeof panelRequestSchema>;
  * The vis variant of an `edit_panels` item: targets an existing Lens panel by id
  * and re-resolves its content from a natural-language query. Derived from the
  * add schema so the request shape stays in sync.
+ *
+ * Data pinning: without `new_esql` or `change_data`, the panel's existing
+ * ES|QL query is pinned from state — the edit can restyle the panel but never
+ * silently changes what data it shows.
  */
 export const editPanelRequestInputSchema = panelRequestSchema
-  .omit({ grid: true, index: true })
+  .omit({ grid: true, esql: true })
   .extend({
     panelId: z.string().max(256).describe('Existing Lens panel id to update.'),
     query: z
       .string()
       .max(2048)
       .describe('A natural language query describing how to update the panel.'),
+    new_esql: z
+      .string()
+      .max(4096)
+      .optional()
+      .describe(
+        "(optional) A validated ES|QL query from a prior tool result or explicit user input, replacing the panel's current query. NEVER write or invent an ES|QL query yourself; to change data from natural language, set change_data instead."
+      ),
+    change_data: z
+      .boolean()
+      .optional()
+      .describe(
+        '(optional) Set true when the edit should change WHAT data the panel shows (different fields, filters, aggregations, or sources). The query is regenerated from your natural-language description, seeded with the existing one. Omit for purely visual edits — the existing query is kept exactly as is.'
+      ),
   });
 
 export type EditPanelRequestInput = z.infer<typeof editPanelRequestInputSchema>;

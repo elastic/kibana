@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export { dashboardOperationSchema, executeDashboardOperations } from './operations';
-
-export { getErrorMessage, hasValidCreateMetadataOperations } from './utils';
+export { getErrorMessage } from './utils';
 
 export { createPanelFailureResult } from './resolve_panel';
 export type { PanelContentAttempt } from './resolve_panel';

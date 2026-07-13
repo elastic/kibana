@@ -27,8 +27,18 @@ describe('registerSkills', () => {
     expect(dashboardManagementSkill.content).toContain('platform.core.sml_attach');
   });
 
-  it('inlines the dashboard design guidance directly in the skill body', () => {
-    expect(dashboardManagementSkill.content).toContain('Dashboard Composition Guidelines');
-    expect(dashboardManagementSkill.content).toContain('Grid Packing Rules');
+  it('teaches the NL-intent contract, not operations or design guidance', () => {
+    expect(dashboardManagementSkill.content).toContain('dashboardAttachmentId');
+    expect(dashboardManagementSkill.content).toContain('additionalContext');
+    expect(dashboardManagementSkill.content).toContain('additionalInstructions');
+    // Design knowledge lives in the inner agent's prompt now.
+    expect(dashboardManagementSkill.content).not.toContain('Dashboard Composition Guidelines');
+    expect(dashboardManagementSkill.content).not.toContain('Grid Packing Rules');
+    // No stale operations-contract vocabulary (the `operations` input field,
+    // stale snake_case params, or per-operation instructions).
+    expect(dashboardManagementSkill.content).not.toContain('`operations`');
+    expect(dashboardManagementSkill.content).not.toContain('dashboard_attachment_id');
+    expect(dashboardManagementSkill.content).not.toContain('set_metadata');
+    expect(dashboardManagementSkill.content).not.toContain('source: "config"');
   });
 });

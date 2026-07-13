@@ -16,13 +16,15 @@ import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import type { PanelContentAttempt } from './resolve_panel';
 import type { ResolvePanelContent } from './operations/panels';
 import {
-  executeDashboardOperations,
   dashboardOperationSchema,
+  executeOperationHandler,
+  prepareOperationExecution,
   type DashboardOperation,
-} from './operations';
+} from './operations/registry';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
+import type { PanelFailure } from './utils';
 
 const createMockLogger = (): Logger =>
   ({
@@ -31,6 +33,47 @@ const createMockLogger = (): Logger =>
     info: jest.fn(),
     warn: jest.fn(),
   } as unknown as Logger);
+
+/**
+ * Test harness driving operations through the live single-op pipeline
+ * (`prepareOperationExecution` + `executeOperationHandler` — the same pieces
+ * each orchestrator tool dispatch runs). Accepts an ordered list so the
+ * handler-semantics tests below can exercise sequences of operations.
+ */
+const executeDashboardOperations = async ({
+  dashboardData,
+  operations,
+  logger,
+  resolvePanelContent,
+}: {
+  dashboardData?: DashboardAttachmentData;
+  operations: DashboardOperation[];
+  logger: Logger;
+  resolvePanelContent?: ResolvePanelContent;
+}): Promise<{ dashboardData: DashboardAttachmentData; failures: PanelFailure[] }> => {
+  let nextDashboardData = structuredClone(
+    dashboardData ?? { title: 'User Dashboard', description: undefined, panels: [] }
+  );
+  const failures: PanelFailure[] = [];
+
+  const context = await prepareOperationExecution({
+    operations,
+    logger,
+    resolvePanelContent,
+    failures,
+  });
+
+  for (const [operationIndex, operation] of operations.entries()) {
+    nextDashboardData = await executeOperationHandler({
+      dashboardData: nextDashboardData,
+      operation,
+      operationIndex,
+      context,
+    });
+  }
+
+  return { dashboardData: nextDashboardData, failures };
+};
 
 const createDeferred = <T>() => {
   let resolve!: (value: T) => void;
@@ -52,7 +95,7 @@ const getSections = (panels: DashboardAttachmentData['panels']): DashboardSectio
 const getPanelsOnly = (panels: DashboardAttachmentData['panels']): AttachmentPanel[] =>
   panels.filter((p): p is AttachmentPanel => !isSection(p));
 
-describe('executeDashboardOperations', () => {
+describe('dashboard operation handlers (single-op pipeline)', () => {
   const logger = createMockLogger();
   const createLensPanel = (id: string, gridY = 0): AttachmentPanel => ({
     type: LENS_EMBEDDABLE_TYPE,
@@ -1212,6 +1255,50 @@ describe('executeDashboardOperations', () => {
           id: 'section-panel-1',
           grid: { x: 0, y: 0, w: 24, h: 9 },
           config: { type: 'line' },
+        })
+      );
+    });
+
+    it('forwards explicit data-change controls and the recovery id to the resolver', async () => {
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
+      >(async () =>
+        createResolvedPanelContent({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
+      );
+
+      await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createLensPanel('panel-1')],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'request',
+                type: 'vis',
+                panelId: 'panel-1',
+                query: 'show errors instead',
+                index: 'logs-*',
+                change_data: true,
+                resolvesFailureId: 'failure-1',
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          identifier: 'panel-1',
+          failureId: 'failure-1',
+          index: 'logs-*',
+          changeData: true,
         })
       );
     });
