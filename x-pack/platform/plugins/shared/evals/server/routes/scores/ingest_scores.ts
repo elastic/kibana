@@ -13,20 +13,13 @@ import {
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 const SCORE_INGEST_PAYLOAD_CAP_BYTES = 5 * 1024 * 1024;
 
-/** Sentinel meaning "all spaces". Assigning to it is gated behind a follow-up (post-hoc re-share). */
-const ALL_SPACES_ID = '*';
-
-/**
- * Resolves which spaces a batch of scores should be stamped with. An explicit
- * `space_ids` (offline / cross-space assignment) wins; otherwise the caller's
- * active space is used. In-tool runs reach this route through the workflow's
- * space-prefixed request, so `activeSpaceId` already reflects the run's space.
- */
+/** Uses explicit score space IDs when provided; otherwise defaults to the active space. */
 export const resolveIngestSpaceIds = (
   explicit: string[] | undefined,
   activeSpaceId: string

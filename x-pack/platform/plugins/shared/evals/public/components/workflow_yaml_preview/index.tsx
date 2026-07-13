@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiCodeBlock, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface WorkflowYamlPreviewProps {
@@ -40,12 +47,18 @@ export const WorkflowYamlPreview: React.FC<WorkflowYamlPreviewProps> = ({
 
   if (isLoading) {
     return (
-      <EuiText size="s" color="subdued">
-        <EuiLoadingSpinner size="s" />
-        {i18n.translate('xpack.evals.workflowYamlPreview.loading', {
-          defaultMessage: 'Generating workflow YAML…',
-        })}
-      </EuiText>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.evals.workflowYamlPreview.loading', {
+              defaultMessage: 'Generating workflow YAML…',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

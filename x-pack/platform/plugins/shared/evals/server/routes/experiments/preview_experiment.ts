@@ -19,12 +19,7 @@ import {
 import { experimentRequestToParams, generateSavedWorkflowYaml } from '../../workflow_generator';
 import type { RouteDependencies } from '../register_routes';
 
-/**
- * Returns the generated workflow YAML for the current form inputs without
- * executing or persisting anything. Powers the "Show YAML" preview and works
- * even when the Workflows plugin is unavailable, since it only stringifies the
- * inferred definition.
- */
+/** Returns inferred workflow YAML without execution, persistence, or the Workflows plugin. */
 export const registerPreviewExperimentRoute = ({ router }: RouteDependencies) => {
   router.versioned
     .post({

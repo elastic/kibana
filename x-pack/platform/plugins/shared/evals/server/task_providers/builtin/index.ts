@@ -10,7 +10,6 @@ import { createInferenceTaskProvider } from './inference';
 import { createAgentBuilderConverseTaskProvider } from './agent_builder_converse';
 import { createAgentBuilderToolTaskProvider } from './agent_builder_tool';
 
-/** Instantiates the providers that ship with the evals plugin. */
 export const createBuiltInTaskProviders = (): EvalsTaskProvider[] => [
   createInferenceTaskProvider(),
   createAgentBuilderConverseTaskProvider(),

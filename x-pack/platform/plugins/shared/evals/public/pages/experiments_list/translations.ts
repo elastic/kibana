@@ -78,10 +78,10 @@ export const NEW_EXPERIMENT_BUTTON = i18n.translate(
   }
 );
 
-export const VIEW_SAVED_WORKFLOWS_BUTTON = i18n.translate(
-  'xpack.evals.experimentsList.viewSavedWorkflowsButton',
+export const VIEW_EXPERIMENT_WORKFLOWS_BUTTON = i18n.translate(
+  'xpack.evals.experimentsList.viewExperimentWorkflowsButton',
   {
-    defaultMessage: 'View saved workflows',
+    defaultMessage: 'View experiment workflows',
   }
 );
 

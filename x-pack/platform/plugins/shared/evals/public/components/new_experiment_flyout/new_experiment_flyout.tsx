@@ -647,7 +647,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
               <EuiFormRow
                 key={evaluator.name}
                 label={i18n.translate('xpack.evals.newExperiment.judgeForLabel', {
-                  defaultMessage: '{name} — judge connector',
+                  defaultMessage: '{name} evaluator - judge connector',
                   values: { name: evaluator.name },
                 })}
                 fullWidth
@@ -676,7 +676,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
           <EuiSpacer size="m" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow label={newExperimentStrings.repetitionsLabel}>
+              <EuiFormRow label={newExperimentStrings.repetitionsLabel} fullWidth>
                 <EuiFieldNumber
                   min={1}
                   value={repetitions ?? ''}
@@ -684,11 +684,12 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
                     setRepetitions(e.target.value ? Number(e.target.value) : undefined)
                   }
                   data-test-subj="evalsRepetitions"
+                  fullWidth
                 />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormRow label={newExperimentStrings.concurrencyLabel}>
+              <EuiFormRow label={newExperimentStrings.concurrencyLabel} fullWidth>
                 <EuiFieldNumber
                   min={1}
                   value={concurrency ?? ''}
@@ -696,6 +697,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
                     setConcurrency(e.target.value ? Number(e.target.value) : undefined)
                   }
                   data-test-subj="evalsConcurrency"
+                  fullWidth
                 />
               </EuiFormRow>
             </EuiFlexItem>

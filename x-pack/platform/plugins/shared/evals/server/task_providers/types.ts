@@ -29,10 +29,7 @@ export const BUILT_IN_TASK_PROVIDERS = {
 export type BuiltInTaskProviderName =
   (typeof BUILT_IN_TASK_PROVIDERS)[keyof typeof BUILT_IN_TASK_PROVIDERS];
 
-/**
- * A workflow-agnostic view of the workflow engine's `callKibanaApi`. Kept local
- * so task providers do not have to depend on `@kbn/workflows-extensions`.
- */
+/** Minimal API-calling interface exposed to task providers. */
 export type EvalsCallKibanaApi = <T = unknown>(params: {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   path: string;
@@ -47,25 +44,17 @@ export type EvalsCallKibanaApi = <T = unknown>(params: {
  * the feature under evaluation and correlate the resulting trace.
  */
 export interface EvalsTaskContext {
-  /** The example input (a single dataset row's `input`). */
   input: Record<string, unknown>;
-  /** The connector id of the model under evaluation. */
   connectorId: string;
-  /** Agent Builder agent id (for `agentBuilder.converse`). */
   agentId?: string;
-  /** Agent Builder tool id (for `agentBuilder.tool`). */
   toolId?: string;
-  /** Free-form provider parameters supplied by the step/route. */
   params?: Record<string, unknown>;
   logger: EvalsStepLogger;
   abortSignal: AbortSignal;
-  /** Returns an inference client bound to the given connector id. */
   getInferenceClient: (connectorId: string) => Promise<BoundInferenceClient>;
-  /** Calls an internal or public Kibana API using the caller's credentials. */
   callKibanaApi: EvalsCallKibanaApi;
 }
 
-/** The outcome of a task execution: an output payload and the correlating trace id. */
 export type EvalsTaskResult = TaskResult;
 
 /**
@@ -74,9 +63,7 @@ export type EvalsTaskResult = TaskResult;
  * or a suite-specific function registered by another plugin.
  */
 export interface EvalsTaskProvider {
-  /** Unique provider id, e.g. `inference` or a suite-owned id like `sigEvents.identify`. */
   name: string;
-  /** Optional human-readable description surfaced in the UI/registry listing. */
   description?: string;
   run: (ctx: EvalsTaskContext) => Promise<EvalsTaskResult>;
 }

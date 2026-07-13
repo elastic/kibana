@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// Jest hoists `jest.mock` above declarations, so any variable the factory closes
-// over must be `mock`-prefixed to be allowlisted by the babel-jest transform.
 const mockTraceId = 'a'.repeat(32);
 
 jest.mock('../tracing', () => ({

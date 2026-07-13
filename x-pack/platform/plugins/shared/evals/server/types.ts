@@ -33,9 +33,7 @@ export interface EvaluatorSummary {
   version: string;
   kind: 'llm' | 'code';
   description: string;
-  /** `llm` evaluators require a judge connector id to be supplied at run time. */
   needsJudgeConnector: boolean;
-  /** Whether the evaluator produces meaningful scores for a bare tool trace. */
   supportsBareToolTrace: boolean;
 }
 
@@ -45,27 +43,19 @@ export interface EvalsPluginStart {
   listEvaluators?: () => EvaluatorSummary[];
 }
 
-/**
- * The (optional) workflows-management setup contract, narrowed to what the evals
- * experiment-execution routes actually use. Evals references the workflows
- * management plugin directly to launch and track workflow-based experiment runs.
- */
 export type EvalsWorkflowsManagementSetup = Pick<WorkflowsServerPluginSetup, 'management'>;
 
 export interface EvalsSetupDependencies {
   features: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   inference: InferenceServerSetup;
-  /** Optional: workflow step registration. Absent when Workflows is disabled/unlicensed. */
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
-  /** Optional: launching and tracking workflow executions from evals routes. */
   workflowsManagement?: EvalsWorkflowsManagementSetup;
 }
 
 export interface EvalsStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   inference: InferenceServerStart;
-  /** Optional: resolves the active space id for experiment-execution routes. */
   spaces?: SpacesPluginStart;
   workflowsManagement?: EvalsWorkflowsManagementSetup;
 }

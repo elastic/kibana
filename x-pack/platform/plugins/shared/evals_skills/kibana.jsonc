@@ -8,6 +8,7 @@
     "id": "evalsSkills",
     "server": true,
     "browser": false,
-    "requiredPlugins": ["agentBuilder", "workflowsManagement", "evals"]
+    "requiredPlugins": ["agentBuilder", "workflowsManagement", "evals"],
+    "optionalPlugins": ["spaces"]
   }
 }

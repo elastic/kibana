@@ -51,12 +51,7 @@ export interface RouteDependencies {
   getInferenceStart: () => Promise<InferenceServerStart>;
   getEncryptedSavedObjectsStart: () => Promise<EncryptedSavedObjectsPluginStart>;
   getInternalRemoteConfigsSoClient: () => Promise<SavedObjectsClientContract>;
-  /**
-   * Resolves the active space for a request. Always supplied by the plugin; typed
-   * optional so existing route unit tests can pass partial dependencies.
-   */
   getSpaceId?: (request: KibanaRequest) => Promise<string>;
-  /** Present only when the Workflows plugins are enabled; gates the experiment-execution routes. */
   taskProviderRegistry?: TaskProviderRegistry;
   workflowsManagement?: EvalsWorkflowsManagementSetup;
 }

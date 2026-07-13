@@ -12,6 +12,7 @@ import {
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   runExperimentRequestSchema,
@@ -20,15 +21,7 @@ import {
 import { experimentRequestToParams, generateSavedWorkflowYaml } from '../../workflow_generator';
 import type { RouteDependencies } from '../register_routes';
 
-/** Wildcard sentinel for "all spaces"; deferred to a later phase (see ingest route). */
-const ALL_SPACES_ID = '*';
-
-/**
- * Persists an experiment as a re-runnable, version-controllable workflow
- * ("Save as workflow"). Unlike "Run now", ids are minted fresh on every run so
- * that each (possibly scheduled) execution forms a distinct, comparable
- * experiment.
- */
+/** Saves a reusable experiment workflow that generates fresh IDs for each execution. */
 export const registerSaveExperimentWorkflowRoute = ({
   router,
   logger,

@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { TaskProviderRegistry } from '../task_providers/types';
 
-/** Services captured by the step factory and shared by every evals workflow step. */
 export interface EvalStepDeps {
   logger: Logger;
   taskProviderRegistry: TaskProviderRegistry;

@@ -8,6 +8,7 @@
 import { API_VERSIONS, EVALS_EXPERIMENTS_RUN_URL, INTERNAL_API_ACCESS } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   runExperimentRequestSchema,
@@ -16,17 +17,7 @@ import {
 import { experimentRequestToParams, generateExperimentRun } from '../../workflow_generator';
 import type { RouteDependencies } from '../register_routes';
 
-/** Wildcard sentinel for "all spaces"; deferred to a later phase (see ingest route). */
-const ALL_SPACES_ID = '*';
-
-/**
- * Launches an experiment as one or more workflow executions ("Run now").
- *
- * The route generates self-contained workflow YAML from the form (inferring the
- * fan-out topology) and starts each execution via the workflows management API
- * without waiting for completion. Progress is polled separately from the
- * resulting workflow execution ids.
- */
+/** Launches inferred experiment workflows and returns execution IDs for polling. */
 export const registerRunExperimentRoute = ({
   router,
   logger,

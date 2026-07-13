@@ -115,14 +115,7 @@ export const runTask = async (
 
 /** The graded scores plus any evaluator-level failures returned by `/_evaluate`. */
 export interface EvaluateTraceResult {
-  /** Scores from evaluators that returned `status: 'ok'` — these get ingested. */
   results: EvaluatorResult[];
-  /**
-   * Human-readable messages for evaluators that returned `status: 'error'`. These are
-   * partial failures: the trace was graded and the successful scores are still ingested,
-   * but individual evaluators (e.g. a misconfigured LLM judge) failed. Surfaced so a
-   * "completed" run does not silently hide a broken evaluator.
-   */
   errors: string[];
 }
 
@@ -133,11 +126,6 @@ export const evaluateTrace = async (
     traceId: string;
     referenceData?: Record<string, unknown>;
     evaluators: EvaluatorConfig[];
-    /**
-     * Optional evidence mapping profile. Set for targets whose traces are not a
-     * conversation (e.g. bare `agentBuilder.tool` runs) so evaluators know how to
-     * reconstruct evidence. Omitted for the server default (conversation) mapping.
-     */
     evidenceMapping?: { profile: string };
   }
 ): Promise<EvaluateTraceResult> => {
@@ -198,7 +186,7 @@ export const ingestScores = async (
     path: EVALS_SCORES_URL,
     headers: INTERNAL_API_HEADERS,
     // The internal ingest call is not space-prefixed, so stamp the workflow's space
-    // explicitly; otherwise the ingest route would resolve it to the default space.
+    // explicitly. Otherwise the ingest route would resolve it to the default space.
     body: { ...body, space_ids: body.space_ids ?? [runtime.spaceId] },
   });
   return response;
@@ -354,7 +342,6 @@ export interface EvaluateExampleParams {
   evaluators: EvaluatorConfig[];
   referenceData?: Record<string, unknown>;
   repetitions: number;
-  /** Spaces to assign the scores to; falls back to the workflow space at ingest. */
   spaceIds?: string[];
 }
 
@@ -362,11 +349,9 @@ export interface EvaluateExampleResult {
   scoresIngested: number;
   failed: number;
   repetitions: number;
-  /** Human-readable failure messages captured for the failed repetitions (for surfacing in the UI). */
   errors: string[];
 }
 
-/** Upper bound on a single captured failure message; keeps run-progress payloads small. */
 const MAX_ERROR_MESSAGE_LENGTH = 500;
 
 const toErrorMessage = (error: unknown): string => {
@@ -374,7 +359,7 @@ const toErrorMessage = (error: unknown): string => {
   if (error instanceof KibanaApiCallError) {
     // `callKibanaApi` wraps non-2xx responses as `HTTP <status>: <json body>`. For the
     // run-progress UI, surface the clean server-provided message (`body.message`) instead
-    // of the raw HTTP envelope; fall back to the wrapped message if the body has none.
+    // of the raw HTTP envelope. Fall back to the wrapped message if the body has none.
     const body = error.body as { message?: unknown } | undefined;
     message =
       typeof body?.message === 'string' && body.message.trim() ? body.message : error.message;
@@ -500,9 +485,7 @@ export interface BatchEvaluationResult {
   completed: number;
   failed: number;
   scoresIngested: number;
-  /** Failure messages collected from the examples that failed in this batch. */
   errors: string[];
-  /** True when the batch stopped early because the run was cancelled. */
   cancelled?: boolean;
 }
 

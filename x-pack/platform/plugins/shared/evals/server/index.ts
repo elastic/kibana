@@ -16,16 +16,12 @@ import type {
 
 export type { EvalsPluginSetup, EvalsPluginStart, EvaluatorSummary } from './types';
 
-/**
- * Deterministic workflow-YAML generators shared with dependent plugins (e.g. the
- * evals Agent Builder skill) so experiment authoring always produces valid,
- * route-equivalent YAML instead of hand-crafted definitions.
- */
 export {
   generateExperimentRun,
   generateSavedWorkflowYaml,
   experimentRequestToParams,
 } from './workflow_generator';
+
 export type {
   GenerateExperimentParams,
   GeneratedExperimentRun,

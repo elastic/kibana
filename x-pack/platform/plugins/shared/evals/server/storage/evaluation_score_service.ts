@@ -108,10 +108,6 @@ export class EvaluationScoreService {
     return client.search(request);
   }
 
-  /**
-   * Writes a batch of scores. `spaceIds` is the resolved set of spaces the scores
-   * belong to (stamped on every document so reads can filter by the active space).
-   */
   async write(request: IngestScoresRequestBody, spaceIds: string[]): Promise<WriteResult> {
     if (request.scores.length === 0) {
       return { ingested: 0, conflicted: 0, failed: [] };

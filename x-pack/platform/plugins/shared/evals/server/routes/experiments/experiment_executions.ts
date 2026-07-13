@@ -28,7 +28,7 @@ const WORKFLOWS_UNAVAILABLE = {
   statusCode: 501 as const,
   body: {
     message:
-      'The Workflows plugin is not available; experiment execution is disabled in this deployment.',
+      'The Workflows plugin is not available. Experiment execution is disabled in this deployment.',
   },
 };
 
@@ -46,15 +46,8 @@ const asStringArray = (value: unknown): string[] | undefined =>
     : undefined;
 
 /**
- * Extracts compact progress counters for an `evals.evaluateDataset` step.
- *
- * A completed step carries the authoritative totals on its `output`
- * (`example_count`, `completed`, `failed`, `scores_ingested`). While it is still
- * polling, live counters live in the durable poll state under
- * `state.__durableStepState.customState` (with `work[]` giving the total). We
- * prefer `output` and fall back to the live state, so both finished and in-flight
- * runs report accurate numbers (the raw `state` counters are a pre-batch snapshot
- * and understate the final result).
+ * Extracts dataset progress, preferring final output over live durable state.
+ * Raw state counters are pre-batch snapshots and may be stale.
  */
 export const extractProgress = (
   step: Pick<WorkflowStepExecutionDto, 'output' | 'state'>

@@ -376,9 +376,9 @@ export const ExperimentsListPage: React.FC = () => {
               iconType="popout"
               size="m"
               href={savedWorkflowsHref}
-              data-test-subj="evalsViewSavedWorkflowsButton"
+              data-test-subj="evalsViewExperimentWorkflowsButton"
             >
-              {i18n.VIEW_SAVED_WORKFLOWS_BUTTON}
+              {i18n.VIEW_EXPERIMENT_WORKFLOWS_BUTTON}
             </EuiButton>
           </EuiFlexItem>
         )}

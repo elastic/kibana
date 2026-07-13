@@ -31,16 +31,7 @@ const extractPrompt = (
   return JSON.stringify(input);
 };
 
-/**
- * Built-in provider that evaluates a connector's model directly via a single
- * chat completion. This is the "no agent, no tool" path.
- *
- * The call runs inside an active task span so the inference client's emitted
- * gen_ai spans are exported under a correlatable trace id, which the returned
- * `traceId` points at. Trace-based evaluators (tokens, latency, tool calls)
- * require this — without it every direct-model example fails for lack of a
- * trace to grade.
- */
+/** Evaluates a model with one traced chat completion for trace-based scoring. */
 export const createInferenceTaskProvider = (): EvalsTaskProvider => ({
   name: BUILT_IN_TASK_PROVIDERS.inference,
   description: 'Directly evaluate a connector model with a single chat completion.',

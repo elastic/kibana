@@ -166,7 +166,7 @@ export class EvalsPlugin
       });
     } else {
       this.logger.debug(
-        'workflowsExtensions plugin is not available; evals workflow steps were not registered'
+        'workflowsExtensions plugin is not available. Evals workflow steps were not registered'
       );
     }
 

@@ -42,12 +42,10 @@ export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>> {
   referenceDataSchema?: z.ZodType<ReferenceData>;
   evidenceSchema?: z.ZodType;
   /**
-   * Declares that this evaluator produces meaningful scores for a *bare tool*
-   * trace (an `agentBuilder.tool` run: a single `execute_tool` span with no
-   * surrounding conversation). Defaults to `true`. Set `false` for evaluators
-   * that only make sense for a full conversation (e.g. groundedness, which grades
-   * an answer against the tool calls that produced it). Consumed by the
-   * experiment UI to hide non-applicable evaluators for the tool target.
+   * Whether this evaluator is meaningful for a bare `agentBuilder.tool` trace
+   * (single tool span, no conversation). Default `true`. Set `false` for
+   * conversation-only evaluators like groundedness. The UI uses it to hide
+   * non-applicable evaluators for the tool target.
    */
   supportsBareToolTrace?: boolean;
   evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;

@@ -17,16 +17,7 @@ interface ExecuteToolApiResponse {
   trace_id?: string;
 }
 
-/**
- * Built-in provider that evaluates an Agent Builder tool/skill directly through
- * the public `tools/_execute` API. The example `input` is passed through as the
- * tool parameters (a suite may also override them via `params.tool_params`).
- *
- * The route returns the active `trace_id` (when tracing is enabled) so the run
- * can be graded against its exported trace. Note that a bare tool execution has
- * no LLM/gen_ai spans, so token/cost evaluators will find nothing to score — use
- * the `agentBuilder.converse` provider when the example needs full agent tracing.
- */
+/** Evaluates an Agent Builder tool directly; use `agentBuilder.converse` for LLM tracing. */
 export const createAgentBuilderToolTaskProvider = (): EvalsTaskProvider => ({
   name: BUILT_IN_TASK_PROVIDERS.agentBuilderTool,
   description: 'Evaluate an Agent Builder tool/skill via the tools/_execute API.',

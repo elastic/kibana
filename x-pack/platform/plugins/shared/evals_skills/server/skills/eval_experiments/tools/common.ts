@@ -12,9 +12,7 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import { APP_PATH } from '@kbn/evals-plugin/common';
 import type { GenerateExperimentParams, GeneratedExperimentRun } from '@kbn/evals-plugin/server';
-
-/** Wildcard sentinel for "all spaces"; explicit space ids are required for now. */
-const ALL_SPACES_ID = '*';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 export const EVALS_TOOLS_NAMESPACE = 'platform.evals';
 
@@ -56,7 +54,7 @@ export const evaluatorInputSchema = z.object({
 
 /**
  * The shared "experiment configuration" accepted by the preview/save/run tools.
- * Mirrors the evals "new experiment" form; the workflow topology (single,
+ * Mirrors the evals "new experiment" form. The workflow topology (single,
  * dataset fan-out, or cross-model) is inferred by the generator from these inputs.
  */
 export const evalExperimentConfigSchema = z.object({

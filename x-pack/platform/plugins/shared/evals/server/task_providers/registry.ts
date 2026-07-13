@@ -8,12 +8,7 @@
 import type { EvalsTaskProvider, TaskProviderRegistry } from './types';
 import { createBuiltInTaskProviders } from './builtin';
 
-/**
- * Creates the in-memory task provider registry and seeds it with the built-in
- * providers (`inference`, `agentBuilder.converse`, `agentBuilder.tool`). Other
- * plugins register their real suite task functions via the plugin setup contract
- * (`registerTaskProvider`).
- */
+/** Creates a registry seeded with the built-in task providers. */
 export const createTaskProviderRegistry = (): TaskProviderRegistry => {
   const providers = new Map<string, EvalsTaskProvider>();
 

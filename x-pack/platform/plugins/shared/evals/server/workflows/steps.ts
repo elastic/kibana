@@ -85,14 +85,8 @@ const evaluateDatasetStateSchema = z.object({
   evaluator_model: resolvedModelSchema,
 });
 
-/** Cap on failure messages retained across poll cycles; keeps state/output bounded. */
 const MAX_DATASET_STEP_ERRORS = 20;
 
-/**
- * Creates the eight evals workflow step definitions. A factory is used so the
- * handlers can close over plugin services (inference, task provider registry)
- * that are not available on the workflow step context.
- */
 export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition[] => {
   const makeRuntime = (context: StepHandlerContext): StepRuntime => ({
     logger: context.logger,
@@ -389,11 +383,6 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     ...startExperimentCommonDefinition,
     handler: async (context) => {
       const { input } = context;
-      // Mint a fresh execution id per experiment when one is not inlined (saved /
-      // scheduled workflows). Falling back to the workflow execution id would make
-      // every model in a sequential cross-model workflow share one execution id and
-      // collapse into a single list row; a fresh id gives each model its own row,
-      // symmetric with `experiment_id`. "Run now" always inlines `execution_id`.
       const executionId = input.execution_id ?? randomUUID();
       const experimentId = input.experiment_id ?? randomUUID();
       return { output: { experiment_id: experimentId, execution_id: executionId } };

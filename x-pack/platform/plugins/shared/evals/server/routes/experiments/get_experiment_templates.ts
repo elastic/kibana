@@ -18,7 +18,6 @@ import type {
 import { BUILT_IN_TASK_PROVIDERS } from '../../task_providers/types';
 import type { RouteDependencies } from '../register_routes';
 
-/** Starter templates that map to the built-in task providers. */
 const STARTER_TEMPLATES: ExperimentTemplate[] = [
   {
     id: BUILT_IN_TASK_PROVIDERS.inference,

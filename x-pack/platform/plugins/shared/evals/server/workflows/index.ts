@@ -13,9 +13,7 @@ export type { EvalStepDeps } from './types';
 export { createEvalsServerSteps } from './steps';
 
 /**
- * Registers all eight evals workflow steps with the Workflows engine. Called from
- * the evals plugin `setup()` only when the (optional) `workflowsExtensions` plugin
- * is present.
+ * Registers all evals workflow steps with the Workflows engine.
  */
 export const registerEvalsWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,

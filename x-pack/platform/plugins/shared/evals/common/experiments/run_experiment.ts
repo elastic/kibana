@@ -15,7 +15,6 @@ export const experimentEvaluatorSchema = z.object({
 
 export type ExperimentEvaluator = z.infer<typeof experimentEvaluatorSchema>;
 
-/** Workflow topology is inferred server-side from the experiment inputs. */
 export const runExperimentRequestSchema = z.object({
   name: z.string().optional(),
   connector_ids: z.array(z.string()).min(1),
