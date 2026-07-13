@@ -2202,7 +2202,7 @@
     "react-element-to-jsx-string": "15.0.0",
     "react-refresh": "0.18.0",
     "react-test-renderer": "18.2.0",
-    "recast": "0.23.11",
+    "recast": "0.23.12",
     "regenerate": "1.4.2",
     "resolve": "1.22.8",
     "resolve.exports": "2.0.3",
