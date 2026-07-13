@@ -1,0 +1,1055 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "aefe2b6ade40cc7-c3855fcb3d8742d",
+      "title": "spaces access control - #bulk_create should create write-restricted objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_create.spec.ts",
+        "line": 44,
+        "column": 10
+      }
+    },
+    {
+      "id": "aefe2b6ade40cc7-463e643841de7af",
+      "title": "spaces access control - #bulk_create allows owner to overwrite objects they own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_create.spec.ts",
+        "line": 66,
+        "column": 10
+      }
+    },
+    {
+      "id": "aefe2b6ade40cc7-ce029d31f6b6689",
+      "title": "spaces access control - #bulk_create allows non-owner to overwrite objects in default mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_create.spec.ts",
+        "line": 97,
+        "column": 10
+      }
+    },
+    {
+      "id": "aefe2b6ade40cc7-2451950d4fc06ea",
+      "title": "spaces access control - #bulk_create allows admin to overwrite objects they do not own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_create.spec.ts",
+        "line": 131,
+        "column": 10
+      }
+    },
+    {
+      "id": "aefe2b6ade40cc7-e667b859b49dbf7",
+      "title": "spaces access control - #bulk_create rejects when overwriting and all objects are write-restricted and inaccessible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_create.spec.ts",
+        "line": 163,
+        "column": 10
+      }
+    },
+    {
+      "id": "aefe2b6ade40cc7-ca354de05466a85",
+      "title": "spaces access control - #bulk_create returns status when overwriting and all objects are write-restricted but some are owned by current user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_create.spec.ts",
+        "line": 213,
+        "column": 10
+      }
+    },
+    {
+      "id": "aefe2b6ade40cc7-e89cff9e9179233",
+      "title": "spaces access control - #bulk_create returns status when overwriting and some objects are in default mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_create.spec.ts",
+        "line": 261,
+        "column": 10
+      }
+    },
+    {
+      "id": "aefe2b6ade40cc7-f32364d267321c1",
+      "title": "spaces access control - #bulk_create returns status when overwriting and some authorized types do not support access control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_create.spec.ts",
+        "line": 307,
+        "column": 10
+      }
+    },
+    {
+      "id": "aefe2b6ade40cc7-34bb8b9c523b302",
+      "title": "spaces access control - #bulk_create rejects when overwriting by owner if RBAC privileges are revoked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_create.spec.ts",
+        "line": 354,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7b939362e44446-e51d1766baa59d2",
+      "title": "spaces access control - #bulk_delete allows owner to bulk delete objects in write-restricted mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_delete.spec.ts",
+        "line": 54,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7b939362e44446-6339d68082776d4",
+      "title": "spaces access control - #bulk_delete allows non-owner to bulk delete objects in default mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_delete.spec.ts",
+        "line": 84,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7b939362e44446-1e66fdd7f5ca43b",
+      "title": "spaces access control - #bulk_delete allows admin to bulk delete objects they do not own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_delete.spec.ts",
+        "line": 121,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7b939362e44446-940ce6819d69121",
+      "title": "spaces access control - #bulk_delete rejects if all objects are write-restricted and inaccessible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_delete.spec.ts",
+        "line": 152,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7b939362e44446-556524ffc91d185",
+      "title": "spaces access control - #bulk_delete returns status if all objects are write-restricted but some objects are owned by the current user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_delete.spec.ts",
+        "line": 195,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7b939362e44446-0a2539d0c3c7a21",
+      "title": "spaces access control - #bulk_delete returns status if some objects are in default mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_delete.spec.ts",
+        "line": 244,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7b939362e44446-6122a23993aa72f",
+      "title": "spaces access control - #bulk_delete returns status if some authorized types do not support access control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_delete.spec.ts",
+        "line": 296,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7b939362e44446-425a4458c5ced56",
+      "title": "spaces access control - #bulk_delete rejects if owner no longer has adequate RBAC privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_delete.spec.ts",
+        "line": 349,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7b939362e44446-65095ce732ed632",
+      "title": "spaces access control - #bulk_delete allow owner to force bulk delete objects marked as write-restricted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_delete.spec.ts",
+        "line": 396,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7b939362e44446-c1dd037fa9b8cef",
+      "title": "spaces access control - #bulk_delete allow admin to force bulk delete objects marked as write-restricted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_delete.spec.ts",
+        "line": 429,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7b939362e44446-c361e0fdb08e6cb",
+      "title": "spaces access control - #bulk_delete does not allow non-owner to force bulk delete objects marked as write-restricted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_delete.spec.ts",
+        "line": 463,
+        "column": 10
+      }
+    },
+    {
+      "id": "385e51c2463f48c-0c85dd77299f342",
+      "title": "spaces access control - #bulk_update allows owner to bulk update objects marked as write restricted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_update.spec.ts",
+        "line": 42,
+        "column": 10
+      }
+    },
+    {
+      "id": "385e51c2463f48c-d70b651626da4f6",
+      "title": "spaces access control - #bulk_update allows admin to bulk update objects marked as write restricted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_update.spec.ts",
+        "line": 77,
+        "column": 10
+      }
+    },
+    {
+      "id": "385e51c2463f48c-1c2b716364ad148",
+      "title": "spaces access control - #bulk_update allows non-owner non-admin to bulk update objects in default mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_update.spec.ts",
+        "line": 113,
+        "column": 10
+      }
+    },
+    {
+      "id": "385e51c2463f48c-5b2c865d6b8712a",
+      "title": "spaces access control - #bulk_update rejects if all objects are write-restricted and inaccessible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_update.spec.ts",
+        "line": 153,
+        "column": 10
+      }
+    },
+    {
+      "id": "385e51c2463f48c-ba071adb06fb886",
+      "title": "spaces access control - #bulk_update returns status if all objects are write-restricted but some are owned by the current user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_update.spec.ts",
+        "line": 200,
+        "column": 10
+      }
+    },
+    {
+      "id": "385e51c2463f48c-7420830d90b4836",
+      "title": "spaces access control - #bulk_update returns status if some objects are in default mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_update.spec.ts",
+        "line": 247,
+        "column": 10
+      }
+    },
+    {
+      "id": "385e51c2463f48c-53c8b408f2f870f",
+      "title": "spaces access control - #bulk_update returns status if some authorized types do not support access control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_update.spec.ts",
+        "line": 295,
+        "column": 10
+      }
+    },
+    {
+      "id": "385e51c2463f48c-12070f81b172fc4",
+      "title": "spaces access control - #bulk_update rejects if owner no longer has adequate RBAC privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/bulk_update.spec.ts",
+        "line": 342,
+        "column": 10
+      }
+    },
+    {
+      "id": "cf5efbc6514c89e-2edefb32fa794f4",
+      "title": "spaces access control - #change_access_mode should allow admins to change access mode of any object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_access_mode.spec.ts",
+        "line": 38,
+        "column": 10
+      }
+    },
+    {
+      "id": "cf5efbc6514c89e-3d70129e4557b51",
+      "title": "spaces access control - #change_access_mode allow owner to update object data after access mode change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_access_mode.spec.ts",
+        "line": 72,
+        "column": 10
+      }
+    },
+    {
+      "id": "cf5efbc6514c89e-67a94360ed85fd0",
+      "title": "spaces access control - #change_access_mode should throw when trying to change access mode on write restricted objects when not owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_access_mode.spec.ts",
+        "line": 114,
+        "column": 10
+      }
+    },
+    {
+      "id": "cf5efbc6514c89e-be5da6af30e5bbf",
+      "title": "spaces access control - #change_access_mode allows updates by non-owner after removing write-restricted access mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_access_mode.spec.ts",
+        "line": 152,
+        "column": 10
+      }
+    },
+    {
+      "id": "cf5efbc6514c89e-f0808f9b4ce2915",
+      "title": "spaces access control - #change_access_mode sets the current user as the owner when setting the mode of an object without access control metadata",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_access_mode.spec.ts",
+        "line": 193,
+        "column": 10
+      }
+    },
+    {
+      "id": "cf5efbc6514c89e-4daad2912b02a92",
+      "title": "spaces access control - #change_access_mode should throw when trying to change access mode if owner RBAC privileges are revoked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_access_mode.spec.ts",
+        "line": 231,
+        "column": 10
+      }
+    },
+    {
+      "id": "cf5efbc6514c89e-e6d016deeea0393",
+      "title": "spaces access control - #change_access_mode partial bulk change access mode of allowed objects and reports unsupported types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_access_mode.spec.ts",
+        "line": 284,
+        "column": 10
+      }
+    },
+    {
+      "id": "80cebea03e9ac92-96b1fda49b95dd4",
+      "title": "spaces access control - #change_ownership should transfer ownership of write-restricted objects by owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_ownership.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "80cebea03e9ac92-0373ecfe64b30d2",
+      "title": "spaces access control - #change_ownership should throw when transferring ownership of object owned by a different user and not admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_ownership.spec.ts",
+        "line": 74,
+        "column": 10
+      }
+    },
+    {
+      "id": "80cebea03e9ac92-43d78139aa444ab",
+      "title": "spaces access control - #change_ownership should allow admins to transfer ownership of any object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_ownership.spec.ts",
+        "line": 108,
+        "column": 10
+      }
+    },
+    {
+      "id": "80cebea03e9ac92-7f129ec0fdd5dc2",
+      "title": "spaces access control - #change_ownership should allow bulk transfer ownership of allowed objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_ownership.spec.ts",
+        "line": 143,
+        "column": 10
+      }
+    },
+    {
+      "id": "80cebea03e9ac92-4c5c9d854cdbdd9",
+      "title": "spaces access control - #change_ownership sets the default mode when setting the ownership of an object without access control metadata",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_ownership.spec.ts",
+        "line": 194,
+        "column": 10
+      }
+    },
+    {
+      "id": "80cebea03e9ac92-6672072a2b5ac7c",
+      "title": "spaces access control - #change_ownership should throw when transferring ownership of write-restricted objects if owner RBAC privileges are revoked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_ownership.spec.ts",
+        "line": 232,
+        "column": 10
+      }
+    },
+    {
+      "id": "80cebea03e9ac92-91ea30962562c0e",
+      "title": "spaces access control - #change_ownership partial bulk change ownership transfers allowed objects and reports unsupported types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/change_ownership.spec.ts",
+        "line": 281,
+        "column": 10
+      }
+    },
+    {
+      "id": "df8fd09b5974107-2d9a2dd138a2251",
+      "title": "spaces access control - #create should create a write-restricted object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/create.spec.ts",
+        "line": 34,
+        "column": 10
+      }
+    },
+    {
+      "id": "df8fd09b5974107-8c6893230210b96",
+      "title": "spaces access control - #create creates objects that support access control without metadata when there is no active user profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/create.spec.ts",
+        "line": 47,
+        "column": 10
+      }
+    },
+    {
+      "id": "df8fd09b5974107-821811cd9d1feb2",
+      "title": "spaces access control - #create allows creating an object supporting access control with no metadata when there is no active user profile and no access mode is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/create.spec.ts",
+        "line": 66,
+        "column": 10
+      }
+    },
+    {
+      "id": "df8fd09b5974107-b3b31c3ff32a417",
+      "title": "spaces access control - #create should throw when trying to create an access control object with no user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/create.spec.ts",
+        "line": 88,
+        "column": 10
+      }
+    },
+    {
+      "id": "df8fd09b5974107-97843a4ec65e41a",
+      "title": "spaces access control - #create should allow overwriting an object owned by current user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/create.spec.ts",
+        "line": 102,
+        "column": 10
+      }
+    },
+    {
+      "id": "df8fd09b5974107-b4a4dac131d64c5",
+      "title": "spaces access control - #create should throw when overwriting an object owned by current user if RBAC privileges are revoked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/create.spec.ts",
+        "line": 128,
+        "column": 10
+      }
+    },
+    {
+      "id": "df8fd09b5974107-9b31715b412a19a",
+      "title": "spaces access control - #create should allow overwriting an object owned by another user if admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/create.spec.ts",
+        "line": 171,
+        "column": 10
+      }
+    },
+    {
+      "id": "df8fd09b5974107-1f5ed9ab42b4593",
+      "title": "spaces access control - #create should allow overwriting an object owned by another user if in default mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/create.spec.ts",
+        "line": 200,
+        "column": 10
+      }
+    },
+    {
+      "id": "df8fd09b5974107-6a5a0695aa10dfb",
+      "title": "spaces access control - #create should reject overwriting an object owned by another user if not admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/create.spec.ts",
+        "line": 232,
+        "column": 10
+      }
+    },
+    {
+      "id": "7e986474a62a743-484fe327a77c9ee",
+      "title": "spaces access control - default state of access control objects types supporting access control are created with default access mode when not specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/default_state.spec.ts",
+        "line": 27,
+        "column": 12
+      }
+    },
+    {
+      "id": "9d22b6dbb3d2944-0da37f048bf6eef",
+      "title": "spaces access control - #delete allow owner to delete object marked as write-restricted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/delete.spec.ts",
+        "line": 35,
+        "column": 10
+      }
+    },
+    {
+      "id": "9d22b6dbb3d2944-5fd791b1f666579",
+      "title": "spaces access control - #delete allows admin to delete object marked as write-restricted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/delete.spec.ts",
+        "line": 55,
+        "column": 10
+      }
+    },
+    {
+      "id": "9d22b6dbb3d2944-bd09d9e5fd455bd",
+      "title": "spaces access control - #delete throws when trying to delete write-restricted object owned by a different user when not admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/delete.spec.ts",
+        "line": 84,
+        "column": 10
+      }
+    },
+    {
+      "id": "9d22b6dbb3d2944-954b30b479979fd",
+      "title": "spaces access control - #delete allows non-owner to delete object in default mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/delete.spec.ts",
+        "line": 111,
+        "column": 10
+      }
+    },
+    {
+      "id": "9d22b6dbb3d2944-05f75509a64315d",
+      "title": "spaces access control - #delete throws when trying to delete write-restricted object by owner with revoked RBAC privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/delete.spec.ts",
+        "line": 131,
+        "column": 10
+      }
+    },
+    {
+      "id": "bb7d03d11bfcd21-abf94aede8bbdc7",
+      "title": "spaces access control - import/export should reject import of objects with unexpected access control metadata (unsupported types)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/import_export.spec.ts",
+        "line": 109,
+        "column": 21
+      }
+    },
+    {
+      "id": "bb7d03d11bfcd21-e0ea701509721da",
+      "title": "spaces access control - import/export should apply the current user as owner, and 'default' access mode, only to supported object types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/import_export.spec.ts",
+        "line": 146,
+        "column": 21
+      }
+    },
+    {
+      "id": "bb7d03d11bfcd21-6be293838e16bf1",
+      "title": "spaces access control - import/export should create objects supporting access control without access control metadata if there is no profile ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/import_export.spec.ts",
+        "line": 210,
+        "column": 21
+      }
+    },
+    {
+      "id": "bb7d03d11bfcd21-e1212254c74f5a2",
+      "title": "spaces access control - import/export should apply defaults to objects with no access control metadata",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/import_export.spec.ts",
+        "line": 273,
+        "column": 21
+      }
+    },
+    {
+      "id": "bb7d03d11bfcd21-9084c374384de97",
+      "title": "spaces access control - import/export should disallow overwrite of owned objects if not owned by the current user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/import_export.spec.ts",
+        "line": 336,
+        "column": 21
+      }
+    },
+    {
+      "id": "bb7d03d11bfcd21-259045672f94f5a",
+      "title": "spaces access control - import/export should throw if the import only contains objects that are not overwritable by the current user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/import_export.spec.ts",
+        "line": 425,
+        "column": 21
+      }
+    },
+    {
+      "id": "bb7d03d11bfcd21-41351478b0b696b",
+      "title": "spaces access control - import/export should allow overwrite of owned objects, but maintain original access control metadata, if owned by the current user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/import_export.spec.ts",
+        "line": 505,
+        "column": 21
+      }
+    },
+    {
+      "id": "bb7d03d11bfcd21-0b278a7b2d735c1",
+      "title": "spaces access control - import/export should allow overwrite of owned objects, but maintain original access control metadata, if admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/import_export.spec.ts",
+        "line": 563,
+        "column": 21
+      }
+    },
+    {
+      "id": "bb7d03d11bfcd21-fe78bca8d5c49b0",
+      "title": "spaces access control - import/export should retain all access control metadata on export",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/import_export.spec.ts",
+        "line": 625,
+        "column": 19
+      }
+    },
+    {
+      "id": "bb7d03d11bfcd21-0105f65223ca34b",
+      "title": "spaces access control - import/export should allow 'createNewCopies' global option on resolve import errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/import_export.spec.ts",
+        "line": 676,
+        "column": 21
+      }
+    },
+    {
+      "id": "bb7d03d11bfcd21-da0735e05252a5d",
+      "title": "spaces access control - import/export should disallow overwrite retry for write-restricted objects not owned by the current user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/import_export.spec.ts",
+        "line": 764,
+        "column": 21
+      }
+    },
+    {
+      "id": "bb7d03d11bfcd21-79833e06f016920",
+      "title": "spaces access control - import/export should disallow create new retry with same ID for write-restricted objects not owned by the current user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/import_export.spec.ts",
+        "line": 860,
+        "column": 21
+      }
+    },
+    {
+      "id": "bb7d03d11bfcd21-905c6773d25e41a",
+      "title": "spaces access control - import/export should allow create new retry with destination ID for write-restricted objects not owned by the current user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/import_export.spec.ts",
+        "line": 957,
+        "column": 21
+      }
+    },
+    {
+      "id": "da94c8f7eaf95c7-49a44b0500179cd",
+      "title": "spaces access control - #update should update write-restricted objects owned by the same user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/update.spec.ts",
+        "line": 35,
+        "column": 10
+      }
+    },
+    {
+      "id": "da94c8f7eaf95c7-7fc634e12d319bf",
+      "title": "spaces access control - #update should throw when updating write-restricted objects owned by a different user when not admin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/update.spec.ts",
+        "line": 62,
+        "column": 10
+      }
+    },
+    {
+      "id": "da94c8f7eaf95c7-a5132361a92e272",
+      "title": "spaces access control - #update objects with default accessMode can be modified by non-owners",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/update.spec.ts",
+        "line": 91,
+        "column": 10
+      }
+    },
+    {
+      "id": "da94c8f7eaf95c7-e6743138881df24",
+      "title": "spaces access control - #update allows admin to update objects owned by different user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/update.spec.ts",
+        "line": 117,
+        "column": 10
+      }
+    },
+    {
+      "id": "da94c8f7eaf95c7-492bb383f6e14e9",
+      "title": "spaces access control - #update should throw when updating write-restricted objects by owner with revoked RBAC privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control/api/tests/update.spec.ts",
+        "line": 140,
+        "column": 10
+      }
+    }
+  ]
+}
