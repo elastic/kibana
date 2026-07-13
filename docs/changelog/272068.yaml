@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/272068
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+title: Add DLL Search Order Hijack detection enrichment to Defend Advanced Policy
+description: '{elastic-defend} Adds advanced policy options for {windows} that lets users disable the enrichment of DLL Search Order Hijacking events.'

@@ -12,7 +12,9 @@ import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { FILTER_CLOSED } from '../../../../../../common/types';
 import type { AlertClosingReason } from '../../../../../../common/types';
 import type { AlertWorkflowStatus } from '../../../../../common/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useSetUnifiedAlertsWorkflowStatus } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_workflow_status';
+import { useSetAttacksStatus } from '../../../../../common/containers/attacks/hooks/use_set_attacks_status';
 
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 import type { BaseApplyAttackProps } from '../types';
@@ -33,7 +35,9 @@ interface ApplyAttackWorkflowStatusReturn {
  * Shows a confirmation modal to let users choose whether to update only attacks or both attacks and related alerts.
  */
 export const useApplyAttackWorkflowStatus = (): ApplyAttackWorkflowStatusReturn => {
+  const isPublicAttacksApiEnabled = useIsExperimentalFeatureEnabled('publicAttacksApiEnabled');
   const { mutateAsync: setUnifiedAlertsWorkflowStatus } = useSetUnifiedAlertsWorkflowStatus();
+  const { mutateAsync: setAttacksStatus } = useSetAttacksStatus();
   const showModalIfNeeded = useUpdateAttacksModal();
   const {
     services: { telemetry },
@@ -69,20 +73,34 @@ export const useApplyAttackWorkflowStatus = (): ApplyAttackWorkflowStatusReturn 
 
       setIsLoading?.(true);
       try {
-        // Combine IDs based on user choice
-        const allIds = result.updateAlerts ? [...attackIds, ...relatedAlertIds] : attackIds;
+        if (isPublicAttacksApiEnabled) {
+          await setAttacksStatus({
+            ids: attackIds,
+            status,
+            update_related_alerts: result.updateAlerts,
+            ...(status === FILTER_CLOSED && reason ? { reason } : {}),
+          });
+        } else {
+          const allIds = result.updateAlerts ? [...attackIds, ...relatedAlertIds] : attackIds;
 
-        await setUnifiedAlertsWorkflowStatus({
-          signal_ids: allIds,
-          status,
-          ...(status === FILTER_CLOSED && reason ? { reason } : {}),
-        });
+          await setUnifiedAlertsWorkflowStatus({
+            signal_ids: allIds,
+            status,
+            ...(status === FILTER_CLOSED && reason ? { reason } : {}),
+          });
+        }
         onSuccess?.();
       } finally {
         setIsLoading?.(false);
       }
     },
-    [setUnifiedAlertsWorkflowStatus, showModalIfNeeded, telemetry]
+    [
+      isPublicAttacksApiEnabled,
+      setAttacksStatus,
+      setUnifiedAlertsWorkflowStatus,
+      showModalIfNeeded,
+      telemetry,
+    ]
   );
 
   return { applyWorkflowStatus };
