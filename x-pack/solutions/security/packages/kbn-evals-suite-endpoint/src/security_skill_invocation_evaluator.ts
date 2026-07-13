@@ -11,11 +11,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
 
-/**
- * Security Agent Builder eval suites use the runtime `load_skill` tool span
- * (not only legacy `filestore.read` SKILL.md loads). Keep this evaluator in
- * Security-owned eval packages rather than extending the platform evaluator.
- */
 export function createSecuritySkillInvocationEvaluator({
   traceEsClient,
   log,
@@ -71,7 +66,6 @@ export function createSecuritySkillInvocationEvaluator({
         const totalSpans = row?.[totalSpansIndex] as number | undefined;
         const skillInvoked = row?.[skillInvokedIndex] as number | undefined;
 
-        // Retry only while the trace itself is not yet indexed (OTLP → ES lag).
         if (!totalSpans) {
           return null;
         }

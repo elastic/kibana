@@ -8,16 +8,12 @@
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { AgentBuilderClient } from '@kbn/evals';
 
-export const resolveSecurityEvalAgentId = (): string =>
-  process.env.AGENT_BUILDER_AGENT_ID ?? agentBuilderDefaultAgentId;
-
-/** Maps platform Agent Builder converse (inline `_execution_mode: 'local'`) to eval task output. */
 export const converseQuestionToTaskOutput = async (
   agentBuilderClient: AgentBuilderClient,
   question: string
 ) => {
   const response = await agentBuilderClient.converse({
-    agentId: resolveSecurityEvalAgentId(),
+    agentId: agentBuilderDefaultAgentId,
     input: question,
   });
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { METADATA_UNITED_TRANSFORM } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { evaluate } from '../../src/evaluate';
-import { resolveSecurityEvalAgentId } from '../../src/converse_task';
 import {
   waitForEndpointPackage,
   waitForTransformPropagation,
@@ -205,7 +205,7 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
 
     try {
       await agentBuilderClient.converse({
-        agentId: resolveSecurityEvalAgentId(),
+        agentId: agentBuilderDefaultAgentId,
         input: 'hello',
       });
     } catch (e) {

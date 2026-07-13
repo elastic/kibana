@@ -83,7 +83,6 @@ export const createForensicTrajectoryEvaluator = (): Evaluator<
   } as Evaluator<ForensicDatasetExample, TaskOutput>;
 };
 
-/** Distractor rows should pass when the skill is NOT invoked (invert definitive 0/1 only). */
 export const wrapSkillInvocationForDistractors = (
   evaluator: Evaluator<ForensicDatasetExample, TaskOutput>
 ): Evaluator<ForensicDatasetExample, TaskOutput> => ({
@@ -94,7 +93,6 @@ export const wrapSkillInvocationForDistractors = (
       return result;
     }
 
-    // Indexing gaps / missing traceId are not evidence the skill stayed dormant.
     if (
       result.score === null ||
       result.label === 'potentially_incomplete' ||
@@ -115,11 +113,6 @@ export const wrapSkillInvocationForDistractors = (
   },
 });
 
-/**
- * Matrix L1–L5 baseline for endpoint-forensic-analysis (C3 Investigation).
- * Mirrors @kbn/evals-suite-alerts-rag evaluator stack: criteria + skill
- * invocation + trajectory + trace observability (toolCalls, latency, tokens).
- */
 export const buildForensicEvaluators = ({
   evaluators,
   traceEsClient,

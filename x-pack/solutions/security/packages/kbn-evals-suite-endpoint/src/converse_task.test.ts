@@ -7,30 +7,10 @@
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { AgentBuilderClient } from '@kbn/evals';
-import { converseQuestionToTaskOutput, resolveSecurityEvalAgentId } from './converse_task';
+import { converseQuestionToTaskOutput } from './converse_task';
 
 describe('converse_task', () => {
-  const originalAgentId = process.env.AGENT_BUILDER_AGENT_ID;
-
-  afterEach(() => {
-    if (originalAgentId === undefined) {
-      delete process.env.AGENT_BUILDER_AGENT_ID;
-    } else {
-      process.env.AGENT_BUILDER_AGENT_ID = originalAgentId;
-    }
-  });
-
-  it('resolveSecurityEvalAgentId prefers AGENT_BUILDER_AGENT_ID', () => {
-    process.env.AGENT_BUILDER_AGENT_ID = 'custom-agent';
-    expect(resolveSecurityEvalAgentId()).toBe('custom-agent');
-  });
-
-  it('resolveSecurityEvalAgentId falls back to platform default', () => {
-    delete process.env.AGENT_BUILDER_AGENT_ID;
-    expect(resolveSecurityEvalAgentId()).toBe(agentBuilderDefaultAgentId);
-  });
-
-  it('converseQuestionToTaskOutput maps Agent Builder response to eval task shape', async () => {
+  it('converseQuestionToTaskOutput uses the default agent and maps eval task shape', async () => {
     const agentBuilderClient: AgentBuilderClient = {
       converse: jest.fn().mockResolvedValue({
         message: 'assistant answer',
@@ -42,7 +22,7 @@ describe('converse_task', () => {
     const result = await converseQuestionToTaskOutput(agentBuilderClient, 'who is patient zero?');
 
     expect(agentBuilderClient.converse).toHaveBeenCalledWith({
-      agentId: resolveSecurityEvalAgentId(),
+      agentId: agentBuilderDefaultAgentId,
       input: 'who is patient zero?',
     });
     expect(result).toEqual({

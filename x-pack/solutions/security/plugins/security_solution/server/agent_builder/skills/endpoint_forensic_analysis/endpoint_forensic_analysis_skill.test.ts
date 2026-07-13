@@ -40,7 +40,7 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(isAllowedBuiltinSkill(ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID)).toBe(true);
   });
 
-  it('exposes ES|QL platform registry tools only (slice 1)', () => {
+  it('exposes ES|QL platform registry tools only (read-only scope)', () => {
     const registryTools = endpointForensicAnalysisSkill.getRegistryTools?.() ?? [];
     expect(registryTools).toEqual([
       platformCoreTools.getIndexMapping,
