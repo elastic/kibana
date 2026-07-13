@@ -246,7 +246,6 @@ describe('updateGlobalPacksCreateCallback', () => {
       shard: 100,
       pack_id: 'pack-so-id-4',
       pack_name: 'embedded-pack',
-      default_space_id: 'default',
       queries: {
         query1: {
           name: 'test-query',
