@@ -131,6 +131,8 @@ Then paste the full content of `scripts/check-dom-anomalies.js` as the function 
 - `level2[]` items → Level 2 finding
 - `level3[spinner_present]` → **Level 3 normally**; but if the spinner has been visible for **more than 10 seconds** since the action was triggered → escalate to **Level 2**: "Loading indicator unresolved after 10 seconds"
 
+**Never conclude "no warning is shown" from an `innerText`/text search alone when a Lens or dashboard visualization is on the page.** Kibana renders CCS/partial-result warnings as an **icon-only badge** (`data-test-subj="searchResponseWarningsBadgeToogleButton"`) whose visible text and `title` attribute are only a count ("N warnings") — the actual "Problem with N cluster(s)" text renders **only inside the popover, after a click**. A plain text search will not find it (this produced a real false-negative finding). `check-dom-anomalies.js` now flags this badge at Level 2; when it appears, click it before writing the finding.
+
 ---
 
 **Detector B — Console** (`browser_console_messages` → `browser_evaluate`)
@@ -180,6 +182,7 @@ If the candidate finding is specifically an **absent element** ("X never appeare
   - **Called and still pending** → not settled yet; extend the wait, not confirmed yet.
   - **Called and failed (4xx/5xx)** → log the failed call itself via Detector C's normal path instead; the missing element is a downstream symptom, not a separate finding.
   - **Called and succeeded, but the element still didn't render** → genuine rendering bug. Reproduces — proceed to step 2, and include the successful response in the evidence so the finding can't later be mistaken for a privilege or data problem.
+  - **Called and succeeded, but the response body is genuinely empty** → the element may be absent simply because there is no data, not because of a bug. Before logging "no data" as expected, consider whether real data *should* exist: if so, manufacture a positive control (`scripts/positive-control-alert.md`) and re-check. Only conclude "unsupported/broken" if the panel stays empty after a verified positive control lands.
 
 **2. Record video evidence.** Once a Level 1 or Level 2 finding reproduces, capture it on video using the split-screen technique in `scripts/record-evidence.md`: the real product on one side, untouched, and a live evidence panel on the other side driven by Playwright's own `response`/`console` listeners (not narration added after the fact). Save to `.exploratory-session/videos/findings-flow-<N>[-<slug>].mp4` and reference it in the finding's Evidence section (`- Video: .exploratory-session/videos/findings-flow-<N>.mp4`).
 
@@ -257,6 +260,19 @@ All navigation must stay within this flow's space (`/s/<flow.space_id>/`). In pa
 - **Timebox fires before checklist completes:** log remaining steps as `skipped: time budget exhausted (N minutes elapsed)`
 - **Checklist completes before timebox:** probe 1–2 unexpected UI states noticed during the checklist. Do not start new flows.
 - **Browser session lost:** log findings so far, mark remaining steps as `skipped: session lost`, continue with next flow.
+
+### CCS-specific techniques (optional — CCS sessions only)
+
+**Skip this entire section unless `config.json → environment.ccs` is set.**
+
+**Is this panel even CCS-aware? — inspect the request `index` param.** The most decisive CCS diagnostic: read the panel's own outbound request body to tell "genuinely CCS-aware but currently degraded" apart from "never built to query the remote at all."
+1. After the panel loads, find the search/data request that populates it via `browser_network_requests`.
+2. Read its request body's `index` (or `indices`/`pattern`) parameter.
+3. **Includes a remote-prefixed pattern** (`<remote_cluster_alias>:*`) → the panel *is* CCS-aware; empty/wrong results are a degradation or data bug — investigate further. **Only local patterns, no `<alias>:` prefix** → the panel never queries remote; empty results mean "feature doesn't support CCS," not a runtime bug. **Always log which case applies.**
+
+**Prove real data exists before concluding "unsupported" — positive control.** When a CCS panel shows nothing and you can't tell whether the feature is unsupported or there's simply no matching data, manufacture a genuinely rule-fired alert with `scripts/positive-control-alert.md`. If the control lands but the panel stays empty, the gap is the feature, not the data.
+
+**Testing an unreachable remote cluster.** When a flow's `expected` describes UI behavior while the remote cluster is down, do **not** improvise. Follow `scripts/break-remote-cluster.md` exactly: capture the live config, get explicit user confirmation, break it, verify it's broken, run the flow, then restore the exact original config and verify reconnection before continuing. Restoration is mandatory — a remote cluster is shared deployment infrastructure, not session-local state.
 
 ### Logging discipline
 

@@ -196,7 +196,7 @@ If `.exploratory-session/config.json` already exists — ask the user: **"An exi
      find .exploratory-session -maxdepth 1 -mindepth 1 ! -name 'archive-*' -exec mv {} "$ARCHIVE_DIR/" \;
      ```
   3. Tell the user where the prior session was archived (`$ARCHIVE_DIR`) before continuing.
-  4. Write the new `config.json` into the now-empty `.exploratory-session/` and continue Phase 0 normally.
+  4. Write the new `config.json` into the now-empty `.exploratory-session/`, setting its `prior_session_archive` field to `$ARCHIVE_DIR` (the archive path from step 2) so the new session records where the previous one's output lives. Continue Phase 0 normally.
 
 Write `.exploratory-session/config.json`:
 ```json
@@ -210,7 +210,8 @@ Write `.exploratory-session/config.json`:
     "es_url": "<elasticsearch url — replace kb. with es. for ECH>",
     "managed": true,
     "data_setup": "<run | skip>",
-    "space_id": "exploratory-testing"
+    "space_id": "exploratory-testing",
+    "ccs": null
   },
   "test_user": {
     "username": "exploratory-tester",
@@ -247,6 +248,7 @@ Write `.exploratory-session/config.json`:
   "noise_index": null,
   "known_open_bugs": [{ "number": 0, "title": "" }],
   "recently_closed_bugs": [{ "number": 0, "title": "", "closedAt": "" }],
+  "prior_session_archive": null,
   "session_started_at": "<value of $SESSION_STARTED_AT captured above>"
 }
 ```
@@ -254,6 +256,31 @@ Write `.exploratory-session/config.json`:
 `data_setup` is `"skip"` when the invocation includes `data-setup: skip`; otherwise `"run"`.
 
 For **user-provided environments**: `space_id` defaults to `"exploratory-testing"`. `test_user` is omitted — provided credentials are used directly throughout.
+
+### Cross-Cluster Search (CCS) sessions — optional
+
+**The skill cannot create a CCS setup.** It can only test against one that already exists — a SOURCE cluster with a working, already-configured remote cluster connection to REMOTE. This means CCS sessions require a user-provided environment (never agent-managed/Scout) and the user must supply both SOURCE and REMOTE credentials directly. Before starting, verify the connection is real via `GET /api/remote_clusters` — if it doesn't exist or isn't connected, stop and tell the user to set it up first; do not attempt to create the remote cluster connection yourself.
+
+`environment.ccs` is `null` for the common single-cluster case — **omit or leave it `null` unless the session targets a CCS setup** (a SOURCE cluster running Kibana that queries a REMOTE cluster). Top-level `environment.url` / `environment.es_url` always stay pointed at the **SOURCE** cluster.
+
+When testing CCS, replace `null` with:
+```json
+"ccs": {
+  "note": "SOURCE runs Kibana and issues cross-cluster queries; REMOTE holds the remote data",
+  "source": { "role": "SOURCE", "url": "<SOURCE Kibana url — same as environment.url>" },
+  "remote": { "role": "REMOTE", "url": "<REMOTE Kibana url>", "es_url": "<REMOTE elasticsearch url>" },
+  "remote_cluster_alias": "<alias configured on SOURCE — from GET /api/remote_clusters>",
+  "remote_cluster_status_at_session_start": "<connected | not connected — from GET _remote/info>",
+  "data_view_verified": false
+}
+```
+Set `data_view_verified` to `true` only after confirming the tested data view's index pattern includes `<remote_cluster_alias>:*`.
+
+### Prior-session continuity — optional
+
+`prior_session_archive` is `null` for a first session against an environment. It is set automatically by the "start fresh" archival above; set it manually when the user points you at a prior archived session for the **same environment**.
+
+When it is non-null, before opening any **new** Level 1/2 finding during Phase 2, skim the prior archive's `findings-flow-*.md` and `report.md` for a related root cause — a bug from an adjacent area is often the same underlying defect. If it is, cross-reference the prior finding in the new finding's Evidence section instead of reporting it as freshly discovered.
 
 ---
 

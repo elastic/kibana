@@ -74,5 +74,6 @@ _If empty: no deferred flows — session covered everything identified._
 | Finding | Reason suppressed |
 |---|---|
 | <title> | Matches knowledge/<area_slug>.md: "<entry>" |
+| <title> | Matches shared knowledge/security-solution.md: "<entry>" |
 | <title> | Matches known open bug #<number>: "<title>" |
 ```
