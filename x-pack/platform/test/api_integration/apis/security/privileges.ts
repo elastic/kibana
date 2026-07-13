@@ -138,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
       actions: ['all', 'read', 'minimal_all', 'minimal_read', 'endpoint_security_execute'],
       anonymization: ['all', 'read', 'minimal_all', 'minimal_read'],
       stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
+      stackAlertsOnly: ['all', 'read', 'minimal_all', 'minimal_read'],
       ml: ['all', 'read', 'minimal_all', 'minimal_read'],
       siem: [
         'all',
@@ -487,6 +488,10 @@ export default function ({ getService }: FtrProviderContext) {
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       queryActivity: ['all', 'read', 'minimal_all', 'minimal_read'],
       streams: ['all', 'read', 'minimal_all', 'minimal_read'],
+      alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
+      alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],
+      alerting_v2_action_policies: ['all', 'read', 'minimal_all', 'minimal_read'],
+      alerting_v2_execution_history: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring', 'reporting_user'],
   };

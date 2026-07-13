@@ -400,6 +400,106 @@ describe('RuleBuilderAlertConditionStep', () => {
     expect(afterRemove.evaluations).toHaveLength(0);
   });
 
+  it('updates evaluation expression suggestions when a stat is renamed, added, or removed', async () => {
+    let builderState = makeBuilderState();
+    const onBuilderStateChange = jest.fn((next: ThresholdFormValues) => {
+      builderState = next;
+    });
+
+    const { rerender } = render(
+      <Wrapper builderState={builderState} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('ruleBuilderAddEvaluation'));
+    const afterAddEval = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    rerender(
+      <Wrapper builderState={afterAddEval} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.focus(screen.getByTestId('ruleBuilderEvalExpression-0'));
+    expect(
+      await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
+    ).toBeInTheDocument();
+
+    // Renaming the stat should replace it in the suggestions.
+    fireEvent.change(screen.getByTestId('ruleBuilderStatLabel-0'), {
+      target: { value: 'errors' },
+    });
+    const afterRename = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    rerender(
+      <Wrapper builderState={afterRename} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.focus(screen.getByTestId('ruleBuilderEvalExpression-0'));
+    expect(
+      await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-errors')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
+    ).not.toBeInTheDocument();
+
+    // Adding a stat should add it to the suggestions.
+    fireEvent.click(screen.getByTestId('ruleBuilderAddStat'));
+    const afterAddStat = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    rerender(
+      <Wrapper builderState={afterAddStat} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    // The new stat gets the default label "count" (the only one still unused after the rename).
+    fireEvent.focus(screen.getByTestId('ruleBuilderEvalExpression-0'));
+    expect(
+      await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-errors')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
+    ).toBeInTheDocument();
+
+    // Removing the newly-added stat should drop it from the suggestions again.
+    fireEvent.click(screen.getByTestId('ruleBuilderRemoveStat-1'));
+    const afterRemoveStat = onBuilderStateChange.mock.calls.at(-1)?.[0] as ThresholdFormValues;
+    rerender(
+      <Wrapper builderState={afterRemoveStat} onBuilderStateChange={onBuilderStateChange}>
+        <RuleBuilderAlertConditionStep
+          state={createState()}
+          dispatch={dispatch}
+          services={createMockServices()}
+        />
+      </Wrapper>
+    );
+
+    fireEvent.focus(screen.getByTestId('ruleBuilderEvalExpression-0'));
+    expect(
+      await screen.findByTestId('ruleBuilderEvalExpressionSuggestion-0-option-errors')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('ruleBuilderEvalExpressionSuggestion-0-option-count')
+    ).not.toBeInTheDocument();
+  });
+
   it('sets and displays filter input value', () => {
     const onBuilderStateChange = jest.fn();
     const builderState = makeBuilderState();
@@ -788,7 +888,7 @@ describe('RuleBuilderAlertConditionStep', () => {
         expect(screen.queryByText(/References unknown/)).not.toBeInTheDocument();
 
         act(() => {
-          jest.advanceTimersByTime(300);
+          jest.advanceTimersByTime(500);
         });
 
         expect(screen.getByText('References unknown label: unknown_field')).toBeInTheDocument();
