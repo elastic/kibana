@@ -10,12 +10,12 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventStatusSchema } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { searchEventsToolHandler } from './handler';
 
@@ -27,23 +27,28 @@ const searchEventsSchema = z.object({
     .optional()
     .describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.query', {
-        defaultMessage: 'Optional text search in event title.',
+        defaultMessage:
+          'Optional substring search over the event title and summary fields. ' +
+          'Use it to narrow results to a known incident phrase or service name. ' +
+          'Matching is case-insensitive and not semantic — omit it when you want all episodes for a stream or state.',
       })
     ),
-  stream_name: z
-    .string()
+  stream_names: z
+    .array(z.string())
     .optional()
     .describe(
-      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.streamName', {
-        defaultMessage: 'Optional stream name to scope the search.',
+      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.streamNames', {
+        defaultMessage:
+          'Optional list of stream names to scope the search. Omit to search across all streams.',
       })
     ),
-  status: z
-    .array(significantEventStatusSchema)
+  state: z
+    .enum(['open', 'closed'])
     .optional()
     .describe(
-      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.status', {
-        defaultMessage: 'Optional event status filters.',
+      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.state', {
+        defaultMessage:
+          'Optional latest-event state filter. `open` matches latest status promoted/acknowledged; `closed` matches any latest status not in that open set.',
       })
     ),
   page: z.number().int().min(1).optional().default(1),
@@ -54,22 +59,27 @@ export function createSearchEventsTool({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: {
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof searchEventsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof searchEventsSchema> = {
     id: SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line1', {
-        defaultMessage: 'Search significant events across all streams or a specific stream.',
+        defaultMessage:
+          'Search latest significant events per slug across all streams or a filtered set.',
       })}
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line2', {
         defaultMessage:
-          'Use this before creating or updating events to understand current event state.',
+          'Use `state: "open"` to return latest episodes whose status is promoted/acknowledged. ' +
+          'Use `state: "closed"` to return latest episodes whose status is not promoted/acknowledged. ' +
+          'If `state` is omitted, returns all latest episodes.',
       })}
     `,
     schema: searchEventsSchema,
@@ -87,6 +97,14 @@ export function createSearchEventsTool({
           params: toolParams,
         });
 
+        telemetry.trackAgentToolEventSearch({
+          success: true,
+          result_count: data.total,
+          has_query: toolParams.query !== undefined,
+          has_stream_filter: (toolParams.stream_names?.length ?? 0) > 0,
+          state_filter: toolParams.state,
+        });
+
         return {
           results: [
             {
@@ -98,6 +116,16 @@ export function createSearchEventsTool({
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running event_search: ${message}`);
+
+        telemetry.trackAgentToolEventSearch({
+          success: false,
+          result_count: 0,
+          has_query: toolParams.query !== undefined,
+          has_stream_filter: (toolParams.stream_names?.length ?? 0) > 0,
+          state_filter: toolParams.state,
+          error_message: message,
+        });
+
         return {
           results: [
             {

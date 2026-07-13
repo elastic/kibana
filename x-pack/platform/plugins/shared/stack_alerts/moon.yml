@@ -64,6 +64,7 @@ dependsOn:
   - '@kbn/response-ops-rule-params'
   - '@kbn/object-utils'
   - '@kbn/kql'
+  - '@kbn/core-notifications-browser-mocks'
 tags:
   - plugin
   - prod
