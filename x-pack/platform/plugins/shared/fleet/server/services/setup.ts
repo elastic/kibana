@@ -12,11 +12,8 @@ import { withActiveSpan } from '@kbn/tracing-utils';
 
 import { compact } from 'lodash';
 
-import pRetry from 'p-retry';
-
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { LockAcquisitionError } from '@kbn/lock-manager';
 
 import { MessageSigningError } from '../../common/errors';
 
@@ -81,26 +78,9 @@ export interface SetupStatus {
   >;
 }
 
-export async function _runSetupWithLock(setupFn: () => Promise<SetupStatus>) {
-  return await pRetry(
-    () => appContextService.getLockManagerService()!.withLock('fleet-setup', () => setupFn()),
-    {
-      onFailedAttempt: async (error) => {
-        if (!(error instanceof LockAcquisitionError)) {
-          throw error;
-        }
-      },
-      maxRetryTime: 5 * 60 * 1000, // Retry for 5 minute to get the lock
-    }
-  );
-}
-
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  options: {
-    useLock: boolean;
-  } = { useLock: false }
+  esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
   return withActiveSpan(
     'fleet-setup',
@@ -112,13 +92,7 @@ export async function setupFleet(
     async () => {
       const t = apm.startTransaction('fleet-setup', 'fleet');
       try {
-        if (options.useLock) {
-          return _runSetupWithLock(() =>
-            awaitIfPending(async () => createSetupSideEffects(soClient, esClient))
-          );
-        } else {
-          return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
-        }
+        return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
       } catch (error) {
         apm.captureError(error);
         t.setOutcome('failure');
@@ -279,8 +253,14 @@ async function createSetupSideEffects(
 
   // Bump the revision of agent policies whose package policies were flagged for a bump by a
   // saved object migration (no span: this only schedules a background task).
+  // Fixed suffix: Fleet's setup pipeline reruns from scratch on every invocation (including
+  // lazy-init retries), so repeated calls should coalesce into one pending task via
+  // `ensureScheduled` rather than piling up a duplicate per retry.
   logger.debug('Scheduling agent policy revision bump for migrated package policies');
-  await scheduleBumpMigratedAgentPoliciesTask(appContextService.getTaskManagerStart()!);
+  await scheduleBumpMigratedAgentPoliciesTask(
+    appContextService.getTaskManagerStart()!,
+    'fleet-setup'
+  );
 
   stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
   logger.debug(
