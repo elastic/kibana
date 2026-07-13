@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { usePushFlyoutFocus } from '../hooks/use_push_flyout_focus';
 
 export interface FlyoutHeaderTab<TId extends string> {
   id: TId;
@@ -65,6 +66,7 @@ export const FlyoutWithTabs = <TId extends string>({
 }: FlyoutWithTabsProps<TId>) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'flyoutWithTabs' });
   const { euiTheme } = useEuiTheme();
+  const { focusProps } = usePushFlyoutFocus({ enabled: type === 'push' });
   const [selectedTab, setSelectedTab] = useState<TId | undefined>(() => initialTabId ?? tabs[0].id);
 
   const resolvedSelectedTab =
@@ -97,6 +99,7 @@ export const FlyoutWithTabs = <TId extends string>({
       type={type}
       container={container}
       data-test-subj="flyoutWithTabs"
+      {...focusProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={headerStyles}>
