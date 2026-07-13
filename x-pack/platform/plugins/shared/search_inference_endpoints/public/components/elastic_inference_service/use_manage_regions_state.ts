@@ -100,6 +100,9 @@ export const useManageRegionsState = (onClose: () => void) => {
   const activeSelectionIsDirty =
     activeTab === 'regions' ? regionSelection.isDirty : geoSelection.isDirty;
   const isDirty = syncedFromInitial && (isNewPolicy || activeSelectionIsDirty);
+  const noSelections =
+    activeTab === 'geo' ? geoSelection.totalSelected === 0 : regionSelection.totalSelected === 0;
+  const isSaveDisabled = isSaving || isLoading || !isDirty || (isNewPolicy && noSelections);
 
   const handleTabChange = useCallback((tab: PolicyMode) => {
     setActiveTab(tab);
@@ -182,6 +185,7 @@ export const useManageRegionsState = (onClose: () => void) => {
     isSaving,
     isDirty,
     isNewPolicy,
+    isSaveDisabled,
     isCallOutDismissed,
     showConfirmation,
     // Regions tab

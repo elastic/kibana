@@ -58,8 +58,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     isLoading,
     isError,
     isSaving,
-    isDirty,
-    isNewPolicy,
+    isSaveDisabled,
     showConfirmation,
     handleTabChange,
     handleDismissCallOut,
@@ -73,9 +72,6 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     handleToggleGeo,
     handleSelectAllGeos,
   } = useManageRegionsState(onClose);
-
-  const noSelections = activeTab === 'geo' ? totalGeosSelected === 0 : totalSelected === 0;
-  const isSaveDisabled = isSaving || isLoading || !isDirty || (isNewPolicy && noSelections);
 
   const filteredRegions = useMemo(
     () => zoneGroups.flatMap((z) => z.regions).filter((r) => checkedKeys.has(regionKey(r))),
