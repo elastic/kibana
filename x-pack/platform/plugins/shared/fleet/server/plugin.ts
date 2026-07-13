@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { filter, take } from 'rxjs';
@@ -17,6 +16,7 @@ import type {
   ElasticsearchServiceStart,
   HttpServiceSetup,
   KibanaRequest,
+  LazyInitContext,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -362,6 +362,15 @@ export class FleetPlugin
   private policyWatcher?: PolicyWatcher;
   private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   private lockManagerService?: LockManagerService;
+  // `LazyInitContext` has no `core`/`plugins` field, so this is captured here, during `start()`,
+  // purely so `lazyInitialize` below can reach `core.plugins.loadPluginContract` later.
+  private core?: CoreStart;
+  private setupCompletedResolve!: () => void;
+  // Resolves once the current (or most recent) `lazyInitialize` run has settled, regardless of
+  // whether it succeeded or failed - mirrors the old `fleetSetupPromise`'s semantics.
+  private setupCompletedPromise: Promise<void> = new Promise((resolve) => {
+    this.setupCompletedResolve = resolve;
+  });
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -800,6 +809,7 @@ export class FleetPlugin
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
+    this.core = core;
     this.spacesPluginsStart = plugins.spaces;
 
     const messageSigningService = new MessageSigningService(
@@ -896,96 +906,6 @@ export class FleetPlugin
 
     this.policyWatcher.start(licenseService);
 
-    const setupAttempts = this.configInitialValue.internal?.retrySetupOnBoot ? 25 : 1;
-
-    const fleetSetupPromise = (async () => {
-      try {
-        // Fleet remains `available` during setup as to excessively delay Kibana's boot process.
-        // This should be reevaluated as Fleet's setup process is optimized and stabilized.
-        this.fleetStatus$.next({
-          level: ServiceStatusLevels.available,
-          summary: 'Fleet is setting up',
-        });
-
-        // We need to wait for the licence feature to be available,
-        // to have our internal saved object client with encrypted saved object working properly
-        await plugins.licensing.license$
-          .pipe(
-            filter(
-              (licence) =>
-                licence.getFeature('security').isEnabled &&
-                licence.getFeature('security').isAvailable
-            ),
-            take(1)
-          )
-          .toPromise();
-
-        const randomIntFromInterval = (min: number, max: number) => {
-          return Math.floor(Math.random() * (max - min + 1) + min);
-        };
-
-        // Retry Fleet setup w/ backoff
-        await backOff(
-          async () => {
-            await setupFleet(
-              core.savedObjects.getUnsafeInternalClient({
-                excludedExtensions: [SPACES_EXTENSION_ID],
-              }),
-              core.elasticsearch.client.asInternalUser,
-              { useLock: true }
-            );
-          },
-          {
-            numOfAttempts: setupAttempts,
-            delayFirstAttempt: true,
-            // 1s initial backoff
-            startingDelay: randomIntFromInterval(100, 1000),
-            // 5m max backoff
-            maxDelay: 60000 * 5,
-            timeMultiple: 2,
-            // avoid HA contention with other Kibana instances
-            jitter: 'full',
-            retry: (error: any, attemptCount: number) => {
-              const summary = `Fleet setup attempt ${attemptCount} failed, will retry after backoff`;
-              logger.warn(summary, { error });
-
-              this.fleetStatus$.next({
-                level: ServiceStatusLevels.available,
-                summary,
-                meta: {
-                  attemptCount,
-                  error,
-                },
-              });
-              return true;
-            },
-          }
-        );
-
-        // initialize (generate/encrypt/validate) Uninstall Tokens asynchronously
-        this.initializeUninstallTokens().catch(() => {});
-
-        this.fleetStatus$.next({
-          level: ServiceStatusLevels.available,
-          summary: 'Fleet is available',
-        });
-      } catch (error) {
-        logger.warn(`Fleet setup failed after ${setupAttempts} attempts`, {
-          error,
-        });
-
-        this.fleetStatus$.next({
-          // As long as Fleet has a dependency on EPR, we can't reliably set Kibana status to `unavailable` here.
-          // See https://github.com/elastic/kibana/issues/120237
-          level: ServiceStatusLevels.available,
-          summary: 'Fleet setup failed',
-          meta: {
-            error: error.message,
-          },
-        });
-      }
-    })();
-
     const internalSoClient = core.savedObjects.getUnsafeInternalClient({
       excludedExtensions: [SPACES_EXTENSION_ID],
     });
@@ -996,7 +916,7 @@ export class FleetPlugin
       agentless: {
         enabled: this.configInitialValue.agentless?.enabled ?? false,
       },
-      fleetSetupCompleted: () => fleetSetupPromise,
+      fleetSetupCompleted: () => this.setupCompletedPromise,
       packageService: this.setupPackageService(
         core.elasticsearch.client.asInternalUser,
         internalSoClient
@@ -1038,6 +958,78 @@ export class FleetPlugin
       cloudConnectorService,
       runWithCache,
     };
+  }
+
+  /**
+   * Deferred-init runner, gated by core's lazy-init framework (`enableLazyInitialize` in
+   * `kibana.jsonc`): runs Fleet's setup pipeline the first time something needs it instead of
+   * unconditionally at boot. Replaces the old `fleetSetupPromise` IIFE - core now owns
+   * cross-instance locking and retry-with-backoff (see `docs/design-doc.md`), so this only needs
+   * to run `setupFleet()` once per invocation and let genuinely fatal errors throw; the engine
+   * decides if/when to retry a failed run.
+   */
+  public async lazyInitialize(ctx: LazyInitContext): Promise<void> {
+    const { logger, elasticsearch } = ctx;
+
+    this.setupCompletedPromise = new Promise((resolve) => {
+      this.setupCompletedResolve = resolve;
+    });
+
+    try {
+      // Fleet remains `available` during setup as to not excessively delay Kibana's boot process.
+      // This should be reevaluated as Fleet's setup process is optimized and stabilized.
+      this.fleetStatus$.next({
+        level: ServiceStatusLevels.available,
+        summary: 'Fleet is setting up',
+      });
+
+      // We need to wait for the licence feature to be available,
+      // to have our internal saved object client with encrypted saved object working properly
+      const licensing = await this.core!.plugins.loadPluginContract<LicensingPluginStart>(
+        'licensing'
+      );
+      await licensing.license$
+        .pipe(
+          filter(
+            (licence) =>
+              licence.getFeature('security').isEnabled && licence.getFeature('security').isAvailable
+          ),
+          take(1)
+        )
+        .toPromise();
+
+      // Use `this.core` (not `ctx.savedObjects`) so setup keeps the same encrypted-saved-objects
+      // and security SO extensions it relies on today - the context's repository has none of them.
+      await setupFleet(
+        this.core!.savedObjects.getUnsafeInternalClient({
+          excludedExtensions: [SPACES_EXTENSION_ID],
+        }),
+        elasticsearch.client
+      );
+
+      // initialize (generate/encrypt/validate) Uninstall Tokens asynchronously
+      this.initializeUninstallTokens().catch(() => {});
+
+      this.fleetStatus$.next({
+        level: ServiceStatusLevels.available,
+        summary: 'Fleet is available',
+      });
+    } catch (error) {
+      logger.warn('Fleet setup failed', { error });
+
+      this.fleetStatus$.next({
+        // As long as Fleet has a dependency on EPR, we can't reliably set Kibana status to `unavailable` here.
+        // See https://github.com/elastic/kibana/issues/120237
+        level: ServiceStatusLevels.available,
+        summary: 'Fleet setup failed',
+        meta: {
+          error: error.message,
+        },
+      });
+      throw error;
+    } finally {
+      this.setupCompletedResolve();
+    }
   }
 
   public stop() {

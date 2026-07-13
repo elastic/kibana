@@ -124,10 +124,14 @@ export async function _updatePackagePoliciesThatNeedBump(
 }
 
 export async function scheduleBumpMigratedAgentPoliciesTask(
-  taskManagerStart: TaskManagerStartContract
+  taskManagerStart: TaskManagerStartContract,
+  // Callers that may be retried from scratch (e.g. Fleet's own setup pipeline) should pass a
+  // stable suffix so `ensureScheduled` coalesces repeated calls into a single pending task,
+  // instead of scheduling a fresh duplicate on every retry.
+  taskIdSuffix: string = uuidv4()
 ) {
   await taskManagerStart.ensureScheduled({
-    id: `${TASK_TYPE}:${uuidv4()}`,
+    id: `${TASK_TYPE}:${taskIdSuffix}`,
     scope: ['fleet'],
     params: {},
     taskType: TASK_TYPE,
