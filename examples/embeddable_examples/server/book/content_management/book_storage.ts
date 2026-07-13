@@ -104,7 +104,7 @@ export class BookStorage implements ContentStorage {
     );
 
     if (isSavedObjectErrorResult(savedObject)) {
-      throw Boom.badRequest(`Invalid response. ${savedObject.error.message}`);
+      throw Boom.internal(`Invalid response. ${savedObject.error.message}`);
     }
 
     let item;

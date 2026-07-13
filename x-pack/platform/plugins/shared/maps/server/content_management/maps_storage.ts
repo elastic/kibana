@@ -81,7 +81,7 @@ export class MapsStorage {
     } = await soClient.resolve<StoredMapAttributes>(MAP_SAVED_OBJECT_TYPE, id);
 
     if (isSavedObjectErrorResult(savedObject)) {
-      throw Boom.badRequest(`Invalid response. ${savedObject.error.message}`);
+      throw Boom.internal(`Invalid response. ${savedObject.error.message}`);
     }
 
     const item = savedObjectToItem(savedObject, false);
