@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import type { EuiSuperSelectProps } from '@elastic/eui';
@@ -172,9 +172,38 @@ const POLICY_HOST_LABEL = i18n.translate('xpack.synthetics.monitorManagement.pol
 });
 
 export const SuperSelect = React.forwardRef<HTMLSelectElement, EuiSuperSelectProps<string>>(
-  (props, ref) => (
-    <span ref={ref} tabIndex={-1}>
-      <EuiSuperSelect data-test-subj="syntheticsAgentPolicySelect" {...props} />
-    </span>
-  )
+  ({ popoverProps, ...props }, ref) => {
+    const panelRef = useRef<HTMLElement | null>(null);
+    const setPanelRef = useCallback((node: HTMLElement | null) => {
+      panelRef.current = node;
+    }, []);
+    // Bumping this key remounts EuiSuperSelect, which is how we dismiss a stale dropdown.
+    const [remountKey, setRemountKey] = useState(0);
+
+    // EuiSuperSelect keeps its dropdown open when keyboard focus leaves the collapsed
+    // control (e.g. tabbing away when every option is disabled, so focus never enters
+    // the listbox). Its own closePopover() refocuses the control, which would yank
+    // keyboard focus back, so we dismiss by remounting instead — closing the overlay
+    // without moving focus away from wherever the user tabbed to.
+    const handleBlur = useCallback((event: React.FocusEvent<HTMLSpanElement>) => {
+      const nextFocused = event.relatedTarget as Node | null;
+      const focusStillInside =
+        event.currentTarget.contains(nextFocused) ||
+        (nextFocused != null && (panelRef.current?.contains(nextFocused) ?? false));
+      if (!focusStillInside) {
+        setRemountKey((key) => key + 1);
+      }
+    }, []);
+
+    return (
+      <span ref={ref} tabIndex={-1} onBlur={handleBlur}>
+        <EuiSuperSelect
+          key={remountKey}
+          data-test-subj="syntheticsAgentPolicySelect"
+          {...props}
+          popoverProps={{ ...popoverProps, panelRef: setPanelRef }}
+        />
+      </span>
+    );
+  }
 );
