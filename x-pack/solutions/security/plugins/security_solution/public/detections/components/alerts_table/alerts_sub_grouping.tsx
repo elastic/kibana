@@ -40,7 +40,10 @@ import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_que
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
 import { getAlertsGroupingQuery } from './grouping_settings';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
-import { fetchQueryAlerts, fetchQueryUnifiedAlerts } from '../../containers/detection_engine/alerts/api';
+import {
+  fetchQueryAlerts,
+  fetchQueryUnifiedAlerts,
+} from '../../containers/detection_engine/alerts/api';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 const DEFAULT_FILTERS: Filter[] = [];

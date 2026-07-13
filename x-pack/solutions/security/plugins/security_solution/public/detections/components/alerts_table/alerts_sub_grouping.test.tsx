@@ -20,7 +20,10 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { defaultGroupStatsAggregations } from './grouping_settings';
 import { PageScope } from '../../../data_view_manager/constants';
-import { fetchQueryAlerts, fetchQueryUnifiedAlerts } from '../../containers/detection_engine/alerts/api';
+import {
+  fetchQueryAlerts,
+  fetchQueryUnifiedAlerts,
+} from '../../containers/detection_engine/alerts/api';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
