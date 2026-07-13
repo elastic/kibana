@@ -97,21 +97,30 @@ const deletePhaseAlreadyInUseTooltip = i18n.translate(
   { defaultMessage: 'Delete phase is already in use' }
 );
 
-const renderAddPhaseButton = (label: string) => (buttonProps: IlmPhaseSelectRenderButtonProps) => {
-  const button = (
-    <EuiButton {...buttonProps} color="text" size="s" iconType="chevronSingleDown" iconSide="right">
-      {label}
-    </EuiButton>
-  );
+const renderAddPhaseButton =
+  (label: string) =>
+  ({ 'aria-label': _ariaLabel, ...buttonProps }: IlmPhaseSelectRenderButtonProps) => {
+    const button = (
+      <EuiButton
+        {...buttonProps}
+        aria-label={label}
+        color="text"
+        size="s"
+        iconType="chevronSingleDown"
+        iconSide="right"
+      >
+        {label}
+      </EuiButton>
+    );
 
-  if (!buttonProps.disabled) return button;
+    if (!buttonProps.disabled) return button;
 
-  return (
-    <EuiToolTip position="top" content={allPhasesInUseTooltip}>
-      {button}
-    </EuiToolTip>
-  );
-};
+    return (
+      <EuiToolTip position="top" content={allPhasesInUseTooltip}>
+        {button}
+      </EuiToolTip>
+    );
+  };
 
 interface LifecycleSummaryProps {
   definition: Streams.ingest.all.GetResponse;
