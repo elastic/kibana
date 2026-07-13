@@ -451,6 +451,11 @@ module.exports = {
     'no-prototype-builtins': 'error',
 
     /**
+     * kbn-ui rules
+     */
+    '@kbn/kbn-ui/prefer_toast_action_props': 'warn',
+
+    /**
      * EUI Team rules
      */
 

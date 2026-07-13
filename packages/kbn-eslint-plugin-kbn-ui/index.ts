@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { PreferToastActionProps } from './rules/prefer_toast_action_props';
+
 /**
  * Custom ESLint rules for kbn-ui packages.
  * Add `'@kbn/eslint-plugin-kbn-ui'` to your eslint config to use them.
  * @internal
  */
-export const rules = {};
+export const rules = {
+  prefer_toast_action_props: PreferToastActionProps,
+};
