@@ -33,7 +33,15 @@ async function main() {
   });
   const testSuiteGroups = groupBy('name', testSuiteRuns);
 
-  const success = testSuiteRuns.every((job) => job.state === 'passed');
+  const SETUP_STEP_KEYS = ['build', 'scout_flaky_setup'];
+  const setupFailed = jobs.some(
+    (job) => SETUP_STEP_KEYS.includes(job.step_key ?? '') && job.state !== 'passed'
+  );
+
+  const noTestsRan = testSuiteRuns.length === 0;
+
+  const success =
+    !setupFailed && !noTestsRan && testSuiteRuns.every((job) => job.state === 'passed');
   const testGroupResults = Object.entries(testSuiteGroups).map(([name, group]) => {
     const passingTests = group.filter((job) => job.state === 'passed');
     return {
@@ -53,9 +61,11 @@ async function main() {
     buildkiteBuild.pipeline.slug
   }/builds?branch=${encodeURIComponent(buildkiteBuild.branch)}`;
 
+  const statusLine = getStatusLine({ success, setupFailed, noTestsRan });
+
   const prComment = `
 ## Flaky Test Runner Stats
-### ${success ? '🎉 All tests passed!' : '🟠 Some tests failed.'} - ${buildLink}
+### ${statusLine} - ${buildLink}
 ${testGroupResults.map(formatTestGroupResult).join('\n')}
 
 [see run history](${flakyRunHistoryLink})
@@ -70,6 +80,27 @@ ${testGroupResults.map(formatTestGroupResult).join('\n')}
   });
 
   console.log(`Comment added: ${commentResult.data.html_url}`);
+}
+
+function getStatusLine({
+  success,
+  setupFailed,
+  noTestsRan,
+}: {
+  success: boolean;
+  setupFailed: boolean;
+  noTestsRan: boolean;
+}): string {
+  if (success) {
+    return '🎉 All tests passed!';
+  }
+  if (setupFailed) {
+    return '🔴 Setup failed — tests did not run.';
+  }
+  if (noTestsRan) {
+    return '🔴 No tests ran.';
+  }
+  return '🟠 Some tests failed.';
 }
 
 function formatTestGroupResult(result: TestSuiteResult) {
