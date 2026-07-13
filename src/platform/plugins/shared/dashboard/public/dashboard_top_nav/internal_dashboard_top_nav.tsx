@@ -9,7 +9,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { distinctUntilChanged, map } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import UseUnmount from 'react-use/lib/useUnmount';
 
 import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
@@ -32,8 +32,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import {
+  apiPublishesEsqlUsage,
   apiPublishesUnifiedSearch,
   combineCompatibleChildrenApis,
+  type PublishesEsqlUsage,
   type PublishesUnifiedSearch,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -155,12 +157,25 @@ export function InternalDashboardTopNav({
 
   const [hasEsqlPanel, setHasEsqlPanel] = useState(false);
   useEffect(() => {
-    const subscription = combineCompatibleChildrenApis<
+    const hasEsqlQuery$ = combineCompatibleChildrenApis<
       PublishesUnifiedSearch,
       (Query | AggregateQuery | undefined)[]
-    >(dashboardApi, 'query$', apiPublishesUnifiedSearch, [])
+    >(dashboardApi, 'query$', apiPublishesUnifiedSearch, []).pipe(
+      map((queries) => queries.some((q) => isOfAggregateQueryType(q)))
+    );
+
+    // Vega panels can embed ES|QL data sources directly in their spec, without ever
+    // publishing an aggregate query$, so they publish their own usesEsql$ signal instead.
+    const hasEsqlVegaPanel$ = combineCompatibleChildrenApis<PublishesEsqlUsage, boolean[]>(
+      dashboardApi,
+      'usesEsql$',
+      apiPublishesEsqlUsage,
+      []
+    ).pipe(map((usesEsqlValues) => usesEsqlValues.some(Boolean)));
+
+    const subscription = combineLatest([hasEsqlQuery$, hasEsqlVegaPanel$])
       .pipe(
-        map((queries) => queries.some((q) => isOfAggregateQueryType(q))),
+        map(([hasEsqlQuery, hasEsqlVegaPanel]) => hasEsqlQuery || hasEsqlVegaPanel),
         distinctUntilChanged()
       )
       .subscribe(setHasEsqlPanel);
