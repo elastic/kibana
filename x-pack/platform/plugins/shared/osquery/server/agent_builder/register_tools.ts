@@ -13,6 +13,7 @@ import { checkIntegrationTool } from './check_integration_tool';
 import { listSavedQueriesTool } from './list_saved_queries_tool';
 import { getTableSchemaTool } from './get_table_schema_tool';
 import { runLiveQueryTool } from './run_live_query_tool';
+import { getLiveQueryResultsTool } from './get_live_query_results_tool';
 import { listPacksTool } from './list_packs_tool';
 
 export const registerAgentBuilderTools = (
@@ -25,8 +26,9 @@ export const registerAgentBuilderTools = (
   agentBuilder.tools.register(listSavedQueriesTool(osqueryContext, logger));
   agentBuilder.tools.register(getTableSchemaTool(osqueryContext, logger, schemaService));
   agentBuilder.tools.register(runLiveQueryTool(osqueryContext, logger, schemaService));
+  agentBuilder.tools.register(getLiveQueryResultsTool(osqueryContext, logger));
   agentBuilder.tools.register(listPacksTool(osqueryContext, logger));
   logger.info(
-    'Osquery Agent Builder tools registered (check_integration, list_saved_queries, get_table_schema, run_live_query, list_packs)'
+    'Osquery Agent Builder tools registered (check_integration, list_saved_queries, get_table_schema, run_live_query, get_live_query_results, list_packs)'
   );
 };

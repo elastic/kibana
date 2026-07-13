@@ -7,10 +7,21 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { securityTool } from '../../tools/constants';
 
 export const ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID = 'endpoint-forensic-analysis';
+
+/** Osquery registry tools bound when this skill loads (must match osquery plugin registrations). */
+export const ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS = [
+  `${internalNamespaces.osquery}.check_integration`,
+  `${internalNamespaces.osquery}.list_saved_queries`,
+  `${internalNamespaces.osquery}.get_table_schema`,
+  `${internalNamespaces.osquery}.run_live_query`,
+  `${internalNamespaces.osquery}.get_live_query_results`,
+  `${internalNamespaces.osquery}.list_packs`,
+] as const;
 
 export const ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID = securityTool(
   'endpoint_forensic.discover_telemetry'
@@ -92,8 +103,11 @@ Always scope \`@timestamp\`. Cite index and query in answers.
 For live-state questions, use these Osquery tools in sequence:
 - \`osquery.list_saved_queries\` to find prebuilt queries matching the investigative need
 - \`osquery.get_table_schema\` to verify column names before authoring a custom query
-- \`osquery.run_live_query\` to dispatch a read-only SELECT query to enrolled agents
+- \`osquery.run_live_query\` to dispatch a read-only SELECT query to enrolled agents (waits ~30s inline for rows)
+- \`osquery.get_live_query_results\` when \`run_live_query\` returns \`status: dispatched\` — pass the \`action_id\` and wait up to 60s for agent rows
 - \`osquery.list_packs\` to find Elastic-built packs when the analyst references a pack by name
+
+After rows return, **display them in chat** as a markdown table (columns from the first row, cap at 20 rows with a note if truncated).
 
 ### 3. Patient zero
 Query process and network indices ordered by @timestamp ASC.
@@ -118,9 +132,11 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
 - Do **not** use \`platform.core.search\`, \`relevance_search\`, or repeated \`platform.core.list_indices\` for reconstruction — they cannot replace scoped ES|QL on Defend telemetry.
 - Use \`platform.core.get_index_mapping\` only when field names are uncertain before generating ES|QL.
 - Use \`osquery.run_live_query\` only for **read-only SELECT queries** on enrolled agents. Never attempt shell execution or mutating Osquery tables.
+- When \`osquery.run_live_query\` returns \`status: dispatched\`, **must** call \`osquery.get_live_query_results\` with the \`action_id\` before telling the analyst live dispatch is unavailable.
 - When a prebuilt saved query matches, prefer it over authoring a custom query.
 `,
   getRegistryTools: () => [
+    ...ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS,
     platformCoreTools.getIndexMapping,
     platformCoreTools.generateEsql,
     platformCoreTools.executeEsql,
