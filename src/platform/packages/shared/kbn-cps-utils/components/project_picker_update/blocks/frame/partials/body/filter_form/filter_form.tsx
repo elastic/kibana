@@ -200,7 +200,7 @@ export function ProjectPickerFilterForm({
 
   const filterValues = useMemo(() => {
     if (!anchoringFilteringTagName) return [];
-    const values = state.selectedProjects
+    const values = state.visibleProjectIds
       .map((projectId) => state.availableProjects.get(projectId)?.[anchoringFilteringTagName])
       .filter((value): value is string => value != null);
     return toSelectableOptions([...new Set(values)], filteringTagValue);
@@ -208,7 +208,7 @@ export function ProjectPickerFilterForm({
     anchoringFilteringTagName,
     filteringTagValue,
     state.availableProjects,
-    state.selectedProjects,
+    state.visibleProjectIds,
   ]);
 
   const handleCreateFilter = useCallback(async () => {

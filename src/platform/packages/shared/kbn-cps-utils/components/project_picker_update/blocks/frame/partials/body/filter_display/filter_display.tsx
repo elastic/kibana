@@ -32,11 +32,12 @@ import { filterDisplayStyles } from './filter_display.styles';
 export interface EditingFilter {
   id: string;
   expression: string;
+  enabled: boolean;
 }
 
 interface GetFilterBadgeContextMenuItemsProps {
   closePopover: () => void;
-  onEditFilter: (filter: EditingFilter) => void;
+  onEditFilter: (filter: Pick<EditingFilter, 'id' | 'expression'>) => void;
   actions: ReturnType<typeof useProjectPickerActions>;
 }
 
@@ -47,9 +48,13 @@ interface FilterBadgeClickActionContext extends EditingFilter {
 interface FilterBadgeContextMenuItemProps
   extends Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'external' | 'disabled'> {
   label: string;
-  isEnabled?: (props: FilterBadgeClickActionContext) => boolean;
+  isDisabled?: (props: FilterBadgeClickActionContext) => boolean;
+  isDisplayed?: (props: FilterBadgeClickActionContext) => boolean;
 }
 
+/**
+ * Returns the context menu items for the filter badge.
+ */
 const getFilterBadgeContextMenuItems = ({
   onEditFilter,
   actions,
@@ -61,6 +66,9 @@ const getFilterBadgeContextMenuItems = ({
       label: i18n.translate('projectPicker.filterDisplay.removeFilter', {
         defaultMessage: 'Edit',
       }),
+      isDisabled: ({ enabled }) => {
+        return !enabled;
+      },
       onClick(this: FilterBadgeClickActionContext, e) {
         e.preventDefault();
         onEditFilter({ id: this.id, expression: this.expression });
@@ -76,10 +84,16 @@ const getFilterBadgeContextMenuItems = ({
         actions.invertFilterExpressionOperator({ id: this.id });
         closePopover();
       },
-      isEnabled: ({ projectPickerState, id }) => {
-        return projectPickerState.filterExpressions
-          .get(id)!
-          .expression.includes(FilterOperator.EQUALS);
+      isDisabled: ({ enabled }) => {
+        return !enabled;
+      },
+      isDisplayed: ({ projectPickerState, id }) => {
+        const filterExpression = projectPickerState.filterExpressions.get(id);
+        if (!filterExpression) {
+          return false;
+        }
+
+        return filterExpression.expression.includes(FilterOperator.EQUALS);
       },
     },
     {
@@ -92,10 +106,16 @@ const getFilterBadgeContextMenuItems = ({
         actions.invertFilterExpressionOperator({ id: this.id });
         closePopover();
       },
-      isEnabled: ({ projectPickerState, id }) => {
-        return projectPickerState.filterExpressions
-          .get(id)!
-          .expression.includes(FilterOperator.NOT_EQUALS);
+      isDisabled: ({ enabled }) => {
+        return !enabled;
+      },
+      isDisplayed: ({ projectPickerState, id }) => {
+        const filterExpression = projectPickerState.filterExpressions.get(id);
+        if (!filterExpression) {
+          return false;
+        }
+
+        return filterExpression.expression.includes(FilterOperator.NOT_EQUALS);
       },
     },
     {
@@ -108,7 +128,7 @@ const getFilterBadgeContextMenuItems = ({
         actions.toggleFilterExpression({ id: this.id });
         closePopover();
       },
-      isEnabled: ({ projectPickerState, id }) => {
+      isDisplayed: ({ projectPickerState, id }) => {
         return projectPickerState.filterExpressions.get(id)!.enabled;
       },
     },
@@ -122,7 +142,7 @@ const getFilterBadgeContextMenuItems = ({
         actions.toggleFilterExpression({ id: this.id });
         closePopover();
       },
-      isEnabled: ({ projectPickerState, id }) => {
+      isDisplayed: ({ projectPickerState, id }) => {
         return projectPickerState.filterExpressions.get(id)!.enabled === false;
       },
     },
@@ -141,7 +161,7 @@ const getFilterBadgeContextMenuItems = ({
 };
 
 export interface ProjectPickerFilterDisplayProps {
-  onEditFilter: (filter: EditingFilter | null) => void;
+  onEditFilter: (filter: Pick<EditingFilter, 'id' | 'expression'> | null) => void;
 }
 
 export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilterDisplayProps) {
@@ -170,7 +190,7 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
       return null;
     }
 
-    return { id: selectedFilterId, expression: entry.expression };
+    return { id: selectedFilterId, ...entry };
   }, [selectedFilterId, state.filterExpressions]);
 
   const filterBadgeContextMenuItems = useMemo(() => {
@@ -197,9 +217,9 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
                 projectPickerState: state,
               };
 
-              const isEnabled = contextMenuItemConfig.isEnabled?.(ctx) ?? true;
+              const isDisplayed = contextMenuItemConfig.isDisplayed?.(ctx) ?? true;
 
-              return isEnabled ? (
+              return isDisplayed ? (
                 <EuiContextMenuItem
                   key={contextMenuItemConfig.label}
                   icon={contextMenuItemConfig.icon}
@@ -207,12 +227,13 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
                     id: selectedFilter.id,
                     expression: selectedFilter.expression,
                   })}
+                  disabled={contextMenuItemConfig?.isDisabled?.(ctx) ?? false}
                 >
                   {contextMenuItemConfig.label}
                 </EuiContextMenuItem>
               ) : null;
             })
-            .filter(Boolean)}
+            .filter((item): item is React.ReactElement => item != null)}
         />
       </EuiWrappingPopover>
     ) : null;
@@ -235,7 +256,7 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
       {renderFilterBadgeContextMenu()}
       <EuiFlexGroup direction="column" gutterSize="none" css={styles.container}>
         {filterEntries.length > 0 ? (
-          <EuiFlexItem>
+          <EuiFlexItem css={styles.filterBadgesContainer}>
             <EuiFlexGroup gutterSize="s">
               {filterEntries.map(([id, entry]) => (
                 <EuiFlexItem key={id} grow={false}>

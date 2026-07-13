@@ -23,14 +23,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState } from 'react';
+import type { ProjectPickerState } from '../../../../state/reducers';
 import { useProjectPickerActions, useProjectPickerState } from '../../../../state';
 
+interface HeaderContextMenuClickActionContext {
+  state: ProjectPickerState;
+}
+interface HeaderContextMenuItemProps
+  extends Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'external' | 'disabled'> {
+  label: string;
+  isDisabled?: (props: HeaderContextMenuClickActionContext) => boolean;
+}
+
 const getContextMenuItems = (
-  actions: ReturnType<typeof useProjectPickerActions>,
-  isUsingSpaceDefaults: boolean
-): Array<
-  Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'external' | 'disabled'> & { label: string }
->[] => [
+  actions: ReturnType<typeof useProjectPickerActions>
+): Array<HeaderContextMenuItemProps>[] => [
   [
     {
       icon: 'eraser',
@@ -40,7 +47,9 @@ const getContextMenuItems = (
       onClick: () => {
         actions.clearProjectFilters();
       },
-      disabled: !isUsingSpaceDefaults,
+      isDisabled: ({ state }) => {
+        return state.filterExpressions.size === 0;
+      },
     },
     {
       icon: 'clockCounter',
@@ -50,7 +59,9 @@ const getContextMenuItems = (
       onClick: () => {
         actions.revertToSpaceDefaults();
       },
-      disabled: isUsingSpaceDefaults,
+      isDisabled: ({ state }) => {
+        return state.filterExpressions.size === 0;
+      },
     },
   ],
   [
@@ -84,10 +95,7 @@ export function ProjectPickerFrameHeader() {
   );
 
   const closePopover = useCallback(() => setIsOpen(false), []);
-  const contextMenuConfig = useMemo(
-    () => getContextMenuItems(actions, isUsingSpaceDefaults),
-    [actions, isUsingSpaceDefaults]
-  );
+  const contextMenuConfig = useMemo(() => getContextMenuItems(actions), [actions]);
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
@@ -141,7 +149,7 @@ export function ProjectPickerFrameHeader() {
                         key={item.label}
                         icon={item.icon}
                         onClick={item.onClick}
-                        disabled={item.disabled}
+                        disabled={item.isDisabled?.({ state }) ?? false}
                       >
                         {item.label}
                       </EuiContextMenuItem>

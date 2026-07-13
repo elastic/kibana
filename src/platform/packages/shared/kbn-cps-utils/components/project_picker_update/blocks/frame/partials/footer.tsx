@@ -9,12 +9,21 @@
 
 import { EuiFlexGroup, EuiText, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useProjectPickerActions, useProjectPickerState } from '../../../state';
 
 export function ProjectPickerFrameFooter() {
   const actions = useProjectPickerActions();
   const state = useProjectPickerState();
+
+  const { includedCount, excludedCount } = useMemo(() => {
+    const selected = new Set(state.selectedProjects);
+    const included = state.visibleProjectIds.filter((id) => selected.has(id)).length;
+    return {
+      includedCount: included,
+      excludedCount: state.visibleProjectIds.length - included,
+    };
+  }, [state.visibleProjectIds, state.selectedProjects]);
 
   const includeAllVisibleProjects = useCallback(() => {
     actions.includeAllVisibleProjects();
@@ -26,17 +35,17 @@ export function ProjectPickerFrameFooter() {
         <EuiText size="xs" color="subdued">
           <p>
             {i18n.translate('cpsUtils.projectPicker.frameFooter.description', {
-              defaultMessage: '{filteredProjectsCount} included',
-              values: {
-                filteredProjectsCount: state.selectedProjects.length,
-              },
+              defaultMessage: '{includedCount} included · {excludedCount} excluded',
+              values: { includedCount, excludedCount },
             })}
           </p>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          disabled={state.selectedProjects.length === state.visibleProjectIds.length}
+          disabled={
+            state.visibleProjectIds.length === 0 || includedCount === state.visibleProjectIds.length
+          }
           onClick={includeAllVisibleProjects}
           flush="right"
           size="xs"
