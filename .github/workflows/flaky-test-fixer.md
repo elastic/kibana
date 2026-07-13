@@ -343,5 +343,6 @@ Follow this format:
   ```markdown
   ### The fix is already on `main` — it needs backporting
 
-  #<main-PR> already fixed this on `main`; please backport it to <branch(es)>. cc @<github-handle-here>
+  #<main-PR> already fixed this on `main`; add the `backport:version` + `<vX.Y.Z>` label(s) to it to backport to <branch(es)>. cc @<github-handle-here>
   ```
+  Fill `<vX.Y.Z>` from the branch → version mapping in "Backport label" (only the branches that still need the fix). Adding these labels to the merged PR triggers the backport.
