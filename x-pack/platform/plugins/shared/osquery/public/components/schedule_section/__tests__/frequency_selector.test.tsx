@@ -234,7 +234,10 @@ describe('FrequencySelector', () => {
       expect(next.byweekday).toEqual(['MO', 'WE']);
     });
 
-    it('clamps the repeat-every input to [1, 9999] regardless of unit', () => {
+    it('clamps the repeat-every input to the unit-specific maximum, not a shared 9999', () => {
+      // Month(s) caps at 1200 (100 years) — well under the ~292.5-year
+      // rrule-go horizon. A unit-blind 9999 cap would let an interval
+      // through whose second MONTHLY occurrence never fires.
       const onChange = jest.fn();
       renderWithProviders(
         <FrequencySelector
@@ -248,7 +251,81 @@ describe('FrequencySelector', () => {
       });
 
       const next = onChange.mock.calls[0][0] as RecurrenceFormState;
+      expect(next.interval).toBe(1200);
+    });
+
+    it('clamps a Year(s) interval above 100 to 100', () => {
+      const onChange = jest.fn();
+      renderWithProviders(
+        <FrequencySelector
+          value={{ ...baseRecurrence(), frequency: 'custom', repeatUnit: 'years' }}
+          onChange={onChange}
+        />
+      );
+
+      fireEvent.change(screen.getByTestId('osquery-frequency-selector-every'), {
+        target: { value: '293' },
+      });
+
+      const next = onChange.mock.calls[0][0] as RecurrenceFormState;
+      expect(next.interval).toBe(100);
+    });
+
+    it('clamps a Month(s) interval above 1200 to 1200', () => {
+      const onChange = jest.fn();
+      renderWithProviders(
+        <FrequencySelector
+          value={{ ...baseRecurrence(), frequency: 'custom', repeatUnit: 'months' }}
+          onChange={onChange}
+        />
+      );
+
+      fireEvent.change(screen.getByTestId('osquery-frequency-selector-every'), {
+        target: { value: '3508' },
+      });
+
+      const next = onChange.mock.calls[0][0] as RecurrenceFormState;
+      expect(next.interval).toBe(1200);
+    });
+
+    it('still allows a Week(s) interval up to 9999', () => {
+      const onChange = jest.fn();
+      renderWithProviders(
+        <FrequencySelector
+          value={{ ...baseRecurrence(), frequency: 'custom', repeatUnit: 'weeks' }}
+          onChange={onChange}
+        />
+      );
+
+      fireEvent.change(screen.getByTestId('osquery-frequency-selector-every'), {
+        target: { value: '9999' },
+      });
+
+      const next = onChange.mock.calls[0][0] as RecurrenceFormState;
       expect(next.interval).toBe(9999);
+    });
+
+    it('re-bounds an over-cap Month(s) interval when switching to Year(s)', () => {
+      const onChange = jest.fn();
+      renderWithProviders(
+        <FrequencySelector
+          value={{
+            ...baseRecurrence(),
+            frequency: 'custom',
+            repeatUnit: 'months',
+            interval: 1200,
+          }}
+          onChange={onChange}
+        />
+      );
+
+      fireEvent.change(screen.getByTestId('osquery-frequency-selector-unit'), {
+        target: { value: 'years' },
+      });
+
+      const next = onChange.mock.calls[0][0] as RecurrenceFormState;
+      expect(next.repeatUnit).toBe('years');
+      expect(next.interval).toBe(100);
     });
 
     it('keeps `repeatUnit` sticky across a Daily round trip (frequency change does not reset it)', () => {

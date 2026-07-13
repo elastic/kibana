@@ -118,6 +118,12 @@ export const AT_LEAST_ONE_DAY_ERROR = i18n.translate(
   { defaultMessage: 'Select at least one day of the week.' }
 );
 
+export const intervalOutOfRangeError = (max: number): string =>
+  i18n.translate('xpack.osquery.scheduleSection.intervalOutOfRangeError', {
+    defaultMessage: 'Repeat every must be between 1 and {max}.',
+    values: { max },
+  });
+
 export const START_DATE_LABEL = i18n.translate('xpack.osquery.scheduleSection.startDateLabel', {
   defaultMessage: 'Start date and time',
 });

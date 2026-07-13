@@ -9,8 +9,10 @@ import { MAX_SPLAY_SECONDS } from '../../../common/schedule';
 import { splayInSeconds, sumCompoundSeconds } from '../../../common/utils/splay_utils';
 import { floorTo30Min } from './slot_utils';
 import type { ScheduleFormData } from './types';
+import { maxIntervalForUnit } from './types';
 import {
   AT_LEAST_ONE_DAY_ERROR,
+  intervalOutOfRangeError,
   SPLAY_MAX_ERROR,
   START_DATE_IN_PAST_ERROR,
   STOP_AFTER_BEFORE_START_ERROR,
@@ -57,6 +59,17 @@ export const validateScheduleFormData = (
     data.recurrence.frequency === 'custom' && (data.recurrence.repeatUnit ?? 'weeks') === 'weeks';
   if (isCustomWeekly && data.recurrence.byweekday.length === 0) {
     errors.push(AT_LEAST_ONE_DAY_ERROR);
+  }
+
+  // Custom interval must stay within the active unit's cap — defends
+  // against form state hydrated from a SO that predates the cap, since
+  // the field's own clamp only guards live user input.
+  if (data.recurrence.frequency === 'custom') {
+    const repeatUnit = data.recurrence.repeatUnit ?? 'weeks';
+    const max = maxIntervalForUnit(repeatUnit);
+    if (data.recurrence.interval > max) {
+      errors.push(intervalOutOfRangeError(max));
+    }
   }
 
   const startIsUnchanged =

@@ -36,6 +36,34 @@ export type FrequencyMode =
 export type RepeatUnit = 'weeks' | 'months' | 'years';
 
 /**
+ * Per-unit maxima for the Custom "Repeat every N ___" interval. Conservative,
+ * human-meaningful caps well under the ~292.5-year horizon osquerybeat's
+ * RRULE engine (`teambition/rrule-go`) allows for an `UNTIL`-less rule
+ * (`DTSTART + MaxInt64` ns) — see design D1. `Week(s)` is unchanged since
+ * 9999 weeks (≈191 years) already sits comfortably under that horizon.
+ */
+export const MAX_INTERVAL_WEEKS = 9999;
+export const MAX_INTERVAL_MONTHS = 1200;
+export const MAX_INTERVAL_YEARS = 100;
+
+/**
+ * Resolve the interval maximum for a given {@link RepeatUnit}. Shared by the
+ * field clamp (`frequency_selector.tsx`) and the submit-time validator
+ * (`validation.ts`) so the two enforcement layers cannot drift (D2).
+ */
+export const maxIntervalForUnit = (unit: RepeatUnit): number => {
+  switch (unit) {
+    case 'months':
+      return MAX_INTERVAL_MONTHS;
+    case 'years':
+      return MAX_INTERVAL_YEARS;
+    case 'weeks':
+    default:
+      return MAX_INTERVAL_WEEKS;
+  }
+};
+
+/**
  * Weekday tokens supported by the custom (WEEKLY) frequency. Reuses
  * {@link WeekdayStr} from `@kbn/rrule` — the same string keys the parser /
  * serializer round-trip through `BYDAY=`.

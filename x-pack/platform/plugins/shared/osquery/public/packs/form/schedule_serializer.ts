@@ -227,7 +227,8 @@ export const rruleFieldsToRecurrence = (fields: RRuleFields): RecurrenceFormStat
     fields.freq === Frequency.MONTHLY &&
     (!fields.bymonthday || fields.bymonthday.length === 0) &&
     (!fields.bymonth || fields.bymonth.length === 0) &&
-    (!fields.byweekday || fields.byweekday.length === 0)
+    (!fields.byweekday || fields.byweekday.length === 0) &&
+    !fields._unknown?.BYDAY
   ) {
     // MONTHLY with no BYMONTHDAY/BYMONTH/BYDAY override renders as Custom +
     // Month(s) — the recurrence day-of-month is implicitly DTSTART's (D39).
@@ -241,10 +242,12 @@ export const rruleFieldsToRecurrence = (fields: RRuleFields): RecurrenceFormStat
     fields.freq === Frequency.YEARLY &&
     (!fields.bymonthday || fields.bymonthday.length === 0) &&
     (!fields.bymonth || fields.bymonth.length === 0) &&
-    (!fields.byweekday || fields.byweekday.length === 0)
+    (!fields.byweekday || fields.byweekday.length === 0) &&
+    !fields._unknown?.BYDAY
   ) {
     // YEARLY with no BYMONTH/BYMONTHDAY/BYDAY override renders as Custom +
-    // Year(s) — the recurrence month/day is implicitly DTSTART's (D39).
+    // Year(s) — the recurrence month/day is implicitly DTSTART's (D39). Same
+    // `_unknown.BYDAY` guard as MONTHLY above.
     frequency = 'custom';
     repeatUnit = 'years';
 

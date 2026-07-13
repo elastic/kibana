@@ -40,7 +40,7 @@ import {
   UNIT_YEARS,
 } from './translations';
 import type { FrequencyMode, RecurrenceFormState, RepeatUnit } from './types';
-import { clampInt, WEEKDAY_TOKENS } from './types';
+import { clampInt, maxIntervalForUnit, WEEKDAY_TOKENS } from './types';
 import { selectAppendCss } from './select_append_css';
 
 export interface FrequencySelectorProps {
@@ -58,6 +58,7 @@ interface FrequencyOptionTemplate {
   label: string;
   mode: FrequencyMode;
 }
+
 const FREQUENCY_OPTION_TEMPLATES: FrequencyOptionTemplate[] = [
   { suffix: 'daily', label: FREQUENCY_DAILY, mode: 'daily' },
   { suffix: 'custom', label: FREQUENCY_CUSTOM, mode: 'custom' },
@@ -163,18 +164,23 @@ export const FrequencySelector = ({
       // Switching units changes the effective RRULE shape (WEEKLY+BYDAY vs.
       // MONTHLY vs. YEARLY) even though `frequency` itself stays `'custom'` —
       // clear `_unknown` for the same reason a frequency change does (D39).
-      onChange({ ...value, repeatUnit: raw, _unknown: undefined });
+      // Re-bound the interval to the new unit's max so a large Month(s)
+      // value can't leak into Year(s).
+      const nextInterval = clampInt(value.interval, 1, maxIntervalForUnit(raw), value.interval);
+      onChange({ ...value, repeatUnit: raw, interval: nextInterval, _unknown: undefined });
     },
     [onChange, repeatUnit, value]
   );
 
+  const intervalMax = maxIntervalForUnit(repeatUnit);
+
   const handleIntervalChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const raw = Number(event.target.value);
-      const next = clampInt(raw, 1, 9999, value.interval);
+      const next = clampInt(raw, 1, intervalMax, value.interval);
       onChange({ ...value, interval: next });
     },
-    [onChange, value]
+    [intervalMax, onChange, value]
   );
 
   const tokenForWeekdayId = useCallback(
@@ -271,6 +277,7 @@ export const FrequencySelector = ({
               <EuiFieldNumber
                 fullWidth
                 min={1}
+                max={intervalMax}
                 step={1}
                 value={value.interval}
                 onChange={handleIntervalChange}

@@ -431,6 +431,21 @@ describe('schedule_serializer', () => {
       expect(Object.keys(restored.recurrence._unknown ?? {}).length).toBeGreaterThan(0);
     });
 
+    it('round-trips an ordinal BYDAY on MONTHLY byte-identically, landing on daily (D3/D4)', () => {
+      const restored = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: { rrule: 'FREQ=MONTHLY;BYDAY=1MO', start_date: '2026-01-01T00:00:00.000Z' },
+      });
+
+      expect(restored.recurrence.frequency).toBe('daily');
+      expect(restored.recurrence._unknown).toEqual({ FREQ: 'MONTHLY', BYDAY: '1MO' });
+      expect(serializeSchedule(restored).rrule_schedule!.rrule).toBe('FREQ=MONTHLY;BYDAY=1MO');
+    });
+
+    it('round-trips an ordinal BYDAY on YEARLY byte-identically, landing on daily (D3/D4)', () => {
+      expect(roundTripRrule('FREQ=YEARLY;BYDAY=-1FR')).toBe('FREQ=YEARLY;BYDAY=-1FR');
+    });
+
     it('does not double-emit a part present as both a typed field and _unknown', () => {
       // Custom (WEEKLY) emits BYDAY from the typed `byweekday` field. A stray
       // `_unknown.BYDAY` (e.g. left over from external state) must be dropped by
