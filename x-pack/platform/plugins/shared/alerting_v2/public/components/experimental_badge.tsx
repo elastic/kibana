@@ -10,7 +10,7 @@ import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const EXPERIMENTAL_LABEL = i18n.translate('xpack.alertingV2.experimentalBadge.label', {
-  defaultMessage: 'Experimental feature',
+  defaultMessage: 'Experimental',
 });
 
 const EXPERIMENTAL_TOOLTIP = i18n.translate('xpack.alertingV2.experimentalBadge.tooltip', {

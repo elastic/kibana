@@ -29,6 +29,10 @@ import {
   simulateClassicStreamTemplate,
 } from '../../../../lib/streams/data_streams/manage_data_streams';
 import {
+  getDataStreamGlobalRetention,
+  type DataStreamGlobalRetention,
+} from '../../../../lib/streams/lifecycle/global_retention';
+import {
   buildPolicyUsage,
   normalizeIlmPhases,
   type IlmPoliciesResponse,
@@ -41,6 +45,8 @@ import {
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 
 type PhaseNameWithoutDelete = Exclude<PhaseName, 'delete'>;
+
+const MAX_BACKING_INDICES = 1000;
 
 export interface DslPhaseStat {
   size_in_bytes: number;
@@ -93,7 +99,7 @@ const getDslPhaseStats = async (
           },
           aggs: {
             indices: {
-              terms: { field: '_index', size: 1000 },
+              terms: { field: '_index', size: MAX_BACKING_INDICES },
             },
           },
         },
@@ -476,23 +482,70 @@ const lifecycleSnapshotRepositoriesRoute = createServerRoute({
   handler: async ({
     request,
     getScopedClients,
-  }): Promise<{ repositories: Array<{ name: string; type: string }> }> => {
+  }): Promise<{
+    repositories: Array<{ name: string; type: string }>;
+    default_repository?: string;
+  }> => {
     const { scopedClusterClient } = await getScopedClients({ request });
-    const repositoriesByName = await scopedClusterClient.asCurrentUser.snapshot.getRepository({
-      name: '*',
-    });
+    const [repositoriesByName, clusterSettings] = await Promise.all([
+      scopedClusterClient.asCurrentUser.snapshot.getRepository({ name: '*' }),
+      scopedClusterClient.asCurrentUser.cluster.getSettings({
+        filter_path: 'persistent.repositories.default_repository',
+      }),
+    ]);
 
     const repositories = Object.entries(repositoriesByName).map(([name, { type }]) => ({
       name,
       type: type ?? '',
     }));
 
-    return { repositories };
+    // The frozen data stream lifecycle phase relies on the cluster's default snapshot repository
+    // (`persistent.repositories.default_repository`) for its searchable snapshots.
+    const rawDefaultRepository = (
+      clusterSettings.persistent?.repositories as { default_repository?: unknown } | undefined
+    )?.default_repository;
+    const defaultRepository =
+      typeof rawDefaultRepository === 'string' && rawDefaultRepository.trim().length > 0
+        ? rawDefaultRepository
+        : undefined;
+
+    return { repositories, default_repository: defaultRepository };
+  },
+});
+
+const lifecycleGlobalRetentionRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/lifecycle/_global_retention',
+  options: {
+    access: 'internal',
+    summary: 'Get data stream global retention',
+    description:
+      'Gets the cluster-wide default and maximum data retention that apply to a stream lifecycle',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+  }),
+  handler: async ({ params, request, getScopedClients }): Promise<DataStreamGlobalRetention> => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { name } = params.path;
+
+    // Verifies read privileges and that the stream exists.
+    await streamsClient.getStream(name);
+
+    return getDataStreamGlobalRetention({
+      esClient: scopedClusterClient.asCurrentUser,
+      name,
+    });
   },
 });
 
 export const internalLifecycleRoutes = {
   ...lifecycleStatsRoute,
+  ...lifecycleGlobalRetentionRoute,
   ...lifecycleDslPhaseStatsRoute,
   ...lifecycleIlmExplainRoute,
   ...lifecycleInheritedRoute,

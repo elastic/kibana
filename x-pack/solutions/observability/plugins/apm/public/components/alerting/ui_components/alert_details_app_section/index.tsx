@@ -11,11 +11,7 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  AnomalyThreshold,
-  formatAlertEvaluationValue,
-  Threshold,
-} from '@kbn/observability-plugin/public';
+import { formatAlertEvaluationValue, Threshold } from '@kbn/observability-plugin/public';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import {
@@ -43,16 +39,13 @@ import { ChartPointerEventContextProvider } from '../../../../context/chart_poin
 import { TimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
-import {
-  formatAnomalySeverityThreshold,
-  formatSeverityLabel,
-  isAnomalyRuleType,
-  isErrorCountRuleType,
-} from './helpers';
+import { isAnomalyRuleType, isErrorCountRuleType } from './helpers';
 import { CHART_LAYOUTS, DEFAULT_LAYOUT } from './types';
 import type { AlertDetailsAppSectionProps } from './types';
 import { AlertDetailsCharts } from './alert_details_charts';
 import { AlertDetailsServiceMapSection } from '../alert_details_service_map_section';
+import { AnomalyAlertCallout } from './anomaly_alert_callout';
+import type { AnomalyChartInfo } from './anomaly_severity_badge';
 
 export function AlertDetailsAppSection({
   rule,
@@ -84,16 +77,7 @@ export function AlertDetailsAppSection({
 
   const thresholdComponent = useMemo(() => {
     if (isAnomaly) {
-      if (!alertSeverity || !alertEvaluationThreshold) return undefined;
-
-      return (
-        <AnomalyThreshold
-          chartProps={chartThemes}
-          id={`${chartLayout.primary}-anomaly-threshold`}
-          severity={formatSeverityLabel(alertSeverity)}
-          severityThreshold={formatAnomalySeverityThreshold(alertEvaluationThreshold)}
-        />
-      );
+      return undefined;
     }
 
     if (!alertEvaluationValue || !alertEvaluationThreshold) return undefined;
@@ -113,13 +97,20 @@ export function AlertDetailsAppSection({
     );
   }, [
     isAnomaly,
-    alertSeverity,
     alertEvaluationValue,
     alertEvaluationThreshold,
     chartThemes,
     chartLayout.primary,
     alertRuleTypeId,
   ]);
+
+  const anomaly = useMemo<AnomalyChartInfo | undefined>(() => {
+    if (!isAnomaly || !alertSeverity || alertEvaluationValue == null) {
+      return undefined;
+    }
+
+    return { severity: alertSeverity, score: Number(alertEvaluationValue) };
+  }, [alertEvaluationValue, alertSeverity, isAnomaly]);
 
   useLayoutEffect(() => {
     if (!isErrorCountRuleType(alertRuleTypeId) || !errorGroupingKey) {
@@ -183,6 +174,13 @@ export function AlertDetailsAppSection({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
+      {isAnomaly && alertSeverity && detectorType && alertEvaluationThreshold != null && (
+        <AnomalyAlertCallout
+          severity={alertSeverity}
+          detectorType={detectorType}
+          alertEvaluationThreshold={Number(alertEvaluationThreshold)}
+        />
+      )}
       <TimeRangeMetadataContextProvider
         start={from}
         end={to}
@@ -206,6 +204,7 @@ export function AlertDetailsAppSection({
             from={from}
             to={to}
             thresholdComponent={thresholdComponent}
+            anomaly={anomaly}
           />
         </ChartPointerEventContextProvider>
       </TimeRangeMetadataContextProvider>

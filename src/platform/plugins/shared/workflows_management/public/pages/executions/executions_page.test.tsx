@@ -37,7 +37,6 @@ jest.mock('@kbn/cell-actions', () => ({
 describe('WorkflowExecutionsPage', () => {
   it('renders the executions page with search, filters, and table', async () => {
     const services = createStartServicesMock();
-    services.workflowsManagement.globalExecutionsView.enabled = true;
     services.spaces.getActiveSpace = jest.fn().mockResolvedValue({ id: 'default' });
     const SearchBarStub = () => <div data-test-subj="searchBarStub" />;
     services.unifiedSearch.ui.SearchBar = SearchBarStub;

@@ -1065,6 +1065,23 @@ const equalsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'flattened',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'flattened',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'geo_point',
           optional: false,
           description: 'An expression.',
@@ -2750,6 +2767,18 @@ const isNotNullDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'flattened',
+          optional: false,
+          description:
+            'Value to check. It can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'geo_point',
           optional: false,
           description:
@@ -3075,6 +3104,18 @@ const isNullDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'exponential_histogram',
+          optional: false,
+          description:
+            'Value to check. It can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'flattened',
           optional: false,
           description:
             'Value to check. It can be a single- or multi-valued column or an expression.',
@@ -5599,6 +5640,23 @@ const notEqualsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'long',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'flattened',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'flattened',
           optional: false,
           description: 'An expression.',
         },

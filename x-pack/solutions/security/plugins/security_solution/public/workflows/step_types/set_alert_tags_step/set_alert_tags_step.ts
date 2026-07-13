@@ -8,7 +8,7 @@
 import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { setAlertTagsStepCommonDefinition } from '../../../../common/workflows/step_types/set_alert_tags_step/set_alert_tags_step_common';
-import { alertTagsInputEditorHandlers } from './alert_tags_selection_handler';
+import { alertTagsInputEditorHandlers } from '../common/alert_tags_selection_handler';
 
 export const setAlertTagsStepDefinition = createPublicStepDefinition({
   ...setAlertTagsStepCommonDefinition,
