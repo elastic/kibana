@@ -101,6 +101,7 @@ const TopNComponent: React.FC<Props> = ({
         onChange={onViewSelected}
         options={options}
         valueOfSelected={view}
+        aria-label={i18n.VIEW_SELECT_ARIA_LABEL}
       />
     ),
     [onViewSelected, options, styles.viewSelect, view]
