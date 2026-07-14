@@ -1,5 +1,9 @@
 {
-  "sha1": "72417c200ac4e321407522f674bb998d210c6355",
+  "sha1": "ef03613f3702e59b5f58126bb427ccb9e6207acd",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "8fdb537796db270-7132d4e40af07dc",
@@ -21,6 +25,38 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/global.setup.ts",
         "line": 10,
         "column": 16
+      }
+    },
+    {
+      "id": "e6fb15478212601-742f5ddf45e2615",
+      "title": "Stream canvas - classic source to destination nodes renders inferred source and destination nodes for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
+        "line": 75,
+        "column": 9
+      }
+    },
+    {
+      "id": "e6fb15478212601-0b811fdb96ea78f",
+      "title": "Stream canvas - classic source to destination nodes shows the processing glyph only on destinations with processing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
+        "line": 94,
+        "column": 9
       }
     },
     {
