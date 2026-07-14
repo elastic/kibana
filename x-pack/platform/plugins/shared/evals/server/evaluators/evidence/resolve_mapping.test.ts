@@ -40,8 +40,8 @@ describe('getEvidenceMapping', () => {
   });
 
   it('throws when profile is unknown', () => {
-    expect(() => getEvidenceMapping('does-not-exist')).toThrow(
-      'Unknown evidence mapping profile: does-not-exist'
-    );
+    expect(() =>
+      getEvidenceMapping('does-not-exist' as Parameters<typeof getEvidenceMapping>[0])
+    ).toThrow('Unknown evidence mapping profile: does-not-exist');
   });
 });

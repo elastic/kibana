@@ -20,12 +20,9 @@ import { EVALS_API_PRIVILEGES } from '../../../common';
 import { getEvidenceMapping } from '../../evaluators/evidence/resolve_mapping';
 import { formatEvidenceSchemaIssues } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
-import { awaitTraceReady } from '../../evaluators/trace_readiness';
+import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
 import type { EvaluatorDefinition } from '../../evaluators/types';
 import type { RouteDependencies } from '../register_routes';
-
-const isUnresolvableTraceError = (error: unknown): boolean =>
-  String(error).includes('evidence is unresolvable for profile');
 
 export const registerEvaluateRoute = ({
   router,
@@ -128,7 +125,7 @@ export const registerEvaluateRoute = ({
         try {
           round = await awaitTraceReady(traceAccessor, resolvedMapping, activeProfile, logger);
         } catch (error) {
-          if (isUnresolvableTraceError(error)) {
+          if (error instanceof TraceReadinessError) {
             return response.notFound({ body: { message: String(error) } });
           }
           throw error;

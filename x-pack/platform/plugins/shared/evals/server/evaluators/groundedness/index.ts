@@ -28,24 +28,9 @@ export const groundednessEvaluator: EvaluatorDefinition = {
   kind: 'llm',
   description: 'Measures whether the response is grounded in tool-call outputs from the trace.',
   evidenceSchema: groundednessEvidenceSchema,
-  async evaluate({ trace, round, inferenceClient, log }) {
+  async evaluate({ round, inferenceClient }) {
     if (!inferenceClient) {
       throw new Error('Inference client is required for groundedness evaluator');
-    }
-
-    if (!round.response.message.trim()) {
-      log.warn(`Returning incomplete groundedness evidence for trace ${trace.traceId}.`);
-      return {
-        scores: [
-          {
-            name: 'groundedness',
-            label: 'potentially_incomplete',
-            metadata: {
-              incomplete: true,
-            },
-          },
-        ],
-      };
     }
 
     const analysis = await runLlmJudge<GroundednessAnalysis>({

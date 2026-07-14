@@ -8,8 +8,8 @@
 import { EVIDENCE_MAPPING_PROFILES } from './profiles';
 import type { EvidenceMapping, EvidenceProfile } from './types';
 
-export const getEvidenceMapping = (profile: string): EvidenceMapping => {
-  const mapping = EVIDENCE_MAPPING_PROFILES[profile as EvidenceProfile];
+export const getEvidenceMapping = (profile: EvidenceProfile): EvidenceMapping => {
+  const mapping = EVIDENCE_MAPPING_PROFILES[profile];
   if (!mapping) {
     throw new Error(`Unknown evidence mapping profile: ${profile}`);
   }

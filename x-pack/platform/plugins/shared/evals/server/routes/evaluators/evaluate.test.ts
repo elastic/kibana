@@ -16,11 +16,14 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
-import { awaitTraceReady } from '../../evaluators/trace_readiness';
+import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
 import { getEvidenceMapping } from '../../evaluators/evidence/resolve_mapping';
 import { registerEvaluateRoute } from './evaluate';
 
-jest.mock('../../evaluators/trace_readiness');
+jest.mock('../../evaluators/trace_readiness', () => ({
+  ...jest.requireActual('../../evaluators/trace_readiness'),
+  awaitTraceReady: jest.fn(),
+}));
 const awaitTraceReadyMock = awaitTraceReady as jest.MockedFunction<typeof awaitTraceReady>;
 const DEFAULT_ROUND = {
   input: { message: 'default input' },
@@ -797,10 +800,11 @@ describe('POST /internal/evals/_evaluate', () => {
     ]);
   });
 
-  it('returns 404 when trace readiness check fails', async () => {
+  it('returns 404 when evidence is unresolvable for the requested profile', async () => {
     awaitTraceReadyMock.mockRejectedValueOnce(
-      new Error(
-        'Trace abc123 has documents but evidence is unresolvable for profile "elastic-inference"'
+      new TraceReadinessError(
+        'Trace abc123 has documents but evidence is unresolvable for profile "elastic-inference"',
+        'unresolvable'
       )
     );
     const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
@@ -826,9 +830,43 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.status).toBe(404);
     expect(response.payload).toEqual({
       message:
-        'Error: Trace abc123 has documents but evidence is unresolvable for profile "elastic-inference"',
+        'TraceReadinessError: Trace abc123 has documents but evidence is unresolvable for profile "elastic-inference"',
     });
     expect(groundedness.evaluate).not.toHaveBeenCalled();
     expect(latency.evaluate).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 when trace documents are never indexed', async () => {
+    awaitTraceReadyMock.mockRejectedValueOnce(
+      new TraceReadinessError(
+        'Trace abc123 is not ready: no documents indexed in traces-* or logs-* yet',
+        'not_ready'
+      )
+    );
+    const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([groundedness]),
+      inferenceStart: {
+        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+      } as unknown as InferenceServerStart,
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }] },
+          evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.payload).toEqual({
+      message:
+        'TraceReadinessError: Trace abc123 is not ready: no documents indexed in traces-* or logs-* yet',
+    });
+    expect(groundedness.evaluate).not.toHaveBeenCalled();
   });
 });

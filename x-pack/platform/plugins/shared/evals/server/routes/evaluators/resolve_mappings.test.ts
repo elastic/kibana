@@ -20,7 +20,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { EvaluatorRegistry } from '../../evaluators/types';
 import { registerResolveMappingsRoute } from './resolve_mappings';
-import { buildSearchMock, hasExistsFilter, hasTermFilter, withHits } from './test_helpers';
+import { buildSearchMock, hasTermFilter, withHits } from './test_helpers';
 
 const ELASTIC_TRACE_ID = '0af7651916cd43dd8448eb211c80319c';
 const ATTR_TRACE_ID = '0af7651916cd43dd8448eb211c80319d';
@@ -101,32 +101,6 @@ const buildRouteSearchMock = () =>
     }
 
     if (traceId === ATTR_TRACE_ID && index === 'traces-*') {
-      if (hasExistsFilter(filters, 'attributes.gen_ai.input.messages')) {
-        return withHits([
-          {
-            '@timestamp': '2026-07-10T10:10:00.000Z',
-            'attributes.gen_ai.input.messages': JSON.stringify([
-              {
-                role: 'user',
-                parts: [{ type: 'text', content: 'Summarize failures in last 24h.' }],
-              },
-            ]),
-          },
-        ]);
-      }
-      if (hasExistsFilter(filters, 'attributes.gen_ai.output.messages')) {
-        return withHits([
-          {
-            '@timestamp': '2026-07-10T10:10:01.000Z',
-            'attributes.gen_ai.output.messages': [
-              {
-                role: 'assistant',
-                parts: [{ type: 'text', content: 'There were 12 failures in the last 24h.' }],
-              },
-            ],
-          },
-        ]);
-      }
       if (hasTermFilter(filters, 'attributes.gen_ai.operation.name', 'execute_tool')) {
         return withHits([
           {
@@ -139,7 +113,26 @@ const buildRouteSearchMock = () =>
         ]);
       }
 
-      return withHits([{ '@timestamp': '2026-07-10T10:10:00.000Z' }]);
+      return withHits([
+        {
+          '@timestamp': '2026-07-10T10:10:00.000Z',
+          'attributes.gen_ai.input.messages': JSON.stringify([
+            {
+              role: 'user',
+              parts: [{ type: 'text', content: 'Summarize failures in last 24h.' }],
+            },
+          ]),
+        },
+        {
+          '@timestamp': '2026-07-10T10:10:01.000Z',
+          'attributes.gen_ai.output.messages': [
+            {
+              role: 'assistant',
+              parts: [{ type: 'text', content: 'There were 12 failures in the last 24h.' }],
+            },
+          ],
+        },
+      ]);
     }
 
     if (traceId === REDACTED_TRACE_ID) {

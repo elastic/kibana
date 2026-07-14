@@ -10,6 +10,18 @@ import pRetry from 'p-retry';
 import type { TraceAccessorWithSearch } from './trace_accessor';
 import { hasTraceDocuments, normalizeEvidence, probeProfiles } from './evidence/evidence_service';
 import type { EvidenceMapping, EvidenceProfile, EvidenceRound } from './evidence/types';
+import { TraceReadinessError } from './trace_readiness_errors';
+
+const MISSING_AGENT_RESPONSE_ERROR_NAME = 'MissingAgentResponseError';
+
+const createMissingAgentResponseError = (message: string): Error => {
+  const error = new Error(message);
+  error.name = MISSING_AGENT_RESPONSE_ERROR_NAME;
+  return error;
+};
+
+const isMissingAgentResponseError = (error: unknown): boolean =>
+  error instanceof Error && error.name === MISSING_AGENT_RESPONSE_ERROR_NAME;
 
 const summarizeProfiles = async (traceAccessor: TraceAccessorWithSearch): Promise<string> => {
   const probes = await probeProfiles(traceAccessor);
@@ -25,7 +37,7 @@ const summarizeProfiles = async (traceAccessor: TraceAccessorWithSearch): Promis
     .join('; ');
 };
 
-class MissingAgentResponseError extends Error {}
+export { TraceReadinessError } from './trace_readiness_errors';
 
 export const awaitTraceReady = async (
   traceAccessor: TraceAccessorWithSearch,
@@ -39,8 +51,9 @@ export const awaitTraceReady = async (
     return await pRetry(
       async () => {
         if (!(await hasTraceDocuments(traceAccessor))) {
-          throw new Error(
-            `Trace ${traceAccessor.traceId} is not ready: no documents indexed in traces-* or logs-* yet`
+          throw new TraceReadinessError(
+            `Trace ${traceAccessor.traceId} is not ready: no documents indexed in traces-* or logs-* yet`,
+            'not_ready'
           );
         }
 
@@ -57,11 +70,14 @@ export const awaitTraceReady = async (
           round.steps.length > 0;
         if (!hasAnyResolvedEvidence) {
           throw new pRetry.AbortError(
-            `Trace ${traceAccessor.traceId} has documents but evidence is unresolvable for profile "${profile}". Probed profiles: ${profileSummary}`
+            new TraceReadinessError(
+              `Trace ${traceAccessor.traceId} has documents but evidence is unresolvable for profile "${profile}". Probed profiles: ${profileSummary}`,
+              'unresolvable'
+            )
           );
         }
 
-        throw new MissingAgentResponseError(
+        throw createMissingAgentResponseError(
           `Trace ${traceAccessor.traceId} has documents but agent response is unavailable for profile "${profile}". Probed profiles: ${profileSummary}`
         );
       },
@@ -78,7 +94,7 @@ export const awaitTraceReady = async (
       }
     );
   } catch (error) {
-    if (!(error instanceof MissingAgentResponseError) || !lastRound) {
+    if (!isMissingAgentResponseError(error) || !lastRound) {
       throw error;
     }
 

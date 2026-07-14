@@ -85,7 +85,7 @@ describe('normalizeEvidence', () => {
     });
   });
 
-  it('adds exists filter for string parse message specs', async () => {
+  it('does not add exists filter for message content fields', async () => {
     const mapping = getEvidenceMapping('elastic-inference');
     const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
@@ -101,54 +101,34 @@ describe('normalizeEvidence', () => {
     const userSearchRequest = searchMock.mock.calls[0][0];
     const filters =
       (userSearchRequest.query as { bool?: { filter?: unknown[] } })?.bool?.filter ?? [];
-    expect(filters).toEqual(
+    expect(filters).not.toEqual(
       expect.arrayContaining([{ exists: { field: mapping.user_query.contentField } }])
     );
+    expect(userSearchRequest.size).toBe(20);
   });
 
-  it('skips redacted first string message hit and returns later hit with content', async () => {
+  it('skips empty first string message hit and returns later hit with content', async () => {
     const mapping = getEvidenceMapping('elastic-inference');
     const { esClient, searchMock } = createEsClient();
     const traceAccessor = createTraceAccessor({ traceId, esClient });
 
     searchMock
-      .mockImplementationOnce(async (request: { query?: { bool?: { filter?: unknown[] } } }) => {
-        const filters = request.query?.bool?.filter ?? [];
-        const hasContentFilter = filters.some(
-          (filter) =>
-            typeof filter === 'object' &&
-            filter !== null &&
-            'exists' in filter &&
-            (filter as { exists?: { field?: string } }).exists?.field ===
-              mapping.user_query.contentField
-        );
-
-        return {
-          hits: {
-            hits: hasContentFilter
-              ? [
-                  {
-                    _source: {
-                      '@timestamp': '2026-06-26T10:00:01.000Z',
-                      'attributes.content': 'non-redacted user query',
-                    },
-                  },
-                ]
-              : [
-                  {
-                    _source: {
-                      '@timestamp': '2026-06-26T10:00:00.000Z',
-                    },
-                  },
-                  {
-                    _source: {
-                      '@timestamp': '2026-06-26T10:00:01.000Z',
-                      'attributes.content': 'non-redacted user query',
-                    },
-                  },
-                ],
-          },
-        };
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-06-26T10:00:00.000Z',
+              },
+            },
+            {
+              _source: {
+                '@timestamp': '2026-06-26T10:00:01.000Z',
+                'attributes.content': 'non-redacted user query',
+              },
+            },
+          ],
+        },
       })
       .mockResolvedValueOnce({
         hits: {
@@ -166,6 +146,62 @@ describe('normalizeEvidence', () => {
       response: { message: '' },
       steps: [],
     });
+  });
+
+  it('reads long otel-genai-events user content from _source without exists filter', async () => {
+    const mapping = getEvidenceMapping('otel-genai-events');
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+    const longUserPrompt = `${'passage '.repeat(800)}Question: What is our work from home policy?`;
+
+    searchMock
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-14T09:24:14.340Z',
+                body: { structured: { content: longUserPrompt } },
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-14T09:24:18.985Z',
+                body: {
+                  structured: {
+                    message: { content: 'Eligible employees may work remotely with approval.' },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [],
+        },
+      });
+
+    await expect(normalizeEvidence(traceAccessor, mapping)).resolves.toEqual({
+      input: { message: longUserPrompt },
+      response: { message: 'Eligible employees may work remotely with approval.' },
+      steps: [],
+    });
+
+    const userSearchRequest = searchMock.mock.calls[0][0];
+    const filters =
+      (userSearchRequest.query as { bool?: { filter?: unknown[] } })?.bool?.filter ?? [];
+    expect(filters).toEqual([
+      { term: { trace_id: traceId } },
+      { term: { event_name: 'gen_ai.user.message' } },
+    ]);
   });
 
   it('resolves fields regardless of flattened, nested, or dotted-key document shape', async () => {

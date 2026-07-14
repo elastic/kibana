@@ -92,12 +92,39 @@ describe('awaitTraceReady', () => {
         'otel-genai-attributes',
         logger
       )
-    ).rejects.toThrow(
-      `Trace ${traceId} has documents but evidence is unresolvable for profile "otel-genai-attributes"`
+    ).rejects.toEqual(
+      expect.objectContaining({
+        name: 'TraceReadinessError',
+        kind: 'unresolvable',
+        message: expect.stringContaining(
+          `Trace ${traceId} has documents but evidence is unresolvable for profile "otel-genai-attributes"`
+        ),
+      })
     );
     expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
     expect(logger.warn).not.toHaveBeenCalled();
   });
+
+  it('throws TraceReadinessError after retries when documents never appear', async () => {
+    hasTraceDocumentsMock.mockResolvedValue(false);
+
+    await expect(
+      awaitTraceReady(
+        traceAccessor,
+        getEvidenceMapping('elastic-inference'),
+        'elastic-inference',
+        logger
+      )
+    ).rejects.toEqual(
+      expect.objectContaining({
+        name: 'TraceReadinessError',
+        kind: 'not_ready',
+        message: `Trace ${traceId} is not ready: no documents indexed in traces-* or logs-* yet`,
+      })
+    );
+    expect(normalizeEvidenceMock).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalled();
+  }, 15000);
 
   it('retries only while trace documents are still absent', async () => {
     hasTraceDocumentsMock.mockResolvedValueOnce(false).mockResolvedValueOnce(true);

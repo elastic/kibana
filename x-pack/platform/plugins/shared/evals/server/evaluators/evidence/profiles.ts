@@ -7,7 +7,7 @@
 
 import type { EvidenceMapping, EvidenceProfile } from './types';
 
-const otelGenAiEventsBase: EvidenceMapping = {
+const otelGenAiEvents: EvidenceMapping = {
   user_query: {
     source: 'logs',
     filter: [{ field: 'event_name', value: 'gen_ai.user.message' }],
@@ -34,22 +34,18 @@ const otelGenAiEventsBase: EvidenceMapping = {
   },
 };
 
-const otelGenAiEvents: EvidenceMapping = {
-  ...otelGenAiEventsBase,
-};
-
 const elasticInference: EvidenceMapping = {
-  ...otelGenAiEventsBase,
+  ...otelGenAiEvents,
   user_query: {
-    ...otelGenAiEventsBase.user_query,
+    ...otelGenAiEvents.user_query,
     contentField: 'attributes.content',
   },
   agent_response: {
-    ...otelGenAiEventsBase.agent_response,
+    ...otelGenAiEvents.agent_response,
     contentField: 'attributes.message.content',
   },
   tool_calls: {
-    ...otelGenAiEventsBase.tool_calls,
+    ...otelGenAiEvents.tool_calls,
     filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
   },
 };

@@ -18,6 +18,7 @@ import type {
 } from './types';
 
 const MAX_EVIDENCE_DOCS = 200;
+const MESSAGE_CANDIDATE_LIMIT = 20;
 const SAMPLE_LIMIT = 120;
 const hasOwnProperty = (value: unknown, key: string): value is Record<string, unknown> =>
   !!value && typeof value === 'object' && Object.prototype.hasOwnProperty.call(value, key);
@@ -96,44 +97,35 @@ const resolveFieldValue = (value: unknown, segments: string[]): unknown => {
 const getFieldValue = (document: Record<string, unknown>, fieldPath: string): unknown =>
   resolveFieldValue(document, fieldPath.split('.'));
 
-const toTraceFilters = (
-  spec: EvidenceMessageItemSpec | EvidenceToolCallsItemSpec,
-  includeContentPresenceFilter: boolean
-): TraceFilter[] => {
-  const filters: TraceFilter[] = spec.filter.map(({ field, value }) => ({
+const toTraceFilters = (spec: EvidenceMessageItemSpec | EvidenceToolCallsItemSpec): TraceFilter[] =>
+  spec.filter.map(({ field, value }) => ({
     type: 'term',
     field,
     value,
   }));
 
-  if (includeContentPresenceFilter && 'contentField' in spec) {
-    filters.push({ type: 'exists', field: spec.contentField });
-  }
-
-  return filters;
-};
-
 const getMessageSearchParams = (
-  spec: EvidenceMessageItemSpec,
-  includeContentPresenceFilter: boolean
+  spec: EvidenceMessageItemSpec
 ): {
   filter: TraceFilter[];
   fields: string[];
   sort: { field: string; order: 'asc' | 'desc' };
   size: number;
 } => ({
-  filter: toTraceFilters(spec, includeContentPresenceFilter),
+  // Do not add an `exists` filter on contentField: long values under `flattened`
+  // mappings (e.g. body.structured) are omitted from the index past ignore_above
+  // but remain available in `_source`.
+  filter: toTraceFilters(spec),
   fields: ['@timestamp', spec.contentField],
   sort: {
     field: '@timestamp',
     order: spec.select === 'last' ? 'desc' : 'asc',
   },
-  size: 1,
+  size: MESSAGE_CANDIDATE_LIMIT,
 });
 
 const getToolCallsSearchParams = (
-  spec: EvidenceToolCallsItemSpec,
-  includeContentPresenceFilter: boolean
+  spec: EvidenceToolCallsItemSpec
 ): {
   filter: TraceFilter[];
   fields: string[];
@@ -142,7 +134,7 @@ const getToolCallsSearchParams = (
 } => {
   const { tool_call_id, tool_id, arguments: toolArguments, result } = spec.fields;
   return {
-    filter: toTraceFilters(spec, includeContentPresenceFilter),
+    filter: toTraceFilters(spec),
     fields: ['@timestamp', tool_call_id, tool_id, toolArguments, result],
     sort: {
       field: '@timestamp',
@@ -194,25 +186,33 @@ const getGenAiMessageText = (
   return undefined;
 };
 
+const parseMessageFromDocument = (
+  itemKey: 'user_query' | 'agent_response',
+  itemSpec: EvidenceMessageItemSpec,
+  document: Record<string, unknown>
+): string | undefined => {
+  if (itemSpec.parse === 'string') {
+    return firstStringValue(getFieldValue(document, itemSpec.contentField));
+  }
+
+  const messages = toMessageArray(getFieldValue(document, itemSpec.contentField));
+  const role = itemKey === 'agent_response' ? 'assistant' : 'user';
+  return getGenAiMessageText(messages, role);
+};
+
 const parseMessageValue = (
   itemKey: 'user_query' | 'agent_response',
   itemSpec: EvidenceMessageItemSpec,
   documents: Array<Record<string, unknown>>
 ): string | undefined => {
-  if (itemSpec.parse === 'string') {
-    if (documents.length === 0) {
-      return undefined;
+  for (const document of documents) {
+    const value = parseMessageFromDocument(itemKey, itemSpec, document);
+    if (typeof value === 'string' && value.trim()) {
+      return value;
     }
-    return firstStringValue(getFieldValue(documents[0], itemSpec.contentField));
   }
 
-  if (documents.length === 0) {
-    return undefined;
-  }
-
-  const messages = toMessageArray(getFieldValue(documents[0], itemSpec.contentField));
-  const role = itemKey === 'agent_response' ? 'assistant' : 'user';
-  return getGenAiMessageText(messages, role);
+  return undefined;
 };
 
 const parseToolCallsValue = (
@@ -290,8 +290,8 @@ const probeItem = async (
 ): Promise<EvidenceItemProbeResult> => {
   const isToolCallsItem = itemKey === 'tool_calls';
   const searchParams = isToolCallsItem
-    ? getToolCallsSearchParams(itemSpec as EvidenceToolCallsItemSpec, false)
-    : getMessageSearchParams(itemSpec as EvidenceMessageItemSpec, true);
+    ? getToolCallsSearchParams(itemSpec as EvidenceToolCallsItemSpec)
+    : getMessageSearchParams(itemSpec as EvidenceMessageItemSpec);
   const { documents } = await accessor.runSearch(itemSpec.source, searchParams);
   const firstFieldPath = isToolCallsItem
     ? (itemSpec as EvidenceToolCallsItemSpec).fields.tool_call_id
@@ -325,17 +325,14 @@ export const normalizeEvidence = async (
   mapping: EvidenceMapping
 ): Promise<EvidenceRound> => {
   const [userSearch, agentSearch, toolSearch] = await Promise.all([
-    traceAccessor.runSearch(
-      mapping.user_query.source,
-      getMessageSearchParams(mapping.user_query, true)
-    ),
+    traceAccessor.runSearch(mapping.user_query.source, getMessageSearchParams(mapping.user_query)),
     traceAccessor.runSearch(
       mapping.agent_response.source,
-      getMessageSearchParams(mapping.agent_response, true)
+      getMessageSearchParams(mapping.agent_response)
     ),
     traceAccessor.runSearch(
       mapping.tool_calls.source,
-      getToolCallsSearchParams(mapping.tool_calls, false)
+      getToolCallsSearchParams(mapping.tool_calls)
     ),
   ]);
 
@@ -357,7 +354,9 @@ export const normalizeEvidence = async (
 export const probeProfiles = async (
   traceAccessor: TraceAccessorWithSearch
 ): Promise<EvidenceProfileProbeResult[]> => {
-  const profileNames = Object.keys(EVIDENCE_MAPPING_PROFILES);
+  const profileNames = Object.keys(EVIDENCE_MAPPING_PROFILES) as Array<
+    keyof typeof EVIDENCE_MAPPING_PROFILES
+  >;
   const profileResults = await Promise.all(
     profileNames.map(async (profile): Promise<EvidenceProfileProbeResult> => {
       const mapping = getEvidenceMapping(profile);
