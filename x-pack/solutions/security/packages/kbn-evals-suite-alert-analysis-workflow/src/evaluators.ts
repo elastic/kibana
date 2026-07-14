@@ -6,6 +6,7 @@
  */
 
 import type { Evaluator } from '@kbn/evals';
+import { createTrajectoryEvaluator } from '@kbn/evals';
 import { CLASSIFICATIONS, type Classification } from './constants';
 import type { AlertAnalysisVerdict } from './workflow_task';
 
@@ -73,4 +74,32 @@ export const validVerdict: Evaluator = {
       },
     };
   },
+};
+
+/**
+ * L2 guardrail: the workflow pre-builds context, so the `ai.agent` step should not call tools.
+ * Golden path is empty; any tool call fails trajectory.
+ */
+export const createAlertAnalysisTrajectoryEvaluator = (): Evaluator => {
+  const inner = createTrajectoryEvaluator({
+    extractToolCalls: (output) => asVerdict(output).toolCallIds ?? [],
+    goldenPathExtractor: () => [],
+    orderWeight: 1,
+    coverageWeight: 0,
+  });
+
+  return {
+    ...inner,
+    name: 'trajectory',
+    evaluate: async (args) => {
+      if (asVerdict(args.output).toolCallsUnavailable) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'Workflow trace unavailable — skipping trajectory evaluation.',
+        };
+      }
+      return inner.evaluate(args);
+    },
+  };
 };

@@ -30,6 +30,7 @@
  * Evaluators:
  *   - ClassificationAccuracy (CODE, primary): predicted verdict == golden label.
  *   - ValidVerdict (CODE): structured output conforms (enum classification + confidence in [0,1]).
+ *   - trajectory (CODE): zero-tool guardrail — agent must not call tools after pre-built context.
  *   - RationaleQuality (LLM): the rationale is grounded in the alert's observable evidence and
  *     names the decision gate / confidence tier it applied.
  *
@@ -48,7 +49,11 @@ import { selectEvaluators, type EvaluationDataset, type Example } from '@kbn/eva
 import { evaluate } from '../src/evaluate';
 import { runAlertAnalysisWorkflow } from '../src/workflow_task';
 import { configureAlertAnalysisWorkflow } from '../src/space_config';
-import { classificationAccuracy, validVerdict } from '../src/evaluators';
+import {
+  classificationAccuracy,
+  createAlertAnalysisTrajectoryEvaluator,
+  validVerdict,
+} from '../src/evaluators';
 import { ALERT_ANALYSIS_EVAL_ALERTS } from '../src/synthetic_alerts';
 import { ALERTS_INDEX } from '../src/constants';
 
@@ -111,7 +116,7 @@ evaluate.describe(
 
     evaluate(
       'classifies alerts with the expected true/false positive verdict',
-      async ({ executorClient, evaluators, esClient, fetch, log }) => {
+      async ({ executorClient, evaluators, esClient, fetch, log, traceEsClient }) => {
         const examples: AlertAnalysisExample[] = ALERT_ANALYSIS_EVAL_ALERTS.map((alert) => ({
           id: alert.id,
           input: { alertId: alert.id },
@@ -127,6 +132,7 @@ evaluate.describe(
         const selectedEvaluators = selectEvaluators([
           classificationAccuracy,
           validVerdict,
+          createAlertAnalysisTrajectoryEvaluator(),
           evaluators.criteria(RATIONALE_CRITERIA),
         ]);
 
@@ -184,6 +190,7 @@ evaluate.describe(
                 return await runAlertAnalysisWorkflow({
                   fetch,
                   log,
+                  traceEsClient,
                   alertId: uniqueAlertId,
                   alertIndex,
                 });

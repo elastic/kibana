@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -13,6 +14,7 @@ import {
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
+import { readWorkflowAgentToolCalls } from './read_workflow_agent_tool_calls';
 import {
   ALERT_ANALYSIS_WORKFLOW_ID,
   WORKFLOWS_API_VERSION,
@@ -53,6 +55,10 @@ export interface AlertAnalysisVerdict {
   executionId: string;
   executionStatus: ExecutionStatus;
   traceId?: string;
+  /** Ordered agent tool IDs from OTel TOOL spans on the workflow execution trace. */
+  toolCallIds?: string[];
+  /** True when trace ES was unreachable or the workflow trace id was invalid. */
+  toolCallsUnavailable?: boolean;
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -90,6 +96,7 @@ const readAgentStructuredOutput = (
 export const runAlertAnalysisWorkflow = async ({
   fetch,
   log,
+  traceEsClient,
   alertId,
   alertIndex,
   maxWaitMs = 12 * 60_000,
@@ -97,6 +104,7 @@ export const runAlertAnalysisWorkflow = async ({
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
+  traceEsClient?: EsClient;
   alertId: string;
   alertIndex: string;
   maxWaitMs?: number;
@@ -157,6 +165,22 @@ export const runAlertAnalysisWorkflow = async ({
     );
   }
 
+  const { toolCallIds, unavailable } = traceEsClient
+    ? await readWorkflowAgentToolCalls({
+        traceEsClient,
+        traceId: execution.traceId,
+        log,
+      })
+    : { toolCallIds: undefined, unavailable: true };
+
+  if (toolCallIds && toolCallIds.length > 0) {
+    log.warning(
+      `Workflow agent called unexpected tools: ${toolCallIds.join(
+        ', '
+      )} (execution ${workflowExecutionId})`
+    );
+  }
+
   return {
     classification: structured?.classification,
     confidenceScore: structured?.confidence_score,
@@ -165,5 +189,7 @@ export const runAlertAnalysisWorkflow = async ({
     executionId: workflowExecutionId,
     executionStatus: execution.status,
     traceId: execution.traceId,
+    toolCallIds,
+    toolCallsUnavailable: unavailable,
   };
 };
