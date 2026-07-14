@@ -14,8 +14,10 @@ export const pushFlyoutPaddingStyles = css`
   ${logicalCSS('padding-left', `var(--euiPushFlyoutOffsetInlineStart, 0px)`)};
 `;
 
+export const AB_PANEL_RADIUS = 12;
+export const AB_INPUT_RADIUS = 16;
+
 const ROUNDED_BORDER_RADIUS = '6px';
-export const ROUNDED_BORDER_RADIUS_LARGE = '12px';
 const ROUNDED_BORDER_RADIUS_EXTRA_LARGE = '16px';
 
 export const roundedBorderRadiusStyles = css`

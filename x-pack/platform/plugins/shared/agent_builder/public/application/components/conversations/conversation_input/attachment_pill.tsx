@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -21,6 +21,7 @@ import React, { useState } from 'react';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
+import { AB_PANEL_RADIUS } from '../../../../common.styles';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
@@ -75,6 +76,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
       css={css`
         max-width: 200px;
         border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
+        border-radius: ${AB_PANEL_RADIUS}px;
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -82,12 +84,12 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <div className={iconContainerStyles}>
+          <div css={iconContainerStyles}>
             <EuiIcon type={iconType} size="m" color="primary" aria-hidden={true} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>
-          <EuiText size="xs" className={titleStyles}>
+          <EuiText size="xs" css={titleStyles}>
             <strong>{displayName}</strong>
           </EuiText>
         </EuiFlexItem>
