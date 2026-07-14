@@ -18,6 +18,7 @@ import type {
   RecursivePartial,
   XYChartElementEvent,
   XYChartSeriesIdentifier,
+  SeriesIdentifier,
   SettingsProps,
   TooltipValue,
   PointerValue,
@@ -97,6 +98,7 @@ import {
   validateExtent,
   getOriginalAxisPosition,
   getDecimalsFromFormat,
+  getLegendSeriesFilterData,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -675,6 +677,23 @@ export function XYChart({
     onClickValue(context);
   };
 
+  // Single filter dispatch shared by the legend action popover's "Filter for"/"Filter out"
+  // buttons and direct legend item clicks (only wired up as the latter when
+  // `legend.canFilterOnClick` is enabled, since it replaces @elastic/charts' default legend
+  // behaviour of toggling series visibility).
+  const filterBySeries = (series: XYChartSeriesIdentifier, negate?: boolean) => {
+    const seriesFilterData = getLegendSeriesFilterData(series, dataLayers, formattedDatatables);
+
+    if (!seriesFilterData?.isFilterable) {
+      return;
+    }
+
+    onClickValue({ data: seriesFilterData.filterActionData, negate });
+  };
+
+  const legendClickFilterHandler = ([xySeries]: SeriesIdentifier[]) =>
+    filterBySeries(xySeries as XYChartSeriesIdentifier);
+
   const brushHandler = ({ x }: XYBrushEvent) => {
     if (!x) {
       return;
@@ -931,11 +950,14 @@ export function XYChart({
               // enable brushing only for time charts, for both ES|QL and DSL queries
               onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
               onElementClick={interactive ? clickHandler : undefined}
+              onLegendItemClick={
+                interactive && legend.canFilterOnClick ? legendClickFilterHandler : undefined
+              }
               legendAction={
                 interactive
                   ? getLegendAction(
                       dataLayers,
-                      onClickValue,
+                      filterBySeries,
                       layerCellValueActions,
                       fieldFormats,
                       formattedDatatables,

@@ -9,14 +9,7 @@
 
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
-import {
-  getAccessorByDimension,
-  isFilterableColumnSet,
-  getFilterDrilldownWarningMessage,
-} from '@kbn/chart-expressions-common';
-import type { CellValueContext } from '@kbn/embeddable-plugin/public';
-import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
-import type { LayerCellValueActions, FilterEvent } from '../types';
+import type { LayerCellValueActions } from '../types';
 import type { CommonXYDataLayerConfig } from '../../common';
 import type { LegendCellValueActions } from './legend_action_popover';
 import { LegendActionPopover } from './legend_action_popover';
@@ -25,11 +18,13 @@ import type {
   LayersAccessorsTitles,
   LayersFieldFormats,
 } from '../helpers';
-import { getSeriesName, hasMultipleLayersWithSplits } from '../helpers';
+import { getSeriesName, hasMultipleLayersWithSplits, getLegendSeriesFilterData } from '../helpers';
 
 export const getLegendAction = (
   dataLayers: CommonXYDataLayerConfig[],
-  onFilter: (data: FilterEvent['data']) => void,
+  // Same callback direct legend item clicks dispatch through (see `filterBySeries` in xy_chart.tsx),
+  // so "Filter for"/"Filter out" and a raw legend click always resolve to the same filter.
+  onFilter: (series: XYChartSeriesIdentifier, negate?: boolean) => void,
   layerCellValueActions: LayerCellValueActions,
   fieldFormats: LayersFieldFormats,
   formattedDatatables: DatatablesWithFormatInfo,
@@ -38,66 +33,24 @@ export const getLegendAction = (
 ): LegendAction =>
   React.memo(({ series: [xySeries] }) => {
     const series = xySeries as XYChartSeriesIdentifier;
-    const layerIndex = dataLayers.findIndex((l) =>
-      series.seriesKeys.some((key: string | number) =>
-        l.accessors.some(
-          (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
-        )
-      )
-    );
     const allYAccessors = dataLayers.flatMap((dataLayer) => dataLayer.accessors);
 
-    if (layerIndex === -1) {
+    const seriesFilterData = getLegendSeriesFilterData(series, dataLayers, formattedDatatables);
+
+    if (!seriesFilterData) {
       return null;
     }
+
+    const { layerIndex, cellValueActionData, isFilterable, warningMessage } = seriesFilterData;
 
     const layer = dataLayers[layerIndex];
-    if (!layer || !layer.splitAccessors || !layer.splitAccessors.length) {
+    if (!layer?.splitAccessors?.length) {
       return null;
     }
-
-    const { table } = layer;
-    const isEsqlMode = table?.meta?.type === ESQL_TABLE_TYPE;
-
-    const filterActionData: FilterEvent['data']['data'] = [];
-    const cellValueActionData: CellValueContext['data'] = [];
-
-    series.splitAccessors.forEach((value, accessor) => {
-      const rowIndex = formattedDatatables[layer.layerId].table.rows.findIndex((row) => {
-        return row[accessor] === value;
-      });
-      const columnIndex = table.columns.findIndex((column) => column.id === accessor);
-
-      if (rowIndex >= 0 && columnIndex >= 0) {
-        filterActionData.push({
-          row: rowIndex,
-          column: columnIndex,
-          value: table.rows[rowIndex][accessor],
-          table,
-        });
-
-        cellValueActionData.push({
-          value: table.rows[rowIndex][accessor],
-          columnMeta: table.columns[columnIndex].meta,
-        });
-      }
-    });
-
-    if (filterActionData.length === 0) {
-      return null;
-    }
-
-    const filterableColumns = filterActionData.map((data) => data.table.columns[data.column]);
-    // isFilterable gates the action (disabled state + whether it runs); warningMessage is
-    // display-only and can be suppressed (e.g. for dates) without affecting isFilterable.
-    const isFilterable = !isEsqlMode || isFilterableColumnSet(filterableColumns);
-    const warningMessage = isEsqlMode
-      ? getFilterDrilldownWarningMessage(filterableColumns)
-      : undefined;
 
     const filterHandler = ({ negate }: { negate?: boolean } = {}) => {
       if (isFilterable) {
-        onFilter({ data: filterActionData, negate });
+        onFilter(series, negate);
       }
     };
 
@@ -113,7 +66,7 @@ export const getLegendAction = (
         {
           splitAccessors: layer.splitAccessors,
           accessorsCount: singleTable ? allYAccessors.length : layer.accessors.length,
-          columns: table.columns,
+          columns: layer.table.columns,
           splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
           alreadyFormattedColumns: formattedDatatables[layer.layerId].formattedColumns,
           columnToLabelMap: layer.columnToLabel ? JSON.parse(layer.columnToLabel) : {},

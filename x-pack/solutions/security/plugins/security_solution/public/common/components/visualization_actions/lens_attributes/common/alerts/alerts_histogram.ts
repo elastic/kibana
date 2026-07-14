@@ -27,6 +27,7 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = ({
           position: 'right',
           legendSize: 'xlarge',
           legendStats: ['currentAndLastValue'],
+          canFilterOnClick: true,
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',

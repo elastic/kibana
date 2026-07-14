@@ -21,12 +21,18 @@ import { ColorVariant, ScaleType } from '@elastic/charts';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { getAccessorByDimension } from '@kbn/chart-expressions-common';
+import {
+  getAccessorByDimension,
+  isFilterableColumnSet,
+  getFilterDrilldownWarningMessage,
+} from '@kbn/chart-expressions-common';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { KbnPalettes } from '@kbn/palettes';
 import { MULTI_FIELD_KEY_SEPARATOR, type RawValue } from '@kbn/data-plugin/common';
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
 import type {
   CommonXYDataLayerConfig,
@@ -35,7 +41,7 @@ import type {
   PointVisibility,
 } from '../../common';
 import { AxisModes, SeriesTypes } from '../../common/constants';
-import type { FormatFactory } from '../types';
+import type { FormatFactory, FilterEvent } from '../types';
 import { getSeriesColor } from './state';
 import type { ColorAssignments } from './color_assignment';
 import type { GroupsConfiguration } from './axes_configuration';
@@ -233,6 +239,84 @@ export const getFormattedTablesByLayers = (
     }),
     {}
   );
+
+export interface LegendSeriesFilterData {
+  layerIndex: number;
+  filterActionData: FilterEvent['data']['data'];
+  cellValueActionData: CellValueContext['data'];
+  isFilterable: boolean;
+  warningMessage?: string;
+}
+
+/**
+ * Resolves the split-series filter data for a legend item, shared between the
+ * legend action popover ("Filter for"/"Filter out") and direct legend item clicks
+ * (see `filterBySeries` in `xy_chart.tsx`, the single callback both paths dispatch through).
+ * Returns `null` when the series can't be mapped to a filterable split layer.
+ */
+export const getLegendSeriesFilterData = (
+  series: XYChartSeriesIdentifier,
+  dataLayers: CommonXYDataLayerConfig[],
+  formattedDatatables: DatatablesWithFormatInfo
+): LegendSeriesFilterData | null => {
+  const layerIndex = dataLayers.findIndex((l) =>
+    series.seriesKeys.some((key: string | number) =>
+      l.accessors.some(
+        (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
+      )
+    )
+  );
+
+  if (layerIndex === -1) {
+    return null;
+  }
+
+  const layer = dataLayers[layerIndex];
+  if (!layer || !layer.splitAccessors || !layer.splitAccessors.length) {
+    return null;
+  }
+
+  const { table } = layer;
+  const isEsqlMode = table?.meta?.type === ESQL_TABLE_TYPE;
+
+  const filterActionData: FilterEvent['data']['data'] = [];
+  const cellValueActionData: CellValueContext['data'] = [];
+
+  series.splitAccessors.forEach((value, accessor) => {
+    const rowIndex = formattedDatatables[layer.layerId].table.rows.findIndex((row) => {
+      return row[accessor] === value;
+    });
+    const columnIndex = table.columns.findIndex((column) => column.id === accessor);
+
+    if (rowIndex >= 0 && columnIndex >= 0) {
+      filterActionData.push({
+        row: rowIndex,
+        column: columnIndex,
+        value: table.rows[rowIndex][accessor],
+        table,
+      });
+
+      cellValueActionData.push({
+        value: table.rows[rowIndex][accessor],
+        columnMeta: table.columns[columnIndex].meta,
+      });
+    }
+  });
+
+  if (filterActionData.length === 0) {
+    return null;
+  }
+
+  const filterableColumns = filterActionData.map((data) => data.table.columns[data.column]);
+  // isFilterable gates the action (disabled state + whether it runs); warningMessage is
+  // display-only and can be suppressed (e.g. for dates) without affecting isFilterable.
+  const isFilterable = !isEsqlMode || isFilterableColumnSet(filterableColumns);
+  const warningMessage = isEsqlMode
+    ? getFilterDrilldownWarningMessage(filterableColumns)
+    : undefined;
+
+  return { layerIndex, filterActionData, cellValueActionData, isFilterable, warningMessage };
+};
 
 function getSplitValues(
   splitAccessorsMap: XYChartSeriesIdentifier['splitAccessors'],

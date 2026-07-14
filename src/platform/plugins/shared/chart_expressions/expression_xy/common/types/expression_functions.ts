@@ -233,6 +233,11 @@ export interface LegendConfig {
   layout?: LegendLayout;
   title?: string;
   isTitleVisible?: boolean;
+  /**
+   * Flag whether clicking a legend item should filter by that series, instead of the
+   * default @elastic/charts behaviour of toggling that series' visibility.
+   */
+  canFilterOnClick?: boolean;
 }
 
 // Arguments to XY chart expression, with computed properties

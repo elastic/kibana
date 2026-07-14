@@ -316,6 +316,7 @@ export const buildXYExpression = (
     legendStats: state.legend.legendStats,
     title: state.legend.title,
     isTitleVisible: state.legend.isTitleVisible,
+    canFilterOnClick: state.legend.canFilterOnClick,
     shouldTruncate:
       state.legend.shouldTruncate ??
       getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,

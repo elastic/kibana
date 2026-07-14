@@ -132,6 +132,14 @@ export const legendConfigFunction: LegendConfigFn = {
       options: [LegendLayout.List],
       strict: true,
     },
+    canFilterOnClick: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('expressionXY.legendConfig.canFilterOnClick.help', {
+        defaultMessage:
+          'Specifies whether clicking a legend item filters by that series, instead of toggling its visibility.',
+      }),
+    },
   },
   async fn(input, args, handlers) {
     const { legendConfigFn } = await import('./expression_module');
