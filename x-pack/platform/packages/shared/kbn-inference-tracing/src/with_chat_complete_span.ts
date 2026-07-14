@@ -146,11 +146,14 @@ function setTokens(
   if (!span.isRecording()) {
     return;
   }
-  span.setAttributes({
+  const attributes: Record<string, number> = {
     [GenAISemanticConventions.GenAIUsageInputTokens]: prompt,
     [GenAISemanticConventions.GenAIUsageOutputTokens]: completion,
-    [GenAISemanticConventions.GenAIUsageCacheReadInputTokens]: cached ?? 0,
-  } satisfies GenAISemConvAttributes);
+  };
+  if (cached != null) {
+    attributes[GenAISemanticConventions.GenAIUsageCacheReadInputTokens] = cached;
+  }
+  span.setAttributes(attributes);
 }
 
 function setResponseModel(span: Span, { modelName }: { modelName?: string }) {
