@@ -57,9 +57,9 @@ export const ExportJsonFlyout = <
   closeFlyout,
   sanitizeState,
 }: SanitizedState extends NoSanitizedState
-  ? { apiPath: string; closeFlyout: () => void; sanitizeState?: undefined }
+  ? { apiPath?: string; closeFlyout: () => void; sanitizeState?: undefined }
   : {
-      apiPath: string;
+      apiPath?: string;
       closeFlyout: () => void;
       sanitizeState: SanitizeStateFunction<State, SanitizedState>;
     }) => {

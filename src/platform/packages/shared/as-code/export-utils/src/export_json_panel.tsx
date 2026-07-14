@@ -175,7 +175,7 @@ function SuccessState({
   );
 
   const canShowDevTools = Boolean(
-    services.core.application?.capabilities?.dev_tools?.show && consoleHref !== undefined
+    services.core.application?.capabilities?.dev_tools?.show && devToolsDataUri !== undefined
   );
 
   return (
