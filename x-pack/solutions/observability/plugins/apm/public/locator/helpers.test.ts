@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { Environment } from '../../common/environment_rt';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { getPathForServiceDetail, type APMLocatorPayload } from './helpers';
@@ -227,7 +228,7 @@ describe('getPathForServiceDetail', () => {
           query: {
             environment: 'prod' as Environment,
             offset: 'expected_bounds',
-            anomalyThreshold: 'critical',
+            anomalyThreshold: ML_ANOMALY_SEVERITY.CRITICAL,
           },
         },
         defaultOptions
@@ -247,7 +248,7 @@ describe('getPathForServiceDetail', () => {
           query: {
             environment: 'prod' as Environment,
             offset: 'expected_bounds',
-            anomalyThreshold: 'major',
+            anomalyThreshold: ML_ANOMALY_SEVERITY.MAJOR,
           },
         },
         defaultOptions

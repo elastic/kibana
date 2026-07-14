@@ -273,7 +273,7 @@ describe('ServiceFlyout local filter state', () => {
     rerender(
       <ServiceFlyout
         {...contextProps}
-        key={otherService.id}
+        key={otherService.name}
         service={otherService}
         environment="staging"
         kuery=""
