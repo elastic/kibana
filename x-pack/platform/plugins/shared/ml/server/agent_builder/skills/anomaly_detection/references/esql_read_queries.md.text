@@ -1,6 +1,6 @@
 # ES|QL Read Query Templates — Records, Timeline, Influencers, RCA
 
-Use `platform.core.execute_esql` with the query text below. Replace `?param` placeholders with actual values.
+Use `platform.core.execute_esql` with the query text below. Keep `?param` placeholders in the query unchanged and pass bound values separately in the tool's `params` map (keys without `?`, e.g. `{ "job_id_pattern": "*", "min_score": 25 }`).
 
 ---
 
