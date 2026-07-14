@@ -98,6 +98,10 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       initialProjectRoutingOverrides
     );
 
+    const usesEsql$ = new BehaviorSubject<boolean>(
+      initialVisInstance.type.usesEsql?.(initialVisInstance.params) ?? false
+    );
+
     // Track UI state
     const onUiStateChange = () => serializedVis$.next(vis$.getValue().serialize());
 
@@ -117,6 +121,11 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
             if (!isEqual(projectRoutingOverrides$.getValue(), newOverrides)) {
               projectRoutingOverrides$.next(newOverrides);
             }
+          }
+
+          const usesEsql = vis.type.usesEsql?.(vis.params) ?? false;
+          if (usesEsql$.getValue() !== usesEsql) {
+            usesEsql$.next(usesEsql);
           }
 
           const { params, abortController } = await getExpressionParams();
@@ -256,6 +265,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       dataLoading$,
       dataViews$: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
       projectRoutingOverrides$,
+      usesEsql$,
       rendered$: hasRendered$,
       supportedTriggers: () => [
         ON_OPEN_PANEL_MENU,
@@ -344,6 +354,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
           const projectRouting = apiPublishesProjectRouting(parentApi)
             ? data.projectRouting
             : undefined;
+          const isApproximate = data.isApproximate;
           const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
           searchSessionId$.next(searchSessionId);
           const settings = apiPublishesSettings(parentApi)
@@ -380,6 +391,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
             return await getExpressionRendererProps({
               unifiedSearch,
               projectRouting,
+              isApproximate,
               vis: vis$.getValue(),
               settings,
               disableTriggers,
