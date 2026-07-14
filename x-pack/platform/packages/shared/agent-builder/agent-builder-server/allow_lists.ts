@@ -248,6 +248,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Dashboards
   'platform.dashboard.dashboard_state',
+  'platform.ai_panel.panel_context',
 
   // Platform – Streams (significant events)
   'platform.sig_event',

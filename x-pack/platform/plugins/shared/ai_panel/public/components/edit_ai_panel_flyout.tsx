@@ -174,8 +174,8 @@ export const EditAiPanelFlyout = ({
             onClick={handleRefineWithAgent}
             disabled={isAiAvailable === false}
           >
-            {i18n.translate('xpack.aiPanel.editFlyout.refineWithAgent', {
-              defaultMessage: 'Refine with agent',
+            {i18n.translate('xpack.aiPanel.editFlyout.refineWithChat', {
+              defaultMessage: 'Refine with chat',
             })}
           </AiButton>
 

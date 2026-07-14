@@ -150,7 +150,7 @@ describe('EditAiPanelFlyout', () => {
     it('opens the agent chat sidebar and closes the flyout when the button is clicked', async () => {
       const onClose = jest.fn();
       render(<EditAiPanelFlyout {...defaultProps} onClose={onClose} />);
-      await userEvent.click(screen.getByRole('button', { name: 'Refine with agent' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Refine with chat' }));
       expect(openChat).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
     });
@@ -158,7 +158,7 @@ describe('EditAiPanelFlyout', () => {
     it('does not clear the chat config when closing to open the chat', async () => {
       const onClose = jest.fn();
       const { rerender } = render(<EditAiPanelFlyout {...defaultProps} onClose={onClose} />);
-      await userEvent.click(screen.getByRole('button', { name: 'Refine with agent' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Refine with chat' }));
 
       // Parent reacts to onClose by unmounting the flyout, same as any other close path.
       rerender(<></>);
@@ -169,7 +169,7 @@ describe('EditAiPanelFlyout', () => {
     it('disables the button when no AI connector is configured', () => {
       mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, isAiAvailable: false });
       render(<EditAiPanelFlyout {...defaultProps} />);
-      expect(screen.getByRole('button', { name: 'Refine with agent' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Refine with chat' })).toBeDisabled();
     });
   });
 
