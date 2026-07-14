@@ -99,6 +99,7 @@ export function registerGenerateRoute(
     },
     async (context, request, response) => {
       const [coreStart, { inference }] = await getStartServices();
+      // Temporary kill-switch — remove once the feature is approved to ship.
       if (!coreStart.featureFlags.getBooleanValue(AI_PANEL_ENABLED_FLAG_KEY, false)) {
         return response.notFound();
       }

@@ -23,6 +23,7 @@ export class AiPanelPlugin implements Plugin<void, void, SetupDeps> {
   }
 
   start(core: CoreStart) {
+    // Temporary kill-switch — remove once the feature is approved to ship.
     if (!core.featureFlags.getBooleanValue(AI_PANEL_ENABLED_FLAG_KEY, false)) return;
     setServices(core);
   }
