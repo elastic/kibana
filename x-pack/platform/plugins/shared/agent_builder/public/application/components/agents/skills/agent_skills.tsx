@@ -364,6 +364,7 @@ export const AgentSkills: React.FC = () => {
                     (activeSkills.find((s) => s.id === selectedSkillId)?.readonly ?? false)
                   }
                   canEditAgent={canEditAgent}
+                  canManageSkills={manageSkills}
                 />
               ) : (
                 <EuiFlexGroup

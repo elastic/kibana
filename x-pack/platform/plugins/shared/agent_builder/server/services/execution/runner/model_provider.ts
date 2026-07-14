@@ -23,7 +23,6 @@ import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
 import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { TrackingService } from '../../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
@@ -38,14 +37,21 @@ export interface CreateModelProviderOpts {
   logger: Logger;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  maxContentLength?: number;
 }
 
 export type CreateModelProviderFactoryFn = (
-  opts: Omit<CreateModelProviderOpts, 'request' | 'defaultConnectorId' | 'telemetryMetadata'>
+  opts: Omit<
+    CreateModelProviderOpts,
+    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'maxContentLength'
+  >
 ) => ModelProviderFactoryFn;
 
 export type ModelProviderFactoryFn = (
-  opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId' | 'telemetryMetadata'>
+  opts: Pick<
+    CreateModelProviderOpts,
+    'request' | 'defaultConnectorId' | 'telemetryMetadata' | 'maxContentLength'
+  >
 ) => ModelProvider;
 
 const memoizeAsync = <T>(fn: () => Promise<T>): (() => Promise<T>) => {
@@ -76,6 +82,7 @@ export const createModelProvider = ({
   searchInferenceEndpoints,
   logger,
   telemetryMetadata,
+  maxContentLength,
 }: CreateModelProviderOpts): ModelProvider => {
   const resolvedTelemetryMetadata = telemetryMetadata ?? MODEL_TELEMETRY_METADATA;
   const getDefaultConnectorId = memoizeAsync(async () => {
@@ -96,31 +103,23 @@ export const createModelProvider = ({
   });
 
   const getFastModelConnectorId = memoizeAsync(async () => {
-    const fastModelEnabled = await uiSettings
-      .asScopedToClient(savedObjects.getScopedClient(request))
-      .get(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-
     let connectorId: string | undefined;
 
-    if (fastModelEnabled) {
-      const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-        AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
-        request
-      );
+    const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+      AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
+      request
+    );
 
-      const recommendedEndpoint = endpoints.filter((endpoint) => endpoint.isRecommended);
-      if (recommendedEndpoint.length > 0) {
-        connectorId = recommendedEndpoint[0].connectorId;
-      }
+    const recommendedEndpoint = endpoints.filter((endpoint) => endpoint.isRecommended);
+    if (recommendedEndpoint.length > 0) {
+      connectorId = recommendedEndpoint[0].connectorId;
     }
 
     if (!connectorId) {
       connectorId = await getDefaultConnectorId();
     }
 
-    logger.debug(
-      `[getFastModelConnectorId] Using connectorId: ${connectorId} (fastModelEnabled: ${fastModelEnabled})`
-    );
+    logger.debug(`[getFastModelConnectorId] Using connectorId: ${connectorId}`);
 
     return connectorId;
   });
@@ -180,6 +179,7 @@ export const createModelProvider = ({
       },
       chatModelOptions: {
         telemetryMetadata: resolvedTelemetryMetadata,
+        ...(maxContentLength !== undefined ? { maxContentLength } : {}),
       },
     });
 

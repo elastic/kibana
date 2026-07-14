@@ -23,6 +23,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
+import { getOAuthPasswordAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_password_access_token';
 
 import type { HttpConnectorType, HttpConnectorTypeExecutorOptions } from './types';
 
@@ -81,6 +82,10 @@ jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
 
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
+}));
+
+jest.mock('@kbn/actions-plugin/server/lib/get_oauth_password_access_token', () => ({
+  getOAuthPasswordAccessToken: jest.fn(),
 }));
 
 const requestMock = utils.request as jest.Mock;
@@ -379,6 +384,72 @@ describe('config validation', () => {
   });
 
   describe('connector validation', () => {
+    test('returns error when OAuth2 password grant credentials are missing', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'https://token.example.com',
+      };
+
+      expect(() => {
+        validateConnector(connectorType, { config, secrets: emptySecrets });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled"`
+      );
+    });
+
+    test('returns error when OAuth2 password grant username is provided without password', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'https://token.example.com',
+      };
+
+      expect(() => {
+        validateConnector(connectorType, { config, secrets: { ...emptySecrets, user: 'bob' } });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled"`
+      );
+    });
+
+    test('returns error when OAuth2 password grant password is provided without username', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'https://token.example.com',
+      };
+
+      expect(() => {
+        validateConnector(connectorType, {
+          config,
+          secrets: { ...emptySecrets, password: 'supersecret' },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: Username and password are required when OAuth2 password grant authentication is enabled"`
+      );
+    });
+
+    test('succeeds when OAuth2 password grant credentials are provided', () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'http://mylisteningserver.com:9200/endpoint',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'https://token.example.com',
+      };
+      const secrets: ConnectorTypeSecretsType = {
+        ...emptySecrets,
+        user: 'bob',
+        password: 'supersecret',
+      };
+
+      expect(() => {
+        validateConnector(connectorType, { config, secrets });
+      }).not.toThrow();
+    });
+
     test('returns error when hasProxyAuth is true but proxyUrl is missing', () => {
       const config: ConnectorTypeConfigType = {
         ...emptyConfig,
@@ -552,6 +623,35 @@ describe('config validation', () => {
       }).toThrowErrorMatchingInlineSnapshot(
         `"error validating connector type config: error validation http action config: additionalFields must be a valid JSON object"`
       );
+    });
+  });
+
+  describe('OAuth2 Password', () => {
+    test('throws if accessTokenUrl is missing', async () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'https://test.com',
+        authType: AuthType.OAuth2Password,
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating connector type config: error validation http action config: missing Access Token URL (accessTokenUrl) field"`
+      );
+    });
+
+    test('passes when accessTokenUrl is set', async () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'https://test.com',
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'http://fake.test',
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities });
+      }).not.toThrow();
     });
   });
 });
@@ -2514,6 +2614,70 @@ describe('execute()', () => {
       const headers = (utils.request as jest.Mock).mock.calls[0][0].headers;
       expect(headers.Authorization).toBe(accessToken);
       expect(headers['X-Custom']).toBe('value');
+    });
+  });
+
+  describe('oauth2 password grant', () => {
+    it('returns error result if access token retrieval fails', async () => {
+      (getOAuthPasswordAccessToken as jest.Mock).mockResolvedValue(undefined);
+
+      const execOptions: HttpConnectorTypeExecutorOptions = {
+        actionId: 'test-id',
+        config: {
+          ...emptyConfig,
+          url: 'https://test.com',
+          authType: AuthType.OAuth2Password,
+          accessTokenUrl: 'https://token.url',
+        },
+        params: {
+          method: 'POST',
+          path: '/endpoint',
+          body: '{}',
+        },
+        secrets: { ...emptySecrets, user: 'test-user', password: 'test-password' },
+        configurationUtilities,
+        logger: mockedLogger,
+        services,
+        connectorUsageCollector,
+      };
+
+      const result = await connectorType.executor?.(execOptions);
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('Unable to retrieve new access token');
+    });
+
+    it('adds access token to headers', async () => {
+      const accessToken = 'Bearer my-access-token';
+      (getOAuthPasswordAccessToken as jest.Mock).mockResolvedValueOnce(accessToken);
+      createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
+
+      const execOptions: HttpConnectorTypeExecutorOptions = {
+        actionId: 'test-id',
+        config: {
+          ...emptyConfig,
+          url: 'https://test.com',
+          authType: AuthType.OAuth2Password,
+          accessTokenUrl: 'https://token.url',
+        },
+        params: {
+          method: 'POST',
+          path: '/endpoint',
+          body: '{}',
+        },
+        secrets: { ...emptySecrets, user: 'test-user', password: 'test-password' },
+        configurationUtilities,
+        logger: mockedLogger,
+        services,
+        connectorUsageCollector,
+      };
+
+      await connectorType.executor?.(execOptions);
+
+      expect(getOAuthPasswordAccessToken).toHaveBeenCalledWith(
+        expect.objectContaining({ username: 'test-user', password: 'test-password' })
+      );
+      expect((utils.request as jest.Mock).mock.calls[0][0].headers.Authorization).toBe(accessToken);
     });
   });
 });

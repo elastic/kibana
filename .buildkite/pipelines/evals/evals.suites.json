@@ -21,6 +21,7 @@
       "name": "Agent Builder",
       "slackChannel": "#agent-builder-alerts",
       "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts",
+      "serverConfigSet": "evals_agent_builder",
       "tags": [
         "platform",
         "agent-builder"
@@ -71,6 +72,7 @@
         "eis/anthropic-claude-4.6-sonnet",
         "eis/anthropic-claude-4.6-opus",
         "eis/anthropic-claude-4.7-opus",
+        "eis/anthropic-claude-4.8-opus",
         "eis/google-gemini-3.0-flash",
         "eis/google-gemini-3.1-flash-lite",
         "eis/google-gemini-3.5-flash",
@@ -205,7 +207,7 @@
     {
       "id": "pci-compliance",
       "name": "PCI DSS v4.0.1 Compliance",
-      "slackChannel": "#security-defend-workflows-tests",
+      "slackChannel": "#compliance-agent-skill",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/playwright.config.ts",
       "tags": ["security", "pci-compliance"],
       "ciLabels": ["evals:pci-compliance"],
@@ -263,9 +265,18 @@
       "ciLabels": ["evals:security-alert-triage"]
     },
     {
+      "id": "skill-selection-benchmark",
+      "name": "Skill Selection Benchmark",
+      "slackChannel": "#agent-builder-alerts",
+      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/skill_selection.playwright.config.ts",
+      "tags": ["platform", "agent-builder", "skill-selection"],
+      "ciLabels": ["evals:skill-selection-benchmark"],
+      "serverConfigSet": "evals_skill_selection"
+    },
+    {
       "id": "siem-readiness",
       "name": "SIEM Readiness",
-      "slackChannel": "#security-defend-workflows-tests",
+      "slackChannel": "#siem-readiness",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness/playwright.config.ts",
       "tags": ["security", "siem-readiness"],
       "ciLabels": ["evals:siem-readiness"],

@@ -44,6 +44,7 @@ import type {
 import { Loading } from '../../../../../components';
 import {
   useGetEpmDatastreams,
+  useGetIlmPoliciesQuery,
   useStartServices,
   useVarGroupCloudConnector,
 } from '../../../../../hooks';
@@ -84,6 +85,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   isAgentlessSelected?: boolean;
   agentPolicies?: AgentPolicy[];
   onNamespaceCustomizationEnabledChange?: (enabled: boolean, isInit?: boolean) => void;
+  onIlmPolicyChange?: (ilmPolicy: string | undefined, isInit?: boolean) => void;
   packagePolicyId?: string;
 }> = memo(
   ({
@@ -98,6 +100,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     isAgentlessSelected = false,
     agentPolicies,
     onNamespaceCustomizationEnabledChange,
+    onIlmPolicyChange,
     packagePolicyId,
   }) => {
     const { docLinks, cloud } = useStartServices();
@@ -241,6 +244,32 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       isManaged: !!isManaged,
       packagePolicyId,
     });
+
+    // ILM policy picker — only relevant when namespace customization is available and not serverless
+    const isServerless = !!cloud?.isServerlessEnabled;
+    const showIlmPicker = showNamespaceCustomizationToggle && !isServerless;
+    const { data: ilmPoliciesData, isLoading: isIlmPoliciesLoading } = useGetIlmPoliciesQuery({
+      enabled: showIlmPicker,
+    });
+
+    const [selectedIlmPolicy, setSelectedIlmPolicy] = useState<string | undefined>(undefined);
+    // Track the namespace for which we last initialized selectedIlmPolicy to detect namespace changes
+    const [initializedForNamespace, setInitializedForNamespace] = useState<string | undefined>(
+      undefined
+    );
+
+    useEffect(() => {
+      if (!packagePolicy.namespace || !packageInfo) return;
+      const ns = packagePolicy.namespace.trim();
+      if (initializedForNamespace === ns) return;
+      const savedIlmPolicy =
+        'installationInfo' in packageInfo
+          ? packageInfo.installationInfo?.namespace_customization_settings?.[ns]?.ilm_policy
+          : undefined;
+      setSelectedIlmPolicy(savedIlmPolicy);
+      onIlmPolicyChange?.(savedIlmPolicy, true);
+      setInitializedForNamespace(ns);
+    }, [packagePolicy.namespace, packageInfo, initializedForNamespace, onIlmPolicyChange]);
 
     return validationResults ? (
       <>
@@ -656,33 +685,122 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     </EuiFlexItem>
                   )}
 
-                  {/* Data retention settings info */}
+                  {/* Data retention settings / ILM policy picker */}
                   <EuiFlexItem>
                     <EuiFormRow
                       label={
-                        <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLabel"
-                          defaultMessage="Data retention settings"
-                        />
+                        <>
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLabel"
+                            defaultMessage="Data retention settings"
+                          />
+                          {showIlmPicker && !namespaceCustomizationEnabled && (
+                            <>
+                              {' '}
+                              <EuiIconTip
+                                type="question"
+                                color="subdued"
+                                content={
+                                  <FormattedMessage
+                                    id="xpack.fleet.createPackagePolicy.ilmPolicy.disabledNotOptedIn"
+                                    defaultMessage="Enable namespace index templates for this namespace to assign an ILM policy."
+                                  />
+                                }
+                              />
+                            </>
+                          )}
+                          {showIlmPicker &&
+                            namespaceCustomizationEnabled &&
+                            ilmPoliciesData?.has_manage_ilm === false && (
+                              <>
+                                {' '}
+                                <EuiIconTip
+                                  type="question"
+                                  color="subdued"
+                                  content={
+                                    <FormattedMessage
+                                      id="xpack.fleet.createPackagePolicy.ilmPolicy.disabledNoPrivilege"
+                                      defaultMessage="You need the manage_ilm cluster privilege to assign an ILM policy."
+                                    />
+                                  }
+                                />
+                              </>
+                            )}
+                        </>
                       }
                       helpText={
-                        <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText"
-                          defaultMessage="By default all logs and metrics data are stored on the hot tier. {learnMore} about changing the data retention policy for this integration."
-                          values={{
-                            learnMore: (
-                              <EuiLink href={docLinks.links.fleet.datastreamsILM} target="_blank">
-                                {i18n.translate(
-                                  'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink',
-                                  { defaultMessage: 'Learn more' }
-                                )}
-                              </EuiLink>
-                            ),
-                          }}
-                        />
+                        showIlmPicker ? (
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyIlmPolicyText"
+                            defaultMessage="Select an ILM policy to apply to all data streams for this namespace. {learnMore}"
+                            values={{
+                              learnMore: (
+                                <EuiLink href={docLinks.links.fleet.datastreamsILM} target="_blank">
+                                  {i18n.translate(
+                                    'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink',
+                                    { defaultMessage: 'Learn more' }
+                                  )}
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText"
+                            defaultMessage="By default all logs and metrics data are stored on the hot tier. {learnMore} about changing the data retention policy for this integration."
+                            values={{
+                              learnMore: (
+                                <EuiLink href={docLinks.links.fleet.datastreamsILM} target="_blank">
+                                  {i18n.translate(
+                                    'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink',
+                                    { defaultMessage: 'Learn more' }
+                                  )}
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        )
                       }
                     >
-                      <div />
+                      {showIlmPicker ? (
+                        <EuiSelect
+                          data-test-subj="packagePolicyIlmPolicySelect"
+                          isLoading={isIlmPoliciesLoading}
+                          disabled={
+                            !namespaceCustomizationEnabled ||
+                            !ilmPoliciesData?.has_manage_ilm ||
+                            isManaged === true
+                          }
+                          options={[
+                            {
+                              value: '',
+                              text: i18n.translate(
+                                'xpack.fleet.createPackagePolicy.ilmPolicy.noneOption',
+                                { defaultMessage: 'None (use default)' }
+                              ),
+                            },
+                            // Keep the currently assigned policy selectable even if it's since
+                            // been deleted in ES or excluded from the fetched list, so the
+                            // control doesn't silently fall back to the first option.
+                            ...(selectedIlmPolicy &&
+                            !ilmPoliciesData?.items?.includes(selectedIlmPolicy)
+                              ? [{ value: selectedIlmPolicy, text: selectedIlmPolicy }]
+                              : []),
+                            ...(ilmPoliciesData?.items ?? []).map((policyName) => ({
+                              value: policyName,
+                              text: policyName,
+                            })),
+                          ]}
+                          value={selectedIlmPolicy ?? ''}
+                          onChange={(e) => {
+                            const val = e.target.value || undefined;
+                            setSelectedIlmPolicy(val);
+                            onIlmPolicyChange?.(val);
+                          }}
+                        />
+                      ) : (
+                        <div />
+                      )}
                     </EuiFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem>

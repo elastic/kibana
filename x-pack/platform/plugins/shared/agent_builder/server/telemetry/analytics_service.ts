@@ -305,6 +305,7 @@ export class AnalyticsService {
           conversation_id: conversationId,
           execution_id: executionId,
           input_tokens: round.model_usage.input_tokens,
+          cached_input_tokens: round.model_usage.cached_input_tokens,
           llm_calls: round.model_usage.llm_calls,
           message_length: round.input.message.length,
           model: round.model_usage.model,

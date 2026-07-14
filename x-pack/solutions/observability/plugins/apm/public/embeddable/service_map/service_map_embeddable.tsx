@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
@@ -27,6 +27,13 @@ import { TimeoutPrompt } from '../../components/app/service_map/timeout_prompt';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
 import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
 import { ServiceMapGraph } from '../../components/app/service_map/graph';
+import { ContextualServiceMapGraph } from '../../components/app/service_map/contextual_map/contextual_service_map_graph';
+import {
+  CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
+  CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES,
+} from '../../components/app/service_map/contextual_map/constants';
+import { SERVICE_FLYOUT_SOURCES } from '../../components/shared/service_flyout/constants';
+import type { ServiceFlyoutOptions } from '../../components/shared/service_flyout/types';
 import { ServiceMapSloFlyoutProvider } from '../../components/shared/service_map/service_map_slo_flyout_context';
 import {
   SloOverviewFlyout,
@@ -68,6 +75,23 @@ export interface ServiceMapEmbeddableProps {
    * Set by the dashboard embeddable factory when the panel is maximized in view mode.
    */
   showEmbeddedControls?: boolean;
+  /** Collapse distant dependencies with expand affordances (requires serviceName). */
+  enableContextualMap?: boolean;
+  /** Contextual map settings (e.g. service overview header controls). */
+  contextualMapBaseMaxHops?: number;
+  contextualMapMaxVisibleNodes?: number;
+  onContextualMapBaseMaxHopsChange?: (value: number) => void;
+  onContextualMapMaxVisibleNodesChange?: (value: number) => void;
+  /** Hide max visible / hops controls inside the map. */
+  hideContextControls?: boolean;
+  /** Expand/collapse state for contextual map (e.g. service overview). */
+  contextualMapExpandedNodeIds?: ReadonlySet<string>;
+  onContextualMapExpand?: (nodeId: string) => void;
+  onContextualMapCollapse?: (nodeId: string) => void;
+  /** Override default min-height (400px) for compact inline embeds. */
+  embeddableMinHeight?: number;
+  /** Optional overrides for the service flyout opened from this map. */
+  flyoutOptions?: ServiceFlyoutOptions;
 }
 
 function LoadingSpinner() {
@@ -104,6 +128,17 @@ export function ServiceMapEmbeddable({
   viewFilters,
   onViewFiltersChange,
   showEmbeddedControls,
+  enableContextualMap = false,
+  contextualMapBaseMaxHops: contextualMapBaseMaxHopsProp,
+  contextualMapMaxVisibleNodes: contextualMapMaxVisibleNodesProp,
+  onContextualMapBaseMaxHopsChange,
+  onContextualMapMaxVisibleNodesChange,
+  hideContextControls = false,
+  contextualMapExpandedNodeIds: contextualMapExpandedNodeIdsProp,
+  onContextualMapExpand,
+  onContextualMapCollapse,
+  embeddableMinHeight = EMBEDDABLE_MIN_HEIGHT,
+  flyoutOptions,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -145,6 +180,45 @@ export function ServiceMapEmbeddable({
 
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();
+
+  const [internalBaseMaxHops, setInternalBaseMaxHops] = useState(
+    CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS
+  );
+  const [internalMaxVisibleNodes, setInternalMaxVisibleNodes] = useState(
+    CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES
+  );
+  const baseMaxHops = contextualMapBaseMaxHopsProp ?? internalBaseMaxHops;
+  const maxVisibleNodes = contextualMapMaxVisibleNodesProp ?? internalMaxVisibleNodes;
+  const setBaseMaxHops = onContextualMapBaseMaxHopsChange ?? setInternalBaseMaxHops;
+  const setMaxVisibleNodes = onContextualMapMaxVisibleNodesChange ?? setInternalMaxVisibleNodes;
+  const [internalExpandedNodeIds, setInternalExpandedNodeIds] = useState<Set<string>>(
+    () => new Set()
+  );
+  const isExpandedNodeIdsControlled = contextualMapExpandedNodeIdsProp !== undefined;
+  const expandedNodeIds = contextualMapExpandedNodeIdsProp ?? internalExpandedNodeIds;
+
+  const internalOnExpand = useCallback((nodeId: string) => {
+    setInternalExpandedNodeIds((prev) => new Set(prev).add(nodeId));
+  }, []);
+
+  const internalOnCollapse = useCallback((nodeId: string) => {
+    setInternalExpandedNodeIds((prev) => {
+      const next = new Set(prev);
+      next.delete(nodeId);
+      return next;
+    });
+  }, []);
+
+  const onExpand = onContextualMapExpand ?? internalOnExpand;
+  const onCollapse = onContextualMapCollapse ?? internalOnCollapse;
+
+  const useContextualMap = Boolean(enableContextualMap && serviceName);
+
+  useEffect(() => {
+    if (!isExpandedNodeIdsControlled) {
+      setInternalExpandedNodeIds(new Set());
+    }
+  }, [serviceName, isExpandedNodeIdsControlled]);
 
   const { dataView } = useAdHocApmDataView();
   const kibanaQuerySettings = useKibanaQuerySettings();
@@ -210,6 +284,14 @@ export function ServiceMapEmbeddable({
       anomalySeverityFilter: [],
     };
   }, [viewFilters, badgesStatus]);
+
+  const flyoutOptionsForGraph = useMemo<ServiceFlyoutOptions>(
+    () => ({
+      source: SERVICE_FLYOUT_SOURCES.dashboardEmbeddable,
+      ...flyoutOptions,
+    }),
+    [flyoutOptions]
+  );
 
   const badgeDependentFiltersActive =
     (viewFilters?.alertStatusFilter?.length ?? 0) > 0 ||
@@ -311,7 +393,7 @@ export function ServiceMapEmbeddable({
           width: '100%',
           height: '100%',
           minWidth: EMBEDDABLE_MIN_WIDTH,
-          minHeight: EMBEDDABLE_MIN_HEIGHT,
+          minHeight: embeddableMinHeight,
           position: 'relative' as const,
           boxSizing: 'border-box',
         }}
@@ -331,28 +413,56 @@ export function ServiceMapEmbeddable({
             css={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1 }}
           />
         )}
-        <ServiceMapGraph
-          height="100%"
-          nodes={isLoading ? [] : nodesForGraph}
-          edges={isLoading ? [] : data.edges}
-          serviceName={serviceName}
-          highlightedServiceName={serviceName}
-          environment={environment}
-          kuery={kuery}
-          start={start}
-          end={end}
-          isFullscreen={false}
-          fullMapHref={fullMapHref}
-          isEmbedded
-          showEmbeddedControls={showEmbeddedControls}
-          showFocusMap={showFocusMapInPopover}
-          alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
-          clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
-          mapOrientation={mapOrientation}
-          onMapOrientationChange={onMapOrientationChange}
-          viewFilters={viewFiltersForGraph}
-          onViewFiltersChange={onViewFiltersChange}
-        />
+        {useContextualMap ? (
+          <ContextualServiceMapGraph
+            height="100%"
+            nodes={isLoading ? [] : nodesForGraph}
+            edges={isLoading ? [] : data.edges}
+            focalServiceId={serviceName!}
+            baseMaxHops={baseMaxHops}
+            maxVisibleNodes={maxVisibleNodes}
+            expandedNodeIds={expandedNodeIds}
+            onExpand={onExpand}
+            onCollapse={onCollapse}
+            onBaseMaxHopsChange={setBaseMaxHops}
+            onMaxVisibleNodesChange={setMaxVisibleNodes}
+            highlightedServiceName={serviceName}
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
+            fullMapHref={fullMapHref}
+            showFocusMap={showFocusMapInPopover}
+            alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
+            clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
+            showContextControls={!hideContextControls}
+            flyoutOptions={flyoutOptionsForGraph}
+          />
+        ) : (
+          <ServiceMapGraph
+            height="100%"
+            nodes={isLoading ? [] : nodesForGraph}
+            edges={isLoading ? [] : data.edges}
+            serviceName={serviceName}
+            highlightedServiceName={serviceName}
+            environment={environment}
+            kuery={kuery}
+            start={start}
+            end={end}
+            isFullscreen={false}
+            fullMapHref={fullMapHref}
+            isEmbedded
+            showEmbeddedControls={showEmbeddedControls}
+            showFocusMap={showFocusMapInPopover}
+            alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
+            clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
+            mapOrientation={mapOrientation}
+            onMapOrientationChange={onMapOrientationChange}
+            viewFilters={viewFiltersForGraph}
+            onViewFiltersChange={onViewFiltersChange}
+            flyoutOptions={flyoutOptionsForGraph}
+          />
+        )}
       </div>
       {sloOverviewFlyout && (
         <SloOverviewFlyout

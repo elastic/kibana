@@ -12,6 +12,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import type { AppHeaderPadding } from '../types';
+import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 // Single-row bar height, applied to every header (title, tabbed, or back-button-only) so the bar
 // stays a consistent 48px. The symmetric size.s padding leaves a 32px content area, enough for the
@@ -51,8 +52,8 @@ const resolvePadding = (
 
   // `{ bleed }`: pull the header out to its padded container's top/left/right edges (negative margin)
   // and re-inset the content by the same amount so it stays aligned with the page gutter. The value
-  // mirrors the container's symmetric padding, so it applies equally to the sides and the top.
-  const value = resolved.bleed === 'l' ? euiTheme.size.l : euiTheme.size.m;
+  // mirrors the container's symmetric EUI `paddingSize`: `'m'` → 16px (`size.base`), `'l'` → 24px.
+  const value = { m: euiTheme.size.base, l: euiTheme.size.l }[resolved.bleed];
   return { paddingInline: value, bleedMargin: value };
 };
 
@@ -218,7 +219,7 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
     const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend, !!metadata, borderless);
 
     return (
-      <div css={styles.root} data-test-subj="appHeader">
+      <div css={styles.root} data-test-subj={APP_HEADER_TEST_SUBJECTS.root}>
         <div css={styles.primaryRow}>
           <div css={styles.titleCluster}>
             <div css={styles.titleGroup}>
@@ -236,12 +237,12 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
           {trailing && <div css={styles.trailingSlot}>{trailing}</div>}
         </div>
         {metadata && (
-          <div css={styles.metadataRow} data-test-subj="appHeaderMetadata">
+          <div css={styles.metadataRow} data-test-subj={APP_HEADER_TEST_SUBJECTS.metadata}>
             {metadata}
           </div>
         )}
         {tabs && (
-          <div css={styles.tabsRow} data-test-subj="appHeaderTabs">
+          <div css={styles.tabsRow} data-test-subj={APP_HEADER_TEST_SUBJECTS.tabs}>
             {tabs}
           </div>
         )}

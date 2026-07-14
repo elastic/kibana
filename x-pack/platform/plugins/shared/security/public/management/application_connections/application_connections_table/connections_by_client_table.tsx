@@ -92,10 +92,14 @@ export const ConnectionsByClientTable = ({
     () => ({
       selected: selectedClientRows,
       selectable: (row) => (selectableConnectionsByClient[row.client.id]?.length ?? 0) > 0,
-      selectableMessage: (selectable, row) =>
-        selectable
-          ? labels.groupedColumns.selectClientLabel(row.client.client_name ?? row.client.id)
-          : labels.groupedColumns.allRevokedClientLabel,
+      selectableMessage: (selectable, row) => {
+        if (selectable) {
+          return labels.groupedColumns.selectClientLabel(row.client.client_name ?? row.client.id);
+        }
+        return row.connections.length === 0
+          ? labels.groupedColumns.noConnectionsClientLabel
+          : labels.groupedColumns.allRevokedClientLabel;
+      },
       onSelectionChange: (nextSelection) => {
         const nextIds = new Set(nextSelection.map((row) => row.client.id));
         const prevIds = new Set(selectedClientRows.map((row) => row.client.id));

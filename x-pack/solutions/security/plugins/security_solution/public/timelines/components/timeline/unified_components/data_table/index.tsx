@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { useDispatch, useSelector, useStore } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   UnifiedDataTableProps,
@@ -20,11 +20,9 @@ import type {
   EuiDataGridProps,
 } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useHistory } from 'react-router-dom';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
 import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
@@ -35,6 +33,7 @@ import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import type {
   ColumnHeaderOptions,
   OnFetchMoreRecords,
@@ -57,10 +56,6 @@ import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
-import { DocumentFlyoutWrapper } from '../../../../../flyout_v2/document/main/document_flyout_wrapper';
-import { AttackFlyoutWrapper } from '../../../../../flyout_v2/attack/main/attack_flyout_wrapper';
-import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
-import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -123,11 +118,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     leadingControlColumns,
     onUpdatePageIndex,
   }) {
-    const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
     const dispatch = useDispatch();
-    const store = useStore();
-    const history = useHistory();
-    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
     const [activeStatefulEventContext] = useState({
@@ -147,8 +138,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       telemetry,
       theme,
       data: dataPluginContract,
-      overlays,
     } = services;
+
+    const enableNewFlyout = useIsNewFlyoutEnabled();
+    const { openAttackFlyout, openDocumentFlyoutFromIndex } = useFlyoutApi();
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
 
@@ -188,34 +181,22 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
-        if (newFlyoutSystemEnabled) {
+        if (enableNewFlyout) {
           const isAttackRow = isAttackDiscoveryRow(eventData);
-          overlays.openSystemFlyout(
-            flyoutProviders({
-              services,
-              store,
-              history,
-              children: isAttackRow ? (
-                <AttackFlyoutWrapper
-                  attackId={eventData._id}
-                  indexName={eventData.ecs._index ?? ''}
-                  onAttackUpdated={refetch}
-                />
-              ) : (
-                <DocumentFlyoutWrapper
-                  documentId={eventData._id}
-                  indexName={eventData.ecs._index}
-                  renderCellActions={cellActionRenderer}
-                  onAlertUpdated={refetch}
-                />
-              ),
-            }),
-            {
-              ...defaultFlyoutProperties,
-              historyKey: documentFlyoutHistoryKey,
-              session: 'start',
-            }
-          );
+          if (isAttackRow) {
+            openAttackFlyout({
+              attackId: eventData._id,
+              indexName: eventData.ecs._index ?? '',
+              onAttackUpdated: refetch,
+            });
+          } else {
+            openDocumentFlyoutFromIndex({
+              documentId: eventData._id,
+              indexName: eventData.ecs._index,
+              renderCellActions: cellActionRenderer,
+              onAlertUpdated: refetch,
+            });
+          }
         } else {
           const isAttackRow = isAttackDiscoveryRow(eventData);
           const indexName = eventData.ecs._index ?? '';
@@ -245,14 +226,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         }
       },
       [
-        defaultFlyoutProperties,
-        newFlyoutSystemEnabled,
-        overlays,
-        services,
-        store,
-        history,
-        timelineId,
+        enableNewFlyout,
+        openAttackFlyout,
+        openDocumentFlyoutFromIndex,
         refetch,
+        timelineId,
         openFlyout,
         telemetry,
       ]

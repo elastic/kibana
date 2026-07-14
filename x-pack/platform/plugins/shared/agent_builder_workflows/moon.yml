@@ -23,7 +23,7 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
-  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/agent-builder-sml-plugin'
   - '@kbn/workflows'
   - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
@@ -36,13 +36,13 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/kibana-react-plugin'
   - '@kbn/css-utils'
-  - '@kbn/monaco'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server'
   - '@kbn/workflows-yaml'
   - '@kbn/react-query'
   - '@kbn/agent-builder-workflow-gen'
+  - '@kbn/security-plugin-types-server'
 tags:
   - plugin
   - prod
