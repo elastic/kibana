@@ -629,6 +629,25 @@ export class DiscoverApp {
     await this.codeEditor.waitCodeEditorReady('ESQLEditor');
   }
 
+  async selectClassicMode() {
+    const currentMode = await this.getCurrentQueryMode();
+
+    if (currentMode !== 'classic') {
+      await this.clickAppMenuItem('select-classic-mode-btn');
+      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
+        state: 'visible',
+      });
+      await this.page.testSubj.click('discover-esql-to-dataview-no-save-btn');
+      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
+        state: 'hidden',
+      });
+    }
+
+    await this.waitUntilSearchingHasFinished();
+    const queryMode = await this.getCurrentQueryMode();
+    expect(queryMode).toBe('classic');
+  }
+
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
     await this.codeEditor.setCodeEditorValue(query);

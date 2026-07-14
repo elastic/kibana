@@ -22,6 +22,10 @@ import type {
  * On create/update the legacy side's rule is deleted (best-effort). On bulk delete both
  * sides are targeted. Errors from the legacy adapter are logged and swallowed so a
  * missing legacy rule never blocks the primary operation.
+ *
+ * `findOwnedRuleIds` unions both sides (flag flips don't migrate existing rules) and, unlike
+ * the other methods, propagates legacy errors — a partial union would wrongly orphan-delete
+ * legacy-owned rules via reconcileStream.
  */
 export class DualCleanupRulesAdapter implements IRulesManagementClient {
   constructor(
@@ -61,6 +65,14 @@ export class DualCleanupRulesAdapter implements IRulesManagementClient {
     if (primaryResult.status === 'rejected') {
       throw primaryResult.reason;
     }
+  }
+
+  async findOwnedRuleIds(streamName: string): Promise<string[]> {
+    const [primaryIds, legacyIds] = await Promise.all([
+      this.primary.findOwnedRuleIds(streamName),
+      this.legacy.findOwnedRuleIds(streamName),
+    ]);
+    return [...new Set([...primaryIds, ...legacyIds])];
   }
 
   private async cleanupLegacyRule(id: string): Promise<void> {

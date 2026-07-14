@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import { either } from 'fp-ts/Either';
+import { z } from '@kbn/zod/v4';
 import type { unitOfTime } from 'moment';
 import moment from 'moment';
 import type { AmountAndUnit } from '../amount_and_unit';
@@ -47,5 +48,24 @@ export function getDurationRt({ min, max }: { min?: string; max?: string }) {
       });
     },
     t.identity
+  );
+}
+
+// zod equivalent, additive (io-ts -> zod migration, elastic/kibana#243355).
+export function getDurationSchema({ min, max }: { min?: string; max?: string }) {
+  const minAsMilliseconds = amountAndUnitToMilliseconds(min) ?? -Infinity;
+  const maxAsMilliseconds = amountAndUnitToMilliseconds(max) ?? Infinity;
+  const message = getRangeTypeMessage(min, max);
+
+  return z.string().refine(
+    (inputAsString) => {
+      const inputAsMilliseconds = amountAndUnitToMilliseconds(inputAsString);
+      return (
+        inputAsMilliseconds !== undefined &&
+        inputAsMilliseconds >= minAsMilliseconds &&
+        inputAsMilliseconds <= maxAsMilliseconds
+      );
+    },
+    { message }
   );
 }
