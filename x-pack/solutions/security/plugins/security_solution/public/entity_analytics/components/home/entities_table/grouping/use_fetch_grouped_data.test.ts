@@ -9,15 +9,22 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { getESQLResults } from '@kbn/esql-utils';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import {
   getGroupedEntitiesQuery,
   parseTargetMetadataHits,
   useFetchTargetMetadata,
+  useFetchResolutionGroupDataPathA,
+  useFetchResolutionGroupDataPathB,
+  ESQL_LIMIT_CAP,
   type EntitiesGroupingQuery,
 } from './use_fetch_grouped_data';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { DataViewContext, type DataViewContextValue } from '..';
+import { ENTITY_FIELDS, ENTITY_GROUPING_OPTIONS } from '../constants';
+
+jest.mock('@kbn/esql-utils', () => ({ getESQLResults: jest.fn() }));
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -272,5 +279,358 @@ describe('useFetchTargetMetadata', () => {
     renderHook(() => useFetchTargetMetadata([]), { wrapper: createWrapper() });
 
     expect(mockSearch).not.toHaveBeenCalled();
+  });
+});
+
+// ─── Shared helpers for ES|QL fetch hook tests ──────────────────────────────
+
+const makePathAEsqlResponse = (
+  targets: Array<{
+    id: string;
+    name: string;
+    type: string;
+    eff: number | null;
+    riskScore: number | null;
+    resolutionRisk: number | null;
+  }>
+) => ({
+  response: {
+    columns: [
+      { name: ENTITY_FIELDS.ENTITY_ID },
+      { name: ENTITY_FIELDS.ENTITY_NAME },
+      { name: ENTITY_FIELDS.ENTITY_TYPE },
+      { name: 'eff' },
+      { name: ENTITY_FIELDS.ENTITY_RISK },
+      { name: ENTITY_FIELDS.RESOLUTION_RISK_SCORE },
+    ],
+    values: targets.map((t) => [t.id, t.name, t.type, t.eff, t.riskScore, t.resolutionRisk]),
+  },
+  params: { query: '' },
+});
+
+const makePathBEsqlResponse = (
+  groups: Array<{ group_key: string; group_risk: number | null; group_size: number }>
+) => ({
+  response: {
+    columns: [{ name: 'group_key' }, { name: 'group_risk' }, { name: 'group_size' }],
+    values: groups.map((g) => [g.group_key, g.group_risk, g.group_size]),
+  },
+  params: { query: '' },
+});
+
+const setupKibanaMock = () => {
+  (useKibana as jest.Mock).mockReturnValue({
+    services: {
+      data: { search: { search: mockSearch } },
+      notifications: { toasts: { addError: jest.fn() } },
+    },
+  });
+};
+
+describe('useFetchResolutionGroupDataPathA', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupKibanaMock();
+  });
+
+  it('returns target metadata from ES|QL rows without a separate metadata DSL query', async () => {
+    (getESQLResults as jest.Mock).mockResolvedValue(
+      makePathAEsqlResponse([
+        {
+          id: 'user:alice',
+          name: 'alice',
+          type: 'user',
+          eff: 85,
+          riskScore: 70,
+          resolutionRisk: 85,
+        },
+      ])
+    );
+    // Call 1: track_total_hits; Call 2: alias count
+    mockSearch
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 1 } } } }))
+      .mockReturnValueOnce(
+        of({ rawResponse: { aggregations: { aliases_by_target: { buckets: [] } } } })
+      );
+
+    const { result } = renderHook(
+      () => useFetchResolutionGroupDataPathA({ pageIndex: 0, pageSize: 10 }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data?.targetMetadata.get('user:alice')).toEqual({
+      name: 'alice',
+      type: 'user',
+      riskScore: 85,
+      individualRiskScore: 70,
+    });
+
+    // Only 2 DSL search calls (track_total_hits + alias count) — no metadata fixup call
+    expect(mockSearch).toHaveBeenCalledTimes(2);
+  });
+
+  it('sets doc_count to 1 plus the alias count from the terms agg', async () => {
+    (getESQLResults as jest.Mock).mockResolvedValue(
+      makePathAEsqlResponse([
+        {
+          id: 'user:alice',
+          name: 'alice',
+          type: 'user',
+          eff: 85,
+          riskScore: 70,
+          resolutionRisk: 85,
+        },
+        {
+          id: 'host:srv-01',
+          name: 'srv-01',
+          type: 'host',
+          eff: 60,
+          riskScore: 60,
+          resolutionRisk: null,
+        },
+      ])
+    );
+    mockSearch
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 2 } } } }))
+      .mockReturnValueOnce(
+        of({
+          rawResponse: {
+            aggregations: {
+              aliases_by_target: {
+                // alice has 1 alias; srv-01 has none
+                buckets: [{ key: 'user:alice', doc_count: 1 }],
+              },
+            },
+          },
+        })
+      );
+
+    const { result } = renderHook(
+      () => useFetchResolutionGroupDataPathA({ pageIndex: 0, pageSize: 10 }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const buckets = result.current.data!.groupData.groupByFields.buckets;
+    const alice = buckets.find((b) => b.key[0] === 'user:alice');
+    const srv = buckets.find((b) => b.key[0] === 'host:srv-01');
+
+    expect(alice?.doc_count).toBe(2); // 1 target + 1 alias
+    expect(srv?.doc_count).toBe(1); // 1 target, no aliases
+  });
+
+  it('wraps each target entity id in an array as bucket.key with key_as_string and selectedGroup', async () => {
+    (getESQLResults as jest.Mock).mockResolvedValue(
+      makePathAEsqlResponse([
+        {
+          id: 'user:alice',
+          name: 'alice',
+          type: 'user',
+          eff: 85,
+          riskScore: 70,
+          resolutionRisk: 85,
+        },
+      ])
+    );
+    mockSearch
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 1 } } } }))
+      .mockReturnValueOnce(
+        of({ rawResponse: { aggregations: { aliases_by_target: { buckets: [] } } } })
+      );
+
+    const { result } = renderHook(
+      () => useFetchResolutionGroupDataPathA({ pageIndex: 0, pageSize: 10 }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const [bucket] = result.current.data!.groupData.groupByFields.buckets;
+    expect(Array.isArray(bucket.key)).toBe(true);
+    expect(bucket.key).toEqual(['user:alice']);
+    expect(bucket.key_as_string).toBe('user:alice');
+    expect(bucket.selectedGroup).toBe(ENTITY_GROUPING_OPTIONS.RESOLUTION);
+  });
+
+  it(`caps the ES|QL LIMIT at ${ESQL_LIMIT_CAP} when (pageIndex+1)*pageSize would exceed it`, async () => {
+    (getESQLResults as jest.Mock).mockResolvedValue(makePathAEsqlResponse([]));
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: {
+          hits: { total: { value: 0 } },
+          aggregations: { aliases_by_target: { buckets: [] } },
+        },
+      })
+    );
+
+    renderHook(() => useFetchResolutionGroupDataPathA({ pageIndex: 999, pageSize: 100 }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(getESQLResults as jest.Mock).toHaveBeenCalled());
+
+    const { esqlQuery } = (getESQLResults as jest.Mock).mock.calls[0][0];
+    expect(esqlQuery).toMatch(new RegExp(`LIMIT ${ESQL_LIMIT_CAP}`));
+  });
+
+  it('uses track_total_hits result as groupsCount', async () => {
+    (getESQLResults as jest.Mock).mockResolvedValue(makePathAEsqlResponse([]));
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: {
+          hits: { total: { value: 42 } },
+          aggregations: { aliases_by_target: { buckets: [] } },
+        },
+      })
+    );
+
+    const { result } = renderHook(
+      () => useFetchResolutionGroupDataPathA({ pageIndex: 0, pageSize: 10 }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data!.groupData.groupsCount.value).toBe(42);
+  });
+});
+
+describe('useFetchResolutionGroupDataPathB', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    setupKibanaMock();
+  });
+
+  it('passes the user DSL filter to the STATS join ES|QL query', async () => {
+    const userFilter = {
+      bool: { filter: [{ term: { 'host.name': 'my-host' } }], must: [], should: [], must_not: [] },
+    };
+
+    (getESQLResults as jest.Mock).mockResolvedValue(makePathBEsqlResponse([]));
+    mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: { value: 0 }, hits: [] } } }));
+
+    renderHook(
+      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10, filter: userFilter }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(getESQLResults as jest.Mock).toHaveBeenCalled());
+
+    expect((getESQLResults as jest.Mock).mock.calls[0][0].filter).toEqual(userFilter);
+  });
+
+  it('fetches target metadata without user filters in the fixup DSL query', async () => {
+    const userFilter = {
+      bool: { filter: [{ term: { 'host.name': 'my-host' } }], must: [], should: [], must_not: [] },
+    };
+
+    (getESQLResults as jest.Mock).mockResolvedValue(
+      makePathBEsqlResponse([{ group_key: 'user:alice', group_risk: 90, group_size: 1 }])
+    );
+    // Call 1: total count; Call 2: metadata fixup
+    mockSearch
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 1 } } } }))
+      .mockReturnValueOnce(of({ rawResponse: { hits: { hits: [] } } }));
+
+    renderHook(
+      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10, filter: userFilter }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(2));
+
+    const metadataCall = mockSearch.mock.calls[1][0];
+    // Metadata fixup query must NOT contain user filter terms
+    const filterClauses: unknown[] = metadataCall.params?.query?.bool?.filter ?? [];
+    const hasUserFilter = filterClauses.some(
+      (f) =>
+        typeof f === 'object' && f !== null && 'bool' in f && JSON.stringify(f).includes('my-host')
+    );
+    expect(hasUserFilter).toBe(false);
+    // Must query by entity.id (the target ids from the page)
+    expect(filterClauses).toContainEqual({
+      terms: { [ENTITY_FIELDS.ENTITY_ID]: ['user:alice'] },
+    });
+  });
+
+  it('load-bearing: alias-only match surfaces target name and risk from the metadata fixup', async () => {
+    // The user filter matches only the alias. The STATS join returns group_key = target's id
+    // (COALESCE(resolved_to, entity.id) = resolved_to = target id for the alias row).
+    // Without the metadata fixup the target's name would be unknown; with it we get it.
+    (getESQLResults as jest.Mock).mockResolvedValue(
+      makePathBEsqlResponse([{ group_key: 'target-user-001', group_risk: 90, group_size: 1 }])
+    );
+
+    const metadataHit = {
+      _source: {
+        entity: {
+          id: 'target-user-001',
+          name: 'Alice',
+          EngineMetadata: { Type: EntityType.user },
+          relationships: { resolution: { risk: { calculated_score_norm: 90 } } },
+        },
+      },
+    };
+
+    mockSearch
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 1 } } } })) // total count
+      .mockReturnValueOnce(of({ rawResponse: { hits: { hits: [metadataHit] } } })); // fixup
+
+    const { result } = renderHook(
+      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10 }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const { targetMetadata, groupData } = result.current.data!;
+
+    expect(targetMetadata.get('target-user-001')).toEqual({
+      name: 'Alice',
+      type: EntityType.user,
+      riskScore: 90,
+      individualRiskScore: null,
+    });
+
+    const [bucket] = groupData.groupByFields.buckets;
+    expect(bucket.key).toEqual(['target-user-001']);
+    expect(bucket.key_as_string).toBe('target-user-001');
+    expect(bucket.resolutionRiskScore.value).toBe(90);
+  });
+
+  it('wraps each group_key in an array as bucket.key', async () => {
+    (getESQLResults as jest.Mock).mockResolvedValue(
+      makePathBEsqlResponse([{ group_key: 'user:alice', group_risk: 85, group_size: 2 }])
+    );
+    mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: { value: 1 }, hits: [] } } }));
+
+    const { result } = renderHook(
+      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10 }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const [bucket] = result.current.data!.groupData.groupByFields.buckets;
+    expect(Array.isArray(bucket.key)).toBe(true);
+    expect(bucket.key).toEqual(['user:alice']);
+    expect(bucket.selectedGroup).toBe(ENTITY_GROUPING_OPTIONS.RESOLUTION);
+  });
+
+  it(`caps the ES|QL LIMIT at ${ESQL_LIMIT_CAP} when (pageIndex+1)*pageSize would exceed it`, async () => {
+    (getESQLResults as jest.Mock).mockResolvedValue(makePathBEsqlResponse([]));
+    mockSearch.mockReturnValue(of({ rawResponse: { hits: { total: { value: 0 }, hits: [] } } }));
+
+    renderHook(() => useFetchResolutionGroupDataPathB({ pageIndex: 999, pageSize: 100 }), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(getESQLResults as jest.Mock).toHaveBeenCalled());
+
+    const { esqlQuery } = (getESQLResults as jest.Mock).mock.calls[0][0];
+    expect(esqlQuery).toMatch(new RegExp(`LIMIT ${ESQL_LIMIT_CAP}`));
   });
 });

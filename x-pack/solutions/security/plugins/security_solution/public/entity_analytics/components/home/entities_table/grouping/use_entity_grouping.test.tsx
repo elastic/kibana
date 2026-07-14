@@ -20,7 +20,12 @@ import {
   getAggregationsByGroupField,
   useEntityGrouping,
 } from './use_entity_grouping';
-import { useFetchGroupedData } from './use_fetch_grouped_data';
+import type { Filter } from '@kbn/es-query';
+import {
+  useFetchGroupedData,
+  useFetchResolutionGroupDataPathA,
+  useFetchResolutionGroupDataPathB,
+} from './use_fetch_grouped_data';
 
 jest.mock('@kbn/grouping', () => ({
   ...jest.requireActual('@kbn/grouping'),
@@ -316,5 +321,242 @@ describe('useEntityGrouping — entity type plain-field query', () => {
     expect(query.aggs?.nullGroupItems).toEqual({ missing: { field: ENTITY_FIELDS.ENTITY_TYPE } });
     expect(query.aggs?.unitsCount).toEqual({ value_count: { field: ENTITY_FIELDS.ENTITY_TYPE } });
     expect(query.aggs?.groupsCount).toEqual({ cardinality: { field: ENTITY_FIELDS.ENTITY_TYPE } });
+  });
+});
+
+describe('useEntityGrouping — filter detection and Path A/B routing', () => {
+  const mockPathA = useFetchResolutionGroupDataPathA as jest.Mock;
+  const mockPathB = useFetchResolutionGroupDataPathB as jest.Mock;
+  const mockUseGrouping = useGrouping as jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+    (useGlobalFilterQuery as jest.Mock).mockReturnValue({ filterQuery: undefined });
+    mockPathA.mockReturnValue({ data: undefined, isFetching: false });
+    mockPathB.mockReturnValue({ data: undefined, isFetching: false });
+    (useFetchGroupedData as jest.Mock).mockReturnValue({ data: undefined, isFetching: false });
+    mockUseGrouping.mockReturnValue({
+      selectedGroups: [ENTITY_GROUPING_OPTIONS.RESOLUTION],
+      setSelectedGroups: jest.fn(),
+      groupsUnit: jest.fn(),
+      options: [],
+    });
+  });
+
+  it('enables Path A and disables Path B when query, globalFilterQuery, and groupFilters are all empty', () => {
+    renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState({ query: undefined }),
+          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    expect(mockPathA.mock.calls[0][0].enabled).toBe(true);
+    expect(mockPathB.mock.calls[0][0].enabled).toBe(false);
+  });
+
+  it('treats an all-empty bool query as no user filter (Path A)', () => {
+    const emptyBool: ESBoolQuery = { bool: { must: [], filter: [], should: [], must_not: [] } };
+
+    renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState({ query: emptyBool }),
+          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    expect(mockPathA.mock.calls[0][0].enabled).toBe(true);
+    expect(mockPathB.mock.calls[0][0].enabled).toBe(false);
+  });
+
+  it('enables Path B and disables Path A when state.query has a non-empty bool', () => {
+    const activeQuery: ESBoolQuery = {
+      bool: {
+        filter: [{ term: { 'host.name': 'my-host' } } as unknown as ESBoolQuery],
+        must: [],
+        should: [],
+        must_not: [],
+      },
+    };
+
+    renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState({ query: activeQuery }),
+          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    expect(mockPathA.mock.calls[0][0].enabled).toBe(false);
+    expect(mockPathB.mock.calls[0][0].enabled).toBe(true);
+  });
+
+  it('enables Path B when globalFilterQuery is non-empty', () => {
+    (useGlobalFilterQuery as jest.Mock).mockReturnValue({
+      filterQuery: {
+        bool: {
+          filter: [{ term: { 'host.ip': '1.2.3.4' } } as unknown as ESBoolQuery],
+          must: [],
+          should: [],
+          must_not: [],
+        },
+      },
+    });
+
+    renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState({ query: undefined }),
+          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    expect(mockPathA.mock.calls[0][0].enabled).toBe(false);
+    expect(mockPathB.mock.calls[0][0].enabled).toBe(true);
+  });
+
+  it('enables Path B when groupFilters is non-empty', () => {
+    const groupFilter: Filter = { meta: {}, query: { match_phrase: { 'host.name': 'srv-01' } } };
+
+    renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState({ query: undefined }),
+          groupFilters: [groupFilter],
+          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    expect(mockPathA.mock.calls[0][0].enabled).toBe(false);
+    expect(mockPathB.mock.calls[0][0].enabled).toBe(true);
+  });
+});
+
+describe('useEntityGrouping — synthesized resolution bucket shape', () => {
+  const mockPathA = useFetchResolutionGroupDataPathA as jest.Mock;
+  const mockUseGrouping = useGrouping as jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+    (useGlobalFilterQuery as jest.Mock).mockReturnValue({ filterQuery: undefined });
+    (useFetchResolutionGroupDataPathB as jest.Mock).mockReturnValue({
+      data: undefined,
+      isFetching: false,
+    });
+    (useFetchGroupedData as jest.Mock).mockReturnValue({ data: undefined, isFetching: false });
+    mockUseGrouping.mockReturnValue({
+      selectedGroups: [ENTITY_GROUPING_OPTIONS.RESOLUTION],
+      setSelectedGroups: jest.fn(),
+      groupsUnit: jest.fn(),
+      options: [],
+    });
+    mockPathA.mockReturnValue({
+      data: {
+        groupData: {
+          groupByFields: {
+            buckets: [
+              {
+                key: ['user:alice'],
+                key_as_string: 'user:alice',
+                selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+                doc_count: 2,
+                resolutionRiskScore: { value: 85 },
+              },
+            ],
+          },
+          groupsCount: { value: 1 },
+          unitsCount: { value: 1 },
+        },
+        targetMetadata: new Map(),
+      },
+      isFetching: false,
+    });
+  });
+
+  it('passes through the synthesized bucket with key as array, key_as_string, selectedGroup, doc_count, and resolutionRiskScore', () => {
+    const { result } = renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState({ query: undefined }),
+          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    const groupData = result.current.groupData as unknown as {
+      groupByFields: { buckets: Array<Record<string, unknown>> };
+    };
+    const [bucket] = groupData.groupByFields.buckets;
+
+    expect(bucket.key).toEqual(['user:alice']);
+    expect(bucket.key_as_string).toBe('user:alice');
+    expect(bucket.selectedGroup).toBe(ENTITY_GROUPING_OPTIONS.RESOLUTION);
+    expect(bucket.doc_count).toBe(2);
+    expect(bucket.resolutionRiskScore).toEqual({ value: 85 });
+  });
+
+  // Expansion regression: bucket.key must be an array so @kbn/grouping generates the right
+  // match_phrase filter, which processGroupFilters then converts to buildResolutionBoolQuery.
+  // A bare string instead of [string] would break the expansion child query.
+  it('bucket.key is an array of exactly one string (required for group expansion)', () => {
+    const { result } = renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState({ query: undefined }),
+          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    const groupData = result.current.groupData as unknown as {
+      groupByFields: {
+        buckets: Array<{ key: unknown; key_as_string: string }>;
+      };
+    };
+    const [bucket] = groupData.groupByFields.buckets;
+
+    expect(Array.isArray(bucket.key)).toBe(true);
+    expect((bucket.key as string[]).length).toBe(1);
+    expect(typeof (bucket.key as string[])[0]).toBe('string');
+    // key[0] === key_as_string is the targetId that drives buildResolutionBoolQuery
+    expect((bucket.key as string[])[0]).toBe(bucket.key_as_string);
+  });
+
+  it('hooks are called with pageIndex and pageSize from state', () => {
+    renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState({ pageIndex: 3, pageSize: 50 }),
+          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    expect(mockPathA.mock.calls[0][0]).toMatchObject({ pageIndex: 3, pageSize: 50 });
   });
 });
