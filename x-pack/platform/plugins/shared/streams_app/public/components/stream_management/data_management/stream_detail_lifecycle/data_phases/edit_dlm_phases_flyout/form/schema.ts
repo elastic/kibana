@@ -7,7 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import { formatDuration, PRESERVED_TIME_UNITS, toMilliseconds } from '../../shared';
+import {
+  formatDuration,
+  getTimingBoundHelpText,
+  PRESERVED_TIME_UNITS,
+  toMilliseconds,
+} from '../../shared';
 import type { DlmPhasesFlyoutFormInternal } from './types';
 
 export const getDlmPhasesFlyoutFormSchema = (): z.ZodType<DlmPhasesFlyoutFormInternal> => {
@@ -98,13 +103,10 @@ export const getDlmPhasesFlyoutFormSchema = (): z.ZodType<DlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['delete', 'afterValue'],
-            message: i18n.translate(
-              'xpack.streams.editDlmPhasesFlyout.deleteAfterSmallerThanFrozenAfterError',
-              {
-                defaultMessage: 'Must be greater or equal than the frozen phase value ({value})',
-                values: { value: frozenEs },
-              }
-            ),
+            message:
+              getTimingBoundHelpText({
+                lower: { neighbor: { type: 'phase', phase: 'frozen' }, value: frozenEs },
+              }) ?? '',
           });
         }
       }

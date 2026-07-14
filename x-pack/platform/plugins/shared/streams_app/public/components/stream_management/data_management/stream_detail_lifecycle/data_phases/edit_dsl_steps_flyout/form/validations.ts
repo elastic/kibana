@@ -11,6 +11,7 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 import type { DslStepMetaFields, PreservedTimeUnit } from './types';
 import { toMilliseconds } from './utils';
+import { getIntervalBoundHelpText, getTimingBoundHelpText } from '../../shared';
 
 const { emptyField, isInteger } = fieldValidators;
 
@@ -107,10 +108,10 @@ export const afterGreaterThanPreviousStep: DslValidationFunc = (arg) => {
 
   if (previous.ms >= 0 && current.ms >= 0 && current.ms < previous.ms) {
     return {
-      message: i18n.translate('xpack.streams.editDslStepsFlyout.afterSmallerThanPreviousError', {
-        defaultMessage: 'Must be greater or equal than the previous step value ({value})',
-        values: { value: previous.esFormat },
-      }),
+      message:
+        getTimingBoundHelpText({
+          lower: { neighbor: { type: 'previousStep' }, value: previous.esFormat ?? '' },
+        }) ?? '',
     };
   }
 };
@@ -154,15 +155,9 @@ export const afterBeforeExitBoundary = ({
     if (ms >= 0 && ms >= boundaryMs) {
       return {
         message:
-          phase === 'frozen'
-            ? i18n.translate('xpack.streams.editDslStepsFlyout.afterGreaterThanFrozenError', {
-                defaultMessage: 'Must not exceed the frozen phase ({value}).',
-                values: { value: boundaryEsFormat },
-              })
-            : i18n.translate('xpack.streams.editDslStepsFlyout.afterGreaterThanDeletePhaseError', {
-                defaultMessage: 'Must not exceed the delete phase ({value}).',
-                values: { value: boundaryEsFormat },
-              }),
+          getTimingBoundHelpText({
+            upper: { neighbor: { type: 'phase', phase }, value: boundaryEsFormat },
+          }) ?? '',
       };
     }
   };
@@ -256,14 +251,13 @@ export const fixedIntervalMultipleOfPreviousStep: DslValidationFunc = (arg) => {
     current.milliseconds % previous.milliseconds === 0;
   if (!isGreaterThanAndMultipleOfPrevious) {
     return {
-      message: i18n.translate(
-        'xpack.streams.editDslStepsFlyout.fixedIntervalPreviousIntervalError',
-        {
-          defaultMessage:
-            'Must be greater than and a multiple of the previous step value ({value})',
-          values: { value: previous.esFormat },
-        }
-      ),
+      message:
+        getIntervalBoundHelpText({
+          multipleOf: {
+            neighbor: { type: 'stepInterval', stepNumber: stepIndex },
+            value: previous.esFormat,
+          },
+        }) ?? '',
     };
   }
 };
@@ -302,21 +296,9 @@ export const fixedIntervalBeforeExitBoundary = ({
     if (ms >= boundaryMs) {
       return {
         message:
-          phase === 'frozen'
-            ? i18n.translate(
-                'xpack.streams.editDslStepsFlyout.fixedIntervalGreaterThanFrozenError',
-                {
-                  defaultMessage: 'Must not exceed the frozen phase ({value}).',
-                  values: { value: boundaryEsFormat },
-                }
-              )
-            : i18n.translate(
-                'xpack.streams.editDslStepsFlyout.fixedIntervalGreaterThanDeletePhaseError',
-                {
-                  defaultMessage: 'Must not exceed the delete phase ({value}).',
-                  values: { value: boundaryEsFormat },
-                }
-              ),
+          getIntervalBoundHelpText({
+            upper: { neighbor: { type: 'phase', phase }, value: boundaryEsFormat },
+          }) ?? '',
       };
     }
   };

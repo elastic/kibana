@@ -68,7 +68,13 @@ export const AfterField = ({
   });
 
   return (
-    <EuiFormRow fullWidth label={label} helpText={helpText} isInvalid={isInvalid} error={error}>
+    <EuiFormRow
+      fullWidth
+      label={label}
+      helpText={isInvalid && error === helpText ? undefined : helpText}
+      isInvalid={isInvalid}
+      error={error}
+    >
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiFieldNumber

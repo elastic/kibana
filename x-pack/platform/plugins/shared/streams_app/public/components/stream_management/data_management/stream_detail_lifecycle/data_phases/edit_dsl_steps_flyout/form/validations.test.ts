@@ -71,7 +71,7 @@ describe('streams DSL steps flyout validations', () => {
       );
 
       expect(result).toEqual({
-        message: 'Must be greater or equal than the previous step value (30d)',
+        message: 'Must occur after the previous step (30d).',
       });
     });
 
@@ -149,7 +149,7 @@ describe('streams DSL steps flyout validations', () => {
       );
 
       expect(result).toEqual({
-        message: 'Must be greater than and a multiple of the previous step value (5m)',
+        message: 'Must be a multiple of the step 1 interval (5m).',
       });
     });
 
@@ -198,7 +198,7 @@ describe('streams DSL steps flyout validations', () => {
       );
 
       expect(result).toEqual({
-        message: 'Must not exceed the delete phase (30d).',
+        message: 'Must occur before the delete phase (30d).',
       });
     });
 
@@ -224,7 +224,7 @@ describe('streams DSL steps flyout validations', () => {
       );
 
       expect(result).toEqual({
-        message: 'Must not exceed the frozen phase (20d).',
+        message: 'Must occur before the frozen phase (20d).',
       });
     });
 
@@ -312,7 +312,7 @@ describe('streams DSL steps flyout validations', () => {
       );
 
       expect(result).toEqual({
-        message: 'Must not exceed the frozen phase (40d).',
+        message: 'Must be smaller than the frozen phase (40d).',
       });
     });
 
@@ -337,7 +337,7 @@ describe('streams DSL steps flyout validations', () => {
       );
 
       expect(result).toEqual({
-        message: 'Must not exceed the delete phase (30d).',
+        message: 'Must be smaller than the delete phase (30d).',
       });
     });
 

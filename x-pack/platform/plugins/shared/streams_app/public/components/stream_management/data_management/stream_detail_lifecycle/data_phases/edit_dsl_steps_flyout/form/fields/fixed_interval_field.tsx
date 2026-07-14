@@ -146,7 +146,7 @@ const FixedIntervalFieldControl = ({
       label={i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalLabel', {
         defaultMessage: 'Downsample interval',
       })}
-      helpText={helpText}
+      helpText={isInvalid && errorMessage === helpText ? undefined : helpText}
       isInvalid={isInvalid}
       error={isInvalid ? errorMessage : null}
     >

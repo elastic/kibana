@@ -111,7 +111,12 @@ const MinAgeFieldControl = ({
   });
 
   return (
-    <EuiFormRow label={fieldLabel} helpText={helpText} isInvalid={isInvalid} error={errorMessage}>
+    <EuiFormRow
+      label={fieldLabel}
+      helpText={isInvalid && errorMessage === helpText ? undefined : helpText}
+      isInvalid={isInvalid}
+      error={errorMessage}
+    >
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiFieldNumber

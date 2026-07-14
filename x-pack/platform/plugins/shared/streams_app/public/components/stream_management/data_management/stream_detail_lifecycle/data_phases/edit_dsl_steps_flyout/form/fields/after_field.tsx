@@ -124,7 +124,7 @@ const AfterFieldControl = ({
       label={i18n.translate('xpack.streams.editDslStepsFlyout.afterLabel', {
         defaultMessage: 'Downsample after data stored',
       })}
-      helpText={helpText}
+      helpText={isInvalid && errorMessage === helpText ? undefined : helpText}
       isInvalid={isInvalid}
       error={isInvalid ? errorMessage : null}
     >

@@ -45,6 +45,24 @@ describe('getDlmPhasesFlyoutFormSchema', () => {
     expect(deleteIssue?.message).toMatch(/Must be 100 characters or less/);
   });
 
+  it('produces a boundary error message matching the help text when delete is below frozen', () => {
+    const schema = getDlmPhasesFlyoutFormSchema();
+    const unit = PRESERVED_TIME_UNITS[0];
+
+    const result = schema.safeParse({
+      frozen: { enabled: true, afterValue: '30', afterUnit: unit },
+      delete: { enabled: true, afterValue: '20', afterUnit: unit },
+    });
+
+    expect(result.success).toBe(false);
+    if (result.success) return;
+
+    const deleteIssue = result.error.issues.find(
+      (i) => i.path[0] === 'delete' && i.path[1] === 'afterValue'
+    );
+    expect(deleteIssue?.message).toBe(`Must occur after the frozen phase (30${unit}).`);
+  });
+
   it('accepts 100 characters for afterValue', () => {
     const schema = getDlmPhasesFlyoutFormSchema();
     const unit = PRESERVED_TIME_UNITS[0];

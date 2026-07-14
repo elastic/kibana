@@ -121,7 +121,7 @@ const DownsampleIntervalFieldControl = ({
       label={i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingIntervalLabel', {
         defaultMessage: 'Interval',
       })}
-      helpText={helpText}
+      helpText={showInvalid && showError === helpText ? undefined : helpText}
       isInvalid={showInvalid}
       error={showError}
     >
