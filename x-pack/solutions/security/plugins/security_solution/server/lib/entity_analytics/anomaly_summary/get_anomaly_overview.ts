@@ -18,8 +18,9 @@ import {
 import type {
   AnomalyOverviewEntry,
   AnomalyOverviewHit,
+  AnomalyScoreRange,
 } from '../../../../common/api/entity_analytics';
-import { getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
+import { buildScoreRangeFilter, getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
 import type { RawAnomalyRecord } from '../ml_anomaly_detection/types';
 
 const NUM_RECENT_ANOMALIES = 3;
@@ -44,8 +45,7 @@ interface GetEntityAnomalyOverviewParams {
   entityType: EntityType;
   fromMs?: number;
   toMs?: number;
-  minScore?: number;
-  maxScore?: number;
+  scoreRanges?: AnomalyScoreRange[];
   threatTactics?: string[];
   logger: Logger;
   ml: MlPluginSetup;
@@ -74,6 +74,7 @@ interface AnomalyOverview {
   totalAnomaliesCount: number;
   from: number;
   to: number;
+  hasJobsMissingThreatTactics: boolean;
 }
 
 export const getEntityAnomalyOverview = async ({
@@ -81,8 +82,7 @@ export const getEntityAnomalyOverview = async ({
   entityType,
   fromMs,
   toMs,
-  minScore,
-  maxScore,
+  scoreRanges,
   threatTactics,
   logger,
   ml,
@@ -99,6 +99,7 @@ export const getEntityAnomalyOverview = async ({
     totalAnomaliesCount: 0,
     from: effectiveFromMs,
     to: effectiveToMs,
+    hasJobsMissingThreatTactics: false,
   };
 
   const mlSystem = ml.mlSystemProvider(request, soClient);
@@ -141,14 +142,7 @@ export const getEntityAnomalyOverview = async ({
             filter: [
               { term: { result_type: 'record' } },
               { term: { is_interim: false } },
-              {
-                range: {
-                  record_score: {
-                    gte: minScore || 1,
-                    ...(maxScore !== undefined ? { lt: maxScore } : {}),
-                  },
-                },
-              },
+              buildScoreRangeFilter(scoreRanges),
               { range: { timestamp: { gte: effectiveFromMs, lte: effectiveToMs } } },
               { term: { entity_id: entityId } },
               ...(resolvedJobIds.length > 0 ? [{ terms: { job_id: resolvedJobIds } }] : []),
@@ -192,6 +186,10 @@ export const getEntityAnomalyOverview = async ({
   // Build jobId → tactics lookup once, reused per bucket.
   const tacticsByJob = new Map(
     presentJobIds.map((id) => [id, allJobConfigs.get(id)?.threatTactics ?? []])
+  );
+
+  const hasJobsMissingThreatTactics = presentJobIds.some(
+    (id) => !allJobConfigs.get(id)?.hasThreatTactics
   );
 
   const anomalyByTimeBucket: AnomalyOverviewEntry[] = (aggs?.by_time?.buckets ?? [])
@@ -240,5 +238,6 @@ export const getEntityAnomalyOverview = async ({
     totalAnomaliesCount,
     from: effectiveFromMs,
     to: effectiveToMs,
+    hasJobsMissingThreatTactics,
   };
 };

@@ -106,6 +106,7 @@ describe('getTemplateDefinitionJsonSchema', () => {
       SELECT_BASIC: 'Select',
       TEXTAREA: 'Textarea',
       DATE_PICKER: 'Date Picker',
+      TOGGLE: 'Toggle',
       CHECKBOX_GROUP: 'Checkbox Group',
       RADIO_GROUP: 'Radio Group',
       USER_PICKER: 'User Picker',
@@ -254,5 +255,61 @@ describe('getTemplateDefinitionJsonSchema', () => {
       return props?.const === 'INPUT_NUMBER';
     });
     expect(inputNumberEntry).toBeDefined();
+  });
+
+  describe('connector and settings', () => {
+    it('omits connector and settings from the editor schema (panel-owned, not in the buffer)', () => {
+      // They are edited on the Configuration tab and merged into the definition on save, so the
+      // editor must not suggest them — otherwise a value typed in the Fields YAML would be silently
+      // overwritten by the panel state on save.
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const props = schema.properties as JsonSchemaObject;
+
+      expect(props.connector).toBeUndefined();
+      expect(props.settings).toBeUndefined();
+    });
+
+    it('exposes the editable case-default and fields properties but no template_* identity keys', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const props = schema.properties as JsonSchemaObject;
+
+      // Template identity is not part of the YAML anymore.
+      expect(props.template_name).toBeUndefined();
+      expect(props.template_description).toBeUndefined();
+      expect(props.template_tags).toBeUndefined();
+
+      expect(props.name).toBeDefined();
+      expect(props.description).toBeDefined();
+      expect(props.tags).toBeDefined();
+      expect(props.severity).toBeDefined();
+      expect(props.category).toBeDefined();
+      expect(props.assignees).toBeDefined();
+      expect(props.fields).toBeDefined();
+    });
+
+    it('marks the always-present blocks as required so Monaco flags their removal', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const required = schema.required as string[];
+
+      expect(required).toEqual(
+        expect.arrayContaining([
+          'name',
+          'description',
+          'severity',
+          'category',
+          'tags',
+          'assignees',
+          'fields',
+        ])
+      );
+    });
+
+    it('does not mark the renderer-managed connector/settings blocks as required', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const required = (schema.required as string[]) ?? [];
+
+      expect(required).not.toContain('settings');
+      expect(required).not.toContain('connector');
+    });
   });
 });

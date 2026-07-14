@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/275690
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+areas:
+- Alerting and reporting
+title: Support default connector and case settings in YAML templates
