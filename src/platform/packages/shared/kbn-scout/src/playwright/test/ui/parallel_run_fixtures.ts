@@ -29,6 +29,7 @@ import {
   browserAuthFixture,
   pageObjectsParallelFixture,
   validateTagsFixture,
+  logTestFileFixture,
 } from '../../fixtures/scope/test';
 import type { BrowserAuthFixture, ScoutPage, PageObjects } from '../../fixtures/scope/test';
 
@@ -42,7 +43,8 @@ export const scoutParallelFixtures = mergeTests(
   browserAuthFixture,
   scoutPageParallelFixture,
   pageObjectsParallelFixture,
-  validateTagsFixture
+  validateTagsFixture,
+  logTestFileFixture
 );
 
 export interface ScoutParallelTestFixtures {
