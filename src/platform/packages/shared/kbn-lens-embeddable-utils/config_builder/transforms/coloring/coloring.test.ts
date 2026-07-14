@@ -10,12 +10,7 @@
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { DEFAULT_COLOR_STEPS } from '@kbn/coloring';
 import type { KbnPaletteId } from '@kbn/palettes';
-import type {
-  ColorByValuePaletteType,
-  ColorByValueType,
-  ColorMappingType,
-  StaticColorType,
-} from '../../schema/color';
+import type { ColorByValueType, ColorMappingType, StaticColorType } from '../../schema/color';
 import {
   fromColorByValueAPIToLensState,
   fromColorByValueLensStateToAPI,
@@ -933,7 +928,6 @@ describe('Color util transforms', () => {
       });
     });
 
-    describe('named palette (distributed_palette)', () => {
     it('should maintain data integrity for static colors', () => {
       const originalColor = '#ff0000';
       const apiFormat = fromStaticColorLensStateToAPI(originalColor);
