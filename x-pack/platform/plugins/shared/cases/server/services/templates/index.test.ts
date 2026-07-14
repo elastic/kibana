@@ -71,6 +71,16 @@ const createTemplateSO = (
     } as Template,
   } as SavedObject<Template>);
 
+const createMockFindResponse = (
+  savedObjects: Array<SavedObject<Template>>
+): SavedObjectsFindResponse<Template> =>
+  ({
+    page: 1,
+    per_page: savedObjects.length,
+    total: savedObjects.length,
+    saved_objects: savedObjects,
+  } as SavedObjectsFindResponse<Template>);
+
 describe('TemplatesService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const savedObjectsSerializer = serializerMock.create();
@@ -103,6 +113,7 @@ describe('TemplatesService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    unsecuredSavedObjectsClient.find.mockResolvedValue(createMockFindResponse([]));
   });
 
   describe('getAllTemplates', () => {
@@ -934,6 +945,38 @@ describe('TemplatesService', () => {
     );
   });
 
+  it('rejects create when another latest template already uses the same name (case-insensitive)', async () => {
+    const definition = buildDefinition('Case title');
+    const service = createService();
+
+    unsecuredSavedObjectsClient.find.mockResolvedValue(
+      createMockFindResponse([
+        createTemplateSO('existing-so', {
+          templateId: 'existing-template-id',
+          name: 'existing template',
+          owner: 'securitySolution',
+          isLatest: true,
+          deletedAt: null,
+        }),
+      ])
+    );
+
+    await expect(
+      service.createTemplate(
+        {
+          name: 'Existing Template',
+          owner: 'securitySolution',
+          definition,
+        },
+        'alice'
+      )
+    ).rejects.toThrow(
+      'Template name "Existing Template" already exists for owner "securitySolution"'
+    );
+
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+  });
+
   it('persists isEnabled: false when explicitly set to false on create', async () => {
     const definition = buildDefinition('Disabled Template');
     const service = createService();
@@ -1110,6 +1153,97 @@ describe('TemplatesService', () => {
       }),
       expect.any(Object)
     );
+  });
+
+  it('rejects update when another template already uses the same name', async () => {
+    const definition = buildDefinition('Case defaults');
+    const service = createService();
+
+    jest
+      .spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      )
+      .mockResolvedValue(
+        createTemplateSO('current-so', {
+          templateId: 'current-template-id',
+          name: 'Current Template',
+          owner: 'securitySolution',
+          definition: buildDefinition('Current case defaults'),
+          templateVersion: 2,
+          isLatest: true,
+          deletedAt: null,
+        })
+      );
+
+    unsecuredSavedObjectsClient.find.mockResolvedValue(
+      createMockFindResponse([
+        createTemplateSO('other-so', {
+          templateId: 'other-template-id',
+          name: 'Duplicate Name',
+          owner: 'securitySolution',
+          isLatest: true,
+          deletedAt: null,
+        }),
+      ])
+    );
+
+    await expect(
+      service.updateTemplate('current-template-id', {
+        name: 'Duplicate Name',
+        owner: 'securitySolution',
+        definition,
+      })
+    ).rejects.toThrow('Template name "Duplicate Name" already exists for owner "securitySolution"');
+
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+  });
+
+  it('allows update when the only matching name belongs to the same templateId', async () => {
+    const definition = buildDefinition('Case defaults');
+    const service = createService();
+
+    jest
+      .spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      )
+      .mockResolvedValue(
+        createTemplateSO('current-so', {
+          templateId: 'current-template-id',
+          name: 'Current Template',
+          owner: 'securitySolution',
+          definition: buildDefinition('Current case defaults'),
+          templateVersion: 2,
+          isLatest: true,
+          deletedAt: null,
+        })
+      );
+
+    unsecuredSavedObjectsClient.find.mockResolvedValue(
+      createMockFindResponse([
+        createTemplateSO('current-so', {
+          templateId: 'current-template-id',
+          name: 'Current Template',
+          owner: 'securitySolution',
+          isLatest: true,
+          deletedAt: null,
+        }),
+      ])
+    );
+
+    unsecuredSavedObjectsClient.create.mockResolvedValue({
+      id: 'template-new-so-id',
+      attributes: {} as Template,
+    } as SavedObject<Template>);
+
+    await service.updateTemplate('current-template-id', {
+      name: 'Current Template',
+      owner: 'securitySolution',
+      definition,
+    });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
   });
 
   describe('updateTemplate', () => {
