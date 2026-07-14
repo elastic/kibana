@@ -207,6 +207,42 @@ describe('fetchPipelines - per-category silence threshold', () => {
     expect(pipe?.isSilent).toBe(false);
   });
 
+  it('keeps the full category union when one index appears under multiple main categories', async () => {
+    // Regression: previously getIndexCategoryMap collapsed to a single last-writer-wins value,
+    // so UI (multi-valued) and agent (single-valued) disagreed on panel membership + silence.
+    const now = Date.now();
+    const sharedIndex = 'logs-shared-multi-cat';
+    const esClient = makeEsClient({
+      indexToPipeline: { [sharedIndex]: 'pipe-shared' },
+      pipelineCounts: { 'pipe-shared': 5 },
+      lastEventByStream: { [sharedIndex]: now - 60 * MINUTE }, // 1h ago
+    });
+
+    const categoriesData: CategoriesResponse = {
+      rawCategoriesMap: [],
+      mainCategoriesMap: [
+        { category: 'Endpoint', indices: [{ indexName: sharedIndex, docs: 10 }] },
+        { category: 'Network', indices: [{ indexName: sharedIndex, docs: 10 }] },
+        { category: 'Application/SaaS', indices: [{ indexName: sharedIndex, docs: 10 }] },
+      ],
+    };
+
+    const result = await fetchPipelines({
+      esClient,
+      isServerless: false,
+      logger,
+      categoriesData,
+    });
+
+    const pipe = result.find((p) => p.name === 'pipe-shared');
+    expect(pipe?.categories).toEqual(
+      expect.arrayContaining(['Endpoint', 'Network', 'Application/SaaS'])
+    );
+    expect(pipe?.categories).toHaveLength(3);
+    // Most lenient threshold wins (Application/SaaS 24h) → not silent at 1h
+    expect(pipe?.isSilent).toBe(false);
+  });
+
   it('does not issue a categories aggregation when categoriesData is provided', async () => {
     const now = Date.now();
     const searchSpy = { categoriesSearchCalled: false };

@@ -39,7 +39,7 @@ const qualityData = {
   ],
   actionableFindings: [
     {
-      category: 'Endpoint',
+      categories: ['Endpoint'],
       severity: 'WARNING' as const,
       message: '3 incompatible fields',
       resource: 'logs-endpoint-default',
@@ -58,11 +58,12 @@ const continuityData = {
       docsCount: 100,
       failedDocsCount: 5,
       statsAvailable: true,
+      categories: ['Endpoint'],
     },
   ],
   actionableFindings: [
     {
-      category: 'Endpoint',
+      categories: ['Endpoint'],
       severity: 'CRITICAL' as const,
       message: '5 failed docs',
       resource: 'endpoint-pipeline',
@@ -83,11 +84,12 @@ const retentionData = {
       retentionDays: 30,
       policyName: 'my-policy',
       status: 'non-compliant' as const,
+      categories: ['Cloud'],
     },
   ],
   actionableFindings: [
     {
-      category: 'Cloud',
+      categories: ['Cloud'],
       severity: 'WARNING' as const,
       message: 'Retention below 365d',
       resource: 'logs-cloud-default',

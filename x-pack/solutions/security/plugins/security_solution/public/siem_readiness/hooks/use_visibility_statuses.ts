@@ -12,7 +12,6 @@ import {
   getQualityStatus,
   getContinuityStatus,
   getRetentionStatus,
-  getIndexCategoryMap,
 } from '@kbn/siem-readiness';
 import type { MainCategories, VisibilityStatus } from '@kbn/siem-readiness';
 import { useSiemReadinessApi } from './use_siem_readiness_api';
@@ -43,8 +42,6 @@ export const useVisibilityStatuses = (activeCategories: MainCategories[]): Visib
 
   const { ruleIntegrationCoverage } = useDetectionRulesByIntegration();
 
-  const indexToCategoryMap = useMemo(() => getIndexCategoryMap(categoriesData), [categoriesData]);
-
   const coverageStatus = useMemo(
     () =>
       getCoverageStatus(
@@ -61,8 +58,8 @@ export const useVisibilityStatuses = (activeCategories: MainCategories[]): Visib
   );
 
   const continuityStatus = useMemo(
-    () => getContinuityStatus(pipelinesData?.items, indexToCategoryMap, activeCategories),
-    [pipelinesData?.items, indexToCategoryMap, activeCategories]
+    () => getContinuityStatus(pipelinesData?.items, activeCategories),
+    [pipelinesData?.items, activeCategories]
   );
 
   const retentionStatus = useMemo(

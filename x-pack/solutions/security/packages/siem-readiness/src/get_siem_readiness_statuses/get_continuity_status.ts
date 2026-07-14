@@ -8,9 +8,15 @@
 import type { MainCategories, PipelineStats, VisibilityStatus } from '../types';
 import { isCriticalFailureRate } from './status_check_helpers';
 
+/**
+ * Computes the Continuity visibility status from server-computed pipeline.categories.
+ *
+ * Consumers must rely on `pipeline.categories` (the multi-valued union populated by
+ * fetchPipelines) rather than recomputing category membership from a separate map —
+ * that keeps status cards, the accordion, and the agent in agreement.
+ */
 export const getContinuityStatus = (
   pipelinesData: PipelineStats[] | undefined,
-  indexToCategoryMap: Map<string, string>,
   activeCategories: MainCategories[]
 ): VisibilityStatus => {
   if (!pipelinesData?.length) return 'noData';
@@ -19,15 +25,8 @@ export const getContinuityStatus = (
   let hasRelevantPipelines = false;
 
   pipelinesData.forEach((pipeline) => {
-    const pipelineCategories = new Set<string>();
-    pipeline.indices.forEach((indexName) => {
-      const category = indexToCategoryMap.get(indexName);
-      if (category) pipelineCategories.add(category);
-    });
-
-    const isInActiveCategory = Array.from(pipelineCategories).some((cat) =>
-      activeCategories.includes(cat as MainCategories)
-    );
+    const pipelineCategories = pipeline.categories ?? [];
+    const isInActiveCategory = pipelineCategories.some((cat) => activeCategories.includes(cat));
 
     if (isInActiveCategory) {
       hasRelevantPipelines = true;

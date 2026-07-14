@@ -89,7 +89,7 @@ describe('getCoverageTool', () => {
             severity: 'WARNING',
             message: 'No data for Cloud.',
             resource: 'Cloud',
-            category: 'Cloud',
+            categories: ['Cloud'],
           },
         ],
       });

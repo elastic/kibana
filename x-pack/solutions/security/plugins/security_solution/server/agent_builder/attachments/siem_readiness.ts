@@ -14,10 +14,12 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
   ContinuityPayload,
   CoveragePayload,
+  MainCategories,
   QualityPayload,
   RetentionInfo,
   RetentionPayload,
 } from '@kbn/siem-readiness';
+import { pickPrimaryCategory } from '@kbn/siem-readiness';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 export const SIEM_READINESS_ATTACHMENT_ID = 'security.siem_readiness';
@@ -42,7 +44,7 @@ const recommendedActionSchema = z.object({
 });
 
 const actionableFindingSchema = z.object({
-  category: z.string().max(100).optional(),
+  categories: z.array(z.string().max(100)).optional(),
   severity: z.enum(['CRITICAL', 'WARNING', 'INFORMATIONAL']),
   message: z.string().max(5000),
   resource: z.string().max(500),
@@ -232,11 +234,13 @@ const formatContinuityForAgent = (
 ): string => {
   const lines = [`SIEM Continuity — ${formatStatus(data.status)}`, data.summary];
 
-  // Group critical pipelines by their primary category for the agent.
+  // Group critical pipelines by primary category (CATEGORY_ORDER) for compact display.
+  // A multi-category pipeline appears once under its primary category.
   const criticalByCategory = new Map<string, typeof data.items>();
   data.items.forEach((item) => {
     if (item.statsAvailable && item.failedDocsCount > 0) {
-      const primaryCategory = item.categories?.[0] ?? 'Uncategorized';
+      const primaryCategory =
+        pickPrimaryCategory(item.categories as MainCategories[] | undefined) ?? 'Uncategorized';
       const existing = criticalByCategory.get(primaryCategory) ?? [];
       criticalByCategory.set(primaryCategory, [...existing, item]);
     }
@@ -271,12 +275,14 @@ const formatContinuityForAgent = (
 const formatRetentionForAgent = (data: RetentionPayload & { dimension: 'retention' }): string => {
   const lines = [`SIEM Retention — ${formatStatus(data.status)}`, data.summary];
 
-  // Group non-compliant items by their primary category for the agent.
+  // Group non-compliant items by primary category (CATEGORY_ORDER) for compact display.
   const nonCompliantByCategory = new Map<string, typeof data.items>();
   data.items.forEach((item) => {
     if (item.status === 'non-compliant') {
       const primaryCategory =
-        (item as RetentionInfo & { categories?: string[] }).categories?.[0] ?? 'Uncategorized';
+        pickPrimaryCategory(
+          (item as RetentionInfo & { categories?: MainCategories[] }).categories
+        ) ?? 'Uncategorized';
       const existing = nonCompliantByCategory.get(primaryCategory) ?? [];
       nonCompliantByCategory.set(primaryCategory, [...existing, item]);
     }
@@ -313,7 +319,7 @@ The attachment contains:
 - actionableFindings: pre-shaped findings with blast radius context
 
 Each actionable finding includes:
-- category, severity (CRITICAL | WARNING | INFORMATIONAL), message, resource
+- categories (array of SIEM main categories this finding belongs to — may be multiple), severity (CRITICAL | WARNING | INFORMATIONAL), message, resource
 - type (continuity only): pipeline_failure | silence | volume_drop_warning | volume_drop_critical
 - affectedRules: detection rules impacted by this finding
 - affectedTactics: MITRE ATT&CK tactics with rule counts (total vs affected)
@@ -321,6 +327,7 @@ Each actionable finding includes:
 - recommendedActions: links to relevant Kibana pages and case creation
 
 Continuity pipeline items include silence and volume health fields:
+- categories: full union of SIEM main categories this pipeline serves (filter by this field for tab/panel questions — never by pipeline name substring)
 - silenceMs: milliseconds since the last event (null if stream never received events)
 - isSilent: true when the silence gap exceeds the category-specific threshold
 - lastFullDayDocs: document count for yesterday (the most recent complete day; the in-progress current day is excluded) (null if stream < 7 days old)

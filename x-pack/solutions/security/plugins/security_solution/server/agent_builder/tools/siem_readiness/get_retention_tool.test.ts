@@ -137,7 +137,7 @@ describe('getRetentionTool', () => {
       )) as ToolHandlerStandardReturn;
 
       const data = (result.results[0] as OtherResult<RetentionPayload>).data;
-      expect(data.actionableFindings![0].category).toBe('Network');
+      expect(data.actionableFindings![0].categories).toEqual(['Network']);
     });
 
     it('filters out findings whose resource has no category match', async () => {

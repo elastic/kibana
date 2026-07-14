@@ -32,7 +32,7 @@ The dimension orchestrators in `server/lib/siem_readiness/dimensions/` filter it
 
 - **Coverage**: items are `CategoryGroup[]` — already grouped by category (this IS the categories data).
 - **Continuity**: items are ALL `PipelineStats[]` including uncategorized pipelines. The agent tool and the UI tab **both call `filterPipelinesByCategories`** (from `src/filter_pipelines_by_categories.ts`) to reduce to categorized-only before displaying. Use exact-match against the category index list.
-- **Quality**: items are ALL `DataQualityResultDocument[]`. Agent tools filter and enrich; UI filters client-side using `getIndexCategoryMap`.
+- **Quality**: items are ALL `DataQualityResultDocument[]`. Agent tools filter and enrich; UI filters client-side using `getIndexCategoriesMap`.
 - **Retention**: items are ALL `RetentionInfo[]`. The agent tool and the UI tab **both call `filterRetentionItemsByCategories`** (from `src/filter_retention_items_by_categories.ts`). Note: retention items carry data stream names while categories indices carry backing index names — use contains-match (`idx.indexName.includes(item.indexName)`) when joining them.
 
 ### Shared filtering predicates
@@ -43,9 +43,10 @@ The filtering logic for continuity and retention is extracted into pure function
 |---|---|---|
 | `filterPipelinesByCategories(pipelines, categoriesData)` | Exact-match on backing index name | `getContinuityTool` + `continuity_tab.tsx` |
 | `filterRetentionItemsByCategories(items, categoriesData)` | Contains-match (data stream ⊂ backing index) | `getRetentionTool` + `retention_tab.tsx` |
-| `getIndexCategoryMap(categoriesData)` | Exact-match, returns Map for lookups | used by the above + quality tool |
+| `getIndexCategoriesMap(categoriesData)` | Exact-match, returns multi-valued `Map<string, MainCategories[]>` | pipeline enrichment, quality/retention tools, silence thresholds |
+| `pickPrimaryCategory(categories)` | Deterministic single label via `CATEGORY_ORDER` | attachment display grouping only |
 
-**If you change how items are filtered** (e.g., different matching strategy, new exclusion rules), change the shared function — not the tool or the tab independently.
+**If you change how items are filtered** (e.g., different matching strategy, new exclusion rules), change the shared function — not the tool or the tab independently. Never encode index→category as `Map<string, string>` — an index can belong to multiple main categories.
 
 ### Thresholds and compliance rules
 

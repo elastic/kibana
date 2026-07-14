@@ -8,7 +8,11 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { ActionableFinding, CategoriesResponse, ContinuityPayload } from '@kbn/siem-readiness';
-import { getContinuityDataFlowHealth, isCriticalFailureRate } from '@kbn/siem-readiness';
+import {
+  buildContinuitySummary,
+  getContinuityDataFlowHealth,
+  isCriticalFailureRate,
+} from '@kbn/siem-readiness';
 import { fetchPipelines } from '../fetchers';
 
 export const getContinuity = async ({
@@ -94,26 +98,4 @@ export const getContinuity = async ({
   const summary = buildContinuitySummary(status, pipelines.length, actionableFindings);
 
   return { status, summary, items: pipelines, actionableFindings };
-};
-
-const buildContinuitySummary = (
-  status: string,
-  pipelineCount: number,
-  findings: ActionableFinding[]
-): string => {
-  if (status === 'noData') return 'No active ingest pipelines found.';
-  if (findings.length === 0) return `All ${pipelineCount} active ingest pipelines are healthy.`;
-
-  const silentCount = findings.filter((f) => f.type === 'silence').length;
-  const dropCritical = findings.filter((f) => f.type === 'volume_drop_critical').length;
-  const dropWarning = findings.filter((f) => f.type === 'volume_drop_warning').length;
-  const failureCount = findings.filter((f) => f.type === 'pipeline_failure').length;
-
-  const parts: string[] = [];
-  if (silentCount) parts.push(`${silentCount} silent`);
-  if (dropCritical) parts.push(`${dropCritical} critical volume drop`);
-  if (dropWarning) parts.push(`${dropWarning} volume drop warning`);
-  if (failureCount) parts.push(`${failureCount} pipeline failure`);
-
-  return `${parts.join(', ')} across ${pipelineCount} active pipelines.`;
 };
