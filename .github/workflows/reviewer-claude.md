@@ -161,7 +161,7 @@ You orchestrate specialized review subagents; you do not review the diff yoursel
 
 1. Read `/tmp/gh-aw/agent/pr-metadata.json` and create a compact intent block containing the PR title and the stated goal/claimed testing. Read `/tmp/gh-aw/agent/pr-reviewer-assignments.json`; each task entry contains `subagentType`, `files`, `changedLines`, and `diffPath`. Do not read any diff yourself.
 2. Select every task entry with a non-empty `files` array.
-3. Launch every selected task and `pr-review-thread-resolver` in the background before consuming any result. Use the entry's `subagentType` as `subagent_type` and the map key only as its distinct task id. Do not collapse entries that share a `subagentType`; the ten `pr-reviewer-general` chunks are independent review tasks. Do not rewrite specialist instructions.
+3. Launch every selected task and `pr-review-thread-resolver` in the background before consuming any result. Use the entry's `subagentType` as `subagent_type` and the map key only as its distinct task id. Do not collapse entries that share a `subagentType`; general-review chunks are independent tasks when enabled. Do not rewrite specialist instructions.
    - Concern-review task input: task id, `REPOSITORY`, `PR_NUMBER`, the compact intent block, that task's `files`, `changedLines`, and `diffPath`.
    - Thread-resolver input: `REPOSITORY`, `PR_NUMBER`, and workflow id `reviewer-claude`. It owns its safe outputs and returns nothing to aggregate. Its safe outputs run after the agent session, so describe its actions only as queued resolution requests, never completed resolutions.
 4. Wait for every concern-review task to finish. From each final response, parse one JSON object with `findings` and `unavailable`.
