@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { MAX_ID_LENGTH, MAX_TITLE_LENGTH, MAX_TEXT_LENGTH } from './constants';
+import { detectionSchema } from './detections';
 
 const blastRadiusDependencySchema = z.object({
   type: z.literal('dependency'),
@@ -35,7 +36,6 @@ const blastRadiusDependencySchema = z.object({
   stream_name: z
     .string()
     .max(MAX_STREAM_NAME_LENGTH)
-    .optional()
     .describe('Data stream associated with this dependency.'),
 });
 
@@ -62,7 +62,6 @@ const blastRadiusInfrastructureSchema = z.object({
   stream_name: z
     .string()
     .max(MAX_STREAM_NAME_LENGTH)
-    .optional()
     .describe('Data stream associated with this infrastructure component.'),
 });
 
@@ -72,16 +71,8 @@ const blastRadiusEntitySchema = z.object({
     .string()
     .max(MAX_ID_LENGTH)
     .describe('Identifier of the Knowledge Indicator feature this entity entry is based on.'),
-  name: z
-    .string()
-    .max(MAX_TITLE_LENGTH)
-    .optional()
-    .describe('Human-readable name of the affected entity.'),
-  stream_name: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .optional()
-    .describe('Data stream associated with this entity.'),
+  name: z.string().max(MAX_TITLE_LENGTH).describe('Human-readable name of the affected entity.'),
+  stream_name: z.string().max(MAX_ID_LENGTH).describe('Data stream associated with this entity.'),
 });
 
 export const blastRadiusEntrySchema = z.discriminatedUnion('type', [
@@ -131,7 +122,6 @@ const signalBaseSchema = z.object({
   stream_name: z
     .string()
     .max(MAX_STREAM_NAME_LENGTH)
-    .optional()
     .describe('Data stream this signal was collected from.'),
   description: z
     .string()
@@ -139,7 +129,11 @@ const signalBaseSchema = z.object({
     .describe(
       'Human-readable account of what was observed and what it means. ' +
         'For detection signals, use this structure: ' +
-        '"Testing: [hypothesis]. Expected if true: [pattern]. Found: [result]. Verdict: confirms | refutes | inconclusive." ' +
+        '"Testing: [hypothesis]. Expected if true: [pattern]. ' +
+        'Found: [N rows — include the failing upstream target/endpoint read from the row, e.g. service name, host:port, or DNS name]. ' +
+        'Why: [bounded observable cause, ≤1–2 steps from the found-row — name the failing upstream and the observed failure mode; ' +
+        'stop at the lowest actionable cause the row supports]. ' +
+        'Verdict: confirms | refutes | inconclusive — state who or what is blocked." ' +
         'No raw IDs, UUIDs, or metric values.'
     ),
   confirmed: z
@@ -148,9 +142,10 @@ const signalBaseSchema = z.object({
     .describe(
       'Whether this signal actively confirms the failure hypothesis. ' +
         'Omit when the signal is unverified or non-confirming — never set to false.'
-    ),
+    )
+    .default(false),
   collected_at: z.iso
-    .datetime()
+    .datetime({ offset: true })
     .optional()
     .describe('ISO timestamp when this signal was collected.'),
   evidence: signalEvidenceSchema
@@ -163,52 +158,12 @@ const signalBaseSchema = z.object({
 
 const detectionSignalSchema = signalBaseSchema.extend({
   type: z.literal('detection'),
-  metadata: z.object({
-    rule_uuid: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .optional()
-      .describe(
-        'UUID of the alerting rule that fired. Used to correlate signals with KI query rules.'
-      ),
-    rule_name: z
-      .string()
-      .max(MAX_TEXT_LENGTH)
-      .optional()
-      .describe('Human-readable name of the alerting rule.'),
-    detection_id: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .optional()
-      .describe('ID of the detection document. Used for traceability back to the source alert.'),
-    kind: z
-      .enum(['detection', 'quiet', 'handled'])
-      .optional()
-      .describe(
-        '"detection" = rule is actively firing; "quiet" = alert rate has returned to baseline.'
-      ),
-    change_point_type: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .optional()
-      .describe(
-        'Change point type detected by the alerting rule. ' +
-          '"spike" = sudden increase in alert volume (load surge, cascading failure, noisy rule); ' +
-          '"dip" = sudden decrease — often means the service went DOWN and stopped producing data, not a recovery; ' +
-          '"step_change" = sustained level shift (config change, new deployment, capacity change); ' +
-          '"trend_change" = gradual directional shift (growing workload, degrading performance, slow leak); ' +
-          '"distribution_change" = overall distribution shifted (mixed traffic pattern, deployment rollout); ' +
-          '"non_stationary" = no discrete change point but not stationary — gradual drift, chronic instability, weak signal; ' +
-          '"stationary" = no change point found — distribution stable, rule returned to normal, false positive, or noise.'
-      ),
-    p_value: z
-      .number()
-      .optional()
-      .describe(
-        'Statistical p-value for the change-point. Lower values indicate a stronger signal.'
-      ),
-    event_count: z.number().optional().describe('Number of events in the detection window.'),
-    alert_count: z.number().optional().describe('Number of alerts fired by this rule.'),
+  metadata: detectionSchema.omit({
+    '@timestamp': true,
+    alert_index: true,
+    workflow_execution_id: true,
+    processed: true,
+    stream_name: true,
   }),
 });
 
@@ -250,9 +205,9 @@ export const significantEventBaseSchema = z.object({
     .enum(['critical', 'high', 'medium', 'low'])
     .describe(
       '"critical" = core user journey broken or PII/credentials confirmed in logs — page immediately; ' +
-        '"high" = significant feature unavailable, no workaround — respond within the hour; ' +
-        '"medium" = partial degradation, stable workarounds — schedule a fix; ' +
-        '"low" = low-impact, noise, or confirmed false alarm — monitor.'
+        '"high" = significant feature unavailable, confirmed user impact — respond within the hour; also use when signal quality is unclear but cannot be dismissed; ' +
+        '"medium" = partial degradation, stable workarounds, or impact not yet confirmed — schedule a fix; ' +
+        '"low" = low-impact, noise, confirmed false alarm, or confirmed recovery — stays open for user review when corroborated (confidence ≥ 0.5); pair with status "dismissed" when evidence is too thin to trust.'
     ),
   confidence: z
     .number()

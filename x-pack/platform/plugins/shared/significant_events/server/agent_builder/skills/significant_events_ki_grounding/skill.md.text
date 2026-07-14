@@ -124,7 +124,13 @@ After:  FROM logs.* | WHERE @timestamp >= "2026-06-11T15:03:00Z" AND @timestamp 
 
 Each signal entry combines the detection metadata and the query result into one object. See `<output_arrays>` for the exact format.
 
-**`result: found`** means the query returned rows consistent with the failure hypothesis. Healthy transaction logs are NOT confirmation — describe as: "Testing: [hypothesis]. Expected if true: [error pattern]. Found: [N rows, no error signature]. Verdict: refutes or inconclusive."
+Follow the `description` field format defined in the `platform_sig_events_discovery_write` tool metadata. The **upstream target you name in the Found clause** (service name, host:port, or DNS hostname extracted from the row) is the primary signal the grouping step uses to decide whether rules belong to the same incident — name it precisely. Concretely:
+
+- **Confirmed**: `"Testing: api-service failing to reach the database. Expected if true: TCP connection errors to a database host. Found: 1 row — query failed, dial tcp db-primary:5432 connection refused. Why: api-service cannot reach db-primary at :5432 — connection refused (nothing accepting). Verdict: confirms — all db-dependent requests blocked."`
+- **Inconclusive (signature mismatch)**: `"Testing: metrics-exporter failing to push metrics. Expected if true: export timeout or connection errors to the metrics endpoint. Found: 1 row — content is an unrelated upstream API error, not a metrics export failure; hypothesis unconfirmed. Verdict: inconclusive."`
+- **Refutes (healthy rows)**: `"Testing: elevated error rate on orders service. Expected if true: error-signature rows. Found: 1 row — healthy transaction log, no error signature. Verdict: refutes."`
+
+`result: found` means rows were returned — it does **not** mean the hypothesis is confirmed. Healthy or off-topic rows require `refutes` or `inconclusive` in the Verdict.
 
 ---
 
@@ -182,11 +188,11 @@ One entry per detection rule — never two, even when a contradiction follow-up 
 Each entry is a unified detection+evidence object:
 - `type`: always `"detection"`
 - `stream_name`: the detection rule's stream
-- `description`: the evidence narrative. Format: `"Testing: [hypothesis]. Expected if true: [error pattern]. Found: [N rows / summary]. Verdict: confirms | refutes | inconclusive."` For quiet rules: `"No query run — trusting detection pipeline kind:quiet signal. Change_point analysis determined alert rate returned to baseline."` For no-query-available rules: `"no confirming query available"`
+- `description`: the evidence narrative.
 - `confirmed`: `true` only when the query returned rows consistent with the failure hypothesis. Omit entirely if not confirmed.
 - `confirmed_by`: `"agent"` when `confirmed: true`. Omit otherwise.
 - `collected_at`: ISO-8601 timestamp of when the query ran. Omit for quiet-rule entries with no query.
 - `evidence`: `{ esql_query, result, row_count }` when a query was run; omit for quiet rules. `esql_query` is the exact string as sent (or `null` for no-query-available dispositions). `result`: `"found"` | `"empty"` | `"error"`. `row_count`: integer.
-- `metadata`: detection rule metadata — `rule_uuid`, `rule_name`, `detection_id`, `kind` (`"detection"` or `"quiet"`), `change_point_type`, `p_value`, `alert_count` (when present).
+- `metadata`: detection rule metadata — `rule_uuid`, `rule_name`, `detection_id`, `change_point_type`, `p_value`.
 
 </output_arrays>

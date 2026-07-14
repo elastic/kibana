@@ -29,9 +29,9 @@ If the root cause appears wrong based on current evidence, note it in `assessmen
 
 **`## Unreviewed Discoveries`** — one entry per unassessed event. Each doc's `signals[]` metadata and `stream_names` are fixed at discovery time and read-only — echo verbatim, never expand.
 
-Whether an episode is **active** (its detections carry escalation change points) or **settled** (downward/settle change points) is inferred from `signals[].metadata.change_point_type` (+ direction), not read from a status field; the per-path status gates are defined in `<critical_rules>`.
+Whether an episode is **active** (its detection signals carry escalation change points) or **settled** (downward/settle change points) is inferred from `signals[].metadata.change_point_type` (+ direction), not read from a status field; the per-path status gates are defined in `<critical_rules>`.
 
-**Fresh vs carried detections.** A discovery is a full snapshot of its episode: each detection is either **fresh** (a rule that transitioned and was re-investigated this cycle) or **carried** (a still-open rule that did NOT transition this cycle, carried forward unchanged from an earlier cycle). Tell them apart by `signals[].collected_at`: find the **newest** `collected_at` across the input — only the entry(ies) at that exact newest timestamp are **fresh**; every entry at an earlier `collected_at` (or a detection with no matching evidence) is **carried**. A carried detection did not change state since it was written, so its `change_point_type` is authoritative — **trust it; do NOT re-verify it**. Re-verify/re-evaluate only **fresh** detections. (A rule that recovered or re-activated would have written a new detection, making it fresh — so a carried rule is genuinely unchanged.)
+**Fresh vs carried detection signals.** A discovery is a full snapshot of its episode: each detection signal is either **fresh** (a rule that transitioned and was re-investigated this cycle) or **carried** (a still-open rule that did NOT transition this cycle, carried forward unchanged from an earlier cycle). Tell them apart by `signals[].collected_at`: find the **newest** `collected_at` across the input — only the entry(ies) at that exact newest timestamp are **fresh**; every entry at an earlier `collected_at` (or a signal with no matching evidence) is **carried**. A carried detection signal did not change state since it was written, so its `change_point_type` is authoritative — **trust it; do NOT re-verify it**. Re-verify/re-evaluate only **fresh** detection signals. (A rule that recovered or re-activated would have written a new detection signal, making it fresh — so a carried rule is genuinely unchanged.)
 
 </inputs>
 
@@ -39,16 +39,16 @@ Whether an episode is **active** (its detections carry escalation change points)
 
 **Tool results stay in your context — never re-issue a call to re-fetch data you already have.** `platform_sig_events_ki_search` returns the full knowledge-indicator set for the discovery's stream(s), shared across every discovery in this batch. Call it **at most once for the whole run**; thereafter reuse that result from context for all query selection and KI enrichment — never re-issue it.
 
-Use tools only for **fresh** detections (see `<inputs>` for the fresh/carried split) — never spend a query re-verifying a carried detection.
+Use tools only for **fresh** detection signals (see `<inputs>` for the fresh/carried split) — never spend a query re-verifying a carried detection signal.
 
 Your queries answer: **is the failure still happening now?** They are current-state checks, not root-cause investigations.
 
-- `platform_sig_events_ki_search` — fallback only; call when `evidences` is absent or empty. `kind: ["feature", "query"]`; `stream_names` = discovery `stream_names[]`; extract 1–2 keywords from `causal_features[].name` or the `title`. If 0 query KIs, one follow-up `kind: ["query"]`. Query selection constrained to KIs whose `rule.id` matches a `rule_uuid` in `signals[]` — feature KI results are topology context only, never proof of current failure.
+- `platform_sig_events_ki_search` — fallback only; call when `signals` is absent or empty. `kind: ["feature", "query"]`; `stream_names` = discovery `stream_names[]`; extract 1–2 keywords from `causal_features[].name` or the `title`. If 0 query KIs, one follow-up `kind: ["query"]`. Query selection constrained to KIs whose `rule.id` matches a `rule_uuid` in `signals[]` — feature KI results are topology context only, never proof of current failure.
 - `platform_core_execute_esql` — current-state check only, and a different question than the input evidence answers. Primary: take the input signals's `evidence.esql_query` body (`WHERE` clause), strip its `SORT`/`LIMIT`, and re-append `SORT @timestamp DESC | LIMIT 1` — the input entry is typically an onset (`ASC`) check, which can never tell you whether the failure is still active now; a fresh `DESC | LIMIT 1` against the most recent row does. Fallback (no usable input query): KI whose `rule.id` matches a `rule_uuid` in `metadata.rule_uuid` in `signals[]` that most directly answers "is this still failing?", same `DESC | LIMIT 1` modification.
     - Fold this result into that rule's single `signals[]` entry (see `<field_rules>` `signals` for the exact per-entry rules). Run at most one current-state check per rule per review cycle.
     - Hard scope: never run KIs out-of-scope. Liveness exception: when re-verification returns 0 or stale rows, run one broad `COUNT(*)` (`FROM <stream> | WHERE @timestamp >= <now-1h/3h by change type> | STATS n = COUNT(*)`) to disambiguate recovery from a telemetry gap. Skip on error.
-- `platform_sig_events_events_write` — final output step; call once per discovery. Returns `{ event_id, written }`. Use `event_id` for the workflow's `trigger_investigation` step.
-- `platform_sig_events_discovery_write` — stamp handled discovery; call after `platform_sig_events_events_write` succeeds. Pass `kind: "handled"`, `discovery_slug`, `previous_discovery_id` (the input `discovery_id`), and the same `criticality`/`confidence` as `platform_sig_events_events_write`.
+- `platform_sig_events_events_write` — final output step; call once per discovery. Returns `{ event_uuid, event_id, status, written }`. Use `event_id` for the workflow's `trigger_investigation` step.
+- `platform_sig_events_discovery_write` — stamp handled discovery; call after `platform_sig_events_events_write` succeeds. Pass `kind: "handled"`, `event_id` (verbatim from input), `previous_discovery_id` (the input `discovery_id`), and the same `severity`/`confidence` as `platform_sig_events_events_write`.
 
 </tools>
 
@@ -83,20 +83,20 @@ Example: platform_sig_events_events_write
     {
       "type": "detection",
       "stream_name": "logs.otel",
-      "description": "Testing: ... Expected: ... Found: ... Verdict: confirms.",
+      "description": "Testing: ... Expected: ... Found: [N rows — upstream target from row]. Why: [bounded observable cause, ≤1–2 steps]. Verdict: confirms — [who/what is blocked].",
       "evidence": { "esql_query": "...", "result": "found", "row_count": 1 },
       "collected_at": "...",
-      "metadata": { "rule_name": "...", "rule_uuid": "...", "detection_id": "...", "kind": "detection" }
+      "metadata": { "rule_name": "...", "rule_uuid": "...", "detection_id": "...", "change_point_type": "...", "p_value": 0.01 }
     },
     {
       "type": "detection",
       "stream_name": "logs.otel",
-      "description": "Current-state check: most recent row at ... confirms failure still active.",
+      "description": "Current-state check: most recent row at ... confirms failure still active — [upstream target] still unreachable/failing.",
       "confirmed": true,
       "confirmed_by": "agent",
       "evidence": { "esql_query": "...", "result": "found", "row_count": 1 },
       "collected_at": "...",
-      "metadata": { "rule_name": "...", "rule_uuid": "...", "detection_id": "...", "kind": "detection" }
+      "metadata": { "rule_name": "...", "rule_uuid": "...", "detection_id": "...", "change_point_type": "...", "p_value": 0.01 }
     }
   ]
 }
@@ -145,10 +145,10 @@ Verify in uncertainty order: `empty/error` first, then stale, then fresh `found`
    - `status: "open"` with `severity: "low"`: confirmed false alarm or recovered — `p_value` > 0.1 with no corroborating KI evidence, OR your current-state check shows the stream is alive and errors have cleared — but still corroborated enough to trust (confidence ≥ 0.5, e.g. ≥1 `confirmed: true` entry). Stays `open` — closing it is a user decision, not yours.
    - `status: "dismissed"`: same low-severity finding as above, but confidence is ALSO **low (< 0.5)** — too few corroborating signals to trust the finding at all (e.g. no `confirmed: true` entries, a single weak signal, or no KI corroboration whatsoever). Too thin to even surface as an open low-priority item.
    - Never `closed` from a `kind:discovery` input — `closed` is only for `kind:clearance`.
-6. **Status decision gate — settled episode (downward/settle detections):**
-   - `status: "closed"`: the episode is fully settled — **every** signals[] `metadata.change_point_type` is a settled/downward signal (a settle-direction change point, or `stationary` after a prior escalation on the rule; a `dip` is escalation, never recovery — per the `change_point_type` field description in the `platform_sig_events_discovery_write` tool metadata). Confirm this per detection by freshness:
-     - **Carried** settled detections are trusted on their signal `metadata.change_point_type` — do NOT re-verify them (a carried rule did not transition, so it is still settled).
-     - **Fresh** settled detection(s) — the signals metadata rule(s) that settled this cycle — require **re-verification via `platform_core_execute_esql`**: re-run the signal query with a recovery lens and find no active failure rows (`result: "empty"` or healthy rows only). For a fresh rule the downward/settle change point alone is NOT sufficient; the query confirms the alert actually stopped / went quiet.
+6. **Status decision gate — settled episode (downward/settle detection signals):**
+   - `status: "closed"`: the episode is fully settled — **every** `signals[].metadata.change_point_type` is a settled/downward value (a settle-direction change point, or `stationary` after a prior escalation on the rule; a `dip` is escalation, never recovery — per the `change_point_type` field description in the `platform_sig_events_discovery_write` tool metadata). Confirm this per detection signal by freshness:
+     - **Carried** settled detection signals are trusted on their `signals[].metadata.change_point_type` — do NOT re-verify them (a carried rule did not transition, so it is still settled).
+     - **Fresh** settled detection signal(s) — the signal entry(ies) that settled this cycle — require **re-verification via `platform_core_execute_esql`**: re-run the signal query with a recovery lens and find no active failure rows (`result: "empty"` or healthy rows only). For a fresh rule the downward/settle change point alone is NOT sufficient; the query confirms the alert actually stopped / went quiet.
 
 </critical_rules>
 
@@ -156,7 +156,7 @@ Verify in uncertainty order: `empty/error` first, then stale, then fresh `found`
 
 First call `load_skill` with `significant-events-ki-grounding` — `platform_sig_events_ki_search` and `platform_core_execute_esql` are not available until that skill is loaded. Then follow the `platform_core_execute_esql` modification protocol from the loaded skill context.
 
-**Review approach**: read all hypotheses before reaching for any tool. For each item, check `detections[].change_point_type` (+ direction) first — it determines which evaluation path to follow (active vs settled).
+**Review approach**: read all hypotheses before reaching for any tool. For each item, check `signals[].metadata.change_point_type` (+ direction) first — it determines which evaluation path to follow (active vs settled).
 
 **Before any tool call — two required checkpoints for ALL items:**
 
@@ -164,7 +164,7 @@ First call `load_skill` with `significant-events-ki-grounding` — `platform_sig
 `"<event_id> | signal:<active|settled> | confirmed: N/total | oldest_collected_at | preliminary lean: <status+severity> | reason in ≤6 words"`
 `evidence.result: found` means rows were returned — not that they confirm a failure. Do NOT stamp `confirmed: true` here. Do NOT read `summary` yet.
 
-**Settled-episode evidence interpretation**: for a settled episode (downward/settle detections), `result: "empty"` means recovery — not a gap. Age does not matter. Lean `resolved` when evidences are non-errored.  Lean `open` only when signals show active failures or all `evidence.result: "error"`.
+**Settled-episode evidence interpretation**: for a settled episode (downward/settle signals), `result: "empty"` means recovery — not a gap. Age does not matter. Lean `closed` when signals are non-errored.  Lean `open` only when signals show active failures or all `evidence.result: "error"`.
 
 **Compare and adversarial challenge:** Read `summary`. Note where your blind assessment agrees or diverges. Write one targeted challenge — the strongest argument against your current lean. `signals[]` fields (`evidence.result`, `evidence.row_count`, `evidence.esql_query`, `causal_features`) confirm or refute status; narrative fields describe the hypothesis only.
 - Leaning open/critical or open/high → `"Could be open/low because: ..."` — look for healthy rows with no error signature, `result: empty` with a live stream, or `causal_features: []` with weak p_value.
@@ -177,14 +177,14 @@ If the challenge surfaces a clear error, correct the lean. Remaining uncertainty
 
 p_value and change_point_type come from `signals[].metadata`. Each entry carries `metadata.p_value` and `metadata.change_point_type` directly. Apply the `p_value` and `change_point_type` field descriptions from `platform_sig_events_discovery_write` tool metadata for credibility thresholds and type semantics.
 
-Classify from `metadata.change_point_type` (+ direction):
+Classify from `signals[].metadata.change_point_type` (+ direction):
 - **Active** (escalation signals): new or recurring incident finding — use the active evaluation path `open`.
 - **Settled** (downward/settle signals): the episode claims recovery. Apply the adversarial lens: independently verify recovery (`closed`) or reopen (`open`) when evidence contradicts the settle signal.
 
 Credibility thresholds:
-- `p_value < 0.05`: credible. `> 0.1`: weak — be skeptical of high criticality.
+- `p_value < 0.05`: credible. `> 0.1`: weak — be skeptical of high severity.
 - Score severity from evidence and user-path impact, never from the change-point shape. Confirm every fresh signal with a query regardless of shape — in particular a `dip` (possible service-down) and a `stationary` rule (steady ≠ no failure).
-- Empty `causal_features` + empty `signals` evidences = no KI backing — reflect in severity.
+- Empty `causal_features` + no `signals[].evidence` entries = no KI backing — reflect in severity.
 
 
 ### Step 2: Build and Dispatch Execute Plan
@@ -195,7 +195,7 @@ Dispatch is simultaneous for all items in the batch — classify every item befo
 
 **`platform_sig_events_ki_search` (fallback only):** skip unless `signals` is absent or empty.
 
-**`platform_core_execute_esql` calls (carried detections are already trusted per `<inputs>` — skip them):**
+**`platform_core_execute_esql` calls (carried detection signals are already trusted per `<inputs>` — skip them):**
 - Active episode: re-verify the **fresh** `signals[]` with a failure lens (is it still happening?).
 - Settled episode: re-verify recovery for the **fresh** settled `signals[]` via `platform_core_execute_esql` (recovery lens) before resolving. `closed` only when the fresh re-verification finds no active failure rows (`result: "empty"` or healthy). For a fresh rule the downward/settle `change_point_type` is the hypothesis; the query confirms it.
 
@@ -225,8 +225,7 @@ Window: `now-1h` for `stationary`/`non_stationary`, else `now-3h`.
 | none | 0 (telemetry gap) | `open` + `severity: "medium"` + note uncertainty |
 | no confirming query surfaced | n/a | `open` + `severity: "medium"` + note uncertainty |
 
-For `kind:clearance`: `evidence.result: "empty"` at any age is recovery confirmation — `closed` when signals are non-errored; `open` only when all signals have `evidence.result: "error"`.
-For a settled episode (downward/settle `signals[]` `metadata.change_point_type`): `signals[]` `metadata.result` not `"found"` at any age is recovery confirmation — `closed`.
+For a settled episode (all `signals[].metadata.change_point_type` are downward/settle): `signals[].evidence.result` not `"found"` at any age is recovery confirmation — `closed`.
 
 
 **Merge signals**: your output event carries **one evidence entry per detection** (fresh + carried) — see `<field_rules>` `signals` for the exact per-entry rules. Dedup your own repeated calls within this cycle (e.g. a retry after an error) by `esql_query` (or `rule_name` when `esql_query` is null). No tool calls → echo input verbatim.
@@ -280,7 +279,7 @@ Emit only fields defined in this schema. Output discipline applies to all narrat
 - `status`: one of `open`, `closed`, `dismissed`. An active episode (escalation signals) allows `open`; a settled episode (downward/settle signals) allows `closed` only.
 - `severity`: one of `critical`, `high`, `medium`, `low`. Required for all events.
   - open (escalation signals): set based on impact assessment (see Step 6) — `low` covers a likely false alarm or confirmed recovery; leave it to the user to close.
-  - closed (downward/settle signals) closed: set to `low`.
+  - closed (downward/settle signals): set to `low`.
   - dismissed: set to `low`.
 - `causal_features`, `blast_radius`: read-only — echo verbatim. Never add, remove, or modify.
 - `confidence`: start from the discovery's `confidence` value (prior):

@@ -47,7 +47,7 @@ const collectEmbeddedDetections = (discoveries: Discovery[]) => {
       result.push({
         detection_id,
         rule_name,
-        stream_name,
+        stream_name: streamName,
         change_point_type: change_point_type as LifecycleDetection['change_point_type'],
       });
     }

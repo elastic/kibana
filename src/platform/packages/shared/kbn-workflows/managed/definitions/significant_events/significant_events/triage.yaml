@@ -186,12 +186,12 @@ steps:
                   description: 'Echo the event_id verbatim from the input discovery. Also returned by events_write. Required for trigger_investigation context.'
                 status:
                   type: string
-                  enum: [promoted, acknowledged, demoted, resolved]
+                  enum: [open, dismissed, closed]
                   description: 'Status decision.'
                 written:
                   type: boolean
                   description: 'true when events_write appended the event version.'
-              required: [discovery_slug, status, written]
+              required: [event_id, status, written]
         required: [significant_events]
     on-failure:
       continue: false
@@ -227,7 +227,7 @@ steps:
       # investigation workflow).
       - name: trigger_investigation
         type: workflow.executeAsync
-        if: '${{ foreach.item.status == "promoted" and foreach.item.written }}'
+        if: '${{ foreach.item.status == "open" and foreach.item.written }}'
         with:
           workflow-id: 'system-significant-events-investigation'
           inputs:

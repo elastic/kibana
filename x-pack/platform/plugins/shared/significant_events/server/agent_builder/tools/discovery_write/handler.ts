@@ -89,119 +89,77 @@ const parseDateMathToMs = (expr: string): number | undefined => {
   return parsed?.isValid() ? now.getTime() - parsed.valueOf() : undefined;
 };
 
-export type DiscoveryDetection = Discovery['detections'][number];
-
-export const mergeDetectionsLatestPerRule = (
-  priorDocs: Array<Pick<Discovery, '@timestamp' | 'detections'>>,
-  submitted: DiscoveryDetection[],
+/**
+ * Merges signals from prior discovery documents with the submitted signals, keeping the
+ * latest per `metadata.rule_uuid` for detection-type signals. Prior-only rules are carried
+ * forward; submitted rules win on equal-timestamp ties.
+ */
+export const mergeSignalsLatestPerRule = (
+  priorDocs: Array<Pick<Discovery, '@timestamp' | 'signals'>>,
+  submitted: SignalEntry[],
   submittedTimestamp: string
-): DiscoveryDetection[] => {
-  const latest = new Map<string, { timestamp: string; detection: DiscoveryDetection }>();
+): SignalEntry[] => {
+  const latest = new Map<string, { timestamp: string; signal: SignalEntry }>();
 
-  // submitted considered last, so it wins equal-timestamp ties.
-  const consider = (timestamp: string, detections: DiscoveryDetection[] = []) => {
-    for (const detection of detections) {
-      const existing = latest.get(detection.rule_uuid);
+  const consider = (timestamp: string, signals: SignalEntry[] = []) => {
+    for (const signal of signals) {
+      if (signal.type !== 'detection') continue;
+      const ruleId = signal.metadata?.rule_uuid;
+      if (!ruleId) continue;
+      const existing = latest.get(ruleId);
       if (existing === undefined || timestamp >= existing.timestamp) {
-        latest.set(detection.rule_uuid, { timestamp, detection });
+        latest.set(ruleId, { timestamp, signal });
       }
     }
   };
 
-  priorDocs.forEach((doc) => consider(doc['@timestamp'], doc.detections ?? []));
+  priorDocs.forEach((doc) => consider(doc['@timestamp'], doc.signals ?? []));
   consider(submittedTimestamp, submitted);
 
-  return [...latest.values()].map((entry) => entry.detection);
-};
-
-export type DiscoveryEvidence = NonNullable<Discovery['evidences']>[number];
-
-export const mergeEvidencesForCarriedRules = (
-  priorDocs: Array<Pick<Discovery, '@timestamp' | 'evidences'>>,
-  submitted: DiscoveryEvidence[]
-): DiscoveryEvidence[] => {
-  const merged: DiscoveryEvidence[] = [...submitted];
-  const coveredRules = new Set(
-    submitted.map((e) => e.rule_uuid).filter((id): id is string => Boolean(id))
-  );
-
-  const latestPerCarriedRule = new Map<
-    string,
-    { timestamp: string; evidence: DiscoveryEvidence }
-  >();
-  for (const doc of priorDocs) {
-    for (const evidence of doc.evidences ?? []) {
-      const ruleId = evidence.rule_uuid;
-      if (!ruleId || coveredRules.has(ruleId)) continue; // keyless dropped; submitted wins
-      const existing = latestPerCarriedRule.get(ruleId);
-      if (existing === undefined || doc['@timestamp'] >= existing.timestamp) {
-        latestPerCarriedRule.set(ruleId, { timestamp: doc['@timestamp'], evidence });
-      }
-    }
-  }
-  latestPerCarriedRule.forEach(({ evidence }) => merged.push(evidence));
-
-  return merged;
+  return [...latest.values()].map((entry) => entry.signal);
 };
 
 const findDuplicateDiscovery = async ({
   discoveryClient,
-  input,
+  resolvedEventId,
   dedupWindow,
-  isExplicitSlug,
+  kind,
+  isExplicitEventId,
 }: {
   discoveryClient: DiscoveryClient;
-  input: Pick<DiscoveryWriteInput, 'kind' | 'stream_names' | 'rule_names'>;
+  resolvedEventId: string;
   dedupWindow: string | undefined;
-  isExplicitSlug: boolean;
+  kind: Discovery['kind'];
+  isExplicitEventId: boolean;
 }): Promise<Discovery | undefined> => {
   const windowMs = dedupWindow ? parseDateMathToMs(dedupWindow) : undefined;
-  if (
-    isExplicitSlug ||
-    input.kind === 'handled' ||
-    input.kind === 'clearance' ||
-    windowMs === undefined
-  ) {
+  // Skip dedup for continuations (explicit event_id), handled stamps, clearances, or unrecognised windows.
+  if (isExplicitEventId || kind === 'handled' || kind === 'clearance' || windowMs === undefined) {
     return undefined;
   }
 
   const cutoffIso = new Date(Date.now() - windowMs).toISOString();
-  const fingerprint = incidentFingerprint(input.kind, input.stream_names, input.rule_names);
-  const { hits } = await discoveryClient.findLatest({ from: cutoffIso });
-
-  return hits.find(
-    (discovery) =>
-      incidentFingerprint(
-        discovery.kind,
-        discovery.stream_names ?? [],
-        discovery.rule_names ?? []
-      ) === fingerprint
-  );
+  const { hits } = await discoveryClient.findByEventId(resolvedEventId);
+  return hits.find((h) => h['@timestamp'] >= cutoffIso && h.kind !== 'handled');
 };
 
-const prepareSnapshotFields = async ({
+const prepareSnapshotSignals = async ({
   discoveryClient,
   input,
-  isExplicitSlug,
+  isExplicitEventId,
   timestamp,
 }: {
   discoveryClient: DiscoveryClient;
-  input: DiscoveryWriteInput & { discovery_slug: string };
-  isExplicitSlug: boolean;
+  input: DiscoveryWriteInput & { event_id: string };
+  isExplicitEventId: boolean;
   timestamp: string;
-}): Promise<Pick<DiscoveryWriteInput, 'detections' | 'evidences'>> => {
-  if (!isExplicitSlug || input.kind === 'handled') {
-    return {
-      detections: input.detections,
-      evidences: input.evidences,
-    };
+}): Promise<SignalEntry[]> => {
+  if (!isExplicitEventId || input.kind === 'handled') {
+    return input.signals ?? [];
   }
 
-  const { hits: priorDocs } = await discoveryClient.findStateBySlug(input.discovery_slug);
-  return {
-    detections: mergeDetectionsLatestPerRule(priorDocs, input.detections ?? [], timestamp),
-    evidences: mergeEvidencesForCarriedRules(priorDocs, input.evidences ?? []),
-  };
+  const { hits: priorDocs } = await discoveryClient.findByEventId(input.event_id);
+  return mergeSignalsLatestPerRule(priorDocs, input.signals ?? [], timestamp);
 };
 
 export async function discoveryWriteHandler({
@@ -226,14 +184,15 @@ export async function discoveryWriteHandler({
 
   const duplicate = await findDuplicateDiscovery({
     discoveryClient,
-    input: rest,
+    resolvedEventId,
     dedupWindow,
+    kind: rest.kind,
     isExplicitEventId,
   });
   if (duplicate) {
     return {
       discovery_id: duplicate.discovery_id,
-      discovery_slug: duplicate.discovery_slug ?? resolvedSlug,
+      event_id: resolvedEventId,
       kind: discoveryInput.kind,
       written: false,
       skipped: true,
@@ -245,10 +204,10 @@ export async function discoveryWriteHandler({
   const discoveryId = uuidv4();
 
   const timestamp = new Date().toISOString();
-  const { detections, evidences } = await prepareSnapshotFields({
+  const signals = await prepareSnapshotSignals({
     discoveryClient,
-    input: discoveryInput,
-    isExplicitSlug,
+    input: { ...discoveryInput, event_id: resolvedEventId },
+    isExplicitEventId,
     timestamp,
   });
 
@@ -258,8 +217,7 @@ export async function discoveryWriteHandler({
         '@timestamp': timestamp,
         discovered_at: discoveryInput.kind === 'discovery' ? timestamp : undefined,
         ...discoveryInput,
-        detections,
-        evidences,
+        signals,
         discovery_id: discoveryId,
         processed: discoveryInput.kind === 'handled',
       },

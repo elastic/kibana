@@ -40,7 +40,7 @@ describe('eventsWriteHandler', () => {
     expect(typeof result.event_uuid).toBe('string');
   });
 
-  it('generates a synthetic slug and skips dedup lookup when discovery_slug is absent', async () => {
+  it('skips dedup lookup when event_id is absent', async () => {
     const eventClient = {
       findLatestByEventIds: jest.fn(),
       bulkCreate: jest.fn().mockResolvedValue(undefined),
