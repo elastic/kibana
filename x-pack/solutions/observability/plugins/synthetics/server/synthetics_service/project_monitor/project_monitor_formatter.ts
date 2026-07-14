@@ -229,10 +229,15 @@ export class ProjectMonitorFormatter {
 
       return decodedMonitor;
     } catch (e) {
-      this.server.logger.error(e);
+      const isInvalidLocation = e instanceof InvalidLocationError;
 
-      const reason =
-        e instanceof InvalidLocationError ? INVALID_CONFIGURATION_ERROR : FAILED_TO_UPDATE_MONITOR;
+      // Invalid locations are a user input error that we surface in the API response via
+      // `failedMonitors`; don't log them as a server error (see issue #221378).
+      if (!isInvalidLocation) {
+        this.server.logger.error(e);
+      }
+
+      const reason = isInvalidLocation ? INVALID_CONFIGURATION_ERROR : FAILED_TO_UPDATE_MONITOR;
 
       this.failedMonitors.push({
         reason,
