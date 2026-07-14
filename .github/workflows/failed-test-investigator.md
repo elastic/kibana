@@ -107,16 +107,16 @@ safe-outputs:
     hide-older-comments: true
   add-labels:
     allowed:
-      # Classification — add exactly one of these (the failure category):
-      - failure:test-needs-update # the test code itself needs fixing (waits, selectors, fixtures, assertions)
-      - failure:test-environment # test is fine; its surroundings/shared state are the problem
-      - failure:application # a real product bug the test exposed
-      - failure:ci-environment # CI agent / infra / dependency, outside test + app
-      - failure:inconclusive # evidence doesn't support a defensible call
-      # Optional — add alongside the classification when they apply (any, all, or none):
-      - failure:ai-fixable # confident a PR-able fix is available
-      - failure:fix-did-not-hold # a prior merged fix for this same failure regressed
-      - failure:insufficient-data # data needed to diagnose was missing/expired
+      # Classification — add exactly one of these:
+      - failure:test-needs-update
+      - failure:test-environment
+      - failure:application
+      - failure:ci-environment
+      - failure:inconclusive
+      # Optional — add alongside the classification when they apply:
+      - failure:ai-fixable
+      - failure:fix-did-not-hold
+      - failure:insufficient-data
     max: 4
     target: *issue_number
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
