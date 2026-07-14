@@ -11,6 +11,8 @@ import { FlowTargetSourceDest } from '../../common/search_strategy/security_solu
 import type { Indicator } from '../../common/threat_intelligence/types/indicator';
 import { useAttackFlyoutApi } from './attack/use_attack_flyout_api';
 import { createAttackFlyoutApiMock } from './attack/use_attack_flyout_api.mock';
+import { useCspFlyoutApi } from './csp/use_csp_flyout_api';
+import { createCspFlyoutApiMock } from './csp/use_csp_flyout_api.mock';
 import { useDocumentFlyoutApi } from './document/use_document_flyout_api';
 import { createDocumentFlyoutApiMock } from './document/use_document_flyout_api.mock';
 import { useEntityFlyoutApi } from './entity/use_entity_flyout_api';
@@ -24,6 +26,7 @@ import { createRuleFlyoutApiMock } from './rule/use_rule_flyout_api.mock';
 import { useFlyoutApi } from './use_flyout_api';
 
 jest.mock('./attack/use_attack_flyout_api');
+jest.mock('./csp/use_csp_flyout_api');
 jest.mock('./document/use_document_flyout_api');
 jest.mock('./entity/use_entity_flyout_api');
 jest.mock('./ioc/use_ioc_flyout_api');
@@ -35,15 +38,17 @@ describe('useFlyoutApi', () => {
     jest.clearAllMocks();
   });
 
-  it('exposes document, attack, entity, IOC, network, and rule methods from composed per-type hooks', () => {
+  it('exposes document, attack, CSP, entity, IOC, network, and rule methods from composed hooks', () => {
     const documentApi = createDocumentFlyoutApiMock();
     const attackApi = createAttackFlyoutApiMock();
+    const cspApi = createCspFlyoutApiMock();
     const entityApi = createEntityFlyoutApiMock();
     const iocApi = createIocFlyoutApiMock();
     const networkApi = createNetworkFlyoutApiMock();
     const ruleApi = createRuleFlyoutApiMock();
     jest.mocked(useDocumentFlyoutApi).mockReturnValue(documentApi);
     jest.mocked(useAttackFlyoutApi).mockReturnValue(attackApi);
+    jest.mocked(useCspFlyoutApi).mockReturnValue(cspApi);
     jest.mocked(useEntityFlyoutApi).mockReturnValue(entityApi);
     jest.mocked(useIocFlyoutApi).mockReturnValue(iocApi);
     jest.mocked(useNetworkFlyoutApi).mockReturnValue(networkApi);
@@ -53,6 +58,8 @@ describe('useFlyoutApi', () => {
 
     const fromIndexParams = { documentId: '1', indexName: 'index' };
     const attackParams = { attackId: 'attack-1', indexName: '.alerts-security' };
+    const misconfigurationParams = { resourceId: 'resource-1', ruleId: 'rule-1' };
+    const vulnerabilityParams = { vulnerabilityId: 'CVE-1', resourceId: 'resource-1' };
     const hostParams = { hostName: 'host-1' };
     const userParams = { userName: 'user-1' };
     const iocParams = { indicator: { _id: 'ioc-1', fields: {} } as unknown as Indicator };
@@ -65,6 +72,10 @@ describe('useFlyoutApi', () => {
     result.current.openNotes({ hit });
     result.current.openAttackFlyout(attackParams);
     result.current.openAttackFlyoutAsChild(attackParams);
+    result.current.openMisconfigurationFinding(misconfigurationParams);
+    result.current.openMisconfigurationFindingAsChild(misconfigurationParams, { title: 'my-host' });
+    result.current.openVulnerabilityFinding(vulnerabilityParams);
+    result.current.openVulnerabilityFindingAsChild(vulnerabilityParams, { title: 'my-host' });
     result.current.openHostFlyout(hostParams);
     result.current.openHostFlyoutAsChild(hostParams);
     result.current.openUserFlyout(userParams);
@@ -87,6 +98,14 @@ describe('useFlyoutApi', () => {
     expect(documentApi.openNotes).toHaveBeenCalledWith({ hit });
     expect(attackApi.openAttackFlyout).toHaveBeenCalledWith(attackParams);
     expect(attackApi.openAttackFlyoutAsChild).toHaveBeenCalledWith(attackParams);
+    expect(cspApi.openMisconfigurationFinding).toHaveBeenCalledWith(misconfigurationParams);
+    expect(cspApi.openMisconfigurationFindingAsChild).toHaveBeenCalledWith(misconfigurationParams, {
+      title: 'my-host',
+    });
+    expect(cspApi.openVulnerabilityFinding).toHaveBeenCalledWith(vulnerabilityParams);
+    expect(cspApi.openVulnerabilityFindingAsChild).toHaveBeenCalledWith(vulnerabilityParams, {
+      title: 'my-host',
+    });
     expect(entityApi.openHostFlyout).toHaveBeenCalledWith(hostParams);
     expect(entityApi.openHostFlyoutAsChild).toHaveBeenCalledWith(hostParams);
     expect(entityApi.openUserFlyout).toHaveBeenCalledWith(userParams);

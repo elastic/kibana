@@ -4,13 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { environmentRt } from '../../common/environment_rt';
-export {
-  rangeRt,
-  kueryRt,
-  probabilityRt,
-  offsetRt,
-  serviceTransactionDataSourceRt,
-  transactionDataSourceRt,
-  filtersRt,
-} from '@kbn/apm-api-shared';
+
+export const MISCONFIGURATION_PANEL_LOADING_TEST_ID = 'misconfiguration-panel-loading' as const;
