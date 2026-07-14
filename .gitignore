@@ -37,7 +37,6 @@ types.eslint.config.js
 types.eslint.config.cjs
 __tmp__
 .bug-fixer-session/
-.ad2-pr-evidence/
 .playwright-mcp/
 .exploratory-session/
 .codex/
