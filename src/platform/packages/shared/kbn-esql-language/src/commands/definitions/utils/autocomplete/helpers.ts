@@ -29,8 +29,14 @@ export const shouldBeQuotedText = (
 };
 
 export const getSafeInsertText = (text: string, options: { dashSupported?: boolean } = {}) => {
+  // Spaces, operators, or backticks can identify a flat expression-derived name,
+  // which must be quoted as a whole. Dashes are tolerated because they occur in field paths.
+  if (shouldBeQuotedText(text, { dashSupported: true })) {
+    return `\`${text.replace(/`/g, '``')}\``;
+  }
+
   if (options.dashSupported) {
-    return shouldBeQuotedText(text, options) ? `\`${text.replace(/`/g, '``')}\`` : text;
+    return text;
   }
 
   return escapeEsqlColumnName(text);

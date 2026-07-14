@@ -18,6 +18,10 @@ describe('getSafeInsertText', () => {
   it('preserves dashes in contexts that support them', () => {
     expect(getSafeInsertText('my-policy', { dashSupported: true })).toBe('my-policy');
   });
+
+  it('quotes an expression-derived column name as a single identifier', () => {
+    expect(getSafeInsertText('host.cpu.pct > 0.5')).toBe('`host.cpu.pct > 0.5`');
+  });
 });
 
 describe('appendCommandToSuggestionItem', () => {
