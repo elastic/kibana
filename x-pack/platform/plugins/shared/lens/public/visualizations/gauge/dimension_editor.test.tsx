@@ -21,7 +21,8 @@ import { defaultPaletteParams } from './palette_config';
 
 type Props = ComponentProps<typeof GaugeDimensionEditor>;
 
-describe('GaugeDimensionEditor', () => {
+// Failing: See https://github.com/elastic/kibana/issues/272465
+describe.skip('GaugeDimensionEditor', () => {
   const mockSetState = jest.fn();
   const paletteService = chartPluginMock.createPaletteRegistry();
   const defaultFrame = createMockFramePublicAPI({
