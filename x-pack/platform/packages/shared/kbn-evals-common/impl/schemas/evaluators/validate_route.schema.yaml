@@ -1,15 +1,15 @@
 openapi: 3.0.0
 info:
-  title: Evaluate API endpoint
+  title: Validate Evals Evaluator Evidence API endpoint
   version: '1'
 paths:
-  /internal/evals/_evaluate:
+  /internal/evals/evaluators/_validate:
     post:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
-      operationId: Evaluate
-      description: Executes one or more evaluators against a subject
-      summary: Evaluate
+      operationId: Validate
+      description: Validates evaluator evidence requirements against a trace
+      summary: Validate evaluator evidence
       tags:
         - Evals API
       requestBody:
@@ -75,9 +75,6 @@ paths:
                       version:
                         type: string
                         maxLength: 64
-                      connector_id:
-                        type: string
-                        maxLength: 256
       responses:
         '200':
           description: Successful response
@@ -86,70 +83,31 @@ paths:
               schema:
                 type: object
                 required:
-                  - results
+                  - evaluators
                 properties:
-                  results:
+                  evaluators:
                     type: array
                     items:
                       type: object
                       required:
-                        - status
-                        - evaluator
+                        - name
+                        - version
+                        - ready
+                        - unmet
                       properties:
-                        status:
+                        name:
                           type: string
-                          enum:
-                            - ok
-                            - error
-                        evaluator:
-                          type: object
-                          required:
-                            - name
-                            - version
-                            - kind
-                          properties:
-                            name:
-                              type: string
-                              maxLength: 256
-                            version:
-                              type: string
-                              maxLength: 64
-                            kind:
-                              type: string
-                              enum:
-                                - llm
-                                - code
-                        scores:
+                          maxLength: 256
+                        version:
+                          type: string
+                          maxLength: 64
+                        ready:
+                          type: boolean
+                        unmet:
                           type: array
                           items:
-                            type: object
-                            required:
-                              - name
-                            properties:
-                              name:
-                                type: string
-                                maxLength: 256
-                              score:
-                                type: number
-                                nullable: true
-                              label:
-                                type: string
-                                maxLength: 1024
-                              explanation:
-                                type: string
-                                maxLength: 8192
-                              metadata:
-                                type: object
-                                additionalProperties: true
-                        error:
-                          type: object
-                          required:
-                            - message
-                          properties:
-                            code:
-                              type: string
-                              enum:
-                                - evidence_unmet
-                            message:
-                              type: string
-                              maxLength: 8192
+                            type: string
+                            maxLength: 1024
+                        remediation:
+                          type: string
+                          maxLength: 2048

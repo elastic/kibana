@@ -42,6 +42,8 @@ import {
   registerGetExperimentExecutionRoute,
   registerCancelExperimentExecutionRoute,
 } from './experiments/experiment_executions';
+import { registerResolveMappingsRoute } from './evaluators/resolve_mappings';
+import { registerValidateRoute } from './evaluators/validate';
 
 export interface RouteDependencies {
   router: EvalsRouter;
@@ -84,5 +86,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerGetExperimentTemplatesRoute(dependencies);
   registerGetExperimentExecutionRoute(dependencies);
   registerCancelExperimentExecutionRoute(dependencies);
+  registerResolveMappingsRoute(dependencies);
+  registerValidateRoute(dependencies);
   registerRemoteConfigsRoutes(dependencies);
 };

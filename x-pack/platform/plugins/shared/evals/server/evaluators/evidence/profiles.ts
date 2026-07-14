@@ -5,147 +5,139 @@
  * 2.0.
  */
 
-import type { EvidenceMappingOverrides, EvidenceMappingProfileDefinition } from './types';
+import type { EvidenceMapping, EvidenceProfile } from './types';
 
-const otelGenAiEvents: EvidenceMappingProfileDefinition = {
-  mapping: {
-    user_query: {
-      source: 'logs',
-      filter: [{ field: 'event_name', value: 'gen_ai.user.message' }],
-      fields: {
-        content: 'body.structured.content',
-      },
-      select: 'first',
-      parse: 'string',
-    },
-    agent_response: {
-      source: 'logs',
-      filter: [{ field: 'event_name', value: 'gen_ai.choice' }],
-      fields: {
-        content: 'body.structured.message.content',
-      },
-      select: 'last',
-      parse: 'string',
-    },
-    tool_calls: {
-      source: 'traces',
-      filter: [{ field: 'attributes.gen_ai.operation.name', value: 'execute_tool' }],
-      fields: {
-        tool_call_id: 'attributes.gen_ai.tool.call.id',
-        tool_id: 'attributes.gen_ai.tool.name',
-        arguments: 'attributes.gen_ai.tool.call.arguments',
-        result: 'attributes.gen_ai.tool.call.result',
-      },
-      select: 'all',
-      parse: 'json',
+const otelGenAiEvents: EvidenceMapping = {
+  user_query: {
+    source: 'logs',
+    filter: [{ field: 'event_name', value: 'gen_ai.user.message' }],
+    contentField: 'body.structured.content',
+    select: 'first',
+    parse: 'string',
+  },
+  agent_response: {
+    source: 'logs',
+    filter: [{ field: 'event_name', value: 'gen_ai.choice' }],
+    contentField: 'body.structured.message.content',
+    select: 'last',
+    parse: 'string',
+  },
+  tool_calls: {
+    source: 'traces',
+    filter: [{ field: 'attributes.gen_ai.operation.name', value: 'execute_tool' }],
+    fields: {
+      tool_call_id: 'attributes.gen_ai.tool.call.id',
+      tool_id: 'attributes.gen_ai.tool.name',
+      arguments: 'attributes.gen_ai.tool.call.arguments',
+      result: 'attributes.gen_ai.tool.call.result',
     },
   },
 };
 
-const elasticInferenceOverrides: EvidenceMappingOverrides = {
+const elasticInference: EvidenceMapping = {
+  ...otelGenAiEvents,
   user_query: {
-    fields: {
-      content: 'attributes.content',
-    },
+    ...otelGenAiEvents.user_query,
+    contentField: 'attributes.content',
   },
   agent_response: {
-    fields: {
-      content: 'attributes.message.content',
-    },
+    ...otelGenAiEvents.agent_response,
+    contentField: 'attributes.message.content',
   },
   tool_calls: {
+    ...otelGenAiEvents.tool_calls,
     filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
   },
 };
 
-const otelGenAiAttributes: EvidenceMappingProfileDefinition = {
-  mapping: {
-    user_query: {
-      source: 'traces',
-      filter: [],
-      fields: {
-        messages: 'attributes.gen_ai.input.messages',
-      },
-      select: 'first',
-      parse: 'genai_messages',
-    },
-    agent_response: {
-      source: 'traces',
-      filter: [],
-      fields: {
-        messages: 'attributes.gen_ai.output.messages',
-      },
-      select: 'last',
-      parse: 'genai_messages',
-    },
-    tool_calls: {
-      source: 'traces',
-      filter: [{ field: 'attributes.gen_ai.operation.name', value: 'execute_tool' }],
-      fields: {
-        tool_call_id: 'attributes.gen_ai.tool.call.id',
-        tool_id: 'attributes.gen_ai.tool.name',
-        arguments: 'attributes.gen_ai.tool.call.arguments',
-        result: 'attributes.gen_ai.tool.call.result',
-      },
-      select: 'all',
-      parse: 'json',
+const otelGenAiAttributes: EvidenceMapping = {
+  user_query: {
+    source: 'traces',
+    filter: [],
+    contentField: 'attributes.gen_ai.input.messages',
+    select: 'first',
+    parse: 'genai_messages',
+  },
+  agent_response: {
+    source: 'traces',
+    filter: [],
+    contentField: 'attributes.gen_ai.output.messages',
+    select: 'last',
+    parse: 'genai_messages',
+  },
+  tool_calls: {
+    source: 'traces',
+    filter: [{ field: 'attributes.gen_ai.operation.name', value: 'execute_tool' }],
+    fields: {
+      tool_call_id: 'attributes.gen_ai.tool.call.id',
+      tool_id: 'attributes.gen_ai.tool.name',
+      arguments: 'attributes.gen_ai.tool.call.arguments',
+      result: 'attributes.gen_ai.tool.call.result',
     },
   },
 };
 
-/**
- * Profile for `agentBuilder.tool` runs. A bare tool execution produces a single
- * `execute_tool` span (Elastic inference convention: `elastic.inference.span.kind
- * = TOOL`) with no surrounding conversation, so there is no `gen_ai.user.message` /
- * `gen_ai.choice` to grade. Instead we treat the tool call itself as the subject:
- * its arguments are the "question" and its result is the "answer", which lets the
- * generic LLM judges (e.g. correctness) score a tool the same way they score a
- * conversation turn. `select: 'first'` targets the outermost (root) tool span.
- */
-const agentBuilderTool: EvidenceMappingProfileDefinition = {
-  mapping: {
-    user_query: {
-      source: 'traces',
-      filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
-      fields: {
-        content: 'attributes.gen_ai.tool.call.arguments',
-      },
-      select: 'first',
-      parse: 'string',
-    },
-    agent_response: {
-      source: 'traces',
-      filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
-      fields: {
-        content: 'attributes.gen_ai.tool.call.result',
-      },
-      select: 'first',
-      parse: 'string',
-    },
-    tool_calls: {
-      source: 'traces',
-      filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
-      fields: {
-        tool_call_id: 'attributes.gen_ai.tool.call.id',
-        tool_id: 'attributes.gen_ai.tool.name',
-        arguments: 'attributes.gen_ai.tool.call.arguments',
-        result: 'attributes.gen_ai.tool.call.result',
-      },
-      select: 'all',
-      parse: 'json',
+const claudeCode: EvidenceMapping = {
+  user_query: {
+    source: 'logs',
+    filter: [{ field: 'event_name', value: 'user_prompt' }],
+    contentField: 'attributes.prompt',
+    select: 'first',
+    parse: 'string',
+  },
+  agent_response: {
+    source: 'logs',
+    filter: [{ field: 'event_name', value: 'api_response_body' }],
+    contentField: 'attributes.body',
+    select: 'last',
+    parse: 'anthropic_message',
+  },
+  tool_calls: {
+    source: 'traces',
+    filter: [{ field: 'span.name', value: 'claude_code.tool' }],
+    parse: 'prefixed_json',
+    fields: {
+      tool_call_id: 'attributes.tool_use_id',
+      tool_id: 'attributes.tool_name',
+      arguments: 'attributes.tool_input',
+      result: 'attributes.new_context',
     },
   },
 };
 
-/** Evidence profile key for bare `agentBuilder.tool` executions. */
-export const AGENT_BUILDER_TOOL_PROFILE = 'agent-builder-tool' as const;
+export const AGENT_BUILDER_TOOL_PROFILE = 'agent-builder-tool';
 
-export const EVIDENCE_MAPPING_PROFILES: Record<string, EvidenceMappingProfileDefinition> = {
+const agentBuilderTool: EvidenceMapping = {
+  user_query: {
+    source: 'traces',
+    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
+    contentField: 'attributes.gen_ai.tool.call.arguments',
+    select: 'first',
+    parse: 'string',
+  },
+  agent_response: {
+    source: 'traces',
+    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
+    contentField: 'attributes.gen_ai.tool.call.result',
+    select: 'last',
+    parse: 'string',
+  },
+  tool_calls: {
+    source: 'traces',
+    filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
+    fields: {
+      tool_call_id: 'attributes.gen_ai.tool.call.id',
+      tool_id: 'attributes.gen_ai.tool.name',
+      arguments: 'attributes.gen_ai.tool.call.arguments',
+      result: 'attributes.gen_ai.tool.call.result',
+    },
+  },
+};
+
+export const EVIDENCE_MAPPING_PROFILES: Record<EvidenceProfile, EvidenceMapping> = {
   'otel-genai-events': otelGenAiEvents,
-  'elastic-inference': {
-    extends: 'otel-genai-events',
-    overrides: elasticInferenceOverrides,
-  },
+  'elastic-inference': elasticInference,
   'otel-genai-attributes': otelGenAiAttributes,
+  'claude-code': claudeCode,
   [AGENT_BUILDER_TOOL_PROFILE]: agentBuilderTool,
 };

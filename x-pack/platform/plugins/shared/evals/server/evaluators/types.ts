@@ -39,15 +39,9 @@ export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>> {
   version: string;
   kind: 'llm' | 'code';
   description: string;
-  referenceDataSchema?: z.ZodType<ReferenceData>;
-  evidenceSchema?: z.ZodType;
-  /**
-   * Whether this evaluator is meaningful for a bare `agentBuilder.tool` trace
-   * (single tool span, no conversation). Default `true`. Set `false` for
-   * conversation-only evaluators like groundedness. The UI uses it to hide
-   * non-applicable evaluators for the tool target.
-   */
   supportsBareToolTrace?: boolean;
+  referenceDataSchema?: z.ZodType<ReferenceData>;
+  evidenceSchema?: z.ZodType<Partial<EvidenceRound>>;
   evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;
 }
 

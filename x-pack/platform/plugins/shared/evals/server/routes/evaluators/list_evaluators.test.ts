@@ -29,7 +29,7 @@ describe('GET /internal/evals/evaluators', () => {
         evidenceSchema: z.object({
           input: z.object({ message: z.string().min(1) }),
           response: z.object({ message: z.string().min(1) }),
-          steps: z.array(z.unknown()),
+          steps: z.array(z.object({}).catchall(z.unknown())),
         }),
         evaluate: jest.fn(),
       },
@@ -124,7 +124,6 @@ describe('GET /internal/evals/evaluators', () => {
       version: '1.0.0',
       kind: 'llm',
       description: 'Groundedness evaluator',
-      supports_bare_tool_trace: true,
       evidence_schema: expect.objectContaining({
         properties: expect.objectContaining({
           input: expect.objectContaining({ type: 'object' }),
@@ -142,7 +141,6 @@ describe('GET /internal/evals/evaluators', () => {
       version: '1.0.0',
       kind: 'llm',
       description: 'Correctness evaluator',
-      supports_bare_tool_trace: true,
       reference_data_schema: expect.objectContaining({
         properties: expect.objectContaining({
           expected: expect.objectContaining({
