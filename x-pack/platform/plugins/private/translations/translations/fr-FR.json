@@ -53580,7 +53580,6 @@
     "xpack.triggersActionsUI.ruleSnoozeScheduler.saveSchedule": "Enregistrer le calendrier",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.timezoneLabel": "Fuseau horaire",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.untilDateSummary": "jusqu'au {date}",
-    "xpack.triggersActionsUI.rulesPage.pageDescription": "Gérez et monitorez toutes vos règles depuis un seul et même endroit.",
     "xpack.triggersActionsUI.rulesPage.pageTitle": "Règles",
     "xpack.triggersActionsUI.rulesPage.title": "Règles",
     "xpack.triggersActionsUI.rulesSettings.flapping.alertFlappingDetection": "Détection de bagotement d'alerte",
