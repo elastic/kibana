@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useI18n } from '@kbn/i18n-react';
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
@@ -36,13 +36,30 @@ export const useDashboardExportItems = ({
 }: Props): AppMenuPopoverItem[] => {
   const intl = useI18n();
 
+  const [shareOptions, setShareOptions] = useState<ReturnType<typeof buildDashboardShareOptions>>(
+    buildDashboardShareOptions({
+      objectId,
+      dashboardTitle,
+    })
+  );
+  useEffect(() => {
+    const subscription = dashboardApi.anyStateChange$.subscribe(() => {
+      setShareOptions(
+        buildDashboardShareOptions({
+          objectId,
+          dashboardTitle,
+        })
+      );
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [dashboardApi, objectId, dashboardTitle]);
+
   return useMemo(() => {
     if (!shareService) return [];
 
-    const { locatorParams, shareableUrl, allowShortUrl, title } = buildDashboardShareOptions({
-      objectId,
-      dashboardTitle,
-    });
+    const { locatorParams, shareableUrl, allowShortUrl, title } = shareOptions;
 
     const baseOptions = {
       objectType: 'dashboard' as const,
@@ -92,5 +109,5 @@ export const useDashboardExportItems = ({
       }));
 
     return [...exportItems, ...derivativeItems];
-  }, [dashboardApi, intl, objectId, isDirty, dashboardTitle]);
+  }, [dashboardApi, intl, isDirty, objectId, shareOptions]);
 };
