@@ -17,19 +17,25 @@ function getExpressionForLayer(
   layerId: string,
   refs: IndexPatternRef[]
 ): Ast | null {
-  if (!layer.columns || layer.columns?.length === 0) {
+  if (!layer.columns || !Array.isArray(layer.columns) || layer.columns?.length === 0) {
     return null;
   }
 
   let idMapper: Record<string, OriginalColumn[]> = {};
   layer.columns.forEach((col) => {
-    const entry = {
+    // Only pick fields that OriginalColumn declares; the Omit<> drops the
+    // `interval: never` discriminant that doesn't apply to text-based columns.
+    const entry: OriginalColumn = {
       id: col.columnId,
-      label: col.customLabel ? col.label : col.fieldName,
-      variable: col?.variable,
+      label: col.customLabel ? col.label ?? col.fieldName : col.fieldName,
+      variable: col.variable,
       ...(col.params?.dropPartials !== undefined ? { dropPartials: col.params.dropPartials } : {}),
-    } as OriginalColumn;
-
+      format: col.params?.format,
+      dataType: col.meta?.type as OriginalColumn['dataType'],
+      customLabel: col.customLabel,
+      // no operation type for text-based columns
+      operationType: undefined,
+    };
     if (idMapper[col.fieldName]) {
       idMapper[col.fieldName].push(entry);
     } else {

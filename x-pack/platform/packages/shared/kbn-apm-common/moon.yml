@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/elastic-agent-utils'
+  - '@kbn/zod'
+  - '@kbn/zod-helpers'
 tags:
   - shared-common
   - package

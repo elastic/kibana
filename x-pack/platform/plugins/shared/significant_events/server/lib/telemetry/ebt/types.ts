@@ -112,6 +112,10 @@ interface DetectionScanProps {
   duration_ms: number;
   /** Number of distinct rules covered by the change-point scan. */
   rules_scanned: number;
+  /** Rule-backed query count using the critical 1m cadence. */
+  critical_rule_count: number;
+  /** Rule-backed query count using the default 5m cadence. */
+  default_rule_count: number;
   /** Resolved alerting engine backing the read: `v2` reads `.rule-events`, `v1` reads `.alerts-*`. */
   alerting_engine: 'v1' | 'v2';
   /** The alerts-source index that was read (e.g. `.rule-events`). */
@@ -133,12 +137,42 @@ interface KnowledgeIndicatorOnboardingScheduledProps {
   skip_queries: boolean;
 }
 
+interface AgentToolEventWriteProps {
+  success: boolean;
+  discovery_slug: string;
+  status: SignificantEventStatus;
+  written: boolean;
+  stream_names: string[];
+  error_message?: string;
+}
+
+interface AgentToolDiscoveryWriteProps {
+  success: boolean;
+  kind: 'discovery' | 'clearance' | 'handled';
+  discovery_slug: string;
+  stream_names: string[];
+  written: boolean;
+  error_message?: string;
+}
+
+interface AgentToolEventSearchProps {
+  success: boolean;
+  result_count: number;
+  has_query: boolean;
+  has_stream_filter: boolean;
+  state_filter?: 'open' | 'closed';
+  error_message?: string;
+}
+
 export {
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
+  type AgentToolDiscoveryWriteProps,
   type AgentToolEventCreateProps,
   type AgentToolEventInvestigationAttachProps,
+  type AgentToolEventSearchProps,
   type AgentToolEventStatusUpdateProps,
+  type AgentToolEventWriteProps,
   type CodeAnalysisGroundingProps,
   type DetectionScanProps,
   type DiscoveryTriggeredProps,

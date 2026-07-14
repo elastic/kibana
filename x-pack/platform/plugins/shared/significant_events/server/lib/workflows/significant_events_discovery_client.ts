@@ -13,14 +13,9 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { type SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
 import { WorkflowExecutionService } from './workflow_execution_service';
 
-interface SignificantEventsDiscoveryWorkflowInputPayload {
-  agentConnectorId: string;
-}
-
 export interface SignificantEventsDiscoveryRunParams {
   request: KibanaRequest;
   spaceId: string;
-  inputs: SignificantEventsDiscoveryWorkflowInputPayload;
 }
 
 /**
@@ -29,7 +24,7 @@ export interface SignificantEventsDiscoveryRunParams {
  * Extend the generic when the discovery pipeline produces structured output.
  */
 export class SignificantEventsDiscoveryClient {
-  private readonly workflowExecutionService: WorkflowExecutionService<SignificantEventsDiscoveryWorkflowInputPayload>;
+  private readonly workflowExecutionService: WorkflowExecutionService;
 
   constructor({ managementApi }: { managementApi: WorkflowsServerPluginSetup['management'] }) {
     this.workflowExecutionService = new WorkflowExecutionService({
@@ -39,7 +34,7 @@ export class SignificantEventsDiscoveryClient {
     });
   }
 
-  async run({ request, spaceId, inputs }: SignificantEventsDiscoveryRunParams): Promise<{
+  async run({ request, spaceId }: SignificantEventsDiscoveryRunParams): Promise<{
     executionId: string;
     isNew: boolean;
   }> {
@@ -50,7 +45,6 @@ export class SignificantEventsDiscoveryClient {
 
     const executionId = await this.workflowExecutionService.execute({
       executionSpaceId: spaceId,
-      inputs: { agentConnectorId: inputs.agentConnectorId },
       request,
     });
     return { executionId, isNew: true };

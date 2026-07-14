@@ -153,6 +153,7 @@ export class ServiceManager {
       uiSettings,
       savedObjects,
       actions,
+      securityPlugin,
     });
 
     const skillsServiceStart = this.services.skills.start({
@@ -284,6 +285,7 @@ export class ServiceManager {
       savedObjects,
       plugins,
       consumption,
+      searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
     };
 

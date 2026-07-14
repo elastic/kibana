@@ -8,14 +8,14 @@
  */
 
 import React, { useMemo } from 'react';
-import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
+import { useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { css } from '@emotion/react';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
-import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
+import { MAX_DIMENSIONS_SELECTIONS, FEATURE_FLAGS } from '../../../common/constants';
+import { useFeatureFlag } from './use_feature_flag';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
   allDimensions: Dimension[];
@@ -25,6 +25,7 @@ interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderTo
   isLoading?: boolean;
   /** Forwarded to {@link DimensionsSelector}; see its prop docs. */
   metricItems?: ParsedMetricItem[];
+  onOpenGridSettings: () => void;
 }
 
 export const useToolbarActions = ({
@@ -35,12 +36,13 @@ export const useToolbarActions = ({
   hideRightSideActions = false,
   isLoading = false,
   metricItems,
+  onOpenGridSettings,
 }: UseToolbarActionsProps) => {
   const { selectedDimensions, onDimensionsChange, isFullscreen, onToggleFullscreen } =
     useMetricsExperienceState();
   const onDimensionsSelectionChange = onDimensionsChangeProp ?? onDimensionsChange;
 
-  const { euiTheme } = useEuiTheme();
+  const isEditGridEnabled = useFeatureFlag(FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED, false);
 
   const isSmallScreen = useIsWithinMaxBreakpoint(isFullscreen ? 'm' : 'l');
 
@@ -79,6 +81,10 @@ export const useToolbarActions = ({
       return [];
     }
 
+    const editGridLabel = i18n.translate('metricsExperience.editGridButton', {
+      defaultMessage: 'Edit grid of metrics',
+    });
+
     const fullscreenButtonLabel = isFullscreen
       ? i18n.translate('metricsExperience.fullScreenExitButton', {
           defaultMessage: 'Exit fullscreen (esc)',
@@ -88,23 +94,32 @@ export const useToolbarActions = ({
         });
 
     return [
+      ...(isEditGridEnabled
+        ? [
+            {
+              iconType: 'pencil',
+              label: editGridLabel,
+              toolTipContent: editGridLabel,
+              onClick: onOpenGridSettings,
+              'data-test-subj': 'metricsExperienceEditGridButton',
+            },
+          ]
+        : []),
       {
         iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
         label: fullscreenButtonLabel,
         toolTipContent: fullscreenButtonLabel,
         onClick: onToggleFullscreen,
         'data-test-subj': 'metricsExperienceToolbarFullScreen',
-        css: css`
-          &.euiButtonGroupButton:first-of-type {
-            border: ${euiTheme.border.thin} !important;
-            border-left: none !important;
-            border-top-left-radius: 0px !important;
-            border-bottom-left-radius: 0px !important;
-          }
-        `,
       },
     ];
-  }, [isFullscreen, hideRightSideActions, onToggleFullscreen, euiTheme.border.thin]);
+  }, [
+    isFullscreen,
+    hideRightSideActions,
+    onToggleFullscreen,
+    onOpenGridSettings,
+    isEditGridEnabled,
+  ]);
 
   return {
     toggleActions,

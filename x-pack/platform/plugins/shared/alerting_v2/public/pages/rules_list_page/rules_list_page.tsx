@@ -206,7 +206,7 @@ export const RulesListPage = () => {
     closeCreateOptionsFlyout();
     navigateToAgentBuilder();
   };
-  const onCreateThresholdAlertFromOptionsFlyout = () => {
+  const onCreateThresholdRuleFromOptionsFlyout = () => {
     closeCreateOptionsFlyout();
     openCreateBuilderFlyout('threshold');
   };
@@ -274,7 +274,7 @@ export const RulesListPage = () => {
           onCreateWithAgent={navigateToAgentBuilder}
           createWithAgentDisabled={!isRuleManagementABSkillAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
-          onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
+          onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
         />
       ) : null}
       {hasRules || hasActiveFilters ? (
@@ -329,7 +329,7 @@ export const RulesListPage = () => {
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
           createWithAgentDisabled={!isRuleManagementABSkillAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
-          onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
+          onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
         />
       ) : null}
       {flyout}
