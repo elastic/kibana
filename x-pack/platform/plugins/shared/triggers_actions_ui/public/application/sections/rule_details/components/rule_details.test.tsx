@@ -172,13 +172,13 @@ const clickMenuItem = async (testSubj: string) => {
 };
 
 /**
- * Opens the header enabled/disabled badge popover and clicks the enable/disable item with the given
- * test subject. Enable/disable lives on the header badge (mirroring the rule status control in the
- * page body), not in the app menu.
+ * Opens the app menu overflow ("More") popover and toggles the enabled/disabled switch. Enable/disable
+ * now lives in the actions area as a toggle (the header badge is a non-interactive status indicator).
+ * At the jsdom viewport width the switch collapses into the overflow popover, so it must be opened first.
  */
-const clickEnabledBadgeItem = async (testSubj: string) => {
-  await userEvent.click(screen.getByTestId('ruleEnabledBadge'));
-  await userEvent.click(await screen.findByTestId(testSubj));
+const toggleEnabledSwitch = async () => {
+  await openAppMenuOverflow();
+  await userEvent.click(await screen.findByTestId('ruleEnabledSwitch'));
 };
 
 describe('rule_details', () => {
@@ -204,7 +204,7 @@ describe('rule_details', () => {
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
       renderComponent({ autoRecoverAlerts: true });
 
-      await clickEnabledBadgeItem('disableRuleBadgeItem');
+      await toggleEnabledSwitch();
 
       expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
       expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
@@ -221,7 +221,7 @@ describe('rule_details', () => {
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
       renderComponent({ autoRecoverAlerts: undefined });
 
-      await clickEnabledBadgeItem('disableRuleBadgeItem');
+      await toggleEnabledSwitch();
 
       expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
       expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
@@ -238,7 +238,7 @@ describe('rule_details', () => {
     it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
       renderComponent({ autoRecoverAlerts: false });
 
-      await clickEnabledBadgeItem('disableRuleBadgeItem');
+      await toggleEnabledSwitch();
 
       await waitFor(() => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
@@ -273,15 +273,20 @@ describe('rule_details', () => {
       expect(screen.getByText('Active')).toBeInTheDocument();
     });
 
-    it('renders the enabled badge with an enable/disable popover', async () => {
+    it('renders the enabled badge as a non-interactive status indicator with an enabled toggle', async () => {
       const rule = mockRule({ enabled: true });
       renderPage(rule);
 
+      // The badge only materializes the status and is not a dropdown anymore.
       expect(screen.getByTestId('ruleEnabledBadge')).toHaveTextContent('Enabled');
-
       await userEvent.click(screen.getByTestId('ruleEnabledBadge'));
-      expect(await screen.findByTestId('enableRuleBadgeItem')).toBeInTheDocument();
-      expect(screen.getByTestId('disableRuleBadgeItem')).toBeInTheDocument();
+      expect(screen.queryByTestId('enableRuleBadgeItem')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('disableRuleBadgeItem')).not.toBeInTheDocument();
+
+      // Enable/disable is now a toggle in the actions area.
+      await openAppMenuOverflow();
+      const enabledSwitch = await screen.findByTestId('ruleEnabledSwitch');
+      expect(enabledSwitch).toBeChecked();
     });
 
     it('renders the disabled badge when the rule is disabled', () => {
@@ -798,8 +803,8 @@ describe('rule_details', () => {
     });
   });
 
-  describe('enable/disable rule button', () => {
-    it('should disable the rule when clicked', async () => {
+  describe('enable/disable rule toggle', () => {
+    it('should disable the rule when toggled off', async () => {
       const rule = mockRule();
       const requestRefresh = jest.fn();
       renderRuleDetails(
@@ -812,7 +817,7 @@ describe('rule_details', () => {
         />
       );
 
-      await clickEnabledBadgeItem('disableRuleBadgeItem');
+      await toggleEnabledSwitch();
 
       await screen.findByTestId('untrackAlertsModal');
 
@@ -827,7 +832,7 @@ describe('rule_details', () => {
       });
     });
 
-    it('should enable the rule when clicked', async () => {
+    it('should enable the rule when toggled on', async () => {
       const rule = { ...mockRule(), enabled: false };
       const requestRefresh = jest.fn();
       renderRuleDetails(
@@ -840,7 +845,7 @@ describe('rule_details', () => {
         />
       );
 
-      await clickEnabledBadgeItem('enableRuleBadgeItem');
+      await toggleEnabledSwitch();
 
       await waitFor(() => {
         expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
@@ -861,7 +866,7 @@ describe('rule_details', () => {
         />
       );
 
-      await clickEnabledBadgeItem('disableRuleBadgeItem');
+      await toggleEnabledSwitch();
 
       expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
 

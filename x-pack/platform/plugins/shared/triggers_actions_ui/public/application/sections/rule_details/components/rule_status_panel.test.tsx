@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { RuleStatusPanelWithApiProps } from './rule_status_panel';
@@ -94,9 +93,8 @@ describe('rule status panel', () => {
     });
   });
 
-  it('should disable the rule when picking disable in the dropdown', async () => {
+  it('renders the enabled status as plain text', async () => {
     const rule = mockRule({ enabled: true });
-    const bulkDisableRules = jest.fn();
     render(
       <IntlProvider locale="en">
         <RuleStatusPanelWithProvider
@@ -106,85 +104,15 @@ describe('rule status panel', () => {
           healthColor="primary"
           statusMessage="Ok"
           requestRefresh={requestRefresh}
-          bulkDisableRules={bulkDisableRules}
         />
       </IntlProvider>
     );
 
-    if (screen.queryByTestId('centerJustifiedSpinner')) {
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-    }
-
-    await userEvent.click(screen.getByTestId('ruleStatusDropdownBadge'));
-
-    await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
-
-    await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-
-    await waitFor(() => expect(bulkDisableRules).toHaveBeenCalledTimes(1));
+    expect(screen.getByTestId('ruleStatusText')).toHaveTextContent('Enabled');
+    expect(screen.queryByTestId('ruleStatusDropdownBadge')).not.toBeInTheDocument();
   });
 
-  it('should disable the rule when picking disable in the dropdown without showing untrack alerts modal', async () => {
-    const rule = mockRule({ enabled: true });
-    const bulkDisableRules = jest.fn();
-    render(
-      <IntlProvider locale="en">
-        <RuleStatusPanelWithProvider
-          {...mockAPIs}
-          rule={rule}
-          isEditable
-          healthColor="primary"
-          statusMessage="Ok"
-          requestRefresh={requestRefresh}
-          bulkDisableRules={bulkDisableRules}
-          autoRecoverAlerts={false}
-        />
-      </IntlProvider>
-    );
-
-    if (screen.queryByTestId('centerJustifiedSpinner')) {
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-    }
-
-    await userEvent.click(screen.getByTestId('ruleStatusDropdownBadge'));
-
-    await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
-
-    expect(screen.queryByTestId('confirmModalConfirmButton')).not.toBeInTheDocument();
-
-    await waitFor(() => expect(bulkDisableRules).toHaveBeenCalledTimes(1));
-  });
-
-  it('if rule is already disabled should do nothing when picking disable in the dropdown', async () => {
-    const rule = mockRule({ enabled: false });
-    const bulkDisableRules = jest.fn();
-    render(
-      <IntlProvider locale="en">
-        <RuleStatusPanelWithProvider
-          {...mockAPIs}
-          rule={rule}
-          isEditable
-          healthColor="primary"
-          statusMessage="Ok"
-          requestRefresh={requestRefresh}
-          bulkDisableRules={bulkDisableRules}
-        />
-      </IntlProvider>
-    );
-
-    if (screen.queryByTestId('centerJustifiedSpinner')) {
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-    }
-
-    await userEvent.click(screen.getByTestId('ruleStatusDropdownBadge'));
-
-    await screen.findByTestId('statusDropdownDisabledItem');
-    await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
-
-    expect(bulkDisableRules).toHaveBeenCalledTimes(0);
-  });
-
-  it('should enable the rule when picking enable in the dropdown', async () => {
+  it('renders the disabled status as plain text', async () => {
     const rule = mockRule({ enabled: false });
     render(
       <IntlProvider locale="en">
@@ -199,44 +127,6 @@ describe('rule status panel', () => {
       </IntlProvider>
     );
 
-    if (screen.queryByTestId('centerJustifiedSpinner')) {
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-    }
-
-    await userEvent.click(screen.getByTestId('ruleStatusDropdownBadge'));
-
-    await screen.findByTestId('statusDropdownEnabledItem');
-    await userEvent.click(screen.getByTestId('statusDropdownEnabledItem'));
-
-    await waitFor(() => expect(mockAPIs.bulkEnableRules).toHaveBeenCalledTimes(1));
-  });
-
-  it('if rule is already enabled should do nothing when picking enable in the dropdown', async () => {
-    const rule = mockRule({ enabled: true });
-    const bulkEnableRules = jest.fn();
-    render(
-      <IntlProvider locale="en">
-        <RuleStatusPanelWithProvider
-          {...mockAPIs}
-          rule={rule}
-          isEditable
-          healthColor="primary"
-          statusMessage="Ok"
-          requestRefresh={requestRefresh}
-          bulkEnableRules={bulkEnableRules}
-        />
-      </IntlProvider>
-    );
-
-    if (screen.queryByTestId('centerJustifiedSpinner')) {
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-    }
-
-    await userEvent.click(screen.getByTestId('ruleStatusDropdownBadge'));
-
-    await screen.findByTestId('statusDropdownEnabledItem');
-    await userEvent.click(screen.getByTestId('statusDropdownEnabledItem'));
-
-    expect(bulkEnableRules).toHaveBeenCalledTimes(0);
+    expect(screen.getByTestId('ruleStatusText')).toHaveTextContent('Disabled');
   });
 });

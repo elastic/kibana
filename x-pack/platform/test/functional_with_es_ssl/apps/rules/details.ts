@@ -189,28 +189,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should disable the rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
+        const statusBadge = await testSubjects.find('ruleEnabledBadge');
 
-        expect(await actionsDropdown.getVisibleText()).to.eql('Enabled');
+        expect(await statusBadge.getVisibleText()).to.eql('Enabled');
 
-        await actionsDropdown.click();
-        const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
-        const actionsMenuItemElem = await actionsMenuElem.findAllByClassName('euiContextMenuItem');
-
-        await actionsMenuItemElem.at(1)?.click();
+        await testSubjects.click('ruleEnabledSwitch');
 
         await testSubjects.click('confirmModalConfirmButton');
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
-          expect(await actionsDropdown.getVisibleText()).to.eql('Disabled');
+          expect(await statusBadge.getVisibleText()).to.eql('Disabled');
         });
       });
 
       it('should allow you to snooze a disabled rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
+        const statusBadge = await testSubjects.find('ruleEnabledBadge');
 
-        expect(await actionsDropdown.getVisibleText()).to.eql('Disabled');
+        expect(await statusBadge.getVisibleText()).to.eql('Disabled');
 
         let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
         await snoozeBadge.click();
@@ -231,18 +227,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should reenable a disabled the rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
+        const statusBadge = await testSubjects.find('ruleEnabledBadge');
 
-        expect(await actionsDropdown.getVisibleText()).to.eql('Disabled');
+        expect(await statusBadge.getVisibleText()).to.eql('Disabled');
 
-        await actionsDropdown.click();
-        const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
-        const actionsMenuItemElem = await actionsMenuElem.findAllByClassName('euiContextMenuItem');
-
-        await actionsMenuItemElem.at(0)?.click();
+        await testSubjects.click('ruleEnabledSwitch');
 
         await retry.try(async () => {
-          expect(await actionsDropdown.getVisibleText()).to.eql('Enabled');
+          expect(await statusBadge.getVisibleText()).to.eql('Enabled');
         });
       });
 

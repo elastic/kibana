@@ -574,7 +574,7 @@ describe('disable/enable functionality', () => {
       />
     );
 
-    const actionsElem = await screen.findByTestId('statusDropdown');
+    const actionsElem = await screen.findByTestId('ruleStatusText');
 
     expect(actionsElem).toHaveTextContent('Enabled');
   });
@@ -596,7 +596,7 @@ describe('disable/enable functionality', () => {
       />
     );
 
-    const actionsElem = await screen.findByTestId('statusDropdown');
+    const actionsElem = await screen.findByTestId('ruleStatusText');
 
     expect(actionsElem).toHaveTextContent('Disabled');
   });

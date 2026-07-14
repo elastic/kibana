@@ -100,16 +100,6 @@ const DISABLED_LABEL = i18n.translate(
   { defaultMessage: 'Disabled' }
 );
 
-const ENABLE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.enableRuleButtonLabel',
-  { defaultMessage: 'Enable' }
-);
-
-const DISABLE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.disableRuleButtonLabel',
-  { defaultMessage: 'Disable' }
-);
-
 export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
   ruleType,
@@ -345,24 +335,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
       label: rule.enabled ? ENABLED_LABEL : DISABLED_LABEL,
       color: rule.enabled ? 'success' : 'default',
       'data-test-subj': 'ruleEnabledBadge',
-      items: canSaveRule
-        ? [
-            {
-              name: ENABLE_LABEL,
-              icon: 'eye',
-              onClick: () => onEnableDisable(true),
-              disabled: rule.enabled,
-              'data-test-subj': 'enableRuleBadgeItem',
-            },
-            {
-              name: DISABLE_LABEL,
-              icon: 'eyeSlash',
-              onClick: () => onEnableDisable(false),
-              disabled: !rule.enabled,
-              'data-test-subj': 'disableRuleBadgeItem',
-            },
-          ]
-        : undefined,
     },
     ...rule.tags.map((tag): AppHeaderBadge => ({ label: tag, color: 'hollow' })),
   ];

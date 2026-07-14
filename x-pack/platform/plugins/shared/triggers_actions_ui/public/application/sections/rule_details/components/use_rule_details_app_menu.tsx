@@ -12,6 +12,7 @@ import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import type { Rule, RuleType } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { isRuleSnoozed } from '../../../lib';
 import { loadRuleQueryInspector } from '../../../lib/rule_api/inspect_query';
 import { useLinkedObject } from '../hooks/use_linked_object/use_linked_object';
 
@@ -120,36 +121,31 @@ export const useRuleDetailsAppMenu = ({
     }
   }, [http, inspector, toasts, rule.id]);
 
+  const isSnoozed = isRuleSnoozed(rule);
+
   return useMemo<AppHeaderMenu>(() => {
     const items: AppMenuItems = [];
+    let primaryActionItem: AppHeaderMenu['primaryActionItem'];
+    let enabledSwitch: AppHeaderMenu['switch'];
 
     if (canSaveRule) {
-      // Enable/disable is also available on the header status badge; keep it in the menu too so the
-      // action is discoverable alongside the other rule actions.
-      const enableDisableItem = rule.enabled
-        ? {
-            id: 'disableRule',
-            order: 20,
-            label: DISABLE_LABEL,
-            iconType: 'eyeSlash',
-            run: () => onEnableDisable(false),
-            testId: isInternallyManaged ? 'disableButtonInternallyManaged' : 'disableButton',
-          }
-        : {
-            id: 'enableRule',
-            order: 20,
-            label: ENABLE_LABEL,
-            iconType: 'eye',
-            run: () => onEnableDisable(true),
-            testId: isInternallyManaged ? 'disableButtonInternallyManaged' : 'disableButton',
-          };
+      // Enable/disable is materialized as a toggle in the actions area (the header status badge is
+      // now non-interactive and only reflects the current state).
+      enabledSwitch = {
+        id: 'ruleEnabledSwitch',
+        label: ENABLED_SWITCH_LABEL,
+        labelProps: {},
+        checked: rule.enabled,
+        onChange: (checked: boolean) => onEnableDisable(checked),
+        'data-test-subj': 'ruleEnabledSwitch',
+      };
 
+      // Snooze / unsnooze is a secondary action; its label reflects the current snooze state.
       const snoozeItem = {
         id: 'snoozeRule',
         order: 30,
-        overflow: true as const,
-        label: SNOOZE_LABEL,
-        iconType: 'bell',
+        label: isSnoozed ? UNSNOOZE_LABEL : SNOOZE_LABEL,
+        iconType: isSnoozed ? 'bell' : 'bellSlash',
         run: onSnooze,
         testId: isInternallyManaged ? 'snoozeRuleButtonInternallyManaged' : 'snoozeRuleButton',
       };
@@ -165,45 +161,42 @@ export const useRuleDetailsAppMenu = ({
       };
 
       if (isInternallyManaged) {
-        items.push(enableDisableItem, snoozeItem, updateApiKeyItem);
+        items.push(snoozeItem, updateApiKeyItem);
       } else {
-        items.push(
-          {
-            id: 'runRule',
-            order: 10,
-            label: RUN_LABEL,
-            iconType: 'play',
-            run: () => onRunRule(rule.id),
-            testId: 'runRuleButton',
-          },
-          enableDisableItem,
-          snoozeItem,
-          updateApiKeyItem
-        );
-
         if (canEdit) {
-          items.push({
+          primaryActionItem = {
             id: 'editRule',
-            order: 80,
-            overflow: true,
             label: EDIT_LABEL,
             iconType: 'pencil',
             run: () => onEdit(rule.id),
             disableButton: isEditDisabled,
             testId: 'openEditRuleFlyoutButton',
-          });
+          };
         }
 
-        items.push({
-          id: 'deleteRule',
-          order: 90,
-          overflow: true,
-          isDestructive: true,
-          label: DELETE_LABEL,
-          iconType: 'trash',
-          run: () => onDelete(rule.id),
-          testId: 'deleteRuleButton',
-        });
+        items.push(
+          snoozeItem,
+          {
+            id: 'runRule',
+            order: 10,
+            overflow: true,
+            label: RUN_LABEL,
+            iconType: 'play',
+            run: () => onRunRule(rule.id),
+            testId: 'runRuleButton',
+          },
+          updateApiKeyItem,
+          {
+            id: 'deleteRule',
+            order: 90,
+            overflow: true,
+            isDestructive: true,
+            label: DELETE_LABEL,
+            iconType: 'trash',
+            run: () => onDelete(rule.id),
+            testId: 'deleteRuleButton',
+          }
+        );
       }
     }
 
@@ -244,11 +237,12 @@ export const useRuleDetailsAppMenu = ({
       });
     }
 
-    return { items };
+    return { items, primaryActionItem, switch: enabledSwitch };
   }, [
     canSaveRule,
     rule.enabled,
     rule.id,
+    isSnoozed,
     isInternallyManaged,
     canEdit,
     isEditDisabled,
@@ -275,19 +269,19 @@ const RUN_LABEL = i18n.translate(
   }
 );
 
-const ENABLE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.enableRuleButtonLabel',
-  { defaultMessage: 'Enable' }
-);
-
-const DISABLE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.disableRuleButtonLabel',
-  { defaultMessage: 'Disable' }
+const ENABLED_SWITCH_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.enabledSwitchLabel',
+  { defaultMessage: 'Enabled' }
 );
 
 const SNOOZE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.manageSnoozeButtonLabel',
-  { defaultMessage: 'Notifications settings' }
+  'xpack.triggersActionsUI.sections.ruleDetails.snoozeRuleButtonLabel',
+  { defaultMessage: 'Snooze' }
+);
+
+const UNSNOOZE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.unsnoozeRuleButtonLabel',
+  { defaultMessage: 'Unsnooze' }
 );
 
 const UPDATE_API_KEY_LABEL = i18n.translate(

@@ -133,28 +133,24 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should disable the rule', async () => {
-        const actionsDropdown = await testSubjects.find('ruleStatusDropdownBadge');
+        const statusBadge = await testSubjects.find('ruleEnabledBadge');
         await retry.try(async () => {
-          expect(await actionsDropdown.getVisibleText()).toEqual('Enabled');
+          expect(await statusBadge.getVisibleText()).toEqual('Enabled');
         });
 
-        await actionsDropdown.click();
-        const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
-        const actionsMenuItemElem = await actionsMenuElem.findAllByClassName('euiContextMenuItem');
-
-        await actionsMenuItemElem.at(1)?.click();
+        await testSubjects.click('ruleEnabledSwitch');
 
         await (await testSubjects.find('confirmModalConfirmButton')).click();
 
         await retry.tryForTime(30 * 1000, async () => {
-          expect(await actionsDropdown.getVisibleText()).toEqual('Disabled');
+          expect(await statusBadge.getVisibleText()).toEqual('Disabled');
         });
       });
 
       it('should allow you to snooze a disabled rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
+        const statusBadge = await testSubjects.find('ruleEnabledBadge');
 
-        expect(await actionsDropdown.getVisibleText()).toEqual('Disabled');
+        expect(await statusBadge.getVisibleText()).toEqual('Disabled');
 
         let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
         await snoozeBadge.click();
@@ -175,18 +171,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should reenable a disabled the rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
+        const statusBadge = await testSubjects.find('ruleEnabledBadge');
 
-        expect(await actionsDropdown.getVisibleText()).toEqual('Disabled');
+        expect(await statusBadge.getVisibleText()).toEqual('Disabled');
 
-        await actionsDropdown.click();
-        const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
-        const actionsMenuItemElem = await actionsMenuElem.findAllByClassName('euiContextMenuItem');
-
-        await actionsMenuItemElem.at(0)?.click();
+        await testSubjects.click('ruleEnabledSwitch');
 
         await retry.try(async () => {
-          expect(await actionsDropdown.getVisibleText()).toEqual('Enabled');
+          expect(await statusBadge.getVisibleText()).toEqual('Enabled');
         });
       });
 
