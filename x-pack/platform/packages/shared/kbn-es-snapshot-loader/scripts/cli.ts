@@ -179,11 +179,11 @@ ES Snapshot Loader - Load Elasticsearch snapshots for testing
 Usage: node scripts/es_snapshot_loader <command> [options]
 
 Commands:
-  create     Create a snapshot in a writable repository (gcs/fs)
-  restore    Restore a snapshot directly to Elasticsearch
-             Supports index renaming (--rename-pattern/--rename-replacement)
-             and graceful no-match handling (--allow-no-matches)
-  replay     Restore a snapshot with timestamp transformation for data streams
+  create           Create a snapshot in a writable repository (gcs/fs)
+  restore          Restore a snapshot directly to Elasticsearch
+                   Supports index renaming (--rename-pattern/--rename-replacement)
+                   and graceful no-match handling (--allow-no-matches)
+  replay           Restore a snapshot with timestamp transformation for data streams
 
 Run 'node scripts/es_snapshot_loader <command> --help' for more information.
 `;

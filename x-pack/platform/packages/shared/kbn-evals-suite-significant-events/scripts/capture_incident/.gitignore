@@ -1,0 +1,2 @@
+# Local credentials for the --incident-id auto mode (never commit real keys).
+secrets.env

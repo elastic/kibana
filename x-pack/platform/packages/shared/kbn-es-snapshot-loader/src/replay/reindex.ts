@@ -60,15 +60,15 @@ export async function reindexThroughPipeline({
 
   log.debug(`Reindexing to ${destIndex}${useInlineScript ? ' (inline script)' : ''}`);
 
-  try {
-    const response: ReindexResponse = await esClient.reindex(
+  const runReindex = (opType: 'create' | 'index'): Promise<ReindexResponse> =>
+    esClient.reindex(
       {
         wait_for_completion: true,
         source: { index: sourceIndex },
         dest: {
           index: destIndex,
           ...(!useInlineScript && { pipeline: pipelineName }),
-          op_type: isDataStream ? 'create' : 'index',
+          op_type: opType,
         },
         ...(useInlineScript && {
           script: {
@@ -80,6 +80,40 @@ export async function reindexThroughPipeline({
       },
       { requestTimeout: requestTimeoutMs }
     );
+
+  // The destination may resolve to a data stream even when the source index name
+  // didn't look like a backing index (e.g. it's already the data-stream name and a
+  // `logs-*`/`metrics-*` data-stream template matches). Data streams reject
+  // `op_type: index` with "only ... create ... allowed in data streams" — which ES
+  // surfaces either as per-doc `failures` (200 response) or as a thrown
+  // ResponseError. Detect it in both forms and retry as `create` so replay
+  // populates the data stream instead of failing every doc.
+  const isDataStreamOpTypeError = (value: unknown): boolean =>
+    JSON.stringify(value ?? '').includes('op_type of create are allowed in data streams');
+
+  try {
+    let response: ReindexResponse;
+    try {
+      response = await runReindex(isDataStream ? 'create' : 'index');
+      if (!isDataStream && isDataStreamOpTypeError(response)) {
+        log.debug(
+          `Destination ${destIndex} is a data stream; retrying reindex with op_type=create`
+        );
+        response = await runReindex('create');
+      }
+    } catch (initialError) {
+      if (
+        !isDataStream &&
+        isDataStreamOpTypeError((initialError as { meta?: unknown })?.meta ?? initialError)
+      ) {
+        log.debug(
+          `Destination ${destIndex} is a data stream; retrying reindex with op_type=create`
+        );
+        response = await runReindex('create');
+      } else {
+        throw initialError;
+      }
+    }
 
     const failures = response.failures ?? [];
     const timedOut = response.timed_out;

@@ -113,3 +113,10 @@ This script is designed for **disposable dev data** and assumes it owns the `log
 - **Use a unique `--run-id`**: It determines the snapshot repository name (`sigevents-<run-id>`) and the GCS base path. Reusing a run ID can collide with existing snapshots (same scenario snapshot names).
 - **Start small**: When iterating, run a single `--scenario` first; use `--dry-run` to verify what will be created.
 - **If you abort mid-run**: You may need to manually teardown the demo (`node scripts/otel_demo.js --teardown`) and/or clean up remaining `logs*` / streams state before retrying.
+
+## Related tools
+
+- [`capture_incident/`](capture_incident/README.md) — capture a real-world
+  incident's curated logs from a source cluster (e.g. Overview) into local ES and
+  snapshot them to the `nightshift-incident-snapshots` GCS bucket. Run via
+  `node scripts/capture_incident_snapshot.js`.

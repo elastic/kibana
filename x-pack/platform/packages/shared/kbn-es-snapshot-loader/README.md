@@ -1,6 +1,6 @@
 # @kbn/es-snapshot-loader
 
-Load Elasticsearch snapshots for testing environments. Provides three operations:
+Load Elasticsearch snapshots for testing environments. Provides these operations:
 
 - **create** - Create a snapshot in a writable Elasticsearch repository (`gcs` or `fs`)
 - **restore** - Basic snapshot restore directly to Elasticsearch
@@ -191,19 +191,20 @@ node scripts/es_snapshot_loader replay \
 
 | Flag              | Description                                                                          |
 | ----------------- | ------------------------------------------------------------------------------------ |
-| `--repo-type`     | Repository type (`url`, `gcs`, or `fs`; default: `url`)                             |
-| `--snapshot-url`  | URL snapshot directory for `url` repositories (`file://...`)                        |
+| `--repo-type`     | Repository type (`url`, `gcs`, or `fs`; default: `url`)                              |
+| `--snapshot-url`  | URL snapshot directory for `url` repositories (`file://...`)                         |
 | `--gcs-bucket`    | GCS bucket name (required when using `gcs`)                                          |
 | `--gcs-base-path` | Optional base path in the GCS bucket                                                 |
 | `--gcs-client`    | Optional Elasticsearch GCS client name                                               |
-| `--fs-location`   | FS repository location (required when using `fs`)                                   |
+| `--fs-location`   | FS repository location (required when using `fs`)                                    |
 | `--fs-compress`   | Enable compression for FS repository snapshots                                       |
 | `--snapshot-name` | Snapshot name to restore/replay (default: latest SUCCESS snapshot in the repository) |
-| `--es-url`        | Elasticsearch URL with credentials (e.g., `http://elastic:changeme@localhost:9200`) |
-| `--es-api-key`    | Base64-encoded Elasticsearch API key. Overrides credentials embedded in `--es-url`  |
-| `--kibana-url`    | Kibana URL for ES requests proxied through Kibana (e.g., `http://localhost:5601`)   |
+| `--es-url`        | Elasticsearch URL with credentials (e.g., `http://elastic:changeme@localhost:9200`)  |
+| `--es-api-key`    | Base64-encoded Elasticsearch API key. Overrides credentials embedded in `--es-url`   |
+| `--kibana-url`    | Kibana URL for ES requests proxied through Kibana (e.g., `http://localhost:5601`)    |
 
 Notes:
+
 - `--es-api-key` can be used with `create`, `restore`, and `replay`.
 - Auth precedence is `--es-api-key` > credentials in `--es-url` > no auth.
 - `--snapshot-url`, `--gcs-*`, and `--fs-*` repository flags are mutually exclusive.
@@ -213,19 +214,19 @@ Notes:
 
 ### Restore-specific Options
 
-| Flag                    | Description                                                                                      |
-| ----------------------- | ------------------------------------------------------------------------------------------------ |
-| `--indices`             | Comma-separated index patterns to restore                                                        |
-| `--rename-pattern`      | Regex applied to index names during restore (ES `rename_pattern`). Must pair with `--rename-replacement` |
-| `--rename-replacement`  | Replacement string for renamed indices (ES `rename_replacement`). Must pair with `--rename-pattern`      |
-| `--allow-no-matches`    | When set, a restore that matches no indices succeeds silently instead of throwing an error        |
+| Flag                   | Description                                                                                              |
+| ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| `--indices`            | Comma-separated index patterns to restore                                                                |
+| `--rename-pattern`     | Regex applied to index names during restore (ES `rename_pattern`). Must pair with `--rename-replacement` |
+| `--rename-replacement` | Replacement string for renamed indices (ES `rename_replacement`). Must pair with `--rename-pattern`      |
+| `--allow-no-matches`   | When set, a restore that matches no indices succeeds silently instead of throwing an error               |
 
 ### Replay-specific Options
 
-| Flag            | Description                                                                           |
-| --------------- | ------------------------------------------------------------------------------------- |
-| `--patterns`    | Comma-separated data stream patterns to replay (required)                              |
-| `--concurrency` | Number of indices to reindex in parallel (default: all at once)                       |
+| Flag            | Description                                                     |
+| --------------- | --------------------------------------------------------------- |
+| `--patterns`    | Comma-separated data stream patterns to replay (required)       |
+| `--concurrency` | Number of indices to reindex in parallel (default: all at once) |
 
 ## Programmatic API
 
@@ -384,3 +385,14 @@ await repository.register({ esClient, log, repoName, verify: true });
    - All other timestamps are adjusted by the same offset, preserving relative timing
 6. Reindex through the pipeline to the target data streams
 7. Clean up temporary indices, pipeline, and repository
+
+## Capturing incident snapshots
+
+Capturing a curated incident slice from a source cluster (e.g. "Overview") into a
+local Elasticsearch and snapshotting it to GCS is handled by the standalone
+`capture_incident` tool, which is built on top of this package's GCS repository and
+`restore`/`replay` commands. It now lives in the `@kbn/evals-suite-significant-events`
+package:
+
+See the [capture_incident README](../kbn-evals-suite-significant-events/scripts/capture_incident/README.md)
+for the full guide: prerequisites, config-file schema, usage, and troubleshooting.
