@@ -105,4 +105,29 @@ describe('<AiButtonBase />', () => {
 
     expect(screen.queryByTestId('svg-ai-gradient-defs')).not.toBeInTheDocument();
   });
+
+  it.each(['productAgent', 'addToChat'] as const)(
+    'uses static "Add to chat" label when iconType is %s',
+    (iconType) => {
+      render(
+        <AiButtonBase variant="base" iconType={iconType}>
+          Custom label
+        </AiButtonBase>
+      );
+
+      expect(screen.getByText('Add to chat')).toBeInTheDocument();
+      expect(screen.queryByText('Custom label')).not.toBeInTheDocument();
+    }
+  );
+
+  it('uses children as label for non add-to-chat icon types', () => {
+    render(
+      <AiButtonBase variant="base" iconType="sparkles">
+        Custom label
+      </AiButtonBase>
+    );
+
+    expect(screen.getByText('Custom label')).toBeInTheDocument();
+    expect(screen.queryByText('Add to chat')).not.toBeInTheDocument();
+  });
 });

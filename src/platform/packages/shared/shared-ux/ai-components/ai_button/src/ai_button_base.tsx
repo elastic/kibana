@@ -19,9 +19,18 @@ import { useAiButtonXsSizeCss } from './ai_button_xs_size_styles';
 import { SvgAiGradientDefs } from '../../gradient_styles/svg_ai_gradient_defs';
 import { AiAssistantLogo } from '../../ai_icons/ai_assistant_logo';
 import type { AiButtonIconType, AiButtonProps, AiButtonVariant } from './types';
+import { ADD_TO_CHAT_LABEL } from './constants';
 
 const resolvedIconType = (iconType: AiButtonIconType): IconType =>
   iconType === 'aiAssistantLogo' ? AiAssistantLogo : iconType;
+
+const usesAddToChatLabel = (iconType?: AiButtonIconType): boolean =>
+  iconType === 'productAgent' || iconType === 'addToChat';
+
+const resolveButtonLabel = (
+  iconType: AiButtonIconType | undefined,
+  children: React.ReactNode
+): React.ReactNode => (usesAddToChatLabel(iconType) ? ADD_TO_CHAT_LABEL : children);
 
 // Per design: only xs uses small icon; s and m both use medium icon.
 const getSyncedIconSize = (size?: 'xs' | 's' | 'm') => (size === 'xs' ? 's' : 'm');
@@ -111,7 +120,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
       iconSize: rest.iconSize ?? getSyncedIconSize(rest.size),
       iconType: iconType ? resolvedIconType(iconType) : undefined,
       css: [buttonCss, iconGradientCss, userCss],
-      children: <span css={labelCss}>{children}</span>,
+      children: <span css={labelCss}>{resolveButtonLabel(iconType, children)}</span>,
     };
     return (
       <>
@@ -140,7 +149,7 @@ export const AiButtonBase = (props: AiButtonProps) => {
     iconType: iconType ? resolvedIconType(iconType) : undefined,
     css: [buttonCss, iconGradientCss, size === 'xs' && euiButtonXsSizeCss, userCss],
     fill: variant === 'accent',
-    children: <span css={labelCss}>{children}</span>,
+    children: <span css={labelCss}>{resolveButtonLabel(iconType, children)}</span>,
   };
 
   return (
