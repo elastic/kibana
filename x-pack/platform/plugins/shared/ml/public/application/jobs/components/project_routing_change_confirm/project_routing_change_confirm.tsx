@@ -17,6 +17,8 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { OverlayStart } from '@kbn/core/public';
@@ -66,22 +68,25 @@ function getScopeChangeCounts(
   return { added, removed };
 }
 
-function ScopeChangeCount({ count, type }: { count: number; type: 'added' | 'removed' }) {
+const ScopeChangeCount: FC<{ count: number; type: 'added' | 'removed' }> = ({ count, type }) => {
+  const { euiTheme } = useEuiTheme();
   const prefix = type === 'added' ? '+' : '-';
-  const color = count === 0 ? 'subdued' : type === 'added' ? 'success' : 'danger';
+  const color =
+    count === 0 ? euiTheme.colors.textDisabled : type === 'added' ? 'success' : 'danger';
 
   return (
     <EuiText size="s" color={color} textAlign="right">
       {`${prefix}${count}`}
     </EuiText>
   );
-}
+};
 
 export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
   onCancel,
   onConfirm,
   countsDependencies,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'confirmModalTitle' });
   const [jobScopeChangeCounts, setJobScopeChangeCounts] = useState<
     Map<string, { added: number; removed: number }>
@@ -115,11 +120,15 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
 
   return (
     <EuiConfirmModal
+      maxWidth={euiTheme.breakpoint.s}
       aria-labelledby={confirmModalTitleId}
       title={i18n.translate(
         'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.confirmModalTitle',
         {
-          defaultMessage: 'Update project routing?',
+          defaultMessage: 'Change project scope for {count} jobs?',
+          values: {
+            count: countsDependencies?.jobIds.length,
+          },
         }
       )}
       titleProps={{ id: confirmModalTitleId }}
@@ -145,18 +154,20 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
           id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.confirmModalBody"
           defaultMessage="The model for this job was trained on a specific set of data. Changing this data set may cause temporary model instability and an increase in false-positives. Are you sure you want to apply these changes?"
         />
+      </EuiText>
 
-        {countsDependencies ? (
-          <>
-            <EuiSpacer size="s" />
-
+      {countsDependencies && countsDependencies.jobIds.length > 1 ? (
+        <>
+          <EuiTitle size="xxs">
             <h6>
               <FormattedMessage
                 id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.affectedJobsTitle"
                 defaultMessage="Affected jobs"
               />
             </h6>
+          </EuiTitle>
 
+          <EuiText>
             <EuiPanel
               paddingSize="s"
               hasBorder={false}
@@ -168,29 +179,32 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
                 const counts = jobScopeChangeCounts.get(jobId) ?? { added: 0, removed: 0 };
 
                 return (
-                  <EuiFlexGroup
-                    key={jobId}
-                    responsive={false}
-                    gutterSize="s"
-                    alignItems="center"
-                    data-test-subj={`mlUpdateAdJobsProjectRoutingConfirmModalJob-${jobId}`}
-                  >
-                    <EuiFlexItem>
-                      <EuiText size="s">{jobId}</EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <ScopeChangeCount count={counts.added} type="added" />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <ScopeChangeCount count={counts.removed} type="removed" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                  <>
+                    <EuiFlexGroup
+                      key={jobId}
+                      responsive={false}
+                      gutterSize="s"
+                      alignItems="center"
+                      data-test-subj={`mlUpdateAdJobsProjectRoutingConfirmModalJob-${jobId}`}
+                    >
+                      <EuiFlexItem>
+                        <EuiText size="s">{jobId}</EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ScopeChangeCount count={counts.added} type="added" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ScopeChangeCount count={counts.removed} type="removed" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiSpacer size="s" />
+                  </>
                 );
               })}
             </EuiPanel>
-          </>
-        ) : null}
-      </EuiText>
+          </EuiText>
+        </>
+      ) : null}
     </EuiConfirmModal>
   );
 };

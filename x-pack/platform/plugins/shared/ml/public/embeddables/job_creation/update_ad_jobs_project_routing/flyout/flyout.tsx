@@ -29,6 +29,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
+import type { ICPSManager } from '@kbn/cps-utils';
 import { useFetchProjects } from '@kbn/cps-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { showProjectRoutingChangeConfirmModal } from '../../../../application/jobs/components/project_routing_change_confirm';
@@ -40,6 +41,32 @@ interface Props {
   onClose: () => void;
   initialJobIds?: string[];
   allowScopeSelection?: boolean;
+}
+
+function getSelectedProjectRoutingFromJobs(
+  jobs: Array<{ datafeed_config: { project_routing?: string } }>,
+  manager: ICPSManager
+): string {
+  const defaultProjectRouting = manager.getDefaultProjectRouting();
+  if (jobs.length === 0) {
+    return defaultProjectRouting ?? DEFAULT_ML_PROJECT_ROUTING;
+  }
+
+  const projectRoutings = jobs.map((job) => job.datafeed_config.project_routing);
+  const allUndefined = projectRoutings.every((routing) => routing == null);
+  if (allUndefined) {
+    // if the jobs haven't been migrated to CPS yet, use ML's default project routing _origin
+    return DEFAULT_ML_PROJECT_ROUTING;
+  }
+
+  const [firstRouting] = projectRoutings;
+  const allSame = projectRoutings.every((routing) => routing === firstRouting);
+  if (allSame && firstRouting != null) {
+    return firstRouting;
+  }
+
+  // if the jobs have a mix of project routings, use the space default
+  return defaultProjectRouting ?? DEFAULT_ML_PROJECT_ROUTING;
 }
 
 export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
@@ -64,6 +91,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   const [selectedProjectRouting, setSelectedProjectRouting] = useState<string>(
     DEFAULT_ML_PROJECT_ROUTING
   );
+  const [hasInitializedProjectRouting, setHasInitializedProjectRouting] = useState(false);
 
   const fetchProjects = useCallback(
     (routing?: ProjectRouting) => {
@@ -78,13 +106,6 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    if (initialJobIds) {
-      setJobIds(initialJobIds);
-      setLoading(false);
-      setLoadError(null);
-      return;
-    }
-
     let cancelled = false;
 
     (async () => {
@@ -98,15 +119,32 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
         if (cancelled) {
           return;
         }
-        const response = await jobsApi.bulkUpdateProjectRouting({
-          projectRouting: selectedProjectRouting,
-          simulate: true,
-          auto: true,
-        });
-        if (cancelled) {
-          return;
+
+        let nextJobIds: string[];
+        if (initialJobIds) {
+          nextJobIds = initialJobIds;
+        } else {
+          const response = await jobsApi.bulkUpdateProjectRouting({
+            projectRouting: selectedProjectRouting,
+            simulate: true,
+            auto: true,
+          });
+          if (cancelled) {
+            return;
+          }
+          nextJobIds = Object.keys(response.results).sort();
         }
-        setJobIds(Object.keys(response.results).sort());
+
+        setJobIds(nextJobIds);
+
+        if (!hasInitializedProjectRouting && nextJobIds.length > 0 && manager) {
+          const jobs = await jobsApi.jobs(nextJobIds);
+          if (cancelled) {
+            return;
+          }
+          setSelectedProjectRouting(getSelectedProjectRoutingFromJobs(jobs, manager));
+          setHasInitializedProjectRouting(true);
+        }
       } catch (e) {
         if (cancelled) {
           return;
@@ -122,7 +160,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
     return () => {
       cancelled = true;
     };
-  }, [cps, jobsApi, initialJobIds, selectedProjectRouting]);
+  }, [cps, jobsApi, initialJobIds, selectedProjectRouting, hasInitializedProjectRouting]);
 
   const onUpdateProjectRouting = useCallback(async () => {
     if (jobIds.length === 0 || !cpsManager) {
@@ -234,6 +272,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
                 projects={projects}
                 totalProjectCount={totalProjectCount}
                 projectRoutingValueTestSubj="mlUpdateAdJobsProjectRoutingValue"
+                disabled={hasInitializedProjectRouting === false}
               />
             </EuiFormRow>
             {selectedProjectRouting !== DEFAULT_ML_PROJECT_ROUTING ? (
@@ -354,7 +393,11 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
               onClick={onUpdateProjectRouting}
               isLoading={updating}
               isDisabled={
-                loading || loadError !== null || jobIds.length === 0 || allUpdatesSucceeded
+                hasInitializedProjectRouting === false ||
+                loading ||
+                loadError !== null ||
+                jobIds.length === 0 ||
+                allUpdatesSucceeded
               }
               data-test-subj="mlUpdateAdJobsProjectRoutingSubmit"
             >

@@ -102,7 +102,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
   };
 
   return (
-    <div data-test-subj="mlPageSourceSelection">
+    <div data-test-subj="mlPageSourceSelection" css={{ maxWidth: '800px', margin: '0 auto' }}>
       <EuiPageBody>
         <MlPageHeader>
           <PageTitle
