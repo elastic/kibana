@@ -7,7 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
+import {
+  MAX_CLOUD_CONNECTOR_PACKAGE_POLICIES,
+  ORGANIZATION_ACCOUNT,
+  SINGLE_ACCOUNT,
+} from '../../../common/constants';
+
+import { PackagePolicyPermissionSummarySchema } from '../models/cloud_connector';
 
 export const CreateCloudConnectorRequestSchema = {
   body: schema.object({
@@ -56,10 +62,20 @@ export const CreateCloudConnectorRequestSchema = {
 // The actual structure varies based on cloudProvider (AWS vs Azure), so we use a flexible schema
 const CloudConnectorResponseVarsSchema = schema.recordOf(schema.string(), schema.any());
 
+// PackagePolicyPermissionSummarySchema is imported from ../models/cloud_connector so
+// REST responses validate against the same shape the SO stores. Keeping a local copy
+// here caused drift in the past — single source of truth is enforced via the shared import.
+
 const VerificationFieldsSchema = {
-  verification_status: schema.maybe(schema.string()),
-  verification_started_at: schema.maybe(schema.string()),
-  verification_failed_at: schema.maybe(schema.string()),
+  // 'pending' | 'success' | 'failed' — narrow string but bounded for CodeQL.
+  verification_status: schema.maybe(schema.string({ maxLength: 32 })),
+  // ISO-8601 timestamps: ~25 chars.
+  verification_started_at: schema.maybe(schema.string({ maxLength: 40 })),
+  verification_failed_at: schema.maybe(schema.string({ maxLength: 40 })),
+  // Aligns with MAX_PACKAGE_POLICY_BUCKETS_PER_CONNECTOR (25) with 40× headroom.
+  verification_permissions: schema.maybe(
+    schema.arrayOf(PackagePolicyPermissionSummarySchema, { maxSize: 1000 })
+  ),
 };
 
 export const CreateCloudConnectorResponseSchema = schema.object({
@@ -227,13 +243,17 @@ export const GetCloudConnectorUsageRequestSchema = {
   query: schema.object({
     page: schema.maybe(
       schema.number({
+        defaultValue: 1,
         min: 1,
+        max: 10000,
         meta: { description: 'The page number for pagination.' },
       })
     ),
     perPage: schema.maybe(
       schema.number({
+        defaultValue: 10,
         min: 1,
+        max: MAX_CLOUD_CONNECTOR_PACKAGE_POLICIES,
         meta: { description: 'The number of items per page.' },
       })
     ),
