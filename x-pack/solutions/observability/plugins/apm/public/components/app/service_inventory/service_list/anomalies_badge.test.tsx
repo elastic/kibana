@@ -12,27 +12,39 @@ import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock
 import type { AnomaliesBadgeNavigationProps } from './anomalies_badge';
 import { AnomaliesBadge } from './anomalies_badge';
 
-const baseQuery = {
-  environment: 'ENVIRONMENT_ALL',
-  kuery: '',
-  rangeFrom: 'now-15m',
-  rangeTo: 'now',
-  serviceGroup: '',
-  comparisonEnabled: false,
-};
+const mockGetRedirectUrl = jest
+  .fn()
+  .mockImplementation(({ serviceName, isMobileAgentName, query }: any) => {
+    const base = isMobileAgentName
+      ? `/mobile-services/${serviceName}/overview`
+      : `/services/${serviceName}/overview`;
+    const params = new URLSearchParams();
+    Object.entries(query ?? {}).forEach(([k, v]) => {
+      if (v !== undefined) params.set(k, String(v));
+    });
+    return `${base}?${params.toString()}`;
+  });
+
+const mockLocators = {
+  get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }),
+} as unknown as AnomaliesBadgeNavigationProps['locators'];
 
 const regularClickProps: AnomaliesBadgeNavigationProps = {
   serviceName: 'opbeans-java',
   agentName: 'nodejs',
-  query: baseQuery,
   anomalyEnvironment: 'production',
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+  locators: mockLocators,
 };
 
 const mobileClickProps: AnomaliesBadgeNavigationProps = {
   serviceName: 'opbeans-android',
   agentName: 'android/java',
-  query: baseQuery,
   anomalyEnvironment: 'mobile',
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+  locators: mockLocators,
 };
 
 const CRITICAL_SEVERITY = 82;
@@ -82,10 +94,7 @@ describe('AnomaliesBadge', () => {
       <AnomaliesBadge
         score={CRITICAL_SEVERITY}
         detectorType={AnomalyDetectorType.txLatency}
-        navigationProps={{
-          ...regularClickProps,
-          query: { ...baseQuery, kuery: 'service.name: "foo"' },
-        }}
+        navigationProps={regularClickProps}
       />
     );
 

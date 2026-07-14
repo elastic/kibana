@@ -319,6 +319,7 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
       expect(columns.length).toBe(9);
@@ -336,6 +337,7 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
       const hasAnomaliesColumn = columns.some((c) => c.field === 'anomalyScore');
@@ -354,6 +356,7 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
       const hasAlertsColumn = columns.some((c) => c.field === 'alertsCount');
@@ -372,6 +375,7 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
       const hasSlosColumn = columns.some((c) => c.field === 'sloStatus');
@@ -390,6 +394,7 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
       const hasSlosColumn = columns.some((c) => c.field === 'sloStatus');
@@ -408,6 +413,7 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
       const hasTransactionTypeColumn = columns.some((c) => c.field === 'transactionType');
@@ -426,6 +432,7 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
       const hasEnvironmentColumn = columns.some((c) => c.field === 'environments');
@@ -469,6 +476,7 @@ describe('ApmServicesTable', () => {
             link: apmRouter.link,
             serviceOverflowCount: 0,
             onSloBadgeClick: jest.fn(),
+            locators: undefined,
           }).map((c) =>
             c.render
               ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
@@ -514,6 +522,7 @@ describe('ApmServicesTable', () => {
             link: apmRouter.link,
             serviceOverflowCount: 0,
             onSloBadgeClick: jest.fn(),
+            locators: undefined,
           }).map((c) =>
             c.render
               ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
@@ -549,6 +558,7 @@ describe('ApmServicesTable', () => {
             link: apmRouter.link,
             serviceOverflowCount: 0,
             onSloBadgeClick: jest.fn(),
+            locators: undefined,
           }).map((c) =>
             c.render
               ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
@@ -593,6 +603,7 @@ describe('ApmServicesTable', () => {
             link: apmRouter.link,
             serviceOverflowCount: 0,
             onSloBadgeClick: jest.fn(),
+            locators: undefined,
           }).map((c) =>
             c.render
               ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)

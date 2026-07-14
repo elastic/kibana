@@ -196,6 +196,30 @@ describe('getPathForServiceDetail', () => {
   });
 
   describe('anomaly param forwarding', () => {
+    it('forwards comparisonEnabled from payload, overriding the default', () => {
+      const path = getPathForServiceDetail(
+        {
+          serviceName: 'svc',
+          query: {
+            environment: 'prod' as Environment,
+            comparisonEnabled: true,
+          },
+        },
+        { ...defaultOptions, isComparisonEnabledByDefault: false }
+      );
+
+      expect(splitPath(path).query.get('comparisonEnabled')).toBe('true');
+    });
+
+    it('falls back to isComparisonEnabledByDefault when comparisonEnabled is not in payload', () => {
+      const path = getPathForServiceDetail(
+        { serviceName: 'svc', query: { environment: 'prod' as Environment } },
+        { ...defaultOptions, isComparisonEnabledByDefault: true }
+      );
+
+      expect(splitPath(path).query.get('comparisonEnabled')).toBe('true');
+    });
+
     it('forwards offset and anomalyThreshold to the overview URL', () => {
       const path = getPathForServiceDetail(
         {

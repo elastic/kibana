@@ -11,16 +11,15 @@ import { EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
-import type { TypeOf } from '@kbn/typed-react-router-config';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import {
   getApmMlDetectorLabel,
   getSeverity,
   getSeverityColor,
 } from '../../../../../common/anomaly_detection';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
-import type { ApmRoutes } from '../../../routing/apm_route_config';
+import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 
 export function getI18nLabel(severity: ML_ANOMALY_SEVERITY): string {
   switch (severity) {
@@ -92,32 +91,14 @@ export function getAnomalyTooltipContent({
   });
 }
 
-type OverviewQuery = TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
-
-function toAnomalyOverviewQuery(
-  query: OverviewQuery,
-  severity: ML_ANOMALY_SEVERITY,
-  anomalyEnvironment: Environment
-): OverviewQuery {
-  return {
-    ...query,
-    kuery: '',
-    anomalyThreshold: severity === ML_ANOMALY_SEVERITY.UNKNOWN ? undefined : severity,
-    environment: anomalyEnvironment,
-    comparisonEnabled: true,
-    offset: 'expected_bounds',
-  };
-}
-
 export interface AnomaliesBadgeNavigationProps {
   serviceName: string;
   agentName: AgentName;
   anomalyEnvironment: Environment;
-  /**
-   * Ambient query from the consumer's own route context (rangeFrom/rangeTo/
-   * environment/etc).
-   */
-  query: OverviewQuery;
+  rangeFrom: string;
+  rangeTo: string;
+  locators: SharePluginStart['url']['locators'];
+  transactionType?: string;
 }
 
 interface AnomaliesBadgeProps {
@@ -131,25 +112,25 @@ interface AnomaliesBadgeProps {
 }
 
 export function AnomaliesBadge({ score, detectorType, navigationProps }: AnomaliesBadgeProps) {
-  const apmRouter = useApmRouter();
   const severity = getSeverity(score);
   const text = formatLabelWithScore(getI18nLabel(severity), score);
 
   const href =
     navigationProps && score !== undefined
-      ? apmRouter.link(
-          isMobileAgentName(navigationProps.agentName)
-            ? '/mobile-services/{serviceName}/overview'
-            : '/services/{serviceName}/overview',
-          {
-            path: { serviceName: navigationProps.serviceName },
-            query: toAnomalyOverviewQuery(
-              navigationProps.query,
-              severity,
-              navigationProps.anomalyEnvironment
-            ),
-          }
-        )
+      ? navigationProps.locators.get(APM_APP_LOCATOR_ID)?.getRedirectUrl({
+          serviceName: navigationProps.serviceName,
+          isMobileAgentName: isMobileAgentName(navigationProps.agentName),
+          query: {
+            environment: navigationProps.anomalyEnvironment,
+            rangeFrom: navigationProps.rangeFrom,
+            rangeTo: navigationProps.rangeTo,
+            kuery: '',
+            transactionType: navigationProps.transactionType,
+            anomalyThreshold: severity === ML_ANOMALY_SEVERITY.UNKNOWN ? undefined : severity,
+            comparisonEnabled: true,
+            offset: 'expected_bounds',
+          },
+        })
       : undefined;
 
   const tooltipContent = getAnomalyTooltipContent({ score, detectorType, isInteractive: !!href });

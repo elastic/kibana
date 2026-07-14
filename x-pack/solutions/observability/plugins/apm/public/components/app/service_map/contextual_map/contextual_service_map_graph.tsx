@@ -55,6 +55,7 @@ import { ContextualServiceMapControls } from './contextual_service_map_controls'
 import { ServiceFlyout } from '../../../shared/service_flyout';
 import { SERVICE_FLYOUT_SOURCES } from '../../../shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../../shared/service_flyout/types';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 type ServiceMapServiceNode = Node<ServiceNodeData>;
 
@@ -120,6 +121,7 @@ function ContextualGraphInner({
 }: ContextualServiceMapGraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
+  const { core, share, lens, dataViews } = useApmPluginContext();
   const makeAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
   const { euiTheme } = useEuiTheme();
   const { fitView, zoomIn, zoomOut } = useReactFlow();
@@ -416,12 +418,21 @@ function ContextualGraphInner({
             {selectedServiceNodeForFlyout && (
               <ServiceFlyout
                 key={selectedServiceNodeForFlyout.data.id}
-                service={selectedServiceNodeForFlyout.data}
+                service={{
+                  name: selectedServiceNodeForFlyout.data.id,
+                  agentName: selectedServiceNodeForFlyout.data.agentName,
+                  sloStatus: selectedServiceNodeForFlyout.data.sloStatus,
+                  sloCount: selectedServiceNodeForFlyout.data.sloCount,
+                }}
                 environment={environment}
                 kuery={flyoutOptions?.kuery ?? kuery}
                 initialRangeFrom={flyoutOptions?.rangeFrom ?? start}
                 initialRangeTo={flyoutOptions?.rangeTo ?? end}
                 initialTransactionType={flyoutOptions?.initialTransactionType}
+                core={core}
+                share={share}
+                lens={lens}
+                dataViews={dataViews}
                 onView={handleServiceFlyoutView}
                 onClose={handlePopoverClose}
               />
