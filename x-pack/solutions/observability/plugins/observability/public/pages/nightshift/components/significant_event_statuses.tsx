@@ -1,0 +1,165 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { css } from '@emotion/react';
+import React from 'react';
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+type SignificantEventStatusGroup = 'needsAction' | 'resolved';
+
+interface SignificantEventStatusCardProps {
+  count: number;
+  label: string;
+  onClick: () => void;
+  status: SignificantEventStatusGroup;
+  testSubj: string;
+}
+
+function SignificantEventStatusCard({
+  count,
+  label,
+  onClick,
+  status,
+  testSubj,
+}: SignificantEventStatusCardProps) {
+  const { euiTheme } = useEuiTheme();
+  const isNeedsAction = status === 'needsAction';
+
+  return (
+    <EuiPanel
+      aria-label={`${label}: ${count}`}
+      css={css`
+        border: ${euiTheme.border.thin};
+        border-radius: ${euiTheme.size.s};
+        box-sizing: border-box;
+        overflow: hidden;
+        padding: ${euiTheme.size.m};
+
+        && {
+          transition: background-color ${euiTheme.animation.fast} ease,
+            border-color ${euiTheme.animation.fast} ease;
+        }
+
+        &&:hover {
+          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+          border-color: ${euiTheme.colors.borderInteractiveFormsHoverPlain};
+          box-shadow: none;
+          transform: none;
+        }
+      `}
+      data-test-subj={testSubj}
+      hasBorder={false}
+      hasShadow={false}
+      onClick={onClick}
+    >
+      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText
+            component="span"
+            size="s"
+            css={css`
+              font-weight: 500;
+            `}
+          >
+            {label}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            css={css`
+              height: ${euiTheme.size.xl};
+            `}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiAvatar
+                aria-hidden={true}
+                color={
+                  isNeedsAction
+                    ? euiTheme.colors.backgroundLightDanger
+                    : euiTheme.colors.backgroundLightSuccess
+                }
+                iconColor={isNeedsAction ? 'danger' : 'success'}
+                iconType={isNeedsAction ? 'faceNeutral' : 'faceHappy'}
+                name={label}
+                size="m"
+                type="user"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span
+                css={css`
+                  align-items: center;
+                  color: ${euiTheme.colors.textHeading};
+                  display: flex;
+                  font-size: 28px;
+                  font-weight: 500;
+                  height: ${euiTheme.size.xl};
+                  line-height: 28px;
+                `}
+              >
+                {count}
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+}
+
+export interface SignificantEventStatusesProps {
+  needsActionCount: number;
+  onNeedsActionClick: () => void;
+  onResolvedClick: () => void;
+  resolvedCount: number;
+}
+
+export function SignificantEventStatuses({
+  needsActionCount,
+  onNeedsActionClick,
+  onResolvedClick,
+  resolvedCount,
+}: SignificantEventStatusesProps) {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlexItem
+      css={css`
+        margin-top: ${euiTheme.size.l};
+      `}
+    >
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <SignificantEventStatusCard
+            count={needsActionCount}
+            label={i18n.translate('xpack.observability.nightshift.summary.needActionLabel', {
+              defaultMessage: 'Need action',
+            })}
+            onClick={onNeedsActionClick}
+            status="needsAction"
+            testSubj="o11yNightshiftNeedActionFilter"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <SignificantEventStatusCard
+            count={resolvedCount}
+            label={i18n.translate('xpack.observability.nightshift.summary.resolvedLabel', {
+              defaultMessage: 'Resolved',
+            })}
+            onClick={onResolvedClick}
+            status="resolved"
+            testSubj="o11yNightshiftResolvedFilter"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+}

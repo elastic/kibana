@@ -16,11 +16,12 @@ interface SignificantEventsResponse {
   total: number;
 }
 
-export const useFetchSignificantEvents = () => {
+export const useFetchSignificantEvents = (enabled = true) => {
   const { http } = useKibana().services;
 
   return useQuery<SignificantEventsResponse, Error>({
     queryKey: ['nightshift.significantEvents'],
+    enabled,
     queryFn: async ({ signal }) => {
       return http.get<SignificantEventsResponse>('/internal/significant_events/events', {
         query: {

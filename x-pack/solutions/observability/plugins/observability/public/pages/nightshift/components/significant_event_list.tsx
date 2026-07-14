@@ -43,8 +43,6 @@ export function SignificantEventList({
 }: SignificantEventListProps) {
   const { euiTheme } = useEuiTheme();
   const roundedPanelCss = css`
-    border: ${euiTheme.border.thin};
-    border-radius: ${euiTheme.size.xs};
     box-sizing: border-box;
     overflow: hidden;
   `;
@@ -60,9 +58,11 @@ export function SignificantEventList({
             <h2>{title}</h2>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color={statusColor}>{events.length}</EuiBadge>
-        </EuiFlexItem>
+        {!isLoading && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color={statusColor}>{events.length}</EuiBadge>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
     </>
@@ -72,7 +72,13 @@ export function SignificantEventList({
     return (
       <section ref={sectionRef} css={sectionCss}>
         {heading}
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" css={roundedPanelCss}>
+        <EuiPanel
+          borderRadius="m"
+          hasBorder
+          hasShadow={false}
+          paddingSize="l"
+          css={roundedPanelCss}
+        >
           <EuiFlexGroup justifyContent="center" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner size="l" />
@@ -88,7 +94,8 @@ export function SignificantEventList({
       <section ref={sectionRef} css={sectionCss}>
         {heading}
         <EuiPanel
-          hasBorder={false}
+          borderRadius="m"
+          hasBorder
           hasShadow={false}
           paddingSize="l"
           color="subdued"
@@ -109,7 +116,13 @@ export function SignificantEventList({
   return (
     <section ref={sectionRef} css={sectionCss}>
       {heading}
-      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" css={roundedPanelCss}>
+      <EuiPanel
+        borderRadius="m"
+        hasBorder
+        hasShadow={false}
+        paddingSize="none"
+        css={roundedPanelCss}
+      >
         <ol
           css={css`
             list-style: none;

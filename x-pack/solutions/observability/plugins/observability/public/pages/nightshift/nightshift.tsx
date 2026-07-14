@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -47,15 +47,11 @@ export function NightshiftPage() {
     { serverless }
   );
 
-  const { data, isLoading } = useFetchSignificantEvents();
+  const { data, error, isLoading } = useFetchSignificantEvents(isEnabled);
   const events = data?.hits ?? [];
   const showAllEventsHref = application.getUrlForApp('streams', {
     deepLinkId: 'significantEventsEvents',
   });
-
-  const handleEventClick = useCallback((event: SignificantEvent) => {
-    // Will be wired to flyout in PR 2
-  }, []);
 
   const handleChatClick = useCallback(
     (event: SignificantEvent) => {
@@ -73,8 +69,13 @@ export function NightshiftPage() {
     [agentBuilder]
   );
 
+  useEffect(() => {
+    if (!isEnabled) {
+      history.replace(OVERVIEW_PATH);
+    }
+  }, [history, isEnabled]);
+
   if (!isEnabled) {
-    history.replace(OVERVIEW_PATH);
     return null;
   }
 
@@ -89,9 +90,9 @@ export function NightshiftPage() {
       }}
     >
       <NightshiftApp
+        error={error ?? undefined}
         events={events}
         isLoading={isLoading}
-        onEventClick={handleEventClick}
         onChatClick={agentBuilder ? handleChatClick : undefined}
         showAllEventsHref={showAllEventsHref}
       />

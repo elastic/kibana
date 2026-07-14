@@ -9,9 +9,9 @@ import { css, keyframes } from '@emotion/react';
 import React from 'react';
 import {
   EuiBadge,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -19,6 +19,12 @@ import {
 import type { EuiBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
+import {
+  AiButtonIcon,
+  SvgAiGradientDefs,
+  useAiButtonGradientStyles,
+  useSvgAiGradient,
+} from '@kbn/shared-ux-ai-components';
 import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 
 export interface SignificantEventItemProps {
@@ -87,7 +93,48 @@ function InvestigatingStatus({ label }: { label: string }) {
   );
 }
 
-const getStatusColor = (status: SignificantEventStatus): string => {
+function InvestigatedStatus({ label }: { label: string }) {
+  const { euiTheme } = useEuiTheme();
+  const { labelCss } = useAiButtonGradientStyles({ variant: 'outlined' });
+  const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant: 'outlined' });
+
+  const borderGradient = `linear-gradient(90deg, ${euiTheme.colors.backgroundLightPrimary} 2.98%, ${euiTheme.colors.backgroundLightAssistance} 66.24%)`;
+
+  return (
+    <>
+      <SvgAiGradientDefs gradientId={gradientId} colors={colors} />
+      <EuiBadge
+        color="hollow"
+        iconType="check"
+        iconSide="left"
+        data-test-subj="nightshiftInvestigatedStatus"
+        css={[
+          iconGradientCss,
+          css`
+            background: linear-gradient(
+                  ${euiTheme.colors.backgroundBasePlain},
+                  ${euiTheme.colors.backgroundBasePlain}
+                )
+                padding-box,
+              ${borderGradient} border-box;
+            border: ${euiTheme.border.width.thin} solid transparent;
+            border-radius: ${euiTheme.size.l};
+
+            .euiBadge__text {
+              ${labelCss}
+            }
+          `,
+        ]}
+      >
+        {label}
+      </EuiBadge>
+    </>
+  );
+}
+
+type StatusColor = 'danger' | 'subdued' | 'success';
+
+const getStatusColor = (status: SignificantEventStatus): StatusColor => {
   switch (status) {
     case 'promoted':
     case 'acknowledged':
@@ -140,7 +187,7 @@ const getInvestigationBadgeIcon = (
 export function SignificantEventItem({ event, onClick, onChatClick }: SignificantEventItemProps) {
   const { euiTheme } = useEuiTheme();
   const statusColor = getStatusColor(event.status);
-  const statusDotColors: Record<string, string> = {
+  const statusDotColors: Record<StatusColor, string> = {
     danger: euiTheme.colors.danger,
     success: euiTheme.colors.success,
     subdued: euiTheme.colors.mediumShade,
@@ -150,37 +197,15 @@ export function SignificantEventItem({ event, onClick, onChatClick }: Significan
   const isInvestigating = event.status === 'promoted' || event.status === 'acknowledged';
   const isInvestigated = event.status === 'resolved' || event.status === 'closed';
 
-  const handleKeyDown = (keyboardEvent: React.KeyboardEvent<HTMLDivElement>) => {
-    if (onClick && (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ')) {
-      keyboardEvent.preventDefault();
-      onClick(event);
-    }
-  };
-
   return (
     <div
       data-test-subj="nightshiftSignificantEventItem"
-      onClick={onClick ? () => onClick(event) : undefined}
-      onKeyDown={handleKeyDown}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
       css={css`
         background: ${euiTheme.colors.backgroundBasePlain};
-        cursor: ${onClick ? 'pointer' : 'default'};
         padding: ${euiTheme.size.m};
-
-        &:hover {
-          background: ${onClick ? euiTheme.colors.backgroundBaseInteractiveHover : 'inherit'};
-        }
       `}
     >
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          gap: ${euiTheme.size.xs};
-        `}
-      >
+      <EuiFlexGroup alignItems="stretch" direction="column" gutterSize="xs" responsive={false}>
         <EuiFlexGroup
           alignItems="center"
           gutterSize="s"
@@ -190,20 +215,13 @@ export function SignificantEventItem({ event, onClick, onChatClick }: Significan
           <EuiFlexItem grow={false}>
             {isInvestigating ? (
               <InvestigatingStatus label={statusLabel} />
+            ) : isInvestigated ? (
+              <InvestigatedStatus label={statusLabel} />
             ) : (
               <EuiBadge
                 color="hollow"
                 iconType={getInvestigationBadgeIcon(event.status)}
                 iconSide="left"
-                css={
-                  isInvestigated
-                    ? css`
-                        background: ${euiTheme.colors.backgroundBasePlain};
-                        border-color: ${euiTheme.colors.borderBasePrimary};
-                        color: ${euiTheme.colors.textPrimary};
-                      `
-                    : undefined
-                }
               >
                 {statusLabel}
               </EuiBadge>
@@ -226,7 +244,7 @@ export function SignificantEventItem({ event, onClick, onChatClick }: Significan
                       }
                     )}
                   >
-                    <EuiButtonIcon
+                    <AiButtonIcon
                       aria-label={i18n.translate(
                         'xpack.observability.nightshift.event.openInChatButtonAriaLabel',
                         {
@@ -241,6 +259,22 @@ export function SignificantEventItem({ event, onClick, onChatClick }: Significan
                         onChatClick(event);
                       }}
                       size="s"
+                      variant="empty"
+                      css={css`
+                        && {
+                          color: ${euiTheme.colors.textSubdued} !important;
+                        }
+
+                        &&:not(:hover):not(:focus-visible) {
+                          background: transparent !important;
+                        }
+
+                        && .euiIcon,
+                        && .euiIcon [fill]:not([fill='none']) {
+                          color: currentColor !important;
+                          fill: currentColor !important;
+                        }
+                      `}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -249,65 +283,77 @@ export function SignificantEventItem({ event, onClick, onChatClick }: Significan
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <div
-          css={css`
-            display: flex;
-          `}
-        >
-          <span
-            aria-hidden={true}
-            css={css`
-              align-items: flex-start;
-              display: flex;
-              height: 18px;
-              padding: 6px 4px;
-              width: 14px;
-            `}
-          >
+        <EuiFlexGroup gutterSize="none" responsive={false}>
+          <EuiFlexItem grow={false}>
             <span
+              aria-hidden={true}
               css={css`
-                background: ${statusDotColor};
-                border-radius: 50%;
-                height: 6px;
-                width: 6px;
+                align-items: flex-start;
+                display: flex;
+                height: 18px;
+                padding: 6px 4px;
+                width: 14px;
               `}
-            />
-          </span>
-          <div
+            >
+              <span
+                css={css`
+                  background: ${statusDotColor};
+                  border-radius: 50%;
+                  height: 6px;
+                  width: 6px;
+                `}
+              />
+            </span>
+          </EuiFlexItem>
+          <EuiFlexItem
             css={css`
-              display: flex;
-              flex: 1;
-              flex-direction: column;
-              gap: ${euiTheme.size.xs};
               min-width: 0;
             `}
           >
-            <p
-              className="eui-textTruncate"
-              data-test-subj="o11ySignificantEventItemLink"
-              css={css`
-                font-size: 14px;
-                font-weight: ${euiTheme.font.weight.medium};
-                line-height: 20px;
-                margin: 0;
-              `}
-            >
-              {event.title}
-            </p>
-            <p
-              className="eui-textTruncate"
-              css={css`
-                color: ${euiTheme.colors.textSubdued};
-                font-size: 12px;
-                line-height: ${euiTheme.size.base};
-                margin: 0;
-              `}
-            >
-              {event.summary}
-            </p>
-          </div>
-        </div>
-      </div>
+            <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+              <EuiFlexItem>
+                <EuiText
+                  className="eui-textTruncate"
+                  component="p"
+                  data-test-subj="o11ySignificantEventItemLink"
+                  size="s"
+                  css={css`
+                    font-weight: ${euiTheme.font.weight.medium};
+                    line-height: 20px;
+                    margin: 0;
+                  `}
+                >
+                  {onClick ? (
+                    <EuiLink
+                      data-test-subj="o11ySignificantEventItemLink"
+                      color="text"
+                      onClick={() => onClick(event)}
+                    >
+                      {event.title}
+                    </EuiLink>
+                  ) : (
+                    event.title
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText
+                  className="eui-textTruncate"
+                  color="subdued"
+                  component="p"
+                  size="xs"
+                  css={css`
+                    line-height: ${euiTheme.size.base};
+                    margin: 0;
+                  `}
+                >
+                  {event.summary}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexGroup>
     </div>
   );
 }

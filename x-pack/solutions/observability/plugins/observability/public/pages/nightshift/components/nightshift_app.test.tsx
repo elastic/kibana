@@ -33,6 +33,23 @@ function renderWithIntl(ui: React.ReactElement) {
 
 describe('NightshiftApp', () => {
   const scrollIntoView = jest.fn();
+  const OriginalMutationObserver = global.MutationObserver;
+
+  beforeAll(() => {
+    class MockMutationObserver {
+      observe() {}
+      disconnect() {}
+      takeRecords() {
+        return [];
+      }
+    }
+
+    global.MutationObserver = MockMutationObserver as unknown as typeof MutationObserver;
+  });
+
+  afterAll(() => {
+    global.MutationObserver = OriginalMutationObserver;
+  });
 
   beforeEach(() => {
     scrollIntoView.mockClear();
@@ -55,8 +72,8 @@ describe('NightshiftApp', () => {
       mockEvent({ event_id: '3', status: 'resolved' }),
     ];
     const { container } = renderWithIntl(<NightshiftApp events={events} isLoading={false} />);
-    expect(screen.getAllByText('2').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('1').length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: 'Need action: 2' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Resolved: 1' })).toBeInTheDocument();
     expect(container.querySelector('[data-euiicon-type="faceNeutral"]')).toBeInTheDocument();
     expect(container.querySelector('[data-euiicon-type="faceHappy"]')).toBeInTheDocument();
   });
@@ -108,11 +125,25 @@ describe('NightshiftApp', () => {
 
     expect(screen.getByText('Service B event')).toBeInTheDocument();
     expect(screen.queryByText('Service A event')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Need action: 2' })).toBeInTheDocument();
+    expect(screen.queryByText('No significant events found')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Resolved' })).not.toBeInTheDocument();
   });
 
-  it('shows empty state when no events', () => {
+  it('does not render event lists when there are no events', () => {
     renderWithIntl(<NightshiftApp events={[]} isLoading={false} />);
-    expect(screen.getByText('No significant events found')).toBeInTheDocument();
+    expect(screen.queryByText('No significant events found')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Need action' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Resolved' })).not.toBeInTheDocument();
+  });
+
+  it('shows an error instead of empty states when loading fails', () => {
+    renderWithIntl(
+      <NightshiftApp events={[]} error={new Error('Request failed')} isLoading={false} />
+    );
+
+    expect(screen.getByText('Unable to load significant events')).toBeInTheDocument();
+    expect(screen.queryByText('No significant events found')).not.toBeInTheDocument();
   });
 
   it('links to all significant events', () => {
@@ -133,6 +164,7 @@ describe('NightshiftApp', () => {
     );
     fireEvent.click(screen.getByText('Test significant event'));
     expect(onEventClick).toHaveBeenCalledWith(event);
+    expect(screen.getByText('Test significant event').closest('[role="button"]')).toBeNull();
   });
 
   it('shows investigating progress and opens an event in chat', () => {
