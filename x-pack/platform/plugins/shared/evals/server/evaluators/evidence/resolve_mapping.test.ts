@@ -6,6 +6,7 @@
  */
 
 import { getEvidenceMapping } from './resolve_mapping';
+import { EVIDENCE_MAPPING_PROFILES } from './profiles';
 
 describe('getEvidenceMapping', () => {
   it('resolves elastic-inference to the current Kibana field paths and filters', () => {
@@ -43,5 +44,42 @@ describe('getEvidenceMapping', () => {
     expect(() =>
       getEvidenceMapping('does-not-exist' as Parameters<typeof getEvidenceMapping>[0])
     ).toThrow('Unknown evidence mapping profile: does-not-exist');
+  });
+
+  it('resolves claude-code to the expected field paths and filters', () => {
+    const mapping = getEvidenceMapping('claude-code');
+
+    expect(mapping.user_query).toEqual({
+      source: 'logs',
+      filter: [{ field: 'event_name', value: 'user_prompt' }],
+      contentField: 'attributes.prompt',
+      select: 'first',
+      parse: 'string',
+    });
+
+    expect(mapping.agent_response).toEqual({
+      source: 'logs',
+      filter: [{ field: 'event_name', value: 'api_response_body' }],
+      contentField: 'attributes.body',
+      select: 'last',
+      parse: 'anthropic_message',
+    });
+
+    expect(mapping.tool_calls).toEqual({
+      source: 'traces',
+      filter: [{ field: 'span.name', value: 'claude_code.tool' }],
+      parse: 'prefixed_json',
+      fields: {
+        tool_call_id: 'attributes.tool_use_id',
+        tool_id: 'attributes.tool_name',
+        arguments: 'attributes.tool_input',
+        result: 'attributes.new_context',
+      },
+    });
+  });
+
+  it('keeps claude-code as the last profile key', () => {
+    const profileKeys = Object.keys(EVIDENCE_MAPPING_PROFILES);
+    expect(profileKeys.at(-1)).toBe('claude-code');
   });
 });

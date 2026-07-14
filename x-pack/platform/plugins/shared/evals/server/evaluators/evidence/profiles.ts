@@ -77,8 +77,37 @@ const otelGenAiAttributes: EvidenceMapping = {
   },
 };
 
+const claudeCode: EvidenceMapping = {
+  user_query: {
+    source: 'logs',
+    filter: [{ field: 'event_name', value: 'user_prompt' }],
+    contentField: 'attributes.prompt',
+    select: 'first',
+    parse: 'string',
+  },
+  agent_response: {
+    source: 'logs',
+    filter: [{ field: 'event_name', value: 'api_response_body' }],
+    contentField: 'attributes.body',
+    select: 'last',
+    parse: 'anthropic_message',
+  },
+  tool_calls: {
+    source: 'traces',
+    filter: [{ field: 'span.name', value: 'claude_code.tool' }],
+    parse: 'prefixed_json',
+    fields: {
+      tool_call_id: 'attributes.tool_use_id',
+      tool_id: 'attributes.tool_name',
+      arguments: 'attributes.tool_input',
+      result: 'attributes.new_context',
+    },
+  },
+};
+
 export const EVIDENCE_MAPPING_PROFILES: Record<EvidenceProfile, EvidenceMapping> = {
   'otel-genai-events': otelGenAiEvents,
   'elastic-inference': elasticInference,
   'otel-genai-attributes': otelGenAiAttributes,
+  'claude-code': claudeCode,
 };

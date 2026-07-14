@@ -199,4 +199,27 @@ describe('awaitTraceReady', () => {
     expect(normalizeEvidenceMock).toHaveBeenCalledTimes(3);
     expect(logger.warn).toHaveBeenCalled();
   }, 15000);
+
+  it('returns ready for claude-code profile when claude-shaped evidence resolves', async () => {
+    hasTraceDocumentsMock.mockResolvedValueOnce(true);
+    const claudeReadyRound: EvidenceRound = {
+      input: { message: 'Find failed checkout requests.' },
+      response: { message: 'I found 14 failed checkout requests.' },
+      steps: [
+        {
+          tool_id: 'search_logs',
+          arguments: { query: 'service:checkout status:500' },
+          result: { count: 14 },
+        },
+      ],
+    };
+    normalizeEvidenceMock.mockResolvedValueOnce(claudeReadyRound);
+
+    await expect(
+      awaitTraceReady(traceAccessor, getEvidenceMapping('claude-code'), 'claude-code', logger)
+    ).resolves.toEqual(claudeReadyRound);
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
+    expect(probeProfilesMock).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
 });

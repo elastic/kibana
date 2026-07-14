@@ -72,6 +72,15 @@ const parseJsonIfPossible = (value: unknown): unknown => {
   }
 };
 
+const TOOL_PAYLOAD_PREFIX_PATTERN = /^\[TOOL (?:INPUT|RESULT): [^\]]*\]\s*\n?/;
+
+const stripToolPayloadPrefix = (value: unknown): unknown => {
+  if (typeof value !== 'string') {
+    return value;
+  }
+  return value.replace(TOOL_PAYLOAD_PREFIX_PATTERN, '');
+};
+
 const resolveFieldValue = (value: unknown, segments: string[]): unknown => {
   if (segments.length === 0) {
     return value;
@@ -195,6 +204,38 @@ const parseMessageFromDocument = (
     return firstStringValue(getFieldValue(document, itemSpec.contentField));
   }
 
+  if (itemSpec.parse === 'anthropic_message') {
+    const rawValue = getFieldValue(document, itemSpec.contentField);
+    const parsedValue = parseJsonIfPossible(rawValue);
+    if (!parsedValue || typeof parsedValue !== 'object') {
+      return undefined;
+    }
+
+    const content = (parsedValue as Record<string, unknown>).content;
+    if (typeof content === 'string') {
+      return content;
+    }
+
+    if (!Array.isArray(content)) {
+      return undefined;
+    }
+
+    const textBlocks = content
+      .flatMap((entry) => {
+        if (!entry || typeof entry !== 'object') {
+          return [];
+        }
+
+        const block = entry as Record<string, unknown>;
+        return block.type === 'text' && typeof block.text === 'string' && block.text
+          ? [block.text]
+          : [];
+      })
+      .filter((text) => text.trim());
+
+    return textBlocks.length > 0 ? textBlocks.join('\n\n') : undefined;
+  }
+
   const messages = toMessageArray(getFieldValue(document, itemSpec.contentField));
   const role = itemKey === 'agent_response' ? 'assistant' : 'user';
   return getGenAiMessageText(messages, role);
@@ -234,12 +275,16 @@ const parseToolCallsValue = (
         evidence.tool_id = toolId;
       }
 
-      const parsedArguments = parseJsonIfPossible(toolArguments);
+      const parsedArguments = parseJsonIfPossible(
+        itemSpec.parse === 'prefixed_json' ? stripToolPayloadPrefix(toolArguments) : toolArguments
+      );
       if (parsedArguments !== undefined) {
         evidence.arguments = parsedArguments;
       }
 
-      const parsedResult = parseJsonIfPossible(toolResult);
+      const parsedResult = parseJsonIfPossible(
+        itemSpec.parse === 'prefixed_json' ? stripToolPayloadPrefix(toolResult) : toolResult
+      );
       if (parsedResult !== undefined) {
         evidence.result = parsedResult;
       }

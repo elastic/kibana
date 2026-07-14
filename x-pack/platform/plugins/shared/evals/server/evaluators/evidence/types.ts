@@ -20,9 +20,13 @@ export interface EvidenceRound {
 
 export type EvidenceSource = 'traces' | 'logs';
 export type EvidenceMessageSelectMode = 'first' | 'last';
-export type EvidenceMessageParseMode = 'string' | 'genai_messages';
+export type EvidenceMessageParseMode = 'string' | 'genai_messages' | 'anthropic_message';
 export type EvidenceItemKey = 'user_query' | 'agent_response' | 'tool_calls';
-export type EvidenceProfile = 'otel-genai-events' | 'elastic-inference' | 'otel-genai-attributes';
+export type EvidenceProfile =
+  | 'otel-genai-events'
+  | 'elastic-inference'
+  | 'otel-genai-attributes'
+  | 'claude-code';
 
 export interface EvidenceFilterTerm {
   field: string;
@@ -40,6 +44,7 @@ export interface EvidenceMessageItemSpec {
 export interface EvidenceToolCallsItemSpec {
   source: EvidenceSource;
   filter: EvidenceFilterTerm[];
+  parse?: 'prefixed_json';
   fields: {
     tool_call_id: string;
     tool_id: string;

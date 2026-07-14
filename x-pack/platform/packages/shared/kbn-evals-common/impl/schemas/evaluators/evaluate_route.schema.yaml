@@ -59,6 +59,7 @@ paths:
                             - elastic-inference
                             - otel-genai-events
                             - otel-genai-attributes
+                            - claude-code
                 evaluators:
                   type: array
                   minItems: 1
