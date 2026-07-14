@@ -5,5 +5,12 @@
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/share-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/code-editor-mock",
+    "@kbn/code-editor",
+  ]
 }
