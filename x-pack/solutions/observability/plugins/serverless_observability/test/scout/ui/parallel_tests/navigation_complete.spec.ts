@@ -63,7 +63,7 @@ test.describe(
       });
     });
 
-    test('clicking body nav items sets the active link, updates breadcrumbs, and navigates', async ({
+    test('clicking body nav items sets the active link and navigates', async ({
       pageObjects,
       page,
     }) => {
@@ -77,9 +77,6 @@ test.describe(
         await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
-        await expect(nav.breadcrumb({ deepLinkId: 'discover' })).toBeVisible({
-          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
-        });
       });
 
       await test.step('Dashboards', async () => {
@@ -88,9 +85,6 @@ test.describe(
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
         await expect(nav.activeNavItemByDeepLinkId('dashboards')).toBeVisible({
-          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
-        });
-        await expect(nav.breadcrumb({ deepLinkId: 'dashboards' })).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -118,7 +112,7 @@ test.describe(
       await test.step('Cases (via More menu)', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
-        await expect(nav.breadcrumb({ text: 'Cases' })).toBeVisible({
+        await expect(page).toHaveURL(/\/app\/observability\/cases/, {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -142,7 +136,7 @@ test.describe(
       });
     });
 
-    test('footer-panel children navigate and update breadcrumbs', async ({ pageObjects }) => {
+    test('footer-panel children navigate', async ({ pageObjects, page }) => {
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('data_management → Integrations', async () => {
@@ -155,7 +149,7 @@ test.describe(
           .sidePanel('data_management')
           .locator('[data-test-subj~="nav-item-deepLinkId-integrations"]')
           .click();
-        await expect(nav.breadcrumb({ deepLinkId: 'integrations' })).toBeVisible({
+        await expect(page).toHaveURL(/\/app\/integrations/, {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -170,7 +164,7 @@ test.describe(
           .sidePanel('data_management')
           .locator('[data-test-subj~="nav-item-deepLinkId-fleet"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Fleet' })).toBeVisible({
+        await expect(page).toHaveURL(/\/app\/fleet/, {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -185,7 +179,7 @@ test.describe(
           .sidePanel('admin_and_settings')
           .locator('[data-test-subj~="nav-item-id-management:tags"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible({
+        await expect(page).toHaveURL(/\/app\/management\/kibana\/tags/, {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -200,7 +194,7 @@ test.describe(
           .sidePanel('admin_and_settings')
           .locator('[data-test-subj~="nav-item-id-management:maintenanceWindows"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Maintenance Windows' })).toBeVisible({
+        await expect(page).toHaveURL(/\/app\/management\/insightsAndAlerting\/maintenanceWindows/, {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -217,6 +211,7 @@ test.describe(
 
     test('navigates between apps without a full page reload (SPA) and restores via logo', async ({
       pageObjects,
+      page,
     }) => {
       const nav = pageObjects.observabilityNavigation;
 
@@ -227,15 +222,12 @@ test.describe(
         await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
-        await expect(nav.breadcrumb({ deepLinkId: 'discover' })).toBeVisible({
-          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
-        });
       });
 
       await test.step('Agents via More', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreById('agent_builder').click();
-        await expect(nav.breadcrumb({ text: 'Agents' })).toBeVisible({
+        await expect(page).toHaveURL(/\/app\/agent_builder/, {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -250,7 +242,7 @@ test.describe(
           .sidePanel('admin_and_settings')
           .locator('[data-test-subj~="nav-item-id-management:tags"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible({
+        await expect(page).toHaveURL(/\/app\/management\/kibana\/tags/, {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });

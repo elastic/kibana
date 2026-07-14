@@ -430,7 +430,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('breadcrumbs', () => {
+    describe('title', () => {
       let createdCase: any;
 
       before(async () => {
@@ -442,8 +442,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should set the cases title', async () => {
-        await svlCommonNavigation.breadcrumbs.expectExists();
-        await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: createdCase.title });
+        const title = await testSubjects.getVisibleText('header-page-title');
+        expect(title).to.be(createdCase.title);
       });
     });
 

@@ -70,9 +70,7 @@ test.describe(
       });
     });
 
-    test('Stack Management panel children navigate and update breadcrumbs', async ({
-      pageObjects,
-    }) => {
+    test('Stack Management panel children navigate', async ({ pageObjects, page }) => {
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('stack_management → Tags', async () => {
@@ -83,7 +81,7 @@ test.describe(
           .sidePanel('stack_management')
           .locator('[data-test-subj~="nav-item-id-management:tags"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible();
+        await expect(page).toHaveURL(/\/app\/management\/kibana\/tags/);
       });
 
       await test.step('stack_management → Maintenance Windows', async () => {
@@ -94,7 +92,7 @@ test.describe(
           .sidePanel('stack_management')
           .locator('[data-test-subj~="nav-item-id-management:maintenanceWindows"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Maintenance Windows' })).toBeVisible();
+        await expect(page).toHaveURL(/\/app\/management\/insightsAndAlerting\/maintenanceWindows/);
       });
     });
 
@@ -122,7 +120,7 @@ test.describe(
         .sidePanel('stack_management')
         .locator('[data-test-subj~="nav-item-id-management:tags"]')
         .click();
-      await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible();
+      await expect(page).toHaveURL(/\/app\/management\/kibana\/tags/);
 
       await page.reload();
       await nav.waitForLoad();

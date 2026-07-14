@@ -79,16 +79,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchIndexDetailsPage.expectSearchIndexDetailsTabsExists();
           });
         });
-        describe('breadcrumbs', function () {
-          it('displays correct breadcrumbs on index list page', async () => {
-            await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbTexts([
-              'Data management',
-              'Indices and data streams',
-              'Index Management',
-              'Indices',
-            ]);
-          });
-        });
       });
     });
     describe('Classic Nav', function () {

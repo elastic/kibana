@@ -83,7 +83,7 @@ test.describe(
         .sidePanel('admin_and_settings')
         .locator('[data-test-subj~="nav-item-id-management:tags"]')
         .click();
-      await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible();
+      await expect(page).toHaveURL(/\/app\/management\/kibana\/tags/);
 
       await page.reload();
       await nav.waitForLoad();

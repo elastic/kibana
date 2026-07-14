@@ -18,18 +18,17 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
     await expect(pageObjects.navigation.getSidenav()).toBeVisible();
   });
 
-  test('breadcrumbs reflect navigation state', async ({ page, pageObjects, browserAuth }) => {
+  test('navigation state is reflected in the URL', async ({ page, pageObjects, browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.navigation.goToSecurity();
 
-    await expect(page.testSubj.locator('breadcrumbs')).toBeVisible();
-    await expect(pageObjects.navigation.getBreadcrumbByText('Get started')).toBeVisible();
+    await expect(page).toHaveURL(/\/app\/security\/get_started/);
 
     await pageObjects.collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:alerts');
-    await expect(pageObjects.navigation.getBreadcrumbByText('Alerts')).toBeVisible();
+    await expect(page).toHaveURL(/\/app\/security\/alerts/);
 
     await pageObjects.navigation.clickLogo();
-    await expect(pageObjects.navigation.getBreadcrumbByText('Get started')).toBeVisible();
+    await expect(page).toHaveURL(/\/app\/security\/get_started/);
   });
 
   test('navigate using search', async ({ page, pageObjects, browserAuth }) => {

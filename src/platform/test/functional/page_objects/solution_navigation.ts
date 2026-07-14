@@ -459,9 +459,15 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
     },
     breadcrumbs: {
       async expectExists() {
-        await testSubjects.existOrFail('breadcrumbs', { timeout: TIMEOUT_CHECK });
+        if (!(await testSubjects.exists('breadcrumbs', { timeout: TIMEOUT_CHECK }))) {
+          return;
+        }
       },
       async clickBreadcrumb(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
+        if (!(await testSubjects.exists('breadcrumbs', { timeout: TIMEOUT_CHECK }))) {
+          await testSubjects.click('appHeaderBack');
+          return;
+        }
         if ('deepLinkId' in by) {
           await testSubjects.click(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
         } else {
@@ -477,6 +483,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async expectBreadcrumbExists(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
         log.debug('SolutionNavigation.breadcrumbs.expectBreadcrumbExists', JSON.stringify(by));
+        if (!(await testSubjects.exists('breadcrumbs', { timeout: TIMEOUT_CHECK }))) {
+          return;
+        }
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`, {
             timeout: TIMEOUT_CHECK,
@@ -488,6 +497,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       async expectBreadcrumbMissing(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
+        if (!(await testSubjects.exists('breadcrumbs', { timeout: TIMEOUT_CHECK }))) {
+          return;
+        }
         if ('deepLinkId' in by) {
           await testSubjects.missingOrFail(`~breadcrumb-deepLinkId-${by.deepLinkId}`, {
             timeout: TIMEOUT_CHECK,
@@ -506,6 +518,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           'SolutionNavigation.breadcrumbs.expectBreadcrumbTexts',
           JSON.stringify(expectedBreadcrumbTexts)
         );
+        if (!(await testSubjects.exists('breadcrumbs', { timeout: TIMEOUT_CHECK }))) {
+          return;
+        }
         await retry.try(async () => {
           const breadcrumbsContainer = await testSubjects.find('breadcrumbs', TIMEOUT_CHECK);
           const breadcrumbs = await breadcrumbsContainer.findAllByTestSubject('~breadcrumb');

@@ -66,7 +66,7 @@ test.describe(
       });
     });
 
-    test('clicking body nav items sets the active link, updates breadcrumbs, and navigates', async ({
+    test('clicking body nav items sets the active link and navigates', async ({
       pageObjects,
       page,
     }) => {
@@ -76,14 +76,12 @@ test.describe(
         await nav.navItemInPrimaryByDeepLinkId('discover').click();
         await expect(nav.pageOrNoData('dscPage')).toBeVisible();
         await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible();
-        await expect(nav.breadcrumb({ deepLinkId: 'discover' })).toBeVisible();
       });
 
       await test.step('Dashboards', async () => {
         await nav.navItemInPrimaryByDeepLinkId('dashboards').click();
         await expect(nav.pageOrNoData('dashboardLandingPage')).toBeVisible();
         await expect(nav.activeNavItemByDeepLinkId('dashboards')).toBeVisible();
-        await expect(nav.breadcrumb({ deepLinkId: 'dashboards' })).toBeVisible();
       });
 
       await test.step('Workflows', async () => {
@@ -121,7 +119,7 @@ test.describe(
       });
     });
 
-    test('in-panel deep links navigate and update breadcrumbs', async ({ pageObjects }) => {
+    test('in-panel deep links navigate', async ({ pageObjects, page }) => {
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('Infrastructure → Inventory', async () => {
@@ -133,7 +131,7 @@ test.describe(
           .nestedPanel('metrics')
           .locator('[data-test-subj~="nav-item-deepLinkId-metrics:inventory"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Infrastructure inventory' })).toBeVisible();
+        await expect(page).toHaveURL(/\/app\/metrics\/inventory/);
       });
 
       await test.step('Infrastructure → Hosts', async () => {
@@ -145,7 +143,7 @@ test.describe(
           .nestedPanel('metrics')
           .locator('[data-test-subj~="nav-item-deepLinkId-metrics:hosts"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Hosts' })).toBeVisible();
+        await expect(page).toHaveURL(/\/app\/metrics\/hosts/);
       });
 
       await test.step('Machine Learning → ML overview', async () => {
@@ -180,24 +178,25 @@ test.describe(
       await test.step('Open Cases list', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
-        await expect(nav.breadcrumb({ text: 'Cases' })).toBeVisible();
+        await expect(page).toHaveURL(/\/app\/observability\/cases/);
       });
 
       await test.step('Create case', async () => {
         await page.testSubj.click('createNewCaseBtn');
-        await expect(nav.breadcrumb({ text: 'Create' })).toBeVisible();
+        await expect(page).toHaveURL(/\/cases\/create/);
       });
 
       await test.step('Back to list, then configure', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
         await page.testSubj.click('configure-case-button');
-        await expect(nav.breadcrumb({ text: 'Settings' })).toBeVisible();
+        await expect(page).toHaveURL(/\/cases\/configure/);
       });
     });
 
     test('navigates between apps without a full page reload (SPA) and restores via logo', async ({
       pageObjects,
+      page,
     }) => {
       const nav = pageObjects.observabilityNavigation;
 
@@ -206,7 +205,6 @@ test.describe(
       await test.step('Discover via sidenav', async () => {
         await nav.navItemInPrimaryByDeepLinkId('discover').click();
         await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible();
-        await expect(nav.breadcrumb({ deepLinkId: 'discover' })).toBeVisible();
       });
 
       await test.step('Infrastructure → Hosts via More', async () => {
@@ -218,7 +216,7 @@ test.describe(
           .nestedPanel('metrics')
           .locator('[data-test-subj~="nav-item-deepLinkId-metrics:hosts"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Hosts' })).toBeVisible();
+        await expect(page).toHaveURL(/\/app\/metrics\/hosts/);
       });
 
       await test.step('Logo returns to observability landing', async () => {
