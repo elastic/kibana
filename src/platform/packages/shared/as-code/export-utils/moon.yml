@@ -16,7 +16,13 @@ project:
   channel: ''
   owner: '@elastic/kibana-presentation'
   sourceRoot: src/platform/packages/shared/as-code/export-utils
-dependsOn: []
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/share-plugin'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/code-editor-mock'
+  - '@kbn/code-editor'
 tags:
   - shared-browser
   - package
@@ -27,6 +33,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - '**/*.tsx'
     - '!target/**/*'
   jest-config:
     - jest.config.js
