@@ -16,9 +16,53 @@ import {
 } from './incident_config';
 import { IncidentAgentClient } from './incident_agent_client';
 import { IncidentMetadataClient } from './incident_metadata_client';
+import type { IncidentMetadata } from './incident_investigate';
 import { investigateIncidentMetadata, deriveSymptomFromLogs } from './incident_investigate';
-import { createOverviewClient, probeOverview } from './incident_probe';
+import { createOverviewClient, probeOverview, type TimeRange } from './incident_probe';
 import { INCIDENT_AUTO_GCS_FOLDER } from './constants';
+
+// Padding around the incident's real lifecycle timestamps for the probe's OUTER
+// search window. It only needs to bracket the symptom logs (the probe re-anchors
+// the captured `timeRange` on the real symptom min/max ±1h), so a few hours on
+// each side comfortably covers pre-detection onset and post-mitigation tail.
+const WINDOW_PAD_MS = 6 * 60 * 60 * 1000;
+
+/** ISO-8601 without milliseconds (matches the hand-written config style). */
+function toIso(ms: number): string {
+  return new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
+
+/**
+ * Builds a grounded probe search window from the incident's real lifecycle
+ * timestamps: `[earliest - pad, latest + pad]`. Returns `undefined` when no
+ * timestamp parsed, so the caller falls back to the agent's derived window.
+ */
+function incidentSearchWindow(
+  window: IncidentMetadata['window'],
+  log: ToolingLog
+): TimeRange | undefined {
+  if (!window) {
+    return undefined;
+  }
+  const times = [
+    window.startedAt,
+    window.detectedAt,
+    window.acknowledgedAt,
+    window.mitigatedAt,
+    window.resolvedAt,
+  ]
+    .map((value) => (value ? Date.parse(value) : NaN))
+    .filter((ms) => Number.isFinite(ms));
+  if (times.length === 0) {
+    return undefined;
+  }
+  const range = {
+    gte: toIso(Math.min(...times) - WINDOW_PAD_MS),
+    lt: toIso(Math.max(...times) + WINDOW_PAD_MS),
+  };
+  log.info(`Grounding probe search window on incident timestamps: ${range.gte}..${range.lt}`);
+  return range;
+}
 
 /** Lists the Overview source's CCS remote aliases (`GET _remote/info`). */
 async function getRemotes(esClient: Client, log: ToolingLog): Promise<string[]> {
@@ -128,12 +172,15 @@ export async function writeIncidentConfigFromId(options: AutoConfigOptions): Pro
   const broadIndex = `${cluster}:logs-*`;
 
   // 2. Anchor the window on the real symptom timestamps, discover the entity values,
-  //    pick the narrowest-covering entity, exclude noisy datasets, count.
+  //    pick the narrowest-covering entity, exclude noisy datasets, count. Prefer the
+  //    incident's real lifecycle timestamps as the outer search bound (grounded),
+  //    falling back to the agent's derived window when none were captured.
+  const searchWindow = incidentSearchWindow(metadata.window, log) ?? derivation.searchWindow;
   const probe = await probeOverview({
     esClient: overviewClient,
     log,
     sourceIndex: [broadIndex],
-    searchWindow: derivation.searchWindow,
+    searchWindow,
     symptom,
     entityField: derivation.entityField,
   });

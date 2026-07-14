@@ -84,12 +84,11 @@ and source it in a subshell so the exports don't linger:
 
 ### API keys
 
-| Env var                   | Cluster  | Purpose                                                                 |
-| ------------------------- | -------- | ----------------------------------------------------------------------- |
-| `INCIDENT_KIBANA_API_KEY` | Incident | ES `read` on rootly/pagerduty + Console (Dev Tools) access              |
-| `OVERVIEW_KIBANA_API_KEY` | Overview | Agent Builder converse (Kibana `base: ["all"]` + ES `monitor` + `read`) |
-| `OVERVIEW_ES_API_KEY`     | Overview | ES probe key (falls back to `OVERVIEW_API_KEY`)                         |
-| `OVERVIEW_API_KEY`        | Overview | remote reindex source key (`cluster: ["monitor"]` + `read` on `logs-*`) |
+| Env var                   | Cluster  | Purpose                                                                         |
+| ------------------------- | -------- | ------------------------------------------------------------------------------- |
+| `INCIDENT_KIBANA_API_KEY` | Incident | ES `read` on rootly/pagerduty + Console (Dev Tools) access                      |
+| `OVERVIEW_KIBANA_API_KEY` | Overview | Agent Builder converse (Kibana `base: ["all"]` + ES `monitor` + `read`)         |
+| `OVERVIEW_API_KEY`        | Overview | probe + remote reindex source key (`cluster: ["monitor"]` + `read` on `logs-*`) |
 
 Create each in the relevant cluster's Kibana **Dev Tools** with the internal route
 (`POST kbn:/internal/security/api_key`, NOT `/api/...`). The incident key needs ES
@@ -126,7 +125,7 @@ POST /_security/api_key
 }
 ```
 
-Set it as `OVERVIEW_API_KEY` in `secrets.env` (preferred over `source.apiKey`).
+Set it as `OVERVIEW_API_KEY` in `secrets.env`.
 
 ### 2. A local Elasticsearch with remote reindex + GCS enabled
 
@@ -199,7 +198,6 @@ source templates are not carried over.
 | `incident.date`                    | yes      | Incident date (stored in metadata)                                                   |
 | `incident.slackChannel`            | no       | Slack channel (stored in metadata)                                                   |
 | `source.host`                      | yes      | Source Elasticsearch endpoint (must be in `reindex.remote.whitelist`)                |
-| `source.apiKey`                    | no       | Inline API key (prefer `OVERVIEW_API_KEY` env var)                                   |
 | `source.index`                     | yes      | One index pattern or a list; broad `clusterAlias:logs-*` recommended                 |
 | `source.exclude`                   | no       | Patterns to drop from `source.index` (compiled to `-pattern`)                        |
 | `source.cluster`                   | no       | Source cluster alias (provenance metadata)                                           |

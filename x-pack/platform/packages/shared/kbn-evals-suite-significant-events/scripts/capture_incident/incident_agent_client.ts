@@ -36,9 +36,8 @@ type ChatStreamData = Record<string, unknown>;
 /**
  * Thin client over the platform-logging cluster's Agent Builder API. It calls the
  * streaming `POST /api/agent_builder/converse/async` endpoint (Server-Sent Events)
- * and reduces the stream to the final assistant message plus the steps the agent
- * took. Streaming is required because a full round can outlast the sync endpoint's
- * proxy/await-headers timeout.
+ * and reduces the stream to the final assistant message. Streaming is required
+ * because a full round can outlast the sync endpoint's proxy/await-headers timeout.
  *
  * Auth is a Kibana API key (needs `agentBuilder:read`) sent as `Authorization:
  * ApiKey <key>`. The public versioned route also requires `kbn-xsrf` and the

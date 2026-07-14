@@ -29,6 +29,9 @@ const queryDslSchema = z
 // context handed verbatim to the logs-cluster agent (step 2) to derive the symptom.
 const metadataSchema = z.object({
   title: z.string().min(1),
+  // The internal public status-page title, which can phrase the incident
+  // differently from `title`; another source of literal wording to match.
+  publicTitle: z.string().optional(),
   // Incident start date as YYYY-MM-DD. `rootly.started_at` is a full ISO datetime
   // (with offset), so accept that and keep the date portion.
   date: z
@@ -39,20 +42,55 @@ const metadataSchema = z.object({
       (value) => /^\d{4}-\d{2}-\d{2}$/.test(value),
       'date must be (or start with) YYYY-MM-DD'
     ),
+  // Precise incident lifecycle timestamps (full ISO). Handed to the agent so its
+  // searchWindow is grounded in the real window instead of a date-padded guess.
+  window: z
+    .object({
+      startedAt: z.string().optional(),
+      detectedAt: z.string().optional(),
+      acknowledgedAt: z.string().optional(),
+      mitigatedAt: z.string().optional(),
+      resolvedAt: z.string().optional(),
+    })
+    .optional(),
   slackChannel: z.string().optional(),
-  // The incident region may be cloud-prefixed (e.g. `aws.ap-southeast-2`); handed
+  // The incident regions may be cloud-prefixed (e.g. `aws.ap-southeast-2`); handed
   // to the agent RAW so it resolves the bare region + remote alias itself.
-  region: z.string().optional(),
-  cloud: z.string().optional(),
-  // Affected / causal services narrow WHERE to look in the logs.
+  regions: z.array(z.string()).default([]),
+  // The cloud service providers involved (e.g. `aws`, `gcp`), from the rootly
+  // `environments` custom field — a hint for which remote alias holds the logs.
+  environments: z.array(z.string()).default([]),
+  // The deployment environment (e.g. `Production`), distinct from the CSP list.
+  environment: z.string().optional(),
+  // Causal services ("Docker Registry") — the strongest WHERE-to-look signal.
   services: z.array(z.string()).default([]),
-  // Free-text narrative + the PagerDuty alert text — the richest sources of the
-  // literal error strings the symptom is built from.
+  // Affected services (top-level rootly `services` + customer-impact tagging) —
+  // often where the symptom logs concentrate (an entityField hint).
+  affectedServices: z.array(z.string()).default([]),
+  // Structured failure taxonomy ("Errors caused by third party service failure").
+  // Steers the search STRATEGY (class of failure) without any text mining.
+  causes: z.array(z.string()).default([]),
+  // Products impacted ("Elastic Cloud Serverless") — narrows the product namespace.
+  productsImpacted: z.array(z.string()).default([]),
+  // Owning team — routes the search to the right cluster/namespace/team.
+  owningTeam: z.array(z.string()).default([]),
+  // Customer-impact type (internal vs external) + a coarse impacted count; both
+  // help the agent scope log sources and gauge severity.
+  customerImpactType: z.string().optional(),
+  customerImpactCount: z.string().optional(),
+  // Free-text narratives — the richest sources of the literal error strings the
+  // symptom is built from. `summary` + `mitigation` + `resolution` +
+  // `customerImpact` join the PagerDuty alert text as token-mining inputs.
   summary: z.string().optional(),
+  mitigation: z.string().optional(),
+  resolution: z.string().optional(),
+  customerImpact: z.string().optional(),
   pagerduty: z
     .object({
       title: z.string().optional(),
       firstTriggerLogEntrySummary: z.string().optional(),
+      id: z.string().optional(),
+      url: z.string().optional(),
     })
     .optional(),
 });
@@ -96,13 +134,13 @@ remoteCluster: the remote that holds the affected services' logs.${
           .join('\n')}\n  Return EXACTLY one of these.`
       : ''
   }
-  The incident "region" may be cloud-prefixed (e.g. "aws.ap-southeast-2" = cloud "aws", region "ap-southeast-2"); the alias uses the BARE region ("serverless-logging-ap-southeast-2"). It MUST include the region — never a region-less alias like "serverless-logging-aws". Confirm the logs are there with 1-2 quick counts.
+  The incident "regions" may be cloud-prefixed (e.g. "aws.ap-southeast-2" = cloud "aws", region "ap-southeast-2"); the alias uses the BARE region ("serverless-logging-ap-southeast-2"). It MUST include the region — never a region-less alias like "serverless-logging-aws". Use the "environments" (CSP list, e.g. "aws"/"gcp") only as a tie-breaker, never as the region. When several regions are listed, pick the one whose logs actually carry the symptom. Confirm the logs are there with 1-2 quick counts.
 
-symptom: a STRUCTURED bool query — NEVER a query_string. Build it ONLY from literal ERROR text — exception names, error phrases, status codes, failure keywords (e.g. "ImagePullBackOff", "failed to pull image"). NEVER use a component / service / pod / container NAME as a token: those appear across MANY datasets and match unrelated noise. A correct symptom is CONCENTRATED — its hits sit in ONE or a FEW datasets. VERIFY: aggregate by data_stream.dataset; if it spreads across many datasets at low density, drop the offending token and re-verify. Build with match_phrase on "message" per error token, optionally a term on a keyword field (e.g. { "term": { "log.level": "ERROR" } }) you confirmed is populated, combined in a bool (required -> "filter", alternatives -> "should" + "minimum_should_match": 1). Confirm it matches an incident-CLUSTERED set (tens to low thousands during the incident). Do NOT include a @timestamp range.
+symptom: a STRUCTURED bool query — NEVER a query_string. Build it ONLY from literal ERROR text — exception names, error phrases, status codes, failure keywords (e.g. "ImagePullBackOff", "failed to pull image"). Mine the FACTS narratives ("summary", "mitigation", "resolution", "customerImpact", and the PagerDuty text) for these literal strings; use "causes" only to decide the CLASS of failure to look for, never as a literal token. NEVER use a component / service / pod / container NAME as a token: those appear across MANY datasets and match unrelated noise. A correct symptom is CONCENTRATED — its hits sit in ONE or a FEW datasets. VERIFY: aggregate by data_stream.dataset; if it spreads across many datasets at low density, drop the offending token and re-verify. Build with match_phrase on "message" per error token, optionally a term on a keyword field (e.g. { "term": { "log.level": "ERROR" } }) you confirmed is populated, combined in a bool (required -> "filter", alternatives -> "should" + "minimum_should_match": 1). Confirm it matches an incident-CLUSTERED set (tens to low thousands during the incident). Do NOT include a @timestamp range.
 
 entityField: the field that best identifies the affected entity AND keys the symptom dataset — confirm via a terms agg on the symptom hits. Prefer a broad, stable key ("serverless.project.id" or "kubernetes.namespace"); use "kubernetes.pod.name" or "host.name" for pod/node-level infra incidents. Return the FIELD name only.
 
-searchWindow: a WIDE ISO-8601 UTC window that certainly brackets all symptom logs (pad the incident date generously — a day before and after).
+searchWindow: a WIDE ISO-8601 UTC window that certainly brackets all symptom logs. When the FACTS include a "window" (startedAt/detectedAt/mitigatedAt/resolvedAt), ANCHOR on it — start a few hours before the earliest timestamp and end a few hours after the latest — instead of guessing from the date. Only fall back to padding the incident "date" generously (a day before and after) when no "window" is provided.
 
 Your FINAL message MUST be ONLY this fenced JSON block — never end on a tool call or prose:
 
@@ -120,10 +158,10 @@ Your FINAL message MUST be ONLY this fenced JSON block — never end on a tool c
 // ---------------------------------------------------------------------------
 
 /**
- * Extracts candidate JSON strings from an agent message, best-first: every fenced
+ * Extracts candidate JSON strings from an agent message: every fenced
  * \`\`\`json block in REVERSE order (the final answer is usually the last block,
- * after any "thinking out loud" / example snippets), then the widest balanced
- * `{…}` span as a last resort.
+ * after any "thinking out loud" / example snippets). The prompt mandates a fenced
+ * block, so we don't scan for a bare `{…}` span.
  */
 function extractJsonCandidates(message: string): string[] {
   const fenced: string[] = [];
@@ -134,13 +172,7 @@ function extractJsonCandidates(message: string): string[] {
       fenced.push(match[1].trim());
     }
   }
-  const candidates = fenced.reverse();
-  const start = message.indexOf('{');
-  const end = message.lastIndexOf('}');
-  if (start >= 0 && end > start) {
-    candidates.push(message.slice(start, end + 1).trim());
-  }
-  return candidates;
+  return fenced.reverse();
 }
 
 function parseAgainst<T>(
@@ -428,21 +460,62 @@ export async function investigateIncidentMetadata({
   const pagerduty = await fetchPagerdutyIncident({ client, rootly, log });
 
   const started = firstString(rootly, 'rootly.started_at', 'rootly.created_at');
+  const detectedAt = firstString(rootly, 'rootly.detected_at');
+  const acknowledgedAt = firstString(rootly, 'rootly.acknowledged_at');
+  const mitigatedAt = firstString(rootly, 'rootly.mitigated_at');
+  const resolvedAt = firstString(rootly, 'rootly.resolved_at');
+  // Only emit the window block when at least one timestamp resolved; an all-empty
+  // object would just be noise in the facts handed to the agent.
+  const window: Record<string, string> = {};
+  if (started) window.startedAt = started;
+  if (detectedAt) window.detectedAt = detectedAt;
+  if (acknowledgedAt) window.acknowledgedAt = acknowledgedAt;
+  if (mitigatedAt) window.mitigatedAt = mitigatedAt;
+  if (resolvedAt) window.resolvedAt = resolvedAt;
+
+  // Affected services come from the top-level rootly `services` array, plus any
+  // services explicitly tagged in the customer-impact form field.
+  const affectedServices = [
+    ...formFieldValues(getField(rootly, 'rootly.services.name')),
+    ...formFieldValues(getField(rootly, 'rootly.services.slug')),
+    ...formFieldValues(getField(rootly, 'rootly.customer-impact.selected_services.value')),
+  ];
+
+  const pdId = firstString(rootly, 'rootly.pagerduty_incident_id');
+  const pdUrl = firstString(rootly, 'rootly.pagerduty_incident_url');
 
   const raw: Record<string, unknown> = {
     // A missing title should fail the schema loudly rather than be masked by a
     // placeholder — the agent uses it as a fact when deriving the symptom.
     title: firstString(rootly, 'rootly.title', 'rootly.public_title') ?? '',
+    publicTitle: firstString(rootly, 'rootly.public_title'),
     // Deterministic date from the real incident timestamp (the schema trims it to
     // YYYY-MM-DD). A wrong year here makes the symptom match 0 logs.
     date: started ?? '',
+    ...(Object.keys(window).length > 0 ? { window } : {}),
     slackChannel: firstString(rootly, 'rootly.slack_channel_name'),
-    // Region custom field verbatim (may be cloud-prefixed); cloud = CSP name hint.
-    region: formFieldFirst(rootly, 'rootly.region'),
-    cloud: formFieldFirst(rootly, 'rootly.environments'),
+    // Region custom field verbatim (may be cloud-prefixed); environments = CSP hints.
+    regions: formFieldValues(getField(rootly, 'rootly.region')),
+    environments: [
+      ...new Set([
+        ...formFieldValues(getField(rootly, 'rootly.environments.slug')),
+        ...formFieldValues(getField(rootly, 'rootly.environments.name')),
+      ]),
+    ],
+    environment: formFieldFirst(rootly, 'rootly.environment'),
     // Causal service ("Docker Registry") is the strongest WHERE-to-look signal.
     services: formFieldValues(getField(rootly, 'rootly.causal-service')),
+    affectedServices: [...new Set(affectedServices)],
+    // Structured failure taxonomy — steers the agent's search STRATEGY.
+    causes: formFieldValues(getField(rootly, 'rootly.causes.name')),
+    productsImpacted: formFieldValues(getField(rootly, 'rootly.product-s-impacted')),
+    owningTeam: formFieldValues(getField(rootly, 'rootly.owning-team')),
+    customerImpactType: formFieldFirst(rootly, 'rootly.customer-impact-type'),
+    customerImpactCount: formFieldFirst(rootly, 'rootly.customer-impact-number'),
     summary: firstString(rootly, 'rootly.summary'),
+    mitigation: firstString(rootly, 'rootly.mitigation_message'),
+    resolution: firstString(rootly, 'rootly.resolution_message'),
+    customerImpact: formFieldFirst(rootly, 'rootly.customer-impact'),
     ...(pagerduty
       ? {
           pagerduty: {
@@ -451,6 +524,8 @@ export async function investigateIncidentMetadata({
               pagerduty,
               'pagerduty.first_trigger_log_entry.summary'
             ),
+            ...(pdId ? { id: pdId } : {}),
+            ...(pdUrl ? { url: pdUrl } : {}),
           },
         }
       : {}),
@@ -469,9 +544,15 @@ export async function investigateIncidentMetadata({
   const metadata = result.data;
 
   log.info(
-    `Incident metadata: "${metadata.title}" (${metadata.date}), region=${
-      metadata.region ?? 'n/a'
-    }, services=[${metadata.services.join(', ')}]${pagerduty ? ', +pagerduty' : ''}.`
+    `Incident metadata: "${metadata.title}" (${metadata.date}), regions=[${metadata.regions.join(
+      ', '
+    )}], environments=[${metadata.environments.join(
+      ', '
+    )}], causalServices=[${metadata.services.join(
+      ', '
+    )}], affectedServices=[${metadata.affectedServices.join(', ')}], causes=[${metadata.causes.join(
+      ', '
+    )}]${pagerduty ? ', +pagerduty' : ''}.`
   );
   return metadata;
 }

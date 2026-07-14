@@ -36,7 +36,6 @@ const incidentConfigSchema = z.object({
   }),
   source: z.object({
     host: z.string().url(),
-    apiKey: z.string().optional(),
     // One index pattern or a list of them. May be plain (`serverless.logs-*`),
     // CCS-prefixed (`logging-us-east-1:logs-elasticsearch.server-*`), non-`logs-*`
     // (`logging-*:cluster-kibana-*`), broad (`logs-*`), or a mix of local + remote.
@@ -75,7 +74,7 @@ const incidentConfigSchema = z.object({
 export type IncidentConfig = z.infer<typeof incidentConfigSchema>;
 
 export interface ResolvedIncidentConfig extends IncidentConfig {
-  /** API key resolved from env (preferred) or the config's `source.apiKey`. */
+  /** Source API key read from the `OVERVIEW_API_KEY` environment variable. */
   resolvedApiKey: string;
   /** GCS base path (from config or derived from the incident id). */
   gcsBasePath: string;
@@ -155,14 +154,13 @@ export function buildIncidentConfigYaml(config: IncidentConfig): string {
 
 /**
  * Resolves runtime values that depend on the environment: the source API key
- * (env var preferred over inline config) and defaulted snapshot options.
+ * (from `OVERVIEW_API_KEY`) and defaulted snapshot options.
  */
 export function resolveIncidentConfig(config: IncidentConfig): ResolvedIncidentConfig {
-  const resolvedApiKey = process.env.OVERVIEW_API_KEY || config.source.apiKey || '';
+  const resolvedApiKey = process.env.OVERVIEW_API_KEY || '';
   if (!resolvedApiKey) {
     throw new Error(
-      `Missing source API key. Set the OVERVIEW_API_KEY environment variable in secrets.env ` +
-        `(preferred) or add "source.apiKey" to the config file.`
+      `Missing source API key. Set the OVERVIEW_API_KEY environment variable in secrets.env.`
     );
   }
 

@@ -24,9 +24,8 @@ source:
   # Management > Fleet > Settings > Outputs, "default" row). Must be in the local
   # ES `reindex.remote.whitelist` (see README).
   host: 'https://<host>.<region>.aws.found.io:443'
-  # The API key is read from the OVERVIEW_API_KEY env var (preferred). You may set
-  # `apiKey` here instead, but never commit a real key.
-  # apiKey: '<api-key>'
+  # The API key is read from the OVERVIEW_API_KEY env var (set it in secrets.env);
+  # never commit a real key.
   # Prefer the BROAD all-datasets pattern so the capture spans every logs-*
   # dataset the affected entity emitted (kibana.log, elasticsearch.server,
   # container_logs, system.syslog, …), not just the symptom dataset. Scope volume
@@ -98,6 +97,7 @@ snapshot:
   # expectedSymptomDocCount: <n>
   # Optional: fail the run if the reindexed TOTAL count (across all captured indices) differs.
   # expectedDocCount: <n>
-  # gcsBasePath: 'customer0-incidents/incident-<id>'
+  # Optional: override the GCS base path (default: incidents/incident-<id>).
+  # gcsBasePath: 'incidents/incident-<id>'
   # Optional (default true): keep the original _index / source cluster on each doc.
   preserveProvenance: true
