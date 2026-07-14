@@ -1,0 +1,7 @@
+Use this skill when investigating the health or performance of a specific APM service when NO alert is attached. Strong triggers:
+
+- A service attachment is present (`observability.service`) and the user asks about its health, performance, or problems
+- The user types: "what's wrong with my <service>", "is <service> healthy", "why is <service> slow/erroring", "diagnose <service>", "investigate <service>", "check <service>"
+- The user navigates from the APM service overview page and asks a general health or performance question
+
+Do NOT use this skill when an `observability.alert` attachment is present — defer to `investigate-apm-alert` for alert-driven investigations. If the user references a specific alert UUID, rule type, or says "investigate this alert", that skill applies instead.
