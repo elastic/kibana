@@ -34,6 +34,15 @@ const MOCK_CONNECTORS_BY_TYPE: Record<string, SingleStepConnector[]> = {
       isDeprecated: false,
     },
   ],
+  '.slack2': [
+    {
+      id: 'slack-alerts',
+      name: '#alerts channel',
+      connectorTypeId: '.slack2',
+      isMissingSecrets: false,
+      isDeprecated: false,
+    },
+  ],
 };
 
 export const useFetchConnectorsByType = ({
