@@ -21,10 +21,10 @@ import {
 } from '@elastic/eui';
 import { type AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
-import { ThreatEuiFlexGroup } from '../../../detection_engine/rule_creation_ui/components/description_step/threat_description';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { toSimpleRuleSchedule } from '../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import { FiltersDisplay } from './filters_display';
+import { MitreAttackDisplay } from './mitre_display';
 import { RuleTypeDetails } from './rule_type_details';
 import { parseRuleFromAttachment, getRuleTypeLabel, getQueryLabel } from './helpers';
 import type { RuleAttachment } from './helpers';
@@ -220,7 +220,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
           <EuiFlexGrid columns={2} gutterSize="m" responsive={false}>
             {rule.threat.map((entry, threatIndex) => (
               <EuiFlexItem key={threatIndex}>
-                <ThreatEuiFlexGroup threat={[entry]} />
+                <MitreAttackDisplay threat={[entry]} />
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
