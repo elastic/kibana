@@ -43,6 +43,10 @@ describe('KubernetesConnector', () => {
       expect(KubernetesConnector.metadata.supportedFeatureIds).toContain('workflows');
       expect(KubernetesConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
     });
+
+    it('is marked as technical preview', () => {
+      expect(KubernetesConnector.metadata.isTechnicalPreview).toBe(true);
+    });
   });
 
   describe('auth', () => {

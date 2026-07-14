@@ -9,6 +9,8 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+const MAX_STRING_LENGTH = 2048;
+
 // =============================================================================
 // Shared field descriptions
 // =============================================================================
@@ -45,13 +47,14 @@ export const RequestInputSchema = lazySchema(() =>
     method: HttpMethodSchema.describe('The HTTP method to use.'),
     path: z
       .string()
+      .max(MAX_STRING_LENGTH)
       .describe(
         'The Kubernetes API path, starting with a slash. ' +
           'Examples: "/api/v1/namespaces/default/pods", "/apis/apps/v1/namespaces/default/deployments/my-app", ' +
           '"/api/v1/nodes", "/version". Do not include the host — it comes from the connector configuration.'
       ),
     query: z
-      .record(z.string(), z.string())
+      .record(z.string().max(MAX_STRING_LENGTH), z.string().max(MAX_STRING_LENGTH))
       .optional()
       .describe(
         'Optional query parameters, e.g. { labelSelector: "app=nginx" } or { fieldSelector: "status.phase=Running" }.'
@@ -65,6 +68,7 @@ export const RequestInputSchema = lazySchema(() =>
       ),
     contentType: z
       .string()
+      .max(MAX_STRING_LENGTH)
       .optional()
       .describe(
         'Optional Content-Type override. Kubernetes PATCH requires one of: ' +
@@ -81,15 +85,17 @@ export type RequestInput = z.infer<typeof RequestInputSchema>;
 
 export const ListResourcesInputSchema = lazySchema(() =>
   z.object({
-    apiVersion: z.string().describe(API_VERSION_DESCRIPTION),
-    resource: z.string().describe(RESOURCE_DESCRIPTION),
-    namespace: z.string().optional().describe(NAMESPACE_DESCRIPTION),
+    apiVersion: z.string().max(MAX_STRING_LENGTH).describe(API_VERSION_DESCRIPTION),
+    resource: z.string().max(MAX_STRING_LENGTH).describe(RESOURCE_DESCRIPTION),
+    namespace: z.string().max(MAX_STRING_LENGTH).optional().describe(NAMESPACE_DESCRIPTION),
     labelSelector: z
       .string()
+      .max(MAX_STRING_LENGTH)
       .optional()
       .describe('Optional label selector to filter results, e.g. "app=nginx,tier=frontend".'),
     fieldSelector: z
       .string()
+      .max(MAX_STRING_LENGTH)
       .optional()
       .describe('Optional field selector to filter results, e.g. "status.phase=Running".'),
     limit: z
@@ -103,10 +109,10 @@ export type ListResourcesInput = z.infer<typeof ListResourcesInputSchema>;
 
 export const GetResourceInputSchema = lazySchema(() =>
   z.object({
-    apiVersion: z.string().describe(API_VERSION_DESCRIPTION),
-    resource: z.string().describe(RESOURCE_DESCRIPTION),
-    name: z.string().describe('The name of the resource to retrieve.'),
-    namespace: z.string().optional().describe(NAMESPACE_DESCRIPTION),
+    apiVersion: z.string().max(MAX_STRING_LENGTH).describe(API_VERSION_DESCRIPTION),
+    resource: z.string().max(MAX_STRING_LENGTH).describe(RESOURCE_DESCRIPTION),
+    name: z.string().max(MAX_STRING_LENGTH).describe('The name of the resource to retrieve.'),
+    namespace: z.string().max(MAX_STRING_LENGTH).optional().describe(NAMESPACE_DESCRIPTION),
   })
 );
 export type GetResourceInput = z.infer<typeof GetResourceInputSchema>;
@@ -115,6 +121,7 @@ export const ListNamespacesInputSchema = lazySchema(() =>
   z.object({
     labelSelector: z
       .string()
+      .max(MAX_STRING_LENGTH)
       .optional()
       .describe('Optional label selector to filter namespaces, e.g. "team=platform".'),
   })
@@ -123,10 +130,11 @@ export type ListNamespacesInput = z.infer<typeof ListNamespacesInputSchema>;
 
 export const GetPodLogsInputSchema = lazySchema(() =>
   z.object({
-    namespace: z.string().describe('The namespace the pod belongs to.'),
-    name: z.string().describe('The name of the pod.'),
+    namespace: z.string().max(MAX_STRING_LENGTH).describe('The namespace the pod belongs to.'),
+    name: z.string().max(MAX_STRING_LENGTH).describe('The name of the pod.'),
     container: z
       .string()
+      .max(MAX_STRING_LENGTH)
       .optional()
       .describe('The container to read logs from. Required only for multi-container pods.'),
     previous: z
@@ -150,6 +158,7 @@ export const ListEventsInputSchema = lazySchema(() =>
   z.object({
     namespace: z
       .string()
+      .max(MAX_STRING_LENGTH)
       .optional()
       .describe('The namespace to read events from. Omit to read events across all namespaces.'),
     limit: z
@@ -167,11 +176,11 @@ export type ListEventsInput = z.infer<typeof ListEventsInputSchema>;
 
 export const CreateResourceInputSchema = lazySchema(() =>
   z.object({
-    apiVersion: z.string().describe(API_VERSION_DESCRIPTION),
-    resource: z.string().describe(RESOURCE_DESCRIPTION),
-    namespace: z.string().optional().describe(NAMESPACE_DESCRIPTION),
+    apiVersion: z.string().max(MAX_STRING_LENGTH).describe(API_VERSION_DESCRIPTION),
+    resource: z.string().max(MAX_STRING_LENGTH).describe(RESOURCE_DESCRIPTION),
+    namespace: z.string().max(MAX_STRING_LENGTH).optional().describe(NAMESPACE_DESCRIPTION),
     manifest: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(MAX_STRING_LENGTH), z.unknown())
       .describe(
         'The full resource manifest as a JSON object (including apiVersion, kind, metadata, and spec).'
       ),
@@ -182,19 +191,21 @@ export type CreateResourceInput = z.infer<typeof CreateResourceInputSchema>;
 
 export const ApplyResourceInputSchema = lazySchema(() =>
   z.object({
-    apiVersion: z.string().describe(API_VERSION_DESCRIPTION),
-    resource: z.string().describe(RESOURCE_DESCRIPTION),
+    apiVersion: z.string().max(MAX_STRING_LENGTH).describe(API_VERSION_DESCRIPTION),
+    resource: z.string().max(MAX_STRING_LENGTH).describe(RESOURCE_DESCRIPTION),
     name: z
       .string()
+      .max(MAX_STRING_LENGTH)
       .describe('The name of the resource to apply (must match manifest.metadata.name).'),
-    namespace: z.string().optional().describe(NAMESPACE_DESCRIPTION),
+    namespace: z.string().max(MAX_STRING_LENGTH).optional().describe(NAMESPACE_DESCRIPTION),
     manifest: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(MAX_STRING_LENGTH), z.unknown())
       .describe(
         'The desired resource manifest as a JSON object, used as the server-side apply patch.'
       ),
     fieldManager: z
       .string()
+      .max(MAX_STRING_LENGTH)
       .optional()
       .default('kibana')
       .describe('The field manager name recorded by server-side apply (default: "kibana").'),
@@ -211,12 +222,12 @@ export type ApplyResourceInput = z.infer<typeof ApplyResourceInputSchema>;
 
 export const PatchResourceInputSchema = lazySchema(() =>
   z.object({
-    apiVersion: z.string().describe(API_VERSION_DESCRIPTION),
-    resource: z.string().describe(RESOURCE_DESCRIPTION),
-    name: z.string().describe('The name of the resource to patch.'),
-    namespace: z.string().optional().describe(NAMESPACE_DESCRIPTION),
+    apiVersion: z.string().max(MAX_STRING_LENGTH).describe(API_VERSION_DESCRIPTION),
+    resource: z.string().max(MAX_STRING_LENGTH).describe(RESOURCE_DESCRIPTION),
+    name: z.string().max(MAX_STRING_LENGTH).describe('The name of the resource to patch.'),
+    namespace: z.string().max(MAX_STRING_LENGTH).optional().describe(NAMESPACE_DESCRIPTION),
     patch: z
-      .union([z.record(z.string(), z.unknown()), z.array(z.unknown())])
+      .union([z.record(z.string().max(MAX_STRING_LENGTH), z.unknown()), z.array(z.unknown())])
       .describe(
         'The patch body. A JSON object for strategic-merge/merge patches, or a JSON array of operations ' +
           'for JSON Patch (patchType "json").'
@@ -236,10 +247,10 @@ export type PatchResourceInput = z.infer<typeof PatchResourceInputSchema>;
 
 export const DeleteResourceInputSchema = lazySchema(() =>
   z.object({
-    apiVersion: z.string().describe(API_VERSION_DESCRIPTION),
-    resource: z.string().describe(RESOURCE_DESCRIPTION),
-    name: z.string().describe('The name of the resource to delete.'),
-    namespace: z.string().optional().describe(NAMESPACE_DESCRIPTION),
+    apiVersion: z.string().max(MAX_STRING_LENGTH).describe(API_VERSION_DESCRIPTION),
+    resource: z.string().max(MAX_STRING_LENGTH).describe(RESOURCE_DESCRIPTION),
+    name: z.string().max(MAX_STRING_LENGTH).describe('The name of the resource to delete.'),
+    namespace: z.string().max(MAX_STRING_LENGTH).optional().describe(NAMESPACE_DESCRIPTION),
     dryRun: z.boolean().optional().describe(DRY_RUN_DESCRIPTION),
   })
 );
@@ -250,8 +261,8 @@ export const ScaleWorkloadInputSchema = lazySchema(() =>
     resource: z
       .enum(['deployments', 'statefulsets', 'replicasets'])
       .describe('The scalable workload resource type.'),
-    name: z.string().describe('The name of the workload to scale.'),
-    namespace: z.string().describe('The namespace the workload belongs to.'),
+    name: z.string().max(MAX_STRING_LENGTH).describe('The name of the workload to scale.'),
+    namespace: z.string().max(MAX_STRING_LENGTH).describe('The namespace the workload belongs to.'),
     replicas: z.number().int().min(0).describe('The desired number of replicas.'),
     dryRun: z.boolean().optional().describe(DRY_RUN_DESCRIPTION),
   })
