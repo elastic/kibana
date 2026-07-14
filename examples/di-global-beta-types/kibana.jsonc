@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/di-global-beta-types",
+  "owner": "@elastic/kibana-core",
+  "description": "Service token and interface for the Beta example plugin's globally published service.",
+  "group": "platform",
+  "visibility": "shared"
+}

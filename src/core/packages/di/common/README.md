@@ -564,6 +564,11 @@ expect(result).toMatchObject({ status: 200 });
 ## Examples
 There is an [example](https://github.com/elastic/kibana/tree/main/examples/dependency_injection) plugin covering the complete injection flow.
 
-These primitives are the foundation this effort builds on to demonstrate
-cross-plugin **services** (one-owner, one-value contracts) and **extension
-points** (one-host, many-contributor contracts) between real plugins.
+The [Alpha](../../../../../examples/di_global_alpha) and
+[Beta](../../../../../examples/di_global_beta) plugins demonstrate bidirectional
+cross-plugin **service** resolution using `createTokenFactory(...).service(...)`,
+`provide(...)`, and `injectService(...)`, including the hybrid
+classic-plus-module pattern.
+
+The same primitives support **extension points** (one-host, many-contributor
+contracts), which this effort exercises against real registry-style plugins.
