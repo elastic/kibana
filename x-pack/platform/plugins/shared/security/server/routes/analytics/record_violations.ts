@@ -225,14 +225,25 @@ function getLastHeader(header: string | string[] | undefined) {
 }
 
 /**
+ * Result of {@link stripNullValues}: any key whose value could be `null` becomes optional (it is
+ * dropped from the object when `null`), and `null` is removed from every value type. Keys that
+ * cannot be `null` are preserved as-is (including their required/optional-ness).
+ */
+type WithoutNullValues<T> = {
+  [K in keyof T as null extends T[K] ? never : K]: T[K];
+} & {
+  [K in keyof T as null extends T[K] ? K : never]?: Exclude<T[K], null>;
+};
+
+/**
  * Browsers legitimately send `null` for optional report fields that don't apply (the CSP3 and
  * Permissions-Policy specs define these as nullable IDL attributes, which serialize to explicit
  * `null` rather than being omitted). Event-based telemetry has no concept of a nullable field, so
  * its schema validation rejects `null` values. Drop them here so we only forward values EBT can
  * represent; absent optional fields are simply not reported.
  */
-function stripNullValues<T extends object>(source: T): { [K in keyof T]: Exclude<T[K], null> } {
-  return Object.fromEntries(Object.entries(source).filter(([, value]) => value !== null)) as {
-    [K in keyof T]: Exclude<T[K], null>;
-  };
+function stripNullValues<T extends object>(source: T): WithoutNullValues<T> {
+  return Object.fromEntries(
+    Object.entries(source).filter(([, value]) => value !== null)
+  ) as WithoutNullValues<T>;
 }
