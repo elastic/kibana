@@ -15,10 +15,10 @@ import type {
   ColorMappingCategoricalType,
   ColorMappingType,
 } from './color';
-
-type ColorByValueRangeType = Extract<ColorByValueType, { type: 'dynamic' }>;
 import { allColoringTypeSchema, colorByValueStepsSchema, AUTO_COLOR, NO_COLOR } from './color';
 import { PALETTE_IDS } from './constants';
+
+type ColorByValueRangeType = Extract<ColorByValueType, { type: 'dynamic' }>;
 
 describe('Color Schema', () => {
   describe('colorByValue schema', () => {
