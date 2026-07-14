@@ -2383,6 +2383,109 @@ describe('AlertingAuthorization', () => {
       expect(atSpacesMock).not.toHaveBeenCalled();
       expect(globallyMock).toHaveBeenCalledWith(requiredPrivileges);
     });
+
+    it('excludes a rule type when its privilege is authorized in some requested spaces but not all', async () => {
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      // atSpaces returns one entry per (space, privilege) pair. Simulate the user
+      // having access in space-a but not space-b for consumer-a.
+      atSpacesMock.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            {
+              resource: 'space-a',
+              privilege: mockAuthorizationAction('rule-type-id-1', 'consumer-a', 'rule', 'get'),
+              authorized: true,
+            },
+            {
+              resource: 'space-b',
+              privilege: mockAuthorizationAction('rule-type-id-1', 'consumer-a', 'rule', 'get'),
+              authorized: false,
+            },
+          ],
+        },
+      });
+
+      expect(
+        // @ts-expect-error: need to test the private method
+        await auth._getAuthorizedRuleTypesWithAuthorizedConsumers({
+          ruleTypeIds: ['rule-type-id-1'],
+          operations: [ReadOperations.Get],
+          authorizationEntity: AlertingAuthorizationEntity.Rule,
+          namespaces: ['space-a', 'space-b'],
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "authorizedRuleTypes": Map {},
+          "hasAllRequested": false,
+          "username": "some-user",
+        }
+      `);
+    });
+
+    it('includes a rule type when its privilege is authorized in all requested spaces', async () => {
+      const auth = await AlertingAuthorization.create({
+        request,
+        ruleTypeRegistry,
+        getSpaceId,
+        features,
+        getSpace,
+        authorization: securityStart.authz,
+      });
+
+      atSpacesMock.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: true,
+        privileges: {
+          kibana: [
+            {
+              resource: 'space-a',
+              privilege: mockAuthorizationAction('rule-type-id-1', 'consumer-a', 'rule', 'get'),
+              authorized: true,
+            },
+            {
+              resource: 'space-b',
+              privilege: mockAuthorizationAction('rule-type-id-1', 'consumer-a', 'rule', 'get'),
+              authorized: true,
+            },
+          ],
+        },
+      });
+
+      expect(
+        // @ts-expect-error: need to test the private method
+        await auth._getAuthorizedRuleTypesWithAuthorizedConsumers({
+          ruleTypeIds: ['rule-type-id-1'],
+          operations: [ReadOperations.Get],
+          authorizationEntity: AlertingAuthorizationEntity.Rule,
+          namespaces: ['space-a', 'space-b'],
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "authorizedRuleTypes": Map {
+            "rule-type-id-1" => Object {
+              "authorizedConsumers": Object {
+                "consumer-a": Object {
+                  "all": false,
+                  "read": true,
+                },
+              },
+            },
+          },
+          "hasAllRequested": true,
+          "username": "some-user",
+        }
+      `);
+    });
   });
 
   describe('ensureAuthorizedByRuleType', () => {
