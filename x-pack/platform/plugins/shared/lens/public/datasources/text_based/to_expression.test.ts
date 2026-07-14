@@ -58,7 +58,6 @@ describe('toExpression', () => {
       id: 'a',
       label: '@timestamp',
       dataType: 'date',
-      operationType: 'literal',
     });
     expect(idMap['@timestamp'][0]).not.toHaveProperty('dropPartials');
   });
@@ -84,7 +83,6 @@ describe('toExpression', () => {
       label: '@timestamp',
       dropPartials: false,
       dataType: 'date',
-      operationType: 'literal',
     });
   });
 
@@ -109,7 +107,6 @@ describe('toExpression', () => {
       label: '@timestamp',
       dropPartials: true,
       dataType: 'date',
-      operationType: 'literal',
     });
   });
 });
