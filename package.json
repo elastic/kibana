@@ -1872,7 +1872,7 @@
     "json-schema-typed": "8.0.1",
     "keyv": "5.3.4",
     "license-checker": "25.0.1",
-    "lighthouse": "12.8.2",
+    "lighthouse": "13.4.0",
     "lightningcss": "1.32.0",
     "listr2": "8.2.5",
     "lmdb": "3.4.4",
