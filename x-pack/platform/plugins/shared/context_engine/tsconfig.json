@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../../../typings/**/*", "common/**/*", "server/**/*", "test/scout/**/*"],
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "test/scout/**/*"
+  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -15,6 +21,9 @@
     "@kbn/features-plugin",
     "@kbn/storage-adapter",
     "@kbn/es-errors",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/i18n-react"
   ]
 }
