@@ -119,7 +119,7 @@
   "dependencies": {
     "@a2a-js/sdk": "0.3.4",
     "@ai-sdk/langchain": "1.0.190",
-    "@apidevtools/json-schema-ref-parser": "14.1.1",
+    "@apidevtools/json-schema-ref-parser": "15.3.6",
     "@appland/sql-parser": "1.5.1",
     "@arizeai/openinference-semantic-conventions": "1.1.0",
     "@aws-sdk/client-bedrock-runtime": "3.994.0",
@@ -2070,7 +2070,7 @@
     "superagent": "10.2.1",
     "supertest": "7.1.1",
     "svgo": "4.0.1",
-    "swagger-jsdoc": "6.2.8",
+    "swagger-jsdoc": "6.3.0",
     "swagger-ui-express": "5.0.1",
     "table": "6.9.0",
     "tape": "5.9.0",
