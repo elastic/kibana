@@ -33,6 +33,7 @@ import type {
   RevokedApplicationConnection,
 } from './constants/types';
 import { useRevokeConnections } from './hooks/use_revoke_connections';
+import { RevokeClientDetailsPopover } from './revoke_client_details_popover';
 
 export interface RevokeApplicationConnectionsModalProps {
   connections: RevokeApplicationConnectionsModalConnection[];
@@ -103,7 +104,7 @@ export const RevokeApplicationConnectionsModal = ({
     {
       field: 'client.client_name',
       name: labels.revoke.clientNameColumn,
-      render: (_value, item) => item.client.client_name ?? item.client.id,
+      render: (_value, item) => <RevokeClientDetailsPopover client={item.client} />,
     },
     {
       field: 'userId',

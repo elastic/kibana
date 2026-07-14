@@ -48,6 +48,7 @@ export const isValidateSpecAction = (action: VegaAction): action is ValidateSpec
 
 // Node name constants
 export const GENERATE_ESQL_NODE = 'generate_esql_query';
+export const SELECT_EXAMPLES_NODE = 'select_reference_examples';
 export const AUTHOR_SPEC_NODE = 'author_spec';
 export const VALIDATE_SPEC_NODE = 'validate_spec';
 export const FINALIZE_NODE = 'finalize';

@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { EntityAnalyticsHomePage } from './entity_analytics_home_page';
-import { TestProviders } from '../../common/mock';
+import { TestProviders, kibanaMock } from '../../common/mock';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
@@ -17,6 +17,9 @@ import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_
 import { useLeadGenerationPrivileges } from '../api/hooks/use_lead_generation_privileges';
 import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
+import { HUNT_WITH_AI_PROMPT } from '../prompts';
+import { EntityEventTypes } from '../../common/lib/telemetry';
+import type { StartServices } from '../../types';
 
 jest.mock('../../common/components/links/link_props', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -142,8 +145,13 @@ jest.mock('../components/threat_hunting/top_threat_hunting_leads/use_lead_attach
 }));
 
 jest.mock('../components/threat_hunting/top_threat_hunting_leads', () => ({
-  TopThreatHuntingLeads: () => (
-    <div data-test-subj="top-threat-hunting-leads">{'Top Threat Hunting Leads'}</div>
+  TopThreatHuntingLeads: ({ onHuntInChat }: { onHuntInChat: () => void }) => (
+    <div data-test-subj="top-threat-hunting-leads">
+      {'Top Threat Hunting Leads'}
+      <button type="button" data-test-subj="mockHuntInChatButton" onClick={onHuntInChat}>
+        {'Hunt with AI'}
+      </button>
+    </div>
   ),
 }));
 
@@ -577,5 +585,52 @@ describe('EntityAnalyticsHomePage', () => {
 
     expect(screen.queryByText('Insufficient privileges')).not.toBeInTheDocument();
     expect(screen.getByTestId('top-threat-hunting-leads')).toBeInTheDocument();
+  });
+
+  it('opens the agent builder chat with the hunt-with-AI prompt when "Hunt with AI" is triggered', () => {
+    mockUseIsExperimentalFeatureEnabled.mockImplementation((flag: string) => {
+      if (flag === 'leadGenerationEnabled') return true;
+      if (flag === 'newDataViewPickerEnabled') return false;
+      return false;
+    });
+    mockUseLeadGenerationPrivileges.mockReturnValue({
+      isLoading: false,
+      data: {
+        has_all_required: true,
+        has_read_permissions: true,
+        privileges: { elasticsearch: { index: {} } },
+      },
+    });
+
+    const openChat = jest.fn();
+    const reportEvent = jest.fn();
+    const startServices = {
+      ...kibanaMock,
+      telemetry: { ...kibanaMock.telemetry, reportEvent },
+      agentBuilder: { openChat },
+    } as unknown as StartServices;
+
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      {
+        wrapper: ({ children }) => (
+          <TestProviders startServices={startServices}>{children}</TestProviders>
+        ),
+      }
+    );
+
+    fireEvent.click(screen.getByTestId('mockHuntInChatButton'));
+
+    expect(reportEvent).toHaveBeenCalledTimes(1);
+    expect(reportEvent).toHaveBeenCalledWith(EntityEventTypes.LeadGenerationHuntWithAiClicked, {});
+    expect(openChat).toHaveBeenCalledTimes(1);
+    expect(openChat).toHaveBeenCalledWith({
+      newConversation: true,
+      initialMessage: HUNT_WITH_AI_PROMPT,
+      autoSendInitialMessage: false,
+      sessionTag: 'security',
+    });
   });
 });

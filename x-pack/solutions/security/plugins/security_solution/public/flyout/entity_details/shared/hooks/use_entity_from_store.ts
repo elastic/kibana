@@ -226,6 +226,8 @@ export function useEntityFromStore(
           perPage: 1,
           sortField: '@timestamp',
           sortOrder: 'desc',
+          // The AI summary is loaded separately from the metadata datastream via
+          // useFetchPersistedAiSummary, not from the entity store record.
         },
       });
     },

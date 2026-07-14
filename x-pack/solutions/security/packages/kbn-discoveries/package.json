@@ -1,0 +1,19 @@
+{
+  "name": "@kbn/discoveries",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "sideEffects": false,
+  "scripts": {
+    "openapi:generate": "node scripts/openapi/generate",
+    "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.26",
+    "@langchain/langgraph": "^0.2.20"
+  }
+}
+
+
+
+
