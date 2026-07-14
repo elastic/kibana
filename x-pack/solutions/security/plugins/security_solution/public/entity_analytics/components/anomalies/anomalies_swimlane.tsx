@@ -8,11 +8,15 @@
 import {
   Chart,
   Heatmap,
+  type HeatmapCellDatum,
   type HeatmapStyle,
   type Predicate,
   type RecursivePartial,
   ScaleType,
   Settings,
+  Tooltip,
+  TooltipContainer,
+  type CustomTooltip,
 } from '@elastic/charts';
 import { EuiFlexItem } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
@@ -22,12 +26,14 @@ import { deriveBucketInterval } from '../../../../common/entity_analytics/anomal
 import { getAnomalyChartStyling } from '../recent_anomalies/anomaly_chart_styling';
 import type { AnomalyBand } from '../recent_anomalies/anomaly_bands';
 import {
+  ENTITY_ANOMALIES_SWIMLANE_ANOMALY_COUNT,
   ENTITY_ANOMALIES_SWIMLANE_MAX_SCORE,
   ENTITY_ANOMALIES_SWIMLANE_X_AXIS_LABEL,
 } from './translations';
 
 const SWIMLANE_X_ACCESSOR_KEY = '@timestamp';
 const SWIMLANE_Y_ACCESSOR_KEY = 'record_score';
+const SWIMLANE_COUNT_ACCESSOR_KEY = 'count';
 
 const heatmapComponentStyle: RecursivePartial<HeatmapStyle> = {
   brushTool: {
@@ -61,6 +67,16 @@ const dateLabelFormatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   year: 'numeric',
 });
 
+const dateTimeLabelFormatter = new Intl.DateTimeFormat(i18n.getLocale(), {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+  timeZone: 'UTC',
+});
+
 /** Formats x-axis ticks as "May 25, 2026". */
 const formatDateTick = (value: string | number): string => {
   const ms = typeof value === 'number' ? value : Number(value);
@@ -69,6 +85,67 @@ const formatDateTick = (value: string | number): string => {
   }
   return dateLabelFormatter.format(new Date(ms));
 };
+
+function createSwimlaneTooltip(
+  bucketIntervalMs: number,
+  records: Array<Record<string, unknown>>,
+  yAxisLabel: string
+): CustomTooltip<HeatmapCellDatum> {
+  const SwimlaneTooltip: CustomTooltip<HeatmapCellDatum> = ({ values }) => {
+    const datum = values[0]?.datum;
+    if (!datum) return null;
+
+    const bucketStart = datum.x as number;
+    const bucketEnd = bucketStart + bucketIntervalMs;
+    const yValue = datum.y as string;
+    const maxScore = datum.value;
+    const count = (records[datum.originalIndex]?.[SWIMLANE_COUNT_ACCESSOR_KEY] as number) ?? 0;
+
+    const timeRange = `${dateTimeLabelFormatter.format(
+      bucketStart
+    )} – ${dateTimeLabelFormatter.format(bucketEnd)}`;
+
+    const rows = [
+      { label: yAxisLabel, value: yValue },
+      { label: ENTITY_ANOMALIES_SWIMLANE_ANOMALY_COUNT, value: String(count) },
+      { label: ENTITY_ANOMALIES_SWIMLANE_MAX_SCORE, value: maxScore.toFixed(2) },
+    ];
+
+    return (
+      <TooltipContainer>
+        <div style={{ minWidth: 240 }}>
+          <div
+            style={{
+              fontWeight: 700,
+              padding: '8px 12px',
+              borderBottom: '1px solid #cad3e2',
+            }}
+          >
+            {timeRange}
+          </div>
+          <div style={{ padding: '4px 0' }}>
+            {rows.map(({ label, value }) => (
+              <div
+                key={label}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 24,
+                  padding: '2px 12px',
+                }}
+              >
+                <span>{label}</span>
+                <span>{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </TooltipContainer>
+    );
+  };
+
+  return SwimlaneTooltip;
+}
 
 interface AnomaliesSwimlaneProps {
   anomalyBands: AnomalyBand[];
@@ -96,6 +173,11 @@ export const AnomaliesSwimlane: React.FC<AnomaliesSwimlaneProps> = ({
   const xDomain = useMemo(() => ({ min: from, max: to }), [from, to]);
   const bucketInterval = useMemo(() => deriveBucketInterval(from, to), [from, to]);
 
+  const swimlaneTooltip = useMemo(
+    () => createSwimlaneTooltip(bucketInterval.ms, records, yAxisLabel),
+    [bucketInterval.ms, records, yAxisLabel]
+  );
+
   const chartBands = useMemo(
     () => anomalyBands.map(({ start, end, color }) => ({ start, end, color })),
     [anomalyBands]
@@ -111,6 +193,7 @@ export const AnomaliesSwimlane: React.FC<AnomaliesSwimlaneProps> = ({
       }}
     >
       <Chart>
+        <Tooltip customTooltip={swimlaneTooltip} />
         <Settings
           baseTheme={baseTheme}
           locale={i18n.getLocale()}

@@ -201,6 +201,7 @@ export const getEntityAnomalyOverview = async ({
         timestamp: new Date(b.key).toISOString(),
         maxScore: b.max_score.value as number,
         threatTactics: tactics,
+        count: b.doc_count,
       };
     });
 

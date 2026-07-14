@@ -405,6 +405,7 @@ components:
         - timestamp
         - maxScore
         - threatTactics
+        - count
       properties:
         timestamp:
           type: string
@@ -420,6 +421,10 @@ components:
             type: string
             maxLength: 150
           description: MITRE ATT&CK tactic names for all jobs that fired in this bucket
+        count:
+          type: integer
+          minimum: 0
+          description: Total number of anomaly records within this time bucket
 
     AnomalyOverviewHit:
       type: object

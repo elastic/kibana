@@ -191,10 +191,12 @@ describe('getEntityAnomalyOverview', () => {
       expect(result.anomalyByTimeBucket[0]).toMatchObject({
         timestamp: new Date(bucket1Key).toISOString(),
         maxScore: 75.5,
+        count: 3,
       });
       expect(result.anomalyByTimeBucket[1]).toMatchObject({
         timestamp: new Date(bucket2Key).toISOString(),
         maxScore: 50,
+        count: 2,
       });
     });
 

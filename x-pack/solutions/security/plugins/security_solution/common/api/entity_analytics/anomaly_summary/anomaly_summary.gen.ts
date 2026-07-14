@@ -180,6 +180,10 @@ export const AnomalyOverviewEntry = lazySchema(() =>
      * MITRE ATT&CK tactic names for all jobs that fired in this bucket
      */
     threatTactics: z.array(z.string().max(150)).max(100),
+    /**
+     * Total number of anomaly records within this time bucket
+     */
+    count: z.number().int().min(0),
   })
 );
 export type AnomalyOverviewEntry = z.infer<typeof AnomalyOverviewEntry>;
