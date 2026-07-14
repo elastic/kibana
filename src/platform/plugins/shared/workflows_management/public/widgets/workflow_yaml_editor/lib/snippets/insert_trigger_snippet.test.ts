@@ -82,6 +82,7 @@ steps:
       null,
       [
         {
+          // Insert at the start of the existing steps line.
           range: new monaco.Range(11, 1, 11, 1),
           text: `  - type: scheduled
     with:
