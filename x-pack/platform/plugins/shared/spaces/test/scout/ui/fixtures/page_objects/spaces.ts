@@ -42,11 +42,16 @@ export class SpacesPage {
   }
 
   spacesSelectorLocator() {
-    return this.page.testSubj.locator('spacesNavSelector');
+    return this.page.testSubj.locator('contextSwitcherTriggerButton');
   }
 
   async openSpacesSelector() {
-    await this.page.testSubj.click('spacesNavSelector');
+    await this.page.testSubj.click('contextSwitcherTriggerButton');
+    await this.page.testSubj.locator('contextSwitcherPopover').waitFor({ state: 'visible' });
+    const spacesRow = this.page.testSubj.locator('contextSwitcherSpacesRow');
+    if (await spacesRow.isVisible()) {
+      await spacesRow.click();
+    }
   }
 
   async isManageButtonVisible() {
