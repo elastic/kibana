@@ -8,6 +8,7 @@
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { KueryNode } from '@kbn/es-query';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { ConnectorTypes } from '../../../common';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import { buildFilter } from '../../client/utils';
 import type {
@@ -62,13 +63,7 @@ export const getConnectorsTelemetryData = async ({
     return res;
   };
 
-  const connectorTypes = [
-    '.servicenow',
-    '.servicenow-sir',
-    '.jira',
-    '.resilient',
-    '.swimlane',
-  ] as const;
+  const connectorTypes = Object.values(ConnectorTypes).filter((x) => x !== ConnectorTypes.none);
 
   const all = await Promise.all([
     getData<ReferencesAggregation>({ aggs: getConnectorsCardinalityAggregationQuery() }),
@@ -100,6 +95,8 @@ export const getConnectorsTelemetryData = async ({
       jira: { totalAttached: data['.jira'] },
       resilient: { totalAttached: data['.resilient'] },
       swimlane: { totalAttached: data['.swimlane'] },
+      thehive: { totalAttached: data['.thehive'] },
+      caseswebhook: { totalAttached: data['.cases-webhook'] },
       /**
        * This metric is not 100% accurate. To get this metric we
        * we do a term aggregation based on the the case reference id.
@@ -110,6 +107,8 @@ export const getConnectorsTelemetryData = async ({
        * contains also the updates on the fields of the connector. Ideally we would
        * like to filter for unique connector ids on each bucket.
        */
+      // TODO: incorrect
+      // TODO: failure case
       maxAttachedToACase,
     },
   };

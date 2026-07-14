@@ -258,6 +258,8 @@ export interface CasesTelemetry {
       jira: { totalAttached: number };
       resilient: { totalAttached: number };
       swimlane: { totalAttached: number };
+      caseswebhook: { totalAttached: number };
+      thehive: { totalAttached: number };
       maxAttachedToACase: number;
     };
   };

@@ -8,6 +8,7 @@
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getConnectorsTelemetryData } from './connectors';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
+import { ConnectorTypes } from '../../../common';
 
 describe('getConnectorsTelemetryData', () => {
   describe('getConnectorsTelemetryData', () => {
@@ -28,13 +29,18 @@ describe('getConnectorsTelemetryData', () => {
     };
 
     const mockResponse = () => {
+      // call to all connectors (getConnectorsCardinalityAggregationQuery)
       mockFind({ references: { referenceType: { referenceAgg: { value: 1 } } } });
+      // call to MaxBucketOnCaseAggregation
       mockFind({ references: { cases: { max: { value: 2 } } } });
+      // calls to each connector type
       mockFind({ references: { referenceType: { referenceAgg: { value: 3 } } } });
       mockFind({ references: { referenceType: { referenceAgg: { value: 4 } } } });
       mockFind({ references: { referenceType: { referenceAgg: { value: 5 } } } });
       mockFind({ references: { referenceType: { referenceAgg: { value: 6 } } } });
       mockFind({ references: { referenceType: { referenceAgg: { value: 7 } } } });
+      mockFind({ references: { referenceType: { referenceAgg: { value: 8 } } } });
+      mockFind({ references: { referenceType: { referenceAgg: { value: 9 } } } });
     };
 
     beforeEach(() => {
@@ -53,20 +59,26 @@ describe('getConnectorsTelemetryData', () => {
           all: {
             totalAttached: 1,
           },
-          itsm: {
+          caseswebhook: {
             totalAttached: 3,
           },
-          sir: {
+          jira: {
             totalAttached: 4,
           },
-          jira: {
+          resilient: {
             totalAttached: 5,
           },
-          resilient: {
+          itsm: {
             totalAttached: 6,
           },
-          swimlane: {
+          sir: {
             totalAttached: 7,
+          },
+          swimlane: {
+            totalAttached: 8,
+          },
+          thehive: {
+            totalAttached: 9,
           },
           maxAttachedToACase: 2,
         },
@@ -160,13 +172,9 @@ describe('getConnectorsTelemetryData', () => {
         namespaces: ['*'],
       });
 
-      for (const [index, connector] of [
-        '.servicenow',
-        '.servicenow-sir',
-        '.jira',
-        '.resilient',
-        '.swimlane',
-      ].entries()) {
+      for (const [index, connector] of Object.values(ConnectorTypes)
+        .filter((x) => x !== ConnectorTypes.none)
+        .entries()) {
         const callIndex = index + 2;
 
         expect(savedObjectsClient.find.mock.calls[callIndex][0]).toEqual({
