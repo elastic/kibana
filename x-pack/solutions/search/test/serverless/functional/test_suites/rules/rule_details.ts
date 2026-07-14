@@ -120,7 +120,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('renders the rule details', async () => {
-        const headingText = await testSubjects.getVisibleText('ruleDetailsTitle');
+        const headingText = await testSubjects.getVisibleText('appHeaderTitle');
         expect(headingText.includes(`test-rule-${testRunUuid}`)).toBe(true);
         const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
         expect(ruleType).toEqual('Elasticsearch query');
@@ -318,7 +318,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         await retry.tryForTime(30 * 1000, async () => {
-          const headingText = await testSubjects.getVisibleText('ruleDetailsTitle');
+          const headingText = await testSubjects.getVisibleText('appHeaderTitle');
           expect(headingText.includes(updatedRuleName)).toBe(true);
         });
       });
