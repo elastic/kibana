@@ -70,83 +70,56 @@ spaceTest.describe(
     spaceTest('restores a tab after it was closed manually', async ({ pageObjects }) => {
       const { discover, filterBar, queryBar, unifiedTabs } = pageObjects;
 
-      expect(await unifiedTabs.getRecentlyClosedRootTitles()).toStrictEqual([]);
+      await spaceTest.step('close a tab with filters and query state', async () => {
+        expect(await unifiedTabs.getRecentlyClosedRootTitles()).toStrictEqual([]);
 
-      await createClosedKqlTab(pageObjects);
+        await createClosedKqlTab(pageObjects);
 
-      expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-      expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([SECOND_TAB_LABEL]);
+        expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
+        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([SECOND_TAB_LABEL]);
+      });
 
-      await unifiedTabs.restoreRecentlyClosedTab(0);
-      await discover.waitUntilTabIsLoaded();
+      await spaceTest.step('restore the closed tab with its state', async () => {
+        await unifiedTabs.restoreRecentlyClosedTab(0);
+        await discover.waitUntilTabIsLoaded();
 
-      expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-        UNTITLED_TAB_LABEL,
-        SECOND_TAB_LABEL,
-      ]);
-      expect(await filterBar.hasFilter({ field: 'extension', value: 'jpg' })).toBe(true);
-      expect(await queryBar.getQuery()).toBe(KQL_QUERY);
-      expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([SECOND_TAB_LABEL]);
-    });
-
-    spaceTest('shows relative time when a tab was closed', async ({ pageObjects }) => {
-      const { discover, unifiedTabs } = pageObjects;
-
-      await unifiedTabs.createNewTab();
-      await discover.waitUntilTabIsLoaded();
-      await unifiedTabs.editTabLabel(1, SECOND_TAB_LABEL);
-      await discover.waitUntilTabIsLoaded();
-      await unifiedTabs.closeTab(1);
-      await discover.waitUntilTabIsLoaded();
-
-      expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-      const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTexts();
-      expect(recentlyClosedTabs).toHaveLength(1);
-      expect(recentlyClosedTabs[0]).toMatch(
-        new RegExp(`^${SECOND_TAB_LABEL}\\n\\d+ (second|minute)s? ago$`)
-      );
+        expect(await unifiedTabs.getTabLabels()).toStrictEqual([
+          UNTITLED_TAB_LABEL,
+          SECOND_TAB_LABEL,
+        ]);
+        expect(await filterBar.hasFilter({ field: 'extension', value: 'jpg' })).toBe(true);
+        expect(await queryBar.getQuery()).toBe(KQL_QUERY);
+        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([SECOND_TAB_LABEL]);
+      });
     });
 
     spaceTest('restores a tab after a page refresh', async ({ page, pageObjects }) => {
       const { discover, filterBar, queryBar, unifiedTabs } = pageObjects;
 
-      await createClosedKqlTab(pageObjects);
+      await spaceTest.step('close a tab and refresh the page', async () => {
+        await createClosedKqlTab(pageObjects);
 
-      expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-      expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([SECOND_TAB_LABEL]);
+        expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
+        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([SECOND_TAB_LABEL]);
 
-      await page.reload();
-      await discover.waitUntilTabIsLoaded();
-      expect(await discover.getHitCountInt()).toBe(14_004);
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+        expect(await discover.getHitCountInt()).toBe(14_004);
+      });
 
-      await unifiedTabs.restoreRecentlyClosedTab(0);
-      await discover.waitUntilTabIsLoaded();
+      await spaceTest.step('restore the tab from persisted recently closed state', async () => {
+        await unifiedTabs.restoreRecentlyClosedTab(0);
+        await discover.waitUntilTabIsLoaded();
 
-      expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-        UNTITLED_TAB_LABEL,
-        SECOND_TAB_LABEL,
-      ]);
-      expect(await filterBar.hasFilter({ field: 'extension', value: 'jpg' })).toBe(true);
-      expect(await queryBar.getQuery()).toBe(KQL_QUERY);
-      expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([SECOND_TAB_LABEL]);
-      expect(await discover.getHitCountInt()).toBe(1_813);
-
-      await filterBar.removeFilter('extension');
-      await discover.waitUntilTabIsLoaded();
-      expect(await discover.getHitCountInt()).toBe(2_784);
-
-      await unifiedTabs.restoreRecentlyClosedTab(0);
-      await discover.waitUntilTabIsLoaded();
-
-      expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-        UNTITLED_TAB_LABEL,
-        SECOND_TAB_LABEL,
-        SECOND_TAB_LABEL,
-      ]);
-      expect(await filterBar.hasFilter({ field: 'extension', value: 'jpg' })).toBe(true);
-      expect(await queryBar.getQuery()).toBe(KQL_QUERY);
-      expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([SECOND_TAB_LABEL]);
-      expect(await discover.getHitCountInt()).toBe(1_813);
+        expect(await unifiedTabs.getTabLabels()).toStrictEqual([
+          UNTITLED_TAB_LABEL,
+          SECOND_TAB_LABEL,
+        ]);
+        expect(await filterBar.hasFilter({ field: 'extension', value: 'jpg' })).toBe(true);
+        expect(await queryBar.getQuery()).toBe(KQL_QUERY);
+        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([SECOND_TAB_LABEL]);
+        expect(await discover.getHitCountInt()).toBe(1_813);
+      });
     });
 
     spaceTest(
@@ -154,286 +127,41 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         const { discover, unifiedTabs } = pageObjects;
 
-        await createTwoEsqlTabsAndLoadSavedSearch(pageObjects);
+        await spaceTest.step('open a saved session and group the previous tabs', async () => {
+          await createTwoEsqlTabsAndLoadSavedSearch(pageObjects);
 
-        expect(await discover.getSelectedDataViewName()).toBe(testData.DEFAULT_DATA_VIEW);
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-        expect(await discover.getHitCountInt()).toBe(14_004);
-        expect(await unifiedTabs.getRecentlyClosedRootTitles()).toStrictEqual(['2 tabs']);
-        expect(await unifiedTabs.getRecentlyClosedGroupTabTitles(0)).toStrictEqual([
-          FIRST_TAB_LABEL,
-          SECOND_TAB_LABEL,
-        ]);
+          expect(await discover.getSelectedDataViewName()).toBe(testData.DEFAULT_DATA_VIEW);
+          expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
+          expect(await discover.getHitCountInt()).toBe(14_004);
+          expect(await unifiedTabs.getRecentlyClosedRootTitles()).toStrictEqual(['2 tabs']);
+          expect(await unifiedTabs.getRecentlyClosedGroupTabTitles(0)).toStrictEqual([
+            FIRST_TAB_LABEL,
+            SECOND_TAB_LABEL,
+          ]);
+        });
 
-        await unifiedTabs.restoreRecentlyClosedTabFromGroup(0, 0);
-        await discover.waitUntilTabIsLoaded();
+        await spaceTest.step('restore individual tabs from the grouped entry', async () => {
+          await unifiedTabs.restoreRecentlyClosedTabFromGroup(0, 0);
+          await discover.waitUntilTabIsLoaded();
 
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-          UNTITLED_TAB_LABEL,
-          FIRST_TAB_LABEL,
-        ]);
-        expect(await discover.getEsqlQueryValue()).toBe(FIRST_ESQL_QUERY);
-        expect(await discover.getHitCountInt()).toBe(51);
+          expect(await unifiedTabs.getTabLabels()).toStrictEqual([
+            UNTITLED_TAB_LABEL,
+            FIRST_TAB_LABEL,
+          ]);
+          expect(await discover.getEsqlQueryValue()).toBe(FIRST_ESQL_QUERY);
+          expect(await discover.getHitCountInt()).toBe(51);
 
-        await unifiedTabs.restoreRecentlyClosedTabFromGroup(0, 1);
-        await discover.waitUntilTabIsLoaded();
+          await unifiedTabs.restoreRecentlyClosedTabFromGroup(0, 1);
+          await discover.waitUntilTabIsLoaded();
 
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-          UNTITLED_TAB_LABEL,
-          FIRST_TAB_LABEL,
-          SECOND_TAB_LABEL,
-        ]);
-        expect(await discover.getEsqlQueryValue()).toBe(SECOND_ESQL_QUERY);
-        expect(await discover.getHitCountInt()).toBe(52);
-      }
-    );
-
-    spaceTest('restores all tabs from a recently closed tab group', async ({ pageObjects }) => {
-      const { discover, unifiedTabs } = pageObjects;
-
-      await createTwoEsqlTabsAndLoadSavedSearch(pageObjects);
-
-      expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-      expect(await unifiedTabs.getRecentlyClosedRootTitles()).toStrictEqual(['2 tabs']);
-      expect(await unifiedTabs.getRecentlyClosedGroupTabTitles(0)).toStrictEqual([
-        FIRST_TAB_LABEL,
-        SECOND_TAB_LABEL,
-      ]);
-
-      await unifiedTabs.restoreAllRecentlyClosedTabsFromGroup(0);
-      await discover.waitUntilTabIsLoaded();
-
-      expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-        UNTITLED_TAB_LABEL,
-        FIRST_TAB_LABEL,
-        SECOND_TAB_LABEL,
-      ]);
-      expect(await discover.getEsqlQueryValue()).toBe(FIRST_ESQL_QUERY);
-      expect(await discover.getHitCountInt()).toBe(51);
-
-      await unifiedTabs.selectTab(2);
-      await discover.waitUntilTabIsLoaded();
-
-      expect(await discover.getEsqlQueryValue()).toBe(SECOND_ESQL_QUERY);
-      expect(await discover.getHitCountInt()).toBe(52);
-    });
-
-    spaceTest(
-      'handles recently closed tabs correctly after saving a new discover session',
-      async ({ pageObjects }) => {
-        const { discover, unifiedTabs } = pageObjects;
-        const testTabLabel = 'My test tab';
-        const firstSessionName = 'My Discover Session';
-        const secondSessionName = 'My Discover Session 2';
-
-        await unifiedTabs.editTabLabel(0, FIRST_TAB_LABEL);
-        await discover.waitUntilTabIsLoaded();
-
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await unifiedTabs.editTabLabel(1, testTabLabel);
-        await discover.waitUntilTabIsLoaded();
-        await unifiedTabs.closeTab(1);
-        await discover.waitUntilTabIsLoaded();
-
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([FIRST_TAB_LABEL]);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([testTabLabel]);
-
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await unifiedTabs.editTabLabel(1, SECOND_TAB_LABEL);
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([FIRST_TAB_LABEL, SECOND_TAB_LABEL]);
-
-        await discover.saveSearch(firstSessionName);
-        await discover.waitUntilTabIsLoaded();
-
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([FIRST_TAB_LABEL, SECOND_TAB_LABEL]);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([testTabLabel]);
-
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-          FIRST_TAB_LABEL,
-          SECOND_TAB_LABEL,
-          UNTITLED_TAB_LABEL,
-        ]);
-
-        await discover.saveSearchAsNew(secondSessionName);
-        await discover.waitUntilTabIsLoaded();
-
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-          FIRST_TAB_LABEL,
-          SECOND_TAB_LABEL,
-          UNTITLED_TAB_LABEL,
-        ]);
-        expect(await unifiedTabs.getRecentlyClosedRootTitles()).toStrictEqual([
-          '3 tabs',
-          testTabLabel,
-        ]);
-        expect(await unifiedTabs.getRecentlyClosedGroupTabTitles(0)).toStrictEqual([
-          FIRST_TAB_LABEL,
-          SECOND_TAB_LABEL,
-          UNTITLED_TAB_LABEL,
-        ]);
-      }
-    );
-
-    spaceTest(
-      'updates recently closed tabs after starting a new discover session',
-      async ({ pageObjects }) => {
-        const { discover, unifiedTabs } = pageObjects;
-        const testTabLabel = 'My test tab';
-        const tabWithFilterLabel = 'Tab with filter';
-
-        await unifiedTabs.editTabLabel(0, FIRST_TAB_LABEL);
-        await discover.waitUntilTabIsLoaded();
-
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await unifiedTabs.editTabLabel(1, testTabLabel);
-        await discover.waitUntilTabIsLoaded();
-        await unifiedTabs.closeTab(1);
-        await discover.waitUntilTabIsLoaded();
-
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([FIRST_TAB_LABEL]);
-
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await unifiedTabs.editTabLabel(1, SECOND_TAB_LABEL);
-
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([FIRST_TAB_LABEL, SECOND_TAB_LABEL]);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([testTabLabel]);
-
-        await discover.clickNewSearch();
-        await discover.waitUntilTabIsLoaded();
-        await unifiedTabs.editTabLabel(0, tabWithFilterLabel);
-        await discover.writeAndSubmitKqlQuery(KQL_QUERY);
-
-        expect(await discover.getHitCountInt()).toBe(2_784);
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([tabWithFilterLabel]);
-        expect(await unifiedTabs.getRecentlyClosedRootTitles()).toStrictEqual([
-          '2 tabs',
-          testTabLabel,
-        ]);
-        expect(await unifiedTabs.getRecentlyClosedGroupTabTitles(0)).toStrictEqual([
-          FIRST_TAB_LABEL,
-          SECOND_TAB_LABEL,
-        ]);
-
-        await discover.loadSavedSearch(testData.SAVED_SEARCH_TITLE);
-        await discover.waitUntilTabIsLoaded();
-
-        expect(await discover.getHitCountInt()).toBe(14_004);
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-        expect(await unifiedTabs.getRecentlyClosedRootTitles()).toStrictEqual([
-          tabWithFilterLabel,
-          '2 tabs',
-          testTabLabel,
-        ]);
-        expect(await unifiedTabs.getRecentlyClosedGroupTabTitles(0)).toStrictEqual([
-          FIRST_TAB_LABEL,
-          SECOND_TAB_LABEL,
-        ]);
-
-        await discover.clickNewSearch();
-        await discover.waitUntilTabIsLoaded();
-
-        expect(await discover.getHitCountInt()).toBe(14_004);
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-        expect(await unifiedTabs.getRecentlyClosedRootTitles()).toStrictEqual([
-          UNTITLED_TAB_LABEL,
-          tabWithFilterLabel,
-          '2 tabs',
-          testTabLabel,
-        ]);
-        expect(await unifiedTabs.getRecentlyClosedGroupTabTitles(0)).toStrictEqual([
-          FIRST_TAB_LABEL,
-          SECOND_TAB_LABEL,
-        ]);
-
-        await unifiedTabs.restoreRecentlyClosedTab(1);
-        await discover.waitUntilTabIsLoaded();
-
-        expect(await discover.getHitCountInt()).toBe(2_784);
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([
-          UNTITLED_TAB_LABEL,
-          tabWithFilterLabel,
-        ]);
-        expect(await unifiedTabs.getRecentlyClosedRootTitles()).toStrictEqual([
-          UNTITLED_TAB_LABEL,
-          tabWithFilterLabel,
-          '2 tabs',
-          testTabLabel,
-        ]);
-        expect(await unifiedTabs.getRecentlyClosedGroupTabTitles(0)).toStrictEqual([
-          FIRST_TAB_LABEL,
-          SECOND_TAB_LABEL,
-        ]);
-      }
-    );
-
-    spaceTest(
-      'pushes previous tabs to recently closed list after reopening a discover session',
-      async ({ pageObjects }) => {
-        const { discover, queryBar, unifiedTabs } = pageObjects;
-        const firstSessionName = 'Session1';
-        const secondSessionName = 'Session2';
-
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([]);
-        expect(await discover.getHitCountInt()).toBe(14_004);
-
-        await discover.saveSearch(firstSessionName);
-        await discover.waitUntilTabIsLoaded();
-
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([]);
-        expect(await discover.getHitCountInt()).toBe(14_004);
-        expect(await discover.getCurrentQueryName()).toBe(firstSessionName);
-        await expect(discover.unsavedChangesIndicator()).toBeHidden();
-
-        await discover.writeAndSubmitKqlQuery(KQL_QUERY);
-
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([]);
-        expect(await discover.getHitCountInt()).toBe(2_784);
-        await expect(discover.unsavedChangesIndicator()).toBeVisible();
-
-        await discover.saveSearchAsNew(secondSessionName);
-        await discover.waitUntilTabIsLoaded();
-
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-        expect(await discover.getHitCountInt()).toBe(2_784);
-        expect(await queryBar.getQuery()).toBe(KQL_QUERY);
-        expect(await discover.getCurrentQueryName()).toBe(secondSessionName);
-        await expect(discover.unsavedChangesIndicator()).toBeHidden();
-
-        await discover.loadSavedSearch(firstSessionName);
-        await discover.waitUntilTabIsLoaded();
-
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([
-          UNTITLED_TAB_LABEL,
-          UNTITLED_TAB_LABEL,
-        ]);
-        expect(await discover.getHitCountInt()).toBe(14_004);
-        expect(await queryBar.getQuery()).toBe('');
-        expect(await discover.getCurrentQueryName()).toBe(firstSessionName);
-        await expect(discover.unsavedChangesIndicator()).toBeHidden();
-
-        await discover.loadSavedSearch(secondSessionName);
-        await discover.waitUntilTabIsLoaded();
-
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([
-          UNTITLED_TAB_LABEL,
-          UNTITLED_TAB_LABEL,
-        ]);
-        expect(await discover.getHitCountInt()).toBe(2_784);
-        expect(await queryBar.getQuery()).toBe(KQL_QUERY);
-        expect(await discover.getCurrentQueryName()).toBe(secondSessionName);
-        await expect(discover.unsavedChangesIndicator()).toBeHidden();
+          expect(await unifiedTabs.getTabLabels()).toStrictEqual([
+            UNTITLED_TAB_LABEL,
+            FIRST_TAB_LABEL,
+            SECOND_TAB_LABEL,
+          ]);
+          expect(await discover.getEsqlQueryValue()).toBe(SECOND_ESQL_QUERY);
+          expect(await discover.getHitCountInt()).toBe(52);
+        });
       }
     );
   }
