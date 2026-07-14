@@ -19,7 +19,7 @@ import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { TemplateDetail, useLibraryEnabled } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
-import { WorkflowsDeepLinks } from '../../deep_links';
+import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowsExperimentalUiSetting } from '../../hooks/use_workflows_experimental_ui_setting';
@@ -56,13 +56,13 @@ export const LibraryTemplateDetailPage = React.memo<LibraryTemplateDetailPagePro
   );
 
   const goToLibrary = useCallback(() => {
-    application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsDeepLinks.library });
+    application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library });
   }, [application]);
 
   const libraryBreadcrumb = useMemo<ChromeBreadcrumb>(
     () => ({
       text: libraryBreadcrumbLabel,
-      href: application.getUrlForApp(PLUGIN_ID, { deepLinkId: WorkflowsDeepLinks.library }),
+      href: application.getUrlForApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library }),
       onClick: (event) => {
         if (event) {
           event.preventDefault();
