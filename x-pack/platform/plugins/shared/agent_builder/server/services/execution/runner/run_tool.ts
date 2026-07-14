@@ -184,12 +184,12 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
           toolHandlerContext
         );
         if (isToolHandlerStandardReturn(result) && hasOnlyErrorResults(result.results) && span) {
-          markToolSpanAsError(span);
+          markToolSpanAsError(span, result.results);
         }
         return result;
       } catch (err) {
         if (span) {
-          markToolSpanAsError(span);
+          markToolSpanAsError(span, { error: err.message });
         }
         return {
           results: [createErrorResult(err.message)],

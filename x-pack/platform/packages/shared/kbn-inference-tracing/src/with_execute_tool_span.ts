@@ -23,10 +23,15 @@ export const TOOL_ERROR_TYPE = 'tool_error';
 /**
  * Marks a tool span as errored per GenAI/MCP semantic conventions.
  *
+ * Optionally sets the tool call result attribute before ending the span.
  * Also ends the span so that downstream handlers (e.g. `handlePromise`
  * in `withActiveSpan`) cannot override the status back to `OK`.
  */
-export const markToolSpanAsError = (span: Span) => {
+export const markToolSpanAsError = (span: Span, result?: unknown) => {
+  const stringified = result === undefined ? undefined : safeJsonStringify(result);
+  if (stringified) {
+    span.setAttribute(GenAISemanticConventions.GenAIToolCallResult, stringified);
+  }
   span.setAttribute('error.type', TOOL_ERROR_TYPE);
   span.setStatus({ code: SpanStatusCode.ERROR, message: TOOL_ERROR_TYPE });
   span.end();

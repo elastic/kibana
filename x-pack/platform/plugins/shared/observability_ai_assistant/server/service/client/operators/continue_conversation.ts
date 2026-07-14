@@ -112,7 +112,7 @@ export function executeFunctionAndCatchError({
       catchError((error) => {
         span?.recordException(error);
         if (span) {
-          markToolSpanAsError(span);
+          markToolSpanAsError(span, { error: error.message });
         }
         logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
 

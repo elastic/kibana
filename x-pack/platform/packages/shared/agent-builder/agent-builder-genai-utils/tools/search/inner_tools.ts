@@ -158,17 +158,16 @@ export const createNaturalLanguageSearchTool = ({
                 },
               ]
             : (() => {
+                const errorResult = createErrorResult({
+                  message: response.error ?? 'Query was not executed',
+                  metadata: {
+                    query: response.generatedQuery,
+                  },
+                });
                 if (span) {
-                  markToolSpanAsError(span);
+                  markToolSpanAsError(span, [errorResult]);
                 }
-                return [
-                  createErrorResult({
-                    message: response.error ?? 'Query was not executed',
-                    metadata: {
-                      query: response.generatedQuery,
-                    },
-                  }),
-                ];
+                return [errorResult];
               })();
 
           const content = JSON.stringify(results);

@@ -78,7 +78,7 @@ describe('markToolSpanAsError', () => {
     jest.clearAllMocks();
   });
 
-  it('sets error.type, ERROR status, and ends the span', () => {
+  it('sets error.type, ERROR status, and ends the span without result', () => {
     markToolSpanAsError(mockSpan);
 
     expect(mockSpan.setAttribute).toHaveBeenCalledWith('error.type', TOOL_ERROR_TYPE);
@@ -87,5 +87,37 @@ describe('markToolSpanAsError', () => {
       message: TOOL_ERROR_TYPE,
     });
     expect(mockSpan.end).toHaveBeenCalled();
+    expect(mockSpan.setAttribute).not.toHaveBeenCalledWith(
+      GenAISemanticConventions.GenAIToolCallResult,
+      expect.anything()
+    );
+  });
+
+  it('sets gen_ai.tool.call.result before ending span', () => {
+    const result = { error: 'failed' };
+    markToolSpanAsError(mockSpan, result);
+
+    expect(mockSpan.setAttribute).toHaveBeenCalledWith(
+      GenAISemanticConventions.GenAIToolCallResult,
+      JSON.stringify(result)
+    );
+    expect(mockSpan.setAttribute).toHaveBeenCalledWith('error.type', TOOL_ERROR_TYPE);
+    expect(mockSpan.setStatus).toHaveBeenCalledWith({
+      code: SpanStatusCode.ERROR,
+      message: TOOL_ERROR_TYPE,
+    });
+    expect(mockSpan.end).toHaveBeenCalled();
+  });
+
+  it('skips result attribute when result is undefined', () => {
+    markToolSpanAsError(mockSpan, undefined);
+
+    expect(mockSpan.setAttribute).toHaveBeenCalledWith('error.type', TOOL_ERROR_TYPE);
+    expect(mockSpan.end).toHaveBeenCalled();
+    // Should be called twice: once for error.type, once (or zero times) for result
+    const resultCalls = (mockSpan.setAttribute as jest.Mock).mock.calls.filter(
+      (call) => call[0] === GenAISemanticConventions.GenAIToolCallResult
+    );
+    expect(resultCalls).toHaveLength(0);
   });
 });
