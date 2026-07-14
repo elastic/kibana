@@ -159,9 +159,7 @@ describe('useEntityFlyoutOverrides', () => {
 
   describe('without a hit (attack tool usage)', () => {
     it('onPreviewEntity calls openUserFlyoutAsChild with hit=undefined', () => {
-      const { result } = renderHook(() =>
-        useEntityFlyoutOverrides({ scopeId: 'attack-scope' })
-      );
+      const { result } = renderHook(() => useEntityFlyoutOverrides({ scopeId: 'attack-scope' }));
       const overrides = result.current.buildUserOverrides!({ name: 'alice' });
       overrides.onPreviewEntity!();
       expect(mockOpenUserFlyoutAsChild).toHaveBeenCalledWith({
@@ -173,9 +171,7 @@ describe('useEntityFlyoutOverrides', () => {
     });
 
     it('onPreviewEntity calls openHostFlyoutAsChild with hit=undefined', () => {
-      const { result } = renderHook(() =>
-        useEntityFlyoutOverrides({ scopeId: 'attack-scope' })
-      );
+      const { result } = renderHook(() => useEntityFlyoutOverrides({ scopeId: 'attack-scope' }));
       const overrides = result.current.buildHostOverrides!({ name: 'server-1' });
       overrides.onPreviewEntity!();
       expect(mockOpenHostFlyoutAsChild).toHaveBeenCalledWith({
