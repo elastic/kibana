@@ -448,11 +448,11 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
         return changes;
       }
 
-      if (prev?.lensRequestAdapter !== curr.lensRequestAdapter) {
+      if (!prev || prev.lensRequestAdapter !== curr.lensRequestAdapter) {
         changes.lensRequestAdapter = curr.lensRequestAdapter;
       }
 
-      if (prev?.chartHidden !== curr.chartHidden) {
+      if (!prev || prev.chartHidden !== curr.chartHidden) {
         changes.hideChart = curr.chartHidden;
       }
 

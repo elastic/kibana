@@ -1,0 +1,24 @@
+{
+  "10.1.0": [
+    {
+      "profileUid": "profile-1",
+      "connectorId": "connector-1",
+      "credentialType": "access_token",
+      "credentials": "{\"accessToken\":\"encrypted-value\"}",
+      "expiresAt": "2026-01-01T00:00:00.000Z",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "10.2.0": [
+    {
+      "profileUid": "profile-1",
+      "connectorId": "connector-1",
+      "credentialType": "access_token",
+      "credentials": "{\"accessToken\":\"encrypted-value\"}",
+      "expiresAt": "2026-01-01T00:00:00.000Z",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}

@@ -16,8 +16,10 @@ import { manageWatchlistsSkill } from './manage_watchlists';
 import { pciComplianceSkill } from './pci_compliance';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
+import { alertTriageSkill } from './alert_triage';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
+import { createInvestigateRuleSkill } from './investigate_rule';
 import { createFindRulesSkill } from './find_rules';
 import { siemReadinessSkill } from './siem_readiness';
 import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
@@ -62,7 +64,11 @@ export const registerSkills = async ({
     agentBuilder.skills.register(manageWatchlistsSkill);
   }
 
-  agentBuilder.skills.register(getDetectionRuleEditSkill());
+  agentBuilder.skills.register(
+    getDetectionRuleEditSkill({
+      rulePreviewEnabled: experimentalFeatures.rulePreviewAttachmentEnabled,
+    })
+  );
   if (experimentalFeatures.dexAiSkillRecommendPrebuiltRules) {
     await agentBuilder.skills.register(
       createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml })
@@ -75,6 +81,7 @@ export const registerSkills = async ({
 
   await agentBuilder.skills.register(threatHuntingSkill);
   await agentBuilder.skills.register(alertAnalysisSkill);
+  await agentBuilder.skills.register(alertTriageSkill);
   if (experimentalFeatures.dexAiSkillFindRules) {
     await agentBuilder.skills.register(createFindRulesSkill({ getStartServices, logger }));
   }
@@ -86,5 +93,9 @@ export const registerSkills = async ({
 
   if (experimentalFeatures.pciComplianceAgentBuilder) {
     agentBuilder.skills.register(pciComplianceSkill);
+  }
+
+  if (experimentalFeatures.investigateRuleSkill) {
+    await agentBuilder.skills.register(createInvestigateRuleSkill());
   }
 };

@@ -57,7 +57,7 @@ export function ServiceBadges({
 
   const slosHref = useManageSlosUrl({ serviceName: service.id, environment });
 
-  const { alertsCount, anomalyScore } = useServiceBadgesData({
+  const { alertsCount, anomalyData } = useServiceBadgesData({
     serviceName: service.id,
     environment,
     rangeFrom,
@@ -65,7 +65,7 @@ export function ServiceBadges({
   });
 
   const showAlertsBadge = alertsCount !== undefined;
-  const showAnomalyBadge = anomalyScore !== undefined;
+  const showAnomalyBadge = anomalyData !== undefined;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
@@ -116,7 +116,27 @@ export function ServiceBadges({
       )}
       {showAnomalyBadge && (
         <EuiFlexItem grow={false} data-test-subj="serviceFlyoutAnomaliesBadge">
-          <AnomaliesBadge score={anomalyScore} />
+          <AnomaliesBadge
+            score={anomalyData.anomalyScore}
+            detectorType={anomalyData.detectorType}
+            navigationProps={
+              service.agentName && anomalyData.anomalyEnvironment
+                ? {
+                    serviceName: service.id,
+                    anomalyEnvironment: anomalyData.anomalyEnvironment,
+                    agentName: service.agentName,
+                    query: {
+                      rangeFrom,
+                      rangeTo,
+                      environment,
+                      kuery,
+                      comparisonEnabled: true,
+                      serviceGroup: '',
+                    },
+                  }
+                : undefined
+            }
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
