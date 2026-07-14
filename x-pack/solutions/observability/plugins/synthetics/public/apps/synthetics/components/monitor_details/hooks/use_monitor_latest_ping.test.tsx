@@ -13,16 +13,9 @@ import { ConfigKey, MonitorTypeEnum, type Ping } from '../../../../../../common/
 import { getMonitorLastRunAction } from '../../../state';
 import { fetchLatestTestRun } from '../../../state/monitor_details/api';
 
-// Mirror of the real FETCH_STATUS enum values so the mocked module stays in
-// sync with @kbn/observability-shared-plugin/public.
-const FETCH_STATUS = {
-  LOADING: 'loading',
-  SUCCESS: 'success',
-  FAILURE: 'failure',
-  PENDING: 'pending',
-} as const;
-
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  // Mirror of the real FETCH_STATUS enum values; test bodies read it back off
+  // the mocked module below so there is a single source of truth.
   FETCH_STATUS: {
     LOADING: 'loading',
     SUCCESS: 'success',
@@ -31,6 +24,8 @@ jest.mock('@kbn/observability-shared-plugin/public', () => ({
   },
   useFetcher: jest.fn().mockReturnValue({ data: undefined, status: 'pending', loading: false }),
 }));
+
+const { FETCH_STATUS } = observabilitySharedPublic;
 
 jest.mock('../../../state/monitor_details/api', () => ({
   fetchLatestTestRun: jest.fn().mockResolvedValue({ ping: undefined }),
