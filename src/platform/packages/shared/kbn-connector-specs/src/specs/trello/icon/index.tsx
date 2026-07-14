@@ -10,8 +10,8 @@
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
+import trelloIcon from './trello_icon_gradient_blue.svg';
 
 export default (props: ConnectorIconProps) => {
-  // Placeholder icon: use built-in EUI icon until a custom one is added
-  return <EuiIcon type="globe" {...props} />;
+  return <EuiIcon type={trelloIcon} {...props} />;
 };
