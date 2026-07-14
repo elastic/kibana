@@ -442,7 +442,6 @@ export function XYChart({
 
   const isHistogramVis = dataLayers.every((l) => l.isHistogram);
   const hasBars = dataLayers.some((l) => l.seriesType === SeriesTypes.BAR);
-  const isHorizontalBarChart = isHorizontalChart(dataLayers) && hasBars;
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
     data.datatableUtilities,
@@ -512,6 +511,7 @@ export function XYChart({
     const position = getOriginalAxisPosition(axis.position, shouldRotate);
 
     const style = {
+      maxExtent: axis.truncate,
       tickLabel: {
         fill: axis.labelColor,
         visible: tickVisible,
@@ -726,34 +726,56 @@ export function XYChart({
     strokeWidth: 1,
   };
 
-  const xAxisStyle: RecursivePartial<AxisStyle> = isHorizontalTimeAxis
-    ? {
-        tickLabel: {
-          visible: Boolean(xAxisConfig?.showLabels),
-          fill: xAxisConfig?.labelColor,
-        },
-        tickLine: {
-          visible: Boolean(xAxisConfig?.showLabels),
-        },
-        axisTitle: {
-          visible: xAxisConfig?.showTitle,
-        },
-      }
-    : {
-        tickLabel: {
-          visible: xAxisConfig?.showLabels,
-          rotation: xAxisConfig?.labelsOrientation,
-          padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
-          fill: xAxisConfig?.labelColor,
-        },
-        axisTitle: {
-          visible: xAxisConfig?.showTitle,
-          padding:
-            !xAxisConfig?.showLabels && linesPaddings.bottom != null
-              ? { inner: linesPaddings.bottom }
-              : undefined,
-        },
+  const xAxisStyle: RecursivePartial<AxisStyle> = (() => {
+    const style: RecursivePartial<AxisStyle> = {
+      tickLabel: {
+        visible: Boolean(xAxisConfig?.showLabels),
+        fill: xAxisConfig?.labelColor,
+      },
+      axisTitle: {
+        visible: xAxisConfig?.showTitle,
+      },
+    };
+
+    if (isHorizontalTimeAxis) {
+      style.tickLine = {
+        visible: Boolean(xAxisConfig?.showLabels),
       };
+      return style;
+    }
+
+    style.tickLabel = {
+      ...style.tickLabel,
+      truncate: xAxisConfig?.truncate ? 'end' : undefined,
+      rotation: xAxisConfig?.labelsOrientation,
+      padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
+    };
+
+    style.axisTitle = {
+      ...style.axisTitle,
+      padding:
+        !xAxisConfig?.showLabels && linesPaddings.bottom != null
+          ? { inner: linesPaddings.bottom }
+          : undefined,
+    };
+
+    if (hasBars) {
+      style.maxExtent = style.maxExtent ?? '40%';
+      style.tickLabel = {
+        ...style.tickLabel,
+        truncate: 'middle',
+        wrapLines: 2,
+      };
+      if (!isHorizontalChart(dataLayers)) {
+        style.tickLabel = {
+          ...style.tickLabel,
+          minLength: 50,
+        };
+      }
+    }
+
+    return style;
+  })();
   const isSplitChart = splitColumnAccessor || splitRowAccessor;
   const splitTable = isSplitChart ? dataLayers[0].table : undefined;
   const splitColumnId =
@@ -977,13 +999,6 @@ export function XYChart({
               style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
-              tickLabelMaxLength={
-                xAxisConfig?.truncate ?? (isHorizontalBarChart ? '40%' : undefined)
-              }
-              tickLabelTruncate={
-                // If legacy truncate is set, preserve end truncation behavior.
-                isHorizontalBarChart ? (xAxisConfig?.truncate ? 'end' : 'middle') : undefined
-              }
               {...getOverridesFor(overrides, 'axisX')}
             />
             {isSplitChart && splitTable && (
