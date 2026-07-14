@@ -1134,6 +1134,7 @@ export class TaskManagerRunner implements TaskRunner {
       const isValid = this.eventLogger.isValidEvent(enrichedEvent);
       if (isValid) {
         this.eventLogger.logEvent(enrichedEvent);
+        return;
       } else {
         this.logger.warn(
           `Custom event log fields for task ${this.taskType} "${this.id}" are invalid; will log the task manager event without the custom fields.`
