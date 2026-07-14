@@ -1,0 +1,19 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "aca8c749b1f9679-c1aa05b35aa13cc",
+      "title": "ES|QL Data Federation management app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout/ui/tests/data_federation_management.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    }
+  ]
+}
