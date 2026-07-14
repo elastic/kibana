@@ -20,7 +20,7 @@ import type { ConcreteTaskInstance } from '../task';
 import type { TaskClaim } from '../task_events';
 
 import type { TaskTypeDictionary } from '../task_type_dictionary';
-import type { TaskStore, UpdateByQueryResult } from '../task_store';
+import type { TaskStore } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
 import type { TaskClaimerOpts, TaskClaimerFn, ClaimOwnershipResult } from '../task_claimers';
 import { getTaskClaimer } from '../task_claimers';
@@ -44,12 +44,6 @@ export interface OwnershipClaimingOpts {
   size: number;
   taskTypes: Set<string>;
 }
-export type IncrementalOwnershipClaimingOpts = OwnershipClaimingOpts & {
-  precedingQueryResult: UpdateByQueryResult;
-};
-export type IncrementalOwnershipClaimingReduction = (
-  opts: IncrementalOwnershipClaimingOpts
-) => Promise<UpdateByQueryResult>;
 
 export interface FetchResult {
   docs: ConcreteTaskInstance[];

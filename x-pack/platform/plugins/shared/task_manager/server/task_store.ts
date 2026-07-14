@@ -106,14 +106,6 @@ export interface AggregationOpts {
   size?: number;
 }
 
-export interface UpdateByQuerySearchOpts extends SearchOpts {
-  script?: estypes.Script;
-}
-
-export interface UpdateByQueryOpts extends SearchOpts {
-  max_docs?: number;
-}
-
 export interface FetchResult {
   docs: ConcreteTaskInstance[];
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
@@ -132,12 +124,6 @@ export type PartialBulkUpdateResult = Result<PartialConcreteTaskInstance, ErrorO
 export type BulkGetResult = Array<
   Result<ConcreteTaskInstance, { type: string; id: string; error: SavedObjectError }>
 >;
-
-export interface UpdateByQueryResult {
-  updated: number;
-  version_conflicts: number;
-  total: number;
-}
 
 /**
  * Wraps an elasticsearch connection and provides a task manager-specific
@@ -1257,25 +1243,6 @@ export class TaskStore {
     }
     return result;
   }
-}
-
-/**
- * When we run updateByQuery with conflicts='proceed', it's possible for the `version_conflicts`
- * to count against the specified `max_docs`, as per https://github.com/elastic/elasticsearch/issues/63671
- * In order to correct for that happening, we only count `version_conflicts` if we haven't updated as
- * many docs as we could have.
- * This is still no more than an estimation, as there might have been less docuemnt to update that the
- * `max_docs`, but we bias in favour of over zealous `version_conflicts` as that's the best indicator we
- * have for an unhealthy cluster distribution of Task Manager polling intervals
- */
-
-export function correctVersionConflictsForContinuation(
-  updated: estypes.ReindexResponse['updated'],
-  versionConflicts: estypes.ReindexResponse['version_conflicts'],
-  maxDocs?: number
-): number {
-  // @ts-expect-error estypes.ReindexResponse['updated'] and estypes.ReindexResponse['version_conflicts'] can be undefined
-  return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 
 /**
