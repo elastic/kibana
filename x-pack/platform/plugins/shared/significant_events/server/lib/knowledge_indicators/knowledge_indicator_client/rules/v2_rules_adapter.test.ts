@@ -89,7 +89,7 @@ describe('RulesAdapterV2', () => {
       expect(lastCreateCall(mock).options).toEqual({ id: 'rule-1' });
     });
 
-    it('includes a 2-minute lookback to match v1 MATCH_LOOKBACK_MINUTES', async () => {
+    it('includes a 2-minute lookback for 1-minute rules', async () => {
       const mock = makeRulesClientMock();
       mock.createRule.mockResolvedValue({} as never);
       const adapter = makeAdapter(mock);
@@ -97,6 +97,16 @@ describe('RulesAdapterV2', () => {
 
       const data = lastCreateCall(mock).data as Record<string, unknown>;
       expect((data.schedule as Record<string, unknown>).lookback).toBe('2m');
+    });
+
+    it('includes a 10-minute lookback for 5-minute rules', async () => {
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock);
+      await adapter.createRule('rule-1', { ...createBody, schedule: { interval: '5m' } });
+
+      const data = lastCreateCall(mock).data as Record<string, unknown>;
+      expect(data.schedule).toEqual({ every: '5m', lookback: '10m' });
     });
 
     it('groups by _id so overlapping windows dedupe per source document', async () => {

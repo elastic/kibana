@@ -73,6 +73,9 @@ export const platformSignificantEventsTools = {
   searchEvent: `${internalNamespaces.platformSignificantEvents}.event_search`,
   createEvent: `${internalNamespaces.platformSignificantEvents}.event_create`,
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
+  discoveryWrite: `${internalNamespaces.platformSignificantEvents}.discovery_write`,
+  eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
+
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
   reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
 } as const;
