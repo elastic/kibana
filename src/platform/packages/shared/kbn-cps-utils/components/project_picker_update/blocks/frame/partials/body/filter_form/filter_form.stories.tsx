@@ -7,18 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentProps } from 'react';
 import React from 'react';
+import { faker } from '@faker-js/faker';
 import type { Meta, StoryObj } from '@storybook/react';
-import { ProjectPickerFilterForm } from './filter_form';
+import type { ProjectPickerProviderProps } from '../../../../../state';
+import { ProjectPickerProvider } from '../../../../../state';
+import { ProjectPickerFilterForm, type ProjectPickerFilterFormProps } from './filter_form';
 
 export default {
   title: 'Project Picker/Blocks/Filter Box',
   component: ProjectPickerFilterForm,
 } satisfies Meta<typeof ProjectPickerFilterForm>;
 
-export const ProjectPickerFilterBoxStory: StoryObj<ComponentProps<typeof ProjectPickerFilterForm>> =
-  {
-    name: 'ProjectPickerFilterBox',
-    render: () => <ProjectPickerFilterForm defaultFilterExpression={null} />,
-  };
+export const ProjectPickerFilterBoxStory: StoryObj<
+  Pick<ProjectPickerProviderProps, 'availableProjects'> & ProjectPickerFilterFormProps
+> = {
+  name: 'ProjectPickerFilterBox',
+  args: {
+    availableProjects: Array.from({ length: 10 }, () => ({
+      _id: faker.string.uuid(),
+      _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
+      _alias: faker.company.name(),
+      _organisation: faker.company.name(),
+      _region: faker.helpers.arrayElement(['us-east-1', 'us-west-1', 'eu-west-1']),
+      _provider: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
+    })),
+  },
+  render: ({ availableProjects, ...props }) => (
+    <ProjectPickerProvider availableProjects={availableProjects}>
+      <ProjectPickerFilterForm {...props} />
+    </ProjectPickerProvider>
+  ),
+};
