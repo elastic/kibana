@@ -7,12 +7,11 @@
 
 import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { EuiCallOutProps, IconType } from '@elastic/eui';
+import type { EuiCallOutProps } from '@elastic/eui';
 
 export interface CardCallOutProps {
   text: React.ReactNode;
   color?: EuiCallOutProps['color'];
-  icon?: IconType;
   action?: React.ReactNode;
 }
 
