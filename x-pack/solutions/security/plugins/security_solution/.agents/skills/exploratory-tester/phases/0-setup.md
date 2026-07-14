@@ -90,7 +90,7 @@ Resolve env var references in credentials (`$VAR` → environment variable value
 
 ## Step 0b — Parse input
 
-**Inline mode:** extract `Area`, `Flows`, `Setup`, `Environment`, `Specs`, `Session-timeout`, and `mode` directly from the invocation text.
+**Inline mode:** extract `Area`, `Flows`, `Setup`, `Environment`, `Specs`, `Session-timeout`, `Session-dir`, and `mode` directly from the invocation text.
 
 For each flow, parse optional sub-fields: `entry:`, `expected:`, `timeout:` (minutes, default 4).
 
@@ -168,39 +168,34 @@ gh issue list --repo elastic/kibana --state closed \
 
 ---
 
-## Step 0e — Write config.json
+## Step 0e — Create session directory and write config.json
+
+Each session lives in its own timestamped subfolder of `.exploratory-session/`. This keeps sessions isolated so multiple agents can run in parallel without interfering, and prior sessions are naturally preserved without any archiving step.
+
+**Resume path — `Session-dir:` was provided in the invocation:**
+
+Set `SESSION_DIR` to the provided path. Read `$SESSION_DIR/config.json` — trust it as-is. Skip remaining Phase 0 steps and all of Phase 1. Jump to Phase 2. Existing `findings-flow-<N>.md` files in `$SESSION_DIR/` are included in Phase 3.
+
+**New session path — no `Session-dir:` provided:**
 
 ```bash
-mkdir -p .exploratory-session
+AREA_SLUG="<area-slug from Step 0c>"
+SESSION_TIMESTAMP=$(date -u +"%Y%m%d-%H%M%S")
 SESSION_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+SESSION_DIR=".exploratory-session/${AREA_SLUG}-${SESSION_TIMESTAMP}"
+mkdir -p "$SESSION_DIR/screenshots" "$SESSION_DIR/videos"
+echo "SESSION_DIR: $SESSION_DIR"
 echo "session_started_at: $SESSION_STARTED_AT"
 ```
 
+Tell the user the session directory: _"Session directory: `$SESSION_DIR`"_. Keep `$SESSION_DIR` in context — every phase and sub-agent uses it.
+
 Use the value of `$SESSION_STARTED_AT` for the `session_started_at` field below. **Never leave it as a placeholder** — the Phase 2 session cap check will crash with a parse error if the field is missing or malformed.
 
-If `.exploratory-session/config.json` already exists — ask the user: **"An existing session config was found. Reuse it (r) or start fresh (f)?"** Wait for their answer.
-
-- **Reuse (r):** Trust `config.json` as-is. Skip remaining Phase 0 steps and all of Phase 1. Jump to Phase 2. Existing `findings-flow-<N>.md` files are included in Phase 3.
-- **Start fresh (f):** never delete or overwrite prior session data in place — archive it first. `.exploratory-session/` is a fixed, reused path, so anything not moved out of the way (findings, `report.md`, `screenshots/`, `videos/`) either gets silently deleted or, worse, gets mixed into the new session's output.
-
-  1. Read the old `area_slug` from the existing `config.json` (fall back to `"session"` if unreadable).
-  2. Archive everything currently in `.exploratory-session/` — except prior `archive-*` folders — into a new dated, named subfolder:
-     ```bash
-     OLD_AREA_SLUG=$(python3 -c "import json; print(json.load(open('.exploratory-session/config.json')).get('area_slug','session'))" 2>/dev/null || echo "session")
-     ARCHIVE_DATE=$(date -u +"%Y-%m-%d")
-     BASE_DIR=".exploratory-session/archive-${ARCHIVE_DATE}-${OLD_AREA_SLUG}"
-     ARCHIVE_DIR="$BASE_DIR"
-     i=2
-     while [ -e "$ARCHIVE_DIR" ]; do ARCHIVE_DIR="${BASE_DIR}-${i}"; i=$((i+1)); done
-     mkdir -p "$ARCHIVE_DIR"
-     find .exploratory-session -maxdepth 1 -mindepth 1 ! -name 'archive-*' -exec mv {} "$ARCHIVE_DIR/" \;
-     ```
-  3. Tell the user where the prior session was archived (`$ARCHIVE_DIR`) before continuing.
-  4. Write the new `config.json` into the now-empty `.exploratory-session/`, setting its `prior_session_archive` field to `$ARCHIVE_DIR` (the archive path from step 2) so the new session records where the previous one's output lives. Continue Phase 0 normally.
-
-Write `.exploratory-session/config.json`:
+Write `$SESSION_DIR/config.json`:
 ```json
 {
+  "session_dir": "<value of $SESSION_DIR>",
   "area": "<area name from input>",
   "area_slug": "<area-slug>",
   "mode": "<single | parallel>",
@@ -248,7 +243,7 @@ Write `.exploratory-session/config.json`:
   "noise_index": null,
   "known_open_bugs": [{ "number": 0, "title": "" }],
   "recently_closed_bugs": [{ "number": 0, "title": "", "closedAt": "" }],
-  "prior_session_archive": null,
+  "prior_session_dir": null,
   "session_started_at": "<value of $SESSION_STARTED_AT captured above>"
 }
 ```
@@ -256,6 +251,8 @@ Write `.exploratory-session/config.json`:
 `data_setup` is `"skip"` when the invocation includes `data-setup: skip`; otherwise `"run"`.
 
 For **user-provided environments**: `space_id` defaults to `"exploratory-testing"`. `test_user` is omitted — provided credentials are used directly throughout.
+
+`prior_session_dir` is `null` for a first session. Set it manually when the user points you at a prior session directory for the **same environment** — when non-null, before opening any **new** Level 1/2 finding during Phase 2, skim the prior session's `findings-flow-*.md` and `report.md` for a related root cause. A bug from an adjacent area is often the same underlying defect — cross-reference it instead of reporting it as freshly discovered.
 
 ### Cross-Cluster Search (CCS) sessions — optional
 
@@ -275,12 +272,6 @@ When testing CCS, replace `null` with:
 }
 ```
 Set `data_view_verified` to `true` only after confirming the tested data view's index pattern includes `<remote_cluster_alias>:*`.
-
-### Prior-session continuity — optional
-
-`prior_session_archive` is `null` for a first session against an environment. It is set automatically by the "start fresh" archival above; set it manually when the user points you at a prior archived session for the **same environment**.
-
-When it is non-null, before opening any **new** Level 1/2 finding during Phase 2, skim the prior archive's `findings-flow-*.md` and `report.md` for a related root cause — a bug from an adjacent area is often the same underlying defect. If it is, cross-reference the prior finding in the new finding's Evidence section instead of reporting it as freshly discovered.
 
 ---
 

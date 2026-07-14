@@ -7,20 +7,26 @@ were created by this session). Spaces that already existed before the session
 (i.e. not in that list) are never touched.
 
 Usage:
-    python3 scripts/delete-flow-spaces.py
+    python3 scripts/delete-flow-spaces.py --session-dir .exploratory-session/entity-analytics-20260714-093022
 
-Reads:  .exploratory-session/config.json
+Reads:  <session-dir>/config.json
 Exit 0: all deletions succeeded (or list was empty).
 Exit 1: one or more deletions failed — manual cleanup needed.
 
 Run this at the end of Phase 3, after the knowledge file is committed.
 """
 
+import argparse
 import json
 import subprocess
 import sys
 
-CONFIG_PATH = '.exploratory-session/config.json'
+parser = argparse.ArgumentParser()
+parser.add_argument('--session-dir', required=True,
+                    help='Path to the session directory (contains config.json)')
+args = parser.parse_args()
+
+CONFIG_PATH = f'{args.session_dir}/config.json'
 
 with open(CONFIG_PATH) as f:
     cfg = json.load(f)

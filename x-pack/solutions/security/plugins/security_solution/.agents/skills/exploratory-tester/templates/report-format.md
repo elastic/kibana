@@ -1,6 +1,6 @@
 # Report Format
 
-Write `.exploratory-session/report.md` using this template:
+Write `$SESSION_DIR/report.md` using this template:
 
 ```markdown
 # Exploratory Testing Report

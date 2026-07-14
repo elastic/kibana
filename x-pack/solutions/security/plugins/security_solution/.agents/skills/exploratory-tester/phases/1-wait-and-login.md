@@ -74,7 +74,8 @@ curl -s -u "<username>:<password>" -X POST "<environment.url>/api/spaces/space" 
 
 If `config.json → mode` is `"parallel"`, run after the base space is ready:
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/create-flow-spaces.py
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/create-flow-spaces.py \
+  --session-dir "$SESSION_DIR"
 ```
 This creates `exploratory-testing-flow-<N>` for each flow where `isolate: true` (the default) and updates `flows[N].space_id` in `config.json`. Flows with `isolate: false` share the base space.
 
@@ -115,9 +116,9 @@ NOISE_INDEX_ALIAS=$(
 )
 python3 -c "
 import json
-cfg = json.load(open('.exploratory-session/config.json'))
+cfg = json.load(open('$SESSION_DIR/config.json'))
 cfg['noise_index'] = '$NOISE_INDEX_ALIAS'
-json.dump(cfg, open('.exploratory-session/config.json', 'w'), indent=2)
+json.dump(cfg, open('$SESSION_DIR/config.json', 'w'), indent=2)
 print('noise_index set to:', '$NOISE_INDEX_ALIAS')
 "
 ```

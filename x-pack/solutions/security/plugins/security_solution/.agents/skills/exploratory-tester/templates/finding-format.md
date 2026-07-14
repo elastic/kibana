@@ -41,11 +41,11 @@ Never write "expected behavior unknown" — if none of the above apply, use (4) 
 <mandatory for Level 1 and 2: commit to reasoning, explain user impact>
 
 ### Evidence
-- Screenshot: `.exploratory-session/screenshots/<area_slug>-flow<N>-step<M>-<checklist-step-slug>.png`
+- Screenshot: `$SESSION_DIR/screenshots/<area_slug>-flow<N>-step<M>-<checklist-step-slug>.png`
 - Console: `<relevant line>` — relevant = appeared after the action AND contains error/exception
   keywords or HTTP 5xx; ignore CSP violations, 404s on `/internal/cloud/solution`, browser extensions
 - Network: <METHOD> `<path>` → <status> `<relevant response snippet>`
-- Video: `.exploratory-session/videos/findings-flow-<N>.mp4` (or `- Video: unavailable (<reason>)` — see `scripts/record-evidence.md`)
+- Video: `$SESSION_DIR/videos/findings-flow-<N>.mp4` (or `- Video: unavailable (<reason>)` — see `scripts/record-evidence.md`)
 ```
 
 ## Level 3 observation (short format)

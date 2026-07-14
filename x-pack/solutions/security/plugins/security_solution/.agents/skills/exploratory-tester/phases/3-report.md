@@ -6,14 +6,14 @@
 
 Enumerate which findings files exist:
 ```bash
-ls .exploratory-session/findings-flow-*.md 2>/dev/null | sort -V
+ls "$SESSION_DIR"/findings-flow-*.md 2>/dev/null | sort -V
 ```
 Read each file in that list. Before writing the report, **deduplicate across flows**:
 - Group findings by the combination of `type` + first 100 characters of `current_behavior`.
 - For groups with identical entries from 2+ different flows, keep one entry and append: `"Also seen in flows: <N>, <M>"` to the Evidence section.
 - Only the deduplicated set appears in the Level 1/2/3 sections of the report — duplicates inflate severity and obscure the real scope.
 
-Then write `.exploratory-session/report.md` using the template:
+Then write `$SESSION_DIR/report.md` using the template:
 ```
 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/templates/report-format.md
 ```
@@ -108,7 +108,8 @@ git commit -m "knowledge(exploratory-tester): update <area_slug> after session o
 After committing the knowledge file, delete the Kibana spaces created by this session:
 
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/delete-flow-spaces.py
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/delete-flow-spaces.py \
+  --session-dir "$SESSION_DIR"
 ```
 
 This only deletes spaces listed in `config.json → created_flow_spaces` — spaces that already existed before this session are never touched. If a deletion fails, the script prints the space IDs for manual cleanup via **Kibana > Stack Management > Spaces**.

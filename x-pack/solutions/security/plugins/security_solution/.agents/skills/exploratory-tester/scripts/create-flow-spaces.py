@@ -7,11 +7,11 @@ dedicated Kibana space "exploratory-testing-flow-<N>" and updates the flow's
 space_id in config.json. Flows with isolate=false share the base space.
 
 Usage:
-    python3 scripts/create-flow-spaces.py
+    python3 scripts/create-flow-spaces.py --session-dir .exploratory-session/entity-analytics-20260714-093022
 
-Reads:  .exploratory-session/config.json
-Writes: .exploratory-session/config.json  (updates flow.space_id for each flow,
-                                            adds created_flow_spaces list)
+Reads:  <session-dir>/config.json
+Writes: <session-dir>/config.json  (updates flow.space_id for each flow,
+                                    adds created_flow_spaces list)
 
 Exit 0: all spaces created (or already existed).
 Exit 1: unrecoverable error — check output for details.
@@ -19,11 +19,17 @@ Exit 1: unrecoverable error — check output for details.
 Run this during Phase 1c, while still authenticated as admin.
 """
 
+import argparse
 import json
 import subprocess
 import sys
 
-CONFIG_PATH = '.exploratory-session/config.json'
+parser = argparse.ArgumentParser()
+parser.add_argument('--session-dir', required=True,
+                    help='Path to the session directory (contains config.json)')
+args = parser.parse_args()
+
+CONFIG_PATH = f'{args.session_dir}/config.json'
 
 with open(CONFIG_PATH) as f:
     cfg = json.load(f)

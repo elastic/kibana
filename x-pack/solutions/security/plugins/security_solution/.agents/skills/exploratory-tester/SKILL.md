@@ -38,8 +38,11 @@ Flows:
 Setup: <connector name>, role: <role>
 Specs: <URL or file path to PRD / acceptance criteria / design doc>   # optional
 Session-timeout: 90    # optional, total session cap in minutes (default 90)
+Session-dir: .exploratory-session/entity-analytics-20260714-093022  # optional — resume a prior session
 ```
-`Specs:`, `Session-timeout:`, `isolate:` optional. User-provided: add `Environment:` block with `api-key:` for ECH/ESS (`phases/0-setup.md`).
+`Specs:`, `Session-timeout:`, `isolate:`, `Session-dir:` optional. User-provided: add `Environment:` block with `api-key:` for ECH/ESS (`phases/0-setup.md`).
+
+Each session writes its output to an isolated subfolder of `.exploratory-session/` named `<area-slug>-<YYYYMMDD-HHMMSS>`, so multiple agents can run sessions in parallel without interfering. To resume a prior session, pass its folder path as `Session-dir:`.
 
 ## Red Flags
 
