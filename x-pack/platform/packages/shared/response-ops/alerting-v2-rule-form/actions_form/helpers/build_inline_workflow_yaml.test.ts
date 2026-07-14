@@ -7,7 +7,7 @@
 
 import { parse } from 'yaml';
 import { INLINE_WORKFLOW_TAG } from '../constants';
-import { buildInlineWorkflowYaml, InvalidInlineWorkflowError } from './build_inline_workflow_yaml';
+import { buildInlineWorkflowYaml, InvalidInlineWorkflowError, stepTypeFromConnectorType } from './build_inline_workflow_yaml';
 
 describe('buildInlineWorkflowYaml', () => {
   it('builds a valid email workflow YAML', () => {
@@ -106,4 +106,33 @@ describe('buildInlineWorkflowYaml', () => {
       })
     ).toThrow(InvalidInlineWorkflowError);
   });
+
+  it('builds a valid slack v2 workflow YAML', () => {
+    const yaml = buildInlineWorkflowYaml({
+      id: 't8',
+      source: 'inline',
+      stepType: 'slack2.sendMessage',
+      connectorId: 'my-slackv2-connector',
+      params: 'channel: "channel"\ntext: "Hello {{ policyId }}"',
+    });
+
+    const parsed = parse(yaml);
+    expect(parsed.steps[0]).toMatchObject({
+      type: 'slack2.sendMessage',
+      'connector-id': 'my-slackv2-connector',
+      with: { channel: 'channel', text: 'Hello {{ policyId }}' },
+    });
+  });
 });
+
+describe('stepTypeFromConnectorType', () => {
+  it('returns the connector type ID without a leading dot', () => {
+    expect(stepTypeFromConnectorType('.email')).toBe('email');
+    expect(stepTypeFromConnectorType('slack')).toBe('slack');
+  });
+
+  it('returns the connector type ID with subAction if provided', () => {
+    expect(stepTypeFromConnectorType('.slack2', 'sendMessage')).toBe('slack2.sendMessage');
+    expect(stepTypeFromConnectorType('custom', 'doSomething')).toBe('custom.doSomething');
+  });
+})

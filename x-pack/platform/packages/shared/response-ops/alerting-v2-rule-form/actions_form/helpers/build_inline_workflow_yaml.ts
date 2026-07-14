@@ -18,7 +18,7 @@ export class InvalidInlineWorkflowError extends Error {
   }
 }
 
-const stepTypeFromConnectorType = (connectorTypeId: string, subAction?: string): string => {
+export const stepTypeFromConnectorType = (connectorTypeId: string, subAction?: string): string => {
   const typeId = connectorTypeId.startsWith('.') ? connectorTypeId.slice(1) : connectorTypeId;
   return subAction ? `${typeId}.${subAction}` : typeId;
 }
