@@ -29,12 +29,6 @@ export const getControlsCount = async (page: ScoutPage): Promise<number> => {
   return (await getAllControlIds(page)).length;
 };
 
-/**
- * Web-first assertion: asserts that the options-list control for `controlId`
- * contains `expectedText` in either its selections badge or its button label.
- * Prefer this over `optionsListGetSelectionsString` + `toBe` to benefit from
- * Playwright's built-in auto-retry.
- */
 export const expectOptionsListSelection = async (
   page: ScoutPage,
   controlId: string,

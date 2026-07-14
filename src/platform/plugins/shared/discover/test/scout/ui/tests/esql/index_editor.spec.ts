@@ -16,7 +16,7 @@
 
 import path from 'path';
 import type { Client } from '@elastic/elasticsearch';
-import { test, tags, EuiDataGridWrapper } from '@kbn/scout';
+import { test, EuiDataGridWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { IndexEditor } from '../../fixtures/esql/index_editor';
 import {
@@ -85,7 +85,7 @@ const getIndexFieldTypes = async (
   );
 };
 
-test.describe('Discover ES|QL index editor', { tag: tags.stateful.classic }, () => {
+test.describe('Discover ES|QL index editor', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(

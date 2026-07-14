@@ -24,8 +24,6 @@ const BROKEN_QUERIES = [
 ];
 
 spaceTest.describe('Discover ES|QL view - errors', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.use({ viewport: { width: 1600, height: 1200 } });
-
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
@@ -60,14 +58,12 @@ spaceTest.describe('Discover ES|QL view - errors', { tag: tags.deploymentAgnosti
         );
         expect(message).not.toContain('undefined');
 
-        // Line-scoped errors also render exactly one squiggly error marker in
-        // the editor (`.cdr.squiggly-error` is the Monaco decoration class the
-        // editor applies; there is no test-subj for it).
-        if (message.includes('line')) {
-          await expect(
-            page.testSubj.locator('kibanaCodeEditor').locator('.cdr.squiggly-error')
-          ).toHaveCount(1);
-        }
+        // Line-scoped errors render exactly one squiggly marker; non-line errors
+        // (e.g. missing FROM) render none. `.cdr.squiggly-error` is the Monaco
+        // decoration class — no test-subj exists for it.
+        await expect(
+          page.testSubj.locator('kibanaCodeEditor').locator('.cdr.squiggly-error')
+        ).toHaveCount(message.includes('line') ? 1 : 0);
       });
     }
   });

@@ -13,8 +13,7 @@
  * underlying query is slow.
  */
 
-import type { ScoutPage } from '@kbn/scout';
-import { tags } from '@kbn/scout';
+import { tags, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures';
 import { testData } from '../../../fixtures/common';
@@ -29,8 +28,6 @@ const AGG_QUERY =
   'from logstash-* | sort @timestamp | limit 10 | stats countB = count(bytes) by geo.dest | sort countB';
 
 spaceTest.describe('Discover ES|QL view - inspector', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.use({ viewport: { width: 1600, height: 1200 } });
-
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
@@ -118,9 +115,10 @@ spaceTest.describe('Discover ES|QL view - inspector', { tag: tags.deploymentAgno
 
       await discover.openInspectorFromTabMenu();
       await switchToRequestsView(page);
-      await expect.poll(() => hasInspectorRequest(page, 'Table'), { timeout: 15_000 }).toBe(true);
+      // The slow query (5 s delay) + CI overhead needs more headroom than the first test.
+      await expect.poll(() => hasInspectorRequest(page, 'Table'), { timeout: 30_000 }).toBe(true);
       await expect
-        .poll(() => hasInspectorRequest(page, 'Visualization'), { timeout: 15_000 })
+        .poll(() => hasInspectorRequest(page, 'Visualization'), { timeout: 30_000 })
         .toBe(true);
 
       // Exactly one "Table" and one "Visualization" entry - never duplicated
@@ -178,7 +176,11 @@ const hasInspectorRequest = async (page: ScoutPage, name: string): Promise<boole
   await expect(chooser).toBeVisible();
   await chooser.click();
   const option = page.testSubj.locator(`inspectorRequestChooser${name}`);
-  const found = await option.isVisible().catch(() => false);
+  // Wait briefly for the combo-box dropdown to render before probing the option.
+  const found = await option
+    .waitFor({ state: 'visible', timeout: 3_000 })
+    .then(() => true)
+    .catch(() => false);
   await page.keyboard.press('Escape');
   return found;
 };

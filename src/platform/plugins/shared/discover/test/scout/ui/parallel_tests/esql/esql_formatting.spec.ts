@@ -18,8 +18,6 @@ import { spaceTest } from '../../fixtures';
 import { testData } from '../../fixtures/common';
 
 spaceTest.describe('Discover ES|QL results formatting', { tag: '@local-stateful-classic' }, () => {
-  spaceTest.use({ viewport: { width: 1600, height: 1200 } });
-
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.savedObjects.load(testData.FLIGHTS_KBN_ARCHIVE);
@@ -30,8 +28,7 @@ spaceTest.describe('Discover ES|QL results formatting', { tag: '@local-stateful-
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.discover.goto({ queryMode: 'classic' });
-    await pageObjects.discover.selectTextBaseLang();
+    await pageObjects.discover.goto({ queryMode: 'esql' });
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 

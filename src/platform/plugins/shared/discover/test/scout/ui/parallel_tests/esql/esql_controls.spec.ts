@@ -33,8 +33,6 @@ import {
 } from '../../fixtures/esql/controls_helpers';
 
 spaceTest.describe('Discover ES|QL controls', { tag: '@local-stateful-classic' }, () => {
-  spaceTest.use({ viewport: { width: 1600, height: 1200 } });
-
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.savedObjects.load(ESQL_CONTROLS_DASHBOARD_KBN_ARCHIVE);

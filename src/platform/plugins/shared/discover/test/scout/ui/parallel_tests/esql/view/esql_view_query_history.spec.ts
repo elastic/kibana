@@ -12,8 +12,7 @@
  * history items can be re-run, and failed queries are flagged.
  */
 
-import type { ScoutPage } from '@kbn/scout';
-import { tags } from '@kbn/scout';
+import { tags, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures';
 import { testData } from '../../../fixtures/common';
@@ -31,8 +30,6 @@ const getHistoryQueryTexts = async (page: ScoutPage): Promise<string[]> => {
 };
 
 spaceTest.describe('Discover ES|QL view - query history', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.use({ viewport: { width: 1600, height: 1200 } });
-
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
