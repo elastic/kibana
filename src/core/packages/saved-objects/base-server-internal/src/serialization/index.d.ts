@@ -1,1 +1,0 @@
-export { SavedObjectsSerializer } from './serializer';
