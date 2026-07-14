@@ -1332,6 +1332,7 @@ export async function createInstallation(options: {
   let savedObject: Installation = {
     installed_kibana: [],
     installed_kibana_space_id: options.spaceId,
+    installed_kibana_version: appContextService.getKibanaVersion(),
     installed_es: [],
     package_assets: [],
     es_index_patterns: toSaveESIndexPatterns,
@@ -1463,6 +1464,7 @@ export const saveKibanaAssetsRefs = async (
         pkgName,
         {
           installed_kibana: newAssetRefs,
+          installed_kibana_version: appContextService.getKibanaVersion(),
         },
         { refresh: false }
       );

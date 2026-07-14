@@ -134,3 +134,7 @@ export const EpmPackagesSchemaV11 = EpmPackagesSchemaV10.extends({
     )
   ),
 });
+
+export const EpmPackagesSchemaV12 = EpmPackagesSchemaV11.extends({
+  installed_kibana_version: schema.maybe(schema.string()),
+});
