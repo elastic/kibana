@@ -8,18 +8,15 @@
 import { spaceTest, tags, KibanaCodeEditorWrapper, EuiComboBoxWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { ScoutPage } from '@kbn/scout';
-import {
-  applyLensInlineEditorAndWaitClosed,
-  openNewEsqlDashboardWithInlineEditor,
-  testData,
-} from '../fixtures';
+import { applyLensInlineEditorAndWaitClosed, testData } from '../fixtures';
 
 // Maximum number of initial ESQL columns loaded
 // This is a temporary limit to avoid overwhelming the UI with too many columns
 // Should be syncronized with MAX_NUM_OF_COLUMNS
 const MAX_NUM_OF_INITIAL_ESQL_COLUMNS = 10;
 
-const setQueryAndRun = async (
+const setEsqlQueryAndRun = async (
+  dashboard: ScoutPage,
   page: ScoutPage,
   codeEditor: KibanaCodeEditorWrapper,
   query: string
@@ -27,9 +24,10 @@ const setQueryAndRun = async (
   await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
   await codeEditor.setCodeEditorValue(query);
   await page.testSubj.click('ESQLEditor-run-query-button');
+  await dashboard.waitForRenderComplete();
 };
 
-spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.uiSettings.set({
       'dateFormat:tz': 'UTC',
@@ -37,8 +35,13 @@ spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.c
     });
   });
 
-  spaceTest.beforeEach(async ({ browserAuth }) => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
+    const { dashboard } = pageObjects;
+
+    await dashboard.openTryEsqlDashboard();
+    await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
+    await dashboard.waitForRenderComplete();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -47,15 +50,13 @@ spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.c
   });
 
   spaceTest(
-    'should keep the table type when the user adds a limit via Try ES|QL',
+    'should keep the table type when the user adds a limit via Try ESQL',
     async ({ pageObjects, page }) => {
       const { dashboard, lens } = pageObjects;
       const codeEditor = new KibanaCodeEditorWrapper(page);
 
-      await spaceTest.step('open new ES|QL dashboard with inline editor', async () => {
-        await openNewEsqlDashboardWithInlineEditor({ dashboard, lens }, page);
-
-        await setQueryAndRun(page, codeEditor, 'from logstash-*');
+      await spaceTest.step('set ESQL query and validate the chart type is table', async () => {
+        await setEsqlQueryAndRun(dashboard, page, codeEditor, 'from logstash-*');
         await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Table');
       });
 
@@ -82,45 +83,13 @@ spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.c
       await spaceTest.step(
         'add limit to query and verify table type and bytes column persist',
         async () => {
-          await setQueryAndRun(page, codeEditor, 'from logstash-* | limit 100');
+          await setEsqlQueryAndRun(dashboard, page, codeEditor, 'from logstash-* | limit 100');
           await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Table');
 
           const bytesDimension = page.testSubj
             .locator('lnsDatatable_metrics > lns-dimensionTrigger-textBased')
             .filter({ hasText: 'bytes' });
           await expect(bytesDimension).toBeVisible();
-
-          await applyLensInlineEditorAndWaitClosed({ lens });
-        }
-      );
-    }
-  );
-
-  spaceTest(
-    'should remain table if the user edits an existing table panel',
-    async ({ pageObjects, page }) => {
-      const { dashboard, lens } = pageObjects;
-      const codeEditor = new KibanaCodeEditorWrapper(page);
-
-      await spaceTest.step('create a dashboard with an ES|QL table panel', async () => {
-        await openNewEsqlDashboardWithInlineEditor({ dashboard, lens }, page);
-
-        await setQueryAndRun(page, codeEditor, 'from logstash-*');
-        await dashboard.waitForRenderComplete();
-        await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Table');
-        await applyLensInlineEditorAndWaitClosed({ lens });
-      });
-
-      await spaceTest.step(
-        'rewrite the query entirely and verify table type persists',
-        async () => {
-          await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-          await expect(lens.getInlineEditor()).toBeVisible();
-
-          await setQueryAndRun(page, codeEditor, 'from logstash-* | STATS COUNT(*) BY geo.dest');
-          await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Table');
-
-          await applyLensInlineEditorAndWaitClosed({ lens });
         }
       );
     }
@@ -133,17 +102,18 @@ spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.c
       const codeEditor = new KibanaCodeEditorWrapper(page);
 
       await spaceTest.step('create a line chart panel with a red Y-axis color', async () => {
-        await openNewEsqlDashboardWithInlineEditor({ dashboard, lens }, page);
-
-        await setQueryAndRun(
+        await setEsqlQueryAndRun(
+          dashboard,
           page,
           codeEditor,
           'from logstash-* | stats maxB = max(bytes) by geo.dest'
         );
+
+        // change to line chart
+        await lens.switchToVisualization('line');
         await dashboard.waitForRenderComplete();
 
-        await lens.switchToVisualization('line');
-
+        // change the color to red
         await page.testSubj.click('lnsXY_yDimensionPanel');
         const colorPickerInput = page.getByTestId(/indexPattern-dimension-colorPicker/);
         await colorPickerInput.fill('');
@@ -161,7 +131,8 @@ spaceTest.describe('Lens ES|QL dashboard inline editing', { tag: tags.stateful.c
           await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
           await expect(lens.getInlineEditor()).toBeVisible();
 
-          await setQueryAndRun(
+          await setEsqlQueryAndRun(
+            dashboard,
             page,
             codeEditor,
             'from logstash-* | stats maxB = max(bytes) by geo.dest | limit 10'

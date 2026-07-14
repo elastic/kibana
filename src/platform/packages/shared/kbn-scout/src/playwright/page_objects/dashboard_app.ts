@@ -35,6 +35,7 @@ export class DashboardApp {
   private readonly viewOnlyModeButton;
   private readonly dashboardViewport;
   private readonly embeddablePanel;
+  private readonly tryEsqlLink;
 
   // Add panel flow
   private readonly addTopNavButton;
@@ -81,6 +82,7 @@ export class DashboardApp {
     this.viewOnlyModeButton = this.page.testSubj.locator('dashboardViewOnlyMode');
     this.dashboardViewport = this.page.testSubj.locator('dshDashboardViewport');
     this.embeddablePanel = this.page.testSubj.locator('embeddablePanel');
+    this.tryEsqlLink = this.page.testSubj.locator('tryESQLLink');
 
     // Add panel flow
     this.addTopNavButton = this.page.testSubj.locator('dashboardAddTopNavButton');
@@ -138,6 +140,22 @@ export class DashboardApp {
   async openNewDashboard(options?: TimeoutOptions) {
     await this.page.gotoApp('dashboards', { hash: '/create' });
     await expect(this.addTopNavButton).toBeVisible({ timeout: options?.timeout ?? 20_000 });
+  }
+
+  async openTryEsqlDashboard() {
+    await this.goto();
+
+    // The "Try ES|QL" button depends on an async Lens helper hook that may not
+    // have resolved yet when the button becomes clickable. Retry until the click
+    // actually triggers navigation.
+    await expect(async () => {
+      if (await this.tryEsqlLink.isVisible()) {
+        await this.tryEsqlLink.click();
+      }
+      await expect(this.dashboardViewport).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 60_000 });
+
+    await this.waitForPanelsToLoad(1);
   }
 
   private getSettingsFlyout() {
