@@ -307,7 +307,8 @@ describe('TemplateFields', () => {
       await user.click(screen.getByTestId('template-field-confirm-summary'));
 
       expect(summary.value).toBe('updated summary');
-      expect(screen.getByTestId('template-field-confirm-summary')).toBeInTheDocument();
+      expect(summary).toBeEnabled();
+      expect(screen.getByTestId('template-field-confirm-summary')).toBeEnabled();
     });
 
     it('does NOT call onUpdateField when cancel button is clicked', async () => {
