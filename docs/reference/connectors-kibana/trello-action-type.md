@@ -53,6 +53,18 @@ List board cards
 :   Returns all open cards on a board across all of its lists.
     - **Board ID** (required): The 24-character Trello board ID.
 
+List board labels
+:   Returns the labels defined on a board, including their IDs, names, and colors. Call this
+    before **Create card** or **Update card** to resolve label names to IDs for the Label IDs
+    parameter.
+    - **Board ID** (required): The 24-character Trello board ID.
+
+List board members
+:   Returns the members (collaborators) of a board, including their IDs, usernames, and full
+    names. Call this before **Create card** or **Update card** to resolve member names to IDs
+    for the Member IDs parameter.
+    - **Board ID** (required): The 24-character Trello board ID.
+
 List list cards
 :   Returns the open cards within a single list.
     - **List ID** (required): The 24-character Trello list ID, as returned by **List board lists**.

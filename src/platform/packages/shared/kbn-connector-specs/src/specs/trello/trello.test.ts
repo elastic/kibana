@@ -73,6 +73,30 @@ describe('Trello', () => {
     });
   });
 
+  describe('listBoardLabels action', () => {
+    it('fetches labels for a board', async () => {
+      mockClient.get.mockResolvedValue({ data: [{ id: 'label1', name: 'Bug', color: 'red' }] });
+      const result = await Trello.actions.listBoardLabels.handler(mockContext, {
+        boardId: 'board1',
+      });
+      expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/boards/board1/labels`);
+      expect(result).toEqual([{ id: 'label1', name: 'Bug', color: 'red' }]);
+    });
+  });
+
+  describe('listBoardMembers action', () => {
+    it('fetches members for a board', async () => {
+      mockClient.get.mockResolvedValue({
+        data: [{ id: 'member1', username: 'jdoe', fullName: 'Jane Doe' }],
+      });
+      const result = await Trello.actions.listBoardMembers.handler(mockContext, {
+        boardId: 'board1',
+      });
+      expect(mockClient.get).toHaveBeenCalledWith(`${BASE_URL}/boards/board1/members`);
+      expect(result).toEqual([{ id: 'member1', username: 'jdoe', fullName: 'Jane Doe' }]);
+    });
+  });
+
   describe('getCard action', () => {
     it('fetches a card by ID', async () => {
       mockClient.get.mockResolvedValue({ data: { id: 'card1', name: 'Fix bug' } });

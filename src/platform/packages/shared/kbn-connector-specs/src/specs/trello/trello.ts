@@ -139,6 +139,28 @@ export const Trello: ConnectorSpec = {
       },
     },
 
+    listBoardLabels: {
+      isTool: true,
+      description:
+        'List the labels defined on a board. Returns label IDs, names, and colors. Call this before createCard or updateCard to resolve label names to IDs for the idLabels parameter.',
+      input: BoardIdInputSchema,
+      handler: async (ctx, input: BoardIdInput) => {
+        const response = await ctx.client.get(`${BASE_URL}/boards/${input.boardId}/labels`);
+        return response.data;
+      },
+    },
+
+    listBoardMembers: {
+      isTool: true,
+      description:
+        'List the members (collaborators) of a board. Returns member IDs, usernames, and full names. Call this before createCard or updateCard to resolve member names to IDs for the idMembers parameter.',
+      input: BoardIdInputSchema,
+      handler: async (ctx, input: BoardIdInput) => {
+        const response = await ctx.client.get(`${BASE_URL}/boards/${input.boardId}/members`);
+        return response.data;
+      },
+    },
+
     listListCards: {
       isTool: true,
       description:
@@ -259,6 +281,8 @@ export const Trello: ConnectorSpec = {
     '',
     '## Writing cards',
     'To create a card, first find the target list ID via listBoardLists, then call createCard with that listId.',
+    'To assign labels or members when creating or updating a card, resolve names to IDs first: ' +
+      'call listBoardLabels to get label IDs for idLabels, and listBoardMembers to get member IDs for idMembers.',
     'To edit, move, archive, or unarchive an existing card, use updateCard: set idList to move it between lists, ' +
       'or closed: true/false to archive/unarchive it. There is no hard-delete action — archiving is the only ' +
       'way to remove a card through this connector.',
