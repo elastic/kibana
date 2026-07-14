@@ -64,14 +64,29 @@ export const modelVersion2: SavedObjectsModelVersion = {
           ? (attrs.fieldNames as Array<string | Record<string, unknown>>)
           : [];
 
-        const fieldDefinitions = legacy.map((field) =>
-          typeof field === 'string' ? { name: field, label: field, type: '', control: '' } : field
-        );
+        const fieldDefinitions = legacy.map((field) => {
+          if (typeof field === 'string') {
+            return { name: field, label: field, type: '', control: '' };
+          }
+          // Coerce malformed objects (missing name/label) so a one-shot migration can't leave
+          // values that crash downstream readers (e.g. `field.label.toLowerCase()`).
+          if (typeof field.name !== 'string' || typeof field.label !== 'string') {
+            return {
+              name: String(field.name ?? ''),
+              label: String(field.label ?? ''),
+              type: typeof field.type === 'string' ? field.type : '',
+              control: typeof field.control === 'string' ? field.control : '',
+            };
+          }
+          return field;
+        });
 
+        // `fieldNames` is intentionally left untouched: `data_backfill` merges via lodash and drops
+        // `undefined`, so it cannot remove the attribute. The mapping is deprecated instead; the
+        // stale value is harmless and would be purged by a future `data_removal`.
         return {
           attributes: {
             fieldDefinitions,
-            fieldNames: undefined,
           },
         };
       },

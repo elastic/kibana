@@ -51,7 +51,6 @@ describe('templates model version 2', () => {
         { name: 'Severity', label: 'Severity', type: '', control: '' },
         { name: 'Priority', label: 'Priority', type: '', control: '' },
       ]);
-      expect(attributes.fieldNames).toBeUndefined();
     });
 
     it('passes through 9.5 BC2 object arrays unchanged', () => {
@@ -62,7 +61,17 @@ describe('templates model version 2', () => {
       const { attributes } = runBackfill({ fieldNames: objects });
 
       expect(attributes.fieldDefinitions).toEqual(objects);
-      expect(attributes.fieldNames).toBeUndefined();
+    });
+
+    it('coerces malformed objects missing name/label so downstream readers stay safe', () => {
+      const { attributes } = runBackfill({
+        fieldNames: [{ label: 'Priority', type: 'keyword' }, { name: 'severity' }],
+      });
+
+      expect(attributes.fieldDefinitions).toEqual([
+        { name: '', label: 'Priority', type: 'keyword', control: '' },
+        { name: 'severity', label: '', type: '', control: '' },
+      ]);
     });
 
     it('produces field definitions that satisfy the v2 schema', () => {
@@ -96,11 +105,10 @@ describe('templates model version 2', () => {
       expect(attributes).toEqual({});
     });
 
-    it('clears a non-array legacy value without propagating it', () => {
+    it('produces empty field definitions for a non-array legacy value', () => {
       const { attributes } = runBackfill({ fieldNames: 'unexpected' });
 
       expect(attributes.fieldDefinitions).toEqual([]);
-      expect(attributes.fieldNames).toBeUndefined();
     });
   });
 });
