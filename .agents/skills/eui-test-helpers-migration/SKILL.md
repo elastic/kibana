@@ -1,73 +1,70 @@
 ---
 name: eui-test-helpers-migration
-description: >
-  Migrate Kibana tests to the published EUI test helpers (`@elastic/eui-test-helpers` — the
-  Component Objects like `EuiComboBoxObject`, exposed in Scout via `page.components.<component>(...)`).
-  Use when: (1) migrating a Scout/RTL/Cypress test off an in-repo EUI component wrapper onto the
-  published helper, (2) a test uses an old wrapper method the minimal helper doesn't expose,
-  (3) deciding whether to adapt a test vs. extend a helper vs. move the check to an API/unit test,
-  (4) adding or reviewing usage of any `EuiXxxObject` component object.
+description: Use when migrating Kibana Scout tests onto the published EUI test helpers (`@elastic/eui-test-helpers`), or reviewing such migrations — including when a test uses an old in-repo wrapper method the minimal helper doesn't expose, or when deciding whether to adapt a test, extend a helper, or move a check to an API/unit test.
 ---
 
-# Migrating tests to the EUI test helpers
+# Migrating Scout tests to the EUI test helpers
 
 ## What these helpers are
 
-`@elastic/eui-test-helpers` ships **Component Objects** — semantic wrappers around a Playwright
-`Locator` (also usable from RTL/Cypress) for one EUI component. Scout exposes them via a factory,
-e.g. `page.components.comboBox(testSubj, scope?)`. Two things drive everything below:
+`@elastic/eui-test-helpers` ships **Component Objects** — wrappers around a Playwright `Locator` for
+one EUI component. Scout exposes them via a factory, e.g. `page.components.comboBox(testSubj, scope?)`.
+Two facts drive everything below:
 
-- **They set up and read component state so a test can focus on its real assertion** — they are not
-  a way to test EUI's own behavior (EUI has its own RTL/Cypress/VRT suites for that).
-- **They are deliberately minimal and configuration-agnostic:** one public method auto-detects the
-  DOM and works across every prop variant (`clear()` figures out pills vs. plain-text vs. dropdown
-  itself). Expect ~3 broad methods, not ~10 narrow ones. This minimalism is intentional — don't
-  "fix" it by fattening the helper.
+- **They set up and read component state so the test can focus on its real assertion.** They are not
+  a way to test EUI's own behavior — EUI has its own suites for that.
+- **They are minimal and configuration-agnostic by design.** One public method auto-detects the DOM
+  and works across every prop variant (`clear()` handles pills vs. plain-text vs. dropdown itself).
+  Expect ~3 broad methods, not ~10 narrow ones. Don't "fix" the minimalism by fattening the helper.
 
-## Core principle: judge the test, don't mirror the old API
+## Judge the test — don't mirror the old API
 
-In-repo wrappers accrete many narrow methods; the helper has few broad ones. The wrong instinct is a
-1:1 map that stalls the moment an old method has no equivalent. A missing method is **not** evidence
-it should be added — it's a prompt to re-examine the test. For each old-API call, stop at the first
-that applies:
+In-repo wrappers accrete many narrow methods; the helper has few broad ones. Do not 1:1-map them. A
+method missing from the helper is **not** evidence it should be added — it's a prompt to re-examine
+the test. For each old-API call, stop at the first rule that applies:
 
-1. **Is the test valid / in e2e scope at all?** Not all tests are good tests — fix or drop bad
-   assertions rather than preserving them through a new helper method.
-2. **Can an existing helper method express it?** Most narrow methods collapse into the minimal set
+1. **Is the test valid / in e2e scope?** Not all tests are good tests. Fix or drop a bad assertion
+   instead of preserving it through a new helper method.
+2. **Can an existing method express it?** Most narrow methods collapse into the minimal set
    (select-one / select-many / read / clear → a couple of set-based methods). Adapt the test to the
-   simpler API. This unlocks the large majority of cases.
+   simpler API — this covers the large majority of cases.
 3. **Does it belong at a lower layer?** Move it to an API/unit test (see below).
-4. **Only if none apply and the need recurs across tests** → extend the helper (see "Extending").
+4. **Only if none apply and the need recurs across tests** — extend the helper (see *Keep the helper
+   minimal*).
 
-## e2e vs. API/unit (a test-validity check, not just a helper one)
+## Don't assert data correctness through the UI
 
-Anti-pattern: call an API, get a value, then assert it appears in the component. **In e2e we trust
-the lower layers** — re-checking data correctness through the DOM is slow, flaky, and redundant; that
-assertion belongs in an API or unit test. *Exception:* when there's **non-trivial client-side wiring**
-(the UI transforms the data, cross-links it with other state, derives what's shown), verifying the
-rendered result *is* legitimate e2e coverage, because only an end-to-end flow exercises that logic.
-Judge by how much UI logic sits between the data and the pixels.
+Anti-pattern: call an API, get a value, then assert it appears in the component. In e2e we trust the
+lower layers — that check belongs in an API or unit test; re-checking it through the DOM is slow,
+flaky, and redundant.
+
+**Exception:** when non-trivial client-side wiring sits between the data and the render (the UI
+transforms it, cross-links it with other state, derives what's shown), verifying the rendered result
+*is* valid e2e coverage — only an end-to-end flow exercises that logic. Judge by how much UI logic
+sits between the data and the pixels.
 
 ## Keep the helper minimal — extend rarely
 
-There's a balance: too thin and every test re-invents DOM-poking; too fat and the helper becomes an
-unstable grab-bag coupled to EUI internals. Bias thin. When something genuinely isn't covered:
+Too thin, and every test re-invents DOM-poking; too fat, and the helper becomes an unstable grab-bag
+coupled to EUI internals. Bias thin. When something genuinely isn't covered:
 
-- **Extend only when reasonable and valuable across multiple tests**, not to unblock one. Single
+- **Extend only when the need is valuable across multiple tests**, not to unblock one. A single
   caller → keep it local (a Kibana-side subclass) or adapt the test.
 - **Prefer teaching an existing method a new auto-detected configuration** over adding a new public
-  method (each public method is stable surface Kibana couples to).
-- **Land helper additions as their own EUI PR** — don't grow the helper inside a migration PR; it
-  stalls the migration behind another review cycle. Migrate what maps; defer what doesn't with a note.
+  method — every public method is stable surface Kibana couples to.
+- **Land helper additions as their own EUI PR.** Don't grow the helper inside a migration PR; it
+  stalls the migration behind another review cycle. Migrate what maps; defer what doesn't, with a note.
 
-## Collections & virtualization (any read/enumerate method)
+## Reading collections: account for virtualization
 
 Never assume the whole collection is in the DOM. Combo box, data grid, and selectable use **virtual
-scrolling** that mounts/unmounts items, so "return all items" can silently miss entries. Prefer
-**exact-text lookups** ("is X present / select X") over "list everything" — a `getOptions`/
-`optionsList`-style method may *require* an explicit search term precisely because there are too many
-options and virtualization has dropped the target until you filter to it. A test that truly needs the
-full list is a signal to reconsider scope before adding an enumeration method.
+scrolling** that mounts/unmounts items, so "return all items" silently misses entries.
+
+- Prefer **exact-text lookups** ("is X present / select X") over "list everything."
+- A `getOptions`/`optionsList`-style method may *require* an explicit search term, because there are
+  too many options and virtualization drops the target until you filter to it.
+- A test that truly needs the full list is a signal to reconsider scope before adding an enumeration
+  method.
 
 ## Worked example: `EuiComboBox`
 
@@ -93,15 +90,14 @@ simpler; what the test verifies is unchanged:
 +  await this.comboBox.setSelectedOptions([destination]);
 ```
 
-The base published helper is minimal, so Kibana adds a thin `KbnComboBoxObject` subclass (what
-`page.components.comboBox` actually returns) covering what the base doesn't yet: free-text
-`onCreateOption` via `setSelectedOptions([v], { create: true })`; server-side/virtualized search where
-the option isn't in the DOM until you type (its `setSelectedOptions` types to filter, then selects by
-accessible name); and `getAvailableOptions` for reading the *unselected* list. These are interim — they
-graduate into the published helper via its own EUI PR, deleting the subclass with no test changes (same
-method names). Only a couple of genuinely odd combos stay fully raw (neither helper nor subclass): e.g.
-virtualized + middle-truncated options keyed by a stable option `data-test-subj`, and an `asPlainText`
-combo that defaults to a preset value.
+The base helper is minimal, so Kibana adds a thin `KbnComboBoxObject` subclass (what
+`page.components.comboBox` returns) for what the base doesn't cover yet: free-text `onCreateOption`
+via `setSelectedOptions([v], { create: true })`; server-side/virtualized search where the option
+isn't in the DOM until you type (its `setSelectedOptions` types to filter, then selects by accessible
+name); and `getAvailableOptions` for reading the *unselected* list. These are interim — they graduate
+into the published helper via its own EUI PR, deleting the subclass with no test changes (same method
+names). A couple of genuinely odd combos stay fully raw: e.g. virtualized + middle-truncated options
+keyed by a stable option `data-test-subj`, and an `asPlainText` combo that defaults to a preset value.
 
 ## Migration workflow (Scout)
 
@@ -113,11 +109,11 @@ combo that defaults to a preset value.
    need recurs.
 5. Verify: run the test, and confirm it *fails* when the behavior is broken.
 
-## FTR / RTL / Cypress
+## FTR
 
-There's no `page.components` factory for FTR (it isn't Playwright): migrate FTR → Scout first (see
-`scout-migrate-from-ftr`) and adopt the helper there, or import the Component Object directly in
-RTL/Cypress. The judgment principles above are framework-agnostic and always apply.
+FTR isn't Playwright, so there's no `page.components` factory. Migrate the FTR suite to Scout first
+(see `scout-migrate-from-ftr`), then adopt the helper in the Scout test. The judgment rules above
+apply regardless.
 
 ## References
 
