@@ -19,7 +19,7 @@ export interface ToSignificantEventSeedParams {
  * `.significant_events-events` between continuation cycles. The seeded doc has `status: "promoted"`
  * so the next cycle's `event_search state: "open"` call picks it up for continuation routing.
  */
-export function toSignificantEventSeed({
+export function canonicalSignificantEventFromGroundTruth({
   discovery,
   eventId,
 }: ToSignificantEventSeedParams): SignificantEvent {
