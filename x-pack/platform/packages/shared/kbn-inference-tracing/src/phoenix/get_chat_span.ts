@@ -45,6 +45,7 @@ import type {
 } from '../types';
 import { GenAISemanticConventions } from '../types';
 import { flattenAttributes } from '../util/flatten_attributes';
+import { parseJsonAttr } from '../util/parse_json_attr';
 
 function isTextPart(part: GenAIMessagePart): part is GenAITextPart {
   return part.type === 'text';
@@ -56,15 +57,6 @@ function isToolCallPart(part: GenAIMessagePart): part is GenAIToolCallPart {
 
 function isToolCallResponsePart(part: GenAIMessagePart): part is GenAIToolCallResponsePart {
   return part.type === 'tool_call_response';
-}
-
-function parseJsonAttr<T>(value: unknown): T | undefined {
-  if (typeof value !== 'string') return undefined;
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return undefined;
-  }
 }
 
 export function getChatSpan(span: tracing.ReadableSpan) {

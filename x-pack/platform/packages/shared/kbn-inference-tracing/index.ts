@@ -24,6 +24,7 @@ export {
   EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
   CONVERSATION_ID_BAGGAGE_KEY,
 } from './src/baggage';
+export { parseJsonAttr } from './src/util/parse_json_attr';
 
 export { isInferenceSpan } from './src/is_inference_span';
 export { LangfuseSpanProcessor } from './src/langfuse/langfuse_span_processor';

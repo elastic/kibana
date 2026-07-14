@@ -9,6 +9,7 @@ import type { api } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import {
   GenAISemanticConventions,
+  parseJsonAttr,
   type GenAIInputMessage,
   type GenAIOutputMessage,
   type GenAIMessagePart,
@@ -183,9 +184,10 @@ function applyMessageAttributePrivacy(
   }
 
   if (!settings.includeUserPrompts) {
-    const raw = result[GenAISemanticConventions.GenAIInputMessages];
-    if (typeof raw === 'string') {
-      const msgs = JSON.parse(raw) as GenAIInputMessage[];
+    const msgs = parseJsonAttr<GenAIInputMessage[]>(
+      result[GenAISemanticConventions.GenAIInputMessages]
+    );
+    if (msgs) {
       const filtered = msgs.filter((m) => m.role !== 'user');
       result[GenAISemanticConventions.GenAIInputMessages] = JSON.stringify(filtered);
     }
@@ -193,26 +195,29 @@ function applyMessageAttributePrivacy(
 
   if (!settings.includeLlmResponses) {
     delete result[GenAISemanticConventions.GenAIOutputMessages];
-    const raw = result[GenAISemanticConventions.GenAIInputMessages];
-    if (typeof raw === 'string') {
-      const msgs = JSON.parse(raw) as GenAIInputMessage[];
+    const msgs = parseJsonAttr<GenAIInputMessage[]>(
+      result[GenAISemanticConventions.GenAIInputMessages]
+    );
+    if (msgs) {
       const filtered = msgs.filter((m) => m.role !== 'assistant');
       result[GenAISemanticConventions.GenAIInputMessages] = JSON.stringify(filtered);
     }
   }
 
   if (!settings.includeToolDetails) {
-    const inputRaw = result[GenAISemanticConventions.GenAIInputMessages];
-    if (typeof inputRaw === 'string') {
-      const msgs = JSON.parse(inputRaw) as GenAIInputMessage[];
+    const msgs = parseJsonAttr<GenAIInputMessage[]>(
+      result[GenAISemanticConventions.GenAIInputMessages]
+    );
+    if (msgs) {
       const withoutToolMsgs = msgs.filter((m) => m.role !== 'tool');
       const stripped = stripToolCallPartsFromMessages(withoutToolMsgs);
       result[GenAISemanticConventions.GenAIInputMessages] = JSON.stringify(stripped);
     }
 
-    const outputRaw = result[GenAISemanticConventions.GenAIOutputMessages];
-    if (typeof outputRaw === 'string') {
-      const outputMsgs = JSON.parse(outputRaw) as GenAIOutputMessage[];
+    const outputMsgs = parseJsonAttr<GenAIOutputMessage[]>(
+      result[GenAISemanticConventions.GenAIOutputMessages]
+    );
+    if (outputMsgs) {
       result[GenAISemanticConventions.GenAIOutputMessages] = JSON.stringify(
         stripToolCallPartsFromMessages(outputMsgs)
       );
@@ -220,9 +225,10 @@ function applyMessageAttributePrivacy(
   }
 
   if (!settings.includeRealNames) {
-    const inputRaw = result[GenAISemanticConventions.GenAIInputMessages];
-    if (typeof inputRaw === 'string') {
-      const msgs = JSON.parse(inputRaw) as GenAIInputMessage[];
+    const msgs = parseJsonAttr<GenAIInputMessage[]>(
+      result[GenAISemanticConventions.GenAIInputMessages]
+    );
+    if (msgs) {
       const anonymized = msgs.map((msg) => ({
         ...msg,
         parts: anonymizeToolNamesInParts(msg.parts),
@@ -230,9 +236,10 @@ function applyMessageAttributePrivacy(
       result[GenAISemanticConventions.GenAIInputMessages] = JSON.stringify(anonymized);
     }
 
-    const outputRaw = result[GenAISemanticConventions.GenAIOutputMessages];
-    if (typeof outputRaw === 'string') {
-      const outputMsgs = JSON.parse(outputRaw) as GenAIOutputMessage[];
+    const outputMsgs = parseJsonAttr<GenAIOutputMessage[]>(
+      result[GenAISemanticConventions.GenAIOutputMessages]
+    );
+    if (outputMsgs) {
       const anonymized = outputMsgs.map((msg) => ({
         ...msg,
         parts: anonymizeToolNamesInParts(msg.parts),

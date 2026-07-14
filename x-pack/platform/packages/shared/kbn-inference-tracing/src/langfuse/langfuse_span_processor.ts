@@ -11,6 +11,7 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { memoize } from 'lodash';
 import { diag } from '@opentelemetry/api';
 import { BaseInferenceSpanProcessor } from '../base_inference_span_processor';
+import { parseJsonAttr } from '../util/parse_json_attr';
 import type {
   GenAIInputMessage,
   GenAIMessagePart,
@@ -26,15 +27,6 @@ function isTextPart(part: GenAIMessagePart): part is GenAITextPart {
 
 function isToolCallPart(part: GenAIMessagePart): part is GenAIToolCallPart {
   return part.type === 'tool_call';
-}
-
-function parseJsonAttr<T>(value: unknown): T | undefined {
-  if (typeof value !== 'string') return undefined;
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return undefined;
-  }
 }
 
 export class LangfuseSpanProcessor extends BaseInferenceSpanProcessor {
