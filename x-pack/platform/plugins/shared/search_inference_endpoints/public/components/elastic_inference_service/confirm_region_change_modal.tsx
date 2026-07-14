@@ -8,8 +8,7 @@
 import React from 'react';
 import { EuiConfirmModal, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getGeoDisplayName, regionKey } from '../../utils/eis_utils';
-import { REGION_DISPLAY_NAMES } from '../../../common/constants';
+import { getGeoDisplayName, getRegionDisplayName } from '../../utils/eis_utils';
 import type { CspRegion } from '../../../common/types';
 import type { PolicyMode } from '../../types';
 
@@ -95,14 +94,9 @@ export const ConfirmRegionChangeModal: React.FC<ConfirmRegionChangeModalProps> =
           </ul>
         ) : (
           <ul data-test-subj="confirmModalRegionList">
-            {selectedRegions.map((r) => {
-              const key = regionKey(r);
-              return (
-                <li key={key}>{`${
-                  REGION_DISPLAY_NAMES[key] ?? r.region
-                } - ${r.csp.toUpperCase()}`}</li>
-              );
-            })}
+            {selectedRegions.map((r) => (
+              <li key={`${r.csp}::${r.region}`}>{getRegionDisplayName(r)}</li>
+            ))}
           </ul>
         )}
       </EuiText>

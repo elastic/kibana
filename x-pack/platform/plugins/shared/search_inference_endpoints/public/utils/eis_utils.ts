@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { EisInferenceEndpoint, CspRegion } from '../../common/types';
+import { REGION_DISPLAY_NAMES } from '../../common/constants';
 import { EisModelStatus } from '../../common/types';
 import type { PolicyMode } from '../types';
 import {
@@ -332,6 +333,15 @@ const GEO_DISPLAY_NAMES: Record<string, string> = {
  * EIS uses short codes ("us", "eu", "apac"); unknown values fall back to the raw code.
  */
 export const getGeoDisplayName = (geo: string): string => GEO_DISPLAY_NAMES[geo] ?? geo;
+
+/**
+ * Returns the display label for a CSP region, e.g. "US East (N. Virginia) - AWS".
+ * Falls back to the raw region code when no display name is registered.
+ */
+export const getRegionDisplayName = (r: CspRegion): string => {
+  const key = regionKey(r);
+  return `${REGION_DISPLAY_NAMES[key] ?? r.region} - ${r.csp.toUpperCase()}`;
+};
 
 const collectRegionsPerGeo = (endpoints: EisInferenceEndpoint[]): Map<string, CspRegion[]> => {
   const byGeo = new Map<string, Map<string, CspRegion>>();

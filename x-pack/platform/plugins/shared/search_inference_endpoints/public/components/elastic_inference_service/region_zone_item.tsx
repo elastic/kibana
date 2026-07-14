@@ -8,8 +8,7 @@
 import React from 'react';
 import { EuiAccordion, EuiCheckbox, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { regionKey } from '../../utils/eis_utils';
-import { REGION_DISPLAY_NAMES } from '../../../common/constants';
+import { getRegionDisplayName, regionKey } from '../../utils/eis_utils';
 import type { ZoneGroup } from './region_zone_list';
 
 export interface RegionZoneItemProps {
@@ -62,7 +61,7 @@ export const RegionZoneItem: React.FC<RegionZoneItemProps> = ({
             <EuiCheckbox
               key={key}
               id={`region-${key}`}
-              label={`${REGION_DISPLAY_NAMES[key] ?? r.region} - ${r.csp.toUpperCase()}`}
+              label={getRegionDisplayName(r)}
               checked={checkedKeys.has(key)}
               onChange={() => onToggleRegion(key)}
               data-test-subj={`manageRegionsCheckbox-${key}`}
