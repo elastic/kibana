@@ -293,12 +293,8 @@ export const allowedExperimentalValues = Object.freeze({
    * config flag, which gates the underlying primitive that produces the history
    * records. Both must be enabled for the API to return non-empty results.
    */
-  ruleChangesHistoryEnabled: false,
+  ruleChangesHistoryEnabled: true,
 
-  /**
-   * Enables the Agents, Discover and Workflows external links in the classic Security Solution side navigation
-   */
-  securityClassicNavExternalLinks: true,
   /**
    * Enables public Detection Engine attacks REST APIs
    * (`/api/detection_engine/attacks/*`).
@@ -316,12 +312,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the risk score history API endpoint for Entity Analytics.
    */
   riskScoreHistoryEnabled: false,
-
-  /**
-   * Enables the Attacks page tour (welcome callout + guided tour).
-   * Release: 9.5
-   */
-  attacksPageTourEnabled: false,
 
   /**
    * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift

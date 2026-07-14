@@ -137,12 +137,42 @@ interface KnowledgeIndicatorOnboardingScheduledProps {
   skip_queries: boolean;
 }
 
+interface AgentToolEventWriteProps {
+  success: boolean;
+  discovery_slug: string;
+  status: SignificantEventStatus;
+  written: boolean;
+  stream_names: string[];
+  error_message?: string;
+}
+
+interface AgentToolDiscoveryWriteProps {
+  success: boolean;
+  kind: 'discovery' | 'clearance' | 'handled';
+  discovery_slug: string;
+  stream_names: string[];
+  written: boolean;
+  error_message?: string;
+}
+
+interface AgentToolEventSearchProps {
+  success: boolean;
+  result_count: number;
+  has_query: boolean;
+  has_stream_filter: boolean;
+  state_filter?: 'open' | 'closed';
+  error_message?: string;
+}
+
 export {
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
+  type AgentToolDiscoveryWriteProps,
   type AgentToolEventCreateProps,
   type AgentToolEventInvestigationAttachProps,
+  type AgentToolEventSearchProps,
   type AgentToolEventStatusUpdateProps,
+  type AgentToolEventWriteProps,
   type CodeAnalysisGroundingProps,
   type DetectionScanProps,
   type DiscoveryTriggeredProps,

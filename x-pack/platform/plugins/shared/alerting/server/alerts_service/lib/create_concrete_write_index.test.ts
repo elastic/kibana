@@ -374,6 +374,129 @@ describe('createConcreteWriteIndex', () => {
         expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
       });
 
+      it(`should not lower an existing total_fields.limit that is higher than the configured value`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.getSettings.mockResolvedValue({
+          '.internal.alerts-test.alerts-default-000001': {
+            settings: {
+              'index.mapping.total_fields.limit': '5000',
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': 'true',
+            },
+          },
+        });
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
+      });
+
+      it(`should skip the settings update when the existing limit equals the configured value`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.getSettings.mockResolvedValue({
+          '.internal.alerts-test.alerts-default-000001': {
+            settings: {
+              'index.mapping.total_fields.limit': '2500',
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': 'true',
+            },
+          },
+        });
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
+      });
+
+      it(`should raise an existing lower total_fields.limit to the configured value`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.getSettings.mockResolvedValue({
+          '.internal.alerts-test.alerts-default-000001': {
+            settings: {
+              'index.mapping.total_fields.limit': '2000',
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': 'true',
+            },
+          },
+        });
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+        expect(clusterClient.indices.putSettings).toHaveBeenCalledWith({
+          index: useDataStream
+            ? '.alerts-test.alerts-default'
+            : '.internal.alerts-test.alerts-default-000001',
+          settings: {
+            'index.mapping.total_fields.limit': 2500,
+            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+          },
+        });
+      });
+
+      it(`should preserve a higher existing limit when the ignore_dynamic_beyond_limit flag is missing`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.getSettings.mockResolvedValue({
+          '.internal.alerts-test.alerts-default-000001': {
+            settings: {
+              'index.mapping.total_fields.limit': '5000',
+            },
+          },
+        });
+
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+        });
+
+        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+        expect(clusterClient.indices.putSettings).toHaveBeenCalledWith({
+          index: useDataStream
+            ? '.alerts-test.alerts-default'
+            : '.internal.alerts-test.alerts-default-000001',
+          settings: {
+            'index.mapping.total_fields.limit': 5000,
+            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+          },
+        });
+      });
+
       it(`should skip updating underlying settings and mappings of existing concrete indices if they follow an unexpected naming convention`, async () => {
         clusterClient.indices.getAlias.mockImplementation(async () => ({
           bad_index_name: {
