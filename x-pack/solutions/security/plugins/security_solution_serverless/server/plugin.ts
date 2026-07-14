@@ -23,7 +23,10 @@ import {
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
 } from '@kbn/workflows/common/constants';
-import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '@kbn/security-solution-navigation';
+import {
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
+} from '@kbn/security-solution-navigation';
 import { ProductTier } from '../common/product';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
@@ -100,6 +103,11 @@ export class SecuritySolutionServerlessPlugin
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
 
     const projectSettings = [...SECURITY_PROJECT_SETTINGS];
+
+    // Registered unconditionally in ESS (`security_solution/server/ui_settings.ts`), so it
+    // must be allowlisted unconditionally here too, otherwise the Attack Discovery Workflows
+    // toggle would not appear in serverless Advanced Settings.
+    projectSettings.push(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING);
 
     // This setting is only registered when `enableAlertsAndAttacksAlignment` is enabled
     if (this.config.experimentalFeatures.enableAlertsAndAttacksAlignment) {
