@@ -36,9 +36,6 @@ const DocumentFlyoutWrapperFromPattern = lazy(() =>
     default: m.DocumentFlyoutWrapperFromPattern,
   }))
 );
-const NotesDetails = lazy(() =>
-  import('../shared/tools/notes').then((m) => ({ default: m.NotesDetails }))
-);
 const AnalyzerGraph = lazy(() =>
   import('./tools/analyzer').then((m) => ({ default: m.AnalyzerGraph }))
 );
@@ -77,11 +74,6 @@ export interface OpenDocumentFlyoutParams {
   renderCellActions?: CellActionRenderer;
   /** Invoked after an alert is mutated inside the flyout, to let the caller refresh. Defaults to a no-op. */
   onAlertUpdated?: () => void;
-}
-
-export interface OpenNotesParams {
-  /** The document record whose notes should be shown. */
-  hit: DataTableRecord;
 }
 
 export interface OpenAnalyzerParams {
@@ -162,8 +154,6 @@ export interface DocumentFlyoutApi {
    * (for callers that don't know the concrete `_index`, e.g. notes).
    */
   openDocumentFlyoutFromPattern: (params: OpenDocumentFlyoutParams) => void;
-  /** Opens the notes tools flyout for a document. */
-  openNotes: (params: OpenNotesParams) => void;
   /** Opens the analyzer tools flyout for a document. */
   openAnalyzer: (params: OpenAnalyzerParams) => void;
   /** Opens the session view tools flyout for a document. */
@@ -280,13 +270,6 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey]
-  );
-
-  const openNotes = useCallback(
-    ({ hit }: OpenNotesParams) => {
-      open(<NotesDetails hit={hit} />, { ...defaultToolsFlyoutProperties, historyKey });
-    },
-    [open, historyKey]
   );
 
   const openAnalyzer = useCallback(
@@ -433,7 +416,6 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       openDocumentFlyoutFromIndex,
       openDocumentFlyoutFromIndexAsChild,
       openDocumentFlyoutFromPattern,
-      openNotes,
       openAnalyzer,
       openSessionView,
       openDocumentEntities,
@@ -448,7 +430,6 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       openDocumentFlyoutFromIndex,
       openDocumentFlyoutFromIndexAsChild,
       openDocumentFlyoutFromPattern,
-      openNotes,
       openAnalyzer,
       openSessionView,
       openDocumentEntities,
