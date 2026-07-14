@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getAvailableConnectors, takeRandomLlmSample } from '@kbn/gen-ai-functional-testing';
+import {
+  excludeUnavailableLlmConnectors,
+  getAvailableConnectors,
+  takeRandomLlmSample,
+} from '@kbn/gen-ai-functional-testing';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { converseApiSuite } from './converse';
 import { getPreDiscoveredEisModels, enableCcm } from './eis_helpers';
@@ -20,7 +24,7 @@ export default function (providerContext: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
 
-  const allStaticConnectors = getAvailableConnectors();
+  const allStaticConnectors = excludeUnavailableLlmConnectors(getAvailableConnectors());
   const sampledStaticConnectors = takeRandomLlmSample(allStaticConnectors);
   const allEisModels = getPreDiscoveredEisModels();
   const sampledEisModels = takeRandomLlmSample(allEisModels);
