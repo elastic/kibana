@@ -72,19 +72,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           defaultMessage: 'Geographies',
         }),
         'data-test-subj': 'manageRegionsGeoTab',
-        content: (
-          <GeoTabContent
-            isLoading={isLoading}
-            isError={isError}
-            totalGeos={geoTab.total}
-            totalGeosSelected={geoTab.totalSelected}
-            allGeosSelected={geoTab.allSelected}
-            availableGeos={geoTab.availableGeos}
-            checkedGeos={geoTab.checkedGeos}
-            onSelectAll={geoTab.onSelectAll}
-            onToggleGeo={geoTab.onToggleGeo}
-          />
-        ),
+        content: <GeoTabContent isLoading={isLoading} isError={isError} {...geoTab} />,
       },
       {
         id: 'regions',
@@ -92,47 +80,10 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           defaultMessage: 'Regions',
         }),
         'data-test-subj': 'manageRegionsRegionsTab',
-        content: (
-          <RegionsTabContent
-            isLoading={isLoading}
-            isError={isError}
-            totalRegions={regionTab.total}
-            totalSelected={regionTab.totalSelected}
-            allSelected={regionTab.allSelected}
-            isAllExpanded={regionTab.isAllExpanded}
-            zoneGroups={regionTab.zoneGroups}
-            checkedKeys={regionTab.checkedKeys}
-            expandedZones={regionTab.expandedZones}
-            onSelectAll={regionTab.onSelectAll}
-            onExpandAll={regionTab.onExpandAll}
-            onToggleRegion={regionTab.onToggleRegion}
-            onToggleExpand={regionTab.onToggleExpand}
-          />
-        ),
+        content: <RegionsTabContent isLoading={isLoading} isError={isError} {...regionTab} />,
       },
     ],
-    [
-      isLoading,
-      isError,
-      geoTab.total,
-      geoTab.totalSelected,
-      geoTab.allSelected,
-      geoTab.availableGeos,
-      geoTab.checkedGeos,
-      geoTab.onSelectAll,
-      geoTab.onToggleGeo,
-      regionTab.total,
-      regionTab.totalSelected,
-      regionTab.allSelected,
-      regionTab.isAllExpanded,
-      regionTab.zoneGroups,
-      regionTab.checkedKeys,
-      regionTab.expandedZones,
-      regionTab.onSelectAll,
-      regionTab.onExpandAll,
-      regionTab.onToggleRegion,
-      regionTab.onToggleExpand,
-    ]
+    [isLoading, isError, geoTab, regionTab]
   );
 
   const selectedTab = useMemo(

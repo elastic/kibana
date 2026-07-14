@@ -308,9 +308,9 @@ describe('useManageRegionsState', () => {
         isError: false,
       } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.geoTab.allSelected).toBe(true);
+      expect(result.current.geoTab.allGeosSelected).toBe(true);
       act(() => result.current.geoTab.onSelectAll());
-      expect(result.current.geoTab.totalSelected).toBe(0);
+      expect(result.current.geoTab.totalGeosSelected).toBe(0);
     });
   });
 

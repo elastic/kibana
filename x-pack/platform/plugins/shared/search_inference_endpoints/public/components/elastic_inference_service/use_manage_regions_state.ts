@@ -139,12 +139,12 @@ export const useManageRegionsState = (onClose: () => void) => {
       handleConfirmSave,
       handleCancelConfirmation,
     },
-    // Regions tab
+    // Regions tab — keys match RegionsTabContentProps for direct spread
     regionTab: {
       zoneGroups: regionTab.zoneGroups,
       checkedKeys: regionTab.regionSelection.selected,
       expandedZones: regionTab.expandedZones,
-      total: regionTab.regionSelection.total,
+      totalRegions: regionTab.regionSelection.total,
       totalSelected: regionTab.regionSelection.totalSelected,
       allSelected: regionTab.regionSelection.allSelected,
       isAllExpanded: regionTab.isAllExpanded,
@@ -153,13 +153,13 @@ export const useManageRegionsState = (onClose: () => void) => {
       onToggleExpand: regionTab.handleToggleExpand,
       onExpandAll: regionTab.handleExpandAll,
     },
-    // Geo tab
+    // Geo tab — keys match GeoTabContentProps for direct spread
     geoTab: {
       availableGeos,
       checkedGeos: geoSelection.selected,
-      total: geoSelection.total,
-      totalSelected: geoSelection.totalSelected,
-      allSelected: geoSelection.allSelected,
+      totalGeos: geoSelection.total,
+      totalGeosSelected: geoSelection.totalSelected,
+      allGeosSelected: geoSelection.allSelected,
       onSelectAll: geoSelection.selectAll,
       onToggleGeo: geoSelection.toggle,
     },
