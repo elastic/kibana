@@ -54,6 +54,51 @@ describe('executeRuleOperations', () => {
       ]);
     });
 
+    it('resolves the time field from the source index instead of defaulting to @timestamp', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'timestamp', type: 'date' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: { timestamp: { date: {} } },
+      } as never);
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM kibana_sample_data_flights | STATS COUNT(*)' },
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient);
+
+      expect(result.data.time_field).toBe('timestamp');
+    });
+
+    it('does not set the time field when the index has no date fields', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'cpu', type: 'double' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({ fields: {} } as never);
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS avg(cpu)' } },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient);
+
+      expect(result.data.time_field).toBeUndefined();
+    });
+
     it('throws with the ES error message when the query is invalid', async () => {
       const esClient = createMockEsClient();
       esClient.asCurrentUser.esql.query.mockRejectedValueOnce(

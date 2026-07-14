@@ -10,6 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getESQLTimeFieldFromQuery } from '@kbn/esql-utils';
+import { DEFAULT_TIME_FIELD, resolveTimeField } from '@kbn/alerting-v2-schemas';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import { ruleFormKeys } from '../../form/hooks/query_key_factory';
 import { extractFromSourceQuery } from './extract_from_source_query';
@@ -68,7 +69,19 @@ export const useResolveTimeField = ({
     retry: false,
   });
 
-  const resolvedTimeField = dateFields[0] ?? apiTimeField;
+  // Candidate date fields: field caps when available, otherwise the single
+  // field the ES|QL API inferred from the query.
+  const candidateDateFields = useMemo(
+    () => (dateFields.length > 0 ? dateFields : apiTimeField ? [apiTimeField] : []),
+    [dateFields, apiTimeField]
+  );
+
+  const resolvedTimeField = useMemo(
+    () => resolveTimeField({ dateFields: candidateDateFields, currentTimeField: timeField }),
+    [candidateDateFields, timeField]
+  );
+
+  const isLoadingResolution = isLoadingFields || (needsApiTimeField && isLoadingApiTimeField);
 
   const timeFieldOptions = useMemo(() => {
     if (dateFields.length > 0) {
@@ -77,42 +90,34 @@ export const useResolveTimeField = ({
     if (apiTimeField) {
       return [{ value: apiTimeField, text: apiTimeField }];
     }
-    return [{ value: '@timestamp', text: '@timestamp' }];
+    return [{ value: DEFAULT_TIME_FIELD, text: DEFAULT_TIME_FIELD }];
   }, [dateFields, apiTimeField]);
 
   const isTimeFieldResolved = useMemo(() => {
     if (!enabled || !fromSourceQuery) {
       return true;
     }
-    if (isLoadingFields || (needsApiTimeField && isLoadingApiTimeField)) {
+    if (isLoadingResolution) {
       return false;
     }
-    if (resolvedTimeField) {
-      return timeField === resolvedTimeField;
+    return timeField === resolvedTimeField;
+  }, [enabled, fromSourceQuery, isLoadingResolution, resolvedTimeField, timeField]);
+
+  useEffect(() => {
+    if (!enabled || !onTimeFieldChange || !fromSourceQuery || isLoadingResolution) {
+      return;
     }
-    return true;
+    if (timeField !== resolvedTimeField) {
+      onTimeFieldChange(resolvedTimeField);
+    }
   }, [
     enabled,
     fromSourceQuery,
-    isLoadingFields,
-    needsApiTimeField,
-    isLoadingApiTimeField,
+    isLoadingResolution,
     resolvedTimeField,
     timeField,
+    onTimeFieldChange,
   ]);
-
-  useEffect(() => {
-    if (!enabled || !onTimeFieldChange || !fromSourceQuery) {
-      return;
-    }
-    if (dateFields.length > 0 && !dateFields.includes(timeField)) {
-      onTimeFieldChange(dateFields[0]);
-    } else if (apiTimeField && timeField !== apiTimeField) {
-      onTimeFieldChange(apiTimeField);
-    } else if (dateFields.length === 0 && !apiTimeField && timeField !== '@timestamp') {
-      onTimeFieldChange('@timestamp');
-    }
-  }, [enabled, fromSourceQuery, dateFields, apiTimeField, timeField, onTimeFieldChange]);
 
   return {
     timeFieldOptions,

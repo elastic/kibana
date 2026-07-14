@@ -28,6 +28,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/react-hooks';
+import { DEFAULT_TIME_FIELD, resolveTimeField } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../../../../form/types';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { useIndexSources } from '../../../../form/hooks/use_index_sources';
@@ -112,18 +113,31 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     [fieldMap]
   );
 
-  const dateFields = useMemo(() => {
-    const dates = Object.values(fieldMap)
-      .filter((f) => f.type === 'date')
-      .map((f) => f.name)
-      .sort();
-    if (dates.length === 0) return ['@timestamp'];
-    return dates;
-  }, [fieldMap]);
+  const dateFields = useMemo(
+    () =>
+      Object.values(fieldMap)
+        .filter((f) => f.type === 'date')
+        .map((f) => f.name)
+        .sort(),
+    [fieldMap]
+  );
 
+  // Show real date fields when known, otherwise fall back to the default.
+  const timeFieldOptions = dateFields.length > 0 ? dateFields : [DEFAULT_TIME_FIELD];
+
+  // Auto-correct the selected time field once real date fields load, so we never
+  // build ES|QL against a non-existent `@timestamp` (rna-program#613). Only runs
+  // when fields are known to avoid clobbering during loading.
   useEffect(() => {
-    if (dateFields.length > 0 && !dateFields.includes(thresholdValues.timeField)) {
-      onThresholdValuesChange({ ...thresholdValues, timeField: dateFields[0] });
+    if (dateFields.length === 0) {
+      return;
+    }
+    const resolved = resolveTimeField({
+      dateFields,
+      currentTimeField: thresholdValues.timeField,
+    });
+    if (resolved !== thresholdValues.timeField) {
+      onThresholdValuesChange({ ...thresholdValues, timeField: resolved });
     }
   }, [dateFields, thresholdValues, onThresholdValuesChange]);
 
@@ -491,7 +505,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
         <EuiSelect
           fullWidth
           compressed
-          options={dateFields.map((name) => ({ value: name, text: name }))}
+          options={timeFieldOptions.map((name) => ({ value: name, text: name }))}
           value={thresholdValues.timeField}
           onChange={(e) => update('timeField', e.target.value)}
           data-test-subj="ruleBuilderTimeField"

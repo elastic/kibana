@@ -12,6 +12,7 @@ import {
   MAX_ARTIFACT_VALUE_LIMIT,
 } from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
+import { DEFAULT_TIME_FIELD } from './time_field';
 import { durationSchema, tagsSchema } from './common';
 import {
   MAX_CONSECUTIVE_BREACHES,
@@ -372,7 +373,7 @@ export const createRuleDataBaseSchema = z
       .string()
       .min(1)
       .max(128)
-      .default('@timestamp')
+      .default(DEFAULT_TIME_FIELD)
       .describe('Time field used for the lookback window range filter.'),
     schedule: scheduleSchema,
     query: querySchema,

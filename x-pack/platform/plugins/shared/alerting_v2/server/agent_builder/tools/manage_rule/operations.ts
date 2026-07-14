@@ -27,6 +27,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
+import { resolveTimeFieldForQuery } from './resolve_time_field';
 
 // Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept
 // local to avoid forcing an export purely for this guard.
@@ -192,12 +193,19 @@ export const executeRuleOperations = async (
       }
 
       case 'set_query': {
+        const rootQuery = getRootEsqlQuery(op.query);
+        let resolvedTimeField: string | undefined;
         if (esClient) {
-          lastQueryColumns = await validateEsqlQuery(esClient, getRootEsqlQuery(op.query));
+          lastQueryColumns = await validateEsqlQuery(esClient, rootQuery);
+          // Resolve the time field from the index so we don't persist a
+          // non-existent `@timestamp` (rna-program#613). Best-effort: keeps the
+          // current value when the index has no discoverable date fields.
+          resolvedTimeField = await resolveTimeFieldForQuery(esClient, rootQuery, next.time_field);
         }
         next = {
           ...next,
           query: op.query,
+          ...(resolvedTimeField !== undefined ? { time_field: resolvedTimeField } : {}),
           ...(op.recovery_strategy !== undefined
             ? { recovery_strategy: op.recovery_strategy }
             : {}),
