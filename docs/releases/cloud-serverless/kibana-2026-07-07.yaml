@@ -22,13 +22,13 @@ entries:
   - https://github.com/elastic/kibana/issues/275147
 - file:
     name: 272068.yaml
-    checksum: 4b950f7817f58969cbab6dfb2f1ea39172fa7b4b
+    checksum: 108ee58ddd261589faec250bc8de55c171087fee
   type: enhancement
-  title: Add DLL Search Order Hijack detection enrichment to Defend Advanced Policy
+  title: Add advanced policy option to disable DLL search order hijack enrichment
   products:
   - product: cloud-serverless
     target: 2026-07-07
-  description: '{elastic-defend} Adds advanced policy options for {windows} that lets users disable the enrichment of DLL Search Order Hijacking events.'
+  description: Adds advanced policy options for Windows that let you disable the enrichment of DLL search order hijacking events.
   prs:
   - https://github.com/elastic/kibana/pull/272068
 - file:
@@ -96,9 +96,9 @@ entries:
   - https://github.com/elastic/kibana/issues/275606
 - file:
     name: 275647.yaml
-    checksum: 3727d65a7b55c778ca48739a7e51d662c6bfc64c
+    checksum: 132b9566bb9890d5a59a12a286a97a06f5a887bf
   type: bug-fix
-  title: Fix case links from alert details in SLO and observability apps
+  title: Fix case links from alert details in SLO and Observability apps
   products:
   - product: cloud-serverless
     target: 2026-07-07
@@ -120,9 +120,9 @@ entries:
   - https://github.com/elastic/kibana/issues/275789
 - file:
     name: 275597.yaml
-    checksum: 9b691af3e95955904a2b8f1e4232d221d3dc47f2
+    checksum: 927f4dafca9e29bba9e77a7184e97182f1729629
   type: feature
-  title: Add Osquery query results export
+  title: Add an option to export Osquery query results
   products:
   - product: cloud-serverless
     target: 2026-07-07
@@ -156,9 +156,9 @@ entries:
   - https://github.com/elastic/kibana/issues/273111
 - file:
     name: 274646.yaml
-    checksum: 20908cbca54ae021519a41c6267a500b28572bbc
+    checksum: 916da6808c518b39d1e854a0a9597bed45c550a0
   type: bug-fix
-  title: Fix xpack.productDocBase.artifactRepositoryProxyUrl silently ignored
+  title: Fix an issue where `xpack.productDocBase.artifactRepositoryProxyUrl` was silently ignored
   products:
   - product: cloud-serverless
     target: 2026-07-07
@@ -182,22 +182,6 @@ entries:
   issues:
   - https://github.com/elastic/kibana/issues/267914
 - file:
-    name: 268951.yaml
-    checksum: c2086e46e4fcd27de6bd0845f1fa3267c9a541f9
-  type: breaking-change
-  title: Align Dashboard API search endpoint schema with As Code schemas
-  products:
-  - product: cloud-serverless
-    target: 2026-07-07
-  impact: Dashboard API search request and response schemas change when `asCode.useGASchemas` is enabled. Requests are limited to a `per_page` of 1000, and responses use a `data` and `meta` structure instead of `dashboards`, `page`, and `total`.
-  action: Update Dashboard API clients to use the `data` and `meta` response fields and respect the `per_page` limit. Test integrations against the new schema before the `asCode.useGASchemas` flag is enabled for your deployment.
-  areas:
-  - Dashboards and visualizations
-  prs:
-  - https://github.com/elastic/kibana/pull/268951
-  issues:
-  - https://github.com/elastic/kibana/issues/267607
-- file:
     name: 271793.yaml
     checksum: 039f18039456ea28a36c1674dafa44ba07672824
   type: enhancement
@@ -212,9 +196,9 @@ entries:
   - https://github.com/elastic/kibana/pull/271793
 - file:
     name: 275601.yaml
-    checksum: e6faddb4d0dd8fa66ef4a1930e1623a6b044a478
+    checksum: 2dc5c6b667335e828d72ff15b0846978a7e97c04
   type: feature
-  title: Add PrivateLink endpoint support for Fleet Server and ES output in serverless
+  title: Add PrivateLink endpoint support for Fleet Server and Elasticsearch output
   products:
   - product: cloud-serverless
     target: 2026-07-07
@@ -247,9 +231,9 @@ entries:
   - https://github.com/elastic/kibana/pull/276201
 - file:
     name: 275417.yaml
-    checksum: 481ae4434cc51fc4a41f8905de764171c80647c2
+    checksum: 4733c95bc362de6871a4ef8b3cd7756a6d5a4bdd
   type: bug-fix
-  title: Timeline fails for suppressed alerts with exception lists
+  title: Fix an issue where Investigate in Timeline failed for suppressed alerts with exception lists
   products:
   - product: cloud-serverless
     target: 2026-07-07
@@ -272,9 +256,9 @@ entries:
   - https://github.com/elastic/kibana/issues/272232
 - file:
     name: 275694.yaml
-    checksum: 697ce5ddcec4918ebbfdd3213a251b2f27f67b77
+    checksum: 204ae59223aee0bfa3ba59c7f03a09ecdafee8fe
   type: bug-fix
-  title: Reintroduce hardcoded to text conversion for quick fix
+  title: Reintroduce hardcoded `TO_TEXT` conversion
   products:
   - product: cloud-serverless
     target: 2026-07-07
@@ -284,9 +268,9 @@ entries:
   - https://github.com/elastic/kibana/pull/275694
 - file:
     name: 270398.yaml
-    checksum: c24d654f1864261993c73649593e26638fe4436e
+    checksum: 94d193a6cced904f5f215a3ab7a08c5b6caf7cd7
   type: enhancement
-  title: Add min_* rollover fields
+  title: Add `min_*` rollover fields
   products:
   - product: cloud-serverless
     target: 2026-07-07
@@ -376,9 +360,9 @@ entries:
   - https://github.com/elastic/kibana/issues/254889
 - file:
     name: 275706.yaml
-    checksum: dcb6d16b243b4e4d1babc45f3aa0ec96fc400a53
+    checksum: 0c0d9c0a89d50a282b4fcba4b0d9f8a14061f268
   type: enhancement
-  title: 'Streams: Introduce add data phases flow to Streams UI'
+  title: Introduce add data phases flow to Streams UI
   products:
   - product: cloud-serverless
     target: 2026-07-07
@@ -464,13 +448,13 @@ entries:
   - https://github.com/elastic/kibana/pull/275853
 - file:
     name: 275453.yaml
-    checksum: 1cedb56de63ee3d1cf7f8f2b28c554d2d292ec71
+    checksum: 3ad6c34d75a6c1fc9a4674c90b39d3349093bf6d
   type: bug-fix
-  title: Fix Logstash output client SSL certificate/key incorrectly required
+  title: Fix an issue where the Fleet UI incorrectly required Client SSL certificate and Client SSL certificate key for Logstash outputs when SSL was enabled
   products:
   - product: cloud-serverless
     target: 2026-07-07
-  description: Fixed a bug where the Fleet UI incorrectly required Client SSL certificate and Client SSL certificate key for Logstash outputs when SSL was enabled, preventing users from configuring server-only TLS. The client cert and key are now optional but required together (both or neither) to support correct mTLS configuration.
+  description: The issue prevented users from configuring server-only TLS. The client cert and key are now optional but required together (both or neither) to support correct mTLS configuration.
   areas:
   - Search and data
   prs:
@@ -492,9 +476,9 @@ entries:
   - '# PRIVATE: https://github.com/elastic/security-team/issues/16730'
 - file:
     name: 273572.yaml
-    checksum: f2e7a87ccee44ccdc7e9f27536d358c387b014a3
+    checksum: ad2a51b594e241aeabff9aab6f20a9f1a3dbec8d
   type: feature
-  title: Add observabilityAlerts feature privilege
+  title: Add Observability Alerts (`observabilityAlerts`) feature privilege
   products:
   - product: cloud-serverless
     target: 2026-07-07
