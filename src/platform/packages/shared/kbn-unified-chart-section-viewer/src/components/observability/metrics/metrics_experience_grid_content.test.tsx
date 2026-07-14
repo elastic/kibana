@@ -18,6 +18,8 @@ import type {
 } from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ParsedMetricItem, MetricUnit, Dimension } from '../../../types';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '../../flyout/metrics_grid_settings_flyout/constants';
+import { DEFAULT_METRICS_SORT } from '../../../common/constants';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
@@ -125,7 +127,11 @@ describe('MetricsExperienceGridContent', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: DEFAULT_METRICS_SORT,
+      onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
+      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      onGridSettingsChange: jest.fn(),
     });
 
     usePaginationMock.mockReturnValue({
@@ -188,7 +194,11 @@ describe('MetricsExperienceGridContent', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: DEFAULT_METRICS_SORT,
+      onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
+      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      onGridSettingsChange: jest.fn(),
     });
 
     const cpuMetricItems = allFieldsSomeWithCpu.filter((f) => f.metricName.includes('cpu'));

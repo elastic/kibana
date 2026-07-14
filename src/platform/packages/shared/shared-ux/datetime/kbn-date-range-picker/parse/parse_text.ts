@@ -339,7 +339,7 @@ function containsGrammarVocabulary(text: string, compiled: CompiledGrammar): boo
 function dateStringToDate(
   dateString: DateString,
   formats: string[],
-  options?: { roundUp?: boolean }
+  options?: { roundUp?: boolean; forceNow?: Date }
 ): Date | null {
   const strict = moment(dateString, formats, true);
   if (strict.isValid()) return strict.toDate();
@@ -374,12 +374,14 @@ function buildRange(
 ): TimeRange {
   const startType = dateStringToType(start);
   const endType = dateStringToType(end);
+  // Anchor both bounds to the same instant
+  const forceNow = new Date();
   const range: TimeRange = {
     value: text,
     start,
     end,
-    startDate: dateStringToDate(start, formats),
-    endDate: dateStringToDate(end, formats, { roundUp: true }),
+    startDate: dateStringToDate(start, formats, { forceNow }),
+    endDate: dateStringToDate(end, formats, { roundUp: true, forceNow }),
     type: [startType, endType],
     isNaturalLanguage,
     startOffset: startType === DATE_TYPE_RELATIVE ? dateStringToOffset(start) : null,

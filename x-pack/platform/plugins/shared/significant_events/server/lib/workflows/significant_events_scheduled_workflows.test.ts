@@ -102,7 +102,7 @@ describe('scheduled Significant Events managed workflows', () => {
     });
   });
 
-  it('wires the detection interval into both the trigger cadence and the lookback, clamped to a 30m floor', () => {
+  it('wires the detection interval into both the trigger cadence and the lookback, clamped to a 40m floor', () => {
     const belowFloor = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
       detectionIntervalMinutes: 5,
     });
@@ -117,7 +117,7 @@ describe('scheduled Significant Events managed workflows', () => {
     const belowFloorStep = findStep(belowFloor.steps, 'detect');
     expect(belowFloorStep?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
-      inputs: { lookback: 'now-30m' },
+      inputs: { lookback: 'now-40m' },
     });
 
     expect(aboveFloor.triggers).toEqual(
