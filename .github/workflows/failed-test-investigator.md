@@ -40,9 +40,8 @@ env:
   # Lets the agent omit `-o elastic` on every `bk` invocation (see https://buildkite.com/docs/pipelines/configure/environment-variables)
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
-# Installs the `bk` CLI + exports BUILDKITE_API_TOKEN (shared with the flaky-test fixer/verifier).
 imports:
-  - .github/workflows/shared/buildkite-cli-setup.md
+  - .github/workflows/buildkite-cli-setup.md
 
 engine:
   id: claude
