@@ -24,6 +24,8 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
 
     await expect(page).toHaveURL(/\/app\/security\/get_started/);
 
+    // Alerts is now nested inside the "Detections" panel opener; open it before clicking Alerts.
+    await pageObjects.collapsibleNav.getNavItemById('securityGroup:alertDetections').click();
     await pageObjects.collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:alerts');
     await expect(page).toHaveURL(/\/app\/security\/alerts/);
 
