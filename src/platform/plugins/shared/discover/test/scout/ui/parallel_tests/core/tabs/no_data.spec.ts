@@ -13,20 +13,6 @@ import type { DiscoverTestFixtures, DiscoverWorkerFixtures } from '../../../fixt
 import { spaceTest } from '../../../fixtures/common';
 import { DEFAULT_TIME_RANGE } from '../../../fixtures/common/constants';
 
-const createDataViewFromPrompt = async (page: ScoutPage, name: string) => {
-  await page.testSubj.locator('createDataViewButton').click();
-
-  const flyout = page.testSubj.locator('indexPatternEditorFlyout');
-  const form = page.testSubj.locator('indexPatternEditorForm');
-  await flyout.waitFor({ state: 'visible' });
-
-  const titleInput = page.testSubj.locator('createIndexPatternTitleInput');
-  await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
-  await form.and(page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
-  await page.testSubj.locator('saveIndexPatternButton').click();
-  await flyout.waitFor({ state: 'hidden' });
-};
-
 const prepareDiscoverWithoutCustomDataViews = async ({
   browserAuth,
   pageObjects,
@@ -98,8 +84,7 @@ spaceTest.describe(
         await expect(page.testSubj.locator('noDataViewsPrompt')).toBeVisible();
         expect(await unifiedTabs.isTabsBarVisible()).toBe(false);
 
-        await createDataViewFromPrompt(page, 'logstash');
-        await discover.waitUntilTabIsLoaded();
+        await discover.createDataViewFromNoDataPrompt({ name: 'logstash' });
 
         expect(await discover.getSelectedDataViewName()).toBe('logstash*');
         expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(0);

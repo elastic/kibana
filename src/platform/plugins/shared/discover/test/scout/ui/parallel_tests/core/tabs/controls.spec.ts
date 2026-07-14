@@ -46,19 +46,6 @@ const createEsqlControl = async (
   await page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
 };
 
-const saveHistogramToNewDashboard = async (page: ScoutPage, title: string) => {
-  await page.testSubj.locator('unifiedHistogramSaveVisualization').click();
-  await page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'visible' });
-  await page.testSubj.locator('savedObjectTitle').fill(title);
-  await page.testSubj
-    .locator('add-to-dashboard-options')
-    .locator('label[for="new-dashboard-option"]')
-    .click();
-
-  await page.testSubj.locator('confirmSaveSavedObjectButton').click();
-  await page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'hidden' });
-};
-
 const expectOnlyRowsContaining = (rows: string[][], values: string[]) => {
   expect(rows.length).toBeGreaterThan(0);
   expect(
@@ -184,7 +171,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await discover.waitUntilTabIsLoaded();
       await expect(dashboard.getControlsGroupLocator()).toBeVisible();
 
-      await saveHistogramToNewDashboard(page, savedChart);
+      await discover.saveVisualizationToNewDashboard(savedChart);
       await dashboard.waitForRenderComplete();
       await expect(dashboard.getDashboardControlsLocator()).toHaveCount(1);
 

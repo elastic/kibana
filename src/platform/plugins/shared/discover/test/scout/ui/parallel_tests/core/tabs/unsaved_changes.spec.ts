@@ -32,11 +32,6 @@ const saveSession = async (
   await pageObjects.discover.waitUntilTabIsLoaded();
 };
 
-const submitQueryAndWait = async (pageObjects: PageObjects, query: string) => {
-  await pageObjects.discover.writeAndSubmitKqlQuery(query);
-  await pageObjects.discover.waitUntilTabIsLoaded();
-};
-
 spaceTest.describe('Discover tabs - unsaved changes', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
@@ -62,7 +57,7 @@ spaceTest.describe('Discover tabs - unsaved changes', { tag: '@local-stateful-cl
     await saveSession(pageObjects, createSessionName('unsaved-changes-query'));
     await expect(await unifiedTabs.getTabUnsavedIndicator(0)).toBeHidden();
 
-    await submitQueryAndWait(pageObjects, QUERY_IOS);
+    await discover.writeAndSubmitKqlQuery(QUERY_IOS);
 
     await expect(await unifiedTabs.getTabUnsavedIndicator(0)).toBeVisible();
     await expect(discover.unsavedChangesIndicator()).toBeVisible();
@@ -75,7 +70,7 @@ spaceTest.describe('Discover tabs - unsaved changes', { tag: '@local-stateful-cl
     await saveSession(pageObjects, sessionName);
     await expect(await unifiedTabs.getTabUnsavedIndicator(0)).toBeHidden();
 
-    await submitQueryAndWait(pageObjects, QUERY_IOS);
+    await discover.writeAndSubmitKqlQuery(QUERY_IOS);
     await expect(await unifiedTabs.getTabUnsavedIndicator(0)).toBeVisible();
     await expect(discover.unsavedChangesIndicator()).toBeVisible();
 
@@ -92,13 +87,13 @@ spaceTest.describe('Discover tabs - unsaved changes', { tag: '@local-stateful-cl
     await saveSession(pageObjects, createSessionName('unsaved-changes-revert'));
     await expect(await unifiedTabs.getTabUnsavedIndicator(1)).toBeHidden();
 
-    await submitQueryAndWait(pageObjects, QUERY_WINDOWS);
+    await discover.writeAndSubmitKqlQuery(QUERY_WINDOWS);
     await expect(await unifiedTabs.getTabUnsavedIndicator(1)).toBeVisible();
     await expect(discover.unsavedChangesIndicator()).toBeVisible();
 
     await unifiedTabs.selectTab(0);
     await discover.waitUntilTabIsLoaded();
-    await submitQueryAndWait(pageObjects, QUERY_IOS);
+    await discover.writeAndSubmitKqlQuery(QUERY_IOS);
     await expect(await unifiedTabs.getTabUnsavedIndicator(0)).toBeVisible();
     await expect(discover.unsavedChangesIndicator()).toBeVisible();
 
@@ -125,13 +120,13 @@ spaceTest.describe('Discover tabs - unsaved changes', { tag: '@local-stateful-cl
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
-      await submitQueryAndWait(pageObjects, QUERY_IOS);
+      await discover.writeAndSubmitKqlQuery(QUERY_IOS);
       await expect(await unifiedTabs.getTabUnsavedIndicator(0)).toBeVisible();
       await expect(discover.unsavedChangesIndicator()).toBeVisible();
 
       await unifiedTabs.selectTab(1);
       await discover.waitUntilTabIsLoaded();
-      await submitQueryAndWait(pageObjects, QUERY_WINDOWS);
+      await discover.writeAndSubmitKqlQuery(QUERY_WINDOWS);
       await expect(await unifiedTabs.getTabUnsavedIndicator(1)).toBeVisible();
       await expect(await unifiedTabs.getTabUnsavedIndicator(2)).toBeHidden();
 
@@ -163,7 +158,7 @@ spaceTest.describe('Discover tabs - unsaved changes', { tag: '@local-stateful-cl
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
-      await submitQueryAndWait(pageObjects, QUERY_IOS);
+      await discover.writeAndSubmitKqlQuery(QUERY_IOS);
       await expect(await unifiedTabs.getTabUnsavedIndicator(0)).toBeVisible();
       await expect(discover.unsavedChangesIndicator()).toBeVisible();
       expect(await discover.getHitCountInt()).not.toBe(originalHitCount);

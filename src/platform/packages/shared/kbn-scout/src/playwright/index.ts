@@ -13,6 +13,7 @@ import './peggy_setup';
 // Config and utilities
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
+export { extendPlaywrightPage } from './fixtures/scope/test/scout_page/single_thread';
 
 // Matchers
 export { expect } from './matchers/ui';

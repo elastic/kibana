@@ -39,8 +39,12 @@ import type { KibanaUrl } from '../../common/services/kibana_url';
 
 export {
   ContentListWrapper,
+  DiscoverApp,
+  FilterBar,
   DataGrid,
   DataViewsManagementPage,
+  QueryBar,
+  UnifiedTabs,
   ListingTable,
   buildContentListSearch,
   buildContentListUrlRegex,

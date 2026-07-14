@@ -167,6 +167,11 @@ export class DiscoverApp {
     await this.fillAndSubmitDataViewEditor(options);
   }
 
+  async createDataViewFromNoDataPrompt(options: DataViewOptions) {
+    await this.page.testSubj.click('createDataViewButton');
+    await this.fillAndSubmitDataViewEditor(options);
+  }
+
   async getAvailableDataViewsFromSearchBar(): Promise<string[]> {
     await this.openDataViewSwitcher();
     const switcher = this.page.testSubj.locator('indexPattern-switcher');

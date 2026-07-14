@@ -30,6 +30,7 @@ export {
   esArchiverFixture,
   createPlaywrightConfig,
   createLazyPageObject,
+  extendPlaywrightPage,
 } from './src/playwright';
 
 // Playwright integration
@@ -48,6 +49,10 @@ export * from './src/playwright/ui_components';
 export {
   ContentListWrapper,
   DataGrid,
+  DiscoverApp,
+  FilterBar,
+  QueryBar,
+  UnifiedTabs,
   buildContentListSearch,
   buildContentListUrlRegex,
   ListingTable,

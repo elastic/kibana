@@ -7,22 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../fixtures';
+import { spaceTest } from '../../../fixtures/surrounding_docs';
 
 const FIRST_TAB_LABEL = 'Untitled';
 const SECOND_TAB_LABEL = 'testing';
 const THIRD_TAB_LABEL = 'third tab';
 const SAVED_SEARCH_TITLE = 'A Saved Search';
-
-const getFilterBadge = (page: ScoutPage, field: string, value: string) =>
-  page.locator(`[data-test-subj*="filter-key-${field}"][data-test-subj*="filter-value-${value}"]`);
-
-const goBackToDiscover = async (page: ScoutPage) => {
-  await page.testSubj.click('~breadcrumb-deepLinkId-discover');
-  await page.testSubj.locator('dscPage').waitFor({ state: 'visible' });
-};
 
 spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -42,7 +33,7 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
   spaceTest(
     'goes back to the last active tab when returning from Surrounding Docs page',
     async ({ page, pageObjects }) => {
-      const { discover, docViewer, filterBar, unifiedTabs } = pageObjects;
+      const { contextPage, discover, docViewer, filterBar, unifiedTabs } = pageObjects;
 
       await discover.loadSavedSearch(SAVED_SEARCH_TITLE);
       await discover.waitUntilTabIsLoaded();
@@ -81,9 +72,9 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
       await discover.waitUntilTabIsLoaded();
       await docViewer.openSurroundingDocuments(0);
       await page.waitForURL(/#\/context/);
-      await expect(getFilterBadge(page, 'extension', 'jpg')).toBeVisible();
+      expect(await filterBar.hasFilter({ field: 'extension', value: 'jpg' })).toBe(true);
 
-      await goBackToDiscover(page);
+      await contextPage.goBackToDiscover();
       await discover.waitUntilTabIsLoaded();
 
       expect(await discover.getHitCountInt()).toBe(9_109);
@@ -92,7 +83,7 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
         SECOND_TAB_LABEL,
         THIRD_TAB_LABEL,
       ]);
-      await expect(getFilterBadge(page, 'extension', 'jpg')).toHaveCount(1);
+      expect(await filterBar.hasFilter({ field: 'extension', value: 'jpg' })).toBe(true);
       expect(await unifiedTabs.getSelectedTabLabel()).toBe(SECOND_TAB_LABEL);
       expect(await discover.getCurrentQueryName()).toBe(SAVED_SEARCH_TITLE);
     }
@@ -101,7 +92,7 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
   spaceTest(
     'returns to the last active tab from Single Doc page',
     async ({ page, pageObjects }) => {
-      const { discover, docViewer, filterBar, unifiedTabs } = pageObjects;
+      const { contextPage, discover, docViewer, filterBar, unifiedTabs } = pageObjects;
 
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
@@ -116,12 +107,12 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
       await page.waitForURL(/#\/doc/);
       await expect(page.testSubj.locator('doc-hit')).toBeVisible();
 
-      await goBackToDiscover(page);
+      await contextPage.goBackToDiscover();
       await discover.waitUntilTabIsLoaded();
 
       expect(await discover.getHitCountInt()).toBe(9_109);
       expect(await unifiedTabs.getTabLabels()).toStrictEqual([FIRST_TAB_LABEL, SECOND_TAB_LABEL]);
-      await expect(getFilterBadge(page, 'extension', 'jpg')).toHaveCount(1);
+      expect(await filterBar.hasFilter({ field: 'extension', value: 'jpg' })).toBe(true);
       expect(await unifiedTabs.getSelectedTabLabel()).toBe(SECOND_TAB_LABEL);
       await expect(page.testSubj.locator('breadcrumb first last')).toHaveCount(1);
     }
