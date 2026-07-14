@@ -9,6 +9,7 @@
 
 import type { Locator } from '@kbn/scout';
 import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export type InspectorView = 'Requests' | 'Data';
 
@@ -21,6 +22,7 @@ export class Inspector {
   public readonly panel: Locator;
   public readonly closeButton: Locator;
   public readonly viewChooser: Locator;
+  public readonly tablePaginationPopoverButton: Locator;
 
   public readonly requests: {
     readonly statisticsTab: Locator;
@@ -34,6 +36,7 @@ export class Inspector {
     this.panel = page.testSubj.locator('inspectorPanel');
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
+    this.tablePaginationPopoverButton = page.testSubj.locator('tablePaginationPopoverButton');
 
     this.requests = {
       statisticsTab: page.testSubj.locator('inspectorRequestDetailStatistics'),
@@ -44,9 +47,60 @@ export class Inspector {
     };
   }
 
-  async open() {
-    await this.page.testSubj.click('openInspectorButton');
+  async open(openButtonTestSubj: string = 'openInspectorButton') {
+    if (await this.panel.isVisible()) {
+      return;
+    }
+
+    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
+    if (await overflowButton.isVisible()) {
+      await overflowButton.click();
+    }
+
+    await this.page.testSubj.click(openButtonTestSubj);
     await this.panel.waitFor({ state: 'visible' });
+  }
+
+  async setTablePageSize(size: number) {
+    await this.tablePaginationPopoverButton.click();
+    await this.page.getByRole('button', { name: `${size} rows`, exact: true }).click();
+  }
+
+  async getTableData(): Promise<string[][]> {
+    await this.panel.waitFor({ state: 'visible' });
+    const rowLocators = this.panel.locator('tbody tr');
+    const rowCount = await rowLocators.count();
+    const result: string[][] = [];
+
+    for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+      const row = rowLocators.nth(rowIndex);
+      const euiCells = row.locator('td .euiTableCellContent');
+      const euiCellCount = await euiCells.count();
+
+      if (euiCellCount > 0) {
+        const rowData: string[] = [];
+        for (let cellIndex = 0; cellIndex < euiCellCount; cellIndex++) {
+          rowData.push((await euiCells.nth(cellIndex).innerText()).trim());
+        }
+        result.push(rowData);
+        continue;
+      }
+
+      const cells = row.locator('td');
+      const cellCount = await cells.count();
+      const rowData: string[] = [];
+      for (let cellIndex = 0; cellIndex < cellCount; cellIndex++) {
+        rowData.push((await cells.nth(cellIndex).innerText()).trim());
+      }
+      result.push(rowData);
+    }
+
+    return result;
+  }
+
+  async expectTableData(expectedData: string[][]) {
+    const data = await this.getTableData();
+    expect(data).toEqual(expectedData);
   }
 
   async close() {
