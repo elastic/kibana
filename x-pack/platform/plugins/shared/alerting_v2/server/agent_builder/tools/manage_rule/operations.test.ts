@@ -148,11 +148,7 @@ describe('executeRuleOperations', () => {
         },
       ];
 
-      const result = await executeRuleOperations(
-        { time_field: 'event.ingested' },
-        ops,
-        esClient
-      );
+      const result = await executeRuleOperations({ time_field: 'event.ingested' }, ops, esClient);
 
       expect(result.data.time_field).toBe('event.ingested');
     });

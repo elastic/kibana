@@ -205,7 +205,9 @@ export const executeRuleOperations = async (
             const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
             throw new RuleOperationValidationError(
               `Could not determine a time field for the query: the source index ` +
-                `${sourceIndex ? `"${sourceIndex}"` : ''} has no \`date\` or \`date_nanos\` field ` +
+                `${
+                  sourceIndex ? `"${sourceIndex}"` : ''
+                } has no \`date\` or \`date_nanos\` field ` +
                 `(and no \`@timestamp\`), which is required for the rule's lookback window. ` +
                 `Add a date field to the data, or query an index that has one.`
             );
