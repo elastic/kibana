@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ATTACK_DISCOVERY_AD_HOC_RULE_ID } from '@kbn/elastic-assistant-common';
+import { useBulkGetUserProfiles } from '../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { Subtitle } from './subtitle';
 import { getMockAttackDiscoveryAlerts } from '../../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
 
@@ -35,12 +36,17 @@ jest.mock(
   })
 );
 
+jest.mock('../../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => ({
+  useBulkGetUserProfiles: jest.fn(),
+}));
+
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
 
 describe('Subtitle', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (getFormattedDate as jest.Mock).mockReturnValue('2023-10-27 10:00:00');
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({ data: [] });
   });
 
   it('should render with formatted date and summary for scheduled attacks', () => {
@@ -114,6 +120,45 @@ describe('Subtitle', () => {
     expect(getByTestId('attack-subtitle')).toHaveTextContent('Run by:');
     expect(getByTestId('attack-subtitle')).toHaveTextContent('|');
     expect(getByTestId('attack-run-by-avatar')).toBeInTheDocument();
+  });
+
+  it('should render avatar image if profile is available for manually generated attacks with userId', () => {
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      data: [
+        {
+          user: { uid: 'test-user-id', full_name: 'test_user' },
+          data: { avatar: { imageUrl: 'http://example.com/avatar.png' } },
+        },
+      ],
+    });
+    const manualAttack = {
+      ...mockAttack,
+      alertRuleUuid: ATTACK_DISCOVERY_AD_HOC_RULE_ID,
+      userId: 'test-user-id',
+      userName: 'test_user',
+    };
+    const { getByTestId } = render(<Subtitle attack={manualAttack} />);
+
+    expect(getByTestId('attack-run-by-avatar')).toBeInTheDocument();
+    expect(getByTestId('attack-run-by-avatar')).toHaveStyle(
+      'background-image: url(http://example.com/avatar.png)'
+    );
+  });
+
+  it('should render avatar placeholder if profile is not yet loaded for manually generated attacks with userId', () => {
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      data: undefined,
+    });
+    const manualAttack = {
+      ...mockAttack,
+      alertRuleUuid: ATTACK_DISCOVERY_AD_HOC_RULE_ID,
+      userId: 'test-user-id',
+      userName: 'test_user',
+    };
+    const { getByTestId } = render(<Subtitle attack={manualAttack} />);
+
+    expect(getByTestId('attack-run-by-avatar')).toBeInTheDocument();
+    expect(getByTestId('attack-run-by-avatar')).toHaveTextContent('?');
   });
 
   it('should pass originalAlertIds to AttackDiscoveryMarkdownFormatter', () => {
