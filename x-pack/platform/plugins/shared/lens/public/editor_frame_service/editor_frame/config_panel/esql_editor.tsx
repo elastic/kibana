@@ -151,6 +151,7 @@ export function ESQLEditor({
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
+      setErrors([]);
       const attrs = await getSuggestions(
         q,
         data,
