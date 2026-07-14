@@ -34,6 +34,7 @@ export const isTestRunning = (testRun?: ManualTestRun) =>
 
 export interface ManualTestRun {
   configId: string;
+  name?: string;
   testRunId?: string;
   status: TestRunStatus;
   errors?: ServiceLocationErrors;
@@ -63,6 +64,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
 
         state[action.payload.configId] = {
           configId: action.payload.configId,
+          name: action.payload.name,
           status: TestRunStatus.LOADING,
           isTestNowFlyoutOpen: true,
         };
@@ -73,6 +75,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
       (state: Draft<ManualTestRunsState>, { payload }: PayloadAction<EnrichedTestNowResponse>) => {
         state[payload.configId] = {
           configId: payload.configId,
+          name: state[payload.configId]?.name,
           testRunId: payload.testRunId,
           status: TestRunStatus.IN_PROGRESS,
           errors: payload.errors,

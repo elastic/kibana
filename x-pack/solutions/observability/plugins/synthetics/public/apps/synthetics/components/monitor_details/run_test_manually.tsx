@@ -25,9 +25,16 @@ import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import {
   manualTestMonitorAction,
   manualTestRunInProgressSelector,
+  toggleTestNowFlyoutAction,
 } from '../../state/manual_test_runs';
 
-export const RunTestManuallyContextItem = ({ isRemote = false }: { isRemote?: boolean }) => {
+export const RunTestManuallyContextItem = ({
+  isRemote = false,
+  closePopover,
+}: {
+  isRemote?: boolean;
+  closePopover?: () => void;
+}) => {
   const dispatch = useDispatch();
 
   const { monitor } = useSelectedMonitor();
@@ -77,15 +84,22 @@ export const RunTestManuallyContextItem = ({ isRemote = false }: { isRemote?: bo
         disabled={!canUsePublicLocations || !canSave}
         onClick={() => {
           if (monitor) {
-            const spaceId = 'spaceId' in monitor ? (monitor.spaceId as string) : undefined;
-            dispatch(
-              manualTestMonitorAction.get({
-                configId: monitor.config_id,
-                name: monitor.name,
-                ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
-              })
-            );
+            // A run is already in progress for this monitor: re-open its flyout instead of
+            // kicking off a second run (the user likely closed it while the test was running).
+            if (testInProgress) {
+              dispatch(toggleTestNowFlyoutAction(monitor.config_id));
+            } else {
+              const spaceId = 'spaceId' in monitor ? (monitor.spaceId as string) : undefined;
+              dispatch(
+                manualTestMonitorAction.get({
+                  configId: monitor.config_id,
+                  name: monitor.name,
+                  ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+                })
+              );
+            }
           }
+          closePopover?.();
         }}
       >
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -96,7 +110,9 @@ export const RunTestManuallyContextItem = ({ isRemote = false }: { isRemote?: bo
               <EuiIcon type="flask" size="s" aria-hidden={true} />
             )}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{<span>{RUN_TEST_LABEL}</span>}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <span>{testInProgress ? VIEW_TEST_RUN_LABEL : RUN_TEST_LABEL}</span>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiContextMenuItem>
     </NoPermissionsTooltip>
@@ -105,6 +121,10 @@ export const RunTestManuallyContextItem = ({ isRemote = false }: { isRemote?: bo
 
 const RUN_TEST_LABEL = i18n.translate('xpack.synthetics.monitorSummary.runTestManually', {
   defaultMessage: 'Run test manually',
+});
+
+const VIEW_TEST_RUN_LABEL = i18n.translate('xpack.synthetics.monitorSummary.viewTestRun', {
+  defaultMessage: 'View test run in progress',
 });
 
 const NOT_AVAILABLE_FOR_REMOTE_MONITORS = i18n.translate(

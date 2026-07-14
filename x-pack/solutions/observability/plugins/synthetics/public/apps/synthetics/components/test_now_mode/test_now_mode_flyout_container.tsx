@@ -13,6 +13,7 @@ import { TestNowModeFlyout } from './test_now_mode_flyout';
 import { ManualTestRunMode } from './manual_test_run_mode/manual_test_run_mode';
 import { useSyntheticsRefreshContext } from '../../contexts';
 import {
+  hideTestNowFlyoutAction,
   manualTestRunUpdateAction,
   testNowRunsSelector,
   TestRunStatus,
@@ -63,26 +64,41 @@ export function TestNowModeFlyoutContainer() {
       : undefined;
   }, [flyoutOpenTestRun, monitor]);
 
-  const flyout =
-    flyoutOpenTestRun && testRun && monitor ? (
-      <TestNowModeFlyout
-        testRun={testRun}
-        name={monitor.name}
-        inProgress={
-          flyoutOpenTestRun.status === 'in-progress' || flyoutOpenTestRun.status === 'loading'
-        }
-        onClose={() => handleFlyoutClose(flyoutOpenTestRun.testRunId)}
-        onDone={onDone}
-        isPushing={flyoutOpenTestRun.status === 'loading'}
-        errors={flyoutOpenTestRun.errors ?? []}
-      />
-    ) : null;
+  // Open the flyout as soon as the run is initiated (status `loading`) so it shows the
+  // "Starting test run" state immediately. We don't wait for the trigger-test API to return
+  // a `testRunId`, nor for the full monitor to be fetched (which adds a visible delay when
+  // launched from the overview list, where the monitor isn't loaded yet) — the stored run
+  // `name` is enough for the header until the monitor resolves. `TestNowModeFlyout` handles
+  // the missing `testRun`.
+  const flyout = flyoutOpenTestRun ? (
+    <TestNowModeFlyout
+      testRun={testRun}
+      name={monitor?.name ?? flyoutOpenTestRun.name ?? ''}
+      inProgress={
+        flyoutOpenTestRun.status === 'in-progress' || flyoutOpenTestRun.status === 'loading'
+      }
+      onClose={() =>
+        flyoutOpenTestRun.testRunId
+          ? handleFlyoutClose(flyoutOpenTestRun.testRunId)
+          : dispatch(hideTestNowFlyoutAction())
+      }
+      onDone={onDone}
+      isPushing={flyoutOpenTestRun.status === 'loading'}
+      errors={flyoutOpenTestRun.errors ?? []}
+    />
+  ) : null;
 
   return (
     <>
       {Object.values(testNowRuns)
+        // Exclude the run currently shown in the flyout: it already polls via the flyout's
+        // `BrowserTestRunResult`, so rendering it here too would double every journey/steps
+        // request. `ManualTestRunMode` is only for background runs (progress toasts).
         .filter(
-          (val) => val.testRunId && (val.status === 'in-progress' || val.status === 'loading')
+          (val) =>
+            val.testRunId &&
+            !val.isTestNowFlyoutOpen &&
+            (val.status === 'in-progress' || val.status === 'loading')
         )
         .map((manualTestRun) => (
           <ManualTestRunMode

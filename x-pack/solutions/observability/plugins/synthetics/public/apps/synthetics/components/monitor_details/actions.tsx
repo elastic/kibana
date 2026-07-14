@@ -44,9 +44,17 @@ export function Actions() {
     >
       <EuiContextMenuPanel
         items={[
-          <EditMonitorContextItem key="edit-monitor" isRemote={isRemote} />,
-          <RefreshContextItem key="refresh-monitor" />,
-          <RunTestManuallyContextItem key="run-test-manually" isRemote={isRemote} />,
+          <EditMonitorContextItem
+            key="edit-monitor"
+            isRemote={isRemote}
+            closePopover={closePopover}
+          />,
+          <RefreshContextItem key="refresh-monitor" closePopover={closePopover} />,
+          <RunTestManuallyContextItem
+            key="run-test-manually"
+            isRemote={isRemote}
+            closePopover={closePopover}
+          />,
         ]}
       />
     </EuiPopover>

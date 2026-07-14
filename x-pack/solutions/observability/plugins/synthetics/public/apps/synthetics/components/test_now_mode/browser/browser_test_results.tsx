@@ -132,6 +132,7 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
                   compressed={true}
                   testNowMode={true}
                   showLastSuccessful={false}
+                  isJourneyCompleted={Boolean(summaryDoc)}
                 />
               </>
             )}

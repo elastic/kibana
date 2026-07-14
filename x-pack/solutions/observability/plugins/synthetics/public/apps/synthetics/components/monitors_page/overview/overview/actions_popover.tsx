@@ -24,12 +24,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../../common/embeddables/monitors_overview/constants';
 import { getSyntheticsCcsIndex } from '../../../../../../../common/get_synthetics_indices';
 import { useCreateSLO } from '../../hooks/use_create_slo';
-import { TEST_SCHEDULED_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
 import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
 import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
 import {
   manualTestMonitorAction,
   manualTestRunInProgressSelector,
+  toggleTestNowFlyoutAction,
 } from '../../../../state/manual_test_runs';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
 import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
@@ -294,27 +294,29 @@ export function ActionsPopover({
     {
       name: isRemote ? (
         runTestManually
-      ) : testInProgress ? (
-        <EuiToolTip content={TEST_SCHEDULED_LABEL}>
-          <span tabIndex={0}>{runTestManually}</span>
-        </EuiToolTip>
       ) : (
         <NoPermissionsTooltip
           canUsePublicLocations={canUsePublicLocations}
           canEditSynthetics={canEditSynthetics}
         >
-          {runTestManually}
+          {testInProgress ? viewTestRun : runTestManually}
         </NoPermissionsTooltip>
       ),
-      icon: 'flask',
-      disabled: isRemote || testInProgress || !canUsePublicLocations || !isServiceAllowed,
+      // Show a spinner while a run is in progress; clicking then re-opens its flyout
+      // rather than starting a second run.
+      icon: testInProgress ? <EuiLoadingSpinner size="s" /> : 'flask',
+      disabled: isRemote || !canUsePublicLocations || !isServiceAllowed,
       toolTipContent: isRemote ? NOT_AVAILABLE_FOR_REMOTE_MONITORS : undefined,
       onClick: isRemote
         ? undefined
         : () => {
-            dispatch(
-              manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name })
-            );
+            if (testInProgress) {
+              dispatch(toggleTestNowFlyoutAction(monitor.configId));
+            } else {
+              dispatch(
+                manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name })
+              );
+            }
             dispatch(setFlyoutConfig(null));
             setIsPopoverOpen(false);
           },
@@ -511,6 +513,10 @@ const quickInspectName = i18n.translate('xpack.synthetics.overview.actions.quick
 
 const runTestManually = i18n.translate('xpack.synthetics.overview.actions.runTestManually.title', {
   defaultMessage: 'Run test manually',
+});
+
+const viewTestRun = i18n.translate('xpack.synthetics.overview.actions.viewTestRun.title', {
+  defaultMessage: 'View test run in progress',
 });
 
 const openActionsMenuAria = i18n.translate(

@@ -52897,7 +52897,6 @@
     "xpack.synthetics.testRun.description": "Tester votre moniteur et vérifier les résultats avant d'enregistrer",
     "xpack.synthetics.testRun.invalid": "Le moniteur doit être valide pour exécuter le test, veuillez vérifier les champs requis ci-dessus.",
     "xpack.synthetics.testRun.pushError": "Ce test ne peut pas être exécuté pour l'instant. Réessayez plus tard.",
-    "xpack.synthetics.testRun.pushing.description": "Envoi du moniteur vers le service...",
     "xpack.synthetics.testRun.runErrorLabel": "Impossible d’exécuter le test maintenant",
     "xpack.synthetics.testRun.runErrorLocation.reason": "Impossible d'exécuter le moniteur sur l'emplacement {locationName} {reason}",
     "xpack.synthetics.testRun.testErrorLabel": "Erreur lors de l'exécution du test",

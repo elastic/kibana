@@ -53268,7 +53268,6 @@
     "xpack.synthetics.testRun.description": "モニターをテストし、保存する前に結果を検証します",
     "xpack.synthetics.testRun.invalid": "テストを実行するには、モニターが有効である必要があります。上記の必須フィールドを修正してください。",
     "xpack.synthetics.testRun.pushError": "このテストは現在実行できません。しばらくたってから再試行してください。",
-    "xpack.synthetics.testRun.pushing.description": "モニターをサービスにプッシュしています...",
     "xpack.synthetics.testRun.runErrorLabel": "今すぐテストを実行できません",
     "xpack.synthetics.testRun.runErrorLocation.reason": "場所{locationName}でテストを実行できませんでした。{reason}",
     "xpack.synthetics.testRun.testErrorLabel": "テストの実行エラー",

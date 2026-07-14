@@ -11,6 +11,7 @@ import {
   EmptyThumbnail,
   SCREENSHOT_LOADING_ARIA_LABEL,
   SCREENSHOT_NOT_AVAILABLE,
+  SCREENSHOT_PENDING_MESSAGE,
 } from './empty_thumbnail';
 import { THUMBNAIL_SCREENSHOT_SIZE } from './screenshot_size';
 
@@ -31,6 +32,22 @@ describe('EmptyThumbnail', () => {
 
     expect(queryByTestId('stepScreenshotPlaceholderLoading')).not.toBeInTheDocument();
     expect(getByLabelText(SCREENSHOT_NOT_AVAILABLE));
+  });
+
+  it('renders a pending state (not loading or error) while the journey is running', () => {
+    const { getByTestId, queryByTestId, getByLabelText } = render(
+      <EmptyThumbnail
+        isLoading={false}
+        isPending={true}
+        animateLoading={true}
+        size={THUMBNAIL_SCREENSHOT_SIZE}
+      />
+    );
+
+    expect(getByTestId('stepScreenshotPending')).toBeInTheDocument();
+    expect(queryByTestId('stepScreenshotPlaceholderLoading')).not.toBeInTheDocument();
+    expect(queryByTestId('stepScreenshotNotAvailable')).not.toBeInTheDocument();
+    expect(getByLabelText(SCREENSHOT_PENDING_MESSAGE));
   });
 
   it('renders the provided unavailable message instead of default', () => {

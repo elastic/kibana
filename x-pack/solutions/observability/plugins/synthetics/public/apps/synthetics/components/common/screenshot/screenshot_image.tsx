@@ -20,6 +20,8 @@ type ScreenshotImageCallback = (e: { stopPropagation(): void }) => void;
 export interface ScreenshotImageProps {
   label?: string;
   isLoading: boolean;
+  /** Journey still running: screenshot not indexed yet, show a calm pending state instead of loading/error. */
+  isPending?: boolean;
   animateLoading?: boolean;
   size?: ScreenshotImageSize;
   unavailableMessage?: string;
@@ -35,6 +37,7 @@ export const ScreenshotImage: React.FC<ScreenshotImageProps & { imgSrc?: string 
   label,
   imgSrc,
   isLoading,
+  isPending = false,
   animateLoading = true,
   unavailableMessage,
   borderColor,
@@ -89,6 +92,7 @@ export const ScreenshotImage: React.FC<ScreenshotImageProps & { imgSrc?: string 
   ) : (
     <EmptyThumbnail
       isLoading={isLoading}
+      isPending={isPending}
       size={size === 'full' ? naturalSize : size}
       unavailableMessage={unavailableMessage}
       borderRadius={borderRadius}

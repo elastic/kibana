@@ -53077,7 +53077,6 @@
     "xpack.synthetics.testRun.description": "Testen Sie Ihren Monitor und verifizieren Sie die Ergebnisse, bevor Sie speichern",
     "xpack.synthetics.testRun.invalid": "Der Monitor muss gültig sein, um den Test auszuführen. Bitte korrigieren Sie die oben genannten Pflichtfelder.",
     "xpack.synthetics.testRun.pushError": "Dieser Test kann zurzeit nicht ausgeführt werden. Versuchen Sie es später erneut.",
-    "xpack.synthetics.testRun.pushing.description": "Den Monitor in den Wartungsmodus versetzen ...",
     "xpack.synthetics.testRun.runErrorLabel": "Ich kann den Test jetzt nicht ausführen",
     "xpack.synthetics.testRun.runErrorLocation.reason": "Der Test konnte am Standort {locationName} nicht ausgeführt werden. {reason}",
     "xpack.synthetics.testRun.testErrorLabel": "Fehler beim Ausführen des Tests",
