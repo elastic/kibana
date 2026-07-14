@@ -95,6 +95,12 @@ export const PER_PACKAGE_ALLOWED_LICENSES = {
   '@img/sharp-libvips-linux-x64@1.2.4': ['LGPL-3.0-or-later'],
   '@img/sharp-libvips-linuxmusl-arm64@1.2.4': ['LGPL-3.0-or-later'],
   '@img/sharp-libvips-linuxmusl-x64@1.2.4': ['LGPL-3.0-or-later'],
+  // sharp's wasm32 and win32 bindings statically bundle libvips (LGPL) instead of
+  // using the separate @img/sharp-libvips-* packages, so they carry LGPL themselves.
+  '@img/sharp-wasm32@0.34.5': ['LGPL-3.0-or-later'],
+  '@img/sharp-win32-arm64@0.34.5': ['LGPL-3.0-or-later'],
+  '@img/sharp-win32-ia32@0.34.5': ['LGPL-3.0-or-later'],
+  '@img/sharp-win32-x64@0.34.5': ['LGPL-3.0-or-later'],
   'dompurify@3.4.11': ['(MPL-2.0 OR Apache-2.0)'],
   'node-liblzma@2.2.0': ['LGPL-3.0'],
 };
