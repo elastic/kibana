@@ -269,13 +269,13 @@ The investigator's comment is a starting hint, not a verdict you can trust blind
 
 - it was posted **more than 1 day ago** (older analyses have drifted from the current code and failure signature more often than not);
 - **new failures arrived after it** — e.g. `kibanamachine` "New failure for …" notification comments, or CI-data updates, timestamped later than the analysis. A later failure can mean the symptom has shifted (for example a "table never loaded" timeout later surfacing as a "1 of 6 rows" data-visibility failure), so the prior root cause may no longer be the operative one;
-- the **issue was reopened** after the analysis (a reopen is the strongest signal the prior diagnosis did not hold), or a **previous AI fix did not hold** — the issue carries the `failure:ai-fix-did-not-hold` label, or you find an earlier **merged** `flaky-test-fixer` PR that referenced this issue and the same failure recurred; or
+- the **issue was reopened** after the analysis (a reopen is the strongest signal the prior diagnosis did not hold), or a **previous fix did not hold** — the issue carries the `failure:fix-did-not-hold` label, or the issue timeline shows an earlier **merged** fix PR (human- or automation-authored) that referenced this issue and the same failure recurred; or
 - the comment is **absent**, or offers no actionable root cause.
 
 To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill). Kibana is already bootstrapped and the `bk` CLI is available, so pull the latest failing builds' artifacts (JUnit XML, screenshots, server logs), map the Scout lane and its neighbouring configs, read the failing code, and reach your **own** diagnosis from current evidence. Base the fix on that conclusion.
 
 - Where your fresh conclusion **departs** from the prior comment, say so and why in the PR's Context section.
-- When a previous AI fix did not hold, do **not** re-propose the same shape of fix — name what that fix changed, why it failed to hold, and take a genuinely different approach (address the root cause, not the symptom).
+- When a previous fix did not hold (human- or automation-authored), do **not** re-propose the same shape of fix — name what that fix changed, why it failed to hold, and take a genuinely different approach (address the root cause, not the symptom).
 - If your fresh analysis shows the failure is not a test-side issue you can fix (environment, product, or insufficient data), open no PR and post the matching outcome comment (step 7).
 
 ## PR format
@@ -294,7 +294,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   ### Context
   <a few bullet points of history around this flake, in the same concise, high-value style as the Summary — every bullet earned, and omit any you cannot back with real evidence (never guess a PR or attribution). Cover, where known:
   - a link to the failed test investigator's comment on the issue, flagging whether this patch follows or departs from their proposed fix — and, if you re-investigated because that comment was stale (see "Validate the investigation is current"), say so and summarize what your fresh analysis concluded
-  - when a previous AI fix for this issue did not hold, one line on what it changed, why it failed to hold, and how this patch's approach differs
+  - when a previous fix for this issue did not hold (human- or automation-authored), one line on what it changed, why it failed to hold, and how this patch's approach differs
   - a one-line recount of where the failures happened — e.g. the CI pipeline/lane and how often/recently — from the issue's CI data and the investigator's comment>
 
   <details>
