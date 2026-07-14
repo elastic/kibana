@@ -82,8 +82,9 @@ dependsOn:
   - '@kbn/console-plugin'
   - '@kbn/scout'
   - '@kbn/core-http-server-mocks'
-  - '@kbn/actions-utils'
+  - '@kbn/apm-utils'
   - '@kbn/es-query'
+  - '@kbn/actions-utils'
   - '@kbn/datemath'
 tags:
   - plugin
