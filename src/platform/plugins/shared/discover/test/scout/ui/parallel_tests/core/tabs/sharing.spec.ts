@@ -51,20 +51,25 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
   });
 
   spaceTest('can share an unsaved tab', async ({ kbnUrl, page, pageObjects }) => {
-    await pageObjects.unifiedTabs.editTabLabel(0, 'first tab');
-    await pageObjects.discover.waitUntilTabIsLoaded();
-    expect(await pageObjects.discover.getHitCountInt()).toBe(14_004);
+    const sharedUrl = await spaceTest.step('create share URL for unsaved tab', async () => {
+      await pageObjects.unifiedTabs.editTabLabel(0, 'first tab');
+      await pageObjects.discover.waitUntilTabIsLoaded();
+      expect(await pageObjects.discover.getHitCountInt()).toBe(14_004);
 
-    await pageObjects.unifiedTabs.createNewTab();
-    await pageObjects.discover.waitUntilTabIsLoaded();
-    await pageObjects.unifiedTabs.editTabLabel(1, 'second tab');
-    await pageObjects.discover.writeAndSubmitKqlQuery('bytes > 1000');
-    expect(await pageObjects.discover.getHitCountInt()).toBe(12_653);
-    expect(await pageObjects.unifiedTabs.getTabLabels()).toStrictEqual(['first tab', 'second tab']);
+      await pageObjects.unifiedTabs.createNewTab();
+      await pageObjects.discover.waitUntilTabIsLoaded();
+      await pageObjects.unifiedTabs.editTabLabel(1, 'second tab');
+      await pageObjects.discover.writeAndSubmitKqlQuery('bytes > 1000');
+      expect(await pageObjects.discover.getHitCountInt()).toBe(12_653);
+      expect(await pageObjects.unifiedTabs.getTabLabels()).toStrictEqual([
+        'first tab',
+        'second tab',
+      ]);
 
-    const sharedUrl = await pageObjects.discover.getSharedUrl();
+      return pageObjects.discover.getSharedUrl();
+    });
 
-    {
+    await spaceTest.step('open shared URL and modify shared tab', async () => {
       const { page: sharedPage, pageObjects: sharedPageObjects } = await openSharedPage(
         page,
         sharedUrl,
@@ -83,11 +88,12 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
       expect(await discover.getHitCount()).toBe('13,129');
 
       await sharedPage.close();
-    }
+    });
+
     await page.bringToFront();
     await page.reload();
 
-    {
+    await spaceTest.step('verify original page picks up modified tab label', async () => {
       const { discover, queryBar, unifiedTabs } = pageObjects;
 
       await discover.waitUntilTabIsLoaded();
@@ -99,10 +105,11 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
       ]);
       expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([]);
       expect(await unifiedTabs.getSelectedTabLabel()).toBe('second tab (modified)');
-    }
+    });
 
     await page.evaluate(() => window.localStorage.setItem('discover.tabs', ''));
-    {
+
+    await spaceTest.step('open shared URL with empty local tab storage', async () => {
       const { page: sharedPage, pageObjects: sharedPageObjects } = await openSharedPage(
         page,
         sharedUrl,
@@ -116,7 +123,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
       expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([]);
 
       await sharedPage.close();
-    }
+    });
   });
 
   spaceTest(
@@ -126,23 +133,28 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
       const queryEsql = 'FROM logstash-* | LIMIT 20';
       const queryEsqlModified = 'FROM logstash-* | LIMIT 22';
 
-      await pageObjects.unifiedTabs.editTabLabel(0, 'esql1');
-      await pageObjects.discover.selectTextBaseLang();
-      await pageObjects.discover.waitUntilTabIsLoaded();
+      const sharedUrl = await spaceTest.step(
+        'create share URL for persisted ES|QL session',
+        async () => {
+          await pageObjects.unifiedTabs.editTabLabel(0, 'esql1');
+          await pageObjects.discover.selectTextBaseLang();
+          await pageObjects.discover.waitUntilTabIsLoaded();
 
-      await pageObjects.unifiedTabs.createNewTab();
-      await pageObjects.discover.waitUntilTabIsLoaded();
-      await pageObjects.unifiedTabs.editTabLabel(1, 'esql2');
-      await pageObjects.discover.writeAndSubmitEsqlQuery(queryEsql);
-      expect(await pageObjects.discover.getHitCountInt()).toBe(20);
-      expect(await pageObjects.unifiedTabs.getTabLabels()).toStrictEqual(['esql1', 'esql2']);
+          await pageObjects.unifiedTabs.createNewTab();
+          await pageObjects.discover.waitUntilTabIsLoaded();
+          await pageObjects.unifiedTabs.editTabLabel(1, 'esql2');
+          await pageObjects.discover.writeAndSubmitEsqlQuery(queryEsql);
+          expect(await pageObjects.discover.getHitCountInt()).toBe(20);
+          expect(await pageObjects.unifiedTabs.getTabLabels()).toStrictEqual(['esql1', 'esql2']);
 
-      await pageObjects.discover.saveSearch(savedSearchName);
-      await pageObjects.discover.waitUntilTabIsLoaded();
+          await pageObjects.discover.saveSearch(savedSearchName);
+          await pageObjects.discover.waitUntilTabIsLoaded();
 
-      const sharedUrl = await pageObjects.discover.getSharedUrl();
+          return pageObjects.discover.getSharedUrl();
+        }
+      );
 
-      {
+      await spaceTest.step('open shared URL and modify persisted ES|QL tab', async () => {
         const { page: sharedPage, pageObjects: sharedPageObjects } = await openSharedPage(
           page,
           sharedUrl,
@@ -162,11 +174,12 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
         expect(await discover.getHitCount()).toBe('22');
 
         await sharedPage.close();
-      }
+      });
+
       await page.bringToFront();
       await page.reload();
 
-      {
+      await spaceTest.step('verify original persisted session after shared page edit', async () => {
         const { discover, unifiedTabs } = pageObjects;
 
         await discover.waitUntilTabIsLoaded();
@@ -176,26 +189,30 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
         expect(await unifiedTabs.getTabLabels()).toStrictEqual(['esql1', 'esql2 (modified)']);
         expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([]);
         expect(await discover.getCurrentQueryName()).toBe(savedSearchName);
-      }
+      });
 
       await page.evaluate(() => window.localStorage.setItem('discover.tabs', ''));
-      {
-        const { page: sharedPage, pageObjects: sharedPageObjects } = await openSharedPage(
-          page,
-          sharedUrl,
-          kbnUrl
-        );
-        const { discover, unifiedTabs } = sharedPageObjects;
 
-        expect(await discover.getHitCount()).toBe('20');
-        expect(await discover.getEsqlQueryValue()).toBe(queryEsql);
-        expect(await unifiedTabs.getSelectedTabLabel()).toBe('esql2');
-        expect(await unifiedTabs.getTabLabels()).toStrictEqual(['esql1', 'esql2']);
-        expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([]);
-        expect(await discover.getCurrentQueryName()).toBe(savedSearchName);
+      await spaceTest.step(
+        'open persisted ES|QL shared URL with empty local tab storage',
+        async () => {
+          const { page: sharedPage, pageObjects: sharedPageObjects } = await openSharedPage(
+            page,
+            sharedUrl,
+            kbnUrl
+          );
+          const { discover, unifiedTabs } = sharedPageObjects;
 
-        await sharedPage.close();
-      }
+          expect(await discover.getHitCount()).toBe('20');
+          expect(await discover.getEsqlQueryValue()).toBe(queryEsql);
+          expect(await unifiedTabs.getSelectedTabLabel()).toBe('esql2');
+          expect(await unifiedTabs.getTabLabels()).toStrictEqual(['esql1', 'esql2']);
+          expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([]);
+          expect(await discover.getCurrentQueryName()).toBe(savedSearchName);
+
+          await sharedPage.close();
+        }
+      );
     }
   );
 
@@ -204,29 +221,40 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
     async ({ kbnUrl, page, pageObjects }) => {
       const savedSearchName = 'kql';
 
-      await pageObjects.unifiedTabs.editTabLabel(0, 'saved');
-      await pageObjects.discover.saveSearch(savedSearchName);
-      await pageObjects.discover.waitUntilTabIsLoaded();
+      const sharedUrl = await spaceTest.step(
+        'create share URL for unsaved tab in persisted session',
+        async () => {
+          await pageObjects.unifiedTabs.editTabLabel(0, 'saved');
+          await pageObjects.discover.saveSearch(savedSearchName);
+          await pageObjects.discover.waitUntilTabIsLoaded();
 
-      await pageObjects.unifiedTabs.createNewTab();
-      await pageObjects.discover.waitUntilTabIsLoaded();
-      await pageObjects.discover.createDataViewFromSearchBar({ name: 'logs', adHoc: true });
-      await pageObjects.discover.waitUntilTabIsLoaded();
-      await pageObjects.unifiedTabs.editTabLabel(1, 'unsaved');
-      await pageObjects.filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpg' });
-      await pageObjects.discover.waitUntilTabIsLoaded();
-      expect(await pageObjects.discover.getHitCountInt()).toBe(9_109);
-      expect(await pageObjects.unifiedTabs.getTabLabels()).toStrictEqual(['saved', 'unsaved']);
+          await pageObjects.unifiedTabs.createNewTab();
+          await pageObjects.discover.waitUntilTabIsLoaded();
+          await pageObjects.discover.createDataViewFromSearchBar({ name: 'logs', adHoc: true });
+          await pageObjects.discover.waitUntilTabIsLoaded();
+          await pageObjects.unifiedTabs.editTabLabel(1, 'unsaved');
+          await pageObjects.filterBar.addFilter({
+            field: 'extension',
+            operator: 'is',
+            value: 'jpg',
+          });
+          await pageObjects.discover.waitUntilTabIsLoaded();
+          expect(await pageObjects.discover.getHitCountInt()).toBe(9_109);
+          expect(await pageObjects.unifiedTabs.getTabLabels()).toStrictEqual(['saved', 'unsaved']);
 
-      const sharedUrl = await pageObjects.discover.getSharedUrl();
-      await pageObjects.discover.closeShareModal();
+          const url = await pageObjects.discover.getSharedUrl();
+          await pageObjects.discover.closeShareModal();
 
-      await pageObjects.unifiedTabs.selectTab(0);
-      await pageObjects.discover.waitUntilTabIsLoaded();
-      await pageObjects.discover.clickNewSearch();
-      await pageObjects.discover.waitUntilTabIsLoaded();
+          await pageObjects.unifiedTabs.selectTab(0);
+          await pageObjects.discover.waitUntilTabIsLoaded();
+          await pageObjects.discover.clickNewSearch();
+          await pageObjects.discover.waitUntilTabIsLoaded();
 
-      {
+          return url;
+        }
+      );
+
+      await spaceTest.step('open shared URL and modify unsaved tab', async () => {
         const { page: sharedPage, pageObjects: sharedPageObjects } = await openSharedPage(
           page,
           sharedUrl,
@@ -254,10 +282,11 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
         expect(await discover.getHitCount()).toBe('8,830');
 
         await sharedPage.close();
-      }
+      });
+
       await page.bringToFront();
 
-      {
+      await spaceTest.step('verify persisted session keeps saved tab state', async () => {
         const { discover, filterBar, queryBar, unifiedTabs } = pageObjects;
 
         await discover.loadSavedSearch(savedSearchName);
@@ -278,7 +307,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
         ]);
         expect(await discover.getCurrentQueryName()).toBe(savedSearchName);
         expect(await discover.isCurrentDataViewAdHoc()).toBe(false);
-      }
+      });
     }
   );
 });
