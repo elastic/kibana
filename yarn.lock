@@ -6977,6 +6977,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-alert-analysis-workflow@link:x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-alerts-rag@link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag":
   version "0.0.0"
   uid ""

@@ -1777,6 +1777,7 @@
     "@kbn/evals-phoenix-executor": "link:x-pack/platform/packages/shared/kbn-evals-phoenix-executor",
     "@kbn/evals-suite-agent-builder": "link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder",
     "@kbn/evals-suite-agent-builder-dashboards": "link:x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards",
+    "@kbn/evals-suite-alert-analysis-workflow": "link:x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow",
     "@kbn/evals-suite-alerts-rag": "link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag",
     "@kbn/evals-suite-attack-discovery": "link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery",
     "@kbn/evals-suite-endpoint": "link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint",
