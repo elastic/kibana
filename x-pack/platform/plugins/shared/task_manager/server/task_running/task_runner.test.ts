@@ -85,6 +85,7 @@ describe('TaskManagerRunner', () => {
 
   let otelExporter: tracing.InMemorySpanExporter;
   let otelProvider: tracing.BasicTracerProvider;
+  const isValidEventMock = eventLoggerMock.isValidEvent as jest.Mock;
 
   beforeAll(() => {
     otelExporter = new tracing.InMemorySpanExporter();
@@ -92,6 +93,7 @@ describe('TaskManagerRunner', () => {
       spanProcessors: [new tracing.SimpleSpanProcessor(otelExporter)],
     });
     trace.setGlobalTracerProvider(otelProvider);
+    isValidEventMock.mockReturnValue(true);
   });
 
   beforeEach(() => {
@@ -3176,7 +3178,7 @@ describe('TaskManagerRunner', () => {
           .map((call) => call[0])
           .find((event) => event.event.action === action);
 
-      test('flushes custom fields onto the task-run event', async () => {
+      test('adds custom fields onto the task-run event', async () => {
         const id = _.random(1, 20).toString();
         const { runner } = await readyToRunStageSetup({
           instance: { id },
@@ -3214,7 +3216,7 @@ describe('TaskManagerRunner', () => {
         });
       });
 
-      test('a later call replaces fields set by an earlier call', async () => {
+      test('replaces existing fields when called', async () => {
         const id = _.random(1, 20).toString();
         const { runner } = await readyToRunStageSetup({
           instance: { id },
@@ -3248,7 +3250,7 @@ describe('TaskManagerRunner', () => {
         expect(runEvent.kibana.my_plugin.metrics.a).toBeUndefined();
       });
 
-      test('does not allow custom fields to override Task Manager owned fields', async () => {
+      test('does not allow custom fields to override task manager owned fields', async () => {
         const id = _.random(1, 20).toString();
         const { runner } = await readyToRunStageSetup({
           instance: { id },
@@ -3285,10 +3287,8 @@ describe('TaskManagerRunner', () => {
         });
       });
 
-      test('drops only the custom fields (and warns) when the enriched event is invalid', async () => {
-        const validationError = new Error('[kibana.my_plugin]: definition for this key is missing');
-        const isValidEvent = eventLoggerMock.isValidEvent as jest.Mock;
-        isValidEvent.mockReturnValueOnce(validationError);
+      test('drops only the custom fields logs a warning when the event is invalid', async () => {
+        isValidEventMock.mockReturnValueOnce(false);
 
         const id = _.random(1, 20).toString();
         const { runner, logger } = await readyToRunStageSetup({
@@ -3320,13 +3320,11 @@ describe('TaskManagerRunner', () => {
         // but the invalid custom fields were dropped
         expect(runEvent.kibana.my_plugin).toBeUndefined();
         expect(logger.warn).toHaveBeenCalledWith(
-          expect.stringContaining(
-            'supplied invalid task-run event log fields; dropping custom fields'
-          )
+          `Custom event log fields for task bar \"${id}\" are invalid; will log the task manager event without the custom fields.`
         );
       });
 
-      test('flushes custom fields onto the task-run event when the task throws', async () => {
+      test('adds custom fields onto the task-run event when the task throws', async () => {
         const id = _.random(1, 20).toString();
         const { runner } = await readyToRunStageSetup({
           instance: { id },
@@ -3352,7 +3350,7 @@ describe('TaskManagerRunner', () => {
         });
       });
 
-      test('flushes custom fields onto the task-run event when a taskRunError is returned', async () => {
+      test('adds custom fields onto the task-run event when a taskRunError is returned', async () => {
         const id = _.random(1, 20).toString();
         const { runner } = await readyToRunStageSetup({
           instance: { id, schedule: { interval: '1m' } },
@@ -3383,7 +3381,7 @@ describe('TaskManagerRunner', () => {
         });
       });
 
-      test('flushes custom fields set before cancellation onto the task-cancel event', async () => {
+      test('adds custom fields set before cancellation onto the task-cancel event', async () => {
         jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
         const { runner } = await readyToRunStageSetup({
