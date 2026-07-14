@@ -8,12 +8,14 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { MAX_NAME_LENGTH } from '@kbn/evals-plugin/common';
 import { evalsTools, otherResult, toErrorResult } from './common';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const schema = z.object({
   search: z
     .string()
+    .max(MAX_NAME_LENGTH)
     .optional()
     .describe('Optional case-insensitive substring to filter datasets by name or description.'),
   limit: z

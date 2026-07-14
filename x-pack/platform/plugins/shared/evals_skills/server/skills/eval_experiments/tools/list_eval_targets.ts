@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { MAX_NAME_LENGTH } from '@kbn/evals-plugin/common';
 import { evalsTools, otherResult, toErrorResult } from './common';
 import type { EvalExperimentsToolDeps } from './deps';
 
@@ -18,6 +19,7 @@ const schema = z.object({
     .describe('Which target types to list. Defaults to "all".'),
   search: z
     .string()
+    .max(MAX_NAME_LENGTH)
     .optional()
     .describe('Optional case-insensitive substring to filter targets by id, name, or description.'),
   limit: z

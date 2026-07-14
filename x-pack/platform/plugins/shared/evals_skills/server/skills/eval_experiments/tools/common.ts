@@ -10,7 +10,12 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
-import { APP_PATH } from '@kbn/evals-plugin/common';
+import {
+  APP_PATH,
+  EXPERIMENT_LIMITS,
+  MAX_ID_LENGTH,
+  MAX_NAME_LENGTH,
+} from '@kbn/evals-plugin/common';
 import type { GenerateExperimentParams, GeneratedExperimentRun } from '@kbn/evals-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -40,13 +45,19 @@ export class EvalExperimentConfigError extends Error {
 }
 
 export const evaluatorInputSchema = z.object({
-  name: z.string().min(1).describe('Evaluator name, as returned by list_evaluators.'),
+  name: z
+    .string()
+    .min(1)
+    .max(MAX_NAME_LENGTH)
+    .describe('Evaluator name, as returned by list_evaluators.'),
   version: z
     .string()
+    .max(MAX_NAME_LENGTH)
     .optional()
     .describe('Optional evaluator version. Defaults to the latest registered version.'),
   connector_id: z
     .string()
+    .max(MAX_ID_LENGTH)
     .optional()
     .describe(
       'Judge model connector id. REQUIRED for `llm` evaluators (needsJudgeConnector=true); omit for `code` evaluators.'
@@ -61,40 +72,48 @@ export const evaluatorInputSchema = z.object({
 export const evalExperimentConfigSchema = z.object({
   name: z
     .string()
+    .max(MAX_NAME_LENGTH)
     .optional()
     .describe('Human-readable experiment name. A default is derived from the target when omitted.'),
   connector_ids: z
-    .array(z.string().min(1))
+    .array(z.string().min(1).max(MAX_ID_LENGTH))
     .min(1)
+    .max(EXPERIMENT_LIMITS.maxConnectorIds)
     .describe(
       'Model connector id(s) under evaluation. Providing two or more triggers a cross-model comparison.'
     ),
   agent_id: z
     .string()
+    .max(MAX_ID_LENGTH)
     .optional()
     .describe('Agent Builder agent id to evaluate. Mutually exclusive with tool_id.'),
   tool_id: z
     .string()
+    .max(MAX_ID_LENGTH)
     .optional()
     .describe('Agent Builder tool id to evaluate. Mutually exclusive with agent_id.'),
   dataset_ids: z
-    .array(z.string().min(1))
+    .array(z.string().min(1).max(MAX_ID_LENGTH))
     .min(1)
+    .max(EXPERIMENT_LIMITS.maxDatasetIds)
     .describe('Dataset id(s) to evaluate against, as returned by list_eval_datasets.'),
   evaluators: z
     .array(evaluatorInputSchema)
     .min(1)
+    .max(EXPERIMENT_LIMITS.maxEvaluators)
     .describe('Evaluators used to score each example.'),
   repetitions: z
     .number()
     .int()
     .min(1)
+    .max(EXPERIMENT_LIMITS.maxRepetitions)
     .optional()
     .describe('How many times to run each example. Defaults to 1.'),
   concurrency: z
     .number()
     .int()
     .min(1)
+    .max(EXPERIMENT_LIMITS.maxConcurrency)
     .optional()
     .describe('Maximum number of examples evaluated in parallel. Defaults to 5.'),
   compare: z
@@ -104,8 +123,9 @@ export const evalExperimentConfigSchema = z.object({
       'Only for saved cross-model workflows: append an evals.compareExperiments step after the per-model runs.'
     ),
   space_ids: z
-    .array(z.string().min(1))
+    .array(z.string().min(1).max(MAX_NAME_LENGTH))
     .min(1)
+    .max(EXPERIMENT_LIMITS.maxSpaceIds)
     .optional()
     .describe(
       'Spaces the resulting scores are visible in. Defaults to the current space when omitted.'

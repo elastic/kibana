@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { MAX_ID_LENGTH } from '@kbn/evals-plugin/common';
 import { generateSavedWorkflowYaml } from '@kbn/evals-plugin/server';
 import {
   buildWorkflowLink,
@@ -22,6 +23,7 @@ import type { EvalExperimentsToolDeps } from './deps';
 const saveSchema = evalExperimentConfigSchema.extend({
   workflow_id: z
     .string()
+    .max(MAX_ID_LENGTH)
     .optional()
     .describe(
       'Existing saved workflow id to update in place. Omit to create a new workflow (pass it to avoid duplicates when re-saving).'

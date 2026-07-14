@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { MAX_ID_LENGTH } from '@kbn/evals-plugin/common';
 import { generateExperimentRun } from '@kbn/evals-plugin/server';
 import {
   buildResultsLink,
@@ -22,6 +23,7 @@ import type { EvalExperimentsToolDeps } from './deps';
 const runSchema = evalExperimentConfigSchema.extend({
   workflow_id: z
     .string()
+    .max(MAX_ID_LENGTH)
     .optional()
     .describe('Optional saved workflow id to associate this run with (for correlation in the UI).'),
 });
