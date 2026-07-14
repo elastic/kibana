@@ -75,3 +75,11 @@ it('caches yaml transforms', () => {
     code: 'module.exports = "hello: world";\n',
   });
 });
+
+it('returns compiled output without a cache', () => {
+  expect(dotTextTransform('/repo/foo.text', 'hello')).toBe('module.exports = "hello";\n');
+  expect(peggyTransform('/repo/foo.peggy', 'start = "a"')).toBe('compiled peggy');
+  expect(yamlTransform('/repo/foo.yaml', 'hello: world')).toBe(
+    'module.exports = "hello: world";\n'
+  );
+});
