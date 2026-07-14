@@ -23,6 +23,7 @@ export interface UseMatchedActionPoliciesResult {
   isLoading: boolean;
   error: Error | null;
   items: MatchedActionPolicy[];
+  total: number;
 }
 
 export const useMatchedActionPolicies = ({
@@ -44,7 +45,7 @@ export const useMatchedActionPolicies = ({
   const { isLoading, error, data } = useQuery({
     queryKey: ['matchedActionPolicies', ruleId, name, tags],
     queryFn: async (): Promise<MatchActionPoliciesForRuleResponse> => {
-      if (!http) return { items: [] };
+      if (!http) return { items: [], total: 0 };
       return http.fetch<MatchActionPoliciesForRuleResponse>(
         '/api/alerting/v2/action_policies/_match_for_rule',
         { method: 'POST', body: JSON.stringify(body) }
@@ -59,5 +60,6 @@ export const useMatchedActionPolicies = ({
     isLoading: enabled && isLoading,
     error: error instanceof Error ? error : error != null ? new Error(String(error)) : null,
     items: data?.items ?? [],
+    total: data?.total ?? 0,
   };
 };

@@ -68,4 +68,5 @@ export interface MatchActionPoliciesForRuleParams {
 
 export interface MatchActionPoliciesForRuleResponse {
   items: MatchedActionPolicy[];
+  total: number;
 }
