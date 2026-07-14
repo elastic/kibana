@@ -82,7 +82,7 @@ methods: `setSelectedOptions` / `getSelectedOptions` / `clear`), via `page.compo
 | `getSelectedValue()` / `getSelectedMultiOptions()` | `getSelectedOptions()` | One reader for single and multi. |
 | clear-button click | `clear()` | Auto-detects the clearing strategy. |
 | `removeOption(v)` | `setSelectedOptions(current.filter(x => x !== v))` | Express the end-state, not the step. |
-| `setCustom{Single,Multi}Option(v)` (free-text `onCreateOption`) | **no equivalent** | Genuinely missing — don't force a bad map (see below). |
+| `setCustom{Single,Multi}Option(v)` (free-text `onCreateOption`) | `setSelectedOptions([v], { create: true })` | Types the value and commits it via `onCreateOption` (see below). |
 
 Before/after (from [#275609](https://github.com/elastic/kibana/pull/275609)) — only the setup got
 simpler; what the test verifies is unchanged:
@@ -94,12 +94,15 @@ simpler; what the test verifies is unchanged:
 +  await this.comboBox.setSelectedOptions([destination]);
 ```
 
-Cases **intentionally kept** off the minimal helper (real missing capability, i.e. the bar for a
-future extension — not a reason to fatten it now): free-text `onCreateOption` (values that can't
-pre-exist — tags, custom field names, date formats); server-side/virtualized search (option not in
-the DOM until you type); reading the *available* (unselected) option list. In Kibana these live on a
-thin `KbnComboBoxObject` subclass until a capability proves valuable enough to graduate into the
-published helper via its own EUI PR.
+The base published helper is minimal, so Kibana adds a thin `KbnComboBoxObject` subclass (what
+`page.components.comboBox` actually returns) covering what the base doesn't yet: free-text
+`onCreateOption` via `setSelectedOptions([v], { create: true })`; server-side/virtualized search where
+the option isn't in the DOM until you type (its `setSelectedOptions` types to filter, then selects by
+accessible name); and `getAvailableOptions` for reading the *unselected* list. These are interim — they
+graduate into the published helper via its own EUI PR, deleting the subclass with no test changes (same
+method names). Only a couple of genuinely odd combos stay fully raw (neither helper nor subclass): e.g.
+virtualized + middle-truncated options keyed by a stable option `data-test-subj`, and an `asPlainText`
+combo that defaults to a preset value.
 
 ## Migration workflow (Scout)
 
