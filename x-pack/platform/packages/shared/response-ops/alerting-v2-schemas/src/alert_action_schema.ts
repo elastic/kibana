@@ -139,9 +139,7 @@ const snoozeActionSchema = z
       .describe('Optional conditions that automatically lift the snooze when met.'),
     match: snoozeConditionsMatchSchema
       .optional()
-      .describe(
-        'How to combine `conditions` when deciding to lift the snooze. Defaults to `any`.'
-      ),
+      .describe('How to combine `conditions` when deciding to lift the snooze. Defaults to `any`.'),
   })
   .strict();
 
