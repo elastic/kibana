@@ -20,7 +20,7 @@ export interface ShareHelper {
 }
 
 export function createShareHelper(page: ScoutPage): ShareHelper {
-  const shareButton = page.testSubj.locator('shareTopNavButton');
+  const shareButton = page.testSubj.locator('~shareTopNavButton');
   const modal = page.testSubj.locator('shareContextModal');
   const copyUrlButton = page.testSubj.locator('copyShareUrlButton');
 
@@ -30,6 +30,11 @@ export function createShareHelper(page: ScoutPage): ShareHelper {
     copyUrlButton,
 
     openShareModal: async () => {
+      // The project header renders share as a title action that is revealed on header hover.
+      const appHeader = page.testSubj.locator('appHeader');
+      if (await appHeader.isVisible()) {
+        await appHeader.hover();
+      }
       await shareButton.click();
       await expect(modal).toBeVisible();
     },
