@@ -110,8 +110,7 @@ export const registerAnomalySummaryRoutes = ({
           const {
             from,
             to,
-            min_score: minScore,
-            max_score: maxScore,
+            score_ranges: scoreRanges,
             threat_tactics: threatTactics,
           } = request.body ?? {};
 
@@ -122,10 +121,10 @@ export const registerAnomalySummaryRoutes = ({
             });
           }
 
-          if (minScore !== undefined && maxScore !== undefined && minScore > maxScore) {
+          if (scoreRanges?.some((r) => r.max_score !== undefined && r.min_score > r.max_score)) {
             return siemResponse.error({
               statusCode: 400,
-              body: '`min_score` must not be greater than `max_score`',
+              body: "each `score_ranges` entry's `min_score` must not be greater than its `max_score`",
             });
           }
 
@@ -168,8 +167,7 @@ export const registerAnomalySummaryRoutes = ({
             entityType,
             fromMs: from,
             toMs: to,
-            minScore,
-            maxScore,
+            scoreRanges,
             threatTactics,
             logger,
             ml,
@@ -225,8 +223,7 @@ export const registerAnomalySummaryRoutes = ({
             page_size: pageSize = 100,
             from,
             to,
-            min_score: minScore,
-            max_score: maxScore,
+            score_ranges: scoreRanges,
             job_ids: jobIds,
             threat_tactics: threatTactics,
             sort,
@@ -239,10 +236,10 @@ export const registerAnomalySummaryRoutes = ({
             });
           }
 
-          if (minScore !== undefined && maxScore !== undefined && minScore > maxScore) {
+          if (scoreRanges?.some((r) => r.max_score !== undefined && r.min_score > r.max_score)) {
             return siemResponse.error({
               statusCode: 400,
-              body: '`min_score` must not be greater than `max_score`',
+              body: "each `score_ranges` entry's `min_score` must not be greater than its `max_score`",
             });
           }
 
@@ -284,8 +281,7 @@ export const registerAnomalySummaryRoutes = ({
             esClient,
             fromMs: from,
             toMs: to,
-            minScore,
-            maxScore,
+            scoreRanges,
             jobIds,
             threatTactics,
             logger,
