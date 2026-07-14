@@ -92,6 +92,7 @@ export class EventLogger implements IEventLogger {
     }
   }
 
+  // non-blocking, but spawns an async task to do the work
   logEvent(eventProperties: IEvent, id?: string): void {
     const event = this.buildEvent(eventProperties);
 
