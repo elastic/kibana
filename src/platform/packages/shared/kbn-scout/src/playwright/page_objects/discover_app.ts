@@ -629,6 +629,25 @@ export class DiscoverApp {
     await this.codeEditor.waitCodeEditorReady('ESQLEditor');
   }
 
+  async selectClassicMode() {
+    const currentMode = await this.getCurrentQueryMode();
+
+    if (currentMode !== 'classic') {
+      await this.clickAppMenuItem('select-classic-mode-btn');
+      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
+        state: 'visible',
+      });
+      await this.page.testSubj.click('discover-esql-to-dataview-no-save-btn');
+      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
+        state: 'hidden',
+      });
+    }
+
+    await this.waitUntilSearchingHasFinished();
+    const queryMode = await this.getCurrentQueryMode();
+    expect(queryMode).toBe('classic');
+  }
+
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
     await this.codeEditor.setCodeEditorValue(query);
@@ -806,44 +825,5 @@ export class DiscoverApp {
     } catch {
       return false;
     }
-  }
-
-  /**
-   * Inside an open document-viewer flyout, type a field name into the search
-   * input to filter the fields table. Mirrors the FTR
-   * `discover.findFieldByNameOrValueInDocViewer`.
-   */
-  async findFieldByNameOrValueInDocViewer(name: string) {
-    const flyout = this.page.testSubj.locator('docViewerFlyout');
-    const searchInput = flyout.locator('[data-test-subj="unifiedDocViewerFieldsSearchInput"]');
-    await searchInput.fill(name);
-    await expect(searchInput).toHaveValue(name, { timeout: 5_000 });
-  }
-
-  /**
-   * Inside an open document-viewer flyout, click a cell-level action button
-   * for a given field (e.g. `addFilterForValueButton`, `addExistsFilterButton`).
-   * Mirrors the FTR `dataGrid.clickFieldActionInFlyout`.
-   */
-  async clickFieldActionInFlyout(fieldName: string, actionName: string) {
-    const isValueAction = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(
-      actionName
-    );
-    const cellTestSubj = isValueAction
-      ? `tableDocViewRow-${fieldName}-value`
-      : `tableDocViewRow-${fieldName}-name`;
-
-    const flyout = this.page.testSubj.locator('docViewerFlyout');
-    await expect(async () => {
-      const cell = flyout.locator(`[data-test-subj="${cellTestSubj}"]`);
-      await cell.evaluate((el) => {
-        el.scrollIntoView({ block: 'center', inline: 'nearest' });
-      });
-      await cell.hover();
-
-      const actionBtn = flyout.locator(`[data-test-subj="${actionName}-${fieldName}"]`);
-      await actionBtn.waitFor({ state: 'visible' });
-      await actionBtn.click();
-    }).toPass({ timeout: 15_000 });
   }
 }
