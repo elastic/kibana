@@ -102,7 +102,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, usageCounter, undefined, async () => {
         const requestBodyData = req.body;
         if (isLensLegacyAttributes(requestBodyData) && !requestBodyData.visualizationType) {
           throw new Error('visualizationType is required');

@@ -76,6 +76,7 @@ export class DashboardPlugin
 {
   private readonly logger: Logger;
   private apiUsageCounter?: UsageCounter;
+  private agenticApiUsageCounter?: UsageCounter;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -108,6 +109,8 @@ export class DashboardPlugin
 
     if (plugins.usageCollection) {
       this.apiUsageCounter = plugins.usageCollection.createUsageCounter('dashboard_api');
+      this.agenticApiUsageCounter =
+        plugins.usageCollection.createUsageCounter('dashboard_api_agentic');
 
       // Registers routes for tracking and fetching dashboard views
       registerContentInsights(
@@ -133,7 +136,7 @@ export class DashboardPlugin
 
     core.uiSettings.register(getUISettings());
 
-    registerRoutes(core.http, this.apiUsageCounter, this.logger);
+    registerRoutes(core.http, this.apiUsageCounter, this.logger, this.agenticApiUsageCounter);
 
     void registerAccessControl({
       http: core.http,

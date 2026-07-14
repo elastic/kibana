@@ -26,7 +26,8 @@ export function registerCreateRoute(
   router: VersionedRouter<RequestHandlerContext>,
   usageCounter: UsageCounter | undefined,
   isDashboardAppRequest: boolean,
-  logger: Logger
+  logger: Logger,
+  agenticUsageCounter?: UsageCounter
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const createRoute = router.post({
@@ -69,7 +70,7 @@ export function registerCreateRoute(
       }),
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, usageCounter, agenticUsageCounter, async () => {
         try {
           const result = await create(
             ctx,

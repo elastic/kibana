@@ -24,7 +24,8 @@ import { getDashboardStateSchema } from '../dashboard_state_schemas';
 export function registerDeleteRoute(
   router: VersionedRouter<RequestHandlerContext>,
   usageCounter: UsageCounter | undefined,
-  logger: Logger
+  logger: Logger,
+  agenticUsageCounter?: UsageCounter
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const deleteRoute = router.delete({
@@ -75,7 +76,7 @@ export function registerDeleteRoute(
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, usageCounter, agenticUsageCounter, async () => {
         try {
           const result = await deleteDashboard(ctx, req.params.id, getCachedDashboardStateSchema());
           try {

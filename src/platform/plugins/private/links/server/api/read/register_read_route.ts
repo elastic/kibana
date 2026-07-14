@@ -65,7 +65,7 @@ export function registerReadRoute(
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, usageCounter, undefined, async () => {
         try {
           const result = await read(ctx, req.params.id);
           return res.ok({

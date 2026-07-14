@@ -24,7 +24,8 @@ export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
   usageCounter: UsageCounter | undefined,
   isDashboardAppRequest: boolean,
-  logger: Logger
+  logger: Logger,
+  agenticUsageCounter?: UsageCounter
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const readRoute = router.get({
@@ -79,7 +80,7 @@ export function registerReadRoute(
       }),
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, usageCounter, agenticUsageCounter, async () => {
         try {
           const { core } = await ctx.resolve(['core']);
           const useGASchemas = await getUseGASchemas(core);

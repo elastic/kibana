@@ -14,6 +14,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 export async function telemetryHandler<TResponse extends IKibanaResponse>(
   request: KibanaRequest,
   usageCounter: UsageCounter | undefined,
+  agenticUsageCounter: UsageCounter | undefined,
   handler: () => Promise<TResponse> | TResponse
 ): Promise<TResponse> {
   const handlerResponse = await handler();
@@ -22,13 +23,22 @@ export async function telemetryHandler<TResponse extends IKibanaResponse>(
   const isKibanaOrigin = typeof origin === 'string' && origin.toLocaleLowerCase() === 'kibana';
   const routePath = request.route.routePath;
 
-  if (!usageCounter || isKibanaOrigin || !routePath) {
+  if (isKibanaOrigin || !routePath) {
     return handlerResponse;
   }
 
-  usageCounter.incrementCounter({
-    counterName: `${request.route.method} ${routePath} ${handlerResponse.status}`,
-  });
+  const counterName = `${request.route.method} ${routePath} ${handlerResponse.status}`;
+
+  if (usageCounter) {
+    usageCounter.incrementCounter({ counterName });
+  }
+
+  if (agenticUsageCounter) {
+    const userAgent = [request.headers['user-agent'] ?? ''].flat();
+    if (userAgent.some((v) => v.toLowerCase().includes('elastic-agentic'))) {
+      agenticUsageCounter.incrementCounter({ counterName });
+    }
+  }
 
   return handlerResponse;
 }
