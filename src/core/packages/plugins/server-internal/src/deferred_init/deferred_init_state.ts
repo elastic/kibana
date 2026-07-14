@@ -27,6 +27,8 @@ export interface DeferredInitStateAttributes {
   updatedAt: string;
   attempts: number;
   lastError?: string;
+  /** Kibana version that last wrote this record. Used to invalidate stale state after an upgrade. */
+  kibanaVersion: string;
 }
 
 export const DEFERRED_INIT_STATE_TYPE = 'core-deferred-init-state';
@@ -68,6 +70,7 @@ export async function writeDeferredInitOutcome(
   pluginId: string,
   status: 'available' | 'failed',
   previousAttempts: number,
+  kibanaVersion: string,
   error?: unknown
 ): Promise<void> {
   try {
@@ -77,6 +80,7 @@ export async function writeDeferredInitOutcome(
         status,
         updatedAt: new Date().toISOString(),
         attempts: previousAttempts + 1,
+        kibanaVersion,
         ...(status === 'failed' && error !== undefined
           ? { lastError: error instanceof Error ? error.message : String(error) }
           : {}),

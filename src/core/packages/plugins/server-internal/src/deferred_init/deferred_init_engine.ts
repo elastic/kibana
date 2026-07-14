@@ -58,7 +58,7 @@ export class DeferredInitEngine {
   private readonly records = new Map<string, DeferredInitRecord>();
   private readonly retryAttempts = new Map<string, number>();
 
-  constructor(private readonly log: Logger) {}
+  constructor(private readonly log: Logger, private readonly kibanaVersion: string) {}
 
   /**
    * Reserve a slot for a plugin id and set its state to `idle`. Called during setup so
@@ -257,7 +257,10 @@ export class DeferredInitEngine {
     const { savedObjects, elasticsearch, logger } = ctx;
 
     const existing = await readDeferredInitState(savedObjects, logger, pluginId);
-    if (existing?.status === 'available') {
+    // Only trust a stored `available` result if it was written by the same Kibana version.
+    // On upgrade the SO is migrated but attributes persist, so a stale `available` from the
+    // previous version must be treated as unknown and the runner re-executed.
+    if (existing?.status === 'available' && existing.kibanaVersion === this.kibanaVersion) {
       return 'available';
     }
 
@@ -277,7 +280,7 @@ export class DeferredInitEngine {
       // The runner threw. Before recording a cluster-wide failure, make sure a peer that
       // raced us to completion didn't already succeed in the meantime.
       const latest = await readDeferredInitState(savedObjects, logger, pluginId);
-      if (latest?.status === 'available') {
+      if (latest?.status === 'available' && latest.kibanaVersion === this.kibanaVersion) {
         return 'available';
       }
       await writeDeferredInitOutcome(
@@ -286,6 +289,7 @@ export class DeferredInitEngine {
         pluginId,
         'failed',
         latest?.attempts ?? existing?.attempts ?? 0,
+        this.kibanaVersion,
         error
       );
       throw error;
@@ -298,7 +302,8 @@ export class DeferredInitEngine {
       logger,
       pluginId,
       'available',
-      existing?.attempts ?? 0
+      existing?.attempts ?? 0,
+      this.kibanaVersion
     );
     return 'available';
   }

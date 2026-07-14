@@ -43,7 +43,7 @@ describe('DeferredInitEngine', () => {
   let engine: DeferredInitEngine;
 
   beforeEach(() => {
-    engine = new DeferredInitEngine(loggingSystemMock.create().get());
+    engine = new DeferredInitEngine(loggingSystemMock.create().get(), '9.0.0');
     readDeferredInitStateMock.mockReset().mockResolvedValue(undefined);
     writeDeferredInitOutcomeMock.mockReset().mockResolvedValue(undefined);
     withLockMock.mockReset();
@@ -133,6 +133,63 @@ describe('DeferredInitEngine', () => {
       } finally {
         jest.useRealTimers();
       }
+    });
+  });
+
+  describe('version-aware SO fast path', () => {
+    it('skips the lock and runner when the stored state is available and version matches', async () => {
+      const runner = jest.fn().mockResolvedValue(undefined);
+      engine.register(PLUGIN_ID);
+      engine.setRunner(PLUGIN_ID, runner, createCtx());
+      readDeferredInitStateMock.mockResolvedValue({
+        status: 'available',
+        kibanaVersion: '9.0.0',
+        updatedAt: new Date().toISOString(),
+        attempts: 1,
+      });
+
+      await engine.waitUntilAvailable(PLUGIN_ID);
+
+      expect(runner).not.toHaveBeenCalled();
+      expect(withLockMock).not.toHaveBeenCalled();
+      expect(engine.getState(PLUGIN_ID)).toBe('available');
+    });
+
+    it('falls through to the lock and runner when the stored version does not match (upgrade scenario)', async () => {
+      const runner = jest.fn().mockResolvedValue(undefined);
+      engine.register(PLUGIN_ID);
+      engine.setRunner(PLUGIN_ID, runner, createCtx());
+      readDeferredInitStateMock.mockResolvedValue({
+        status: 'available',
+        kibanaVersion: '8.99.0',
+        updatedAt: new Date().toISOString(),
+        attempts: 1,
+      });
+      withLockMock.mockImplementation((_opts, cb) => cb());
+
+      await engine.waitUntilAvailable(PLUGIN_ID);
+
+      expect(runner).toHaveBeenCalledTimes(1);
+      expect(engine.getState(PLUGIN_ID)).toBe('available');
+    });
+
+    it('falls through to the lock and runner when the stored state is failed regardless of version', async () => {
+      const runner = jest.fn().mockResolvedValue(undefined);
+      engine.register(PLUGIN_ID);
+      engine.setRunner(PLUGIN_ID, runner, createCtx());
+      readDeferredInitStateMock.mockResolvedValue({
+        status: 'failed',
+        kibanaVersion: '9.0.0',
+        updatedAt: new Date().toISOString(),
+        attempts: 1,
+        lastError: 'previous run blew up',
+      });
+      withLockMock.mockImplementation((_opts, cb) => cb());
+
+      await engine.waitUntilAvailable(PLUGIN_ID);
+
+      expect(runner).toHaveBeenCalledTimes(1);
+      expect(engine.getState(PLUGIN_ID)).toBe('available');
     });
   });
 

@@ -36,6 +36,8 @@ const deferredInitStateAttributesSchemaV1 = schema.object({
   /** Number of `lazyInitialize` attempts across the cluster; informational only. */
   attempts: schema.number(),
   lastError: schema.maybe(schema.string()),
+  /** Kibana version that last wrote this record; used to invalidate stale state after an upgrade. */
+  kibanaVersion: schema.string(),
 });
 
 const deferredInitStateModelVersion1: SavedObjectsFullModelVersion = {
@@ -58,6 +60,7 @@ const deferredInitStateType: SavedObjectsType = {
       status: { type: 'keyword' },
       updatedAt: { type: 'date' },
       attempts: { type: 'integer' },
+      kibanaVersion: { type: 'keyword' },
       // lastError is diagnostic free text; deliberately unmapped (dynamic: false covers it).
     },
   },

@@ -736,7 +736,7 @@ describe('start', () => {
   });
 
   it('attaches the deferred-init runner for lazy plugins before the loop moves on', async () => {
-    const engine = new DeferredInitEngine(logger.get());
+    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
     jest.spyOn(engine, 'setRunner');
     const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
 
@@ -761,7 +761,7 @@ describe('start', () => {
   });
 
   it('does not attach a runner for plugins that did not opt into lazy init', async () => {
-    const engine = new DeferredInitEngine(logger.get());
+    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
     jest.spyOn(engine, 'setRunner');
     const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
 
@@ -876,7 +876,7 @@ describe('start - retrying on deferred-init failures', () => {
 
 describe('deferred-init engine wiring', () => {
   it('registers the deferred-init engine with the runtime contract resolver, when present', async () => {
-    const engine = new DeferredInitEngine(logger.get());
+    const engine = new DeferredInitEngine(logger.get(), '9.0.0');
     const localPluginsSystem = new PluginsSystem(coreContext, PluginType.standard, engine);
     const plugin = createPlugin('somePlugin');
     jest.spyOn(plugin, 'setup').mockReturnValue({});
