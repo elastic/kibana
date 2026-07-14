@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // 2. Match the specific known counter reported in src/platform/test/common/plugins/otel_metrics/server/monitoring/metrics.ts
       expect(cleanResponseText).to.match(
-        /# HELP request_count_total Counts total number of requests # TYPE request_count_total counter request_count_total [0-9]/
+        /# HELP request_count_total Counts total number of requests # TYPE request_count_total counter request_count_total\{otel_scope_name="dummyMetric"\} [0-9]/
       );
     });
   });

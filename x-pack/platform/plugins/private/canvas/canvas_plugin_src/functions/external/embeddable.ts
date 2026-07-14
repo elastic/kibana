@@ -13,6 +13,7 @@ import type {
 } from '@kbn/expressions-plugin/common';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
+import { DEFAULT_TIME_RANGE } from '../../../common/lib';
 import type { ExpressionValueFilter } from '../../../types';
 import type { EmbeddableExpression } from '../../expression_types';
 import { EmbeddableExpressionType } from '../../expression_types';
@@ -26,13 +27,8 @@ export interface Arguments {
   type: string;
 }
 
-const defaultTimeRange = {
-  from: 'now-15m',
-  to: 'now',
-};
-
 const baseEmbeddableInput = {
-  timeRange: defaultTimeRange,
+  timeRange: DEFAULT_TIME_RANGE,
   disableTriggers: true,
   renderMode: 'noInteractivity',
 };

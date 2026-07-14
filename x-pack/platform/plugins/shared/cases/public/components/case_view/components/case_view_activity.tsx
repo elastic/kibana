@@ -174,6 +174,7 @@ export const CaseViewActivity = ({
         customFieldId: customField.key,
         customFieldValue: customField.value,
         caseVersion: caseData.version,
+        caseData,
       });
     },
     [replaceCustomField, caseData]

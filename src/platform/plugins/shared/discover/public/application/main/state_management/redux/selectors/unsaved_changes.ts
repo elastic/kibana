@@ -22,6 +22,7 @@ import { selectTab } from './tabs';
 import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
 import {
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToTabState,
   fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
@@ -80,7 +81,7 @@ export const selectHasUnsavedChanges = (
       tab: fromSavedObjectTabToTabState({
         tab: persistedTab,
         initialAppState: getInitialAppState({
-          initialUrlState: undefined,
+          initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
           persistedTab,
           dataView: getSerializedSearchSourceDataViewDetails(
             persistedTab.serializedSearchSource,

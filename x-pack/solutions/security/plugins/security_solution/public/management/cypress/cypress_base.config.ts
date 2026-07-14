@@ -40,11 +40,12 @@ export const getCypressBaseConfig = (
       },
 
       screenshotsFolder:
-        '../../../target/kibana-security-solution/public/management/cypress/screenshots',
+        '../../../../../target/kibana-security-solution/public/management/cypress/screenshots',
       trashAssetsBeforeRuns: false,
       video: true,
       videoCompression: 15,
-      videosFolder: '../../../target/kibana-security-solution/public/management/cypress/videos',
+      videosFolder:
+        '../../../../../target/kibana-security-solution/public/management/cypress/videos',
       viewportHeight: 1200,
       viewportWidth: 1920,
       experimentalStudio: true,
@@ -82,18 +83,6 @@ export const getCypressBaseConfig = (
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
         setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
-          on('before:browser:launch', (browser, launchOptions) => {
-            if (browser.name === 'chrome' && browser.isHeadless) {
-              launchOptions.args.push('--window-size=1920,1200');
-              return launchOptions;
-            }
-            if (browser.family === 'chromium') {
-              launchOptions.args.push(
-                '--js-flags="--max_old_space_size=4096 --max_semi_space_size=1024"'
-              );
-            }
-            return launchOptions;
-          });
           registerDataSession(on, config);
           // IMPORTANT: setting the log level should happen before any tooling is called
           setupToolingLogLevel(config);
@@ -111,7 +100,7 @@ export const getCypressBaseConfig = (
           responseActionTasks(on, config);
 
           // eslint-disable-next-line @typescript-eslint/no-var-requires
-          require('@cypress/grep/src/plugin')(config);
+          require('@cypress/grep/plugin').plugin(config);
 
           on('after:spec', (_, results) => {
             getVideosForFailedSpecs(results);

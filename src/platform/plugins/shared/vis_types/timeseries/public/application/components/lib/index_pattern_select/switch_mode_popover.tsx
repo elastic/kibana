@@ -19,6 +19,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiLink,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { PopoverProps } from './types';
@@ -32,6 +33,7 @@ const allowStringIndicesMessage = i18n.translate(
 
 export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
 
@@ -74,6 +76,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
 
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       button={
         <EuiButtonIcon
           iconType={'gear'}
@@ -92,7 +95,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
       css={{ height: 'auto' }}
     >
       <div css={{ width: '360px' }} data-test-subj="switchIndexPatternSelectionModePopoverContent">
-        <EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId}>
           {i18n.translate('visTypeTimeseries.indexPatternSelect.switchModePopover.title', {
             defaultMessage: 'Data view mode',
           })}

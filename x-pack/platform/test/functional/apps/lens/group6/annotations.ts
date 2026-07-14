@@ -9,12 +9,20 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, tagManagement } = getPageObjects(['visualize', 'lens', 'tagManagement']);
+  const { visualize, lens, tagManagement, dashboard, header } = getPageObjects([
+    'visualize',
+    'lens',
+    'tagManagement',
+    'dashboard',
+    'header',
+  ]);
   const find = getService('find');
   const retry = getService('retry');
   const toastsService = getService('toasts');
   const testSubjects = getService('testSubjects');
   const listingTable = getService('listingTable');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('lens annotations tests', () => {
     it('should show a disabled annotation layer button if there is no date histogram in data layer', async () => {
@@ -107,6 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const ANNOTATION_GROUP_TITLE = 'library annotation group';
       const FIRST_VIS_TITLE = 'first visualization';
       const SECOND_VIS_TITLE = 'second visualization';
+      const DASHBOARD_TITLE = 'annotation sync test dashboard';
 
       it('should save annotation group to library', async () => {
         await visualize.navigateToNewVisualization();
@@ -167,6 +176,47 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.save(SECOND_VIS_TITLE);
       });
 
+      it('should sync annotation group updates across dashboard panels', async () => {
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
+        await dashboardAddPanel.addEmbeddable(FIRST_VIS_TITLE);
+        await dashboardPanelActions.clonePanel(FIRST_VIS_TITLE);
+        await dashboard.saveDashboard(DASHBOARD_TITLE);
+        await dashboard.waitForRenderComplete();
+
+        // Neither panel should show annotation text yet (text visibility is off)
+        const textsBefore = await find.allByCssSelector(
+          '[data-test-subj="xyVisAnnotationText"]',
+          1000
+        );
+        expect(textsBefore.length).to.be(0);
+
+        // Switch to edit mode so panel actions are available
+        await dashboard.switchToEditMode();
+
+        // Inline-edit the first panel
+        const firstPanel = await dashboardPanelActions.getPanelWrapper(FIRST_VIS_TITLE);
+        await dashboardPanelActions.clickInlineEdit(firstPanel);
+
+        // Switch to the annotation layer and enable text visibility
+        await lens.ensureLayerTabIsActive(1);
+        await testSubjects.click('lnsXY_xAnnotationsPanel > lns-dimensionTrigger');
+        await testSubjects.click('lnsXY_textVisibility_name');
+        await lens.closeDimensionEditor();
+
+        // Click "Apply and close" — this auto-saves the linked annotation to the
+        // library and propagates updates to other panels via annotationGroupUpdated$.
+        await testSubjects.click('applyFlyoutButton');
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.waitForRenderComplete();
+
+        // Both panels should now show the "Event" annotation text
+        await retry.waitFor('annotation text to appear in both panels', async () => {
+          const texts = await find.allByCssSelector('[data-test-subj="xyVisAnnotationText"]', 1000);
+          return texts.length >= 2;
+        });
+      });
+
       it('should remove layer for deleted annotation group', async () => {
         await visualize.gotoVisualizationLandingPage();
         await visualize.selectAnnotationsTab();
@@ -177,6 +227,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await lens.assertLayerCount(1);
+      });
+
+      it('should remove annotation layer from dashboard panel when group is deleted', async () => {
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard(DASHBOARD_TITLE);
+        await dashboard.waitForRenderComplete();
+
+        // The annotation group was deleted in the previous test. The inline-edited
+        // panels (saved via saveByRef in persisted format) should no longer render
+        // annotation text after reloading from the saved object.
+        await retry.waitFor('annotation text to disappear from dashboard panels', async () => {
+          const texts = await find.allByCssSelector('[data-test-subj="xyVisAnnotationText"]', 1000);
+          return texts.length === 0;
+        });
       });
 
       // TODO check various saving configurations (linked layer, clean by-ref, revert)

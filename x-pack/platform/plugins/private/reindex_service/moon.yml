@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/reindex-service-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/reindex-service-plugin'
+  title: '@kbn/reindex-service-plugin'
   description: Moon project for @kbn/reindex-service-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/reindex_service
+  sourceRoot: x-pack/platform/plugins/private/reindex_service
 dependsOn:
   - '@kbn/security-plugin'
   - '@kbn/es-ui-shared-plugin'
@@ -47,16 +46,6 @@ fileGroups:
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

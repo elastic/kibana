@@ -241,7 +241,7 @@ export const FrameJankIndicator: React.FC = () => {
 
   return (
     <EuiToolTip content={tooltipContent}>
-      <div css={getContainerStyles(euiTheme)}>
+      <div css={getContainerStyles(euiTheme)} tabIndex={0}>
         <EuiBadge color={'default'} css={getBadgeStyles(euiTheme)}>
           Jank {perfInfo ? `${perfInfo.jankPercentage}%` : '-%'}
         </EuiBadge>

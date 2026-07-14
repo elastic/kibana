@@ -74,6 +74,7 @@ exports[`TOCEntry is rendered 1`] = `
       title="Show layer details"
     >
       <EuiIcon
+        aria-hidden={true}
         className="eui-alignBaseline"
         size="s"
         type="arrowDown"
@@ -161,6 +162,7 @@ exports[`TOCEntry props Should indent child layer 1`] = `
       title="Show layer details"
     >
       <EuiIcon
+        aria-hidden={true}
         className="eui-alignBaseline"
         size="s"
         type="arrowDown"
@@ -244,6 +246,7 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
       title="Show layer details"
     >
       <EuiIcon
+        aria-hidden={true}
         className="eui-alignBaseline"
         size="s"
         type="arrowDown"
@@ -327,6 +330,7 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
       title="Show layer details"
     >
       <EuiIcon
+        aria-hidden={true}
         className="eui-alignBaseline"
         size="s"
         type="arrowDown"
@@ -395,6 +399,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
       title="Show layer details"
     >
       <EuiIcon
+        aria-hidden={true}
         className="eui-alignBaseline"
         size="s"
         type="arrowDown"
@@ -500,6 +505,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
       title="Hide layer details"
     >
       <EuiIcon
+        aria-hidden={true}
         className="eui-alignBaseline"
         size="s"
         type="arrowUp"

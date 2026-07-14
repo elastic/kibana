@@ -1538,6 +1538,46 @@ describe('Action Executor', () => {
       }
     });
   }
+
+  describe('schema validation on execute', () => {
+    test('returns error result when params fail Zod validation', async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      const result = await actionExecutor.execute({
+        ...executeParams,
+        params: { foo: 'not-a-boolean' },
+      });
+
+      expect(result.status).toBe('error');
+      expect(result.message).toMatch(/error validating action params/);
+      expect(result.errorSource).toBe(TaskErrorSource.USER);
+      expect(connectorType.executor).not.toHaveBeenCalled();
+    });
+
+    test('returns error result when config fails Zod validation against saved object', async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      const typeWithStringBar: jest.Mocked<ConnectorType> = {
+        ...connectorType,
+        validate: {
+          ...connectorType.validate,
+          config: { schema: z.object({ bar: z.string() }) },
+        },
+      };
+      connectorTypeRegistry.get.mockReturnValueOnce(typeWithStringBar);
+
+      const result = await actionExecutor.execute(executeParams);
+
+      expect(result.status).toBe('error');
+      expect(result.message).toMatch(/error validating connector type config/);
+      expect(result.errorSource).toBe(TaskErrorSource.FRAMEWORK);
+      expect(typeWithStringBar.executor).not.toHaveBeenCalled();
+    });
+  });
 });
 
 describe('System actions', () => {

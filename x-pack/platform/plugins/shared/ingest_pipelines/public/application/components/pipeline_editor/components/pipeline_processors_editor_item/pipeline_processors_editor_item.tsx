@@ -129,6 +129,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     const isDimmed = isEditingOtherProcessor || isMovingOtherProcessor;
 
     const processorDescriptor = getProcessorDescriptor(processor.type);
+    const processorName = processorDescriptor?.label ?? processor.type;
 
     const { testPipelineData } = useTestPipelineContext();
     const {
@@ -178,9 +179,10 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     );
 
     const renderMoveButton = () => {
-      const label = !isMovingThisProcessor
-        ? i18nTexts.moveButtonLabel
-        : i18nTexts.cancelMoveButtonLabel;
+      const moveLabel = i18nTexts.moveButtonLabelWithName({ processorName });
+      const label = isMovingThisProcessor
+        ? i18nTexts.cancelMoveButtonLabelWithName({ processorName })
+        : moveLabel;
       const dataTestSubj = !isMovingThisProcessor ? 'moveItemButton' : 'cancelMoveItemButton';
       const icon = isMovingThisProcessor ? 'cross' : 'sortable';
       const disabled = isEditorNotInIdleMode && !isMovingThisProcessor;
@@ -201,15 +203,11 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           }}
         />
       );
-      // Remove the tooltip from the DOM to prevent it from lingering if the mouse leave event
-      // did not fire.
       return (
         <div css={styles.moveButton}>
-          {!isInMoveMode ? (
-            <EuiToolTip content={i18nTexts.moveButtonLabel}>{moveButton}</EuiToolTip>
-          ) : (
-            moveButton
-          )}
+          <EuiToolTip content={isInMoveMode ? undefined : label} disableScreenReaderOutput>
+            {moveButton}
+          </EuiToolTip>
         </div>
       );
     };
@@ -236,7 +234,10 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 {isExecutingPipeline ? (
                   <EuiLoadingSpinner size="s" />
                 ) : (
-                  <PipelineProcessorsItemStatus processorStatus={processorStatus} />
+                  <PipelineProcessorsItemStatus
+                    processorStatus={processorStatus}
+                    isInMoveMode={isInMoveMode}
+                  />
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

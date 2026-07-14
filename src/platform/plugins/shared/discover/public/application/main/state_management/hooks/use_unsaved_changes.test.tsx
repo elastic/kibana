@@ -10,7 +10,7 @@
 import { renderHook } from '@testing-library/react';
 import { useUnsavedChanges } from './use_unsaved_changes';
 import type { DiscoverStateContainer } from '../discover_state';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import type { DiscoverServices } from '../../../../build_services';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { AppMountParameters } from '@kbn/core/public';
@@ -22,11 +22,14 @@ import {
   selectAllTabs,
   selectHasUnsavedChanges,
   selectRecentlyClosedTabs,
+  selectTabRuntimeState,
 } from '../redux';
-import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
+import { getPersistedTabMock, getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 import { getConnectedCustomizationService } from '../../../../customizations';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { AppLeaveActionFactory } from '@kbn/core-application-browser';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 
 const mockSelectHasUnsavedChanges = jest.mocked(selectHasUnsavedChanges);
 
@@ -40,18 +43,43 @@ jest.mock('../redux/selectors', () => {
 
 describe('useUnsavedChanges', () => {
   const setup = async ({
-    stateContainer = getDiscoverStateMock(),
     services = createDiscoverServicesMock(),
     onAppLeave,
   }: {
-    stateContainer?: DiscoverStateContainer;
     services?: DiscoverServices;
     onAppLeave?: AppMountParameters['onAppLeave'];
   } = {}) => {
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
+    });
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({
+        id: 'test-id',
+        tabs: [
+          getPersistedTabMock({
+            tabId: 'persisted-tab',
+            dataView: dataViewWithTimefieldMock,
+            services,
+          }),
+        ],
+      }),
+    });
+
+    const currentTabId = toolkit.internalState.getState().tabs.unsafeCurrentId;
+
+    await toolkit.initializeSingleTab({ tabId: currentTabId });
+
+    const stateContainer = selectTabRuntimeState(
+      toolkit.runtimeStateManager,
+      currentTabId
+    ).stateContainer$.getValue()!;
+
     const result = renderHook(useUnsavedChanges, {
       initialProps: {
-        internalState: stateContainer.internalState,
-        runtimeStateManager: stateContainer.runtimeStateManager,
+        internalState: toolkit.internalState,
+        runtimeStateManager: toolkit.runtimeStateManager,
         onAppLeave,
       },
       wrapper: ({ children }) => (
@@ -60,7 +88,8 @@ describe('useUnsavedChanges', () => {
         </DiscoverTestProvider>
       ),
     });
-    return { result, stateContainer, services };
+
+    return { result, stateContainer, ...toolkit };
   };
 
   const changeTabs = async (stateContainer: DiscoverStateContainer, services: DiscoverServices) => {

@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { PluginConfig } from './config';
 import type {
   PluginSetupDependencies,
@@ -30,6 +31,7 @@ export class AgentBuilderPlatformPlugin
   private logger: Logger;
   // @ts-expect-error unused for now
   private config: OnechatConfig;
+  private security?: SecurityPluginStart;
 
   constructor(context: PluginInitializerContext<PluginConfig>) {
     this.logger = context.logger.get();
@@ -43,6 +45,7 @@ export class AgentBuilderPlatformPlugin
     registerTools({
       coreSetup,
       setupDeps,
+      getSecurity: () => this.security,
     });
     registerAttachmentTypes({
       coreSetup,
@@ -53,6 +56,7 @@ export class AgentBuilderPlatformPlugin
   }
 
   start(coreStart: CoreStart, startDeps: PluginStartDependencies): AgentBuilderPlatformPluginStart {
+    this.security = startDeps.security;
     return {};
   }
 

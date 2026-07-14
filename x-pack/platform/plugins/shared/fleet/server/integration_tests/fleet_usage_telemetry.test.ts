@@ -282,6 +282,41 @@ describe('fleet usage telemetry', () => {
       refresh: 'wait_for',
     });
 
+    await esClient.bulk({
+      index: '.fleet-actions',
+      body: [
+        // Rollback action within 1h — should be counted
+        { create: { _id: 'rollback1' } },
+        {
+          type: 'UPGRADE',
+          '@timestamp': new Date().toISOString(),
+          data: { rollback: true, version: '8.11.0' },
+        },
+        // Another rollback within 1h — should be counted
+        { create: { _id: 'rollback2' } },
+        {
+          type: 'UPGRADE',
+          '@timestamp': new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30m ago
+          data: { rollback: true, version: '8.10.0' },
+        },
+        // Non-rollback UPGRADE within 1h — should NOT be counted
+        { create: { _id: 'upgrade-no-rollback' } },
+        {
+          type: 'UPGRADE',
+          '@timestamp': new Date().toISOString(),
+          data: { rollback: false, version: '8.12.0' },
+        },
+        // Rollback outside 1h window — should NOT be counted
+        { create: { _id: 'rollback-old' } },
+        {
+          type: 'UPGRADE',
+          '@timestamp': new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2h ago
+          data: { rollback: true, version: '8.9.0' },
+        },
+      ],
+      refresh: 'wait_for',
+    });
+
     await esClient.create({
       index: 'logs-elastic_agent-default',
       id: 'panic1',
@@ -616,6 +651,7 @@ describe('fleet usage telemetry', () => {
           'stderr panic close of closed channel',
         ]),
         fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
+        agent_upgrade_rollbacks: 2,
         integrations_details: [
           {
             total_integration_policies: 2,

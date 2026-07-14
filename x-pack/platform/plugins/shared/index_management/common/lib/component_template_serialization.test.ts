@@ -98,6 +98,60 @@ describe('Component template serialization', () => {
         },
       });
     });
+
+    test('does not migrate deprecated mappings._source.mode to index.mapping.source.mode on deserialize', () => {
+      expect(
+        deserializeComponentTemplate(
+          {
+            name: 'my_component_template',
+            component_template: {
+              template: {
+                mappings: {
+                  _source: {
+                    mode: 'stored',
+                    includes: ['a'],
+                  },
+                },
+              },
+            },
+          },
+          []
+        )
+      ).toHaveProperty('template', {
+        mappings: {
+          _source: {
+            mode: 'stored',
+            includes: ['a'],
+          },
+        },
+      });
+    });
+
+    test('does not migrate enabled _source property - it remains represented via _source.enabled', () => {
+      expect(
+        deserializeComponentTemplate(
+          {
+            name: 'my_component_template',
+            component_template: {
+              template: {
+                mappings: {
+                  _source: {
+                    enabled: false,
+                  },
+                },
+              },
+            },
+          },
+          []
+        )
+      ).toHaveProperty('template', {
+        mappings: {
+          _source: {
+            enabled: false,
+          },
+        },
+      });
+    });
   });
 
   describe('serializeComponentTemplate()', () => {
@@ -166,6 +220,95 @@ describe('Component template serialization', () => {
         },
       });
     });
+
+    test('migrates deprecated mappings._source.mode to index.mapping.source.mode on serialize', () => {
+      expect(
+        serializeComponentTemplate({
+          ...deserializedComponentTemplate,
+          template: {
+            ...deserializedComponentTemplate.template,
+            mappings: {
+              ...deserializedComponentTemplate.template.mappings,
+              _source: {
+                mode: 'synthetic',
+                excludes: ['b'],
+              },
+            },
+          },
+        })
+      ).toHaveProperty('template', {
+        settings: {
+          number_of_shards: 1,
+          index: {
+            mapping: {
+              source: {
+                mode: 'synthetic',
+              },
+            },
+          },
+        },
+        mappings: {
+          _source: {
+            excludes: ['b'],
+          },
+          properties: deserializedComponentTemplate.template.mappings.properties,
+        },
+      });
+    });
+
+    test('does not include _source.mode in mappings when it is the only mappings value', () => {
+      expect(
+        serializeComponentTemplate({
+          ...deserializedComponentTemplate,
+          template: {
+            ...deserializedComponentTemplate.template,
+            mappings: {
+              _source: {
+                mode: 'synthetic',
+              },
+            },
+          },
+        })
+      ).toHaveProperty('template', {
+        mappings: {},
+        settings: {
+          number_of_shards: 1,
+          index: {
+            mapping: {
+              source: {
+                mode: 'synthetic',
+              },
+            },
+          },
+        },
+      });
+    });
+
+    test('does not migrate enabled _source property - it remains represented via _source.enabled', () => {
+      expect(
+        serializeComponentTemplate({
+          ...deserializedComponentTemplate,
+          template: {
+            ...deserializedComponentTemplate.template,
+            mappings: {
+              ...deserializedComponentTemplate.template.mappings,
+              _source: {
+                enabled: false,
+              },
+            },
+          },
+        })
+      ).toHaveProperty('template', {
+        ...deserializedComponentTemplate.template,
+        mappings: {
+          ...deserializedComponentTemplate.template.mappings,
+          _source: {
+            enabled: false,
+          },
+        },
+      });
+    });
+
     test('serialize a component template with data stream options', () => {
       expect(
         serializeComponentTemplate(deserializedComponentTemplate, {

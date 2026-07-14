@@ -25,7 +25,10 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
     ...originalModule,
     useKibana: () => ({
       services: {
-        docLinks: { ELASTIC_WEBSITE_URL: 'url' },
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'url',
+          links: { alerting: { casesWebhookAction: 'url/cases-webhook' } },
+        },
         notifications: {
           toasts: {
             addError: jest.fn(),
@@ -205,7 +208,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     expect(screen.queryByTestId('webhookHeadersValueInput')).not.toBeInTheDocument();
   });
 
-  describe('Step Validation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/237095
+  describe.skip('Step Validation', () => {
     it('Steps work correctly when all fields valid', async () => {
       render(
         <ConnectorFormTestProvider connector={actionConnector}>

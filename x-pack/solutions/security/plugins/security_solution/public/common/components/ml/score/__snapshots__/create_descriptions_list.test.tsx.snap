@@ -13,7 +13,7 @@ exports[`create_description_list renders correctly against snapshot 1`] = `
   }
 >
   <dl
-    css="unknown styles"
+    className="euiDescriptionList"
     data-type="row"
   >
     <EuiDescriptionListTitle

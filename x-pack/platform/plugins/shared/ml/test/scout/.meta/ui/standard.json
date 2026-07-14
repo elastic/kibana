@@ -1,0 +1,33 @@
+{
+  "sha1": "4a7595c5b7c64dabaefea06c56772b0e5f7824ec",
+  "tests": [
+    {
+      "id": "c8ef714ccee931c-76874840f05b4c6",
+      "title": "Machine Learning feature controls mlAppPageOverview renders in a space where ML is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "id": "c8ef714ccee931c-0adf1432521d86e",
+      "title": "Machine Learning feature controls navigating to /app/ml returns 404 in a space where ML is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    }
+  ]
+}

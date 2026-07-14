@@ -1,0 +1,158 @@
+<!DOCTYPE qhelp SYSTEM "qhelp.dtd">
+<qhelp>
+
+<overview>
+<p>
+This query detects calls to <code>schema.string()</code> from <code>@kbn/config-schema</code>
+and <code>z.string()</code> from Zod (<code>@kbn/zod</code>, <code>@kbn/zod/v4</code>, or
+plain <code>zod</code>) that do not specify a maximum length constraint. When string schemas
+are used to validate untrusted input (such as HTTP request bodies, query parameters, or URL
+parameters), the absence of a length limit can lead to Denial of Service (DoS) vulnerabilities.
+</p>
+<p>
+An attacker could exploit unbounded string validation by sending extremely large string values
+in their requests. This can cause:
+</p>
+<ul>
+<li>Excessive memory consumption as the server allocates storage for oversized strings</li>
+<li>CPU exhaustion during validation, regex processing, or downstream operations on long strings</li>
+<li>Database field overflow or storage exhaustion when persisting unbounded values</li>
+<li>Application crashes due to out-of-memory conditions</li>
+<li>Degraded performance affecting all users of the system</li>
+</ul>
+<p>
+The query uses a shared exclusion list (defined in <code>KibanaDoSExclusions.qll</code>) to
+skip files whose schemas are known to never validate HTTP request payloads, such as
+saved-object attribute schemas, plugin configuration, UI settings definitions,
+content-management layer schemas, and similar structural/data-at-rest categories. See that
+file for the full set of excluded path patterns.
+</p>
+<p>
+Some findings will be in schemas that validate route <b>responses</b> or other non-request-payload
+contexts. These are expected false positives. To suppress a legitimate false positive, add a
+<code>codeql[js/kibana/unbounded-string-in-schema]</code> comment on the line above the flagged
+call. If a false positive affects an entire file category, consider proposing an addition to
+<code>KibanaDoSExclusions.qll</code> rather than adding per-line suppressions.
+</p>
+</overview>
+
+<recommendation>
+<p>
+Always specify a maximum length constraint when using string schemas to validate input from
+untrusted sources.
+</p>
+<p>
+For <code>@kbn/config-schema</code>, add a <code>maxLength</code> option:
+</p>
+<sample language="javascript">
+// Before (vulnerable)
+schema.string()
+
+// After (protected)
+schema.string({ maxLength: 1024 })
+</sample>
+<p>
+For Zod (<code>@kbn/zod</code>, <code>@kbn/zod/v4</code>, or plain <code>zod</code>), chain a <code>.max()</code> call:
+</p>
+<sample language="javascript">
+// Before (vulnerable)
+z.string()
+
+// After (protected)
+z.string().max(1024)
+</sample>
+<p>
+When determining an appropriate maximum length, consider:
+</p>
+<ul>
+<li>The actual business requirement - what is the longest string a user would legitimately submit?</li>
+<li>Memory overhead of storing and processing the string</li>
+<li>Whether the string undergoes regex validation (long strings amplify backtracking)</li>
+<li>Database column size limits for persisted values</li>
+<li>Rate limiting and other complementary security controls in place</li>
+</ul>
+</recommendation>
+
+<example>
+<p>
+The following example shows a route handler that accepts an unbounded string for a search query.
+An attacker could send a multi-megabyte string, causing excessive memory usage and potential
+regex backtracking:
+</p>
+<sample language="javascript">
+import { schema } from '@kbn/config-schema';
+
+// BAD: No maxLength constraint - vulnerable to DoS
+router.post({
+  path: '/api/search',
+  validate: {
+    body: schema.object({
+      query: schema.string(),  // Unbounded!
+    }),
+  },
+}, async (context, request, response) => {
+  const { query } = request.body;
+  const results = await performSearch(query);
+  return response.ok({ body: { results } });
+});
+</sample>
+<p>
+The fix is to add a <code>maxLength</code> constraint that matches the legitimate use case:
+</p>
+<sample language="javascript">
+import { schema } from '@kbn/config-schema';
+
+// GOOD: maxLength constraint prevents DoS
+router.post({
+  path: '/api/search',
+  validate: {
+    body: schema.object({
+      query: schema.string({ maxLength: 256 }),
+    }),
+  },
+}, async (context, request, response) => {
+  const { query } = request.body;
+  const results = await performSearch(query);
+  return response.ok({ body: { results } });
+});
+</sample>
+<p>
+The equivalent fix using Zod (applies to <code>@kbn/zod</code>, <code>@kbn/zod/v4</code>, or plain <code>zod</code>):
+</p>
+<sample language="javascript">
+import { z } from '@kbn/zod';
+
+// BAD: No .max() constraint
+const badSchema = z.object({
+  query: z.string(),
+});
+
+// GOOD: .max() constraint prevents DoS
+const goodSchema = z.object({
+  query: z.string().max(256),
+});
+</sample>
+</example>
+
+<references>
+<li>
+  <a href="https://owasp.org/www-community/attacks/Denial_of_Service">OWASP: Denial of Service Attacks</a>
+</li>
+<li>
+  <a href="https://cheatsheetseries.owasp.org/cheatsheets/Denial_of_Service_Cheat_Sheet.html">OWASP: Denial of Service Cheat Sheet</a>
+</li>
+<li>
+  <a href="https://cwe.mitre.org/data/definitions/400.html">CWE-400: Uncontrolled Resource Consumption</a>
+</li>
+<li>
+  <a href="https://cwe.mitre.org/data/definitions/770.html">CWE-770: Allocation of Resources Without Limits or Throttling</a>
+</li>
+<li>
+  Kibana <code>@kbn/config-schema</code> documentation for <code>schema.string()</code> options
+</li>
+<li>
+  Zod documentation for <code>z.string().max()</code>
+</li>
+</references>
+
+</qhelp>

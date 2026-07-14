@@ -14,7 +14,7 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { pickLevelFromFlags } from '@kbn/tooling-log';
-import { resolve } from 'path';
+import { basename, isAbsolute, relative, resolve } from 'path';
 import { silence } from '../../common';
 import {
   preCreateSecurityIndexesViaSamlAuth,
@@ -24,7 +24,7 @@ import {
 import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import type { ScoutPlaywrightProjects } from '../types';
-import { execPromise, getPlaywrightGrepTag } from '../utils';
+import { execPromise, getPlaywrightGrepTag, withKibanaBabelRegister } from '../utils';
 import type { RunTestsOptions } from './flags';
 
 export const getPlaywrightProject = (
@@ -40,6 +40,22 @@ export const getPlaywrightProject = (
   }
 };
 
+const getScoutRunCommandForReporting = (argv: string[]): string => {
+  const [nodeBin, scriptPath, ...rest] = argv;
+  const nodeDisplay =
+    typeof nodeBin === 'string' && basename(nodeBin) === 'node' ? 'node' : nodeBin;
+
+  if (typeof scriptPath !== 'string') {
+    return [nodeDisplay, ...rest].filter(Boolean).join(' ');
+  }
+
+  const relativeScriptPath = isAbsolute(scriptPath) ? relative(REPO_ROOT, scriptPath) : scriptPath;
+  const scriptDisplay =
+    relativeScriptPath && !relativeScriptPath.startsWith('..') ? relativeScriptPath : scriptPath;
+
+  return [nodeDisplay, scriptDisplay, ...rest].filter(Boolean).join(' ');
+};
+
 async function runPlaywrightTest(
   procs: ProcRunner,
   cmd: string,
@@ -50,10 +66,10 @@ async function runPlaywrightTest(
     cmd,
     args,
     cwd: resolve(REPO_ROOT),
-    env: {
+    env: withKibanaBabelRegister({
       ...process.env,
       ...env,
-    },
+    }),
     wait: true,
   });
 }
@@ -66,10 +82,14 @@ export async function hasTestsInPlaywrightConfig(
 ): Promise<number> {
   log.info(`scout: Validate Playwright config has tests`);
   try {
-    const validationCmd = ['SCOUT_REPORTER_ENABLED=false', cmd, ...cmdArgs, '--list'].join(' ');
-    log.debug(`scout: running '${validationCmd}'`);
+    const validationCmd = [cmd, ...cmdArgs, '--list'].join(' ');
 
-    const result = await execPromise(validationCmd);
+    const result = await execPromise(validationCmd, {
+      env: withKibanaBabelRegister({
+        ...process.env,
+        SCOUT_REPORTER_ENABLED: 'false',
+      }) as NodeJS.ProcessEnv,
+    });
     const lastLine = result.stdout.trim().split('\n').pop() || '';
 
     log.info(`scout: ${lastLine}`);
@@ -78,7 +98,10 @@ export async function hasTestsInPlaywrightConfig(
     const errorMessage = (err as Error).message || String(err);
 
     if (errorMessage.includes('No tests found')) {
-      log.error(`scout: No tests found in [${configPath}]`);
+      log.error(
+        `scout: No tests found in [${configPath}]. ` +
+          `Run 'npx playwright test --list --config ${configPath}' to see Playwright errors.`
+      );
       return 2; // "no tests" code, no hard failure on CI
     }
 
@@ -150,6 +173,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/scout run-tests');
 
+  const scoutRunCommandForReporting = getScoutRunCommandForReporting(process.argv);
+
   const pwGrepTag = getPlaywrightGrepTag(options.testTarget);
   const pwConfigPath = options.configPath;
   const pwTestFiles = options.testFiles || [];
@@ -189,6 +214,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       SCOUT_TARGET_LOCATION: options.testTarget.location,
       SCOUT_TARGET_ARCH: options.testTarget.arch,
       SCOUT_TARGET_DOMAIN: options.testTarget.domain,
+      SCOUT_RUN_COMMAND: scoutRunCommandForReporting,
     };
 
     if (exitCode !== 0) {

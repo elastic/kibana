@@ -14,7 +14,8 @@ viewer:
     - names:
         - '.alerts*'
         - '.preview.alerts*'
-        - '.adhoc.alerts*'
+        - '.alerts-security.attack.discovery.alerts*'
+        - '.adhoc.alerts-security.attack.discovery.alerts*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -100,8 +101,9 @@ editor:
         - '.alerts*'
         - '.internal.preview.alerts*'
         - '.preview.alerts*'
-        - '.internal.adhoc.alerts*'
-        - '.adhoc.alerts*'
+        - '.alerts-security.attack.discovery.alerts*'
+        - '.adhoc.alerts-security.attack.discovery.alerts*'
+        - '.internal.adhoc.alerts-security.attack.discovery.alerts*'
         - 'risk-score.risk-score-*'
       privileges:
         - 'read'
@@ -126,6 +128,14 @@ editor:
         - '.ml-anomalies-*'
       privileges:
         - read
+    - names:
+        - 'kibana_sample_data_*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'manage'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -174,6 +184,14 @@ t1_analyst:
         - write
         - maintenance
     - names:
+        - '.alerts-security.attack.discovery.alerts*'
+        - '.adhoc.alerts-security.attack.discovery.alerts*'
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
+    - names:
         - .lists*
         - .items*
         - apm-*-transaction*
@@ -207,7 +225,7 @@ t1_analyst:
         - feature_securitySolutionRulesV1.read
         - feature_securitySolutionCasesV2.read
         - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_securitySolutionTimeline.read
         - feature_securitySolutionNotes.read
         - feature_actions.read
@@ -232,6 +250,14 @@ t2_analyst:
         - read
         - write
         - maintenance
+    - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
     - names:
         - .lists*
         - .items*
@@ -270,7 +296,7 @@ t2_analyst:
         - feature_securitySolutionRulesV1.read
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
-        - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionAttackDiscovery.minimal_all
         - feature_securitySolutionTimeline.read
         - feature_securitySolutionNotes.read
         - feature_actions.read
@@ -310,6 +336,14 @@ t3_analyst:
         - read
         - write
         - maintenance
+    - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
     - names:
         - .lists*
         - .items*
@@ -403,6 +437,14 @@ threat_intelligence_analyst:
         - write
         - maintenance
     - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
+    - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
@@ -462,8 +504,9 @@ rule_author:
         - .siem-signals-*
         - .internal.preview.alerts-security*
         - .preview.alerts-security*
-        - .internal.adhoc.alerts-security*
-        - .adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
@@ -543,8 +586,9 @@ soc_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write
@@ -636,8 +680,9 @@ detections_admin:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -711,8 +756,9 @@ platform_engineer:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
         - risk-score.risk-score-*
         - security_solution-*.misconfiguration_latest*
       privileges:
@@ -805,12 +851,19 @@ endpoint_operations_analyst:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
       privileges:
         - read
         - write
         - maintenance
+    - names:
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
     - names:
         - .asset-criticality.asset-criticality-*
       privileges:
@@ -900,8 +953,9 @@ endpoint_policy_manager:
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
-        - .adhoc.alerts-security*
-        - .internal.adhoc.alerts-security*
+        - .alerts-security.attack.discovery.alerts*
+        - .adhoc.alerts-security.attack.discovery.alerts*
+        - .internal.adhoc.alerts-security.attack.discovery.alerts*
       privileges:
         - read
         - write

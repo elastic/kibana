@@ -51,7 +51,7 @@ const noopFs: FS = {
     );
   },
   resolve: (_dir: string, file: string, _ext: string) => file,
-  contains: () => false,
+  contains: async () => false,
 };
 
 /**

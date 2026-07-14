@@ -75,7 +75,7 @@ export const NewsfeedNavButton = ({ newsfeedApi, hasCustomBranding$, isServerles
           notification={hasNew ? true : null}
           onClick={showFlyout}
         >
-          <EuiIcon type="cheer" size="m" />
+          <EuiIcon type="cheer" size="m" aria-hidden={true} />
         </EuiHeaderSectionItemButton>
         {flyoutVisible ? (
           <NewsfeedFlyout

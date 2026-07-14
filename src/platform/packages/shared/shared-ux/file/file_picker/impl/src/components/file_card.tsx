@@ -60,7 +60,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
             height: ${imageHeight};
           `}
         >
-          <EuiIcon type="filebeatApp" size="xl" />
+          <EuiIcon type="filebeatApp" size="xl" aria-hidden={true} />
         </div>
       )}
     </div>

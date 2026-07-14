@@ -32,6 +32,25 @@ describe('truncateAndPreserveHighlightTags', () => {
     });
   });
 
+  describe('when there are <span class="ffArray__highlight"> tags', () => {
+    const SPAN = '<span class="ffArray__highlight">';
+    const CLOSE = '</span>';
+    const ARRAY_SHORT = `${SPAN}[${CLOSE}ab${SPAN}]${CLOSE}`;
+    const ARRAY_LONG = `${SPAN}[${CLOSE}elastic-agent-service${SPAN},${CLOSE} filebeat${SPAN}]${CLOSE}`;
+
+    describe('and text is shorter than maxLength', () => {
+      it('should return the original string with the tags', () => {
+        expect(truncateAndPreserveHighlightTags(ARRAY_SHORT, MAX_LENGTH)).toBe(ARRAY_SHORT);
+      });
+    });
+
+    describe('and text is longer than or equal to maxLength', () => {
+      it('should truncate and strip the array spans', () => {
+        expect(truncateAndPreserveHighlightTags(ARRAY_LONG, MAX_LENGTH)).toBe('[elas...beat]');
+      });
+    });
+  });
+
   describe('when there are <mark> tags', () => {
     describe('and text is shorter than maxLength', () => {
       const result = truncateAndPreserveHighlightTags(`<mark>${SHORT_TEXT}</mark>`, MAX_LENGTH);

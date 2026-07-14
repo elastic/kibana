@@ -7,29 +7,18 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  ALERT_GROUP_FIELD,
-  ALERT_GROUP_VALUE,
-  ALERT_REASON,
-  ALERT_RULE_PARAMETERS,
-  ALERT_START,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-} from '@kbn/rule-data-utils';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type {
   CustomMetricExpressionParams,
-  CustomThresholdExpressionMetric,
   CustomThresholdSearchSourceFields,
-  SearchConfigurationWithExtractedReferenceType,
 } from '../../common/custom_threshold_rule/types';
-import type { MetricExpression } from '../components/custom_threshold/types';
-import { getViewInAppUrl } from '../../common/custom_threshold_rule/get_view_in_app_url';
-import { getGroups } from '../../common/custom_threshold_rule/helpers/get_group';
 import type { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import { validateCustomThreshold } from '../components/custom_threshold/components/validation';
 import { getDescriptionFields } from './custom_threshold_description_fields';
+import { formatCustomThresholdAlert } from './format_custom_threshold_alert';
 
 const thresholdDefaultActionMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultActionMessage',
@@ -53,11 +42,6 @@ const thresholdDefaultRecoveryMessage = i18n.translate(
 `,
   }
 );
-
-const getDataViewId = (searchConfiguration?: SearchConfigurationWithExtractedReferenceType) =>
-  typeof searchConfiguration?.index === 'string'
-    ? searchConfiguration.index
-    : searchConfiguration?.index?.title;
 
 export const registerObservabilityRuleTypes = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
@@ -91,30 +75,7 @@ export const registerObservabilityRuleTypes = (
     defaultActionMessage: thresholdDefaultActionMessage,
     defaultRecoveryMessage: thresholdDefaultRecoveryMessage,
     requiresAppContext: false,
-    format: ({ fields }) => {
-      const groups = getGroups(fields[ALERT_GROUP_FIELD], fields[ALERT_GROUP_VALUE]);
-      const searchConfiguration = fields[ALERT_RULE_PARAMETERS]?.searchConfiguration as
-        | SearchConfigurationWithExtractedReferenceType
-        | undefined;
-      const criteria = fields[ALERT_RULE_PARAMETERS]?.criteria as MetricExpression[];
-      const metrics: CustomThresholdExpressionMetric[] =
-        criteria.length === 1 ? criteria[0].metrics : [];
-
-      const dataViewId = getDataViewId(searchConfiguration);
-
-      return {
-        reason: fields[ALERT_REASON] ?? '-',
-        link: getViewInAppUrl({
-          dataViewId,
-          groups,
-          logsLocator,
-          metrics,
-          searchConfiguration,
-          startedAt: fields[ALERT_START],
-        }),
-        hasBasePath: true,
-      };
-    },
+    format: ({ fields }) => formatCustomThresholdAlert(fields, logsLocator),
     alertDetailsAppSection: lazy(
       () =>
         import(

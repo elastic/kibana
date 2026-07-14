@@ -17,6 +17,7 @@ describe('<Loading />', () => {
         class="canvasLoading"
       >
         <span
+          aria-hidden="true"
           color="ghost"
           data-euiicon-type="clock"
         />

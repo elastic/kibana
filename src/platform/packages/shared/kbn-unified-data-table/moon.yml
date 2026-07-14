@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/unified-data-table'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/unified-data-table'
+  title: '@kbn/unified-data-table'
   description: Moon project for @kbn/unified-data-table
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-unified-data-table
+  sourceRoot: src/platform/packages/shared/kbn-unified-data-table
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/data-views-plugin'
@@ -66,16 +65,6 @@ fileGroups:
     - src/**/*
     - __mocks__/**/*.ts
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

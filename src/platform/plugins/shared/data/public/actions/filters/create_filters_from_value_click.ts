@@ -27,7 +27,7 @@ import {
 } from '@kbn/es-query/src/filters/build_filters';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { getIndexPatterns, getSearchService } from '../../services';
+import { getHttp, getIndexPatterns, getSearchService } from '../../services';
 import type { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
 
@@ -151,6 +151,7 @@ const createFilterFromRawColumnsESQL = async (
   const dataView = await getESQLAdHocDataview({
     query: 'FROM ' + indexPattern,
     dataViewsService: getIndexPatterns() as DataViewsPublicPluginStart,
+    http: getHttp(),
   });
   const field = dataView.getFieldByName(column.name);
 
@@ -285,7 +286,8 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
           column.name,
           value,
           getOperationForWhere(value, negate || false),
-          column.meta?.type
+          column.meta?.type,
+          column.meta?.esType
         );
 
         if (queryWithWhere) {

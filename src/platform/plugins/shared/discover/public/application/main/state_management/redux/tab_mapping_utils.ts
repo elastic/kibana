@@ -10,12 +10,42 @@
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { isObject } from 'lodash';
+import { isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
+
+export const fromSavedObjectTabToAppState = ({
+  tab,
+}: {
+  tab: DiscoverSessionTab;
+}): DiscoverAppState => {
+  return omitBy<DiscoverAppState>(
+    {
+      columns: tab.columns,
+      filters: tab.serializedSearchSource.filter,
+      grid: tab.grid,
+      hideChart: tab.hideChart,
+      dataSource: createDataSource({
+        query: tab.serializedSearchSource.query,
+        dataView: tab.serializedSearchSource.index,
+      }),
+      query: tab.serializedSearchSource.query,
+      sort: tab.sort,
+      viewMode: tab.viewMode,
+      hideAggregatedPreview: tab.hideAggregatedPreview,
+      rowHeight: tab.rowHeight,
+      headerRowHeight: tab.headerRowHeight,
+      rowsPerPage: tab.rowsPerPage,
+      sampleSize: tab.sampleSize,
+      breakdownField: tab.breakdownField,
+      density: tab.density,
+    },
+    isUndefined
+  );
+};
 
 export const fromSavedObjectTabToTabState = ({
   tab,
@@ -26,26 +56,7 @@ export const fromSavedObjectTabToTabState = ({
   existingTab?: TabState;
   initialAppState?: DiscoverAppState;
 }): TabState => {
-  const appState: DiscoverAppState = initialAppState ?? {
-    columns: tab.columns,
-    filters: tab.serializedSearchSource.filter,
-    grid: tab.grid,
-    hideChart: tab.hideChart,
-    dataSource: createDataSource({
-      query: tab.serializedSearchSource.query,
-      dataView: tab.serializedSearchSource.index,
-    }),
-    query: tab.serializedSearchSource.query,
-    sort: tab.sort,
-    viewMode: tab.viewMode,
-    hideAggregatedPreview: tab.hideAggregatedPreview,
-    rowHeight: tab.rowHeight,
-    headerRowHeight: tab.headerRowHeight,
-    rowsPerPage: tab.rowsPerPage,
-    sampleSize: tab.sampleSize,
-    breakdownField: tab.breakdownField,
-    density: tab.density,
-  };
+  const appState: DiscoverAppState = initialAppState ?? fromSavedObjectTabToAppState({ tab });
 
   return {
     ...DEFAULT_TAB_STATE,

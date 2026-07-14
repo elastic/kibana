@@ -55,6 +55,7 @@ export const SolutionsViewBadge: FunctionComponent<{ badgeText: string }> = ({ b
   return (
     <EuiThemeProvider colorMode={theme.darkMode ? 'dark' : 'light'}>
       <EuiPopover
+        aria-label={badgeText}
         button={
           <EuiBadge
             color="hollow"

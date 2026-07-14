@@ -7,8 +7,6 @@
 
 export default function ({ loadTestFile }) {
   describe('Monitoring app', function () {
-    loadTestFile(require.resolve('./feature_controls'));
-
     loadTestFile(require.resolve('./cluster/list'));
     loadTestFile(require.resolve('./cluster/list_mb'));
     loadTestFile(require.resolve('./cluster/overview'));

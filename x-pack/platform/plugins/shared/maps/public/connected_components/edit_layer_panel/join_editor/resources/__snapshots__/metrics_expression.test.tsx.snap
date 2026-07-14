@@ -3,6 +3,7 @@
 exports[`Should render default props 1`] = `
 <EuiPopover
   anchorPosition="leftCenter"
+  aria-label="Configure join metrics"
   button={
     <EuiExpression
       description="and use metric"
@@ -63,6 +64,7 @@ exports[`Should render default props 1`] = `
 exports[`Should render metrics expression for metrics 1`] = `
 <EuiPopover
   anchorPosition="leftCenter"
+  aria-label="Configure join metrics"
   button={
     <EuiExpression
       description="and use metrics"

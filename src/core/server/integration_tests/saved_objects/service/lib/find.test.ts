@@ -29,12 +29,37 @@ interface NestedFieldSOAttributes {
   };
 }
 
+interface DeeplyNestedFieldSOAttributes {
+  comments: Array<{
+    message: string;
+    metadata: {
+      author: string;
+      tag: string;
+    };
+  }>;
+}
+
 const users: NestedFieldSOAttributes[] = [
   { user: { name: 'John Doe', email: 'john.doe@example.com' } },
   { user: { name: 'Jane Doe', email: 'jane.doe@example.com' } },
   { user: { name: 'Alice Smith', email: 'alice.smith@example.com' } },
   { user: { name: 'Alice Johnson', email: 'alice.johnson@example.com' } },
   { user: { name: 'Charlie Brown', email: 'charlie.brown@example.com' } },
+];
+
+const deeplyNestedDocs: DeeplyNestedFieldSOAttributes[] = [
+  {
+    comments: [
+      { message: 'great post', metadata: { author: 'alice', tag: 'review' } },
+      { message: 'needs work', metadata: { author: 'bob', tag: 'feedback' } },
+    ],
+  },
+  {
+    comments: [{ message: 'excellent', metadata: { author: 'charlie', tag: 'review' } }],
+  },
+  {
+    comments: [{ message: 'not helpful', metadata: { author: 'diana', tag: 'complaint' } }],
+  },
 ];
 
 const registerSOTypes = (setup: InternalCoreSetup) => {
@@ -48,6 +73,33 @@ const registerSOTypes = (setup: InternalCoreSetup) => {
         user: {
           type: 'nested',
           properties: { name: { type: 'text' }, email: { type: 'keyword' } },
+        },
+      },
+    },
+    management: {
+      importableAndExportable: true,
+    },
+    modelVersions: {},
+  });
+
+  setup.savedObjects.registerType({
+    name: 'find-test-deeply-nested-field-type',
+    hidden: false,
+    namespaceType: 'single',
+    mappings: {
+      dynamic: false,
+      properties: {
+        comments: {
+          type: 'nested',
+          properties: {
+            message: { type: 'text' },
+            metadata: {
+              properties: {
+                author: { type: 'text' },
+                tag: { type: 'keyword' },
+              },
+            },
+          },
         },
       },
     },
@@ -96,6 +148,13 @@ describe('SOR - find API', () => {
         attributes: user,
       }))
     );
+
+    await savedObjectsRepository.bulkCreate(
+      deeplyNestedDocs.map((doc) => ({
+        type: 'find-test-deeply-nested-field-type',
+        attributes: doc,
+      }))
+    );
   });
 
   afterAll(async () => {
@@ -127,5 +186,27 @@ describe('SOR - find API', () => {
     expect(documents.saved_objects[0].attributes?.user?.email).toBe('alice.smith@example.com');
     expect(documents.saved_objects[1].attributes?.user?.name).toBe('Alice Johnson');
     expect(documents.saved_objects[1].attributes?.user?.email).toBe('alice.johnson@example.com');
+  });
+
+  it('supports deeply nested fields under a nested ancestor', async () => {
+    const documents = await savedObjectsRepository.find<DeeplyNestedFieldSOAttributes>({
+      type: 'find-test-deeply-nested-field-type',
+      searchFields: ['comments.metadata.author'],
+      search: 'charlie',
+    });
+
+    expect(documents.total).toBe(1);
+    expect(documents.saved_objects[0].attributes?.comments[0]?.metadata?.author).toBe('charlie');
+  });
+
+  it('supports deeply nested fields with wildcard', async () => {
+    const documents = await savedObjectsRepository.find<DeeplyNestedFieldSOAttributes>({
+      type: 'find-test-deeply-nested-field-type',
+      searchFields: ['comments.metadata.author'],
+      search: 'ali*',
+    });
+
+    expect(documents.total).toBe(1);
+    expect(documents.saved_objects[0].attributes?.comments[0]?.metadata?.author).toBe('alice');
   });
 });

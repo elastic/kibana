@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/server-route-repository'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-knowledge-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/server-route-repository'
+  title: '@kbn/server-route-repository'
   description: Moon project for @kbn/server-route-repository
   channel: ''
   owner: '@elastic/obs-knowledge-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-server-route-repository
+  sourceRoot: src/platform/packages/shared/kbn-server-route-repository
 dependsOn:
   - '@kbn/io-ts-utils'
   - '@kbn/core-http-request-handler-context-server'
@@ -41,16 +40,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

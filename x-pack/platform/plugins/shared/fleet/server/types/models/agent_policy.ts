@@ -115,6 +115,9 @@ export const AgentPolicyBaseSchema = {
           if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
             return 'inputs overrides is not allowed';
           }
+          if (Object.keys(val).some((key) => key.match(/^output_permissions(\.)?/))) {
+            return 'output_permissions overrides is not allowed';
+          }
         },
         meta: {
           description:
@@ -147,7 +150,7 @@ export const AgentPolicyBaseSchema = {
           description:
             'User defined data tags that are added to all of the inputs. The values can be strings or numbers.',
         },
-        maxSize: 10,
+        maxSize: 100,
       }
     )
   ),

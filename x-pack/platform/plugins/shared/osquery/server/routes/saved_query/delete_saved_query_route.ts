@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -59,9 +59,19 @@ export const deleteSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           return response.conflict({ body: `Elastic prebuilt Saved query cannot be deleted.` });
         }
 
-        await spaceScopedClient.delete(savedQuerySavedObjectType, request.params.id, {
-          refresh: 'wait_for',
-        });
+        try {
+          await spaceScopedClient.delete(savedQuerySavedObjectType, request.params.id, {
+            refresh: 'wait_for',
+          });
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Saved query ${request.params.id} not found` },
+            });
+          }
+
+          throw err;
+        }
 
         return response.ok({
           body: {},

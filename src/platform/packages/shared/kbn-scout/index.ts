@@ -11,13 +11,22 @@
 export * as cli from './src/cli';
 
 // Test framework
-export { test, spaceTest, lighthouseTest, apiTest, globalSetupHook, tags } from './src/playwright';
+export {
+  test,
+  spaceTest,
+  lighthouseTest,
+  apiTest,
+  globalSetupHook,
+  globalTeardownHook,
+  tags,
+} from './src/playwright';
 
 // Fixtures & configuration
 export {
   browserAuthFixture,
   apiServicesFixture,
-  synthtraceFixture,
+  coreWorkerFixtures,
+  esArchiverFixture,
   createPlaywrightConfig,
   createLazyPageObject,
 } from './src/playwright';
@@ -52,7 +61,6 @@ export type {
   BrowserAuthFixture,
   RequestAuthFixture,
   SamlAuth,
-  SynthtraceFixture,
 } from './src/playwright';
 
 // Service & configuration types
@@ -63,12 +71,14 @@ export type {
   ScoutLogger,
   ScoutServerConfig,
   ScoutTestConfig,
+  ServerlessProductTier,
   KibanaRole,
   ElasticsearchRoleDescriptor,
 } from './src/types';
 
 // Authentication types
 export type { RoleApiCredentials } from './src/playwright/fixtures/scope/worker/api_key';
+export type { ApiClientFixture } from './src/playwright/fixtures/scope/worker/api_client';
 export type {
   RoleSessionCredentials,
   CookieHeader,
@@ -76,6 +86,3 @@ export type {
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from 'playwright/test';
-
-// Utility for overriding synthtrace clients
-export { getSynthtraceClient } from './src/common/services/synthtrace';

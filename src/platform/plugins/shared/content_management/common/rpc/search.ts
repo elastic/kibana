@@ -19,8 +19,8 @@ export const searchQuerySchema = schema.oneOf([
       text: schema.maybe(schema.string()),
       tags: schema.maybe(
         schema.object({
-          included: schema.maybe(schema.arrayOf(schema.string())),
-          excluded: schema.maybe(schema.arrayOf(schema.string())),
+          included: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+          excluded: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
         })
       ),
       limit: schema.maybe(schema.number()),
@@ -33,6 +33,7 @@ export const searchQuerySchema = schema.oneOf([
 ]);
 
 export const searchResultSchema = schema.object({
+  // codeql[js/kibana/unbounded-array-in-schema] output schema — server controls the response size
   hits: schema.arrayOf(schema.any()),
   pagination: schema.object({
     total: schema.number(),

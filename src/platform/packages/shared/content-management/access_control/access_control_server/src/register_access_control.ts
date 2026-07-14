@@ -91,7 +91,8 @@ export const registerAccessControl = async ({
               schema.object({
                 type: schema.string(),
                 id: schema.string(),
-              })
+              }),
+              { maxSize: 100 }
             ),
             accessMode: schema.oneOf([
               schema.literal('write_restricted'),
@@ -103,6 +104,7 @@ export const registerAccessControl = async ({
           200: {
             body: () =>
               schema.object({
+                // codeql[js/kibana/unbounded-array-in-schema] output schema — server controls the response size
                 results: schema.arrayOf(
                   schema.object({
                     type: schema.string(),

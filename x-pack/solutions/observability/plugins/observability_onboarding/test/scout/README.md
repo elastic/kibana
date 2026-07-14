@@ -12,6 +12,18 @@ node scripts/scout.js start-server --arch serverless --domain [search|observabil
 
 Then you can run the tests in another terminal:
 
+### API tests (sequential)
+
+```bash
+// ESS
+npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/playwright.config.ts --project=local --grep stateful-classic
+
+// Serverless
+npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/api/playwright.config.ts --project=local --grep serverless-observability_complete
+```
+
+### UI tests
+
 Some tests are designed to run sequentially:
 
 ```bash

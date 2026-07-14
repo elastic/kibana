@@ -49,6 +49,15 @@ export const featureSetSchema = schema.object({
   migrateDataStreams: schema.boolean({ defaultValue: true }),
 });
 
+/**
+ * Default base URL for the public Cloud "stack versions" endpoint we proxy.
+ *
+ * Note: the path is region-scoped. We assume the *set of published stack versions* is effectively
+ * region-agnostic for the purposes of Upgrade Assistant's "latest available version" UI.
+ */
+export const DEFAULT_CLOUD_STACK_VERSIONS_API_BASE_URL =
+  'https://cloud.elastic.co/api/v1/regions/aws-eu-central-1/stack/versions';
+
 // -------------------------------
 // >= 8.6 UA is always enabled to guide stack upgrades
 // even for minor releases.
@@ -75,6 +84,14 @@ const configSchema = schema.object({
    */
   dataSourceExclusions: dataSourceExclusionsSchema,
   featureSet: featureSetSchema,
+
+  /**
+   * Optional override for the Cloud stack versions API base URL.
+   * Primarily intended for tests; production defaults to the public Cloud endpoint.
+   */
+  cloudStackVersionsApiBaseUrl: schema.string({
+    defaultValue: DEFAULT_CLOUD_STACK_VERSIONS_API_BASE_URL,
+  }),
   /**
    * This config allows to hide the UI without disabling the plugin.
    */

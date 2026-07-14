@@ -150,24 +150,27 @@ export const productInterceptRegistrationConfig = ({
       easeInterceptStep,
       completionInterceptStep,
     ],
-    onProgress: ({ stepId, stepResponse, runId }) => {
+    onProgress: ({ stepId, stepResponse, runId, interceptId }) => {
       eventReporter.reportInterceptInteractionProgress({
         interceptRunId: runId,
+        interceptId,
         metricId: stepId,
         value: Number(stepResponse),
       });
     },
-    onFinish: ({ response: feedbackResponse, runId }) => {
+    onFinish: ({ runId, interceptId }) => {
       eventReporter.reportInterceptInteractionTermination({
         interactionType: 'completion',
         interceptRunId: runId,
+        interceptId,
       });
     },
-    onDismiss: ({ runId }) => {
+    onDismiss: ({ runId, interceptId }) => {
       // still update user profile run count, a dismissal is still an interaction
       eventReporter.reportInterceptInteractionTermination({
         interactionType: 'dismissal',
         interceptRunId: runId,
+        interceptId,
       });
     },
   };

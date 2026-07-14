@@ -32,6 +32,7 @@ import {
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../../../../../screens/exceptions';
 import {
+  createEndpointExceptionList,
   createExceptionList,
   deleteExceptionLists,
 } from '../../../../../../tasks/api_calls/exceptions';
@@ -64,6 +65,7 @@ describe(
       beforeEach(() => {
         deleteAlertsAndRules();
         deleteExceptionLists();
+        createEndpointExceptionList();
         createRule(getNewRule({ name: 'Another rule' }));
 
         // Create exception list associated with a rule

@@ -24,7 +24,7 @@ import {
   EsVersion,
   DedicatedTaskRunner,
 } from './lib';
-import { createEsClientForFtrConfig } from '../es';
+import { createEsClientForFtrConfig } from '../ftr_es_client';
 
 export class FunctionalTestRunner {
   private readonly esVersion: EsVersion;

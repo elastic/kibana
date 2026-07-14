@@ -24,18 +24,18 @@ const privilegeSetSchema = schema.object(
       schema.arrayOf(
         schema.oneOf([
           schema.string(),
-          schema.object({ allOf: schema.arrayOf(schema.string(), { minSize: 2 }) }),
+          schema.object({ allOf: schema.arrayOf(schema.string(), { minSize: 2, maxSize: 100 }) }),
         ]),
-        { minSize: 2 }
+        { minSize: 2, maxSize: 100 }
       )
     ),
     allRequired: schema.maybe(
       schema.arrayOf(
         schema.oneOf([
           schema.string(),
-          schema.object({ anyOf: schema.arrayOf(schema.string(), { minSize: 2 }) }),
+          schema.object({ anyOf: schema.arrayOf(schema.string(), { minSize: 2, maxSize: 100 }) }),
         ]),
-        { minSize: 1 }
+        { minSize: 1, maxSize: 100 }
       )
     ),
   },
@@ -51,6 +51,7 @@ const privilegeSetSchema = schema.object(
 const requiredPrivilegesSchema = schema.arrayOf(
   schema.oneOf([privilegeSetSchema, schema.string()]),
   {
+    maxSize: 100,
     validate: (value) => {
       const anyRequired: string[] = [];
       const allRequired: string[] = [];

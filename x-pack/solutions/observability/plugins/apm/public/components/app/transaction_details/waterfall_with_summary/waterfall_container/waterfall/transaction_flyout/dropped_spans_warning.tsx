@@ -13,7 +13,7 @@ import { useApmPluginContext } from '../../../../../../../context/apm_plugin/use
 
 export function DroppedSpansWarning({ transactionDoc }: { transactionDoc: Transaction }) {
   const { docLinks } = useApmPluginContext().core;
-  const dropped = transactionDoc.transaction.span_count?.dropped;
+  const dropped = transactionDoc.transaction?.span_count?.dropped;
   if (!dropped) {
     return null;
   }

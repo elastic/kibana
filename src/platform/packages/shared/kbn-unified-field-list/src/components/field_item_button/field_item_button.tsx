@@ -27,7 +27,7 @@ import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
 
-const DRAG_ICON = <EuiIcon type="grabOmnidirectional" size="m" />;
+const DRAG_ICON = <EuiIcon type="grabOmnidirectional" size="m" aria-hidden={true} />;
 
 /**
  * Props of FieldItemButton component

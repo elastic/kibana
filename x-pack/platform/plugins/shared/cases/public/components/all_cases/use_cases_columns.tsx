@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { CaseStatuses } from '../../../common/types/domain';
 
 import type { ActionConnector } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
@@ -329,16 +330,18 @@ export const useCasesColumns = ({
         align: RIGHT_ALIGNMENT,
         render: (theCase: CaseUI) => {
           if (theCase.id != null) {
-            const disabled = disabledCases?.has(theCase.id) ?? false;
+            const isAlreadyAttached = disabledCases?.has(theCase.id) ?? false;
+            const isClosed = theCase.status === CaseStatuses.closed;
+            const disabled = isAlreadyAttached || isClosed;
             return (
               <EuiButton
                 data-test-subj={`cases-table-row-select-${theCase.id}`}
                 onClick={() => assignCaseAction(theCase)}
                 size="s"
-                iconType={disabled ? 'check' : undefined}
+                iconType={isAlreadyAttached ? 'check' : undefined}
                 disabled={disabled}
               >
-                {disabled ? i18n.ALREADY_ATTACHED : i18n.SELECT}
+                {isAlreadyAttached ? i18n.ALREADY_ATTACHED : i18n.SELECT}
               </EuiButton>
             );
           }

@@ -9,7 +9,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { IconType } from '@elastic/eui';
-import { EuiIconTip } from '@elastic/eui';
+import { EuiIcon, EuiIconTip } from '@elastic/eui';
 import type { ProcessorStatus } from '../types';
 import { ErrorIcon, ErrorIgnoredIcon, SkippedIcon } from './shared';
 
@@ -76,10 +76,26 @@ const unknownStatus = {
 
 interface Props {
   processorStatus: ProcessorStatus;
+  isInMoveMode?: boolean;
 }
 
-export const PipelineProcessorsItemStatus: FunctionComponent<Props> = ({ processorStatus }) => {
+export const PipelineProcessorsItemStatus: FunctionComponent<Props> = ({
+  processorStatus,
+  isInMoveMode = false,
+}) => {
   const { icon, iconColor, label } = processorStatusToIconMap[processorStatus] || unknownStatus;
+
+  if (isInMoveMode) {
+    return (
+      <EuiIcon
+        type={icon}
+        color={iconColor}
+        size="s"
+        aria-label={label}
+        data-test-subj="processorStatusIcon"
+      />
+    );
+  }
 
   return (
     <EuiIconTip

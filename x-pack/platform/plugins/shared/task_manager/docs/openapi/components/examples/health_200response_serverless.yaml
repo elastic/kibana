@@ -155,13 +155,6 @@ value: |-
                 "idle": 1
               }
             },
-            "logs-data-telemetry": {
-              "count": 1,
-              "cost": 2,
-              "status": {
-                "running": 1
-              }
-            },
             "session_cleanup": {
               "count": 1,
               "cost": 2,

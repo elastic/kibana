@@ -38,6 +38,13 @@ export const txtDeleteDrilldowns = (count: number) =>
     },
   });
 
+export const txtTableCaption = i18n.translate(
+  'uiActionsEnhanced.components.DrilldownTable.tableCaption',
+  {
+    defaultMessage: 'Drilldowns',
+  }
+);
+
 export const txtSelectDrilldown = i18n.translate(
   'uiActionsEnhanced.components.DrilldownTable.selectThisDrilldownCheckboxLabel',
   {

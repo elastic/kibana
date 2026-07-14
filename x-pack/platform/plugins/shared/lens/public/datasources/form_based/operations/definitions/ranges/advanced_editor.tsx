@@ -92,6 +92,9 @@ export const RangePopover = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.lens.indexPattern.ranges.popoverAriaLabel', {
+        defaultMessage: 'Range editor',
+      })}
       display="block"
       ownFocus
       isOpen={isOpen}

@@ -15,6 +15,9 @@ import { TestSubActionConnector } from './mocks';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import * as utils from '../lib/axios_utils';
 import { ConnectorUsageCollector } from '../usage';
+import type { ZodType } from '@kbn/zod';
+import { z as z3 } from '@kbn/zod';
+import { SubActionConnector } from './sub_action_connector';
 
 jest.mock('axios');
 
@@ -225,6 +228,83 @@ describe('SubActionConnector', () => {
           }
         ])"
       `);
+    });
+
+    describe('zod v3 schema validation', () => {
+      class V3SchemaConnector extends SubActionConnector<
+        { url: string },
+        { username: string; password: string }
+      > {
+        protected getResponseErrorMessage(error: AxiosError) {
+          return `Error: ${error.message}`;
+        }
+
+        public async testV3(usageCollector: ConnectorUsageCollector) {
+          return this.request(
+            {
+              url: 'https://example.com',
+              responseSchema: z3.object({ status: z3.string() }) as unknown as ZodType<{
+                status: string;
+              }>,
+            },
+            usageCollector
+          );
+        }
+      }
+
+      let v3Service: V3SchemaConnector;
+
+      beforeEach(() => {
+        v3Service = new V3SchemaConnector({
+          configurationUtilities: mockedActionsConfig,
+          logger,
+          connector: { id: 'test-id', type: '.test' },
+          config: { url: 'https://example.com' },
+          secrets: { username: 'elastic', password: 'changeme' },
+          services,
+        });
+      });
+
+      it('accepts a valid response', async () => {
+        requestMock.mockReturnValue({ data: { status: 'ok' } });
+        const res = await v3Service.testV3(connectorUsageCollector);
+        expect(res.data).toEqual({ status: 'ok' });
+      });
+
+      it('throws when a required field is missing', async () => {
+        requestMock.mockReturnValue({ data: { wrongField: 123 } });
+        await expect(() => v3Service.testV3(connectorUsageCollector)).rejects.toThrow(
+          /Response validation failed/
+        );
+      });
+
+      it('throws when a field has the wrong type', async () => {
+        requestMock.mockReturnValue({ data: { status: 123 } });
+        await expect(() => v3Service.testV3(connectorUsageCollector)).rejects.toThrow(
+          /Response validation failed/
+        );
+      });
+
+      it('throws when a required field is null', async () => {
+        requestMock.mockReturnValue({ data: { status: null } });
+        await expect(() => v3Service.testV3(connectorUsageCollector)).rejects.toThrow(
+          /Response validation failed/
+        );
+      });
+
+      it('throws when a required field is an object instead of a string', async () => {
+        requestMock.mockReturnValue({ data: { status: {} } });
+        await expect(() => v3Service.testV3(connectorUsageCollector)).rejects.toThrow(
+          /Response validation failed/
+        );
+      });
+
+      it('throws when the response data is not an object', async () => {
+        requestMock.mockReturnValue({ data: 'not-an-object' });
+        await expect(() => v3Service.testV3(connectorUsageCollector)).rejects.toThrow(
+          /Response validation failed/
+        );
+      });
     });
 
     it('formats the response error correctly', async () => {

@@ -47,6 +47,7 @@ export interface DocLinks {
     readonly spanCompression: string;
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
+    readonly metricsUi: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -479,6 +480,7 @@ export interface DocLinks {
     slackAction: string;
     slackApiAction: string;
     teamsAction: string;
+    casesWebhookAction: string;
     connectors: string;
   }>;
   readonly taskManager: Readonly<{
@@ -581,6 +583,12 @@ export interface DocLinks {
     agentReleaseProcess: string;
     fipsIngest: string;
     edotCollector: string;
+    agentPolicyLimitCpu: string;
+    agentDownloadTimeout: string;
+    elasticAgentStandaloneDownload: string;
+    elasticAgentStandaloneLoggingConfig: string;
+    agentPolicyLogLevel: string;
+    elasticAgentLogFileRetention: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

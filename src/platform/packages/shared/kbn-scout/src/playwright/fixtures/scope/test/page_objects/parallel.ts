@@ -9,7 +9,7 @@
 
 import type { PageObjects } from '../../../../page_objects';
 import { createCorePageObjects } from '../../../../page_objects';
-import type { ScoutSpaceParallelFixture, ScoutTestConfig } from '../../worker';
+import type { KibanaUrl, ScoutSpaceParallelFixture, ScoutTestConfig } from '../../worker';
 import { scoutPageParallelFixture } from '../scout_page';
 
 /**
@@ -24,10 +24,10 @@ export const pageObjectsParallelFixture = scoutPageParallelFixture.extend<
   {
     pageObjects: PageObjects;
   },
-  { scoutSpace: ScoutSpaceParallelFixture; config: ScoutTestConfig }
+  { scoutSpace: ScoutSpaceParallelFixture; config: ScoutTestConfig; kbnUrl: KibanaUrl }
 >({
-  pageObjects: async ({ page, config, log }, use) => {
-    const corePageObjects = createCorePageObjects({ page, config, log });
+  pageObjects: async ({ page, config, log, kbnUrl }, use) => {
+    const corePageObjects = createCorePageObjects({ page, config, log, kbnUrl });
     log.serviceLoaded(`pageObjects`);
     await use(corePageObjects);
   },

@@ -9,7 +9,7 @@
 
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { getTabStateMock } from '../__mocks__/internal_state.mocks';
+import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { fromTabStateToSavedObjectTab, selectTabRuntimeState } from '..';
 import { selectHasUnsavedChanges } from './unsaved_changes';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
@@ -53,6 +53,38 @@ describe('selectHasUnsavedChanges', () => {
 
     await initializeTabs();
     await addNewTab({ tab: getTabStateMock({ id: 'new-tab' }) });
+
+    const result = selectHasUnsavedChanges(internalState.getState(), {
+      runtimeStateManager,
+      services,
+    });
+
+    expect(result).toEqual({ hasUnsavedChanges: false, unsavedTabIds: [] });
+  });
+
+  it('does not detect unsaved changes for untouched persisted tabs with empty sort', async () => {
+    const services = createDiscoverServicesMock();
+    const { internalState, runtimeStateManager, initializeTabs, initializeSingleTab } =
+      getDiscoverInternalStateMock({
+        services,
+        persistedDataViews: [dataViewWithTimefieldMock],
+      });
+
+    const persistedTab = {
+      ...getPersistedTabMock({
+        tabId: 'persisted-tab',
+        dataView: dataViewWithTimefieldMock,
+        services,
+      }),
+      sort: [],
+    };
+    const persistedDiscoverSession = createDiscoverSessionMock({
+      id: 'test-id',
+      tabs: [persistedTab],
+    });
+
+    await initializeTabs({ persistedDiscoverSession });
+    await initializeSingleTab({ tabId: persistedTab.id });
 
     const result = selectHasUnsavedChanges(internalState.getState(), {
       runtimeStateManager,

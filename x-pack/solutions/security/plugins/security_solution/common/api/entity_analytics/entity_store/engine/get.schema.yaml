@@ -9,13 +9,15 @@ paths:
       x-codegen-enabled: true
       operationId: GetEntityEngine
       summary: Get an Entity Engine
+      description: Get the engine descriptor for a specific entity type, including its configuration and current status.
       parameters:
         - name: entityType
           in: path
           required: true
           schema:
             $ref: '../common.schema.yaml#/components/schemas/EntityType'
-          description: The entity type of the engine (either 'user' or 'host').
+          description: The entity type of the engine.
+          example: host
       responses:
         '200':
           description: Successful response
@@ -23,3 +25,17 @@ paths:
             application/json:
               schema:
                 $ref: '../common.schema.yaml#/components/schemas/EngineDescriptor'
+              examples:
+                getEntityEngineExample:
+                  summary: A running host engine
+                  description: Returns the engine descriptor for a host engine that is currently running with default settings.
+                  value:
+                    type: host
+                    indexPattern: ''
+                    status: started
+                    fieldHistoryLength: 10
+                    lookbackPeriod: '24h'
+                    timestampField: '@timestamp'
+                    timeout: '180s'
+                    frequency: '1m'
+                    delay: '1m'

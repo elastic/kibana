@@ -13,6 +13,7 @@ import { getDiscoverStateMock } from '../__mocks__/discover_state.mock';
 import {
   type ConnectedCustomizationService,
   getConnectedCustomizationService,
+  getExtendedDiscoverStateContainer,
   useDiscoverCustomization,
   useDiscoverCustomization$,
 } from './customization_provider';
@@ -21,6 +22,7 @@ import { createCustomizationService } from './customization_service';
 import type { CustomizationCallback } from './types';
 import { DiscoverTestProvider } from '../__mocks__/test_provider';
 import { createDiscoverServicesMock } from '../__mocks__/services';
+import { savedSearchMockWithTimeField } from '../__mocks__/saved_search';
 
 describe('getConnectedCustomizationService', () => {
   it('should provide customization service', async () => {
@@ -54,6 +56,22 @@ describe('getConnectedCustomizationService', () => {
     });
     expect(callback).toHaveBeenCalledTimes(1);
     expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('getExtendedDiscoverStateContainer', () => {
+  it('should preserve empty sort arrays when deriving app state from a saved search', () => {
+    const services = createDiscoverServicesMock();
+    const stateContainer = getExtendedDiscoverStateContainer(
+      getDiscoverStateMock({ services }),
+      services
+    );
+    const savedSearch = {
+      ...savedSearchMockWithTimeField,
+      sort: [],
+    };
+
+    expect(stateContainer.getAppStateFromSavedSearch(savedSearch).sort).toEqual([]);
   });
 });
 

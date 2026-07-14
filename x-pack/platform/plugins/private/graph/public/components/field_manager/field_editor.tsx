@@ -128,6 +128,10 @@ export function FieldEditor({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.graph.fieldManager.fieldEditorPopoverAriaLabel', {
+        defaultMessage: 'Edit field {fieldName}',
+        values: { fieldName: initialField.name },
+      })}
       id={`graphFieldEditor-${initialField.name}`}
       anchorPosition="downCenter"
       ownFocus

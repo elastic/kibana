@@ -57,7 +57,13 @@ export class AssetPicker extends PureComponent<Props> {
             >
               <EuiImage url={asset.value} alt={strings.getAssetAltText()} />
               {asset.id === selected && (
-                <EuiIcon className="canvasAssetPicker__selected" type="checkInCircleFilled" />
+                <EuiIcon
+                  className="canvasAssetPicker__selected"
+                  type="checkInCircleFilled"
+                  aria-label={i18n.translate('xpack.canvas.assetpicker.selectedIconAriaLabel', {
+                    defaultMessage: 'Selected',
+                  })}
+                />
               )}
             </EuiLink>
           </EuiFlexItem>

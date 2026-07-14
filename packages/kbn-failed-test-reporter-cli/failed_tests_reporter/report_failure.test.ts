@@ -9,13 +9,59 @@
 
 import dedent from 'dedent';
 
-import { createFailureIssue, updateFailureIssue } from './report_failure';
+import {
+  createFailureIssue,
+  redactSensitiveGithubFailureText,
+  updateFailureIssue,
+} from './report_failure';
 
 jest.mock('./github_api');
 const { GithubApi } = jest.requireMock('./github_api');
 
 beforeEach(() => {
   jest.clearAllMocks();
+});
+
+describe('redactSensitiveGithubFailureText()', () => {
+  it('redacts @elastic.co emails, qa.elastic.cloud hosts, and console.qa.cld.elstc.co', () => {
+    const input = dedent`
+      Error: Failed to parse SAML response value.
+      Most likely the 'fixture-user+alias@elastic.co' user has no access to the cloud deployment.
+      Login to console.qa.cld.elstc.co with the user from '.ftr/role_users.json' file and try to load
+      https://fixture-depl-abc123.kb.eu-west-1.aws.qa.elastic.cloud in the same window.
+    `;
+
+    const out = redactSensitiveGithubFailureText(input);
+
+    expect(out).toContain('<redacted>@elastic.co');
+    expect(out).not.toContain('fixture-user+alias@elastic.co');
+    expect(out).toContain('Login to <redacted> with');
+    expect(out).not.toContain('console.qa.cld.elstc.co');
+    expect(out).toContain('<redacted>.qa.elastic.cloud');
+    expect(out).not.toContain('fixture-depl-abc123');
+  });
+
+  it('redacts bare *.qa.elastic.cloud hostnames without a URL scheme', () => {
+    expect(
+      redactSensitiveGithubFailureText('open fake-sub.kb.eu-west-1.aws.qa.elastic.cloud in browser')
+    ).toBe('open <redacted>.qa.elastic.cloud in browser');
+  });
+
+  it('redacts any *.found.no and *.elastic.co hosts and URLs', () => {
+    expect(
+      redactSensitiveGithubFailureText(
+        'open https://fixture-staging.found.no/ then https://fixture-app.elastic.co/'
+      )
+    ).toBe('open <redacted>.found.no then <redacted>.elastic.co');
+    expect(
+      redactSensitiveGithubFailureText(
+        'Login at fixture-staging.found.no or fixture-app.elastic.co'
+      )
+    ).toBe('Login at <redacted>.found.no or <redacted>.elastic.co');
+    expect(redactSensitiveGithubFailureText('other https://fixture-api.found.no/x')).toBe(
+      'other <redacted>.found.no'
+    );
+  });
 });
 
 describe('createFailureIssue()', () => {

@@ -24,8 +24,8 @@ export const registerInternalFindRoute = (router: GlobalSearchRouter) => {
         body: schema.object({
           params: schema.object({
             term: schema.maybe(schema.string()),
-            types: schema.maybe(schema.arrayOf(schema.string())),
-            tags: schema.maybe(schema.arrayOf(schema.string())),
+            types: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+            tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
           }),
           options: schema.maybe(
             schema.object({

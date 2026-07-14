@@ -124,6 +124,10 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
   );
   return (
     <EuiPopover
+      aria-label={i18n.translate('expressionXY.legend.filterOptionsLegend', {
+        defaultMessage: '{legendDataLabel}, filter options',
+        values: { legendDataLabel: label },
+      })}
       button={Button}
       isOpen={popoverOpen}
       closePopover={() => {

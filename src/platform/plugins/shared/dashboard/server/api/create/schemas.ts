@@ -11,24 +11,9 @@ import { schema } from '@kbn/config-schema';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
-const DASHBOARD_ID_REGEX = /^[a-z0-9_\-]+$/;
-
 export function getCreateRequestBodySchema() {
   return schema.object({
-    id: schema.maybe(
-      schema.string({
-        maxLength: 100,
-        minLength: 1,
-        validate: (value) => {
-          if (!DASHBOARD_ID_REGEX.test(value)) {
-            return `must be lower case, a-z, 0-9, '_', and '-' are allowed`;
-          }
-        },
-        meta: {
-          description: `The ID of the dashboard. Must be lower case, a-z, 0-9, '_', and '-' are allowed.`,
-        },
-      })
-    ),
+    id: schema.maybe(schema.string()),
     data: getDashboardStateSchema(),
     spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1 })),
   });

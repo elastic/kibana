@@ -48,6 +48,7 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 - Use `spaceTest` so you can access `scoutSpace` for worker-isolated saved objects + UI settings.
 - Pre-ingest shared ES data in `parallel_tests/global.setup.ts` via `globalSetupHook(...)`.
   - Only **worker** fixtures are available there (no `page`, `browserAuth`, `pageObjects`).
+- Reset Elasticsearch/Kibana state once after the suite via `globalTeardownHook(...)` in `parallel_tests/global.teardown.ts` (optional, opt-in by file presence). For state that does need resetting, use `esClient`/`kbnClient`/`apiServices`. See `references/scout-ui-parallelism.md`.
 - Cleanup space-scoped mutations in `afterAll` (`scoutSpace.savedObjects.cleanStandardList()`, unset UI settings you set).
 
 ## Extending fixtures
@@ -95,6 +96,7 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 
 - Don’t use `page.waitForTimeout`. Wait on a page-ready signal (loading indicator hidden, container visible, `expect.poll` on element counts).
 - If selectors aren’t stable, add `data-test-subj` (Scout uses it as the `testIdAttribute`).
+- Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`). Don’t use them in tests or page objects for app loading state management; rely on Playwright auto-waiting and page-ready signals instead.
 
 ## A11y checks (optional, high value)
 

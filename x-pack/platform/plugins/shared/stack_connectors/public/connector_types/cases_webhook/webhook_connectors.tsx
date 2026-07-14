@@ -190,10 +190,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
   return (
     <>
       <EuiStepsHorizontal steps={horizontalSteps} />
-      <EuiLink
-        href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/cases-webhook-action-type.html`}
-        target="_blank"
-      >
+      <EuiLink href={docLinks.links.alerting.casesWebhookAction} target="_blank">
         {i18n.DOC_LINK}
       </EuiLink>
       <EuiSpacer size="l" />

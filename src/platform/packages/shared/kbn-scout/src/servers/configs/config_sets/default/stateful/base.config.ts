@@ -20,12 +20,23 @@ import {
   MOCK_IDP_REALM_NAME,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { defineDockerServersConfig, fleetPackageRegistryDockerImage } from '@kbn/test';
+import {
+  defineDockerServersConfig,
+  fleetPackageRegistryDockerImage,
+} from '@kbn/test-docker-servers';
 import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../../../constants';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
-const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+// EPR_REQUIRE_PACKAGE_SIGNATURES=false: the `:lite` distribution ships some
+// packages without `.sig` files, so opt out of upstream signature enforcement
+// (added in elastic/package-registry#1646).
+const dockerArgs: string[] = [
+  '-v',
+  `${packageRegistryConfig}:/package-registry/config.yml`,
+  '-e',
+  'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+];
 
 /**
  * This is used by CI to set the docker registry port

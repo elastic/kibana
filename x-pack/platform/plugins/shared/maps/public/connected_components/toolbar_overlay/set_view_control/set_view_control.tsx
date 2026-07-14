@@ -69,6 +69,9 @@ export class SetViewControl extends Component<Props, State> {
         }
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
+        aria-label={i18n.translate('xpack.maps.setViewControl.popoverAriaLabel', {
+          defaultMessage: 'Set view',
+        })}
       >
         <SetViewForm
           settings={this.props.settings}

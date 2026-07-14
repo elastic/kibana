@@ -198,6 +198,7 @@ function getInputComponent({
         onChange={onChange}
         onBlur={() => setIsDirty(true)}
         isDisabled={frozen}
+        isSecret={varDef.secret}
         data-test-subj={`multiTextInput-${fieldTestSelector}`}
       />
     );

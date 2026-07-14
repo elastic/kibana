@@ -503,6 +503,62 @@ describe('HttpStepImpl', () => {
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
 
+    it('should pass beforeRedirect callback that validates redirect hostnames', async () => {
+      mockUrlValidator = new UrlValidator({ allowedHosts: ['api.example.com'] });
+      mockStep.configuration.with = {
+        url: 'https://api.example.com/data',
+        method: 'GET',
+        headers: {},
+        timeout: '30s',
+      };
+      httpStep = new HttpStepImpl(
+        mockStep,
+        mockStepExecutionRuntime,
+        mockWorkflowLogger,
+        mockUrlValidator,
+        mockWorkflowRuntime
+      );
+
+      (mockedAxios as any).mockResolvedValueOnce({ data: {}, status: 200 });
+
+      await (httpStep as any)._run(mockStep.configuration.with);
+
+      const axiosConfig = (mockedAxios as unknown as jest.Mock).mock.calls[0][0];
+      expect(axiosConfig.beforeRedirect).toBeDefined();
+
+      // Allowed redirect should not throw
+      expect(() => axiosConfig.beforeRedirect({ hostname: 'api.example.com' })).not.toThrow();
+
+      // Disallowed redirect should throw
+      expect(() => axiosConfig.beforeRedirect({ hostname: 'malicious.internal.host' })).toThrow(
+        'Redirect to host "malicious.internal.host" is blocked because it is not in the Kibana config workflowsExecutionEngine.http.allowedHosts'
+      );
+    });
+
+    it('should allow all redirects when wildcard is configured', async () => {
+      mockUrlValidator = new UrlValidator({ allowedHosts: ['*'] });
+      mockStep.configuration.with = {
+        url: 'https://any-host.com/data',
+        method: 'GET',
+        headers: {},
+        timeout: '30s',
+      };
+      httpStep = new HttpStepImpl(
+        mockStep,
+        mockStepExecutionRuntime,
+        mockWorkflowLogger,
+        mockUrlValidator,
+        mockWorkflowRuntime
+      );
+
+      (mockedAxios as any).mockResolvedValueOnce({ data: {}, status: 200 });
+
+      await (httpStep as any)._run(mockStep.configuration.with);
+
+      const axiosConfig = (mockedAxios as unknown as jest.Mock).mock.calls[0][0];
+      expect(() => axiosConfig.beforeRedirect({ hostname: 'any-host.example.com' })).not.toThrow();
+    });
+
     it('should allow all hosts when wildcard is configured', async () => {
       mockStep.configuration.with = {
         url: 'https://any-host.com/test',

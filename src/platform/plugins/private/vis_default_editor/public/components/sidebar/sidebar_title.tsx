@@ -22,6 +22,7 @@ import {
   EuiTitle,
   EuiToolTip,
   type UseEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -70,6 +71,7 @@ interface SidebarTitleProps {
 export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   const styles = useMemoCss(linkedSearchStyles);
   const [showPopover, setShowPopover] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const {
     services: { application },
   } = useKibana<{ application: ApplicationStart }>();
@@ -122,6 +124,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
 
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-labelledby={popoverTitleId}
           anchorPosition="downRight"
           button={
             <EuiToolTip content={linkButtonAriaLabel} disableScreenReaderOutput>
@@ -137,7 +140,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
           closePopover={closePopover}
           panelPaddingSize="s"
         >
-          <EuiPopoverTitle>
+          <EuiPopoverTitle id={popoverTitleId}>
             <FormattedMessage
               id="visDefaultEditor.sidebar.savedSearch.popoverTitle"
               defaultMessage="Linked to Discover session"

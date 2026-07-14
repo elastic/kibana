@@ -11,7 +11,6 @@ import React, { Fragment } from 'react';
 import { css } from '@emotion/react';
 import type {
   DataTableRecord,
-  EsHitRecord,
   FormattedHit,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/src/types';
@@ -30,6 +29,7 @@ import classnames from 'classnames';
 import { getInnerColumns } from '../utils/columns';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
+const SKIP_NULLISH_VALUES_FORMAT_OPTIONS = { skipNullishValues: true };
 
 export function SourceDocument({
   useTopLevelObjectColumns,
@@ -59,13 +59,21 @@ export function SourceDocument({
   const styles = useMemoCss(componentStyles);
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(
-        row.raw,
+        row,
         columnId,
         dataView,
         shouldShowFieldHandler,
-        fieldFormats
+        fieldFormats,
+        Boolean(isPlainRecord)
       ).slice(0, maxEntries)
-    : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
+    : formatHit(
+        row,
+        dataView,
+        shouldShowFieldHandler,
+        maxEntries,
+        fieldFormats,
+        isPlainRecord ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined
+      );
 
   return (
     <EuiDescriptionList
@@ -76,9 +84,6 @@ export function SourceDocument({
       data-test-subj={dataTestSubj}
     >
       {pairs.map(([fieldDisplayName, value, fieldName]) => {
-        // temporary solution for text based mode. As there are a lot of unsupported fields we want to
-        // hide the empty one from the Document view
-        if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) return null;
         return (
           <Fragment key={fieldDisplayName}>
             <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
@@ -100,24 +105,29 @@ export function SourceDocument({
  * this is used for legacy stuff like displaying products of our ecommerce dataset
  */
 function getTopLevelObjectPairs(
-  row: EsHitRecord,
+  row: DataTableRecord,
   columnId: string,
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
-  fieldFormats: FieldFormatsStart
-) {
-  const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
+  fieldFormats: FieldFormatsStart,
+  skipNullishValues: boolean
+): FormattedHit {
+  const innerColumns = getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
-  const highlights: Record<string, unknown> = (row.highlight as Record<string, unknown>) ?? {};
+  const highlights: Record<string, unknown> = (row.raw.highlight as Record<string, unknown>) ?? {};
   const highlightPairs: FormattedHit = [];
   const sourcePairs: FormattedHit = [];
   Object.entries(innerColumns).forEach(([key, values]) => {
+    if (skipNullishValues && (row.flattened[key] ?? null) === null) {
+      return;
+    }
+
     const subField = dataView.getFieldByName(key);
     const displayKey = dataView.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;
     const formatted = values
-      .map((value: unknown) => formatFieldValue(value, row, fieldFormats, dataView, subField))
+      .map((value: unknown) => formatFieldValue(value, row.raw, fieldFormats, dataView, subField))
       .join(', ');
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     if (displayKey) {

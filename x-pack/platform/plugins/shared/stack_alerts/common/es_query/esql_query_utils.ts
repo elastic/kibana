@@ -17,7 +17,11 @@ import {
   isFunctionExpression,
 } from '@kbn/esql-ast';
 import { getArgsFromRenameFunction } from '@kbn/esql-utils';
-import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  EsqlEsqlShardFailure,
+  EsqlQueryResponse,
+  FieldValue,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ActionGroupId } from './constants';
 
 type EsqlDocument = Record<string, string | null>;
@@ -63,16 +67,21 @@ export interface EsqlTable {
 export const ALERT_ID_COLUMN = 'Alert ID';
 export const ALERT_ID_SUGGESTED_MAX = 10;
 
-export const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): EsqlDocument => {
+export const rowToDocument = (
+  columns: EsqlQueryResponse['columns'],
+  row: FieldValue[]
+): EsqlDocument => {
   const doc: EsqlDocument = {};
   for (let i = 0; i < columns.length; ++i) {
-    doc[columns[i].name] = row[i];
+    doc[columns[i].name] = row[i]?.toString() || null;
   }
   return doc;
 };
 
+// The union type "EsqlTable | EsqlQueryResponse" is needed in this file to support both the UI test query funtionality and the server side execution of the rule.
+// The UI uses the data plugin to fetch results and while the server side execution calls the esClient directly.
 export const getEsqlQueryHits = async (
-  table: EsqlTable,
+  table: EsqlTable | EsqlQueryResponse,
   query: string,
   isGroupAgg: boolean,
   isPreview: boolean = false
@@ -85,7 +94,7 @@ export const getEsqlQueryHits = async (
 };
 
 export const toEsqlQueryHits = async (
-  table: EsqlTable,
+  table: EsqlTable | EsqlQueryResponse,
   isPreview: boolean = false,
   chunkSize: number = CHUNK_SIZE
 ): Promise<EsqlQueryHits> => {
@@ -130,7 +139,7 @@ export const toEsqlQueryHits = async (
 };
 
 export const toGroupedEsqlQueryHits = async (
-  table: EsqlTable,
+  table: EsqlTable | EsqlQueryResponse,
   alertIdFields: string[],
   isPreview: boolean = false,
   chunkSize: number = CHUNK_SIZE

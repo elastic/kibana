@@ -117,6 +117,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
             onChange={() => {}}
             value={value}
             aria-labelledby={titleId}
+            aria-label={ariaLabel}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === 'ArrowDown') {
                 e.preventDefault();

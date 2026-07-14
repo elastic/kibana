@@ -9,7 +9,7 @@
 
 import { escape, isFunction } from 'lodash';
 import type { IFieldFormat, HtmlContextTypeConvert, FieldFormatsContentType } from '../types';
-import { getHighlightHtml } from '../utils';
+import { getHighlightHtml, checkForMissingValueHtml } from '../utils';
 
 export const HTML_CONTEXT_TYPE: FieldFormatsContentType = 'html';
 
@@ -18,6 +18,11 @@ const getConvertFn = (
   convert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
   const fallbackHtml: HtmlContextTypeConvert = (value, options = {}) => {
+    const missing = checkForMissingValueHtml(value);
+    if (missing) {
+      return missing;
+    }
+
     const { field, hit } = options;
     const formatted = escape(format.convert(value, 'text'));
 
@@ -42,7 +47,9 @@ export const setup = (
     }
 
     const subValues = value.map((v: unknown) => recurse(v, options));
-    const useMultiLine = subValues.some((sub: string) => sub.indexOf('\n') > -1);
+    const useMultiLine = subValues.some(
+      (sub: string) => typeof sub === 'string' && sub.indexOf('\n') > -1
+    );
 
     return subValues.join(highlight(',') + (useMultiLine ? '\n' : ' '));
   };
@@ -54,7 +61,7 @@ export const setup = (
       return convertedValue;
     }
 
-    if (convertedValue.includes('\n')) {
+    if (typeof convertedValue === 'string' && convertedValue.includes('\n')) {
       const indentedValue = convertedValue.replaceAll(/(\n+)/g, '$1  ');
 
       return highlight('[') + `\n  ${indentedValue}\n` + highlight(']');

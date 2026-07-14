@@ -52,7 +52,8 @@ export const registerBulkDeleteRoute = (
           schema.object({
             type: schema.string(),
             id: schema.string(),
-          })
+          }),
+          { maxSize: 10_000 }
         ),
         query: schema.object({
           force: schema.maybe(schema.boolean()),

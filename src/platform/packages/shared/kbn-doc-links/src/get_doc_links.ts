@@ -63,6 +63,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       spanCompression: `${ELASTIC_DOCS}solutions/observability/apm/spans`,
       transactionSampling: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
       indexLifecycleManagement: `${ELASTIC_DOCS}solutions/observability/apm/index-lifecycle-management`,
+      metricsUi: `${ELASTIC_DOCS}solutions/observability/apm/metrics-ui`,
     },
     canvas: {
       guide: `${ELASTIC_DOCS}explore-analyze/visualize/canvas`,
@@ -445,7 +446,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ruleApiOverview: isServerless
         ? `${KIBANA_APIS}group/endpoint-security-detections-api`
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
-      configureAlertSuppression: `${ELASTIC_DOCS}solutions/security/detect-and-alert/suppress-detection-alerts#security-alert-suppression-configure-alert-suppression`,
+      configureAlertSuppression: `${ELASTIC_DOCS}solutions/security/detect-and-alert/alert-suppression#configure-alert-suppression`,
     },
     server: {
       protocol: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-protocol`,
@@ -484,12 +485,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       },
       privileges: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/elastic-defend-feature-privileges`,
       manageDetectionRules: `${ELASTIC_DOCS}solutions/security/detect-and-alert/manage-detection-rules`,
-      createDetectionRules: `${ELASTIC_DOCS}solutions/security/detect-and-alert/create-detection-rule`,
-      updatePrebuiltDetectionRules: `${ELASTIC_DOCS}solutions/security/detect-and-alert/install-manage-elastic-prebuilt-rules#update-prebuilt-rules`,
+      createDetectionRules: `${ELASTIC_DOCS}solutions/security/detect-and-alert/using-the-rule-ui`,
+      updatePrebuiltDetectionRules: `${ELASTIC_DOCS}solutions/security/detect-and-alert/update-prebuilt-rules`,
       prebuiltRuleCustomizationPromoBlog: `${ELASTIC_WEBSITE_URL}blog/security-prebuilt-rules-editing`,
-      resolvePrebuiltRuleConflicts: `${ELASTIC_DOCS}solutions/security/detect-and-alert/prebuilt-rules-update-modified-unmodified#resolve-reduce-rule-conflicts`,
-      createEsqlRuleType: `${ELASTIC_DOCS}solutions/security/detect-and-alert/create-detection-rule#create-esql-rule`,
-      ruleUiAdvancedParams: `${ELASTIC_DOCS}solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params`,
+      resolvePrebuiltRuleConflicts: `${ELASTIC_DOCS}solutions/security/detect-and-alert/update-prebuilt-rules#resolve-reduce-rule-conflicts`,
+      createEsqlRuleType: `${ELASTIC_DOCS}solutions/security/detect-and-alert/esql`,
+      ruleUiAdvancedParams: `${ELASTIC_DOCS}solutions/security/detect-and-alert/common-rule-settings`,
       thirdPartyLlmProviders: `${ELASTIC_DOCS}solutions/security/ai/set-up-connectors-for-large-language-models-llm`,
       entityAnalytics: {
         riskScorePrerequisites: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring-requirements`,
@@ -659,6 +660,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       slackAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/slack-action-type#configuring-slack-webhook`,
       slackApiAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/slack-action-type#configuring-slack-web-api`,
       teamsAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/teams-action-type#configuring-teams`,
+      casesWebhookAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/cases-webhook-action-type`,
       connectors: `${ELASTIC_DOCS}reference/kibana/connectors-kibana`,
     },
     taskManager: {
@@ -823,11 +825,13 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       registerUrl: `${ELASTIC_DOCS}deploy-manage/tools/snapshot-and-restore/read-only-url-repository#read-only-url-repository-settings`,
       restoreSnapshot: `${ELASTIC_DOCS}deploy-manage/tools/snapshot-and-restore/restore-snapshot`,
       restoreSnapshotApi: `${ELASTICSEARCH_APIS}operation/operation-snapshot-restore`,
+      searchableSnapshot: `${ELASTIC_DOCS}deploy-manage/tools/snapshot-and-restore/searchable-snapshots`,
       searchableSnapshotSharedCache: `${ELASTIC_DOCS}deploy-manage/tools/snapshot-and-restore/searchable-snapshots#searchable-snapshots-shared-cache`,
       slmStart: `${ELASTICSEARCH_APIS}operation/operation-slm-start`,
     },
     ingest: {
       append: `${ELASTIC_DOCS}reference/enrich-processor/append-processor`,
+      cef: `${ELASTIC_DOCS}reference/enrich-processor/cef-processor`,
       bytes: `${ELASTIC_DOCS}reference/enrich-processor/bytes-processor`,
       circle: `${ELASTIC_DOCS}reference/enrich-processor/ingest-circle-processor`,
       community: `${ELASTIC_DOCS}reference/enrich-processor/community-id-processor`,
@@ -938,6 +942,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       agentReleaseProcess: `${ELASTIC_DOCS}reference/fleet/fleet-agent-release-process`,
       fipsIngest: `${ELASTIC_DOCS}deploy-manage/security/fips-ingest`,
       edotCollector: `${ELASTIC_DOCS}reference/edot-collector`,
+      agentPolicyLimitCpu: `${ELASTIC_DOCS}reference/fleet/agent-policy#agent-policy-limit-cpu`,
+      agentDownloadTimeout: `${ELASTIC_DOCS}reference/fleet/enable-custom-policy-settings#configure-agent-download-timeout`,
+      elasticAgentStandaloneDownload: `${ELASTIC_DOCS}reference/fleet/elastic-agent-standalone-download`,
+      elasticAgentStandaloneLoggingConfig: `${ELASTIC_DOCS}reference/fleet/elastic-agent-standalone-logging-config#elastic-agent-standalone-logging-settings`,
+      agentPolicyLogLevel: `${ELASTIC_DOCS}reference/fleet/agent-policy#agent-policy-log-level`,
+      elasticAgentLogFileRetention: `${ELASTIC_DOCS}reference/fleet/agent-policy#agent-policy-log-file-rotation-retention`,
     },
     integrationDeveloper: {
       upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,

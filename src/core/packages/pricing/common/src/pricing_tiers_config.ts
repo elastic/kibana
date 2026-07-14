@@ -73,6 +73,7 @@ export const tiersConfigSchema = schema.object({
   }),
   products: schema.maybe(
     schema.arrayOf(pricingProductsSchema, {
+      maxSize: 25,
       validate: (products) => {
         if (products && products.length > 1) {
           const firstTier = products[0].tier;

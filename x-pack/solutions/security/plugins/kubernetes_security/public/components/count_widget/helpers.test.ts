@@ -32,17 +32,17 @@ const RESULT_QUERY_POD =
 describe('Testing Helper functions', () => {
   it('Testing numberFormatter helper function', () => {
     expect(numberFormatter(TEST_DATA_ARRAY[0])).toBe('32');
-    expect(numberFormatter(TEST_DATA_ARRAY[1])).toBe('2K');
-    expect(numberFormatter(TEST_DATA_ARRAY[2])).toBe('999K');
-    expect(numberFormatter(TEST_DATA_ARRAY[3])).toBe('1.3M');
-    expect(numberFormatter(TEST_DATA_ARRAY[4])).toBe('999M');
-    expect(numberFormatter(TEST_DATA_ARRAY[5])).toBe('999B');
-    expect(numberFormatter(TEST_DATA_ARRAY[6])).toBe('1.2T');
+    expect(numberFormatter(TEST_DATA_ARRAY[1])).toBe('2k');
+    expect(numberFormatter(TEST_DATA_ARRAY[2])).toBe('999k');
+    expect(numberFormatter(TEST_DATA_ARRAY[3])).toBe('1.3m');
+    expect(numberFormatter(TEST_DATA_ARRAY[4])).toBe('999m');
+    expect(numberFormatter(TEST_DATA_ARRAY[5])).toBe('999bn');
+    expect(numberFormatter(TEST_DATA_ARRAY[6])).toBe('1.2tn');
     expect(numberFormatter(TEST_DATA_ARRAY[7])).toBe('NaN');
     expect(numberFormatter(TEST_DATA_ARRAY[8])).toBe('NaN');
     expect(numberFormatter(TEST_DATA_ARRAY[9])).toBe('NaN');
     expect(numberFormatter(TEST_DATA_ARRAY[10])).toBe('NaN');
-    expect(numberFormatter(TEST_DATA_ARRAY[11])).toBe('999T');
+    expect(numberFormatter(TEST_DATA_ARRAY[11])).toBe('999tn');
   });
 
   it('Testing addResourceTypeToFilterQuery helper function', () => {

@@ -12,3 +12,6 @@ export * from './tag_utils';
 export * from './transform_utils';
 export * from './file_utils';
 export * from './search_configs';
+export * from './affected_modules';
+export * from './code_changes';
+export * from './testing_scope';

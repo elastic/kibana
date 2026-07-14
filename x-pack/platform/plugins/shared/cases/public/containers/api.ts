@@ -131,6 +131,21 @@ export const resolveCase = async ({
   return convertCaseResolveToCamelCase(decodeCaseResolveResponse(response));
 };
 
+export const getCase = async ({
+  caseId,
+  signal,
+}: {
+  caseId: string;
+  signal?: AbortSignal;
+}): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseDetailsUrl(caseId), {
+    method: 'GET',
+    signal,
+  });
+
+  return convertCaseToCamelCase(decodeCaseResponse(response));
+};
+
 export const getTags = async ({
   owner,
   signal,

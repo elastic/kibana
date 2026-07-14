@@ -220,6 +220,10 @@ GET connector-${rawName}/_search
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.enterpriseSearch.createConnector.finishUpStep.popover.ariaLabel',
+          { defaultMessage: 'More configuration options' }
+        )}
         id={splitButtonPopoverId}
         button={
           <EuiButtonIcon

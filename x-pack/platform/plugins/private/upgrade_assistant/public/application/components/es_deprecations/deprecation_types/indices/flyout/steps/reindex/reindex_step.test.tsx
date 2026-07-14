@@ -19,9 +19,11 @@ import type { ReindexState } from '../../../use_reindex';
 import { ReindexFlyoutStep } from './reindex_step';
 
 jest.mock('../../../../../../../app_context', () => {
+  const actual = jest.requireActual('../../../../../../../app_context');
   const { docLinksServiceMock } = jest.requireActual('@kbn/core-doc-links-browser-mocks');
 
   return {
+    ...actual,
     useAppContext: () => {
       return {
         services: {

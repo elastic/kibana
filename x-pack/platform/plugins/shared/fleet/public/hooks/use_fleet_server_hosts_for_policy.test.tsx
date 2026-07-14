@@ -39,7 +39,6 @@ describe('useFleetServerHostsForPolicy', () => {
             id: 'default-proxy',
             name: 'default-proxy',
             url: 'https://defaultproxy',
-            is_preconfigured: false,
           },
           has_active: true,
           es_output: {
@@ -54,10 +53,6 @@ describe('useFleetServerHostsForPolicy', () => {
             id: 'es-output-proxy',
             name: 'es-output-proxy',
             url: 'https://es-output-proxy',
-            proxy_headers: {
-              'header-key': 'header-value',
-            },
-            is_preconfigured: false,
           },
         },
         download_source: {
@@ -70,10 +65,6 @@ describe('useFleetServerHostsForPolicy', () => {
           id: 'download-src-proxy',
           name: 'download-src-proxy',
           url: 'https://download-src-proxy',
-          proxy_headers: {
-            'header-key': 'header-value',
-          },
-          is_preconfigured: false,
         },
       },
     });
@@ -95,7 +86,6 @@ describe('useFleetServerHostsForPolicy', () => {
         id: 'default-proxy',
         name: 'default-proxy',
         url: 'https://defaultproxy',
-        is_preconfigured: false,
       },
       esOutput: {
         id: 'es-output',
@@ -109,10 +99,6 @@ describe('useFleetServerHostsForPolicy', () => {
         id: 'es-output-proxy',
         name: 'es-output-proxy',
         url: 'https://es-output-proxy',
-        proxy_headers: {
-          'header-key': 'header-value',
-        },
-        is_preconfigured: false,
       },
       downloadSource: {
         id: 'default-source',
@@ -124,10 +110,6 @@ describe('useFleetServerHostsForPolicy', () => {
         id: 'download-src-proxy',
         name: 'download-src-proxy',
         url: 'https://download-src-proxy',
-        proxy_headers: {
-          'header-key': 'header-value',
-        },
-        is_preconfigured: false,
       },
     });
   });

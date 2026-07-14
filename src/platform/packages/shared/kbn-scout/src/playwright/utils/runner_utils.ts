@@ -14,6 +14,25 @@ import { testTargets, type ScoutTestTarget } from '@kbn/scout-info';
 
 export const execPromise = promisify(exec);
 
+const BABEL_REGISTER_REQUIRE = '--require=@kbn/babel-register/install';
+
+/**
+ * Returns a new env object with `--require=@kbn/babel-register/install` appended
+ * to `NODE_OPTIONS`, so that Playwright (spawned as a binary) and any worker
+ * processes it forks internally use Kibana's Babel transpilation for CommonJS
+ * imports. Idempotent when the flag is already present.
+ */
+export function withKibanaBabelRegister(
+  env: Record<string, string | undefined> = {}
+): Record<string, string | undefined> {
+  const existing = env.NODE_OPTIONS ?? process.env.NODE_OPTIONS ?? '';
+  const alreadyPresent = existing.includes(BABEL_REGISTER_REQUIRE);
+  const NODE_OPTIONS = alreadyPresent
+    ? existing
+    : [existing, BABEL_REGISTER_REQUIRE].filter(Boolean).join(' ');
+  return { ...env, NODE_OPTIONS };
+}
+
 export const isValidUTCDate = (date: string): boolean => {
   return !isNaN(Date.parse(date)) && new Date(date).toISOString() === date;
 };

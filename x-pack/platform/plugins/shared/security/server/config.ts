@@ -79,7 +79,7 @@ function getUniqueProviderSchema<TProperties extends Record<string, Type<any>>>(
 ) {
   return schema.maybe(
     schema.recordOf(
-      schema.string(),
+      schema.string({ maxLength: 1024 }),
       schema.object(
         properties
           ? { ...getCommonProviderSchemaProperties(overrides), ...properties }
@@ -136,7 +136,7 @@ const providersConfigSchema = schema.object(
     pki: getUniqueProviderSchema('pki'),
     saml: schema.maybe(
       schema.recordOf(
-        schema.string(),
+        schema.string({ maxLength: 1024 }),
         schema.object({
           ...getCommonProviderSchemaProperties(),
           realm: schema.string(),
@@ -147,7 +147,7 @@ const providersConfigSchema = schema.object(
     ),
     oidc: schema.maybe(
       schema.recordOf(
-        schema.string(),
+        schema.string({ maxLength: 1024 }),
         schema.object({ ...getCommonProviderSchemaProperties(), realm: schema.string() })
       )
     ),
@@ -376,7 +376,7 @@ export function createConfig(
         'restart, please set xpack.security.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
     );
 
-    encryptionKey = crypto.randomBytes(16).toString('hex');
+    encryptionKey = crypto.randomBytes(32).toString('hex');
   }
 
   const hashedEncryptionKey = crypto.createHash('sha3-256').update(encryptionKey).digest('base64');

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { load } from 'js-yaml';
 
 import {
   EuiFlyout,
@@ -49,6 +48,7 @@ import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 import type { Output, FleetProxy } from '../../../../types';
 
 import { useBreadcrumbs, useFleetStatus, useStartServices } from '../../../../hooks';
+import { useYaml } from '../../../../../../services';
 
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
 
@@ -76,8 +76,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   proxies,
 }) => {
   useBreadcrumbs('settings');
+  const yaml = useYaml();
   const form = useOutputForm(onClose, output, defaultOutput);
   const inputs = form.inputs;
+  const parseFn = yaml?.parse;
   const { docLinks, cloud } = useStartServices();
   const fleetStatus = useFleetStatus();
   const isServerless = !!cloud?.isServerlessEnabled;
@@ -113,6 +115,19 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
 
   // Remote ES output not yet supported in serverless
   const isStateful = !cloud?.isServerlessEnabled;
+  const yamlConfigValue = inputs.additionalYamlConfigInput.value;
+  const presetValue = inputs.presetInput.value;
+  const setPresetValue = inputs.presetInput.setValue;
+  useEffect(() => {
+    if (
+      yaml &&
+      supportsPresets &&
+      outputYmlIncludesReservedPerformanceKey(yamlConfigValue, yaml.parse) &&
+      presetValue !== 'custom'
+    ) {
+      setPresetValue('custom');
+    }
+  }, [yaml, supportsPresets, yamlConfigValue, presetValue, setPresetValue]);
 
   const OUTPUT_TYPE_OPTIONS = [
     { value: outputType.Elasticsearch, text: 'Elasticsearch' },
@@ -319,6 +334,9 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               <EuiSelect
                 fullWidth
                 data-test-subj="settingsOutputsFlyout.typeInput"
+                aria-label={i18n.translate('xpack.fleet.settings.editOutputFlyout.typeInputLabel', {
+                  defaultMessage: 'Type',
+                })}
                 {...inputs.typeInput.props}
                 options={OUTPUT_TYPE_OPTIONS}
               />
@@ -449,10 +467,11 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   onChange={(e) => inputs.presetInput.setValue(e.target.value)}
                   disabled={
                     inputs.presetInput.props.disabled ||
-                    outputYmlIncludesReservedPerformanceKey(
-                      inputs.additionalYamlConfigInput.value,
-                      load
-                    )
+                    (!!parseFn &&
+                      outputYmlIncludesReservedPerformanceKey(
+                        inputs.additionalYamlConfigInput.value,
+                        parseFn
+                      ))
                   }
                   options={[
                     { value: 'balanced', text: 'Balanced' },
@@ -499,15 +518,17 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                     defaultMessage="Allow agents to write to Streams"
                   />
                 }
+                disabled={inputs.writeToStreams.props.disabled}
                 checked={inputs.writeToStreams.value}
                 onChange={(e) => inputs.writeToStreams.setValue(e.target.checked)}
               />
             </EuiFormRow>
           )}
           {supportsPresets &&
+            !!parseFn &&
             outputYmlIncludesReservedPerformanceKey(
               inputs.additionalYamlConfigInput.value,
-              load
+              parseFn
             ) && (
               <>
                 <EuiSpacer size="s" />
@@ -556,24 +577,26 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             {...inputs.additionalYamlConfigInput.formRowProps}
             fullWidth
           >
-            <YamlCodeEditorWithPlaceholder
-              value={inputs.additionalYamlConfigInput.value}
-              onChange={(value) => {
-                if (outputYmlIncludesReservedPerformanceKey(value, load)) {
-                  inputs.presetInput.setValue('custom');
-                }
+            <div data-test-subj="settingsOutputsFlyout.yamlConfigInput">
+              <YamlCodeEditorWithPlaceholder
+                value={inputs.additionalYamlConfigInput.value}
+                onChange={(value) => {
+                  if (parseFn && outputYmlIncludesReservedPerformanceKey(value, parseFn)) {
+                    inputs.presetInput.setValue('custom');
+                  }
 
-                inputs.additionalYamlConfigInput.setValue(value);
-              }}
-              disabled={inputs.additionalYamlConfigInput.props.disabled}
-              placeholder={i18n.translate(
-                'xpack.fleet.settings.editOutputFlyout.yamlConfigInputPlaceholder',
-                {
-                  defaultMessage:
-                    '# YAML settings here will be added to the output section of each agent policy.',
-                }
-              )}
-            />
+                  inputs.additionalYamlConfigInput.setValue(value);
+                }}
+                disabled={inputs.additionalYamlConfigInput.props.disabled}
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.yamlConfigInputPlaceholder',
+                  {
+                    defaultMessage:
+                      '# YAML settings here will be added to the output section of each agent policy.',
+                  }
+                )}
+              />
+            </div>
           </EuiFormRow>
           <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
         </EuiForm>

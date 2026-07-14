@@ -7,6 +7,7 @@
 
 import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 interface PopoverTooltipProps {
   ariaLabel?: string;
@@ -26,6 +27,12 @@ export function PopoverTooltip({
       anchorPosition={'upCenter'}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      aria-label={
+        ariaLabel ??
+        i18n.translate('xpack.apm.popoverTooltip.ariaLabel', {
+          defaultMessage: 'More information',
+        })
+      }
       button={
         <EuiButtonIcon
           data-test-subj="apmPopoverTooltipButton"

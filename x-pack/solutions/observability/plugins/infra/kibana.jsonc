@@ -23,6 +23,7 @@
       "embeddable",
       "features",
       "fieldFormats",
+      "inspector",
       "lens",
       "logsShared",
       "metricsDataAccess",

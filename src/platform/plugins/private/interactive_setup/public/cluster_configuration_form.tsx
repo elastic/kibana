@@ -510,6 +510,9 @@ export const ForgotPasswordPopover: FunctionComponent<ForgotPasswordPopoverProps
       anchorPosition="rightCenter"
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      aria-label={i18n.translate('interactiveSetup.forgotPasswordPopover.ariaLabel', {
+        defaultMessage: 'Forgot password',
+      })}
     >
       <EuiText size="s" grow={false}>
         <p>

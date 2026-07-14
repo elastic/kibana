@@ -27,7 +27,7 @@ import {
 
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
 import type { DashboardLocatorParams } from '../../../../common';
-import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../../../services/dashboard_api_services';
 import {
   dataService,
   shareService,

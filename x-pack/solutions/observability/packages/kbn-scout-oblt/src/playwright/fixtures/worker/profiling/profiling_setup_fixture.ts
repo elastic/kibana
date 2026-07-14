@@ -47,10 +47,20 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
               'content-type': 'application/json',
               'kbn-xsrf': 'reporting',
             },
+            // The route is not idempotent on retry; we want a fast, clear failure so the
+            // underlying error (logged in Kibana by handleRouteHandlerError) is the first
+            // thing the developer sees instead of a series of 500s.
+            retries: 0,
           });
           log.info('Profiling resources set up successfully');
-        } catch (error) {
-          log.error(`Error setting up profiling resources: ${error}`);
+        } catch (error: any) {
+          const status = error?.response?.status ?? error?.originalError?.response?.status;
+          const body = error?.response?.data ?? error?.originalError?.response?.data;
+          log.error(
+            `Error setting up profiling resources POST /api/profiling/setup/es_resources: status=${status} body=${JSON.stringify(
+              body
+            )}`
+          );
           throw error;
         }
       };
@@ -97,20 +107,25 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
       const cleanup = async (): Promise<void> => {
         log.info(`Unloading Profiling data`);
 
-        const indices = await esClient.cat.indices({ format: 'json' });
+        const ignoreNotFound = (error: any) => {
+          if (error?.meta?.statusCode === 404) return undefined;
+          throw error;
+        };
 
-        const profilingIndices = indices
-          .filter((index) => index.index !== undefined)
+        const profilingIndices = (await esClient.cat.indices({ format: 'json' }))
           .map((index) => index.index)
-          .filter((index) => {
-            return index!.startsWith('profiling') || index!.startsWith('.profiling');
-          }) as string[];
+          .filter(
+            (name): name is string =>
+              !!name && (name.startsWith('profiling') || name.startsWith('.profiling'))
+          );
 
         await Promise.all([
-          ...profilingIndices.map((index) => esClient.indices.delete({ index })),
-          esClient.indices.deleteDataStream({
-            name: 'profiling-events*',
-          }),
+          ...profilingIndices.map((index) =>
+            esClient.indices.delete({ index, ignore_unavailable: true }).catch(ignoreNotFound)
+          ),
+          // 'profiling-events*' may not exist on a fresh cluster; tolerate the 404 so we
+          // do not abort the whole Promise.all and leave preceding cleanup work half-done.
+          esClient.indices.deleteDataStream({ name: 'profiling-events*' }).catch(ignoreNotFound),
         ]);
         log.info('Unloaded Profiling data');
       };

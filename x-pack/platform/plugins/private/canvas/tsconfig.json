@@ -22,6 +22,7 @@
     "server/**/*",
     "storybook/**/*",
     "tasks/mocks/*",
+    "test/scout/**/*",
     "types/**/*"
   ],
   "kbn_references": [
@@ -81,7 +82,10 @@
     "@kbn/content-management-utils",
     "@kbn/deeplinks-analytics",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/visualizations-common"
+    "@kbn/visualizations-common",
+    "@kbn/core-http-browser",
+    "@kbn/scout",
+    "@kbn/rison"
   ],
   "exclude": ["target/**/*"]
 }

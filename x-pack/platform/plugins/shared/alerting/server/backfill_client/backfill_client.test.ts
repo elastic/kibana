@@ -274,7 +274,6 @@ describe('BackfillClient', () => {
           title: 'Alerting Backfill Rule Run',
           priority: TaskPriority.Low,
           createTaskRunner: expect.any(Function),
-          maxConcurrency: 3,
         },
       });
     });

@@ -296,7 +296,7 @@ export class HttpService
 
     const stringOrStringArraySchema = schema.oneOf([
       schema.string(),
-      schema.arrayOf(schema.string()),
+      schema.arrayOf(schema.string(), { maxSize: 100 }),
     ]);
     const querySchema = schema.object({
       access: schema.oneOf([schema.literal('public'), schema.literal('internal')], {

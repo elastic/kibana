@@ -786,6 +786,12 @@ export class ExplorerChartDistribution extends React.Component {
             }}
           >
             <EuiPopover
+              aria-label={i18n.translate(
+                'xpack.ml.explorer.distributionChart.anomalyActionsPopoverAriaLabel',
+                {
+                  defaultMessage: 'Anomaly actions',
+                }
+              )}
               isOpen={true}
               closePopover={() => this.closePopover()}
               panelPaddingSize="none"

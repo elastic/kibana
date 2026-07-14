@@ -25,7 +25,7 @@ Add the following snippet to your settings for your AI Coding IDE so it will aut
       "command": "bash",
       "args": [
         "-lc",
-        "source \"$NVM_DIR/nvm.sh\" && cd ${KIBANA_WORKSPACE} && nvm use --silent && node --no-experimental-require-module ./scripts/mcp_dev.js"
+        "source \"$NVM_DIR/nvm.sh\" && cd ${KIBANA_WORKSPACE} && nvm use --silent && node ./scripts/mcp_dev.js"
       ]
     }
   }

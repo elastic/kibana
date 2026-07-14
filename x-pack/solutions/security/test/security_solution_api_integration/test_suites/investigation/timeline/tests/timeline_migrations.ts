@@ -47,7 +47,9 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     const kibanaServer = getService('kibanaServer');
     const spacesService = getService('spaces');
 
-    describe('8.0 id migration', () => {
+    // Flaky on CI: esArchiver.load triggers SO migration which returns 500 under shared CI agents.
+    // Coverage moved to Jest integration tests in server/integration_tests/ on main. See #233580.
+    describe.skip('8.0 id migration', () => {
       const resolveWithSpaceApi = '/s/awesome-space/api/timeline/resolve';
 
       before(async () => {

@@ -42,10 +42,10 @@ export interface EmulatorServerPlugin<TServices extends Record<string, any> = an
 
 export interface EmulatorServerRequest<
   TParams extends HapiTypes.Request['params'] = any,
-  TQuery extends HapiTypes.Request['query'] = any,
+  TQuery extends object = any,
   TPayload extends HapiTypes.Request['payload'] = any,
   TPre extends HapiTypes.Request['pre'] = any
-> extends HapiTypes.Request {
+> extends Omit<HapiTypes.Request, 'query'> {
   params: TParams;
   query: TQuery;
   payload: TPayload;
@@ -54,7 +54,7 @@ export interface EmulatorServerRequest<
 
 export type EmulatorServerRouteHandlerMethod<
   TParams extends HapiTypes.Request['params'] = any,
-  TQuery extends HapiTypes.Request['query'] = any,
+  TQuery extends object = any,
   TPayload extends HapiTypes.Request['payload'] = any,
   TPre extends HapiTypes.Request['pre'] = any
 > = (
@@ -65,7 +65,7 @@ export type EmulatorServerRouteHandlerMethod<
 
 export interface EmulatorServerRouteDefinition<
   TParams extends HapiTypes.Request['params'] = any,
-  TQuery extends HapiTypes.Request['query'] = any,
+  TQuery extends object = any,
   TPayload extends HapiTypes.Request['payload'] = any,
   TPre extends HapiTypes.Request['pre'] = any
 > extends Omit<HapiTypes.ServerRoute, 'handler'> {

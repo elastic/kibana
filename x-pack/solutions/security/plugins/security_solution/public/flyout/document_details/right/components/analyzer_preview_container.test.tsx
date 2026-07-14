@@ -12,7 +12,11 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import {
+  ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID,
+  ANALYZER_PREVIEW_LOADING_TEST_ID,
+  ANALYZER_PREVIEW_TEST_ID,
+} from './test_ids';
 import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '../../../shared/components/test_ids';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -27,6 +31,21 @@ jest.mock('../../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
+
+const mockUiSettingsGet = jest.fn();
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...actual,
+    useKibana: () => ({
+      services: {
+        uiSettings: {
+          get: mockUiSettingsGet,
+        },
+      },
+    }),
+  };
+});
 
 const mockAnalyzerPreview = jest.fn((indices: string) => (
   <div data-test-subj="analyzerPreviewStub" />
@@ -65,7 +84,7 @@ const renderAnalyzerPreview = (context = mockContextValue) =>
 describe('AnalyzerPreviewContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
+    mockUiSettingsGet.mockReturnValue(true);
     (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSourcererDataView as jest.Mock).mockReturnValue({
@@ -81,6 +100,24 @@ describe('AnalyzerPreviewContainer', () => {
 
     mockNavigateToAnalyzer.mockClear();
     mockAnalyzerPreview.mockClear();
+  });
+
+  it('should render excluded cold/frozen tiers badge when setting is enabled', () => {
+    const { getByTestId } = renderAnalyzerPreview();
+
+    expect(getByTestId(ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID)).toHaveTextContent(
+      'Cold/Frozen tiers off'
+    );
+  });
+
+  it('should render included cold/frozen tiers badge when setting is disabled', () => {
+    mockUiSettingsGet.mockReturnValue(false);
+
+    const { getByTestId } = renderAnalyzerPreview();
+
+    expect(getByTestId(ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID)).toHaveTextContent(
+      'Cold/Frozen tiers on'
+    );
   });
 
   it('should render AnalyzerPreview with experimental patterns when the new picker is enabled', () => {

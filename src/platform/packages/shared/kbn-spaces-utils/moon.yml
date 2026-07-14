@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/spaces-utils'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/spaces-utils'
+  title: '@kbn/spaces-utils'
   description: Moon project for @kbn/spaces-utils
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-spaces-utils
+  sourceRoot: src/platform/packages/shared/kbn-spaces-utils
 dependsOn: []
 tags:
   - shared-common
@@ -29,16 +28,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

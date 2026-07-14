@@ -47,113 +47,116 @@ export const getAllHosts = async ({
     schema,
   });
 
-  const response = await infraMetricsClient.search({
-    allow_no_indices: true,
-    ignore_unavailable: true,
-    size: 0,
-    track_total_hits: false,
-    query: {
-      bool: {
-        filter: [...termsQuery(HOST_NAME_FIELD, ...hostNames), ...rangeQuery(from, to)],
-        should: [...documentsFilter],
+  const response = await infraMetricsClient.search(
+    {
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      size: 0,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [...termsQuery(HOST_NAME_FIELD, ...hostNames), ...rangeQuery(from, to)],
+          should: [...documentsFilter],
+        },
+      },
+      aggs: {
+        // Aggregation to find hosts whose metrics are monitored by the system integration.
+        monitoredHosts: {
+          filter: { bool: { filter: [...(inventoryModel.nodeFilter?.({ schema }) ?? [])] } },
+          aggs: {
+            names: {
+              terms: {
+                field: HOST_NAME_FIELD,
+                size: limit,
+                order: {
+                  _key: 'asc',
+                },
+              },
+            },
+          },
+        },
+        allHostMetrics: {
+          terms: {
+            field: HOST_NAME_FIELD,
+            size: limit,
+            order: {
+              _key: 'asc',
+            },
+          },
+          aggs: {
+            ...metricAggregations,
+            hostOsName: {
+              filter: {
+                exists: {
+                  field: 'host.os.name',
+                },
+              },
+              aggs: {
+                latest: {
+                  top_metrics: {
+                    metrics: [
+                      {
+                        field: 'host.os.name',
+                      },
+                    ],
+                    size: 1,
+                    sort: {
+                      '@timestamp': 'desc',
+                    },
+                  },
+                },
+              },
+            },
+            cloudProvider: {
+              filter: {
+                exists: {
+                  field: 'cloud.provider',
+                },
+              },
+              aggs: {
+                latest: {
+                  top_metrics: {
+                    metrics: [
+                      {
+                        field: 'cloud.provider',
+                      },
+                    ],
+                    size: 1,
+                    sort: {
+                      '@timestamp': 'desc',
+                    },
+                  },
+                },
+              },
+            },
+            hostIp: {
+              filter: {
+                exists: {
+                  field: 'host.ip',
+                },
+              },
+              aggs: {
+                latest: {
+                  top_metrics: {
+                    metrics: [
+                      {
+                        field: 'host.ip',
+                      },
+                    ],
+                    size: 1,
+                    sort: {
+                      '@timestamp': 'desc',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
-    aggs: {
-      // find hosts with metrics that are monitored by the system integration.
-      monitoredHosts: {
-        filter: { bool: { filter: [...(inventoryModel.nodeFilter?.({ schema }) ?? [])] } },
-        aggs: {
-          names: {
-            terms: {
-              field: HOST_NAME_FIELD,
-              size: limit,
-              order: {
-                _key: 'asc',
-              },
-            },
-          },
-        },
-      },
-      allHostMetrics: {
-        terms: {
-          field: HOST_NAME_FIELD,
-          size: limit,
-          order: {
-            _key: 'asc',
-          },
-        },
-        aggs: {
-          ...metricAggregations,
-          hostOsName: {
-            filter: {
-              exists: {
-                field: 'host.os.name',
-              },
-            },
-            aggs: {
-              latest: {
-                top_metrics: {
-                  metrics: [
-                    {
-                      field: 'host.os.name',
-                    },
-                  ],
-                  size: 1,
-                  sort: {
-                    '@timestamp': 'desc',
-                  },
-                },
-              },
-            },
-          },
-          cloudProvider: {
-            filter: {
-              exists: {
-                field: 'cloud.provider',
-              },
-            },
-            aggs: {
-              latest: {
-                top_metrics: {
-                  metrics: [
-                    {
-                      field: 'cloud.provider',
-                    },
-                  ],
-                  size: 1,
-                  sort: {
-                    '@timestamp': 'desc',
-                  },
-                },
-              },
-            },
-          },
-          hostIp: {
-            filter: {
-              exists: {
-                field: 'host.ip',
-              },
-            },
-            aggs: {
-              latest: {
-                top_metrics: {
-                  metrics: [
-                    {
-                      field: 'host.ip',
-                    },
-                  ],
-                  size: 1,
-                  sort: {
-                    '@timestamp': 'desc',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
+    'get all hosts'
+  );
 
   const systemIntegrationHosts = new Set(
     response.aggregations?.monitoredHosts.names.buckets.map((p) => p.key) ?? []

@@ -13,7 +13,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const toasts = getService('toasts');
-  const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -48,9 +47,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
       );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
 
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
@@ -58,7 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     });
 
     it('should navigate back correctly from to surrounding and single views', async () => {

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ui-actions-explorer-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ui-actions-explorer-plugin'
+  title: '@kbn/ui-actions-explorer-plugin'
   description: Moon project for @kbn/ui-actions-explorer-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: examples/ui_actions_explorer
+  sourceRoot: examples/ui_actions_explorer
 dependsOn:
   - '@kbn/core'
   - '@kbn/ui-actions-plugin'

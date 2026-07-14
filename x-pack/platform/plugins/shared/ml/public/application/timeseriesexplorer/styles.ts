@@ -104,7 +104,7 @@ export const useTimeseriesExplorerStyles = () => {
           },
 
           '.values-dots circle': {
-            fill: 'none',
+            fill: euiTheme.colors.primary,
             strokeWidth: 0,
           },
 

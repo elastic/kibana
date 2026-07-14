@@ -8,7 +8,7 @@
 import moment from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsQueryConfig } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import type {
@@ -42,6 +42,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   esClient: ElasticsearchClient,
   params: Params,
   dataView: string,
+  dataViewDefinition: DataViewBase | undefined,
   timeFieldName: string,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
@@ -76,6 +77,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         timeFieldName,
         groupBy,
         searchConfiguration,
+        dataViewDefinition,
         esQueryConfig,
         compositeSize,
         alertOnGroupDisappear,
@@ -92,6 +94,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         timeFieldName,
         groupBy,
         searchConfiguration,
+        dataViewDefinition,
         logger,
         calculatedTimerange,
         esQueryConfig,

@@ -74,10 +74,21 @@ export interface RolloverAction {
   max_docs?: number;
   max_primary_shard_size?: string;
   max_primary_shard_docs?: number;
+
   /**
    * @deprecated This will be removed in versions 8+ of the stack
    */
   max_size?: string;
+
+  /**
+   * Currently we do not yet support configuring min_* values in the UI
+   * but they are accepted by the API.
+   */
+  min_age?: string;
+  min_docs?: number;
+  min_size?: string;
+  min_primary_shard_size?: string;
+  min_primary_shard_docs?: number;
 }
 
 export interface SerializedHotPhase extends SerializedPhase {

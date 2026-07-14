@@ -84,7 +84,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
           <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">
             {iconPath && (
               <EuiFlexItem grow={false}>
-                <EuiIcon size="xl" type={iconPath} />
+                <EuiIcon size="xl" type={iconPath} aria-hidden={true} />
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>

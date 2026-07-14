@@ -17,6 +17,7 @@ import {
   txtSingleItemCopyActionLabel,
   txtActionColumnTitle,
   txtTriggerColumnTitle,
+  txtTableCaption,
 } from './i18n';
 import { TextWithIcon } from '../text_with_icon';
 import { TriggerLineItem } from '../trigger_line_item';
@@ -118,6 +119,7 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
           },
           selectableMessage: () => txtSelectableMessage,
         }}
+        tableCaption={txtTableCaption}
       />
       <EuiSpacer />
       {!!onClone && !!selected.length && (

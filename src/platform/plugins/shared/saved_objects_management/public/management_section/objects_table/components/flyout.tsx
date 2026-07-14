@@ -31,6 +31,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiLoadingSpinner,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -101,6 +102,8 @@ export class FlyoutClass extends Component<
   FlyoutProps & EuiTablePersistInjectedProps<any>,
   FlyoutState
 > {
+  private flyoutTitleId = htmlIdGenerator()();
+
   constructor(props: FlyoutProps & EuiTablePersistInjectedProps<unknown>) {
     super(props);
 
@@ -637,10 +640,15 @@ export class FlyoutClass extends Component<
     }
 
     return (
-      <EuiFlyout onClose={close} size="s" data-test-subj="importSavedObjectsFlyout">
+      <EuiFlyout
+        onClose={close}
+        size="s"
+        data-test-subj="importSavedObjectsFlyout"
+        aria-labelledby={this.flyoutTitleId}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
+            <h2 id={this.flyoutTitleId}>
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
                 defaultMessage="Import saved objects"

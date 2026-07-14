@@ -66,6 +66,7 @@ export const useSeverityAction = ({
         {
           cases: casesToUpdate,
           successToasterTitle: getSeverityToasterMessage(severity, selectedCases),
+          originalCases: selectedCases,
         },
         { onSuccess: onActionSuccess }
       );

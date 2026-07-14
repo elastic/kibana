@@ -25,11 +25,13 @@ import { RoutingSection } from './routing_section';
 import { MapperSizePluginSection } from './mapper_size_plugin_section';
 import { SubobjectsSection } from './subobjects_section';
 import { configurationFormSchema } from './configuration_form_schema';
+import type { IndexMode } from '../../../../../../common/types/data_streams';
 
 interface Props {
   value?: MappingsConfiguration;
   /** List of plugins installed in the cluster nodes */
   esNodesPlugins: string[];
+  indexMode?: IndexMode;
 }
 
 interface SerializedSourceField {
@@ -129,7 +131,7 @@ export const formDeserializer = (formData: GenericObject) => {
   };
 };
 
-export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) => {
+export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode }: Props) => {
   const {
     config: { enableMappingsSourceFieldSection },
   } = useAppContext();
@@ -199,7 +201,7 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
       <EuiSpacer size="xl" />
       {enableMappingsSourceFieldSection && (
         <>
-          <SourceFieldSection /> <EuiSpacer size="xl" />
+          <SourceFieldSection indexMode={indexMode} /> <EuiSpacer size="xl" />
         </>
       )}
       <RoutingSection />

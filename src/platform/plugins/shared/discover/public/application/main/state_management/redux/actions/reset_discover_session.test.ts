@@ -15,7 +15,7 @@ import { internalStateActions, selectTab, selectTabRuntimeState } from '..';
 import type { InternalStateStore } from '../internal_state';
 import { internalStateSlice } from '../internal_state';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
-import { getTabStateMock } from '../__mocks__/internal_state.mocks';
+import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
 import * as tabsActions from './tabs';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { DiscoverServices } from '../../../../../build_services';
@@ -112,6 +112,36 @@ describe('resetDiscoverSession', () => {
 
     expect(internalState.getState().persistedDiscoverSession).toBeUndefined();
     expect(updateTabsSpy).not.toHaveBeenCalled();
+  });
+
+  it('should preserve empty sort arrays when resetting initialized time-based tabs', async () => {
+    const services = createDiscoverServicesMock();
+    const { internalState, initializeTabs, initializeSingleTab } = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
+    });
+    const persistedTab = {
+      ...getPersistedTabMock({
+        tabId: 'tab-1',
+        dataView: dataViewWithTimefieldMock,
+        appStateOverrides: { sort: [] },
+        services,
+      }),
+      sort: [],
+    };
+    const persistedDiscoverSession = createDiscoverSessionMock({
+      id: 'test-id',
+      tabs: [persistedTab],
+    });
+
+    await initializeTabs({ persistedDiscoverSession });
+    await initializeSingleTab({ tabId: persistedTab.id });
+
+    expect(selectTab(internalState.getState(), persistedTab.id).appState.sort).toEqual([]);
+
+    await internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
+
+    expect(selectTab(internalState.getState(), persistedTab.id).appState.sort).toEqual([]);
   });
 
   it('should reset persisted tabs and mark unsaved tabs for refetch', async () => {

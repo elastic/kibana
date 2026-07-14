@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { createRouteValidationFunction } from '@kbn/io-ts-utils';
+import * as rt from 'io-ts';
+import { createRouteValidationFunction, jsonRt } from '@kbn/io-ts-utils';
 import {
   GetInfraMetricsRequestBodyPayloadRT,
   GetInfraMetricsRequestParamsRT,
@@ -20,8 +20,11 @@ import { getInfraAlertsClient } from '../../lib/helpers/get_infra_alerts_client'
 import { getHosts } from './lib/host/get_hosts';
 import { getHostsCount } from './lib/host/get_hosts_count';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
+import { withInspect } from '../../lib/helpers/with_inspect';
 import { getApmDataAccessClient } from '../../lib/helpers/get_apm_data_access_client';
 import type { InfraEntityMetricType } from '../../../common/http_api/infra';
+
+const InspectQueryRT = rt.exact(rt.partial({ _inspect: jsonRt.pipe(rt.boolean) }));
 
 // Network metrics that are not supported for semconv schema
 // These require derivative aggregations with histogram parents which would
@@ -38,68 +41,51 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
       validate: {
         body: createRouteValidationFunction(GetInfraMetricsRequestBodyPayloadRT),
         params: createRouteValidationFunction(GetInfraMetricsRequestParamsRT),
+        query: createRouteValidationFunction(InspectQueryRT),
       },
     },
-    async (context, request, response) => {
+    withInspect(async (context, request) => {
       const { from, to, metrics, limit, query, schema } = request.body;
 
-      // Validate that unsupported metrics are not requested for semconv schema
       if (schema === 'semconv') {
-        const unsupportedMetrics = metrics.filter((metric) =>
+        const unsupportedMetrics = metrics.filter((metric: InfraEntityMetricType) =>
           UNSUPPORTED_SEMCONV_METRICS.includes(metric)
         );
 
         if (unsupportedMetrics.length > 0) {
-          return response.badRequest({
-            body: {
-              message: `The following metrics are not supported for semconv schema: ${unsupportedMetrics.join(
+          throw Object.assign(
+            new Error(
+              `The following metrics are not supported for semconv schema: ${unsupportedMetrics.join(
                 ', '
-              )}`,
-            },
-          });
+              )}`
+            ),
+            { statusCode: 400 }
+          );
         }
       }
 
-      try {
-        const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
+      const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
 
-        const [infraMetricsClient, alertsClient, apmDataAccessServices] = await Promise.all([
-          getInfraMetricsClient({ request, libs, context }),
-          getInfraAlertsClient({ libs, request }),
-          apmDataAccessClient.getServices(),
-        ]);
+      const [infraMetricsClient, alertsClient, apmDataAccessServices] = await Promise.all([
+        getInfraMetricsClient({ request, libs, context }),
+        getInfraAlertsClient({ libs, request }),
+        apmDataAccessClient.getServices(),
+      ]);
 
-        const hosts = await getHosts({
-          from,
-          to,
-          metrics,
-          limit,
-          query,
-          alertsClient,
-          infraMetricsClient,
-          apmDataAccessServices,
-          schema,
-        });
+      const hosts = await getHosts({
+        from,
+        to,
+        metrics,
+        limit,
+        query,
+        alertsClient,
+        infraMetricsClient,
+        apmDataAccessServices,
+        schema,
+      });
 
-        return response.ok({
-          body: GetInfraMetricsResponsePayloadRT.encode(hosts),
-        });
-      } catch (err) {
-        if (Boom.isBoom(err)) {
-          return response.customError({
-            statusCode: err.output.statusCode,
-            body: { message: err.output.payload.message },
-          });
-        }
-
-        return response.customError({
-          statusCode: err.statusCode ?? 500,
-          body: {
-            message: err.message ?? 'An unexpected error occurred',
-          },
-        });
-      }
-    }
+      return GetInfraMetricsResponsePayloadRT.encode(hosts);
+    })
   );
 
   framework.registerRoute(
@@ -109,51 +95,34 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
       validate: {
         body: createRouteValidationFunction(GetInfraEntityCountRequestBodyPayloadRT),
         params: createRouteValidationFunction(GetInfraEntityCountRequestParamsPayloadRT),
+        query: createRouteValidationFunction(InspectQueryRT),
       },
     },
-    async (context, request, response) => {
+    withInspect(async (context, request) => {
       const { body, params } = request;
       const { entityType } = params;
       const { query, from, to, schema = 'ecs' } = body;
 
-      try {
-        const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
+      const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
 
-        const [infraMetricsClient, apmDataAccessServices] = await Promise.all([
-          getInfraMetricsClient({ request, libs, context }),
-          apmDataAccessClient.getServices(),
-        ]);
+      const [infraMetricsClient, apmDataAccessServices] = await Promise.all([
+        getInfraMetricsClient({ request, libs, context }),
+        apmDataAccessClient.getServices(),
+      ]);
 
-        const count = await getHostsCount({
-          infraMetricsClient,
-          apmDataAccessServices,
-          query,
-          from,
-          to,
-          schema,
-        });
+      const count = await getHostsCount({
+        infraMetricsClient,
+        apmDataAccessServices,
+        query,
+        from,
+        to,
+        schema,
+      });
 
-        return response.ok({
-          body: GetInfraEntityCountResponsePayloadRT.encode({
-            entityType,
-            count,
-          }),
-        });
-      } catch (err) {
-        if (Boom.isBoom(err)) {
-          return response.customError({
-            statusCode: err.output.statusCode,
-            body: { message: err.output.payload.message },
-          });
-        }
-
-        return response.customError({
-          statusCode: err.statusCode ?? 500,
-          body: {
-            message: err.message ?? 'An unexpected error occurred',
-          },
-        });
-      }
-    }
+      return GetInfraEntityCountResponsePayloadRT.encode({
+        entityType,
+        count,
+      });
+    })
   );
 };

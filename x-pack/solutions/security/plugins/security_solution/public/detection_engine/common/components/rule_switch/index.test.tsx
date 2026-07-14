@@ -125,7 +125,10 @@ describe('RuleSwitch', () => {
 
     await waitFor(() => {
       wrapper.update();
-      expect(rulesTableContext.actions.setLoadingRules).toHaveBeenCalledTimes(1);
+      expect(rulesTableContext.actions.setLoadingRules).toHaveBeenCalledWith({
+        ids: ['7'],
+        action: 'disable',
+      });
     });
   });
 });

@@ -11,7 +11,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { clearCache } from '../../../services/rest/call_api';
-import { fromQuery, toQuery } from '../links/url_helpers';
+import { fromQuery, isInactiveHistoryError, toQuery } from '../links/url_helpers';
 import type { TimePickerQuickRange } from './typings';
 
 export function DatePicker({
@@ -47,13 +47,19 @@ export function DatePicker({
     refreshPaused?: boolean;
     refreshInterval?: number;
   }) {
-    history.push({
-      ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        ...nextQuery,
-      }),
-    });
+    try {
+      history.push({
+        ...location,
+        search: fromQuery({
+          ...toQuery(location.search),
+          ...nextQuery,
+        }),
+      });
+    } catch (error) {
+      if (!isInactiveHistoryError(error)) {
+        throw error;
+      }
+    }
   }
 
   function onRefreshChange({

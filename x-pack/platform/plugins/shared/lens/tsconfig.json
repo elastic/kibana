@@ -3,7 +3,14 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
+  "include": [
+    "*.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../../typings/**/*",
+    "test/scout/**/*"
+  ],
   "kbn_references": [
     "@kbn/spaces-plugin",
     "@kbn/core",
@@ -135,6 +142,8 @@
     "@kbn/unified-tabs",
     "@kbn/esql-composer",
     "@kbn/cps",
+    "@kbn/core-http-browser",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }

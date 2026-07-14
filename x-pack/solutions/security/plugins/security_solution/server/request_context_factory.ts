@@ -191,6 +191,9 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getEndpointService: () => endpointAppContextService,
 
+      getCheckOsqueryResponseActionAuthz: () => (params) =>
+        plugins.osquery.checkResponseActionAuthz(request, params),
+
       getConfig: () => config,
 
       getFrameworkRequest: () => frameworkRequest,

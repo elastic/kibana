@@ -35,7 +35,7 @@ export const ErrorCallout = ({ title, error, isEsqlMode }: Props) => {
 
   return (
     <EuiEmptyPrompt
-      icon={<EuiIcon size="l" type="error" color="danger" />}
+      icon={<EuiIcon size="l" type="error" color="danger" aria-hidden={true} />}
       color="plain"
       paddingSize="m"
       css={css`

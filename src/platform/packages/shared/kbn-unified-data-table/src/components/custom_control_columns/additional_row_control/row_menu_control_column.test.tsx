@@ -21,6 +21,7 @@ describe('getRowMenuControlColumn', () => {
   };
 
   it('should render the component', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
     const mockClick = jest.fn();
     const props = {
       id: 'test_row_menu_control',
@@ -56,7 +57,7 @@ describe('getRowMenuControlColumn', () => {
     );
     expect(menuButton).toBeInTheDocument();
 
-    await userEvent.click(menuButton);
+    await user.click(menuButton);
 
     expect(screen.getByTestId('exampleRowControl-visBarVerticalStacked')).toBeInTheDocument();
     expect(screen.getByTestId('exampleRowControl-heart')).toBeInTheDocument();
@@ -64,7 +65,7 @@ describe('getRowMenuControlColumn', () => {
     const button = screen.getByTestId('unifiedDataTable_rowMenu_test_row_menu_control');
     expect(button).toBeInTheDocument();
 
-    await userEvent.click(button);
+    await user.click(button);
 
     expect(mockClick).toHaveBeenCalledWith({ record: contextMock.getRowByIndex(1), rowIndex: 1 });
   });

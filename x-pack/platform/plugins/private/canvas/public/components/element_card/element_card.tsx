@@ -43,7 +43,7 @@ export const ElementCard = ({ title, description, image, tags = [], onClick, ...
     description={description}
     footer={<TagList tags={tags} tagType={tagType} />}
     image={image}
-    icon={image ? undefined : <EuiIcon type="canvasApp" size="xxl" />}
+    icon={image ? undefined : <EuiIcon type="canvasApp" size="xxl" aria-hidden={true} />}
     onClick={onClick}
     {...rest}
   />

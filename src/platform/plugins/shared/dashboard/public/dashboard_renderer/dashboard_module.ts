@@ -18,3 +18,4 @@ export { AddToLibraryAction } from '../dashboard_actions/library_add_action';
 export { UnlinkFromLibraryAction } from '../dashboard_actions/library_unlink_action';
 export { CopyToDashboardAction } from '../dashboard_actions/copy_to_dashboard_action';
 export { AddSectionAction } from '../dashboard_actions/add_section_action';
+export { initializeDashboardApiServices } from '../services/dashboard_api_services';

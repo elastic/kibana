@@ -58,4 +58,31 @@ describe('String TruncateFormat', () => {
       '<span class="ffString__emptyValue">(blank)</span>'
     );
   });
+
+  test('escapes HTML characters in html context', () => {
+    const truncate = new TruncateFormat({ fieldLength: 100 }, jest.fn());
+
+    expect(truncate.convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE)).toBe(
+      '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;'
+    );
+    expect(truncate.convert('<img src="x" onerror="alert(1)">', HTML_CONTEXT_TYPE)).toBe(
+      '&lt;img src=&quot;x&quot; onerror=&quot;alert(1)&quot;&gt;'
+    );
+  });
+
+  test('escapes HTML characters in truncated html context', () => {
+    const truncate = new TruncateFormat({ fieldLength: 10 }, jest.fn());
+
+    expect(truncate.convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE)).toBe(
+      '&lt;script&gt;al...'
+    );
+  });
+
+  test('does not escape HTML characters in text context', () => {
+    const truncate = new TruncateFormat({ fieldLength: 100 }, jest.fn());
+
+    expect(truncate.convert('<script>alert("test")</script>', TEXT_CONTEXT_TYPE)).toBe(
+      '<script>alert("test")</script>'
+    );
+  });
 });

@@ -9,7 +9,6 @@ import type { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const testDataListPositive = [
     {
@@ -36,10 +35,6 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     before(async () => {
       await ml.api.cleanMlIndices();
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-      await esArchiver.loadIfNeeded(
-        'x-pack/platform/test/fixtures/es_archives/ml/bm_classification'
-      );
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createDataViewIfNeeded('ft_bank_marketing', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();

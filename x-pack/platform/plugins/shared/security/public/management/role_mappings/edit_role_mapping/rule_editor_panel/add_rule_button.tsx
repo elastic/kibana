@@ -8,6 +8,7 @@
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Rule } from '../../model';
@@ -77,6 +78,12 @@ export const AddRuleButton = (props: Props) => {
       closePopover={() => setIsMenuOpen(false)}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate(
+        'xpack.security.management.editRoleMapping.addRulePopoverAriaLabel',
+        {
+          defaultMessage: 'Add rule options',
+        }
+      )}
     >
       <EuiContextMenuPanel title="Add rule" items={options} />
     </EuiPopover>

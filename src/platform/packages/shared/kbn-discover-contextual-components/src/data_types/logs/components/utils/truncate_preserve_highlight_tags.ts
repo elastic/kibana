@@ -9,10 +9,12 @@
 
 export function extractTextAndMarkTags(html: string) {
   const markTags: string[] = [];
-  const cleanText = html.replace(/<\/?mark[^>]*>/g, (match) => {
-    markTags.push(match);
-    return '';
-  });
+  const cleanText = html
+    .replace(/<\/?mark[^>]*>/g, (match) => {
+      markTags.push(match);
+      return '';
+    })
+    .replace(/<span class="ffArray__highlight">|<\/span>/g, '');
 
   return { cleanText, markTags };
 }

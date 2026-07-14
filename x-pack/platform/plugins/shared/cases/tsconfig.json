@@ -100,7 +100,8 @@
     "@kbn/react-query",
     "@kbn/zod",
     "@kbn/securitysolution-es-utils",
-    "@kbn/openapi-generator"
+    "@kbn/openapi-generator",
+    "@kbn/lens-embeddable-utils",
   ],
   "exclude": [
     "target/**/*"

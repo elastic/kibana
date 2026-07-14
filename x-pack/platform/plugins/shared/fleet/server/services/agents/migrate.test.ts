@@ -11,13 +11,17 @@ import { v4 as uuidv4 } from 'uuid';
 import type { AgentPolicy, Agent } from '../../types';
 
 import { FleetError, FleetUnauthorizedError } from '../../errors';
+import { sendActionTelemetryEvents } from '../action_sender';
 
 import { bulkMigrateAgents, migrateSingleAgent } from './migrate';
 import { createAgentAction, createErrorActionResults } from './actions';
+import { detectTargetClusterType } from './detect_target_cluster_type';
 import { getAgentPolicyForAgents, getAgents } from './crud';
 
 // Mock the imported functions
 jest.mock('./actions');
+jest.mock('../action_sender');
+jest.mock('./detect_target_cluster_type');
 
 jest.mock('./crud', () => {
   return {
@@ -42,6 +46,7 @@ jest.mock('..', () => {
     appContextService: {
       getLogger: jest.fn(),
       getTelemetryEventsSender: jest.fn(),
+      getCloud: jest.fn(),
     },
   };
 });
@@ -81,9 +86,14 @@ const mockedPolicy: AgentPolicy = {
   namespace: 'default',
 };
 
+const mockedDetectTargetClusterType = detectTargetClusterType as jest.MockedFunction<
+  typeof detectTargetClusterType
+>;
+
 describe('Agent migration', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
   let mockLicenseService: any;
+  let mockAppContextService: any;
   const soClientMock = {
     getCurrentNamespace: jest.fn(),
   } as any;
@@ -93,10 +103,19 @@ describe('Agent migration', () => {
     jest.resetAllMocks();
     esClientMock = elasticsearchServiceMock.createInternalClient();
 
-    // Get the mocked license service
     mockLicenseService = jest.requireMock('..').licenseService;
-    // Default to having the required license
     mockLicenseService.hasAtLeast.mockReturnValue(true);
+
+    mockAppContextService = jest.requireMock('..').appContextService;
+    mockAppContextService.getLogger.mockReturnValue({ debug: jest.fn() });
+    mockAppContextService.getTelemetryEventsSender.mockReturnValue({
+      queueTelemetryEvents: jest.fn(),
+    });
+    mockAppContextService.getCloud.mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: false,
+      deploymentId: 'dep-123',
+    });
 
     (getAgentPolicyForAgents as jest.Mock).mockResolvedValue([mockedPolicy]);
 
@@ -112,6 +131,9 @@ describe('Agent migration', () => {
     mockedUuidv4.mockReturnValue('test-action-id' as any);
 
     mockedPolicy.is_protected = false;
+
+    // Default: target detected as ECH
+    mockedDetectTargetClusterType.mockReturnValue('ech');
   });
 
   describe('migrateSingleAgent', () => {
@@ -183,6 +205,67 @@ describe('Agent migration', () => {
             enrollment_token: options.enrollment_token,
           },
         })
+      );
+    });
+
+    it('should send telemetry with source ECH and detected serverless target', async () => {
+      mockedDetectTargetClusterType.mockReturnValue('serverless');
+
+      await migrateSingleAgent(esClientMock, soClientMock, 'agent-123', mockedPolicy, mockedAgent, {
+        policyId: 'policy-456',
+        enrollment_token: 'token',
+        uri: 'https://target.example.com',
+      });
+
+      expect(sendActionTelemetryEvents).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        expect.objectContaining({
+          eventType: 'MIGRATE',
+          agentCount: 1,
+          sourceType: 'ech',
+          targetType: 'serverless',
+        })
+      );
+    });
+
+    it('should send telemetry with undefined sourceType when not on cloud', async () => {
+      mockAppContextService.getCloud.mockReturnValue({
+        isCloudEnabled: false,
+        isServerlessEnabled: false,
+        deploymentId: undefined,
+      });
+
+      await migrateSingleAgent(esClientMock, soClientMock, 'agent-123', mockedPolicy, mockedAgent, {
+        policyId: 'policy-456',
+        enrollment_token: 'token',
+        uri: 'https://target.example.com',
+      });
+
+      expect(sendActionTelemetryEvents).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        expect.objectContaining({
+          eventType: 'MIGRATE',
+          agentCount: 1,
+          sourceType: undefined,
+        })
+      );
+    });
+
+    it('should send telemetry with undefined targetType when detection fails', async () => {
+      mockedDetectTargetClusterType.mockReturnValue(undefined);
+
+      await migrateSingleAgent(esClientMock, soClientMock, 'agent-123', mockedPolicy, mockedAgent, {
+        policyId: 'policy-456',
+        enrollment_token: 'token',
+        uri: 'https://target.example.com',
+      });
+
+      expect(sendActionTelemetryEvents).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        expect.objectContaining({ targetType: undefined })
       );
     });
 
@@ -382,6 +465,52 @@ describe('Agent migration', () => {
           secrets: {
             enrollment_token: options.enrollment_token,
           },
+        })
+      );
+    });
+
+    it('should send telemetry with source and target cluster types', async () => {
+      mockedDetectTargetClusterType.mockReturnValue('serverless');
+      (getAgents as jest.Mock).mockResolvedValue([mockedAgent]);
+
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        agentIds: [mockedAgent.id],
+        enrollment_token: 'token',
+        uri: 'https://target.example.com',
+      });
+
+      expect(sendActionTelemetryEvents).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        expect.objectContaining({
+          eventType: 'MIGRATE',
+          sourceType: 'ech',
+          targetType: 'serverless',
+        })
+      );
+    });
+
+    it('should send telemetry with undefined sourceType when not on cloud', async () => {
+      mockAppContextService.getCloud.mockReturnValue({
+        isCloudEnabled: false,
+        isServerlessEnabled: false,
+        deploymentId: undefined,
+      });
+      mockedDetectTargetClusterType.mockReturnValue('ech');
+      (getAgents as jest.Mock).mockResolvedValue([mockedAgent]);
+
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        agentIds: [mockedAgent.id],
+        enrollment_token: 'token',
+        uri: 'https://target.example.com',
+      });
+
+      expect(sendActionTelemetryEvents).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        expect.objectContaining({
+          eventType: 'MIGRATE',
+          sourceType: undefined,
         })
       );
     });

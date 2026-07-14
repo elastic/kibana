@@ -58,7 +58,9 @@ export const ClusterSettingsTableRow: React.FunctionComponent<Props> = ({
         statusType: error ? 'error' : 'complete',
         details: error ?? undefined,
       });
-      closeFlyout();
+      if (!error) {
+        closeFlyout();
+      }
     },
     [api, closeFlyout]
   );

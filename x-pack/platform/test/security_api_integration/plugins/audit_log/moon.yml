@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/audit-log-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/audit-log-plugin'
+  title: '@kbn/audit-log-plugin'
   description: Moon project for @kbn/audit-log-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/test/security_api_integration/plugins/audit_log
+  sourceRoot: x-pack/platform/test/security_api_integration/plugins/audit_log
 dependsOn:
   - '@kbn/core'
 tags:

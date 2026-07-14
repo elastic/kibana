@@ -15,7 +15,7 @@ import {
 } from '../../errors';
 import { AgentNotFoundError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
-import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
+import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { licenseService } from '../license';
 import { LICENSE_FOR_AGENT_ROLLBACK } from '../../../common/constants';
@@ -114,8 +114,9 @@ export async function sendRollbackAgentsActions(
   options: ({ agents: Agent[] } | GetAgentsOptions) & {
     batchSize?: number;
     includeInactive?: boolean;
+    dryRun?: boolean;
   }
-): Promise<{ actionIds: string[] }> {
+): Promise<{ actionIds: string[] } | { count: number }> {
   checkLicense();
 
   const currentSpaceId = getCurrentNamespace(soClient);
@@ -123,8 +124,15 @@ export async function sendRollbackAgentsActions(
   let givenAgents: Agent[] = [];
 
   if ('agents' in options) {
+    if (options.dryRun) {
+      return { count: options.agents.length };
+    }
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
+    if (options.dryRun) {
+      const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+      return { count: maybeAgents.filter((a) => !('notFound' in a)).length };
+    }
     const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
     for (const maybeAgent of maybeAgents) {
       if ('notFound' in maybeAgent) {
@@ -136,7 +144,7 @@ export async function sendRollbackAgentsActions(
   } else if ('kuery' in options) {
     const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
     const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
-    const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
+    const kuery = buildFilterWithNamespace(namespaceFilter, options.kuery);
 
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
@@ -145,6 +153,9 @@ export async function sendRollbackAgentsActions(
       page: 1,
       perPage: batchSize,
     });
+    if (options.dryRun) {
+      return { count: res.total };
+    }
 
     if (res.total <= batchSize) {
       givenAgents = res.agents;

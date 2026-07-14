@@ -373,6 +373,10 @@ const ActionsConnectorsList = ({
       itemId="id"
       columns={actionsTableColumns}
       css={disabledActConnectorCss}
+      tableCaption={i18n.translate(
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.tableCaption',
+        { defaultMessage: 'Connectors' }
+      )}
       rowProps={(item: ActionConnectorTableItem) => ({
         className:
           !item.isPreconfigured &&

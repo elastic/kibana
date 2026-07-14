@@ -1,0 +1,18 @@
+{
+  "sourceId": "alias-match",
+  "targetType": "resolvetype",
+  "targetId": "alias-match-newid"
+}
+
+{
+  "sourceId": "disabled",
+  "targetType": "resolvetype",
+  "targetId": "disabled-newid",
+  "disabled": true
+}
+
+{
+  "sourceId": "conflict",
+  "targetType": "resolvetype",
+  "targetId": "conflict-newid"
+}

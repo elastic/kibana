@@ -9,6 +9,7 @@ paths:
       x-codegen-enabled: true
       operationId: ListEntityEngines
       summary: List the Entity Engines
+      description: Get a list of all installed entity engines and their current status.
       responses:
         '200':
           description: Successful response
@@ -19,7 +20,34 @@ paths:
                 properties:
                   count:
                     type: integer
+                    description: The total number of entity engines.
                   engines:
                     type: array
+                    description: An array of engine descriptors.
                     items:
                       $ref: '../common.schema.yaml#/components/schemas/EngineDescriptor'
+              examples:
+                listEntityEnginesExample:
+                  summary: Two engines installed
+                  description: Returns a list with one running host engine and one stopped user engine.
+                  value:
+                    count: 2
+                    engines:
+                      - type: host
+                        indexPattern: ''
+                        status: started
+                        fieldHistoryLength: 10
+                        lookbackPeriod: '24h'
+                        timestampField: '@timestamp'
+                        timeout: '180s'
+                        frequency: '1m'
+                        delay: '1m'
+                      - type: user
+                        indexPattern: ''
+                        status: stopped
+                        fieldHistoryLength: 10
+                        lookbackPeriod: '24h'
+                        timestampField: '@timestamp'
+                        timeout: '180s'
+                        frequency: '1m'
+                        delay: '1m'

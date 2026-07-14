@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { EuiComboBoxWrapper } from '..';
 
 // Increased timeout because new map container is not always loaded within default one
 const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
@@ -23,6 +24,7 @@ export class MapsPage {
   public readonly savedObjectTitleInput;
   public readonly returnToOriginSwitch;
   public readonly confirmSaveButton;
+  public readonly documentsItem;
 
   constructor(private readonly page: ScoutPage) {
     this.mapContainer = this.page.locator('#maps-plugin');
@@ -37,6 +39,7 @@ export class MapsPage {
     this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
     this.returnToOriginSwitch = this.page.testSubj.locator('returnToOriginModeSwitch');
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
+    this.documentsItem = this.page.testSubj.locator('documents');
   }
 
   async gotoNewMap() {
@@ -79,5 +82,16 @@ export class MapsPage {
   getLayerToggleButton(displayName: string) {
     const escapedName = displayName.replace(/\s+/g, '_');
     return this.page.testSubj.locator(`layerTocActionsPanelToggleButton${escapedName}`);
+  }
+
+  async addDocumentsLayer(documentSelector: string) {
+    await this.addLayerButton.click();
+    await this.layerAddForm.waitFor({ state: 'visible' });
+    await this.documentsItem.click();
+    const comboBox = new EuiComboBoxWrapper(this.page, 'mapGeoIndexPatternSelect');
+    await comboBox.selectSingleOption(documentSelector);
+    await this.importFileButton.click();
+    await this.waitForRenderComplete();
+    await this.saveAndReturnButton.click();
   }
 }

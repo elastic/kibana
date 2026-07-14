@@ -118,6 +118,14 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       headers,
       signal: this.stepExecutionRuntime.abortController.signal,
       ...(body && { data: body }),
+      beforeRedirect: (options: Record<string, any>) => {
+        const redirectHost = options.hostname || options.host;
+        if (!this.urlValidator.isHostnameAllowed(redirectHost)) {
+          throw new Error(
+            `Redirect to host "${redirectHost}" is blocked because it is not in the Kibana config workflowsExecutionEngine.http.allowedHosts`
+          );
+        }
+      },
     };
 
     // Apply fetcher options if provided

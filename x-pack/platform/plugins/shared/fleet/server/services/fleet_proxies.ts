@@ -19,6 +19,7 @@ import {
   MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS,
 } from '../constants';
 import { FleetProxyUnauthorizedError } from '../errors';
+import { validateFleetSavedObjectId } from '../../common/services';
 import type {
   DownloadSource,
   FleetProxy,
@@ -78,6 +79,8 @@ export async function createFleetProxy(
 ): Promise<FleetProxy> {
   const logger = appContextService.getLogger();
   logger.debug(`Creating fleet proxy ${data}`);
+
+  validateFleetSavedObjectId(options?.id);
 
   const res = await soClient.create<FleetProxySOAttributes>(
     FLEET_PROXY_SAVED_OBJECT_TYPE,

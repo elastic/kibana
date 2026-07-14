@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/storybook'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/storybook'
+  title: '@kbn/storybook'
   description: Moon project for @kbn/storybook
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-storybook
+  sourceRoot: src/platform/packages/shared/kbn-storybook
 dependsOn:
   - '@kbn/ui-shared-deps-npm'
   - '@kbn/ui-shared-deps-src'

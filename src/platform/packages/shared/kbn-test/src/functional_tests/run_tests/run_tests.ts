@@ -16,12 +16,12 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 
 import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
+import { runKibanaServer } from '@kbn/test-kibana-server';
 import { applyFipsOverrides, fipsIsEnabled } from '../lib/fips';
 import { Config, readConfigFile } from '../../functional_test_runner';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
-import { runKibanaServer } from '../lib/run_kibana_server';
 import type { RunTestsOptions } from './flags';
 /**
  * Run servers and tests for each config

@@ -196,15 +196,6 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     width: fit-content;
   }
 
-  .udtTimeline .rightPosition {
-    position: absolute;
-    right: 5px;
-
-    button {
-      ${({ theme }) => `color: ${theme.eui.euiColorDarkShade};`}
-    }
-  }
-
   .udtTimeline .euiDataGrid__rightControls {
     padding-right: 30px;
   }

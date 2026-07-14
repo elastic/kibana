@@ -220,12 +220,6 @@ components:
                     "p95": 2525,
                     "p99": 2525
                   },
-                  "logs-data-telemetry": {
-                    "p50": 2525,
-                    "p90": 2525,
-                    "p95": 2525,
-                    "p99": 2525
-                  },
                   "security:telemetry-lists": {
                     "p50": 2525,
                     "p90": 2525,
@@ -458,12 +452,6 @@ components:
                       "p99": 78
                     },
                     "security:endpoint-diagnostics": {
-                      "p50": 6,
-                      "p90": 6,
-                      "p95": 6,
-                      "p99": 6
-                    },
-                    "logs-data-telemetry": {
                       "p50": 6,
                       "p90": 6,
                       "p95": 6,
@@ -712,12 +700,6 @@ components:
                       "status": "OK"
                     },
                     "security:endpoint-diagnostics": {
-                      "Success": 100,
-                      "RetryScheduled": 0,
-                      "Failed": 0,
-                      "status": "OK"
-                    },
-                    "logs-data-telemetry": {
                       "Success": 100,
                       "RetryScheduled": 0,
                       "Failed": 0,
@@ -1022,13 +1004,6 @@ components:
                     }
                   },
                   "fleet:unenroll-inactive-agents-task": {
-                    "count": 1,
-                    "cost": 2,
-                    "status": {
-                      "idle": 1
-                    }
-                  },
-                  "logs-data-telemetry": {
                     "count": 1,
                     "cost": 2,
                     "status": {

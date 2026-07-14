@@ -138,6 +138,7 @@ export const SchedulesTable: React.FC = React.memo(() => {
       </div>
       <EuiSpacer size="m" />
       <EuiBasicTable<AttackDiscoverySchedule>
+        tableCaption={i18n.ATTACK_DISCOVER_SCHEDULES_TABLE_CAPTION}
         loading={isTableLoading}
         items={schedules}
         pagination={pagination}

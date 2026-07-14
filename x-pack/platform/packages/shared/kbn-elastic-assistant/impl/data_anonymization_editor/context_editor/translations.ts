@@ -126,3 +126,10 @@ export const YES = i18n.translate(
     defaultMessage: 'Yes',
   }
 );
+
+export const ANONYMIZATION_FIELDS_TABLE_CAPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.anonymizationFieldsTableCaption',
+  {
+    defaultMessage: 'Anonymization fields',
+  }
+);

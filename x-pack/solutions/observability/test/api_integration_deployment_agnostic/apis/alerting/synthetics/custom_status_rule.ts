@@ -443,11 +443,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
         expect(recoveredResponse.hits.hits[0]._source).property('locationId', 'dev');
-        expect(recoveredResponse.hits.hits[0]._source).property(
-          'recoveryReason',
-          'the alert condition is no longer met'
-        );
-        expect(recoveredResponse.hits.hits[0]._source).property('recoveryStatus', 'has recovered');
+        const recoveryReason = (recoveredResponse.hits.hits[0]._source as Record<string, string>)
+          .recoveryReason;
+        expect(recoveryReason).to.match(/the monitor is now up again\. It ran successfully at /);
+        expect(recoveredResponse.hits.hits[0]._source).property('recoveryStatus', 'is now up');
       });
     });
 
@@ -764,8 +763,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
           );
           expect(alertActionDoc).property('locationId', 'dev and dev2');
-          expect(alertActionDoc).property('recoveryReason', 'the alert condition is no longer met');
-          expect(alertActionDoc).property('recoveryStatus', 'has recovered');
+          const recoveryReason = (alertActionDoc as Record<string, string>).recoveryReason;
+          expect(recoveryReason).to.match(/the monitor is now up again\. It ran successfully at /);
+          expect(alertActionDoc).property('recoveryStatus', 'is now up');
         });
       });
     }

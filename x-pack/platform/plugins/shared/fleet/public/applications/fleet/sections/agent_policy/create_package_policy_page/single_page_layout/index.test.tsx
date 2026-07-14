@@ -30,6 +30,10 @@ import {
   useConfig,
 } from '../../../../hooks';
 
+jest.mock('../../../../../../services/use_yaml', () => ({
+  useYaml: () => require('yaml'),
+}));
+
 jest.mock('../components/steps/components/use_policies', () => {
   return {
     ...jest.requireActual('../components/steps/components/use_policies'),

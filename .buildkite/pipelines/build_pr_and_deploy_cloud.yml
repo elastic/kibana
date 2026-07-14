@@ -59,9 +59,10 @@ steps:
           provider: gcp
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
-          machineType: n2-standard-8
-          preemptible: true
           diskSizeGb: 125
+          machineType: c4d-standard-16
+          diskType: hyperdisk-balanced
+          zones: us-central1-a,us-central1-b,us-central1-c
         if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
         timeout_in_minutes: 90
         key: build
@@ -76,8 +77,9 @@ steps:
           provider: gcp
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
-          machineType: n2-standard-2
+          machineType: c2-standard-16
           preemptible: true
+          diskSizeGb: 150
         timeout_in_minutes: 30
         depends_on: build
         retry:

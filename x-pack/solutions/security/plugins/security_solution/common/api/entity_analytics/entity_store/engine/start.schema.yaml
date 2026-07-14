@@ -10,13 +10,15 @@ paths:
       x-codegen-enabled: true
       operationId: StartEntityEngine
       summary: Start an Entity Engine
+      description: Start a previously stopped entity engine, resuming transform processing for the given entity type.
       parameters:
         - name: entityType
           in: path
           required: true
           schema:
             $ref: '../common.schema.yaml#/components/schemas/EntityType'
-          description: The entity type of the engine
+          description: The entity type of the engine to start.
+          example: host
       responses:
         '200':
           description: Successful response
@@ -24,8 +26,13 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:      
+                properties:
                   started:
                     type: boolean
-                  
-                    
+                    description: Whether the engine was successfully started.
+              examples:
+                startEntityEngineExample:
+                  summary: Engine started successfully
+                  description: The engine was successfully started and is now processing data.
+                  value:
+                    started: true

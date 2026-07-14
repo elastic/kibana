@@ -38,7 +38,7 @@ steps:
       provider: gcp
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
-      zones: us-central1-a,us-central1-b,us-central1-c
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
       diskSizeGb: 200
     key: build
     timeout_in_minutes: 60
@@ -87,10 +87,11 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2d-standard-16
+      machineType: n4-standard-16
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -104,10 +105,11 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2d-standard-32
+      machineType: n4-standard-32
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: linting_with_types
     timeout_in_minutes: 60
     retry:
@@ -121,12 +123,15 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2d-highmem-4
+      machineType: c4-standard-8-lssd
+      diskType: hyperdisk-balanced
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
       diskSizeGb: 105
     key: check_types
     timeout_in_minutes: 60
+    env:
+      UPLOAD_ARCHIVE: 'true'
     retry:
       automatic:
         - exit_status: '-1'
@@ -214,11 +219,12 @@ steps:
       diskSizeGb: 105
     key: build_scout_tests
     timeout_in_minutes: 20
-    depends_on:
-      - build
     env:
-      SCOUT_CONFIGS_DEPS: 'build_scout_tests'
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
+      SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+      SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS: 300
+      SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES: 5
+      SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES: 20
     retry:
       automatic:
         - exit_status: '*'
@@ -237,22 +243,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: '.buildkite/scripts/steps/functional/on_merge_unsupported_ftrs.sh'
-    label: Trigger unsupported ftr tests
-    timeout_in_minutes: 10
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-    depends_on:
-      - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
     agents:
@@ -262,6 +252,7 @@ steps:
       machineType: n2-standard-8
       preemptible: true
       spotZones: us-central1-b,us-central1-c,us-central1-f
+      diskSizeGb: 105
     key: storybooks
     depends_on:
       - build

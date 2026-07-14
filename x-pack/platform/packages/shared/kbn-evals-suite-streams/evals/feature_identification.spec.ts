@@ -14,7 +14,7 @@ import { tags } from '@kbn/evals';
 import { omit, uniq } from 'lodash';
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
-import type { WiredIngest } from '@kbn/streams-schema';
+import type { Streams, WiredIngest } from '@kbn/streams-schema';
 import { evaluate } from '../src/evaluate';
 import type { StreamsEvaluationWorkerFixtures } from '../src/types';
 import type { FeatureIdentificationEvaluationDataset } from './feature_identification_datasets';
@@ -116,7 +116,10 @@ evaluate.describe(
           dataset,
           concurrency: 1,
           task: async ({ input, metadata, output }) => {
-            const { stream } = await apiServices.streams.getStreamDefinition(input.stream.name);
+            const { stream: apiStream } = await apiServices.streams.getStreamDefinition(
+              input.stream.name
+            );
+            const stream = apiStream as Streams.ingest.all.Definition;
 
             await apiServices.streams.updateStream(stream.name, {
               ingest: {

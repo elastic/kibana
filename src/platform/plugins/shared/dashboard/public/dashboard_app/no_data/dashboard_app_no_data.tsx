@@ -29,7 +29,7 @@ import {
   shareService,
   lensService,
 } from '../../services/kibana_services';
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
 import { dashboardClient } from '../../dashboard_client';
 
 export const DashboardAppNoDataPage = ({

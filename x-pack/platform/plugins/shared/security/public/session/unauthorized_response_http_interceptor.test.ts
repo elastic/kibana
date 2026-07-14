@@ -42,10 +42,17 @@ afterEach(() => {
 for (const reason of [
   LogoutReason.AUTHENTICATION_ERROR,
   LogoutReason.SESSION_EXPIRED,
+  LogoutReason.SESSION_IDLE_TIMEOUT,
+  LogoutReason.SESSION_LIFESPAN_TIMEOUT,
   LogoutReason.CONCURRENCY_LIMIT,
 ]) {
+  const sessionExpiredReasons: string[] = [
+    LogoutReason.SESSION_EXPIRED,
+    LogoutReason.SESSION_IDLE_TIMEOUT,
+    LogoutReason.SESSION_LIFESPAN_TIMEOUT,
+  ];
   const headers =
-    reason === LogoutReason.SESSION_EXPIRED || reason === LogoutReason.CONCURRENCY_LIMIT
+    sessionExpiredReasons.includes(reason) || reason === LogoutReason.CONCURRENCY_LIMIT
       ? { [SESSION_ERROR_REASON_HEADER]: reason }
       : undefined;
 

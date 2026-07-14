@@ -21,6 +21,7 @@ import {
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
@@ -45,6 +46,8 @@ export interface CreateIndexModalProps {
 
 export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
+
+  const indexModeFormRowId = useGeneratedHtmlId({ prefix: 'indexMode' });
 
   const [indexName, setIndexName] = useState<string>('');
   const [indexMode, setIndexMode] = useState<string>(STANDARD_INDEX_MODE);
@@ -147,15 +150,26 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
             />
           </EuiFormRow>
           <EuiFormRow
+            id={indexModeFormRowId}
             fullWidth
-            label={i18n.translate('xpack.idxMgmt.createIndex.modal.indexMode.label', {
-              defaultMessage: 'Index mode',
-            })}
+            label={
+              <>
+                {i18n.translate('xpack.idxMgmt.createIndex.modal.indexMode.label', {
+                  defaultMessage: 'Index mode',
+                })}
+                <EuiScreenReaderOnly>
+                  <span>{`, ${
+                    indexModeLabels[indexMode as keyof typeof indexModeLabels] ?? indexMode
+                  }`}</span>
+                </EuiScreenReaderOnly>
+              </>
+            }
             isDisabled={isSaving}
           >
             <EuiSuperSelect
               fullWidth
               hasDividers
+              aria-labelledby={`${indexModeFormRowId}-label`}
               name="indexMode"
               valueOfSelected={indexMode}
               onChange={(mode) => setIndexMode(mode)}

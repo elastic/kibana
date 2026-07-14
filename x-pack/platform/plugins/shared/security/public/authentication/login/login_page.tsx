@@ -67,6 +67,19 @@ const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['messag
       defaultMessage: 'Your session has timed out. Please log in again.',
     }),
   },
+  SESSION_IDLE_TIMEOUT: {
+    type: MessageType.Info,
+    content: i18n.translate('xpack.security.login.sessionIdleTimeoutDescription', {
+      defaultMessage: 'Your session has timed out due to inactivity. Please log in again.',
+    }),
+  },
+  SESSION_LIFESPAN_TIMEOUT: {
+    type: MessageType.Info,
+    content: i18n.translate('xpack.security.login.sessionLifespanTimeoutDescription', {
+      defaultMessage:
+        'Your session has expired because it reached the maximum lifespan. Please log in again.',
+    }),
+  },
   CONCURRENCY_LIMIT: {
     type: MessageType.Info,
     content: i18n.translate('xpack.security.login.concurrencyLimitDescription', {
@@ -161,7 +174,7 @@ export class LoginPage extends Component<Props, State> {
     const logo = customLogo ? (
       <EuiImage src={customLogo} size={40} alt="logo" />
     ) : (
-      <EuiIcon type="logoElastic" size="xxl" />
+      <EuiIcon type="logoElastic" size="xxl" aria-hidden={true} />
     );
     // custom logo needs to be centered
     const logoStyle = customLogo ? { padding: 0 } : {};

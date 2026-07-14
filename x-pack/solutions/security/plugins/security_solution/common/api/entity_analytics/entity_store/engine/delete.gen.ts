@@ -43,6 +43,9 @@ export type DeleteEntityEngineRequestParamsInput = z.input<typeof DeleteEntityEn
 
 export type DeleteEntityEngineResponse = z.infer<typeof DeleteEntityEngineResponse>;
 export const DeleteEntityEngineResponse = z.object({
+  /**
+   * Whether the engine was successfully deleted.
+   */
   deleted: z.boolean().optional(),
 });
 export type DeleteEntityEnginesRequestQuery = z.infer<typeof DeleteEntityEnginesRequestQuery>;
@@ -60,6 +63,12 @@ export type DeleteEntityEnginesRequestQueryInput = z.input<typeof DeleteEntityEn
 
 export type DeleteEntityEnginesResponse = z.infer<typeof DeleteEntityEnginesResponse>;
 export const DeleteEntityEnginesResponse = z.object({
+  /**
+   * Entity types whose engines were successfully deleted.
+   */
   deleted: z.array(EntityType).optional(),
+  /**
+   * Entity types whose engines are still running.
+   */
   still_running: z.array(EntityType).optional(),
 });

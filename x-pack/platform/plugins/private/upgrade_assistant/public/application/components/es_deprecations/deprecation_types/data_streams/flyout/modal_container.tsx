@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiModal } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 
 import moment from 'moment';
 import type { EnrichedDeprecationInfo } from '../../../../../../../common/types';
@@ -153,6 +154,10 @@ export const DataStreamReadonlyModal: React.FunctionComponent<Props> = ({
       data-test-subj="updateIndexModal"
       maxWidth={true}
       css={{ minWidth: 750 }}
+      aria-label={i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.dataStreams.flyout.modalAriaLabel',
+        { defaultMessage: 'Data stream migration' }
+      )}
     >
       {modalContent}
     </EuiModal>

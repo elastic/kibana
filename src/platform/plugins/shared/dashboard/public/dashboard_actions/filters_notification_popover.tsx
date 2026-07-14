@@ -110,6 +110,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
         }
       }}
       anchorPosition="upCenter"
+      aria-label={displayName}
     >
       <EuiForm
         component="div"

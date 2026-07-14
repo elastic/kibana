@@ -120,12 +120,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   return { group1, group2, group3, group4, refOrigins };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
-
-  const { addTests, createTestDefinitions } = importTestSuiteFactory(es, esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = importTestSuiteFactory(context);
   const createTests = (overwrite: boolean, createNewCopies: boolean, spaceId: string) => {
     const singleRequest = true;
     if (createNewCopies) {

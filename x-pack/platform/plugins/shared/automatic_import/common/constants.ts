@@ -48,6 +48,14 @@ export const CATEROGIZATION_REVIEW_BATCH_SIZE = 40;
 export const CATEGORIZATION_REVIEW_MAX_CYCLES = 5;
 export const CATEGORIZATION_RECURSION_LIMIT = 50;
 
+// Field length limits for user-editable text inputs.
+// These values are mirrored in the OpenAPI schema YAML files and must stay in sync.
+// Schemas shared between request and response bodies (Pipeline, Docs, etc.) use
+// generous limits well above realistic LLM output to avoid ever rejecting valid work.
+export const MAX_NAME_LENGTH = 256;
+export const MAX_TITLE_LENGTH = 256;
+export const MAX_DESCRIPTION_LENGTH = 4096;
+
 // Name regex pattern
 export const NAME_REGEX_PATTERN = /^[a-z_][a-z0-9_]+$/;
 

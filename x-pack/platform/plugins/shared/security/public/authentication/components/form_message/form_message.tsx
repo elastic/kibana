@@ -30,6 +30,19 @@ export const formMessages: Record<LogoutReason, FormMessage> = {
       defaultMessage: 'Your session has timed out. Please log in again.',
     }),
   },
+  SESSION_IDLE_TIMEOUT: {
+    type: MessageType.Info,
+    content: i18n.translate('xpack.security.login.sessionIdleTimeoutDescription', {
+      defaultMessage: 'Your session has timed out due to inactivity. Please log in again.',
+    }),
+  },
+  SESSION_LIFESPAN_TIMEOUT: {
+    type: MessageType.Info,
+    content: i18n.translate('xpack.security.login.sessionLifespanTimeoutDescription', {
+      defaultMessage:
+        'Your session has expired because it reached the maximum lifespan. Please log in again.',
+    }),
+  },
   CONCURRENCY_LIMIT: {
     type: MessageType.Info,
     content: i18n.translate('xpack.security.login.concurrencyLimitDescription', {

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/kbn-sample-panel-action-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/kbn-sample-panel-action-plugin'
+  title: '@kbn/kbn-sample-panel-action-plugin'
   description: Moon project for @kbn/kbn-sample-panel-action-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/kbn_sample_panel_action
+  sourceRoot: src/platform/test/plugin_functional/plugins/kbn_sample_panel_action
 dependsOn:
   - '@kbn/core'
   - '@kbn/ui-actions-plugin'

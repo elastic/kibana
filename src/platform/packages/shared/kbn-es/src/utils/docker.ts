@@ -40,6 +40,7 @@ import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './d
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
+import { shouldPreferCachedSnapshot } from './find_local_cached_snapshot';
 import type { EsClusterExecOptions } from '../cluster_exec_options';
 import {
   SERVERLESS_RESOURCES_PATHS,
@@ -482,8 +483,25 @@ const RETRYABLE_DOCKER_PULL_ERROR_MESSAGES = [
  * Stops serverless from pulling the same image in each node's promise and
  * gives better control of log output, instead of falling back to docker run.
  */
+export async function isDockerImageAvailableLocally(image: string) {
+  try {
+    const { stdout } = await execa('docker', ['images', '-q', image]);
+    return stdout.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export async function maybePullDockerImage(log: ToolingLog, image: string) {
   log.info(chalk.bold(`Checking for image: ${image}`));
+
+  if (shouldPreferCachedSnapshot() && (await isDockerImageAvailableLocally(image))) {
+    log.info(
+      'prefer-cached enabled, skipping pull of locally available image %s',
+      chalk.bold(image)
+    );
+    return;
+  }
 
   await pRetry(
     async () => {

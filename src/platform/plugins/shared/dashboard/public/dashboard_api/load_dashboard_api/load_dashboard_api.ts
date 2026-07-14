@@ -9,7 +9,6 @@
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { getAccessControlClient } from '../../services/access_control_service';
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardApi } from '../get_dashboard_api';
@@ -20,6 +19,10 @@ import { getUserAccessControlData } from './get_user_access_control_data';
 import { dashboardClient } from '../../dashboard_client';
 import { getLastSavedState } from '../default_dashboard_state';
 import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
+import {
+  getDashboardBackupService,
+  initializeDashboardApiServices,
+} from '../../services/dashboard_api_services';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -46,6 +49,7 @@ export async function loadDashboardApi({
     return;
   }
 
+  await initializeDashboardApiServices();
   const unsavedChanges = creationOptions?.useSessionStorageIntegration
     ? getDashboardBackupService().getState(savedObjectId)
     : undefined;
