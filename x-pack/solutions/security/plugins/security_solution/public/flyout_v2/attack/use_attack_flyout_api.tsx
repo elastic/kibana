@@ -32,6 +32,7 @@ import {
 } from '../shared/constants/flyout_titles';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import { getAttackTitleValue } from './utils/get_attack_title';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
 
 // Lazy-loaded so consumers of this hook don't statically pull the attack flyout graph into their
 // bundle; the chunk only loads when the flyout (or one of its tools) is actually opened.
@@ -115,23 +116,32 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   // The main/child flyout and the tools differ only in their properties (base size + session). Both
   // are kept private here so callers never reason about them: they pick the method they want and
   // this helper opens the system flyout with the given properties.
   const open = useCallback(
-    (children: ReactNode, properties: OverlaySystemFlyoutOpenOptions) => {
+    (
+      children: ReactNode,
+      properties: OverlaySystemFlyoutOpenOptions,
+      propagatedMainFlyoutSessionMode = mainFlyoutSessionMode
+    ) => {
       overlays.openSystemFlyout(
         flyoutProviders({
           services,
           store,
           history,
-          children: <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>,
+          children: (
+            <FlyoutSessionContextProvider value={propagatedMainFlyoutSessionMode}>
+              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
+            </FlyoutSessionContextProvider>
+          ),
         }),
         properties
       );
     },
-    [overlays, services, store, history]
+    [overlays, services, store, history, mainFlyoutSessionMode]
   );
 
   const openAttackFlyout = useCallback(
@@ -152,12 +162,12 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,
-          session: 'start',
+          session: mainFlyoutSessionMode,
           title: formatFlyoutTitle(ATTACK_TITLE, attackTitle),
         }
       );
     },
-    [open, defaultDocumentFlyoutProperties, historyKey]
+    [open, defaultDocumentFlyoutProperties, historyKey, mainFlyoutSessionMode]
   );
 
   const openAttackFlyoutAsChild = useCallback(
@@ -180,7 +190,8 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
           historyKey,
           session: 'inherit',
           title: buildFlyoutNavTitle(formatFlyoutTitle(ATTACK_TITLE, attackTitle)),
-        }
+        },
+        'inherit'
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey]

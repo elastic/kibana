@@ -18,6 +18,7 @@ import { flyoutProviders } from '../components/flyout_provider';
 import { FlyoutLoading } from '../components/flyout_loading';
 import { defaultToolsFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
+import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context'; // Lazy-loaded so consumers of this hook don't statically pull the shared tool graph into their
 
 // Lazy-loaded so consumers of this hook don't statically pull the shared tool graph into their
 // bundle; the chunk only loads when the tool is actually opened.
@@ -53,6 +54,7 @@ export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
   const history = useHistory();
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const mainFlyoutSessionMode = useFlyoutSessionContext();
 
   const open = useCallback(
     (children: ReactNode, properties: OverlaySystemFlyoutOpenOptions) => {
@@ -61,17 +63,25 @@ export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
           services,
           store,
           history,
-          children: <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>,
+          children: (
+            <FlyoutSessionContextProvider value={mainFlyoutSessionMode}>
+              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
+            </FlyoutSessionContextProvider>
+          ),
         }),
         properties
       );
     },
-    [overlays, services, store, history]
+    [overlays, services, store, history, mainFlyoutSessionMode]
   );
 
   const openNotes = useCallback(
     ({ hit }: OpenNotesParams) => {
-      open(<NotesDetails hit={hit} />, { ...defaultToolsFlyoutProperties, historyKey });
+      open(<NotesDetails hit={hit} />, {
+        ...defaultToolsFlyoutProperties,
+        historyKey,
+        session: 'start',
+      });
     },
     [open, historyKey]
   );

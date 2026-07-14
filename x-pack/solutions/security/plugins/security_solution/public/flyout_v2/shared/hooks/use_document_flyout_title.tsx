@@ -29,6 +29,7 @@ import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 import { DocumentSeverity } from '../../document/main/components/severity';
 import { Timestamp } from '../components/timestamp';
+import { FlyoutSessionContextProvider } from '../../session_context';
 
 export interface UseDocumentFlyoutTitleOptions {
   /** The source document to derive display values from. */
@@ -83,11 +84,13 @@ export const useDocumentFlyoutTitle = ({
         store,
         history,
         children: (
-          <DocumentFlyout
-            hit={hit}
-            renderCellActions={renderCellActions}
-            onAlertUpdated={onAlertUpdated}
-          />
+          <FlyoutSessionContextProvider value="inherit">
+            <DocumentFlyout
+              hit={hit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
+          </FlyoutSessionContextProvider>
         ),
       }),
       {

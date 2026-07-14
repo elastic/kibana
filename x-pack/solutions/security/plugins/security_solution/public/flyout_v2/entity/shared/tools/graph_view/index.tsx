@@ -31,6 +31,7 @@ import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { GraphVisualization } from '../../../../document/tools/graph/components/graph_visualization';
+import { FlyoutSessionContextProvider } from '../../../../session_context';
 
 const TITLE = ENTITY_GRAPH_VIEW_TITLE;
 
@@ -97,12 +98,14 @@ export const GraphView = memo(
             store,
             history,
             children: (
-              <GraphGroupedNodePreviewPanel
-                {...params}
-                scopeId={scopeId}
-                onShowDocument={onShowDocument}
-                onShowEntity={onShowEntity}
-              />
+              <FlyoutSessionContextProvider value="inherit">
+                <GraphGroupedNodePreviewPanel
+                  {...params}
+                  scopeId={scopeId}
+                  onShowDocument={onShowDocument}
+                  onShowEntity={onShowEntity}
+                />
+              </FlyoutSessionContextProvider>
             ),
           }),
           {
