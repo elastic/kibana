@@ -334,18 +334,16 @@ export const getAllTimelineByIds = async (
 
   const enrichedTimelines = await Promise.all(
     bulkResponse.saved_objects
-      .filter(
-        (savedObject): savedObject is SavedObject<SavedObjectTimelineWithoutExternalRefs> => {
-          if (isSavedObjectErrorResult(savedObject)) return false;
-          if (
-            savedObject.attributes.status === TimelineStatusEnum.draft &&
-            savedObject.attributes.createdBy !== userName
-          ) {
-            return false;
-          }
-          return true;
+      .filter((savedObject): savedObject is SavedObject<SavedObjectTimelineWithoutExternalRefs> => {
+        if (isSavedObjectErrorResult(savedObject)) return false;
+        if (
+          savedObject.attributes.status === TimelineStatusEnum.draft &&
+          savedObject.attributes.createdBy !== userName
+        ) {
+          return false;
         }
-      )
+        return true;
+      })
       .map(async (savedObject) => {
         const migratedSO = timelineFieldsMigrator.populateFieldsFromReferences(savedObject);
         const timelineSavedObject = convertSavedObjectToSavedTimeline(migratedSO);
@@ -739,14 +737,13 @@ export const deleteTimeline = async (
   const allowedIds: string[] = [];
 
   for (const savedObject of bulkGetResponse.saved_objects) {
-    if (isSavedObjectErrorResult(savedObject)) {
-      continue;
-    }
-    const { status, createdBy } = savedObject.attributes;
-    if (status === TimelineStatusEnum.draft && createdBy !== currentUsername) {
-      hasNonOwnerDraft = true;
-    } else {
-      allowedIds.push(savedObject.id);
+    if (!isSavedObjectErrorResult(savedObject)) {
+      const { status, createdBy } = savedObject.attributes;
+      if (status === TimelineStatusEnum.draft && createdBy !== currentUsername) {
+        hasNonOwnerDraft = true;
+      } else {
+        allowedIds.push(savedObject.id);
+      }
     }
   }
 
