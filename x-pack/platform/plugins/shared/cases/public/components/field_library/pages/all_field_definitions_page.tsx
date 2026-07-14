@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { AppHeader } from '@kbn/app-header';
 import {
   EuiBasicTable,
-  EuiButton,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiConfirmModal,
   EuiFlexGroup,
@@ -17,11 +16,8 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { Owner } from '../../../../common/bundled-types.gen';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
@@ -33,13 +29,13 @@ import { useUpdateFieldDefinition } from '../hooks/use_update_field_definition';
 import { useDeleteFieldDefinition } from '../hooks/use_delete_field_definition';
 import { FieldDefinitionFlyout } from '../components/field_definition_flyout';
 import * as i18n from '../translations';
+import * as templatesI18n from '../../templates_v2/translations';
 
 export type AllFieldDefinitionsPageProps = Record<string, never>;
 
 export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = () => {
-  const { euiTheme } = useEuiTheme();
   const { owner } = useCasesContext();
-  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
+  const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [editingFieldDef, setEditingFieldDef] = useState<FieldDefinition | undefined>(undefined);
@@ -168,46 +164,45 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
 
   const fieldDefinitions = data?.fieldDefinitions ?? [];
 
+  const fieldLibraryMenu = useMemo(
+    () => ({
+      primaryActionItem: {
+        id: 'createFieldDefinition',
+        label: i18n.CREATE_FIELD_DEFINITION,
+        iconType: 'plusInCircle' as const,
+        run: () => handleCreate(),
+        testId: 'createFieldDefinitionButton',
+      },
+    }),
+    [handleCreate]
+  );
+
+  const fieldLibraryBack = useMemo(
+    () => ({
+      href: getCasesTemplatesUrl(),
+      // `AppHeader` renders this as "Back to {label}", so pass just the destination name.
+      label: templatesI18n.TEMPLATE_TITLE,
+      // AppHeader's back button keeps its `href` on the rendered anchor, so the default
+      // navigation must be prevented here to avoid a full page reload alongside the SPA one.
+      onClick: (event: React.MouseEvent) => {
+        event.preventDefault();
+        navigateToCasesTemplates();
+      },
+    }),
+    [getCasesTemplatesUrl, navigateToCasesTemplates]
+  );
+
   return (
     <>
-      <header>
-        <EuiButtonEmpty
-          iconType="sortLeft"
-          size="xs"
-          flush="left"
-          onClick={navigateToCasesTemplates}
-          aria-label={i18n.BACK_TO_TEMPLATES}
-          data-test-subj="fieldLibraryBackToTemplatesButton"
-        >
-          {i18n.BACK_TO_TEMPLATES}
-        </EuiButtonEmpty>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          css={css`
-            margin-bottom: ${euiTheme.size.l};
-          `}
-        >
-          <EuiFlexItem>
-            <EuiTitle size="l">
-              <h1>{i18n.FIELD_LIBRARY_TITLE}</h1>
-            </EuiTitle>
-            <EuiText size="s" color="subdued">
-              <p>{i18n.FIELD_LIBRARY_DESCRIPTION}</p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="plusInCircle"
-              onClick={handleCreate}
-              data-test-subj="createFieldDefinitionButton"
-            >
-              {i18n.CREATE_FIELD_DEFINITION}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </header>
+      <AppHeader
+        title={i18n.FIELD_LIBRARY_TITLE}
+        back={fieldLibraryBack}
+        menu={fieldLibraryMenu}
+        sticky={false}
+      />
+      <EuiText size="s" color="subdued">
+        <p>{i18n.FIELD_LIBRARY_DESCRIPTION}</p>
+      </EuiText>
       <EuiSpacer size="l" />
       {isLoading ? (
         <EuiSkeletonText lines={5} />

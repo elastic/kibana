@@ -161,4 +161,17 @@ describe('InlineFilterPopover', () => {
     expect(screen.getByTestId('test-popover-option-option2')).toBeInTheDocument();
     expect(screen.getByTestId('test-popover-option-option3')).toBeInTheDocument();
   });
+
+  it('renders prepend content for options when provided', () => {
+    const optionsWithPrepend = [
+      {
+        label: 'Option 1',
+        value: 'option1',
+        prepend: <span>custom-prepend-content</span>,
+      },
+      { label: 'Option 2', value: 'option2' },
+    ];
+    render(<InlineFilterPopover {...defaultProps} options={optionsWithPrepend} />);
+    expect(screen.getByText('custom-prepend-content')).toBeInTheDocument();
+  });
 });

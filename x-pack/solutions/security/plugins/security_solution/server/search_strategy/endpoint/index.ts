@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { map, mergeMap, from } from 'rxjs';
+import { map, mergeMap, from, forkJoin } from 'rxjs';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type {
   EndpointStrategyParseResponseType,
   EndpointStrategyRequestType,
@@ -17,6 +18,7 @@ import type {
 import type { EndpointFactory } from './factory/types';
 
 import type { EndpointAppContext } from '../../endpoint/types';
+import { ENDPOINT_AUTHZ_ERROR_MESSAGE } from '../../endpoint/errors';
 import { endpointFactory } from './factory';
 
 export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTypes>(
@@ -33,12 +35,20 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
       if (request.factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
       }
-      return from(endpointContext.service.getEndpointAuthz(deps.request)).pipe(
-        mergeMap((authz) => {
+      return forkJoin({
+        authz: from(endpointContext.service.getEndpointAuthz(deps.request)),
+        ccsEnabled: endpointContext.service.isCcsEnabled(),
+      }).pipe(
+        mergeMap(({ authz, ccsEnabled }) => {
+          if (!authz.canAccessEndpointActionsLogManagement) {
+            throw new KbnServerError(ENDPOINT_AUTHZ_ERROR_MESSAGE, 403);
+          }
+
           const queryFactory: EndpointFactory<T> = endpointFactory[request.factoryQueryType];
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,
             sort: request.sort,
+            ccsEnabled,
             ...('alertIds' in request ? { alertIds: request.alertIds } : {}),
             ...('agentId' in request ? { agentId: request.agentId } : {}),
             ...('expiration' in request ? { expiration: request.expiration } : {}),

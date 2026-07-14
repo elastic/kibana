@@ -9,7 +9,10 @@ import { createAppContextStartContractMock as fleetCreateAppContextStartContract
 import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
 
 import { getESQueryHostMetadataByID, buildUnitedIndexQuery } from './query_builders';
-import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
+import {
+  metadataCurrentIndexPattern,
+  METADATA_UNITED_INDEX,
+} from '../../../../common/endpoint/constants';
 import { get } from 'lodash';
 import { expectedCompleteUnitedIndexQuery } from './query_builders.fixtures';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -39,6 +42,13 @@ describe('query builder', () => {
       expect(get(query, 'query.bool.filter.0.bool.should')).toContainEqual({
         term: { 'HostDetails.agent.id': mockID },
       });
+    });
+
+    it('expands the index pattern with CCS prefix when ccsEnabled is true', () => {
+      const query = getESQueryHostMetadataByID('nonsense-id', true);
+      expect(query.index).toEqual(
+        `${metadataCurrentIndexPattern},*:${metadataCurrentIndexPattern}`
+      );
     });
   });
 
@@ -95,8 +105,15 @@ describe('query builder', () => {
               },
             },
             {
-              terms: {
-                'united.agent.policy_id': [],
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    terms: {
+                      'united.agent.policy_id': [],
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -138,6 +155,17 @@ describe('query builder', () => {
       );
       const expected = expectedCompleteUnitedIndexQuery;
       expect(query.query).toEqual(expected);
+    });
+
+    it('expands the index pattern with CCS prefix when ccsEnabled is true', async () => {
+      const query = await buildUnitedIndexQuery(
+        soClient,
+        { page: 1, pageSize: 10, hostStatuses: [], kuery: '' },
+        [],
+        true
+      );
+
+      expect(query.index).toEqual(`${METADATA_UNITED_INDEX},*:${METADATA_UNITED_INDEX}`);
     });
 
     describe('sorting', () => {

@@ -15,7 +15,6 @@ import { TaskStatus } from '@kbn/streams-schema';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
 import type { StreamsClient } from '../../lib/streams/client';
-import type { KnowledgeIndicatorClient } from '../../lib/streams/ki';
 import type { AttachmentClient } from '../../lib/streams/attachments/attachment_client';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
 import type { TaskClient } from '../../lib/tasks/task_client';
@@ -31,6 +30,7 @@ type ToolScopedClients = Pick<
   | 'streamsClient'
   | 'scopedClusterClient'
   | 'getKnowledgeIndicatorClient'
+  | 'uiSettingsClient'
   | 'attachmentClient'
   | 'taskClient'
   | 'uiSettingsClient'
@@ -86,12 +86,6 @@ export const createMockGetScopedClients = () => {
     get: jest.fn().mockResolvedValue(true),
   };
 
-  const kiClient: jest.Mocked<Pick<KnowledgeIndicatorClient, 'getStreamToQueryLinksMap'>> = {
-    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({}),
-  };
-
-  const getKnowledgeIndicatorClient = jest.fn().mockResolvedValue(kiClient);
-
   const attachmentClient: jest.Mocked<Pick<AttachmentClient, 'getAttachments'>> = {
     getAttachments: jest.fn().mockResolvedValue([]),
   };
@@ -111,10 +105,10 @@ export const createMockGetScopedClients = () => {
   } = {
     streamsClient,
     scopedClusterClient,
-    getKnowledgeIndicatorClient,
+    uiSettingsClient,
     attachmentClient,
     taskClient,
-    uiSettingsClient,
+    getKnowledgeIndicatorClient: jest.fn().mockRejectedValue(new Error('Not implemented')),
   };
 
   const getScopedClients = jest
@@ -126,7 +120,6 @@ export const createMockGetScopedClients = () => {
     streamsClient,
     esClient,
     scopedClusterClient,
-    getKnowledgeIndicatorClient,
     attachmentClient,
     taskClient,
     uiSettingsClient,
