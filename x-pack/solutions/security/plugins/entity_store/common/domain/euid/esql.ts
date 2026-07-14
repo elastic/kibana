@@ -394,6 +394,29 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
 }
 
 /**
+ * Returns the EVAL fragment for the identity-specific field evaluations of the given entity type
+ * (e.g. the `entity.namespace` derivation for the user entity).
+ *
+ * **Use this together with `getEuidEsqlEvaluation({ skipIdentityFieldEvaluations: true })`**
+ * to emit the field evaluations in a **separate** `| EVAL` stage that precedes the EUID
+ * computation. This is required when `SET unmapped_fields="nullify"` is in effect (e.g. when
+ * querying `.ml-anomalies-*`): within a single `| EVAL`, newly-assigned columns whose names
+ * match unmapped source fields (like `entity.namespace`) may resolve back to NULL instead of
+ * the just-computed value, silently nullifying all `_present` columns that reference them.
+ * A separate `| EVAL` stage commits the computed value before the next stage references it.
+ *
+ * Returns `undefined` when the entity type has no identity-specific field evaluations.
+ */
+export function getIdentityFieldEvaluationsEsql(entityType: EntityType): string | undefined {
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
+  if (isSingleFieldIdentity(identityField)) return undefined;
+  const evaluations = identityField.fieldEvaluations ?? [];
+  if (evaluations.length === 0) return undefined;
+  return evaluations.map((e) => buildOneFieldEvaluationEsql(e)).join(',\n ');
+}
+
+/**
  * Returns a comma-separated ES|QL EVAL assignments fragment that computes the entity id
  * for the given entity type and assigns it to `outputColumn`.
  *
@@ -405,11 +428,18 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
  * ```ts
  * parts.push(`| EVAL ${getEuidEsqlEvaluation(type, 'entity.id')}`);
  * ```
+ *
+ * When querying indices with `SET unmapped_fields="nullify"`, pass
+ * `skipIdentityFieldEvaluations: true` and emit a dedicated `| EVAL` for
+ * `getIdentityFieldEvaluationsEsql` first — see that function's docs for details.
  */
 export function getEuidEsqlEvaluation(
   entityType: EntityType,
   outputColumn: string,
-  { withTypeId = true }: { withTypeId?: boolean } = {}
+  {
+    withTypeId = true,
+    skipIdentityFieldEvaluations = false,
+  }: { withTypeId?: boolean; skipIdentityFieldEvaluations?: boolean } = {}
 ): string {
   const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
@@ -433,9 +463,12 @@ export function getEuidEsqlEvaluation(
   const assignments: string[] = [];
 
   // Identity-specific field evaluations (e.g. entity.namespace for user) must precede
-  // the _present columns that may reference their output.
-  for (const evaluation of identityField.fieldEvaluations ?? []) {
-    assignments.push(buildOneFieldEvaluationEsql(evaluation));
+  // the _present columns that may reference their output.  When skipIdentityFieldEvaluations
+  // is true the caller emits them in a prior | EVAL stage via getIdentityFieldEvaluationsEsql.
+  if (!skipIdentityFieldEvaluations) {
+    for (const evaluation of identityField.fieldEvaluations ?? []) {
+      assignments.push(buildOneFieldEvaluationEsql(evaluation));
+    }
   }
   for (const f of presentFields) {
     assignments.push(`${esqlPresentColumnName(f)} = ${esqlIsNotNullOrEmpty(f)}`);

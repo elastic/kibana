@@ -29,11 +29,38 @@ describe('recent anomalies ES|QL sources', () => {
         esql: {
           getFieldEvaluations: (entityType: string) =>
             `${entityType}_field = TO_STRING(${entityType}.name)`,
+          getIdentityFieldEvaluations: (entityType: string) =>
+            `${entityType}_namespace = "test_ns"`,
           getEuidEvaluation: (entityType: string, target: string) =>
             `${target} = CONCAT("${entityType}:", ${entityType}.name)`,
         },
       },
     });
+  });
+
+  it('emits identity field evals in a separate | EVAL stage before the EUID formula', () => {
+    const { result } = renderHook(() =>
+      useRecentAnomaliesTopRowsEsqlSource({
+        anomalyBands: [],
+        viewBy: 'entity',
+        spaceId: 'default',
+        rowsLimit: 5,
+      })
+    );
+    const source = result.current!;
+
+    // All three | EVAL stages must be present
+    const topLevelPos = source.indexOf('| EVAL user_field =');
+    const identityPos = source.indexOf('| EVAL user_namespace =');
+    const euidPos = source.indexOf('| EVAL user_euid =');
+
+    expect(topLevelPos).toBeGreaterThan(-1);
+    expect(identityPos).toBeGreaterThan(-1);
+    expect(euidPos).toBeGreaterThan(-1);
+
+    // Identity field evals must come after top-level field evals and before the EUID formula
+    expect(topLevelPos).toBeLessThan(identityPos);
+    expect(identityPos).toBeLessThan(euidPos);
   });
 
   const expectTimeRangeBeforeLookupJoin = (source: string | undefined) => {

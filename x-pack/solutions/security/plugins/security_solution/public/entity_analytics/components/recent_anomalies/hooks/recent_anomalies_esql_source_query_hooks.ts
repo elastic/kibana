@@ -57,11 +57,25 @@ const getEuidEvaluationBlock = (euidApi: EntityStoreEuid) => {
   const parts: string[] = [];
 
   for (const entityType of ANOMALY_ENTITY_TYPES) {
+    // Stage 1: top-level field evals (e.g. entity.source)
     const fieldEvals = euidApi.esql.getFieldEvaluations(entityType);
     if (fieldEvals) {
       parts.push(`| EVAL ${fieldEvals}`);
     }
-    parts.push(`| EVAL ${euidApi.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
+    // Stage 2: identity-specific field evals (e.g. entity.namespace) in a separate | EVAL.
+    // Required because SET unmapped_fields="nullify" causes entity.namespace — an unmapped
+    // field in .ml-anomalies-* — to resolve back to NULL when referenced in the same | EVAL
+    // that assigns it.  A separate stage commits the computed value before stage 3 reads it.
+    const identityFieldEvals = euidApi.esql.getIdentityFieldEvaluations(entityType);
+    if (identityFieldEvals) {
+      parts.push(`| EVAL ${identityFieldEvals}`);
+    }
+    // Stage 3: EUID formula (identity field evals already committed above)
+    parts.push(
+      `| EVAL ${euidApi.esql.getEuidEvaluation(entityType, `${entityType}_euid`, {
+        skipIdentityFieldEvaluations: true,
+      })}`
+    );
   }
 
   parts.push(

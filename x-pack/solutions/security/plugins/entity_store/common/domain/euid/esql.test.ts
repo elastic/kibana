@@ -11,6 +11,7 @@ import {
   getEuidEsqlFilterBasedOnDocument,
   getFieldEvaluationsEsql,
   getFieldEvaluationsEsqlFromDefinition,
+  getIdentityFieldEvaluationsEsql,
   collectRankingFields,
   buildRankingCaseEsql,
   buildSourcePickerEsql,
@@ -317,6 +318,52 @@ describe('getEuidEsqlEvaluation', () => {
 
     expect(result).toContain('my_custom_euid =');
     expect(result).not.toContain('entity.id =');
+  });
+
+  describe('skipIdentityFieldEvaluations option', () => {
+    it('omits identity field evaluations (e.g. entity.namespace) when true', () => {
+      const result = getEuidEsqlEvaluation('user', 'user_euid', {
+        skipIdentityFieldEvaluations: true,
+      });
+
+      // entity.namespace derivation must be absent
+      expect(result).not.toContain('entity.namespace =');
+      // but _present columns and the EUID formula must still be present
+      expect(result).toContain('entity_namespace_present =');
+      expect(result).toContain('user_euid =');
+    });
+
+    it('includes identity field evaluations by default', () => {
+      const result = getEuidEsqlEvaluation('user', 'user_euid');
+
+      expect(result).toContain('entity.namespace =');
+    });
+
+    it('matches the output of getIdentityFieldEvaluationsEsql for the skipped block', () => {
+      const withSkip = getEuidEsqlEvaluation('user', 'user_euid', {
+        skipIdentityFieldEvaluations: true,
+      });
+      const withoutSkip = getEuidEsqlEvaluation('user', 'user_euid');
+      const identityEvals = getIdentityFieldEvaluationsEsql('user');
+
+      // The default evaluation is the skipped evaluation prepended with the identity evals
+      expect(withoutSkip).toContain(identityEvals!);
+      expect(withSkip).not.toContain(identityEvals!);
+    });
+
+    it('is a no-op for entity types without identity field evaluations (host)', () => {
+      const withSkip = getEuidEsqlEvaluation('host', 'host_euid', {
+        skipIdentityFieldEvaluations: true,
+      });
+      const withoutSkip = getEuidEsqlEvaluation('host', 'host_euid');
+
+      expect(withSkip).toBe(withoutSkip);
+    });
+
+    it('getIdentityFieldEvaluationsEsql returns undefined for entity types with no identity field evaluations', () => {
+      expect(getIdentityFieldEvaluationsEsql('host')).toBeUndefined();
+      expect(getIdentityFieldEvaluationsEsql('service')).toBeUndefined();
+    });
   });
 });
 

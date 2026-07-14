@@ -85,6 +85,19 @@ export const euid = {
      * Input: entity type. Output: ESQL expression string for `EVAL`, or `undefined` if none defined.
      */
     getFieldEvaluations: euidModule.getFieldEvaluationsEsql,
+
+    /**
+     * Returns the ESQL `EVAL` expressions for identity-specific field evaluations only
+     * (e.g. entity.namespace derivation for the user entity).
+     *
+     * Emit this in a **separate** `| EVAL` stage before `getEuidEvaluation` when querying
+     * indices with `SET unmapped_fields="nullify"` (e.g. `.ml-anomalies-*`). Pass
+     * `skipIdentityFieldEvaluations: true` to `getEuidEvaluation` in that case to avoid
+     * re-emitting these assignments in the same `| EVAL` where they would be read.
+     *
+     * Input: entity type. Output: ESQL expression string for `EVAL`, or `undefined` if none defined.
+     */
+    getIdentityFieldEvaluations: euidModule.getIdentityFieldEvaluationsEsql,
   },
 
   /**
