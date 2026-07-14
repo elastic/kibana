@@ -30,6 +30,12 @@ export interface DataViewOptions {
   adHoc?: boolean;
 }
 
+interface TimeoutOptions {
+  timeout?: number;
+}
+
+const DEFAULT_SAVE_MODAL_TIMEOUT = 30_000;
+
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
   private readonly dataGrid: DataGrid;
@@ -198,6 +204,14 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
+  private async confirmSaveModal(options?: TimeoutOptions) {
+    const saveModal = this.page.testSubj.locator('savedObjectSaveModal');
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await expect(saveModal).toBeHidden({
+      timeout: options?.timeout ?? DEFAULT_SAVE_MODAL_TIMEOUT,
+    });
+  }
+
   async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
     await this.page.testSubj.click('discoverSaveButton');
     await this.page.testSubj.fill('savedObjectTitle', name);
@@ -209,8 +223,7 @@ export class DiscoverApp {
         await switchControl.click();
       }
     }
-    await this.page.testSubj.click('confirmSaveSavedObjectButton');
-    await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+    await this.confirmSaveModal();
   }
 
   async saveSearchAsNew(name: string) {
@@ -220,15 +233,13 @@ export class DiscoverApp {
     if (!(await checkbox.isChecked())) {
       await checkbox.click();
     }
-    await this.page.testSubj.click('confirmSaveSavedObjectButton');
-    await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+    await this.confirmSaveModal();
   }
 
   async saveUnsavedChanges() {
     await this.page.testSubj.click('discoverSaveButton');
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
-    await this.page.testSubj.click('confirmSaveSavedObjectButton');
-    await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+    await this.confirmSaveModal();
     await this.waitUntilSearchingHasFinished();
   }
 
@@ -244,8 +255,7 @@ export class DiscoverApp {
     // Clicking the EuiRadio wrapper does not toggle the underlying input
     // reliably; clicking the associated label does.
     await this.page.locator('label[for="new-dashboard-option"]').click();
-    await this.page.testSubj.click('confirmSaveSavedObjectButton');
-    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeHidden();
+    await this.confirmSaveModal();
   }
 
   async waitUntilFieldListHasCountOfFields() {
