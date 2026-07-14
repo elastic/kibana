@@ -1,3 +1,0 @@
-import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
-export declare function createObjectsFilter(retries: SavedObjectsImportRetry[]): (obj: SavedObject) => boolean;

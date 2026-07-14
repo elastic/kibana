@@ -1,1 +1,0 @@
-export type { ApiVersion, AddVersionOpts, VersionedRouteValidation, VersionedRouteRequestValidation, VersionedRouteResponseValidation, VersionedRoute, VersionedRouteConfig, VersionedRouteRegistrar, VersionedRouter, VersionedRouteCustomResponseBodyValidation, VersionedResponseBodyValidation, VersionedRouterRoute, } from './types';

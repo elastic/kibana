@@ -1,3 +1,0 @@
-/** @public */
-export interface UserSettingsServiceSetup {
-}

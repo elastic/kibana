@@ -1,1 +1,0 @@
-export { ClassicHeader } from './header';
