@@ -288,7 +288,6 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   ### Context
   <a few bullet points of history around this flake, in the same concise, high-value style as the Summary — every bullet earned, and omit any you cannot back with real evidence (never guess a PR or attribution). Cover, where known:
   - a link to the failed test investigator's comment on the issue, flagging whether this patch follows or departs from their proposed fix — and, if you re-investigated because that comment was stale (see "Validate the investigation is current"), say so and summarize what your fresh analysis concluded
-  - when a previous fix for this issue did not hold (human- or automation-authored), one line on what it changed, why it failed to hold, and how this patch's approach differs
   - a one-line recount of where the failures happened — e.g. the CI pipeline/lane and how often/recently — from the issue's CI data and the investigator's comment>
 
   <details>
