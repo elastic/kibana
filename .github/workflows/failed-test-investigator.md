@@ -149,7 +149,7 @@ This run is killed at a hard timeout and posts a single, write-once comment that
 
 Investigate the test failure(s) using the `flaky-test-investigator` skill (path: `.agents/skills/flaky-test-investigator`). Read the files in the folder directly, do not invoke the skill directly as that is disabled in this environment.
 
-Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.).
+Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.). Review the **issue timeline** as part of this — its reopen history and any prior fix PRs that referenced this issue tell you whether an earlier fix already tried and failed.
 
 Every conclusion must cite specific evidence. Do not guess.
 
@@ -195,16 +195,12 @@ Add `failure:ai-fixable` to the issue if we are confident that a fix is availabl
 
 ### "Previous fix didn't hold" label
 
-Add `failure:fix-did-not-hold` (in addition to the classification label) when the evidence shows a **fix was already merged for this same failure and the failure came back** — regardless of who wrote it (a human contributor or an automation such as the flaky-test fixer). This label tracks fixes that regressed, so apply it only when **both** of the following hold:
+Add `failure:fix-did-not-hold` (in addition to the classification label) when your investigation shows a **fix was already merged for this same failure and the failure came back** — regardless of who wrote it (a human contributor or an automation such as the flaky-test fixer). This label tracks fixes that regressed, so apply it only when **both** of the following hold:
 
-- a prior PR that **fixed this issue was merged** — search the **issue timeline** for it: a `cross-referenced`, `referenced`, or `closed` event pointing at a merged PR (e.g. one whose body said `Fixes #<issue>`, which typically closed this issue before it was reopened). Corroborate with `git log`/`git blame` on the failing test file when the timeline is ambiguous; and
-- the current failure is the **same** one that PR set out to fix — same test, and the same assertion/error signature and root-cause area — i.e. the merged fix demonstrably did not hold (the issue was usually closed by that PR and later reopened on the same failure).
+- a prior PR that **fixed this issue was merged** (from the issue timeline / reopen history you already reviewed, corroborated by `git log`/`git blame` when ambiguous); and
+- the current failure is the **same** one that PR set out to fix — same test, and the same assertion/error signature and root-cause area — i.e. the merged fix demonstrably did not hold.
 
-Do **not** add the label when the recurring failure is **unrelated** to what the merged fix addressed — a different assertion, a different root cause, or a symptom the earlier fix never targeted — even if it lands in the same test file or suite. In that case, treat it as an ordinary investigation.
-
-The issue timeline is the primary source (a reopen after a merged fix is the key signal); the `flaky-test-investigator` skill's scope questions ("Has this issue been closed and reopened before?", "Is there a chain of fix attempts?", "What did the previous fix change, and what did it claim to address?") guide the rest.
-
-When you add this label, your `#### Proposed fix` must take a **genuinely different approach** from the fix that didn't hold: state what the previous fix changed, why it failed to hold, and how your recommendation differs. Never re-propose the same shape of fix — a merged fix that already regressed is direct evidence that shape was wrong.
+Do **not** add the label when the recurring failure is **unrelated** to what the merged fix addressed — a different assertion, a different root cause, or a symptom the earlier fix never targeted — even if it lands in the same test file or suite.
 
 ### "Insufficient data" label
 
