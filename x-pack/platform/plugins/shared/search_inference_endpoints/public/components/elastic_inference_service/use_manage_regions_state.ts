@@ -71,7 +71,7 @@ export const useManageRegionsState = (onClose: () => void) => {
     activeTab === 'geo'
       ? geoSelection.totalSelected === 0
       : regionTab.regionSelection.totalSelected === 0;
-  const isSaveDisabled = isSaving || isLoading || !isDirty || (isNewPolicy && noSelections);
+  const isSaveDisabled = isSaving || isLoading || !isDirty || noSelections;
 
   // --- Confirmation flow handlers ---
   const handleRequestSave = useCallback(() => {
