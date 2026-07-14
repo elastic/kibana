@@ -48,6 +48,10 @@ export interface BaseExecutionParams {
    * Agent Builder telemetry is used.
    */
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  /**
+   * Optional connector response content length override for buffered LLM calls.
+   */
+  maxContentLength?: number;
 }
 
 /**

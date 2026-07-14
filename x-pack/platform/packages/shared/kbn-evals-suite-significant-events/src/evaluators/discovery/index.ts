@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export { createDiscoveryEvaluators } from './discovery';
+export { createDiscoveryEvaluators, createContinuationEvaluators } from './discovery';
 export { createJudgeEvaluators } from './judge';
-export { createContinuationEvaluators } from './discovery/continuation/continuation_stability';
 
 export type {
   DiscoveryAgentOutput,
