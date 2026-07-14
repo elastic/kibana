@@ -120,7 +120,7 @@
   "dependencies": {
     "@a2a-js/sdk": "0.3.4",
     "@ai-sdk/langchain": "1.0.190",
-    "@apidevtools/json-schema-ref-parser": "14.1.1",
+    "@apidevtools/json-schema-ref-parser": "15.3.6",
     "@appland/sql-parser": "1.5.1",
     "@arizeai/openinference-semantic-conventions": "1.1.0",
     "@atlaskit/pragmatic-drag-and-drop": "1.7.7",
@@ -2163,7 +2163,7 @@
     "superagent": "10.3.0",
     "supertest": "7.2.2",
     "svgo": "4.0.1",
-    "swagger-jsdoc": "6.2.8",
+    "swagger-jsdoc": "6.3.0",
     "swagger-ui-express": "5.0.1",
     "table": "6.9.0",
     "tape": "5.9.0",
