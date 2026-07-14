@@ -495,7 +495,7 @@ export class ActionsClient {
           connectorTokenClient: this.context.connectorTokenClient,
           scope: tokenOpts.scope,
           authMode,
-          profileUid,
+          userIdentifiers: profileUid ? { profileUid } : undefined,
         });
 
         this.context.logger.debug(

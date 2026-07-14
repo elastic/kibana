@@ -652,10 +652,11 @@ export const oauthCallbackRoute = (
             logger: routeLogger,
           });
 
+          const userIdentifiers = { profileUid };
           await userConnectorTokenClient.deleteConnectorTokens({
             connectorId: stateConnectorId,
             tokenType: 'access_token',
-            profileUid,
+            userIdentifiers,
           });
           const formattedToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
           await userConnectorTokenClient.createWithRefreshToken({
@@ -665,7 +666,7 @@ export const oauthCallbackRoute = (
             expiresIn: tokenResult.expiresIn,
             refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
             tokenType: 'access_token',
-            profileUid,
+            userIdentifiers,
           });
 
           await oauthStateClient.delete(oauthState.id);

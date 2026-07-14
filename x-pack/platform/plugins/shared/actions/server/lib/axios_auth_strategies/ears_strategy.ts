@@ -34,7 +34,7 @@ export class EarsStrategy implements AxiosAuthStrategy {
       logger,
       configurationUtilities,
       authMode,
-      profileUid,
+      userIdentifiers,
     } = deps;
 
     config._retry = true;
@@ -51,7 +51,7 @@ export class EarsStrategy implements AxiosAuthStrategy {
       provider,
       connectorTokenClient: connectorTokenClient!,
       authMode,
-      profileUid,
+      userIdentifiers,
       forceRefresh: true,
     });
 
@@ -141,7 +141,7 @@ export class EarsStrategy implements AxiosAuthStrategy {
       logger,
       configurationUtilities,
       authMode,
-      profileUid,
+      userIdentifiers,
     } = deps;
     if (!connectorTokenClient) {
       throw new Error('ConnectorTokenClient is required for EARS OAuth flow');
@@ -155,7 +155,7 @@ export class EarsStrategy implements AxiosAuthStrategy {
       provider,
       connectorTokenClient,
       authMode,
-      profileUid,
+      userIdentifiers,
     });
   }
 }

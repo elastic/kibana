@@ -150,6 +150,20 @@ describe('get()', () => {
     expect(result).toEqual({ connectorToken: null, hasErrors: false });
   });
 
+  test('delegates to user client when userIdentifiers contain only userCloudId', async () => {
+    const result = await connectorTokenClient.get({
+      connectorId: '123',
+      userIdentifiers: { userCloudId: 'cloud-user-1' },
+      tokenType: 'access_token',
+    });
+
+    expect(result).toEqual({ hasErrors: true, connectorToken: null });
+    expect(logger.error.mock.calls[0]).toMatchObject([
+      'Cannot get user_connector_token: profileUid is required',
+    ]);
+    expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+  });
+
   test('return null and log the error if unsecuredSavedObjectsClient throws an error', async () => {
     unsecuredSavedObjectsClient.find.mockRejectedValueOnce(new Error('Fail'));
 
@@ -566,6 +580,7 @@ describe('delete()', () => {
 
       await connectorTokenClient.deleteConnectorTokens({
         connectorId: '123',
+        userIdentifiers: { profileUid: 'user-123' },
         authMode: 'per-user',
       });
 
@@ -581,7 +596,7 @@ describe('delete()', () => {
 
       await connectorTokenClient.deleteConnectorTokens({
         connectorId: '123',
-        profileUid: 'user-123',
+        userIdentifiers: { profileUid: 'user-123' },
       });
 
       expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
@@ -596,7 +611,7 @@ describe('delete()', () => {
 
       await connectorTokenClient.deleteConnectorTokens({
         connectorId: '123',
-        profileUid: 'user-123',
+        userIdentifiers: { profileUid: 'user-123' },
         authMode: 'shared',
       });
 
@@ -612,13 +627,45 @@ describe('delete()', () => {
 
       await connectorTokenClient.deleteConnectorTokens({
         connectorId: '123',
-        profileUid: 'user-123',
+        userIdentifiers: { profileUid: 'user-123' },
         authMode: 'per-user',
       });
 
       expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
         'user_connector_token',
         'user-token-1'
+      );
+    });
+
+    test('does not delete user tokens when only userCloudId is provided with per-user authMode', async () => {
+      await connectorTokenClient.deleteConnectorTokens({
+        connectorId: '123',
+        userIdentifiers: { userCloudId: 'cloud-1' },
+        authMode: 'per-user',
+      });
+
+      expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+      expect(logger.warn.mock.calls[0]).toMatchObject([
+        expect.stringContaining(
+          'Skipping deleteConnectorTokens for user_connector_token: userCloudId without profileUid'
+        ),
+      ]);
+    });
+
+    test('routes to shared client when authMode is shared and only userCloudId is provided', async () => {
+      unsecuredSavedObjectsClient.delete.mockResolvedValue({});
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(sharedFindResult);
+
+      await connectorTokenClient.deleteConnectorTokens({
+        connectorId: '123',
+        userIdentifiers: { userCloudId: 'cloud-1' },
+        authMode: 'shared',
+      });
+
+      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+        'connector_token',
+        'shared-token-1'
       );
     });
   });
