@@ -170,7 +170,6 @@ export function ESQLEditor({
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
-        setErrors([]);
         updateSuggestion?.(attrs);
       }
       prevQuery.current = q;
