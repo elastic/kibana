@@ -54,9 +54,8 @@ describe('initUiSettings', () => {
     expect(registeredSettings[ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]).toEqual(
       expect.objectContaining({
         name: 'Enable alerts and attacks alignment',
-        value: false,
+        value: true,
         type: 'boolean',
-        technicalPreview: true,
       })
     );
   });

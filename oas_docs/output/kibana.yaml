@@ -86735,6 +86735,9 @@ components:
         is_system_action_type:
           description: Indicates whether the action is a system action.
           type: boolean
+        is_testable:
+          description: Indicates whether the connector type supports testing.
+          type: boolean
         minimum_license_required:
           description: The minimum license required to enable the connector.
           enum:
@@ -86776,6 +86779,7 @@ components:
         - is_system_action_type
         - is_deprecated
         - source
+        - is_testable
       title: connector_type_response
       type: object
     Kibana_HTTP_APIs_ContentPackIncludedObjects:
@@ -95343,6 +95347,20 @@ components:
                 required:
                   - name
                   - message
+              missing_assets:
+                items:
+                  additionalProperties: true
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                    - id
+                    - type
+                maxItems: 10000
+                type: array
               target_version:
                 type: string
             required:
@@ -96945,6 +96963,16 @@ components:
                                   - auto
                                 type: string
                             description: Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
+                          rows_per_page:
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
+                            maximum: 10000
+                            minimum: 1
+                            type: number
+                          sample_size:
+                            description: The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
+                            maximum: 10000
+                            minimum: 10
+                            type: number
                           sort:
                             default: []
                             description: Sort configuration for the data table (field and direction).
@@ -123540,8 +123568,6 @@ components:
             - id
             - text
     Observability_AI_Assistant_API_Message:
-      name: Message
-      type: object
       properties:
         '@timestamp':
           description: The timestamp when the message was created.
@@ -123571,6 +123597,8 @@ components:
       required:
         - '@timestamp'
         - message
+      title: Message
+      type: object
     Observability_AI_Assistant_API_MessageRoleEnum:
       description: The role of the message sender.
       enum:

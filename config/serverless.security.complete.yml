@@ -10,8 +10,8 @@ xpack.features.overrides:
   agentBuilder:
     category: "security"
     order: 1101
-  ### Agent Context Layer should match Agent Builder for role management.
-  agentContextLayer:
+  ### Agent Builder SML should match Agent Builder for role management.
+  agentBuilderSml:
     category: "security"
     order: 1102
 
