@@ -11,6 +11,7 @@ import { StringsShouldBeTranslatedWithI18n } from './rules/strings_should_be_tra
 import { StringsShouldBeTranslatedWithFormattedMessage } from './rules/strings_should_be_translated_with_formatted_message';
 import { I18nTranslateShouldStartWithTheRightId } from './rules/i18n_translate_should_start_with_the_right_id';
 import { FormattedMessageShouldStartWithTheRightId } from './rules/formatted_message_should_start_with_the_right_id';
+import { NavLinkShouldUseSentenceCase } from './rules/nav_link_should_use_sentence_case';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-i18n'` to your eslint config to use them
@@ -22,4 +23,5 @@ export const rules = {
     StringsShouldBeTranslatedWithFormattedMessage,
   i18n_translate_should_start_with_the_right_id: I18nTranslateShouldStartWithTheRightId,
   formatted_message_should_start_with_the_right_id: FormattedMessageShouldStartWithTheRightId,
+  nav_link_should_use_sentence_case: NavLinkShouldUseSentenceCase,
 };
