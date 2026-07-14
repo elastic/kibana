@@ -21,6 +21,7 @@ const mockUseStoredAssistantConnectorId = jest.fn();
 const mockUseAssistantAvailability = jest.fn();
 const mockUseAgentBuilderAvailability = jest.fn();
 const mockUseFetchEntityDetailsHighlights = jest.fn();
+const mockUseFetchPersistedAiSummary = jest.fn();
 const mockUseHasEntityHighlightsLicense = jest.fn();
 
 jest.mock('@kbn/elastic-assistant', () => ({
@@ -58,6 +59,10 @@ jest.mock('../../../../common/hooks/use_space_id', () => ({
 
 jest.mock('../hooks/use_fetch_entity_details_highlights', () => ({
   useFetchEntityDetailsHighlights: () => mockUseFetchEntityDetailsHighlights(),
+}));
+
+jest.mock('../hooks/use_fetch_persisted_ai_summary', () => ({
+  useFetchPersistedAiSummary: () => mockUseFetchPersistedAiSummary(),
 }));
 
 jest.mock('../../../../common/hooks/use_has_entity_highlights_license', () => ({
@@ -132,6 +137,12 @@ describe('EntityHighlights', () => {
     mockUseAssistantAvailability.mockReturnValue(defaultAssistantAvailability);
     mockUseAgentBuilderAvailability.mockReturnValue(defaultAgentBuilderAvailability);
     mockUseFetchEntityDetailsHighlights.mockReturnValue(defaultFetchEntityDetailsHighlights);
+    mockUseFetchPersistedAiSummary.mockReturnValue({
+      summary: null,
+      canRead: true,
+      isLoading: false,
+      refetch: jest.fn(),
+    });
     mockUseHasEntityHighlightsLicense.mockReturnValue(true);
   });
 
@@ -292,7 +303,7 @@ describe('EntityHighlights', () => {
             text: 'User has high risk activity\n- Multiple failed login attempts',
           },
         ],
-        recommendedActions: null,
+        recommended_actions: null,
       },
       replacements: { anonymized_user: 'test-user' },
       summaryAsText: '{"user": "test-user"}',
@@ -377,7 +388,7 @@ describe('EntityHighlights', () => {
             text: 'Some summary text',
           },
         ],
-        recommendedActions: null,
+        recommended_actions: null,
       },
       replacements: {},
       summaryAsText: '{"user": "test-user"}',

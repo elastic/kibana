@@ -9,12 +9,22 @@ export { withExecuteToolSpan } from './src/with_execute_tool_span';
 export { withActiveInferenceSpan } from './src/with_active_inference_span';
 export { withInferenceContext } from './src/with_inference_context';
 export { GenAISemanticConventions, ElasticGenAIAttributes } from './src/types';
+export type {
+  GenAITextPart,
+  GenAIToolCallPart,
+  GenAIToolCallResponsePart,
+  GenAIMessagePart,
+  GenAIInputMessage,
+  GenAIOutputMessage,
+} from './src/types';
 export {
   BAGGAGE_TRACKING_BEACON_KEY,
   BAGGAGE_TRACKING_BEACON_VALUE,
   EXECUTION_ID_BAGGAGE_KEY,
   EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
+  CONVERSATION_ID_BAGGAGE_KEY,
 } from './src/baggage';
+export { parseJsonAttr } from './src/util/parse_json_attr';
 
 export { isInferenceSpan } from './src/is_inference_span';
 export { LangfuseSpanProcessor } from './src/langfuse/langfuse_span_processor';

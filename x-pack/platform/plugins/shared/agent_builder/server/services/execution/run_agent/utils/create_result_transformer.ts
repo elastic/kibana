@@ -7,10 +7,10 @@
 
 import type { ToolResult } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
-import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
+import type { ToolResultStore } from '@kbn/agent-builder-server/runner';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner/tool_manager';
-import { getToolCallEntryPath } from '../../runner/store/volumes/tool_results/utils';
+import { getToolCallEntryAbsolutePath } from '../../runner/store/volumes/tool_results/utils';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import {
   areAllResultsCleaned,
@@ -45,13 +45,10 @@ export interface CreateResultTransformerOptions {
    */
   toolManager: ToolManager;
   /**
-   * Filestore to check token counts for file reference substitution.
+   * Tool-result store used to look up per-result entry metadata when deciding whether
+   * to substitute an oversize result with a file reference.
    */
-  filestore: IFileStore;
-  /**
-   * Whether filestore-based substitution is enabled.
-   */
-  filestoreEnabled: boolean;
+  resultStore: ToolResultStore;
   /**
    * Unified, summarization-aware conversation token estimate. Gates filestore
    * substitution and is computed once per turn so it matches the compaction trigger.
@@ -80,8 +77,7 @@ export interface CreateResultTransformerOptions {
 export const createResultTransformer = ({
   toolRegistry,
   toolManager,
-  filestore,
-  filestoreEnabled,
+  resultStore,
   conversationTokenEstimate,
   toolCallTokenThreshold = FS_TOOL_CALL_TOKEN_THRESHOLD,
   conversationTokenThreshold = FS_CONTEXT_TOKEN_THRESHOLD,
@@ -104,16 +100,13 @@ export const createResultTransformer = ({
     // or when the caller forces it (intra-round compaction, where pressure comes from
     // the in-flight round rather than conversation history).
     const useFilestore =
-      filestoreEnabled &&
-      (filestoreSubstitutionEnabled || options?.forceFilestoreSubstitution === true);
+      filestoreSubstitutionEnabled || options?.forceFilestoreSubstitution === true;
     if (useFilestore) {
       return Promise.all(
         toolCall.results.map((result) =>
           tryFilestoreSubstitution({
             result,
-            toolId: toolCall.tool_id,
-            toolCallId: toolCall.tool_call_id,
-            filestore,
+            resultStore,
             threshold: toolCallTokenThreshold,
           })
         )
@@ -131,15 +124,11 @@ export const createResultTransformer = ({
  */
 const tryFilestoreSubstitution = async ({
   result,
-  toolId,
-  toolCallId,
-  filestore,
+  resultStore,
   threshold,
 }: {
   result: ToolResult;
-  toolId: string;
-  toolCallId: string;
-  filestore: IFileStore;
+  resultStore: ToolResultStore;
   threshold: number;
 }): Promise<ToolResult> => {
   // Skip if already cleaned
@@ -147,14 +136,8 @@ const tryFilestoreSubstitution = async ({
     return result;
   }
 
-  const path = getToolCallEntryPath({
-    toolId,
-    toolCallId,
-    toolResultId: result.tool_result_id,
-  });
-
   try {
-    const entry = await filestore.read(path);
+    const entry = await resultStore.getEntryByResultId(result.tool_result_id);
 
     // If entry exists and exceeds threshold, substitute with file reference
     if (entry && entry.metadata.token_count > threshold) {
@@ -162,9 +145,9 @@ const tryFilestoreSubstitution = async ({
         tool_result_id: result.tool_result_id,
         type: ToolResultType.fileReference,
         data: {
-          filepath: path,
+          filepath: getToolCallEntryAbsolutePath(entry.path),
           comment:
-            'The result has been stored on the filestore. You can access it using the filestore_read tool with the specified filepath',
+            'The result has been stored in the virtual file system. You can access it using the read_file tool with the specified filepath.',
         },
       });
     }

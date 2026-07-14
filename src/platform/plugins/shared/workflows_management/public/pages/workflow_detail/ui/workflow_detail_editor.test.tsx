@@ -13,20 +13,32 @@ import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
+  selectEditorWorkflowDefinition,
+  selectFocusedStepId,
+  selectFocusedTriggerId,
+  selectIsExecutionsTab,
+  selectWorkflowId,
+  selectYamlString as selectYamlStringSelector,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
+import {
   _setComputedDataInternal,
+  HIGHLIGHTED_STEP_TRIGGER,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
+import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
 const mockUseKibana = jest.fn();
+const mockUseUiSetting$ = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
 const mockUseWorkflowActions = jest.fn();
 const mockUseSelector = jest.fn();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => mockUseKibana(),
+  useUiSetting$: (key: string, defaultValue: boolean) => mockUseUiSetting$(key, defaultValue),
 }));
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
@@ -43,18 +55,35 @@ jest.mock('react-redux', () => ({
 }));
 
 // Mock lazy loaded components
-const WorkflowYAMLEditorMock = ({ highlightDiff, onStepRun }: any) => (
-  <div data-test-subj="workflow-yaml-editor">
-    {highlightDiff && <span data-test-subj="highlight-diff-indicator">{'Highlight Diff'}</span>}
-    <button
-      type="button"
-      data-test-subj="test-step-run"
-      onClick={() => onStepRun?.({ stepId: 'test-step', actionType: 'run' })}
-    >
-      {'Run Step'}
-    </button>
-  </div>
-);
+const WorkflowYAMLEditorMock = ({
+  highlightDiff,
+  onStepRun,
+  editorRef,
+  onToggleEditorMode,
+}: any) => {
+  if (editorRef) {
+    editorRef.current = { getPosition: () => ({ lineNumber: 4 }) };
+  }
+  return (
+    <div data-test-subj="workflow-yaml-editor">
+      {highlightDiff && <span data-test-subj="highlight-diff-indicator">{'Highlight Diff'}</span>}
+      <button
+        type="button"
+        data-test-subj="workflow-toggle-editor-mode"
+        onClick={() => onToggleEditorMode?.()}
+      >
+        {'Toggle Editor Mode'}
+      </button>
+      <button
+        type="button"
+        data-test-subj="test-step-run"
+        onClick={() => onStepRun?.({ stepId: 'test-step', actionType: 'run' })}
+      >
+        {'Run Step'}
+      </button>
+    </div>
+  );
+};
 
 jest.mock('../../../widgets/workflow_yaml_editor/ui/workflow_yaml_editor', () => ({
   WorkflowYAMLEditor: WorkflowYAMLEditorMock,
@@ -105,6 +134,25 @@ describe('WorkflowDetailEditor', () => {
   const mockYaml =
     'version: "1"\nname: Test Workflow\ntriggers:\n  - type: manual\nsteps:\n  - type: log\n    with:\n      message: hello';
 
+  // Named base implementation so tests can extend it without creating infinite recursion
+  const baseUseSelectorImpl = (selector: any) => {
+    if (selector === selectIsExecutionsTab) return false;
+    if (selector === selectYamlStringSelector) return mockYaml;
+    if (selector === selectWorkflowId) return 'workflow-1';
+    if (selector === selectFocusedStepId) return undefined;
+    if (selector === selectFocusedTriggerId) return undefined;
+    if (selector === selectEditorWorkflowDefinition) {
+      return {
+        version: '1',
+        name: 'Test Workflow',
+        enabled: true,
+        triggers: [],
+        steps: [{ name: 'test-step', type: 'test', with: {} }],
+      };
+    }
+    return null;
+  };
+
   const mockStore = () => {
     const store = createMockStore();
     store.dispatch(setYamlString(mockYaml));
@@ -148,10 +196,29 @@ describe('WorkflowDetailEditor', () => {
       },
     });
 
+    mockUseUiSetting$.mockImplementation((key: string, defaultValue: boolean) => {
+      if (key === 'workflows:ui:executionGraph:enabled') return [false];
+      return [defaultValue];
+    });
+    // Reset to the default (disabled) after each test that may have overridden it.
+    (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(false);
+
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow',
+      editorView: 'yaml',
+      graphDirection: 'TB',
       selectedExecutionId: null,
+      selectedStepExecutionId: null,
+      selectedStepId: null,
+      shouldAutoResume: false,
+      setActiveTab: jest.fn(),
+      setEditorView: jest.fn(),
+      setGraphDirection: jest.fn(),
       setSelectedExecution: jest.fn(),
+      setSelectedStepExecution: jest.fn(),
+      setSelectedStep: jest.fn(),
+      updateUrlState: jest.fn(),
+      clearResumeParam: jest.fn(),
     });
 
     mockUseWorkflowActions.mockReturnValue({
@@ -160,33 +227,7 @@ describe('WorkflowDetailEditor', () => {
       },
     });
 
-    mockUseSelector.mockImplementation((selector: any) => {
-      // Mock selectYamlString
-      if (selector.toString().includes('selectYamlString')) {
-        return mockYaml;
-      }
-      // Mock selectWorkflowId
-      if (selector.toString().includes('selectWorkflowId')) {
-        return 'workflow-1';
-      }
-      // Mock selectWorkflowDefinition
-      if (selector.toString().includes('selectWorkflowDefinition')) {
-        return {
-          version: '1',
-          name: 'Test Workflow',
-          enabled: true,
-          triggers: [],
-          steps: [
-            {
-              name: 'test-step',
-              type: 'test',
-              with: {},
-            },
-          ],
-        };
-      }
-      return null;
-    });
+    mockUseSelector.mockImplementation(baseUseSelectorImpl);
   });
 
   describe('rendering', () => {
@@ -210,6 +251,128 @@ describe('WorkflowDetailEditor', () => {
     it('should check execution graph configuration', () => {
       const { container } = renderEditor();
       expect(container).toBeTruthy();
+    });
+  });
+
+  describe('graph focus when switching views', () => {
+    it('highlights trigger sentinel when focusedTriggerId is set in Redux state', async () => {
+      const store = mockStore();
+
+      // Enable the visual editor so handleEditorViewChange runs the graph-focus logic.
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockImplementation(
+        (settingId: string) => settingId === 'workflows:experimentalFeatures'
+      );
+
+      // Simulate cursor being inside the triggers block via Redux-derived focusedTriggerId
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectFocusedTriggerId) return HIGHLIGHTED_STEP_TRIGGER;
+        if (selector === selectFocusedStepId) return undefined;
+        return baseUseSelectorImpl(selector);
+      });
+
+      const wrapper = ({ children }: { children: React.ReactNode }) => {
+        return <TestWrapper store={store}>{children}</TestWrapper>;
+      };
+      const { findByTestId } = render(<WorkflowDetailEditor />, { wrapper });
+      const toggle = await findByTestId('workflow-toggle-editor-mode');
+
+      await act(async () => {
+        toggle.click();
+      });
+
+      await waitFor(() => {
+        expect(store.getState().detail.highlightedStepId).toBe(HIGHLIGHTED_STEP_TRIGGER);
+      });
+    });
+
+    it('highlights step when focusedStepId is set in Redux state', async () => {
+      const store = mockStore();
+
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockImplementation(
+        (settingId: string) => settingId === 'workflows:experimentalFeatures'
+      );
+
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectFocusedTriggerId) return undefined;
+        if (selector === selectFocusedStepId) return 'test-step';
+        return baseUseSelectorImpl(selector);
+      });
+
+      const wrapper = ({ children }: { children: React.ReactNode }) => {
+        return <TestWrapper store={store}>{children}</TestWrapper>;
+      };
+      const { findByTestId } = render(<WorkflowDetailEditor />, { wrapper });
+      const toggle = await findByTestId('workflow-toggle-editor-mode');
+
+      await act(async () => {
+        toggle.click();
+      });
+
+      await waitFor(() => {
+        expect(store.getState().detail.highlightedStepId).toBe('test-step');
+      });
+    });
+  });
+
+  describe('peer rendering — item 6 (bodyOverride decoupling)', () => {
+    it('renders WorkflowYAMLEditor without bodyOverride or hideEditorBody props', async () => {
+      // Enable the visual editor so graph-related props could theoretically be passed
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'workflow',
+        editorView: 'yaml', // YAML view
+        graphDirection: 'TB',
+        selectedExecutionId: null,
+        selectedStepExecutionId: null,
+        selectedStepId: null,
+        shouldAutoResume: false,
+        setActiveTab: jest.fn(),
+        setEditorView: jest.fn(),
+        setGraphDirection: jest.fn(),
+        setSelectedExecution: jest.fn(),
+        setSelectedStepExecution: jest.fn(),
+        setSelectedStep: jest.fn(),
+        updateUrlState: jest.fn(),
+        clearResumeParam: jest.fn(),
+      });
+
+      const { findByTestId } = renderEditor();
+      const yamlEditor = await findByTestId('workflow-yaml-editor');
+
+      // The mock renders the YAML editor; there must be no graph nested inside it
+      expect(yamlEditor.querySelector('[data-test-subj="workflow-visual-editor"]')).toBeNull();
+    });
+
+    it('renders visual editor as a peer (sibling), not nested inside YAML editor, in graph view', async () => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'workflow',
+        editorView: 'graph', // Graph view
+        graphDirection: 'TB',
+        selectedExecutionId: null,
+        selectedStepExecutionId: null,
+        selectedStepId: null,
+        shouldAutoResume: false,
+        setActiveTab: jest.fn(),
+        setEditorView: jest.fn(),
+        setGraphDirection: jest.fn(),
+        setSelectedExecution: jest.fn(),
+        setSelectedStepExecution: jest.fn(),
+        setSelectedStep: jest.fn(),
+        updateUrlState: jest.fn(),
+        clearResumeParam: jest.fn(),
+      });
+
+      const { findByTestId } = renderEditor();
+      const yamlEditor = await findByTestId('workflow-yaml-editor');
+      const visualEditor = await findByTestId('workflow-visual-editor');
+
+      // Both present in the DOM (YAML stays mounted for validation)
+      expect(yamlEditor).toBeInTheDocument();
+      expect(visualEditor).toBeInTheDocument();
+
+      // Visual editor must NOT be a descendant of the YAML editor (peer rendering)
+      expect(yamlEditor.contains(visualEditor)).toBe(false);
     });
   });
 
@@ -248,6 +411,32 @@ describe('WorkflowDetailEditor', () => {
         new Error('Failed to run step'),
         { title: 'Failed to run step' }
       );
+    });
+
+    it('does not run step or open modal when on the executions tab', async () => {
+      // Regression: "Run step" must be a no-op on the Executions tab because
+      // handleStepRun uses the editable (draft) YAML/context, which differs from
+      // the execution snapshot the graph is currently showing.
+      mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} } as any);
+
+      const mockMutateAsync = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-123' });
+      mockUseWorkflowActions.mockReturnValue({
+        runIndividualStep: { mutateAsync: mockMutateAsync },
+      });
+
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectIsExecutionsTab) return true; // on the executions tab
+        return baseUseSelectorImpl(selector);
+      });
+
+      const { getByTestId, store } = renderEditor();
+      await act(async () => {
+        getByTestId('test-step-run').click();
+      });
+
+      // Neither mutation nor modal should fire — the handler must bail out early
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+      expect(store?.getState().detail.testStepModalOpenStepId).toBeUndefined();
     });
 
     it('does not run step or open modal when executeWorkflow is not granted', async () => {

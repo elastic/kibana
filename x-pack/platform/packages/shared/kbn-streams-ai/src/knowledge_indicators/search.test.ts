@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { Feature, QueryLink, StreamQuery } from '@kbn/streams-schema';
+import type { Feature, QueryLink, StreamQuery } from '@kbn/significant-events-schema';
 import { searchKnowledgeIndicators } from './search';
 
 function makeFeature(overrides: Partial<Feature> = {}): Feature {
   return {
     id: 'feature-id',
+    uuid: 'feature-uuid',
     stream_name: 'logs.test',
     type: 'dataset_analysis',
     description: 'Feature description',

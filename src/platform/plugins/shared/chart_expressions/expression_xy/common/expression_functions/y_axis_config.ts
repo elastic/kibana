@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from '@elastic/charts';
+import { ChartPosition } from '@kbn/chart-expressions-common';
 import { strings } from '../i18n';
 import { Y_AXIS_CONFIG, AxisModes, YScaleTypes } from '../constants';
 import type { YAxisConfigFn } from '../types';
@@ -37,7 +37,7 @@ export const yAxisConfigFunction: YAxisConfigFn = {
     },
     position: {
       types: ['string'],
-      options: [Position.Right, Position.Left],
+      options: [ChartPosition.Right, ChartPosition.Left],
       help: strings.getAxisPositionHelp(),
       strict: true,
     },
@@ -46,7 +46,7 @@ export const yAxisConfigFunction: YAxisConfigFn = {
     return {
       type: Y_AXIS_CONFIG,
       ...args,
-      position: args.position ?? Position.Left,
+      position: args.position ?? ChartPosition.Left,
     };
   },
 };

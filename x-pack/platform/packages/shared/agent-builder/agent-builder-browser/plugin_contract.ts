@@ -15,6 +15,7 @@ import type { BrowserApiToolDefinition } from './tools/browser_api_tool';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
+  RendererServiceStartContract,
   EventsServiceStartContract,
   ToolServiceStartContract,
 } from '.';
@@ -77,6 +78,16 @@ export interface EmbeddableConversationProps {
    * It will be appended only if it has changed since previous conversation round.
    */
   attachments?: ConversationAttachment[];
+
+  /**
+   * Optional heading shown on the empty "new conversation" screen in place of the
+   * default "How can I help you?" greeting. Use this to surface a page-specific
+   * call to action (e.g. "What do you want to automate?" for the workflow editor).
+   *
+   * The value is rendered as plain text; embedders are expected to pass an
+   * already-translated string.
+   */
+  greetingMessage?: string;
 
   /**
    * Browser API tools that the agent can use to interact with the page.
@@ -162,6 +173,10 @@ export interface AgentBuilderPluginStart {
    * Attachment service contract, can be used to register and retrieve attachment UI definitions.
    */
   attachments: AttachmentServiceStartContract;
+  /**
+   * Renderer service contract, can be used to register and retrieve renderer UI definitions.
+   */
+  renderers: RendererServiceStartContract;
   /**
    * Tool service contract, can be used to list or execute tools.
    */

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -27,10 +28,7 @@ import React from 'react';
 import { paths } from '../../../constants';
 import { RuleActionsMenu } from '../../../pages/rules_list_page/rule_actions_menu';
 import { RuleProvider } from '../../rule_details/rule_context';
-import {
-  RuleHeaderDescription,
-  RuleTitleWithBadges,
-} from '../../rule_details/rule_header_description';
+import { RuleHeaderDescription, RuleTitleWithBadges } from '../../rule_details/rule_summary_header';
 import { RuleConditions } from '../../rule_details/sidebar/rule_conditions';
 import { RuleMetadata } from '../../rule_details/sidebar/rule_metadata';
 import type { RuleApiResponse } from '../../../services/rules_api';
@@ -45,6 +43,9 @@ export interface RuleSummaryFlyoutProps {
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
+  session?: EuiFlyoutProps['session'];
+  ownFocus?: EuiFlyoutProps['ownFocus'];
+  hasAnimation?: EuiFlyoutProps['hasAnimation'];
 }
 
 export const RuleSummaryFlyout = ({
@@ -55,6 +56,9 @@ export const RuleSummaryFlyout = ({
   onClone,
   onDelete,
   onToggleEnabled,
+  session,
+  ownFocus = true,
+  hasAnimation = true,
 }: RuleSummaryFlyoutProps) => {
   const { basePath } = useService(CoreStart('http'));
   const detailsHref = basePath.prepend(paths.ruleDetails(rule.id));
@@ -63,9 +67,10 @@ export const RuleSummaryFlyout = ({
     <RuleProvider rule={rule}>
       <EuiFlyout
         type="push"
-        hasAnimation
+        hasAnimation={hasAnimation}
         size="s"
-        ownFocus
+        ownFocus={ownFocus}
+        session={session}
         hideCloseButton
         paddingSize="none"
         onClose={onClose}

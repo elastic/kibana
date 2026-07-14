@@ -14,6 +14,13 @@ export const ALERTS_PREVIEW = i18n.translate(
   }
 );
 
+export const ALERTS_LIST = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.alertsListTabLabel',
+  {
+    defaultMessage: 'Alerts list',
+  }
+);
+
 export const ALERTS_SUMMARY = i18n.translate(
   'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.alertsSummaryTitle',
   {
@@ -24,7 +31,7 @@ export const ALERTS_SUMMARY = i18n.translate(
 export const CONNECTOR = i18n.translate(
   'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.connectorTitle',
   {
-    defaultMessage: 'Connector',
+    defaultMessage: 'Connector for generating attack discoveries',
   }
 );
 
@@ -32,7 +39,23 @@ export const CUSTOMIZE_THE_CONNECTOR_AND_ALERTS = i18n.translate(
   'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.customizeTheConnectorAndAlertsLabel',
   {
     defaultMessage:
-      'Customize the connector and alerts that will be analyzed when generating Attack discoveries on the fly, which are private to you. Scheduled Attack discoveries are set up independently.',
+      'Customize the alerts and connector that will be analyzed when generating Attack discoveries on the fly, which are private to you. Scheduled Attack discoveries are set up independently.',
+  }
+);
+
+export const PREVIEW_MATCHED_ALERTS = (count: number) =>
+  i18n.translate(
+    'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.previewMatchedAlertsLabel',
+    {
+      defaultMessage: 'Preview matched alerts ({count})',
+      values: { count },
+    }
+  );
+
+export const PREVIEW_MATCHED_ALERTS_LOADING = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.previewMatchedAlertsLoadingLabel',
+  {
+    defaultMessage: 'Preview matched alerts',
   }
 );
 

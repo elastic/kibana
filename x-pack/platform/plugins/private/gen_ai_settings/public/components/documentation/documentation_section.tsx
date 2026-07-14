@@ -175,11 +175,12 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
           item={item}
           productDocBase={productDocBase}
           hasManagePrivilege={hasManagePrivilege}
+          isInferenceIdLoading={isInferenceIdLoading}
           onRefetch={refetch}
         />
       );
     },
-    [hasManagePrivilege, productDocBase, refetch]
+    [hasManagePrivilege, isInferenceIdLoading, productDocBase, refetch]
   );
 
   const columns: Array<EuiBasicTableColumn<DocumentationItem>> = useMemo(
@@ -264,8 +265,9 @@ const DocumentationRowActions: React.FC<{
   item: DocumentationItem;
   productDocBase: ProductDocBasePluginStart;
   hasManagePrivilege: boolean;
+  isInferenceIdLoading: boolean;
   onRefetch: () => void;
-}> = ({ item, productDocBase, hasManagePrivilege, onRefetch }) => {
+}> = ({ item, productDocBase, hasManagePrivilege, isInferenceIdLoading, onRefetch }) => {
   const { services } = useKibana();
   const { notifications, rendering, docLinks } = services;
 
@@ -314,6 +316,7 @@ const DocumentationRowActions: React.FC<{
 
   const isItemInstalling = item.status === 'installing' || installMutation.isLoading;
   const isItemUninstalling = item.status === 'uninstalling' || uninstallMutation.isLoading;
+  const isActionDisabled = !hasManagePrivilege || isInferenceIdLoading;
 
   const wrapWithPrivilegeTooltip = (button: React.ReactElement) => {
     if (!hasManagePrivilege) {
@@ -361,8 +364,8 @@ const DocumentationRowActions: React.FC<{
       <EuiButtonEmpty
         size="xs"
         iconType="refresh"
-        onClick={hasManagePrivilege ? () => installMutation.mutate(installVars) : undefined}
-        isDisabled={!hasManagePrivilege}
+        onClick={isActionDisabled ? undefined : () => installMutation.mutate(installVars)}
+        isDisabled={isActionDisabled}
         data-test-subj={`documentation-retry-${item.id}`}
       >
         {i18n.ACTION_RETRY}
@@ -398,8 +401,8 @@ const DocumentationRowActions: React.FC<{
             <EuiButtonEmpty
               size="xs"
               iconType="refresh"
-              onClick={hasManagePrivilege ? () => installMutation.mutate(installVars) : undefined}
-              isDisabled={!hasManagePrivilege}
+              onClick={isActionDisabled ? undefined : () => installMutation.mutate(installVars)}
+              isDisabled={isActionDisabled}
               data-test-subj={`documentation-update-${item.id}`}
             >
               {i18n.ACTION_UPDATE}
@@ -409,8 +412,8 @@ const DocumentationRowActions: React.FC<{
             <EuiButtonEmpty
               size="xs"
               iconType="returnKey"
-              onClick={hasManagePrivilege ? () => uninstallMutation.mutate(installVars) : undefined}
-              isDisabled={!hasManagePrivilege}
+              onClick={isActionDisabled ? undefined : () => uninstallMutation.mutate(installVars)}
+              isDisabled={isActionDisabled}
               data-test-subj={`documentation-uninstall-${item.id}`}
             >
               {i18n.ACTION_UNINSTALL}
@@ -424,8 +427,8 @@ const DocumentationRowActions: React.FC<{
       <EuiButtonEmpty
         size="xs"
         iconType="returnKey"
-        onClick={hasManagePrivilege ? () => uninstallMutation.mutate(installVars) : undefined}
-        isDisabled={!hasManagePrivilege}
+        onClick={isActionDisabled ? undefined : () => uninstallMutation.mutate(installVars)}
+        isDisabled={isActionDisabled}
         data-test-subj={`documentation-uninstall-${item.id}`}
       >
         {i18n.ACTION_UNINSTALL}
@@ -452,8 +455,8 @@ const DocumentationRowActions: React.FC<{
     <EuiButtonEmpty
       size="xs"
       iconType="download"
-      onClick={hasManagePrivilege ? () => installMutation.mutate(installVars) : undefined}
-      isDisabled={!hasManagePrivilege}
+      onClick={isActionDisabled ? undefined : () => installMutation.mutate(installVars)}
+      isDisabled={isActionDisabled}
       data-test-subj={`documentation-install-${item.id}`}
     >
       {i18n.ACTION_INSTALL}

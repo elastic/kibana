@@ -76,7 +76,11 @@ jest.mock('../hooks/use_header_data', () => ({
   useHeaderData: jest.fn().mockReturnValue({ timestamp: '' }),
 }));
 
-jest.mock('../hooks/use_attack_entities_lists', () => ({
+jest.mock('../hooks/use_original_alert_ids', () => ({
+  useOriginalAlertIds: jest.fn().mockReturnValue([]),
+}));
+
+jest.mock('../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists', () => ({
   useAttackEntitiesLists: jest.fn().mockReturnValue({
     userEntityEntries: [],
     hostEntityEntries: [],

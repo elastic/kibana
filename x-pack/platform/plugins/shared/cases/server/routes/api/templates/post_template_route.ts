@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { parse as yamlParse } from 'yaml';
+import { isBoom } from '@hapi/boom';
 import {
   CreateTemplateInputSchema,
   ParsedTemplateDefinitionSchema,
@@ -38,7 +39,7 @@ export const postTemplateRoute = createCasesRoute({
       // Validate YAML definition can be parsed
       let parsedYaml: unknown;
       try {
-        parsedYaml = yaml.load(input.definition);
+        parsedYaml = yamlParse(input.definition);
       } catch (yamlError) {
         return response.badRequest({
           body: { message: `Invalid YAML definition: ${yamlError}` },
@@ -64,6 +65,12 @@ export const postTemplateRoute = createCasesRoute({
         body: parsedTemplate,
       });
     } catch (error) {
+      if (isBoom(error) && error.output.statusCode === 409) {
+        return response.conflict({
+          body: { message: error.message },
+        });
+      }
+
       throw createCaseError({
         message: `Failed to create template: ${error}`,
         error,

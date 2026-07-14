@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { ContainerModule } from 'inversify';
 import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
 import { CoreSetup, CoreStart } from '@kbn/core-di-browser';
@@ -15,10 +16,12 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import React from 'react';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
@@ -29,7 +32,9 @@ import {
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';
+import { UserCapabilities } from './services/user_capabilities';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
+import { disableAlertingManagementUi } from './lib/disable_management_ui';
 import { setKibanaServices } from './kibana_services';
 import type { AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
@@ -52,6 +57,7 @@ export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(ActionPoliciesApi).toSelf().inSingletonScope();
   bind(ExecutionHistoryApi).toSelf().inSingletonScope();
+  bind(UserCapabilities).toSelf().inSingletonScope();
   bind(WorkflowApi)
     .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
     .inSingletonScope();
@@ -66,18 +72,118 @@ export const module = new ContainerModule(({ bind }) => {
 
     registerTriggerDefinitions(workflowsExtensionsSetup);
 
+    const management = container.get(PluginSetup('management')) as ManagementSetup;
+    const alertingSection = management.sections.register({
+      id: ALERTING_V2_SECTION_ID,
+      title: 'Alerting V2 Preview',
+      tip: 'Start exploring our latest alerts experience',
+      order: 1,
+    });
+
+    alertingSection.registerApp({
+      id: ALERTING_V2_RULES_APP_ID,
+      title: 'Rules',
+      order: 1,
+      async mount(params) {
+        const [coreStart] = await getStartServices();
+        const { mountAlertingV2App } = await import('./application/mount');
+        return mountAlertingV2App({
+          params,
+          container: coreStart.injection.getContainer(),
+          coreStart,
+        });
+      },
+    });
+
+    alertingSection.registerApp({
+      id: ALERTING_V2_EPISODES_APP_ID,
+      title: i18n.translate('xpack.alertingV2.management.alertEpisodesNavTitle', {
+        defaultMessage: 'Alerts',
+      }),
+      order: 2,
+      async mount(params) {
+        const [coreStart] = await getStartServices();
+        const { mountEpisodesApp } = await import('./application/mount');
+        return mountEpisodesApp({
+          params,
+          container: coreStart.injection.getContainer(),
+          coreStart,
+        });
+      },
+    });
+
+    alertingSection.registerApp({
+      id: ALERTING_V2_ACTION_POLICIES_APP_ID,
+      title: i18n.translate('xpack.alertingV2.management.actionPoliciesNavTitle', {
+        defaultMessage: 'Action Policies',
+      }),
+      order: 3,
+      async mount(params) {
+        const [coreStart] = await getStartServices();
+        const { mountActionPoliciesApp } = await import('./application/mount');
+        return mountActionPoliciesApp({
+          params,
+          container: coreStart.injection.getContainer(),
+          coreStart,
+        });
+      },
+    });
+
+    alertingSection.registerApp({
+      id: ALERTING_V2_EXECUTION_HISTORY_APP_ID,
+      title: i18n.translate('xpack.alertingV2.management.executionHistoryNavTitle', {
+        defaultMessage: 'Execution history',
+      }),
+      order: 5,
+      async mount(params) {
+        const [coreStart] = await getStartServices();
+        const { mountExecutionHistoryApp } = await import('./application/mount');
+        return mountExecutionHistoryApp({
+          params,
+          container: coreStart.injection.getContainer(),
+          coreStart,
+        });
+      },
+    });
+
     getStartServices().then(([coreStart]) => {
       const diContainer = coreStart.injection.getContainer();
+
+      const dashboardToken = PluginStart('dashboard');
+      const dashboard = diContainer.isBound(dashboardToken)
+        ? (diContainer.get(dashboardToken) as DashboardStart)
+        : undefined;
+
+      // Optional RuleFormServices field; used by ComposeDiscoverFlyout (CpsPicker), not artifacts UI.
+      const cpsToken = PluginStart('cps');
+      const cps = diContainer.isBound(cpsToken)
+        ? (diContainer.get(cpsToken) as CPSPluginStart)
+        : undefined;
+
       setKibanaServices({
         http: coreStart.http,
         notifications: coreStart.notifications,
         application: coreStart.application,
+        uiSettings: coreStart.uiSettings,
         data: diContainer.get(PluginStart('data')) as DataPublicPluginStart,
         dataViews: diContainer.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,
         lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
         expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
+        dashboard,
+        cps,
+        container: diContainer,
       });
+
+      const alertingEnabled = coreStart.settings.globalClient.get<boolean>(
+        ALERTING_V2_ENABLED_SETTING_ID,
+        false
+      );
+
+      if (!alertingEnabled) {
+        disableAlertingManagementUi(alertingSection);
+        return;
+      }
 
       const agentBuilderToken = PluginStart('agentBuilder');
       if (diContainer.isBound(agentBuilderToken)) {
@@ -110,80 +216,6 @@ export const module = new ContainerModule(({ bind }) => {
           }
         );
       }
-    });
-
-    const management = container.get(PluginSetup('management')) as ManagementSetup;
-    const alertingV2Section = management.sections.register({
-      id: ALERTING_V2_SECTION_ID,
-      title: 'V2 Alerting Preview',
-      tip: 'Start exploring our latest alerts experience',
-      order: 1,
-    });
-
-    alertingV2Section.registerApp({
-      id: ALERTING_V2_RULES_APP_ID,
-      title: 'Rules',
-      order: 1,
-      async mount(params) {
-        const [coreStart] = await getStartServices();
-        const { mountAlertingV2App } = await import('./application/mount');
-        return mountAlertingV2App({
-          params,
-          container: coreStart.injection.getContainer(),
-          coreStart,
-        });
-      },
-    });
-
-    alertingV2Section.registerApp({
-      id: ALERTING_V2_EPISODES_APP_ID,
-      title: i18n.translate('xpack.alertingV2.management.alertEpisodesNavTitle', {
-        defaultMessage: 'Alerts',
-      }),
-      order: 2,
-      async mount(params) {
-        const [coreStart] = await getStartServices();
-        const { mountEpisodesApp } = await import('./application/mount');
-        return mountEpisodesApp({
-          params,
-          container: coreStart.injection.getContainer(),
-          coreStart,
-        });
-      },
-    });
-
-    alertingV2Section.registerApp({
-      id: ALERTING_V2_ACTION_POLICIES_APP_ID,
-      title: i18n.translate('xpack.alertingV2.management.actionPoliciesNavTitle', {
-        defaultMessage: 'Action Policies',
-      }),
-      order: 3,
-      async mount(params) {
-        const [coreStart] = await getStartServices();
-        const { mountActionPoliciesApp } = await import('./application/mount');
-        return mountActionPoliciesApp({
-          params,
-          container: coreStart.injection.getContainer(),
-          coreStart,
-        });
-      },
-    });
-
-    alertingV2Section.registerApp({
-      id: ALERTING_V2_EXECUTION_HISTORY_APP_ID,
-      title: i18n.translate('xpack.alertingV2.management.executionHistoryNavTitle', {
-        defaultMessage: 'Execution history',
-      }),
-      order: 5,
-      async mount(params) {
-        const [coreStart] = await getStartServices();
-        const { mountExecutionHistoryApp } = await import('./application/mount');
-        return mountExecutionHistoryApp({
-          params,
-          container: coreStart.injection.getContainer(),
-          coreStart,
-        });
-      },
     });
   });
 });

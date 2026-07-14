@@ -1,0 +1,28 @@
+version: "1"
+name: "Significant Events Scheduled Detection"
+description: "Runs Significant Events detection on a schedule for the current space."
+enabled: false
+tags:
+  - observability
+  - streams
+  - significant-events
+  - scheduled
+  - detection
+settings:
+  timeout: "10m"
+  concurrency:
+    key: "significant-events-scheduled-detection"
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "__DETECTION_INTERVAL_MINUTES__m"
+  - type: manual
+steps:
+  - name: detect
+    type: workflow.execute
+    with:
+      workflow-id: "system-significant-events-detection"
+      inputs:
+        lookback: "now-__DETECTION_LOOKBACK_MINUTES__m"

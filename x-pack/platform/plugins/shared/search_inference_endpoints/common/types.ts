@@ -6,8 +6,14 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import type { InferenceConnector, EisInferenceEndpointMetadata } from '@kbn/inference-common';
+import type {
+  InferenceConnector,
+  EisInferenceEndpointMetadata,
+  CspRegion,
+} from '@kbn/inference-common';
 import { INFERENCE_CONNECTORS_INTERNAL_API_PATH } from '@kbn/inference-common';
+
+export type { CspRegion };
 
 /** Route path constants (const object so imported paths stay type-narrowed as `string`). */
 export const APIRoutes = {
@@ -18,6 +24,8 @@ export const APIRoutes = {
   PUT_INFERENCE_SETTINGS: '/internal/search_inference_endpoints/settings',
   GET_INFERENCE_FEATURES: '/internal/search_inference_endpoints/features',
   GET_INFERENCE_CONNECTORS: INFERENCE_CONNECTORS_INTERNAL_API_PATH,
+  // Single path shared by GET, PUT, and DELETE region policy operations
+  REGION_POLICY: '/internal/search_inference_endpoints/region_policy',
 } as const;
 
 export interface InferenceConnectorsResponse {
@@ -99,6 +107,20 @@ export type InferenceEndpointWithDisplayCreatorMetadata = InferenceEndpointWithM
     };
   };
 };
+
+export interface RegionPolicyBody {
+  allowed_regions?: CspRegion[];
+  allowed_geos?: string[];
+  fallback_region?: CspRegion;
+}
+
+export interface RegionPolicyResponse {
+  region_policy: RegionPolicyBody;
+  created_at: string;
+  created_by?: string;
+  updated_at?: string;
+  updated_by?: string;
+}
 
 export enum EisModelStatus {
   Preview = 'preview',
