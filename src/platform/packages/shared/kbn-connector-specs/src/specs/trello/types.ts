@@ -13,6 +13,7 @@ const trelloId = (label: string) =>
   z
     .string()
     .min(1)
+    .max(200)
     .describe(
       `Trello ${label} ID (24-character hex string, e.g. "5f8a1b2c3d4e5f6a7b8c9d0e"), as returned by listBoards, search, or another action.`
     );
@@ -55,6 +56,7 @@ export const SearchInputSchema = lazySchema(() =>
       ),
     modelTypes: z
       .string()
+      .max(100)
       .optional()
       .describe(
         'Comma-separated list of result types to search: any of "cards", "boards", "members", "organizations". ' +
@@ -62,6 +64,7 @@ export const SearchInputSchema = lazySchema(() =>
       ),
     idBoards: z
       .string()
+      .max(2000)
       .optional()
       .describe(
         'Comma-separated Trello board IDs to restrict the search to. Omit to search all boards the member can access.'
@@ -97,6 +100,7 @@ export const CreateCardInputSchema = lazySchema(() =>
       .describe('Card description text. Supports Trello-flavored Markdown.'),
     due: z
       .string()
+      .max(100)
       .optional()
       .describe('Due date as an ISO 8601 datetime string, e.g. "2024-06-15T17:00:00.000Z".'),
     pos: cardPosition()
@@ -106,10 +110,12 @@ export const CreateCardInputSchema = lazySchema(() =>
       ),
     idMembers: z
       .string()
+      .max(2000)
       .optional()
       .describe('Comma-separated Trello member IDs to assign to the card.'),
     idLabels: z
       .string()
+      .max(2000)
       .optional()
       .describe('Comma-separated Trello label IDs to apply to the card.'),
   })
@@ -123,6 +129,7 @@ export const UpdateCardInputSchema = lazySchema(() =>
     desc: z.string().max(16384).optional().describe('New description text for the card.'),
     due: z
       .string()
+      .max(100)
       .nullable()
       .optional()
       .describe('New due date as an ISO 8601 datetime string, or null to clear the due date.'),

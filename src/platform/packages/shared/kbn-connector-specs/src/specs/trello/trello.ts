@@ -20,6 +20,15 @@ import {
   UpdateCardInputSchema,
   AddCommentInputSchema,
 } from './types';
+import type {
+  BoardIdInput,
+  ListListCardsInput,
+  CardIdInput,
+  SearchInput,
+  CreateCardInput,
+  UpdateCardInput,
+  AddCommentInput,
+} from './types';
 
 const BASE_URL = 'https://api.trello.com/1';
 
@@ -102,7 +111,7 @@ export const Trello: ConnectorSpec = {
       description:
         'Get the full details of a single Trello board by ID. Use when you already have a board ID and need its metadata.',
       input: BoardIdInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: BoardIdInput) => {
         const response = await ctx.client.get(`${BASE_URL}/boards/${input.boardId}`);
         return response.data;
       },
@@ -113,7 +122,7 @@ export const Trello: ConnectorSpec = {
       description:
         'List the (open) lists on a board, e.g. "To Do", "Doing", "Done". Use the returned list IDs with listListCards or createCard.',
       input: BoardIdInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: BoardIdInput) => {
         const response = await ctx.client.get(`${BASE_URL}/boards/${input.boardId}/lists`);
         return response.data;
       },
@@ -124,7 +133,7 @@ export const Trello: ConnectorSpec = {
       description:
         'List all open cards on a board, across all of its lists. Use when you need every card on a board rather than one list at a time.',
       input: BoardIdInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: BoardIdInput) => {
         const response = await ctx.client.get(`${BASE_URL}/boards/${input.boardId}/cards`);
         return response.data;
       },
@@ -135,7 +144,7 @@ export const Trello: ConnectorSpec = {
       description:
         "List the open cards within a single list. Use once you have a list ID (from listBoardLists) and want just that list's cards.",
       input: ListListCardsInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: ListListCardsInput) => {
         const response = await ctx.client.get(`${BASE_URL}/lists/${input.listId}/cards`);
         return response.data;
       },
@@ -146,7 +155,7 @@ export const Trello: ConnectorSpec = {
       description:
         'Get the full details of a single card by ID, including its description, due date, members, and labels. Use when you already have a card ID and need the complete record.',
       input: CardIdInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: CardIdInput) => {
         const response = await ctx.client.get(`${BASE_URL}/cards/${input.cardId}`);
         return response.data;
       },
@@ -157,7 +166,7 @@ export const Trello: ConnectorSpec = {
       description:
         'List comments posted on a card (the conversation thread). Use when you have a card ID and need to read its discussion history.',
       input: CardIdInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: CardIdInput) => {
         const response = await ctx.client.get(`${BASE_URL}/cards/${input.cardId}/actions`, {
           params: { filter: 'commentCard' },
         });
@@ -170,7 +179,7 @@ export const Trello: ConnectorSpec = {
       description:
         'Search across Trello boards and cards by keyword or query operators. Use when you need to find items by keyword rather than browsing a known board/list.',
       input: SearchInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: SearchInput) => {
         const params: Record<string, string | number> = {
           query: input.query,
           modelTypes: input.modelTypes ?? 'cards,boards',
@@ -188,7 +197,7 @@ export const Trello: ConnectorSpec = {
       description:
         'Create a new card in a list. Returns the created card, including its ID. Use listBoardLists first to find the target list ID.',
       input: CreateCardInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: CreateCardInput) => {
         const params: Record<string, string | number> = {
           idList: input.listId,
           name: input.name,
@@ -208,7 +217,7 @@ export const Trello: ConnectorSpec = {
       description:
         "Edit a card's fields, move it to another list, or archive/unarchive it. Set idList to move the card, or closed: true to archive it (there is no hard-delete action). Returns the updated card.",
       input: UpdateCardInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: UpdateCardInput) => {
         const params: Record<string, string | number | boolean> = {};
         if (input.name !== undefined) params.name = input.name;
         if (input.desc !== undefined) params.desc = input.desc;
@@ -228,7 +237,7 @@ export const Trello: ConnectorSpec = {
       description:
         "Post a comment on a card. Use to leave notes or updates on a card's activity feed. Returns the created comment action.",
       input: AddCommentInputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx, input: AddCommentInput) => {
         const response = await ctx.client.post(
           `${BASE_URL}/cards/${input.cardId}/actions/comments`,
           null,
