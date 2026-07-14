@@ -53,28 +53,28 @@ steps:
     with:
       spaceId: '{{ workflow.spaceId }}'
 
-  # Broadcast the latest seen timestamp to each slug, exclude seen markers, then select the latest
-  # real state with _id as a deterministic tie-break. Only slugs whose latest state is discovery
-  # remain eligible. Scoring combines criticality with minutes since last consideration.
+  # Broadcast the latest seen timestamp to each event, exclude seen markers, then select the latest
+  # real state with _id as a deterministic tie-break. Only events whose latest state is discovery
+  # remain eligible. Scoring combines severity with minutes since last consideration.
   - name: get_unassessed_discoveries
     type: elasticsearch.esql.query
     with:
       query: |-
         FROM .significant_events-discoveries METADATA _id, _source
-        | EVAL seen_timestamp = CASE(kind == "seen", @timestamp, null)
-        | INLINE STATS last_seen_timestamp = MAX(seen_timestamp) BY discovery_slug
-        | WHERE kind != "seen"
-        | INLINE STATS latest_timestamp = MAX(@timestamp) BY discovery_slug
+        | EVAL seen_timestamp = CASE(seen_by IS NOT NULL, @timestamp, null)
+        | INLINE STATS last_seen_timestamp = MAX(seen_timestamp) BY event_id
+        | WHERE seen_by IS NULL
+        | INLINE STATS latest_timestamp = MAX(@timestamp) BY event_id
         | WHERE @timestamp == latest_timestamp
-        | INLINE STATS latest_id = MAX(_id) BY discovery_slug
+        | INLINE STATS latest_id = MAX(_id) BY event_id
         | WHERE _id == latest_id AND kind == "discovery"
-        | EVAL criticality = COALESCE(criticality, 0)
+        | EVAL severity_score = CASE(severity == "80-critical", 80, severity == "60-high", 60, severity == "40-medium", 40, severity == "20-low", 20, 0)
         | EVAL staleness_minutes = DATE_DIFF("minute", COALESCE(last_seen_timestamp, @timestamp), NOW())
         | EVAL first_consideration_bonus = CASE(last_seen_timestamp IS NULL, 101, 0)
-        | EVAL score = first_consideration_bonus + criticality + staleness_minutes
+        | EVAL score = first_consideration_bonus + severity_score + staleness_minutes
         | SORT score DESC, @timestamp ASC, _id ASC
         | LIMIT ?1
-        | KEEP discovery_slug, _source, score
+        | KEEP event_id, _source, score
       params:
         - '${{ inputs.discoveryBatchMax }}'
       filter:
@@ -93,12 +93,12 @@ steps:
     with:
       query: |-
         FROM .significant_events-discoveries METADATA _id, _source
-        | EVAL seen_timestamp = CASE(kind == "seen", @timestamp, null)
-        | INLINE STATS last_seen_timestamp = MAX(seen_timestamp) BY discovery_slug
-        | WHERE kind != "seen"
-        | INLINE STATS latest_timestamp = MAX(@timestamp) BY discovery_slug
+        | EVAL seen_timestamp = CASE(seen_by IS NOT NULL, @timestamp, null)
+        | INLINE STATS last_seen_timestamp = MAX(seen_timestamp) BY event_id
+        | WHERE seen_by IS NULL
+        | INLINE STATS latest_timestamp = MAX(@timestamp) BY event_id
         | WHERE @timestamp == latest_timestamp
-        | INLINE STATS latest_id = MAX(_id) BY discovery_slug
+        | INLINE STATS latest_id = MAX(_id) BY event_id
         | WHERE _id == latest_id AND kind == "discovery"
         | STATS candidate_count = COUNT(*)
       filter:
@@ -126,8 +126,7 @@ steps:
             kibana:
               space_ids:
                 - '{{ variables.spaceId }}'
-            kind: seen
-            discovery_slug: '{{ foreach.item[0] }}'
+            event_id: '{{ foreach.item[0] }}'
             seen_by: '{{ execution.id }}'
         on-failure:
           continue: true
@@ -197,20 +196,17 @@ steps:
             items:
               type: object
               properties:
-                discovery_slug:
-                  type: string
-                  description: 'Echo verbatim from the input discovery.'
                 event_id:
                   type: string
-                  description: 'event_id returned by events_write. Required for trigger_investigation context.'
+                  description: 'Echo the event_id verbatim from the input discovery. Also returned by events_write. Required for trigger_investigation context.'
                 status:
                   type: string
-                  enum: [promoted, acknowledged, demoted, resolved]
+                  enum: [open, dismissed, closed]
                   description: 'Status decision.'
                 written:
                   type: boolean
                   description: 'true when events_write appended the event version.'
-              required: [discovery_slug, status, written]
+              required: [event_id, status, written]
         required: [significant_events]
     on-failure:
       continue: false
@@ -241,19 +237,18 @@ steps:
     steps:
       # Fire-and-forget a root-cause investigation for each newly-promoted event.
       # Async so triage (30m) never blocks on the investigation (60m).
-      # concurrency_key per slug ensures a re-promotion cancels the prior in-progress
+      # concurrency_key per event_id ensures a re-promotion cancels the prior in-progress
       # investigation rather than queuing alongside it (cancel-in-progress / max:1 in the
       # investigation workflow).
       - name: trigger_investigation
         type: workflow.executeAsync
-        if: '${{ foreach.item.status == "promoted" and foreach.item.written }}'
+        if: '${{ foreach.item.status == "open" and foreach.item.written }}'
         with:
           workflow-id: 'system-significant-events-investigation'
           inputs:
-            concurrency_key: '{{ foreach.item.discovery_slug }}'
+            concurrency_key: '{{ foreach.item.event_id }}'
             context:
               event_id: '{{ foreach.item.event_id }}'
-              discovery_slug: '{{ foreach.item.discovery_slug }}'
         on-failure:
           continue: true
 

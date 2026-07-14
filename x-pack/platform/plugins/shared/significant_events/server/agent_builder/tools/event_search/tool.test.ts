@@ -40,7 +40,7 @@ describe('event_search tool', () => {
   it('returns events on success and tracks telemetry', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (searchEventsToolHandler as jest.Mock).mockResolvedValue({
-      events: [{ event_id: 'e1' }],
+      events: [{ event_uuid: 'e1' }],
       total: 1,
     });
 
@@ -79,7 +79,7 @@ describe('event_search tool', () => {
   it('accepts cross-stream searches without stream_names', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     (searchEventsToolHandler as jest.Mock).mockResolvedValue({
-      events: [{ event_id: 'e2' }],
+      events: [{ event_uuid: 'e2' }],
       total: 1,
     });
 

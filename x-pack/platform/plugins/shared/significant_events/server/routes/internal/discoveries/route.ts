@@ -73,7 +73,7 @@ const discoveriesHistoryRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const result = await getDiscoveryClient().findBySlug(params.path.id);
+    const result = await getDiscoveryClient().findByEventId(params.path.id);
     return { hits: result.hits };
   },
 });

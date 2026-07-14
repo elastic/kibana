@@ -6,22 +6,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { sigEventBaseSchema } from '../common_schemas';
+import { significantEventBaseSchema } from '../common_schemas';
 import { MAX_TEXT_LENGTH, MAX_ID_LENGTH } from '../constants';
 
-export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
-  'promoted',
-  'acknowledged',
-  'demoted',
-  'resolved',
-  'closed',
-] as const;
+export const SIGNIFICANT_EVENT_STATUS_OPTIONS = ['open', 'closed', 'dismissed'] as const;
 
 export const significantEventStatusSchema = z
   .enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
   .describe(
-    '"promoted" for actionable incidents, "acknowledged" for known and actively tracked events, ' +
-      '"demoted" for false positives, "resolved" for closed incidents.'
+    '"open" = incident is active and being tracked; ' +
+      '"closed" = incident is confirmed resolved; ' +
+      '"dismissed" = severity is low AND confidence is also low — too few corroborating signals to trust the finding. ' +
+      'A low-severity but well-corroborated finding stays "open"; only dismiss when the evidence itself is too thin.'
   );
 export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema>;
 
@@ -34,29 +30,38 @@ export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema
  * `completed_at` is absent.
  */
 export const significantEventInvestigationSchema = z.object({
-  workflow_execution_id: z.string().max(MAX_ID_LENGTH),
-  started_at: z.iso.datetime({ offset: true }),
-  completed_at: z.iso.datetime({ offset: true }).optional(),
+  workflow_execution_id: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe(
+      'ID of the investigation workflow execution. Use it to fetch the full investigation ' +
+        'state (hypotheses, conclusion, etc.) — that workflow execution document is the ' +
+        "single source of truth for the investigation's content."
+    ),
+  started_at: z.iso.datetime({ offset: true }).describe('When this investigation run started.'),
+  completed_at: z.iso
+    .datetime({ offset: true })
+    .optional()
+    .describe(
+      'When this investigation run finished. Absent while the investigation is still running.'
+    ),
 });
 export type SignificantEventInvestigation = z.infer<typeof significantEventInvestigationSchema>;
 
-export const significantEventSchema = sigEventBaseSchema.extend({
+export const significantEventSchema = significantEventBaseSchema.extend({
   '@timestamp': z.iso.datetime({ offset: true }),
-  created_at: z.iso.datetime({ offset: true }),
-  event_id: z.string().max(MAX_ID_LENGTH),
+  event_uuid: z.string().max(MAX_ID_LENGTH).describe('Unique ID of an event.'),
   discovery_id: z
     .string()
     .max(MAX_ID_LENGTH)
     .optional()
-    .describe('ID of the discovery episode this event was promoted from.'),
-  previous_event_id: z.string().max(MAX_ID_LENGTH).optional(),
+    .describe('ID of the discovery document this event was derived from.'),
+  previous_event_uuid: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe('event_uuid of the original event that this event was derived from.'),
   status: significantEventStatusSchema,
-  recommendations: z
-    .array(z.string().max(1000))
-    .max(50)
-    .describe(
-      '3 stop-the-bleeding actions ranked by likelihood of stopping user impact, most reversible first.'
-    ),
   assessment_note: z
     .string()
     .max(MAX_TEXT_LENGTH)

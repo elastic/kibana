@@ -24,20 +24,20 @@ export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;
 
 const eventStatusUpdateSchema = z.object({
-  event_id: z
+  event_uuid: z
     .string()
     .max(MAX_ID_LENGTH)
     .describe(
       i18n.translate(
-        'xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.schema.eventId',
+        'xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.schema.eventUuid',
         {
           defaultMessage: 'Identifier of the significant event to update.',
         }
       )
     ),
   status: significantEventStatusSchema.describe(
-    i18n.translate('xpack.significantEvents.agentBuilder.tools.eventStatusUpdate.schema.status', {
-      defaultMessage: 'Target status value to set.',
+    i18n.translate('xpack.streams.agentBuilder.tools.eventStatusUpdate.schema.status', {
+      defaultMessage: 'The new status to set on the significant event.',
     })
   ),
 });
@@ -72,13 +72,13 @@ export function createEventStatusUpdateTool({
 
         const data = await updateEventStatusToolHandler({
           eventClient: getEventClient(),
-          eventId: toolParams.event_id,
+          eventUuid: toolParams.event_uuid,
           status: toolParams.status,
         });
 
         telemetry.trackAgentToolEventStatusUpdate({
           success: true,
-          event_id: toolParams.event_id,
+          event_uuid: toolParams.event_uuid,
           status: toolParams.status,
         });
 
@@ -88,7 +88,7 @@ export function createEventStatusUpdateTool({
         logger.error(`Error running event_status_update: ${message}`);
         telemetry.trackAgentToolEventStatusUpdate({
           success: false,
-          event_id: toolParams.event_id,
+          event_uuid: toolParams.event_uuid,
           status: toolParams.status,
           error_message: message,
         });

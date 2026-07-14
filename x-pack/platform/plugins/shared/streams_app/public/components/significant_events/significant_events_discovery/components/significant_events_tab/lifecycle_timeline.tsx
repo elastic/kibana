@@ -66,10 +66,10 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
       timestamp: discovery['@timestamp'],
       title: discovery.title,
       description:
-        discovery.kind === 'discovery' && discovery.criticality != null
-          ? i18n.translate('xpack.streams.lifecycle.criticality', {
-              defaultMessage: 'Criticality {n}',
-              values: { n: discovery.criticality },
+        discovery.kind === 'discovery' && discovery.severity != null
+          ? i18n.translate('xpack.streams.lifecycle.severity', {
+              defaultMessage: 'Severity: {severity}',
+              values: { severity: discovery.severity },
             })
           : undefined,
     }));
@@ -83,10 +83,10 @@ function buildEntries(data: EventLifecycleResponse): TimelineEntry[] {
       timestamp: event['@timestamp'],
       title: event.title,
       description:
-        event.criticality != null
-          ? i18n.translate('xpack.streams.lifecycle.criticality', {
-              defaultMessage: 'Criticality {n}',
-              values: { n: event.criticality },
+        event.severity != null
+          ? i18n.translate('xpack.streams.lifecycle.severity', {
+              defaultMessage: 'Severity: {severity}',
+              values: { severity: event.severity },
             })
           : undefined,
 

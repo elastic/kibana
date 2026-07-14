@@ -286,7 +286,7 @@ evaluate.describe(
 
           // Continuation over time — does a re-arriving incident fold into ONE slug? We grade three
           // matchers per scenario: rule-UUID re-detection (same rule re-fires) plus the declared
-          // `semantic` and `cascade` chains (different rules, same episode). One experiment example
+          // `semantic` and `cascade` chains (different rules, same event). One experiment example
           // per (scenario × path); each chain is ground truth, so slug reuse is the correct answer
           // and minting a new slug is the defect ("slug proliferation is a defect").
           evaluate(
@@ -407,12 +407,12 @@ evaluate.describe(
                     );
 
                     const cycles: ContinuationCycle[] = [];
-                    // Tracks event_ids seeded by this run so they can be deleted after all cycles
+                    // Tracks event_uuids seeded by this run so they can be deleted after all cycles
                     // complete. Without this cleanup the next run's cycle-0 event_search would
-                    // find the previous run's open episodes and either reuse a foreign slug or
+                    // find the previous run's open events and either reuse a foreign slug or
                     // produce spurious noise. Deleting by explicit IDs is safer than wiping the
                     // entire stream and works correctly even when concurrency > 1.
-                    const seededEventIds: string[] = [];
+                    const seededEventUuids: string[] = [];
 
                     try {
                       // Feed one detection per cycle, oldest first. After each cycle, seed a
@@ -434,7 +434,7 @@ evaluate.describe(
 
                         const discoveries = extractDiscoveriesFromToolCall(converseResult.steps);
                         const producedSlugs = discoveries
-                          .map((discovery) => discovery.discovery_slug)
+                          .map((discovery) => discovery.event_id)
                           .filter((slug): slug is string => Boolean(slug));
 
                         cycles.push({
@@ -444,18 +444,18 @@ evaluate.describe(
                         });
 
                         // Seed a SignificantEvent per produced discovery so event_search resolves it
-                        // as an open episode in subsequent cycles.
+                        // as an open event in subsequent cycles.
                         for (const [idx, discovery] of discoveries.entries()) {
-                          if (!discovery.discovery_slug) continue;
-                          const eventId = `${discovery.discovery_slug}-cycle-${i}-${idx}`;
+                          if (!discovery.event_id) continue;
+                          const eventUuid = `${discovery.event_id}-cycle-${i}-${idx}`;
                           await esClient.index({
                             index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
                             document: canonicalSignificantEventFromGroundTruth({
                               discovery,
-                              eventId,
+                              eventUuid,
                             }),
                           });
-                          seededEventIds.push(eventId);
+                          seededEventUuids.push(eventUuid);
                         }
                         if (producedSlugs.length > 0) {
                           await esClient.indices.refresh({
@@ -464,10 +464,10 @@ evaluate.describe(
                         }
                       }
                     } finally {
-                      if (seededEventIds.length > 0) {
+                      if (seededEventUuids.length > 0) {
                         await esClient.deleteByQuery({
                           index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-                          query: { terms: { event_id: seededEventIds } },
+                          query: { terms: { event_uuid: seededEventUuids } },
                           refresh: true,
                         });
                       }

@@ -377,7 +377,7 @@ interface RunGetProcessedIdsArgs {
 /**
  * Returns the set of IDs where a handled stamp (kind == handledKind) is at least
  * as recent as the latest state doc (kind in stateKinds). Used by both DetectionClient
- * and DiscoveryClient to determine which episodes are fully processed.
+ * and DiscoveryClient to determine which events are fully processed.
  */
 export const runGetProcessedIds = async ({
   esClient,

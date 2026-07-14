@@ -14,9 +14,7 @@ export const DISCOVERY_KIND_COLORS: Record<Discovery['kind'], string> = {
 };
 
 export const SIGNIFICANT_EVENT_STATUS_COLORS: Record<SignificantEventStatus, string> = {
-  promoted: 'danger',
-  acknowledged: 'warning',
-  resolved: 'success',
-  demoted: 'default',
+  open: 'danger',
   closed: 'default',
+  dismissed: 'default',
 };

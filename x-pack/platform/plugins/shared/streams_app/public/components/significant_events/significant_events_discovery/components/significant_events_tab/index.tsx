@@ -62,7 +62,7 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
       aria-label={RUN_ARIA_LABEL}
       onClick={(e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!isTriggering) triggerInvestigation(event.event_id);
+        if (!isTriggering) triggerInvestigation(event.event_uuid);
       }}
       isDisabled={isTriggering}
       isLoading={isTriggering}
@@ -86,7 +86,7 @@ const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
       aria-label={CLOSE_EVENT_ARIA_LABEL}
       onClick={(e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!isUpdating) updateEventStatus({ eventId: event.event_id, status: 'closed' });
+        if (!isUpdating) updateEventStatus({ eventUuid: event.event_uuid, status: 'closed' });
       }}
       isDisabled={isUpdating}
       isLoading={isUpdating}
@@ -179,12 +179,12 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
     },
   },
   {
-    field: 'criticality',
-    name: i18n.translate('xpack.streams.sigEventsTab.criticalityColumn', {
-      defaultMessage: 'Criticality',
+    field: 'severity',
+    name: i18n.translate('xpack.streams.sigEventsTab.severityColumn', {
+      defaultMessage: 'Severity',
     }),
     width: '100px',
-    render: (criticality: number | undefined) => <EuiText size="xs">{criticality ?? '-'}</EuiText>,
+    render: (severity: string | undefined) => <EuiText size="xs">{severity ?? '-'}</EuiText>,
   },
   {
     name: '',

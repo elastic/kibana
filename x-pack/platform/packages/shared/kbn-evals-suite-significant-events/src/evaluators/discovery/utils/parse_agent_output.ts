@@ -10,11 +10,11 @@ import type { ConverseStep } from '@kbn/evals';
 import type { Discovery, SignificantEvent } from '@kbn/significant-events-schema';
 
 interface DiscoveryWriteToolResult {
-  data?: Pick<Discovery, 'discovery_slug'>;
+  data?: Pick<Discovery, 'event_id'>;
 }
 
 interface EventsWriteToolResult {
-  data?: { event_id?: string; written?: boolean };
+  data?: { event_uuid?: string; written?: boolean };
 }
 
 const toolCallSteps = (steps: ConverseStep[], toolId: string) =>
@@ -25,20 +25,20 @@ const toolCallSteps = (steps: ConverseStep[], toolId: string) =>
  */
 export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Discovery[] =>
   toolCallSteps(steps, platformSignificantEventsTools.discoveryWrite).map((step) => {
-    const slug = (step.results?.[0] as DiscoveryWriteToolResult | undefined)?.data?.discovery_slug;
-    return { ...step.params, ...(slug ? { discovery_slug: slug } : {}) } as Discovery;
+    const eventId = (step.results?.[0] as DiscoveryWriteToolResult | undefined)?.data?.event_id;
+    return { ...step.params, ...(eventId ? { event_id: eventId } : {}) } as Discovery;
   });
 
 /**
  * Extract significant events from `events_write` tool call steps.
- * Merges `event_id` and `written` from the tool result so evaluators can inspect dedup outcomes.
+ * Merges `event_uuid` and `written` from the tool result so evaluators can inspect dedup outcomes.
  */
 export const extractSignificantEventsFromToolCall = (steps: ConverseStep[]): SignificantEvent[] =>
   toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).map((step) => {
     const result = (step.results?.[0] as EventsWriteToolResult | undefined)?.data;
     return {
       ...step.params,
-      ...(result?.event_id != null ? { event_id: result.event_id } : {}),
+      ...(result?.event_uuid != null ? { event_uuid: result.event_uuid } : {}),
       ...(result?.written != null ? { written: result.written } : {}),
     } as SignificantEvent;
   });

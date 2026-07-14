@@ -26,13 +26,11 @@ const createEventSchema = significantEventSchema
     status: true,
     title: true,
     summary: true,
-    root_cause: true,
     stream_names: true,
-    criticality: true,
+    severity: true,
     confidence: true,
-    recommendations: true,
   })
-  .partial({ status: true, recommendations: true });
+  .partial({ status: true });
 
 export function createEventTool({
   getScopedClients,

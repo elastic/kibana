@@ -36,10 +36,22 @@ export type ChangePointType = (typeof CHANGE_POINT_TYPES)[number];
  */
 export const detectionSchema = z.object({
   '@timestamp': z.iso.datetime({ offset: true }),
-  detection_id: z.string().max(MAX_ID_LENGTH),
-  rule_uuid: z.string().max(MAX_ID_LENGTH),
-  rule_name: z.string().max(MAX_RULE_NAME_LENGTH),
-  stream_name: z.string().max(MAX_ID_LENGTH).optional(),
+  detection_id: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe('ID of the detection document. Used for traceability back to the source alert.'),
+  rule_uuid: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe(
+      'UUID of the alerting rule that fired. Used to correlate signals with KI query rules.'
+    ),
+  rule_name: z
+    .string()
+    .max(MAX_RULE_NAME_LENGTH)
+    .optional()
+    .describe('Human-readable name of the alerting rule.'),
+  stream_name: z.string().max(MAX_ID_LENGTH),
   change_point_type: z
     .enum(CHANGE_POINT_TYPES)
     .describe(

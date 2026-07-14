@@ -9,8 +9,9 @@ import type { DiscoveryJudgeEvaluator } from '../../types';
 import { summarizeEsqlGrounding } from '../../utils/tool_usage';
 
 /**
- * CODE evaluator: every `promoted` event must carry a `confirmed: true` evidence and the judge must
- * have run `execute_esql` this cycle. Score = valid promoted / promoted; null when none promoted.
+ * CODE evaluator: every `open` event with `severity: "critical"` must carry a `confirmed: true`
+ * signal and the judge must have run `execute_esql` this cycle.
+ * Score = valid critical-open / critical-open; null when none qualify.
  */
 export const confirmedEvidencesEvaluator: DiscoveryJudgeEvaluator = {
   name: 'confirmed_evidences',
@@ -18,46 +19,46 @@ export const confirmedEvidencesEvaluator: DiscoveryJudgeEvaluator = {
   evaluate: ({ output }) => {
     const { significantEvents, steps } = output;
     const events = significantEvents ?? [];
-    const promoted = events.filter((e) => e.status === 'promoted');
+    const criticalOpen = events.filter((e) => e.status === 'open' && e.severity === 'critical');
 
-    if (promoted.length === 0) {
+    if (criticalOpen.length === 0) {
       return Promise.resolve({
         score: null,
         label: 'unavailable',
-        explanation: 'No promoted events — confirmed-evidence invariant does not apply',
+        explanation: 'No open+critical events — confirmed-signal invariant does not apply',
       });
     }
 
     const esqlCallCount = summarizeEsqlGrounding(steps ?? []).noOfToolCalls;
-    // Require at least one execute_esql call per promoted event. A single call shared
-    // across all promotions cannot guarantee that each event was individually re-verified.
-    const sufficientEsqlCoverage = esqlCallCount >= promoted.length;
+    // Require at least one execute_esql call per critical-open event. A single call shared
+    // across all events cannot guarantee that each event was individually re-verified.
+    const sufficientEsqlCoverage = esqlCallCount >= criticalOpen.length;
 
     let satisfied = 0;
     const issues: string[] = [];
 
-    promoted.forEach((event, i) => {
-      const evidences = event.evidences ?? [];
-      const hasConfirmed = evidences.some((ev) => ev.confirmed === true);
+    criticalOpen.forEach((event, i) => {
+      const signals = event.signals ?? [];
+      const hasConfirmed = signals.some((s) => s.confirmed === true);
 
       if (hasConfirmed && sufficientEsqlCoverage) {
         satisfied++;
       } else if (!sufficientEsqlCoverage) {
         issues.push(
-          `[${i}] judge ran ${esqlCallCount} execute_esql call(s) for ${promoted.length} promoted event(s) — insufficient per-event coverage`
+          `[${i}] judge ran ${esqlCallCount} execute_esql call(s) for ${criticalOpen.length} critical-open event(s) — insufficient per-event coverage`
         );
       } else {
-        issues.push(`[${i}] promoted with no confirmed:true evidence`);
+        issues.push(`[${i}] open/critical with no confirmed:true signal`);
       }
     });
 
-    const score = satisfied / promoted.length;
+    const score = satisfied / criticalOpen.length;
     return Promise.resolve({
       score,
       explanation:
         issues.length > 0
           ? `${issues.join('; ')} (score=${score.toFixed(2)})`
-          : `All ${promoted.length} promoted event(s) backed by confirmed, freshly-verified evidence`,
+          : `All ${criticalOpen.length} open+critical event(s) backed by confirmed, freshly-verified signals`,
     });
   },
 };

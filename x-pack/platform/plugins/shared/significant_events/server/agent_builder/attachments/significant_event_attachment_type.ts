@@ -28,21 +28,15 @@ const formatList = (values: string[] | undefined): string => {
 };
 
 export const formatSignificantEventAsText = (event: SignificantEvent): string => {
-  const recommendations = event.recommendations
-    .map((recommendation, index) => `${index + 1}. ${recommendation}`)
-    .join('\n');
-
   return [
     `Significant Event "${event.title}"`,
     `Event ID: ${event.event_id}`,
-    `Discovery slug: ${event.discovery_slug}`,
+    `Event UUID: ${event.event_uuid}`,
     `Status: ${event.status}`,
-    `Criticality: ${event.criticality}`,
+    `Severity: ${event.severity}`,
     `Confidence: ${event.confidence}`,
     `Streams: ${formatList(event.stream_names)}`,
     `Summary: ${event.summary}`,
-    `Root cause: ${event.root_cause}`,
-    recommendations ? `Recommendations:\n${recommendations}` : undefined,
   ]
     .filter((line): line is string => Boolean(line))
     .join('\n');
@@ -55,12 +49,12 @@ export const createSignificantEventAttachmentType = ({
   typeof SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
   SignificantEvent
 > => {
-  const fetchByDiscoverySlug = async (
-    discoverySlug: string,
+  const fetchByEventId = async (
+    eventId: string,
     context: AttachmentResolveContext
   ): Promise<SignificantEvent | undefined> => {
     const { getEventClient } = await getScopedClients({ request: context.request });
-    const { hits } = await getEventClient().findByDiscoverySlug(discoverySlug);
+    const { hits } = await getEventClient().findByEventId(eventId);
 
     return hits.at(-1);
   };
@@ -77,7 +71,7 @@ export const createSignificantEventAttachmentType = ({
     },
     resolve: async (origin, context): Promise<SignificantEvent | undefined> => {
       try {
-        return await fetchByDiscoverySlug(origin, context);
+        return await fetchByEventId(origin, context);
       } catch (error) {
         logger.warn(
           `Failed to resolve significant event attachment for origin "${origin}": ${error}`
@@ -99,10 +93,10 @@ export const createSignificantEventAttachmentType = ({
       }
 
       try {
-        const latestEvent = await fetchByDiscoverySlug(attachment.origin, context);
+        const latestEvent = await fetchByEventId(attachment.origin, context);
         return (
           !latestEvent ||
-          latestVersion.data.event_id !== latestEvent.event_id ||
+          latestVersion.data.event_uuid !== latestEvent.event_uuid ||
           latestVersion.data['@timestamp'] !== latestEvent['@timestamp']
         );
       } catch (error) {
@@ -119,7 +113,7 @@ export const createSignificantEventAttachmentType = ({
       }),
     }),
     getAgentDescription: () =>
-      'A significant event attachment represents a durable incident-level Streams event. Rendering it inline displays a read-only event summary card in the conversation UI. Use it as authoritative context for the incident, affected streams, root cause, and recommendations.',
+      'A significant event attachment represents a durable incident-level Streams event. Rendering it inline displays a read-only event summary card in the conversation UI. Use it as authoritative context for the incident and affected streams.',
     getTools: () => [],
   };
 };

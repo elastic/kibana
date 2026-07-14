@@ -30,7 +30,7 @@ const searchEventsSchema = z.object({
         defaultMessage:
           'Optional substring search over the event title and summary fields. ' +
           'Use it to narrow results to a known incident phrase or service name. ' +
-          'Matching is case-insensitive and not semantic — omit it when you want all episodes for a stream or state.',
+          'Matching is case-insensitive and not semantic — omit it when you want all events for a stream or state.',
       })
     ),
   stream_names: z
@@ -48,7 +48,7 @@ const searchEventsSchema = z.object({
     .describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.state', {
         defaultMessage:
-          'Optional latest-event state filter. `open` matches latest status promoted/acknowledged; `closed` matches any latest status not in that open set.',
+          'Filters results by the latest status of each event. "open" returns active incidents; "closed" returns resolved or dismissed ones. Omit to return all.',
       })
     ),
   page: z.number().int().min(1).optional().default(1),
@@ -77,9 +77,9 @@ export function createSearchEventsTool({
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line2', {
         defaultMessage:
-          'Use `state: "open"` to return latest episodes whose status is promoted/acknowledged. ' +
-          'Use `state: "closed"` to return latest episodes whose status is not promoted/acknowledged. ' +
-          'If `state` is omitted, returns all latest episodes.',
+          'Use `state: "open"` to filter for active incidents. ' +
+          'Use `state: "closed"` to filter for resolved or dismissed events. ' +
+          'Omit to return all events.',
       })}
     `,
     schema: searchEventsSchema,

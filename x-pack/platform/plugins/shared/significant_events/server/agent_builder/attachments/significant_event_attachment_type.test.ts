@@ -21,27 +21,23 @@ import {
 
 const event: SignificantEvent = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  created_at: '2026-01-01T00:00:00.000Z',
-  event_id: 'event-1',
+  event_uuid: 'event-1',
   discovery_id: 'discovery-1',
-  discovery_slug: 'payment-outage',
-  status: 'promoted',
+  event_id: 'payment-outage',
+  status: 'open',
   workflow_execution_id: 'workflow-1',
-  rule_names: ['Payment errors'],
   stream_names: ['logs.payment'],
   title: 'Payment outage',
   summary: 'Payments are failing.',
-  root_cause: 'Payment gateway timeout.',
-  criticality: 90,
+  severity: 'high',
   confidence: 0.8,
-  recommendations: ['Restart gateway client'],
 };
 
 const createGetScopedClients = (
   events: SignificantEvent[]
 ): jest.MockedFunction<GetScopedClients> => {
   const getEventClient = jest.fn(() => ({
-    findByDiscoverySlug: jest.fn().mockResolvedValue({ hits: events }),
+    findByEventId: jest.fn().mockResolvedValue({ hits: events }),
   }));
 
   return jest.fn().mockResolvedValue({
@@ -54,7 +50,7 @@ const createVersionedAttachment = (
 ): VersionedAttachmentWithOrigin<typeof SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SignificantEvent> => ({
   id: 'attachment-1',
   type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
-  origin: data.discovery_slug,
+  origin: data.event_id,
   current_version: 1,
   versions: [
     {
@@ -82,8 +78,8 @@ describe('createSignificantEventAttachmentType', () => {
     ).resolves.toEqual(expect.objectContaining({ valid: false }));
   });
 
-  it('resolves the latest event by discovery slug', async () => {
-    const updatedEvent = { ...event, event_id: 'event-2', status: 'acknowledged' as const };
+  it('resolves the latest event by event_id', async () => {
+    const updatedEvent = { ...event, event_uuid: 'event-2', status: 'closed' as const };
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([event, updatedEvent]),
@@ -95,7 +91,7 @@ describe('createSignificantEventAttachmentType', () => {
   });
 
   it('reports stale when the latest event differs from the stored snapshot', async () => {
-    const updatedEvent = { ...event, event_id: 'event-2', status: 'acknowledged' as const };
+    const updatedEvent = { ...event, event_uuid: 'event-2', status: 'closed' as const };
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
@@ -146,7 +142,7 @@ describe('createSignificantEventAttachmentType', () => {
     });
 
     expect(formatSignificantEventAsText(event)).toContain('Payment outage');
-    expect(formatSignificantEventAsText(event)).toContain('Payment gateway timeout.');
+    expect(formatSignificantEventAsText(event)).toContain('Payments are failing.');
     expect(type.isReadonly).toBe(true);
     expect(type.getTools?.()).toEqual([]);
     expect(type.getAgentDescription?.()).toContain('significant event attachment');

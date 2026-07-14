@@ -58,6 +58,9 @@ describe('significant events fair batch selection', () => {
     expect(selection.type).toBe('elasticsearch.esql.query');
     expect(selection.with?.query).toContain('INLINE STATS last_seen_timestamp');
     expect(selection.with?.query).toContain('INLINE STATS latest_timestamp');
+    expect(selection.with?.query).toContain('BY event_id');
+    expect(selection.with?.query).toContain('severity_score');
+    expect(selection.with?.query).not.toContain('discovery_slug');
     expect(selection.with?.query).toContain('first_consideration_bonus');
     expect(selection.with?.query).toContain('LIMIT ?1');
     expect(count.with?.query).toContain('STATS candidate_count = COUNT(*)');

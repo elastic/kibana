@@ -69,11 +69,7 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     }),
     width: '160px',
     render: (discovery: Discovery) => {
-      const streamNames = [
-        ...new Set(
-          (discovery.detections ?? []).map((d) => d.stream_name).filter((s): s is string => !!s)
-        ),
-      ];
+      const streamNames = discovery.stream_names ?? [];
       return (
         <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
           {streamNames.slice(0, MAX_VISIBLE_STREAMS).map((name) => (
@@ -91,12 +87,12 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     },
   },
   {
-    field: 'criticality',
-    name: i18n.translate('xpack.streams.discoveriesTab.criticalityColumn', {
-      defaultMessage: 'Criticality',
+    field: 'severity',
+    name: i18n.translate('xpack.streams.discoveriesTab.severityColumn', {
+      defaultMessage: 'Severity',
     }),
     width: '100px',
-    render: (value: number | undefined) => (value != null ? String(value) : '-'),
+    render: (value: string | undefined) => value ?? '-',
   },
   {
     field: 'confidence',
@@ -136,7 +132,7 @@ export const DiscoveriesTab = () => {
   const [selectedDiscovery, setSelectedDiscovery] = useState<Discovery | undefined>();
 
   const { data: historyData, isLoading: isHistoryLoading } = useFetchDiscoveryHistory(
-    selectedDiscovery?.discovery_slug
+    selectedDiscovery?.event_id
   );
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {

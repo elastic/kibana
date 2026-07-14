@@ -13,17 +13,14 @@ import type { SignificantEvent } from './data_stream';
 
 const createEvent = (): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  created_at: '2026-01-01T00:00:00.000Z',
-  event_id: 'event-1',
-  discovery_slug: 'agent-event-1',
-  status: 'promoted',
+  event_uuid: 'event-1',
+  event_id: 'agent-event-1',
+  status: 'open',
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  root_cause: 'Test root cause',
-  criticality: 50,
+  severity: 'medium',
   confidence: 0.8,
-  recommendations: ['Investigate the test signal'],
 });
 
 const createClient = (response: BulkResponse) => {
@@ -139,10 +136,10 @@ describe('EventClient', () => {
 
   describe('findLatestByCurrentStatePaginated', () => {
     it('filters open state after latest-per-slug reduction', async () => {
-      const resolvedLatest = { ...createEvent(), status: 'resolved' as const };
+      const closedLatest = { ...createEvent(), status: 'closed' as const };
       const { client, query } = createSearchClient({
         openHits: [],
-        closedHits: [resolvedLatest],
+        closedHits: [closedLatest],
         total: 0,
       });
 
@@ -159,17 +156,17 @@ describe('EventClient', () => {
     });
 
     it('treats closed as latest status not in open set', async () => {
-      const resolvedLatest = { ...createEvent(), status: 'resolved' as const };
+      const closedLatest = { ...createEvent(), status: 'closed' as const };
       const { client } = createSearchClient({
         openHits: [],
-        closedHits: [resolvedLatest],
+        closedHits: [closedLatest],
         total: 1,
       });
 
       const result = await client.findLatestByCurrentStatePaginated({ state: 'closed' });
 
       expect(result.hits).toHaveLength(1);
-      expect(result.hits[0].status).toBe('resolved');
+      expect(result.hits[0].status).toBe('closed');
       expect(result.total).toBe(1);
     });
   });

@@ -38,11 +38,18 @@ import {
   type StoredEvent,
   type eventsMappings,
 } from './data_stream';
-import { FIELD_EVENT_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
+import { FIELD_EVENT_UUID, FIELD_EVENT_ID } from '../field_names';
 import { enrichFromEvidences } from '../utils';
+import { fromSortableSeverity } from '../severity';
+
+const normalizeSeverity = (doc: SignificantEvent): SignificantEvent =>
+  doc.severity
+    ? { ...doc, severity: fromSortableSeverity(doc.severity) as SignificantEvent['severity'] }
+    : doc;
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
-const SIGNIFICANT_EVENT_OPEN_STATUS_OPTIONS = ['promoted', 'acknowledged'] as const;
+
+const SIGNIFICANT_EVENT_OPEN_STATUS = 'open' as const;
 
 export interface EventsFilterOptions {
   status?: string[];
@@ -106,13 +113,14 @@ export class EventClient {
   }
 
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: SignificantEvent[] }> {
-    return runLatestSourceEsqlQuery<SignificantEvent>({
+    const result = await runLatestSourceEsqlQuery<SignificantEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: EVENTS_DATA_STREAM,
-      groupBy: FIELD_DISCOVERY_SLUG,
+      groupBy: FIELD_EVENT_ID,
     });
+    return { hits: result.hits.map(normalizeSeverity) };
   }
 
   async findLatestPaginated(
@@ -124,10 +132,10 @@ export class EventClient {
       options,
       index: EVENTS_DATA_STREAM,
       where: this.buildWhere(options),
-      groupBy: FIELD_DISCOVERY_SLUG,
+      groupBy: FIELD_EVENT_ID,
     });
 
-    return { ...result, hits: result.hits.map(enrichFromEvidences) };
+    return { ...result, hits: result.hits.map(enrichFromEvidences).map(normalizeSeverity) };
   }
 
   async findLatestByCurrentStatePaginated(
@@ -136,11 +144,10 @@ export class EventClient {
     const page = options.page ?? 1;
     const perPage = options.perPage ?? 25;
 
-    const openStatuses = SIGNIFICANT_EVENT_OPEN_STATUS_OPTIONS.map((s) => esql.str(s));
     const stateWhere =
       options.state === 'open'
-        ? esql.exp`${esql.col('status')} IN (${openStatuses})`
-        : esql.exp`${esql.col('status')} NOT IN (${openStatuses})`;
+        ? esql.exp`${esql.col('status')} IN (${esql.str(SIGNIFICANT_EVENT_OPEN_STATUS)})`
+        : esql.exp`${esql.col('status')} NOT IN (${esql.str(SIGNIFICANT_EVENT_OPEN_STATUS)})`;
 
     // ComposerQuery is mutable — each chaining call mutates the same object and returns `this`.
     // Build the base query twice via a factory so the data branch and count branch get independent
@@ -157,7 +164,7 @@ export class EventClient {
       });
       // stream + search filters run pre-latest; state filter runs post-latest
       q = withWhere(q, this.buildWhere({ stream: options.stream, search: options.search }));
-      q = pickLatestPerGroup(q, FIELD_DISCOVERY_SLUG);
+      q = pickLatestPerGroup(q, FIELD_EVENT_ID);
       q = withWhere(q, stateWhere);
       return q;
     };
@@ -183,48 +190,48 @@ export class EventClient {
     const paginatedHits = start >= hits.length ? [] : hits.slice(start, start + perPage);
 
     return {
-      hits: paginatedHits.map(enrichFromEvidences),
+      hits: paginatedHits.map(enrichFromEvidences).map(normalizeSeverity),
       page,
       perPage,
       total,
     };
   }
 
-  async findById(id: string): Promise<{ hits: SignificantEvent[] }> {
+  async findByEventUuid(id: string): Promise<{ hits: SignificantEvent[] }> {
+    return runFindByIdEsqlQuery<SignificantEvent>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: EVENTS_DATA_STREAM,
+      idField: FIELD_EVENT_UUID,
+      idValue: id,
+    });
+  }
+
+  async findByEventId(eventId: string): Promise<{ hits: SignificantEvent[] }> {
     return runFindByIdEsqlQuery<SignificantEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: EVENTS_DATA_STREAM,
       idField: FIELD_EVENT_ID,
-      idValue: id,
+      idValue: eventId,
     });
   }
 
-  async findByDiscoverySlug(slug: string): Promise<{ hits: SignificantEvent[] }> {
-    return runFindByIdEsqlQuery<SignificantEvent>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      index: EVENTS_DATA_STREAM,
-      idField: FIELD_DISCOVERY_SLUG,
-      idValue: slug,
-    });
-  }
-
-  async findLatestBySlugs(slugs: string[]): Promise<Map<string, SignificantEvent>> {
-    if (!slugs.length) return new Map();
-    const slugLiterals = slugs.map((s) => esql.str(s));
-    const where = esql.exp`${esql.col(FIELD_DISCOVERY_SLUG)} IN (${slugLiterals})`;
+  async findLatestByEventIds(eventIds: string[]): Promise<Map<string, SignificantEvent>> {
+    if (!eventIds.length) return new Map();
+    const idLiterals = eventIds.map((s) => esql.str(s));
+    const where = esql.exp`${esql.col(FIELD_EVENT_ID)} IN (${idLiterals})`;
     const { hits } = await runPaginatedLatestSourceEsqlQuery<SignificantEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
-      options: { perPage: slugs.length },
+      options: { perPage: eventIds.length },
       index: EVENTS_DATA_STREAM,
       where,
-      groupBy: FIELD_DISCOVERY_SLUG,
+      groupBy: FIELD_EVENT_ID,
     });
     const map = new Map<string, SignificantEvent>();
     for (const event of hits) {
-      if (event.discovery_slug) map.set(event.discovery_slug, event);
+      if (event.event_id) map.set(event.event_id, normalizeSeverity(event));
     }
     return map;
   }

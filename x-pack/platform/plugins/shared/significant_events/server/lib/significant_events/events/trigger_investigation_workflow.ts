@@ -48,32 +48,20 @@ export const triggerInvestigationWorkflow = async ({
     return undefined;
   }
 
-  const {
-    title,
-    summary,
-    root_cause,
-    stream_names,
-    event_id,
-    discovery_slug,
-    status,
-    criticality,
-    confidence,
-    recommendations,
-  } = event;
+  const { title, summary, stream_names, event_uuid, event_id, status, severity, confidence } =
+    event;
 
   const inputs = {
-    message: `${title}\n\n${summary}\n\nProbable cause: ${root_cause}`,
+    message: `${title}\n\n${summary}`,
     stream_names: stream_names ?? [],
-    concurrency_key: discovery_slug,
+    concurrency_key: event_id,
     context: {
       source: 'significant_event',
+      event_uuid,
       event_id,
-      discovery_slug,
       status,
-      criticality,
+      severity,
       confidence,
-      root_cause,
-      recommendations,
     },
   };
 
@@ -86,7 +74,7 @@ export const triggerInvestigationWorkflow = async ({
   );
 
   logger.info(
-    `Triggered investigation workflow for event "${event_id}", executionId=${executionId}`
+    `Triggered investigation workflow for event "${event_uuid}", executionId=${executionId}`
   );
   return executionId;
 };

@@ -16,12 +16,13 @@ export const eventsMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
-    event_id: mappings.keyword(),
+    event_uuid: mappings.keyword(),
     discovery_id: mappings.keyword(),
-    discovery_slug: mappings.keyword(),
-    previous_event_id: mappings.keyword(),
+    event_id: mappings.keyword(),
+    previous_event_uuid: mappings.keyword(),
     stream_names: mappings.keyword(),
     status: mappings.keyword(),
+    severity: mappings.keyword(),
     title: mappings.text(),
     summary: mappings.text(),
   },
@@ -31,7 +32,7 @@ export type { SignificantEvent };
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
-  version: 6,
+  version: 7,
   hidden: true,
   template: {
     priority: 500,

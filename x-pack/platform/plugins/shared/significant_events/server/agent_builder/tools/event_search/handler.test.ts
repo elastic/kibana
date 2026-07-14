@@ -8,7 +8,7 @@
 import { searchEventsToolHandler } from './handler';
 
 describe('searchEventsToolHandler', () => {
-  const makeClient = (hits: object[] = [{ event_id: 'e1' }]) => ({
+  const makeClient = (hits: object[] = [{ event_uuid: 'e1' }]) => ({
     findLatestByCurrentStatePaginated: jest
       .fn()
       .mockResolvedValue({ hits, page: 1, perPage: 20, total: hits.length }),
@@ -33,11 +33,11 @@ describe('searchEventsToolHandler', () => {
       state: 'open',
     });
     expect(eventClient.findLatestPaginated).not.toHaveBeenCalled();
-    expect(result).toEqual({ events: [{ event_id: 'e1' }], page: 1, per_page: 20, total: 1 });
+    expect(result).toEqual({ events: [{ event_uuid: 'e1' }], page: 1, per_page: 20, total: 1 });
   });
 
   it('supports cross-stream state search when stream_names is omitted', async () => {
-    const eventClient = makeClient([{ event_id: 'e2' }]);
+    const eventClient = makeClient([{ event_uuid: 'e2' }]);
 
     await searchEventsToolHandler({
       eventClient: eventClient as never,

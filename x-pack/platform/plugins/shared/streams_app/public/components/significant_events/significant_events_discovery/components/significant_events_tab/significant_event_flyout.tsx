@@ -78,8 +78,8 @@ const RESTART_INVESTIGATION_TOOLTIP = i18n.translate(
     defaultMessage: 'This will cancel the running investigation and start a new one.',
   }
 );
-const CRITICALITY_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.criticalityLabel', {
-  defaultMessage: 'Criticality',
+const SEVERITY_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.severityLabel', {
+  defaultMessage: 'Severity',
 });
 const CONFIDENCE_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.confidenceLabel', {
   defaultMessage: 'Confidence',
@@ -99,13 +99,13 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     isLoading: isLifecycleLoading,
     isError: isLifecycleError,
     refetch: refetchLifecycle,
-  } = useFetchSignificantEventLifecycle(event.event_id);
+  } = useFetchSignificantEventLifecycle(event.event_uuid);
 
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'significantEventFlyout' });
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   // Use the latest event version from the lifecycle response — lifecycle fetches all
-  // versions via findByDiscoverySlug (no time filter), so it captures newly-written
+  // versions via findByEventId (no time filter), so it captures newly-written
   // versions that fall outside the time-filtered list query used by the parent table.
   const latestEvent = useMemo(() => lifecycleData?.events.at(-1) ?? event, [lifecycleData, event]);
 
@@ -147,7 +147,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
     focusedSignificantEventService.setFocusedEvent(latestEvent);
 
     return () => {
-      focusedSignificantEventService.clearFocusedEvent(latestEvent.discovery_slug);
+      focusedSignificantEventService.clearFocusedEvent(latestEvent.event_id);
     };
   }, [latestEvent, focusedSignificantEventService]);
 
@@ -185,7 +185,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
                     onClick={() => {
                       if (!isUpdating) {
                         setIsActionsMenuOpen(false);
-                        updateEventStatus({ eventId: latestEvent.event_id, status: 'closed' });
+                        updateEventStatus({ eventUuid: latestEvent.event_uuid, status: 'closed' });
                       }
                     }}
                     data-test-subj="sigEventCloseButton"
@@ -223,7 +223,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             {formatTimestamp(event['@timestamp'])}
-            {event.criticality != null && ` · ${CRITICALITY_LABEL}: ${event.criticality}`}
+            {event.severity != null && ` · ${SEVERITY_LABEL}: ${event.severity}`}
             {event.confidence != null &&
               ` · ${CONFIDENCE_LABEL}: ${Math.round(event.confidence * 100)}%`}
           </EuiText>
@@ -270,7 +270,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
               <EuiButton
                 iconType="inspect"
                 onClick={() => {
-                  if (!isTriggering) triggerInvestigation(latestEvent.event_id);
+                  if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
                 }}
                 isDisabled={isTriggering}
                 isLoading={isTriggering}
