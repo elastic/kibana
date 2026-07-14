@@ -442,7 +442,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should set the cases title', async () => {
-        expect(await testSubjects.getVisibleText('appHeaderTitle')).to.equal(createdCase.title);
+        const title = await testSubjects.getVisibleText('header-page-title');
+        expect(title).to.be(createdCase.title);
       });
     });
 

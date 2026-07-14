@@ -124,14 +124,9 @@ export class ContextPage {
   }
 
   async goBackToDiscover() {
-    // Chrome-next (project layout) drops the classic breadcrumb trail and surfaces the parent page
-    // as a back button in the app header; classic chrome still renders the Discover breadcrumb.
-    const isChromeNext = (await this.page.testSubj.locator('chromeNextGlobalHeader').count()) > 0;
-    if (isChromeNext) {
-      await this.page.testSubj.click('appHeaderBack');
-    } else {
-      await this.page.testSubj.click('~breadcrumb-deepLinkId-discover');
-    }
+    const backButton = this.page.testSubj.locator('appHeaderBack');
+    const breadcrumb = this.page.testSubj.locator('~breadcrumb-deepLinkId-discover');
+    await backButton.or(breadcrumb).click();
     await this.page.testSubj
       .locator('dscPage')
       .waitFor({ state: 'visible', timeout: CONTEXT_LOAD_TIMEOUT });
