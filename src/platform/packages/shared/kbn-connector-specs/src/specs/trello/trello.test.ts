@@ -219,6 +219,18 @@ describe('Trello', () => {
         params: { closed: false },
       });
     });
+
+    it('updates member and label assignments', async () => {
+      mockClient.put.mockResolvedValue({ data: { id: 'card1' } });
+      await Trello.actions.updateCard.handler(mockContext, {
+        cardId: 'card1',
+        idMembers: 'member1,member2',
+        idLabels: 'label1',
+      });
+      expect(mockClient.put).toHaveBeenCalledWith(`${BASE_URL}/cards/card1`, null, {
+        params: { idMembers: 'member1,member2', idLabels: 'label1' },
+      });
+    });
   });
 
   describe('addComment action', () => {

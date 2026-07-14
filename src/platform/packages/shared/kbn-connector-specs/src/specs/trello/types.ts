@@ -148,6 +148,20 @@ export const UpdateCardInputSchema = lazySchema(() =>
       .describe(
         'Set true to archive the card, or false to unarchive it. This is the only way to remove a card through this connector — there is no hard-delete action.'
       ),
+    idMembers: z
+      .string()
+      .max(2000)
+      .optional()
+      .describe(
+        'Comma-separated Trello member IDs to assign to the card, replacing the current assignment. Use listBoardMembers to resolve names to IDs.'
+      ),
+    idLabels: z
+      .string()
+      .max(2000)
+      .optional()
+      .describe(
+        'Comma-separated Trello label IDs to apply to the card, replacing the current labels. Use listBoardLabels to resolve label names to IDs.'
+      ),
   })
 );
 export type UpdateCardInput = z.infer<typeof UpdateCardInputSchema>;

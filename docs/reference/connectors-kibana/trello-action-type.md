@@ -110,6 +110,8 @@ Update card
     - **List ID** (optional): Target list ID to move the card into a different list.
     - **Position** (optional): New position within its list: `top`, `bottom`, or a positive number.
     - **Closed** (optional): Set to `true` to archive the card, or `false` to unarchive it.
+    - **Member IDs** (optional): Comma-separated Trello member IDs to assign to the card, replacing the current assignment. Use **List board members** to resolve names to IDs.
+    - **Label IDs** (optional): Comma-separated Trello label IDs to apply to the card, replacing the current labels. Use **List board labels** to resolve label names to IDs.
 
 Add comment
 :   Posts a comment on a card. Returns the created comment action.

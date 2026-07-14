@@ -247,6 +247,8 @@ export const Trello: ConnectorSpec = {
         if (input.idList !== undefined) params.idList = input.idList;
         if (input.pos !== undefined) params.pos = input.pos;
         if (input.closed !== undefined) params.closed = input.closed;
+        if (input.idMembers !== undefined) params.idMembers = input.idMembers;
+        if (input.idLabels !== undefined) params.idLabels = input.idLabels;
         const response = await ctx.client.put(`${BASE_URL}/cards/${input.cardId}`, null, {
           params,
         });
