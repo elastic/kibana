@@ -40,7 +40,7 @@ For every failure, try to retrieve:
 
 - **Screenshot at the failure point.** What is actually on the page? Is the awaited element present but the selector wrong? Is a loading indicator still visible? Is there an error toast or unexpected modal? Is the page blank (app crash) or on a different route than expected?
 - **DOM / HTML snapshot at the failure point.** Confirms whether the element the test was looking for actually existed in the DOM (selector issue vs. rendering issue vs. product missing the element entirely).
-- **Server logs** (`kibana.log`, `elasticsearch.log` when present). Cross-reference the failure timestamp with any errors in the logs — a server-side 500 or unexpected warning is strong evidence the failure is a product bug, not a test bug.
+- **Server logs.** Cross-reference the failure timestamp with any server errors — a 500 or unexpected warning is strong evidence of a product bug, not a test bug. Where these logs live depends on the runner (see **Where the Kibana & Elasticsearch logs live** below), and they are captured at **INFO level and above only**.
 - **Full session trace** when the framework supports it (Scout / Playwright). Lets you scrub through every step, locator query, network call, and DOM snapshot.
 
 Things to specifically check in the artifacts before forming a root-cause hypothesis:
@@ -55,6 +55,16 @@ If artifacts are not available (expired, not uploaded, no `read_artifacts` token
 ### List failure artifacts
 
 `bk artifacts list <build> -p <pipeline> --job-uuid <jobId> --json` returns a JSON listing of every artifact uploaded for the failing job. Pass `--job-uuid <jobId>` for the failed attempt (without it, `bk` only returns the latest attempt and hides retried failures). If a build retried to green, failure artifacts only live on the failed job's listing; don't conclude "no screenshot" until you've scoped to the right job UUID.
+
+### Where the Kibana & Elasticsearch logs live
+
+Some runs ship server logs, others don't — and they're **INFO+ only** (no `debug`/`trace`):
+
+| Test type | Kibana logs | Elasticsearch logs |
+| --- | --- | --- |
+| **FTR** | In the test stdout (`target/test_failures/*.log`, `proc [kibana]` lines) | None |
+| **Scout stateful** | `.scout/server.log` | Startup lines only in `.scout/server.log` |
+| **Scout serverless** | `.scout/server.log` | None (runs in Docker) |
 
 ### Understand the scope
 

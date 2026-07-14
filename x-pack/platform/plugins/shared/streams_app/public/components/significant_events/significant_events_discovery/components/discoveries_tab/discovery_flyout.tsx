@@ -95,7 +95,8 @@ export const DiscoveryFlyout = ({
         title: i18n.translate('xpack.streams.discoveryFlyout.confidence', {
           defaultMessage: 'Confidence',
         }),
-        description: discovery.confidence != null ? `${discovery.confidence}%` : '-',
+        description:
+          discovery.confidence != null ? `${Math.round(discovery.confidence * 100)}%` : '-',
       },
       {
         title: i18n.translate('xpack.streams.discoveryFlyout.streams', {
