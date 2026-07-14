@@ -7,7 +7,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftApp } from './nightshift_app';
 
@@ -28,13 +28,24 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
 });
 
 function renderWithIntl(ui: React.ReactElement) {
-  return render(<IntlProvider locale="en">{ui}</IntlProvider>);
+  return render(<I18nProvider>{ui}</I18nProvider>);
 }
 
 describe('NightshiftApp', () => {
+  const scrollIntoView = jest.fn();
+
+  beforeEach(() => {
+    scrollIntoView.mockClear();
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      value: scrollIntoView,
+    });
+  });
+
   it('renders hero message when events need action', () => {
     renderWithIntl(<NightshiftApp events={[mockEvent()]} isLoading={false} />);
-    expect(screen.getByText(/1 significant event need/i)).toBeInTheDocument();
+    expect(screen.getByText(/Good (morning|afternoon|evening)!/)).toBeInTheDocument();
+    expect(screen.getByText('Some significant events need action')).toBeInTheDocument();
   });
 
   it('renders summary cards with correct counts', () => {
@@ -43,38 +54,75 @@ describe('NightshiftApp', () => {
       mockEvent({ event_id: '2', status: 'acknowledged' }),
       mockEvent({ event_id: '3', status: 'resolved' }),
     ];
-    renderWithIntl(<NightshiftApp events={events} isLoading={false} />);
-    expect(screen.getByText('2')).toBeInTheDocument();
-    expect(screen.getByText('1')).toBeInTheDocument();
+    const { container } = renderWithIntl(<NightshiftApp events={events} isLoading={false} />);
+    expect(screen.getAllByText('2').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('1').length).toBeGreaterThan(0);
+    expect(container.querySelector('[data-euiicon-type="faceNeutral"]')).toBeInTheDocument();
+    expect(container.querySelector('[data-euiicon-type="faceHappy"]')).toBeInTheDocument();
   });
 
-  it('filters events by active tab', () => {
+  it('scrolls to the event lists from the summary cards', () => {
     const events = [
       mockEvent({ event_id: '1', status: 'promoted', title: 'Active event' }),
       mockEvent({ event_id: '2', status: 'resolved', title: 'Resolved event' }),
     ];
-    renderWithIntl(<NightshiftApp events={events} isLoading={false} />);
+    const { container } = renderWithIntl(<NightshiftApp events={events} isLoading={false} />);
 
     expect(screen.getByText('Active event')).toBeInTheDocument();
-    expect(screen.queryByText('Resolved event')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByText('Resolved'));
     expect(screen.getByText('Resolved event')).toBeInTheDocument();
-    expect(screen.queryByText('Active event')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Need action' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Resolved' })).toBeInTheDocument();
+
+    const resolvedFilter = container.querySelector<HTMLElement>(
+      '[data-test-subj="o11yNightshiftResolvedFilter"]'
+    );
+    expect(resolvedFilter).toBeInTheDocument();
+    fireEvent.click(resolvedFilter as HTMLElement);
+
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+    expect(screen.getByRole('heading', { name: 'Resolved' })).toBeInTheDocument();
+    expect(screen.getByText('Resolved event')).toBeInTheDocument();
+    expect(screen.getByText('Active event')).toBeInTheDocument();
   });
 
   it('renders blast radius badges from stream_names', () => {
+    const streamNames = Array.from({ length: 10 }, (_, index) => `service-${index}`);
     const events = [
-      mockEvent({ event_id: '1', stream_names: ['service-a', 'service-b'] }),
-      mockEvent({ event_id: '2', stream_names: ['service-a', 'service-c'] }),
+      mockEvent({ event_id: '1', stream_names: streamNames }),
+      mockEvent({ event_id: '2', stream_names: ['service-0'] }),
+    ];
+    const { container } = renderWithIntl(<NightshiftApp events={events} isLoading={false} />);
+    expect(screen.getAllByText('service-0').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('[data-test-subj="blast-radius-chip"]')).toHaveLength(10);
+    expect(screen.queryByText(/\+\d+/)).not.toBeInTheDocument();
+  });
+
+  it('filters significant events by blast radius', () => {
+    const events = [
+      mockEvent({ event_id: '1', stream_names: ['service-a'], title: 'Service A event' }),
+      mockEvent({ event_id: '2', stream_names: ['service-b'], title: 'Service B event' }),
     ];
     renderWithIntl(<NightshiftApp events={events} isLoading={false} />);
-    expect(screen.getByText('service-a 2')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /service-b/i }));
+
+    expect(screen.getByText('Service B event')).toBeInTheDocument();
+    expect(screen.queryByText('Service A event')).not.toBeInTheDocument();
   });
 
   it('shows empty state when no events', () => {
     renderWithIntl(<NightshiftApp events={[]} isLoading={false} />);
     expect(screen.getByText('No significant events found')).toBeInTheDocument();
+  });
+
+  it('links to all significant events', () => {
+    renderWithIntl(
+      <NightshiftApp events={[mockEvent()]} isLoading={false} showAllEventsHref="/events" />
+    );
+    expect(screen.getByRole('link', { name: 'Show all events' })).toHaveAttribute(
+      'href',
+      '/events'
+    );
   });
 
   it('calls onEventClick when an event is clicked', () => {
@@ -85,5 +133,27 @@ describe('NightshiftApp', () => {
     );
     fireEvent.click(screen.getByText('Test significant event'));
     expect(onEventClick).toHaveBeenCalledWith(event);
+  });
+
+  it('shows investigating progress and opens an event in chat', () => {
+    const onEventClick = jest.fn();
+    const onChatClick = jest.fn();
+    const event = mockEvent();
+    const { container } = renderWithIntl(
+      <NightshiftApp
+        events={[event]}
+        isLoading={false}
+        onEventClick={onEventClick}
+        onChatClick={onChatClick}
+      />
+    );
+
+    expect(
+      container.querySelector('[data-test-subj="nightshiftInvestigatingStatusSpinner"]')
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open Test significant event in chat' }));
+    expect(onChatClick).toHaveBeenCalledWith(event);
+    expect(onEventClick).not.toHaveBeenCalled();
   });
 });

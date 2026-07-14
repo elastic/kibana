@@ -11,6 +11,7 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
 import { NightshiftApp } from './components/nightshift_app';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -19,6 +20,8 @@ import { useFetchSignificantEvents } from './hooks/use_fetch_significant_events'
 
 export function NightshiftPage() {
   const {
+    agentBuilder,
+    application,
     http: { basePath },
     uiSettings,
     serverless,
@@ -46,10 +49,29 @@ export function NightshiftPage() {
 
   const { data, isLoading } = useFetchSignificantEvents();
   const events = data?.hits ?? [];
+  const showAllEventsHref = application.getUrlForApp('streams', {
+    deepLinkId: 'significantEventsEvents',
+  });
 
   const handleEventClick = useCallback((event: SignificantEvent) => {
     // Will be wired to flyout in PR 2
   }, []);
+
+  const handleChatClick = useCallback(
+    (event: SignificantEvent) => {
+      agentBuilder?.openChat({
+        newConversation: true,
+        attachments: [
+          {
+            id: event.event_id,
+            type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
+            data: event,
+          },
+        ],
+      });
+    },
+    [agentBuilder]
+  );
 
   if (!isEnabled) {
     history.replace(OVERVIEW_PATH);
@@ -59,10 +81,20 @@ export function NightshiftPage() {
   return (
     <ObservabilityPageTemplate
       data-test-subj="nightshiftPage"
-      restrictWidth="800px"
-      pageSectionProps={{ restrictWidth: '800px' }}
+      restrictWidth="900px"
+      pageSectionProps={{
+        color: 'subdued',
+        contentProps: { style: { minHeight: 'max-content' } },
+        restrictWidth: '900px',
+      }}
     >
-      <NightshiftApp events={events} isLoading={isLoading} onEventClick={handleEventClick} />
+      <NightshiftApp
+        events={events}
+        isLoading={isLoading}
+        onEventClick={handleEventClick}
+        onChatClick={agentBuilder ? handleChatClick : undefined}
+        showAllEventsHref={showAllEventsHref}
+      />
     </ObservabilityPageTemplate>
   );
 }
