@@ -16,7 +16,7 @@ import { AiButtonEmpty } from './ai_button_empty';
 import { AiButtonIcon } from './ai_button_icon';
 import type { AiButtonVariant } from './types';
 
-type AiIconType = 'aiAssistantLogo' | 'sparkles' | 'productAgent';
+type AiIconType = 'aiAssistantLogo' | 'sparkles' | 'productAgent' | 'addToChat';
 
 interface CommonStoryArgs {
   label: string;
@@ -58,7 +58,10 @@ export default {
     isDisabled: { control: 'boolean' },
     withIcon: { control: 'boolean' },
     iconOnly: { control: 'boolean' },
-    icon: { control: 'select', options: ['aiAssistantLogo', 'sparkles', 'productAgent'] },
+    icon: {
+      control: 'select',
+      options: ['aiAssistantLogo', 'sparkles', 'productAgent', 'addToChat'],
+    },
   },
 } as Meta<StoryArgs>;
 
