@@ -26,7 +26,6 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_WRITE_TOOL_ID =
 const discoveryWriteSchema = discoverySchema
   .pick({
     kind: true,
-    discovery_id: true,
     discovery_slug: true,
     title: true,
     summary: true,
@@ -48,7 +47,7 @@ const discoveryWriteSchema = discoverySchema
     workflow_execution_id: true,
     conversation_id: true,
   })
-  .partial({ discovery_slug: true, discovery_id: true })
+  .partial({ discovery_slug: true })
   .extend({
     dedup_window: z
       .string()
