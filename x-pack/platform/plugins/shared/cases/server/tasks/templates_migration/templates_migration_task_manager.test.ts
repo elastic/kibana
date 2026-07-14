@@ -18,6 +18,8 @@ import {
   CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
+import { ConnectorTypes } from '../../../common/types/domain/connector/v1';
+import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import { TemplatesMigrationTaskManager } from './templates_migration_task_manager';
 import {
   CASES_TEMPLATES_MIGRATION_TASK_TYPE,
@@ -94,15 +96,26 @@ const buildLegacyCustomField = (
   defaultValue,
 });
 
-const buildLegacyTemplate = (name: string, customFieldKeys: string[] = []) => ({
+const buildLegacyTemplate = (
+  name: string,
+  customFieldKeys: string[] = [],
+  overrides: Partial<{
+    description: string;
+    tags: string[];
+    caseFields: Record<string, unknown>;
+  }> = {}
+) => ({
   key: `key-${name}`,
   name,
+  description: overrides.description,
+  tags: overrides.tags,
   caseFields: {
     customFields: customFieldKeys.map((k) => ({
       key: k,
       type: CustomFieldTypes.TEXT,
       value: null,
     })),
+    ...(overrides.caseFields ?? {}),
   },
 });
 
@@ -322,6 +335,194 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(toggleDef.metadata?.default).toBe('true');
     });
 
+    it('preserves template metadata while keeping case defaults as top-level definition keys', async () => {
+      const configSO = buildConfigureSO({
+        templates: [
+          buildLegacyTemplate('Template metadata name', [], {
+            description: 'Template metadata description',
+            tags: ['metadata-tag'],
+            caseFields: {
+              title: 'Case default title',
+              description: 'Case default description',
+              tags: ['case-tag'],
+              severity: 'critical',
+              category: 'malware',
+              assignees: [{ uid: 'analyst-1' }],
+            },
+          }),
+        ],
+      });
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 });
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const templateCreateCall = repo.create.mock.calls.find(
+        (c) => c[0] === CASE_TEMPLATE_SAVED_OBJECT
+      );
+      expect(templateCreateCall).toBeDefined();
+      const templateAttributes = templateCreateCall?.[1] as {
+        name: string;
+        description?: string;
+        tags?: string[];
+        definition: string;
+      };
+
+      expect(templateAttributes.name).toBe('Template metadata name');
+      expect(templateAttributes.description).toBe('Template metadata description');
+      expect(templateAttributes.tags).toEqual(['metadata-tag']);
+
+      const parsedDefinition = parseYaml(templateAttributes.definition) as {
+        name?: string;
+        description?: string;
+        tags?: string[];
+        severity?: string;
+        category?: string | null;
+        assignees?: Array<{ uid: string }>;
+      };
+      expect(parsedDefinition.name).toEqual('Case default title');
+      expect(parsedDefinition.description).toEqual('Case default description');
+      expect(parsedDefinition.tags).toEqual(['case-tag']);
+      expect(parsedDefinition.severity).toEqual('critical');
+      expect(parsedDefinition.category).toEqual('malware');
+      expect(parsedDefinition.assignees).toEqual([{ uid: 'analyst-1' }]);
+      expect(parsedDefinition).not.toHaveProperty('case');
+    });
+
+    it('migrates a legacy template with a Jira connector into a valid, connector-preserving definition', async () => {
+      // Regression guard for the desk-test finding "migration is not picking up connector fields
+      // → preview error". Exercise the full task path and assert the persisted definition (a) is
+      // valid per ParsedTemplateDefinitionSchema (so the template is created, not skipped) and
+      // (b) preserves the Jira connector's fields, dropping only the resolved `name`.
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        templates: [
+          buildLegacyTemplate('Jira Template', ['cf_text'], {
+            caseFields: {
+              title: 'Jira default title',
+              connector: {
+                id: 'my-connector',
+                name: 'My Jira',
+                type: ConnectorTypes.jira,
+                fields: { issueType: '10001', priority: 'High', parent: null },
+              },
+            },
+          }),
+        ],
+      });
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 })
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 });
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const templateCreateCall = repo.create.mock.calls.find(
+        (c) => c[0] === CASE_TEMPLATE_SAVED_OBJECT
+      );
+      expect(templateCreateCall).toBeDefined();
+      const definition = (templateCreateCall?.[1] as { definition: string }).definition;
+
+      // The migrated definition must validate — an invalid definition would have been skipped and
+      // never written, and would fail the preview.
+      const result = ParsedTemplateDefinitionSchema.safeParse(parseYaml(definition));
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.name).toBe('Jira default title');
+        expect(result.data.connector).toEqual({
+          type: '.jira',
+          id: 'my-connector',
+          fields: { issueType: '10001', priority: 'High', parent: null },
+        });
+      }
+    });
+
+    it('fully migrates a fleshed-out v1 template: identity → attributes; connector (all sub-fields), settings & case defaults → definition', async () => {
+      // The core GA guarantee: a complete legacy template — template identity (name/description/tags),
+      // every case default, a fully-populated Jira connector (all sub-fields incl. the free-form
+      // otherFields), and both settings — migrates COMPLETELY and losslessly to v2.
+      const connectorFields = {
+        issueType: '10002',
+        priority: 'Highest',
+        parent: 'PROJ-42',
+        otherFields: '{"customfield_10010":"squad-blue","labels":["triage","p1"]}',
+      };
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        templates: [
+          buildLegacyTemplate('Security incident template', ['cf_text'], {
+            // Template identity — must land on the SO attributes, NOT the definition.
+            description: 'Template used by the SOC for suspicious-login incidents',
+            tags: ['soc', 'identity-tag'],
+            caseFields: {
+              // Case defaults — must land in the definition (the blueprint).
+              title: 'Investigate suspicious login',
+              description: 'Default case description',
+              tags: ['triage', 'p1'],
+              severity: 'critical',
+              category: 'Security',
+              assignees: [{ uid: 'analyst-1' }, { uid: 'analyst-2' }],
+              connector: {
+                id: 'my-connector',
+                name: 'My Jira',
+                type: ConnectorTypes.jira,
+                fields: connectorFields,
+              },
+              settings: { syncAlerts: true, extractObservables: true },
+            },
+          }),
+        ],
+      });
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 })
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 });
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      const templateCreateCall = repo.create.mock.calls.find(
+        (c) => c[0] === CASE_TEMPLATE_SAVED_OBJECT
+      );
+      expect(templateCreateCall).toBeDefined();
+      const attributes = templateCreateCall?.[1] as { definition: string } & Record<
+        string,
+        unknown
+      >;
+
+      // Identity persisted on the SO attributes (source of truth for identity under Option 2).
+      expect(attributes).toMatchObject({
+        name: 'Security incident template',
+        description: 'Template used by the SOC for suspicious-login incidents',
+        tags: ['soc', 'identity-tag'],
+      });
+
+      // The definition is the COMPLETE blueprint: schema-valid, with every case default, both
+      // settings, and the connector with EVERY sub-field intact (deep-equal, nothing dropped).
+      const result = ParsedTemplateDefinitionSchema.safeParse(parseYaml(attributes.definition));
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toMatchObject({
+          name: 'Investigate suspicious login',
+          description: 'Default case description',
+          tags: ['triage', 'p1'],
+          severity: 'critical',
+          category: 'Security',
+          assignees: [{ uid: 'analyst-1' }, { uid: 'analyst-2' }],
+          connector: { type: '.jira', id: 'my-connector', fields: connectorFields },
+          settings: { syncAlerts: true, extractObservables: true },
+        });
+        // The custom field survived as a $ref entry.
+        expect(result.data.fields).toHaveLength(1);
+      }
+    });
+
     it('emits a single aggregate summary log line instead of one per configure SO', async () => {
       // Regression guard for the "overly verbose logging" concern. Three spaces are migrated but
       // only ONE summary INFO line should be produced for the run; per-SO detail is at debug.
@@ -497,16 +698,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('rejects a template with an invalid YAML definition and logs the error', async () => {
-      // buildTemplateYaml always emits valid YAML, but ParsedTemplateDefinitionSchema
-      // validation can fail if the emitted structure is missing required fields.
-      // Simulate this by pointing to a template whose name resolves to an empty string,
-      // which would fail the min(1) validation — we test the safeParse error path by
-      // monkeypatching after construction. Use the simplest proxy: a template whose
-      // name passes buildTemplateYaml but whose YAML would fail schema validation.
-      // The easiest approach: mock repo.create to confirm the error was logged.
+      // buildTemplateYaml always emits syntactically valid YAML, but ParsedTemplateDefinitionSchema
+      // can still reject semantically invalid values. Use an unsupported severity value to exercise
+      // the safeParse error path.
       const configSO = buildConfigureSO({
-        // Empty name would fail ParsedTemplateDefinitionSchema (name must be min length 1)
-        templates: [{ key: 'k', name: '', caseFields: {} }],
+        templates: [{ key: 'k', name: 'T', caseFields: { severity: 'urgent' } }],
       });
 
       repo.find
@@ -526,6 +722,27 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('produced an invalid definition')
       );
+    });
+
+    it('skips legacy templates with empty names and logs the error', async () => {
+      const configSO = buildConfigureSO({
+        templates: [buildLegacyTemplate('')],
+      });
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }) // field-defs
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // templates
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      expect(repo.create).not.toHaveBeenCalledWith(
+        CASE_TEMPLATE_SAVED_OBJECT,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('empty name'));
     });
 
     it('continues to next configure SO even if one fails entirely', async () => {
