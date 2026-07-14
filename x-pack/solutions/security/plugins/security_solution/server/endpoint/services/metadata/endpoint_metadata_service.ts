@@ -10,7 +10,6 @@ import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@k
 import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   hasVersionSuffix,
   removeVersionSuffixFromPolicyId,
@@ -124,7 +123,7 @@ export class EndpointMetadataService {
 
     if (recordsAltered.length > 0) {
       this.logger
-        .get('adjustUnitedIndexSearchResultHits')
+        ?.get('adjustUnitedIndexSearchResultHits')
         .debug(
           () => `Made ${recordsAltered.length} data adjustments:\n${recordsAltered.join('\n')}`
         );
@@ -403,7 +402,7 @@ export class EndpointMetadataService {
 
     let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadataPersistedData>;
 
-    logger.debug(() => `Executing query: ${stringify(unitedIndexQuery, 15)}`);
+    this.logger?.debug(() => `Executing query: ${stringify(unitedIndexQuery, 15)}`);
 
     try {
       unitedMetadataQueryResponse = await this.esClient
@@ -491,10 +490,9 @@ export class EndpointMetadataService {
   }
 
   async getMetadataForEndpoints(endpointIDs: string[]): Promise<HostMetadata[]> {
-    const ccsEnabled = await this.endpointContext.isCcsEnabled();
-    const query = getESQueryHostMetadataByIDs(endpointIDs, ccsEnabled);
+    const query = getESQueryHostMetadataByIDs(endpointIDs);
 
-    this.logger.get('getMetadataForEndpoints').debug(() => `with query: ${stringify(query, 15)}`);
+    this.logger?.get('getMetadataForEndpoints').debug(() => `with query: ${stringify(query, 15)}`);
 
     const searchResult = await this.esClient.search<HostMetadata>(query).catch(catchAndWrapError);
 
