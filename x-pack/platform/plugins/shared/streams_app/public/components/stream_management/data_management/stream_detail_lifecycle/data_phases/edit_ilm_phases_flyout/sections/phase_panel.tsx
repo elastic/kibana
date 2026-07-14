@@ -52,8 +52,7 @@ export const PhasePanel = ({
 }: PhasePanelProps) => {
   const isHidden = selectedPhase !== phase;
   const { control } = useFormContext<IlmPhasesFlyoutFormInternal>();
-  const { phaseDescriptionStyles, phaseDescriptionNoBottomPaddingStyles } =
-    useDataPhasesFlyoutStyles();
+  const { phaseDescriptionNoBottomPaddingStyles } = useDataPhasesFlyoutStyles();
 
   const { ilmPhases } = useIlmPhasesColorAndDescription();
 
@@ -82,15 +81,10 @@ export const PhasePanel = ({
       ? Boolean(coldDownsampleEnabled)
       : false;
 
-  const descriptionStyles =
-    isHotPhase && isDownsampleEnabled
-      ? phaseDescriptionStyles
-      : phaseDescriptionNoBottomPaddingStyles;
-
   return (
     <div hidden={isHidden} data-test-subj={`${dataTestSubj}Panel-${phase}`}>
       <PhaseFieldsMount phase={phase} />
-      <EuiText size="s" color="subdued" css={descriptionStyles}>
+      <EuiText size="s" color="subdued" css={phaseDescriptionNoBottomPaddingStyles}>
         {ilmPhases[phase].description}
       </EuiText>
       <EuiFlexGroup direction="column" gutterSize="m" responsive={false} css={sectionStyles}>
