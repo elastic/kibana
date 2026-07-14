@@ -32,6 +32,7 @@ const mockShare = {
 
 const mockCore = {
   http: { basePath: { prepend: (path: string) => path } },
+  application: { capabilities: { slo: { read: true }, apm: { 'alerting:show': true } } },
 } as any;
 
 const mockLens = undefined as any;
@@ -202,8 +203,8 @@ describe('ServiceFlyoutFooter', () => {
   });
 
   it('omits the Discover actions when no Discover hrefs resolve', () => {
+    setupAllHrefs();
     mockUseDiscoverHref.mockReturnValue(undefined);
-    mockGetManageSlosUrl.mockReturnValue('/app/slos');
     renderFooter();
 
     openActionsMenu();
@@ -215,5 +216,14 @@ describe('ServiceFlyoutFooter', () => {
       screen.queryByTestId('serviceFlyoutActionsMenuItem-openLogsInDiscover')
     ).not.toBeInTheDocument();
     expect(screen.getByTestId('serviceFlyoutActionsMenuItem-openAlerts')).toBeInTheDocument();
+  });
+
+  it('disables the actions button when no hrefs resolve', () => {
+    mockUseDiscoverHref.mockReturnValue(undefined);
+    mockGetManageSlosUrl.mockReturnValue(undefined);
+    mockUseAlertsHref.mockReturnValue(undefined);
+    renderFooter();
+
+    expect(screen.getByTestId('serviceFlyoutActionsButton')).toBeDisabled();
   });
 });
