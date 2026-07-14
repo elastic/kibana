@@ -67,6 +67,7 @@ describe('AttackFlyoutOverviewTab', () => {
         hit={buildHit()}
         servicesPromise={new Promise<StartServices>(() => undefined)}
         storePromise={new Promise<ReturnType<typeof createStore>>(() => undefined) as never}
+        onAttackUpdated={jest.fn()}
       />
     );
 
@@ -81,6 +82,7 @@ describe('AttackFlyoutOverviewTab', () => {
         hit={buildHit()}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
+        onAttackUpdated={jest.fn()}
       />
     );
 
@@ -104,6 +106,7 @@ describe('AttackFlyoutOverviewTab', () => {
         hit={buildHit()}
         servicesPromise={Promise.resolve(servicesMock)}
         storePromise={Promise.resolve(store as never)}
+        onAttackUpdated={jest.fn()}
       />
     );
 
@@ -123,6 +126,7 @@ describe('AttackFlyoutOverviewTab', () => {
         hit={buildHit()}
         servicesPromise={Promise.reject(new Error('services failed'))}
         storePromise={Promise.resolve(store as never)}
+        onAttackUpdated={jest.fn()}
       />
     );
 

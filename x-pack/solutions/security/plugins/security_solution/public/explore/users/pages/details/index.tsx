@@ -226,7 +226,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
       return legacyFilters;
     }
 
-    const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnDocument(
+    const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnEntityRecord(
       EntityType.user,
       entityFromStoreResult.entityRecord
     );
@@ -254,6 +254,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     startDate: from,
     userName: detailName,
     entityId: entityStoreV2Enabled ? entityFromStoreResult?.entityRecord?.entity?.id : undefined,
+    entityRecord: entityStoreV2Enabled ? entityFromStoreResult?.entityRecord : undefined,
+    entityStoreInitialLoading: entityStoreV2Enabled && entityFromStoreResult.isInitialLoading,
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
