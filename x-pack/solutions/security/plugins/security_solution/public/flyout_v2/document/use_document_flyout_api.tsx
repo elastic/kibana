@@ -33,7 +33,6 @@ import {
   formatFlyoutTitle,
   GRAPH_TITLE,
   INVESTIGATION_GUIDE_TITLE,
-  NOTES_TITLE,
   PREVALENCE_TITLE,
   RESPONSE_TITLE,
   SESSION_VIEW_TITLE,
@@ -50,9 +49,6 @@ const DocumentFlyoutWrapperFromPattern = lazy(() =>
   import('./main/document_flyout_wrapper_from_pattern').then((m) => ({
     default: m.DocumentFlyoutWrapperFromPattern,
   }))
-);
-const NotesDetails = lazy(() =>
-  import('../shared/tools/notes').then((m) => ({ default: m.NotesDetails }))
 );
 const AnalyzerGraph = lazy(() =>
   import('./tools/analyzer').then((m) => ({ default: m.AnalyzerGraph }))
@@ -99,11 +95,6 @@ export interface OpenDocumentFlyoutParams {
    * since the full document isn't loaded yet at open time.
    */
   title?: string;
-}
-
-export interface OpenNotesParams {
-  /** The document record whose notes should be shown. */
-  hit: DataTableRecord;
 }
 
 export interface OpenAnalyzerParams {
@@ -184,8 +175,6 @@ export interface DocumentFlyoutApi {
    * (for callers that don't know the concrete `_index`, e.g. notes).
    */
   openDocumentFlyoutFromPattern: (params: OpenDocumentFlyoutParams) => void;
-  /** Opens the notes tools flyout for a document. */
-  openNotes: (params: OpenNotesParams) => void;
   /** Opens the analyzer tools flyout for a document. */
   openAnalyzer: (params: OpenAnalyzerParams) => void;
   /** Opens the session view tools flyout for a document. */
@@ -304,17 +293,6 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey]
-  );
-
-  const openNotes = useCallback(
-    ({ hit }: OpenNotesParams) => {
-      open(<NotesDetails hit={hit} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
-      });
-    },
-    [open, historyKey]
   );
 
   const openAnalyzer = useCallback(
@@ -490,7 +468,6 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       openDocumentFlyoutFromIndex,
       openDocumentFlyoutFromIndexAsChild,
       openDocumentFlyoutFromPattern,
-      openNotes,
       openAnalyzer,
       openSessionView,
       openDocumentEntities,
@@ -505,7 +482,6 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       openDocumentFlyoutFromIndex,
       openDocumentFlyoutFromIndexAsChild,
       openDocumentFlyoutFromPattern,
-      openNotes,
       openAnalyzer,
       openSessionView,
       openDocumentEntities,

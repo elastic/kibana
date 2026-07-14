@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -17,26 +17,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
-import { useStore } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
-import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
-import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { JsonTab as SharedJsonTab } from '../../shared/components/json_tab';
 import { cellActionRenderer } from '../../shared/components/cell_actions';
-import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
-import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { NotesDetails } from '../../shared/tools/notes';
-import { useKibana } from '../../../common/lib/kibana';
+import { useSharedToolsFlyoutApi } from '../../shared/tools/use_shared_tools_flyout_api';
 import { useTabs } from '../../shared/hooks/use_tabs';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
 import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
 import { Footer } from './footer';
-import { formatFlyoutTitle, NOTES_TITLE } from '../../shared/constants/flyout_titles';
-import { getAttackTitleValue } from '../utils/get_attack_title';
 
 type AttackFlyoutTabId = 'overview' | 'table' | 'json';
 
@@ -87,13 +77,7 @@ export interface AttackFlyoutProps {
  */
 export const AttackFlyout = memo(
   ({ hit, attack, onAttackUpdated, renderCellActions = cellActionRenderer }: AttackFlyoutProps) => {
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
-    const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-    const attackTitle = useMemo(() => getAttackTitleValue(hit), [hit]);
+    const { openNotes } = useSharedToolsFlyoutApi();
 
     // The selected tab is persisted to localStorage, sharing the key with the legacy
     // attack flyout so the user's preference carries across both implementations.
@@ -103,21 +87,8 @@ export const AttackFlyout = memo(
     });
 
     const onShowNotes = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <NotesDetails hit={hit} />,
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-          title: formatFlyoutTitle(NOTES_TITLE, attackTitle),
-        }
-      );
-    }, [attackTitle, history, historyKey, hit, overlays, services, store]);
+      openNotes({ hit });
+    }, [openNotes, hit]);
 
     return (
       <>

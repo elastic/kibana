@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import {
   GRAPH_SCOPE_ID,
@@ -31,14 +32,12 @@ import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import {
-  getEntityFlyoutTitle,
-  renderEntityDetails,
-} from '../../../entity/shared/render_entity_details';
-import { buildFlyoutNavTitle } from '../../../shared/utils/build_flyout_nav_title';
-import { ENTITIES_TITLE, EVENT_TITLE, GRAPH_TITLE } from '../../../shared/constants/flyout_titles';
 
 export const GRAPH_TOOLS_TEST_ID = `${PREFIX}GraphTools` as const;
+
+const TITLE = i18n.translate('xpack.securitySolution.flyout.graph.title', {
+  defaultMessage: 'Graph',
+});
 
 export interface GraphDetailsProps {
   hit: DataTableRecord;
@@ -60,16 +59,19 @@ export const GraphDetails = memo(
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const { openDocumentFlyoutFromIndexAsChild, openNetworkFlyoutAsChild } = useFlyoutApi();
+    const {
+      openDocumentFlyoutFromIndexAsChild,
+      openNetworkFlyoutAsChild,
+      openEntityDetailsAsChild,
+    } = useFlyoutApi();
 
     const onShowDocument = useCallback(
-      (documentId: string, indexName?: string, isEvent?: boolean) =>
+      (documentId: string, indexName?: string) =>
         openDocumentFlyoutFromIndexAsChild({
           documentId,
           indexName,
           renderCellActions,
           onAlertUpdated,
-          title: isEvent ? EVENT_TITLE : undefined,
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );
@@ -88,28 +90,8 @@ export const GraphDetails = memo(
         engineType: string | undefined;
         entityId: string;
         entityName: string | undefined;
-      }) => {
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: renderEntityDetails({
-              engineType,
-              entityId,
-              entityName,
-              scopeId: GRAPH_SCOPE_ID,
-            }),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            historyKey,
-            session: 'inherit',
-            title: buildFlyoutNavTitle(getEntityFlyoutTitle({ engineType, entityId, entityName })),
-          }
-        );
-      },
-      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
+      }) => openEntityDetailsAsChild({ engineType, entityId, entityName, scopeId: GRAPH_SCOPE_ID }),
+      [openEntityDetailsAsChild]
     );
 
     const onShowGrouped = useCallback(
@@ -133,14 +115,7 @@ export const GraphDetails = memo(
               />
             ),
           }),
-          {
-            ...defaultFlyoutProperties,
-            historyKey,
-            session: 'inherit',
-            title: buildFlyoutNavTitle(
-              params.docMode === 'grouped-entities' ? ENTITIES_TITLE : EVENT_TITLE
-            ),
-          }
+          { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
         ),
       [
         defaultFlyoutProperties,
@@ -168,7 +143,7 @@ export const GraphDetails = memo(
         >
           <DocumentToolsFlyoutHeader
             hit={hit}
-            title={GRAPH_TITLE}
+            title={TITLE}
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}
           />
