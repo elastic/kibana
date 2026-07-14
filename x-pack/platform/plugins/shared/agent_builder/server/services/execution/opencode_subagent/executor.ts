@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SandboxProfile } from '@kbn/agent-builder-common';
+import { GITHUB_APP_PRIVATE_KEY_SECRET_KEY } from '@kbn/agent-builder-common';
 import { SandboxManager } from './sandbox_manager';
 import { SandboxRegistry } from './sandbox_registry';
 import { OpenCodeAcpRuntime } from './opencode_acp_runtime';
@@ -21,7 +22,13 @@ import type {
 import type { OpencodeRunProgress } from './types';
 import type { OpencodeRunClient } from './persistence/run_client';
 import type { McpAuthMinter } from './mcp_auth_minter';
+import type { GithubTokenResolver } from './github_token_resolver';
+import { GithubUserCredentialSource } from './github_user_credential_source';
+import { GithubAppTokenMinter } from './github_app_token_minter';
 import { ProfileRuntimeResolver } from './profile_runtime_resolver';
+
+/** A profile as it arrives at the executor: resolved with decrypted secrets. */
+type ProfileWithSecrets = SandboxProfile & { secrets?: Record<string, string> };
 
 // Re-export shared types for existing importers.
 export type { OpencodePhase, OpencodeItemStatus, OpencodeTodo, OpencodeRunProgress } from './types';
@@ -70,6 +77,18 @@ export interface OpencodeRunContext {
 export interface ExecuteOpencodeParams {
   prompt: string;
   /**
+   * Dynamically composed system instructions for the sub-agent (e.g. the
+   * catalog of attached connectors and how to call them). Kept separate from the
+   * user `prompt` so it maps onto the runtime's dedicated system-prompt slot.
+   */
+  systemPrompt?: string;
+  /**
+   * Connector ids this run is allowed to use (resolved from the conversation's
+   * connector attachments). Forwarded to the runtime's tool-access scope so the
+   * broker/runtime knows exactly which connectors this run may touch.
+   */
+  allowedConnectors?: string[];
+  /**
    * The originating request. Used to mint a per-run, privilege-scoped API key
    * (on behalf of this user) that the sandbox uses to call back into the Agent
    * Builder MCP server, preserving the user's connector RBAC. The key is revoked
@@ -108,11 +127,20 @@ export class OpencodeSubagentExecutor {
   private readonly runtime: CodingRuntime;
   private readonly profileResolver: ProfileRuntimeResolver;
 
+  /**
+   * Per-profile GitHub user-token credential source (Device Flow), built from the
+   * profile's own `githubApp` config + private-key secret. Cached by profile id
+   * so the acquired user token survives across turns of a conversation. This is
+   * per-sandbox config, not global Kibana config.
+   */
+  private readonly userCredentialSources = new Map<string, GithubUserCredentialSource>();
+
   constructor(
     private readonly config: OpencodeSubagentConfig,
     private readonly logger: Logger,
     private readonly runClient?: OpencodeRunClient,
-    private readonly mcpAuthMinter?: McpAuthMinter
+    private readonly mcpAuthMinter?: McpAuthMinter,
+    private readonly gitTokenResolver?: GithubTokenResolver
   ) {
     this.provider = new SandboxManager(
       {
@@ -136,6 +164,102 @@ export class OpencodeSubagentExecutor {
       logger.get('profiles'),
       () => this.config.litellm.apiKey
     );
+  }
+
+  /**
+   * Build (or reuse) the GitHub user-token credential source for a profile. The
+   * OAuth client id + App private key come from the profile itself (not global
+   * config), so each sandbox carries its own git credential story. Returns
+   * `undefined` when the profile has no App client id configured.
+   */
+  private getUserCredentialSource(
+    profile?: ProfileWithSecrets
+  ): GithubUserCredentialSource | undefined {
+    const clientId = profile?.githubApp?.clientId;
+    if (!profile || !GithubUserCredentialSource.isConfigured(clientId)) {
+      return undefined;
+    }
+    const cached = this.userCredentialSources.get(profile.id);
+    if (cached) return cached;
+    const source = new GithubUserCredentialSource(
+      clientId,
+      this.logger.get(`githubUser.${profile.id}`)
+    );
+    this.userCredentialSources.set(profile.id, source);
+    return source;
+  }
+
+  /**
+   * Mint an ephemeral, repo-scoped GitHub App *installation token* for the git
+   * operations (clone/push/PR) this run needs — the least-privilege machine
+   * credential. Requires the profile to carry an App id + private-key secret.
+   * Repos are taken from the profile's git policy (falling back to the owner the
+   * App is installed on). Emits a green `credential` timeline item. Returns
+   * `undefined` when the profile has no App configured or minting fails.
+   */
+  private async resolveInstallToken(
+    profile: ProfileWithSecrets | undefined,
+    onProgress?: (progress: OpencodeRunProgress) => void
+  ): Promise<{ token: string; connectorId: string } | undefined> {
+    const appId = profile?.githubApp?.appId;
+    const privateKey = profile?.secrets?.[GITHUB_APP_PRIVATE_KEY_SECRET_KEY];
+    if (!appId || !privateKey) return undefined;
+
+    // Repos this run may touch (owner/repo). Scope the token to just these; the
+    // account login is derived from the first repo's owner.
+    const repos = profile?.policy?.git?.repos ?? [];
+    const owner = repos[0]?.split('/')[0];
+    const repoNames = repos.map((r) => r.split('/')[1]).filter(Boolean);
+    if (!owner) {
+      this.logger.warn(
+        `Profile ${profile?.id} has a GitHub App but no git repos in policy; cannot scope an installation token`
+      );
+      return undefined;
+    }
+
+    const itemId = 'github-install-token';
+    onProgress?.({
+      id: itemId,
+      phase: 'credential',
+      label: 'Minting scoped GitHub token',
+      status: 'in_progress',
+      detail: `Requesting a short-lived token scoped to ${repos.join(', ')} (push + PR).`,
+    });
+
+    try {
+      const minter = new GithubAppTokenMinter(
+        { appId, privateKeyPem: privateKey },
+        this.logger.get(`githubApp.${profile?.id}`)
+      );
+      const minted = await minter.mintForAccount(owner, {
+        repositories: repoNames.length > 0 ? repoNames : undefined,
+        permissions: { contents: 'write', pull_requests: 'write' },
+      });
+      const perms = Object.entries(minted.permissions)
+        .map(([k, v]) => `${k}:${v}`)
+        .join(', ');
+      onProgress?.({
+        id: itemId,
+        phase: 'credential',
+        label: 'Minted scoped GitHub token',
+        status: 'completed',
+        detail: `${repos.join(', ')} · ${perms} · expires ${new Date(
+          minted.expiresAt
+        ).toLocaleTimeString()}`,
+      });
+      return { token: minted.token, connectorId: `github-app:${appId}` };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Failed to mint GitHub App installation token: ${message}`);
+      onProgress?.({
+        id: itemId,
+        phase: 'credential',
+        label: 'Could not mint GitHub token',
+        status: 'failed',
+        detail: message,
+      });
+      return undefined;
+    }
   }
 
   /** Reap sandbox pods orphaned by a prior process (e.g. a dev hot-reload). */
@@ -235,6 +359,8 @@ export class OpencodeSubagentExecutor {
 
   async execute({
     prompt,
+    systemPrompt,
+    allowedConnectors,
     request,
     onProgress,
     abortSignal,
@@ -295,6 +421,20 @@ export class OpencodeSubagentExecutor {
           revoke: async () => {},
         };
 
+    // Resolve GitHub credentials for real git operations (clone/push/PR) from the
+    // run's allowed connectors. The token is a deliberate, scoped exception to
+    // "no secrets in sandbox": raw git needs a git-usable credential in the pod.
+    // Injected + scrubbed by the runtime; rely on short PAT expiry as backstop.
+    // A user-token (Device Flow) source is resolved lazily inside `try` so its
+    // interactive "authorize" step can stream into the timeline.
+    let gitCredentials = this.gitTokenResolver
+      ? await this.gitTokenResolver.resolve({
+          request,
+          allowedConnectors,
+          spaceId: runContext?.spaceId,
+        })
+      : undefined;
+
     const persist = this.runClient && runContext;
 
     // Throttle timeline persistence: coalesce bursts into at most one write/interval.
@@ -339,6 +479,38 @@ export class OpencodeSubagentExecutor {
     const emitLifecycle = (item: OpencodeRunProgress) => recordProgress(item);
 
     try {
+      // If no connector PAT was found and the profile configures a GitHub App
+      // Device Flow, obtain a short-lived user token ("act as me") so the sandbox
+      // can read private repos the user has access to (e.g. elastic/*). The
+      // interactive "open URL + enter code" step streams into the timeline as a
+      // `credential` item. Cached per space, so the user approves at most once.
+      const profileWithSecrets = profile as ProfileWithSecrets | undefined;
+      const userCredentialSource = this.getUserCredentialSource(profileWithSecrets);
+      if (!gitCredentials && userCredentialSource) {
+        // The visible "authorize as me" gesture: confirms the human authorized
+        // this run and identifies them in the UI (green credential card).
+        const userCred = await userCredentialSource.resolve({
+          cacheKey: runContext?.spaceId ?? 'default',
+          onProgress: recordProgress,
+          abortSignal,
+        });
+        if (userCred) {
+          gitCredentials = {
+            token: userCred.token,
+            connectorId: userCred.login ? `github-user:${userCred.login}` : 'github-user',
+          };
+        }
+      }
+
+      // Prefer an ephemeral, repo-scoped App *installation* token for the actual
+      // git operations (clone/push/PR): least-privilege, auto-expiring, scoped to
+      // just the policy's repos. Overrides the user token when available so the
+      // sandbox operates with the minimal machine credential, not a broad one.
+      const installCred = await this.resolveInstallToken(profileWithSecrets, recordProgress);
+      if (installCred) {
+        gitCredentials = installCred;
+      }
+
       emitLifecycle({
         id: 'provisioning',
         phase: 'provisioning',
@@ -393,11 +565,14 @@ export class OpencodeSubagentExecutor {
       const result = await stack.runtime.run({
         sandbox,
         prompt,
+        systemPrompt,
         modelConfig: stack.litellm,
         toolAccess: {
           mcpUrl: this.config.mcpUrl,
           mcpAuthHeader: mcpAuth.header,
+          allowedConnectors,
         },
+        gitCredentials,
         timeoutMs: stack.maxRunSeconds * 1000,
         onProgress: recordProgress,
         abortSignal,

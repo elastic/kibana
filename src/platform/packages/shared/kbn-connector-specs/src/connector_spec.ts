@@ -210,6 +210,64 @@ export interface ConnectorPolicies {
 // ACTIONS
 // ============================================================================
 
+// ============================================================================
+// AGENT SANDBOX EXPOSURE
+// ============================================================================
+// Lets a connector declare, per action, whether/how it may be invoked from an
+// agent sandbox (untrusted code running a coding sub-agent). The guiding rule is
+// "capability, not credential": the sandbox never receives the connector's
+// secret; it calls back to Kibana (the broker) which runs the action host-side.
+// All fields are opt-in and fail-safe — absent = not exposed, unclassified
+// actions are treated as mutating ('write').
+
+/**
+ * Access class for a sandbox-exposed action, used to enforce a sandbox's
+ * `connectorAccess` policy: a read-only sandbox may only call 'read' actions.
+ */
+export type SandboxAccessClass = 'read' | 'write';
+
+/**
+ * How a connector's credential is handled when a sandbox uses it:
+ * - `broker-rpc`         — the secret never leaves Kibana; the sandbox calls
+ *   `execute_connector` over the MCP loopback and the action runs host-side.
+ *   The default and correct choice for almost every connector.
+ * - `short-lived-token`  — for the rare integrations that natively support
+ *   scoped, expiring tokens (e.g. GitHub App installation tokens, cloud STS):
+ *   a scoped token is minted host-side and injected into the sandbox for the
+ *   duration of the operation. Requires `mintScopedToken`.
+ * - `host-proxy`         — Kibana performs the privileged operation and streams
+ *   the result into the sandbox (e.g. clone a private repo host-side, hydrate
+ *   the workspace). No credential crosses the boundary.
+ */
+export type SandboxCredentialStrategy = 'broker-rpc' | 'short-lived-token' | 'host-proxy';
+
+/** Per-action declaration of how it is exposed to agent sandboxes. */
+export interface SandboxActionExposure {
+  /** When true, this action may be invoked from an agent sandbox via the broker. */
+  exposed: boolean;
+  /**
+   * Access class used to enforce the sandbox's `connectorAccess` policy.
+   * Defaults to 'write' when omitted (fail-safe: unclassified actions are
+   * treated as mutating so a read-only sandbox can't call them).
+   */
+  access?: SandboxAccessClass;
+  /** Optional per-run cap on how many times a sandbox may call this action. */
+  maxCallsPerRun?: number;
+}
+
+/** Connector-level default posture + credential strategy for sandbox use. */
+export interface ConnectorSandboxSpec {
+  /** Master switch: may any of this connector's actions be used from a sandbox. */
+  exposable: boolean;
+  /**
+   * How credentials are handled when a sandbox uses this connector.
+   * Defaults to 'broker-rpc' (secret stays host-side) when omitted.
+   */
+  credentialStrategy?: SandboxCredentialStrategy;
+  /** Default access class for exposed actions that don't set their own. */
+  defaultAccess?: SandboxAccessClass;
+}
+
 export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
   isTool?: boolean;
   input: z.ZodSchema<TInput>;
@@ -225,6 +283,11 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
    * response-size limit is exceeded. Defaults to `content-length`.
    */
   responseSizeHeader?: string;
+  /**
+   * How this action is exposed to agent sandboxes. Omit (or `exposed: false`)
+   * to keep the action unreachable from untrusted sandbox code.
+   */
+  sandbox?: SandboxActionExposure;
 }
 
 export interface ActionContext {
@@ -332,6 +395,12 @@ export interface ConnectorSpec {
   // included in the connector's agent attachment representation so the LLM
   // has richer context about how to use the connector's sub-actions.
   skill?: string;
+
+  // Optional agent-sandbox exposure. When present and `exposable`, the connector
+  // opts in to being called from an agent sandbox (via the broker). Per-action
+  // exposure/access is declared on each `ActionDefinition.sandbox`. Absent =
+  // the connector is not reachable from sandboxes (fail-safe default).
+  sandbox?: ConnectorSandboxSpec;
 }
 
 // ============================================================================
@@ -352,4 +421,51 @@ export function getActionNames(connector: ConnectorSpec): string[] {
 
 export function isToolAction(connector: ConnectorSpec, actionName: string): boolean {
   return connector.actions[actionName]?.isTool ?? false;
+}
+
+/** The credential strategy for a connector, defaulting to the safe broker RPC. */
+export function getSandboxCredentialStrategy(connector: ConnectorSpec): SandboxCredentialStrategy {
+  return connector.sandbox?.credentialStrategy ?? 'broker-rpc';
+}
+
+/**
+ * The effective access class of an action for sandbox use: the action's own
+ * `access`, else the connector's `defaultAccess`, else 'write' (fail-safe:
+ * unclassified actions are treated as mutating).
+ */
+export function getSandboxActionAccess(
+  connector: ConnectorSpec,
+  actionName: string
+): SandboxAccessClass {
+  const action = connector.actions[actionName];
+  return action?.sandbox?.access ?? connector.sandbox?.defaultAccess ?? 'write';
+}
+
+/**
+ * Whether an action may be invoked from a sandbox at the given access level.
+ * Requires the connector to be `exposable`, the action to be `exposed`, and —
+ * when `access` is provided — the action's class to be permitted (a 'read'
+ * sandbox may only call 'read' actions; a 'write' sandbox may call either).
+ */
+export function isSandboxExposed(
+  connector: ConnectorSpec,
+  actionName: string,
+  access?: SandboxAccessClass
+): boolean {
+  if (!connector.sandbox?.exposable) return false;
+  if (!connector.actions[actionName]?.sandbox?.exposed) return false;
+  if (access === 'read') return getSandboxActionAccess(connector, actionName) === 'read';
+  return true;
+}
+
+/**
+ * Names of actions a sandbox may invoke at the given access level. Used by the
+ * broker to build the allowed tool surface and by the agent-attachment layer to
+ * tell the LLM what it can do from inside the sandbox.
+ */
+export function getSandboxExposedActions(
+  connector: ConnectorSpec,
+  access?: SandboxAccessClass
+): string[] {
+  return Object.keys(connector.actions).filter((name) => isSandboxExposed(connector, name, access));
 }

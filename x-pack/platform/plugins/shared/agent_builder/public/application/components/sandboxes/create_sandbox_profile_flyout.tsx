@@ -7,9 +7,11 @@
 
 import React, { useMemo, useState } from 'react';
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiComboBox,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
@@ -22,27 +24,42 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
   EuiSelect,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTextArea,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   CLOUD_RUN_SA_SECRET_KEY,
+  GITHUB_APP_PRIVATE_KEY_SECRET_KEY,
   DEFAULT_SANDBOX_POLICY,
+  SANDBOX_TIER_PRESETS,
   type SandboxConnection,
+  type SandboxConnectorAccess,
+  type SandboxEgressMode,
+  type SandboxFilesystemMode,
+  type SandboxGitPolicy,
   type SandboxProfile,
   type SandboxProfileCreateRequest,
   type SandboxProviderId,
+  type SandboxTier,
 } from '@kbn/agent-builder-common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSandboxProfiles } from '../../hooks/sandboxes/use_sandbox_profiles';
+import { FIELD_HELP, LabelWithHelp, TIER_HELP } from './capability_help';
 import opencodeLogo from './assets/opencode.svg';
 import piLogo from './assets/pi.svg';
+import codexLogo from './assets/codex.svg';
+import claudeCodeLogo from './assets/claude_code.svg';
+import e2bLogo from './assets/e2b.png';
+import namespaceLogo from './assets/namespace.svg';
 
 interface Props {
   /** When set, the flyout edits an existing profile instead of creating one. */
@@ -73,7 +90,16 @@ const RUNTIME_DEFAULTS = {
 
 type SandboxRuntimeUiId = 'opencode' | 'pi';
 
-const RUNTIMES: Array<{ id: SandboxRuntimeUiId; label: string; logo: string; hint: string }> = [
+interface RuntimeOption {
+  id: SandboxRuntimeUiId;
+  label: string;
+  logo: string;
+  hint: string;
+  /** When true, the tile is shown grayed-out with a "coming soon" tooltip and is not selectable. */
+  comingSoon?: boolean;
+}
+
+const RUNTIMES: RuntimeOption[] = [
   {
     id: 'opencode',
     label: i18n.translate('xpack.agentBuilder.sandboxes.runtime.opencode', {
@@ -95,6 +121,28 @@ const RUNTIMES: Array<{ id: SandboxRuntimeUiId; label: string; logo: string; hin
       defaultMessage:
         'earendil-works/pi coding agent. Installed on first run and driven one-shot per turn via `pi --print`, using a single model.',
     }),
+  },
+];
+
+/**
+ * Runtimes we intend to support but haven't wired yet. Rendered as grayed-out,
+ * non-selectable tiles so the roadmap is visible in the UI. `id` is only used as
+ * a React key here (these are never selected).
+ */
+const COMING_SOON_RUNTIMES: Array<{ id: string; label: string; logo: string }> = [
+  {
+    id: 'codex',
+    label: i18n.translate('xpack.agentBuilder.sandboxes.runtime.codex', {
+      defaultMessage: 'Codex',
+    }),
+    logo: codexLogo,
+  },
+  {
+    id: 'claude-code',
+    label: i18n.translate('xpack.agentBuilder.sandboxes.runtime.claudeCode', {
+      defaultMessage: 'Claude Code',
+    }),
+    logo: claudeCodeLogo,
   },
 ];
 
@@ -121,6 +169,111 @@ const PROVIDERS: Array<{ id: SandboxProviderId; label: string; icon: string; hin
     }),
   },
 ];
+
+/**
+ * Compute providers on the roadmap. Rendered as grayed-out, non-selectable tiles
+ * next to the supported ones. `logo` is an imported SVG (rendered via <img>);
+ * `icon` is an EUI icon type (rendered via <EuiIcon>). Provide exactly one.
+ */
+const COMING_SOON_PROVIDERS: Array<{
+  id: string;
+  label: string;
+  logo?: string;
+  icon?: string;
+}> = [
+  {
+    id: 'e2b',
+    label: i18n.translate('xpack.agentBuilder.sandboxes.provider.e2b', {
+      defaultMessage: 'E2B',
+    }),
+    logo: e2bLogo,
+  },
+  {
+    id: 'namespace',
+    label: i18n.translate('xpack.agentBuilder.sandboxes.provider.namespace', {
+      defaultMessage: 'Namespace',
+    }),
+    logo: namespaceLogo,
+  },
+];
+
+const TIERS: Array<{ id: SandboxTier; label: string; icon: string }> = [
+  {
+    id: 'restricted',
+    label: i18n.translate('xpack.agentBuilder.sandboxes.tier.restricted', {
+      defaultMessage: 'Restricted',
+    }),
+    icon: 'lock',
+  },
+  {
+    id: 'investigate',
+    label: i18n.translate('xpack.agentBuilder.sandboxes.tier.investigate', {
+      defaultMessage: 'Investigate',
+    }),
+    icon: 'search',
+  },
+  {
+    id: 'contribute',
+    label: i18n.translate('xpack.agentBuilder.sandboxes.tier.contribute', {
+      defaultMessage: 'Contribute',
+    }),
+    icon: 'documentEdit',
+  },
+  {
+    id: 'trusted',
+    label: i18n.translate('xpack.agentBuilder.sandboxes.tier.trusted', {
+      defaultMessage: 'Trusted',
+    }),
+    icon: 'globe',
+  },
+];
+
+const COMING_SOON_LABEL = i18n.translate('xpack.agentBuilder.sandboxes.comingSoon', {
+  defaultMessage: 'Coming soon',
+});
+
+/**
+ * Keep all tiles (supported + "coming soon") on a single row. EuiKeyPadMenu has a
+ * built-in max-width that fits ~3 items and then wraps/clips the rest, so we lift
+ * the cap and force no-wrap, letting it scroll on very narrow flyouts instead of
+ * hiding a tile.
+ */
+const SINGLE_ROW_MENU_CSS = {
+  flexWrap: 'nowrap' as const,
+  maxWidth: 'none',
+  width: '100%',
+  overflowX: 'auto' as const,
+};
+
+/**
+ * A disabled key-pad tile advertising a not-yet-available option. The logo/icon
+ * is rendered grayed-out (desaturated + dimmed); the label reads "<name> —
+ * Coming soon" and the whole tile has a tooltip. We intentionally avoid EUI's
+ * `betaBadgeLabel` here because it collapses to a single-letter circular badge.
+ */
+const ComingSoonTile: React.FC<{ label: string; logo?: string; icon?: string }> = ({
+  label,
+  logo,
+  icon,
+}) => (
+  <EuiToolTip position="top" content={COMING_SOON_LABEL}>
+    <EuiKeyPadMenuItem
+      label={`${label} (${COMING_SOON_LABEL.toLowerCase()})`}
+      isDisabled
+      data-test-subj={`agentBuilderSandboxComingSoon-${label}`}
+    >
+      {logo ? (
+        <img
+          src={logo}
+          alt={label}
+          style={{ height: 32, maxWidth: 64, filter: 'grayscale(1)', opacity: 0.4 }}
+        />
+      ) : (
+        <EuiIcon type={icon ?? 'wrench'} size="l" css={{ filter: 'grayscale(1)', opacity: 0.4 }} />
+      )}
+    </EuiKeyPadMenuItem>
+  </EuiToolTip>
+);
 
 export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }) => {
   const { notifications } = useKibana().services;
@@ -163,6 +316,14 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
   const initialPi = profile?.runtimeConfig.type === 'pi' ? profile.runtimeConfig : undefined;
   const [piModel, setPiModel] = useState(initialPi?.model ?? RUNTIME_DEFAULTS.piModel);
 
+  // GitHub App credential config (git layer). clientId enables the Device Flow
+  // "act as the user" read credential; appId (+ the private-key secret) enables
+  // minting scoped installation tokens for push/PR. Non-secret ids persist on the
+  // profile; the private key is a secret (set on create, like the GCP SA key).
+  const [githubClientId, setGithubClientId] = useState(profile?.githubApp?.clientId ?? '');
+  const [githubAppId, setGithubAppId] = useState(profile?.githubApp?.appId ?? '');
+  const [githubPrivateKey, setGithubPrivateKey] = useState('');
+
   // policy
   const [idleTtlMin, setIdleTtlMin] = useState(
     (profile?.policy.idleTtlMs ?? DEFAULT_SANDBOX_POLICY.idleTtlMs) / 60000
@@ -173,6 +334,41 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
   const [maxRunSeconds, setMaxRunSeconds] = useState(
     profile?.policy.maxRunSeconds ?? DEFAULT_SANDBOX_POLICY.maxRunSeconds
   );
+
+  // capabilities (tier preset + per-axis overrides)
+  const [tier, setTier] = useState<SandboxTier>(
+    profile?.policy.tier ?? DEFAULT_SANDBOX_POLICY.tier ?? 'investigate'
+  );
+  const preset = SANDBOX_TIER_PRESETS[tier];
+  const [filesystem, setFilesystem] = useState<SandboxFilesystemMode>(
+    profile?.policy.filesystem ?? preset.filesystem
+  );
+  const [allowShell, setAllowShell] = useState<boolean>(
+    profile?.policy.allowShell ?? preset.allowShell
+  );
+  const [egress, setEgress] = useState<SandboxEgressMode>(profile?.policy.egress ?? preset.egress);
+  const [egressAllowlist, setEgressAllowlist] = useState<string[]>(
+    profile?.policy.egressAllowlist ?? ['github.com']
+  );
+  const [connectorAccess, setConnectorAccess] = useState<SandboxConnectorAccess>(
+    profile?.policy.connectorAccess ?? preset.connectorAccess
+  );
+  const [gitMode, setGitMode] = useState<SandboxGitPolicy['mode']>(
+    profile?.policy.git?.mode ?? preset.git.mode
+  );
+  const [gitRepos, setGitRepos] = useState<string[]>(profile?.policy.git?.repos ?? []);
+
+  // Picking a tier resets the axes to that tier's preset (advanced users can
+  // then override individual axes below). Keeps tier + axes from disagreeing.
+  const applyTier = (next: SandboxTier) => {
+    setTier(next);
+    const p = SANDBOX_TIER_PRESETS[next];
+    setFilesystem(p.filesystem);
+    setAllowShell(p.allowShell);
+    setEgress(p.egress);
+    setConnectorAccess(p.connectorAccess);
+    setGitMode(p.git.mode);
+  };
 
   const connection: SandboxConnection = useMemo(
     () =>
@@ -195,14 +391,32 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
   }, [name, provider, kubeContext, namespace, image, project, region, bridgeUrl]);
 
   const submit = async () => {
-    const secrets =
-      provider === 'cloud-run' && saKey.trim()
-        ? { [CLOUD_RUN_SA_SECRET_KEY]: saKey.trim() }
+    const secretEntries: Record<string, string> = {};
+    if (provider === 'cloud-run' && saKey.trim()) {
+      secretEntries[CLOUD_RUN_SA_SECRET_KEY] = saKey.trim();
+    }
+    if (githubPrivateKey.trim()) {
+      secretEntries[GITHUB_APP_PRIVATE_KEY_SECRET_KEY] = githubPrivateKey.trim();
+    }
+    const secrets = Object.keys(secretEntries).length > 0 ? secretEntries : undefined;
+    const githubApp =
+      githubClientId.trim() || githubAppId.trim()
+        ? {
+            clientId: githubClientId.trim() || undefined,
+            appId: githubAppId.trim() || undefined,
+          }
         : undefined;
     const policy = {
+      tier,
       idleTtlMs: idleTtlMin * 60000,
       maxLifetimeMs: maxLifetimeMin * 60000,
       maxRunSeconds,
+      filesystem,
+      allowShell,
+      egress,
+      egressAllowlist: egress === 'allowlist' ? egressAllowlist : undefined,
+      connectorAccess,
+      git: { mode: gitMode, repos: gitRepos.length > 0 ? gitRepos : undefined },
     };
     const runtimeConfig =
       runtime === 'pi'
@@ -213,7 +427,14 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
       if (isEdit && profile) {
         await updateProfile({
           id: profile.id,
-          body: { name, description: description || undefined, connection, runtimeConfig, policy },
+          body: {
+            name,
+            description: description || undefined,
+            connection,
+            runtimeConfig,
+            policy,
+            githubApp,
+          },
         });
         notifications.toasts.addSuccess(
           i18n.translate('xpack.agentBuilder.sandboxes.updated', {
@@ -230,6 +451,7 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
           connection,
           runtimeConfig,
           policy,
+          githubApp,
           secrets,
         };
         await createProfile(body);
@@ -302,6 +524,7 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
           </EuiText>
           <EuiSpacer size="s" />
           <EuiKeyPadMenu
+            css={SINGLE_ROW_MENU_CSS}
             aria-label={i18n.translate('xpack.agentBuilder.sandboxes.providerAria', {
               defaultMessage: 'Compute provider',
             })}
@@ -317,6 +540,9 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
               >
                 <EuiIcon type={p.icon} size="l" />
               </EuiKeyPadMenuItem>
+            ))}
+            {COMING_SOON_PROVIDERS.map((p) => (
+              <ComingSoonTile key={p.id} label={p.label} logo={p.logo} icon={p.icon} />
             ))}
           </EuiKeyPadMenu>
           <EuiSpacer size="xs" />
@@ -469,6 +695,7 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
           </EuiText>
           <EuiSpacer size="s" />
           <EuiKeyPadMenu
+            css={SINGLE_ROW_MENU_CSS}
             aria-label={i18n.translate('xpack.agentBuilder.sandboxes.runtimeAria', {
               defaultMessage: 'Coding runtime',
             })}
@@ -483,6 +710,9 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
               >
                 <img src={r.logo} alt={r.label} style={{ height: 32, maxWidth: 64 }} />
               </EuiKeyPadMenuItem>
+            ))}
+            {COMING_SOON_RUNTIMES.map((r) => (
+              <ComingSoonTile key={r.id} label={r.label} logo={r.logo} />
             ))}
           </EuiKeyPadMenu>
           <EuiSpacer size="xs" />
@@ -537,6 +767,277 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
             </EuiFormRow>
           )}
 
+          {/* ---- GitHub App credential (git layer) ---- */}
+          <EuiHorizontalRule margin="l" />
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.agentBuilder.sandboxes.section.githubApp', {
+                defaultMessage: 'GitHub App (optional)',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.agentBuilder.sandboxes.section.githubAppHint', {
+              defaultMessage:
+                'Lets the sandbox authenticate to GitHub. Client ID enables "act as the user" (Device Flow) to read private repos you can access; App ID + private key mint short-lived, repo-scoped tokens for push/PR.',
+            })}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            label={
+              <LabelWithHelp
+                label={i18n.translate('xpack.agentBuilder.sandboxes.field.githubClientId', {
+                  defaultMessage: 'OAuth Client ID',
+                })}
+                help={i18n.translate('xpack.agentBuilder.sandboxes.field.githubClientIdHelp', {
+                  defaultMessage:
+                    'The GitHub App client ID (Iv...). Enables the Device Flow so the sandbox reads GitHub as you. Requires "Enable Device Flow" on the App.',
+                })}
+              />
+            }
+          >
+            <EuiFieldText
+              placeholder="Iv23li..."
+              value={githubClientId}
+              onChange={(e) => setGithubClientId(e.target.value)}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <LabelWithHelp
+                label={i18n.translate('xpack.agentBuilder.sandboxes.field.githubAppId', {
+                  defaultMessage: 'App ID',
+                })}
+                help={i18n.translate('xpack.agentBuilder.sandboxes.field.githubAppIdHelp', {
+                  defaultMessage:
+                    'Numeric GitHub App ID. Used with the private key to mint scoped installation tokens for push/PR on a fork.',
+                })}
+              />
+            }
+          >
+            <EuiFieldText
+              placeholder="4286449"
+              value={githubAppId}
+              onChange={(e) => setGithubAppId(e.target.value)}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <LabelWithHelp
+                label={i18n.translate('xpack.agentBuilder.sandboxes.field.githubPrivateKey', {
+                  defaultMessage: 'App private key (PEM)',
+                })}
+                help={i18n.translate('xpack.agentBuilder.sandboxes.field.githubPrivateKeyHelp', {
+                  defaultMessage:
+                    'Stored encrypted, never returned to the browser. Only needed for installation tokens (push/PR). Set on create; leave blank to keep the existing key.',
+                })}
+              />
+            }
+          >
+            <EuiTextArea
+              placeholder="-----BEGIN RSA PRIVATE KEY-----"
+              value={githubPrivateKey}
+              onChange={(e) => setGithubPrivateKey(e.target.value)}
+              rows={4}
+            />
+          </EuiFormRow>
+
+          {/* ---- Capabilities (permission tier + advanced axes) ---- */}
+          <EuiHorizontalRule margin="l" />
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h3>
+                  {i18n.translate('xpack.agentBuilder.sandboxes.section.capabilities', {
+                    defaultMessage: 'Capabilities',
+                  })}
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={FIELD_HELP.tier}
+                position="top"
+                type="question"
+                color="subdued"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.agentBuilder.sandboxes.section.capabilitiesHint', {
+              defaultMessage:
+                'How much the coding sub-agent is allowed to do. Least privilege by default; escalate explicitly. Hover a tier to see what it grants.',
+            })}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup
+            gutterSize="s"
+            responsive={false}
+            wrap={false}
+            aria-label={i18n.translate('xpack.agentBuilder.sandboxes.tierAria', {
+              defaultMessage: 'Capability tier',
+            })}
+          >
+            {TIERS.map((t) => (
+              <EuiFlexItem key={t.id} grow={false}>
+                <EuiToolTip position="top" content={TIER_HELP[t.id]}>
+                  <EuiKeyPadMenuItem
+                    label={t.label}
+                    isSelected={tier === t.id}
+                    onClick={() => applyTier(t.id)}
+                    data-test-subj={`agentBuilderSandboxTier-${t.id}`}
+                  >
+                    <EuiIcon type={t.icon} size="l" />
+                  </EuiKeyPadMenuItem>
+                </EuiToolTip>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            {TIER_HELP[tier]}
+          </EuiText>
+          {tier === 'trusted' && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiCallOut
+                size="s"
+                color="warning"
+                iconType="warning"
+                title={i18n.translate('xpack.agentBuilder.sandboxes.trustedWarning', {
+                  defaultMessage:
+                    'Trusted grants open egress and full capability. Only use for local/single-tenant development.',
+                })}
+              />
+            </>
+          )}
+          <EuiSpacer size="s" />
+          <EuiAccordion
+            id="sandboxCapabilitiesAdvanced"
+            buttonContent={i18n.translate('xpack.agentBuilder.sandboxes.advancedCaps', {
+              defaultMessage: 'Advanced: override individual capabilities',
+            })}
+          >
+            <EuiSpacer size="s" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={<LabelWithHelp label="Filesystem" help={FIELD_HELP.filesystem} />}
+                >
+                  <EuiSelect
+                    options={[
+                      { value: 'ephemeral-rw', text: 'Ephemeral, writable' },
+                      { value: 'ephemeral-ro', text: 'Ephemeral, read-only root' },
+                    ]}
+                    value={filesystem}
+                    onChange={(e) => setFilesystem(e.target.value as SandboxFilesystemMode)}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={<LabelWithHelp label="Network egress" help={FIELD_HELP.egress} />}
+                >
+                  <EuiSelect
+                    options={[
+                      { value: 'deny', text: 'Deny (model gateway only)' },
+                      { value: 'allowlist', text: 'Allowlist' },
+                      { value: 'open', text: 'Open' },
+                    ]}
+                    value={egress}
+                    onChange={(e) => setEgress(e.target.value as SandboxEgressMode)}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {egress === 'allowlist' && (
+              <EuiFormRow
+                label={i18n.translate('xpack.agentBuilder.sandboxes.field.egressAllowlist', {
+                  defaultMessage: 'Allowed egress hosts',
+                })}
+                helpText={i18n.translate('xpack.agentBuilder.sandboxes.field.egressAllowlistHelp', {
+                  defaultMessage:
+                    'The model gateway and MCP loopback are always allowed. Add hosts like github.com.',
+                })}
+              >
+                <EuiComboBox
+                  noSuggestions
+                  placeholder="github.com"
+                  selectedOptions={egressAllowlist.map((h) => ({ label: h }))}
+                  onCreateOption={(v) => setEgressAllowlist((cur) => [...cur, v.trim()])}
+                  onChange={(opts) => setEgressAllowlist(opts.map((o) => o.label))}
+                />
+              </EuiFormRow>
+            )}
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={<LabelWithHelp label="Connector access" help={FIELD_HELP.connectors} />}
+                >
+                  <EuiSelect
+                    options={[
+                      { value: 'none', text: 'None' },
+                      { value: 'read', text: 'Read-only' },
+                      { value: 'write', text: 'Read + write' },
+                    ]}
+                    value={connectorAccess}
+                    onChange={(e) => setConnectorAccess(e.target.value as SandboxConnectorAccess)}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow label={<LabelWithHelp label="Git access" help={FIELD_HELP.git} />}>
+                  <EuiSelect
+                    options={[
+                      { value: 'none', text: 'None' },
+                      { value: 'clone-ro', text: 'Clone (read-only)' },
+                      { value: 'push-pr', text: 'Push + open PR' },
+                    ]}
+                    value={gitMode}
+                    onChange={(e) => setGitMode(e.target.value as SandboxGitPolicy['mode'])}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {gitMode !== 'none' && (
+              <EuiFormRow
+                label={
+                  <LabelWithHelp
+                    label={i18n.translate('xpack.agentBuilder.sandboxes.field.gitRepos', {
+                      defaultMessage: 'Git repositories',
+                    })}
+                    help={i18n.translate('xpack.agentBuilder.sandboxes.field.gitReposHelp', {
+                      defaultMessage:
+                        'owner/repo the sandbox may touch (e.g. shahargl/kibana). Scopes the minted GitHub App token to exactly these repos.',
+                    })}
+                  />
+                }
+              >
+                <EuiComboBox
+                  noSuggestions
+                  placeholder="shahargl/kibana"
+                  selectedOptions={gitRepos.map((r) => ({ label: r }))}
+                  onCreateOption={(v) => setGitRepos((prev) => [...prev, v.trim()])}
+                  onChange={(opts) => setGitRepos(opts.map((o) => o.label))}
+                />
+              </EuiFormRow>
+            )}
+            <EuiFormRow>
+              <EuiSwitch
+                label={
+                  <LabelWithHelp
+                    label={i18n.translate('xpack.agentBuilder.sandboxes.field.allowShell', {
+                      defaultMessage: 'Allow arbitrary shell commands',
+                    })}
+                    help={FIELD_HELP.allowShell}
+                  />
+                }
+                checked={allowShell}
+                onChange={(e) => setAllowShell(e.target.checked)}
+              />
+            </EuiFormRow>
+          </EuiAccordion>
+
           {/* ---- Lifecycle policy ---- */}
           <EuiHorizontalRule margin="l" />
           <EuiTitle size="xs">
@@ -557,9 +1058,14 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
-                label={i18n.translate('xpack.agentBuilder.sandboxes.field.idleTtl', {
-                  defaultMessage: 'Idle TTL (min)',
-                })}
+                label={
+                  <LabelWithHelp
+                    label={i18n.translate('xpack.agentBuilder.sandboxes.field.idleTtl', {
+                      defaultMessage: 'Idle TTL (min)',
+                    })}
+                    help={FIELD_HELP.idleTtl}
+                  />
+                }
               >
                 <EuiFieldNumber
                   min={1}
@@ -570,9 +1076,14 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow
-                label={i18n.translate('xpack.agentBuilder.sandboxes.field.maxLifetime', {
-                  defaultMessage: 'Max lifetime (min)',
-                })}
+                label={
+                  <LabelWithHelp
+                    label={i18n.translate('xpack.agentBuilder.sandboxes.field.maxLifetime', {
+                      defaultMessage: 'Max lifetime (min)',
+                    })}
+                    help={FIELD_HELP.maxLifetime}
+                  />
+                }
               >
                 <EuiFieldNumber
                   min={1}
@@ -583,9 +1094,14 @@ export const CreateSandboxProfileFlyout: React.FC<Props> = ({ profile, onClose }
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow
-                label={i18n.translate('xpack.agentBuilder.sandboxes.field.maxRun', {
-                  defaultMessage: 'Max run (sec)',
-                })}
+                label={
+                  <LabelWithHelp
+                    label={i18n.translate('xpack.agentBuilder.sandboxes.field.maxRun', {
+                      defaultMessage: 'Max run (sec)',
+                    })}
+                    help={FIELD_HELP.maxRun}
+                  />
+                }
               >
                 <EuiFieldNumber
                   min={60}

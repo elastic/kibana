@@ -15,6 +15,7 @@
 export type OpencodePhase =
   | 'provisioning'
   | 'connecting'
+  | 'credential'
   | 'thinking'
   | 'editing'
   | 'running'
@@ -51,4 +52,9 @@ export interface OpencodeRunProgress {
   fileContent?: string;
   /** Language hint for the code block (derived from filePath extension). */
   fileLanguage?: string;
+  /**
+   * For `kibana` connector calls: the connector instance id, so the UI can
+   * render that connector's own icon (resolved via its action type).
+   */
+  connectorId?: string;
 }

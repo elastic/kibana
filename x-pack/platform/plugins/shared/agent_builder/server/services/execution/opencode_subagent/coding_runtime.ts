@@ -62,11 +62,26 @@ export interface CodingRunParams {
    * exactly what the scoped credential permits.
    */
   systemPrompt?: string;
+  /**
+   * GitHub credentials for real git operations (clone/push/PR) inside the
+   * sandbox. Injected into the pod's git per-run and scrubbed afterwards. Unlike
+   * MCP-brokered API calls, raw git needs a git-usable credential in the pod, so
+   * this is a deliberate, narrowly-scoped exception to "no secrets in sandbox".
+   */
+  gitCredentials?: GitCredentials;
   /** Max wall-clock for the agent turn. */
   timeoutMs: number;
   /** Streaming activity for the parent agent/UI. */
   onProgress?: (progress: OpencodeRunProgress) => void;
   abortSignal?: AbortSignal;
+}
+
+/** A short-lived, minimally-scoped credential for git operations in the sandbox. */
+export interface GitCredentials {
+  /** GitHub token (PAT) used as the `x-access-token` password over HTTPS. */
+  token: string;
+  /** The connector this token came from (for logging/correlation). */
+  connectorId: string;
 }
 
 export interface CodingRunResult {

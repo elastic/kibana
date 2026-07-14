@@ -22,6 +22,14 @@ export interface SandboxConfig {
   namespace: string;
   image: string;
   maxRunSeconds: number;
+  /**
+   * Effective egress allowlist (hostnames) the resolver derived from the policy
+   * tier. `undefined` = open egress (no restriction). An empty/essential-only
+   * list = deny-by-default. Applied as a per-pod NetworkPolicy.
+   */
+  egressAllowlist?: string[];
+  /** Mount the container root filesystem read-only (ephemeral-ro tier). */
+  readOnlyRootFs?: boolean;
 }
 
 // Re-exported for existing importers. Prefer the provider-neutral types.
@@ -52,6 +60,10 @@ export class SandboxManager implements SandboxProvider {
 
   async create(spec: SandboxSpec): Promise<Sandbox> {
     await this.createPod(spec.name);
+    // Egress posture: spec-level allowlist (per-run) wins over the provider
+    // default; `undefined` on both = open egress (no NetworkPolicy applied).
+    const egressAllowlist = spec.egressAllowlist ?? this.config.egressAllowlist;
+    await this.applyEgressPolicy(spec.name, egressAllowlist);
     return new KubectlSandbox(spec.name, this.kubectl);
   }
 
@@ -94,6 +106,9 @@ export class SandboxManager implements SandboxProvider {
               runAsNonRoot: true,
               runAsUser: 1000,
               capabilities: { drop: ['ALL'] },
+              // ephemeral-ro tier: root FS is immutable; only /workspace (an
+              // emptyDir) is writable, so the agent can edit code but not the OS.
+              ...(this.config.readOnlyRootFs ? { readOnlyRootFilesystem: true } : {}),
             },
           },
         ],
@@ -109,6 +124,68 @@ export class SandboxManager implements SandboxProvider {
       130_000
     );
     this.logger.info(`Sandbox pod ${podName} is Ready`);
+  }
+
+  /**
+   * Apply a per-pod egress NetworkPolicy from the policy tier.
+   *
+   * `undefined` = open egress → no policy applied.
+   * Otherwise = deny-by-default egress, allowing only DNS (so hostnames resolve)
+   * plus HTTPS/HTTP to the allowed destinations. Vanilla Kubernetes
+   * NetworkPolicy is IP/port-based (not hostname-based), so we can't pin exact
+   * FQDNs without a CNI that supports FQDN rules (e.g. Cilium); for the PoC this
+   * enforces "deny-all except DNS + egress ports", and records the intended
+   * host allowlist on the policy annotation for auditability. Never throws:
+   * egress hardening is best-effort so a missing NetworkPolicy CRD/CNI doesn't
+   * break the run.
+   */
+  private async applyEgressPolicy(podName: string, allowlist?: string[]): Promise<void> {
+    if (!allowlist) {
+      this.logger.debug(`Egress open for ${podName} (no NetworkPolicy)`);
+      return;
+    }
+    const manifest = JSON.stringify({
+      apiVersion: 'networking.k8s.io/v1',
+      kind: 'NetworkPolicy',
+      metadata: {
+        name: `${podName}-egress`,
+        labels: { app: 'opencode-sandbox', role: 'subagent' },
+        annotations: { 'agent-builder/egress-allowlist': allowlist.join(',') },
+      },
+      spec: {
+        podSelector: { matchLabels: { 'sandbox-id': podName } },
+        policyTypes: ['Egress'],
+        egress: [
+          // DNS so hostnames in the allowlist can resolve.
+          {
+            to: [{ namespaceSelector: {} }],
+            ports: [
+              { protocol: 'UDP', port: 53 },
+              { protocol: 'TCP', port: 53 },
+            ],
+          },
+          // HTTPS/HTTP egress (host pinning requires an FQDN-aware CNI).
+          {
+            ports: [
+              { protocol: 'TCP', port: 443 },
+              { protocol: 'TCP', port: 80 },
+            ],
+          },
+        ],
+      },
+    });
+    try {
+      // Label the pod so the NetworkPolicy podSelector matches this instance.
+      await this.kubectl.run(['label', 'pod', podName, `sandbox-id=${podName}`, '--overwrite']);
+      await this.kubectl.run(['apply', '-f', '-'], manifest);
+      this.logger.info(
+        `Applied egress NetworkPolicy for ${podName} (allow: ${allowlist.join(', ')})`
+      );
+    } catch (e) {
+      this.logger.warn(
+        `Failed to apply egress NetworkPolicy for ${podName} (continuing): ${(e as Error).message}`
+      );
+    }
   }
 
   /**

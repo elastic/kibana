@@ -22,23 +22,40 @@ import type { SandboxProfile } from '@kbn/agent-builder-common';
 import type { OpencodeSubagentExecutor } from '../../opencode_subagent/executor';
 
 /**
- * Build a plain-text briefing of the connectors currently attached to the
- * conversation, so the OpenCode sub-agent knows which connectorId + sub-actions
- * it can call over MCP (via platform.core.execute_connector_sub_action) WITHOUT
- * the user having to spell out ids/sub-actions in the prompt.
+ * Result of resolving the conversation's attached connectors for the sub-agent:
+ * a human-readable catalog (goes into the sub-agent's system prompt) and the
+ * flat list of connector ids (goes into the run's tool-access scope so the
+ * broker/runtime knows exactly which connectors this run may touch).
+ */
+interface ConnectorContext {
+  /** Catalog (Connector ID + sub-actions) to inject into the sub-agent system prompt. */
+  catalog: string;
+  /** Connector ids the sub-agent is allowed to use for this run. */
+  connectorIds: string[];
+}
+
+/**
+ * Build a briefing of the connectors currently attached to the conversation, so
+ * the OpenCode sub-agent knows which connectorId + sub-actions it can call over
+ * MCP (via platform.core.execute_connector_sub_action) WITHOUT the user spelling
+ * out ids/sub-actions in the prompt.
  *
  * This mirrors the connector attachment representation the parent agent already
- * sees; we surface it to the sub-agent because it runs in its own session.
+ * sees; we surface it to the sub-agent because it runs in its own session. The
+ * secret never leaves Kibana — the sub-agent only ever names a connectorId, and
+ * Kibana's actions framework brokers the call.
  */
-const buildConnectorContext = (attachments: AttachmentStateManager): string => {
+const buildConnectorContext = (attachments: AttachmentStateManager): ConnectorContext => {
   const toolId = platformCoreTools.executeConnectorSubAction;
   const connectorAttachments = attachments
     .getActive()
     .filter((a) => a.type === AttachmentType.connector);
 
-  if (connectorAttachments.length === 0) return '';
+  const empty: ConnectorContext = { catalog: '', connectorIds: [] };
+  if (connectorAttachments.length === 0) return empty;
 
   const blocks: string[] = [];
+  const connectorIds: string[] = [];
   for (const attachment of connectorAttachments) {
     const data = getLatestVersion(attachment)?.data as ConnectorAttachmentData | undefined;
     if (!data) continue;
@@ -47,6 +64,7 @@ const buildConnectorContext = (attachments: AttachmentStateManager): string => {
       connector_name: connectorName,
       connector_type: connectorType,
     } = data;
+    connectorIds.push(connectorId);
     const spec = getConnectorSpec(connectorType);
     const subActions = spec
       ? Object.entries(spec.actions)
@@ -64,9 +82,9 @@ const buildConnectorContext = (attachments: AttachmentStateManager): string => {
     blocks.push(lines.join('\n'));
   }
 
-  if (blocks.length === 0) return '';
+  if (blocks.length === 0) return empty;
 
-  return [
+  const catalog = [
     '## Available Kibana connectors',
     '',
     `You can call these connectors through the agent_builder MCP tool "${toolId}".`,
@@ -74,6 +92,49 @@ const buildConnectorContext = (attachments: AttachmentStateManager): string => {
     'Kibana holds the credentials and makes the external call; you never see the secret.',
     '',
     ...blocks,
+  ].join('\n');
+
+  return { catalog, connectorIds };
+};
+
+/**
+ * Compose git/PR guidance for the sub-agent's system prompt from the profile's
+ * git policy. When the profile allows push+PR, tell the agent exactly how to
+ * clone, branch, commit, push, and open a PR on the allowed repo(s) — the
+ * sandbox already has a scoped, short-lived credential injected into git + gh.
+ */
+const buildGitGuidance = (profile: SandboxProfile): string => {
+  const git = profile.policy?.git;
+  if (!git || git.mode === 'none') return '';
+  const repos = git.repos ?? [];
+  const repoLine =
+    repos.length > 0
+      ? `You may operate on these repositories only: ${repos.join(', ')}.`
+      : 'Operate only on the repository named in the task.';
+
+  if (git.mode === 'clone-ro') {
+    return [
+      '## Git access (read-only)',
+      '',
+      repoLine,
+      'git and the `gh` CLI are pre-authenticated in this sandbox with a short-lived,',
+      'repo-scoped token. You may `git clone` and read, but do NOT push or open PRs.',
+    ].join('\n');
+  }
+
+  // push-pr
+  return [
+    '## Git access (push + open PR)',
+    '',
+    repoLine,
+    'git and the `gh` CLI are pre-authenticated in this sandbox with a short-lived,',
+    'repo-scoped GitHub App token (contents + pull_requests). To deliver a fix:',
+    '1. `git clone https://github.com/<owner>/<repo>.git` and investigate.',
+    '2. Create a branch, make the minimal fix, and commit with a clear message.',
+    '3. `git push` the branch.',
+    '4. Open a pull request with `gh pr create --fill` (or the GitHub API) and',
+    '   return the PR URL in your final answer.',
+    'Keep the change focused and small. Do not modify unrelated files.',
   ].join('\n');
 };
 
@@ -144,19 +205,23 @@ export const createOpencodeSubagentTool = ({
       { events, runContext, spaceId, request, attachments }
     ) => {
       try {
-        // Prepend any attached connectors so the sub-agent can use them by id
+        // Resolve any attached connectors so the sub-agent can use them by id
         // without the user spelling out connectorId/subAction. The parent agent
-        // discovers connectors via SML (sml_search/sml_attach); this forwards
-        // that context into the sub-agent's separate session.
-        const connectorContext = buildConnectorContext(attachments);
-        const fullPrompt = connectorContext
-          ? `${description}\n\n${connectorContext}\n\n---\n\n${prompt}`
-          : `${description}\n\n${prompt}`;
+        // discovers connectors via SML (sml_search/sml_attach) or the user
+        // attaches them; this forwards that context into the sub-agent's
+        // separate session. The catalog goes into the system prompt; the ids
+        // scope the run's tool access (broker/runtime).
+        const { catalog, connectorIds } = buildConnectorContext(attachments);
+        const gitGuidance = buildGitGuidance(profile);
+        const systemPrompt = [catalog, gitGuidance].filter(Boolean).join('\n\n') || undefined;
+        const fullPrompt = `${description}\n\n${prompt}`;
 
         const agentCtx = getAgentFromRunContext(runContext);
 
         const result = await executor.execute({
           prompt: fullPrompt,
+          systemPrompt,
+          allowedConnectors: connectorIds.length > 0 ? connectorIds : undefined,
           request,
           profile,
           runContext: {

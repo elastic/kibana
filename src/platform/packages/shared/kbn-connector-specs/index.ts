@@ -23,7 +23,14 @@ export {
 } from './src/auth_types/oauth_client_credentials_private_key_jwt';
 
 export { getConnectorSpec } from './src/get_connector_spec';
-export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
+export {
+  isToolAction,
+  TEST_CONNECTOR_SUB_ACTION,
+  getSandboxCredentialStrategy,
+  getSandboxActionAccess,
+  isSandboxExposed,
+  getSandboxExposedActions,
+} from './src/connector_spec';
 export {
   getConnectorActionErrorMeta,
   setConnectorActionErrorMeta,

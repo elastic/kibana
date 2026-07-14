@@ -34,6 +34,7 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { queryKeys } from '../../../query_keys';
 import { appPaths } from '../../../utils/app_paths';
 import { PageWrapper } from '../common/page_wrapper';
+import { FIELD_HELP, LabelWithHelp } from '../../sandboxes/capability_help';
 
 interface Props {
   agentId: string;
@@ -188,10 +189,20 @@ export const AgentSandbox: React.FC<Props> = ({ agentId }) => {
                 type="responsiveColumn"
                 columnWidths={[1, 2]}
                 listItems={[
-                  { title: 'Provider', description: attachedProfile.provider },
-                  { title: 'Runtime', description: attachedProfile.runtime },
                   {
-                    title: 'Model',
+                    title: <LabelWithHelp label="Provider" help={FIELD_HELP.provider} />,
+                    description: attachedProfile.provider,
+                  },
+                  {
+                    title: <LabelWithHelp label="Runtime" help={FIELD_HELP.runtime} />,
+                    description: attachedProfile.runtime,
+                  },
+                  {
+                    title: <LabelWithHelp label="Capability tier" help={FIELD_HELP.tier} />,
+                    description: attachedProfile.policy.tier ?? 'investigate',
+                  },
+                  {
+                    title: <LabelWithHelp label="Model" help={FIELD_HELP.model} />,
                     description:
                       attachedProfile.runtimeConfig.type === 'pi'
                         ? attachedProfile.runtimeConfig.model

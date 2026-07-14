@@ -16,9 +16,11 @@ import type {
   CodingRuntime,
   CodingRunParams,
   CodingRunResult,
+  GitCredentials,
   RuntimeModelConfig,
   RuntimeToolAccess,
 } from './coding_runtime';
+import type { Sandbox } from './sandbox_provider';
 import type { OpencodePhase, OpencodeItemStatus, OpencodeTodo, OpencodeRunProgress } from './types';
 
 /** Max output kept per item, to bound payload size for the UI. */
@@ -132,6 +134,8 @@ const extractFileEdit = (rawInput?: Record<string, unknown>): FileEdit | undefin
 interface Classification {
   phase: OpencodePhase;
   label: string;
+  /** Connector instance id, when this call executed a connector sub-action. */
+  connectorId?: string;
 }
 
 /**
@@ -161,6 +165,7 @@ const classifyToolCall = ({
     return {
       phase: 'kibana',
       label: detail ? `Called connector: ${detail}` : 'Called a Kibana connector',
+      connectorId,
     };
   }
   if (
@@ -211,6 +216,8 @@ const classifyToolCall = ({
 /** Absolute workspace path inside the sandbox. */
 const WORKSPACE = '/workspace';
 const CONFIG_PATH = `${WORKSPACE}/opencode.json`;
+/** Where the git HTTPS credential is stored inside the sandbox (per-run, scrubbed). */
+const GIT_CREDENTIALS_PATH = `${WORKSPACE}/.git-credentials`;
 
 /**
  * OpenCode coding runtime, driven over ACP (LAYER 2).
@@ -257,6 +264,9 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
               Authorization: tools.mcpAuthHeader,
               Accept: 'application/json, text/event-stream',
               'kbn-xsrf': 'true',
+              // Bypass ngrok's free-tier browser interstitial when the MCP
+              // loopback is tunneled through ngrok (harmless otherwise).
+              'ngrok-skip-browser-warning': 'true',
             },
           },
         },
@@ -272,6 +282,7 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
     modelConfig,
     toolAccess,
     systemPrompt,
+    gitCredentials,
     timeoutMs,
     onProgress,
     abortSignal,
@@ -307,6 +318,14 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
         { path: CONFIG_PATH, contents: this.buildConfig(modelConfig, toolAccess) },
       ]);
       abortSignal?.throwIfAborted?.();
+
+      // Inject git credentials for real clone/push/PR. Written each turn (and
+      // scrubbed in `finally`) so a warm-reused sandbox never retains the token
+      // across runs. Uses the HTTPS credential store with x-access-token.
+      if (gitCredentials) {
+        await this.injectGitCredentials(sandbox, gitCredentials);
+        abortSignal?.throwIfAborted?.();
+      }
 
       const child = sandbox.spawn([
         'sh',
@@ -396,6 +415,7 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
               filePath,
               fileContent: fileContent ? capTail(fileContent) : undefined,
               fileLanguage: langFromPath(filePath),
+              connectorId: fresh.connectorId ?? existing?.connectorId,
             });
             break;
           }
@@ -454,6 +474,54 @@ export class OpenCodeAcpRuntime implements CodingRuntime {
       };
     } finally {
       client?.close();
+      // Scrub git credentials so a warm-reused sandbox never keeps the token
+      // between turns (defense-in-depth; the executor also relies on short PAT
+      // expiry). Best-effort — never fail the run on cleanup.
+      if (gitCredentials) {
+        await this.scrubGitCredentials(sandbox).catch((e) =>
+          this.logger.warn(`Failed to scrub git credentials: ${(e as Error).message}`)
+        );
+      }
     }
+  }
+
+  /**
+   * Configure the sandbox's git to authenticate to github.com over HTTPS using
+   * the provided token as the `x-access-token` password. Also rewrites SSH/`git@`
+   * remotes to HTTPS so `git clone git@github.com:...` still works.
+   */
+  private async injectGitCredentials(sandbox: Sandbox, creds: GitCredentials): Promise<void> {
+    // The token is written to a file (not passed on the command line) to avoid
+    // it appearing in process listings. `credential.helper store` reads it.
+    await sandbox.putFiles([
+      {
+        path: GIT_CREDENTIALS_PATH,
+        contents: `https://x-access-token:${creds.token}@github.com\n`,
+      },
+    ]);
+    await sandbox.exec(
+      [
+        `git config --global credential.helper 'store --file=${GIT_CREDENTIALS_PATH}'`,
+        `git config --global url."https://github.com/".insteadOf git@github.com:`,
+        `git config --global url."https://github.com/".insteadOf ssh://git@github.com/`,
+        // gh CLI (if present) reads GH_TOKEN from a login; make the token usable.
+        `chmod 600 ${GIT_CREDENTIALS_PATH}`,
+      ].join(' && '),
+      { timeoutMs: 10_000 }
+    );
+    this.logger.info(
+      `Injected git credentials (connector ${creds.connectorId}) into sandbox ${sandbox.id}`
+    );
+  }
+
+  private async scrubGitCredentials(sandbox: Sandbox): Promise<void> {
+    await sandbox.exec(
+      [
+        `rm -f ${GIT_CREDENTIALS_PATH}`,
+        `git config --global --unset credential.helper 2>/dev/null || true`,
+        `git config --global --unset-all url."https://github.com/".insteadOf 2>/dev/null || true`,
+      ].join('; '),
+      { timeoutMs: 10_000 }
+    );
   }
 }

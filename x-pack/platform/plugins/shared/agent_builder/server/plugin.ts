@@ -260,6 +260,8 @@ export class AgentBuilderPlugin
       logger: this.logger.get('opencodeSubagent'),
       esClient: elasticsearch.client.asInternalUser,
       security,
+      getActions: async () => actions,
+      encryptedSavedObjects: startDeps.encryptedSavedObjects,
     });
 
     // Request-scoped Sandbox Profile CRUD (Encrypted Saved Objects). Cheap to

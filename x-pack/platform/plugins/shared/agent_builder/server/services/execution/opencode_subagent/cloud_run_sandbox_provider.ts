@@ -48,8 +48,13 @@ export class CloudRunSandboxProvider implements SandboxProvider {
   }
 
   async create(spec: SandboxSpec): Promise<Sandbox> {
+    const egress = spec.egressAllowlist ?? this.config.egressAllowlist;
     this.logger.debug(
-      `Provisioning Cloud Run sandbox ${spec.name} via bridge ${this.config.bridgeUrl}`
+      `Provisioning Cloud Run sandbox ${spec.name} via bridge ${this.config.bridgeUrl}` +
+        (egress
+          ? ` (egress allowlist requested: ${egress.join(', ')} — advisory until the ` +
+            `bridge enforces per-host egress; currently uses --allow-egress)`
+          : ' (open egress)')
     );
     await this.bridge.createSandbox(spec.name);
     return new CloudRunSandbox(spec.name, this.bridge);

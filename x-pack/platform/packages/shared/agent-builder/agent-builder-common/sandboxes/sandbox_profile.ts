@@ -59,19 +59,137 @@ export interface CloudRunConnection {
 
 export type SandboxConnection = LocalK8sConnection | CloudRunConnection;
 
+/**
+ * Capability tier: a named preset over the four permission axes below. The tier
+ * is the primary knob users pick; advanced users override individual axes. It
+ * exists so the default is least-privilege and escalation is an explicit choice
+ * (unlike "let the agent do everything"). Ordered least → most privileged:
+ *
+ * - `restricted`  — ephemeral FS, deny-all egress (except model gateway + MCP
+ *   loopback), no connectors, no git. "Run a snippet."
+ * - `investigate` — + egress allowlist, read-only clone, read-only connectors.
+ *   No writes anywhere. (the abusedb/checkIp demo)
+ * - `contribute`  — + push branch / open PR (broker-scoped token) + write
+ *   connectors. The "wow" tier.
+ * - `trusted`     — open egress, full capability. Local/single-tenant dev only.
+ */
+export type SandboxTier = 'restricted' | 'investigate' | 'contribute' | 'trusted';
+
+/** Filesystem posture inside the sandbox. */
+export type SandboxFilesystemMode = 'ephemeral-ro' | 'ephemeral-rw';
+
+/** Network egress posture. */
+export type SandboxEgressMode = 'deny' | 'allowlist' | 'open';
+
+/** How the sandbox's runtime may use Kibana connectors (enforced by the broker). */
+export type SandboxConnectorAccess = 'none' | 'read' | 'write';
+
+/** Git/repo capability (enforced by the broker's scoped git credential). */
+export interface SandboxGitPolicy {
+  mode: 'none' | 'clone-ro' | 'push-pr';
+  /** Repos this sandbox may touch (owner/repo). Empty = none (or all if trusted). */
+  repos?: string[];
+}
+
 /** Lifecycle + capability policy for sandboxes created from this profile. */
 export interface SandboxPolicy {
+  /** Named preset over the capability axes; the axes below may override it. */
+  tier?: SandboxTier;
+
+  // ---- Lifecycle ---------------------------------------------------------
   /** Reap a warm sandbox after this much inactivity in a conversation. */
   idleTtlMs: number;
   /** Hard cap on a sandbox's lifetime regardless of activity. */
   maxLifetimeMs: number;
   /** Max wall-clock for a single coding turn. */
   maxRunSeconds: number;
-  /** Outbound hosts the sandbox may reach (deny-by-default otherwise). */
+
+  // ---- Axis 1: compute (enforced by the SandboxProvider) -----------------
+  /** Filesystem posture. Defaults to ephemeral-rw. */
+  filesystem?: SandboxFilesystemMode;
+  /** Whether arbitrary shell is allowed. Defaults to true. */
+  allowShell?: boolean;
+
+  // ---- Axis 2: network (enforced by the SandboxProvider) -----------------
+  /** Egress posture. Defaults to `allowlist` when an allowlist is present. */
+  egress?: SandboxEgressMode;
+  /** Outbound hosts the sandbox may reach (used when egress = 'allowlist'). */
   egressAllowlist?: string[];
+
+  // ---- Axis 3: Kibana data/tools (enforced by the broker) ----------------
+  /** How the runtime may use connectors. Defaults to `read`. */
+  connectorAccess?: SandboxConnectorAccess;
   /** Connector ids the sandbox's runtime may use (empty = the user's RBAC). */
   allowedConnectors?: string[];
+
+  // ---- Axis 4: git/repo (enforced by the broker) -------------------------
+  /** Git capability + repo scope. Defaults to clone-ro. */
+  git?: SandboxGitPolicy;
 }
+
+/**
+ * The capability axes each tier implies. Advanced overrides are merged on top.
+ * Lifecycle fields (TTLs) are orthogonal and not part of the preset.
+ */
+export const SANDBOX_TIER_PRESETS: Record<
+  SandboxTier,
+  Required<Pick<SandboxPolicy, 'filesystem' | 'allowShell' | 'egress' | 'connectorAccess'>> & {
+    git: SandboxGitPolicy;
+  }
+> = {
+  restricted: {
+    filesystem: 'ephemeral-rw',
+    allowShell: true,
+    egress: 'deny',
+    connectorAccess: 'none',
+    git: { mode: 'none' },
+  },
+  investigate: {
+    filesystem: 'ephemeral-rw',
+    allowShell: true,
+    egress: 'allowlist',
+    connectorAccess: 'read',
+    git: { mode: 'clone-ro' },
+  },
+  contribute: {
+    filesystem: 'ephemeral-rw',
+    allowShell: true,
+    egress: 'allowlist',
+    connectorAccess: 'write',
+    git: { mode: 'push-pr' },
+  },
+  trusted: {
+    filesystem: 'ephemeral-rw',
+    allowShell: true,
+    egress: 'open',
+    connectorAccess: 'write',
+    git: { mode: 'push-pr' },
+  },
+};
+
+/**
+ * Resolve the effective capability axes for a policy: start from the tier preset
+ * (default `investigate`), then apply any explicit per-axis overrides. Callers
+ * (resolver, providers, broker) use this so tier and overrides can't disagree.
+ */
+export const resolveSandboxCapabilities = (
+  policy: SandboxPolicy
+): Required<Pick<SandboxPolicy, 'filesystem' | 'allowShell' | 'egress' | 'connectorAccess'>> & {
+  git: SandboxGitPolicy;
+  egressAllowlist?: string[];
+  allowedConnectors?: string[];
+} => {
+  const preset = SANDBOX_TIER_PRESETS[policy.tier ?? 'investigate'];
+  return {
+    filesystem: policy.filesystem ?? preset.filesystem,
+    allowShell: policy.allowShell ?? preset.allowShell,
+    egress: policy.egress ?? preset.egress,
+    egressAllowlist: policy.egressAllowlist,
+    connectorAccess: policy.connectorAccess ?? preset.connectorAccess,
+    allowedConnectors: policy.allowedConnectors,
+    git: policy.git ?? preset.git,
+  };
+};
 
 /** Runtime (coding agent) configuration — model routing for OpenCode. */
 export interface OpencodeRuntimeConfig {
@@ -97,6 +215,23 @@ export interface PiRuntimeConfig {
 
 export type SandboxRuntimeConfig = OpencodeRuntimeConfig | PiRuntimeConfig;
 
+/**
+ * GitHub App configuration for a sandbox profile — the git credential layer.
+ * Non-secret identifiers live here; the App private key is stored in the
+ * profile's `secrets` (under {@link GITHUB_APP_PRIVATE_KEY_SECRET_KEY}), like the
+ * GCP service-account key. This is per-profile (not global Kibana config) so each
+ * sandbox brings its own credential story:
+ *
+ * - `clientId` enables the OAuth Device Flow ("act as the user") so the sandbox
+ *   can read private repos the user has access to (e.g. `elastic/*`).
+ * - `appId` (+ the private key secret) enables minting short-lived, repo-scoped
+ *   *installation* tokens for push/PR on a fork.
+ */
+export interface SandboxGithubAppConfig {
+  clientId?: string;
+  appId?: string;
+}
+
 /** A profile as returned to the UI (no secrets). */
 export interface SandboxProfile {
   id: string;
@@ -107,6 +242,8 @@ export interface SandboxProfile {
   connection: SandboxConnection;
   runtimeConfig: SandboxRuntimeConfig;
   policy: SandboxPolicy;
+  /** Optional GitHub App credential config for git operations in the sandbox. */
+  githubApp?: SandboxGithubAppConfig;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -125,6 +262,7 @@ export type SandboxProfileUpdateRequest = Partial<
 
 /** Sensible defaults for a new profile (mirrors the previous hardcoded config). */
 export const DEFAULT_SANDBOX_POLICY: SandboxPolicy = {
+  tier: 'investigate',
   idleTtlMs: 20 * 60 * 1000,
   maxLifetimeMs: 2 * 60 * 60 * 1000,
   maxRunSeconds: 1800,
@@ -132,3 +270,6 @@ export const DEFAULT_SANDBOX_POLICY: SandboxPolicy = {
 
 /** Well-known secret key holding a GCP service-account JSON for Cloud Run. */
 export const CLOUD_RUN_SA_SECRET_KEY = 'gcpServiceAccountKey';
+
+/** Well-known secret key holding a GitHub App private key PEM for a profile. */
+export const GITHUB_APP_PRIVATE_KEY_SECRET_KEY = 'githubAppPrivateKey';

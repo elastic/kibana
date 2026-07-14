@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SandboxProfile } from '@kbn/agent-builder-common';
-import { CLOUD_RUN_SA_SECRET_KEY } from '@kbn/agent-builder-common';
+import { CLOUD_RUN_SA_SECRET_KEY, resolveSandboxCapabilities } from '@kbn/agent-builder-common';
 import { SandboxManager } from './sandbox_manager';
 import { CloudRunSandboxProvider } from './cloud_run_sandbox_provider';
 import { SandboxRegistry, type SandboxRegistryConfig } from './sandbox_registry';
@@ -125,6 +125,12 @@ export class ProfileRuntimeResolver {
     const { connection, policy } = profile;
     const log = this.logger.get(`provider.${profile.id}`);
 
+    // Resolve the tier preset + per-axis overrides once, then map the compute
+    // axes (egress, filesystem) onto what each provider can enforce today.
+    const caps = resolveSandboxCapabilities(policy);
+    const egressAllowlist = this.effectiveEgressAllowlist(caps.egress, caps.egressAllowlist);
+    const readOnlyRootFs = caps.filesystem === 'ephemeral-ro';
+
     if (connection.type === 'local-k8s') {
       return {
         provider: new SandboxManager(
@@ -133,6 +139,8 @@ export class ProfileRuntimeResolver {
             namespace: connection.namespace,
             image: connection.image,
             maxRunSeconds: Math.ceil(policy.maxRunSeconds),
+            egressAllowlist,
+            readOnlyRootFs,
           },
           log
         ),
@@ -150,7 +158,7 @@ export class ProfileRuntimeResolver {
             bridgeUrl: connection.bridgeUrl,
             audience: connection.audience,
             serviceAccountKeyJson,
-            egressAllowlist: policy.egressAllowlist,
+            egressAllowlist,
           },
           log
         ),
@@ -159,6 +167,25 @@ export class ProfileRuntimeResolver {
     }
 
     throw new Error(`Unsupported sandbox provider: ${profile.provider}`);
+  }
+
+  /**
+   * Translate the egress *mode* into a concrete allowlist a provider enforces:
+   * - `open`      → undefined (no restriction)
+   * - `allowlist` → the configured hosts (+ always-needed model gateway / MCP loopback)
+   * - `deny`      → only the always-needed hosts (model gateway + MCP loopback),
+   *   so the sandbox can still reason + call back, but reach nothing else.
+   */
+  private effectiveEgressAllowlist(
+    mode: 'deny' | 'allowlist' | 'open',
+    configured?: string[]
+  ): string[] | undefined {
+    if (mode === 'open') return undefined;
+    // Hosts the runtime always needs regardless of tier: the model gateway and
+    // the MCP loopback back to Kibana. These are the minimum for any coding turn.
+    const essential = ['host.docker.internal', 'elastic.litellm-prod.ai'];
+    if (mode === 'deny') return essential;
+    return Array.from(new Set([...essential, ...(configured ?? [])]));
   }
 
   /** Provider metadata for a profile, for the Sandboxes page (no run). */

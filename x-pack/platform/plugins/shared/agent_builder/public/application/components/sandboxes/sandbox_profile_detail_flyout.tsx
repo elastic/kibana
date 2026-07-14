@@ -21,6 +21,7 @@ import {
   EuiHealth,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -28,6 +29,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SandboxProfile } from '@kbn/agent-builder-common';
+import { resolveSandboxCapabilities } from '@kbn/agent-builder-common';
+import { FIELD_HELP, LabelWithHelp, TIER_HELP, VALUE_HELP } from './capability_help';
 import { internalApiPath } from '../../../../common/constants';
 import { useKibana } from '../../hooks/use_kibana';
 import {
@@ -173,16 +176,114 @@ export const SandboxProfileDetailFlyout: React.FC<Props> = ({
           type="responsiveColumn"
           columnWidths={[1, 2]}
           listItems={[
-            { title: 'Runtime', description: profile.runtime },
+            {
+              title: <LabelWithHelp label="Runtime" help={FIELD_HELP.runtime} />,
+              description: profile.runtime,
+            },
             { title: 'Model gateway', description: profile.runtimeConfig.baseUrl },
             ...(profile.runtimeConfig.type === 'pi'
-              ? [{ title: 'Model', description: profile.runtimeConfig.model }]
+              ? [
+                  {
+                    title: <LabelWithHelp label="Model" help={FIELD_HELP.model} />,
+                    description: profile.runtimeConfig.model,
+                  },
+                ]
               : [
                   { title: 'Orchestrator', description: profile.runtimeConfig.orchestratorModel },
                   { title: 'Coder', description: profile.runtimeConfig.coderModel },
                 ]),
           ]}
         />
+
+        <EuiHorizontalRule margin="m" />
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h3>
+                {i18n.translate('xpack.agentBuilder.sandboxes.detail.capabilities', {
+                  defaultMessage: 'Capabilities',
+                })}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content={TIER_HELP[profile.policy.tier ?? 'investigate']}
+              position="top"
+              type="question"
+              color="subdued"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color={profile.policy.tier === 'trusted' ? 'warning' : 'hollow'}>
+              {profile.policy.tier ?? 'investigate'}
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        {(() => {
+          const caps = resolveSandboxCapabilities(profile.policy);
+          const egressValue =
+            caps.egress === 'allowlist' && caps.egressAllowlist?.length
+              ? `allowlist (${caps.egressAllowlist.join(', ')})`
+              : caps.egress;
+          // One `?` per row, on the label. Its tooltip explains the field and
+          // the meaning of the current value, so the value column stays clean.
+          const help = (field: string, value: string) => (
+            <>
+              {field}
+              <EuiSpacer size="xs" />
+              <em>This profile: {value}</em>
+            </>
+          );
+          return (
+            <EuiDescriptionList
+              type="responsiveColumn"
+              columnWidths={[1, 2]}
+              listItems={[
+                {
+                  title: (
+                    <LabelWithHelp
+                      label="Filesystem"
+                      help={help(FIELD_HELP.filesystem, VALUE_HELP.filesystem[caps.filesystem])}
+                    />
+                  ),
+                  description: caps.filesystem,
+                },
+                {
+                  title: (
+                    <LabelWithHelp
+                      label="Egress"
+                      help={help(FIELD_HELP.egress, VALUE_HELP.egress[caps.egress])}
+                    />
+                  ),
+                  description: egressValue,
+                },
+                {
+                  title: (
+                    <LabelWithHelp
+                      label="Connectors"
+                      help={help(
+                        FIELD_HELP.connectors,
+                        VALUE_HELP.connectors[caps.connectorAccess]
+                      )}
+                    />
+                  ),
+                  description: caps.connectorAccess,
+                },
+                {
+                  title: (
+                    <LabelWithHelp
+                      label="Git"
+                      help={help(FIELD_HELP.git, VALUE_HELP.git[caps.git.mode])}
+                    />
+                  ),
+                  description: caps.git.mode,
+                },
+              ]}
+            />
+          );
+        })()}
 
         <EuiHorizontalRule margin="m" />
         <EuiFlexGroup alignItems="center" gutterSize="s">

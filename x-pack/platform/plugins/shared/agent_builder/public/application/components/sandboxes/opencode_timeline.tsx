@@ -16,6 +16,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useListConnectors } from '../../hooks/tools/use_mcp_connectors';
+import { ConnectorTypeIcon } from '../connectors/connector_type_icon';
 
 export interface OpencodeTodo {
   content: string;
@@ -34,12 +36,15 @@ export interface OpencodeTimelineItem {
   filePath?: string;
   fileContent?: string;
   fileLanguage?: string;
+  /** Connector instance id for `kibana` connector calls (renders its icon). */
+  connectorId?: string;
 }
 
 /** Phase → EUI icon type. */
 const PHASE_ICON: Record<string, string> = {
   provisioning: 'container',
   connecting: 'plugs',
+  credential: 'lockOpen',
   thinking: 'sparkles',
   editing: 'documentEdit',
   running: 'play',
@@ -54,10 +59,12 @@ const topMargin = css`
   margin-top: 2px;
 `;
 
-const StatusIcon: React.FC<{ status?: OpencodeTimelineItem['status']; phase: string }> = ({
-  status,
-  phase,
-}) => {
+const StatusIcon: React.FC<{
+  status?: OpencodeTimelineItem['status'];
+  phase: string;
+  /** Resolved action type for a connector call, so we can show its own icon. */
+  actionTypeId?: string;
+}> = ({ status, phase, actionTypeId }) => {
   const { euiTheme } = useEuiTheme();
   if (status === 'failed') {
     return <EuiIcon type="errorFilled" size="s" color="danger" css={topMargin} />;
@@ -65,8 +72,24 @@ const StatusIcon: React.FC<{ status?: OpencodeTimelineItem['status']; phase: str
   if (status === 'in_progress' && phase !== 'done') {
     return <EuiLoadingSpinner size="s" css={topMargin} />;
   }
+  // A connector call shows that connector's own icon (e.g. AbuseIPDB, Slack),
+  // resolved from its action type; falls back to the generic phase icon.
+  if (phase === 'kibana' && actionTypeId) {
+    return (
+      <span css={topMargin}>
+        <ConnectorTypeIcon actionTypeId={actionTypeId} size="s" />
+      </span>
+    );
+  }
   const icon = PHASE_ICON[phase] ?? 'wrench';
-  const color = phase === 'kibana' ? euiTheme.colors.textAccent : 'subdued';
+  // Highlight security-relevant steps: connector calls (accent) and credential
+  // minting (success/green, to read as "a scoped, short-lived grant happened").
+  const color =
+    phase === 'kibana'
+      ? euiTheme.colors.textAccent
+      : phase === 'credential'
+      ? euiTheme.colors.textSuccess
+      : 'subdued';
   return <EuiIcon type={icon} size="s" color={color} css={topMargin} />;
 };
 
@@ -116,10 +139,12 @@ const TodoList: React.FC<{ todos: OpencodeTodo[] }> = ({ todos }) => {
   );
 };
 
-const TimelineRow: React.FC<{ item: OpencodeTimelineItem; autoExpand: boolean }> = ({
-  item,
-  autoExpand,
-}) => {
+const TimelineRow: React.FC<{
+  item: OpencodeTimelineItem;
+  autoExpand: boolean;
+  /** connector instance id -> action type id, for per-connector icons. */
+  connectorTypeById: Map<string, string>;
+}> = ({ item, autoExpand, connectorTypeById }) => {
   const { euiTheme } = useEuiTheme();
   const hasDetail = Boolean(item.command || item.output || item.todos?.length || item.fileContent);
   const [isOpen, setIsOpen] = useState(false);
@@ -146,7 +171,11 @@ const TimelineRow: React.FC<{ item: OpencodeTimelineItem; autoExpand: boolean }>
         onClick={hasDetail ? () => setIsOpen((v) => !v) : undefined}
       >
         <EuiFlexItem grow={false}>
-          <StatusIcon status={item.status} phase={item.phase} />
+          <StatusIcon
+            status={item.status}
+            phase={item.phase}
+            actionTypeId={item.connectorId ? connectorTypeById.get(item.connectorId) : undefined}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">{item.label}</EuiText>
@@ -238,6 +267,14 @@ export const OpencodeTimeline: React.FC<{
   autoExpand?: boolean;
 }> = ({ timeline, autoExpand = false }) => {
   const { euiTheme } = useEuiTheme();
+  // Shared, cached connector list (same query the Connectors page uses); lets us
+  // map a connector instance id to its action type for the per-connector icon.
+  const { connectors } = useListConnectors({});
+  const connectorTypeById = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const c of connectors) map.set(c.id, c.actionTypeId);
+    return map;
+  }, [connectors]);
   if (!timeline.length) return null;
   return (
     <div
@@ -251,7 +288,12 @@ export const OpencodeTimeline: React.FC<{
       `}
     >
       {timeline.map((item) => (
-        <TimelineRow key={item.id} item={item} autoExpand={autoExpand} />
+        <TimelineRow
+          key={item.id}
+          item={item}
+          autoExpand={autoExpand}
+          connectorTypeById={connectorTypeById}
+        />
       ))}
     </div>
   );

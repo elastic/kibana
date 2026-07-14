@@ -57,15 +57,55 @@ const piRuntimeConfigSchema = schema.object({
 
 const runtimeConfigSchema = schema.oneOf([opencodeRuntimeConfigSchema, piRuntimeConfigSchema]);
 
+// GitHub App credential config (non-secret ids). The App private key travels in
+// `secrets` under GITHUB_APP_PRIVATE_KEY_SECRET_KEY, never in this block.
+const githubAppSchema = schema.object({
+  clientId: schema.maybe(schema.string()),
+  appId: schema.maybe(schema.string()),
+});
+
 const policySchema = schema.object({
+  // Capability tier (named preset over the axes below); axes may override it.
+  tier: schema.maybe(
+    schema.oneOf([
+      schema.literal('restricted'),
+      schema.literal('investigate'),
+      schema.literal('contribute'),
+      schema.literal('trusted'),
+    ])
+  ),
   idleTtlMs: schema.number({ min: 60_000, defaultValue: DEFAULT_SANDBOX_POLICY.idleTtlMs }),
   maxLifetimeMs: schema.number({
     min: 60_000,
     defaultValue: DEFAULT_SANDBOX_POLICY.maxLifetimeMs,
   }),
   maxRunSeconds: schema.number({ min: 60, defaultValue: DEFAULT_SANDBOX_POLICY.maxRunSeconds }),
+  // Axis 1: compute (enforced by the provider).
+  filesystem: schema.maybe(
+    schema.oneOf([schema.literal('ephemeral-ro'), schema.literal('ephemeral-rw')])
+  ),
+  allowShell: schema.maybe(schema.boolean()),
+  // Axis 2: network (enforced by the provider).
+  egress: schema.maybe(
+    schema.oneOf([schema.literal('deny'), schema.literal('allowlist'), schema.literal('open')])
+  ),
   egressAllowlist: schema.maybe(schema.arrayOf(schema.string())),
+  // Axis 3: Kibana data/tools (enforced by the broker).
+  connectorAccess: schema.maybe(
+    schema.oneOf([schema.literal('none'), schema.literal('read'), schema.literal('write')])
+  ),
   allowedConnectors: schema.maybe(schema.arrayOf(schema.string())),
+  // Axis 4: git/repo (enforced by the broker).
+  git: schema.maybe(
+    schema.object({
+      mode: schema.oneOf([
+        schema.literal('none'),
+        schema.literal('clone-ro'),
+        schema.literal('push-pr'),
+      ]),
+      repos: schema.maybe(schema.arrayOf(schema.string())),
+    })
+  ),
 });
 
 const createBodySchema = schema.object({
@@ -77,6 +117,7 @@ const createBodySchema = schema.object({
   connection: connectionSchema,
   runtimeConfig: runtimeConfigSchema,
   policy: policySchema,
+  githubApp: schema.maybe(githubAppSchema),
   secrets: schema.maybe(schema.recordOf(schema.string(), schema.string())),
 });
 
@@ -86,6 +127,7 @@ const updateBodySchema = schema.object({
   connection: schema.maybe(connectionSchema),
   runtimeConfig: schema.maybe(runtimeConfigSchema),
   policy: schema.maybe(policySchema),
+  githubApp: schema.maybe(githubAppSchema),
   secrets: schema.maybe(schema.recordOf(schema.string(), schema.string())),
 });
 

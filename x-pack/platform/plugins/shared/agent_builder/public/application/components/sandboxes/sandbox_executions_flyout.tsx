@@ -21,6 +21,7 @@ import {
   EuiFlyoutHeader,
   EuiHealth,
   EuiHorizontalRule,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -105,16 +106,44 @@ const relativeTime = (iso: string): string => {
 };
 
 /**
+ * The run's `kubeContext` for cloud-run holds "<project> / <region>" (see the
+ * executor). Parse it so we can deep-link into the GCP Cloud Run console.
+ */
+const parseCloudRunEnv = (kubeContext: string): { project: string; region?: string } | undefined => {
+  const [project, region] = kubeContext.split('/').map((s) => s.trim());
+  if (!project) return undefined;
+  return { project, region: region || undefined };
+};
+
+/** GCP console deep link to the Cloud Run services list for a project/region. */
+const cloudRunConsoleUrl = (project: string, region?: string): string => {
+  const base = `https://console.cloud.google.com/run?project=${encodeURIComponent(project)}`;
+  return region ? `${base}&region=${encodeURIComponent(region)}` : base;
+};
+
+/**
  * Cluster/environment panel derived from the *selected run's own record* (which
  * provider it actually used), rather than the process-level default sandbox — so
  * a Cloud Run run shows Cloud Run, and a local-k8s run shows the local cluster.
+ * For Cloud Run, the environment is a clickable link into the GCP console.
  */
 const RunEnvironmentPanel: React.FC<{ run: RunDetail }> = ({ run }) => {
   const isLocal = (run.provider ?? 'local-k8s') === 'local-k8s';
   const providerLabel = isLocal ? 'local-k8s' : run.provider ?? 'cloud-run';
+  const cloudEnv = !isLocal && run.kubeContext ? parseCloudRunEnv(run.kubeContext) : undefined;
+  const consoleUrl = cloudEnv ? cloudRunConsoleUrl(cloudEnv.project, cloudEnv.region) : undefined;
+
+  const environmentValue = consoleUrl ? (
+    <EuiLink href={consoleUrl} target="_blank" external>
+      {run.kubeContext}
+    </EuiLink>
+  ) : (
+    run.kubeContext || '—'
+  );
+
   const items = [
     { title: 'Provider', description: providerLabel },
-    { title: 'Environment', description: run.kubeContext || '—' },
+    { title: 'Environment', description: environmentValue },
     ...(run.namespace ? [{ title: isLocal ? 'Namespace' : 'Region', description: run.namespace }] : []),
     { title: 'Sandbox', description: run.podName },
   ];
@@ -127,9 +156,17 @@ const RunEnvironmentPanel: React.FC<{ run: RunDetail }> = ({ run }) => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={isLocal ? 'success' : 'primary'} iconType={isLocal ? 'desktop' : 'cloudSunny'}>
-            {isLocal ? labels.local : labels.cloud}
-          </EuiBadge>
+          {consoleUrl ? (
+            <EuiLink href={consoleUrl} target="_blank" external={false}>
+              <EuiBadge color="primary" iconType="cloudSunny">
+                {labels.cloud}
+              </EuiBadge>
+            </EuiLink>
+          ) : (
+            <EuiBadge color={isLocal ? 'success' : 'primary'} iconType={isLocal ? 'desktop' : 'cloudSunny'}>
+              {isLocal ? labels.local : labels.cloud}
+            </EuiBadge>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

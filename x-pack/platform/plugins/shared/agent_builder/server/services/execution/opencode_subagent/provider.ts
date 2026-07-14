@@ -7,9 +7,12 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { OpencodeSubagentExecutor, type OpencodeSubagentConfig } from './executor';
 import { OpencodeRunClient } from './persistence/run_client';
 import { McpAuthMinter } from './mcp_auth_minter';
+import { GithubTokenResolver } from './github_token_resolver';
 
 /**
  * PoC provider for the OpenCode sub-agent executor.
@@ -28,6 +31,8 @@ export const initOpencodeSubagentExecutor = ({
   logger,
   esClient,
   security,
+  getActions,
+  encryptedSavedObjects,
 }: {
   config: OpencodeSubagentConfig;
   logger: Logger;
@@ -35,10 +40,28 @@ export const initOpencodeSubagentExecutor = ({
   esClient: ElasticsearchClient;
   /** Used to mint/revoke the per-run scoped MCP loopback credential. */
   security: SecurityServiceStart;
+  /** Actions start, to resolve a GitHub connector's PAT for git operations. */
+  getActions: () => Promise<ActionsPluginStart>;
+  /** ESO start, to decrypt the connector's bearer secret server-side. */
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }): void => {
   runClient = new OpencodeRunClient(esClient, logger.get('runs'));
   const mcpAuthMinter = new McpAuthMinter(security, logger.get('mcpAuth'));
-  executor = new OpencodeSubagentExecutor(config, logger, runClient, mcpAuthMinter);
+  const gitTokenResolver = new GithubTokenResolver(
+    getActions,
+    encryptedSavedObjects,
+    logger.get('gitToken')
+  );
+  // The GitHub App credential source is built per-profile inside the executor
+  // (from each profile's own githubApp config + private-key secret), not from
+  // global config — a profile brings its own git credential story.
+  executor = new OpencodeSubagentExecutor(
+    config,
+    logger,
+    runClient,
+    mcpAuthMinter,
+    gitTokenResolver
+  );
   // Reap any sandbox pods orphaned by a previous process (e.g. a hot-reload that
   // killed the runtime mid-run). Fire-and-forget; never blocks startup.
   void executor.sweepOrphans();
