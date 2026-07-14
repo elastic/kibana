@@ -38,7 +38,7 @@ const updateAiPanelConfigSchema = z
       .max(AI_PANEL_MAX_PROMPT_LENGTH)
       .optional()
       .describe(
-        'The updated panel instructions, if the user wants to change what the panel shows or how it looks. Omit if unchanged.'
+        'The updated panel instructions, if the user wants to change what the panel shows or how it looks. Omit if unchanged. Describe WHAT the panel should show, not HOW to build it — this panel renders in a sandboxed, scripting-disabled iframe, so JavaScript never runs there. Do not mention JavaScript, onclick/onmouseover handlers, or any scripted behavior; if the user asks for interactivity like a hover tooltip, just describe the desired outcome (e.g. "show the value on hover") — it will be implemented with CSS alone.'
       ),
     esqlQuery: z
       .string()
