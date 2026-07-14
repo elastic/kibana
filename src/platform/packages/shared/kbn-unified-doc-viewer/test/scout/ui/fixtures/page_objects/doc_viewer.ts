@@ -152,10 +152,12 @@ export class DocViewer {
       .waitFor({ state: 'hidden' });
   }
 
-  async getFieldTypeFilterCount(): Promise<string> {
-    return this.page.testSubj
-      .locator('unifiedDocViewerFieldsTableFieldTypeFilterToggle')
-      .innerText();
+  getFieldTypeFilterCountLocator(): Locator {
+    return this.page.testSubj.locator('unifiedDocViewerFieldsTableFieldTypeFilterToggle');
+  }
+
+  async expectFieldTypeFilterCount(count: string): Promise<void> {
+    await expect(this.getFieldTypeFilterCountLocator()).toHaveText(count);
   }
 
   async clickShowOnlySelectedFieldsSwitch(): Promise<void> {

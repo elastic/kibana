@@ -92,7 +92,7 @@ spaceTest.describe(
             'true'
           );
           await docViewer.closeFieldTypeFilter();
-          expect(await docViewer.getFieldTypeFilterCount()).toBe('1');
+          await docViewer.expectFieldTypeFilterCount('1');
 
           await unifiedFieldList.clickFieldListItemAdd('utc_time');
           await discover.waitUntilTabIsLoaded();
@@ -112,7 +112,7 @@ spaceTest.describe(
               'true'
             );
             await docViewer.closeFieldTypeFilter();
-            expect(await docViewer.getFieldTypeFilterCount()).toBe('2');
+            await docViewer.expectFieldTypeFilterCount('2');
 
             await unifiedFieldList.clickFieldListItemAdd('utc_time');
             await discover.waitUntilTabIsLoaded();
@@ -126,7 +126,7 @@ spaceTest.describe(
           await unifiedTabs.selectTab(0);
           await discover.waitUntilTabIsLoaded();
           await expect(docViewer.getFlyout()).toBeVisible();
-          expect(await docViewer.getFieldTypeFilterCount()).toBe('1');
+          await docViewer.expectFieldTypeFilterCount('1');
           await docViewer.expectShowOnlySelectedFields(false);
         });
       }
