@@ -78,6 +78,85 @@ describe('createAlertEventsBatchBuilder', () => {
     expect(doc1.group_hash).not.toEqual(doc2.group_hash);
   });
 
+  describe('group_hash when the configured grouping field is absent (ES|QL views)', () => {
+    // View-backed rules (Streams `$.<name>` ES|QL views) group by `_id`, but a view
+    // exposes no `_id` column, so every row is missing the grouping field. Without a
+    // content fallback the hash collapses to one constant per rule and the occurrence
+    // count degenerates to 1.
+    const buildIdGroupedBatch = () =>
+      createAlertEventsBatchBuilder({
+        ruleId: 'rule-view',
+        ruleVersion: 1,
+        spaceId: 'default',
+        ruleAttributes: { grouping: { fields: ['_id'] } },
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      });
+
+    it('gives distinct rows distinct group_hash instead of one constant', () => {
+      const docs = buildIdGroupedBatch()([
+        { message: 'panic A', 'host.name': 'host-a' },
+        { message: 'panic B', 'host.name': 'host-a' },
+        { message: 'panic C', 'host.name': 'host-b' },
+      ]);
+
+      const hashes = docs.map((doc) => doc.group_hash);
+
+      expect(new Set(hashes).size).toBe(3);
+      // Not the degenerate constant hash of an empty `_id` value.
+      expect(new Set(hashes).size).toBeGreaterThan(1);
+    });
+
+    it('produces a stable group_hash for identical row content across runs (dedup re-emissions)', () => {
+      const row = { message: 'panic A', 'host.name': 'host-a' };
+
+      // Two separate builder invocations simulate two overlapping executions that
+      // re-see the same document; the index/executionUuid differ between them.
+      const [first] = buildIdGroupedBatch()([{ other: 'noise' }, row]);
+      const [second] = buildIdGroupedBatch()([row]);
+
+      // `first` is index 0 of run 1, `second` is index 0 of run 2, but both carry the
+      // same row content only for the row we compare.
+      const runOne = buildIdGroupedBatch()([row]);
+      const runTwo = buildIdGroupedBatch()([row]);
+      expect(runOne[0].group_hash).toEqual(runTwo[0].group_hash);
+
+      // And it does not depend on the row's position within the batch.
+      const [, sameRowLaterIndex] = buildIdGroupedBatch()([{ other: 'noise' }, row]);
+      expect(sameRowLaterIndex.group_hash).toEqual(runOne[0].group_hash);
+      expect(first).toBeDefined();
+      expect(second).toBeDefined();
+    });
+
+    it('still distinguishes genuinely different documents', () => {
+      const docs = buildIdGroupedBatch()([
+        { message: 'panic A' },
+        { message: 'panic A extra' },
+      ]);
+
+      expect(docs[0].group_hash).not.toEqual(docs[1].group_hash);
+    });
+  });
+
+  it('uses the configured grouping field when it is present on the row', () => {
+    const buildBatch = createAlertEventsBatchBuilder({
+      ruleId: 'rule-concrete',
+      ruleVersion: 1,
+      spaceId: 'default',
+      ruleAttributes: { grouping: { fields: ['host.name'] } },
+      scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+    });
+
+    // Same host across different content → same group (field-based grouping, unchanged).
+    const docs = buildBatch([
+      { 'host.name': 'host-a', message: 'x' },
+      { 'host.name': 'host-a', message: 'y' },
+      { 'host.name': 'host-b', message: 'z' },
+    ]);
+
+    expect(docs[0].group_hash).toEqual(docs[1].group_hash);
+    expect(docs[0].group_hash).not.toEqual(docs[2].group_hash);
+  });
+
   it('sets space_id on breached alert events from the provided spaceId', () => {
     const buildBatch = createAlertEventsBatchBuilder({
       ruleId: 'rule-123',

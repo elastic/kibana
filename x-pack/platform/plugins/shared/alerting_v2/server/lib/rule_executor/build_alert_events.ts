@@ -80,6 +80,13 @@ export function buildGroupHash({
   const keyPart = groupKeyFields.join('|');
   const valuePart = groupKeyFields.map((f) => String(rowDoc[f] ?? '')).join('|');
 
+  // ES|QL views don't expose `_id`, so an `_id`-grouped view rule has no value
+  // for its grouping field and every row would hash to the same constant. Hash
+  // the row content instead: distinct rows differ, identical re-emissions match.
+  if (valuePart.replace(/\|/g, '') === '') {
+    return sha256(stableStringify(rowDoc));
+  }
+
   return sha256(`${keyPart}|${valuePart}`);
 }
 
