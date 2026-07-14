@@ -19,7 +19,7 @@ export const deriveBucketInterval = (fromMs: number, toMs: number): BucketInterv
   if (spanMs <= 2 * DAY_MS) {
     return { value: 1, unit: 'h', ms: HOUR_MS };
   }
-  if (spanMs <= 30 * DAY_MS) {
+  if (spanMs <= 45 * DAY_MS) {
     return { value: 1, unit: 'd', ms: DAY_MS };
   }
   return { value: 7, unit: 'd', ms: 7 * DAY_MS };

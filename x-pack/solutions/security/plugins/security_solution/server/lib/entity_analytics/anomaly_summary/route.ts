@@ -30,9 +30,10 @@ import { DEFAULT_OVERVIEW_LOOKBACK_MS, getEntityAnomalyOverview } from './get_an
 import { _formatPrivileges, hasReadWritePermissions } from '../utils/check_and_format_privileges';
 
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 const getStartOfDayOneYearAgo = (): number => {
-  const d = new Date(Date.now() - ONE_YEAR_MS);
+  const d = new Date(Date.now() - ONE_YEAR_MS - ONE_DAY_MS);
   d.setUTCHours(0, 0, 0, 0);
   return d.getTime();
 };
