@@ -7,11 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 
-/**
- * Upper bounds on request string lengths, to reject unbounded inputs that could exhaust resources
- * during validation (DoS). Values mirror the score-document schema in `@kbn/evals-common`
- * (resource ids ~1024, names/short tokens ~256).
- */
 export const MAX_ID_LENGTH = 1024;
 export const MAX_NAME_LENGTH = 256;
 
