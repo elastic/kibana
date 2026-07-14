@@ -23,7 +23,6 @@ import {
   useNavigateToPath,
   useMlManagementLocator,
 } from '../../../../contexts/kibana';
-import { MlPageHeader } from '../../../../components/page_header';
 
 export interface PageProps {
   nextStepPath: string;
@@ -104,16 +103,14 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
   return (
     <div data-test-subj="mlPageSourceSelection" css={{ maxWidth: '800px', margin: '0 auto' }}>
       <EuiPageBody>
-        <MlPageHeader>
-          <PageTitle
-            title={
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
-                defaultMessage="Select project scope and data source"
-              />
-            }
-          />
-        </MlPageHeader>
+        <PageTitle
+          title={
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
+              defaultMessage="Select project scope and data source"
+            />
+          }
+        />
         <EuiPanel hasShadow={false}>
           {totalProjectCount > 1 && projects ? (
             <>
