@@ -9,5 +9,5 @@ products:
 areas:
 - Kibana platform
 - Alerting and reporting
-title: Serialize non-Error task/connector failures in logs
-description: Task Manager and the Slack/Webhook connectors now log a meaningful error message when a task or connector fails with a non-`Error` value, instead of `[object Object]` or `undefined`.
+title: "Fix unhelpful error messages for Task Manager and connector failures"
+description: "Task Manager and the Slack/Webhook connectors now log a meaningful error message when a task or connector fails with a non-`Error` value, instead of `[object Object]` or `undefined`."

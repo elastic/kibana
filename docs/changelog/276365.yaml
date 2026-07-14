@@ -8,5 +8,5 @@ products:
   target: 2026-07-14
 areas:
 - Search and data
-title: Fix output copy button clicks being silently swallowed and harden clipboard fallback
-description: Fixed the Dev Tools Console copy button silently failing to copy response output.
+title: "Fix Dev Tools Console copy button silently failing to copy output"
+description: "The Dev Tools Console copy button now copies response output reliably, including when the clipboard API is unavailable."

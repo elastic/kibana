@@ -4,4 +4,5 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-07-14
-title: 'Attack Discovery 2.0: Workflows Integration 10 - Integrate workflow-based generation with alerting-framework scheduling'
+title: "Enable Attack Discovery workflow scheduling through alerting"
+description: "Attack Discovery workflow-based generation can now be scheduled through the alerting framework when the Attack Discovery workflows feature is enabled."

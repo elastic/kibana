@@ -4,5 +4,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-07-14
-title: FormatDate mustache lambda accepts epoch-millisecond strings
-description: 'Alerting: FormatDate mustache template function now accepts epoch millisecond strings (e.g., 1669736864000) for more flexible date formatting in connector actions.'
+title: "Fix FormatDate rejecting epoch-millisecond strings in alert templates"
+description: "The FormatDate mustache template function now accepts epoch-millisecond strings (for example, `1669736864000`) so nested date formatting in connector actions works reliably."

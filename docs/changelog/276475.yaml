@@ -10,5 +10,5 @@ areas:
 - Alerting and reporting
 - Kibana platform
 - Dashboards and visualizations
-title: Return focus to triggering element when panel config flyout closes
-description: Dashboard panel action flyouts (such as panel settings) now return keyboard focus to the triggering button when closed, improving keyboard and screen reader navigation.
+title: "Fix keyboard focus not returning when dashboard panel flyouts close"
+description: "Dashboard panel action flyouts (such as panel settings) now return keyboard focus to the triggering button when closed, improving keyboard and screen reader navigation."

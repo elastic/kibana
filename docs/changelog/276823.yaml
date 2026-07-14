@@ -6,4 +6,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-07-14
-title: Preserve threat_match concurrent_searches/items_per_search on GUI save
+title: "Fix Indicator Match rule settings reset when saving in the UI"
+description: "API-configured `concurrent_searches` and `items_per_search` values on Indicator Match (`threat_match`) rules are now preserved when you edit and save the rule in the UI."

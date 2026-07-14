@@ -8,4 +8,5 @@ products:
   target: 2026-07-14
 areas:
 - Kibana platform
-title: 'fix: low-cardinality names for kibana-frontend page-load transactions'
+title: "Fix high-cardinality page-load transaction names in kibana-frontend RUM"
+description: "Page-load performance transactions from the kibana-frontend RUM agent now use a stable `/app/{appId}` name instead of the raw URL path, reducing cardinality in aggregated metrics."

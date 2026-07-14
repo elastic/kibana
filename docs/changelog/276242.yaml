@@ -1,7 +1,7 @@
 prs:
 - https://github.com/elastic/kibana/pull/276242
-type: feature
+type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-07-14
-title: Fixes Sentinel Rules upload step copy
+title: "Fix Sentinel Rules upload step copy in Automatic Migration"
