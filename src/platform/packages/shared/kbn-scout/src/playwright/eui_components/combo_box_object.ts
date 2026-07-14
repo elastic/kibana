@@ -11,7 +11,7 @@ import { EuiComboBoxObject } from '@elastic/eui-test-helpers';
 import type { Locator } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-// Stable EUI combo-box `data-test-subj`s (the same ones the EUI helper uses internally).
+// EUI's internal combo-box `data-test-subj`s (mirror the eui-helper's own selectors).
 const INPUT_WRAPPER_TEST_SUBJ = 'comboBoxInput';
 const SEARCH_INPUT_TEST_SUBJ = 'comboBoxSearchInput';
 
