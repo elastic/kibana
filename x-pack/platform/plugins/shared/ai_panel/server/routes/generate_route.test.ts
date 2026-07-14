@@ -107,8 +107,16 @@ describe('registerGenerateRoute', () => {
   });
 
   it('returns 400 and never calls the LLM when no connector is configured', async () => {
-    const { router, handler, getStartServices, logger, request, response, getDefaultConnector, chatComplete } =
-      buildMocks();
+    const {
+      router,
+      handler,
+      getStartServices,
+      logger,
+      request,
+      response,
+      getDefaultConnector,
+      chatComplete,
+    } = buildMocks();
     registerGenerateRoute(router, getStartServices, logger);
     getDefaultConnector.mockRejectedValue(new Error('no connector'));
 

@@ -11,11 +11,7 @@ jest.mock('dompurify', () => ({
   default: { sanitize: (html: string) => html },
 }));
 
-import {
-  stripMarkdownFences,
-  containsScript,
-  injectCsp,
-} from './template_fill';
+import { stripMarkdownFences, containsScript, injectCsp } from './template_fill';
 
 describe('injectCsp', () => {
   it('injects CSP into an existing <head>', () => {

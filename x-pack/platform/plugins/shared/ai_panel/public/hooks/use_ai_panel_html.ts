@@ -9,11 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
-import {
-  stripMarkdownFences,
-  containsScript,
-  prepareHtml,
-} from '../utils/template_fill';
+import { stripMarkdownFences, containsScript, prepareHtml } from '../utils/template_fill';
 
 const SCRIPT_ERROR_MESSAGE = i18n.translate('xpack.aiPanel.error.templateScript', {
   defaultMessage:

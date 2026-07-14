@@ -8,7 +8,11 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { AI_PANEL_EMBEDDABLE_TYPE, AI_PANEL_APP_NAME, AI_PANEL_ENABLED_FLAG_KEY } from '../common/constants';
+import {
+  AI_PANEL_EMBEDDABLE_TYPE,
+  AI_PANEL_APP_NAME,
+  AI_PANEL_ENABLED_FLAG_KEY,
+} from '../common/constants';
 import { aiPanelEmbeddableSchema } from './embeddable/schemas';
 import { registerGenerateRoute } from './routes/generate_route';
 

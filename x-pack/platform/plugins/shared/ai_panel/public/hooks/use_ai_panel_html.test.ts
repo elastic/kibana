@@ -70,9 +70,7 @@ describe('useAiPanelHtml', () => {
         }
       );
 
-      const { result } = renderHook(() =>
-        useAiPanelHtml({ ...baseParams, onTemplateChange })
-      );
+      const { result } = renderHook(() => useAiPanelHtml({ ...baseParams, onTemplateChange }));
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
       expect(streamGenerate).toHaveBeenCalledTimes(1);
