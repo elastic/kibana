@@ -15,7 +15,11 @@ import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../..
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
 import { SortSelector } from '../sort_selector';
-import { MAX_DIMENSIONS_SELECTIONS, FEATURE_FLAGS } from '../../../common/constants';
+import {
+  MAX_DIMENSIONS_SELECTIONS,
+  FEATURE_FLAGS,
+  FEATURE_FLAG_DEFAULTS,
+} from '../../../common/constants';
 import { useFeatureFlag } from './use_feature_flag';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
@@ -49,8 +53,14 @@ export const useToolbarActions = ({
   } = useMetricsExperienceState();
   const onDimensionsSelectionChange = onDimensionsChangeProp ?? onDimensionsChange;
 
-  const isEditGridEnabled = useFeatureFlag(FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED, false);
-  const isSortingEnabled = useFeatureFlag(FEATURE_FLAGS.IS_SORTING_ENABLED, false);
+  const isEditGridEnabled = useFeatureFlag(
+    FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED,
+    FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]
+  );
+  const isSortingEnabled = useFeatureFlag(
+    FEATURE_FLAGS.IS_SORTING_ENABLED,
+    FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_SORTING_ENABLED]
+  );
 
   const isSmallScreen = useIsWithinMaxBreakpoint(isFullscreen ? 'm' : 'l');
 

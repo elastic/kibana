@@ -72,6 +72,12 @@ export const FEATURE_FLAGS = {
 
 export type FeatureFlag = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
 
+// Fallback values used when a feature flag is not configured externally
+export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
+  [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: false,
+  [FEATURE_FLAGS.IS_SORTING_ENABLED]: false,
+};
+
 // Metrics grid sort options
 export const METRICS_SORT_BY = {
   alphabetically: 'alphabetically',
