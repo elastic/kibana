@@ -40,6 +40,54 @@ describe('getShare', () => {
     );
   });
 
+  it('uses dataRequestParams.timeRangeAbsolute as absoluteTimeRange in ES|QL mode when available', async () => {
+    const lastFetchAbsoluteRange = {
+      from: '2025-01-01T00:00:00.000Z',
+      to: '2025-01-01T00:15:00.000Z',
+    };
+
+    toolkit.internalState.dispatch(
+      internalStateActions.setDataRequestParams({
+        tabId: toolkit.getCurrentTab().id,
+        dataRequestParams: {
+          timeRangeAbsolute: lastFetchAbsoluteRange,
+          timeRangeRelative: { from: 'now-15m', to: 'now' },
+          searchSessionId: undefined,
+          isSearchSessionRestored: false,
+        },
+      })
+    );
+
+    const shareOptions = await buildShareOptions({
+      services: mockDiscoverService,
+      discoverParams: {
+        dataView: dataViewMock,
+        isEsqlMode: true,
+        adHocDataViews: [],
+        authorizedRuleTypeIds: [],
+      },
+      currentTab: toolkit.getCurrentTab(),
+      persistedDiscoverSession: undefined,
+      totalHitsState: { result: 0, fetchStatus: FetchStatus.COMPLETE },
+      hasUnsavedChanges: false,
+    });
+
+    expect(shareOptions.sharingData.absoluteTimeRange).toEqual(lastFetchAbsoluteRange);
+
+    // Reset dataRequestParams for subsequent tests
+    toolkit.internalState.dispatch(
+      internalStateActions.setDataRequestParams({
+        tabId: toolkit.getCurrentTab().id,
+        dataRequestParams: {
+          timeRangeAbsolute: undefined,
+          timeRangeRelative: undefined,
+          searchSessionId: undefined,
+          isSearchSessionRestored: false,
+        },
+      })
+    );
+  });
+
   it('should return the correct share options, without absolute time range set when in classic mode', async () => {
     const shareOptions = await buildShareOptions({
       services: mockDiscoverService,

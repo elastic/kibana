@@ -63,6 +63,48 @@ describe('csv export config', () => {
         })
       );
     });
+
+    it('classic path: uses absolute filter when useAbsoluteTime is true (immediate export)', () => {
+      const getSearchSourceMock = jest.fn(() => ({ filter: 'absolute-filter' }));
+      const reportParams = getCsvReportParams({
+        sharingData: {
+          isTextBased: false,
+          locatorParams: [],
+          getSearchSource: getSearchSourceMock,
+          columns: [],
+          title: 'test',
+        },
+        useAbsoluteTime: true,
+      });
+
+      expect(getSearchSourceMock).toHaveBeenCalledWith(
+        expect.objectContaining({ absoluteTime: true })
+      );
+      expect(reportParams).toEqual(
+        expect.objectContaining({ isEsqlMode: false, searchSource: { filter: 'absolute-filter' } })
+      );
+    });
+
+    it('classic path: uses relative filter when useAbsoluteTime is omitted (scheduled export)', () => {
+      const getSearchSourceMock = jest.fn(() => ({ filter: 'relative-filter' }));
+      const reportParams = getCsvReportParams({
+        sharingData: {
+          isTextBased: false,
+          locatorParams: [],
+          getSearchSource: getSearchSourceMock,
+          columns: [],
+          title: 'test',
+        },
+        // no useAbsoluteTime — this is how schedule creation calls getCsvReportParams
+      });
+
+      expect(getSearchSourceMock).toHaveBeenCalledWith(
+        expect.objectContaining({ absoluteTime: false })
+      );
+      expect(reportParams).toEqual(
+        expect.objectContaining({ isEsqlMode: false, searchSource: { filter: 'relative-filter' } })
+      );
+    });
   });
 
   describe('getShareMenuItems', () => {

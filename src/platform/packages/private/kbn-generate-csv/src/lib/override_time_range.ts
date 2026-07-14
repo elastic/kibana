@@ -11,6 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import { set } from '@kbn/safer-lodash-set';
 import type { Logger } from '@kbn/core/server';
 import { cloneDeep, get, has, isArray } from 'lodash';
+import dateMath from '@kbn/datemath';
 
 interface TimeFields {
   metaField?: string;
@@ -36,6 +37,11 @@ const getTimeFields = (filter: Filter, timeFieldName?: string): TimeFields => {
 const isValidDateTime = (dateString: string): boolean => {
   const date = Date.parse(dateString);
   return !isNaN(date) && date > 0;
+};
+
+const isValidDateMath = (value: string): boolean => {
+  const result = dateMath.parse(value);
+  return result !== undefined && result.isValid();
 };
 
 interface OverrideTimeRangeOpts {
@@ -88,7 +94,9 @@ export const overrideTimeRange = ({
     } = getTimeFields(filter, timeFieldName);
 
     if (maybeTimeFieldFormat && maybeTimeFieldGte && maybeTimeFieldLte) {
-      return isValidDateTime(maybeTimeFieldGte) && isValidDateTime(maybeTimeFieldLte);
+      const bothAbsolute = isValidDateTime(maybeTimeFieldGte) && isValidDateTime(maybeTimeFieldLte);
+      const bothDateMath = isValidDateMath(maybeTimeFieldGte) && isValidDateMath(maybeTimeFieldLte);
+      return bothAbsolute || bothDateMath;
     }
     return false;
   });
@@ -98,15 +106,37 @@ export const overrideTimeRange = ({
       const timeFilter = cloneDeep(filters[timeFilterIndex]);
       const { metaField, timeGte, timeLte } = getTimeFields(timeFilter, timeFieldName);
       if (metaField && timeGte && timeLte) {
-        const timeGteMs = Date.parse(timeGte);
-        const timeLteMs = Date.parse(timeLte);
-        const timeDiffMs = timeLteMs - timeGteMs;
-        const newLte = Date.parse(forceNow);
-        const newGte = newLte - timeDiffMs;
-
         const timeFieldAccessorString = getTimeFieldAccessorString(metaField);
-        set(timeFilter, `${timeFieldAccessorString}.gte`, new Date(newGte).toISOString());
-        set(timeFilter, `${timeFieldAccessorString}.lte`, forceNow);
+
+        if (isValidDateTime(timeGte) && isValidDateTime(timeLte)) {
+          // Absolute ISO datetimes: slide the frozen window so it ends at forceNow.
+          // This preserves backward compatibility for scheduled payloads stored before
+          // the switch to relative date math.
+          const timeGteMs = Date.parse(timeGte);
+          const timeLteMs = Date.parse(timeLte);
+          const timeDiffMs = timeLteMs - timeGteMs;
+          const newLte = Date.parse(forceNow);
+          const newGte = newLte - timeDiffMs;
+
+          set(timeFilter, `${timeFieldAccessorString}.gte`, new Date(newGte).toISOString());
+          set(timeFilter, `${timeFieldAccessorString}.lte`, forceNow);
+        } else {
+          // Date math strings (e.g. "now-24h", "now/d"): resolve each expression against
+          // forceNow so the window is anchored to the scheduled run time, not the wall clock.
+          const forceNowDate = new Date(forceNow);
+          const resolvedGte = dateMath.parse(timeGte, { forceNow: forceNowDate });
+          const resolvedLte = dateMath.parse(timeLte, { roundUp: true, forceNow: forceNowDate });
+
+          if (!resolvedGte || !resolvedLte) {
+            logger.warn(
+              `Could not resolve date math time range (gte: ${timeGte}, lte: ${timeLte})`
+            );
+            return;
+          }
+
+          set(timeFilter, `${timeFieldAccessorString}.gte`, resolvedGte.toISOString());
+          set(timeFilter, `${timeFieldAccessorString}.lte`, resolvedLte.toISOString());
+        }
 
         filters.splice(timeFilterIndex, 1, timeFilter);
         return filters;
