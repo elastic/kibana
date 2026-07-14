@@ -73,6 +73,10 @@ export interface DiscoverAppState {
    */
   hideTable?: boolean;
   /**
+   * Hide the field list sidebar (collapsed state)
+   */
+  hideSidebar?: boolean;
+  /**
    * The current data source
    */
   dataSource?: DiscoverDataSource;
@@ -154,6 +158,7 @@ export const DEFAULT_PROFILE_STATE_FIELDS = [
   'breakdownField',
   'hideChart',
   'hideTable',
+  'hideSidebar',
 ] as const;
 
 export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];

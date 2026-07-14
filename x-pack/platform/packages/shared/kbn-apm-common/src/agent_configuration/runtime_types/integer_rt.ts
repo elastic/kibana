@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import { either } from 'fp-ts/Either';
+import { z } from '@kbn/zod/v4';
 import { getRangeTypeMessage } from './get_range_type_message';
 
 export function getIntegerRt({
@@ -29,5 +30,24 @@ export function getIntegerRt({
       });
     },
     t.identity
+  );
+}
+
+// zod equivalent, additive (io-ts -> zod migration, elastic/kibana#243355).
+export function getIntegerSchema({
+  min = -Infinity,
+  max = Infinity,
+}: {
+  min?: number;
+  max?: number;
+} = {}) {
+  const message = getRangeTypeMessage(min, max);
+
+  return z.string().refine(
+    (inputAsString) => {
+      const inputAsInt = parseInt(inputAsString, 10);
+      return inputAsInt >= min && inputAsInt <= max;
+    },
+    { message }
   );
 }

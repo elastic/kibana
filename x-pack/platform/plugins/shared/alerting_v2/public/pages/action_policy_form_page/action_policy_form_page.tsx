@@ -16,21 +16,21 @@ import {
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
-import type {
-  CreateActionPolicyData,
-  ActionPolicyResponse,
-  UpdateActionPolicyBody,
-} from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyDestination, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { ActionPolicyForm } from '../../components/action_policy/form/action_policy_form';
+import { toCreatePayload, toUpdatePayload } from '../../components/action_policy/form/form_utils';
+import type { ActionPolicyFormState } from '../../components/action_policy/form/types';
 import { useActionPolicyForm } from '../../components/action_policy/form/use_action_policy_form';
 import { paths } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useCreateActionPolicy } from '../../hooks/use_create_action_policy';
+import { useCreateInlineWorkflows } from '../../hooks/use_create_inline_workflows';
 import { useFetchActionPolicy } from '../../hooks/use_fetch_action_policy';
 import { useUpdateActionPolicy } from '../../hooks/use_update_action_policy';
 
@@ -145,12 +145,65 @@ const ActionPolicyFormPageContent = ({
   onCancel: () => void;
   onSuccess: () => void;
 }) => {
-  const { mutate: createPolicy, isLoading: isCreating } = useCreateActionPolicy();
-  const { mutate: updatePolicy, isLoading: isUpdating } = useUpdateActionPolicy();
+  const { toasts } = useService(CoreStart('notifications'));
+  const { mutateAsync: createPolicy, isLoading: isCreating } = useCreateActionPolicy();
+  const { mutateAsync: updatePolicy, isLoading: isUpdating } = useUpdateActionPolicy();
+  const { createInlineWorkflows, rollbackWorkflows } = useCreateInlineWorkflows();
+  const [isCreatingWorkflows, setIsCreatingWorkflows] = useState(false);
 
-  const onSubmitCreate = (data: CreateActionPolicyData) => createPolicy(data, { onSuccess });
-  const onSubmitUpdate = (id: string, data: UpdateActionPolicyBody) =>
-    updatePolicy({ id, data }, { onSuccess });
+  const submitWithInlineWorkflows = useCallback(
+    async (
+      values: ActionPolicyFormState,
+      upsert: (destinations: ActionPolicyDestination[]) => Promise<unknown>
+    ) => {
+      let createdIds: string[] = [];
+      setIsCreatingWorkflows(true);
+      try {
+        createdIds = await createInlineWorkflows(values.inlineActions);
+      } catch (err) {
+        toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+          title: i18n.translate('xpack.alertingV2.actionPolicy.inlineWorkflowsError', {
+            defaultMessage: 'Failed to create simple workflows',
+          }),
+        });
+        return;
+      } finally {
+        setIsCreatingWorkflows(false);
+      }
+
+      const destinations: ActionPolicyDestination[] = [
+        ...values.destinations,
+        ...createdIds.map((id) => ({ type: 'workflow' as const, id })),
+      ];
+
+      try {
+        await upsert(destinations);
+      } catch {
+        // The create/update mutation surfaces its own error toast; roll back the
+        // workflows we created so we don't leave orphans behind.
+        return await rollbackWorkflows(createdIds);
+      }
+
+      onSuccess();
+    },
+    [createInlineWorkflows, rollbackWorkflows, toasts, onSuccess]
+  );
+
+  const onSubmitCreate = useCallback(
+    (values: ActionPolicyFormState) =>
+      submitWithInlineWorkflows(values, (destinations) =>
+        createPolicy(toCreatePayload({ ...values, destinations }))
+      ),
+    [submitWithInlineWorkflows, createPolicy]
+  );
+
+  const onSubmitUpdate = useCallback(
+    (id: string, values: ActionPolicyFormState, version: string) =>
+      submitWithInlineWorkflows(values, (destinations) =>
+        updatePolicy({ id, data: toUpdatePayload({ ...values, destinations }, version) })
+      ),
+    [submitWithInlineWorkflows, updatePolicy]
+  );
 
   const { methods, isEditMode, isSubmitEnabled, handleSubmit } = useActionPolicyForm({
     initialValues: initialPolicy,
@@ -158,7 +211,7 @@ const ActionPolicyFormPageContent = ({
     onSubmitUpdate,
   });
 
-  const isLoading = isCreating || isUpdating;
+  const isLoading = isCreating || isUpdating || isCreatingWorkflows;
 
   return (
     <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>

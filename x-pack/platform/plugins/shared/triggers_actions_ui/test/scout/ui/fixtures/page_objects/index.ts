@@ -6,3 +6,4 @@
  */
 
 export { RuleDetailsPage } from './rule_details_page';
+export { StackAlertsPage } from './stack_alerts_page';

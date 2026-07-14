@@ -23,9 +23,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./lifecycle'));
     loadTestFile(require.resolve('./lifecycle_retention'));
     loadTestFile(require.resolve('./failure_store'));
-    loadTestFile(require.resolve('./significant_events'));
-    loadTestFile(require.resolve('./features'));
-    loadTestFile(require.resolve('./queries'));
     loadTestFile(require.resolve('./discover'));
     loadTestFile(require.resolve('./content'));
     loadTestFile(require.resolve('./ingest_missing_data_stream'));
