@@ -291,10 +291,7 @@ export class ProjectMonitorFormatter {
                 reason: i18n.translate(
                   'xpack.synthetics.service.projectMonitors.failedToCreateMonitors',
                   {
-                    defaultMessage: 'Failed to create monitor: {journeyId}',
-                    values: {
-                      journeyId: undefined,
-                    },
+                    defaultMessage: 'Failed to create monitor',
                   }
                 ),
                 details: monitor.error.message,
@@ -440,13 +437,23 @@ export class ProjectMonitorFormatter {
         );
       }
 
+      const successfulMonitors =
+        editedMonitors?.filter(
+          (m): m is SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes> =>
+            !isSavedObjectErrorResult(m)
+        ) ?? [];
+
+      editedMonitors?.filter(isSavedObjectErrorResult).forEach((monitor) => {
+        this.failedMonitors.push({
+          reason: FAILED_TO_UPDATE_MONITOR,
+          details: monitor.error.message,
+          payload: monitor,
+        });
+      });
+
       return {
         errors: [],
-        editedMonitors:
-          editedMonitors?.filter(
-            (m): m is SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes> =>
-              !isSavedObjectErrorResult(m)
-          ) ?? [],
+        editedMonitors: successfulMonitors,
         updatedCount: monitorsToUpdate.length,
       };
     } catch (e) {
