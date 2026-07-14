@@ -722,8 +722,32 @@ export const deleteTimeline = async (
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const uniqueTimelineIds = [...new Set(timelineIds)];
 
-  for (let index = 0; index < uniqueTimelineIds.length; index += DELETE_TIMELINE_BATCH_SIZE) {
-    const timelineIdsBatch = uniqueTimelineIds.slice(index, index + DELETE_TIMELINE_BATCH_SIZE);
+  const bulkGetResponse = await savedObjectsClient.bulkGet<SavedObjectTimelineWithoutExternalRefs>(
+    uniqueTimelineIds.map((id) => ({ id, type: timelineSavedObjectType }))
+  );
+
+  const currentUsername = request.user?.username;
+  let hasNonOwnerDraft = false;
+  const allowedIds: string[] = [];
+
+  for (const savedObject of bulkGetResponse.saved_objects) {
+    if (isSavedObjectErrorResult(savedObject)) {
+      continue;
+    }
+    const { status, createdBy } = savedObject.attributes;
+    if (status === TimelineStatusEnum.draft && createdBy !== currentUsername) {
+      hasNonOwnerDraft = true;
+    } else {
+      allowedIds.push(savedObject.id);
+    }
+  }
+
+  if (hasNonOwnerDraft) {
+    throw Boom.notFound();
+  }
+
+  for (let index = 0; index < allowedIds.length; index += DELETE_TIMELINE_BATCH_SIZE) {
+    const timelineIdsBatch = allowedIds.slice(index, index + DELETE_TIMELINE_BATCH_SIZE);
 
     await Promise.all(
       timelineIdsBatch.map((timelineId) =>

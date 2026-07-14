@@ -700,17 +700,35 @@ describe('saved_object', () => {
 
   describe('deleteTimeline', () => {
     let mockDeleteSavedObject: jest.Mock;
+    let mockBulkGetSavedObject: jest.Mock;
     let mockRequest: FrameworkRequest;
+
+    const buildActiveTimelineSO = (id: string, createdBy = 'username') => ({
+      id,
+      type: 'siem-ui-timeline',
+      attributes: { status: TimelineStatusEnum.active, createdBy },
+      references: [],
+    });
+
+    const buildDraftTimelineSO = (id: string, createdBy = 'username') => ({
+      id,
+      type: 'siem-ui-timeline',
+      attributes: { status: TimelineStatusEnum.draft, createdBy },
+      references: [],
+    });
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+      mockBulkGetSavedObject = jest.fn();
       mockRequest = {
+        user: { username: 'username' },
         context: {
           core: {
             savedObjects: {
               client: {
                 delete: mockDeleteSavedObject,
+                bulkGet: mockBulkGetSavedObject,
               },
             },
           },
@@ -720,6 +738,12 @@ describe('saved_object', () => {
 
     it('deduplicates timeline ids before deleting', async () => {
       const duplicatedTimelineIds = ['timeline-1', 'timeline-1', 'timeline-2'];
+      mockBulkGetSavedObject.mockResolvedValue({
+        saved_objects: [
+          buildActiveTimelineSO('timeline-1'),
+          buildActiveTimelineSO('timeline-2'),
+        ],
+      });
 
       await deleteTimeline(mockRequest, duplicatedTimelineIds, ['search-1']);
 
@@ -732,6 +756,14 @@ describe('saved_object', () => {
     });
 
     it('processes timeline deletes in bounded batches', async () => {
+      const timelineIds = Array.from({ length: 11 }, (_, index) => `timeline-${index}`);
+
+      let resolveBulkGet!: (val: unknown) => void;
+      const bulkGetPromise = new Promise((resolve) => {
+        resolveBulkGet = resolve;
+      });
+      mockBulkGetSavedObject.mockReturnValue(bulkGetPromise);
+
       const pendingDeletes: Array<() => void> = [];
       const startedDeleteCalls: string[] = [];
       mockDeleteSavedObject.mockImplementation(
@@ -741,9 +773,12 @@ describe('saved_object', () => {
             pendingDeletes.push(() => resolve(undefined));
           })
       );
-      const timelineIds = Array.from({ length: 11 }, (_, index) => `timeline-${index}`);
 
       const deletePromise = deleteTimeline(mockRequest, timelineIds);
+
+      // Resolve the bulkGet with all active SOs, then let the first batch start
+      resolveBulkGet({ saved_objects: timelineIds.map((id) => buildActiveTimelineSO(id)) });
+      await new Promise(process.nextTick);
       await Promise.resolve();
 
       expect(startedDeleteCalls).toHaveLength(10);
@@ -755,6 +790,47 @@ describe('saved_object', () => {
 
       pendingDeletes.forEach((resolveDelete) => resolveDelete());
       await deletePromise;
+    });
+
+    it('throws a Boom 404 when any draft timeline is not owned by the requester', async () => {
+      mockBulkGetSavedObject.mockResolvedValue({
+        saved_objects: [
+          buildActiveTimelineSO('timeline-1'),
+          buildDraftTimelineSO('timeline-2', 'other-user'),
+        ],
+      });
+
+      await expect(
+        deleteTimeline(mockRequest, ['timeline-1', 'timeline-2'])
+      ).rejects.toMatchObject({ output: { statusCode: 404 } });
+
+      expect(mockDeleteSavedObject).not.toHaveBeenCalled();
+    });
+
+    it('successfully deletes a draft timeline owned by the requester', async () => {
+      mockBulkGetSavedObject.mockResolvedValue({
+        saved_objects: [buildDraftTimelineSO('timeline-draft', 'username')],
+      });
+
+      await deleteTimeline(mockRequest, ['timeline-draft']);
+
+      expect(mockDeleteSavedObject).toHaveBeenCalledTimes(1);
+      expect(mockDeleteSavedObject).toHaveBeenCalledWith('siem-ui-timeline', 'timeline-draft');
+    });
+
+    it('successfully deletes active (non-draft) timelines regardless of createdBy', async () => {
+      mockBulkGetSavedObject.mockResolvedValue({
+        saved_objects: [
+          buildActiveTimelineSO('timeline-1', 'other-user'),
+          buildActiveTimelineSO('timeline-2', 'another-user'),
+        ],
+      });
+
+      await deleteTimeline(mockRequest, ['timeline-1', 'timeline-2']);
+
+      expect(mockDeleteSavedObject).toHaveBeenCalledTimes(2);
+      expect(mockDeleteSavedObject).toHaveBeenCalledWith('siem-ui-timeline', 'timeline-1');
+      expect(mockDeleteSavedObject).toHaveBeenCalledWith('siem-ui-timeline', 'timeline-2');
     });
   });
 
