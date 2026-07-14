@@ -7,3 +7,4 @@
 
 require('@kbn/setup-node-env');
 require('./cases_generator');
+// some fake comment
