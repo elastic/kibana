@@ -67,6 +67,9 @@ function createMockContext(
         page?: number;
       }) => Promise<{ agents: Agent[]; total: number }>
     >;
+    getByIds: jest.MockedFunction<
+      (agentIds: string[], options?: { ignoreMissing?: boolean }) => Promise<Agent[]>
+    >;
   },
   mockPackagePolicyService: {
     list: jest.MockedFunction<
@@ -190,6 +193,9 @@ describe('parseAgentSelection', () => {
         page?: number;
       }) => Promise<{ agents: Agent[]; total: number }>
     >;
+    getByIds: jest.MockedFunction<
+      (agentIds: string[], options?: { ignoreMissing?: boolean }) => Promise<Agent[]>
+    >;
   };
   let mockPackagePolicyService: {
     list: jest.MockedFunction<
@@ -210,6 +216,7 @@ describe('parseAgentSelection', () => {
 
     mockAgentService = {
       listAgents: jest.fn(),
+      getByIds: jest.fn(async (ids: string[]) => ids.map((id) => ({ id } as Agent))),
     };
 
     mockPackagePolicyService = {
@@ -413,7 +420,7 @@ describe('parseAgentSelection', () => {
       expect(mockAsInternalScopedUser).toHaveBeenCalledWith(spaceId);
     });
 
-    it('should enforce space isolation for explicitly provided agent IDs', async () => {
+    it('should omit explicitly provided agent IDs that the agent service does not return', async () => {
       const spaceId = 'space-A';
       const mockAsInternalScopedUser = jest.fn().mockReturnValue(mockAgentService);
 
@@ -431,6 +438,7 @@ describe('parseAgentSelection', () => {
         agents: [],
         total: 0,
       });
+      mockAgentService.getByIds.mockResolvedValue([]);
 
       const result = await parseAgentSelection(
         mockSoClient,
@@ -439,8 +447,35 @@ describe('parseAgentSelection', () => {
         { agents: ['agent-from-space-B'], spaceId }
       );
 
-      expect(result).toContain('agent-from-space-B');
+      expect(result).not.toContain('agent-from-space-B');
+      expect(result).toEqual([]);
+      expect(mockAgentService.getByIds).toHaveBeenCalledWith(['agent-from-space-B'], {
+        ignoreMissing: true,
+      });
       expect(mockAsInternalScopedUser).toHaveBeenCalledWith(spaceId);
+    });
+
+    it('should keep only the explicitly provided agent IDs returned by the agent service', async () => {
+      const spaceId = 'space-A';
+
+      mockAgentService.listAgents.mockResolvedValue({
+        agents: [],
+        total: 0,
+      });
+      mockAgentService.getByIds.mockResolvedValue([{ id: 'agent-in-space' } as Agent]);
+
+      const result = await parseAgentSelection(
+        mockSoClient,
+        mockElasticsearchClient,
+        mockContextWithServices,
+        { agents: ['agent-in-space', 'agent-from-space-B'], spaceId }
+      );
+
+      expect(result).toEqual(['agent-in-space']);
+      expect(mockAgentService.getByIds).toHaveBeenCalledWith(
+        ['agent-in-space', 'agent-from-space-B'],
+        { ignoreMissing: true }
+      );
     });
   });
 
