@@ -15,7 +15,9 @@ const test = require('node:test');
 
 const {
   assignReviewers,
+  balanceFilesByChangedLines,
   computeAssignments,
+  createReviewTasks,
   getDiffSection,
   matchFiles,
   parseFrontmatter,
@@ -56,6 +58,53 @@ test('dispatches source-only changes to omission and domain reviewers', () => {
   ]);
 });
 
+test('balances files by changed lines with deterministic top-and-bottom pairings', () => {
+  const chunks = balanceFilesByChangedLines({
+    files: [
+      { filename: 'src/a.ts', changes: 9 },
+      { filename: 'src/b.ts', changes: 8 },
+      { filename: 'src/c.ts', changes: 7 },
+      { filename: 'src/d.ts', changes: 6 },
+      { filename: 'src/e.ts', changes: 5 },
+      { filename: 'src/f.ts', changes: 4 },
+    ],
+    chunkCount: 3,
+  });
+
+  assert.deepEqual(
+    chunks.map((chunk) => ({
+      files: chunk.files.map((file) => file.filename),
+      changedLines: chunk.changedLines,
+    })),
+    [
+      { files: ['src/a.ts', 'src/f.ts'], changedLines: 13 },
+      { files: ['src/b.ts', 'src/e.ts'], changedLines: 13 },
+      { files: ['src/c.ts', 'src/d.ts'], changedLines: 13 },
+    ]
+  );
+});
+
+test('creates ten general review tasks without duplicating files', () => {
+  const fileMetadata = Array.from({ length: 20 }, (_, index) => ({
+    filename: `src/file_${String(index + 1).padStart(2, '0')}.ts`,
+    changes: 20 - index,
+  }));
+  const tasks = createReviewTasks({
+    fileMetadata,
+    assignments: {
+      'pr-reviewer-general': fileMetadata.map((file) => file.filename),
+    },
+  });
+  const taskEntries = Object.entries(tasks);
+
+  assert.equal(taskEntries.length, 10);
+  assert(taskEntries.every(([, task]) => task.subagentType === 'pr-reviewer-general'));
+  assert.deepEqual(
+    taskEntries.flatMap(([, task]) => task.files.map((file) => file.filename)).sort(),
+    fileMetadata.map((file) => file.filename).sort()
+  );
+});
+
 test('rejects malformed frontmatter and duplicate reviewer names', () => {
   assert.throws(() => parseFrontmatter('name: missing-globs'), /Failed parsing reviewer/);
 
@@ -75,8 +124,13 @@ test('writes compact metadata and reviewer-specific diff slices', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'reviewer-context-'));
   try {
     const fileMetadata = [
-      { filename: 'src/a.ts', status: 'modified' },
-      { filename: 'src/new.ts', previous_filename: 'src/old.ts', status: 'renamed' },
+      { filename: 'src/a.ts', status: 'modified', changes: 10 },
+      {
+        filename: 'src/new.ts',
+        previous_filename: 'src/old.ts',
+        status: 'renamed',
+        changes: 2,
+      },
     ];
     const diffText = [
       'diff --git a/src/a.ts b/src/a.ts',
@@ -98,16 +152,23 @@ test('writes compact metadata and reviewer-specific diff slices', () => {
         'pr-reviewer-test': ['src/a.ts'],
       },
       reviewerDiffDir: tempDir,
+      generalChunkCount: 2,
     });
 
-    assert.deepEqual(contexts['pr-reviewer-general'].files, [
+    assert.deepEqual(contexts['pr-reviewer-general-chunk-01'].files, [
       { path: 'src/a.ts', status: 'modified' },
+    ]);
+    assert.deepEqual(contexts['pr-reviewer-general-chunk-02'].files, [
       { path: 'src/new.ts', status: 'renamed', previousPath: 'src/old.ts' },
     ]);
 
     const testDiff = fs.readFileSync(contexts['pr-reviewer-test'].diffPath, 'utf8');
     assert.match(testDiff, /diff --git a\/src\/a\.ts b\/src\/a\.ts/);
     assert.doesNotMatch(testDiff, /src\/new\.ts/);
+
+    const renamedDiff = fs.readFileSync(contexts['pr-reviewer-general-chunk-02'].diffPath, 'utf8');
+    assert.match(renamedDiff, /diff --git a\/src\/old\.ts b\/src\/new\.ts/);
+    assert.match(renamedDiff, /\+after/);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
@@ -196,10 +257,11 @@ test('assignReviewers ignores PR file entries without a filename', async () => {
       prDiffPath,
       outputPath,
       reviewerDiffDir,
+      generalChunkCount: 1,
     });
 
     const assignments = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
-    assert.deepEqual(assignments['pr-reviewer-general'].files, [
+    assert.deepEqual(assignments['pr-reviewer-general-chunk-01'].files, [
       { path: 'src/a.ts', status: 'modified' },
     ]);
   } finally {

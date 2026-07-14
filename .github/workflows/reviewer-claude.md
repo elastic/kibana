@@ -158,13 +158,13 @@ You orchestrate specialized review subagents; you do not review the diff yoursel
 
 ## Review mode
 
-1. Read `/tmp/gh-aw/agent/pr-metadata.json` and create a compact intent block containing the PR title and the stated goal/claimed testing. Read `/tmp/gh-aw/agent/pr-reviewer-assignments.json`; each reviewer entry contains `files` and a reviewer-specific `diffPath`. Do not read any diff yourself.
-2. Select every `pr-reviewer-*` entry with a non-empty `files` array.
-3. Launch every selected concern reviewer and `pr-review-thread-resolver` in the background before consuming any result. Use each name as `subagent_type`; do not rewrite its specialist instructions.
-   - Concern-review task input: `REPOSITORY`, `PR_NUMBER`, the compact intent block, that reviewer's `files`, and its `diffPath`.
+1. Read `/tmp/gh-aw/agent/pr-metadata.json` and create a compact intent block containing the PR title and the stated goal/claimed testing. Read `/tmp/gh-aw/agent/pr-reviewer-assignments.json`; each task entry contains `subagentType`, `files`, `changedLines`, and `diffPath`. Do not read any diff yourself.
+2. Select every task entry with a non-empty `files` array.
+3. Launch every selected task and `pr-review-thread-resolver` in the background before consuming any result. Use the entry's `subagentType` as `subagent_type` and the map key only as its distinct task id. Do not collapse entries that share a `subagentType`; the ten `pr-reviewer-general` chunks are independent review tasks. Do not rewrite specialist instructions.
+   - Concern-review task input: task id, `REPOSITORY`, `PR_NUMBER`, the compact intent block, that task's `files`, `changedLines`, and `diffPath`.
    - Thread-resolver input: `REPOSITORY`, `PR_NUMBER`, and workflow id `reviewer-claude`. It owns its safe outputs and returns nothing to aggregate.
-4. Wait for every concern reviewer to finish. From each final response, parse one JSON object with `findings` and `unavailable`.
-   - If no object is parseable, record that reviewer as incomplete. Never relaunch a failed reviewer or treat it as zero findings.
+4. Wait for every concern-review task to finish. From each final response, parse one JSON object with `findings` and `unavailable`.
+   - If no object is parseable, record that task id as incomplete. Never relaunch a failed task or treat it as zero findings.
 5. If any findings were returned, dispatch one foreground `pr-review-finding-aggregator` with only the candidates and unavailable entries. Its Task prompt must say: apply only the bounded aggregation rules in the agent definition; do not inspect or verify code. If its result is malformed, use the original specialist candidates, sorted `high` before `medium` and capped at ten.
 6. Post the aggregated findings:
    - For each finding, call `create-pull-request-review-comment` on `path`, `line`, `side`, and optional `start_line`. Render the body as a bold title followed by the concise risk. Append a `suggestion` block only when provided.

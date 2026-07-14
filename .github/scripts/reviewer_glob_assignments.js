@@ -16,6 +16,8 @@ const DEFAULT_PR_DIFF_PATH = '/tmp/gh-aw/agent/pr-diff.txt';
 const DEFAULT_OUTPUT_PATH = '/tmp/gh-aw/agent/pr-reviewer-assignments.json';
 const DEFAULT_REVIEWER_DIFF_DIR = '/tmp/gh-aw/agent/reviewer-diffs';
 const REVIEWER_FILENAME = /^pr-reviewer-.*\.md$/;
+const GENERAL_REVIEWER = 'pr-reviewer-general';
+const GENERAL_REVIEWER_CHUNK_COUNT = 10;
 
 // `**/*` and `**` mean "every file" — path.matchesGlob otherwise skips dot-directories.
 const CATCH_ALL_GLOBS = new Set(['**/*', '**']);
@@ -70,6 +72,88 @@ const computeAssignments = ({ files, reviewers }) => {
   return assignments;
 };
 
+const getFileChangedLines = (file) => {
+  if (Number.isFinite(file.changes)) {
+    return file.changes;
+  }
+
+  const additions = Number.isFinite(file.additions) ? file.additions : 0;
+  const deletions = Number.isFinite(file.deletions) ? file.deletions : 0;
+  return additions + deletions;
+};
+
+const balanceFilesByChangedLines = ({ files, chunkCount = GENERAL_REVIEWER_CHUNK_COUNT }) => {
+  if (!Number.isInteger(chunkCount) || chunkCount < 1) {
+    throw new Error(`chunkCount must be a positive integer, received: ${chunkCount}`);
+  }
+
+  const chunks = Array.from({ length: chunkCount }, (_, index) => ({
+    index: index + 1,
+    files: [],
+    changedLines: 0,
+  }));
+  const filesByDescendingSize = [...files].sort(
+    (left, right) =>
+      getFileChangedLines(right) - getFileChangedLines(left) ||
+      left.filename.localeCompare(right.filename)
+  );
+
+  for (const file of filesByDescendingSize) {
+    let lightestChunk = chunks[0];
+    for (const chunk of chunks.slice(1)) {
+      if (chunk.changedLines < lightestChunk.changedLines) {
+        lightestChunk = chunk;
+      }
+    }
+
+    lightestChunk.files.push(file);
+    lightestChunk.changedLines += getFileChangedLines(file);
+  }
+
+  return chunks.filter((chunk) => chunk.files.length > 0);
+};
+
+const createReviewTasks = ({
+  fileMetadata,
+  assignments,
+  generalChunkCount = GENERAL_REVIEWER_CHUNK_COUNT,
+}) => {
+  const filesByPath = new Map(fileMetadata.map((file) => [file.filename, file]));
+  const tasks = {};
+
+  for (const [reviewer, matchedPaths] of Object.entries(assignments)) {
+    const matchedFiles = matchedPaths
+      .map((matchedPath) => filesByPath.get(matchedPath))
+      .filter(Boolean);
+
+    if (reviewer === GENERAL_REVIEWER) {
+      const chunks = balanceFilesByChangedLines({
+        files: matchedFiles,
+        chunkCount: generalChunkCount,
+      });
+      for (const chunk of chunks) {
+        const chunkNumber = String(chunk.index).padStart(2, '0');
+        tasks[`${reviewer}-chunk-${chunkNumber}`] = {
+          subagentType: reviewer,
+          files: chunk.files,
+          changedLines: chunk.changedLines,
+        };
+      }
+      continue;
+    }
+
+    if (matchedFiles.length > 0) {
+      tasks[reviewer] = {
+        subagentType: reviewer,
+        files: matchedFiles,
+        changedLines: matchedFiles.reduce((total, file) => total + getFileChangedLines(file), 0),
+      };
+    }
+  }
+
+  return tasks;
+};
+
 const getDiffSection = ({ diffText, file }) => {
   const previousFilename = file.previous_filename ?? file.filename;
   const header = `diff --git a/${previousFilename} b/${file.filename}`;
@@ -88,22 +172,27 @@ const compactFileMetadata = (file) => ({
   ...(file.previous_filename ? { previousPath: file.previous_filename } : {}),
 });
 
-const writeReviewerContexts = ({ fileMetadata, diffText, assignments, reviewerDiffDir }) => {
+const writeReviewerContexts = ({
+  fileMetadata,
+  diffText,
+  assignments,
+  reviewerDiffDir,
+  generalChunkCount = GENERAL_REVIEWER_CHUNK_COUNT,
+}) => {
   fs.mkdirSync(reviewerDiffDir, { recursive: true });
 
-  const filesByPath = new Map(fileMetadata.map((file) => [file.filename, file]));
+  const tasks = createReviewTasks({ fileMetadata, assignments, generalChunkCount });
   const contexts = {};
 
-  for (const [reviewer, matchedPaths] of Object.entries(assignments)) {
-    const matchedFiles = matchedPaths
-      .map((matchedPath) => filesByPath.get(matchedPath))
-      .filter(Boolean);
-    const diffPath = path.join(reviewerDiffDir, `${reviewer}.diff`);
-    const reviewerDiff = matchedFiles.map((file) => getDiffSection({ diffText, file })).join('');
+  for (const [taskId, task] of Object.entries(tasks)) {
+    const diffPath = path.join(reviewerDiffDir, `${taskId}.diff`);
+    const reviewerDiff = task.files.map((file) => getDiffSection({ diffText, file })).join('');
 
     fs.writeFileSync(diffPath, reviewerDiff);
-    contexts[reviewer] = {
-      files: matchedFiles.map(compactFileMetadata),
+    contexts[taskId] = {
+      subagentType: task.subagentType,
+      files: task.files.map(compactFileMetadata),
+      changedLines: task.changedLines,
       diffPath,
     };
   }
@@ -118,6 +207,7 @@ const assignReviewers = async ({
   prDiffPath = DEFAULT_PR_DIFF_PATH,
   outputPath = DEFAULT_OUTPUT_PATH,
   reviewerDiffDir = DEFAULT_REVIEWER_DIFF_DIR,
+  generalChunkCount = GENERAL_REVIEWER_CHUNK_COUNT,
 } = {}) => {
   const log = core ?? console;
 
@@ -146,14 +236,18 @@ const assignReviewers = async ({
     diffText,
     assignments,
     reviewerDiffDir,
+    generalChunkCount,
   });
 
   fs.writeFileSync(outputPath, `${JSON.stringify(reviewerContexts, null, 2)}\n`);
 
-  const summary = Object.entries(assignments)
-    .map(([name, matched]) => `${name}=${matched.length}`)
+  const summary = Object.entries(reviewerContexts)
+    .map(
+      ([taskId, context]) =>
+        `${taskId}=${context.files.length} files/${context.changedLines} changed lines`
+    )
     .join(', ');
-  log.info(`Reviewer file assignments (${files.length} changed files): ${summary}`);
+  log.info(`Reviewer task assignments (${files.length} changed files): ${summary}`);
 };
 
 module.exports = {
@@ -161,6 +255,9 @@ module.exports = {
   matchFiles,
   readReviewers,
   computeAssignments,
+  getFileChangedLines,
+  balanceFilesByChangedLines,
+  createReviewTasks,
   getDiffSection,
   compactFileMetadata,
   writeReviewerContexts,
