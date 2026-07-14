@@ -200,11 +200,13 @@ export class DiscoverApp {
     }
 
     await this.openDataViewSwitcher();
+    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    await switcher.waitFor({ state: 'visible' });
     const isAdHoc = await this.page.testSubj
       .locator(`dataViewItemTempBadge-${dataViewTitle}`)
       .isVisible();
     await this.page.keyboard.press('Escape');
-    await this.page.testSubj.locator('indexPattern-switcher').waitFor({ state: 'hidden' });
+    await switcher.waitFor({ state: 'hidden' });
 
     return isAdHoc;
   }
