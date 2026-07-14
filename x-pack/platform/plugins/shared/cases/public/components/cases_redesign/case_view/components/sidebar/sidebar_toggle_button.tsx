@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import * as i18n from '../../translations';
+import * as i18n from '../../../translations';
 import { useSidebar } from './sidebar_context';
 
 export const SidebarToggleButton: React.FC = () => {
