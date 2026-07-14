@@ -50,6 +50,8 @@ import {
 } from '../../hooks/use_experiments_api';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
 import { WorkflowYamlPreview } from '../workflow_yaml_preview';
+import { ConnectorSelector, type ConnectorSelectorOption } from '../shared/connector_selector';
+import { EvaluatorSelector, type SelectedEvaluator } from '../shared/evaluator_selector';
 import { SavedWorkflowSuccess } from './saved_workflow_success';
 import { newExperimentStrings } from './translations';
 
@@ -57,13 +59,6 @@ const BUILT_IN_TARGETS = ['inference', 'agentBuilder.converse', 'agentBuilder.to
 type BuiltInTarget = (typeof BUILT_IN_TARGETS)[number];
 const isBuiltInTarget = (value: string): value is BuiltInTarget =>
   (BUILT_IN_TARGETS as readonly string[]).includes(value);
-
-interface SelectedEvaluator {
-  name: string;
-  version?: string;
-  kind: 'llm' | 'code';
-  connectorId?: string;
-}
 
 type ToolOption = EuiComboBoxOptionOption<string> & {
   toolType?: string;
@@ -160,7 +155,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     enabled: isBareToolTarget,
   });
 
-  const connectorOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
+  const connectorOptions = useMemo<ConnectorSelectorOption[]>(
     () => (connectorsData ?? []).map((c) => ({ label: c.name, value: c.id })),
     [connectorsData]
   );
@@ -168,17 +163,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
   const datasetOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () => (datasetsData?.datasets ?? []).map((d) => ({ label: d.name, value: d.id })),
     [datasetsData]
-  );
-
-  const evaluatorOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
-    () =>
-      (evaluatorsData?.evaluators ?? [])
-        .filter((e) => !isBareToolTarget || e.supports_bare_tool_trace !== false)
-        .map((e) => ({
-          label: e.kind === 'llm' ? `${e.name} (LLM)` : e.name,
-          value: e.name,
-        })),
-    [evaluatorsData, isBareToolTarget]
   );
 
   useEffect(() => {
@@ -365,36 +349,6 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
 
   const onToggleCompare = useCallback((next: boolean) => setCompare(next), []);
 
-  const onSelectEvaluators = useCallback(
-    (selected: Array<EuiComboBoxOptionOption<string>>) => {
-      const byName = new Map(evaluators.map((e) => [e.name, e]));
-      const definitions = evaluatorsData?.evaluators ?? [];
-      const next: SelectedEvaluator[] = [];
-      for (const option of selected) {
-        const definition = definitions.find((d) => d.name === option.value);
-        if (!definition) {
-          continue;
-        }
-        next.push({
-          name: definition.name,
-          version: definition.version,
-          kind: definition.kind,
-          connectorId: byName.get(definition.name)?.connectorId,
-        });
-      }
-      setEvaluators(next);
-    },
-    [evaluators, evaluatorsData?.evaluators]
-  );
-
-  const setEvaluatorConnector = useCallback((evaluatorName: string, connectorId: string) => {
-    setEvaluators((prev) =>
-      prev.map((e) =>
-        e.name === evaluatorName ? { ...e, connectorId: connectorId || undefined } : e
-      )
-    );
-  }, []);
-
   const onRunNow = useCallback(() => {
     const requestBody: RunExperimentRequest = {
       ...buildRequestBody(),
@@ -487,14 +441,8 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
     });
   }, [buildRequestBody, saveWorkflow, toasts]);
 
-  const selectedConnectorOptions = connectorOptions.filter((o) =>
-    connectorIds.includes(o.value as string)
-  );
   const selectedDatasetOptions = datasetOptions.filter((o) =>
     datasetIds.includes(o.value as string)
-  );
-  const selectedEvaluatorOptions = evaluatorOptions.filter((o) =>
-    evaluators.some((e) => e.name === o.value)
   );
   const selectedAgentOptions = agentId
     ? [agentOptions.find((o) => o.value === agentId) ?? { label: agentId, value: agentId }]
@@ -548,20 +496,15 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
             />
           </EuiFormRow>
 
-          <EuiFormRow
+          <ConnectorSelector
             label={newExperimentStrings.connectorsLabel}
             helpText={newExperimentStrings.connectorsHelp}
-            fullWidth
-          >
-            <EuiComboBox<string>
-              fullWidth
-              isLoading={connectorsLoading}
-              options={connectorOptions}
-              selectedOptions={selectedConnectorOptions}
-              onChange={(selected) => setConnectorIds(selected.map((o) => o.value as string))}
-              data-test-subj="evalsConnectorsCombo"
-            />
-          </EuiFormRow>
+            selectedConnectorIds={connectorIds}
+            connectorOptions={connectorOptions}
+            onChange={setConnectorIds}
+            isLoading={connectorsLoading}
+            dataTestSubj="evalsConnectorsCombo"
+          />
 
           <EuiFormRow label={newExperimentStrings.taskTargetLabel} fullWidth>
             <EuiComboBox<string>
@@ -630,48 +573,20 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
             />
           </EuiFormRow>
 
-          <EuiFormRow label={newExperimentStrings.evaluatorsLabel} fullWidth>
-            <EuiComboBox<string>
-              fullWidth
-              isLoading={evaluatorsLoading}
-              options={evaluatorOptions}
-              selectedOptions={selectedEvaluatorOptions}
-              onChange={onSelectEvaluators}
-              data-test-subj="evalsEvaluatorsCombo"
-            />
-          </EuiFormRow>
-
-          {evaluators
-            .filter((e) => e.kind === 'llm')
-            .map((evaluator) => (
-              <EuiFormRow
-                key={evaluator.name}
-                label={i18n.translate('xpack.evals.newExperiment.judgeForLabel', {
-                  defaultMessage: '{name} evaluator - judge connector',
-                  values: { name: evaluator.name },
-                })}
-                fullWidth
-                isInvalid={!evaluator.connectorId}
-              >
-                <EuiComboBox<string>
-                  fullWidth
-                  singleSelection={{ asPlainText: true }}
-                  isClearable={false}
-                  isInvalid={!evaluator.connectorId}
-                  isLoading={connectorsLoading}
-                  options={connectorOptions}
-                  selectedOptions={
-                    evaluator.connectorId
-                      ? connectorOptions.filter((o) => o.value === evaluator.connectorId)
-                      : []
-                  }
-                  onChange={(selected) =>
-                    setEvaluatorConnector(evaluator.name, (selected[0]?.value as string) ?? '')
-                  }
-                  data-test-subj={`evalsJudgeConnector-${evaluator.name}`}
-                />
-              </EuiFormRow>
-            ))}
+          <EvaluatorSelector
+            label={newExperimentStrings.evaluatorsLabel}
+            evaluators={evaluatorsData?.evaluators ?? []}
+            selectedEvaluators={evaluators}
+            connectorOptions={connectorOptions}
+            onChange={setEvaluators}
+            isEvaluatorsLoading={evaluatorsLoading}
+            isConnectorsLoading={connectorsLoading}
+            evaluatorFilter={(evaluator) =>
+              !isBareToolTarget || evaluator.supports_bare_tool_trace !== false
+            }
+            evaluatorsDataTestSubj="evalsEvaluatorsCombo"
+            judgeConnectorDataTestSubjPrefix="evalsJudgeConnector"
+          />
 
           <EuiSpacer size="m" />
           <EuiFlexGroup>

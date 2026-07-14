@@ -11,41 +11,45 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiComboBox,
+  EuiEmptyPrompt,
   EuiFieldNumber,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
   EuiSelect,
+  EuiSwitch,
   EuiSpacer,
   EuiText,
   EuiTextArea,
   EuiTitle,
-  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { API_VERSIONS, EVALS_EVALUATORS_URL, type ListEvaluatorsResponse } from '@kbn/evals-common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCreateOnlineEvalWorkflow } from '../../hooks/use_online_eval_workflows';
-import { useLlmConnectors } from '../../hooks/use_llm_connectors';
+import { useEvaluators, useModelConnectors } from '../../hooks/use_experiments_api';
 import { buildOnlineEvalWorkflowYaml } from '../../../common/online_evals/workflow_yaml';
-
-interface EvaluatorOption extends EuiComboBoxOptionOption<string> {
-  value: string;
-  kind: 'llm' | 'code';
-  version: string;
-}
-
-interface ConnectorOption extends EuiComboBoxOptionOption<string> {
-  value: string;
-}
+import { ConnectorSelector, type ConnectorSelectorOption } from '../shared/connector_selector';
+import { EvaluatorSelector, type SelectedEvaluator } from '../shared/evaluator_selector';
+import { WorkflowYamlPreview } from '../workflow_yaml_preview';
 
 export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => {
   const { services } = useKibana();
   const createOnlineEvalWorkflow = useCreateOnlineEvalWorkflow();
+  const {
+    data: evaluatorsData,
+    isLoading: isLoadingEvaluators,
+    error: evaluatorsError,
+  } = useEvaluators();
+  const {
+    data: connectorsData,
+    isLoading: isLoadingConnectors,
+    error: connectorsError,
+  } = useModelConnectors();
 
   const [name, setName] = React.useState('');
   const [indexPattern, setIndexPattern] = React.useState('traces-agent_builder.otel-default');
@@ -54,90 +58,31 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
   const [lagMinutes, setLagMinutes] = React.useState(15);
   const [maxTracesPerRun, setMaxTracesPerRun] = React.useState(25);
   const [every, setEvery] = React.useState('1h');
-  const [selectedEvaluators, setSelectedEvaluators] = React.useState<EvaluatorOption[]>([]);
-  const [selectedConnector, setSelectedConnector] = React.useState<ConnectorOption[]>([]);
-  const [evaluatorOptions, setEvaluatorOptions] = React.useState<EvaluatorOption[]>([]);
-  const [isLoadingEvaluators, setIsLoadingEvaluators] = React.useState(false);
+  const [selectedEvaluators, setSelectedEvaluators] = React.useState<SelectedEvaluator[]>([]);
+  const [selectedConnectorIds, setSelectedConnectorIds] = React.useState<string[]>([]);
+  const [showYamlPreview, setShowYamlPreview] = React.useState(false);
+  const [createdWorkflow, setCreatedWorkflow] = React.useState<{ id: string; name: string } | null>(
+    null
+  );
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-  const { connectors, isLoading: isLoadingConnectors, error: connectorsError } = useLlmConnectors();
 
-  const connectorOptions = React.useMemo<ConnectorOption[]>(
+  const connectorOptions = React.useMemo<ConnectorSelectorOption[]>(
     () =>
-      connectors.map((connector) => ({
+      (connectorsData ?? []).map((connector) => ({
         value: connector.id,
         label: connector.name,
       })),
-    [connectors]
+    [connectorsData]
   );
-
-  React.useEffect(() => {
-    let didCancel = false;
-
-    const loadEvaluators = async () => {
-      setIsLoadingEvaluators(true);
-      try {
-        const response = await services.http!.get<ListEvaluatorsResponse>(EVALS_EVALUATORS_URL, {
-          version: API_VERSIONS.internal.v1,
-        });
-
-        if (didCancel) {
-          return;
-        }
-
-        const options: EvaluatorOption[] = response.evaluators.map((evaluator) => {
-          const requiresReferenceData = Boolean(evaluator.reference_data_schema?.required);
-          const label = evaluator.version
-            ? `${evaluator.name}@${evaluator.version} (${evaluator.kind})`
-            : `${evaluator.name} (${evaluator.kind})`;
-
-          return {
-            label,
-            value: evaluator.name,
-            kind: evaluator.kind,
-            version: evaluator.version,
-            disabled: requiresReferenceData,
-            toolTipContent: requiresReferenceData
-              ? i18n.translate(
-                  'xpack.evals.onlineEvaluations.createFlyout.evaluatorReferenceDataRequiredTooltip',
-                  {
-                    defaultMessage:
-                      'This evaluator requires reference data and is not supported in online evaluations yet.',
-                  }
-                )
-              : undefined,
-            append: (
-              <EuiText color="subdued" size="xs">
-                {evaluator.description}
-              </EuiText>
-            ),
-          };
-        });
-        setEvaluatorOptions(options);
-      } catch (error) {
-        if (!didCancel) {
-          setErrorMessage(
-            i18n.translate('xpack.evals.onlineEvaluations.createFlyout.loadEvaluatorsError', {
-              defaultMessage: 'Failed to load evaluators: {message}',
-              values: { message: String(error) },
-            })
-          );
-        }
-      } finally {
-        if (!didCancel) {
-          setIsLoadingEvaluators(false);
-        }
-      }
-    };
-
-    loadEvaluators();
-
-    return () => {
-      didCancel = true;
-    };
-  }, [services.http]);
 
   const combinedErrorMessage =
     errorMessage ??
+    (evaluatorsError
+      ? i18n.translate('xpack.evals.onlineEvaluations.createFlyout.loadEvaluatorsError', {
+          defaultMessage: 'Failed to load evaluators: {message}',
+          values: { message: String(evaluatorsError) },
+        })
+      : null) ??
     (connectorsError
       ? i18n.translate('xpack.evals.onlineEvaluations.createFlyout.loadConnectorsError', {
           defaultMessage: 'Failed to load connectors: {message}',
@@ -146,42 +91,23 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
       : null);
 
   const hasLlmEvaluator = selectedEvaluators.some((option) => option.kind === 'llm');
-  const selectedConnectorId = selectedConnector[0]?.value;
+  const selectedConnectorId = selectedConnectorIds[0];
   const isConnectorMissing = hasLlmEvaluator && !selectedConnectorId;
+  const isNameMissing = name.trim().length === 0;
+  const areEvaluatorsMissing = selectedEvaluators.length === 0;
+  const isFormValid = !isNameMissing && !areEvaluatorsMissing && !isConnectorMissing;
   const isSubmitting = createOnlineEvalWorkflow.isLoading;
+  const workflowHref =
+    createdWorkflow && services.http
+      ? services.http.basePath.prepend(`/app/workflows/${encodeURIComponent(createdWorkflow.id)}`)
+      : undefined;
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setErrorMessage(null);
-
-    if (!name.trim()) {
-      setErrorMessage(
-        i18n.translate('xpack.evals.onlineEvaluations.createFlyout.nameRequiredError', {
-          defaultMessage: 'Enter a name.',
-        })
-      );
-      return;
+  const workflowYaml = React.useMemo(() => {
+    if (!isFormValid) {
+      return undefined;
     }
 
-    if (selectedEvaluators.length === 0) {
-      setErrorMessage(
-        i18n.translate('xpack.evals.onlineEvaluations.createFlyout.evaluatorsRequiredError', {
-          defaultMessage: 'Select at least one evaluator.',
-        })
-      );
-      return;
-    }
-
-    if (isConnectorMissing) {
-      setErrorMessage(
-        i18n.translate('xpack.evals.onlineEvaluations.createFlyout.connectorRequiredError', {
-          defaultMessage: 'Select a connector when any selected evaluator is of kind "llm".',
-        })
-      );
-      return;
-    }
-
-    const yaml = buildOnlineEvalWorkflowYaml({
+    return buildOnlineEvalWorkflowYaml({
       name: name.trim(),
       indexPattern: indexPattern.trim(),
       ...(extraEsqlWhere.trim() ? { extraEsqlWhere: extraEsqlWhere.trim() } : {}),
@@ -189,16 +115,34 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
       lagMinutes,
       maxTracesPerRun,
       every,
-      evaluators: selectedEvaluators.map(({ value, version }) => ({
-        name: value,
+      evaluators: selectedEvaluators.map(({ name: evaluatorName, version }) => ({
+        name: evaluatorName,
         version,
       })),
       connectorId: selectedConnectorId ?? '',
     });
+  }, [
+    every,
+    extraEsqlWhere,
+    indexPattern,
+    isFormValid,
+    lagMinutes,
+    maxTracesPerRun,
+    name,
+    selectedConnectorId,
+    selectedEvaluators,
+    windowMinutes,
+  ]);
+
+  const onSaveAsWorkflow = async () => {
+    setErrorMessage(null);
+    if (!workflowYaml) {
+      return;
+    }
 
     try {
-      await createOnlineEvalWorkflow.mutateAsync({ yaml });
-      onClose();
+      const response = await createOnlineEvalWorkflow.mutateAsync({ yaml: workflowYaml });
+      setCreatedWorkflow({ id: response.id, name: response.name });
     } catch (error) {
       setErrorMessage(
         i18n.translate('xpack.evals.onlineEvaluations.createFlyout.submitError', {
@@ -208,6 +152,74 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
       );
     }
   };
+
+  if (createdWorkflow) {
+    return (
+      <>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.evals.onlineEvaluations.createFlyout.title', {
+                defaultMessage: 'Create online evaluation',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiEmptyPrompt
+            iconType="checkInCircleFilled"
+            iconColor="success"
+            title={
+              <h2>
+                {i18n.translate('xpack.evals.onlineEvaluations.createFlyout.savedTitle', {
+                  defaultMessage: 'Saved workflow "{name}"',
+                  values: { name: createdWorkflow.name },
+                })}
+              </h2>
+            }
+            body={
+              <p>
+                {i18n.translate('xpack.evals.onlineEvaluations.createFlyout.savedBody', {
+                  defaultMessage:
+                    'Your online evaluation is saved as a reusable workflow. Open it in Workflows to run it now, schedule it, or edit it.',
+                })}
+              </p>
+            }
+            actions={
+              workflowHref
+                ? [
+                    <EuiButton
+                      key="openWorkflow"
+                      iconType="popout"
+                      href={workflowHref}
+                      data-test-subj="onlineEvalSavedOpenWorkflowButton"
+                    >
+                      {i18n.translate(
+                        'xpack.evals.onlineEvaluations.createFlyout.savedOpenWorkflowButton',
+                        {
+                          defaultMessage: 'Open in Workflows',
+                        }
+                      )}
+                    </EuiButton>,
+                  ]
+                : undefined
+            }
+          />
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose} data-test-subj="onlineEvalSavedCloseButton">
+                {i18n.translate('xpack.evals.onlineEvaluations.createFlyout.savedCloseButton', {
+                  defaultMessage: 'Close',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </>
+    );
+  }
 
   return (
     <>
@@ -259,7 +271,7 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
 
         <EuiSpacer size="m" />
 
-        <EuiForm component="form" id="createOnlineEvalForm" onSubmit={onSubmit}>
+        <EuiForm component="form" id="createOnlineEvalForm">
           <EuiFormRow
             label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.nameLabel', {
               defaultMessage: 'Name',
@@ -273,6 +285,16 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
               data-test-subj="onlineEvalCreateNameInput"
             />
           </EuiFormRow>
+
+          <EuiSpacer size="m" />
+          <EuiTitle size="xxs">
+            <h3>
+              {i18n.translate('xpack.evals.onlineEvaluations.createFlyout.targetAndFilterLabel', {
+                defaultMessage: 'Target and filter',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
 
           <EuiFormRow
             label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.extraWhereLabel', {
@@ -289,44 +311,54 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
             />
           </EuiFormRow>
 
-          <EuiFormRow
-            label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.everyLabel', {
-              defaultMessage: 'Schedule',
-            })}
-            fullWidth
-          >
-            <EuiSelect
-              fullWidth
-              options={[
-                { value: '5m', text: '5m' },
-                { value: '15m', text: '15m' },
-                { value: '1h', text: '1h' },
-                { value: '6h', text: '6h' },
-                { value: '1d', text: '1d' },
-              ]}
-              value={every}
-              onChange={(event) => setEvery(event.target.value)}
-              data-test-subj="onlineEvalCreateEverySelect"
-            />
-          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xxs">
+            <h3>
+              {i18n.translate(
+                'xpack.evals.onlineEvaluations.createFlyout.evaluatorsAndJudgeLabel',
+                {
+                  defaultMessage: 'Evaluators and judge',
+                }
+              )}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
 
-          <EuiFormRow
+          <EvaluatorSelector
             label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.evaluatorsLabel', {
               defaultMessage: 'Evaluators',
             })}
-            fullWidth
-          >
-            <EuiComboBox
-              fullWidth
-              isLoading={isLoadingEvaluators}
-              options={evaluatorOptions}
-              selectedOptions={selectedEvaluators}
-              onChange={(options) => setSelectedEvaluators(options as EvaluatorOption[])}
-              data-test-subj="onlineEvalCreateEvaluatorsCombo"
-            />
-          </EuiFormRow>
+            evaluators={evaluatorsData?.evaluators ?? []}
+            selectedEvaluators={selectedEvaluators}
+            connectorOptions={connectorOptions}
+            onChange={setSelectedEvaluators}
+            isEvaluatorsLoading={isLoadingEvaluators}
+            showJudgeConnectorSelection={false}
+            evaluatorOptionLabel={(evaluator) =>
+              evaluator.version
+                ? `${evaluator.name}@${evaluator.version} (${evaluator.kind})`
+                : `${evaluator.name} (${evaluator.kind})`
+            }
+            evaluatorOptionMeta={(evaluator) => {
+              const requiresReferenceData = Boolean(evaluator.reference_data_schema?.required);
+              return {
+                disabled: requiresReferenceData,
+                toolTipContent: requiresReferenceData
+                  ? i18n.translate(
+                      'xpack.evals.onlineEvaluations.createFlyout.evaluatorReferenceDataRequiredTooltip',
+                      {
+                        defaultMessage:
+                          'This evaluator requires reference data and is not supported in online evaluations yet.',
+                      }
+                    )
+                  : undefined,
+              };
+            }}
+            evaluatorsDataTestSubj="onlineEvalCreateEvaluatorsCombo"
+            judgeConnectorDataTestSubjPrefix="onlineEvalCreateUnusedJudgeConnector"
+          />
 
-          <EuiFormRow
+          <ConnectorSelector
             label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.connectorLabel', {
               defaultMessage: 'Connector',
             })}
@@ -347,17 +379,45 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
                   )
                 : undefined
             }
+            selectedConnectorIds={selectedConnectorIds}
+            connectorOptions={connectorOptions}
+            onChange={setSelectedConnectorIds}
+            isLoading={isLoadingConnectors}
+            dataTestSubj="onlineEvalCreateConnectorCombo"
+            singleSelection
+          />
+
+          <EuiSpacer size="m" />
+          <EuiTitle size="xxs">
+            <h3>
+              {i18n.translate(
+                'xpack.evals.onlineEvaluations.createFlyout.scheduleAndAdvancedLabel',
+                {
+                  defaultMessage: 'Schedule and advanced',
+                }
+              )}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+
+          <EuiFormRow
+            label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.everyLabel', {
+              defaultMessage: 'Schedule',
+            })}
             fullWidth
           >
-            <EuiComboBox
-              isInvalid={isConnectorMissing}
+            <EuiSelect
               fullWidth
-              isLoading={isLoadingConnectors}
-              options={connectorOptions}
-              selectedOptions={selectedConnector}
-              onChange={(options) => setSelectedConnector(options.slice(0, 1) as ConnectorOption[])}
-              singleSelection={{ asPlainText: true }}
-              data-test-subj="onlineEvalCreateConnectorCombo"
+              options={[
+                { value: '5m', text: '5m' },
+                { value: '15m', text: '15m' },
+                { value: '1h', text: '1h' },
+                { value: '6h', text: '6h' },
+                { value: '1d', text: '1d' },
+              ]}
+              value={every}
+              onChange={(event) => setEvery(event.target.value)}
+              data-test-subj="onlineEvalCreateEverySelect"
             />
           </EuiFormRow>
 
@@ -443,6 +503,34 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
               />
             </EuiFormRow>
           </EuiAccordion>
+
+          <EuiSpacer size="m" />
+          <EuiSwitch
+            label={i18n.translate('xpack.evals.onlineEvaluations.createFlyout.showYamlLabel', {
+              defaultMessage: 'Show workflow YAML',
+            })}
+            checked={showYamlPreview}
+            onChange={(event) => setShowYamlPreview(event.target.checked)}
+            data-test-subj="onlineEvalCreateShowYamlToggle"
+          />
+          {showYamlPreview && (
+            <>
+              <EuiSpacer size="s" />
+              {isFormValid ? (
+                <WorkflowYamlPreview yaml={workflowYaml} />
+              ) : (
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate(
+                    'xpack.evals.onlineEvaluations.createFlyout.yamlPreviewIncompleteHint',
+                    {
+                      defaultMessage:
+                        'Enter a name, choose at least one evaluator, and select a connector for LLM evaluators to preview the YAML.',
+                    }
+                  )}
+                </EuiText>
+              )}
+            </>
+          )}
         </EuiForm>
       </EuiFlyoutBody>
 
@@ -454,16 +542,24 @@ export const CreateOnlineEvalFlyout = ({ onClose }: { onClose: () => void }) => 
         </EuiButtonEmpty>
         <EuiButton
           fill
-          form="createOnlineEvalForm"
-          type="submit"
+          onClick={onSaveAsWorkflow}
           isLoading={isSubmitting}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !isFormValid}
           data-test-subj="onlineEvalCreateSubmitButton"
         >
           {i18n.translate('xpack.evals.onlineEvaluations.createFlyout.submitButton', {
-            defaultMessage: 'Create online evaluation',
+            defaultMessage: 'Save as workflow',
           })}
         </EuiButton>
+        {!isFormValid && (
+          <EuiText size="xs" color="subdued" textAlign="right">
+            <EuiSpacer size="xs" />
+            {i18n.translate('xpack.evals.onlineEvaluations.createFlyout.validationHint', {
+              defaultMessage:
+                'Requires a name and at least one evaluator (with a connector for LLM evaluators).',
+            })}
+          </EuiText>
+        )}
       </EuiFlyoutFooter>
     </>
   );

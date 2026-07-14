@@ -205,6 +205,8 @@ describe('OnlineEvalDetailPage', () => {
     expect(await screen.findByText('trace-123')).toBeInTheDocument();
     expect(screen.getByText('correctness@1.0.0')).toBeInTheDocument();
     expect(screen.getByText('factuality')).toBeInTheDocument();
+    expect(screen.getByText('Scores and traces')).toBeInTheDocument();
+    expect(screen.getByText('Score trends')).toBeInTheDocument();
   });
 
   it('opens the trace waterfall flyout when trace id is clicked', async () => {

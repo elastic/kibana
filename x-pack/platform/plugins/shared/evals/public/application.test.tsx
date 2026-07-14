@@ -16,7 +16,7 @@ jest.mock('./pages/online_evals_list', () => ({
 }));
 
 describe('EvalsApp', () => {
-  it('renders the Online Evaluations tab', () => {
+  it('renders the Online Evaluations tab as selected on /online', () => {
     const history = createMemoryHistory({
       initialEntries: ['/online'],
     }) as unknown as ScopedHistory;
@@ -30,6 +30,8 @@ describe('EvalsApp', () => {
       />
     );
 
-    expect(screen.getByText('Online Evaluations')).toBeInTheDocument();
+    const onlineTab = screen.getByRole('tab', { name: 'Online Evaluations' });
+    expect(onlineTab).toBeInTheDocument();
+    expect(onlineTab).toHaveAttribute('aria-selected', 'true');
   });
 });

@@ -18,6 +18,7 @@ import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { EvaluatorDefinition, EvaluatorRegistry } from '../../evaluators/types';
 import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
 import { getEvidenceMapping } from '../../evaluators/evidence/resolve_mapping';
+import { withEvaluatorNameBaggage } from '../../evaluators/evaluator_tracing_context';
 import { registerEvaluateRoute } from './evaluate';
 import {
   buildClaudeCodeApiResponseDoc,
@@ -32,7 +33,13 @@ jest.mock('../../evaluators/trace_readiness', () => ({
   ...jest.requireActual('../../evaluators/trace_readiness'),
   awaitTraceReady: jest.fn(),
 }));
+jest.mock('../../evaluators/evaluator_tracing_context', () => ({
+  withEvaluatorNameBaggage: jest.fn((_: string, fn: () => unknown) => fn()),
+}));
 const awaitTraceReadyMock = awaitTraceReady as jest.MockedFunction<typeof awaitTraceReady>;
+const withEvaluatorNameBaggageMock = withEvaluatorNameBaggage as jest.MockedFunction<
+  typeof withEvaluatorNameBaggage
+>;
 const DEFAULT_ROUND = {
   input: { message: 'default input' },
   response: { message: 'default response' },
@@ -263,6 +270,16 @@ describe('POST /internal/evals/_evaluate', () => {
         log: logger,
       })
     );
+    expect(withEvaluatorNameBaggageMock).toHaveBeenNthCalledWith(
+      1,
+      'groundedness',
+      expect.any(Function)
+    );
+    expect(withEvaluatorNameBaggageMock).toHaveBeenNthCalledWith(
+      2,
+      'correctness',
+      expect.any(Function)
+    );
   });
 
   it('uses otel-genai-attributes mapping when requested', async () => {
@@ -348,6 +365,102 @@ describe('POST /internal/evals/_evaluate', () => {
       expect.objectContaining({ traceId: '0af7651916cd43dd8448eb211c80319c' }),
       getEvidenceMapping('otel-genai-attributes'),
       'otel-genai-attributes',
+      logger
+    );
+  });
+
+  it('uses agent-builder-tool mapping when requested', async () => {
+    const round = {
+      input: { message: '{"query":"status:failed"}' },
+      response: { message: 'Found 2 failed runs.' },
+      steps: [
+        {
+          tool_call_id: 'tool-call-1',
+          tool_id: 'search_runs',
+          arguments: { query: 'status:failed' },
+          result: { count: 2 },
+        },
+      ],
+    };
+    awaitTraceReadyMock.mockResolvedValueOnce(round);
+    const evaluate = jest.fn().mockResolvedValue({
+      scores: [{ name: 'latency', score: 11 }],
+    });
+    const searchMock = jest
+      .fn()
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-10T09:00:00.500Z',
+                'attributes.gen_ai.tool.call.arguments': '{"query":"status:failed"}',
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-10T09:00:01.000Z',
+                'attributes.gen_ai.tool.call.result': 'Found 2 failed runs.',
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-07-10T09:00:00.500Z',
+                'attributes.gen_ai.tool.call.id': 'tool-call-1',
+                'attributes.gen_ai.tool.name': 'search_runs',
+                'attributes.gen_ai.tool.call.arguments': '{"query":"status:failed"}',
+                'attributes.gen_ai.tool.call.result': '{"count":2}',
+              },
+            },
+          ],
+        },
+      });
+    const { handler, logger } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([
+        buildEvaluator({
+          name: 'latency',
+          kind: 'code',
+          evaluate,
+        }),
+      ]),
+    });
+
+    const response = await handler(
+      buildContext(searchMock) as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }],
+            evidence_mapping: { profile: 'agent-builder-tool' },
+          },
+          evaluators: [{ name: 'latency' }],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(evaluate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        round,
+      })
+    );
+    expect(awaitTraceReadyMock).toHaveBeenCalledWith(
+      expect.objectContaining({ traceId: '0af7651916cd43dd8448eb211c80319c' }),
+      getEvidenceMapping('agent-builder-tool'),
+      'agent-builder-tool',
       logger
     );
   });

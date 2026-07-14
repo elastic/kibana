@@ -60,6 +60,7 @@ paths:
                             - otel-genai-events
                             - otel-genai-attributes
                             - claude-code
+                            - agent-builder-tool
                 evaluators:
                   type: array
                   minItems: 1

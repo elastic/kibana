@@ -41,11 +41,12 @@ const mockedUseLlmConnectors = jest.mocked(useLlmConnectors);
 
 const renderPage = () => {
   const history = createMemoryHistory({ initialEntries: ['/online'] });
-  return render(
+  const view = render(
     <Router history={history}>
       <OnlineEvalsListPage />
     </Router>
   );
+  return { ...view, history };
 };
 
 const buildWorkflow = (
@@ -205,6 +206,29 @@ describe('OnlineEvalsListPage', () => {
     expect(
       container.querySelector('[data-test-subj="createOnlineEvalEmptyStateButton"]')
     ).not.toBeInTheDocument();
+  });
+
+  it('links to tracing projects from empty-state actions', () => {
+    mockedUseOnlineEvalWorkflows.mockReturnValue({
+      data: {
+        page: 1,
+        size: 10,
+        total: 0,
+        workflows: [],
+      },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useOnlineEvalWorkflows>);
+
+    const { container, history } = renderPage();
+
+    fireEvent.click(
+      container.querySelector(
+        '[data-test-subj="onlineEvalsEmptyStateTracingButton"]'
+      ) as HTMLElement
+    );
+    expect(history.location.pathname).toBe('/tracing');
   });
 
   it('shows privilege warning callout when manage permission is missing', () => {

@@ -222,4 +222,33 @@ describe('awaitTraceReady', () => {
     expect(probeProfilesMock).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
   });
+
+  it('returns ready for agent-builder-tool profile when tool result maps to agent_response', async () => {
+    hasTraceDocumentsMock.mockResolvedValueOnce(true);
+    const readyRound: EvidenceRound = {
+      input: { message: '{"query":"status:failed"}' },
+      response: { message: 'Found 2 failed runs.' },
+      steps: [
+        {
+          tool_call_id: 'tool-call-1',
+          tool_id: 'search_runs',
+          arguments: { query: 'status:failed' },
+          result: { count: 2 },
+        },
+      ],
+    };
+    normalizeEvidenceMock.mockResolvedValueOnce(readyRound);
+
+    await expect(
+      awaitTraceReady(
+        traceAccessor,
+        getEvidenceMapping('agent-builder-tool'),
+        'agent-builder-tool',
+        logger
+      )
+    ).resolves.toEqual(readyRound);
+    expect(normalizeEvidenceMock).toHaveBeenCalledTimes(1);
+    expect(probeProfilesMock).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
 });

@@ -7,7 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  EuiBasicTable,
   EuiBottomBar,
   EuiButton,
   EuiButtonEmpty,
@@ -25,7 +24,6 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPageSection,
   EuiPanel,
   EuiSelect,
@@ -35,8 +33,6 @@ import {
   EuiTitle,
   EuiSwitch,
   useEuiTheme,
-  type CriteriaWithPagination,
-  type EuiBasicTableColumn,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -56,6 +52,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { useParams, useHistory } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
+import { OnlineEvalScoresTable } from '../../components/online_eval_scores_table';
 import {
   useDeleteOnlineEvalWorkflow,
   useOnlineEvalWorkflow,
@@ -74,7 +71,6 @@ const EMPTY_TIME_RANGE = {
   to: 'now',
 } as const;
 
-type OnlineScoreRow = ListOnlineScoresResponse['data'][number];
 interface EvaluatorOption extends EuiComboBoxOptionOption<string> {
   value: string;
   kind: 'llm' | 'code';
@@ -254,7 +250,6 @@ export const OnlineEvalDetailPage: React.FC = () => {
   const { canManage } = useEvalsPermissions();
   const [pageIndex, setPageIndex] = useState(0);
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
-  const [expandedRows, setExpandedRows] = useState<Record<string, JSX.Element>>({});
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDataViewLoading, setIsDataViewLoading] = useState(true);
   const [dataViewId, setDataViewId] = useState<string | null>(null);
@@ -490,117 +485,6 @@ export const OnlineEvalDetailPage: React.FC = () => {
     }
   }, [dataViewId, services.dataViews, workflowId]);
 
-  const onTableChange = ({ page }: CriteriaWithPagination<OnlineScoreRow>) => {
-    if (!page) {
-      return;
-    }
-    setPageIndex(page.index);
-  };
-
-  const pagination = {
-    pageIndex,
-    pageSize: SCORES_PER_PAGE,
-    totalItemCount: scoresTotal,
-    pageSizeOptions: [SCORES_PER_PAGE],
-    hidePerPageOptions: true,
-  };
-
-  const columns: Array<EuiBasicTableColumn<OnlineScoreRow>> = [
-    {
-      field: '@timestamp',
-      name: i18n.translate('xpack.evals.onlineEvaluations.detail.scoresTable.timeColumn', {
-        defaultMessage: 'Time',
-      }),
-      width: '190px',
-    },
-    {
-      field: 'trace_id',
-      name: i18n.translate('xpack.evals.onlineEvaluations.detail.scoresTable.traceIdColumn', {
-        defaultMessage: 'Trace ID',
-      }),
-      render: (traceId: string) => (
-        <EuiLink onClick={() => setSelectedTraceId(traceId)}>{traceId}</EuiLink>
-      ),
-    },
-    {
-      name: i18n.translate('xpack.evals.onlineEvaluations.detail.scoresTable.evaluatorColumn', {
-        defaultMessage: 'Evaluator',
-      }),
-      render: (item: OnlineScoreRow) => `${item.evaluator.name}@${item.evaluator.version}`,
-    },
-    {
-      field: 'score.name',
-      name: i18n.translate('xpack.evals.onlineEvaluations.detail.scoresTable.scoreNameColumn', {
-        defaultMessage: 'Score name',
-      }),
-    },
-    {
-      field: 'score.value',
-      name: i18n.translate('xpack.evals.onlineEvaluations.detail.scoresTable.valueColumn', {
-        defaultMessage: 'Value',
-      }),
-    },
-    {
-      field: 'score.label',
-      name: i18n.translate('xpack.evals.onlineEvaluations.detail.scoresTable.labelColumn', {
-        defaultMessage: 'Label',
-      }),
-      render: (label?: string) => label ?? '-',
-    },
-    {
-      name: i18n.translate('xpack.evals.onlineEvaluations.detail.scoresTable.explanationColumn', {
-        defaultMessage: 'Explanation',
-      }),
-      width: '130px',
-      align: 'right',
-      render: (item: OnlineScoreRow) => {
-        if (!item.score.explanation) {
-          return '-';
-        }
-
-        const rowId = `${item.trace_id}-${item.evaluator.name}-${item.score.name}`;
-        const isExpanded = rowId in expandedRows;
-        return (
-          <EuiButton
-            size="s"
-            iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
-            onClick={() => {
-              setExpandedRows((previous) => {
-                if (rowId in previous) {
-                  const { [rowId]: _removed, ...rest } = previous;
-                  return rest;
-                }
-
-                return {
-                  ...previous,
-                  [rowId]: (
-                    <EuiText size="s" data-test-subj={`onlineScoreExplanation-${rowId}`}>
-                      <p>{item.score.explanation}</p>
-                    </EuiText>
-                  ),
-                };
-              });
-            }}
-          >
-            {isExpanded
-              ? i18n.translate(
-                  'xpack.evals.onlineEvaluations.detail.scoresTable.hideExplanationButton',
-                  {
-                    defaultMessage: 'Hide',
-                  }
-                )
-              : i18n.translate(
-                  'xpack.evals.onlineEvaluations.detail.scoresTable.showExplanationButton',
-                  {
-                    defaultMessage: 'Show',
-                  }
-                )}
-          </EuiButton>
-        );
-      },
-    },
-  ];
-
   const updateErrorMessage = updateWorkflow.error
     ? i18n.translate('xpack.evals.onlineEvaluations.detail.updateWorkflowError', {
         defaultMessage: 'Failed to save online evaluation settings: {message}',
@@ -650,6 +534,13 @@ export const OnlineEvalDetailPage: React.FC = () => {
               })}
             </p>
           }
+          actions={[
+            <EuiButton onClick={() => history.push('/online')}>
+              {i18n.translate('xpack.evals.onlineEvaluations.detail.backToOnlineListButton', {
+                defaultMessage: 'Back to Online evaluations',
+              })}
+            </EuiButton>,
+          ]}
         />
       </EuiPageSection>
     );
@@ -1196,83 +1087,14 @@ export const OnlineEvalDetailPage: React.FC = () => {
             <EuiSpacer size="m" />
           </>
         ) : null}
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem>
-            <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-              {isDataViewLoading ? (
-                <EuiText size="s">
-                  <p>
-                    {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingPanelDataView', {
-                      defaultMessage: 'Preparing data view...',
-                    })}
-                  </p>
-                </EuiText>
-              ) : dataViewError || !averageScoreAttributes ? (
-                <EuiEmptyPrompt
-                  iconType="warning"
-                  titleSize="xs"
-                  title={
-                    <h3>
-                      {i18n.translate(
-                        'xpack.evals.onlineEvaluations.detail.avgScoresLoadErrorTitle',
-                        {
-                          defaultMessage: 'Unable to render score trends',
-                        }
-                      )}
-                    </h3>
-                  }
-                />
-              ) : (
-                <div data-test-subj="onlineEvalAverageScoreTrend">
-                  <services.lens.EmbeddableComponent
-                    id="online-evals-average-score-trend"
-                    attributes={averageScoreAttributes}
-                    timeRange={EMPTY_TIME_RANGE}
-                    style={{ height: 280 }}
-                  />
-                </div>
-              )}
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-              {isDataViewLoading ? (
-                <EuiText size="s">
-                  <p>
-                    {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingPanelLabels', {
-                      defaultMessage: 'Preparing score labels panel...',
-                    })}
-                  </p>
-                </EuiText>
-              ) : dataViewError || !scoreCountAttributes ? (
-                <EuiEmptyPrompt
-                  iconType="warning"
-                  titleSize="xs"
-                  title={
-                    <h3>
-                      {i18n.translate(
-                        'xpack.evals.onlineEvaluations.detail.scoreLabelsLoadErrorTitle',
-                        {
-                          defaultMessage: 'Unable to render score label counts',
-                        }
-                      )}
-                    </h3>
-                  }
-                />
-              ) : (
-                <div data-test-subj="onlineEvalScoreLabelCounts">
-                  <services.lens.EmbeddableComponent
-                    id="online-evals-score-label-counts"
-                    attributes={scoreCountAttributes}
-                    timeRange={EMPTY_TIME_RANGE}
-                    style={{ height: 280 }}
-                  />
-                </div>
-              )}
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
+        <EuiText size="s">
+          <h3>
+            {i18n.translate('xpack.evals.onlineEvaluations.detail.scoresSectionTitle', {
+              defaultMessage: 'Scores and traces',
+            })}
+          </h3>
+        </EuiText>
+        <EuiSpacer size="m" />
         {scoresError ? (
           <EuiEmptyPrompt
             color="danger"
@@ -1294,23 +1116,110 @@ export const OnlineEvalDetailPage: React.FC = () => {
             }
           />
         ) : (
-          <EuiBasicTable<OnlineScoreRow>
+          <OnlineEvalScoresTable
             items={scoresData}
-            columns={columns}
+            totalItemCount={scoresTotal}
+            pageIndex={pageIndex}
+            pageSize={SCORES_PER_PAGE}
             loading={scoresLoading}
-            pagination={pagination}
-            onChange={onTableChange}
-            tableCaption={i18n.translate(
-              'xpack.evals.onlineEvaluations.detail.scoresTableCaption',
-              {
-                defaultMessage: 'Recent online evaluation scores',
-              }
-            )}
-            itemId={(item) => `${item.trace_id}-${item.evaluator.name}-${item.score.name}`}
-            itemIdToExpandedRowMap={expandedRows}
-            data-test-subj="onlineEvalRecentScoresTable"
+            onPageChange={setPageIndex}
+            onTraceClick={setSelectedTraceId}
           />
         )}
+        <EuiSpacer size="l" />
+        <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+          <EuiText size="s">
+            <h3>
+              {i18n.translate('xpack.evals.onlineEvaluations.detail.trendsSectionTitle', {
+                defaultMessage: 'Score trends',
+              })}
+            </h3>
+          </EuiText>
+          <EuiText size="xs" color="subdued">
+            <p>
+              {i18n.translate('xpack.evals.onlineEvaluations.detail.trendsSectionDescription', {
+                defaultMessage: 'Secondary view of score distribution over time.',
+              })}
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem>
+              <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+                {isDataViewLoading ? (
+                  <EuiText size="s">
+                    <p>
+                      {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingPanelDataView', {
+                        defaultMessage: 'Preparing data view...',
+                      })}
+                    </p>
+                  </EuiText>
+                ) : dataViewError || !averageScoreAttributes ? (
+                  <EuiEmptyPrompt
+                    iconType="warning"
+                    titleSize="xs"
+                    title={
+                      <h3>
+                        {i18n.translate(
+                          'xpack.evals.onlineEvaluations.detail.avgScoresLoadErrorTitle',
+                          {
+                            defaultMessage: 'Unable to render score trends',
+                          }
+                        )}
+                      </h3>
+                    }
+                  />
+                ) : (
+                  <div data-test-subj="onlineEvalAverageScoreTrend">
+                    <services.lens.EmbeddableComponent
+                      id="online-evals-average-score-trend"
+                      attributes={averageScoreAttributes}
+                      timeRange={EMPTY_TIME_RANGE}
+                      style={{ height: 280 }}
+                    />
+                  </div>
+                )}
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+                {isDataViewLoading ? (
+                  <EuiText size="s">
+                    <p>
+                      {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingPanelLabels', {
+                        defaultMessage: 'Preparing score labels panel...',
+                      })}
+                    </p>
+                  </EuiText>
+                ) : dataViewError || !scoreCountAttributes ? (
+                  <EuiEmptyPrompt
+                    iconType="warning"
+                    titleSize="xs"
+                    title={
+                      <h3>
+                        {i18n.translate(
+                          'xpack.evals.onlineEvaluations.detail.scoreLabelsLoadErrorTitle',
+                          {
+                            defaultMessage: 'Unable to render score label counts',
+                          }
+                        )}
+                      </h3>
+                    }
+                  />
+                ) : (
+                  <div data-test-subj="onlineEvalScoreLabelCounts">
+                    <services.lens.EmbeddableComponent
+                      id="online-evals-score-label-counts"
+                      attributes={scoreCountAttributes}
+                      timeRange={EMPTY_TIME_RANGE}
+                      style={{ height: 280 }}
+                    />
+                  </div>
+                )}
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       </EuiPageSection>
       {draftState.hasChanged ? (
         <EuiBottomBar data-test-subj="onlineEvalDetailBottomBar">

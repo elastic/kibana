@@ -119,11 +119,12 @@ describe('GET /internal/evals/evaluators', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload.evaluators).toHaveLength(6);
-    expect(response.payload.evaluators[0]).toEqual({
+    expect(response.payload.evaluators[0]).toMatchObject({
       name: 'groundedness',
       version: '1.0.0',
       kind: 'llm',
       description: 'Groundedness evaluator',
+      supports_bare_tool_trace: true,
       evidence_schema: expect.objectContaining({
         properties: expect.objectContaining({
           input: expect.objectContaining({ type: 'object' }),
@@ -136,7 +137,7 @@ describe('GET /internal/evals/evaluators', () => {
     const correctnessEval = response.payload.evaluators.find(
       (e: { name: string }) => e.name === 'correctness'
     );
-    expect(correctnessEval).toEqual({
+    expect(correctnessEval).toMatchObject({
       name: 'correctness',
       version: '1.0.0',
       kind: 'llm',

@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`online eval workflow yaml builds a workflow yaml snapshot and validates against WorkflowSchema 1`] = `
+exports[
+  `online eval workflow yaml builds a workflow yaml snapshot and validates against WorkflowSchema 1`
+] = `
 "version: \\"1\\"
 name: \\"[online-eval] My online monitor\\"
 description: Online evaluation created by the Evals UI

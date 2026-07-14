@@ -96,7 +96,10 @@ export const EvaluationScoreDocument = lazySchema(() =>
     '@timestamp': z.string().max(64),
     experiment_id: z.string().max(1024),
     experiment_name: z.string().max(256).optional(),
-    space_ids: z.array(z.string().max(256)).nullable().optional(),
+    /**
+     * Spaces this score belongs to. Absent on documents created before space-awareness was introduced (those are treated as the default space).
+     */
+    space_ids: z.array(z.string().max(256)).max(100).nullable().optional(),
     example: ExampleInfo,
     task: TaskInfo,
     evaluator: EvaluatorInfo,

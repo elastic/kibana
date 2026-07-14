@@ -18,6 +18,7 @@ import { z } from '@kbn/zod/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import { getEvidenceMapping } from '../../evaluators/evidence/resolve_mapping';
+import { withEvaluatorNameBaggage } from '../../evaluators/evaluator_tracing_context';
 import { formatEvidenceSchemaIssues } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_readiness';
@@ -189,13 +190,15 @@ export const registerEvaluateRoute = ({
                 ? await getInferenceClient(config.connector_id)
                 : undefined;
 
-            const result = await definition.evaluate({
-              trace: traceAccessor,
-              round,
-              referenceData: parsedReferenceData,
-              inferenceClient,
-              log: logger,
-            });
+            const result = await withEvaluatorNameBaggage(definition.name, () =>
+              definition.evaluate({
+                trace: traceAccessor,
+                round,
+                referenceData: parsedReferenceData,
+                inferenceClient,
+                log: logger,
+              })
+            );
 
             results.push({
               status: 'ok',

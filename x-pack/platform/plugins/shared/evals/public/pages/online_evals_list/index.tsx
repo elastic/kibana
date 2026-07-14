@@ -9,6 +9,7 @@ import React from 'react';
 import {
   EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiConfirmModal,
@@ -40,6 +41,7 @@ import { useLlmConnectors } from '../../hooks/use_llm_connectors';
 const WORKFLOWS_DOCS_URL = 'https://www.elastic.co/docs/explore-analyze/workflows';
 const CONNECTORS_MANAGEMENT_URL =
   '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors';
+const TRACING_PAGE_PATH = '/tracing';
 
 const tableCaption = i18n.translate('xpack.evals.onlineEvaluations.list.tableCaption', {
   defaultMessage: 'Online evaluations workflows',
@@ -215,6 +217,18 @@ export const OnlineEvalsListPage: React.FC = () => {
               </p>
             }
             actions={[
+              <EuiButtonEmpty
+                iconType="visLine"
+                onClick={() => history.push(TRACING_PAGE_PATH)}
+                data-test-subj="onlineEvalsUnavailableTracingButton"
+              >
+                {i18n.translate(
+                  'xpack.evals.onlineEvaluations.list.unavailable.openTracingButton',
+                  {
+                    defaultMessage: 'Open tracing projects',
+                  }
+                )}
+              </EuiButtonEmpty>,
               <EuiLink href={WORKFLOWS_DOCS_URL} target="_blank" external>
                 {i18n.translate('xpack.evals.onlineEvaluations.list.unavailable.docsLink', {
                   defaultMessage: 'Read workflows documentation',
@@ -306,9 +320,18 @@ export const OnlineEvalsListPage: React.FC = () => {
                 ) : null}
               </>
             }
-            actions={
-              hasNoLlmConnectors
-                ? undefined
+            actions={[
+              <EuiButtonEmpty
+                iconType="visLine"
+                onClick={() => history.push(TRACING_PAGE_PATH)}
+                data-test-subj="onlineEvalsEmptyStateTracingButton"
+              >
+                {i18n.translate('xpack.evals.onlineEvaluations.list.empty.openTracingButton', {
+                  defaultMessage: 'Open tracing projects',
+                })}
+              </EuiButtonEmpty>,
+              ...(hasNoLlmConnectors
+                ? []
                 : [
                     <EuiButton
                       fill
@@ -324,8 +347,8 @@ export const OnlineEvalsListPage: React.FC = () => {
                         }
                       )}
                     </EuiButton>,
-                  ]
-            }
+                  ]),
+            ]}
           />
         ) : (
           <EuiBasicTable<OnlineEvalWorkflowListItem>

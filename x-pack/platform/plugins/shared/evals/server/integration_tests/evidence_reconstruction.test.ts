@@ -45,6 +45,7 @@ const ELASTIC_CONVENTION_TRACE_ID = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const OTEL_EVENTS_TRACE_ID = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
 const OTEL_ATTRIBUTES_TRACE_ID = 'cccccccccccccccccccccccccccccccc';
 const CLAUDE_CODE_TRACE_ID = 'dddddddddddddddddddddddddddddddd';
+const AGENT_BUILDER_TOOL_TRACE_ID = 'eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 const groundednessJudgeResponse: GroundednessAnalysis = {
   summary_verdict: 'GROUNDED',
@@ -318,6 +319,17 @@ const indexFixtures = async (esClient: ElasticsearchClient) => {
         tool_name: 'SummarizeRuns',
       },
     },
+    {
+      'trace.id': AGENT_BUILDER_TOOL_TRACE_ID,
+      '@timestamp': '2026-07-10T09:04:00.500Z',
+      attributes: {
+        'elastic.inference.span.kind': 'TOOL',
+        'gen_ai.tool.call.id': 'tool-call-1',
+        'gen_ai.tool.name': 'search_runs',
+        'gen_ai.tool.call.arguments': '{"query":"status:failed"}',
+        'gen_ai.tool.call.result': 'Found 2 failed workflow runs.',
+      },
+    },
   ];
 
   await Promise.all(
@@ -454,11 +466,19 @@ describe('trace evidence reconstruction integration', () => {
       >[1],
       kibanaResponseFactory
     );
+    const agentBuilderToolResponse = await resolveMappingsHandler(
+      context,
+      { body: { trace_id: AGENT_BUILDER_TOOL_TRACE_ID } } as unknown as Parameters<
+        typeof resolveMappingsHandler
+      >[1],
+      kibanaResponseFactory
+    );
 
     expect(elasticResponse.status).toBe(200);
     expect(eventsResponse.status).toBe(200);
     expect(attributesResponse.status).toBe(200);
     expect(claudeResponse.status).toBe(200);
+    expect(agentBuilderToolResponse.status).toBe(200);
     expect((elasticResponse.payload as ResolveMappingsResponse).recommended_mapping).toEqual({
       profile: 'elastic-inference',
     });
@@ -478,6 +498,11 @@ describe('trace evidence reconstruction integration', () => {
     });
     expect((claudeResponse.payload as ResolveMappingsResponse).recommended_mapping).toEqual({
       profile: 'claude-code',
+    });
+    expect(
+      (agentBuilderToolResponse.payload as ResolveMappingsResponse).recommended_mapping
+    ).toEqual({
+      profile: 'agent-builder-tool',
     });
     expect((attributesResponse.payload as ResolveMappingsResponse).profiles).toContainEqual(
       expect.objectContaining({
@@ -543,11 +568,25 @@ describe('trace evidence reconstruction integration', () => {
       } as unknown as Parameters<typeof validateHandler>[1],
       kibanaResponseFactory
     );
+    const agentBuilderToolResponse = await validateHandler(
+      context,
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: AGENT_BUILDER_TOOL_TRACE_ID }],
+            evidence_mapping: { profile: 'agent-builder-tool' },
+          },
+          evaluators: [{ name: 'groundedness' }],
+        },
+      } as unknown as Parameters<typeof validateHandler>[1],
+      kibanaResponseFactory
+    );
 
     expect(elasticResponse.status).toBe(200);
     expect(eventsResponse.status).toBe(200);
     expect(attributesResponse.status).toBe(200);
     expect(claudeResponse.status).toBe(200);
+    expect(agentBuilderToolResponse.status).toBe(200);
     expect((elasticResponse.payload as ValidateResponse).evaluators).toEqual([
       { name: 'groundedness', version: '1.0.0', ready: true, unmet: [] },
       { name: 'latency', version: '1.0.0', ready: true, unmet: [] },
@@ -559,6 +598,9 @@ describe('trace evidence reconstruction integration', () => {
       { name: 'groundedness', version: '1.0.0', ready: true, unmet: [] },
     ]);
     expect((claudeResponse.payload as ValidateResponse).evaluators).toEqual([
+      { name: 'groundedness', version: '1.0.0', ready: true, unmet: [] },
+    ]);
+    expect((agentBuilderToolResponse.payload as ValidateResponse).evaluators).toEqual([
       { name: 'groundedness', version: '1.0.0', ready: true, unmet: [] },
     ]);
   });
@@ -643,25 +685,45 @@ describe('trace evidence reconstruction integration', () => {
       } as unknown as Parameters<typeof evaluateHandler>[1],
       kibanaResponseFactory
     );
+    const agentBuilderToolResponse = await evaluateHandler(
+      context,
+      {
+        body: {
+          subject: {
+            traces: [{ trace_id: AGENT_BUILDER_TOOL_TRACE_ID }],
+            evidence_mapping: { profile: 'agent-builder-tool' },
+          },
+          evaluators: [{ name: 'groundedness', connector_id: 'connector-1' }, { name: 'latency' }],
+        },
+      } as unknown as Parameters<typeof evaluateHandler>[1],
+      kibanaResponseFactory
+    );
 
     expect(elasticResponse.status).toBe(200);
     expect(eventsResponse.status).toBe(200);
     expect(attributesResponse.status).toBe(200);
     expect(claudeResponse.status).toBe(200);
+    expect(agentBuilderToolResponse.status).toBe(200);
 
     const elasticResults = (elasticResponse.payload as EvaluateResponse).results;
     const eventsResults = (eventsResponse.payload as EvaluateResponse).results;
     const attributesResults = (attributesResponse.payload as EvaluateResponse).results;
     const claudeResults = (claudeResponse.payload as EvaluateResponse).results;
+    const agentBuilderToolResults = (agentBuilderToolResponse.payload as EvaluateResponse).results;
 
     expect(elasticResults.map((result) => result.status)).toEqual(['ok', 'ok']);
     expect(eventsResults.map((result) => result.status)).toEqual(['ok', 'ok']);
     expect(attributesResults.map((result) => result.status)).toEqual(['ok', 'ok']);
     expect(claudeResults.map((result) => result.status)).toEqual(['ok', 'ok']);
+    expect(agentBuilderToolResults.map((result) => result.status)).toEqual(['ok', 'ok']);
     expect(
-      [elasticResults, eventsResults, attributesResults, claudeResults].every(
-        (results) => results[0]?.scores?.[0]?.label === 'GROUNDED'
-      )
+      [
+        elasticResults,
+        eventsResults,
+        attributesResults,
+        claudeResults,
+        agentBuilderToolResults,
+      ].every((results) => results[0]?.scores?.[0]?.label === 'GROUNDED')
     ).toBe(true);
   });
 });

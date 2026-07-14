@@ -78,8 +78,39 @@ describe('getEvidenceMapping', () => {
     });
   });
 
-  it('keeps claude-code as the last profile key', () => {
+  it('resolves agent-builder-tool to tool-only traces mapping', () => {
+    const mapping = getEvidenceMapping('agent-builder-tool');
+
+    expect(mapping.user_query).toEqual({
+      source: 'traces',
+      filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
+      contentField: 'attributes.gen_ai.tool.call.arguments',
+      select: 'first',
+      parse: 'string',
+    });
+
+    expect(mapping.agent_response).toEqual({
+      source: 'traces',
+      filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
+      contentField: 'attributes.gen_ai.tool.call.result',
+      select: 'last',
+      parse: 'string',
+    });
+
+    expect(mapping.tool_calls).toEqual({
+      source: 'traces',
+      filter: [{ field: 'attributes.elastic.inference.span.kind', value: 'TOOL' }],
+      fields: {
+        tool_call_id: 'attributes.gen_ai.tool.call.id',
+        tool_id: 'attributes.gen_ai.tool.name',
+        arguments: 'attributes.gen_ai.tool.call.arguments',
+        result: 'attributes.gen_ai.tool.call.result',
+      },
+    });
+  });
+
+  it('keeps agent-builder-tool as the last profile key', () => {
     const profileKeys = Object.keys(EVIDENCE_MAPPING_PROFILES);
-    expect(profileKeys.at(-1)).toBe('claude-code');
+    expect(profileKeys.at(-1)).toBe('agent-builder-tool');
   });
 });

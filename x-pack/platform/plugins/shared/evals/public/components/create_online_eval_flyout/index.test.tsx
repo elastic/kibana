@@ -8,14 +8,12 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { CreateOnlineEvalFlyout } from '.';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCreateOnlineEvalWorkflow } from '../../hooks/use_online_eval_workflows';
-import { useLlmConnectors } from '../../hooks/use_llm_connectors';
+import { useEvaluators, useModelConnectors } from '../../hooks/use_experiments_api';
 import { parseOnlineEvalWorkflowYaml } from '../../../common/online_evals/workflow_yaml';
 
 jest.mock('../../hooks/use_online_eval_workflows');
-jest.mock('../../hooks/use_llm_connectors');
-jest.mock('@kbn/kibana-react-plugin/public');
+jest.mock('../../hooks/use_experiments_api');
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
 
@@ -81,62 +79,49 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-const mockedUseKibana = jest.mocked(useKibana);
 const mockedUseCreateOnlineEvalWorkflow = jest.mocked(useCreateOnlineEvalWorkflow);
-const mockedUseLlmConnectors = jest.mocked(useLlmConnectors);
+const mockedUseEvaluators = jest.mocked(useEvaluators);
+const mockedUseModelConnectors = jest.mocked(useModelConnectors);
 
 describe('CreateOnlineEvalFlyout', () => {
   const mutateAsync = jest.fn();
   const onClose = jest.fn();
-  const httpGet = jest.fn();
   let container: HTMLElement;
 
   beforeEach(() => {
     mutateAsync.mockReset();
-    mutateAsync.mockResolvedValue({});
+    mutateAsync.mockResolvedValue({ id: 'workflow-1', name: 'nightly monitor' });
     onClose.mockReset();
-    httpGet.mockReset();
-
-    httpGet.mockImplementation(async (path: string) => {
-      if (path === '/internal/evals/evaluators') {
-        return {
-          evaluators: [
-            {
-              name: 'correctness',
-              version: '1.2.3',
-              kind: 'llm',
-              description: 'Checks correctness',
-            },
-            {
-              name: 'cost',
-              version: '0.1.0',
-              kind: 'code',
-              description: 'Estimates costs',
-            },
-          ],
-        };
-      }
-
-      throw new Error(`Unexpected GET ${path}`);
-    });
-
-    mockedUseKibana.mockReturnValue({
-      services: {
-        http: {
-          get: httpGet,
-        },
-      },
-    } as unknown as ReturnType<typeof useKibana>);
 
     mockedUseCreateOnlineEvalWorkflow.mockReturnValue({
       mutateAsync,
       isLoading: false,
     } as unknown as ReturnType<typeof useCreateOnlineEvalWorkflow>);
-    mockedUseLlmConnectors.mockReturnValue({
-      connectors: [{ id: 'connector-allowed', name: 'Judge Connector' }],
+    mockedUseEvaluators.mockReturnValue({
+      data: {
+        evaluators: [
+          {
+            name: 'correctness',
+            version: '1.2.3',
+            kind: 'llm',
+            description: 'Checks correctness',
+          },
+          {
+            name: 'cost',
+            version: '0.1.0',
+            kind: 'code',
+            description: 'Estimates costs',
+          },
+        ],
+      },
       isLoading: false,
       error: null,
-    });
+    } as unknown as ReturnType<typeof useEvaluators>);
+    mockedUseModelConnectors.mockReturnValue({
+      data: [{ id: 'connector-allowed', name: 'Judge Connector' }],
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useModelConnectors>);
   });
 
   const getByTestSubj = (testSubj: string) =>
@@ -145,22 +130,33 @@ describe('CreateOnlineEvalFlyout', () => {
   it('offers 5m as a schedule option', async () => {
     ({ container } = render(<CreateOnlineEvalFlyout onClose={onClose} />));
 
-    await waitFor(() =>
-      expect(httpGet).toHaveBeenCalledWith('/internal/evals/evaluators', { version: '1' })
-    );
-
     const scheduleSelect = getByTestSubj('onlineEvalCreateEverySelect') as HTMLSelectElement;
     const optionValues = Array.from(scheduleSelect.options).map((option) => option.value);
 
     expect(optionValues).toEqual(['5m', '15m', '1h', '6h', '1d']);
   });
 
-  it('renders advanced fields only after expanding the accordion', async () => {
+  it('renders sections in the expected parity order', async () => {
     ({ container } = render(<CreateOnlineEvalFlyout onClose={onClose} />));
 
-    await waitFor(() =>
-      expect(httpGet).toHaveBeenCalledWith('/internal/evals/evaluators', { version: '1' })
+    const nameLabel = screen.getByText('Name');
+    const targetAndFilterLabel = screen.getByText('Target and filter');
+    const evaluatorsAndJudgeLabel = screen.getByText('Evaluators and judge');
+    const scheduleAndAdvancedLabel = screen.getByText('Schedule and advanced');
+
+    expect(nameLabel.compareDocumentPosition(targetAndFilterLabel)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
     );
+    expect(targetAndFilterLabel.compareDocumentPosition(evaluatorsAndJudgeLabel)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(evaluatorsAndJudgeLabel.compareDocumentPosition(scheduleAndAdvancedLabel)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
+  it('renders advanced fields only after expanding the accordion', async () => {
+    ({ container } = render(<CreateOnlineEvalFlyout onClose={onClose} />));
 
     const advancedAccordionButton = screen.getByRole('button', { name: 'Advanced' });
     expect(advancedAccordionButton).toHaveAttribute('aria-expanded', 'false');
@@ -176,10 +172,6 @@ describe('CreateOnlineEvalFlyout', () => {
 
   it('submits workflow yaml that round-trips to the default config', async () => {
     ({ container } = render(<CreateOnlineEvalFlyout onClose={onClose} />));
-
-    await waitFor(() =>
-      expect(httpGet).toHaveBeenCalledWith('/internal/evals/evaluators', { version: '1' })
-    );
     fireEvent.change(getByTestSubj('onlineEvalCreateNameInput'), {
       target: { value: 'nightly monitor' },
     });
@@ -213,15 +205,39 @@ describe('CreateOnlineEvalFlyout', () => {
       evaluators: [{ name: 'correctness', version: '1.2.3' }],
       connectorId: 'connector-allowed',
     });
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Saved workflow "nightly monitor"')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('requires connector when selecting an llm evaluator', async () => {
+  it('renders workflow yaml preview when the toggle is enabled', async () => {
     ({ container } = render(<CreateOnlineEvalFlyout onClose={onClose} />));
+    fireEvent.change(getByTestSubj('onlineEvalCreateNameInput'), {
+      target: { value: 'yaml preview monitor' },
+    });
 
-    await waitFor(() =>
-      expect(httpGet).toHaveBeenCalledWith('/internal/evals/evaluators', { version: '1' })
+    fireEvent.change(getByTestSubj('onlineEvalCreateEvaluatorsCombo'), {
+      target: { value: 'correctness' },
+    });
+    fireEvent.blur(getByTestSubj('onlineEvalCreateEvaluatorsCombo'), {
+      target: { value: 'correctness' },
+    });
+    fireEvent.change(getByTestSubj('onlineEvalCreateConnectorCombo'), {
+      target: { value: 'connector-allowed' },
+    });
+    fireEvent.blur(getByTestSubj('onlineEvalCreateConnectorCombo'), {
+      target: { value: 'connector-allowed' },
+    });
+
+    fireEvent.click(getByTestSubj('onlineEvalCreateShowYamlToggle'));
+
+    expect(screen.getByTestId('evalsWorkflowYamlPreview')).toBeInTheDocument();
+    expect(screen.getByTestId('evalsWorkflowYamlPreview')).toHaveTextContent(
+      'name: "[online-eval] yaml preview monitor"'
     );
+  });
+
+  it('disables submit when selecting an llm evaluator without connector', async () => {
+    ({ container } = render(<CreateOnlineEvalFlyout onClose={onClose} />));
 
     fireEvent.change(getByTestSubj('onlineEvalCreateNameInput'), {
       target: { value: 'monitor no connector' },
@@ -233,10 +249,11 @@ describe('CreateOnlineEvalFlyout', () => {
       target: { value: 'correctness' },
     });
 
-    fireEvent.click(getByTestSubj('onlineEvalCreateSubmitButton'));
-
+    expect(getByTestSubj('onlineEvalCreateSubmitButton')).toBeDisabled();
     expect(
-      await screen.findByText('Select a connector when any selected evaluator is of kind "llm".')
+      screen.getByText(
+        'Requires a name and at least one evaluator (with a connector for LLM evaluators).'
+      )
     ).toBeInTheDocument();
     expect(mutateAsync).not.toHaveBeenCalled();
   });
