@@ -8,7 +8,6 @@
 import type { UseQueryOptions } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
-import { validate as isValidUuid } from 'uuid';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { transformInput } from '../../../common/transforms';
@@ -42,9 +41,7 @@ export const useFetchRuleByIdQuery = (id: string, options?: UseQueryOptions<Rule
       // Mark this query as immediately stale helps to avoid problems related to filtering.
       // e.g. enabled and disabled state filter require data update which happens at the backend side
       staleTime: 0,
-      // The route validates `id` as a UUID; skip the fetch for non-UUID values (e.g. legacy
-      // pre-8.x alerts where `signal.rule.id` may be an arbitrary string) to avoid a 400.
-      enabled: !!id && isValidUuid(id) && canReadRules,
+      enabled: !!id && canReadRules,
     }
   );
 };
