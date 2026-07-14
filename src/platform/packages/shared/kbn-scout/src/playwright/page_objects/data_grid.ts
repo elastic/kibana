@@ -22,20 +22,6 @@ export type DataGridRowHeight = 'Auto' | 'Custom';
 export type DataGridComparisonDiffMode = 'Full value' | 'By character' | 'By word' | 'By line';
 export type DataGridPaginationScope = 'discover' | 'docViewer';
 
-interface MonacoJsonModel {
-  getValue(): string;
-}
-
-interface MonacoJsonEnvironment {
-  MonacoEnvironment?: {
-    monaco?: {
-      editor?: {
-        getModels: () => MonacoJsonModel[];
-      };
-    };
-  };
-}
-
 export class DataGrid {
   constructor(private readonly page: ScoutPage) {}
 
@@ -409,30 +395,6 @@ export class DataGrid {
   async openSelectedRowsMenu() {
     await this.page.testSubj.click('unifiedDataTableSelectionBtn');
     await this.page.testSubj.waitForSelector('unifiedDataTableSelectionMenu', { state: 'visible' });
-  }
-
-  async getJsonCodeEditorValue(): Promise<string> {
-    await this.page
-      .getByLabel('Read only JSON view of an elasticsearch document')
-      .waitFor({ state: 'visible' });
-
-    const raw = await this.page.evaluate(() => {
-      const monacoEnv = (window as unknown as MonacoJsonEnvironment).MonacoEnvironment;
-
-      const models = monacoEnv?.monaco?.editor?.getModels() ?? [];
-      return models.find((model) => model.getValue().trim().startsWith('{'))?.getValue();
-    });
-
-    if (!raw) {
-      throw new Error('DocViewer JSON editor model was not found');
-    }
-
-    return raw;
-  }
-
-  async readJsonFromCodeEditor<T extends Record<string, unknown>>(): Promise<T> {
-    const raw = await this.getJsonCodeEditorValue();
-    return JSON.parse(raw) as T;
   }
 
   async resetColumnWidth(field: string) {
