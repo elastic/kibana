@@ -72,6 +72,20 @@ export const SlackFilled: Story = {
   },
 };
 
+export const Slack2Filled: Story = {
+  args: {
+    initialValue: [
+      {
+        id: 's2',
+        source: 'inline',
+        stepType: 'slack2.sendMessage',
+        connectorId: 'slack2-ops',
+        params: 'channel: "myChannel"\ntext: "Alert for {{ inputs.policyId }}"\n',
+      },
+    ],
+  },
+};
+
 export const MultipleActions: Story = {
   args: {
     initialValue: [

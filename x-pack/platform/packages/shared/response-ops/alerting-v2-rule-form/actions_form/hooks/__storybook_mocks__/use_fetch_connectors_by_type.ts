@@ -28,7 +28,7 @@ const MOCK_CONNECTORS_BY_TYPE: Record<string, SingleStepConnector[]> = {
   '.slack': [
     {
       id: 'slack-alerts',
-      name: '#alerts channel',
+      name: 'slack Connector',
       connectorTypeId: '.slack',
       isMissingSecrets: false,
       isDeprecated: false,
@@ -36,8 +36,8 @@ const MOCK_CONNECTORS_BY_TYPE: Record<string, SingleStepConnector[]> = {
   ],
   '.slack2': [
     {
-      id: 'slack-alerts',
-      name: '#alerts channel',
+      id: 'slack2-alerts',
+      name: 'slack2 Connector',
       connectorTypeId: '.slack2',
       isMissingSecrets: false,
       isDeprecated: false,
