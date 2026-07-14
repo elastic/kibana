@@ -47,28 +47,11 @@ export interface SequentialSynthtraceWorkerDeps {
   config: ScoutTestConfig;
 }
 
-type SynthtraceClientName = 'infraEsClient' | 'logsEsClient' | 'apmEsClient';
-
-const unwrapSynthtraceClient = <TClientName extends SynthtraceClientName, TClient>(
-  clientName: TClientName,
-  value: unknown
-): TClient => {
-  // `getSynthtraceClient` caches instances and returns inconsistent shapes:
-  // - first call: { [clientName]: client }
-  // - subsequent calls: client
-  // Normalize so sequential suites can safely call index + clean.
-  if (value && typeof value === 'object' && clientName in (value as Record<string, unknown>)) {
-    return (value as Record<TClientName, TClient>)[clientName];
-  }
-
-  return value as TClient;
-};
-
 const indexInfra = async (
   deps: SequentialSynthtraceWorkerDeps,
   events: SynthtraceGenerator<InfraDocument>
 ) => {
-  const result = await getSynthtraceClient(
+  const { infraEsClient } = await getSynthtraceClient(
     'infraEsClient',
     {
       esClient: deps.esClient,
@@ -78,10 +61,6 @@ const indexInfra = async (
     },
     skipFleetForFixedDates
   );
-  const infraEsClient = unwrapSynthtraceClient<
-    'infraEsClient',
-    { index: (s: Readable) => Promise<void> }
-  >('infraEsClient', result);
   await infraEsClient.index(Readable.from(Array.from(events)));
 };
 
@@ -89,7 +68,7 @@ const indexLogs = async (
   deps: SequentialSynthtraceWorkerDeps,
   events: SynthtraceGenerator<LogDocument>
 ) => {
-  const result = await getSynthtraceClient(
+  const { logsEsClient } = await getSynthtraceClient(
     'logsEsClient',
     {
       esClient: deps.esClient,
@@ -98,10 +77,6 @@ const indexLogs = async (
     },
     skipFleetForFixedDates
   );
-  const logsEsClient = unwrapSynthtraceClient<
-    'logsEsClient',
-    { index: (s: Readable) => Promise<void> }
-  >('logsEsClient', result);
   await logsEsClient.index(Readable.from(Array.from(events)));
 };
 
@@ -109,7 +84,7 @@ const indexApm = async (
   deps: SequentialSynthtraceWorkerDeps,
   events: SynthtraceGenerator<ApmFields>
 ) => {
-  const result = await getSynthtraceClient(
+  const { apmEsClient } = await getSynthtraceClient(
     'apmEsClient',
     {
       esClient: deps.esClient,
@@ -119,10 +94,6 @@ const indexApm = async (
     },
     skipFleetForFixedDates
   );
-  const apmEsClient = unwrapSynthtraceClient<
-    'apmEsClient',
-    { index: (s: Readable) => Promise<void> }
-  >('apmEsClient', result);
   await apmEsClient.index(Readable.from(Array.from(events)));
 };
 
@@ -161,7 +132,7 @@ export const ingestHostsFlyoutSynthtraceData = async (
 export const cleanHostsFlyoutSynthtraceData = async (
   deps: SequentialSynthtraceWorkerDeps
 ): Promise<void> => {
-  const infraResult = await getSynthtraceClient(
+  const { infraEsClient } = await getSynthtraceClient(
     'infraEsClient',
     {
       esClient: deps.esClient,
@@ -170,14 +141,10 @@ export const cleanHostsFlyoutSynthtraceData = async (
       config: deps.config,
     },
     skipFleetForFixedDates
-  );
-  const infraEsClient = unwrapSynthtraceClient<'infraEsClient', { clean: () => Promise<void> }>(
-    'infraEsClient',
-    infraResult
   );
   await infraEsClient.clean();
 
-  const logsResult = await getSynthtraceClient(
+  const { logsEsClient } = await getSynthtraceClient(
     'logsEsClient',
     {
       esClient: deps.esClient,
@@ -186,13 +153,9 @@ export const cleanHostsFlyoutSynthtraceData = async (
     },
     skipFleetForFixedDates
   );
-  const logsEsClient = unwrapSynthtraceClient<'logsEsClient', { clean: () => Promise<void> }>(
-    'logsEsClient',
-    logsResult
-  );
   await logsEsClient.clean();
 
-  const apmResult = await getSynthtraceClient(
+  const { apmEsClient } = await getSynthtraceClient(
     'apmEsClient',
     {
       esClient: deps.esClient,
@@ -201,10 +164,6 @@ export const cleanHostsFlyoutSynthtraceData = async (
       config: deps.config,
     },
     skipFleetForFixedDates
-  );
-  const apmEsClient = unwrapSynthtraceClient<'apmEsClient', { clean: () => Promise<void> }>(
-    'apmEsClient',
-    apmResult
   );
   await apmEsClient.clean();
 };
@@ -225,7 +184,7 @@ export const ingestSemconvHostsSynthtraceData = async (
 export const cleanSemconvHostsSynthtraceData = async (
   deps: SequentialSynthtraceWorkerDeps
 ): Promise<void> => {
-  const result = await getSynthtraceClient(
+  const { infraEsClient } = await getSynthtraceClient(
     'infraEsClient',
     {
       esClient: deps.esClient,
@@ -234,10 +193,6 @@ export const cleanSemconvHostsSynthtraceData = async (
       config: deps.config,
     },
     skipFleetForFixedDates
-  );
-  const infraEsClient = unwrapSynthtraceClient<'infraEsClient', { clean: () => Promise<void> }>(
-    'infraEsClient',
-    result
   );
   await infraEsClient.clean();
 };

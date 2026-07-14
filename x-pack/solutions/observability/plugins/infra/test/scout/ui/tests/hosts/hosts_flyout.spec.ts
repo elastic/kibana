@@ -23,8 +23,7 @@ import {
 
 const CUSTOM_DASHBOARDS_SETTING = 'observability:enableInfrastructureAssetCustomDashboards';
 
-// Failing: See https://github.com/elastic/kibana/issues/267130
-test.describe.skip(
+test.describe(
   'Hosts Page - Flyout',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

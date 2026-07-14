@@ -43,8 +43,17 @@ export async function getSynthtraceClient<
   { esClient, kbnUrl, log, config }: SynthtraceClientOptions,
   overrides: { skipInstallation?: boolean } = {}
 ): Promise<GetClientsReturn<TClient>> {
-  if (instantiatedClients[synthClient]) {
-    return instantiatedClients[synthClient] as unknown as GetClientsReturn<TClient>;
+  // Cache per (client, skipInstallation): a client instantiated with the Fleet
+  // package installed configures the metrics indices as TSDS, which rejects the
+  // fixed-date docs that `skipInstallation: true` callers rely on. Keying only
+  // by client name let a cached installed client be handed back to a skip-install
+  // caller, silently dropping those docs.
+  const cacheKey = `${synthClient}:${overrides.skipInstallation ?? false}`;
+
+  if (instantiatedClients[cacheKey]) {
+    return {
+      [synthClient]: instantiatedClients[cacheKey],
+    } as unknown as GetClientsReturn<TClient>;
   }
 
   const kibanaTarget = kbnUrl ? buildUrlWithAuth(kbnUrl, config) : undefined;
@@ -80,7 +89,7 @@ export async function getSynthtraceClient<
 
   log.serviceLoaded(synthClient);
 
-  instantiatedClients[synthClient] = clients[synthClient];
+  instantiatedClients[cacheKey] = clients[synthClient];
 
-  return instantiatedClients as GetClientsReturn<TClient>;
+  return { [synthClient]: instantiatedClients[cacheKey] } as unknown as GetClientsReturn<TClient>;
 }
