@@ -190,6 +190,7 @@
     {
       "id": "attack-discovery-agent-builder",
       "name": "Attack Discovery Agent Builder",
+      "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder/playwright.config.ts",
       "tags": [
         "security",
