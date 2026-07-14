@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const POPOVER_ACTIONS_TRIGGER_BUTTON =
-  '[data-test-subj="rules-details-popover-button-icon"]';
+export const POPOVER_ACTIONS_TRIGGER_BUTTON = '[data-test-subj="app-menu-overflow-button"]';
 
 export const EXPORT_RULE_ACTION_BUTTON = '[data-test-subj="rules-details-export-rule"]';
 
@@ -74,7 +73,7 @@ export const FIELDS_BROWSER_BTN =
 export const LAST_EXECUTION_STATUS_REFRESH_BUTTON =
   '[data-test-subj="ruleLastExecutionStatusRefreshButton"]';
 
-export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
+export const RULE_NAME_HEADER = '[data-test-subj="appHeaderTitle"]';
 
 export const RULE_NAME_OVERRIDE_DETAILS = 'Rule name override';
 

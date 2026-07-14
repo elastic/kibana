@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiTextAlign,
   EuiSpacer,
+  EuiWrappingPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RRuleParams } from '@kbn/alerting-types';
@@ -74,11 +75,18 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   showOnHover = false,
   showTooltipInline = false,
   isRuleEditable = true,
+  anchorElement,
+  isOpen: controlledIsOpen,
+  onClose,
 }) => {
   const [requestInFlight, setRequestInFlightLoading] = useState(false);
   const isLoading = loading || requestInFlight;
   const isDisabled = Boolean(disabled) || !snoozeSettings;
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [internalIsPopoverOpen, setIsPopoverOpen] = useState(false);
+  // When `anchorElement` is provided the component is rendered as an externally-anchored popover
+  // whose open state is controlled by the parent via `isOpen`/`onClose`.
+  const isAnchored = anchorElement !== undefined;
+  const isPopoverOpen = isAnchored ? Boolean(controlledIsOpen) : internalIsPopoverOpen;
 
   const togglePopover = useCallback(() => {
     setIsPopoverOpen((prev) => {
@@ -89,9 +97,13 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   }, []);
   //  const openPopover = useCallback(() => setIsPopoverOpen(true), [setIsPopoverOpen]);
   const closePopover = useCallback(() => {
+    if (isAnchored) {
+      onClose?.();
+      return;
+    }
     setIsPopoverOpen(false);
     focusTrapButtonRef.current?.blur();
-  }, [setIsPopoverOpen]);
+  }, [isAnchored, onClose]);
   const isSnoozedUntil = snoozeSettings?.isSnoozedUntil;
   const muteAll = snoozeSettings?.muteAll ?? false;
   const isSnoozedIndefinitely = muteAll;
@@ -406,6 +418,44 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     [closePopover, snoozeRule, onRuleChanged, toasts]
   );
 
+  const snoozePanelContent = (
+    <SnoozePanel
+      snoozeRule={onApplySnooze}
+      unsnoozeRule={onApplyUnsnooze}
+      interval={futureTimeToInterval(isSnoozedUntil)}
+      showCancel={isSnoozed}
+      scheduledSnoozes={snoozeSettings?.snoozeSchedule ?? []}
+      activeSnoozes={snoozeSettings?.activeSnoozes ?? []}
+      inPopover
+    />
+  );
+
+  const popoverAriaLabel = i18n.translate(
+    'xpack.triggersActionsUI.sections.rulesList.notifyBadge.popoverAriaLabel',
+    { defaultMessage: 'Snooze notifications' }
+  );
+
+  // Externally-anchored mode: attach the snooze panel to a parent-owned element (e.g. an app menu
+  // item) instead of rendering the badge's own trigger button.
+  if (isAnchored) {
+    if (!anchorElement) {
+      return null;
+    }
+    return (
+      <EuiWrappingPopover
+        data-test-subj="rulesListNotifyBadge"
+        button={anchorElement}
+        isOpen={isPopoverOpen && !isDisabled}
+        closePopover={closePopover}
+        anchorPosition="downRight"
+        panelStyle={{ maxHeight: '100vh', overflowY: 'auto' }}
+        aria-label={popoverAriaLabel}
+      >
+        {snoozePanelContent}
+      </EuiWrappingPopover>
+    );
+  }
+
   const popover = buttonWithToolTip && (
     <EuiPopover
       data-test-subj="rulesListNotifyBadge"
@@ -414,20 +464,9 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       button={buttonWithToolTip}
       anchorPosition="rightCenter"
       panelStyle={{ maxHeight: '100vh', overflowY: 'auto' }}
-      aria-label={i18n.translate(
-        'xpack.triggersActionsUI.sections.rulesList.notifyBadge.popoverAriaLabel',
-        { defaultMessage: 'Snooze notifications' }
-      )}
+      aria-label={popoverAriaLabel}
     >
-      <SnoozePanel
-        snoozeRule={onApplySnooze}
-        unsnoozeRule={onApplyUnsnooze}
-        interval={futureTimeToInterval(isSnoozedUntil)}
-        showCancel={isSnoozed}
-        scheduledSnoozes={snoozeSettings?.snoozeSchedule ?? []}
-        activeSnoozes={snoozeSettings?.activeSnoozes ?? []}
-        inPopover
-      />
+      {snoozePanelContent}
     </EuiPopover>
   );
 

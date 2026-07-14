@@ -7,10 +7,15 @@
 
 import {
   EuiHeaderSectionItemButton,
+  EuiButtonIcon,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
+  EuiToolTip,
+  EuiWrappingPopover,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -46,110 +51,82 @@ const defaultFilterProps: JobsFilters = {
   selectedGroups: [],
 };
 
-export const MlPopover = React.memo(() => {
-  const mlPopoverTitleId = useGeneratedHtmlId();
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
-  const [mlNodesAvailable, setMlNodesAvailable] = useState(false);
+export interface MlPopoverProps {
+  /**
+   * When provided, the popover attaches to this external element (e.g. an app menu item) and is
+   * controlled via `isOpen`/`onClose`, instead of rendering its own trigger button.
+   */
+  anchorElement?: HTMLElement | null;
+  isOpen?: boolean;
+  onClose?: () => void;
+}
 
-  const {
-    isMlAdmin,
-    isLicensed,
-    loading: isLoadingSecurityJobs,
-    jobs,
-    refetch: refreshJobs,
-  } = useSecurityJobs();
+export const MlPopover = React.memo(
+  ({ anchorElement, isOpen: controlledIsOpen, onClose }: MlPopoverProps = {}) => {
+    const isAnchored = anchorElement !== undefined;
+    const mlPopoverTitleId = useGeneratedHtmlId();
+    const [internalIsOpen, setInternalIsOpen] = useState(false);
+    const isPopoverOpen = isAnchored ? Boolean(controlledIsOpen) : internalIsOpen;
+    const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
+    const [mlNodesAvailable, setMlNodesAvailable] = useState(false);
 
-  const docLinks = useKibana().services.docLinks;
-  const {
-    enableDatafeed,
-    disableDatafeed,
-    isLoading: isLoadingEnableDataFeed,
-  } = useEnableDataFeed();
-  const handleJobStateChange = useCallback(
-    async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
-      if (enable) {
-        await enableDatafeed(job, latestTimestampMs);
+    const closePopover = useCallback(() => {
+      if (isAnchored) {
+        onClose?.();
       } else {
-        await disableDatafeed(job);
+        setInternalIsOpen(false);
       }
+    }, [isAnchored, onClose]);
 
-      refreshJobs();
-    },
-    [refreshJobs, enableDatafeed, disableDatafeed]
-  );
+    const {
+      isMlAdmin,
+      isLicensed,
+      loading: isLoadingSecurityJobs,
+      jobs,
+      refetch: refreshJobs,
+    } = useSecurityJobs();
 
-  const filteredJobs = filterJobs({
-    jobs,
-    ...filterProperties,
-  });
-
-  const incompatibleJobCount = jobs.filter((j) => !j.isCompatible).length;
-  const installedJobsIds = useMemo(
-    () => jobs.filter((j) => j.isInstalled).map((j) => j.id),
-    [jobs]
-  );
-
-  if (!isLicensed) {
-    // If the user does not have platinum show upgrade UI
-    return (
-      <EuiPopover
-        anchorPosition="downRight"
-        aria-label={i18n.ML_JOB_SETTINGS}
-        id="integrations-popover"
-        button={
-          <EuiHeaderSectionItemButton
-            aria-expanded={isPopoverOpen}
-            aria-haspopup="true"
-            aria-label={i18n.ML_JOB_SETTINGS}
-            color="primary"
-            data-test-subj="integrations-button"
-            iconType="chevronSingleDown"
-            iconSide="right"
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            textProps={{ style: { fontSize: '1rem' } }}
-          >
-            {i18n.ML_JOB_SETTINGS}
-          </EuiHeaderSectionItemButton>
+    const docLinks = useKibana().services.docLinks;
+    const {
+      enableDatafeed,
+      disableDatafeed,
+      isLoading: isLoadingEnableDataFeed,
+    } = useEnableDataFeed();
+    const handleJobStateChange = useCallback(
+      async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
+        if (enable) {
+          await enableDatafeed(job, latestTimestampMs);
+        } else {
+          await disableDatafeed(job);
         }
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
-        repositionOnScroll
-      >
-        <UpgradeContents />
-      </EuiPopover>
+
+        refreshJobs();
+      },
+      [refreshJobs, enableDatafeed, disableDatafeed]
     );
-  } else if (isMlAdmin) {
-    // If the user has Platinum License & ML Admin Permissions, show Anomaly Detection button & full config UI
-    return (
-      <EuiPopover
-        anchorPosition="downRight"
-        aria-labelledby={mlPopoverTitleId}
-        id="integrations-popover"
-        button={
-          <EuiHeaderSectionItemButton
-            aria-expanded={isPopoverOpen}
-            aria-haspopup="true"
-            aria-label={i18n.ML_JOB_SETTINGS}
-            color="primary"
-            data-test-subj="integrations-button"
-            iconType="chevronSingleDown"
-            iconSide="right"
-            onClick={() => {
-              setIsPopoverOpen(!isPopoverOpen);
-              refreshJobs();
-            }}
-            textProps={{ style: { fontSize: '1rem' } }}
-          >
-            {i18n.ML_JOB_SETTINGS}
-          </EuiHeaderSectionItemButton>
-        }
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
-        repositionOnScroll
-      >
+
+    const filteredJobs = filterJobs({
+      jobs,
+      ...filterProperties,
+    });
+
+    const incompatibleJobCount = jobs.filter((j) => !j.isCompatible).length;
+    const installedJobsIds = useMemo(
+      () => jobs.filter((j) => j.isInstalled).map((j) => j.id),
+      [jobs]
+    );
+
+    let content: React.ReactNode = null;
+    if (!isLicensed) {
+      // If the user does not have platinum show upgrade UI
+      content = <UpgradeContents />;
+    } else if (isMlAdmin) {
+      // If the user has Platinum License & ML Admin Permissions, show the full config UI
+      content = (
         <PopoverContentsDiv data-test-subj="ml-popover-contents">
-          <EuiPopoverTitle id={mlPopoverTitleId}>{i18n.ML_JOB_SETTINGS}</EuiPopoverTitle>
+          {!isAnchored && (
+            <EuiPopoverTitle id={mlPopoverTitleId}>{i18n.ML_JOB_SETTINGS}</EuiPopoverTitle>
+          )}
           <PopoverDescription />
 
           <EuiSpacer />
@@ -201,12 +178,88 @@ export const MlPopover = React.memo(() => {
             mlNodesAvailable={mlNodesAvailable}
           />
         </PopoverContentsDiv>
+      );
+    }
+
+    // If the user has Platinum License & not ML Admin, there is nothing to configure.
+    if (content === null) {
+      return null;
+    }
+
+    const popoverAriaProps = isMlAdmin
+      ? { 'aria-labelledby': mlPopoverTitleId }
+      : { 'aria-label': i18n.ML_JOB_SETTINGS };
+
+    // Anchored mode: attach the popover to an external element (e.g. an app menu item).
+    if (isAnchored) {
+      if (!anchorElement) {
+        return null;
+      }
+
+      return (
+        <EuiWrappingPopover
+          aria-label={i18n.ML_JOB_SETTINGS}
+          button={anchorElement}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          anchorPosition="downRight"
+          repositionOnScroll
+        >
+          <EuiPopoverTitle>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem>{i18n.ML_JOB_SETTINGS}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18n.CLOSE_ML_JOB_SETTINGS} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="cross"
+                    color="text"
+                    aria-label={i18n.CLOSE_ML_JOB_SETTINGS}
+                    onClick={closePopover}
+                    data-test-subj="ml-popover-close-button"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverTitle>
+          {content}
+        </EuiWrappingPopover>
+      );
+    }
+
+    // Self-anchored mode (default, e.g. the global header): render its own trigger button.
+    return (
+      <EuiPopover
+        {...popoverAriaProps}
+        anchorPosition="downRight"
+        id="integrations-popover"
+        button={
+          <EuiHeaderSectionItemButton
+            aria-expanded={isPopoverOpen}
+            aria-haspopup="true"
+            aria-label={i18n.ML_JOB_SETTINGS}
+            color="primary"
+            data-test-subj="integrations-button"
+            iconType="chevronSingleDown"
+            iconSide="right"
+            onClick={() => {
+              setInternalIsOpen((open) => !open);
+              if (isMlAdmin) {
+                refreshJobs();
+              }
+            }}
+            textProps={{ style: { fontSize: '1rem' } }}
+          >
+            {i18n.ML_JOB_SETTINGS}
+          </EuiHeaderSectionItemButton>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        repositionOnScroll
+      >
+        {content}
       </EuiPopover>
     );
-  } else {
-    // If the user has Platinum License & not ML Admin, hide Anomaly Detection button as they don't have permissions to configure
-    return null;
   }
-});
+);
 
 MlPopover.displayName = 'MlPopover';

@@ -13,6 +13,11 @@ import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
 
 export interface FiltersGlobalProps {
   children: React.ReactNode;
+  /**
+   * When `true`, renders in the normal document flow (e.g. directly below an inline app header)
+   * instead of portaling to the global sticky KQL header at the top of the page.
+   */
+  inline?: boolean;
 }
 
 const headerStyles = css`
@@ -21,18 +26,22 @@ const headerStyles = css`
   }
 `;
 
-export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => {
+export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children, inline = false }) => {
   const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
 
-  return (
-    <InPortal node={globalKQLHeaderPortalNode}>
-      <EuiPanel borderRadius="none" color="subdued" paddingSize="none">
-        <header data-test-subj="filters-global-container" css={headerStyles}>
-          {children}
-        </header>
-      </EuiPanel>
-    </InPortal>
+  const content = (
+    <EuiPanel borderRadius="none" color="subdued" paddingSize="none">
+      <header data-test-subj="filters-global-container" css={headerStyles}>
+        {children}
+      </header>
+    </EuiPanel>
   );
+
+  if (inline) {
+    return content;
+  }
+
+  return <InPortal node={globalKQLHeaderPortalNode}>{content}</InPortal>;
 });
 
 FiltersGlobal.displayName = 'FiltersGlobal';

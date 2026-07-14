@@ -14,6 +14,13 @@ export const ML_JOB_SETTINGS = i18n.translate(
   }
 );
 
+export const CLOSE_ML_JOB_SETTINGS = i18n.translate(
+  'xpack.securitySolution.components.mlPopup.closeButtonLabel',
+  {
+    defaultMessage: 'Close ML job settings',
+  }
+);
+
 export const UPGRADE_TITLE = i18n.translate(
   'xpack.securitySolution.components.mlPopup.upgradeTitle',
   {

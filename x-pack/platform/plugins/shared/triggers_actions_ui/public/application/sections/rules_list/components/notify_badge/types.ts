@@ -27,11 +27,27 @@ export interface RulesListNotifyBadgeProps {
   showTooltipInline?: boolean;
   showOnHover?: boolean;
   isRuleEditable?: boolean;
+  /**
+   * When provided, the snooze panel is rendered as a popover anchored to this element (e.g. an app
+   * menu item) and its open state is controlled via `isOpen`/`onClose`, instead of rendering the
+   * badge's own trigger button.
+   */
+  anchorElement?: HTMLElement | null;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export type RulesListNotifyBadgePropsWithApi = Pick<
   RulesListNotifyBadgeProps,
-  'snoozeSettings' | 'loading' | 'disabled' | 'onRuleChanged' | 'showOnHover' | 'showTooltipInline'
+  | 'snoozeSettings'
+  | 'loading'
+  | 'disabled'
+  | 'onRuleChanged'
+  | 'showOnHover'
+  | 'showTooltipInline'
+  | 'anchorElement'
+  | 'isOpen'
+  | 'onClose'
 > & {
   /**
    * Rule's SO id

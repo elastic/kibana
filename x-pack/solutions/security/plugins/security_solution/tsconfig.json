@@ -307,5 +307,7 @@
     "@kbn/esql-types",
     "@kbn/discoveries-schemas",
     "@kbn/chart-icons",
+    "@kbn/app-header",
+    "@kbn/core-chrome-app-menu-components",
   ]
 }

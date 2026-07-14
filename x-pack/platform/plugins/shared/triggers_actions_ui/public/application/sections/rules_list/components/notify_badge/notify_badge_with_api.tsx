@@ -23,6 +23,9 @@ export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
   showTooltipInline,
   showOnHover,
   onRuleChanged,
+  anchorElement,
+  isOpen,
+  onClose,
 }) => {
   const { http } = useKibana().services;
 
@@ -48,6 +51,9 @@ export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
       unsnoozeRule={onUnsnoozeRule}
       showTooltipInline={showTooltipInline}
       showOnHover={showOnHover}
+      anchorElement={anchorElement}
+      isOpen={isOpen}
+      onClose={onClose}
     />
   );
 };
