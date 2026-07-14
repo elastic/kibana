@@ -81,7 +81,7 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
       await discover.waitUntilTabIsLoaded();
       await docViewer.openSurroundingDocuments(0);
       await page.waitForURL(/#\/context/);
-      await getFilterBadge(page, 'extension', 'jpg').waitFor({ state: 'visible' });
+      await expect(getFilterBadge(page, 'extension', 'jpg')).toBeVisible();
 
       await goBackToDiscover(page);
       await discover.waitUntilTabIsLoaded();
@@ -114,7 +114,7 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
 
       await docViewer.openSingleDocument(0);
       await page.waitForURL(/#\/doc/);
-      await page.testSubj.locator('doc-hit').waitFor({ state: 'visible' });
+      await expect(page.testSubj.locator('doc-hit')).toBeVisible();
 
       await goBackToDiscover(page);
       await discover.waitUntilTabIsLoaded();
@@ -152,7 +152,7 @@ spaceTest.describe('Discover tabs - navigation', { tag: '@local-stateful-classic
 
       // goto() opens app from a fresh app URL, which bypasses the chrome navigation which we want to test here
       await collapsibleNav.clickItem('Dashboards');
-      await page.testSubj.locator('dashboardLandingPage').waitFor({ state: 'visible' });
+      await expect(page.testSubj.locator('dashboardLandingPage')).toBeVisible();
 
       // goto() opens app from a fresh app URL, which bypasses the chrome navigation which we want to test here
       await collapsibleNav.clickItem('Discover');

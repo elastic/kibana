@@ -92,7 +92,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await createEsqlControl(page, LOGSTASH_QUERY_START);
       await discover.waitUntilTabIsLoaded();
 
-      await dashboard.getControlsGroupLocator().waitFor({ state: 'visible' });
+      await expect(dashboard.getControlsGroupLocator()).toBeVisible();
       expect(await discover.getEsqlQueryValue()).toContain(
         'FROM logstash-* | WHERE geo.dest == ?geo_dest'
       );
@@ -100,7 +100,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await page.reload();
       await discover.waitUntilTabIsLoaded();
 
-      await dashboard.getControlsGroupLocator().waitFor({ state: 'visible' });
+      await expect(dashboard.getControlsGroupLocator()).toBeVisible();
       await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
     }
   );
@@ -113,7 +113,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await createEsqlControl(page, ESQL_MULTI_VALUE_QUERY_START, { values: ['IN', 'US'] });
       await discover.waitUntilTabIsLoaded();
 
-      await dashboard.getControlsGroupLocator().waitFor({ state: 'visible' });
+      await expect(dashboard.getControlsGroupLocator()).toBeVisible();
       expect(await discover.getEsqlQueryValue()).toContain(
         'FROM logstash-* | WHERE MV_CONTAINS( ?values'
       );
@@ -147,12 +147,12 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await discover.waitUntilTabIsLoaded();
       await discover.saveSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
-      await dashboard.getControlsGroupLocator().waitFor({ state: 'visible' });
+      await expect(dashboard.getControlsGroupLocator()).toBeVisible();
 
       await discover.clickNewSearch();
       await discover.loadSavedSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
-      await dashboard.getControlsGroupLocator().waitFor({ state: 'visible' });
+      await expect(dashboard.getControlsGroupLocator()).toBeVisible();
       await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
 
       const controlId = await dashboard.getOnlyControlId();
@@ -160,10 +160,10 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await dashboard.optionsListPopoverSelectOption('CN');
       await discover.waitUntilTabIsLoaded();
 
-      await discover.unsavedChangesIndicator().waitFor({ state: 'visible' });
+      await expect(discover.unsavedChangesIndicator()).toBeVisible();
       await discover.revertUnsavedChanges();
       await discover.waitUntilTabIsLoaded();
-      await discover.unsavedChangesIndicator().waitFor({ state: 'hidden' });
+      await expect(discover.unsavedChangesIndicator()).toBeHidden();
     }
   );
 
@@ -182,7 +182,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await discover.clickNewSearch();
       await discover.loadSavedSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
-      await dashboard.getControlsGroupLocator().waitFor({ state: 'visible' });
+      await expect(dashboard.getControlsGroupLocator()).toBeVisible();
 
       await saveHistogramToNewDashboard(page, savedChart);
       await dashboard.waitForRenderComplete();
@@ -211,7 +211,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await dashboard.removeControl(await dashboard.getOnlyControlId());
       await expect(dashboard.getControlFramesLocator()).toHaveCount(0);
       await discover.waitUntilTabIsLoaded();
-      await dashboard.getControlsGroupLocator().waitFor({ state: 'hidden' });
+      await expect(dashboard.getControlsGroupLocator()).toBeHidden();
 
       await discover.saveSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
@@ -219,7 +219,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await discover.loadSavedSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
 
-      await dashboard.getControlsGroupLocator().waitFor({ state: 'hidden' });
+      await expect(dashboard.getControlsGroupLocator()).toBeHidden();
       await expect(dashboard.getControlFramesLocator()).toHaveCount(0);
     }
   );

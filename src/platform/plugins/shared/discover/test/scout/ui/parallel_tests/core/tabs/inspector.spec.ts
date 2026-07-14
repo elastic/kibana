@@ -29,9 +29,7 @@ spaceTest.describe('Discover tabs - inspector', { tag: '@local-stateful-classic'
     const { inspector, unifiedTabs } = pageObjects;
 
     await unifiedTabs.openInspectorForActiveTab();
-    await inspector.panel.waitFor({ state: 'visible' });
-
-    await expect(inspector.panel).toHaveCount(1);
+    await expect(inspector.panel).toBeVisible();
   });
 
   spaceTest('displays request stats in the inspector', async ({ pageObjects }) => {

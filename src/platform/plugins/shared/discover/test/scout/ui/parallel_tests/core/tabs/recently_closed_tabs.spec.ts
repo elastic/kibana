@@ -390,14 +390,14 @@ spaceTest.describe(
         expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([]);
         expect(await discover.getHitCountInt()).toBe(14_004);
         expect(await discover.getCurrentQueryName()).toBe(firstSessionName);
-        await discover.unsavedChangesIndicator().waitFor({ state: 'hidden' });
+        await expect(discover.unsavedChangesIndicator()).toBeHidden();
 
         await discover.writeAndSubmitKqlQuery(KQL_QUERY);
 
         expect(await unifiedTabs.getTabLabels()).toStrictEqual([UNTITLED_TAB_LABEL]);
         expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([]);
         expect(await discover.getHitCountInt()).toBe(2_784);
-        await discover.unsavedChangesIndicator().waitFor({ state: 'visible' });
+        await expect(discover.unsavedChangesIndicator()).toBeVisible();
 
         await discover.saveSearchAsNew(secondSessionName);
         await discover.waitUntilTabIsLoaded();
@@ -407,7 +407,7 @@ spaceTest.describe(
         expect(await discover.getHitCountInt()).toBe(2_784);
         expect(await queryBar.getQuery()).toBe(KQL_QUERY);
         expect(await discover.getCurrentQueryName()).toBe(secondSessionName);
-        await discover.unsavedChangesIndicator().waitFor({ state: 'hidden' });
+        await expect(discover.unsavedChangesIndicator()).toBeHidden();
 
         await discover.loadSavedSearch(firstSessionName);
         await discover.waitUntilTabIsLoaded();
@@ -420,7 +420,7 @@ spaceTest.describe(
         expect(await discover.getHitCountInt()).toBe(14_004);
         expect(await queryBar.getQuery()).toBe('');
         expect(await discover.getCurrentQueryName()).toBe(firstSessionName);
-        await discover.unsavedChangesIndicator().waitFor({ state: 'hidden' });
+        await expect(discover.unsavedChangesIndicator()).toBeHidden();
 
         await discover.loadSavedSearch(secondSessionName);
         await discover.waitUntilTabIsLoaded();
@@ -433,7 +433,7 @@ spaceTest.describe(
         expect(await discover.getHitCountInt()).toBe(2_784);
         expect(await queryBar.getQuery()).toBe(KQL_QUERY);
         expect(await discover.getCurrentQueryName()).toBe(secondSessionName);
-        await discover.unsavedChangesIndicator().waitFor({ state: 'hidden' });
+        await expect(discover.unsavedChangesIndicator()).toBeHidden();
       }
     );
   }

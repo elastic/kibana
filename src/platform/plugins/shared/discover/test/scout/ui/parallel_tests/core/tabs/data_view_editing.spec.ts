@@ -66,9 +66,9 @@ const expectFieldState = async ({
   const field = unifiedFieldList.getAvailableField(fieldName);
 
   if (state === 'visible') {
-    await field.waitFor({ state: 'visible' });
+    await expect(field).toBeVisible();
   } else {
-    await field.waitFor({ state: 'hidden' });
+    await expect(field).toBeHidden();
   }
 };
 
@@ -141,7 +141,7 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
 
         await discover.createRuntimeField(newFieldName, RUNTIME_FIELD_SCRIPT);
         await unifiedFieldList.searchField(newFieldName);
-        await unifiedFieldList.getAvailableField(newFieldName).waitFor({ state: 'visible' });
+        await expect(unifiedFieldList.getAvailableField(newFieldName)).toBeVisible();
 
         let availableDataViews = await discover.getAvailableDataViewsFromSearchBar();
         expect(availableDataViews.filter((name) => name === currentName)).toHaveLength(
@@ -161,14 +161,14 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
         await discover.waitUntilTabIsLoaded();
         expect(await discover.getSelectedDataViewName()).toBe(currentName);
         await unifiedFieldList.searchField(newFieldName);
-        await unifiedFieldList.getAvailableField(newFieldName).waitFor({ state: 'visible' });
+        await expect(unifiedFieldList.getAvailableField(newFieldName)).toBeVisible();
 
         await unifiedFieldList.openFieldEditor(newFieldName);
         await discover.renameRuntimeField(editedFieldName);
         await unifiedFieldList.searchField(editedFieldName);
-        await unifiedFieldList.getAvailableField(editedFieldName).waitFor({ state: 'visible' });
+        await expect(unifiedFieldList.getAvailableField(editedFieldName)).toBeVisible();
         await unifiedFieldList.searchField(newFieldName);
-        await unifiedFieldList.getAvailableField(newFieldName).waitFor({ state: 'hidden' });
+        await expect(unifiedFieldList.getAvailableField(newFieldName)).toBeHidden();
 
         availableDataViews = await discover.getAvailableDataViewsFromSearchBar();
         expect(availableDataViews.filter((name) => name === currentName)).toHaveLength(
@@ -205,7 +205,7 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
 
         await discover.createRuntimeField(newFieldName, RUNTIME_FIELD_SCRIPT);
         await unifiedFieldList.searchField(newFieldName);
-        await unifiedFieldList.getAvailableField(newFieldName).waitFor({ state: 'visible' });
+        await expect(unifiedFieldList.getAvailableField(newFieldName)).toBeVisible();
 
         const availableDataViews = await discover.getAvailableDataViewsFromSearchBar();
         expect(availableDataViews.filter((name) => name === firstTabName)).toHaveLength(1);
@@ -215,13 +215,13 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
         await discover.waitUntilTabIsLoaded();
         expect(await discover.getSelectedDataViewName()).toBe(firstTabName);
         await unifiedFieldList.searchField(newFieldName);
-        await unifiedFieldList.getAvailableField(newFieldName).waitFor({ state: 'hidden' });
+        await expect(unifiedFieldList.getAvailableField(newFieldName)).toBeHidden();
 
         await unifiedTabs.selectTab(1);
         await discover.waitUntilTabIsLoaded();
         expect(await discover.getSelectedDataViewName()).toBe(secondTabName);
         await unifiedFieldList.searchField(newFieldName);
-        await unifiedFieldList.getAvailableField(newFieldName).waitFor({ state: 'visible' });
+        await expect(unifiedFieldList.getAvailableField(newFieldName)).toBeVisible();
       }
     );
   }

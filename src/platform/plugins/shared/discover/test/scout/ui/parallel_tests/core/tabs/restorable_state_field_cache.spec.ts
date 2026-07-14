@@ -102,7 +102,7 @@ spaceTest.describe(
             await discover.createRuntimeField(field, `emit('test')`);
             await unifiedFieldList.expectAvailableFieldCount(49);
             await unifiedFieldList.searchField(field);
-            await unifiedFieldList.getAvailableField(field).waitFor({ state: 'visible' });
+            await expect(unifiedFieldList.getAvailableField(field)).toBeVisible();
           })
         ).toBe(1);
 
@@ -112,7 +112,7 @@ spaceTest.describe(
             await discover.waitUntilTabIsLoaded();
             await expectUnfilteredAvailableFieldCount(pageObjects, 49);
             await unifiedFieldList.searchField(field);
-            await unifiedFieldList.getAvailableField(field).waitFor({ state: 'visible' });
+            await expect(unifiedFieldList.getAvailableField(field)).toBeVisible();
           })
         ).toBe(1);
 
@@ -122,7 +122,7 @@ spaceTest.describe(
             await discover.waitUntilTabIsLoaded();
             await expectUnfilteredAvailableFieldCount(pageObjects, 49);
             await unifiedFieldList.searchField(field);
-            await unifiedFieldList.getAvailableField(field).waitFor({ state: 'visible' });
+            await expect(unifiedFieldList.getAvailableField(field)).toBeVisible();
           })
         ).toBe(0);
 
@@ -132,9 +132,9 @@ spaceTest.describe(
             await discover.renameRuntimeField(field2);
             await expectUnfilteredAvailableFieldCount(pageObjects, 49);
             await unifiedFieldList.searchField(field);
-            await unifiedFieldList.getAvailableField(field).waitFor({ state: 'hidden' });
+            await expect(unifiedFieldList.getAvailableField(field)).toBeHidden();
             await unifiedFieldList.searchField(field2);
-            await unifiedFieldList.getAvailableField(field2).waitFor({ state: 'visible' });
+            await expect(unifiedFieldList.getAvailableField(field2)).toBeVisible();
           })
         ).toBe(1);
 
@@ -144,9 +144,9 @@ spaceTest.describe(
             await discover.waitUntilTabIsLoaded();
             await expectUnfilteredAvailableFieldCount(pageObjects, 49);
             await unifiedFieldList.searchField(field);
-            await unifiedFieldList.getAvailableField(field).waitFor({ state: 'hidden' });
+            await expect(unifiedFieldList.getAvailableField(field)).toBeHidden();
             await unifiedFieldList.searchField(field2);
-            await unifiedFieldList.getAvailableField(field2).waitFor({ state: 'visible' });
+            await expect(unifiedFieldList.getAvailableField(field2)).toBeVisible();
           })
         ).toBe(1);
       }

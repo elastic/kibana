@@ -82,7 +82,7 @@ spaceTest.describe(
 
         await openDiscoverWithoutCustomDataViews({ page, scoutSpace, solutionView: 'classic' });
 
-        await page.testSubj.locator('noDataViewsPrompt').waitFor({ state: 'hidden' });
+        await expect(page.testSubj.locator('noDataViewsPrompt')).toBeHidden();
         expect(await discover.getSelectedDataViewName()).toBe('All logs');
         expect(await unifiedTabs.isTabsBarVisible()).toBe(true);
       }
@@ -95,7 +95,7 @@ spaceTest.describe(
 
         await openDiscoverWithoutCustomDataViews({ page, scoutSpace, solutionView: 'es' });
 
-        await page.testSubj.locator('noDataViewsPrompt').waitFor({ state: 'visible' });
+        await expect(page.testSubj.locator('noDataViewsPrompt')).toBeVisible();
         expect(await unifiedTabs.isTabsBarVisible()).toBe(false);
 
         await createDataViewFromPrompt(page, 'logstash');
@@ -114,7 +114,7 @@ spaceTest.describe(
 
         await openDiscoverWithoutCustomDataViews({ page, scoutSpace, solutionView: 'es' });
 
-        await page.testSubj.locator('noDataViewsPrompt').waitFor({ state: 'visible' });
+        await expect(page.testSubj.locator('noDataViewsPrompt')).toBeVisible();
         expect(await unifiedTabs.isTabsBarVisible()).toBe(false);
 
         await page.testSubj.locator('tryESQLLink').click();

@@ -69,7 +69,7 @@ spaceTest.describe(
           async () => {
             await unifiedTabs.selectTab(0);
             await discover.waitUntilTabIsLoaded();
-            await docViewer.getFlyout().waitFor({ state: 'visible' });
+            await expect(docViewer.getFlyout()).toBeVisible();
             expect(await docViewer.getFieldSearchValue()).toBe('geo');
             expect(await docViewer.getFieldNameCount()).toBe(4);
             expect(await docViewer.isFieldPinned('geo.src')).toBe(true);
@@ -125,7 +125,7 @@ spaceTest.describe(
         await spaceTest.step('return to tab 0 and restore its field filters', async () => {
           await unifiedTabs.selectTab(0);
           await discover.waitUntilTabIsLoaded();
-          await docViewer.getFlyout().waitFor({ state: 'visible' });
+          await expect(docViewer.getFlyout()).toBeVisible();
           expect(await docViewer.getFieldTypeFilterCount()).toBe('1');
           await docViewer.expectShowOnlySelectedFields(false);
         });
@@ -159,7 +159,7 @@ spaceTest.describe(
           async () => {
             await unifiedTabs.selectTab(0);
             await discover.waitUntilTabIsLoaded();
-            await docViewer.getFlyout().waitFor({ state: 'visible' });
+            await expect(docViewer.getFlyout()).toBeVisible();
             expect(await dataGrid.getCurrentRowsPerPage('docViewer')).toBe(50);
             expect(await dataGrid.getCurrentPageNumber('docViewer')).toBe('1');
           }

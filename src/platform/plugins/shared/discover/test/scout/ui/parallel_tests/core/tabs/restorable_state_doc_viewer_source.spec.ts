@@ -72,7 +72,7 @@ spaceTest.describe(
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
-      await docViewer.getFlyout().waitFor({ state: 'visible' });
+      await expect(docViewer.getFlyout()).toBeVisible();
       await expect(hideNullValuesSwitch).toHaveAttribute('aria-checked', 'false');
     });
 
@@ -121,7 +121,7 @@ spaceTest.describe(
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
-      await docViewer.getFlyout().waitFor({ state: 'visible' });
+      await expect(docViewer.getFlyout()).toBeVisible();
       expect(await discover.codeEditor.getScrollTop()).toBe(tab1ScrollTop);
     });
   }

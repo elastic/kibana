@@ -54,7 +54,7 @@ spaceTest.describe('Discover tabs - filters', { tag: '@local-stateful-classic' }
     expect(await queryBar.getQuery()).toBe('');
     expect(await filterBar.getFilterCount()).toBe(0);
     expect(await discover.getHitCount()).toBe('14,004');
-    await page.testSubj.locator('xyVisChart').waitFor({ state: 'visible' });
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     await unifiedTabs.createNewTab();
     await discover.waitUntilTabIsLoaded();
@@ -75,7 +75,7 @@ spaceTest.describe('Discover tabs - filters', { tag: '@local-stateful-classic' }
       })
     ).toBe(true);
     expect(await discover.getHitCount()).toBe('795');
-    await page.testSubj.locator('xyVisChart').waitFor({ state: 'visible' });
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     await unifiedTabs.createNewTab();
     await discover.waitUntilTabIsLoaded();
@@ -110,7 +110,7 @@ spaceTest.describe('Discover tabs - filters', { tag: '@local-stateful-classic' }
       })
     ).toBe(true);
     expect(await discover.getHitCount()).toBe('1,813');
-    await page.testSubj.locator('xyVisChart').waitFor({ state: 'visible' });
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     await unifiedTabs.createNewTab();
     await discover.waitUntilTabIsLoaded();
@@ -138,14 +138,14 @@ spaceTest.describe('Discover tabs - filters', { tag: '@local-stateful-classic' }
     );
     expect(await filterBar.getFilterCount()).toBe(0);
     expect(await discover.getHitCount()).toBe('721');
-    await page.testSubj.locator('xyVisChart').waitFor({ state: 'visible' });
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     await unifiedTabs.selectTab(0);
     await discover.waitUntilTabIsLoaded();
     expect(await queryBar.getQuery()).toBe('');
     expect(await filterBar.getFilterCount()).toBe(0);
     expect(await discover.getHitCount()).toBe('14,004');
-    await page.testSubj.locator('xyVisChart').waitFor({ state: 'visible' });
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     await unifiedTabs.selectTab(1);
     await discover.waitUntilTabIsLoaded();
@@ -160,7 +160,7 @@ spaceTest.describe('Discover tabs - filters', { tag: '@local-stateful-classic' }
       })
     ).toBe(true);
     expect(await discover.getHitCount()).toBe('795');
-    await page.testSubj.locator('xyVisChart').waitFor({ state: 'visible' });
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     await unifiedTabs.selectTab(2);
     await discover.waitUntilTabIsLoaded();
@@ -183,7 +183,7 @@ spaceTest.describe('Discover tabs - filters', { tag: '@local-stateful-classic' }
       })
     ).toBe(true);
     expect(await discover.getHitCount()).toBe('1,813');
-    await page.testSubj.locator('xyVisChart').waitFor({ state: 'visible' });
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
 
     await unifiedTabs.selectTab(3);
     await discover.waitUntilTabIsLoaded();
@@ -192,6 +192,6 @@ spaceTest.describe('Discover tabs - filters', { tag: '@local-stateful-classic' }
     );
     expect(await filterBar.getFilterCount()).toBe(0);
     expect(await discover.getHitCount()).toBe('721');
-    await page.testSubj.locator('xyVisChart').waitFor({ state: 'visible' });
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
   });
 });
