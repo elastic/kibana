@@ -16,6 +16,7 @@ import type {
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import {
@@ -105,6 +106,12 @@ export class SecuritySolutionServerlessPlugin
       projectSettings.push(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
     }
 
+    // TODO(rule-changes-history GA): remove this block when the feature is GA
+    // This setting is only registered when `ruleChangesHistoryEnabled` is enabled
+    if (this.config.experimentalFeatures.ruleChangesHistoryEnabled) {
+      projectSettings.push('securitySolution:enableRuleChangesHistory');
+    }
+
     // Workflows is enabled by default since 9.4.0. The setting is retained so admins can opt out.
     // It is only registered in complete and EASE tiers; adding it while in the essentials tier causes an error.
     if (
@@ -125,6 +132,9 @@ export class SecuritySolutionServerlessPlugin
       }
       if (!projectSettings.includes(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID)) {
         projectSettings.push(AGENT_BUILDER_BASH_SUPPORT_SETTING_ID);
+      }
+      if (!projectSettings.includes(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID)) {
+        projectSettings.push(AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID);
       }
     }
 

@@ -64,6 +64,11 @@ export const ENTITY_ANOMALIES_SWIMLANE_X_AXIS_LABEL = i18n.translate(
   { defaultMessage: 'Date' }
 );
 
+export const ENTITY_ANOMALIES_SWIMLANE_MITRE_TACTIC_Y_AXIS_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.swimlane.mitreTacticYAxis',
+  { defaultMessage: 'Tactic' }
+);
+
 export const ENTITY_ANOMALIES_TAB_MANAGE_ML_JOBS = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.manageMlJobs',
   { defaultMessage: 'Manage ML jobs' }
@@ -182,6 +187,16 @@ export const ENTITY_ANOMALY_TABLE_EXPANDED_ROW_KEY_FIELDS = i18n.translate(
   { defaultMessage: 'Key fields' }
 );
 
+export const ENTITY_ANOMALY_TABLE_EMPTY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.anomalyTable.emptyMessage',
+  { defaultMessage: 'No anomalies detected' }
+);
+
+export const ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.recentAnomaliesEmptyMessage',
+  { defaultMessage: 'No anomalies detected within last 30 days' }
+);
+
 export const ENTITY_ANOMALY_DATE_RANGE_LAST_15_MINUTES = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.dateRangePicker.last15MinutesLabel',
   { defaultMessage: 'Last 15 minutes' }
@@ -228,4 +243,16 @@ export const ENTITY_ANOMALY_DATE_RANGE_TOO_OLD_ERROR = i18n.translate(
     defaultMessage:
       'Anomaly data is only available for the past year. Select a more recent start date.',
   }
+);
+
+export const ENTITY_ANOMALY_STATE_ERROR_BODY = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.stateErrorBody',
+  {
+    defaultMessage: 'An error occurred while retrieving anomaly data.',
+  }
+);
+
+export const ENTITY_ANOMALY_STATE_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.stateErrorTitle',
+  { defaultMessage: 'Unable to load behavioral anomalies' }
 );

@@ -35,8 +35,11 @@ export {
 // Runtime types
 export {
   serviceRt,
+  serviceSchema,
   settingsRt,
+  settingsSchema,
   agentConfigurationIntakeRt,
+  agentConfigurationIntakeSchema,
 } from './src/agent_configuration/runtime_types/agent_configuration_intake_rt';
 export { booleanRt } from './src/agent_configuration/runtime_types/boolean_rt';
 export { captureBodyRt } from './src/agent_configuration/runtime_types/capture_body_rt';
@@ -63,3 +66,9 @@ export type {
   RawSettingDefinition,
   SettingDefinition,
 } from './src/agent_configuration/setting_definitions/types';
+
+export { truncate, unit } from './src/utils/style';
+export { NOT_AVAILABLE_LABEL } from './src/utils/i18n';
+export * from './src/utils/formatters';
+export { isFiniteNumber } from './src/utils/is_finite_number';
+export { getTimestampUs } from './src/utils/get_timestamp_us';
