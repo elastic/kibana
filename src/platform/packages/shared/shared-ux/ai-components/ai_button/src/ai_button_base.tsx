@@ -36,6 +36,9 @@ const resolveButtonLabel = (
   children: React.ReactNode
 ): React.ReactNode => (usesAddToChatLabel(iconType) ? ADD_TO_CHAT_LABEL : children);
 
+const usesIconOnlyAddToChatLabel = (iconType: AiButtonIconOnlyIconType): boolean =>
+  iconType === 'addToChat' || iconType === 'productAgent';
+
 const resolveIconOnlyTooltipContent = ({
   iconType,
   ariaLabel,
@@ -45,7 +48,7 @@ const resolveIconOnlyTooltipContent = ({
   ariaLabel: string;
   children?: React.ReactNode;
 }): React.ReactNode => {
-  if (iconType === 'addToChat') {
+  if (usesIconOnlyAddToChatLabel(iconType)) {
     return ADD_TO_CHAT_LABEL;
   }
 

@@ -101,21 +101,24 @@ describe('<AiButtonBase />', () => {
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Custom tooltip');
   });
 
-  it('iconOnly variant shows static add-to-chat label in tooltip when iconType is addToChat', async () => {
-    render(
-      <AiButtonBase
-        variant="base"
-        iconOnly
-        iconType="addToChat"
-        aria-label="Different aria label"
-        onClick={() => undefined}
-      />
-    );
+  it.each(['productAgent', 'addToChat'] as const)(
+    'iconOnly variant shows static add-to-chat label in tooltip when iconType is %s',
+    async (iconType) => {
+      render(
+        <AiButtonBase
+          variant="base"
+          iconOnly
+          iconType={iconType}
+          aria-label="Different aria label"
+          onClick={() => undefined}
+        />
+      );
 
-    const button = screen.getByRole('button', { name: 'Different aria label' });
-    fireEvent.mouseOver(button);
-    expect(await screen.findByRole('tooltip')).toHaveTextContent('Add to chat');
-  });
+      const button = screen.getByRole('button', { name: 'Different aria label' });
+      fireEvent.mouseOver(button);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('Add to chat');
+    }
+  );
 
   it('renders gradient defs only when iconGradientCss is set', () => {
     mockUseSvgAiGradient.mockReturnValue({

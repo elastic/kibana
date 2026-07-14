@@ -18,7 +18,7 @@ export type AiButtonVariant = 'accent' | 'base' | 'empty' | 'outlined';
 export type AiButtonIconType = 'sparkles' | 'productAgent' | 'aiAssistantLogo';
 
 /** Allowed icon types for icon-only AI button components. */
-export type AiButtonIconOnlyIconType = 'addToChat' | 'sparkles' | 'aiAssistantLogo';
+export type AiButtonIconOnlyIconType = AiButtonIconType | 'addToChat';
 type AiButtonTextSize = 'xs' | 's' | 'm';
 
 /** Event handler prop names from DOMAttributes (onClick, onKeyDown, …). */

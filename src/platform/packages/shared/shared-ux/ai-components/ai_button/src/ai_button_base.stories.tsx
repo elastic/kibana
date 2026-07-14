@@ -20,7 +20,12 @@ type AiTextIconType = AiButtonIconType;
 type AiIconOnlyIconType = AiButtonIconOnlyIconType;
 
 const TEXT_ICON_OPTIONS: AiTextIconType[] = ['aiAssistantLogo', 'sparkles', 'productAgent'];
-const ICON_ONLY_ICON_OPTIONS: AiIconOnlyIconType[] = ['aiAssistantLogo', 'sparkles', 'addToChat'];
+const ICON_ONLY_ICON_OPTIONS: AiIconOnlyIconType[] = [
+  'aiAssistantLogo',
+  'sparkles',
+  'productAgent',
+  'addToChat',
+];
 
 interface CommonStoryArgs {
   label: string;
