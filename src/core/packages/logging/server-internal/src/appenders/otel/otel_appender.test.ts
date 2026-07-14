@@ -8,6 +8,7 @@
  */
 
 import {
+  makeMockResource,
   mockBatchLogRecordProcessor,
   mockDetectResources,
   mockEmit,
@@ -774,23 +775,39 @@ describe('OtelAppender', () => {
       expect(attributes).toHaveProperty(['service.version'], '9.0.0');
     });
 
-    it('does not rebuild the resource when fieldDrops is set — drops are applied at emit time', () => {
-      // fieldDrops are applied in toAttributes() at emit time, not by filtering resource
-      // attributes at construction time. Rebuilding the resource is unsafe because the
-      // merged resource may hold async-resolving entries (e.g. host.id via getMachineId);
-      // passing those Promises into resourceFromAttributes produces malformed attributes.
+    it('rebuilds the resource via getRawAttributes() when fieldDrops is set, excluding dropped keys and preserving async entries', () => {
+      // Set up a resource with known raw attributes including an async (Promise) entry
+      // to verify the rebuild uses getRawAttributes() — not the synchronous .attributes
+      // snapshot — so async-detected attrs (e.g. host.id from getMachineId) are preserved.
+      const asyncEntry = Promise.resolve('node-id');
+      const resourceWithKnownRaw = makeMockResource('known', {
+        'service.name': 'kibana',
+        'host.name': 'my-host',
+        'service.version': '9.0.0',
+      });
+      (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue([
+        ['service.name', 'kibana'],
+        ['host.name', 'my-host'],
+        ['service.version', '9.0.0'],
+        ['host.id', asyncEntry],
+      ]);
 
-      // Baseline: count resourceFromAttributes calls for a normal construction.
-      const beforeBaseline = mockResourceFromAttributes.mock.calls.length;
-      new OtelAppender(validConfig);
-      const baselineCallCount = mockResourceFromAttributes.mock.calls.length - beforeBaseline;
+      // Wire the mock chain: mockMergeResource (inside buildOtelResources) returns r1,
+      // whose .merge() (called by the OtelAppender constructor) returns the resource above.
+      const r1 = makeMockResource('r1', {});
+      r1.merge.mockReturnValueOnce(resourceWithKnownRaw);
+      mockMergeResource.mockReturnValueOnce(r1);
 
-      // With fieldDrops: must make the same number of calls — no extra rebuild.
-      const beforeDrops = mockResourceFromAttributes.mock.calls.length;
-      new OtelAppender({ ...validConfig, fieldDrops: ['service.version', 'host.name'] });
-      const withDropsCallCount = mockResourceFromAttributes.mock.calls.length - beforeDrops;
+      new OtelAppender({ ...validConfig, fieldDrops: ['host.name', 'service.version'] });
 
-      expect(withDropsCallCount).toBe(baselineCallCount);
+      const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+      // Dropped keys must be absent from the rebuilt resource
+      expect(filteredArg).not.toHaveProperty(['host.name']);
+      expect(filteredArg).not.toHaveProperty(['service.version']);
+      // Non-dropped sync key is preserved
+      expect(filteredArg).toHaveProperty(['service.name'], 'kibana');
+      // Async entry is passed through as-is so the SDK can await it at export time
+      expect(filteredArg['host.id']).toBe(asyncEntry);
     });
   });
 

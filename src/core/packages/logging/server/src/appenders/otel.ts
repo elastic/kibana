@@ -115,8 +115,9 @@ export interface OtelAppenderConfig {
    * - Multiple targets: `{ 'client.ip': ['source.address', 'source.ip'] }` — copy value to all
    *   listed keys and remove the original.
    *
-   * Keys absent from the log record are silently skipped. Applied only when using pattern layout
-   * (meta fields are part of the structured body for JSON layout and are not repeated in attributes).
+   * Keys absent from the log record are silently skipped. With JSON layout, meta-sourced keys
+   * (e.g. `kibana.*`, `client.ip`) are part of the structured body and not repeated as individual
+   * attributes, so renames targeting those fields have no effect under that layout.
    */
   fieldRenames?: Record<string, string | string[]>;
   /**

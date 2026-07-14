@@ -63,42 +63,76 @@ apiTest.describe(
             attrs['user.name'] === username
         );
 
-        // Core audit fields
+        // OTel envelope fields — top-level OTLP log record fields (not logRecord.attributes).
+        expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
+        expect(e.severityText).toBe('INFO');
+        expect(e.body).toMatch(/logged in/);
+        expect(typeof e.traceId).toBe('string');
+        expect(e.traceId).not.toBe('');
+        expect(typeof e.spanId).toBe('string');
+        expect(e.spanId).not.toBe('');
+
+        // Resource-level fields (from resource.attributes, merged in by the receiver).
+        // Environment-specific attrs (process.pid, host.id, os.version, etc.) are omitted.
+        expect(e['service.name']).toBe('kibana');
+        expect(e['telemetry.sdk.language']).toBe('nodejs');
+        expect(e['deployment.environment.name']).toBe('development');
+        expect(e['process.runtime.name']).toBe('nodejs');
+        expect(e['process.runtime.description']).toBe('Node.js');
+
+        // AUDIT_OTEL_FIELD_DROPS: service.version and host.name excluded from both
+        // log record attributes and resource attributes.
+        expect(e['service.version']).toBeUndefined();
+        expect(e['host.name']).toBeUndefined();
+
+        // Log-record instrumentation fields.
+        expect(e['log.logger']).toBe('plugins.security.audit.ecs');
+        expect(e['service.type']).toBe('kibana');
+
+        // Core audit fields.
         expect(e['event.action']).toBe('user_login');
         expect(e['event.outcome']).toBe('success');
-
-        // fieldDefaults: auth events with no event.type get ['access']
+        expect(e['event.category']).toStrictEqual(['authentication']);
+        // fieldDefaults: auth events carry no event.type — default supplies ['access'].
         expect(e['event.type']).toStrictEqual(['access']);
 
-        // AUDIT_OTEL_FIELD_RENAMES: client.ip → source.address + source.ip
-        expect(e['source.address']).toBeDefined();
-        expect(e['source.ip']).toBeDefined();
-        expect(e['client.ip']).toBeUndefined();
+        // User identity.
+        expect(e['user.name']).toBe(username);
+        expect(e['user.id']).toBeDefined();
+        expect(e['user.roles']).toStrictEqual(['superuser']);
 
-        // AUDIT_OTEL_FIELD_RENAMES: kibana.authentication_type → authentication.type
+        // Auth context — kibana.authentication_provider is not renamed.
+        expect(e['kibana.authentication_provider']).toBe('cloud-basic');
+        expect(e['kibana.authentication_realm']).toBe('reserved');
+
+        // AUDIT_OTEL_FIELD_RENAMES: kibana.authentication_type → authentication.type.
         expect(e['authentication.type']).toBe('basic');
         expect(e['kibana.authentication_type']).toBeUndefined();
 
         // AUDIT_OTEL_FIELD_RENAMES: kibana.space_id → kibana.space.id — not asserted here:
-        // space isn't meaningful at authentication time, so login events intentionally omit
-        // it (verified separately via the http_request and saved_object_find tests below).
+        // space isn't meaningful at authentication time, so login events intentionally omit it.
         expect(e['kibana.space_id']).toBeUndefined();
 
-        // AUDIT_OTEL_FIELD_RENAMES: kibana.session_id → kibana.session.id
+        // AUDIT_OTEL_FIELD_RENAMES: kibana.session_id → kibana.session.id.
         expect(e['kibana.session.id']).toBeDefined();
         expect(e['kibana.session_id']).toBeUndefined();
 
-        // AUDIT_OTEL_FIELD_RENAMES: kibana.lookup_realm → kibana.lookup.realm
+        // AUDIT_OTEL_FIELD_RENAMES: kibana.lookup_realm → kibana.lookup.realm.
         expect(e['kibana.lookup.realm']).toBeDefined();
         expect(e['kibana.lookup_realm']).toBeUndefined();
 
-        // AUDIT_OTEL_FIELD_DROPS: service.version and host.name excluded
-        expect(e['service.version']).toBeUndefined();
-        expect(e['host.name']).toBeUndefined();
+        // AUDIT_OTEL_FIELD_RENAMES: client.ip → source.address + source.ip.
+        expect(e['source.address']).toBeDefined();
+        expect(e['source.ip']).toBeDefined();
+        expect(e['client.ip']).toBeUndefined();
 
-        // Header rename: http.request.headers.x-forwarded-for → http.request.header.x-forwarded-for
+        // Header rename: http.request.headers.x-forwarded-for → http.request.header.x-forwarded-for.
         expect(e['http.request.header.x-forwarded-for']).toBeDefined();
         expect(e['http.request.headers.x-forwarded-for']).toBeUndefined();
+
+        // AUDIT_OTEL_FIELD_RENAMES: trace.id → request.id.
+        expect(e['request.id']).toBeDefined();
+        expect(e['trace.id']).toBeUndefined();
       }
     );
 
@@ -123,9 +157,49 @@ apiTest.describe(
           (attrs) => attrs['event.action'] === 'user_login' && attrs['event.outcome'] === 'failure'
         );
 
+        // OTel envelope fields.
+        expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
+        expect(e.severityText).toBe('INFO');
+        expect(typeof e.body).toBe('string');
+        expect(typeof e.traceId).toBe('string');
+        expect(e.traceId).not.toBe('');
+        expect(typeof e.spanId).toBe('string');
+        expect(e.spanId).not.toBe('');
+
+        // Resource-level fields.
+        expect(e['service.name']).toBe('kibana');
+        expect(e['telemetry.sdk.language']).toBe('nodejs');
+        expect(e['deployment.environment.name']).toBe('development');
+        expect(e['process.runtime.name']).toBe('nodejs');
+        expect(e['process.runtime.description']).toBe('Node.js');
+
+        // Log-record instrumentation fields.
+        expect(e['log.logger']).toBe('plugins.security.audit.ecs');
+        expect(e['service.type']).toBe('kibana');
+
+        // Core audit fields.
         expect(e['event.action']).toBe('user_login');
         expect(e['event.outcome']).toBe('failure');
+        expect(e['event.category']).toStrictEqual(['authentication']);
+        // fieldDefaults applies event.type even to failed login attempts.
+        expect(e['event.type']).toStrictEqual(['access']);
+
+        // No user fields on a failed authentication attempt.
         expect(e['user.name']).toBeUndefined();
+        expect(e['user.id']).toBeUndefined();
+
+        // Auth context still present even on failure.
+        expect(e['kibana.authentication_provider']).toBe('cloud-basic');
+        expect(e['authentication.type']).toBe('basic');
+
+        // Error details.
+        expect(e['error.code']).toBe('ResponseError');
+        expect(e['error.message']).toMatch(/security_exception/);
+
+        // Network.
+        expect(e['source.address']).toBeDefined();
+        expect(e['source.ip']).toBeDefined();
+        expect(e['request.id']).toBeDefined();
       }
     );
 
@@ -144,14 +218,59 @@ apiTest.describe(
           (attrs) => attrs['event.action'] === 'http_request' && attrs['url.path'] === '/api/status'
         );
 
-        expect(e['event.action']).toBe('http_request');
+        // OTel envelope fields.
+        expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
+        expect(e.severityText).toBe('INFO');
+        expect(e.body).toMatch(/requesting/);
+        expect(typeof e.traceId).toBe('string');
+        expect(e.traceId).not.toBe('');
+        expect(typeof e.spanId).toBe('string');
+        expect(e.spanId).not.toBe('');
 
-        // AUDIT_OTEL_FIELD_RENAMES: trace.id → request.id (avoids OTel TraceId collision)
+        // Resource-level fields.
+        expect(e['service.name']).toBe('kibana');
+        expect(e['telemetry.sdk.language']).toBe('nodejs');
+        expect(e['deployment.environment.name']).toBe('development');
+        expect(e['process.runtime.name']).toBe('nodejs');
+        expect(e['process.runtime.description']).toBe('Node.js');
+
+        // Log-record instrumentation fields.
+        expect(e['log.logger']).toBe('plugins.security.audit.ecs');
+        expect(e['service.type']).toBe('kibana');
+
+        // Core audit fields.
+        expect(e['event.action']).toBe('http_request');
+        expect(e['event.category']).toStrictEqual(['web']);
+        // http_request events have outcome 'unknown' — the request is in-flight when audited.
+        expect(e['event.outcome']).toBe('unknown');
+        // fieldDefaults applies event.type (http_request carries no explicit type).
+        expect(e['event.type']).toStrictEqual(['access']);
+
+        // Request URL.
+        expect(e['url.path']).toBe('/api/status');
+        expect(e['url.domain']).toBe('localhost');
+        expect(e['url.port']).toBe(5620);
+        expect(e['url.scheme']).toBe('http');
+
+        // http.request.method must be uppercase per OTel semantic conventions.
+        expect(e['http.request.method']).toBe('GET');
+
+        // Authenticated user.
+        expect(e['user.name']).toBeDefined();
+        expect(e['user.id']).toBeDefined();
+        expect(Array.isArray(e['user.roles'])).toBe(true);
+
+        // Kibana context.
+        expect(e['kibana.space.id']).toBe('default');
+        expect(e['kibana.session.id']).toBeDefined();
+
+        // Network.
+        expect(e['source.address']).toBe('127.0.0.1');
+        expect(e['source.ip']).toBe('127.0.0.1');
+
+        // AUDIT_OTEL_FIELD_RENAMES: trace.id → request.id (avoids OTel TraceId collision).
         expect(e['request.id']).toBeDefined();
         expect(e['trace.id']).toBeUndefined();
-
-        // http.request.method must be uppercase per OTel semantic conventions
-        expect(e['http.request.method']).toBe('GET');
       }
     );
 
@@ -177,16 +296,58 @@ apiTest.describe(
             attrs['kibana.saved_object.id'] === TEST_DASHBOARD_ID
         );
 
+        // OTel envelope fields.
+        expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
+        expect(e.severityText).toBe('INFO');
+        expect(e.body).toMatch(/accessed/);
+        expect(typeof e.traceId).toBe('string');
+        expect(e.traceId).not.toBe('');
+        expect(typeof e.spanId).toBe('string');
+        expect(e.spanId).not.toBe('');
+
+        // Resource-level fields.
+        expect(e['service.name']).toBe('kibana');
+        expect(e['telemetry.sdk.language']).toBe('nodejs');
+        expect(e['deployment.environment.name']).toBe('development');
+        expect(e['process.runtime.name']).toBe('nodejs');
+        expect(e['process.runtime.description']).toBe('Node.js');
+
+        // AUDIT_OTEL_FIELD_DROPS: service.version and host.name excluded from both
+        // log record attributes and resource attributes.
+        expect(e['service.version']).toBeUndefined();
+        expect(e['host.name']).toBeUndefined();
+
+        // Log-record instrumentation fields.
+        expect(e['log.logger']).toBe('plugins.security.audit.ecs');
+        expect(e['service.type']).toBe('kibana');
+
+        // Core audit fields.
         expect(e['event.action']).toBe('saved_object_find');
         expect(e['event.outcome']).toBe('success');
+        expect(e['event.category']).toStrictEqual(['database']);
+        // event.type is explicitly set by the saved_object_find event (not via fieldDefaults).
+        expect(e['event.type']).toStrictEqual(['access']);
 
-        // AUDIT_OTEL_FIELD_RENAMES: kibana.space_id → kibana.space.id
+        // Saved object identity.
+        expect(e['kibana.saved_object.type']).toBe('dashboard');
+        expect(e['kibana.saved_object.id']).toBe(TEST_DASHBOARD_ID);
+
+        // Authenticated user.
+        expect(e['user.name']).toBeDefined();
+        expect(e['user.id']).toBeDefined();
+        expect(Array.isArray(e['user.roles'])).toBe(true);
+
+        // AUDIT_OTEL_FIELD_RENAMES: kibana.space_id → kibana.space.id.
         expect(e['kibana.space.id']).toBe('default');
         expect(e['kibana.space_id']).toBeUndefined();
 
-        // AUDIT_OTEL_FIELD_DROPS
-        expect(e['service.version']).toBeUndefined();
-        expect(e['host.name']).toBeUndefined();
+        // Kibana context.
+        expect(e['kibana.session.id']).toBeDefined();
+
+        // Network.
+        expect(e['source.address']).toBe('127.0.0.1');
+        expect(e['source.ip']).toBe('127.0.0.1');
+        expect(e['request.id']).toBeDefined();
       }
     );
 
@@ -200,12 +361,53 @@ apiTest.describe(
 
         const e = await snap.waitForLogRecord((attrs) => attrs['event.action'] === 'user_logout');
 
+        // OTel envelope fields.
+        expect(e.severityNumber).toBe(9); // SeverityNumber.INFO
+        expect(e.severityText).toBe('INFO');
+        expect(e.body).toMatch(/logging out/);
+        expect(typeof e.traceId).toBe('string');
+        expect(e.traceId).not.toBe('');
+        expect(typeof e.spanId).toBe('string');
+        expect(e.spanId).not.toBe('');
+
+        // Resource-level fields.
+        expect(e['service.name']).toBe('kibana');
+        expect(e['telemetry.sdk.language']).toBe('nodejs');
+        expect(e['deployment.environment.name']).toBe('development');
+        expect(e['process.runtime.name']).toBe('nodejs');
+        expect(e['process.runtime.description']).toBe('Node.js');
+
+        // Log-record instrumentation fields.
+        expect(e['log.logger']).toBe('plugins.security.audit.ecs');
+        expect(e['service.type']).toBe('kibana');
+
+        // Core audit fields.
         expect(e['event.action']).toBe('user_logout');
-        // fieldDefaults: auth events get event.type: ['access']
+        expect(e['event.category']).toStrictEqual(['authentication']);
+        // logout outcome is 'unknown' — the session teardown is in progress when audited.
+        expect(e['event.outcome']).toBe('unknown');
+        // fieldDefaults: auth events carry no event.type — default supplies ['access'].
         expect(e['event.type']).toStrictEqual(['access']);
-        // AUDIT_OTEL_FIELD_RENAMES: kibana.authentication_type → authentication.type
+
+        // User who logged out.
+        expect(e['user.name']).toBeDefined();
+        expect(e['user.id']).toBeDefined();
+
+        // Auth provider — not renamed, stays as kibana.authentication_provider.
+        expect(e['kibana.authentication_provider']).toBeDefined();
+
+        // AUDIT_OTEL_FIELD_RENAMES: kibana.authentication_type → authentication.type.
         expect(e['authentication.type']).toBeDefined();
         expect(e['kibana.authentication_type']).toBeUndefined();
+
+        // Kibana context.
+        expect(e['kibana.space.id']).toBe('default');
+        expect(e['kibana.session.id']).toBeDefined();
+
+        // Network.
+        expect(e['source.address']).toBeDefined();
+        expect(e['source.ip']).toBeDefined();
+        expect(e['request.id']).toBeDefined();
       }
     );
   }

@@ -297,9 +297,22 @@ export class OtelAppender implements DisposableAppender {
     //   2. Derived: service.name / service.version / deployment.environment from the
     //      APM config singleton (mirrors how initTelemetry builds trace resources)
     //   3. User overrides: explicit attributes from kibana.yml (optional)
-    const resource = buildOtelResources().merge(
+    const baseResource = buildOtelResources().merge(
       resources.resourceFromAttributes(config.attributes ?? {})
     );
+    // When fieldDrops is configured, rebuild the resource excluding the specified keys
+    // so they are absent from resource.attributes in the OTLP export (not just from
+    // per-record log attributes). getRawAttributes() is used — not resource.attributes —
+    // because it preserves async-resolving entries (e.g. host.id from getMachineId).
+    // resourceFromAttributes() correctly accepts MaybePromise values and the SDK awaits
+    // them at export time, so the rebuilt resource retains all async-detected attributes.
+    const resource = config.fieldDrops?.length
+      ? resources.resourceFromAttributes(
+          Object.fromEntries(
+            baseResource.getRawAttributes().filter(([key]) => !config.fieldDrops!.includes(key))
+          )
+        )
+      : baseResource;
     this.loggerProvider = new LoggerProvider({
       processors: [new BatchLogRecordProcessor(exporter)],
       resource,

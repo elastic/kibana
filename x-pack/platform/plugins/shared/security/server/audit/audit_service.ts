@@ -197,10 +197,9 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
         highlight: true,
       },
     };
-    // When the configured appender is OTel, inject the audit-specific field renames so that
-    // legacy underscore-separated field names are translated to their OTel-native equivalents
-    // at the output layer — without touching the upstream AuditEvent type.
-    // Any user-supplied fieldRenames are preserved; audit renames take precedence on conflicts.
+    // When the configured appender is OTel, inject audit-specific field transforms
+    // (renames, drops, defaults) to satisfy Serverless audit log field requirements at
+    // the output layer — without touching the upstream AuditEvent type.
     const appender =
       baseAppender.type === 'otel'
         ? {

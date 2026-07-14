@@ -17,6 +17,15 @@ interface OtlpAnyValue {
 }
 
 interface OtlpLogRecord {
+  severityNumber?: number;
+  severityText?: string;
+  body?: OtlpAnyValue;
+  traceId?: string;
+  spanId?: string;
+  attributes?: Array<{ key: string; value: OtlpAnyValue }>;
+}
+
+interface OtlpResource {
   attributes?: Array<{ key: string; value: OtlpAnyValue }>;
 }
 
@@ -33,8 +42,19 @@ const unwrapAnyValue = (value: OtlpAnyValue | undefined): unknown => {
   return undefined;
 };
 
-const toFlatAttributes = (record: OtlpLogRecord): FlatAttributes => {
-  const attrs: FlatAttributes = {};
+const toFlatAttributes = (record: OtlpLogRecord, resourceAttrs: FlatAttributes): FlatAttributes => {
+  // Start with resource-level attributes so log-record attributes override them.
+  const attrs: FlatAttributes = { ...resourceAttrs };
+
+  // OTLP envelope fields — top-level log record fields distinct from attributes.
+  // Stored under their OTLP JSON field names (camelCase) to avoid collision with
+  // dotted OTel attribute keys.
+  if (record.severityNumber !== undefined) attrs.severityNumber = record.severityNumber;
+  if (record.severityText !== undefined) attrs.severityText = record.severityText;
+  if (record.body !== undefined) attrs.body = unwrapAnyValue(record.body);
+  if (record.traceId) attrs.traceId = record.traceId;
+  if (record.spanId) attrs.spanId = record.spanId;
+
   for (const { key, value } of record.attributes ?? []) {
     attrs[key] = unwrapAnyValue(value);
   }
@@ -55,23 +75,25 @@ const readBody = (req: http.IncomingMessage): Promise<string> =>
  * before triggering any actions — this ensures records from earlier tests
  * (including late-arriving batch flushes) are structurally excluded.
  */
-export class OtlpLogReceiverSnapshot {
-  constructor(private readonly records: FlatAttributes[], private readonly startIndex: number) {}
-
+export interface OtlpLogReceiverSnapshot {
   /** Polls records captured since this snapshot was taken until one matches `predicate`. */
-  async waitForLogRecord(
+  waitForLogRecord(
     predicate: (attrs: FlatAttributes) => boolean,
-    timeoutMs = 15_000
-  ): Promise<FlatAttributes> {
+    timeoutMs?: number
+  ): Promise<FlatAttributes>;
+}
+
+const makeSnapshot = (records: FlatAttributes[], startIndex: number): OtlpLogReceiverSnapshot => ({
+  waitForLogRecord: async (predicate, timeoutMs = 15_000) => {
     const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
-      const match = this.records.slice(this.startIndex).find(predicate);
+      const match = records.slice(startIndex).find(predicate);
       if (match) return match;
       await new Promise((r) => setTimeout(r, 200));
     }
     throw new Error(`Timed out waiting ${timeoutMs}ms for a matching OTLP log record`);
-  }
-}
+  },
+});
 
 /**
  * A fake OTLP/HTTP logs receiver standing in for a real OpenTelemetry Collector.
@@ -96,9 +118,14 @@ export class OtlpLogReceiver {
           .then((rawBody) => {
             const payload = rawBody ? JSON.parse(rawBody) : {};
             for (const resourceLog of payload.resourceLogs ?? []) {
+              const resource: OtlpResource = resourceLog.resource ?? {};
+              const resourceAttrs: FlatAttributes = {};
+              for (const { key, value } of resource.attributes ?? []) {
+                resourceAttrs[key] = unwrapAnyValue(value);
+              }
               for (const scopeLog of resourceLog.scopeLogs ?? []) {
                 for (const logRecord of scopeLog.logRecords ?? []) {
-                  this.records.push(toFlatAttributes(logRecord));
+                  this.records.push(toFlatAttributes(logRecord, resourceAttrs));
                 }
               }
             }
@@ -128,6 +155,6 @@ export class OtlpLogReceiver {
 
   /** Returns a snapshot scoped to records captured from this moment onward. Call this at the top of each test before triggering any actions. */
   snapshot(): OtlpLogReceiverSnapshot {
-    return new OtlpLogReceiverSnapshot(this.records, this.records.length);
+    return makeSnapshot(this.records, this.records.length);
   }
 }
