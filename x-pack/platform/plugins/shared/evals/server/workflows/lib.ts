@@ -25,7 +25,10 @@ import { buildScoreDocuments, mapWithConcurrency, ConcurrencyAbortError } from '
 import type { EvaluatorResult, RunnerExample } from '@kbn/evals-runner';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { BUILT_IN_TASK_PROVIDERS } from '../task_providers/types';
-import { AGENT_BUILDER_TOOL_PROFILE } from '../evaluators/evidence/profiles';
+import {
+  AGENT_BUILDER_TOOL_PROFILE,
+  OTEL_GENAI_ATTRIBUTES_PROFILE,
+} from '../evaluators/evidence/profiles';
 import type {
   EvalsCallKibanaApi,
   EvalsStepLogger,
@@ -78,15 +81,13 @@ export const resolveTaskProviderName = ({ taskRef, toolId, agentId }: TaskTarget
 /**
  * Picks the evidence mapping for a target. Bare tool runs (`agentBuilder.tool`)
  * have no conversation to grade, so they use the tool evidence profile (the tool's
- * arguments/result become the judge's question/answer). Other targets fall back to
- * the server default (conversation) mapping.
+ * arguments/result become the judge's question/answer). Every other target is a
+ * conversation graded from OTel v1.37.0+ structured gen_ai span attributes.
  */
-export const resolveEvidenceMappingForTarget = (
-  target: TaskTarget
-): { profile: string } | undefined =>
+export const resolveEvidenceMappingForTarget = (target: TaskTarget): { profile: string } =>
   resolveTaskProviderName(target) === BUILT_IN_TASK_PROVIDERS.agentBuilderTool
     ? { profile: AGENT_BUILDER_TOOL_PROFILE }
-    : undefined;
+    : { profile: OTEL_GENAI_ATTRIBUTES_PROFILE };
 
 /** Runs the feature under evaluation for a single example via the resolved provider. */
 export const runTask = async (

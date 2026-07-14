@@ -137,6 +137,13 @@ const agentBuilderTool: EvidenceMappingProfileDefinition = {
   },
 };
 
+/**
+ * Evidence profile for conversation targets (direct inference + Agent Builder
+ * agents). Reads gen_ai content from OTel v1.37.0+ structured span attributes
+ * (`gen_ai.input.messages` / `gen_ai.output.messages`).
+ */
+export const OTEL_GENAI_ATTRIBUTES_PROFILE = 'otel-genai-attributes' as const;
+
 /** Evidence profile key for bare `agentBuilder.tool` executions. */
 export const AGENT_BUILDER_TOOL_PROFILE = 'agent-builder-tool' as const;
 
@@ -146,6 +153,6 @@ export const EVIDENCE_MAPPING_PROFILES: Record<string, EvidenceMappingProfileDef
     extends: 'otel-genai-events',
     overrides: elasticInferenceOverrides,
   },
-  'otel-genai-attributes': otelGenAiAttributes,
+  [OTEL_GENAI_ATTRIBUTES_PROFILE]: otelGenAiAttributes,
   [AGENT_BUILDER_TOOL_PROFILE]: agentBuilderTool,
 };

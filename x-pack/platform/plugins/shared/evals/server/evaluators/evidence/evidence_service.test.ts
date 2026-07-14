@@ -217,6 +217,68 @@ describe('normalizeEvidence', () => {
     });
   });
 
+  it('skips duplicate chat spans that carry an empty gen_ai messages array', async () => {
+    const mapping = resolveEvidenceMapping({ profile: 'otel-genai-attributes' });
+    const { esClient, searchMock } = createEsClient();
+
+    searchMock
+      // user_query: the earliest candidate is an empty duplicate span; the real
+      // conversation span shares the same timestamp and must still be picked.
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-06-26T10:00:00.000Z',
+                attributes: { 'gen_ai.input.messages': '[]' },
+              },
+            },
+            {
+              _source: {
+                '@timestamp': '2026-06-26T10:00:00.000Z',
+                attributes: {
+                  'gen_ai.input.messages': JSON.stringify([
+                    {
+                      role: 'user',
+                      parts: [{ type: 'text', content: 'How many indices are there?' }],
+                    },
+                  ]),
+                },
+              },
+            },
+          ],
+        },
+      })
+      // agent_response
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _source: {
+                '@timestamp': '2026-06-26T10:00:01.000Z',
+                attributes: {
+                  'gen_ai.output.messages': JSON.stringify([
+                    {
+                      role: 'assistant',
+                      parts: [{ type: 'text', content: 'There are 42 indices.' }],
+                    },
+                  ]),
+                },
+              },
+            },
+          ],
+        },
+      })
+      // tool_calls
+      .mockResolvedValueOnce({ hits: { hits: [] } });
+
+    await expect(normalizeEvidence({ traceId, esClient }, mapping)).resolves.toEqual({
+      input: { message: 'How many indices are there?' },
+      response: { message: 'There are 42 indices.' },
+      steps: [],
+    });
+  });
+
   it('maps a bare agentBuilder.tool run to arguments (question) and result (answer)', async () => {
     const mapping = resolveEvidenceMapping({ profile: 'agent-builder-tool' });
     const { esClient, searchMock } = createEsClient();

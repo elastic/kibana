@@ -19,6 +19,9 @@ import type {
 
 const MAX_EVIDENCE_DOCS = 200;
 const SAMPLE_LIMIT = 120;
+// Chat turns can emit duplicate spans where one copy carries an empty `messages`
+// array; fetch a few candidates so we can skip those and still find real content.
+const GENAI_CANDIDATE_LIMIT = 25;
 const hasOwnProperty = (value: unknown, key: string): value is Record<string, unknown> =>
   !!value && typeof value === 'object' && Object.prototype.hasOwnProperty.call(value, key);
 
@@ -112,7 +115,12 @@ const getSearchParams = (
     field: '@timestamp',
     order: spec.select === 'last' ? 'desc' : 'asc',
   },
-  size: spec.select === 'all' ? MAX_EVIDENCE_DOCS : 1,
+  size:
+    spec.select === 'all'
+      ? MAX_EVIDENCE_DOCS
+      : spec.parse === 'genai_messages'
+      ? GENAI_CANDIDATE_LIMIT
+      : 1,
 });
 
 const firstStringValue = (value: unknown): string | undefined => {
@@ -172,13 +180,22 @@ const parseItemValue = (
 
   if (itemSpec.parse === 'genai_messages') {
     const [fieldPath] = Object.values(itemSpec.fields);
-    if (!fieldPath || documents.length === 0) {
+    if (!fieldPath) {
       return undefined;
     }
 
-    const messages = toMessageArray(getFieldValue(documents[0], fieldPath));
     const role = itemKey === 'agent_response' ? 'assistant' : 'user';
-    return getGenAiMessageText(messages, role);
+    // Some targets emit duplicate chat spans where one copy has an empty `messages`
+    // array (serialized as `"[]"`), which still passes the field-exists filter. Scan
+    // candidates in select order and return the first one that actually has content.
+    for (const document of documents) {
+      const messages = toMessageArray(getFieldValue(document, fieldPath));
+      const text = getGenAiMessageText(messages, role);
+      if (text && text.trim()) {
+        return text;
+      }
+    }
+    return undefined;
   }
 
   const entries = documents
