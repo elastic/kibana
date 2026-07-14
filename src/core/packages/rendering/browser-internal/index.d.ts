@@ -1,1 +1,0 @@
-export { RenderingService } from './src';

@@ -1,1 +1,0 @@
-export { SavedObjectsTypeValidator } from './validator';
