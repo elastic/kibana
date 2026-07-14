@@ -19,7 +19,10 @@ import { buildEsQuery, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import dedent from 'dedent';
-import type { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingRuntimeFieldType,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ESBoolQuery } from '../../../../../../common/typed_json';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
@@ -91,12 +94,30 @@ export const getAggregationsByGroupField = (field: string): NamedAggregation[] =
   return aggMetrics;
 };
 
-const isEmptyBool = (q: ESBoolQuery | undefined | null): boolean =>
-  !q ||
-  (q.bool.must.length === 0 &&
-    q.bool.filter.length === 0 &&
-    q.bool.should.length === 0 &&
-    q.bool.must_not.length === 0);
+const toClauseArray = (
+  clause: QueryDslQueryContainer | QueryDslQueryContainer[] | undefined
+): QueryDslQueryContainer[] => (clause == null ? [] : Array.isArray(clause) ? clause : [clause]);
+
+// A clause contributes no filtering only if it is a bool query whose every
+// sub-clause is itself empty. Any non-bool leaf (term, match, range, …) is a
+// real filter. This must recurse: `useBaseEsQuery` unconditionally appends the
+// global filter bool into `state.query.bool.filter`, and an empty search bar
+// compiles to a nested empty bool `{ bool: { must:[], filter:[], … } }`. A
+// shallow length check would see `filter.length === 1` and misclassify the
+// default unfiltered view as filtered, routing it to the slow Path B.
+const isEmptyClause = (clause: QueryDslQueryContainer | undefined | null): boolean => {
+  if (!clause) return true;
+  const { bool } = clause;
+  if (!bool) return false;
+  return (
+    toClauseArray(bool.must).every(isEmptyClause) &&
+    toClauseArray(bool.filter).every(isEmptyClause) &&
+    toClauseArray(bool.should).every(isEmptyClause) &&
+    toClauseArray(bool.must_not).every(isEmptyClause)
+  );
+};
+
+const isEmptyBool = (q: ESBoolQuery | undefined | null): boolean => !q || isEmptyClause(q);
 
 export const useEntityGrouping = ({
   state,

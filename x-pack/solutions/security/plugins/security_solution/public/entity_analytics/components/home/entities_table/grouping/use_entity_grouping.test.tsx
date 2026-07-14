@@ -315,6 +315,62 @@ describe('useEntityGrouping — filter detection and Path A/B routing', () => {
     expect(mockPathB.mock.calls[0][0].enabled).toBe(false);
   });
 
+  it('treats a query whose filter only holds a nested empty bool as no user filter (Path A)', () => {
+    // Mirrors real table state: useBaseEsQuery unconditionally appends the
+    // (empty) global filter bool into state.query.bool.filter, so the default
+    // unfiltered view arrives as a bool wrapping a nested empty bool.
+    const nestedEmptyBool: ESBoolQuery = {
+      bool: {
+        must: [],
+        filter: [{ bool: { must: [], filter: [], should: [], must_not: [] } }],
+        should: [],
+        must_not: [],
+      },
+    };
+
+    renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState({ query: nestedEmptyBool }),
+          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    expect(mockPathA.mock.calls[0][0].enabled).toBe(true);
+    expect(mockPathB.mock.calls[0][0].enabled).toBe(false);
+  });
+
+  it('enables Path B when a real leaf clause is nested alongside empty bools', () => {
+    const nestedActiveBool: ESBoolQuery = {
+      bool: {
+        must: [],
+        filter: [
+          { bool: { must: [], filter: [], should: [], must_not: [] } },
+          { term: { 'host.name': 'my-host' } } as unknown as ESBoolQuery,
+        ],
+        should: [],
+        must_not: [],
+      },
+    };
+
+    renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState({ query: nestedActiveBool }),
+          selectedGroup: ENTITY_GROUPING_OPTIONS.RESOLUTION,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    expect(mockPathA.mock.calls[0][0].enabled).toBe(false);
+    expect(mockPathB.mock.calls[0][0].enabled).toBe(true);
+  });
+
   it('enables Path B and disables Path A when state.query has a non-empty bool', () => {
     const activeQuery: ESBoolQuery = {
       bool: {
