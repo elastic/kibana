@@ -111,14 +111,14 @@ apiTest.describe(
               urls: 'https://nextjs-test-synthetics.vercel.app/api/users',
               max_redirects: '3',
               max_attempts: 2,
-              password: testParamWithNewLine.value,
+              password: '********',
               proxy_url: 'http://proxy.com',
               'response.include_body': 'never',
               'response.include_headers': true,
               'check.response.status': ['200', '201'],
-              'check.request.body': 'testValue',
-              'check.request.headers': { sampleHeader: 'sampleHeaderValue' },
-              username: 'test-username',
+              'check.request.body': '********',
+              'check.request.headers': '********',
+              username: '********',
               mode: 'any',
               'response.include_body_max_bytes': '1024',
               ipv4: true,
@@ -239,9 +239,7 @@ apiTest.describe(
       delete compiledStream.processors[0].add_fields.fields.config_id;
       delete compiledStream.processors[0].add_fields.fields.kibanaUrl;
 
-      expect(enabledStream?.vars?.password.value).toBe(
-        '"-----BEGIN CERTIFICATE-----\n\nMIICMzBgNV\n\n\npAqEAJlQND\n\n-----END CERTIFICATE-----"'
-      );
+      expect(enabledStream?.vars?.password).toBe('********');
 
       expect(enabledStream?.compiled_stream).toStrictEqual({
         __ui: { is_tls_enabled: false },
@@ -258,14 +256,14 @@ apiTest.describe(
         max_attempts: 2,
         proxy_url: 'http://proxy.com',
         tags: ['tag1', 'tag2'],
-        username: 'test-username',
-        password: testParamWithNewLine.value,
+        username: '********',
+        password: '********',
         'response.include_headers': true,
         'response.include_body': 'never',
         'response.include_body_max_bytes': 1024,
         'check.request.method': null,
-        'check.request.headers': { sampleHeader: 'sampleHeaderValue' },
-        'check.request.body': 'testValue',
+        'check.request.headers': '********',
+        'check.request.body': '********',
         'check.response.status': ['200', '201'],
         mode: 'any',
         ipv4: true,

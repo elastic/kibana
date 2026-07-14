@@ -1,0 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ConfigKey } from '../../../common/runtime_types';
+import { secretKeys } from '../../../common/constants/monitor_management';
+
+export const INSPECT_SECRET_REDACTED_VALUE = '********';
+
+/**
+ * Secret config keys that must NOT be redacted in the inspect output:
+ * - `params` is already masked separately via the `hideParams` toggle.
+ * - the source/script fields power the "Source code" panel (and browser
+ *   `decodedCode`), so they are shown intentionally rather than being credentials.
+ */
+const INSPECT_UNREDACTED_SECRET_KEYS = new Set<string>([
+  ConfigKey.PARAMS,
+  ConfigKey.SOURCE_INLINE,
+  ConfigKey.SOURCE_PROJECT_CONTENT,
+]);
+
+export const INSPECT_REDACTED_SECRET_KEYS: ReadonlySet<string> = new Set(
+  secretKeys.filter((key) => !INSPECT_UNREDACTED_SECRET_KEYS.has(key))
+);
+
+/**
+ * Deep-clones `value`, replacing any object property whose key is a monitor
+ * secret with a redacted placeholder. Applied to the inspect response so
+ * credentials (password, TLS key, username, request/response checks, ...) are
+ * never returned in plain text — in either the public config or the private
+ * location's compiled Fleet policy (`compiled_stream`/`vars`).
+ */
+export const redactInspectedSecrets = <T>(
+  value: T,
+  keysToRedact: ReadonlySet<string> = INSPECT_REDACTED_SECRET_KEYS
+): T => {
+  if (Array.isArray(value)) {
+    return value.map((item) => redactInspectedSecrets(item, keysToRedact)) as unknown as T;
+  }
+
+  if (value && typeof value === 'object') {
+    const redacted: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(value)) {
+      redacted[key] = keysToRedact.has(key)
+        ? INSPECT_SECRET_REDACTED_VALUE
+        : redactInspectedSecrets(val, keysToRedact);
+    }
+    return redacted as T;
+  }
+
+  return value;
+};
