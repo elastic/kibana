@@ -73,7 +73,7 @@ export const MonitorStats = ({
           <EuiFlexItem
             css={{ display: 'flex', flexDirection: 'row', gap: euiTheme.size.l, height: '200px' }}
           >
-            <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
+            <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
               <MonitorTestRunsCount />
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
