@@ -22,6 +22,7 @@ import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '.
 import { convertToWorkflowGraph } from '../graph/build_execution_graph/build_execution_graph';
 import type { WorkflowYaml } from '../spec/schema';
 import { WorkflowSchemaBase } from '../spec/schema';
+import { isForeachStep } from '../types/utils';
 
 const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(z.object({ type: z.string().min(1) }).passthrough()).min(1),
@@ -193,12 +194,23 @@ describe('managedWorkflowDefinitions', () => {
 
   it('runs significant events detection rules in a bounded parallel fan-out', () => {
     const workflow = parse(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW.yaml) as WorkflowYaml;
-    const foreachRule = workflow.steps.find(({ name }) => name === 'foreach_rule');
+    const foreachRuleBatch = workflow.steps.find(({ name }) => name === 'foreach_rule_batch');
 
+    if (!foreachRuleBatch || !isForeachStep(foreachRuleBatch)) {
+      throw new Error('Expected foreach_rule_batch to be a foreach step');
+    }
+
+    const foreachRule = foreachRuleBatch.steps.find(({ name }) => name === 'foreach_rule');
+
+    expect(foreachRuleBatch).toMatchObject({
+      type: 'foreach',
+      foreach: '${{ steps.run_change_point_aggregation.output.aggregations.by_rule.batches }}',
+    });
     expect(foreachRule).toMatchObject({
       type: 'parallel',
       concurrency: 5,
       mode: 'settled',
+      foreach: '${{ foreach.item }}',
     });
     expect(() => convertToWorkflowGraph(workflow)).not.toThrow();
   });

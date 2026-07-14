@@ -16,6 +16,7 @@ import {
   scheduleIntervalForQuery,
   type RuleDetectionSchedule,
 } from '../../../lib/significant_events/rules/schedule';
+import { batchRuleBuckets } from './batch_rule_buckets';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
@@ -135,7 +136,7 @@ const changePointScanRoute = createServerRoute({
     const durationMs = Date.now() - startedAt;
     const took = scanResults.reduce((sum, result) => sum + (result.took ?? 0), 0);
     const buckets = scanResults.flatMap((result) => result.by_rule.buckets);
-    const aggregations = { by_rule: { buckets } };
+    const aggregations = { by_rule: { batches: batchRuleBuckets(buckets) } };
     const criticalRuleCount = countRulesForInterval(queryLinks, CRITICAL_RULE_INTERVAL);
     const defaultRuleCount = countRulesForInterval(queryLinks, DEFAULT_RULE_INTERVAL);
 
