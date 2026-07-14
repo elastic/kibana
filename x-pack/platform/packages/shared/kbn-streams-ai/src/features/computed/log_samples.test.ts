@@ -12,6 +12,7 @@ import { logSamplesGenerator } from './log_samples';
 
 jest.mock('@kbn/ai-tools', () => ({
   getSampleDocumentsEsql: jest.fn(),
+  DEFAULT_ESQL_QUERY_TIMEOUT_MS: 30_000,
 }));
 
 const getSampleDocumentsEsqlMock = jest.mocked(getSampleDocumentsEsql);
@@ -54,6 +55,7 @@ describe('logSamplesGenerator', () => {
       start: 100,
       end: 200,
       sampleSize: 5,
+      requestTimeout: expect.any(Number),
     });
     expect(result).toEqual({
       samples: [{ 'service.name': 'checkout', message: 'checkout succeeded' }],
