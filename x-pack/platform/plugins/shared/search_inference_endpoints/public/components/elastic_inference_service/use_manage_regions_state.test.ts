@@ -479,14 +479,14 @@ describe('useManageRegionsState', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // handleTabChange + isDirty cross-tab behaviour
+  // setActiveTab + isDirty cross-tab behaviour
   // ---------------------------------------------------------------------------
-  describe('handleTabChange and isDirty', () => {
+  describe('setActiveTab and isDirty', () => {
     it('switches activeTab', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
       // Default is 'geo' when no policy exists.
       expect(result.current.activeTab).toBe('geo');
-      act(() => result.current.handleTabChange('regions'));
+      act(() => result.current.setActiveTab('regions'));
       expect(result.current.activeTab).toBe('regions');
     });
 
@@ -504,7 +504,7 @@ describe('useManageRegionsState', () => {
       expect(result.current.isDirty).toBe(true);
 
       // Switch to regions tab — starts empty (geo policy, no regions policy) → not dirty.
-      act(() => result.current.handleTabChange('regions'));
+      act(() => result.current.setActiveTab('regions'));
       expect(result.current.isDirty).toBe(false);
     });
   });

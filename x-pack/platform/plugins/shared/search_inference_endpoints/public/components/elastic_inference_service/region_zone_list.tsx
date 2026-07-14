@@ -7,14 +7,10 @@
 
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import type { CspRegion } from '../../../common/types';
+import type { ZoneGroup } from '../../utils/eis_utils';
 import { RegionZoneItem } from './region_zone_item';
 
-export interface ZoneGroup {
-  geo: string;
-  displayName: string;
-  regions: CspRegion[];
-}
+export type { ZoneGroup };
 
 interface RegionZoneListProps {
   zoneGroups: ZoneGroup[];

@@ -60,7 +60,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     isSaving,
     isSaveDisabled,
     showConfirmation,
-    handleTabChange,
+    setActiveTab,
     handleDismissCallOut,
     handleRequestSave,
     handleConfirmSave,
@@ -227,7 +227,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           <EuiTabbedContent
             tabs={tabs}
             selectedTab={selectedTab}
-            onTabClick={(tab) => isPolicyMode(tab.id) && handleTabChange(tab.id)}
+            onTabClick={(tab) => isPolicyMode(tab.id) && setActiveTab(tab.id)}
           />
         </EuiModalBody>
 

@@ -442,6 +442,35 @@ export const getAvailableRegions = (endpoints: EisInferenceEndpoint[]): CspRegio
 
 export const regionKey = (region: CspRegion): string => `${region.csp}::${region.region}`;
 
+export interface ZoneGroup {
+  geo: string;
+  displayName: string;
+  regions: CspRegion[];
+}
+
+/**
+ * Groups available regions by geo zone, ordered by GEO_ORDER for known geos
+ * and alphabetically for any unknown ones.
+ */
+export const getZoneGroups = (availableRegions: CspRegion[]): ZoneGroup[] => {
+  const regionsByGeo: Record<string, CspRegion[]> = {};
+  for (const region of availableRegions) {
+    (regionsByGeo[region.geo ?? 'other'] ??= []).push(region);
+  }
+
+  const geoOrderList: readonly string[] = GEO_ORDER;
+  const knownGeos = geoOrderList.filter((geo) => geo in regionsByGeo);
+  const unknownGeos = Object.keys(regionsByGeo)
+    .filter((geo) => !geoOrderList.includes(geo))
+    .sort();
+
+  return [...knownGeos, ...unknownGeos].map((geo) => ({
+    geo,
+    displayName: getGeoDisplayName(geo),
+    regions: regionsByGeo[geo],
+  }));
+};
+
 export const isPolicyMode = (id: string): id is PolicyMode => id === 'geo' || id === 'regions';
 
 /**

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiAccordion, EuiCheckbox, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getRegionDisplayName, regionKey } from '../../utils/eis_utils';
-import type { ZoneGroup } from './region_zone_list';
+import type { ZoneGroup } from '../../utils/eis_utils';
 
 export interface RegionZoneItemProps {
   zone: ZoneGroup;

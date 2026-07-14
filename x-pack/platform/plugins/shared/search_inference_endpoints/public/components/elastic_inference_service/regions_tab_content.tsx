@@ -12,7 +12,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RegionSelectionToolbar } from './region_selection_toolbar';
 import { RegionZoneList } from './region_zone_list';
-import type { ZoneGroup } from './region_zone_list';
+import type { ZoneGroup } from '../../utils/eis_utils';
 
 const tabContentStyles = ({ euiTheme }: UseEuiTheme) => css`
   margin-top: ${euiTheme.size.m};
