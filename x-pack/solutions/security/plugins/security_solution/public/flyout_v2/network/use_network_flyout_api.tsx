@@ -113,7 +113,11 @@ export const useNetworkFlyoutApi = (): NetworkFlyoutApi => {
 
   const openNetworkFlyout = useCallback(
     ({ ip, flowTarget }: OpenNetworkFlyoutParams) => {
-      open(<Network ip={ip} flowTarget={flowTarget} />, mainFlyoutSessionMode, formatFlyoutTitle(NETWORK_TITLE, ip));
+      open(
+        <Network ip={ip} flowTarget={flowTarget} />,
+        mainFlyoutSessionMode,
+        formatFlyoutTitle(NETWORK_TITLE, ip)
+      );
     },
     [open, mainFlyoutSessionMode]
   );
