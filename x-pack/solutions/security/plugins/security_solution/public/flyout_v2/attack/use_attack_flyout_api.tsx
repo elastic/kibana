@@ -199,24 +199,32 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
 
   const openAttackCorrelations = useCallback(
     ({ hit, alertIds, onShowAlert }: OpenAttackCorrelationsParams) => {
-      open(<CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-        title: formatFlyoutTitle(ATTACK_CORRELATIONS_TITLE, getAttackTitleValue(hit)),
-      });
+      open(
+        <CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />,
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(ATTACK_CORRELATIONS_TITLE, getAttackTitleValue(hit)),
+        },
+        'inherit'
+      );
     },
     [open, historyKey]
   );
 
   const openAttackEntities = useCallback(
     ({ hit, alertIds }: OpenAttackEntitiesParams) => {
-      open(<EntitiesDetails hit={hit} alertIds={alertIds} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-        title: formatFlyoutTitle(ATTACK_ENTITIES_TITLE, getAttackTitleValue(hit)),
-      });
+      open(
+        <EntitiesDetails hit={hit} alertIds={alertIds} />,
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(ATTACK_ENTITIES_TITLE, getAttackTitleValue(hit)),
+        },
+        'inherit'
+      );
     },
     [open, historyKey]
   );

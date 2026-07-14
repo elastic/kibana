@@ -367,12 +367,16 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
 
   const openDocumentEntities = useCallback(
     ({ hit, scopeId }: OpenDocumentEntitiesParams) => {
-      open(<EntityDetails hit={hit} scopeId={scopeId} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-        title: formatFlyoutTitle(ENTITIES_TITLE, getDocumentTitle(hit)),
-      });
+      open(
+        <EntityDetails hit={hit} scopeId={scopeId} />,
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'start',
+          title: formatFlyoutTitle(ENTITIES_TITLE, getDocumentTitle(hit)),
+        },
+        'inherit'
+      );
     },
     [open, historyKey]
   );
@@ -398,7 +402,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           historyKey,
           session: 'start',
           title: formatFlyoutTitle(CORRELATIONS_TITLE, getDocumentTitle(hit)),
-        }
+        },
+        'inherit'
       );
     },
     [open, historyKey]
@@ -442,7 +447,8 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           historyKey,
           session: 'start',
           title: formatFlyoutTitle(PREVALENCE_TITLE, getDocumentTitle(hit)),
-        }
+        },
+        'inherit'
       );
     },
     [open, historyKey]
