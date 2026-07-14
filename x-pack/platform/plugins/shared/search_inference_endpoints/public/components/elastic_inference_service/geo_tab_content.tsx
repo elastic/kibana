@@ -51,7 +51,7 @@ export const GeoTabContent: React.FC<GeoTabContentProps> = ({
       <EuiEmptyPrompt
         css={tabContentStyles}
         icon={<EuiLoadingSpinner size="xl" />}
-        data-test-subj="manageRegionsLoading"
+        data-test-subj="manageGeosLoading"
       />
     );
   }

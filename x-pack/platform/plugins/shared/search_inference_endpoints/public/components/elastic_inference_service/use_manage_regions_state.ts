@@ -121,6 +121,56 @@ export const useManageRegionsState = (onClose: () => void) => {
     setIsCallOutDismissed(true);
   }, []);
 
+  const regionTabReturn = useMemo(
+    () => ({
+      zoneGroups: regionTab.zoneGroups,
+      checkedKeys: regionTab.regionSelection.selected,
+      expandedZones: regionTab.expandedZones,
+      totalRegions: regionTab.regionSelection.total,
+      totalSelected: regionTab.regionSelection.totalSelected,
+      allSelected: regionTab.regionSelection.allSelected,
+      isAllExpanded: regionTab.isAllExpanded,
+      onSelectAll: regionTab.regionSelection.selectAll,
+      onToggleRegion: regionTab.regionSelection.toggle,
+      onToggleExpand: regionTab.handleToggleExpand,
+      onExpandAll: regionTab.handleExpandAll,
+    }),
+    [
+      regionTab.zoneGroups,
+      regionTab.regionSelection.selected,
+      regionTab.expandedZones,
+      regionTab.regionSelection.total,
+      regionTab.regionSelection.totalSelected,
+      regionTab.regionSelection.allSelected,
+      regionTab.isAllExpanded,
+      regionTab.regionSelection.selectAll,
+      regionTab.regionSelection.toggle,
+      regionTab.handleToggleExpand,
+      regionTab.handleExpandAll,
+    ]
+  );
+
+  const geoTabReturn = useMemo(
+    () => ({
+      availableGeos,
+      checkedGeos: geoSelection.selected,
+      totalGeos: geoSelection.total,
+      totalGeosSelected: geoSelection.totalSelected,
+      allGeosSelected: geoSelection.allSelected,
+      onSelectAll: geoSelection.selectAll,
+      onToggleGeo: geoSelection.toggle,
+    }),
+    [
+      availableGeos,
+      geoSelection.selected,
+      geoSelection.total,
+      geoSelection.totalSelected,
+      geoSelection.allSelected,
+      geoSelection.selectAll,
+      geoSelection.toggle,
+    ]
+  );
+
   return {
     // Shared modal state and handlers
     common: {
@@ -139,29 +189,7 @@ export const useManageRegionsState = (onClose: () => void) => {
       handleConfirmSave,
       handleCancelConfirmation,
     },
-    // Regions tab — keys match RegionsTabContentProps for direct spread
-    regionTab: {
-      zoneGroups: regionTab.zoneGroups,
-      checkedKeys: regionTab.regionSelection.selected,
-      expandedZones: regionTab.expandedZones,
-      totalRegions: regionTab.regionSelection.total,
-      totalSelected: regionTab.regionSelection.totalSelected,
-      allSelected: regionTab.regionSelection.allSelected,
-      isAllExpanded: regionTab.isAllExpanded,
-      onSelectAll: regionTab.regionSelection.selectAll,
-      onToggleRegion: regionTab.regionSelection.toggle,
-      onToggleExpand: regionTab.handleToggleExpand,
-      onExpandAll: regionTab.handleExpandAll,
-    },
-    // Geo tab — keys match GeoTabContentProps for direct spread
-    geoTab: {
-      availableGeos,
-      checkedGeos: geoSelection.selected,
-      totalGeos: geoSelection.total,
-      totalGeosSelected: geoSelection.totalSelected,
-      allGeosSelected: geoSelection.allSelected,
-      onSelectAll: geoSelection.selectAll,
-      onToggleGeo: geoSelection.toggle,
-    },
+    regionTab: regionTabReturn,
+    geoTab: geoTabReturn,
   };
 };

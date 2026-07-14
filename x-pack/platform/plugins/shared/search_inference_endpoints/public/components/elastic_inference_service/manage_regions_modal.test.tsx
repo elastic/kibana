@@ -98,7 +98,7 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('manageRegionsLoading')).toBeInTheDocument();
+      expect(screen.getByTestId('manageGeosLoading')).toBeInTheDocument();
     });
 
     it('renders a loading spinner while eis models are fetching', () => {
@@ -116,7 +116,7 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('manageRegionsLoading')).toBeInTheDocument();
+      expect(screen.getByTestId('manageGeosLoading')).toBeInTheDocument();
     });
   });
 
