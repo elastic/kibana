@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { EventClient } from '../../../lib/significant_events/events';
+import { eventsWriteHandler, type EventsWriteInput } from '../event_write/handler';
 
-export interface EventCreateInput {
-  status?: SignificantEventStatus;
-  title: string;
-  summary: string;
-  root_cause: string;
-  stream_names: string[];
-  criticality: number;
-  confidence: number;
-  recommendations: string[];
-}
+/**
+ * Chat-initiated event input — a subset of EventsWriteInput without workflow-specific fields.
+ * `discovery_slug` is absent: eventsWriteHandler generates a synthetic one automatically.
+ * `status` is optional (defaults to 'promoted' when omitted).
+ */
+export type EventCreateInput = Omit<
+  EventsWriteInput,
+  | 'discovery_slug'
+  | 'discovery_id'
+  | 'assessment_note'
+  | 'evidences'
+  | 'workflow_execution_id'
+  | 'status'
+  | 'recommendations'
+> & {
+  status?: EventsWriteInput['status'];
+  recommendations?: EventsWriteInput['recommendations'];
+};
 
 export async function createEventToolHandler({
   eventClient,
@@ -27,24 +34,13 @@ export async function createEventToolHandler({
   eventClient: EventClient;
   eventInput: EventCreateInput;
 }): Promise<{ event_id: string; acknowledged: true }> {
-  const now = new Date().toISOString();
-  const eventId = uuidv4();
-
-  const event: SignificantEvent = {
-    '@timestamp': now,
-    created_at: now,
-    event_id: eventId,
-    discovery_slug: `agent-event-${eventId.slice(0, 8)}`,
-    status: eventInput.status ?? 'promoted',
-    stream_names: eventInput.stream_names,
-    title: eventInput.title,
-    summary: eventInput.summary,
-    root_cause: eventInput.root_cause,
-    criticality: eventInput.criticality,
-    confidence: eventInput.confidence,
-    recommendations: eventInput.recommendations,
-  };
-
-  await eventClient.bulkCreate([event], { throwOnFail: true });
-  return { event_id: eventId, acknowledged: true };
+  const result = await eventsWriteHandler({
+    eventClient,
+    input: {
+      ...eventInput,
+      status: eventInput.status ?? 'promoted',
+      recommendations: eventInput.recommendations ?? [],
+    },
+  });
+  return { event_id: result.event_id, acknowledged: true };
 }

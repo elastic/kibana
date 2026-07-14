@@ -5,55 +5,53 @@
  * 2.0.
  */
 
-import type { Discovery } from '@kbn/significant-events-schema';
+import type { Discovery, SignificantEvent } from '@kbn/significant-events-schema';
 
-export interface ToContinuationCandidateParams {
-  /** A discovery the agent produced in a prior cycle. */
+export interface ToSignificantEventSeedParams {
+  /** A discovery the investigator produced in a prior cycle. */
   discovery: Partial<Discovery>;
-  /** Id stamped onto the candidate (agent output carries none; `clearance` needs it). */
-  discoveryId: string;
+  /** Unique event_id to stamp on the seed document. */
+  eventId: string;
 }
 
-/** Map a produced discovery into the `## Continuation Candidates` shape; stamps `discovery_id`, derives `stream_names`. */
-export function toContinuationCandidate({
+/**
+ * Map a produced discovery into a `SignificantEvent` document suitable for indexing into
+ * `.significant_events-events` between continuation cycles. The seeded doc has `status: "promoted"`
+ * so the next cycle's `event_search state: "open"` call picks it up for continuation routing.
+ */
+export function toSignificantEventSeed({
   discovery,
-  discoveryId,
-}: ToContinuationCandidateParams): Partial<Discovery> {
+  eventId,
+}: ToSignificantEventSeedParams): SignificantEvent {
   const detections = discovery.detections ?? [];
+  const ruleNames = [
+    ...new Set(detections.map((d) => d.rule_name).filter((name): name is string => Boolean(name))),
+  ];
   const streamNames = [
     ...new Set(
-      detections
-        .map((detection) => detection.stream_name)
-        .filter((name): name is string => Boolean(name))
+      detections.map((d) => d.stream_name).filter((name): name is string => Boolean(name))
     ),
   ];
 
+  const now = new Date().toISOString();
   return {
-    kind: discovery.kind ?? 'discovery',
-    discovery_id: discoveryId,
-    discovery_slug: discovery.discovery_slug,
-    detections,
-    summary: discovery.summary,
-    root_cause: discovery.root_cause,
-    title: discovery.title,
-    confidence: discovery.confidence,
-    criticality: discovery.criticality,
+    '@timestamp': now,
+    created_at: now,
+    event_id: eventId,
+    discovery_id: discovery.discovery_id,
+    discovery_slug: discovery.discovery_slug ?? eventId,
+    status: 'promoted',
+    rule_names: ruleNames,
+    stream_names: streamNames.length > 0 ? streamNames : ['unknown'],
+    title: discovery.title ?? 'eval-seeded-event',
+    summary: discovery.summary ?? '',
+    root_cause: discovery.root_cause ?? '',
+    criticality: discovery.criticality ?? 50,
+    confidence: discovery.confidence ?? 0.5,
+    recommendations: [],
     cause_kis: discovery.cause_kis,
-    stream_names: streamNames,
     dependency_edges: discovery.dependency_edges,
     infra_components: discovery.infra_components,
+    evidences: discovery.evidences,
   };
-}
-
-/** Collapse produced discoveries to one candidate per `discovery_slug` (latest wins); slugless skipped. */
-export function mergeContinuationCandidates(
-  candidates: Array<Partial<Discovery>>
-): Array<Partial<Discovery>> {
-  const latestBySlug = new Map<string, Partial<Discovery>>();
-  for (const candidate of candidates) {
-    if (candidate.discovery_slug) {
-      latestBySlug.set(candidate.discovery_slug, candidate);
-    }
-  }
-  return [...latestBySlug.values()];
 }

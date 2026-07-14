@@ -113,16 +113,19 @@ safe-outputs:
       - failure:application
       - failure:ci-environment
       - failure:inconclusive
-    max: 2
+      - failure:insufficient-data
+    max: 3
     target: *issue_number
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
   # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
+  # max=4 covers a full stale verdict: up to three investigator labels (a classification,
+  # `failure:ai-fixable`, and `failure:insufficient-data`) plus a lingering `ai:fix-flaky`.
   remove-labels:
     allowed:
       - failure:*
       - ai:fix-flaky
-    max: 3
+    max: 4
     target: *issue_number
 
 strict: false
@@ -188,9 +191,18 @@ Add exactly one classification label to the issue that matches the chosen `class
 
 Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
 
+### "Insufficient data" label
+
+Add `failure:insufficient-data` (in addition to the other label(s)) when you could **not** reach a strong, confident conclusion because the data needed to diagnose the failure was missing — server logs, a Playwright trace, the failure screenshot, or build logs were absent, expired, or never uploaded. Missing data on its own is not enough to warrant the label: add it only when that data would have changed the conclusion or substantially raised the confidence of the analysis.
+
+When you set it, the comment's `#### Additional context` → "Open questions" bullet (or the `#### Data collection issues` section, if a fetch failed) must name exactly what was missing and how to obtain it. When the gap is **logs** specifically, be concrete and actionable instead of asking for "more logs":
+
+- **Name the logs you needed:** the logger/context, level, and the event or time window (e.g. `plugins.security.authentication` at `debug` around the failure), and why they would be decisive.
+- **Propose how to capture them on the next run:** the specific logger to raise and where. Aim for a plan precise enough that a single re-run would produce the evidence needed to firm up the classification.
+
 ### Refresh stale labels on re-investigation
 
-This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification and `failure:ai-fixable` only if a fix is still available, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
+This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, and `failure:insufficient-data` only if data is still the blocker, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
 
 ## Attribution
 
@@ -306,6 +318,7 @@ Explain _why_ it failed in a few tight sentences or bullets, each anchored to a 
 - State the single root cause; don't re-walk the investigation or list every call in the test.
 - Use an ASCII timeline **only** for a genuine race condition, cascade, or multi-component state leak — never for a linear explanation.
 - Fold supporting evidence (missing `data-test-subj`, a failing request, screenshot state) into the narrative rather than listing it separately.
+- Find the PR that most likely introduced the flakiness and name it here with an inline link and its merge date in a readable format (e.g. [#262449](https://github.com/elastic/kibana/pull/262449), merged August 12, 2025). Per **Attribution**, name it only when the evidence strongly implicates it — never as a fallback for weak evidence.
 
 #### Additional context (optional)
 
