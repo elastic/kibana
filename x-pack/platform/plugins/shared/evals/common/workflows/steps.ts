@@ -154,6 +154,8 @@ export const evaluateTraceInputSchema = z.object({
 });
 export const evaluateTraceOutputSchema = z.object({
   results: z.array(evaluatorResultSchema),
+  /** Evaluators that errored while grading the trace; the successful scores are still returned. */
+  errors: z.array(z.string()).optional(),
 });
 export const evaluateTraceCommonDefinition: CommonStepDefinition<
   typeof evaluateTraceInputSchema,
@@ -221,6 +223,7 @@ export const EvaluateExampleStepId = 'evals.evaluateExample' as const;
 export const evaluateExampleInputSchema = z.object({
   ...taskTargetShape,
   experiment_id: z.string(),
+  experiment_name: z.string().optional(),
   execution_id: z.string().optional(),
   suite_id: z.string().optional(),
   task_model: modelSchema.optional(),

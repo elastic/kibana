@@ -295,6 +295,7 @@ export const ExperimentDetailPage: React.FC = () => {
           }
         } else {
           params.delete('trace_id');
+          params.delete('example_id');
         }
       });
     },

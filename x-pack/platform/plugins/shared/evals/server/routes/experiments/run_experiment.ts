@@ -15,6 +15,7 @@ import {
   type RunExperimentResponse,
 } from '../../../common/experiments/run_experiment';
 import { experimentRequestToParams, generateExperimentRun } from '../../workflow_generator';
+import { findUnauthorizedTargetSpaces } from '../shared/authorize_target_spaces';
 import type { RouteDependencies } from '../register_routes';
 
 /** Launches inferred experiment workflows and returns execution IDs for polling. */
@@ -23,6 +24,7 @@ export const registerRunExperimentRoute = ({
   logger,
   workflowsManagement,
   getSpaceId,
+  checkManageEvalsPrivileges,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -77,6 +79,23 @@ export const registerRunExperimentRoute = ({
         }
 
         const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+
+        const unauthorizedSpaceIds = await findUnauthorizedTargetSpaces({
+          request,
+          requestedSpaceIds: body.space_ids,
+          activeSpaceId: spaceId,
+          checkManageEvalsPrivileges,
+        });
+        if (unauthorizedSpaceIds.length > 0) {
+          return response.forbidden({
+            body: {
+              message: `Insufficient privileges to assign the experiment to space(s): ${unauthorizedSpaceIds.join(
+                ', '
+              )}.`,
+            },
+          });
+        }
+
         const workflowExecutionIds: string[] = [];
         const launchedExecutions: RunExperimentResponse['executions'] = [];
 

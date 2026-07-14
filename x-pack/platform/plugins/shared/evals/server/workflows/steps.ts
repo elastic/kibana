@@ -151,12 +151,20 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     ...evaluateTraceCommonDefinition,
     handler: async (context) => {
       const { trace_id, reference_data, evaluators } = context.input;
-      const { results } = await evaluateTrace(makeRuntime(context), {
+      const { results, errors } = await evaluateTrace(makeRuntime(context), {
         traceId: trace_id,
         referenceData: reference_data,
         evaluators,
       });
-      return { output: { results } };
+
+      if (errors.length > 0) {
+        context.logger.warn(
+          `evals.evaluateTrace: ${
+            errors.length
+          } evaluator(s) failed for trace "${trace_id}": ${errors.join('; ')}`
+        );
+      }
+      return { output: { results, errors } };
     },
   });
 
@@ -208,6 +216,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       ]);
       const result = await runExampleEvaluation(deps.taskProviderRegistry, runtime, {
         experimentId: input.experiment_id,
+        experimentName: input.experiment_name,
         executionId: input.execution_id,
         suiteId: input.suite_id,
         taskModel,

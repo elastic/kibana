@@ -13,6 +13,7 @@ import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { DatasetService } from './storage/dataset_service';
 import type { EvaluationScoreService } from './storage/evaluation_score_service';
 import type { EvaluatorRegistry } from './evaluators/types';
@@ -60,6 +61,7 @@ export interface EvalsStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
   workflowsManagement?: EvalsWorkflowsManagementSetup;
 }
 

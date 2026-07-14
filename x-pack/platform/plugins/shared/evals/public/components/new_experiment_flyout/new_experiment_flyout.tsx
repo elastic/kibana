@@ -37,6 +37,7 @@ import type {
   RunExperimentRequest,
   SaveAsWorkflowResponse,
 } from '../../../common/experiments/run_experiment';
+import { EXPERIMENT_LIMITS } from '../../../common/experiments/run_experiment';
 import { useDatasets } from '../../hooks/use_evals_api';
 import {
   useAgentBuilderAgents,
@@ -679,6 +680,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
               <EuiFormRow label={newExperimentStrings.repetitionsLabel} fullWidth>
                 <EuiFieldNumber
                   min={1}
+                  max={EXPERIMENT_LIMITS.maxRepetitions}
                   value={repetitions ?? ''}
                   onChange={(e) =>
                     setRepetitions(e.target.value ? Number(e.target.value) : undefined)
@@ -692,6 +694,7 @@ export const NewExperimentFlyout: React.FC<NewExperimentFlyoutProps> = ({ onClos
               <EuiFormRow label={newExperimentStrings.concurrencyLabel} fullWidth>
                 <EuiFieldNumber
                   min={1}
+                  max={EXPERIMENT_LIMITS.maxConcurrency}
                   value={concurrency ?? ''}
                   onChange={(e) =>
                     setConcurrency(e.target.value ? Number(e.target.value) : undefined)

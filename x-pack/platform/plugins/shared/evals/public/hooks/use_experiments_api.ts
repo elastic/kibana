@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueries, useQuery } from '@kbn/react-query';
+import { useMutation, useQueries, useQuery, type UseQueryOptions } from '@kbn/react-query';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -278,22 +278,30 @@ export const useWorkflowExecutions = (workflowExecutionIds: string[]): WorkflowE
   const { services } = useKibana();
 
   const results = useQueries({
-    queries: workflowExecutionIds.map((workflowExecutionId) => ({
-      queryKey: ['evals', 'workflow-execution', workflowExecutionId],
-      queryFn: async (): Promise<ExperimentExecutionStatus> => {
-        const url = EVALS_EXPERIMENT_EXECUTION_URL.replace(
-          '{workflowExecutionId}',
-          encodeURIComponent(workflowExecutionId)
-        );
-        return services.http!.get<ExperimentExecutionStatus>(url, {
-          version: API_VERSIONS.internal.v1,
-        });
-      },
-      enabled: workflowExecutionId.length > 0,
-      refetchInterval: (data: ExperimentExecutionStatus | undefined) =>
-        data && isTerminalExecutionStatus(data.status) ? false : WORKFLOW_EXECUTION_POLL_MS,
-      retry: retryOnServerError,
-    })),
+    queries: workflowExecutionIds.map(
+      (workflowExecutionId): UseQueryOptions<ExperimentExecutionStatus> => ({
+        queryKey: ['evals', 'workflow-execution', workflowExecutionId],
+        queryFn: async (): Promise<ExperimentExecutionStatus> => {
+          const url = EVALS_EXPERIMENT_EXECUTION_URL.replace(
+            '{workflowExecutionId}',
+            encodeURIComponent(workflowExecutionId)
+          );
+          return services.http!.get<ExperimentExecutionStatus>(url, {
+            version: API_VERSIONS.internal.v1,
+          });
+        },
+        enabled: workflowExecutionId.length > 0,
+        refetchInterval: (data, query) => {
+          // A settled execution or a persistent (non-retryable) error stops the poll; otherwise
+          // `retryOnServerError` would keep polling a permanently failing query forever.
+          if (query.state.status === 'error' || (data && isTerminalExecutionStatus(data.status))) {
+            return false;
+          }
+          return WORKFLOW_EXECUTION_POLL_MS;
+        },
+        retry: retryOnServerError,
+      })
+    ),
   });
 
   const executions = workflowExecutionIds.map<WorkflowExecutionView>((id, index) => ({
@@ -304,9 +312,13 @@ export const useWorkflowExecutions = (workflowExecutionIds: string[]): WorkflowE
 
   const isLoading = results.some((result) => result.isLoading);
 
+  // A query in a persistent error state counts as settled so the UI leaves its in-flight state
+  // (and stops polling) instead of hanging forever when an execution can no longer be fetched.
   const allSettled =
     workflowExecutionIds.length > 0 &&
-    results.every((result) => !!result.data && isTerminalExecutionStatus(result.data.status));
+    results.every(
+      (result) => result.isError || (!!result.data && isTerminalExecutionStatus(result.data.status))
+    );
 
   const scoresIngested = executions.reduce((sum, view) => sum + sumScoresIngested(view.data), 0);
 

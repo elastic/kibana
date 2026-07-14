@@ -15,19 +15,31 @@ export const experimentEvaluatorSchema = z.object({
 
 export type ExperimentEvaluator = z.infer<typeof experimentEvaluatorSchema>;
 
+/**
+ * Upper bounds on the inputs that multiply into per-example Task Manager fan-out. They keep a
+ * single run from scheduling a cluster-destabilizing amount of work; the values are generous
+ * relative to realistic usage. The schema and the form inputs both derive their limits here.
+ */
+export const EXPERIMENT_LIMITS = {
+  maxConnectorIds: 50,
+  maxDatasetIds: 50,
+  maxRepetitions: 100,
+  maxConcurrency: 50,
+} as const;
+
 export const runExperimentRequestSchema = z.object({
   name: z.string().optional(),
-  connector_ids: z.array(z.string()).min(1),
+  connector_ids: z.array(z.string()).min(1).max(EXPERIMENT_LIMITS.maxConnectorIds),
   agent_id: z.string().optional(),
   tool_id: z.string().optional(),
   /** Explicit registered task provider id (overrides the agent/tool/inference inference). */
   task_ref: z.string().optional(),
   /** Free-form parameters forwarded to the task provider. */
   params: z.record(z.string(), z.unknown()).optional(),
-  dataset_ids: z.array(z.string()).min(1),
+  dataset_ids: z.array(z.string()).min(1).max(EXPERIMENT_LIMITS.maxDatasetIds),
   evaluators: z.array(experimentEvaluatorSchema).min(1),
-  repetitions: z.number().int().min(1).optional(),
-  concurrency: z.number().int().min(1).optional(),
+  repetitions: z.number().int().min(1).max(EXPERIMENT_LIMITS.maxRepetitions).optional(),
+  concurrency: z.number().int().min(1).max(EXPERIMENT_LIMITS.maxConcurrency).optional(),
   compare: z.boolean().optional(),
   workflow_id: z.string().optional(),
   space_ids: z.array(z.string().min(1)).min(1).optional(),

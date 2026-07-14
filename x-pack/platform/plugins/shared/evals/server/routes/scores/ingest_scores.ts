@@ -15,6 +15,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { EVALS_API_PRIVILEGES } from '../../../common';
+import { findUnauthorizedTargetSpaces } from '../shared/authorize_target_spaces';
 import type { RouteDependencies } from '../register_routes';
 
 const SCORE_INGEST_PAYLOAD_CAP_BYTES = 5 * 1024 * 1024;
@@ -67,7 +68,12 @@ const getErrorMessage = (error: unknown): string => {
   return String(error);
 };
 
-export const registerIngestScoresRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
+export const registerIngestScoresRoute = ({
+  router,
+  logger,
+  getSpaceId,
+  checkManageEvalsPrivileges,
+}: RouteDependencies) => {
   router.versioned
     .post({
       path: EVALS_SCORES_URL,
@@ -104,6 +110,23 @@ export const registerIngestScoresRoute = ({ router, logger, getSpaceId }: RouteD
 
           const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const spaceIds = resolveIngestSpaceIds(explicitSpaceIds, activeSpaceId);
+
+          const unauthorizedSpaceIds = await findUnauthorizedTargetSpaces({
+            request,
+            requestedSpaceIds: explicitSpaceIds,
+            activeSpaceId,
+            checkManageEvalsPrivileges,
+          });
+
+          if (unauthorizedSpaceIds.length > 0) {
+            return response.forbidden({
+              body: {
+                message: `Insufficient privileges to assign evaluation scores to space(s): ${unauthorizedSpaceIds.join(
+                  ', '
+                )}.`,
+              },
+            });
+          }
 
           const evalsContext = await context.evals;
           const result = await evalsContext.evaluationScoreService.write(request.body, spaceIds);

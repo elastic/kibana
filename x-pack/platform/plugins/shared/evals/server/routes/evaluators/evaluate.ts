@@ -164,11 +164,6 @@ export const registerEvaluateRoute = ({
             return cachedClient;
           }
 
-          if (!getInferenceStart) {
-            logger.error('Inference start contract is not configured');
-            return undefined;
-          }
-
           if (!inferenceStartPromise) {
             inferenceStartPromise = getInferenceStart();
           }

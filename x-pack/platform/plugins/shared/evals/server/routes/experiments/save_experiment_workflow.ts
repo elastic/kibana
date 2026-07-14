@@ -19,6 +19,7 @@ import {
   type SaveAsWorkflowResponse,
 } from '../../../common/experiments/run_experiment';
 import { experimentRequestToParams, generateSavedWorkflowYaml } from '../../workflow_generator';
+import { findUnauthorizedTargetSpaces } from '../shared/authorize_target_spaces';
 import type { RouteDependencies } from '../register_routes';
 
 /** Saves a reusable experiment workflow that generates fresh IDs for each execution. */
@@ -27,6 +28,7 @@ export const registerSaveExperimentWorkflowRoute = ({
   logger,
   workflowsManagement,
   getSpaceId,
+  checkManageEvalsPrivileges,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -81,6 +83,25 @@ export const registerSaveExperimentWorkflowRoute = ({
         }
 
         const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+
+        // `requiredPrivileges` only authorizes the active space; baking any other target space
+        // into the saved workflow is a cross-space write that must be authorized per space.
+        const unauthorizedSpaceIds = await findUnauthorizedTargetSpaces({
+          request,
+          requestedSpaceIds: body.space_ids,
+          activeSpaceId: spaceId,
+          checkManageEvalsPrivileges,
+        });
+
+        if (unauthorizedSpaceIds.length > 0) {
+          return response.forbidden({
+            body: {
+              message: `Insufficient privileges to assign the experiment to space(s): ${unauthorizedSpaceIds.join(
+                ', '
+              )}.`,
+            },
+          });
+        }
 
         try {
           let responseBody: SaveAsWorkflowResponse;

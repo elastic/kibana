@@ -43,6 +43,7 @@
     "@kbn/workflows-management-plugin",
     "@kbn/workflows-yaml",
     "@kbn/spaces-plugin",
+    "@kbn/security-plugin",
     "@kbn/core-spaces-common",
     "@kbn/crypto",
     "@kbn/std",
