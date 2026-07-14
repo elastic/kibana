@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { consumeSmvContextLoadResult, getSmvContextLoadErrorMessages } from './smv_host_wiring';
+import {
+  buildSmvEmptyFocusStatePatch,
+  consumeSmvContextLoadResult,
+  getSmvContextLoadErrorMessages,
+  getSmvFocusLoadErrorMessage,
+} from './smv_host_wiring';
 
 describe('smv_host_wiring', () => {
   describe('getSmvContextLoadErrorMessages', () => {
@@ -19,6 +24,36 @@ describe('smv_host_wiring', () => {
           forecast: expect.any(String),
         })
       );
+    });
+  });
+
+  describe('getSmvFocusLoadErrorMessage', () => {
+    it('returns the focus chart error message', () => {
+      expect(getSmvFocusLoadErrorMessage()).toBe('Error getting focus chart data');
+    });
+  });
+
+  describe('buildSmvEmptyFocusStatePatch', () => {
+    it('clears focus-only fields and records the empty selection without touching context data', () => {
+      const selection = {
+        from: new Date('2020-01-01T00:00:00.000Z'),
+        to: new Date('2020-01-02T00:00:00.000Z'),
+      };
+
+      const patch = buildSmvEmptyFocusStatePatch(selection);
+
+      expect(patch).toEqual({
+        loading: false,
+        focusChartData: undefined,
+        focusForecastData: undefined,
+        focusAnnotationData: [],
+        showModelBoundsCheckbox: false,
+        showForecastCheckbox: false,
+        zoomFromFocusLoaded: selection.from,
+        zoomToFocusLoaded: selection.to,
+      });
+      expect(patch).not.toHaveProperty('contextChartData');
+      expect(patch).not.toHaveProperty('contextForecastData');
     });
   });
 

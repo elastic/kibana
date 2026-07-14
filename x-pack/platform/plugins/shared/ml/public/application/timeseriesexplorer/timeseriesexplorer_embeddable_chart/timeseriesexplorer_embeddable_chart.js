@@ -48,9 +48,11 @@ import {
   buildCriteriaFields,
   consumeSmvContextLoadResult,
   fetchAnomaliesTableData$,
+  buildSmvEmptyFocusStatePatch,
   getModelPlotEnabledForDetector,
   getSmvContextLoadErrorMessages,
   getSmvDataReloadPlan,
+  getSmvFocusLoadErrorMessage,
   loadSingleMetricContextData,
   smvReloadSnapshotFromSmvHostProps,
   subscribeSmvBrushToFocusZoom,
@@ -429,6 +431,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
           this.setState({
             loading: true,
             fullRefresh: false,
+            chartDataError: undefined,
           });
         },
         getFocusAggregationInterval: (selection) => this.getFocusAggregationInterval(selection),
@@ -442,6 +445,16 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
           this.setState(patch, () => {
             this.props.onRenderComplete?.();
           });
+        },
+        onFocusPipelineEmpty: (selection) => {
+          // Empty focus is terminal for reporting, not an error.
+          this.setState(buildSmvEmptyFocusStatePatch(selection), () => {
+            this.props.onRenderComplete?.();
+          });
+        },
+        onFocusPipelineError: (error) => {
+          // Completes reporting via onRenderComplete so deferred focus waits cannot hang.
+          this.displayErrorToastMessages(error, getSmvFocusLoadErrorMessage());
         },
       })
     );
