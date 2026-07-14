@@ -20,6 +20,7 @@ export type {
   ConcreteTaskInstance,
   TaskRunCreatorFunction,
   RunContext,
+  TaskScopedClusterClients,
   IntervalSchedule,
 } from './task';
 

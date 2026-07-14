@@ -35,6 +35,7 @@ import apm from 'elastic-apm-node';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import {
@@ -4116,6 +4117,7 @@ describe('TaskManagerRunner', () => {
       apiKeyStrategy: new EsApiKeyStrategy(),
       eventLogger: eventLoggerMock,
       enrichFakeRequest: opts.enrichFakeRequest,
+      elasticsearchClient: elasticsearchServiceMock.createClusterClient(),
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

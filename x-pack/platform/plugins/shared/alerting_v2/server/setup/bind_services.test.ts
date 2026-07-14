@@ -15,6 +15,7 @@ import {
   EsServiceInternalToken,
   EsServiceScopedToken,
   EsServiceScopedSpaceRoutingToken,
+  TaskManagerEsClientsToken,
 } from '../lib/services/es_service/tokens';
 import {
   QueryServiceScopedToken,
@@ -44,37 +45,65 @@ describe('bindServices - Elasticsearch client routing', () => {
     expect(elasticsearch.client.asScoped).not.toHaveBeenCalled();
   });
 
-  it('binds the scoped client to asCurrentUser without project routing (local)', () => {
-    const client = container.get(EsServiceScopedToken);
+  describe('HTTP route path (request-scoped, no Task Manager)', () => {
+    it('binds the scoped client to asCurrentUser without project routing (local)', () => {
+      const client = container.get(EsServiceScopedToken);
 
-    expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
-    expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request);
-    expect(client).toBe(elasticsearch.client.asScoped.mock.results[0].value.asCurrentUser);
-  });
-
-  it("binds the space-routed scoped client with projectRouting: 'space'", () => {
-    const client = container.get(EsServiceScopedSpaceRoutingToken);
-
-    expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
-    expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request, {
-      projectRouting: 'space',
+      expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request);
+      expect(client).toBe(elasticsearch.client.asScoped.mock.results[0].value.asCurrentUser);
     });
-    expect(client).toBe(elasticsearch.client.asScoped.mock.results[0].value.asCurrentUser);
+
+    it('wires the scoped QueryService to the origin-only (local) client', () => {
+      container.get(QueryServiceScopedToken);
+
+      expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request);
+    });
   });
 
-  it('wires the scoped QueryService to the origin-only (local) client', () => {
-    container.get(QueryServiceScopedToken);
+  describe('rule-executor task path (API-key clients built by Task Manager)', () => {
+    let taskManagerEsClients: {
+      scoped: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+      scopedWithSpaceRouting: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+    };
 
-    expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
-    expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request);
+    beforeEach(() => {
+      taskManagerEsClients = {
+        scoped: elasticsearchServiceMock.createScopedClusterClient(),
+        scopedWithSpaceRouting: elasticsearchServiceMock.createScopedClusterClient(),
+      };
+      container.bind(TaskManagerEsClientsToken).toConstantValue(taskManagerEsClients);
+    });
+
+    it('resolves the space-routed token from the Task Manager client and never scopes the request itself', () => {
+      const client = container.get(EsServiceScopedSpaceRoutingToken);
+
+      expect(client).toBe(taskManagerEsClients.scopedWithSpaceRouting.asCurrentUser);
+      expect(elasticsearch.client.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('wires the space-routed QueryService to the Task Manager client (no local asScoped call)', () => {
+      container.get(QueryServiceScopedSpaceRoutingToken);
+
+      expect(elasticsearch.client.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('still builds the route-path scoped token from the request', () => {
+      const client = container.get(EsServiceScopedToken);
+
+      expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
+      expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request);
+      expect(client).toBe(elasticsearch.client.asScoped.mock.results[0].value.asCurrentUser);
+    });
   });
 
-  it("wires the space-routed scoped QueryService with projectRouting: 'space'", () => {
-    container.get(QueryServiceScopedSpaceRoutingToken);
-
-    expect(elasticsearch.client.asScoped).toHaveBeenCalledTimes(1);
-    expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(request, {
-      projectRouting: 'space',
+  describe('EsServiceScopedSpaceRoutingToken outside task execution', () => {
+    it('throws because Task Manager did not provide the API-key clients', () => {
+      expect(() => container.get(EsServiceScopedSpaceRoutingToken)).toThrow(
+        'only available during task execution'
+      );
+      expect(elasticsearch.client.asScoped).not.toHaveBeenCalled();
     });
   });
 });

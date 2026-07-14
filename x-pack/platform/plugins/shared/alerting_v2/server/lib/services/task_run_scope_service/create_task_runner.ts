@@ -15,6 +15,7 @@ import type {
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server/task';
 import type { ServiceIdentifier } from 'inversify';
+import { TaskManagerEsClientsToken } from '../es_service/tokens';
 
 type TaskRunnerConstructor<T> = new (...args: never[]) => T;
 
@@ -86,7 +87,7 @@ export function createTaskRunnerFactory({
   getInjection: () => CoreDiServiceStart;
 }): TaskRunnerFactory {
   return ({ taskRunnerClass, taskType, requiresFakeRequest = true }) => {
-    return ({ taskInstance, abortController, fakeRequest }: RunContext) => ({
+    return ({ taskInstance, abortController, fakeRequest, esClient }: RunContext) => ({
       run: async () => {
         if (requiresFakeRequest && !fakeRequest) {
           throw new Error(
@@ -99,6 +100,15 @@ export function createTaskRunnerFactory({
         if (fakeRequest) {
           scope.bind(Request).toConstantValue(fakeRequest);
           scope.bind(Global).toConstantValue(Request);
+
+          // Task Manager already built the Elasticsearch clients scoped to this task's API key,
+          // so bind them (as a Global, like Request) and let the ES service tokens resolve from
+          // them instead of calling `elasticsearch.client.asScoped(request)` ourselves.
+          if (esClient) {
+            scope.bind(TaskManagerEsClientsToken).toConstantValue(esClient);
+            scope.bind(Global).toConstantValue(TaskManagerEsClientsToken);
+          }
+
           scope.bind(taskRunnerClass).toSelf().inRequestScope();
         } else {
           scope.bind(taskRunnerClass).toSelf().inTransientScope();
