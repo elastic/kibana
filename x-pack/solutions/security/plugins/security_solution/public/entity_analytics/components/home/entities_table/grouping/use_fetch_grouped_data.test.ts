@@ -456,6 +456,9 @@ describe('useFetchResolutionGroupDataPathA', () => {
 
     const { esqlQuery } = (getESQLResults as jest.Mock).mock.calls[0][0];
     expect(esqlQuery).toMatch(new RegExp(`LIMIT ${ESQL_LIMIT_CAP}`));
+    // Always-on inline entity-type filter and the target-only (unresolved) predicate
+    expect(esqlQuery).toContain(`${ENTITY_FIELDS.ENTITY_TYPE} IN ("user","host","service")`);
+    expect(esqlQuery).toContain(`${ENTITY_FIELDS.RESOLVED_TO} IS NULL`);
   });
 
   it('uses track_total_hits result as groupsCount', async () => {
@@ -498,6 +501,43 @@ describe('useFetchResolutionGroupDataPathA', () => {
     // groups (one per target) and entities (targets + aliases) come from separate count queries
     expect(result.current.data!.groupData.groupsCount.value).toBe(3);
     expect(result.current.data!.groupData.unitsCount.value).toBe(8);
+  });
+
+  it('slices to the requested page and scopes the alias-count include to that page', async () => {
+    // pageIndex 1 / pageSize 2 fetches LIMIT 4 rows, then client-slices to rows[2..3].
+    const mkTarget = (n: number) => ({
+      id: `user:u${n}`,
+      name: `u${n}`,
+      type: 'user',
+      eff: 100 - n,
+      riskScore: 100 - n,
+      resolutionRisk: 100 - n,
+    });
+    (getESQLResults as jest.Mock).mockResolvedValue(
+      makePathAEsqlResponse([mkTarget(0), mkTarget(1), mkTarget(2), mkTarget(3)])
+    );
+    mockSearch
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 4 } } } })) // group count
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 4 } } } })) // unit count
+      .mockReturnValueOnce(
+        of({ rawResponse: { aggregations: { aliases_by_target: { buckets: [] } } } })
+      );
+
+    const { result } = renderHook(
+      () => useFetchResolutionGroupDataPathA({ pageIndex: 1, pageSize: 2 }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const buckets = result.current.data!.groupData.groupByFields.buckets;
+    // Only the second page (rows[2..3]), not rows[0..1]
+    expect(buckets.map((b) => b.key[0])).toEqual(['user:u2', 'user:u3']);
+
+    // The bounded alias-count agg must be limited to the current page's target ids
+    const aliasCall = mockSearch.mock.calls[2][0];
+    expect(aliasCall.params.aggs.aliases_by_target.terms.include).toEqual(['user:u2', 'user:u3']);
+    expect(aliasCall.params.aggs.aliases_by_target.terms.size).toBe(2);
   });
 });
 
@@ -563,8 +603,10 @@ describe('useFetchResolutionGroupDataPathB', () => {
     // The user filter matches only the alias. The STATS join returns group_key = target's id
     // (COALESCE(resolved_to, entity.id) = resolved_to = target id for the alias row).
     // Without the metadata fixup the target's name would be unknown; with it we get it.
+    // group_risk (50) is deliberately different from the metadata riskScore (90) so the assertion
+    // proves resolutionRiskScore came from the metadata branch, not the group_risk fallback.
     (getESQLResults as jest.Mock).mockResolvedValue(
-      makePathBEsqlResponse([{ group_key: 'target-user-001', group_risk: 90, group_size: 1 }])
+      makePathBEsqlResponse([{ group_key: 'target-user-001', group_risk: 50, group_size: 1 }])
     );
 
     const metadataHit = {
@@ -601,7 +643,50 @@ describe('useFetchResolutionGroupDataPathB', () => {
     const [bucket] = groupData.groupByFields.buckets;
     expect(bucket.key).toEqual(['target-user-001']);
     expect(bucket.key_as_string).toBe('target-user-001');
+    // metadata riskScore (90) wins over group_risk (50)
     expect(bucket.resolutionRiskScore.value).toBe(90);
+  });
+
+  it('falls back to group_risk for resolutionRiskScore when no target metadata is found', async () => {
+    // No metadata hit for the group_key (fixup returns nothing), so resolutionRiskScore must fall
+    // back to the STATS join's group_risk rather than surfacing null.
+    (getESQLResults as jest.Mock).mockResolvedValue(
+      makePathBEsqlResponse([{ group_key: 'target-user-001', group_risk: 77, group_size: 1 }])
+    );
+
+    mockSearch
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 1 } } } })) // total count
+      .mockReturnValueOnce(of({ rawResponse: { hits: { hits: [] } } })); // fixup: no metadata
+
+    const { result } = renderHook(
+      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10 }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const [bucket] = result.current.data!.groupData.groupByFields.buckets;
+    expect(bucket.resolutionRiskScore.value).toBe(77);
+  });
+
+  it('sets resolutionRiskScore to null when neither metadata nor group_risk is present', async () => {
+    (getESQLResults as jest.Mock).mockResolvedValue(
+      makePathBEsqlResponse([{ group_key: 'target-user-001', group_risk: null, group_size: 1 }])
+    );
+
+    mockSearch
+      .mockReturnValueOnce(of({ rawResponse: { hits: { total: { value: 1 } } } })) // total count
+      .mockReturnValueOnce(of({ rawResponse: { hits: { hits: [] } } })); // fixup: no metadata
+
+    const { result } = renderHook(
+      () => useFetchResolutionGroupDataPathB({ pageIndex: 0, pageSize: 10 }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    const [bucket] = result.current.data!.groupData.groupByFields.buckets;
+    expect(bucket.resolutionRiskScore.value).toBeNull();
   });
 
   it('wraps each group_key in an array as bucket.key', async () => {
@@ -635,6 +720,12 @@ describe('useFetchResolutionGroupDataPathB', () => {
 
     const { esqlQuery } = (getESQLResults as jest.Mock).mock.calls[0][0];
     expect(esqlQuery).toMatch(new RegExp(`LIMIT ${ESQL_LIMIT_CAP}`));
+    // Always-on inline entity-type filter and the COALESCE group key that lets a matching alias
+    // surface its target's group
+    expect(esqlQuery).toContain(`${ENTITY_FIELDS.ENTITY_TYPE} IN ("user","host","service")`);
+    expect(esqlQuery).toContain(
+      `COALESCE(${ENTITY_FIELDS.RESOLVED_TO}, ${ENTITY_FIELDS.ENTITY_ID})`
+    );
   });
 
   it('reports the distinct-group count as groupsCount so filtered views paginate past page 1', async () => {

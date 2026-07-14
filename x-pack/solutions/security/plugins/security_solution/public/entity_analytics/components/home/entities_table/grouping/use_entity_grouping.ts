@@ -157,7 +157,12 @@ export const useEntityGrouping = ({
     [defaultGroupingOptions, hasResolutionLicense, groupingId]
   );
 
-  const additionalFilters = buildEsQuery(dataView, [], groupFilters);
+  // Memoized so the downstream userFilterForPathB / nonResolutionGroupingQuery memos aren't
+  // defeated by buildEsQuery returning a fresh object reference on every render.
+  const additionalFilters = useMemo(
+    () => buildEsQuery(dataView, [], groupFilters),
+    [dataView, groupFilters]
+  );
   const isResolutionGrouping = selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION;
   const uniqueValue = useMemo(() => `${selectedGroup}-${uuid.v4()}`, [selectedGroup]);
 
@@ -205,6 +210,8 @@ export const useEntityGrouping = ({
   // Non-resolution grouping query (entity-type or other scripted grouping)
   const nonResolutionGroupingQuery = useMemo((): EntitiesGroupingQuery => {
     if (isResolutionGrouping) {
+      // Resolution uses the ES|QL Path A/B hooks instead. Return an inert query only to satisfy
+      // the required `query` arg — useFetchGroupedData is disabled for this case (see enabled flag).
       return { size: 0 } as EntitiesGroupingQuery;
     }
 

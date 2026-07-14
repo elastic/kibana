@@ -56,8 +56,17 @@ export const ENTITY_GROUPING_OPTIONS = {
 
 export const ALLOWED_ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
+/**
+ * The single "only user/host/service entities" terms clause. Shared by every DSL query that must
+ * restrict to the allowed entity types so the constraint lives in one place (the ES|QL paths use
+ * the `IN (...)` form derived from `ALLOWED_ENTITY_TYPES` instead).
+ */
+export const ENTITY_TYPE_TERMS_CLAUSE = {
+  terms: { [ENTITY_FIELDS.ENTITY_TYPE]: [...ALLOWED_ENTITY_TYPES] },
+} as const;
+
 export const ENTITY_TYPE_FILTER = {
   bool: {
-    filter: [{ terms: { [ENTITY_FIELDS.ENTITY_TYPE]: [...ALLOWED_ENTITY_TYPES] } }],
+    filter: [ENTITY_TYPE_TERMS_CLAUSE],
   } as unknown as BoolQuery,
 };

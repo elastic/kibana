@@ -20,6 +20,7 @@ import {
   ALLOWED_ENTITY_TYPES,
   ENTITY_FIELDS,
   ENTITY_GROUPING_OPTIONS,
+  ENTITY_TYPE_TERMS_CLAUSE,
   QUERY_KEY_GROUPING_DATA,
   QUERY_KEY_ENTITY_ANALYTICS,
 } from '../constants';
@@ -33,9 +34,6 @@ export interface EntitiesGroupingAggregation {
     buckets?: GenericBuckets[];
   };
   resolutionRiskScore?: {
-    value: number | null;
-  };
-  bucketRiskScore?: {
     value: number | null;
   };
 }
@@ -302,7 +300,7 @@ export const useFetchResolutionGroupDataPathA = ({
               track_total_hits: true,
               query: {
                 bool: {
-                  filter: [{ terms: { [ENTITY_FIELDS.ENTITY_TYPE]: [...ALLOWED_ENTITY_TYPES] } }],
+                  filter: [ENTITY_TYPE_TERMS_CLAUSE],
                   must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
                 },
               },
@@ -320,7 +318,7 @@ export const useFetchResolutionGroupDataPathA = ({
               track_total_hits: true,
               query: {
                 bool: {
-                  filter: [{ terms: { [ENTITY_FIELDS.ENTITY_TYPE]: [...ALLOWED_ENTITY_TYPES] } }],
+                  filter: [ENTITY_TYPE_TERMS_CLAUSE],
                 },
               },
             },
@@ -463,10 +461,7 @@ export const useFetchResolutionGroupDataPathB = ({
               track_total_hits: true,
               query: {
                 bool: {
-                  filter: [
-                    { terms: { [ENTITY_FIELDS.ENTITY_TYPE]: [...ALLOWED_ENTITY_TYPES] } },
-                    ...(filter ? [filter] : []),
-                  ],
+                  filter: [ENTITY_TYPE_TERMS_CLAUSE, ...(filter ? [filter] : [])],
                 },
               },
             },
