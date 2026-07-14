@@ -38,20 +38,26 @@ describe('DashboardCanvasAttachment', () => {
   const createMockDashboardApi = (
     overrides: Partial<Pick<DashboardApi, 'isManaged' | 'isEditableByUser'>> = {}
   ): DashboardApi & {
+    children$: BehaviorSubject<Record<string, unknown>>;
     dataViews$: BehaviorSubject<any[]>;
+    isApproximate$: BehaviorSubject<boolean>;
   } => {
+    const children$ = new BehaviorSubject<Record<string, unknown>>({});
     const dataViews$ = new BehaviorSubject<any[]>([]);
     const filters$ = new BehaviorSubject<Filter[]>([]);
+    const isApproximate$ = new BehaviorSubject(false);
     const query$ = new BehaviorSubject<Query | undefined>(undefined);
     const timeRange$ = new BehaviorSubject({ from: 'now-15m', to: 'now' });
 
     return {
+      children$,
       locator: {
         navigate: jest.fn().mockResolvedValue(undefined),
       },
       dataViews$,
       filters$,
       forceRefresh: jest.fn(),
+      isApproximate$,
       query$,
       isEditableByUser: true,
       isManaged: false,
@@ -59,6 +65,7 @@ describe('DashboardCanvasAttachment', () => {
       runInteractiveSave: jest.fn().mockResolvedValue({ id: 'new-dashboard-id' }),
       savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
       setFilters: jest.fn((nextFilters?: Filter[]) => filters$.next(nextFilters ?? [])),
+      setEsqlApproximation: jest.fn((isApproximate: boolean) => isApproximate$.next(isApproximate)),
       setQuery: jest.fn((nextQuery?: Query) => query$.next(nextQuery)),
       setViewMode: jest.fn(),
       setTimeRange: jest.fn((nextTimeRange?: { from: string; to: string }) => {
@@ -69,7 +76,9 @@ describe('DashboardCanvasAttachment', () => {
       timeRange$,
       ...overrides,
     } as unknown as DashboardApi & {
+      children$: BehaviorSubject<Record<string, unknown>>;
       dataViews$: BehaviorSubject<any[]>;
+      isApproximate$: BehaviorSubject<boolean>;
     };
   };
 
@@ -400,6 +409,46 @@ describe('DashboardCanvasAttachment', () => {
         useDefaultBehaviors: false,
       })
     );
+  });
+
+  it('configures Fast mode for the full-screen dashboard preview', async () => {
+    const { mockApi } = await renderDashboardCanvasAttachment();
+
+    expect(getLatestSearchBarProps()?.esqlApproximation).toEqual(
+      expect.objectContaining({
+        isApproximate: false,
+        disabled: true,
+      })
+    );
+
+    act(() => {
+      mockApi.children$.next({
+        'esql-panel': {
+          usesEsql$: new BehaviorSubject(true),
+        },
+      });
+    });
+
+    await waitFor(() => {
+      expect(getLatestSearchBarProps()?.esqlApproximation).toEqual(
+        expect.objectContaining({ disabled: false })
+      );
+    });
+
+    act(() => {
+      getLatestSearchBarProps()?.esqlApproximation.onChange(true);
+    });
+
+    expect(mockApi.setEsqlApproximation).toHaveBeenCalledWith(true);
+    expect(getLatestSearchBarProps()?.esqlApproximation).toEqual(
+      expect.objectContaining({ isApproximate: true })
+    );
+  });
+
+  it('does not configure Fast mode for a sidebar dashboard preview', async () => {
+    await renderDashboardCanvasAttachment({ isSidebar: true });
+
+    expect(getLatestSearchBarProps()?.esqlApproximation).toBeUndefined();
   });
 
   it('updates dashboard query and time range from the preview search bar', async () => {
