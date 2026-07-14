@@ -113,6 +113,16 @@ export const permissionsPolicyViolationReportSchema = schema.object(
          * A string indicating whether the violated permissions policy was enforced in this case. disposition will be set to "enforce" if the policy was enforced, or "report" if the violation resulted only in this report being generated (with no further action taken by the user agent in response to the violation).
          */
         disposition: schema.oneOf([schema.literal('enforce'), schema.literal('report')]),
+        /**
+         * For reports attributable to a specific `iframe` element, the value of that element's
+         * `allow` attribute, or null otherwise.
+         */
+        allowAttribute: schema.maybe(schema.nullable(schema.string())),
+        /**
+         * For reports attributable to a specific `iframe` element, the value of that element's
+         * `src` attribute, or null otherwise.
+         */
+        srcAttribute: schema.maybe(schema.nullable(schema.string())),
       },
       { unknowns: 'ignore' }
     ),
@@ -193,14 +203,14 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
               created: `${now + (report.age ?? 0)}`,
               url: report.url,
               user_agent: report.user_agent ?? getLastHeader(request.headers['user-agent']),
-              ...report.body,
+              ...stripNullValues(report.body),
             });
           } else if (report.type === 'permissions-policy-violation') {
             analyticsService.reportPermissionsPolicyViolation({
               created: `${now + (report.age ?? 0)}`,
               url: report.url,
               user_agent: report.user_agent ?? getLastHeader(request.headers['user-agent']),
-              ...report.body,
+              ...stripNullValues(report.body),
             });
           }
         });
@@ -212,4 +222,17 @@ export function defineRecordViolations({ router, analyticsService }: RouteDefini
 
 function getLastHeader(header: string | string[] | undefined) {
   return Array.isArray(header) ? header[header.length - 1] : header;
+}
+
+/**
+ * Browsers legitimately send `null` for optional report fields that don't apply (the CSP3 and
+ * Permissions-Policy specs define these as nullable IDL attributes, which serialize to explicit
+ * `null` rather than being omitted). Event-based telemetry has no concept of a nullable field, so
+ * its schema validation rejects `null` values. Drop them here so we only forward values EBT can
+ * represent; absent optional fields are simply not reported.
+ */
+function stripNullValues<T extends object>(source: T): { [K in keyof T]: Exclude<T[K], null> } {
+  return Object.fromEntries(Object.entries(source).filter(([, value]) => value !== null)) as {
+    [K in keyof T]: Exclude<T[K], null>;
+  };
 }
