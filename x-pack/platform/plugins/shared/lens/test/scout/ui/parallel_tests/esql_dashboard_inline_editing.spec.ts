@@ -7,7 +7,7 @@
 
 import { spaceTest, tags, KibanaCodeEditorWrapper, EuiComboBoxWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { ScoutPage } from '@kbn/scout';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { applyLensInlineEditorAndWaitClosed, testData } from '../fixtures';
 
 // Maximum number of initial ESQL columns loaded
@@ -16,7 +16,7 @@ import { applyLensInlineEditorAndWaitClosed, testData } from '../fixtures';
 const MAX_NUM_OF_INITIAL_ESQL_COLUMNS = 10;
 
 const setEsqlQueryAndRun = async (
-  dashboard: ScoutPage,
+  dashboard: PageObjects['dashboard'],
   page: ScoutPage,
   codeEditor: KibanaCodeEditorWrapper,
   query: string
