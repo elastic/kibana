@@ -5497,7 +5497,7 @@ importers:
         version: 2.35.1
       '@rsdoctor/rspack-plugin':
         specifier: 1.5.7
-        version: 1.5.7(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
+        version: 1.5.7(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rspack/core':
         specifier: 1.7.11
         version: 1.7.11(@swc/helpers@0.5.19)
@@ -32154,14 +32154,14 @@ snapshots:
 
   '@rsdoctor/client@1.5.7': {}
 
-  '@rsdoctor/core@1.5.7(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)':
+  '@rsdoctor/core@1.5.7(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)':
     dependencies:
       '@rsbuild/plugin-check-syntax': 1.6.1
       '@rsdoctor/graph': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/sdk': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/types': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/utils': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
-      '@rspack/resolver': 0.2.8(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+      '@rspack/resolver': 0.2.8(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)
       browserslist-load-config: 1.0.3
       es-toolkit: 1.49.0
       filesize: 10.1.6
@@ -32189,9 +32189,9 @@ snapshots:
       - '@rspack/core'
       - webpack
 
-  '@rsdoctor/rspack-plugin@1.5.7(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)':
+  '@rsdoctor/rspack-plugin@1.5.7(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)':
     dependencies:
-      '@rsdoctor/core': 1.5.7(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
+      '@rsdoctor/core': 1.5.7(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/graph': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/sdk': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
       '@rsdoctor/types': 1.5.7(@rspack/core@1.7.11(@swc/helpers@0.5.19))(webpack@5.96.1)
@@ -32336,9 +32336,9 @@ snapshots:
   '@rspack/resolver-binding-linux-x64-musl@0.2.8':
     optional: true
 
-  '@rspack/resolver-binding-wasm32-wasi@0.2.8(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
+  '@rspack/resolver-binding-wasm32-wasi@0.2.8(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+      '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -32353,7 +32353,7 @@ snapshots:
   '@rspack/resolver-binding-win32-x64-msvc@0.2.8':
     optional: true
 
-  '@rspack/resolver@0.2.8(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)':
+  '@rspack/resolver@0.2.8(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)':
     optionalDependencies:
       '@rspack/resolver-binding-darwin-arm64': 0.2.8
       '@rspack/resolver-binding-darwin-x64': 0.2.8
@@ -32361,7 +32361,7 @@ snapshots:
       '@rspack/resolver-binding-linux-arm64-musl': 0.2.8
       '@rspack/resolver-binding-linux-x64-gnu': 0.2.8
       '@rspack/resolver-binding-linux-x64-musl': 0.2.8
-      '@rspack/resolver-binding-wasm32-wasi': 0.2.8(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)
+      '@rspack/resolver-binding-wasm32-wasi': 0.2.8(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)
       '@rspack/resolver-binding-win32-arm64-msvc': 0.2.8
       '@rspack/resolver-binding-win32-ia32-msvc': 0.2.8
       '@rspack/resolver-binding-win32-x64-msvc': 0.2.8
