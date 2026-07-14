@@ -39,7 +39,7 @@ const MetricsExperienceGridWrapper = (
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
-  const { discoverShared, dataViews, notifications, docLinks, logger, discoverFeatureFlags } =
+  const { discoverShared, dataViews, notifications, docLinks, logger, core } =
     useDiscoverServices();
 
   const gridSettings = useObservable(
@@ -68,9 +68,9 @@ const MetricsExperienceGridWrapper = (
       notifications,
       docLinks,
       logger: logger.get(METRICS_DATA_SOURCE_PROFILE_ID),
-      isSortingEnabled: discoverFeatureFlags.getMetricsExperienceSortEnabled(),
+      featureFlags: core.featureFlags,
     }),
-    [discoverShared, dataViews, notifications, docLinks, logger, discoverFeatureFlags]
+    [discoverShared, dataViews, notifications, docLinks, logger, core.featureFlags]
   );
 
   return (

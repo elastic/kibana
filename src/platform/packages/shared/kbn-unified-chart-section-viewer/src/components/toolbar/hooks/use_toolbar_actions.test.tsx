@@ -7,30 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
+import React from 'react';
+import type { ReactNode } from 'react';
 import { renderHook } from '@testing-library/react';
 import { useToolbarActions } from './use_toolbar_actions';
-import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
-import { useExternalServices } from '../../../context/external_services';
-import { SortSelector } from '../sort_selector';
-import { DimensionsSelector } from '../dimensions_selector';
-import { METRICS_SORT_BY, METRICS_SORT_DIRECTION } from '../../../common/constants';
-
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  useEuiTheme: () => ({ euiTheme: { border: { thin: '1px' } } }),
-  useIsWithinMaxBreakpoint: () => false,
-}));
+import { ExternalServicesProvider } from '../../../context/external_services';
+import type { ExternalServices } from '../../../context/external_services';
+import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags_mock';
+import { FEATURE_FLAGS } from '../../../common/constants';
+import * as metricsExperienceStateProvider from '../../observability/metrics/context/metrics_experience_state_provider';
 
 jest.mock('../../observability/metrics/context/metrics_experience_state_provider');
-jest.mock('../../../context/external_services');
 
-const useMetricsExperienceStateMock = useMetricsExperienceState as jest.Mock;
-const useExternalServicesMock = useExternalServices as jest.Mock;
+const useMetricsExperienceStateMock =
+  metricsExperienceStateProvider.useMetricsExperienceState as jest.MockedFunction<
+    typeof metricsExperienceStateProvider.useMetricsExperienceState
+  >;
 
-// The component rendered by each left-side toolbar action
-const leftSideComponents = (actions: Array<ReactElement | null>) =>
-  actions.map((action) => action?.type);
+const renderToolbarActionsHook = (externalServices?: ExternalServices) => {
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <ExternalServicesProvider externalServices={externalServices}>
+      {children}
+    </ExternalServicesProvider>
+  );
+
+  return renderHook(
+    () =>
+      useToolbarActions({
+        allDimensions: [],
+        renderToggleActions: () => undefined,
+        onOpenGridSettings: jest.fn(),
+      }),
+    { wrapper }
+  );
+};
+
+const findEditGridButton = (buttons: ReturnType<typeof useToolbarActions>['rightSideActions']) =>
+  buttons?.find((button) => button['data-test-subj'] === 'metricsExperienceEditGridButton');
 
 describe('useToolbarActions', () => {
   beforeEach(() => {
@@ -39,34 +52,40 @@ describe('useToolbarActions', () => {
       onDimensionsChange: jest.fn(),
       isFullscreen: false,
       onToggleFullscreen: jest.fn(),
-      metricsSort: [METRICS_SORT_BY.alphabetically, METRICS_SORT_DIRECTION.asc],
-      onMetricsSortChange: jest.fn(),
+    } as unknown as ReturnType<typeof metricsExperienceStateProvider.useMetricsExperienceState>);
+  });
+
+  it('hides the Edit grid of metrics button when featureFlags is not provided by the host (safe default)', () => {
+    const { result } = renderToolbarActionsHook(undefined);
+
+    expect(findEditGridButton(result.current.rightSideActions)).toBeUndefined();
+  });
+
+  it('shows the Edit grid of metrics button when the feature flag resolves to true', () => {
+    const { result } = renderToolbarActionsHook({
+      featureFlags: createFeatureFlagsMock({
+        [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
+      }),
     });
+
+    expect(findEditGridButton(result.current.rightSideActions)).toBeDefined();
   });
 
-  const renderToolbarActions = () =>
-    renderHook(() =>
-      useToolbarActions({
-        allDimensions: [],
-        renderToggleActions: () => undefined,
-        onOpenGridSettings: jest.fn(),
-      })
-    );
+  it('hides the Edit grid of metrics button when the feature flag resolves to false', () => {
+    const { result } = renderToolbarActionsHook({
+      featureFlags: createFeatureFlagsMock({
+        [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: false,
+      }),
+    });
 
-  it('includes the sort selector when sorting is enabled', () => {
-    useExternalServicesMock.mockReturnValue({ isSortingEnabled: true });
-
-    const { result } = renderToolbarActions();
-
-    expect(leftSideComponents(result.current.leftSideActions)).toContain(SortSelector);
+    expect(findEditGridButton(result.current.rightSideActions)).toBeUndefined();
   });
 
-  it('omits the sort selector when sorting is disabled, keeping the dimensions selector', () => {
-    useExternalServicesMock.mockReturnValue({ isSortingEnabled: false });
+  it('hides the Edit grid of metrics button when featureFlags is provided but the flag has no override (falls back to false)', () => {
+    const { result } = renderToolbarActionsHook({
+      featureFlags: createFeatureFlagsMock(),
+    });
 
-    const { result } = renderToolbarActions();
-
-    expect(leftSideComponents(result.current.leftSideActions)).not.toContain(SortSelector);
-    expect(leftSideComponents(result.current.leftSideActions)).toContain(DimensionsSelector);
+    expect(findEditGridButton(result.current.rightSideActions)).toBeUndefined();
   });
 });

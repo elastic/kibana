@@ -65,6 +65,12 @@ export const DIMENSION_TYPES = [
 // Metric instrument types allowed in the Metrics experience.
 export const ALLOWED_METRIC_TYPES = ['gauge', 'counter', 'histogram'];
 
+export const FEATURE_FLAGS = {
+  IS_EDIT_GRID_SETTINGS_ENABLED: 'discover.metricsEditGridSettingsEnabled',
+} as const;
+
+export type FeatureFlag = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
+
 // Metrics grid sort options
 export const METRICS_SORT_BY = {
   alphabetically: 'alphabetically',

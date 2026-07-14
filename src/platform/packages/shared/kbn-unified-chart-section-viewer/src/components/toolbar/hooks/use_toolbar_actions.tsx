@@ -13,10 +13,10 @@ import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
-import { useExternalServices } from '../../../context/external_services';
 import { DimensionsSelector } from '../dimensions_selector';
 import { SortSelector } from '../sort_selector';
-import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
+import { MAX_DIMENSIONS_SELECTIONS, FEATURE_FLAGS } from '../../../common/constants';
+import { useFeatureFlag } from './use_feature_flag';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
   allDimensions: Dimension[];
@@ -48,7 +48,10 @@ export const useToolbarActions = ({
     onMetricsSortChange,
   } = useMetricsExperienceState();
   const onDimensionsSelectionChange = onDimensionsChangeProp ?? onDimensionsChange;
-  const isSortingEnabled = useExternalServices()?.isSortingEnabled ?? false;
+
+  const isEditGridEnabled = useFeatureFlag(FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED, false);
+  const isSortingEnabled = useFeatureFlag(FEATURE_FLAGS.IS_SORTING_ENABLED, false);
+
 
   const isSmallScreen = useIsWithinMaxBreakpoint(isFullscreen ? 'm' : 'l');
 
@@ -106,13 +109,17 @@ export const useToolbarActions = ({
         });
 
     return [
-      {
-        iconType: 'pencil',
-        label: editGridLabel,
-        toolTipContent: editGridLabel,
-        onClick: onOpenGridSettings,
-        'data-test-subj': 'metricsExperienceEditGridButton',
-      },
+      ...(isEditGridEnabled
+        ? [
+            {
+              iconType: 'pencil',
+              label: editGridLabel,
+              toolTipContent: editGridLabel,
+              onClick: onOpenGridSettings,
+              'data-test-subj': 'metricsExperienceEditGridButton',
+            },
+          ]
+        : []),
       {
         iconType: isFullscreen ? 'fullScreenExit' : 'fullScreen',
         label: fullscreenButtonLabel,
@@ -121,7 +128,13 @@ export const useToolbarActions = ({
         'data-test-subj': 'metricsExperienceToolbarFullScreen',
       },
     ];
-  }, [isFullscreen, hideRightSideActions, onToggleFullscreen, onOpenGridSettings]);
+  }, [
+    isFullscreen,
+    hideRightSideActions,
+    onToggleFullscreen,
+    onOpenGridSettings,
+    isEditGridEnabled,
+  ]);
 
   return {
     toggleActions,

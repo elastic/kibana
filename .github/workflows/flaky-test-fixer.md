@@ -81,6 +81,8 @@ safe-outputs:
   mentions:
     allowed:
       - ${{ github.actor }}
+    # Lets the agent `cc` the author of the PR that introduced the flaky test
+    allowed-collaborators: true
   add-comment:
     max: 1
     target: *issue_number
@@ -157,6 +159,50 @@ safe-outputs:
               }
               await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
+    # Requests the author of the PR that introduced the flaky test as a reviewer on the fix PR
+    request-fix-review:
+      description: 'Request a review on the fix PR from the author of the PR that introduced the flaky test. Only pass a real, non-bot GitHub login.'
+      runs-on: ubuntu-latest
+      needs: safe_outputs
+      if: needs.safe_outputs.outputs.created_pr_number != ''
+      permissions:
+        pull-requests: write
+      inputs:
+        author:
+          description: "GitHub login (no leading @) of the introducing PR's author to request as a reviewer on the fix PR."
+          required: true
+          type: string
+      env:
+        GH_AW_PR_NUMBER: ${{ needs.safe_outputs.outputs.created_pr_number }}
+      steps:
+        - name: Request review from the introducing PR author
+          uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+          with:
+            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+            script: |
+              const fs = require('fs');
+              const prNumber = Number(process.env.GH_AW_PR_NUMBER);
+              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
+              if (!Number.isInteger(prNumber) || !outputPath || !fs.existsSync(outputPath)) {
+                core.info('Missing PR number or agent output; nothing to do.');
+                return;
+              }
+              // The agent's `author` tool parameter is delivered here (custom safe-jobs read inputs
+              // from GH_AW_AGENT_OUTPUT, not from the job's inputs context).
+              const { items = [] } = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+              const author = items.find((entry) => entry.type === 'request_fix_review')?.author?.trim().replace(/^@/, '');
+              if (!author) {
+                core.info('No reviewer supplied; nothing to do.');
+                return;
+              }
+              const { owner, repo } = context.repo;
+              try {
+                await github.rest.pulls.requestReviewers({ owner, repo, pull_number: prNumber, reviewers: [author] });
+                core.info(`Requested review from @${author} on #${prNumber}.`);
+              } catch (err) {
+                // Non-fatal: GitHub 422s if the user can't review (not a collaborator, is the PR author, etc.).
+                core.warning(`Could not request review from @${author} on #${prNumber}: ${err.status || ''} ${err.message}`);
+              }
 
 strict: false
 timeout-minutes: 90
@@ -176,7 +222,7 @@ Kibana is already bootstrapped for you.
 
 ## Steps
 
-1. Read the investigator's comment on the issue for the suspected root cause and proposed fix. If no action is needed, skip to step 6.
+1. Read the investigator's comment on the issue for the suspected root cause and proposed fix. Also note its permalink, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. If no action is needed, skip to step 6.
 2. Read the failing test and the helpers, fixtures, and page objects it imports.
 3. Apply the smallest test-side patch that addresses the root cause. Don't add explanatory code comments to the patch by default — a good test-side fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it to 1–2 sentences; a simple change like a timeout bump never warrants a comment.
 4. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
@@ -184,19 +230,25 @@ Kibana is already bootstrapped for you.
 6. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 7. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 8. **Only if you opened a PR in step 5**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
+9. **Only if you opened a PR in step 5 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created.
 
 ## PR format
+
+Write the body so a developer can grasp the fix and its root cause at a glance, from the PR alone — without needing to open links or leave the page (links are still welcome for anyone who wants to dig deeper).
 
 - **Branch**: name the PR's source branch `fix/flaky-<issue-number>-<short-kebab-slug>` (e.g. `fix/flaky-275144-host-flow-ingestion-wait`) to keep fixer branches uniform.
 - **Title**: `[<Plugin name>] <concise summary of the fix>`. Derive the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`).
 - **Body**:
   ```
-  Fixes #<issue-number> (add more issue numbers here if this fix resolves multiple issues)
+  Fixes #<issue-number> - likely introduced by #<introducing-pr> (cc @<introducing-pr-author>)
 
   ### Summary
   <a few bullet points: what was failing, and what this patch changes - keep it very concise, every bullet point must be earned>
 
-  <if this fix matches what the failed test investigator already proposed in the issue, reference it instead of repeating it here; otherwise, explain how and why it differs>
+  ### Context
+  <a few bullet points of history around this flake, in the same concise, high-value style as the Summary — every bullet earned, and omit any you cannot back with real evidence (never guess a PR or attribution). Cover, where known:
+  - a link to the failed test investigator's comment on the issue, flagging whether this patch follows or departs from their proposed fix
+  - a one-line recount of where the failures happened — e.g. the CI pipeline/lane and how often/recently — from the issue's CI data and the investigator's comment>
 
   <details>
   <summary>Verification</summary>
@@ -212,14 +264,19 @@ Kibana is already bootstrapped for you.
   </details>
   ```
 
+The first line attributes the flake:
+- **Introducing PR** (`#<introducing-pr>`): the PR you believe introduced the flake — find the PR that first added the failing test with `git log` / `git blame` on the test file, or prefer a specific PR/commit the investigator implicated as the cause. The `likely` hedge is intentional: this is an informed suspicion, not a proven cause, so keep it. If you can't identify a well-supported candidate, omit the whole `- likely introduced by …` clause and keep just `Fixes #<issue-number>` — never guess.
+- **cc** (`@<introducing-pr-author>`): `@`-mention that PR's author so they're looped in on the fix; drop the `(cc @…)` if the author is a bot (includes `kibanamachine`). Request this same person as a reviewer via the `request_fix_review` tool (see Steps).
+- Add more `Fixes #<issue-number>` references if this fix resolves multiple issues.
+
 Add the following at the very end of the PR description (and outside of the details block):
 
 ```markdown
 > [!NOTE]
-> Requested by @${{ env.REQUESTED_BY }}. Share feedback in #kibana-qa.
+> Requested by @${{ env.REQUESTED_BY }}. Share feedback in #kibana-qa. Need to make quick changes? Ask `@copilot` to do them for you.
 ```
 
-(Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving just `Share feedback in #kibana-qa.`)
+(Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving the rest of the NOTE.)
 
 ## Outcome comment
 

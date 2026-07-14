@@ -29,7 +29,7 @@
     "@kbn/agent-builder-server",
     "@kbn/zod",
     "@kbn/inference-common",
-    "@kbn/agent-context-layer-plugin",
+    "@kbn/agent-builder-sml-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-server",
     "@kbn/core-ui-settings-server",
