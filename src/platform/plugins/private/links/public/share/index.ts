@@ -7,18 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LinksState } from '../../server';
-import { coreServices } from '../services/kibana_services';
-import type { LinksSanitizeResponseBody } from './types';
-
-export async function sanitizeLinks(state: LinksState) {
-  const result = await coreServices.http.post<LinksSanitizeResponseBody>(`/api/links/_sanitize`, {
-    version: '1',
-    body: JSON.stringify(state),
-  });
-
-  return {
-    data: result.data,
-    warnings: result.warnings ?? [],
-  };
-}
+export { exportJsonConfig } from './export_json_config';
