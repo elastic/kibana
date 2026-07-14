@@ -213,6 +213,7 @@ function createChatCompletePipeline({
         toolChoice,
         tools,
         timeout,
+        maxContentLength,
       } = callback(callbackContext);
 
       const messages = sanitizeMessages(givenMessages);
@@ -268,6 +269,7 @@ function createChatCompletePipeline({
                 abortSignal,
                 metadata,
                 timeout,
+                maxContentLength,
                 stream,
               }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
             }
