@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { isRight } from 'fp-ts/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
+import { z } from '@kbn/zod/v4';
+import { environmentSchema } from '@kbn/apm-types';
 import type { Environment } from '../../common/environment_rt';
-import { environmentRt } from '../../common/environment_rt';
 import { apmRouter } from '../components/routing/apm_route_config';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 
@@ -21,38 +19,39 @@ const SERVICE_OVERVIEW_TAB_PATHS = {
   default: '/services/{serviceName}/overview',
 } as const;
 
-export const APMLocatorPayloadValidator = t.union([
-  t.type({ serviceName: t.undefined }),
-  t.intersection([
-    t.type({ serviceName: t.string }),
-    t.type({ dashboardId: t.string }),
-    t.type({ query: environmentRt }),
-  ]),
-  t.intersection([
-    t.type({
-      serviceName: t.string,
-    }),
-    t.partial({ dashboardId: t.undefined }),
-    t.partial({
-      serviceOverviewTab: t.keyof({
-        traces: null,
-        metrics: null,
-        logs: null,
-        errors: null,
-        transactions: null,
-      }),
-      errorGroupId: t.string,
-    }),
-    t.type({
-      query: t.intersection([
-        environmentRt,
-        t.partial({ kuery: t.string, rangeFrom: t.string, rangeTo: t.string }),
-      ]),
-    }),
-  ]),
+export const APMLocatorPayloadValidator = z.union([
+  z.object({ serviceName: z.undefined() }),
+  z
+    .object({ serviceName: z.string() })
+    .merge(z.object({ dashboardId: z.string() }))
+    .merge(z.object({ query: environmentSchema })),
+  z
+    .object({
+      serviceName: z.string(),
+    })
+    .merge(z.object({ dashboardId: z.undefined().optional() }))
+    .merge(
+      z.object({
+        serviceOverviewTab: z
+          .enum(['traces', 'metrics', 'logs', 'errors', 'transactions'])
+          .optional(),
+        errorGroupId: z.string().optional(),
+      })
+    )
+    .merge(
+      z.object({
+        query: environmentSchema.merge(
+          z.object({
+            kuery: z.string().optional(),
+            rangeFrom: z.string().optional(),
+            rangeTo: z.string().optional(),
+          })
+        ),
+      })
+    ),
 ]);
 
-export type APMLocatorPayload = t.TypeOf<typeof APMLocatorPayloadValidator>;
+export type APMLocatorPayload = z.infer<typeof APMLocatorPayloadValidator>;
 
 export function getPathForServiceDetail(
   payload: APMLocatorPayload,
@@ -66,10 +65,14 @@ export function getPathForServiceDetail(
     defaultEnvironment: string;
   }
 ) {
-  const decodedPayload = APMLocatorPayloadValidator.decode(payload);
+  const decodedPayload = APMLocatorPayloadValidator.safeParse(payload);
 
-  if (!isRight(decodedPayload)) {
-    throw new Error(PathReporter.report(decodedPayload).join('\n'));
+  if (!decodedPayload.success) {
+    throw new Error(
+      decodedPayload.error.issues
+        .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+        .join('\n')
+    );
   }
 
   const defaultQueryParams = {
