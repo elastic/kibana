@@ -69,9 +69,11 @@ describe('useManageRegionsState', () => {
 
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
-      expect(result.current.checkedKeys).toEqual(new Set(['aws::us-east-1', 'gcp::europe-west1']));
-      expect(result.current.totalSelected).toBe(2);
-      expect(result.current.allSelected).toBe(true);
+      expect(result.current.regionTab.checkedKeys).toEqual(
+        new Set(['aws::us-east-1', 'gcp::europe-west1'])
+      );
+      expect(result.current.regionTab.totalSelected).toBe(2);
+      expect(result.current.regionTab.allSelected).toBe(true);
     });
 
     it('selects all regions when the policy has an empty allowed_regions list', () => {
@@ -83,7 +85,9 @@ describe('useManageRegionsState', () => {
 
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
-      expect(result.current.checkedKeys).toEqual(new Set(['aws::us-east-1', 'gcp::europe-west1']));
+      expect(result.current.regionTab.checkedKeys).toEqual(
+        new Set(['aws::us-east-1', 'gcp::europe-west1'])
+      );
     });
 
     it('seeds only the policy regions when a partial policy exists', () => {
@@ -95,9 +99,9 @@ describe('useManageRegionsState', () => {
 
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
-      expect(result.current.checkedKeys).toEqual(new Set(['aws::us-east-1']));
-      expect(result.current.totalSelected).toBe(1);
-      expect(result.current.allSelected).toBe(false);
+      expect(result.current.regionTab.checkedKeys).toEqual(new Set(['aws::us-east-1']));
+      expect(result.current.regionTab.totalSelected).toBe(1);
+      expect(result.current.regionTab.allSelected).toBe(false);
     });
 
     it('seeds all regions when the policy has all regions', () => {
@@ -116,8 +120,10 @@ describe('useManageRegionsState', () => {
 
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
-      expect(result.current.checkedKeys).toEqual(new Set(['aws::us-east-1', 'gcp::europe-west1']));
-      expect(result.current.allSelected).toBe(true);
+      expect(result.current.regionTab.checkedKeys).toEqual(
+        new Set(['aws::us-east-1', 'gcp::europe-west1'])
+      );
+      expect(result.current.regionTab.allSelected).toBe(true);
     });
 
     it('does not seed while either query is still loading', () => {
@@ -135,7 +141,7 @@ describe('useManageRegionsState', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
       // Effect guard blocks seeding — checkedKeys remains empty
-      expect(result.current.checkedKeys.size).toBe(0);
+      expect(result.current.regionTab.checkedKeys.size).toBe(0);
     });
 
     it('does not seed twice if already synced', () => {
@@ -148,7 +154,7 @@ describe('useManageRegionsState', () => {
       const { result, rerender } = renderHook(() => useManageRegionsState(onClose));
 
       // No policy → all regions seeded
-      expect(result.current.checkedKeys.size).toBe(2);
+      expect(result.current.regionTab.checkedKeys.size).toBe(2);
 
       // Simulate a re-render with a different policy — syncedFromInitial is true, no re-seed
       mockUseRegionPolicy.mockReturnValue({
@@ -162,7 +168,7 @@ describe('useManageRegionsState', () => {
       rerender();
 
       // Still 2 — the seeding effect is guarded by syncedFromInitial
-      expect(result.current.checkedKeys.size).toBe(2);
+      expect(result.current.regionTab.checkedKeys.size).toBe(2);
     });
   });
 
@@ -181,7 +187,7 @@ describe('useManageRegionsState', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
       expect(result.current.activeTab).toBe('geo');
-      expect(result.current.checkedGeos).toEqual(new Set(['eu']));
+      expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu']));
     });
 
     it('filters out geos from policy that are not in availableGeos', () => {
@@ -197,7 +203,7 @@ describe('useManageRegionsState', () => {
 
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
-      expect(result.current.checkedGeos).toEqual(new Set(['eu']));
+      expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu']));
     });
 
     it('seeds all geos and activates Geo tab when no policy exists (reflects "all routes allowed")', () => {
@@ -211,7 +217,7 @@ describe('useManageRegionsState', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
       expect(result.current.activeTab).toBe('geo');
-      expect(result.current.checkedGeos).toEqual(new Set(['eu', 'us']));
+      expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu', 'us']));
     });
 
     it('seeds geo tab with empty set when an explicit regions policy is active', () => {
@@ -225,7 +231,7 @@ describe('useManageRegionsState', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
 
       expect(result.current.activeTab).toBe('regions');
-      expect(result.current.checkedGeos).toEqual(new Set());
+      expect(result.current.geoTab.checkedGeos).toEqual(new Set());
     });
 
     it('seeds regions tab with empty set when geo policy is active (mutually exclusive)', () => {
@@ -240,9 +246,9 @@ describe('useManageRegionsState', () => {
 
       // Geo tab should be active with 'eu' checked.
       expect(result.current.activeTab).toBe('geo');
-      expect(result.current.checkedGeos).toEqual(new Set(['eu']));
+      expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu']));
       // Regions tab must have nothing pre-selected — the geo policy owns the policy slot.
-      expect(result.current.checkedKeys).toEqual(new Set());
+      expect(result.current.regionTab.checkedKeys).toEqual(new Set());
     });
   });
 
@@ -253,13 +259,13 @@ describe('useManageRegionsState', () => {
     it('builds zone groups ordered by GEO_ORDER (us after eu, apac first)', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
       // twoRegions has eu and us; apac absent → order should be eu, us
-      const geos = result.current.zoneGroups.map((z) => z.geo);
+      const geos = result.current.regionTab.zoneGroups.map((z) => z.geo);
       expect(geos).toEqual(['eu', 'us']);
     });
 
     it('assigns the correct display name to each zone', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      const euGroup = result.current.zoneGroups.find((z) => z.geo === 'eu');
+      const euGroup = result.current.regionTab.zoneGroups.find((z) => z.geo === 'eu');
       expect(euGroup?.displayName).toBe('Europe');
     });
 
@@ -270,7 +276,7 @@ describe('useManageRegionsState', () => {
       ]);
 
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      const geos = result.current.zoneGroups.map((z) => z.geo);
+      const geos = result.current.regionTab.zoneGroups.map((z) => z.geo);
       // 'us' is known (GEO_ORDER); 'mea' is unknown and appended alphabetically
       expect(geos).toEqual(['us', 'mea']);
     });
@@ -282,27 +288,27 @@ describe('useManageRegionsState', () => {
   describe('isAllExpanded', () => {
     it('is false when there are zones but none are expanded', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.isAllExpanded).toBe(false);
+      expect(result.current.regionTab.isAllExpanded).toBe(false);
     });
 
     it('is false when zone list is empty (not a false positive)', () => {
       mockGetAvailableRegions.mockReturnValue([]);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.zoneGroups).toHaveLength(0);
-      expect(result.current.isAllExpanded).toBe(false);
+      expect(result.current.regionTab.zoneGroups).toHaveLength(0);
+      expect(result.current.regionTab.isAllExpanded).toBe(false);
     });
 
     it('is true only when all zones are expanded', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleExpandAll());
-      expect(result.current.isAllExpanded).toBe(true);
+      act(() => result.current.regionTab.onExpandAll());
+      expect(result.current.regionTab.isAllExpanded).toBe(true);
     });
   });
 
   // ---------------------------------------------------------------------------
-  // handleToggleRegion
+  // onToggleRegion
   // ---------------------------------------------------------------------------
-  describe('handleToggleRegion', () => {
+  describe('onToggleRegion', () => {
     it('unchecks a checked region', () => {
       // Seed a full policy so the region starts checked.
       mockUseRegionPolicy.mockReturnValue({
@@ -318,9 +324,9 @@ describe('useManageRegionsState', () => {
         isError: false,
       } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.checkedKeys.has('aws::us-east-1')).toBe(true);
-      act(() => result.current.handleToggleRegion('aws::us-east-1'));
-      expect(result.current.checkedKeys.has('aws::us-east-1')).toBe(false);
+      expect(result.current.regionTab.checkedKeys.has('aws::us-east-1')).toBe(true);
+      act(() => result.current.regionTab.onToggleRegion('aws::us-east-1'));
+      expect(result.current.regionTab.checkedKeys.has('aws::us-east-1')).toBe(false);
     });
 
     it('checks an unchecked region', () => {
@@ -331,16 +337,16 @@ describe('useManageRegionsState', () => {
         isError: false,
       } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.checkedKeys.has('aws::us-east-1')).toBe(false);
-      act(() => result.current.handleToggleRegion('aws::us-east-1'));
-      expect(result.current.checkedKeys.has('aws::us-east-1')).toBe(true);
+      expect(result.current.regionTab.checkedKeys.has('aws::us-east-1')).toBe(false);
+      act(() => result.current.regionTab.onToggleRegion('aws::us-east-1'));
+      expect(result.current.regionTab.checkedKeys.has('aws::us-east-1')).toBe(true);
     });
   });
 
   // ---------------------------------------------------------------------------
-  // handleSelectAll
+  // onSelectAll (regions)
   // ---------------------------------------------------------------------------
-  describe('handleSelectAll', () => {
+  describe('onSelectAll (regions)', () => {
     it('deselects all when all are selected', () => {
       // Seed a full policy so we start fully selected.
       mockUseRegionPolicy.mockReturnValue({
@@ -357,35 +363,35 @@ describe('useManageRegionsState', () => {
         isError: false,
       } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.allSelected).toBe(true);
-      act(() => result.current.handleSelectAll());
-      expect(result.current.totalSelected).toBe(0);
-      expect(result.current.allSelected).toBe(false);
+      expect(result.current.regionTab.allSelected).toBe(true);
+      act(() => result.current.regionTab.onSelectAll());
+      expect(result.current.regionTab.totalSelected).toBe(0);
+      expect(result.current.regionTab.allSelected).toBe(false);
     });
 
     it('selects all when previously deselected', () => {
       // No policy → all pre-selected. Deselect all, then select all again.
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleSelectAll());
-      expect(result.current.totalSelected).toBe(0);
-      act(() => result.current.handleSelectAll());
-      expect(result.current.totalSelected).toBe(2);
-      expect(result.current.allSelected).toBe(true);
+      act(() => result.current.regionTab.onSelectAll());
+      expect(result.current.regionTab.totalSelected).toBe(0);
+      act(() => result.current.regionTab.onSelectAll());
+      expect(result.current.regionTab.totalSelected).toBe(2);
+      expect(result.current.regionTab.allSelected).toBe(true);
     });
 
     it('selects all when some are deselected', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleToggleRegion('aws::us-east-1'));
-      expect(result.current.totalSelected).toBe(1);
-      act(() => result.current.handleSelectAll());
-      expect(result.current.totalSelected).toBe(2);
+      act(() => result.current.regionTab.onToggleRegion('aws::us-east-1'));
+      expect(result.current.regionTab.totalSelected).toBe(1);
+      act(() => result.current.regionTab.onSelectAll());
+      expect(result.current.regionTab.totalSelected).toBe(2);
     });
   });
 
   // ---------------------------------------------------------------------------
-  // handleToggleGeo / handleSelectAllGeos
+  // onToggleGeo / onSelectAll (geos)
   // ---------------------------------------------------------------------------
-  describe('handleToggleGeo', () => {
+  describe('onToggleGeo', () => {
     it('unchecks a checked geo', () => {
       // Seed a geo policy that has both geos selected.
       mockGetAvailableGeos.mockReturnValue(['eu', 'us']);
@@ -395,10 +401,10 @@ describe('useManageRegionsState', () => {
         isError: false,
       } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.checkedGeos.has('eu')).toBe(true);
-      act(() => result.current.handleToggleGeo('eu'));
-      expect(result.current.checkedGeos.has('eu')).toBe(false);
-      expect(result.current.checkedGeos.has('us')).toBe(true);
+      expect(result.current.geoTab.checkedGeos.has('eu')).toBe(true);
+      act(() => result.current.geoTab.onToggleGeo('eu'));
+      expect(result.current.geoTab.checkedGeos.has('eu')).toBe(false);
+      expect(result.current.geoTab.checkedGeos.has('us')).toBe(true);
     });
 
     it('checks an unchecked geo', () => {
@@ -409,25 +415,25 @@ describe('useManageRegionsState', () => {
         isError: false,
       } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.checkedGeos.has('eu')).toBe(false);
-      act(() => result.current.handleToggleGeo('eu'));
-      expect(result.current.checkedGeos.has('eu')).toBe(true);
+      expect(result.current.geoTab.checkedGeos.has('eu')).toBe(false);
+      act(() => result.current.geoTab.onToggleGeo('eu'));
+      expect(result.current.geoTab.checkedGeos.has('eu')).toBe(true);
     });
   });
 
-  describe('handleSelectAllGeos', () => {
+  describe('onSelectAll (geos)', () => {
     it('selects all geos when only a subset is selected', () => {
       mockGetAvailableGeos.mockReturnValue(['eu', 'us']);
       mockUseRegionPolicy.mockReturnValue({
-        // Geo policy with only 'eu' → checkedGeos = Set(['eu']), allGeosSelected = false
+        // Geo policy with only 'eu' → checkedGeos = Set(['eu']), allSelected = false
         data: { region_policy: { allowed_geos: ['eu'] }, created_at: '2024-01-01T00:00:00Z' },
         isLoading: false,
         isError: false,
       } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.checkedGeos).toEqual(new Set(['eu']));
-      act(() => result.current.handleSelectAllGeos());
-      expect(result.current.checkedGeos).toEqual(new Set(['eu', 'us']));
+      expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu']));
+      act(() => result.current.geoTab.onSelectAll());
+      expect(result.current.geoTab.checkedGeos).toEqual(new Set(['eu', 'us']));
     });
 
     it('deselects all geos when all are selected', () => {
@@ -438,43 +444,43 @@ describe('useManageRegionsState', () => {
         isError: false,
       } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.allGeosSelected).toBe(true);
-      act(() => result.current.handleSelectAllGeos());
-      expect(result.current.totalGeosSelected).toBe(0);
+      expect(result.current.geoTab.allSelected).toBe(true);
+      act(() => result.current.geoTab.onSelectAll());
+      expect(result.current.geoTab.totalSelected).toBe(0);
     });
   });
 
   // ---------------------------------------------------------------------------
-  // handleExpandAll / handleToggleExpand
+  // onExpandAll / onToggleExpand
   // ---------------------------------------------------------------------------
-  describe('handleExpandAll / handleToggleExpand', () => {
+  describe('onExpandAll / onToggleExpand', () => {
     it('expands all zones on first call', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleExpandAll());
-      expect(result.current.expandedZones.size).toBe(2);
+      act(() => result.current.regionTab.onExpandAll());
+      expect(result.current.regionTab.expandedZones.size).toBe(2);
     });
 
     it('collapses all zones when all are already expanded', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleExpandAll());
-      act(() => result.current.handleExpandAll());
-      expect(result.current.expandedZones.size).toBe(0);
+      act(() => result.current.regionTab.onExpandAll());
+      act(() => result.current.regionTab.onExpandAll());
+      expect(result.current.regionTab.expandedZones.size).toBe(0);
     });
 
     it('is a no-op when zoneGroups is empty', () => {
       mockGetAvailableRegions.mockReturnValue([]);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      expect(result.current.zoneGroups).toHaveLength(0);
-      act(() => result.current.handleExpandAll());
-      expect(result.current.expandedZones.size).toBe(0);
+      expect(result.current.regionTab.zoneGroups).toHaveLength(0);
+      act(() => result.current.regionTab.onExpandAll());
+      expect(result.current.regionTab.expandedZones.size).toBe(0);
     });
 
     it('toggles a single zone', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleToggleExpand('us', true));
-      expect(result.current.expandedZones.has('us')).toBe(true);
-      act(() => result.current.handleToggleExpand('us', false));
-      expect(result.current.expandedZones.has('us')).toBe(false);
+      act(() => result.current.regionTab.onToggleExpand('us', true));
+      expect(result.current.regionTab.expandedZones.has('us')).toBe(true);
+      act(() => result.current.regionTab.onToggleExpand('us', false));
+      expect(result.current.regionTab.expandedZones.has('us')).toBe(false);
     });
   });
 
@@ -500,7 +506,7 @@ describe('useManageRegionsState', () => {
       } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
       // Geo tab active with 'eu'. Toggle 'us' → dirty on geo tab.
-      act(() => result.current.handleToggleGeo('us'));
+      act(() => result.current.geoTab.onToggleGeo('us'));
       expect(result.current.isDirty).toBe(true);
 
       // Switch to regions tab — starts empty (geo policy, no regions policy) → not dirty.
@@ -554,7 +560,7 @@ describe('useManageRegionsState', () => {
         isError: false,
       } as unknown as ReturnType<typeof useRegionPolicy>);
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleToggleRegion('aws::us-east-1'));
+      act(() => result.current.regionTab.onToggleRegion('aws::us-east-1'));
       act(() => result.current.handleConfirmSave());
       expect(mockSaveMutate).toHaveBeenCalledWith(
         { allowed_regions: [{ csp: 'gcp', region: 'europe-west1' }] },
@@ -608,7 +614,7 @@ describe('useManageRegionsState', () => {
 
     it('calls savePolicy with only selected geos when a subset is chosen', () => {
       const { result } = renderHook(() => useManageRegionsState(onClose));
-      act(() => result.current.handleToggleGeo('eu'));
+      act(() => result.current.geoTab.onToggleGeo('eu'));
       act(() => result.current.handleConfirmSave());
       expect(mockSaveMutate).toHaveBeenCalledWith(
         { allowed_geos: ['us'] },

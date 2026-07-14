@@ -12,8 +12,8 @@ import { useEisModels } from '../../hooks/use_eis_models';
 import { getAvailableRegions, getAvailableGeos, regionKey } from '../../utils/eis_utils';
 import type { PolicyMode } from '../../types';
 import { computeSeedState } from '../../utils/compute_seed_state';
+import { useSetSelection } from '../../hooks/use_set_selection';
 import { useRegionTabState } from './use_region_tab_state';
-import { useGeoTabState } from './use_geo_tab_state';
 
 export const useManageRegionsState = (onClose: () => void) => {
   const { data: policy, isLoading: isPolicyLoading, isError: isPolicyError } = useRegionPolicy();
@@ -28,10 +28,10 @@ export const useManageRegionsState = (onClose: () => void) => {
   const availableGeos = useMemo(() => getAvailableGeos(eisEndpoints ?? []), [eisEndpoints]);
 
   const regionTab = useRegionTabState(availableRegions);
-  const geoTab = useGeoTabState(availableGeos);
+  const geoSelection = useSetSelection(availableGeos);
 
   const { seed: seedRegions } = regionTab.regionSelection;
-  const { seed: seedGeos } = geoTab.geoSelection;
+  const { seed: seedGeos } = geoSelection;
 
   const [activeTab, setActiveTab] = useState<PolicyMode>('geo');
   const [syncedFromInitial, setSyncedFromInitial] = useState(false);
@@ -65,11 +65,11 @@ export const useManageRegionsState = (onClose: () => void) => {
   const isLoading = isPolicyLoading || isEndpointsLoading;
   const isError = isPolicyError || isEndpointsError;
   const activeSelectionIsDirty =
-    activeTab === 'regions' ? regionTab.regionSelection.isDirty : geoTab.geoSelection.isDirty;
+    activeTab === 'regions' ? regionTab.regionSelection.isDirty : geoSelection.isDirty;
   const isDirty = syncedFromInitial && (isNewPolicy || activeSelectionIsDirty);
   const noSelections =
     activeTab === 'geo'
-      ? geoTab.geoSelection.totalSelected === 0
+      ? geoSelection.totalSelected === 0
       : regionTab.regionSelection.totalSelected === 0;
   const isSaveDisabled = isSaving || isLoading || !isDirty || (isNewPolicy && noSelections);
 
@@ -86,7 +86,7 @@ export const useManageRegionsState = (onClose: () => void) => {
   const handleConfirmSave = useCallback(() => {
     if (activeTab === 'geo') {
       savePolicy(
-        { allowed_geos: [...geoTab.geoSelection.selected] },
+        { allowed_geos: [...geoSelection.selected] },
         {
           onSuccess: () => {
             setShowConfirmation(false);
@@ -110,7 +110,7 @@ export const useManageRegionsState = (onClose: () => void) => {
     }
   }, [
     activeTab,
-    geoTab.geoSelection.selected,
+    geoSelection.selected,
     regionTab.regionSelection.selected,
     availableRegions,
     savePolicy,
@@ -122,7 +122,7 @@ export const useManageRegionsState = (onClose: () => void) => {
   }, []);
 
   return {
-    // Common
+    // Common modal state
     activeTab,
     isLoading,
     isError,
@@ -132,33 +132,35 @@ export const useManageRegionsState = (onClose: () => void) => {
     isSaveDisabled,
     isCallOutDismissed,
     showConfirmation,
-    // Regions tab
-    zoneGroups: regionTab.zoneGroups,
-    checkedKeys: regionTab.regionSelection.selected,
-    expandedZones: regionTab.expandedZones,
-    totalSelected: regionTab.regionSelection.totalSelected,
-    totalRegions: regionTab.regionSelection.total,
-    allSelected: regionTab.regionSelection.allSelected,
-    isAllExpanded: regionTab.isAllExpanded,
-    // Geo tab
-    availableGeos,
-    checkedGeos: geoTab.geoSelection.selected,
-    totalGeos: geoTab.geoSelection.total,
-    totalGeosSelected: geoTab.geoSelection.totalSelected,
-    allGeosSelected: geoTab.geoSelection.allSelected,
-    // Handlers – common
+    // Common handlers
     setActiveTab,
     handleDismissCallOut,
     handleRequestSave,
     handleConfirmSave,
     handleCancelConfirmation,
-    // Handlers – regions tab
-    handleSelectAll: regionTab.regionSelection.selectAll,
-    handleToggleRegion: regionTab.regionSelection.toggle,
-    handleToggleExpand: regionTab.handleToggleExpand,
-    handleExpandAll: regionTab.handleExpandAll,
-    // Handlers – geo tab
-    handleToggleGeo: geoTab.geoSelection.toggle,
-    handleSelectAllGeos: geoTab.geoSelection.selectAll,
+    // Regions tab
+    regionTab: {
+      zoneGroups: regionTab.zoneGroups,
+      checkedKeys: regionTab.regionSelection.selected,
+      expandedZones: regionTab.expandedZones,
+      total: regionTab.regionSelection.total,
+      totalSelected: regionTab.regionSelection.totalSelected,
+      allSelected: regionTab.regionSelection.allSelected,
+      isAllExpanded: regionTab.isAllExpanded,
+      onSelectAll: regionTab.regionSelection.selectAll,
+      onToggleRegion: regionTab.regionSelection.toggle,
+      onToggleExpand: regionTab.handleToggleExpand,
+      onExpandAll: regionTab.handleExpandAll,
+    },
+    // Geo tab
+    geoTab: {
+      availableGeos,
+      checkedGeos: geoSelection.selected,
+      total: geoSelection.total,
+      totalSelected: geoSelection.totalSelected,
+      allSelected: geoSelection.allSelected,
+      onSelectAll: geoSelection.selectAll,
+      onToggleGeo: geoSelection.toggle,
+    },
   };
 };

@@ -42,40 +42,27 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
   const modalTitleId = useGeneratedHtmlId();
   const {
     activeTab,
-    zoneGroups,
-    checkedKeys,
-    expandedZones,
-    isCallOutDismissed,
-    totalSelected,
-    totalRegions,
-    allSelected,
-    isAllExpanded,
-    availableGeos,
-    checkedGeos,
-    totalGeos,
-    totalGeosSelected,
-    allGeosSelected,
     isLoading,
     isError,
     isSaving,
     isSaveDisabled,
+    isCallOutDismissed,
     showConfirmation,
     setActiveTab,
     handleDismissCallOut,
     handleRequestSave,
     handleConfirmSave,
     handleCancelConfirmation,
-    handleSelectAll,
-    handleToggleRegion,
-    handleToggleExpand,
-    handleExpandAll,
-    handleToggleGeo,
-    handleSelectAllGeos,
+    regionTab,
+    geoTab,
   } = useManageRegionsState(onClose);
 
   const filteredRegions = useMemo(
-    () => zoneGroups.flatMap((z) => z.regions).filter((r) => checkedKeys.has(regionKey(r))),
-    [zoneGroups, checkedKeys]
+    () =>
+      regionTab.zoneGroups
+        .flatMap((z) => z.regions)
+        .filter((r) => regionTab.checkedKeys.has(regionKey(r))),
+    [regionTab.zoneGroups, regionTab.checkedKeys]
   );
 
   const tabs = useMemo(
@@ -90,13 +77,13 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           <GeoTabContent
             isLoading={isLoading}
             isError={isError}
-            totalGeos={totalGeos}
-            totalGeosSelected={totalGeosSelected}
-            allGeosSelected={allGeosSelected}
-            availableGeos={availableGeos}
-            checkedGeos={checkedGeos}
-            onSelectAll={handleSelectAllGeos}
-            onToggleGeo={handleToggleGeo}
+            totalGeos={geoTab.total}
+            totalGeosSelected={geoTab.totalSelected}
+            allGeosSelected={geoTab.allSelected}
+            availableGeos={geoTab.availableGeos}
+            checkedGeos={geoTab.checkedGeos}
+            onSelectAll={geoTab.onSelectAll}
+            onToggleGeo={geoTab.onToggleGeo}
           />
         ),
       },
@@ -110,17 +97,17 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           <RegionsTabContent
             isLoading={isLoading}
             isError={isError}
-            totalRegions={totalRegions}
-            totalSelected={totalSelected}
-            allSelected={allSelected}
-            isAllExpanded={isAllExpanded}
-            zoneGroups={zoneGroups}
-            checkedKeys={checkedKeys}
-            expandedZones={expandedZones}
-            onSelectAll={handleSelectAll}
-            onExpandAll={handleExpandAll}
-            onToggleRegion={handleToggleRegion}
-            onToggleExpand={handleToggleExpand}
+            totalRegions={regionTab.total}
+            totalSelected={regionTab.totalSelected}
+            allSelected={regionTab.allSelected}
+            isAllExpanded={regionTab.isAllExpanded}
+            zoneGroups={regionTab.zoneGroups}
+            checkedKeys={regionTab.checkedKeys}
+            expandedZones={regionTab.expandedZones}
+            onSelectAll={regionTab.onSelectAll}
+            onExpandAll={regionTab.onExpandAll}
+            onToggleRegion={regionTab.onToggleRegion}
+            onToggleExpand={regionTab.onToggleExpand}
           />
         ),
       },
@@ -128,24 +115,24 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     [
       isLoading,
       isError,
-      totalGeos,
-      totalGeosSelected,
-      allGeosSelected,
-      handleSelectAllGeos,
-      availableGeos,
-      checkedGeos,
-      handleToggleGeo,
-      totalRegions,
-      totalSelected,
-      allSelected,
-      isAllExpanded,
-      handleSelectAll,
-      handleExpandAll,
-      zoneGroups,
-      checkedKeys,
-      expandedZones,
-      handleToggleRegion,
-      handleToggleExpand,
+      geoTab.total,
+      geoTab.totalSelected,
+      geoTab.allSelected,
+      geoTab.availableGeos,
+      geoTab.checkedGeos,
+      geoTab.onSelectAll,
+      geoTab.onToggleGeo,
+      regionTab.total,
+      regionTab.totalSelected,
+      regionTab.allSelected,
+      regionTab.isAllExpanded,
+      regionTab.zoneGroups,
+      regionTab.checkedKeys,
+      regionTab.expandedZones,
+      regionTab.onSelectAll,
+      regionTab.onExpandAll,
+      regionTab.onToggleRegion,
+      regionTab.onToggleExpand,
     ]
   );
 
@@ -260,7 +247,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
         <ConfirmRegionChangeModal
           mode={activeTab}
           selectedRegions={filteredRegions}
-          selectedGeos={[...checkedGeos]}
+          selectedGeos={[...geoTab.checkedGeos]}
           onConfirm={handleConfirmSave}
           onCancel={handleCancelConfirmation}
           isSaving={isSaving}
