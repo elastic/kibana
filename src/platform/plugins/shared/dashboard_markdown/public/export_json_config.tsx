@@ -24,7 +24,7 @@ export const exportJsonConfig: ExportShareParameters = {
       onClick={openFlyout}
       data-test-subj="exportMenuItem-JSON"
     >
-      {i18n.translate('links.exportJson.label', {
+      {i18n.translate('dashboardMarkdown.exportJson.label', {
         defaultMessage: 'JSON',
       })}
     </EuiButtonEmpty>
