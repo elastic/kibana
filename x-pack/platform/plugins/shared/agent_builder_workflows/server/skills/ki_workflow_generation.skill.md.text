@@ -395,7 +395,7 @@ YAML themselves via the Workflows UI **Import** (`.yml`/`.yaml`), or programmati
 
 ## Guardrails
 
-- **Never** use `contextEngine.addEntry` — it was removed. Sink KIs with
+- Sink KIs with
   `elasticsearch.indices.create` + `elasticsearch.index` into a searchable index.
 - **Templating — strings vs. structured values.** In workflow YAML, `"{{ expr }}"` renders to a
   **string**; `"${{ expr }}"` (dollar-prefixed) **preserves the native type** (array/object/number/
