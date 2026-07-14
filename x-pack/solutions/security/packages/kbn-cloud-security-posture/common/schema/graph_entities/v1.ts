@@ -44,13 +44,14 @@ export const entitiesRequestSchema = schema.object({
     size: schema.number({ min: 1, max: DETAIL_PAGE_SIZE_MAX }),
   }),
   query: schema.object({
-    entityIds: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 5000 }),
-    start: schema.oneOf([schema.number(), schema.string()]),
-    end: schema.oneOf([schema.number(), schema.string()]),
+    entityIds: schema.arrayOf(schema.string({ maxLength: 1024 }), { minSize: 1, maxSize: 5000 }),
+    start: schema.oneOf([schema.number(), schema.string({ maxLength: 100 })]),
+    end: schema.oneOf([schema.number(), schema.string({ maxLength: 100 })]),
     indexPatterns: schema.maybe(
       schema.arrayOf(
         schema.string({
           minLength: 1,
+          maxLength: 256,
           validate: (value) => {
             if (!INDEX_PATTERN_REGEX.test(value)) {
               return `Invalid index pattern: ${value}. Contains illegal characters.`;

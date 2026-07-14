@@ -40,7 +40,7 @@ export const registerAlertStatusRoute = (
         validate: {
           request: {
             query: schema.object({
-              alertUuid: schema.string(),
+              alertUuid: schema.string({ maxLength: 64 }),
             }),
           },
         },

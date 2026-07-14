@@ -35,7 +35,7 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * An Elasticsearch simple_query_string
    */
-  search: schema.maybe(schema.string()),
+  search: schema.maybe(schema.string({ maxLength: 1024 })),
 
   /**
    * The page of objects to return
@@ -51,7 +51,7 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
    *  Fields to retrieve from CspBenchmarkRule saved object
    */
   // maxSize is set to 50 to cover all available fields with room for future additions
-  fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
+  fields: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 50 })),
 
   /**
    *  The fields to perform the parsed query against.
@@ -106,13 +106,13 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * benchmark version
    */
-  benchmarkVersion: schema.maybe(schema.string()),
+  benchmarkVersion: schema.maybe(schema.string({ maxLength: 64 })),
 
   /**
    * rule section
    */
-  section: schema.maybe(schema.string()),
-  ruleNumber: schema.maybe(schema.string()),
+  section: schema.maybe(schema.string({ maxLength: 256 })),
+  ruleNumber: schema.maybe(schema.string({ maxLength: 64 })),
 });
 
 export interface BenchmarkRuleSelectParams {
@@ -129,10 +129,10 @@ export interface PageUrlParams {
 // maxSize is set to 500 as there are usually no more than 100 rules per benchmark
 export const rulesToUpdate = schema.arrayOf(
   schema.object({
-    rule_id: schema.string(),
-    benchmark_id: schema.string(),
-    benchmark_version: schema.string(),
-    rule_number: schema.string(),
+    rule_id: schema.string({ maxLength: 256 }),
+    benchmark_id: schema.string({ maxLength: 256 }),
+    benchmark_version: schema.string({ maxLength: 64 }),
+    rule_number: schema.string({ maxLength: 64 }),
   }),
   { maxSize: 500 }
 );

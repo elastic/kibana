@@ -48,10 +48,10 @@ export const registerAlertsRoute = (
         validate: {
           request: {
             query: schema.object({
-              sessionEntityId: schema.string(),
-              sessionStartTime: schema.string(),
-              investigatedAlertId: schema.maybe(schema.string()),
-              cursor: schema.maybe(schema.string()),
+              sessionEntityId: schema.string({ maxLength: 1024 }),
+              sessionStartTime: schema.string({ maxLength: 100 }),
+              investigatedAlertId: schema.maybe(schema.string({ maxLength: 64 })),
+              cursor: schema.maybe(schema.string({ maxLength: 1024 })),
             }),
           },
         },

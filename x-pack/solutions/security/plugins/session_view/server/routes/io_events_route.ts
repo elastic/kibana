@@ -39,10 +39,10 @@ export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              index: schema.string(),
-              sessionEntityId: schema.string(),
-              sessionStartTime: schema.string(),
-              cursor: schema.maybe(schema.string()),
+              index: schema.string({ maxLength: 256 }),
+              sessionEntityId: schema.string({ maxLength: 1024 }),
+              sessionStartTime: schema.string({ maxLength: 100 }),
+              cursor: schema.maybe(schema.string({ maxLength: 1024 })),
               pageSize: schema.maybe(schema.number({ min: 1, max: IO_EVENTS_PER_PAGE })), // currently only set in FTR tests to test pagination
             }),
           },

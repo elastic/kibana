@@ -18,5 +18,5 @@ export const getComplianceDashboardSchema = schema.object({
 });
 
 export const getComplianceDashboardQuerySchema = schema.object({
-  namespace: schema.maybe(schema.string()),
+  namespace: schema.maybe(schema.string({ maxLength: 63 })),
 });

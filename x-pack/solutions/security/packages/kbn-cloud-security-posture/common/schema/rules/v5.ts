@@ -33,7 +33,7 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * An Elasticsearch simple_query_string
    */
-  search: schema.maybe(schema.string()),
+  search: schema.maybe(schema.string({ maxLength: 1024 })),
 
   /**
    * The page of objects to return
@@ -49,7 +49,7 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
    *  Fields to retrieve from CspBenchmarkRule saved object
    */
   // maxSize is set to 50 to cover all available fields with room for future additions
-  fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
+  fields: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 50 })),
 
   /**
    *  The fields to perform the parsed query against.
@@ -104,18 +104,18 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * benchmark version
    */
-  benchmarkVersion: schema.maybe(schema.string()),
+  benchmarkVersion: schema.maybe(schema.string({ maxLength: 64 })),
 
   /**
    * rule section
    */
   // maxSize is set to 100 as there are limited sections per benchmark
   section: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })])
+    schema.oneOf([schema.string({ maxLength: 256 }), schema.arrayOf(schema.string({ maxLength: 256 }), { minSize: 1, maxSize: 100 })])
   ),
   // maxSize is set to 100 as there are limited rules per benchmark
   ruleNumber: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })])
+    schema.oneOf([schema.string({ maxLength: 256 }), schema.arrayOf(schema.string({ maxLength: 256 }), { minSize: 1, maxSize: 100 })])
   ),
 });
 

@@ -31,9 +31,9 @@ export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) =>
         validate: {
           request: {
             query: schema.object({
-              index: schema.string(),
-              sessionEntityId: schema.string(),
-              sessionStartTime: schema.string(),
+              index: schema.string({ maxLength: 256 }),
+              sessionEntityId: schema.string({ maxLength: 1024 }),
+              sessionStartTime: schema.string({ maxLength: 100 }),
             }),
           },
         },

@@ -78,7 +78,7 @@ export const benchmarksQueryParamsSchema = schema.object({
   /**
    * Benchmark filter
    */
-  package_policy_name: schema.maybe(schema.string()),
+  package_policy_name: schema.maybe(schema.string({ maxLength: 256 })),
 });
 
 export type BenchmarksQueryParams = TypeOf<typeof benchmarksQueryParamsSchema>;

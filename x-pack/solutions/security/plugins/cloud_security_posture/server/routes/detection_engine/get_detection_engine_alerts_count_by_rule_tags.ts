@@ -66,7 +66,7 @@ export const defineGetDetectionEngineAlertsStatus = (router: CspRouter) =>
           request: {
             query: schema.object({
               // maxSize is set to 100 as it's not expected to have more than 100 tags
-              tags: schema.arrayOf(schema.string(), { maxSize: 100 }),
+              tags: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 }),
             }),
           },
         },
