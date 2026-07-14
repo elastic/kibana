@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AiPanelPlugin } from './plugin';
+import { CustomContentPlugin } from './plugin';
 
-export { AI_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
-export type { AiPanelEmbeddableState } from '../server';
+export { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '../common/constants';
+export type { CustomContentEmbeddableState } from '../server';
 
-export const plugin = () => new AiPanelPlugin();
+export const plugin = () => new CustomContentPlugin();

@@ -14,9 +14,9 @@ import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import {
-  AI_PANEL_CSP_META,
-  AI_PANEL_MAX_PROMPT_LENGTH,
-  AI_PANEL_ENABLED_FLAG_KEY,
+  CUSTOM_CONTENT_CSP_META,
+  CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
+  CUSTOM_CONTENT_ENABLED_FLAG_KEY,
 } from '../../common/constants';
 
 const SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
@@ -80,7 +80,7 @@ export function registerGenerateRoute(
 ) {
   router.post(
     {
-      path: '/internal/ai_panel/generate',
+      path: '/internal/custom_content/generate',
       security: {
         authz: { enabled: false, reason: 'Delegates auth to the inference plugin' },
       },
@@ -90,7 +90,7 @@ export function registerGenerateRoute(
       },
       validate: {
         body: schema.object({
-          prompt: schema.string({ minLength: 1, maxLength: AI_PANEL_MAX_PROMPT_LENGTH }),
+          prompt: schema.string({ minLength: 1, maxLength: CUSTOM_CONTENT_MAX_PROMPT_LENGTH }),
           colorMode: schema.oneOf([schema.literal('LIGHT'), schema.literal('DARK')], {
             defaultValue: 'LIGHT',
           }),
@@ -100,7 +100,7 @@ export function registerGenerateRoute(
     async (context, request, response) => {
       const [coreStart, { inference }] = await getStartServices();
       // Temporary kill-switch — remove once the feature is approved to ship.
-      if (!coreStart.featureFlags.getBooleanValue(AI_PANEL_ENABLED_FLAG_KEY, false)) {
+      if (!coreStart.featureFlags.getBooleanValue(CUSTOM_CONTENT_ENABLED_FLAG_KEY, false)) {
         return response.notFound();
       }
 
@@ -109,7 +109,7 @@ export function registerGenerateRoute(
       const connector = await inference.getDefaultConnector(request).catch(() => undefined);
       if (!connector) {
         return response.badRequest({
-          body: i18n.translate('xpack.aiPanel.generateRoute.noConnectorError', {
+          body: i18n.translate('xpack.customContent.generateRoute.noConnectorError', {
             defaultMessage: 'No inference connector configured',
           }),
         });
@@ -122,7 +122,7 @@ export function registerGenerateRoute(
 
       const systemPrompt = buildSystemPromptStatic(colorMode);
 
-      passThrough.write(JSON.stringify({ token: AI_PANEL_CSP_META }) + '\n');
+      passThrough.write(JSON.stringify({ token: CUSTOM_CONTENT_CSP_META }) + '\n');
 
       const client = inference.getClient({ request });
       const events$ = client.chatComplete({
@@ -147,7 +147,7 @@ export function registerGenerateRoute(
               if (!passThrough.writableEnded) {
                 passThrough.write(
                   JSON.stringify({
-                    error: i18n.translate('xpack.aiPanel.generateRoute.sizeLimitError', {
+                    error: i18n.translate('xpack.customContent.generateRoute.sizeLimitError', {
                       defaultMessage: 'Generated content exceeded size limit',
                     }),
                   }) + '\n'
@@ -162,12 +162,12 @@ export function registerGenerateRoute(
         },
         error: (err) => {
           abortSub.unsubscribe();
-          logger.error(`AI panel generation failed: ${err.message}`);
+          logger.error(`Custom content generation failed: ${err.message}`);
           if (!passThrough.writableEnded) {
             passThrough.write(
               JSON.stringify({
-                error: i18n.translate('xpack.aiPanel.generateRoute.generationFailedError', {
-                  defaultMessage: 'AI panel generation failed',
+                error: i18n.translate('xpack.customContent.generateRoute.generationFailedError', {
+                  defaultMessage: 'Custom content generation failed',
                 }),
               }) + '\n'
             );

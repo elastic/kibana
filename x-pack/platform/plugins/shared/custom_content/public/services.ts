@@ -18,6 +18,6 @@ export const setServices = (core: CoreStart) => {
 };
 
 export const getServices = (): Services => {
-  if (!services) throw new Error('AiPanel services not initialized');
+  if (!services) throw new Error('CustomContent services not initialized');
   return services;
 };

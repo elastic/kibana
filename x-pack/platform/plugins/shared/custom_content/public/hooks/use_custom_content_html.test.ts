@@ -19,7 +19,7 @@ jest.mock('../utils/stream_generate');
 import type { HttpStart } from '@kbn/core/public';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
-import { useAiPanelHtml } from './use_ai_panel_html';
+import { useCustomContentHtml } from './use_custom_content_html';
 
 const mockHttp = {} as unknown as HttpStart;
 
@@ -40,10 +40,10 @@ const baseParams = {
 
 const VALID_HTML = `<html><body><p>hello</p></body></html>`;
 
-describe('useAiPanelHtml', () => {
+describe('useCustomContentHtml', () => {
   describe('empty prompt', () => {
     it('clears isLoading immediately when prompt is empty', () => {
-      const { result } = renderHook(() => useAiPanelHtml({ ...baseParams, prompt: '' }));
+      const { result } = renderHook(() => useCustomContentHtml({ ...baseParams, prompt: '' }));
       expect(result.current.isLoading).toBe(false);
       expect(streamGenerate).not.toHaveBeenCalled();
     });
@@ -52,7 +52,7 @@ describe('useAiPanelHtml', () => {
   describe('fast path — static panel with stored template', () => {
     it('renders the stored HTML immediately with no server calls', async () => {
       const { result } = renderHook(() =>
-        useAiPanelHtml({ ...baseParams, savedTemplate: VALID_HTML })
+        useCustomContentHtml({ ...baseParams, savedTemplate: VALID_HTML })
       );
       await waitFor(() => expect(result.current.isLoading).toBe(false));
       expect(result.current.html).toContain('hello');
@@ -70,7 +70,9 @@ describe('useAiPanelHtml', () => {
         }
       );
 
-      const { result } = renderHook(() => useAiPanelHtml({ ...baseParams, onTemplateChange }));
+      const { result } = renderHook(() =>
+        useCustomContentHtml({ ...baseParams, onTemplateChange })
+      );
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
       expect(streamGenerate).toHaveBeenCalledTimes(1);
@@ -81,7 +83,7 @@ describe('useAiPanelHtml', () => {
     it('surfaces LLM error', async () => {
       (streamGenerate as jest.Mock).mockRejectedValue(new Error('LLM unavailable'));
 
-      const { result } = renderHook(() => useAiPanelHtml({ ...baseParams }));
+      const { result } = renderHook(() => useCustomContentHtml({ ...baseParams }));
 
       await waitFor(() => expect(result.current.error).toBe('LLM unavailable'));
       expect(result.current.isLoading).toBe(false);
@@ -95,7 +97,7 @@ describe('useAiPanelHtml', () => {
         }
       );
 
-      const { result } = renderHook(() => useAiPanelHtml({ ...baseParams }));
+      const { result } = renderHook(() => useCustomContentHtml({ ...baseParams }));
 
       await waitFor(() => expect(result.current.error).toMatch(/javascript/i));
       expect(result.current.html).toBe('');
@@ -106,7 +108,7 @@ describe('useAiPanelHtml', () => {
         new Error('No inference connector configured')
       );
 
-      const { result } = renderHook(() => useAiPanelHtml({ ...baseParams }));
+      const { result } = renderHook(() => useCustomContentHtml({ ...baseParams }));
 
       await waitFor(() => expect(result.current.isAiUnavailable).toBe(true));
       expect(result.current.isLoading).toBe(false);
@@ -123,7 +125,7 @@ describe('useAiPanelHtml', () => {
         }
       );
 
-      const { unmount } = renderHook(() => useAiPanelHtml({ ...baseParams }));
+      const { unmount } = renderHook(() => useCustomContentHtml({ ...baseParams }));
 
       await act(async () => {});
       unmount();
@@ -138,7 +140,7 @@ describe('useAiPanelHtml', () => {
 
       const { rerender } = renderHook(
         ({ version }: { version: number }) =>
-          useAiPanelHtml({
+          useCustomContentHtml({
             ...baseParams,
             generationVersion: version,
           }),

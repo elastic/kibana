@@ -89,7 +89,7 @@ describe('registerGenerateRoute', () => {
     registerGenerateRoute(router, getStartServices, logger);
 
     expect(router.post).toHaveBeenCalledWith(
-      expect.objectContaining({ path: '/internal/ai_panel/generate' }),
+      expect.objectContaining({ path: '/internal/custom_content/generate' }),
       expect.any(Function)
     );
   });
@@ -236,7 +236,7 @@ describe('registerGenerateRoute', () => {
     const events = await readNdjson(response.ok.mock.results[0].value.body);
     expect(events).toEqual([
       { token: expect.stringContaining('Content-Security-Policy') },
-      { error: 'AI panel generation failed' },
+      { error: 'Custom content generation failed' },
     ]);
     expect(loggerError).toHaveBeenCalledWith(
       expect.stringContaining('upstream provider secret leak')

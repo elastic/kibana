@@ -9,12 +9,15 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 
-export const aiPanelStateSchema = schema.object({
+export const customContentStateSchema = schema.object({
   prompt: schema.string(),
   template: schema.maybe(schema.string()),
 });
 
-export const aiPanelEmbeddableSchema = schema.allOf([aiPanelStateSchema, serializedTitlesSchema]);
+export const customContentEmbeddableSchema = schema.allOf([
+  customContentStateSchema,
+  serializedTitlesSchema,
+]);
 
-export type AiPanelState = TypeOf<typeof aiPanelStateSchema>;
-export type AiPanelEmbeddableState = TypeOf<typeof aiPanelEmbeddableSchema>;
+export type CustomContentState = TypeOf<typeof customContentStateSchema>;
+export type CustomContentEmbeddableState = TypeOf<typeof customContentEmbeddableSchema>;

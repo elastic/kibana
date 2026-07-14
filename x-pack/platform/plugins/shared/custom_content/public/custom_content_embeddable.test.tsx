@@ -7,18 +7,18 @@
 
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
-import { aiPanelEmbeddableFactory } from './ai_panel_embeddable';
-import type { AiPanelApi } from './ai_panel_embeddable';
-import type { AiPanelEmbeddableState } from '../server';
+import { customContentEmbeddableFactory } from './custom_content_embeddable';
+import type { CustomContentApi } from './custom_content_embeddable';
+import type { CustomContentEmbeddableState } from '../server';
 
-jest.mock('./components/ai_panel_component', () => ({
-  AiPanelComponent: (props: {
+jest.mock('./components/custom_content_component', () => ({
+  CustomContentComponent: (props: {
     prompt: string;
     savedTemplate: string | undefined;
     generationVersion: number;
   }) => (
     <div
-      data-test-subj="mockAiPanelComponent"
+      data-test-subj="mockCustomContentComponent"
       data-prompt={props.prompt}
       data-saved-template={props.savedTemplate ?? ''}
       data-generation-version={props.generationVersion}
@@ -26,27 +26,28 @@ jest.mock('./components/ai_panel_component', () => ({
   ),
 }));
 
-const baseState: AiPanelEmbeddableState = {
+const baseState: CustomContentEmbeddableState = {
   prompt: 'Show KPI cards',
   template: '<div>static html</div>',
 };
 
-const buildEmbeddable = async (initialState: AiPanelEmbeddableState) => {
+const buildEmbeddable = async (initialState: CustomContentEmbeddableState) => {
   const parentApiStub = {};
   const uuid = 'test-uuid';
 
-  const embeddable = await aiPanelEmbeddableFactory.buildEmbeddable({
+  const embeddable = await customContentEmbeddableFactory.buildEmbeddable({
     initializeDrilldownsManager: jest.fn(),
     initialState,
     parentApi: parentApiStub,
-    finalizeApi: (api) => ({ ...api, uuid, parentApi: parentApiStub } as unknown as AiPanelApi),
+    finalizeApi: (api) =>
+      ({ ...api, uuid, parentApi: parentApiStub } as unknown as CustomContentApi),
     uuid,
   });
 
   return { embeddable };
 };
 
-describe('aiPanelEmbeddableFactory', () => {
+describe('customContentEmbeddableFactory', () => {
   describe('serializeState', () => {
     it('round-trips prompt and template from initial state', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
@@ -55,7 +56,7 @@ describe('aiPanelEmbeddableFactory', () => {
 
     it('reflects updates applied via applySerializedState', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
-      const nextState: AiPanelEmbeddableState = {
+      const nextState: CustomContentEmbeddableState = {
         prompt: 'Show a status board',
         template: '<div>new</div>',
       };
@@ -95,11 +96,11 @@ describe('aiPanelEmbeddableFactory', () => {
   });
 
   describe('Component', () => {
-    it('passes prompt and savedTemplate to AiPanelComponent', async () => {
+    it('passes prompt and savedTemplate to CustomContentComponent', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
 
-      const el = screen.getByTestId('mockAiPanelComponent');
+      const el = screen.getByTestId('mockCustomContentComponent');
       expect(el).toHaveAttribute('data-prompt', 'Show KPI cards');
       expect(el).toHaveAttribute('data-saved-template', '<div>static html</div>');
     });
@@ -108,7 +109,7 @@ describe('aiPanelEmbeddableFactory', () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
 
-      expect(screen.getByTestId('mockAiPanelComponent')).toHaveAttribute(
+      expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
         'data-generation-version',
         '0'
       );

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { aiPanelEmbeddableFactory } from './ai_panel_embeddable';
+export { customContentEmbeddableFactory } from './custom_content_embeddable';

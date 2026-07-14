@@ -7,10 +7,10 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-export type { AiPanelEmbeddableState } from './embeddable/schemas';
-export { AI_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
+export type { CustomContentEmbeddableState } from './embeddable/schemas';
+export { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '../common/constants';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { AiPanelPlugin } = await import('./plugin');
-  return new AiPanelPlugin(initializerContext);
+  const { CustomContentPlugin } = await import('./plugin');
+  return new CustomContentPlugin(initializerContext);
 };

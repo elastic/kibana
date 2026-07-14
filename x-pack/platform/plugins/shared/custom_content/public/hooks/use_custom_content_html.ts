@@ -11,12 +11,12 @@ import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 import { stripMarkdownFences, containsScript, prepareHtml } from '../utils/template_fill';
 
-const SCRIPT_ERROR_MESSAGE = i18n.translate('xpack.aiPanel.error.templateScript', {
+const SCRIPT_ERROR_MESSAGE = i18n.translate('xpack.customContent.error.templateScript', {
   defaultMessage:
     'The generated panel relied on JavaScript, which this panel type does not support. Try rephrasing the request.',
 });
 
-export interface UseAiPanelHtmlParams {
+export interface UseCustomContentHtmlParams {
   embeddableId: string;
   prompt: string;
   generationVersion: number;
@@ -25,21 +25,21 @@ export interface UseAiPanelHtmlParams {
   onTemplateChange: (template: string) => void;
 }
 
-export interface UseAiPanelHtmlResult {
+export interface UseCustomContentHtmlResult {
   html: string;
   isLoading: boolean;
   error: string | undefined;
   isAiUnavailable: boolean;
 }
 
-export function useAiPanelHtml({
+export function useCustomContentHtml({
   embeddableId,
   prompt,
   generationVersion,
   savedTemplate,
   colorMode,
   onTemplateChange,
-}: UseAiPanelHtmlParams): UseAiPanelHtmlResult {
+}: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
   const [html, setHtml] = useState('');
   const [isLoading, setIsLoading] = useState(Boolean(prompt));
   const [error, setError] = useState<string | undefined>();

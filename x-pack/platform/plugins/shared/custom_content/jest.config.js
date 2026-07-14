@@ -8,11 +8,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/ai_panel'],
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/custom_content'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/ai_panel',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/custom_content',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/ai_panel/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/custom_content/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

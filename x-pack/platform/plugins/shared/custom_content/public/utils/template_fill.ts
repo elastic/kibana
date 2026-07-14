@@ -6,16 +6,16 @@
  */
 
 import DOMPurify from 'dompurify';
-import { AI_PANEL_CSP_META } from '../../common/constants';
+import { CUSTOM_CONTENT_CSP_META } from '../../common/constants';
 
 export function injectCsp(html: string): string {
-  if (html.includes(AI_PANEL_CSP_META)) return html;
+  if (html.includes(CUSTOM_CONTENT_CSP_META)) return html;
   const headMatch = html.match(/<head[^>]*>/i);
   if (headMatch?.index !== undefined) {
     const at = headMatch.index + headMatch[0].length;
-    return html.slice(0, at) + AI_PANEL_CSP_META + html.slice(at);
+    return html.slice(0, at) + CUSTOM_CONTENT_CSP_META + html.slice(at);
   }
-  return AI_PANEL_CSP_META + html;
+  return CUSTOM_CONTENT_CSP_META + html;
 }
 
 export function prepareHtml(html: string): string {

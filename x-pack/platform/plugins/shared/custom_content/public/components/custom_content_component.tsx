@@ -9,9 +9,9 @@ import { EuiCallOut, EuiEmptyPrompt, EuiProgress, useEuiTheme } from '@elastic/e
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
-import { useAiPanelHtml } from '../hooks/use_ai_panel_html';
+import { useCustomContentHtml } from '../hooks/use_custom_content_html';
 
-interface AiPanelComponentProps {
+interface CustomContentComponentProps {
   embeddableId: string;
   prompt: string;
   generationVersion: number;
@@ -35,16 +35,16 @@ const iframeCss = css({
   background: 'transparent',
 });
 
-export const AiPanelComponent = ({
+export const CustomContentComponent = ({
   embeddableId,
   prompt,
   generationVersion,
   savedTemplate,
   onTemplateChange,
   onErrorChange,
-}: AiPanelComponentProps) => {
+}: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const { html, isLoading, error, isAiUnavailable } = useAiPanelHtml({
+  const { html, isLoading, error, isAiUnavailable } = useCustomContentHtml({
     embeddableId,
     prompt,
     generationVersion,
@@ -78,14 +78,14 @@ export const AiPanelComponent = ({
           iconColor="subdued"
           title={
             <h3>
-              {i18n.translate('xpack.aiPanel.aiUnavailable.title', {
+              {i18n.translate('xpack.customContent.aiUnavailable.title', {
                 defaultMessage: 'Set up an AI connector to use this panel',
               })}
             </h3>
           }
           body={
             <p>
-              {i18n.translate('xpack.aiPanel.aiUnavailable.body', {
+              {i18n.translate('xpack.customContent.aiUnavailable.body', {
                 defaultMessage:
                   'This panel generates content using AI. Ask your administrator to configure an AI connector in Stack Management.',
               })}
@@ -97,7 +97,7 @@ export const AiPanelComponent = ({
       {!isAiUnavailable && error && (
         <EuiCallOut
           color="danger"
-          title={i18n.translate('xpack.aiPanel.error.title', {
+          title={i18n.translate('xpack.customContent.error.title', {
             defaultMessage: 'Failed to generate panel',
           })}
           style={{ margin: euiTheme.size.base }}
@@ -108,7 +108,7 @@ export const AiPanelComponent = ({
       )}
       {!isAiUnavailable && !error && html && (
         <div css={iframeContainerCss}>
-          <iframe css={iframeCss} srcDoc={html} sandbox="" title="AI panel" />
+          <iframe css={iframeCss} srcDoc={html} sandbox="" title="Custom content panel" />
         </div>
       )}
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}

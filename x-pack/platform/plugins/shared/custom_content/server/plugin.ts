@@ -13,7 +13,7 @@ interface StartDeps {
   inference: InferenceServerStart;
 }
 
-export class AiPanelPlugin implements Plugin<void, void, {}, StartDeps> {
+export class CustomContentPlugin implements Plugin<void, void, {}, StartDeps> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   setup(core: CoreSetup<StartDeps>) {

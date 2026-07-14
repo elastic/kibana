@@ -18,29 +18,29 @@ import {
 } from '@kbn/presentation-publishing';
 import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
-import type { AiPanelEmbeddableState } from '../server';
-import { AI_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
-import { AiPanelComponent } from './components/ai_panel_component';
+import type { CustomContentEmbeddableState } from '../server';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '../common/constants';
+import { CustomContentComponent } from './components/custom_content_component';
 
-export type AiPanelApi = DefaultEmbeddableApi<AiPanelEmbeddableState>;
+export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState>;
 
-export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
-  AiPanelEmbeddableState,
-  AiPanelApi
+export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
+  CustomContentEmbeddableState,
+  CustomContentApi
 > = {
-  type: AI_PANEL_EMBEDDABLE_TYPE,
+  type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
     const prompt$ = new BehaviorSubject<string>(initialState.prompt ?? '');
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
 
-    const serializeState = (): AiPanelEmbeddableState => ({
+    const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
       prompt: prompt$.getValue(),
       template: template$.getValue(),
     });
 
-    const stateApi = initializeStateApi<AiPanelEmbeddableState>({
+    const stateApi = initializeStateApi<CustomContentEmbeddableState>({
       uuid,
       parentApi,
       serializeState,
@@ -71,12 +71,12 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
       ...stateApi,
       ...titleManager.api,
       serializeState,
-      getTypeDisplayName: () => 'AI Panel',
+      getTypeDisplayName: () => 'Custom content',
     });
 
     return {
       api,
-      Component: function AiPanelEmbeddableComponent() {
+      Component: function CustomContentEmbeddableComponent() {
         const [prompt, savedTemplate] = useBatchedPublishingSubjects(prompt$, template$);
         const [generationVersion, setGenerationVersion] = useState(0);
 
@@ -91,7 +91,7 @@ export const aiPanelEmbeddableFactory: EmbeddablePublicDefinition<
         }, []);
 
         return (
-          <AiPanelComponent
+          <CustomContentComponent
             embeddableId={uuid}
             prompt={prompt}
             generationVersion={generationVersion}

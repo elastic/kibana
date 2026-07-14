@@ -4570,10 +4570,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-panel-plugin@link:x-pack/platform/plugins/shared/ai_panel":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ai-security-labs-content@link:x-pack/solutions/security/packages/ai-security-labs-content":
   version "0.0.0"
   uid ""
@@ -6379,6 +6375,10 @@
   uid ""
 
 "@kbn/custom-branding-plugin@link:x-pack/platform/plugins/private/custom_branding":
+  version "0.0.0"
+  uid ""
+
+"@kbn/custom-content-plugin@link:x-pack/platform/plugins/shared/custom_content":
   version "0.0.0"
   uid ""
 
