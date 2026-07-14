@@ -153,7 +153,7 @@ export const MultiJobActionsMenu: FC<Props> = ({
       >
         <FormattedMessage
           id="xpack.ml.jobsList.multiJobsActions.updateProjectRoutingLabel"
-          defaultMessage="Change project routing"
+          defaultMessage="Change project scope"
         />
       </EuiContextMenuItem>
     );
