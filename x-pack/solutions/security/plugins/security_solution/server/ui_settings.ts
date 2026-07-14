@@ -362,7 +362,6 @@ export const initUiSettings = (
         requiresPageReload: true,
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
-        technicalPreview: true,
       },
     }),
     [NEWS_FEED_URL_SETTING]: {
