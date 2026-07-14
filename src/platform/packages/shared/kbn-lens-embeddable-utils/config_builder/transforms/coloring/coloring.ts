@@ -96,7 +96,7 @@ function buildNamedPaletteLensState({
 }
 
 /**
- * API -> Lens state for a `distributed_palette`.
+ * API -> Lens state for a `distributed_palette` or the deprecated `legacy_dynamic`.
  * - `continuity` is always `none`; the recalculated `min`/`max` act as the range bounds.
  * - `numberOfBands` is the per-chart default band count used to split the domain.
  * - `useNumericRange` defaults to `false` (`percent`). Single-value charts (metric without
@@ -104,28 +104,7 @@ function buildNamedPaletteLensState({
  *   single value across an absolute range where percentages are meaningless.
  */
 function fromColorByValuePaletteAPIToLensState(
-  config: ColorByValuePaletteType,
-  numberOfBands: number = DEFAULT_COLOR_STEPS,
-  useNumericRange: boolean = false
-): PaletteOutput<CustomPaletteParams> {
-  const { palette } = config;
-  return buildNamedPaletteLensState({
-    palette,
-    numberOfBands,
-    useNumericRange,
-  });
-}
-
-/**
- * API -> Lens state for a deprecated `legacy_dynamic` palette. Rebuilt as a named palette
- * (no per-band stops), reading only the `palette` name:
- * - `continuity` is always `none` the recalculated `min`/`max` act as the range bounds.
- * - `numberOfBands` and `rangeType` come from the arguments (`numberOfBands`, `useNumericRange`);
- *   the config's own `steps` count and `range` are ignored.
- * - The `shift` flag is ignored.
- */
-function fromLegacyColorByValueAPIToLensState(
-  config: Extract<ColorByValueType, { type: 'legacy_dynamic' }>,
+  config: ColorByValuePaletteType | Extract<ColorByValueType, { type: 'legacy_dynamic' }>,
   numberOfBands: number = DEFAULT_COLOR_STEPS,
   useNumericRange: boolean = false
 ): PaletteOutput<CustomPaletteParams> {
@@ -151,13 +130,9 @@ export function fromColorByValueAPIToLensState(
 ): PaletteOutput<CustomPaletteParams> | undefined {
   if (!config) return;
 
-  if (config.type === 'distributed_palette') {
-    return fromColorByValuePaletteAPIToLensState(config, numberOfBands, useNumericRange);
-  }
-
   // `legacy_dynamic` is parse-only (deprecated) and is rebuilt as a named palette.
-  if (config.type === 'legacy_dynamic') {
-    return fromLegacyColorByValueAPIToLensState(config, numberOfBands, useNumericRange);
+  if (config.type === 'distributed_palette' || config.type === 'legacy_dynamic') {
+    return fromColorByValuePaletteAPIToLensState(config, numberOfBands, useNumericRange);
   }
 
   const stops = config.steps.map(
