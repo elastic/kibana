@@ -100,7 +100,6 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/core-security-server'
   - '@kbn/logging'
-  - '@kbn/management-settings-ids'
   - '@kbn/agent-builder-sml-plugin'
   - '@kbn/std'
   - '@kbn/use-observable'
