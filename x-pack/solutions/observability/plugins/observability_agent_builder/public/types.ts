@@ -12,6 +12,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   ErrorSampleAiInsightProps,
   AlertAskAiAssistantButtonProps,
+  ServiceInvestigateButtonProps,
 } from './components/insights';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -20,6 +21,7 @@ export interface ObservabilityAgentBuilderPluginPublicSetup {}
 export interface ObservabilityAgentBuilderPluginPublicStart {
   getAlertAskAiAssistantButton: () => ComponentType<AlertAskAiAssistantButtonProps>;
   getErrorSampleAIInsight: () => ComponentType<ErrorSampleAiInsightProps>;
+  getServiceInvestigateButton: () => ComponentType<ServiceInvestigateButtonProps>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

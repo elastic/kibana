@@ -15,16 +15,24 @@ import type { ObservabilityAgentBuilderPluginStartDependencies } from '../../typ
 import type { ErrorSampleAiInsightProps } from './error_sample_ai_insight';
 import type { LogAiInsightProps, LogAiInsightDocument } from './log_ai_insight';
 import type { AlertAskAiAssistantButtonProps } from './alert_ask_ai_assistant_button';
+import type { ServiceInvestigateButtonProps } from './service_investigate_button';
 
 const queryClient = new QueryClient();
 
 export type { ErrorSampleAiInsightProps } from './error_sample_ai_insight';
 export type { LogAiInsightProps, LogAiInsightDocument } from './log_ai_insight';
 export type { AlertAskAiAssistantButtonProps } from './alert_ask_ai_assistant_button';
+export type { ServiceInvestigateButtonProps } from './service_investigate_button';
 
 const AlertAskAiAssistantButtonLazy = dynamic(() =>
   import('./alert_ask_ai_assistant_button').then((m) => ({
     default: m.AlertAskAiAssistantButton,
+  }))
+);
+
+const ServiceInvestigateButtonLazy = dynamic(() =>
+  import('./service_investigate_button').then((m) => ({
+    default: m.ServiceInvestigateButton,
   }))
 );
 
@@ -85,6 +93,24 @@ export function createAlertAskAiAssistantButton(
     <QueryClientProvider client={queryClient}>
       <KibanaReactContextProvider>
         <AlertAskAiAssistantButtonLazy {...props} />
+      </KibanaReactContextProvider>
+    </QueryClientProvider>
+  );
+}
+
+export function createServiceInvestigateButton(
+  core: CoreStart,
+  plugins: ObservabilityAgentBuilderPluginStartDependencies
+) {
+  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+    ...core,
+    ...plugins,
+  });
+
+  return (props: ServiceInvestigateButtonProps) => (
+    <QueryClientProvider client={queryClient}>
+      <KibanaReactContextProvider>
+        <ServiceInvestigateButtonLazy {...props} />
       </KibanaReactContextProvider>
     </QueryClientProvider>
   );
