@@ -33,6 +33,8 @@ import type {
 import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/dataset_service';
 import { EvaluationScoreService } from './storage/evaluation_score_service';
+import { OnlineScoreService } from './storage/online_score_service';
+import { onlineScoresDataStreamDefinition } from './storage/online_scores_index_template';
 import { evaluationsDataStreamDefinition } from './storage/scores_index_template';
 import { createTaskProviderRegistry } from './task_providers/registry';
 import type { TaskProviderRegistry } from './task_providers/types';
@@ -49,6 +51,7 @@ export class EvalsPlugin
   private datasetService?: DatasetService;
   private evaluationScoreService?: EvaluationScoreService;
   private taskProviderRegistry?: TaskProviderRegistry;
+  private onlineScoreService?: OnlineScoreService;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -72,6 +75,7 @@ export class EvalsPlugin
 
     this.logger.info('Setting up Evals plugin');
     coreSetup.dataStreams.registerDataStream(evaluationsDataStreamDefinition);
+    coreSetup.dataStreams.registerDataStream(onlineScoresDataStreamDefinition);
 
     this.taskProviderRegistry = createTaskProviderRegistry();
 
@@ -86,13 +90,19 @@ export class EvalsPlugin
     coreSetup.http.registerRouteHandlerContext<EvalsRequestHandlerContext, 'evals'>(
       'evals',
       async () => {
-        if (!this.datasetService || !this.evaluationScoreService || !this.evaluatorRegistry) {
+        if (
+          !this.datasetService ||
+          !this.evaluationScoreService ||
+          !this.onlineScoreService ||
+          !this.evaluatorRegistry
+        ) {
           throw new Error('Evals storage services have not been initialized');
         }
 
         return {
           datasetService: this.datasetService,
           evaluationScoreService: this.evaluationScoreService,
+          onlineScoreService: this.onlineScoreService,
           evaluatorRegistry: this.evaluatorRegistry,
         };
       }
@@ -188,6 +198,7 @@ export class EvalsPlugin
       this.isServerless
     );
     this.evaluationScoreService = new EvaluationScoreService(this.logger, coreStart.dataStreams);
+    this.onlineScoreService = new OnlineScoreService(this.logger, coreStart.dataStreams);
 
     // Fire-and-forget backfill of the denormalized `examples_count` for datasets
     // created before the field existed. Idempotent and a no-op once complete (and
@@ -229,6 +240,7 @@ export class EvalsPlugin
           type: connector.type,
         }));
       },
+      onlineScoreService: this.onlineScoreService,
     };
   }
 

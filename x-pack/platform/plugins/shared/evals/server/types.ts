@@ -15,6 +15,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { DatasetService } from './storage/dataset_service';
 import type { EvaluationScoreService } from './storage/evaluation_score_service';
+import type { OnlineScoreService } from './storage/online_score_service';
 import type { EvaluatorRegistry } from './evaluators/types';
 import type { EvalsTaskProvider } from './task_providers/types';
 
@@ -44,6 +45,7 @@ export interface EvalsPluginStart {
   listEvaluators?: () => EvaluatorSummary[];
 
   listModelConnectors?: (request: KibanaRequest) => Promise<ModelConnectorSummary[]>;
+  onlineScoreService?: OnlineScoreService;
 }
 
 export type EvalsWorkflowsManagementSetup = Pick<WorkflowsServerPluginSetup, 'management'>;
@@ -66,6 +68,7 @@ export interface EvalsStartDependencies {
 export interface EvalsRouteHandlerContext {
   datasetService: DatasetService;
   evaluationScoreService: EvaluationScoreService;
+  onlineScoreService: OnlineScoreService;
   evaluatorRegistry: EvaluatorRegistry;
 }
 

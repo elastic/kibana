@@ -18,3 +18,12 @@ export const EVALS_UI_PRIVILEGES = {
   show: 'show',
   manage: 'manage',
 } as const;
+
+export type {
+  OnlineEvalWorkflowEvaluatorConfig,
+  OnlineEvalWorkflowConfig,
+} from './online_evals/workflow_yaml';
+export {
+  buildOnlineEvalWorkflowYaml,
+  parseOnlineEvalWorkflowYaml,
+} from './online_evals/workflow_yaml';
