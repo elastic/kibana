@@ -22,7 +22,6 @@ cmd="node scripts/capture_oas_snapshot\
   --include-path /api/agent_builder \
   --include-path /api/workflows \
   --include-path /api/dashboards \
-  --include-path /api/discover_sessions \
   --include-path /api/visualizations \
   --include-path /api/links \
   --include-path /api/tags \

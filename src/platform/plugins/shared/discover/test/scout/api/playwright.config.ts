@@ -12,4 +12,6 @@ import { createPlaywrightConfig } from '@kbn/scout';
 export default createPlaywrightConfig({
   testDir: './tests',
   runGlobalSetup: true,
+  // Feature flag overrides are deployment-global, so these specs must not run concurrently.
+  workers: 1,
 });
