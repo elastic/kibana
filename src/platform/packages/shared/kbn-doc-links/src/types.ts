@@ -758,6 +758,9 @@ export interface DocLinks {
     readonly limitationsKnownIssues: string;
     readonly learnMore: string;
   };
+  readonly applicationConnections: {
+    readonly oauthClients: string;
+  };
   readonly indexManagement: {
     readonly componentTemplate: string;
     readonly indexAlias: string;
