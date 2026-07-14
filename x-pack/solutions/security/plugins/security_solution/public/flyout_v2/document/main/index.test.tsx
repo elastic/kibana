@@ -16,6 +16,9 @@ import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react
 
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../common/hooks/is_in_security_app');
+jest.mock('@kbn/unified-doc-viewer-plugin/public', () => ({
+  UnifiedDocViewer: () => <div data-test-subj="mock-unified-doc-viewer" />,
+}));
 jest.mock('./tabs/table_tab', () => ({
   TableTab: () => <div data-test-subj="mock-table-tab" />,
 }));
@@ -53,6 +56,7 @@ const createAlertHit = (extra: DataTableRecord['flattened'] = {}): DataTableReco
     flattened: { 'event.kind': 'signal', ...extra },
     isAnchor: false,
   } as DataTableRecord);
+const mockDataView = { hasMatchedIndices: () => true } as never;
 
 describe('<DocumentFlyout />', () => {
   const startServices = createStartServicesMock();
@@ -69,6 +73,7 @@ describe('<DocumentFlyout />', () => {
       <TestProviders>
         <DocumentFlyout
           hit={createAlertHit()}
+          dataView={mockDataView}
           onAlertUpdated={jest.fn()}
           renderCellActions={jest.fn()}
         />
@@ -85,6 +90,7 @@ describe('<DocumentFlyout />', () => {
       <TestProviders>
         <DocumentFlyout
           hit={createAlertHit()}
+          dataView={mockDataView}
           onAlertUpdated={jest.fn()}
           renderCellActions={jest.fn()}
         />
@@ -102,6 +108,7 @@ describe('<DocumentFlyout />', () => {
       <TestProviders>
         <DocumentFlyout
           hit={createAlertHit()}
+          dataView={mockDataView}
           renderCellActions={jest.fn()}
           onAlertUpdated={jest.fn()}
         />
@@ -120,6 +127,7 @@ describe('<DocumentFlyout />', () => {
       <TestProviders>
         <DocumentFlyout
           hit={createAlertHit()}
+          dataView={mockDataView}
           renderCellActions={jest.fn()}
           onAlertUpdated={jest.fn()}
         />
@@ -146,7 +154,7 @@ describe('<DocumentFlyout />', () => {
     expect(queryByTestId('mock-table-tab')).not.toBeInTheDocument();
   });
 
-  it('does not render the Table and JSON tabs outside Security Solution (e.g. Discover)', () => {
+  it('renders UnifiedDocViewer without Security tabs outside Security Solution (e.g. Discover)', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
     (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
 
@@ -154,15 +162,17 @@ describe('<DocumentFlyout />', () => {
       <TestProviders>
         <DocumentFlyout
           hit={createAlertHit()}
+          dataView={mockDataView}
           renderCellActions={jest.fn()}
           onAlertUpdated={jest.fn()}
         />
       </TestProviders>
     );
 
+    expect(queryByTestId(OVERVIEW_TAB_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TABLE_TAB_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(JSON_TAB_TEST_ID)).not.toBeInTheDocument();
-    // the overview content still renders directly
-    expect(getByTestId('mock-overview-tab')).toBeInTheDocument();
+    expect(getByTestId('mock-unified-doc-viewer')).toBeInTheDocument();
   });
 
   it('opens notes in a system flyout when notes action is clicked', () => {
@@ -177,6 +187,7 @@ describe('<DocumentFlyout />', () => {
       <TestProviders startServices={startServices}>
         <DocumentFlyout
           hit={createAlertHit()}
+          dataView={mockDataView}
           renderCellActions={jest.fn()}
           onAlertUpdated={jest.fn()}
         />
@@ -203,6 +214,7 @@ describe('<DocumentFlyout />', () => {
       <TestProviders startServices={startServices}>
         <DocumentFlyout
           hit={createAlertHit()}
+          dataView={mockDataView}
           renderCellActions={jest.fn()}
           onAlertUpdated={jest.fn()}
         />
@@ -220,6 +232,7 @@ describe('<DocumentFlyout />', () => {
         <TestProviders>
           <DocumentFlyout
             hit={createAlertHit({ _index: 'remote-cluster:.alerts-security.alerts-default' })}
+            dataView={mockDataView}
             renderCellActions={jest.fn()}
             onAlertUpdated={jest.fn()}
           />
@@ -247,6 +260,7 @@ describe('<DocumentFlyout />', () => {
         <TestProviders>
           <DocumentFlyout
             hit={remoteEventHit}
+            dataView={mockDataView}
             renderCellActions={jest.fn()}
             onAlertUpdated={jest.fn()}
           />
@@ -267,6 +281,7 @@ describe('<DocumentFlyout />', () => {
         <TestProviders>
           <DocumentFlyout
             hit={createAlertHit({ _index: '.alerts-security.alerts-default' })}
+            dataView={mockDataView}
             renderCellActions={jest.fn()}
             onAlertUpdated={jest.fn()}
           />

@@ -8,11 +8,13 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { useAttackDetails } from '../../../flyout/attack_details/hooks/use_attack_details';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { PageScope } from '../../../data_view_manager/constants';
 import { AttackFlyout } from '.';
 
 const FETCH_ERROR = i18n.translate('xpack.securitySolution.flyoutV2.attack.wrapper.fetchError', {
@@ -50,7 +52,12 @@ export interface AttackFlyoutWrapperProps {
  */
 export const AttackFlyoutWrapper = memo(
   ({ attackId, indexName, onAttackUpdated, renderCellActions }: AttackFlyoutWrapperProps) => {
+    const { dataView, status } = useDataView(PageScope.default);
     const { loading, searchHit, attack, refetch } = useAttackDetails({ attackId, indexName });
+
+    const isDataViewLoading = status === 'loading' || status === 'pristine';
+    const isDataViewInvalid =
+      status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices());
 
     const hit = useMemo(
       () => (searchHit ? buildDataTableRecord(searchHit as EsHitRecord) : null),
@@ -62,15 +69,11 @@ export const AttackFlyoutWrapper = memo(
       refetch();
     }, [onAttackUpdated, refetch]);
 
-    // Only render the full-flyout loading state on the initial fetch (no hit yet).
-    // Subsequent refetches (e.g. after a mutation) keep the flyout visible so the
-    // header does not flicker; child components can render their own loading state
-    // if needed.
-    if (loading && !hit) {
+    if ((isDataViewLoading || loading) && !hit) {
       return <FlyoutLoading data-test-subj="attack-flyout-wrapper-loading" />;
     }
 
-    if (!hit || !attack) {
+    if (isDataViewInvalid || !hit || !attack) {
       return (
         <EuiCallOut
           announceOnMount
@@ -86,6 +89,7 @@ export const AttackFlyoutWrapper = memo(
       <AttackFlyout
         hit={hit}
         attack={attack}
+        dataView={dataView}
         onAttackUpdated={handleAttackUpdated}
         renderCellActions={renderCellActions}
       />

@@ -127,6 +127,7 @@ export const DocumentFlyoutWrapper = memo(
       return (
         <DocumentFlyout
           hit={hit}
+          dataView={dataView}
           renderCellActions={renderCellActions}
           onAlertUpdated={handleAlertUpdated}
         />

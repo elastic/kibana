@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -19,6 +20,7 @@ import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
+import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
@@ -87,13 +89,17 @@ export interface DocumentFlyoutProps {
    * Callback invoked after alert mutations to refresh related flyouts.
    */
   onAlertUpdated: () => void;
+  /**
+   * Data view used by the underlying document viewer.
+   */
+  dataView: DataView;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
 export const DocumentFlyout = memo(
-  ({ hit, onAlertUpdated, renderCellActions }: DocumentFlyoutProps) => {
+  ({ hit, onAlertUpdated, renderCellActions, dataView }: DocumentFlyoutProps) => {
     const { openNotes } = useFlyoutApi();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -146,6 +152,98 @@ export const DocumentFlyout = memo(
       openNotes({ hit });
     }, [openNotes, hit]);
 
+    // Overview, Table and JSON tabs rendered when the flyout is displayed in Security Solution
+    const securityTabs = useMemo(
+      () => (
+        <>
+          <EuiTabs>
+            <EuiTab
+              isSelected={selectedTabId === 'overview'}
+              onClick={() => setSelectedTabId('overview')}
+              data-test-subj={OVERVIEW_TAB_TEST_ID}
+            >
+              {OVERVIEW_TAB_LABEL}
+            </EuiTab>
+            <EuiTab
+              isSelected={selectedTabId === 'table'}
+              onClick={() => setSelectedTabId('table')}
+              data-test-subj={TABLE_TAB_TEST_ID}
+            >
+              {TABLE_TAB_LABEL}
+            </EuiTab>
+            <EuiTab
+              isSelected={selectedTabId === 'json'}
+              onClick={() => setSelectedTabId('json')}
+              data-test-subj={JSON_TAB_TEST_ID}
+            >
+              {JSON_TAB_LABEL}
+            </EuiTab>
+          </EuiTabs>
+          <EuiSpacer size="m" />
+        </>
+      ),
+      [selectedTabId, setSelectedTabId]
+    );
+
+    // Overview, Table and JSON tab contents rendered when the flyout is displayed in Security Solution
+    // We're using our custom Security Solution document Table and JSON tabs
+    const securityTabContents = useMemo(
+      () => (
+        <>
+          {selectedTabId === 'table' ? (
+            <TableTab
+              hit={hit}
+              renderCellActions={renderCellActions}
+              renderFlyoutLink={renderFlyoutLink}
+            />
+          ) : selectedTabId === 'json' ? (
+            <JsonTab hit={hit} />
+          ) : (
+            <OverviewTab
+              hit={hit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
+          )}
+        </>
+      ),
+      [hit, onAlertUpdated, renderCellActions, renderFlyoutLink, selectedTabId]
+    );
+
+    // Overview, Table and JSON tabs rendered when the flyout is displayed in Discover
+    // We're then using the Discover Table and JSON tabs
+    const discoverContent = useMemo(
+      () => (
+        <UnifiedDocViewer
+          key={hit.id}
+          hit={hit}
+          dataView={dataView}
+          columns={Object.keys(hit.flattened)}
+          onAddColumn={() => {}}
+          onRemoveColumn={() => {}}
+          docViewsRegistry={(registry) => {
+            registry.add({
+              id: 'doc_view_alerts_overview',
+              title: OVERVIEW_TAB_LABEL,
+              order: 0,
+              render: () => (
+                <>
+                  <EuiSpacer size="m" />
+                  <OverviewTab
+                    hit={hit}
+                    renderCellActions={renderCellActions}
+                    onAlertUpdated={onAlertUpdated}
+                  />
+                </>
+              ),
+            });
+            return registry;
+          }}
+        />
+      ),
+      [dataView, hit, onAlertUpdated, renderCellActions]
+    );
+
     if (isAlert && loading) {
       return <FlyoutLoading data-test-subj="document-overview-loading" />;
     }
@@ -166,48 +264,13 @@ export const DocumentFlyout = memo(
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {isSecurityApp && (
+          {isSecurityApp ? (
             <>
-              <EuiTabs>
-                <EuiTab
-                  isSelected={selectedTabId === 'overview'}
-                  onClick={() => setSelectedTabId('overview')}
-                  data-test-subj={OVERVIEW_TAB_TEST_ID}
-                >
-                  {OVERVIEW_TAB_LABEL}
-                </EuiTab>
-                <EuiTab
-                  isSelected={selectedTabId === 'table'}
-                  onClick={() => setSelectedTabId('table')}
-                  data-test-subj={TABLE_TAB_TEST_ID}
-                >
-                  {TABLE_TAB_LABEL}
-                </EuiTab>
-                <EuiTab
-                  isSelected={selectedTabId === 'json'}
-                  onClick={() => setSelectedTabId('json')}
-                  data-test-subj={JSON_TAB_TEST_ID}
-                >
-                  {JSON_TAB_LABEL}
-                </EuiTab>
-              </EuiTabs>
-              <EuiSpacer size="m" />
+              {securityTabs}
+              {securityTabContents}
             </>
-          )}
-          {isSecurityApp && selectedTabId === 'table' ? (
-            <TableTab
-              hit={hit}
-              renderCellActions={renderCellActions}
-              renderFlyoutLink={renderFlyoutLink}
-            />
-          ) : isSecurityApp && selectedTabId === 'json' ? (
-            <JsonTab hit={hit} />
           ) : (
-            <OverviewTab
-              hit={hit}
-              renderCellActions={renderCellActions}
-              onAlertUpdated={onAlertUpdated}
-            />
+            <>{discoverContent}</>
           )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter css={footerStyles}>
