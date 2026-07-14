@@ -213,7 +213,6 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       version,
       managed,
     } = savedObject;
-    const error = 'error' in savedObject ? savedObject.error : undefined;
 
     return {
       id,
@@ -225,7 +224,6 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       createdBy,
       attributes: pick(attributes, this.allowedSavedObjectAttributes),
       references,
-      error,
       namespaces,
       version,
     };

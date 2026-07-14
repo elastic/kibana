@@ -191,7 +191,7 @@ describe('saved query route handler context', () => {
       expect(timefilter).toEqual(savedQueryAttributesWithFilters.timefilter);
     });
 
-    it('should throw an error when saved objects client returns error', async () => {
+    it('should throw an error when saved objects client throws', async () => {
       mockSavedObjectsClient.find.mockResolvedValue({
         total: 0,
         page: 0,
@@ -285,7 +285,7 @@ describe('saved query route handler context', () => {
       });
     });
 
-    it('should throw an error when saved objects client returns error', async () => {
+    it('should throw an error when saved objects client throws', async () => {
       mockSavedObjectsClient.find.mockResolvedValue({
         total: 0,
         page: 0,
