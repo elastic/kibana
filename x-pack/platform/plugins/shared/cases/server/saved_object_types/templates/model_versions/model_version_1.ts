@@ -15,6 +15,7 @@ import {
   MAX_TEMPLATE_TAG_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_FIELD_DEFINITIONS_PER_OWNER,
 } from '../../../../common/constants';
 
 export const templateSchema = schema.object({
@@ -36,7 +37,9 @@ export const templateSchema = schema.object({
   // NOTE: 9.4 production stored this field as plain keyword strings (not nested objects), so the
   // schema here must tolerate string arrays for forward-compatibility with documents written by
   // older nodes. This was incorrectly typed as an object array in PR #269962.
-  fieldNames: schema.maybe(schema.arrayOf(schema.string())),
+  fieldNames: schema.maybe(
+    schema.arrayOf(schema.string(), { maxSize: MAX_FIELD_DEFINITIONS_PER_OWNER })
+  ),
   lastUsedAt: schema.maybe(schema.string({ maxLength: 30 })),
   isDefault: schema.maybe(schema.boolean()),
   isLatest: schema.maybe(schema.boolean()),

@@ -7,33 +7,13 @@
 
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { schema } from '@kbn/config-schema';
-import {
-  MAX_TEMPLATE_KEY_LENGTH,
-  MAX_TEMPLATE_NAME_LENGTH,
-  MAX_TEMPLATE_DESCRIPTION_LENGTH,
-  MAX_TAGS_PER_TEMPLATE,
-  MAX_TEMPLATE_TAG_LENGTH,
-  MAX_DESCRIPTION_LENGTH,
-  MAX_TITLE_LENGTH,
-  MAX_FIELD_DEFINITIONS_PER_OWNER,
-} from '../../../../common/constants';
+import { MAX_TITLE_LENGTH, MAX_FIELD_DEFINITIONS_PER_OWNER } from '../../../../common/constants';
+import { templateSchema } from './model_version_1';
 
-export const templateSchemaV2 = schema.object({
-  templateId: schema.string({ maxLength: MAX_TEMPLATE_KEY_LENGTH }),
-  name: schema.string({ maxLength: MAX_TEMPLATE_NAME_LENGTH }),
-  owner: schema.string({ maxLength: 30 }),
-  definition: schema.string({ maxLength: MAX_DESCRIPTION_LENGTH }),
-  templateVersion: schema.number(),
-  deletedAt: schema.nullable(schema.string({ maxLength: 30 })),
-  description: schema.maybe(schema.string({ maxLength: MAX_TEMPLATE_DESCRIPTION_LENGTH })),
-  tags: schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: MAX_TEMPLATE_TAG_LENGTH }), {
-      maxSize: MAX_TAGS_PER_TEMPLATE,
-    })
-  ),
-  author: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),
-  usageCount: schema.maybe(schema.number()),
-  fieldCount: schema.maybe(schema.number()),
+// Derived from the v1 schema: drops the deprecated `fieldNames` and adds `fieldDefinitions`
+// (backfilled from `fieldNames` below).
+export const templateSchemaV2 = templateSchema.extends({
+  fieldNames: undefined,
   fieldDefinitions: schema.maybe(
     schema.arrayOf(
       schema.object({
@@ -45,10 +25,6 @@ export const templateSchemaV2 = schema.object({
       { maxSize: MAX_FIELD_DEFINITIONS_PER_OWNER }
     )
   ),
-  lastUsedAt: schema.maybe(schema.string({ maxLength: 30 })),
-  isDefault: schema.maybe(schema.boolean()),
-  isLatest: schema.maybe(schema.boolean()),
-  isEnabled: schema.maybe(schema.boolean()),
 });
 
 export const modelVersion2: SavedObjectsModelVersion = {
@@ -75,17 +51,29 @@ export const modelVersion2: SavedObjectsModelVersion = {
       type: 'data_backfill',
       backfillFn: (doc) => {
         const attrs = doc.attributes as Record<string, unknown>;
-        // fieldNames may hold string arrays (9.4 keyword storage) or object arrays
-        // (written by 9.5 BC2 before this fix) — copy whatever is present
-        if (attrs.fieldNames != null && attrs.fieldDefinitions == null) {
-          return {
-            attributes: {
-              fieldDefinitions: attrs.fieldNames,
-              fieldNames: undefined,
-            },
-          };
+
+        // Nothing to migrate when the legacy field is absent or the new field is already populated.
+        if (attrs.fieldNames == null || attrs.fieldDefinitions != null) {
+          return { attributes: {} };
         }
-        return { attributes: {} };
+
+        // Normalize the two legacy shapes into objects: 9.4 stored plain keyword strings, 9.5 BC2
+        // stored full objects. Strings only carried the name; `type`/`control` are repopulated on
+        // the next template write.
+        const legacy = Array.isArray(attrs.fieldNames)
+          ? (attrs.fieldNames as Array<string | Record<string, unknown>>)
+          : [];
+
+        const fieldDefinitions = legacy.map((field) =>
+          typeof field === 'string' ? { name: field, label: field, type: '', control: '' } : field
+        );
+
+        return {
+          attributes: {
+            fieldDefinitions,
+            fieldNames: undefined,
+          },
+        };
       },
     },
   ],
