@@ -25,7 +25,7 @@ interface ESQLDataGridAccordionProps {
   dataGridAttrs: ESQLDataGridAttrs;
   query: AggregateQuery;
   isTableView: boolean;
-  isApproximate?: boolean;
+  isApproximate: boolean;
   setIsAccordionOpen: (flag: boolean) => void;
   onAccordionToggleCb: (status: boolean) => void;
 }

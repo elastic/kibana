@@ -133,7 +133,10 @@ describe('open in discover action', () => {
     } as ActionExecutionContext<EmbeddableApiContext>);
 
     expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
-    expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgs);
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith({
+      ...viewUnderlyingDataArgs,
+      isApproximate: false,
+    });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
 
@@ -183,6 +186,7 @@ describe('open in discover action', () => {
       ...viewUnderlyingDataArgs,
       filters: [],
       query: { esql: 'FROM logs\n| WHERE `host.name` : "web-1"' },
+      isApproximate: false,
     });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
@@ -232,6 +236,7 @@ describe('open in discover action', () => {
       ...viewUnderlyingDataArgs,
       filters: [],
       query: { esql: 'FROM logs\n| WHERE KQL("""host.name : "web-1"""")' },
+      isApproximate: false,
     });
   });
 
@@ -275,6 +280,7 @@ describe('open in discover action', () => {
     expect(locator.getRedirectUrl).toHaveBeenCalledWith({
       ...viewUnderlyingDataArgs,
       filters: [],
+      isApproximate: false,
     });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
