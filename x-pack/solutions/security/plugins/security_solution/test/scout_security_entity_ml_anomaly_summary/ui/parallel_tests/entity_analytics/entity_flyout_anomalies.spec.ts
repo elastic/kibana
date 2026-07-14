@@ -77,7 +77,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'host right panel does not show anomalies section when the entity has no anomalies',
+      'host right panel shows anomalies section with an empty state when the entity has no anomalies',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
           await route.fulfill({
@@ -87,11 +87,12 @@ spaceTest.describe(
           });
         });
 
-        const overviewResponse = page.waitForResponse(ANOMALY_OVERVIEW_ROUTE, { timeout: 30000 });
         await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
-        await overviewResponse;
 
-        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeHidden();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeVisible();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesRecentTable).toContainText(
+          'No anomalies detected within last 30 days'
+        );
       }
     );
 
@@ -130,20 +131,21 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'host right panel does not show anomalies section when the anomaly overview API returns an error',
+      'host right panel shows an error state in the anomalies section when the anomaly overview API returns an error',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, (route) => route.fulfill({ status: 500 }));
 
-        const overviewResponse = page.waitForResponse(ANOMALY_OVERVIEW_ROUTE, { timeout: 30000 });
         await pageObjects.entityFlyoutAnomaliesPage.navigateToHostRightPanel();
-        await overviewResponse;
 
-        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeHidden();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesSection).toBeVisible();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesExpandablePanel).toContainText(
+          'Unable to load behavioral anomalies'
+        );
       }
     );
 
     spaceTest(
-      'host entity details left panel does not show anomalies tab when the entity has no anomalies',
+      'host entity details left panel shows anomalies tab with an empty state when the entity has no anomalies',
       async ({ page, pageObjects }) => {
         await page.route(ANOMALY_OVERVIEW_ROUTE, async (route) => {
           await route.fulfill({
@@ -152,12 +154,31 @@ spaceTest.describe(
             body: JSON.stringify(MOCK_ANOMALY_OVERVIEW_EMPTY),
           });
         });
+        await page.route(ANOMALY_SUMMARY_ROUTE, async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              entity_id: HOST_FLYOUT_ENTITY_ID,
+              entity_type: 'host',
+              anomalies: [],
+              total: 0,
+              page: 1,
+              page_size: 10,
+            }),
+          });
+        });
 
-        const overviewResponse = page.waitForResponse(ANOMALY_OVERVIEW_ROUTE, { timeout: 30000 });
         await pageObjects.entityFlyoutAnomaliesPage.navigateToHostBothPanels();
-        await overviewResponse;
 
-        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTab).toBeHidden();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTab).toBeVisible();
+
+        await pageObjects.entityFlyoutAnomaliesPage.clickAnomaliesTab();
+
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabAttackChain).toBeHidden();
+        await expect(pageObjects.entityFlyoutAnomaliesPage.anomaliesTabTableGrid).toContainText(
+          'No anomalies detected'
+        );
       }
     );
 
@@ -227,6 +248,22 @@ spaceTest.describe(
             status: 200,
             contentType: 'application/json',
             body: JSON.stringify(MOCK_ANOMALY_SUMMARY),
+          });
+        });
+        // Backs the table's detector-description lookup (useGetInstalledJob). Without it the
+        // call 404s and raises the "Security job fetch failure" toast, which overlays and
+        // blocks the row-actions button click.
+        await page.route('**/internal/ml/jobs/jobs', async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify([
+              {
+                job_id: 'auth_high_count_logon_events_ea',
+                analysis_config: { detectors: [] },
+                datafeed_config: { query: { match_all: {} }, indices: ['logs-*'] },
+              },
+            ]),
           });
         });
 

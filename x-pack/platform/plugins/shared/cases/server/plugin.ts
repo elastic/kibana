@@ -230,7 +230,11 @@ export class CasePlugin
     registerRoutes({
       router,
       routes: [
-        ...getExternalRoutes({ isServerless: this.isServerless, docLinks: core.docLinks }),
+        ...getExternalRoutes({
+          isServerless: this.isServerless,
+          docLinks: core.docLinks,
+          config: this.caseConfig,
+        }),
         ...getInternalRoutes(this.userProfileService, this.caseConfig),
       ],
       logger: this.logger,
@@ -280,7 +284,9 @@ export class CasePlugin
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.agentBuilder) {
-      registerCasesAgentBuilderTools(plugins.agentBuilder, getCasesClient, core);
+      registerCasesAgentBuilderTools(plugins.agentBuilder, getCasesClient, core, {
+        analyticsV2Enabled: this.caseConfig.analyticsV2.enabled,
+      });
     }
 
     return {

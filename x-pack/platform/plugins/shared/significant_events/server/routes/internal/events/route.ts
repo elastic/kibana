@@ -8,6 +8,7 @@
 import {
   significantEventSchema,
   significantEventInvestigationSchema,
+  significantEventStatusSchema,
   type Detection,
   type SignificantEvent,
   type Discovery,
@@ -17,6 +18,7 @@ import {
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
+import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
@@ -26,20 +28,26 @@ import { assertSignificantEventsAccess } from '../../utils/assert_significant_ev
 const toArray = (val: string | string[] | undefined): string[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
 
-const isLifecycleDetection = (
-  hit: Detection
-): hit is Detection & { kind: LifecycleDetection['kind'] } => hit.kind !== 'handled';
+// Detections carry `change_point_type`; processed-marker docs do not.
+const isLifecycleDetection = (hit: Detection): boolean => hit.change_point_type != null;
 
 const collectEmbeddedDetections = (discoveries: Discovery[]) => {
   const seen = new Set<string>();
-  const result: Array<Omit<LifecycleDetection, 'kind' | '@timestamp'>> = [];
+  const result: Array<Omit<LifecycleDetection, '@timestamp'>> = [];
 
   for (const discovery of discoveries) {
     for (const det of discovery.detections ?? []) {
       const { detection_id, rule_name, stream_name, change_point_type } = det;
       if (!detection_id || seen.has(detection_id)) continue;
       seen.add(detection_id);
-      result.push({ detection_id, rule_name, stream_name, change_point_type });
+      // The embedded discovery detection types `change_point_type` as a free-form string
+      // (agent output); narrow to the schema enum for the lifecycle response.
+      result.push({
+        detection_id,
+        rule_name,
+        stream_name,
+        change_point_type: change_point_type as LifecycleDetection['change_point_type'],
+      });
     }
   }
 
@@ -206,8 +214,7 @@ const eventsLifecycleRoute = createServerRoute({
             detection_id,
             rule_name: hit.rule_name ?? rule_name,
             stream_name: hit.stream_name ?? stream_name,
-            change_point_type,
-            kind: hit.kind,
+            change_point_type: change_point_type ?? hit.change_point_type,
             '@timestamp': hit['@timestamp'],
           },
         ];
@@ -307,6 +314,40 @@ const eventsTriggerInvestigationRoute = createServerRoute({
   },
 });
 
+const eventsUpdateRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/events/{id}/update',
+  options: {
+    access: 'internal',
+    summary: 'Update a significant event',
+    description:
+      'Manually override attributes of a significant event, writing a new append-only version.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string().max(255),
+    }),
+    body: z.object({
+      status: significantEventStatusSchema,
+    }),
+  }),
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return updateSignificantEventStatus({
+      eventClient: getEventClient(),
+      eventId: params.path.id,
+      status: params.body.status,
+    });
+  },
+});
+
 export const internalEventsRoutes = {
   ...eventsSearchRoute,
   ...eventsHistoryRoute,
@@ -314,4 +355,5 @@ export const internalEventsRoutes = {
   ...eventsBulkCreateRoute,
   ...eventsAttachInvestigationRoute,
   ...eventsTriggerInvestigationRoute,
+  ...eventsUpdateRoute,
 };

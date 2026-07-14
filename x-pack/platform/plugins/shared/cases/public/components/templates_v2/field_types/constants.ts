@@ -11,19 +11,17 @@ import type { FieldType as FieldTypeType } from '../../../../common/types/domain
 export const fieldTypesArray = Object.keys(FieldType) as FieldTypeType[];
 
 export const exampleTemplateDefinition = `
-# name is required
-name: Example template
-# description is optional
-description: A short description of the template
-# severity is optional (low, medium, high, critical)
+# Case defaults applied when this template creates a case. Template details (name, description and
+# tags) are edited in the "Template details" panel and are intentionally not part of this YAML.
+# These keys stay present so you always see what a case created from this template will include; a
+# blank value simply means "no default".
+name: Example case title
+description: A short default case description
 severity: low
-# category is optional
 category: General
-# tags are optional
 tags:
   - example
-# Case settings (sync alerts, extract observables) and the default connector are configured in the
-# Settings tab of the preview panel, not here.
+assignees: []
 fields:
   - name: start_date
     control: DATE_PICKER

@@ -35,8 +35,12 @@ const SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
   enablement: 'restorable',
 } as const;
 
+// The change_point agg needs >= 22 buckets. At the 1m bucketInterval (detection.yaml default) a
+// ~40m window gives ~41 buckets — comfortably clear of the floor, wide enough that a real
+// drop-to-silence registers as a clean directional `trend_change`, and still overlapping the
+// 30m scan cadence so there are no coverage gaps.
 const getDetectionLookbackMinutes = (detectionIntervalMinutes: number) =>
-  Math.max(30, detectionIntervalMinutes);
+  Math.max(40, detectionIntervalMinutes);
 
 // yamlTemplate values are substituted into the static yaml files above via
 // exact-token replacement, since values (e.g. batch sizes) are needed at
