@@ -63,6 +63,7 @@ export const getNavigationTreeDefinition = ({
   return {
     icon,
     id: 'es',
+    ownerPluginId: 'enterpriseSearch',
     navigationTree$: dynamicItems$.pipe(
       debounceTime(10),
       map(() => {
