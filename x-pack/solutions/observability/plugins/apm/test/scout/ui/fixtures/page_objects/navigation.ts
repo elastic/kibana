@@ -50,20 +50,17 @@ export class NavigationPage {
   }
 
   async searchGlobalNav(keyword: string) {
-    // The input, reveal button and modal button are mutually exclusive, so at
-    // most one of them is rendered at any given time.
-    await this.globalSearchInput
-      .or(this.globalSearchRevealButton)
-      .or(this.globalSearchButton)
-      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-
-    if (await this.globalSearchButton.isVisible()) {
-      await this.globalSearchButton.click();
-    } else if (await this.globalSearchRevealButton.isVisible()) {
-      await this.globalSearchRevealButton.click();
+    // Open the global search if it is not already open (the input may be behind a
+    // header or reveal button, or rendered inline).
+    if (!(await this.globalSearchInput.isVisible())) {
+      if (await this.globalSearchButton.isVisible()) {
+        await this.globalSearchButton.click();
+      } else if (await this.globalSearchRevealButton.isVisible()) {
+        await this.globalSearchRevealButton.click();
+      }
+      await this.globalSearchInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     }
 
-    await this.globalSearchInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.globalSearchInput.fill(keyword);
     await this.waitForSearchResults();
   }

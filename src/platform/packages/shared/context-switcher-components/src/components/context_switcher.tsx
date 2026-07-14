@@ -254,6 +254,7 @@ export const ContextSwitcher = ({
       anchorPosition="downLeft"
       panelStyle={{ width: POPOVER_WIDTH_PX }}
       panelPaddingSize="s"
+      panelProps={{ 'data-test-subj': 'contextSwitcherPopoverPanel' }}
       ownFocus
       repositionOnScroll
       data-test-subj="contextSwitcherPopover"

@@ -54,7 +54,7 @@ export class SpacesPage {
 
     if (await contextTrigger.isVisible()) {
       await contextTrigger.click();
-      await this.page.testSubj.locator('contextSwitcherPopover').waitFor({ state: 'visible' });
+      await this.page.testSubj.locator('contextSwitcherPopoverPanel').waitFor({ state: 'visible' });
       const spacesRow = this.page.testSubj.locator('contextSwitcherSpacesRow');
       if (await spacesRow.isVisible()) {
         await spacesRow.click();
@@ -293,7 +293,7 @@ export class SpacesPage {
 
   spacesMenuPanelLocator() {
     return this.page.testSubj
-      .locator('contextSwitcherPopover')
+      .locator('contextSwitcherPopoverPanel')
       .or(this.page.testSubj.locator('spaceMenuPopoverPanel'));
   }
 
