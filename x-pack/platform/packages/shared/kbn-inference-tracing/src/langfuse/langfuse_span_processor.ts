@@ -12,22 +12,9 @@ import { memoize } from 'lodash';
 import { diag } from '@opentelemetry/api';
 import { BaseInferenceSpanProcessor } from '../base_inference_span_processor';
 import { parseJsonAttr } from '../util/parse_json_attr';
-import type {
-  GenAIInputMessage,
-  GenAIMessagePart,
-  GenAIOutputMessage,
-  GenAITextPart,
-  GenAIToolCallPart,
-} from '../types';
+import { isTextPart, isToolCallPart } from '../util/message_parts';
+import type { GenAIInputMessage, GenAIOutputMessage, GenAITextPart } from '../types';
 import { GenAISemanticConventions } from '../types';
-
-function isTextPart(part: GenAIMessagePart): part is GenAITextPart {
-  return part.type === 'text';
-}
-
-function isToolCallPart(part: GenAIMessagePart): part is GenAIToolCallPart {
-  return part.type === 'tool_call';
-}
 
 export class LangfuseSpanProcessor extends BaseInferenceSpanProcessor {
   private getProjectId: () => Promise<string | undefined>;

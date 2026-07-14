@@ -35,29 +35,11 @@ import {
 } from '@arizeai/openinference-semantic-conventions';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import type { ToolDefinition } from '@kbn/inference-common';
-import type {
-  GenAIInputMessage,
-  GenAIMessagePart,
-  GenAIOutputMessage,
-  GenAITextPart,
-  GenAIToolCallPart,
-  GenAIToolCallResponsePart,
-} from '../types';
+import type { GenAIInputMessage, GenAIOutputMessage, GenAITextPart } from '../types';
 import { GenAISemanticConventions } from '../types';
 import { flattenAttributes } from '../util/flatten_attributes';
 import { parseJsonAttr } from '../util/parse_json_attr';
-
-function isTextPart(part: GenAIMessagePart): part is GenAITextPart {
-  return part.type === 'text';
-}
-
-function isToolCallPart(part: GenAIMessagePart): part is GenAIToolCallPart {
-  return part.type === 'tool_call';
-}
-
-function isToolCallResponsePart(part: GenAIMessagePart): part is GenAIToolCallResponsePart {
-  return part.type === 'tool_call_response';
-}
+import { isTextPart, isToolCallPart, isToolCallResponsePart } from '../util/message_parts';
 
 export function getChatSpan(span: tracing.ReadableSpan) {
   const inputMessages = parseJsonAttr<GenAIInputMessage[]>(

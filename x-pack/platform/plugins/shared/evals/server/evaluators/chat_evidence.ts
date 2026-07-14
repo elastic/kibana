@@ -6,6 +6,7 @@
  */
 
 import type { GenAIInputMessage, GenAIOutputMessage, GenAITextPart } from '@kbn/inference-tracing';
+import { parseJsonAttr } from '@kbn/inference-tracing';
 import type { TraceAccessor } from './types';
 import { createTraceAccessor } from './trace_accessor';
 import { rowsFromEsqlResponse } from './esql_utils';
@@ -42,22 +43,18 @@ export const extractChatEvidence = async (
 
   let userQuery = '';
   const inputMessagesRaw = chatSpans[0][INPUT_MESSAGES_COLUMN];
-  if (inputMessagesRaw) {
-    const inputMessages: GenAIInputMessage[] = JSON.parse(inputMessagesRaw);
-    const firstUserMsg = inputMessages.find((m) => m.role === 'user');
-    if (firstUserMsg) {
-      userQuery = extractTextFromParts(firstUserMsg.parts);
-    }
+  const inputMessages = parseJsonAttr<GenAIInputMessage[]>(inputMessagesRaw);
+  const firstUserMsg = inputMessages?.find((m) => m.role === 'user');
+  if (firstUserMsg) {
+    userQuery = extractTextFromParts(firstUserMsg.parts);
   }
 
   let agentResponse = '';
   const outputMessagesRaw = chatSpans[chatSpans.length - 1][OUTPUT_MESSAGES_COLUMN];
-  if (outputMessagesRaw) {
-    const outputMessages: GenAIOutputMessage[] = JSON.parse(outputMessagesRaw);
-    const lastMsg = outputMessages[outputMessages.length - 1];
-    if (lastMsg) {
-      agentResponse = extractTextFromParts(lastMsg.parts);
-    }
+  const outputMessages = parseJsonAttr<GenAIOutputMessage[]>(outputMessagesRaw);
+  const lastMsg = outputMessages?.[outputMessages.length - 1];
+  if (lastMsg) {
+    agentResponse = extractTextFromParts(lastMsg.parts);
   }
 
   return { user_query: userQuery, agent_response: agentResponse };
