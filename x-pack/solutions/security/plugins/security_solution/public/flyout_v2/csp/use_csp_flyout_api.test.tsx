@@ -19,6 +19,10 @@ jest.mock('../shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: unknown }) => children,
 }));
 
+jest.mock('../shared/utils/build_flyout_nav_title', () => ({
+  buildFlyoutNavTitle: (title: string) => title,
+}));
+
 jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: () => ({ size: 's' }),
 }));

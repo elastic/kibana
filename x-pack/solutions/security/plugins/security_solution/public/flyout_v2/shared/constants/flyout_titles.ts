@@ -191,6 +191,16 @@ export const VULNERABILITY_INSIGHTS_TITLE = i18n.translate(
   { defaultMessage: 'Vulnerabilities' }
 );
 
+export const VULNERABILITY_FINDING_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.csp.vulnerability.title',
+  { defaultMessage: 'Vulnerability' }
+);
+
+export const MISCONFIGURATION_FINDING_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.csp.misconfiguration.title',
+  { defaultMessage: 'Misconfiguration' }
+);
+
 export const FIELDS_TABLE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.fieldsTable.title',
   { defaultMessage: 'Fields' }

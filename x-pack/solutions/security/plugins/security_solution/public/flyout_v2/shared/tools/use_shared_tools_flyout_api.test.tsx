@@ -57,6 +57,17 @@ describe('useSharedToolsFlyoutApi', () => {
     expect(getProperties().session).toBe('start');
   });
 
+  it('openNotes sets a title derived from the document', () => {
+    const { result } = renderHook(() => useSharedToolsFlyoutApi());
+    result.current.openNotes({ hit });
+
+    // hit has no event.kind=signal, so getDocumentHistoryTitle falls back to getDocumentTitle
+    // which for a minimal record produces a non-empty string; the important thing is that
+    // a title is always set (never undefined → never "Unknown Flyout").
+    expect(getProperties().title).toBeDefined();
+    expect(typeof getProperties().title).toBe('string');
+  });
+
   it('uses the doc-viewer history key when outside the security app', () => {
     (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
     const { result } = renderHook(() => useSharedToolsFlyoutApi());

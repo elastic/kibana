@@ -129,7 +129,7 @@ export interface OpenDocumentCorrelationsParams {
   /** Whether the document is being displayed in a rule preview. */
   isRulePreview: boolean;
   /** Callback to open one of the correlated alerts. */
-  onShowAlert: (id: string, indexName: string) => void;
+  onShowAlert: (id: string, indexName: string, title?: string) => void;
   /** Optional callback to open a correlated attack; when omitted the attack column is hidden. */
   onShowAttack?: (id: string, indexName: string) => void;
 }

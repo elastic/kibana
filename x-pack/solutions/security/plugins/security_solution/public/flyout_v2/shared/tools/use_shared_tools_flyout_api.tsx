@@ -18,6 +18,8 @@ import { flyoutProviders } from '../components/flyout_provider';
 import { FlyoutLoading } from '../components/flyout_loading';
 import { defaultToolsFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
+import { formatFlyoutTitle, NOTES_TITLE } from '../constants/flyout_titles';
+import { getDocumentTitle } from '../../document/main/utils/get_header_title';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context'; // Lazy-loaded so consumers of this hook don't statically pull the shared tool graph into their
 
 // Lazy-loaded so consumers of this hook don't statically pull the shared tool graph into their
@@ -81,6 +83,7 @@ export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
         ...defaultToolsFlyoutProperties,
         historyKey,
         session: 'start',
+        title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
       });
     },
     [open, historyKey]

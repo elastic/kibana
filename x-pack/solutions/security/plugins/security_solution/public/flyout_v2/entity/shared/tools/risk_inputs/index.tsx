@@ -37,12 +37,13 @@ export const RiskInputs = memo(
     const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
 
     const onShowAlert = useCallback(
-      (id: string, indexName: string) => {
+      (id: string, indexName: string, title?: string) => {
         openDocumentFlyoutFromIndexAsChild({
           documentId: id,
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
+          title,
         });
       },
       [openDocumentFlyoutFromIndexAsChild]

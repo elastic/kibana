@@ -19,6 +19,7 @@ import type { CloudPostureEntityIdentifier } from '../../../../../cloud_security
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ALERTS_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_titles';
+import { getAlertHistoryTitle } from '../../../../document/main/utils/get_header_title';
 import { ALERTS_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
 const TITLE = ALERTS_INSIGHTS_TITLE;
@@ -50,12 +51,13 @@ export const AlertsInsights = memo(
     const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
 
     const onExpandAlert = useCallback(
-      (eventId: string, indexName: string) => {
+      (eventId: string, indexName: string, ruleName?: string) => {
         openDocumentFlyoutFromIndexAsChild({
           documentId: eventId,
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
+          title: getAlertHistoryTitle(ruleName),
         });
       },
       [openDocumentFlyoutFromIndexAsChild]

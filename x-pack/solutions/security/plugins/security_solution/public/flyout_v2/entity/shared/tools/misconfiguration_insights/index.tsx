@@ -12,7 +12,11 @@ import {
   EntityType,
 } from '../../../../../../common/entity_analytics/types';
 import { useFlyoutApi } from '../../../../use_flyout_api';
-import { MISCONFIGURATION_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_titles';
+import {
+  formatFlyoutTitle,
+  MISCONFIGURATION_FINDING_TITLE,
+  MISCONFIGURATION_INSIGHTS_TITLE,
+} from '../../../../shared/constants/flyout_titles';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table';
@@ -51,10 +55,13 @@ export const MisconfigurationInsights = memo(
     const { openMisconfigurationFindingAsChild } = useFlyoutApi();
 
     const onShowFinding = useCallback(
-      (resourceId: string, ruleId: string) => {
-        openMisconfigurationFindingAsChild({ resourceId, ruleId }, { title: value });
+      (resourceId: string, ruleId: string, ruleName?: string) => {
+        openMisconfigurationFindingAsChild(
+          { resourceId, ruleId },
+          { title: formatFlyoutTitle(MISCONFIGURATION_FINDING_TITLE, ruleName) }
+        );
       },
-      [openMisconfigurationFindingAsChild, value]
+      [openMisconfigurationFindingAsChild]
     );
 
     return (

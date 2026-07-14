@@ -88,12 +88,13 @@ export const InsightsSection = memo(
     }, [openDocumentThreatIntelligence, hit]);
 
     const onShowAlert = useCallback(
-      (id: string, indexName: string) =>
+      (id: string, indexName: string, title?: string) =>
         openDocumentFlyoutFromIndexAsChild({
           documentId: id,
           indexName,
           renderCellActions,
           onAlertUpdated,
+          title,
         }),
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
     );

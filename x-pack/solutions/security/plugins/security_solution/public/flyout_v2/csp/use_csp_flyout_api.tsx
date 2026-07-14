@@ -19,6 +19,7 @@ import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../session_context';
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
 import type { MisconfigurationProps } from './misconfiguration/main';
 import type { VulnerabilityProps } from './vulnerability/main'; // Lazy-loaded so consumers of this hook don't statically pull the CSP finding flyout graph into
 
@@ -137,7 +138,11 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
 
   const openMisconfigurationFindingAsChild = useCallback(
     (params: MisconfigurationProps, options?: OpenCspFindingAsChildOptions) =>
-      open(<Misconfiguration {...params} />, 'inherit', options?.title),
+      open(
+        <Misconfiguration {...params} />,
+        'inherit',
+        options?.title ? buildFlyoutNavTitle(options.title) : undefined
+      ),
     [open]
   );
 
@@ -148,7 +153,11 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
 
   const openVulnerabilityFindingAsChild = useCallback(
     (params: VulnerabilityProps, options?: OpenCspFindingAsChildOptions) =>
-      open(<Vulnerability {...params} />, 'inherit', options?.title),
+      open(
+        <Vulnerability {...params} />,
+        'inherit',
+        options?.title ? buildFlyoutNavTitle(options.title) : undefined
+      ),
     [open]
   );
 

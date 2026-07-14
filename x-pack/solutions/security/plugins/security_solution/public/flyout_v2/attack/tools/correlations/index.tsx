@@ -16,7 +16,7 @@ import { getColumns } from '../../../document/tools/correlations/utils/get_colum
 import { ATTACK_CORRELATIONS_TABLE_TEST_ID, ATTACK_CORRELATIONS_TOOL_TEST_ID } from './test_ids';
 import { ATTACK_CORRELATIONS_TITLE } from '../../../shared/constants/flyout_titles';
 
-const noopShowAlert = (_id: string, _indexName: string) => {};
+const noopShowAlert = (_id: string, _indexName: string, _title?: string) => {};
 
 export interface CorrelationsDetailsProps {
   /**
@@ -32,7 +32,7 @@ export interface CorrelationsDetailsProps {
    * Optional callback to open the alert flyout as a child when the user clicks the
    * preview icon on a row in the correlated-alerts table. Defaults to a no-op.
    */
-  onShowAlert?: (id: string, indexName: string) => void;
+  onShowAlert?: (id: string, indexName: string, title?: string) => void;
 }
 
 /**

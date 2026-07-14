@@ -69,7 +69,7 @@ export interface OpenAttackCorrelationsParams {
   /** Ids of the alerts correlated to the attack. */
   alertIds: string[];
   /** Optional callback to open one of the correlated alerts. */
-  onShowAlert?: (id: string, indexName: string) => void;
+  onShowAlert?: (id: string, indexName: string, title?: string) => void;
 }
 
 export interface OpenAttackEntitiesParams {
