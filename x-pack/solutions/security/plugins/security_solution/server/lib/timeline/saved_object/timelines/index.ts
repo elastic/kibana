@@ -85,6 +85,12 @@ export const getTimelineOrNull = async (
     timeline = await getTimeline(frameworkRequest, savedObjectId);
     // eslint-disable-next-line no-empty
   } catch (e) {}
+  if (
+    timeline?.status === TimelineStatusEnum.draft &&
+    timeline.createdBy !== frameworkRequest.user?.username
+  ) {
+    return null;
+  }
   return timeline;
 };
 
@@ -94,6 +100,12 @@ export const resolveTimelineOrNull = async (
 ): Promise<ResolvedTimeline | null> => {
   try {
     const resolvedTimeline = await resolveSavedTimeline(frameworkRequest, savedObjectId);
+    if (
+      resolvedTimeline.timeline.status === TimelineStatusEnum.draft &&
+      resolvedTimeline.timeline.createdBy !== frameworkRequest.user?.username
+    ) {
+      return null;
+    }
     return resolvedTimeline;
   } catch (e) {
     return null;

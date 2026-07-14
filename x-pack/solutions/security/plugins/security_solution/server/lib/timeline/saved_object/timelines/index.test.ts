@@ -16,6 +16,7 @@ import {
   getAllTimeline,
   getAllTimelineByIds,
   getDraftTimeline,
+  getTimelineOrNull,
   resolveTimelineOrNull,
   updatePartialSavedTimeline,
   copyTimeline,
@@ -355,6 +356,106 @@ describe('saved_object', () => {
 
     test('should return the timeline with resolve attributes', async () => {
       expect(result).toEqual(mockResolveTimelineResponse);
+    });
+
+    test('returns null when the resolved timeline is a draft owned by a different user', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue({
+        ...mockResolvedTimeline,
+        status: TimelineStatusEnum.draft,
+        createdBy: 'other-user',
+      });
+
+      const nonOwnerRequest = {
+        user: { username: 'username' },
+        context: {
+          core: {
+            savedObjects: {
+              client: { resolve: mockResolveSavedObject },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+
+      const res = await resolveTimelineOrNull(
+        nonOwnerRequest,
+        '760d3d20-2142-11ec-a46f-051cb8e3154c'
+      );
+      expect(res).toBeNull();
+    });
+  });
+
+  describe('getTimelineOrNull', () => {
+    let mockGetSavedObject: jest.Mock;
+    let mockFindSavedObject: jest.Mock;
+    let mockRequest: FrameworkRequest;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockResolvedTimeline);
+      mockGetSavedObject = jest.fn().mockResolvedValue(mockResolvedSavedObject.saved_object);
+      mockFindSavedObject = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+      mockRequest = {
+        user: { username: 'username' },
+        context: {
+          core: {
+            savedObjects: {
+              client: {
+                get: mockGetSavedObject,
+                find: mockFindSavedObject,
+              },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+    });
+
+    afterEach(() => {
+      (getNotesByTimelineId as jest.Mock).mockClear();
+      (getAllPinnedEventsByTimelineId as jest.Mock).mockClear();
+    });
+
+    test('returns the timeline when the requester is the owner of the draft', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue({
+        ...mockResolvedTimeline,
+        status: TimelineStatusEnum.draft,
+        createdBy: 'username',
+      });
+
+      const res = await getTimelineOrNull(
+        mockRequest,
+        '760d3d20-2142-11ec-a46f-051cb8e3154c'
+      );
+      expect(res).not.toBeNull();
+      expect(res?.status).toBe(TimelineStatusEnum.draft);
+    });
+
+    test('returns null when the fetched draft belongs to a different user', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue({
+        ...mockResolvedTimeline,
+        status: TimelineStatusEnum.draft,
+        createdBy: 'other-user',
+      });
+
+      const res = await getTimelineOrNull(
+        mockRequest,
+        '760d3d20-2142-11ec-a46f-051cb8e3154c'
+      );
+      expect(res).toBeNull();
+    });
+
+    test('returns the timeline for a non-draft regardless of createdBy', async () => {
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue({
+        ...mockResolvedTimeline,
+        status: TimelineStatusEnum.active,
+        createdBy: 'other-user',
+      });
+
+      const res = await getTimelineOrNull(
+        mockRequest,
+        '760d3d20-2142-11ec-a46f-051cb8e3154c'
+      );
+      expect(res).not.toBeNull();
+      expect(res?.status).toBe(TimelineStatusEnum.active);
     });
   });
   describe('field migrator', () => {
