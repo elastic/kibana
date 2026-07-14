@@ -17,7 +17,10 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
+import { SIGNIFICANT_EVENTS_DETECTION_WORKFLOW } from './definitions/significant_events';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
+import { convertToWorkflowGraph } from '../graph/build_execution_graph/build_execution_graph';
+import type { WorkflowYaml } from '../spec/schema';
 import { WorkflowSchemaBase } from '../spec/schema';
 
 const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
@@ -187,4 +190,16 @@ describe('managedWorkflowDefinitions', () => {
       assertWorkflowYamlIsValid(id, renderedYaml);
     }
   );
+
+  it('runs significant events detection rules in a bounded parallel fan-out', () => {
+    const workflow = parse(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW.yaml) as WorkflowYaml;
+    const foreachRule = workflow.steps.find(({ name }) => name === 'foreach_rule');
+
+    expect(foreachRule).toMatchObject({
+      type: 'parallel',
+      concurrency: 5,
+      mode: 'settled',
+    });
+    expect(() => convertToWorkflowGraph(workflow)).not.toThrow();
+  });
 });
