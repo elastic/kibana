@@ -20,6 +20,7 @@ import {
   getAggregationsByGroupField,
   useEntityGrouping,
 } from './use_entity_grouping';
+import { useFetchGroupedData } from './use_fetch_grouped_data';
 
 jest.mock('@kbn/grouping', () => ({
   ...jest.requireActual('@kbn/grouping'),
@@ -245,5 +246,75 @@ describe('useEntityGrouping — license gating', () => {
     expect(defaultGroupingOptions.map((o: { key: string }) => o.key)).toContain(
       ENTITY_GROUPING_OPTIONS.RESOLUTION
     );
+  });
+});
+
+describe('useEntityGrouping — entity type plain-field query', () => {
+  const mockUseGrouping = useGrouping as jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    (useGlobalFilterQuery as jest.Mock).mockReturnValue({ filterQuery: undefined });
+    mockUseGrouping.mockReturnValue({
+      selectedGroups: [ENTITY_GROUPING_OPTIONS.ENTITY_TYPE],
+      setSelectedGroups: jest.fn(),
+      groupsUnit: jest.fn(),
+      options: [],
+    });
+  });
+
+  it('builds a plain terms agg on ENTITY_TYPE field with no runtime_mappings', () => {
+    renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState(),
+          selectedGroup: ENTITY_GROUPING_OPTIONS.ENTITY_TYPE,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    const { query } = (useFetchGroupedData as jest.Mock).mock.calls[0][0];
+    expect(query.runtime_mappings).toBeUndefined();
+    expect(query.aggs?.groupByFields?.terms?.field).toBe(ENTITY_FIELDS.ENTITY_TYPE);
+    expect(query.aggs?.groupByFields?.terms?.size).toBe(5);
+  });
+
+  it('includes entityType size-1 sub-agg inside groupByFields', () => {
+    renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState(),
+          selectedGroup: ENTITY_GROUPING_OPTIONS.ENTITY_TYPE,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    const { query } = (useFetchGroupedData as jest.Mock).mock.calls[0][0];
+    expect(query.aggs?.groupByFields?.aggs?.entityType).toEqual({
+      terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: 1 },
+    });
+  });
+
+  it('includes nullGroupItems missing agg, unitsCount value_count, and groupsCount cardinality on the plain field', () => {
+    renderHook(
+      () =>
+        useEntityGrouping({
+          state: createMockState(),
+          selectedGroup: ENTITY_GROUPING_OPTIONS.ENTITY_TYPE,
+          tableId: 'test-table',
+          groupingId: 'test-grouping',
+        }),
+      { wrapper }
+    );
+
+    const { query } = (useFetchGroupedData as jest.Mock).mock.calls[0][0];
+    expect(query.aggs?.nullGroupItems).toEqual({ missing: { field: ENTITY_FIELDS.ENTITY_TYPE } });
+    expect(query.aggs?.unitsCount).toEqual({ value_count: { field: ENTITY_FIELDS.ENTITY_TYPE } });
+    expect(query.aggs?.groupsCount).toEqual({ cardinality: { field: ENTITY_FIELDS.ENTITY_TYPE } });
   });
 });

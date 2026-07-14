@@ -292,6 +292,38 @@ export const useEntityGrouping = ({
       ...(globalFilterQuery ? [globalFilterQuery] : []),
     ];
 
+    // Entity type: use the plain mapped field directly — no Painless script needed.
+    // entity.EngineMetadata.Type has at most 5 distinct values so a plain terms agg
+    // is both correct and much faster than the generic runtime-field path.
+    if (selectedGroup === ENTITY_GROUPING_OPTIONS.ENTITY_TYPE) {
+      return {
+        size: 0,
+        aggs: {
+          groupByFields: {
+            terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: 5 },
+            aggs: {
+              entityType: { terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: 1 } },
+              bucket_truncate: {
+                bucket_sort: {
+                  from: Math.min(pageIndex * pageSize, Math.max(5 - pageSize, 0)),
+                  size: pageSize,
+                },
+              },
+            },
+          },
+          unitsCount: { value_count: { field: ENTITY_FIELDS.ENTITY_TYPE } },
+          groupsCount: { cardinality: { field: ENTITY_FIELDS.ENTITY_TYPE } },
+          nullGroupItems: { missing: { field: ENTITY_FIELDS.ENTITY_TYPE } },
+        },
+        query: {
+          bool: {
+            filter: allFilters,
+          },
+        },
+        _source: false,
+      } as EntitiesGroupingQuery;
+    }
+
     const currentGroup = selectedGroup || ENTITY_GROUPING_OPTIONS.ENTITY_TYPE;
     return {
       ...getGroupingQuery({
