@@ -20,6 +20,13 @@ export function getSeverity(score: number | undefined) {
   return getSeverityType(score);
 }
 
+/**
+ * True when a normalized anomaly score is effectively zero (e.g. displays as 0.00).
+ */
+export function isNoAnomalyScore(score: number | undefined): boolean {
+  return score !== undefined && Number(score.toFixed(2)) === 0;
+}
+
 export function getSeverityColor(score: number) {
   return mlGetSeverityColor(score);
 }
