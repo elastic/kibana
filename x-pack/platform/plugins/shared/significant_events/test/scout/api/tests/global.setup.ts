@@ -7,13 +7,11 @@
 
 import { globalSetupHook } from '@kbn/scout';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import { getSignificantEventsTestApiService } from '../services/significant_events_api_service';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../../../../common';
 
 globalSetupHook(
   'Setup environment for Significant Events API tests',
   async ({ apiServices, kbnClient, log }) => {
-    const significantEventsApi = getSignificantEventsTestApiService({ kbnClient, log });
-
     log.debug('[setup] Enabling Streams...');
     await apiServices.streams.enable();
     log.debug('[setup] Streams enabled successfully');
@@ -21,7 +19,11 @@ globalSetupHook(
     // Significant events is gated behind the streams.significantEventsAvailable feature flag, which
     // falls back to false. Force it on as the outermost availability gate for the API tests.
     log.debug('[setup] Enabling significant events availability feature flag...');
-    await significantEventsApi.enableSignificantEventsAvailability();
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+      },
+    });
 
     log.debug('[setup] Enabling significant events feature...');
     try {
