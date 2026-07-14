@@ -186,6 +186,10 @@ export type {
   DatatableColumnArgs,
   DatatableColumnResult,
   ColumnState,
+  ColumnCellDecorationMode,
+  CellDecorationFillMode,
+  CellDecorationValueRange,
+  CellDecorationFillConfig,
   RowHeightMode,
   DataGridDensity,
   DatatableVisualizationState,
@@ -196,6 +200,7 @@ export type {
   LensToggleAction,
   LensPagesizeAction,
 } from './visualizations/datatable/types';
+export { COLUMN_CELL_DECORATION_MODE } from './visualizations/datatable/types';
 export type { GaugeAccessors, GaugeVisualizationState } from './visualizations/gauge/types';
 export type { HeatmapPalette, HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type {

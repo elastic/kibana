@@ -92,7 +92,6 @@ enabled:
   - src/platform/test/functional/apps/discover/group6/config.ts
   - src/platform/test/functional/apps/discover/group11/config.ts
   - src/platform/test/functional/apps/discover/group12/config.ts
-  - src/platform/test/functional/apps/discover/group13/config.ts
   - src/platform/test/functional/apps/discover/group7/config.ts
   - src/platform/test/functional/apps/discover/group8/config.ts
   - src/platform/test/functional/apps/discover/group9/config.ts
@@ -190,7 +189,8 @@ enabled:
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_common.ts
-  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_unified_attachments.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_attachments.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_attachments_legacy.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/platform/test/cases_api_integration/spaces_only/config.ts
   - x-pack/platform/test/cases_api_integration/spaces_only/config_analytics_v2.ts
@@ -257,10 +257,6 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/group13/config.ts
   - x-pack/platform/test/functional/apps/lens/group14/config.ts
   - x-pack/platform/test/functional/apps/lens/group15/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_1/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_2/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_3/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_4/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based_4/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts
   - x-pack/platform/test/functional/apps/license_management/config.ts
@@ -296,7 +292,6 @@ enabled:
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
   - x-pack/platform/test/functional/apps/security/config.ts
   - x-pack/platform/test/functional/apps/snapshot_restore/config.ts
-  - x-pack/platform/test/functional/apps/spaces/config.ts
   - x-pack/platform/test/functional/apps/status_page/config.ts
   - x-pack/platform/test/functional/apps/transform/creation/index_pattern/config.ts
   - x-pack/platform/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
