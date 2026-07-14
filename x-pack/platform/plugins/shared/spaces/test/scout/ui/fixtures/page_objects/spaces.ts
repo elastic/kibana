@@ -76,7 +76,9 @@ export class SpacesPage {
   /** Reads the current space name from the header space selector. */
   async getCurrentSpaceTitle() {
     const selector = this.spacesSelectorLocator();
-    return (await selector.getAttribute('title')) ?? (await selector.innerText());
+    const label = ((await selector.getAttribute('title')) ?? (await selector.innerText())).trim();
+    const separatorIndex = label.lastIndexOf(':');
+    return separatorIndex === -1 ? label : label.slice(separatorIndex + 1).trim();
   }
 
   getCurrentUrl() {

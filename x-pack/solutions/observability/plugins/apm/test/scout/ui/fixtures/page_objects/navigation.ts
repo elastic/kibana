@@ -16,6 +16,7 @@ export class NavigationPage {
     await this.page.goto(this.kbnUrl.app('home'));
     await this.globalSearchInput
       .or(this.globalSearchRevealButton)
+      .or(this.globalSearchButton)
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
@@ -44,14 +45,21 @@ export class NavigationPage {
     return this.page.getByTestId('nav-search-reveal');
   }
 
+  public get globalSearchButton() {
+    return this.page.getByTestId('chromeNextGlobalHeaderSearchButton');
+  }
+
   async searchGlobalNav(keyword: string) {
-    // The input and reveal button are mutually exclusive, so at most one of
-    // them is rendered at any given time.
+    // The input, reveal button and modal button are mutually exclusive, so at
+    // most one of them is rendered at any given time.
     await this.globalSearchInput
       .or(this.globalSearchRevealButton)
+      .or(this.globalSearchButton)
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 
-    if (await this.globalSearchRevealButton.isVisible()) {
+    if (await this.globalSearchButton.isVisible()) {
+      await this.globalSearchButton.click();
+    } else if (await this.globalSearchRevealButton.isVisible()) {
       await this.globalSearchRevealButton.click();
     }
 
@@ -61,11 +69,13 @@ export class NavigationPage {
   }
 
   private get virtualizedSearchList() {
-    return this.page.locator('.navSearch__panel .euiSelectableList__list');
+    return this.page.locator(
+      '.navSearch__panel .euiSelectableList__list, [data-test-subj="chromeNextSearchModal"] .euiSelectableList__list'
+    );
   }
 
   private get searchPanel() {
-    return this.page.locator('.navSearch__panel');
+    return this.page.locator('.navSearch__panel, [data-test-subj="chromeNextSearchModal"]');
   }
 
   private async waitForSearchResults() {
