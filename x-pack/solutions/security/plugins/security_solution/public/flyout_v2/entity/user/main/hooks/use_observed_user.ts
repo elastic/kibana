@@ -49,16 +49,24 @@ export const useObservedUser = (
 
   const { indexPatterns } = useSecurityDefaultPatterns();
 
-  const useEntityStoreObservedData = Boolean(
-    entityFromStore?.entityRecord ?? entityFromStore?.entity
-  );
+  // Use `isInitialLoading` (react-query v4 `isLoading && isFetching`), not raw `isLoading`: an idle or
+  // disabled store query reports `isLoading: true` forever in v4, which would otherwise skip the
+  // observed query and hang the panel spinner permanently.
+  const entityStoreInitialLoading = Boolean(entityFromStore?.isInitialLoading);
+  const hasEntityStoreRecord = Boolean(entityFromStore?.entityRecord ?? entityFromStore?.entity);
+  // While the entity-store record is actively resolving, keep the entity-store branch (base) so the
+  // observed query is skipped and does not flash the broad `user.name` fallback before the scoped query.
+  const useEntityStoreObservedData =
+    Boolean(entityFromStore) && (entityStoreInitialLoading || hasEntityStoreRecord);
 
   const [isLoading, { userDetails, inspect: inspectObservedUser, refetch: refetchUserDetails }] =
     useObservedUserDetails({
       endDate: to,
       startDate: from,
       userName,
-      entityId: useEntityStoreObservedData ? entityFromStore?.entityRecord?.entity?.id : undefined,
+      entityId: hasEntityStoreRecord ? entityFromStore?.entityRecord?.entity?.id : undefined,
+      entityRecord: hasEntityStoreRecord ? entityFromStore?.entityRecord : undefined,
+      entityStoreInitialLoading,
       indexNames: indexPatterns,
       id: USER_PANEL_RISK_SCORE_QUERY_ID,
       skip: isInitializing,
