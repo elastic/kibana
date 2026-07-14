@@ -9,6 +9,7 @@ import React, { type FC, type PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { screen, waitFor, renderHook } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import type { EuiTableComputedColumnType, EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { TransformListRow } from '../../../../common';
 
 import { useColumns } from './use_columns';
@@ -32,9 +33,12 @@ describe('Transform: Job List Columns', () => {
     const columns: ReturnType<typeof useColumns>['columns'] = result.current.columns;
 
     expect(columns).toHaveLength(9);
-    expect(columns[0].isExpander).toBeTruthy();
+    const expanderColumn = columns[0] as EuiTableComputedColumnType<TransformListRow>;
+    const alertRuleColumn = columns[2] as EuiTableComputedColumnType<TransformListRow>;
+
+    expect(expanderColumn.isExpander).toBeTruthy();
     expect(columns[1].name).toBe('ID');
-    expect(columns[2].id).toBe('alertRule');
+    expect(alertRuleColumn.id).toBe('alertRule');
     expect(columns[3].name).toBe('Type');
     expect(columns[4].name).toBe('Status');
     expect(columns[5].name).toBe('Mode');
@@ -54,7 +58,7 @@ describe('Transform: Job List Columns', () => {
 
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    const idColumn = result.current.columns[1];
+    const idColumn = result.current.columns[1] as EuiTableFieldDataColumnType<TransformListRow>;
     const item = {
       ...transformListRow,
       config: {
@@ -65,7 +69,9 @@ describe('Transform: Job List Columns', () => {
 
     renderWithI18n(<>{idColumn.render?.(item.id, item)}</>);
 
-    expect(screen.getByText(item.id)).toBeInTheDocument();
-    expect(screen.getByText('Tracks inventory and stock levels.')).toBeInTheDocument();
+    expect(screen.getByTestId('transformListColumnIdText')).toHaveTextContent(item.id);
+    expect(screen.getByTestId('transformListColumnDescriptionText')).toHaveTextContent(
+      'Tracks inventory and stock levels.'
+    );
   });
 });

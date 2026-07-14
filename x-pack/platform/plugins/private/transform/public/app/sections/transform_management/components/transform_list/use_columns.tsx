@@ -72,7 +72,7 @@ const TransformIdWithDescription = ({ item }: { item: TransformListRow }) => {
   const description = item.config.description;
   const transformIdContent = !isManagedTransform(item) ? (
     <EuiToolTip content={transformId}>
-      <span>{transformId}</span>
+      <span data-test-subj="transformListColumnIdText">{transformId}</span>
     </EuiToolTip>
   ) : (
     <>
@@ -84,7 +84,7 @@ const TransformIdWithDescription = ({ item }: { item: TransformListRow }) => {
           }
         )})`}
       >
-        <span>{transformId}</span>
+        <span data-test-subj="transformListColumnIdText">{transformId}</span>
       </EuiToolTip>
       &nbsp;
       <EuiToolTip
@@ -110,7 +110,7 @@ const TransformIdWithDescription = ({ item }: { item: TransformListRow }) => {
           <EuiSpacer size="xs" />
           <EuiToolTip content={description}>
             <EuiText color="subdued" size="s">
-              <span>{description}</span>
+              <span data-test-subj="transformListColumnDescriptionText">{description}</span>
             </EuiText>
           </EuiToolTip>
         </>
