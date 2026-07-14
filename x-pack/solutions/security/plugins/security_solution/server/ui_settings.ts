@@ -357,7 +357,7 @@ export const initUiSettings = (
           }
         ),
         type: 'boolean',
-        value: false,
+        value: true,
         category: [APP_ID],
         requiresPageReload: true,
         schema: schema.boolean(),
