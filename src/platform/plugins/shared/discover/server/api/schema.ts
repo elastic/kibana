@@ -222,7 +222,8 @@ export const discoverSessionApiDataSchema = schema.object(
         );
       },
       meta: {
-        description: 'Ordered list of tabs in the Discover session.',
+        description:
+          'Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID because Dashboard panels and Discover links can reference it.',
       },
     }),
   },
