@@ -15,6 +15,8 @@ import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser'
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
+import { cellActionRenderer } from '../shared/components/cell_actions';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import {
@@ -42,6 +44,8 @@ export interface OpenAttackFlyoutParams {
   indexName: string;
   /** Invoked after the attack is mutated inside the flyout, to let the caller refresh. Defaults to a no-op. */
   onAttackUpdated?: () => void;
+  /** Renderer for cell actions in nested alert flyouts. Defaults to the standard `cellActionRenderer`. */
+  renderCellActions?: CellActionRenderer;
 }
 
 export interface OpenAttackCorrelationsParams {
@@ -117,12 +121,18 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   );
 
   const openAttackFlyout = useCallback(
-    ({ attackId, indexName, onAttackUpdated = noop }: OpenAttackFlyoutParams) => {
+    ({
+      attackId,
+      indexName,
+      onAttackUpdated = noop,
+      renderCellActions = cellActionRenderer,
+    }: OpenAttackFlyoutParams) => {
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
           indexName={indexName}
           onAttackUpdated={onAttackUpdated}
+          renderCellActions={renderCellActions}
         />,
         { ...defaultDocumentFlyoutProperties, historyKey, session: 'start' }
       );
@@ -131,12 +141,18 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   );
 
   const openAttackFlyoutAsChild = useCallback(
-    ({ attackId, indexName, onAttackUpdated = noop }: OpenAttackFlyoutParams) => {
+    ({
+      attackId,
+      indexName,
+      onAttackUpdated = noop,
+      renderCellActions = cellActionRenderer,
+    }: OpenAttackFlyoutParams) => {
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
           indexName={indexName}
           onAttackUpdated={onAttackUpdated}
+          renderCellActions={renderCellActions}
         />,
         { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' }
       );

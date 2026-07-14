@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SmlData, SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlEntry, SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
@@ -79,7 +79,7 @@ export const createSignificantEventSmlType = ({
       }
     },
 
-    getSmlData: async (originId, context): Promise<SmlData | undefined> => {
+    getSmlEntry: async (originId, context): Promise<SmlEntry | undefined> => {
       try {
         const eventClient = eventService.getClient({
           esClient: context.esClient,
@@ -93,13 +93,9 @@ export const createSignificantEventSmlType = ({
         }
 
         return {
-          chunks: [
-            {
-              type: SIGNIFICANT_EVENT_SML_TYPE,
-              title: event.title,
-              content: eventToSmlContent(event),
-            },
-          ],
+          type: SIGNIFICANT_EVENT_SML_TYPE,
+          title: event.title,
+          content: eventToSmlContent(event),
         };
       } catch (error) {
         context.logger.warn(
@@ -115,7 +111,6 @@ export const createSignificantEventSmlType = ({
      */
     getPermissions: () => ({
       kibana: { privileges: [{ name: `api:${STREAMS_API_PRIVILEGES.read}` }] },
-      elasticsearch: { indices: [] },
     }),
 
     toAttachment: async (item, context) => {

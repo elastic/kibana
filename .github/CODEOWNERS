@@ -1077,7 +1077,7 @@ x-pack/platform/packages/shared/kbn-inference-prompt-utils @elastic/appex-ai-inf
 x-pack/platform/packages/shared/kbn-inference-tracing @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-tracing-config @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-ink @elastic/streams-program-team
-x-pack/platform/packages/shared/kbn-investigation-output @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-investigation-output @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-threat-hunting
@@ -1186,9 +1186,9 @@ x-pack/platform/plugins/shared/actions @elastic/response-ops
 x-pack/platform/plugins/shared/agent_builder @elastic/workchat-eng
 x-pack/platform/plugins/shared/agent_builder_dashboards @elastic/kibana-presentation
 x-pack/platform/plugins/shared/agent_builder_platform @elastic/workchat-eng
+x-pack/platform/plugins/shared/agent_builder_sml @elastic/workchat-eng
 x-pack/platform/plugins/shared/agent_builder_visualizations @elastic/kibana-presentation
 x-pack/platform/plugins/shared/agent_builder_workflows @elastic/workchat-eng @elastic/workflows-eng
-x-pack/platform/plugins/shared/agent_context_layer @elastic/context-eng
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
@@ -1316,7 +1316,6 @@ x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
 x-pack/solutions/observability/plugins/apm @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-presentation-team @elastic/obs-exploration-team
-x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/solutions/observability/plugins/exploratory_view @elastic/actionable-obs-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-presentation-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-presentation-team
@@ -1893,6 +1892,11 @@ x-pack/platform/plugins/shared/significant_events/server/routes/internal/apps/sl
 x-pack/platform/plugins/shared/streams_app/public/components/significant_events/significant_events_discovery/components/settings/apps_section @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-significant-events-schema/src/relay_client.ts @elastic/nightshift-context-and-research-team
 
+# Significant Events - Memory & investigation features (owned by Nightshift context & research)
+x-pack/platform/plugins/shared/significant_events/server/memory_and_investigation @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/common/memory_and_investigation.ts @elastic/nightshift-context-and-research-team
+x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation @elastic/nightshift-context-and-research-team
+
 # Streams - Data quality overrides (owned by Kibana Management)
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_data_quality @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams_app/public/hooks/use_dataset_quality_controller.ts @elastic/kibana-management
@@ -2005,8 +2009,6 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 # APM
 /x-pack/platform/test/stack_functional_integration/apps/apm @elastic/obs-presentation-team
 /src/platform/test/api_integration/apis/ui_metric/*.ts @elastic/obs-presentation-team
-/x-pack/solutions/observability/test/functional/apps/apm/ @elastic/obs-presentation-team
-/x-pack/solutions/observability/test/apm_cypress/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/apm_api_integration/ @elastic/obs-presentation-team
 /x-pack/solutions/observability/test/apm_api_integration/ @elastic/obs-presentation-team
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
