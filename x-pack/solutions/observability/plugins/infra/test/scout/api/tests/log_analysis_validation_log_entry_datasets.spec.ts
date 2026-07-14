@@ -116,6 +116,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(400);
+      expect((response.body as { message: string }).message).toContain('out of bounds');
     });
   }
 );

@@ -107,6 +107,7 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(400);
+        expect((response.body as { message: string }).message).toContain('conflicting valid types');
       }
     );
 
@@ -164,6 +165,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(400);
+      expect((response.body as { message: string }).message).toContain('out of bounds');
     });
 
     apiTest('rejects requests with too many fields', async ({ apiClient }) => {
@@ -188,6 +190,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(400);
+      expect((response.body as { message: string }).message).toContain('out of bounds');
     });
   }
 );
