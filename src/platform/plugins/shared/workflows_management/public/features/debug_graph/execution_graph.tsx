@@ -68,9 +68,6 @@ const ReactFlowWrapper: React.FC<{
       onInit={onInit}
       fitView={isReady}
       fitViewOptions={{ padding: 0.1 }}
-      proOptions={{
-        hideAttribution: true,
-      }}
     >
       <Background />
       <Controls />
