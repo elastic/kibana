@@ -15,7 +15,9 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { distinctUntilChanged, filter, skip } from 'rxjs';
 import type { Subscription } from 'rxjs';
@@ -65,6 +67,8 @@ import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { installMemoryWorkflows } from './memory_and_investigation/lib/memory/install_managed_workflows';
 import { isInvestigationEnabled } from './memory_and_investigation/lib/investigation/is_investigation_enabled';
 import { installInvestigationWorkflow } from './memory_and_investigation/lib/investigation/install_investigation_workflow';
+import { installInvestigationAgent } from './memory_and_investigation/lib/investigation/install_investigation_agent';
+import { registerInvestigationAgentType } from './memory_and_investigation/agents/investigation';
 import {
   SIGNIFICANT_EVENTS_INVESTIGATION_ENABLED_FLAG,
   SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
@@ -246,6 +250,7 @@ export class SignificantEventsPlugin
     }
 
     if (plugins.agentBuilder) {
+      registerInvestigationAgentType(plugins.agentBuilder);
       void core
         .getStartServices()
         .then(async ([coreStart]) => {
@@ -405,15 +410,17 @@ export class SignificantEventsPlugin
     if (plugins.workflowsExtensions) {
       const { workflowsExtensions } = plugins;
 
-      void this.installManagedWorkflows(workflowsExtensions, core.featureFlags).catch(
-        (error: unknown) => {
-          this.logger.error(
-            `significant_events: Failed to install managed workflows: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        }
-      );
+      void this.installManagedWorkflows(
+        workflowsExtensions,
+        core.featureFlags,
+        plugins.agentBuilder
+      ).catch((error: unknown) => {
+        this.logger.error(
+          `significant_events: Failed to install managed workflows: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      });
 
       this.subscriptions.push(
         memoryEnabled$.subscribe(() => {
@@ -431,12 +438,13 @@ export class SignificantEventsPlugin
 
       this.subscriptions.push(
         investigationEnabled$.subscribe(() => {
-          void this.installInvestigationWorkflowIfEnabled(
+          void this.installInvestigationResourcesIfEnabled({
             workflowsExtensions,
-            core.featureFlags
-          ).catch((error: unknown) => {
+            agentBuilder: plugins.agentBuilder,
+            featureFlags: core.featureFlags,
+          }).catch((error: unknown) => {
             this.logger.error(
-              `significant_events: Failed to install investigation managed workflow after feature flag change: ${
+              `significant_events: Failed to install investigation resources after feature flag change: ${
                 error instanceof Error ? error.message : String(error)
               }`
             );
@@ -493,15 +501,28 @@ export class SignificantEventsPlugin
     await client.ready();
   }
 
-  private async installInvestigationWorkflowIfEnabled(
-    workflowsExtensions: WorkflowsExtensionsServerPluginStart,
-    featureFlags: FeatureFlagsStart
-  ): Promise<void> {
+  private async installInvestigationResourcesIfEnabled({
+    workflowsExtensions,
+    agentBuilder,
+    featureFlags,
+  }: {
+    workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+    agentBuilder?: AgentBuilderPluginStart;
+    featureFlags: FeatureFlagsStart;
+  }): Promise<void> {
     if (!(await isInvestigationEnabled(featureFlags))) {
       this.logger.debug(
-        'significant_events: investigation is disabled, skipping investigation workflow installation'
+        'significant_events: investigation is disabled, skipping investigation resource installation'
       );
       return;
+    }
+
+    if (agentBuilder) {
+      const request = kibanaRequestFactory({
+        headers: {},
+        spaceId: asSpaceId(DEFAULT_SPACE_ID),
+      });
+      await installInvestigationAgent({ agentBuilder, request, logger: this.logger });
     }
 
     const client = await workflowsExtensions.initManagedWorkflowsClient(
@@ -513,7 +534,8 @@ export class SignificantEventsPlugin
 
   private async installManagedWorkflows(
     workflowsExtensions: WorkflowsExtensionsServerPluginStart,
-    featureFlags: FeatureFlagsStart
+    featureFlags: FeatureFlagsStart,
+    agentBuilder?: AgentBuilderPluginStart
   ): Promise<void> {
     try {
       const client = await workflowsExtensions.initManagedWorkflowsClient(
@@ -526,6 +548,13 @@ export class SignificantEventsPlugin
       });
 
       if (await isInvestigationEnabled(featureFlags)) {
+        if (agentBuilder) {
+          const request = kibanaRequestFactory({
+            headers: {},
+            spaceId: asSpaceId(DEFAULT_SPACE_ID),
+          });
+          await installInvestigationAgent({ agentBuilder, request, logger: this.logger });
+        }
         await installInvestigationWorkflow({ client });
       } else {
         this.logger.debug(

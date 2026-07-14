@@ -83,6 +83,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/actions-utils",
     "@kbn/es-query",
-    "@kbn/datemath"
+    "@kbn/datemath",
+    "@kbn/core-http-server-utils"
   ]
 }

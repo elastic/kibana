@@ -17,7 +17,6 @@ import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderSkills } from './skills/register_skills';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
 import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
-import { registerInvestigationAgents } from '../memory_and_investigation/agents/investigation';
 import { streamsInvestigationManagementSkill } from '../memory_and_investigation/skills/investigation_management';
 
 export const createMemoryToolsOptions = ({
@@ -74,6 +73,5 @@ export const registerStreamsAgentBuilder = async ({
   registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
   if (investigationEnabled) {
     agentBuilder.skills.register(streamsInvestigationManagementSkill);
-    registerInvestigationAgents(agentBuilder);
   }
 };
