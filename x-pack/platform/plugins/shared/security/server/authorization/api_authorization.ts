@@ -36,6 +36,25 @@ const isReservedPrivilegeSet = (privilege: string): privilege is ReservedPrivile
   return Object.hasOwn(ReservedPrivilegesSet, privilege);
 };
 
+const flattenPrivilegeEntries = (
+  privilegeEntries: AuthzEnabled['requiredPrivileges']
+): string[] => {
+  const privileges: string[] = [];
+
+  for (const privilegeEntry of privilegeEntries) {
+    if (typeof privilegeEntry === 'object') {
+      privileges.push(
+        ...unwindNestedSecurityPrivileges<AllRequiredCondition>(privilegeEntry.allRequired ?? []),
+        ...unwindNestedSecurityPrivileges<AnyRequiredCondition>(privilegeEntry.anyRequired ?? [])
+      );
+    } else {
+      privileges.push(privilegeEntry);
+    }
+  }
+
+  return privileges;
+};
+
 interface InitApiAuthorization extends AuthorizationServiceSetup {
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   getSecurityConfig: () => Promise<EsSecurityConfig>;
@@ -111,8 +130,12 @@ export function initAPIAuthorization(
     // We need to normalize privileges to drop unintended privilege checks.
     // Operator privileges check should be only performed if the `operator_privileges` are enabled in config.
     const requiredPrivileges = await normalizeRequiredPrivileges(authz.requiredPrivileges);
+    const extendedPrivileges = authz.extendedPrivileges ?? [];
 
-    const { requestedPrivileges, requestedReservedPrivileges } = requiredPrivileges.reduce(
+    const { requestedPrivileges, requestedReservedPrivileges } = [
+      ...requiredPrivileges,
+      ...extendedPrivileges,
+    ].reduce(
       (acc, privilegeEntry) => {
         const privileges =
           typeof privilegeEntry === 'object'
@@ -203,9 +226,13 @@ export function initAPIAuthorization(
       return kibanaPrivileges[kbPrivilege];
     };
 
+    const requiredPrivilegeNames = new Set(flattenPrivilegeEntries(requiredPrivileges));
+
     for (const privilege of requiredPrivileges) {
       if (!hasRequestedPrivilege(privilege)) {
-        const missingPrivileges = Object.keys(kibanaPrivileges).filter(
+        // Only list missing *required* privileges in the 403 body. Extended privileges are
+        // never part of the access decision and must not appear to grant the route.
+        const missingPrivileges = [...requiredPrivilegeNames].filter(
           (key) => !kibanaPrivileges[key]
         );
         const forbiddenMessage = `API [${request.route.method.toUpperCase()} ${

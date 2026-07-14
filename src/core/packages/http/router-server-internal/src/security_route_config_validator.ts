@@ -12,6 +12,7 @@ import type {
   RouteSecurity,
   AllRequiredCondition,
   AnyRequiredCondition,
+  Privileges,
 } from '@kbn/core-http-server';
 import { ReservedPrivilegesSet } from '@kbn/core-http-server';
 import { unwindNestedSecurityPrivileges } from '@kbn/core-security-server';
@@ -47,34 +48,47 @@ const privilegeSetSchema = schema.object(
   }
 );
 
+const groupRequiredPrivileges = (
+  privileges: Privileges
+): { anyRequired: string[]; allRequired: string[] } => {
+  const anyRequired: string[] = [];
+  const allRequired: string[] = [];
+
+  for (const privilege of privileges) {
+    if (typeof privilege === 'string') {
+      allRequired.push(privilege);
+    } else {
+      if (privilege.anyRequired) {
+        anyRequired.push(
+          ...unwindNestedSecurityPrivileges<AnyRequiredCondition>(privilege.anyRequired)
+        );
+      }
+      if (privilege.allRequired) {
+        allRequired.push(
+          ...unwindNestedSecurityPrivileges<AllRequiredCondition>(privilege.allRequired)
+        );
+      }
+    }
+  }
+
+  return { anyRequired, allRequired };
+};
+
+const flattenRequiredPrivileges = (privileges: Privileges): string[] => {
+  const { anyRequired, allRequired } = groupRequiredPrivileges(privileges);
+  return [...allRequired, ...anyRequired];
+};
+
 const requiredPrivilegesSchema = schema.arrayOf(
   schema.oneOf([privilegeSetSchema, schema.string()]),
   {
     maxSize: 100,
     validate: (value) => {
-      const anyRequired: string[] = [];
-      const allRequired: string[] = [];
-
       if (!Array.isArray(value)) {
         return undefined;
       }
 
-      value.forEach((privilege) => {
-        if (typeof privilege === 'string') {
-          allRequired.push(privilege);
-        } else {
-          if (privilege.anyRequired) {
-            anyRequired.push(
-              ...unwindNestedSecurityPrivileges<AnyRequiredCondition>(privilege.anyRequired)
-            );
-          }
-          if (privilege.allRequired) {
-            allRequired.push(
-              ...unwindNestedSecurityPrivileges<AllRequiredCondition>(privilege.allRequired)
-            );
-          }
-        }
-      });
+      const { anyRequired, allRequired } = groupRequiredPrivileges(value);
 
       if (anyRequired.includes(ReservedPrivilegesSet.superuser)) {
         return 'Using superuser privileges in anyRequired is not allowed';
@@ -131,21 +145,66 @@ const requiredPrivilegesSchema = schema.arrayOf(
   }
 );
 
-const authzSchema = schema.object({
-  enabled: schema.maybe(schema.literal(false)),
-  requiredPrivileges: schema.conditional(
-    schema.siblingRef('enabled'),
-    schema.never(),
-    requiredPrivilegesSchema,
-    schema.never()
-  ),
-  reason: schema.conditional(
-    schema.siblingRef('enabled'),
-    schema.never(),
-    schema.never(),
-    schema.string()
-  ),
+const extendedPrivilegesSchema = schema.arrayOf(schema.string(), {
+  minSize: 1,
+  maxSize: 100,
+  validate: (value) => {
+    if (value.includes(ReservedPrivilegesSet.superuser)) {
+      return 'Using superuser privileges in extendedPrivileges is not allowed';
+    }
+
+    if (value.includes(ReservedPrivilegesSet.operator)) {
+      return 'Using operator privileges in extendedPrivileges is not allowed';
+    }
+
+    const uniquePrivileges = new Set(value);
+    if (value.length !== uniquePrivileges.size) {
+      return 'extendedPrivileges must contain unique values';
+    }
+  },
 });
+
+const authzSchema = schema.object(
+  {
+    enabled: schema.maybe(schema.literal(false)),
+    requiredPrivileges: schema.conditional(
+      schema.siblingRef('enabled'),
+      schema.never(),
+      requiredPrivilegesSchema,
+      schema.never()
+    ),
+    extendedPrivileges: schema.conditional(
+      schema.siblingRef('enabled'),
+      schema.never(),
+      schema.maybe(extendedPrivilegesSchema),
+      schema.never()
+    ),
+    reason: schema.conditional(
+      schema.siblingRef('enabled'),
+      schema.never(),
+      schema.never(),
+      schema.string()
+    ),
+  },
+  {
+    validate: (value) => {
+      if (!value.extendedPrivileges) {
+        return undefined;
+      }
+
+      if (!value.requiredPrivileges) {
+        return 'requiredPrivileges must be specified when extendedPrivileges is present';
+      }
+
+      const requiredPrivileges = flattenRequiredPrivileges(value.requiredPrivileges);
+      for (const privilege of value.extendedPrivileges) {
+        if (requiredPrivileges.includes(privilege)) {
+          return `extendedPrivileges cannot overlap with requiredPrivileges: [${privilege}]`;
+        }
+      }
+    },
+  }
+);
 
 const authcSchema = schema.object({
   enabled: schema.oneOf([

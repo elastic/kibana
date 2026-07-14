@@ -79,5 +79,14 @@ export const extractAuthzDescription = (routeSecurity: InternalRouteSecurity | u
     return `Route required privileges: ${getPrivilegesDescription(allRequired, anyRequired)}.`;
   };
 
-  return `[Required authorization] ${getDescriptionForRoute()}`;
+  const requiredDescription = `[Required authorization] ${getDescriptionForRoute()}`;
+  const extendedPrivileges = (routeSecurity.authz as AuthzEnabled).extendedPrivileges;
+
+  if (!extendedPrivileges?.length) {
+    return requiredDescription;
+  }
+
+  return `${requiredDescription} Extended privileges (optional, expand functionality when granted): ${extendedPrivileges.join(
+    ', '
+  )}.`;
 };
