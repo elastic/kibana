@@ -17,6 +17,7 @@ import {
   getAllTimelineByIds,
   getDraftTimeline,
   getTimelineOrNull,
+  persistTimeline,
   resolveTimelineOrNull,
   updatePartialSavedTimeline,
   copyTimeline,
@@ -966,6 +967,98 @@ describe('saved_object', () => {
       expect(result.timeline[0].favorite).toEqual([
         expect.objectContaining({ userName: 'username' }),
       ]);
+    });
+  });
+
+  describe('updateTimeline (via persistTimeline)', () => {
+    let mockSOClientGet: jest.Mock;
+    let mockSOClientUpdate: jest.Mock;
+    let mockRequest: FrameworkRequest;
+
+    const buildSavedObjectForUpdate = (overrides: Record<string, unknown> = {}) => ({
+      ...mockResolvedSavedObject.saved_object,
+      attributes: {
+        ...mockResolvedSavedObject.saved_object.attributes,
+        ...overrides,
+      },
+      references: [],
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      mockSOClientUpdate = jest.fn().mockResolvedValue({
+        ...mockResolvedSavedObject.saved_object,
+        attributes: {},
+      });
+
+      mockSOClientGet = jest.fn().mockResolvedValue(
+        buildSavedObjectForUpdate({ status: TimelineStatusEnum.active, createdBy: 'username' })
+      );
+
+      (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue({
+        ...mockResolvedTimeline,
+        status: TimelineStatusEnum.active,
+        createdBy: 'username',
+      });
+
+      mockRequest = {
+        user: { username: 'username' },
+        context: {
+          core: {
+            savedObjects: {
+              client: {
+                get: mockSOClientGet,
+                update: mockSOClientUpdate,
+              },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+    });
+
+    test('throws a Boom 404 when the requester is not the owner of a draft timeline', async () => {
+      mockSOClientGet.mockResolvedValue(
+        buildSavedObjectForUpdate({ status: TimelineStatusEnum.draft, createdBy: 'other-user' })
+      );
+
+      await expect(
+        persistTimeline(mockRequest, '760d3d20-2142-11ec-a46f-051cb8e3154c', null, {})
+      ).rejects.toMatchObject({ output: { statusCode: 404 } });
+
+      expect(mockSOClientUpdate).not.toHaveBeenCalled();
+    });
+
+    test('succeeds when the requester is the owner of the draft timeline', async () => {
+      mockSOClientGet.mockResolvedValue(
+        buildSavedObjectForUpdate({ status: TimelineStatusEnum.draft, createdBy: 'username' })
+      );
+
+      const result = await persistTimeline(
+        mockRequest,
+        '760d3d20-2142-11ec-a46f-051cb8e3154c',
+        null,
+        {}
+      );
+
+      expect(result.code).toBe(200);
+      expect(mockSOClientUpdate).toHaveBeenCalledTimes(1);
+    });
+
+    test('succeeds for an active (non-draft) timeline regardless of createdBy', async () => {
+      mockSOClientGet.mockResolvedValue(
+        buildSavedObjectForUpdate({ status: TimelineStatusEnum.active, createdBy: 'other-user' })
+      );
+
+      const result = await persistTimeline(
+        mockRequest,
+        '760d3d20-2142-11ec-a46f-051cb8e3154c',
+        null,
+        {}
+      );
+
+      expect(result.code).toBe(200);
+      expect(mockSOClientUpdate).toHaveBeenCalledTimes(1);
     });
   });
 });

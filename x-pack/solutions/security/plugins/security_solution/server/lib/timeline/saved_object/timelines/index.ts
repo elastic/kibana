@@ -6,6 +6,7 @@
  */
 
 import { getOr } from 'lodash/fp';
+import * as Boom from '@hapi/boom';
 
 import {
   type SavedObject,
@@ -625,6 +626,13 @@ const updateTimeline = async ({
       timelineSavedObjectType,
       timelineId
     );
+
+  if (
+    rawTimelineSavedObject.attributes.status === TimelineStatusEnum.draft &&
+    rawTimelineSavedObject.attributes.createdBy !== request.user?.username
+  ) {
+    throw Boom.notFound();
+  }
 
   const { transformedFields: migratedPatchAttributes, references } =
     timelineFieldsMigrator.extractFieldsToReferences<TimelineWithoutExternalRefs>({
