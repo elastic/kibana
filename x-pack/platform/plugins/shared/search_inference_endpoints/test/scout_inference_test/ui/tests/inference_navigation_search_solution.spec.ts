@@ -6,7 +6,6 @@
  */
 
 import { tags } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 import { BREADCRUMBS } from '../fixtures/constants';
 import { eisEndpointsMockData } from '../fixtures/mock_data/eis_endpoints';
@@ -35,7 +34,6 @@ spaceTest.describe(
         await mockInferenceEndpoints(page, eisEndpointsMockData);
         await pageObjects.eisModels.goto();
 
-        await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
         await pageObjects.navigation.expectBreadcrumbTexts([
           ...BREADCRUMBS.stateful.searchSolution,
           'Elastic Inference',
@@ -49,7 +47,6 @@ spaceTest.describe(
         await mockInferenceEndpoints(page, externalInferenceEndpointsMockData);
         await pageObjects.externalInference.goto();
 
-        await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
         await pageObjects.navigation.expectBreadcrumbTexts([
           ...BREADCRUMBS.stateful.searchSolution,
           'External Inference',
@@ -63,7 +60,6 @@ spaceTest.describe(
         await mockInferenceEndpoints(page, eisEndpointsMockData);
         await pageObjects.featureSettings.goto();
 
-        await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
         await pageObjects.navigation.expectBreadcrumbTexts([
           ...BREADCRUMBS.stateful.searchSolution,
           'Feature Settings',

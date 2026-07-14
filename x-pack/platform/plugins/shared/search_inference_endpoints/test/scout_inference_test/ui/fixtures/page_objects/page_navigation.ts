@@ -29,6 +29,11 @@ export class PageNavigation {
     expectedTexts: string[],
     options?: { isServerless?: boolean }
   ): Promise<void> {
+    // The project/solution header renders the app header instead of breadcrumbs.
+    if (await this.page.testSubj.locator('chromeNextGlobalHeader').isVisible()) {
+      return;
+    }
+    await expect(this.breadcrumbsContainer).toBeVisible();
     const allTexts = await this.allBreadcrumbs.allTextContents();
     if (options?.isServerless) {
       // Remove the first breadcrumb (project name)

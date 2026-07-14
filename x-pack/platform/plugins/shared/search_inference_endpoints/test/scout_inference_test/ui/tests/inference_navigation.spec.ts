@@ -44,7 +44,6 @@ test.describe('Inference Navigation', () => {
       await mockInferenceEndpoints(page, eisEndpointsMockData);
       await pageObjects.eisModels.goto();
 
-      await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
       await pageObjects.navigation.expectBreadcrumbTexts(
         [...BREADCRUMBS.serverless.search, 'Elastic Inference'],
         { isServerless: true }
@@ -74,7 +73,6 @@ test.describe('Inference Navigation', () => {
       await mockInferenceEndpoints(page, externalInferenceEndpointsMockData);
       await pageObjects.externalInference.goto();
 
-      await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
       await pageObjects.navigation.expectBreadcrumbTexts(
         [...BREADCRUMBS.serverless.search, 'External Inference'],
         { isServerless: true }
@@ -104,7 +102,6 @@ test.describe('Inference Navigation', () => {
       await mockInferenceEndpoints(page, eisEndpointsMockData);
       await pageObjects.featureSettings.goto();
 
-      await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
       await pageObjects.navigation.expectBreadcrumbTexts(
         [...BREADCRUMBS.serverless.search, 'Feature Settings'],
         { isServerless: true }
