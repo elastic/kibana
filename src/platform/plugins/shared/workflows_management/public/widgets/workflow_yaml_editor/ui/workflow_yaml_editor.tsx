@@ -32,7 +32,6 @@ import {
   useWorkflowEventsOnDecorations,
   useWorkflowIdDecorations,
 } from './decorations';
-import { DocumentationLink } from './documentation_link';
 import { EditorSettingsPopover } from './editor_settings_popover';
 import type { ExtraAction } from './extra_actions_bar';
 import { ExtraActionsBar } from './extra_actions_bar';
@@ -341,25 +340,13 @@ export const WorkflowYAMLEditor = ({
   }, [validationErrors, dispatch]);
 
   // Agent Builder integration for AI-assisted editing
-  const { openAgentChat, isAgentBuilderAvailable } = useAgentBuilderIntegration({
+  const { isAgentBuilderAvailable } = useAgentBuilderIntegration({
     editorRef,
     isEditorMounted,
     workflowId: workflow?.id,
     workflowName: workflow?.name ?? workflowDefinition?.name,
     validationErrors,
   });
-
-  const hasAutoOpenedAgentChatRef = useRef(false);
-  const openAgentChatRef = useRef(openAgentChat);
-  openAgentChatRef.current = openAgentChat;
-
-  useEffect(() => {
-    if (!isEditorMounted || !isAgentBuilderAvailable || hasAutoOpenedAgentChatRef.current) {
-      return;
-    }
-    hasAutoOpenedAgentChatRef.current = true;
-    openAgentChatRef.current();
-  }, [isEditorMounted, isAgentBuilderAvailable]);
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {
@@ -816,11 +803,6 @@ export const WorkflowYAMLEditor = ({
 
   const extraActions = useMemo<ExtraAction[]>(
     () => [
-      {
-        id: 'documentation',
-        content: <DocumentationLink />,
-        showInReadOnly: true,
-      },
       {
         id: 'actions-menu',
         content: <ActionsMenuButton onClick={openActionsPopover} />,

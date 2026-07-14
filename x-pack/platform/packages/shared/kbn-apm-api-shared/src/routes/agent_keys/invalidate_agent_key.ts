@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 
 export interface InvalidateAgentKeyResponse {
@@ -13,7 +13,7 @@ export interface InvalidateAgentKeyResponse {
 
 export const invalidateAgentKeyRoute = defineRoute<InvalidateAgentKeyResponse>()({
   endpoint: 'POST /internal/apm/api_key/invalidate',
-  params: t.type({
-    body: t.type({ id: t.string }),
+  params: z.object({
+    body: z.object({ id: z.string() }),
   }),
 });

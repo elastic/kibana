@@ -98,9 +98,14 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       [definition, yamlString]
     );
 
+    const includeHistoricalTrigger = Boolean(workflowId ?? initialExecutionId);
+
     const visibleTriggerTabs = useMemo(
-      () => getVisibleWorkflowTriggerTabs(definition),
-      [definition]
+      () =>
+        getVisibleWorkflowTriggerTabs(definition, {
+          includeHistorical: includeHistoricalTrigger,
+        }),
+      [definition, includeHistoricalTrigger]
     );
 
     const triggerTabAvailability = useMemo<WorkflowTriggerTabAvailability>(
@@ -119,7 +124,8 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         hasAlertRacAccess,
         canReadWorkflowExecution,
         normalizedInputs,
-        eventDrivenExecutionEnabled
+        eventDrivenExecutionEnabled,
+        { includeHistorical: includeHistoricalTrigger }
       )
     );
 
