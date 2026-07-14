@@ -9,7 +9,7 @@
 
 import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '@kbn/scout';
-import { DataGrid } from '@kbn/scout/src/playwright/page_objects';
+import { DataGrid } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 interface MonacoJsonModel {
