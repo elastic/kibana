@@ -8,7 +8,6 @@
  */
 
 import {
-  makeMockResource,
   mockBatchLogRecordProcessor,
   mockDetectResources,
   mockEmit,
@@ -775,26 +774,23 @@ describe('OtelAppender', () => {
       expect(attributes).toHaveProperty(['service.version'], '9.0.0');
     });
 
-    it('drops specified keys from resource attributes', () => {
-      // Make the inner .merge() return a resource with concrete attributes so the
-      // fieldDrops filtering code can iterate over them.
-      const baseResource = makeMockResource('base', {
-        'service.version': '9.0.0',
-        'host.name': 'kibana-1',
-        'service.name': 'kibana',
-      });
-      const innerResource = makeMockResource('inner');
-      innerResource.merge.mockReturnValue(baseResource);
-      mockMergeResource.mockReturnValueOnce(innerResource);
+    it('does not rebuild the resource when fieldDrops is set — drops are applied at emit time', () => {
+      // fieldDrops are applied in toAttributes() at emit time, not by filtering resource
+      // attributes at construction time. Rebuilding the resource is unsafe because the
+      // merged resource may hold async-resolving entries (e.g. host.id via getMachineId);
+      // passing those Promises into resourceFromAttributes produces malformed attributes.
 
+      // Baseline: count resourceFromAttributes calls for a normal construction.
+      const beforeBaseline = mockResourceFromAttributes.mock.calls.length;
+      new OtelAppender(validConfig);
+      const baselineCallCount = mockResourceFromAttributes.mock.calls.length - beforeBaseline;
+
+      // With fieldDrops: must make the same number of calls — no extra rebuild.
+      const beforeDrops = mockResourceFromAttributes.mock.calls.length;
       new OtelAppender({ ...validConfig, fieldDrops: ['service.version', 'host.name'] });
+      const withDropsCallCount = mockResourceFromAttributes.mock.calls.length - beforeDrops;
 
-      // The last resourceFromAttributes call is the filtered resource rebuild.
-      const calls = mockResourceFromAttributes.mock.calls;
-      const filteredAttrs = calls[calls.length - 1][0];
-      expect(filteredAttrs).not.toHaveProperty(['service.version']);
-      expect(filteredAttrs).not.toHaveProperty(['host.name']);
-      expect(filteredAttrs).toHaveProperty(['service.name'], 'kibana');
+      expect(withDropsCallCount).toBe(baselineCallCount);
     });
   });
 

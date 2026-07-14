@@ -23,6 +23,7 @@ export interface MockResource {
   type: string;
   attributes: Record<string, unknown>;
   merge: jest.Mock<MockResource>;
+  getRawAttributes: jest.Mock<Array<[string, unknown]>>;
 }
 
 export const makeMockResource = (
@@ -32,6 +33,7 @@ export const makeMockResource = (
   type: label,
   attributes,
   merge: jest.fn(() => makeMockResource('merged-resource')),
+  getRawAttributes: jest.fn(() => Object.entries(attributes)),
 });
 
 export const mockMergeResource = jest.fn(() => makeMockResource('merged-resource'));

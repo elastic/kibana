@@ -297,16 +297,9 @@ export class OtelAppender implements DisposableAppender {
     //   2. Derived: service.name / service.version / deployment.environment from the
     //      APM config singleton (mirrors how initTelemetry builds trace resources)
     //   3. User overrides: explicit attributes from kibana.yml (optional)
-    const baseResource = buildOtelResources().merge(
+    const resource = buildOtelResources().merge(
       resources.resourceFromAttributes(config.attributes ?? {})
     );
-    const resource = config.fieldDrops?.length
-      ? resources.resourceFromAttributes(
-          Object.fromEntries(
-            Object.entries(baseResource.attributes).filter(([k]) => !config.fieldDrops!.includes(k))
-          )
-        )
-      : baseResource;
     this.loggerProvider = new LoggerProvider({
       processors: [new BatchLogRecordProcessor(exporter)],
       resource,

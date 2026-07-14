@@ -50,12 +50,43 @@ const readBody = (req: http.IncomingMessage): Promise<string> =>
   });
 
 /**
+ * A scoped view of an `OtlpLogReceiver` that only sees records captured after
+ * the snapshot was taken. Call `receiver.snapshot()` at the top of each test
+ * before triggering any actions — this ensures records from earlier tests
+ * (including late-arriving batch flushes) are structurally excluded.
+ */
+export class OtlpLogReceiverSnapshot {
+  constructor(
+    private readonly records: FlatAttributes[],
+    private readonly startIndex: number
+  ) {}
+
+  /** Polls records captured since this snapshot was taken until one matches `predicate`. */
+  async waitForLogRecord(
+    predicate: (attrs: FlatAttributes) => boolean,
+    timeoutMs = 15_000
+  ): Promise<FlatAttributes> {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      const match = this.records.slice(this.startIndex).find(predicate);
+      if (match) return match;
+      await new Promise((r) => setTimeout(r, 200));
+    }
+    throw new Error(`Timed out waiting ${timeoutMs}ms for a matching OTLP log record`);
+  }
+}
+
+/**
  * A fake OTLP/HTTP logs receiver standing in for a real OpenTelemetry Collector.
  *
  * Kibana's OTel audit appender (`protocol: 'http'`) POSTs OTLP JSON-encoded
  * `ExportLogsServiceRequest` bodies — this captures them directly so tests can
  * assert on the exact attribute shape the appender emits, without depending on
  * a real collector + Elasticsearch ingest pipeline.
+ *
+ * Never call `waitForLogRecord` directly on this class. Instead, call
+ * `snapshot()` at the top of each test to get a scoped view that only sees
+ * records captured after that point.
  */
 export class OtlpLogReceiver {
   private server: http.Server | null = null;
@@ -98,17 +129,8 @@ export class OtlpLogReceiver {
     });
   }
 
-  /** Polls captured records until one matches `predicate`, to account for the appender's batch flush delay. */
-  async waitForLogRecord(
-    predicate: (attrs: FlatAttributes) => boolean,
-    timeoutMs = 15_000
-  ): Promise<FlatAttributes> {
-    const deadline = Date.now() + timeoutMs;
-    while (Date.now() < deadline) {
-      const match = this.records.find(predicate);
-      if (match) return match;
-      await new Promise((r) => setTimeout(r, 200));
-    }
-    throw new Error(`Timed out waiting ${timeoutMs}ms for a matching OTLP log record`);
+  /** Returns a snapshot scoped to records captured from this moment onward. Call this at the top of each test before triggering any actions. */
+  snapshot(): OtlpLogReceiverSnapshot {
+    return new OtlpLogReceiverSnapshot(this.records, this.records.length);
   }
 }

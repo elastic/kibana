@@ -42,6 +42,7 @@ apiTest.describe(
     apiTest(
       'user_login success: renamed OTel fields, event.type default applied',
       async ({ apiClient, config }) => {
+        const snap = receiver.snapshot();
         const { username, password } = config.auth;
 
         await apiClient.post('internal/security/login', {
@@ -55,7 +56,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        const e = await receiver.waitForLogRecord(
+        const e = await snap.waitForLogRecord(
           (attrs) =>
             attrs['event.action'] === 'user_login' &&
             attrs['event.outcome'] === 'success' &&
@@ -104,6 +105,7 @@ apiTest.describe(
     apiTest(
       'user_login failure: outcome=failure, no user fields',
       async ({ apiClient, config }) => {
+        const snap = receiver.snapshot();
         const { username } = config.auth;
 
         await apiClient.post('internal/security/login', {
@@ -117,7 +119,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        const e = await receiver.waitForLogRecord(
+        const e = await snap.waitForLogRecord(
           (attrs) => attrs['event.action'] === 'user_login' && attrs['event.outcome'] === 'failure'
         );
 
@@ -130,6 +132,7 @@ apiTest.describe(
     apiTest(
       'http_request: request.id present (not trace.id), HTTP method uppercase',
       async ({ apiClient, samlAuth }) => {
+        const snap = receiver.snapshot();
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
         await apiClient.get('api/status', {
@@ -137,7 +140,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        const e = await receiver.waitForLogRecord(
+        const e = await snap.waitForLogRecord(
           (attrs) => attrs['event.action'] === 'http_request' && attrs['url.path'] === '/api/status'
         );
 
@@ -155,6 +158,7 @@ apiTest.describe(
     apiTest(
       'saved_object_find: kibana.space.id present (not kibana.space_id)',
       async ({ apiClient, samlAuth }) => {
+        const snap = receiver.snapshot();
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
         // per_page is large so our seeded dashboard is guaranteed to be in the result set —
@@ -166,7 +170,7 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        const e = await receiver.waitForLogRecord(
+        const e = await snap.waitForLogRecord(
           (attrs) =>
             attrs['event.action'] === 'saved_object_find' &&
             attrs['kibana.saved_object.type'] === 'dashboard' &&
@@ -189,13 +193,12 @@ apiTest.describe(
     apiTest(
       'user_logout: event.type default applied, authentication.type present',
       async ({ apiClient, samlAuth }) => {
+        const snap = receiver.snapshot();
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
         await apiClient.get('api/security/logout', { headers: { ...cookieHeader } });
 
-        const e = await receiver.waitForLogRecord(
-          (attrs) => attrs['event.action'] === 'user_logout'
-        );
+        const e = await snap.waitForLogRecord((attrs) => attrs['event.action'] === 'user_logout');
 
         expect(e['event.action']).toBe('user_logout');
         // fieldDefaults: auth events get event.type: ['access']
