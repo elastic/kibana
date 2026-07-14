@@ -25,5 +25,6 @@ export const kiWorkflowGenerationSkill = defineSkillType({
     workflowTools.validateWorkflow,
     workflowTools.getStepDefinitions,
     workflowTools.getExamples,
+    workflowTools.getConnectors,
   ],
 });
