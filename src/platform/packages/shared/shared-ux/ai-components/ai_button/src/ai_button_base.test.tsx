@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { css } from '@emotion/react';
 
 import { AiButtonBase } from './ai_button_base';
@@ -78,11 +78,47 @@ describe('<AiButtonBase />', () => {
     );
 
     expect(container.querySelector('button.euiButtonIcon')).toBeInTheDocument();
+    expect(container.querySelector('.euiToolTipAnchor')).toBeInTheDocument();
     expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith({
       variant: 'base',
       iconOnly: true,
     });
   });
+
+  it('iconOnly variant shows aria-label in tooltip content', async () => {
+    render(
+      <AiButtonBase
+        variant="base"
+        iconOnly
+        iconType="sparkles"
+        aria-label="Custom tooltip"
+        onClick={() => undefined}
+      />
+    );
+
+    const button = screen.getByRole('button', { name: 'Custom tooltip' });
+    fireEvent.mouseOver(button);
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Custom tooltip');
+  });
+
+  it.each(['productAgent', 'addToChat'] as const)(
+    'iconOnly variant shows static add-to-chat label in tooltip when iconType is %s',
+    async (iconType) => {
+      render(
+        <AiButtonBase
+          variant="base"
+          iconOnly
+          iconType={iconType}
+          aria-label="Different aria label"
+          onClick={() => undefined}
+        />
+      );
+
+      const button = screen.getByRole('button', { name: 'Different aria label' });
+      fireEvent.mouseOver(button);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('Add to chat');
+    }
+  );
 
   it('renders gradient defs only when iconGradientCss is set', () => {
     mockUseSvgAiGradient.mockReturnValue({

@@ -61,4 +61,5 @@ export type AiButtonProps =
       variant?: AiButtonVariant;
       iconType: AiButtonIconType;
       'aria-label': string;
+      children?: React.ReactNode;
     });
