@@ -135,7 +135,13 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   );
 
   const openAttackFlyout = useCallback(
-    ({ attackId, indexName, onAttackUpdated = noop, attackTitle, renderCellActions = cellActionRenderer }: OpenAttackFlyoutParams) => {
+    ({
+      attackId,
+      indexName,
+      onAttackUpdated = noop,
+      attackTitle,
+      renderCellActions = cellActionRenderer,
+    }: OpenAttackFlyoutParams) => {
       open(
         <AttackFlyoutWrapper
           attackId={attackId}
@@ -155,7 +161,13 @@ export const useAttackFlyoutApi = (): AttackFlyoutApi => {
   );
 
   const openAttackFlyoutAsChild = useCallback(
-    ({ attackId, indexName, onAttackUpdated = noop, attackTitle, renderCellActions = cellActionRenderer }: OpenAttackFlyoutParams) => {
+    ({
+      attackId,
+      indexName,
+      onAttackUpdated = noop,
+      attackTitle,
+      renderCellActions = cellActionRenderer,
+    }: OpenAttackFlyoutParams) => {
       open(
         <AttackFlyoutWrapper
           attackId={attackId}

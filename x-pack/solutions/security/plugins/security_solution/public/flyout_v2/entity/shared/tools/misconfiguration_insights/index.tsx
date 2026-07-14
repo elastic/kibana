@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import {
   EntityIdentifierFields,
   EntityType,
@@ -32,7 +31,6 @@ const FIELD: Record<
   // `related.entity` carries the entity id used to filter findings for generic entities.
   [EntityType.generic]: 'related.entity',
 };
-
 
 export interface MisconfigurationInsightsProps {
   /** Which entity type this tool is scoped to. Controls the icon, query field, and entity type passed to the table. */
