@@ -57,20 +57,22 @@ describe('TemplateCaseDefaultsForm', () => {
     fields: [],
   };
 
-  it('renders only canonical severity options (no empty "none" option)', () => {
+  it('offers an explicit "No default" option ahead of the canonical severities (never a literal null)', () => {
     render(<TemplateCaseDefaultsForm parsedTemplate={baseTemplate} />);
 
     const severitySelect = screen.getByTestId('caseDefaultsSeverityInput');
     const options = within(severitySelect).getAllByRole('option');
     const optionValues = options.map((option) => option.getAttribute('value'));
 
+    // Leading empty-value option = "No default"; the rest are the canonical severities. No "null".
     expect(optionValues).toEqual([
+      '',
       CaseSeverity.LOW,
       CaseSeverity.MEDIUM,
       CaseSeverity.HIGH,
       CaseSeverity.CRITICAL,
     ]);
-    expect(optionValues).not.toContain('');
+    expect(optionValues).not.toContain('null');
   });
 
   it('propagates severity changes from the select input', async () => {

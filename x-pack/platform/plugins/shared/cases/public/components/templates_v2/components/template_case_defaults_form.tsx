@@ -35,6 +35,9 @@ interface TemplateCaseDefaultsFormProps {
 }
 
 const severityOptions = [
+  // Severity default is optional; an explicit "No default" (empty value → `null` in YAML) is offered
+  // instead of surfacing a misleading literal "null" option.
+  { value: '', text: i18n.NO_DEFAULT_OPTION },
   ...(Object.keys(severities) as CaseSeverity[]).map((severity) => ({
     value: severity,
     text: severities[severity].label,

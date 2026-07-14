@@ -52,6 +52,8 @@ interface TemplateEditorLayoutProps {
   metadataErrors: TemplateMetadataErrors;
   onMetadataChange: (metadata: TemplateMetadata) => void;
   formResetKey?: number;
+  /** The Fields YAML has validation errors — surfaces an indicator on the Fields tab. */
+  fieldsHaveErrors?: boolean;
 }
 
 type ActiveTab = 'fields' | 'configuration';
@@ -86,6 +88,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   metadataErrors,
   onMetadataChange,
   formResetKey,
+  fieldsHaveErrors = false,
 }) => {
   const styles = useMemoCss(componentStyles);
   const [activeTab, setActiveTab] = useState<ActiveTab>('fields');
@@ -120,6 +123,19 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
       <EuiTab
         isSelected={activeTab === 'fields'}
         onClick={() => selectTab('fields')}
+        append={
+          fieldsHaveErrors ? (
+            <EuiToolTip content={i18n.FIELDS_TAB_HAS_ERRORS}>
+              <EuiNotificationBadge
+                color="accent"
+                aria-label={i18n.FIELDS_TAB_HAS_ERRORS}
+                data-test-subj="templateFieldsTabErrorIndicator"
+              >
+                {'!'}
+              </EuiNotificationBadge>
+            </EuiToolTip>
+          ) : undefined
+        }
         data-test-subj="templateTabFields"
       >
         {i18n.FIELDS_TAB_LABEL}
