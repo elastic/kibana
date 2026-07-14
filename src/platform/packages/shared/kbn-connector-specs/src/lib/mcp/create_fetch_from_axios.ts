@@ -37,10 +37,9 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
   // so subsequent POSTs can await it without adding a fixed delay.
   //
   // Keyed by Mcp-Session-Id so concurrent sessions sharing this fetch instance don't
-  // unblock each other (session-less servers fall back to ''). Resolved gates are kept
-  // rather than deleted, so a later call sees "already open" instead of a fresh gate
-  // that never resolves. Note: entries are never evicted, so a fetch instance reused
-  // across many sessions (e.g. future connection pooling) will accumulate them.
+  // unblock each other (session-less servers fall back to ''). Entries are deleted once
+  // the SSE channel opens (gate resolved), so the map stays bounded regardless of how
+  // many sessions share this fetch instance.
   const gates = new Map<string, SseChannelGate>();
 
   const ensureChannelGate = (sessionId: string): SseChannelGate => {
@@ -75,9 +74,9 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
     // Resolve this session's gate so its own waiting POSTs can proceed.
     const sessionId = getHeaderValue(headers, MCP_SESSION_HEADER);
     const sseChannelGate = gates.get(sessionId);
-    sseChannelGate?.markOpen?.();
     if (sseChannelGate) {
-      sseChannelGate.markOpen = null;
+      sseChannelGate.markOpen?.();
+      gates.delete(sessionId);
     }
 
     return new Response(createWebStream(res), {
