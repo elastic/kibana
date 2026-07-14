@@ -63,3 +63,5 @@ export const DISCOVER_SESSION_API_BASE_PATH = '/api/discover_sessions';
 // All Kibana public APIs share one version date,
 // and core only accepts '2023-10-31' for public routes.
 export const DISCOVER_SESSION_API_VERSION = '2023-10-31';
+export const DISCOVER_SESSIONS_API_ENABLED_FEATURE_FLAG_KEY = 'discover.sessionsApiEnabled';
+export const DISCOVER_SESSIONS_API_ENABLED_FEATURE_FLAG_DEFAULT = false;

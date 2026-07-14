@@ -9,7 +9,10 @@
 
 import { DISCOVER_SESSION_API_VERSION } from '../../../../common/constants';
 
-export { DISCOVER_SESSION_API_BASE_PATH } from '../../../../common/constants';
+export {
+  DISCOVER_SESSION_API_BASE_PATH,
+  DISCOVER_SESSIONS_API_ENABLED_FEATURE_FLAG_KEY,
+} from '../../../../common/constants';
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

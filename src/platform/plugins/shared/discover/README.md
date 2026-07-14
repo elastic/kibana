@@ -220,6 +220,16 @@ These counters are reported with `usageCollection.reportUiCounter('discover', ..
 
 See the [Feature flag service](https://docs.elastic.dev/kibana-dev-docs/tutorials/feature-flags-service#dynamic-config) documentation for details on how to use feature flags.
 
-Set constants for feature flag keys in [public/constants.ts](./public/constants.ts).
+Set constants for feature flag keys in [public/constants.ts](./public/constants.ts) and
+shared keys in [common/constants.ts](./common/constants.ts).
 
 These are the feature flags used by Discover:
+
+- `discover.sessionsApiEnabled`: Enables the Discover sessions public API. The API is in
+  technical preview and disabled by default. To enable it for local development, add this
+  override to `kibana.yml`:
+
+  ```yaml
+  feature_flags.overrides:
+    discover.sessionsApiEnabled: true
+  ```

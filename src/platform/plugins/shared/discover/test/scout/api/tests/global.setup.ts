@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import { globalSetupHook } from '@kbn/scout';
+import { DISCOVER_SESSIONS_API_ENABLED_FEATURE_FLAG_KEY } from '../fixtures/constants';
 
-export default createPlaywrightConfig({
-  testDir: './tests',
-  runGlobalSetup: true,
+globalSetupHook('Enable the Discover sessions API', async ({ apiServices, log }) => {
+  log.debug('[setup] Enabling the Discover sessions API');
+  await apiServices.core.settings({
+    'feature_flags.overrides': {
+      [DISCOVER_SESSIONS_API_ENABLED_FEATURE_FLAG_KEY]: true,
+    },
+  });
 });

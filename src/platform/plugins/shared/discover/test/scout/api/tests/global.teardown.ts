@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig } from '@kbn/scout';
+import { globalTeardownHook } from '@kbn/scout';
+import { DISCOVER_SESSIONS_API_ENABLED_FEATURE_FLAG_KEY } from '../fixtures/constants';
 
-export default createPlaywrightConfig({
-  testDir: './tests',
-  runGlobalSetup: true,
+globalTeardownHook('Reset the Discover sessions API feature flag', async ({ apiServices, log }) => {
+  log.debug('[teardown] Resetting the Discover sessions API feature flag');
+
+  await apiServices.core.settings({
+    'feature_flags.overrides': {
+      [DISCOVER_SESSIONS_API_ENABLED_FEATURE_FLAG_KEY]: null,
+    },
+  });
 });
