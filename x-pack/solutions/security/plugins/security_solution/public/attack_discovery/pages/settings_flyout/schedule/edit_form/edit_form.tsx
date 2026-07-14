@@ -101,8 +101,16 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     [actionTypeRegistry, connectors]
   );
 
+  // Always initialize the form's workflowConfig field to a concrete value so
+  // that saving without touching any toggle still sends the correct payload.
+  // Without this, a legacy schedule (no workflowConfig) submitted via the
+  // workflows path would omit workflow_config from the API request, leaving the
+  // schedule in legacy state instead of migrating it.
   const { form } = useForm<AttackDiscoveryScheduleSchema>({
-    defaultValue: initialValue,
+    defaultValue: {
+      ...initialValue,
+      workflowConfig: initialValue.workflowConfig ?? DEFAULT_WORKFLOW_CONFIGURATION,
+    },
     options: { stripEmptyFields: false },
     schema,
   });
