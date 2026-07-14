@@ -26,9 +26,10 @@ export interface ShowAlertButtonProps {
   id: string;
   alertId: string;
   index: string;
+  ruleName?: string | null;
 }
 
-export const ShowAlertButton = ({ id, alertId, index }: ShowAlertButtonProps) => {
+export const ShowAlertButton = ({ id, alertId, index, ruleName }: ShowAlertButtonProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const {
     telemetry,
@@ -63,7 +64,7 @@ export const ShowAlertButton = ({ id, alertId, index }: ShowAlertButtonProps) =>
             documentId: alertId,
             indexName: index,
             renderCellActions: casesCellActionRenderer,
-            title: getAlertHistoryTitle(),
+            title: getAlertHistoryTitle(ruleName),
           });
         } else {
           openFlyout({
