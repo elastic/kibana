@@ -50,8 +50,11 @@ export interface ConsumeSmvContextLoadResultOptions {
   /** Invoked when `zoomSelection` is returned (hosts typically forward to `contextChartSelected`). */
   applyZoomSelection?: (range: { from: Date; to: Date }) => void;
   applyStatePatch: (patch: Record<string, unknown>) => void;
-  /** e.g. embeddable `onRenderComplete` when chartable */
-  afterStatePatch?: (patch: Record<string, unknown>) => void;
+  /**
+   * Called after state is applied. `hasPendingFocus` is true when a zoom/focus load will follow
+   * (hosts should defer reporting `onRenderComplete` until that focus pipeline settles).
+   */
+  afterStatePatch?: (patch: Record<string, unknown>, meta: { hasPendingFocus: boolean }) => void;
 }
 
 /**
@@ -87,7 +90,7 @@ export function consumeSmvContextLoadResult(options: ConsumeSmvContextLoadResult
     applyZoomSelection?.(zoomSelection);
   }
   applyStatePatch(statePatch);
-  afterStatePatch?.(statePatch);
+  afterStatePatch?.(statePatch, { hasPendingFocus: zoomSelection !== undefined });
 }
 
 export interface SmvBrushToFocusZoomHost {

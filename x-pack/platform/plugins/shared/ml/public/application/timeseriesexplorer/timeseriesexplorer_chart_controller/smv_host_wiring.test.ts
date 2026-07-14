@@ -49,7 +49,7 @@ describe('smv_host_wiring', () => {
       expect(applyStatePatch).not.toHaveBeenCalled();
     });
 
-    it('applies state, zoom, forecast sync, and after hook', () => {
+    it('applies state, zoom, forecast sync, and after hook with pending focus', () => {
       const applyStatePatch = jest.fn();
       const applyZoomSelection = jest.fn();
       const syncPrevious = jest.fn();
@@ -74,7 +74,85 @@ describe('smv_host_wiring', () => {
       expect(syncPrevious).toHaveBeenCalledTimes(1);
       expect(applyZoomSelection).toHaveBeenCalledWith(zoomSelection);
       expect(applyStatePatch).toHaveBeenCalledWith({ loading: false, hasResults: true });
-      expect(afterStatePatch).toHaveBeenCalledWith({ loading: false, hasResults: true });
+      // Embeddable defers onRenderComplete when focus will load next.
+      expect(afterStatePatch).toHaveBeenCalledWith(
+        { loading: false, hasResults: true },
+        { hasPendingFocus: true }
+      );
+    });
+
+    it('invokes afterStatePatch without pending focus for dataNotChartable', () => {
+      const afterStatePatch = jest.fn();
+      const applyStatePatch = jest.fn();
+
+      consumeSmvContextLoadResult({
+        result: {
+          statePatch: { loading: false, hasResults: false, dataNotChartable: true },
+          shouldUpdatePreviousSelectedForecastId: false,
+        },
+        isUnmounted: () => false,
+        loadCounterWhenStarted: 1,
+        readLoadCounter: () => 1,
+        syncPreviousSelectedForecastIdFromProps: jest.fn(),
+        applyStatePatch,
+        afterStatePatch,
+      });
+
+      expect(applyStatePatch).toHaveBeenCalledWith({
+        loading: false,
+        hasResults: false,
+        dataNotChartable: true,
+      });
+      // Terminal empty state: complete immediately so reporting cannot hang.
+      expect(afterStatePatch).toHaveBeenCalledWith(
+        {
+          loading: false,
+          hasResults: false,
+          dataNotChartable: true,
+        },
+        { hasPendingFocus: false }
+      );
+    });
+
+    it('reports hasPendingFocus false when context finishes without zoomSelection', () => {
+      const afterStatePatch = jest.fn();
+
+      consumeSmvContextLoadResult({
+        result: {
+          statePatch: { loading: false, hasResults: false },
+          shouldUpdatePreviousSelectedForecastId: false,
+        },
+        isUnmounted: () => false,
+        loadCounterWhenStarted: 1,
+        readLoadCounter: () => 1,
+        syncPreviousSelectedForecastIdFromProps: jest.fn(),
+        applyStatePatch: jest.fn(),
+        afterStatePatch,
+      });
+
+      expect(afterStatePatch).toHaveBeenCalledWith(
+        { loading: false, hasResults: false },
+        { hasPendingFocus: false }
+      );
+    });
+
+    it('does not invoke afterStatePatch for stale loads', () => {
+      const afterStatePatch = jest.fn();
+
+      consumeSmvContextLoadResult({
+        result: {
+          statePatch: { loading: false, hasResults: true },
+          shouldUpdatePreviousSelectedForecastId: false,
+        },
+        isUnmounted: () => false,
+        loadCounterWhenStarted: 1,
+        readLoadCounter: () => 2,
+        syncPreviousSelectedForecastIdFromProps: jest.fn(),
+        applyStatePatch: jest.fn(),
+        afterStatePatch,
+      });
+
+      expect(afterStatePatch).not.toHaveBeenCalled();
     });
   });
 });
