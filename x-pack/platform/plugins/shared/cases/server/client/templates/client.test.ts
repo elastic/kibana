@@ -228,4 +228,46 @@ describe('templates client', () => {
       expect(clientArgs.services.templatesService.deleteTemplate).not.toHaveBeenCalled();
     });
   });
+
+  describe('getCasesUsingTemplates', () => {
+    it('returns an empty result without querying when no template ids are given', async () => {
+      const subClient = createTemplatesSubClient(clientArgs, casesClient);
+      const result = await subClient.getCasesUsingTemplates([]);
+
+      expect(result).toEqual({ total: 0, cases: [] });
+      expect(clientArgs.services.caseService.findCases).not.toHaveBeenCalled();
+    });
+
+    it('returns the total and a mapped id/title list scoped by the cases authorization filter', async () => {
+      clientArgs.authorization.getAuthorizationFilter.mockResolvedValueOnce({
+        filter: { type: 'function', function: 'is', arguments: [] },
+        ensureSavedObjectsAreAuthorized: () => {},
+        authorizedOwners: ['securitySolution'],
+      });
+      clientArgs.services.caseService.findCases.mockResolvedValueOnce({
+        saved_objects: [
+          { id: 'case-1', attributes: { title: 'Case One' } },
+          { id: 'case-2', attributes: { title: 'Case Two' } },
+        ],
+        total: 5,
+        page: 1,
+        per_page: 100,
+      } as unknown as Awaited<ReturnType<typeof clientArgs.services.caseService.findCases>>);
+
+      const subClient = createTemplatesSubClient(clientArgs, casesClient);
+      const result = await subClient.getCasesUsingTemplates(['tpl-1']);
+
+      // total may exceed the listed cases (list is capped for display).
+      expect(result).toEqual({
+        total: 5,
+        cases: [
+          { id: 'case-1', title: 'Case One' },
+          { id: 'case-2', title: 'Case Two' },
+        ],
+      });
+      expect(clientArgs.services.caseService.findCases).toHaveBeenCalledWith(
+        expect.objectContaining({ page: 1, perPage: 100 })
+      );
+    });
+  });
 });

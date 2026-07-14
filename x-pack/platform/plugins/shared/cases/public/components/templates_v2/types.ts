@@ -36,3 +36,9 @@ export interface BulkExportTemplatesResponse {
   filename: string;
   content: string;
 }
+
+export interface TemplateUsageResponse {
+  /** Total cases applying the template(s) — may exceed `cases.length`, which is capped for display. */
+  total: number;
+  cases: Array<{ id: string; title: string }>;
+}

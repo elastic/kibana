@@ -31,6 +31,8 @@ export const casesQueriesKeys = {
   templatesAll: (params: unknown) => [...casesQueriesKeys.templatesList(), params] as const,
   templatesTags: () => [...casesQueriesKeys.templates, 'tags'] as const,
   templatesCreators: () => [...casesQueriesKeys.templates, 'creators'] as const,
+  templatesUsage: (templateIds: string[]) =>
+    [...casesQueriesKeys.templates, 'usage', ...templateIds] as const,
   fieldDefinitions: ['field-definitions'] as const,
   fieldDefinitionsList: (params: unknown) =>
     [...casesQueriesKeys.fieldDefinitions, 'list', params] as const,

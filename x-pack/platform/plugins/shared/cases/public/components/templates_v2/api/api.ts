@@ -16,19 +16,21 @@ import {
   INTERNAL_TEMPLATE_CREATORS_URL,
   INTERNAL_TEMPLATE_TAGS_URL,
   INTERNAL_TEMPLATE_DETAILS_URL,
+  INTERNAL_TEMPLATE_USAGE_URL,
   INTERNAL_TEMPLATES_URL,
 } from '../../../../common/constants';
+import type {
+  TemplateUsageResponse,
+  TemplateUpdateRequest,
+  BulkDeleteTemplatesResponse,
+  BulkExportTemplatesResponse,
+} from '../types';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { templatesToYaml } from '../utils/templates_to_yaml';
 import type {
   TemplatesFindRequest,
   TemplatesFindResponse,
 } from '../../../../common/types/api/template/v1';
-import type {
-  TemplateUpdateRequest,
-  BulkDeleteTemplatesResponse,
-  BulkExportTemplatesResponse,
-} from '../types';
 
 export const postTemplate = async ({
   template,
@@ -177,6 +179,20 @@ export const bulkExportTemplates = async ({
     filename,
     content: yamlContent,
   };
+};
+
+export const getTemplatesUsage = async ({
+  templateIds,
+  signal,
+}: {
+  templateIds: string[];
+  signal?: AbortSignal;
+}): Promise<TemplateUsageResponse> => {
+  return KibanaServices.get().http.fetch<TemplateUsageResponse>(INTERNAL_TEMPLATE_USAGE_URL, {
+    method: 'POST',
+    body: JSON.stringify({ ids: templateIds }),
+    signal,
+  });
 };
 
 export const getTemplateTags = async ({

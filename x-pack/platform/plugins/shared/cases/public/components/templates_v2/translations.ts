@@ -544,6 +544,51 @@ export const DELETE_MESSAGE = (name: string) =>
     values: { name },
     defaultMessage: 'This action will permanently delete {name}.',
   });
+
+export const DELETE = i18n.translate('xpack.cases.templates.deleteConfirmButton', {
+  defaultMessage: 'Delete',
+});
+
+export const ERROR_FETCHING_TEMPLATE_USAGE = i18n.translate(
+  'xpack.cases.templates.errorFetchingTemplateUsage',
+  { defaultMessage: 'Error checking which cases use this template' }
+);
+
+export const DELETE_TEMPLATE_UNLINK_WARNING = i18n.translate(
+  'xpack.cases.templates.deleteUnlinkWarning',
+  {
+    defaultMessage:
+      'Cases using this template will be unlinked and lose its conditional behaviors and template-based validation. Their field values remain on the case and stay editable.',
+  }
+);
+
+export const CHECKING_AFFECTED_CASES = i18n.translate(
+  'xpack.cases.templates.checkingAffectedCases',
+  { defaultMessage: 'Checking which cases use this template…' }
+);
+
+export const NO_AFFECTED_CASES = i18n.translate('xpack.cases.templates.noAffectedCases', {
+  defaultMessage: 'No cases currently use this template.',
+});
+
+export const AFFECTED_CASES_TITLE = (count: number) =>
+  i18n.translate('xpack.cases.templates.affectedCasesTitle', {
+    values: { count },
+    defaultMessage:
+      '{count, plural, one {# case will be unlinked} other {# cases will be unlinked}}:',
+  });
+
+export const AND_N_MORE_CASES = (count: number) =>
+  i18n.translate('xpack.cases.templates.andNMoreCases', {
+    values: { count },
+    defaultMessage: 'and {count, plural, one {# more case} other {# more cases}}',
+  });
+
+export const DOWNLOAD_BEFORE_DELETE = (count: number) =>
+  i18n.translate('xpack.cases.templates.downloadBeforeDelete', {
+    values: { count },
+    defaultMessage: 'Download {count, plural, one {template} other {templates}} first',
+  });
 export const NO_TEMPLATES_BODY = i18n.translate('xpack.cases.templates.noTemplatesBody', {
   defaultMessage: 'Create templates that automatically populate values in new cases.',
 });

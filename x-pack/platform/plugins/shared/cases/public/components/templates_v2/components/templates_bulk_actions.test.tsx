@@ -73,6 +73,7 @@ describe('TemplatesBulkActions', () => {
       filename: 'templates-bulk-export.yaml',
       content: 'mock content',
     });
+    apiMock.getTemplatesUsage.mockResolvedValue({ total: 0, cases: [] });
   });
 
   it('renders nothing when no templates are selected', () => {
@@ -151,9 +152,9 @@ describe('TemplatesBulkActions', () => {
     await user.click(await screen.findByTestId('templates-bulk-action-delete'));
 
     expect(await screen.findByText('Delete 2 templates?')).toBeInTheDocument();
-    expect(
-      screen.getByText('This action will permanently delete these 2 templates.')
-    ).toBeInTheDocument();
+    // The confirmation warns that cases will be unlinked (values kept), and offers a download-first.
+    expect(screen.getByTestId('delete-template-unlink-warning')).toBeInTheDocument();
+    expect(screen.getByTestId('delete-template-download-first')).toBeInTheDocument();
   });
 
   it('shows singular text in confirmation modal when one template is selected', async () => {
@@ -163,9 +164,7 @@ describe('TemplatesBulkActions', () => {
     await user.click(await screen.findByTestId('templates-bulk-action-delete'));
 
     expect(await screen.findByText('Delete 1 template?')).toBeInTheDocument();
-    expect(
-      screen.getByText('This action will permanently delete this template.')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('delete-template-unlink-warning')).toBeInTheDocument();
   });
 
   it('calls bulkDeleteTemplates when deletion is confirmed', async () => {

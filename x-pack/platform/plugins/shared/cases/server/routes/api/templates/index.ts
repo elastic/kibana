@@ -17,6 +17,7 @@ import { bulkDeleteTemplatesRoute } from './bulk_delete_templates_route';
 import { bulkExportTemplatesRoute } from './bulk_export_templates_route';
 import { getTemplateTagsRoute } from './get_template_tags_route';
 import { getTemplateCreatorsRoute } from './get_template_creators_route';
+import { postTemplateUsageRoute } from './post_template_usage_route';
 
 /**
  * Register public readonly template routes conditionally, based on feature flag
@@ -47,5 +48,6 @@ export const getTemplateRoutes = (config: ConfigType) => {
     bulkExportTemplatesRoute,
     getTemplateTagsRoute,
     getTemplateCreatorsRoute,
+    postTemplateUsageRoute,
   ];
 };

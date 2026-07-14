@@ -8,7 +8,8 @@
 import Boom from '@hapi/boom';
 import { chunk } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
 import type {
   Template,
@@ -19,10 +20,28 @@ import type {
   TemplatesFindRequest,
   TemplatesFindResponse,
 } from '../../../common/types/api/template/v1';
-import { CASE_SAVED_OBJECT, MAX_CASES_TO_UPDATE } from '../../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  MAX_CASES_TO_UPDATE,
+  MAX_TEMPLATE_USAGE_CASES_LISTED,
+} from '../../../common/constants';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
+
+/** Cases referencing a set of templates — powers the delete-confirmation dialog. */
+export interface TemplateUsage {
+  total: number;
+  cases: Array<{ id: string; title: string }>;
+}
+
+/** KQL matching cases whose applied template is any of `templateIds`. */
+const casesUsingTemplatesFilter = (templateIds: string[]): KueryNode =>
+  nodeBuilder.or(
+    templateIds.map((id) =>
+      fromKueryExpression(`${CASE_SAVED_OBJECT}.attributes.template.id: "${id}"`)
+    )
+  );
 
 /**
  * API for interacting with templates.
@@ -37,6 +56,8 @@ export interface TemplatesSubClient {
   createTemplate(input: CreateTemplateInput): Promise<SavedObject<Template>>;
   updateTemplate(templateId: string, input: UpdateTemplateInput): Promise<SavedObject<Template>>;
   deleteTemplate(templateId: string): Promise<void>;
+  /** Cases the caller can read that currently apply any of `templateIds` (for delete confirmation). */
+  getCasesUsingTemplates(templateIds: string[]): Promise<TemplateUsage>;
   getTags(): Promise<string[]>;
   getAuthors(): Promise<string[]>;
 }
@@ -60,9 +81,7 @@ export const createTemplatesSubClient = (
    * template that defines them is re-applied) — deletion must never make a case un-editable.
    */
   const unlinkCasesFromTemplate = async (templateId: string): Promise<void> => {
-    const filter = fromKueryExpression(
-      `${CASE_SAVED_OBJECT}.attributes.template.id: "${templateId}"`
-    );
+    const filter = casesUsingTemplatesFilter([templateId]);
 
     // Snapshot all referencing cases up front (id + version) so a single pass unlinks them without
     // re-querying freshly-mutated documents.
@@ -167,6 +186,30 @@ export const createTemplatesSubClient = (
       // template. Values are preserved (see unlinkCasesFromTemplate).
       await unlinkCasesFromTemplate(templateId);
       return templatesService.deleteTemplate(templateId);
+    },
+
+    getCasesUsingTemplates: async (templateIds: string[]): Promise<TemplateUsage> => {
+      if (templateIds.length === 0) {
+        return { total: 0, cases: [] };
+      }
+
+      // Scope to cases the caller can read so the confirmation dialog never leaks titles across owners.
+      const { filter: authFilter } = await authorization.getAuthorizationFilter(
+        Operations.findCases
+      );
+      const templateFilter = casesUsingTemplatesFilter(templateIds);
+      const filter = authFilter ? nodeBuilder.and([authFilter, templateFilter]) : templateFilter;
+
+      const found = await caseService.findCases({
+        filter,
+        page: 1,
+        perPage: MAX_TEMPLATE_USAGE_CASES_LISTED,
+      });
+
+      return {
+        total: found.total,
+        cases: found.saved_objects.map((so) => ({ id: so.id, title: so.attributes.title })),
+      };
     },
 
     getTags: () => templatesService.getTags(),
