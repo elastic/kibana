@@ -178,7 +178,7 @@ describe('when calling the Suggestions route handler', () => {
           1,
           expect.any(Object),
           expect.any(Object),
-          mockScopedEsClient.asInternalUser,
+          mockScopedEsClient.asCurrentUser,
           mockIndexPattern,
           fieldName,
           'test-query',
@@ -697,7 +697,83 @@ describe('when calling the Suggestions route handler', () => {
           1,
           expect.any(Object),
           expect.any(Object),
-          mockScopedEsClient.asInternalUser,
+          mockScopedEsClient.asCurrentUser,
+          mockIndexPattern,
+          fieldName,
+          'test-query',
+          [{ term: { 'test.field': 'test-value' } }],
+          'test-field-meta',
+          expect.any(Object)
+        );
+
+        expect(mockResponse.ok).toHaveBeenCalled();
+      });
+    });
+
+    describe('when suggestion_type is trustedApps', () => {
+      beforeEach(() => {
+        mockEndpointContext.experimentalFeatures = {
+          ...mockEndpointContext.experimentalFeatures,
+          trustedAppsAdvancedMode: true,
+        };
+        suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(
+          config$,
+          mockEndpointContext
+        );
+      });
+
+      it('should use the current user es client for trusted apps suggestions', async () => {
+        const spaceId = 'custom-space';
+        const mockIntegrationNamespaces = { endpoint: ['custom-namespace'] };
+        const mockIndexPattern = 'logs-endpoint.events.*-custom-namespace';
+
+        applyActionsEsSearchMock(mockScopedEsClient.asInternalUser);
+
+        const mockContext = requestContextMock.convertContext(
+          createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
+        );
+
+        ((await mockContext.securitySolution).getSpaceId as jest.Mock).mockReturnValue(spaceId);
+
+        const mockFleetServices = {
+          getIntegrationNamespaces: jest.fn().mockResolvedValue(mockIntegrationNamespaces),
+        };
+        mockEndpointContext.service.getInternalFleetServices = jest
+          .fn()
+          .mockReturnValue(mockFleetServices);
+
+        buildIndexNameWithNamespaceMock.mockReturnValue(mockIndexPattern);
+
+        const fieldName = 'process.name';
+        const mockRequest = httpServerMock.createKibanaRequest<
+          TypeOf<typeof EndpointSuggestionsSchema.params>,
+          never,
+          never
+        >({
+          params: { suggestion_type: 'trustedApps' },
+          body: {
+            field: fieldName,
+            query: 'test-query',
+            filters: [{ term: { 'test.field': 'test-value' } }],
+            fieldMeta: 'test-field-meta',
+          },
+        });
+
+        await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
+
+        expect((await mockContext.securitySolution).getSpaceId as jest.Mock).toHaveBeenCalled();
+        expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(spaceId);
+        expect(mockFleetServices.getIntegrationNamespaces).toHaveBeenCalledWith(['endpoint']);
+        expect(buildIndexNameWithNamespaceMock).toHaveBeenCalledWith(
+          eventsIndexPattern,
+          'custom-namespace',
+          { preserveWildcard: true }
+        );
+        expect(termsEnumSuggestionsMock).toHaveBeenNthCalledWith(
+          1,
+          expect.any(Object),
+          expect.any(Object),
+          mockScopedEsClient.asCurrentUser,
           mockIndexPattern,
           fieldName,
           'test-query',
@@ -932,7 +1008,7 @@ describe('when calling the Suggestions route handler', () => {
         expect(termsEnumSuggestionsMock).toHaveBeenCalledWith(
           expect.any(Object),
           expect.any(Object),
-          mockScopedEsClient.asInternalUser,
+          mockScopedEsClient.asCurrentUser,
           `${mockIndexPattern},*:${mockIndexPattern}`,
           'process.id',
           'test-query',
