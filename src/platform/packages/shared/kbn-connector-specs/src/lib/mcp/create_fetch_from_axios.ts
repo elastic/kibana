@@ -25,9 +25,9 @@ const SSE_READY_TIMEOUT_MS = 5_000;
 
 const MCP_SESSION_HEADER = 'mcp-session-id';
 
-interface SseGate {
-  ready: Promise<void>;
-  resolve: (() => void) | null;
+interface SseChannelGate {
+  open: Promise<void>;
+  markOpen: (() => void) | null;
 }
 
 export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
@@ -41,19 +41,19 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
   // rather than deleted, so a later call sees "already open" instead of a fresh gate
   // that never resolves. Note: entries are never evicted, so a fetch instance reused
   // across many sessions (e.g. future connection pooling) will accumulate them.
-  const gates = new Map<string, SseGate>();
+  const gates = new Map<string, SseChannelGate>();
 
-  const ensureGate = (sessionId: string): SseGate => {
-    let gate = gates.get(sessionId);
-    if (!gate) {
-      let resolve: (() => void) | null = null;
-      const ready = new Promise<void>((res) => {
-        resolve = res;
+  const ensureChannelGate = (sessionId: string): SseChannelGate => {
+    let sseChannelGate = gates.get(sessionId);
+    if (!sseChannelGate) {
+      let markOpen: (() => void) | null = null;
+      const open = new Promise<void>((res) => {
+        markOpen = res;
       });
-      gate = { ready, resolve };
-      gates.set(sessionId, gate);
+      sseChannelGate = { open, markOpen };
+      gates.set(sessionId, sseChannelGate);
     }
-    return gate;
+    return sseChannelGate;
   };
 
   // Use responseType:'stream' so the SDK's SSE parser reads events as they arrive
@@ -74,10 +74,10 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
 
     // Resolve this session's gate so its own waiting POSTs can proceed.
     const sessionId = getHeaderValue(headers, MCP_SESSION_HEADER);
-    const gate = gates.get(sessionId);
-    gate?.resolve?.();
-    if (gate) {
-      gate.resolve = null;
+    const sseChannelGate = gates.get(sessionId);
+    sseChannelGate?.markOpen?.();
+    if (sseChannelGate) {
+      sseChannelGate.markOpen = null;
     }
 
     return new Response(createWebStream(res), {
@@ -95,13 +95,13 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
     init?: RequestInit
   ): Promise<Response> => {
     const sessionId = getHeaderValue(headers, MCP_SESSION_HEADER);
-    const gate = gates.get(sessionId);
-    if (gate) {
+    const sseChannelGate = gates.get(sessionId);
+    if (sseChannelGate) {
       // Race the gate against a timeout and the abort signal so a stuck or
       // out-of-order GET can never cause tool-call POSTs to hang indefinitely.
       // Whichever wins first, execution falls through to the request below.
       const races: Array<Promise<void>> = [
-        gate.ready,
+        sseChannelGate.open,
         new Promise<void>((resolve) => setTimeout(resolve, SSE_READY_TIMEOUT_MS)),
       ];
       if (init?.signal) {
@@ -132,7 +132,7 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       const responseSessionId =
         getHeaderValue((res.headers ?? {}) as Record<string, unknown>, MCP_SESSION_HEADER) ||
         sessionId;
-      ensureGate(responseSessionId);
+      ensureChannelGate(responseSessionId);
     }
 
     return new Response(res.data, {
