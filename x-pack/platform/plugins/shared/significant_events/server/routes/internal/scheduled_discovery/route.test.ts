@@ -105,6 +105,7 @@ describe('scheduled significant events discovery settings route', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 45,
+        targetCoverageMinutes: 10,
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 6,
         triageBatchSize: 8,
@@ -139,6 +140,7 @@ describe('scheduled significant events discovery settings route', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 30,
+        targetCoverageMinutes: 10,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         triageBatchSize: 5,
@@ -173,6 +175,7 @@ describe('scheduled significant events discovery settings route', () => {
       spaceId: 'space-a',
       config: {
         detectionIntervalMinutes: 45,
+        targetCoverageMinutes: 10,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
         triageBatchSize: 5,

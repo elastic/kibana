@@ -77,6 +77,12 @@ export const POLL_DELAY_SECONDS = 30;
  * backlogs without creating an unbounded scheduled run.
  */
 export const DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES = 30;
+/**
+ * Target time window (minutes) within which every active rule must be scanned at least once.
+ * The detection workflow divides the fleet across `ceil(fleet / (targetCoverage / interval))`
+ * rules per run to honour this bound.
+ */
+export const DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES = 10;
 export const DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES = 10;
 export const MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES = 1;
 export const DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE = 3;

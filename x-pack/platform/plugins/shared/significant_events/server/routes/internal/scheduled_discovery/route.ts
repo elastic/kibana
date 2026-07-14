@@ -24,6 +24,7 @@ import {
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
+  DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
   MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
@@ -195,6 +196,7 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
           spaceId,
           config: {
             detectionIntervalMinutes: resolveScheduledConfigValue('detectionIntervalMinutes'),
+            targetCoverageMinutes: DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
             reviewIntervalMinutes: resolveScheduledConfigValue('reviewIntervalMinutes'),
             discoveryBatchSize: resolveScheduledConfigValue('discoveryBatchSize'),
             triageBatchSize: resolveScheduledConfigValue('triageBatchSize'),
