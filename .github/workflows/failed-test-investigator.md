@@ -202,7 +202,7 @@ Add `failure:fix-did-not-hold` (in addition to the classification label) when yo
 - a prior PR that **fixed this issue was merged** (from the issue timeline / reopen history you already reviewed, corroborated by `git log`/`git blame` when ambiguous); and
 - the current failure is the **same** one that PR set out to fix — same test, and the same assertion/error signature and root-cause area — i.e. the merged fix demonstrably did not hold.
 
-Do **not** add the label when the recurring failure is **unrelated** to what the merged fix addressed — a different assertion, a different root cause, or a symptom the earlier fix never targeted — even if it lands in the same test file or suite.
+Do **not** add the label when the recurring failure is **unrelated** to what the merged fix addressed — a different root cause, or a symptom the earlier fix never targeted — even if it lands in the same test file or suite.
 
 ### "Insufficient data" label
 

@@ -93,9 +93,6 @@ network:
     - defaults
     - buildkite.com
     - '*.buildkite.com'
-    # Needed so a fresh, in-fixer investigation can download failure artifacts
-    # (JUnit XML, screenshots, server logs) with the `bk` CLI when the prior
-    # investigator comment is stale (see "Validate the investigation is current").
     - buildkiteartifacts.com
     - ci-stats.kibana.dev
     - github.com
@@ -268,15 +265,12 @@ Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed an
 The investigator's comment is a starting hint, not a verdict you can trust blindly — it is a snapshot from when it was written, and both the code and the failure pattern move on. Before you build a fix on it, confirm it still reflects reality. Treat the analysis as **stale** and re-run a complete investigation yourself when **any** of these hold:
 
 - it was posted **more than 1 day ago** (older analyses have drifted from the current code and failure signature more often than not);
-- **new failures arrived after it** — e.g. `kibanamachine` "New failure for …" notification comments, or CI-data updates, timestamped later than the analysis. A later failure can mean the symptom has shifted (for example a "table never loaded" timeout later surfacing as a "1 of 6 rows" data-visibility failure), so the prior root cause may no longer be the operative one;
-- the **issue was reopened** after the analysis (a reopen is the strongest signal the prior diagnosis did not hold), or a **previous fix did not hold** — the issue carries the `failure:fix-did-not-hold` label, or the issue timeline shows an earlier **merged** fix PR (human- or automation-authored) that referenced this issue and the same failure recurred; or
+- **new failures arrived after it** — e.g. `kibanamachine` "New failure for …" notification comments, or CI-data updates, timestamped later than the analysis. A later failure can mean the symptom has shifted, so the prior root cause may no longer be the operative one; or
 - the comment is **absent**, or offers no actionable root cause.
 
-To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill). Kibana is already bootstrapped and the `bk` CLI is available, so pull the latest failing builds' artifacts (JUnit XML, screenshots, server logs), map the Scout lane and its neighbouring configs, read the failing code, and reach your **own** diagnosis from current evidence. Base the fix on that conclusion.
+To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill).
 
 - Where your fresh conclusion **departs** from the prior comment, say so and why in the PR's Context section.
-- When a previous fix did not hold (human- or automation-authored), do **not** re-propose the same shape of fix — name what that fix changed, why it failed to hold, and take a genuinely different approach (address the root cause, not the symptom).
-- If your fresh analysis shows the failure is not a test-side issue you can fix (environment, product, or insufficient data), open no PR and post the matching outcome comment (step 7).
 
 ## PR format
 
