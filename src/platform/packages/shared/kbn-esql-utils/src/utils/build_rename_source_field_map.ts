@@ -12,7 +12,7 @@ import type { ESQLAstCommand, ESQLColumn } from '@elastic/esql/types';
 import type { ESQLCommandSummary } from '@kbn/esql-language/src/commands/registry/types';
 import { getSummaryPerCommand } from './get_query_summary';
 
-const COMMANDS_THAT_ALLOW_RENAMING = new Set(['rename', 'stats', 'inline stats']);
+const COMMANDS_THAT_ALLOW_RENAMING = new Set(['rename', 'stats', 'inline stats', 'eval', 'enrich']);
 
 interface CommandWithSummary {
   cmd: ESQLAstCommand;
