@@ -8,7 +8,6 @@
  */
 
 import type {
-  PageObjects,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
   ScoutSpaceParallelFixture,
@@ -27,22 +26,24 @@ export type DiscoverWorkerFixtures = ScoutParallelWorkerFixtures & {
   discoverScoutSpace: DiscoverScoutSpace;
 };
 
+export type DiscoverPageObjects = ScoutParallelTestFixtures['pageObjects'] & {
+  inspector: Inspector;
+  unifiedFieldList: UnifiedFieldList;
+};
+
 export interface DiscoverTestFixtures extends ScoutParallelTestFixtures {
-  pageObjects: PageObjects & {
-    inspector: Inspector;
-    unifiedFieldList: UnifiedFieldList;
-  };
+  pageObjects: DiscoverPageObjects;
 }
 
 export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWorkerFixtures>({
   pageObjects: async ({ pageObjects, page }, use) => {
-    const discoverPageObjects: DiscoverTestFixtures['pageObjects'] = {
+    const extendedPageObjects: DiscoverPageObjects = {
       ...pageObjects,
       inspector: createLazyPageObject(Inspector, page),
       unifiedFieldList: createLazyPageObject(UnifiedFieldList, page),
     };
 
-    await use(discoverPageObjects);
+    await use(extendedPageObjects);
   },
   discoverScoutSpace: [
     async ({ scoutSpace }, use) => {

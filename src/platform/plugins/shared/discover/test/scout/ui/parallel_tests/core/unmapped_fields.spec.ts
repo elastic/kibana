@@ -11,8 +11,8 @@
  * Tests for unmapped fields visibility in the Discover sidebar.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { spaceTest } from '../../fixtures/common';
 
 const DATA_VIEW_NAME = 'test-index-unmapped-fields';
 const TIME_RANGE = {

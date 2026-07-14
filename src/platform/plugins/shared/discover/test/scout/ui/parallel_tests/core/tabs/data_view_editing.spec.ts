@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../../../fixtures/common';
+import { spaceTest, type DiscoverPageObjects } from '../../../fixtures/common';
 
 const RUNTIME_FIELD_SCRIPT = 'emit("runtime field value")';
 
@@ -40,7 +39,7 @@ const prepareDataView = async ({
   name,
 }: {
   isAdHocDataView: boolean;
-  pageObjects: PageObjects;
+  pageObjects: DiscoverPageObjects;
   name: string;
 }) => {
   if (!isAdHocDataView) {
@@ -56,7 +55,7 @@ const expectFieldState = async ({
   fieldName,
   state,
 }: {
-  pageObjects: PageObjects;
+  pageObjects: DiscoverPageObjects;
   fieldName: string;
   state: FieldState;
 }) => {
