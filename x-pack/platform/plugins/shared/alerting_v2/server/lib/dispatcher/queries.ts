@@ -87,6 +87,9 @@ export const chunkInClauseLiterals = (literals: readonly string[]): string[][] =
 // Expired snoozes are mapped to "snooze_expired" instead of being filtered out: they must stay
 // in the row set so LAST() still picks them as the latest snooze intent. Dropping them before
 // LAST() would resurrect an older snooze (e.g. an indefinite one) for the same series.
+//
+// For the same reason, a snooze without conditions is extracted as the string "null" instead of
+// NULL: LAST() skips null values, so it would fall back to an older snooze's conditions.
 export const getAlertEpisodeSuppressionsQueries = (
   alertEpisodes: AlertEpisode[]
 ): EsqlRequest[] => {
@@ -118,8 +121,8 @@ export const getAlertEpisodeSuppressionsQueries = (
               action_type == "snooze" AND (expiry IS NULL OR expiry > ${minLastEventTimestamp}::datetime), "snooze",
               action_type == "snooze", "snooze_expired"
             ),
-            conditions_json = CASE(action_type == "snooze", JSON_EXTRACT(_source, "$.conditions"), NULL),
-            match_json = CASE(action_type == "snooze", JSON_EXTRACT(_source, "$.match"), NULL)
+            conditions_json = CASE(action_type == "snooze", COALESCE(JSON_EXTRACT(_source, "$.conditions"), "null"), NULL),
+            match_json = CASE(action_type == "snooze", COALESCE(JSON_EXTRACT(_source, "$.match"), "null"), NULL)
         | DROP _source
         | INLINE STATS
             last_snooze_action = LAST(_snooze_action, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),

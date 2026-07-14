@@ -1068,6 +1068,95 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
+    'conditional snooze / a newer quick snooze governs over an older conditional snooze',
+    async ({ apiServices }) => {
+      const baseTime = Date.now();
+      const eventTs = (sec: number) => relativeTime(sec, baseTime);
+      const futureExpiry = new Date(baseTime + 24 * 60 * 60 * 1000).toISOString();
+
+      // An older conditional snooze stacked under a newer quick snooze: the quick snooze is the
+      // latest snooze intent, so the old conditions must not run even when they would be met.
+      await apiServices.alertingV2.alertActionsEvents.seed([
+        buildAlertAction({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-stacked-snooze-series',
+          actionType: 'snooze',
+          lastSeriesEventTimestamp: eventTs(120),
+          timestamp: eventTs(110),
+          conditions: [{ field: 'severity', operator: 'changed' }],
+          match: 'any',
+        }),
+        buildAlertAction({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-stacked-snooze-series',
+          actionType: 'snooze',
+          lastSeriesEventTimestamp: eventTs(120),
+          timestamp: eventTs(100),
+          expiry: futureExpiry,
+        }),
+      ]);
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-stacked-snooze-series',
+          episodeId: 'rule-1-stacked-snooze-ep-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: eventTs(120),
+        }),
+      ]);
+
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
+        ruleId: 'rule-1',
+        actionTypes: ['suppress'],
+      });
+
+      // Severity appears, which would meet the old snooze's condition. The quick snooze has no
+      // conditions, so the episode must stay suppressed and no unsnooze must be written.
+      const newEventTs = eventTs(5);
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-stacked-snooze-series',
+          episodeId: 'rule-1-stacked-snooze-ep-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          severity: 'critical',
+          timestamp: newEventTs,
+        }),
+      ]);
+
+      // Wait until the new event has been processed (a suppress action carries its timestamp).
+      await expect
+        .poll(
+          async () => {
+            const suppresses = await apiServices.alertingV2.alertActionsEvents.find({
+              ruleId: 'rule-1',
+              actionTypes: ['suppress'],
+            });
+            return suppresses.filter((action) => action.last_series_event_timestamp === newEventTs)
+              .length;
+          },
+          { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
+        )
+        .toBe(1);
+
+      const unsnoozes = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId: 'rule-1',
+        actionTypes: ['unsnooze'],
+      });
+      expect(unsnoozes).toHaveLength(0);
+
+      const fires = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId: 'rule-1',
+        actionTypes: ['fire'],
+      });
+      expect(fires).toHaveLength(0);
+    }
+  );
+
+  apiTest(
     'only dispatches episodes matching the KQL expression when the action policy has a matcher',
     async ({ apiServices }) => {
       // Switch to the matcher policy so np-1 doesn't match the same episodes.

@@ -309,6 +309,15 @@ describe('getAlertEpisodeSuppressionsQueries', () => {
     );
   });
 
+  it('extracts missing conditions as the string "null" so LAST() tracks the newest snooze', () => {
+    const requests = getAlertEpisodeSuppressionsQueries([createAlertEpisode()]);
+
+    // LAST() skips null values: without the COALESCE, a newer snooze without conditions would be
+    // skipped and an older snooze's conditions would apply.
+    expect(requests[0].query).toContain('COALESCE(JSON_EXTRACT(_source, "$.conditions"), "null")');
+    expect(requests[0].query).toContain('COALESCE(JSON_EXTRACT(_source, "$.match"), "null")');
+  });
+
   it('drops _source after JSON_EXTRACT and before INLINE STATS', () => {
     const { query } = getAlertEpisodeSuppressionsQueries([createAlertEpisode()])[0];
 
