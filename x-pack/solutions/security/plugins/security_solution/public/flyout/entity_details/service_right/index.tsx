@@ -13,8 +13,6 @@ import { EuiSpacer } from '@elastic/eui';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { ESQuery } from '../../../../common/typed_json';
 import { buildEntityNameFilter, type RiskSeverity } from '../../../../common/search_strategy';
-import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import type { Refetch } from '../../../common/types';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useEntityRiskScoreRecalculation } from '../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
@@ -37,7 +35,6 @@ import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_pan
 import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../shared/components/entity_summary_grid';
-import { ENTITY_ANALYTICS_TABLE_ID } from '../../../entity_analytics/components/home/constants';
 
 export interface ServicePanelProps extends Record<string, unknown> {
   contextID: string;
@@ -105,12 +102,6 @@ export const ServicePanel = memo(function ServicePanel({
   const serviceRiskData = serviceRisk && serviceRisk.length > 0 ? serviceRisk[0] : undefined;
   const isRiskScoreExist = !!serviceRiskData?.service.risk;
 
-  const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
-
-  const onRecalculation = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
-  }, [refetchEntitiesTable]);
-
   const entityStoreV2Enabled = true;
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
@@ -120,13 +111,11 @@ export const ServicePanel = memo(function ServicePanel({
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
-      onRecalculation,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
     calculateEntityRiskScore();
-  }, [calculateEntityRiskScore, refetchEntitiesTable]);
+  }, [calculateEntityRiskScore]);
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
     onSuccess: calculateEntityRiskScore,
