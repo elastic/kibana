@@ -53,6 +53,23 @@ const retryOnServerError = (_failureCount: number, error: unknown) => {
   return true;
 };
 
+/**
+ * A just-launched execution can 404 transiently (index refresh lag). Retry those a bounded
+ * number of times so a brief miss doesn't kill polling; other errors use the shared policy.
+ */
+const MAX_EXECUTION_NOT_FOUND_RETRIES = 5;
+
+const retryExecutionStatus = (failureCount: number, error: unknown): boolean => {
+  if (
+    isHttpFetchError(error) &&
+    error.response?.status === 404 &&
+    failureCount < MAX_EXECUTION_NOT_FOUND_RETRIES
+  ) {
+    return true;
+  }
+  return retryOnServerError(failureCount, error);
+};
+
 export const useExperimentTemplates = () => {
   const { services } = useKibana();
 
@@ -292,14 +309,14 @@ export const useWorkflowExecutions = (workflowExecutionIds: string[]): WorkflowE
         },
         enabled: workflowExecutionId.length > 0,
         refetchInterval: (data, query) => {
-          // A settled execution or a persistent (non-retryable) error stops the poll; otherwise
-          // `retryOnServerError` would keep polling a permanently failing query forever.
+          // A settled execution or an exhausted-retry error stops the poll; otherwise the interval
+          // would keep re-polling a permanently failing query forever.
           if (query.state.status === 'error' || (data && isTerminalExecutionStatus(data.status))) {
             return false;
           }
           return WORKFLOW_EXECUTION_POLL_MS;
         },
-        retry: retryOnServerError,
+        retry: retryExecutionStatus,
       })
     ),
   });

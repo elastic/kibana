@@ -241,11 +241,21 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
         repetitions: input.repetitions ?? DEFAULT_REPETITIONS,
         spaceIds: input.space_ids,
       });
+
+      if (result.errors.length > 0) {
+        context.logger.warn(
+          `evals.evaluateExample: ${result.errors.length} error(s) while evaluating example "${
+            input.example.id
+          }": ${result.errors.join('; ')}`
+        );
+      }
+
       return {
         output: {
           scores_ingested: result.scoresIngested,
           failed: result.failed,
           repetitions: result.repetitions,
+          errors: result.errors,
         },
       };
     },

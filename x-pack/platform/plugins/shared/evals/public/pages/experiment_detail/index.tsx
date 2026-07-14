@@ -290,6 +290,8 @@ export const ExperimentDetailPage: React.FC = () => {
           params.set('trace_id', traceId);
           if (exampleId) {
             params.set('example_id', exampleId);
+          } else {
+            params.delete('example_id');
           }
         } else {
           params.delete('trace_id');

@@ -244,10 +244,12 @@ export const evaluateExampleInputSchema = z.object({
   repetitions: z.number().int().min(1).optional(),
   space_ids: spaceIdsSchema,
 });
+
 export const evaluateExampleOutputSchema = z.object({
   scores_ingested: z.number().int(),
   failed: z.number().int(),
   repetitions: z.number().int(),
+  errors: z.array(z.string()).optional(),
 });
 
 export const evaluateExampleCommonDefinition: CommonStepDefinition<
