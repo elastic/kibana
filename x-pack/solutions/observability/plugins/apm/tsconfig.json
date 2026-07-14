@@ -174,7 +174,8 @@
     "@kbn/apm-types-shared",
     "@kbn/apm-common",
     "@kbn/storybook",
-    "@kbn/lens-embeddable-utils"
+    "@kbn/lens-embeddable-utils",
+    "@kbn/apm-shared"
   ],
   "exclude": ["target/**/*"]
 }

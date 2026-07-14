@@ -356,6 +356,25 @@ groups:
               Optional. Extra config for that output.
             datatype: string
 
+          - setting: "[n].otel_exporter_config_yaml"
+            description: |
+              Optional. Extra YAML configuration that {{fleet}} merges into the {{es}} OpenTelemetry exporter of any OTel-based agent policy that uses this output. The endpoint and authentication settings always take precedence over values set here. Available for `elasticsearch` and `remote_elasticsearch` outputs.
+            datatype: string
+            applies_to:
+              stack: preview 9.5
+              ech: preview
+              self: preview
+
+          - setting: "[n].otel_disable_beatsauth"
+            description: |
+              Optional. If `true`, {{fleet}} skips the `beatsauth` extension and passes only the endpoint and any settings from `otel_exporter_config_yaml` to the {{es}} OpenTelemetry exporter. Available for `elasticsearch` and `remote_elasticsearch` outputs.
+            datatype: bool
+            default: false
+            applies_to:
+              stack: preview 9.5
+              ech: preview
+              self: preview
+
           - setting: "[n].proxy_id"
             description: |
               Optional. Unique ID of a proxy to access the output.
