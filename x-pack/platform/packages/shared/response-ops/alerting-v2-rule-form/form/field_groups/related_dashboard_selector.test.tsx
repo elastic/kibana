@@ -15,10 +15,10 @@ import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { createMockServices, createTestQueryClient } from '../../test_utils';
 import { RuleFormProvider, type RuleFormServices } from '../contexts';
-import type { ComposeFormValues } from '../../flyout/compose_discover/compose_form_types';
+import type { FormValues } from '../types';
 import { RelatedDashboardSelector } from './related_dashboard_selector';
 
-const BASE_COMPOSE_VALUES: ComposeFormValues = {
+const BASE_COMPOSE_VALUES: FormValues = {
   kind: 'alert',
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
@@ -36,8 +36,8 @@ const DASHBOARD_TITLE = 'Dashboard 123';
 const MISSING_DASHBOARD_ID = 'missing-dashboard';
 
 const mockSearch = jest.fn(async () => ({
-  total: 1,
-  dashboards: [{ id: DASHBOARD_ID, data: { title: DASHBOARD_TITLE }, meta: {} }],
+  data: [{ id: DASHBOARD_ID, data: { title: DASHBOARD_TITLE }, meta: {} }],
+  meta: { page: 1, per_page: 100, total: 1 },
 }));
 
 // Resolves only DASHBOARD_ID; any other id is reported as a not-found (deleted) artifact.
@@ -61,20 +61,20 @@ const mockDashboard = {
 } as unknown as DashboardStart;
 
 const ArtifactValueSpy = () => {
-  const { watch } = useFormContext<ComposeFormValues>();
+  const { watch } = useFormContext<FormValues>();
   return (
     <div data-test-subj="artifactValueSpy">{JSON.stringify(watch('dashboardArtifacts') ?? [])}</div>
   );
 };
 
 const createComposeFormWrapper = (
-  defaultValues: ComposeFormValues = BASE_COMPOSE_VALUES,
+  defaultValues: FormValues = BASE_COMPOSE_VALUES,
   services: RuleFormServices = { ...createMockServices(), dashboard: mockDashboard }
 ) => {
   const queryClient = createTestQueryClient();
 
   return ({ children }: { children: React.ReactNode }) => {
-    const form = useForm<ComposeFormValues>({ defaultValues });
+    const form = useForm<FormValues>({ defaultValues });
     return (
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>

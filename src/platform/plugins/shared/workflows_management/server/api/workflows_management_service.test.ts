@@ -21,30 +21,23 @@
  *   2. error propagation from sub-services.
  */
 
-import type { CoreStart, ElasticsearchClient } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 
 import { WorkflowsService } from './workflows_management_service';
-import { readWorkflowVersioningEnabled } from '../lib/is_workflow_versioning_enabled';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
 import { WorkflowValidationService } from '../services/workflow_validation_service';
-import type { WorkflowsServerPluginStartDeps } from '../types';
+import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } from '../types';
 
 jest.mock('../services/workflow_change_history_service');
-jest.mock('../lib/is_workflow_versioning_enabled', () => ({
-  readWorkflowVersioningEnabled: jest.fn().mockResolvedValue(true),
-}));
 
 const MockedWorkflowChangeHistoryService = WorkflowChangeHistoryService as jest.MockedClass<
   typeof WorkflowChangeHistoryService
->;
-const mockedReadWorkflowVersioningEnabled = readWorkflowVersioningEnabled as jest.MockedFunction<
-  typeof readWorkflowVersioningEnabled
 >;
 
 type PrototypeSpies = Record<string, jest.SpyInstance>;
@@ -107,6 +100,16 @@ const makeCoreStart = (esClient: ElasticsearchClient): CoreStart =>
     elasticsearch: { client: { asInternalUser: esClient } },
   } as unknown as CoreStart);
 
+const makeCoreSetup = (
+  startServices: () => Promise<[CoreStart, WorkflowsServerPluginStartDeps]>
+): CoreSetup<WorkflowsServerPluginStartDeps> =>
+  ({
+    getStartServices: startServices,
+  } as unknown as CoreSetup<WorkflowsServerPluginStartDeps>);
+
+const makePluginsSetup = (): WorkflowsServerPluginSetupDeps =>
+  ({} as unknown as WorkflowsServerPluginSetupDeps);
+
 describe('WorkflowsService (facade)', () => {
   let crudSpies: PrototypeSpies;
   let searchSpies: PrototypeSpies;
@@ -116,7 +119,12 @@ describe('WorkflowsService (facade)', () => {
   const buildService = async (): Promise<WorkflowsService> => {
     const coreStart = makeCoreStart(makeEsClient());
     const startServices = jest.fn().mockResolvedValue([coreStart, makePluginsStart()]);
-    const service = new WorkflowsService(startServices as any, loggerMock.create(), '9.0.0');
+    const service = new WorkflowsService(
+      makeCoreSetup(startServices),
+      makePluginsSetup(),
+      loggerMock.create(),
+      '9.0.0'
+    );
     // Wait a tick so initialize() completes.
     await Promise.resolve();
     await Promise.resolve();
@@ -124,7 +132,6 @@ describe('WorkflowsService (facade)', () => {
   };
 
   beforeEach(() => {
-    mockedReadWorkflowVersioningEnabled.mockResolvedValue(true);
     MockedWorkflowChangeHistoryService.mockImplementation(
       () =>
         ({
@@ -134,6 +141,7 @@ describe('WorkflowsService (facade)', () => {
     );
     crudSpies = spyPrototype(WorkflowCrudService, [
       'getWorkflow',
+      'getWorkflowDocumentSource',
       'getWorkflowsByIds',
       'getWorkflowsSourceByIds',
       'createWorkflow',
@@ -171,9 +179,7 @@ describe('WorkflowsService (facade)', () => {
   });
 
   describe('initialization', () => {
-    it('initializes change history when workflow versioning uiSetting is enabled', async () => {
-      mockedReadWorkflowVersioningEnabled.mockResolvedValue(true);
-
+    it('initializes change history at startup', async () => {
       const changeHistoryInstance = {
         initialize: jest.fn().mockResolvedValue(undefined),
         isInitialized: jest.fn().mockReturnValue(true),
@@ -186,7 +192,12 @@ describe('WorkflowsService (facade)', () => {
       const coreStart = makeCoreStart(esClient);
       const service = await (async () => {
         const startServices = jest.fn().mockResolvedValue([coreStart, makePluginsStart()]);
-        const svc = new WorkflowsService(startServices as any, loggerMock.create(), '9.0.0');
+        const svc = new WorkflowsService(
+          makeCoreSetup(startServices),
+          makePluginsSetup(),
+          loggerMock.create(),
+          '9.0.0'
+        );
         await Promise.resolve();
         await Promise.resolve();
         return svc;
@@ -194,38 +205,10 @@ describe('WorkflowsService (facade)', () => {
 
       await service.getWorkflow('wf-1', 'default');
 
-      expect(mockedReadWorkflowVersioningEnabled).toHaveBeenCalledWith(coreStart);
       expect(changeHistoryInstance.initialize).toHaveBeenCalledWith({
         elasticsearchClient: esClient,
         authService: coreStart.security!.authc,
       });
-    });
-
-    it('skips change history init when workflow versioning uiSetting is disabled', async () => {
-      mockedReadWorkflowVersioningEnabled.mockResolvedValue(false);
-
-      const changeHistoryInstance = {
-        initialize: jest.fn().mockResolvedValue(undefined),
-        isInitialized: jest.fn().mockReturnValue(false),
-      };
-      MockedWorkflowChangeHistoryService.mockImplementation(
-        () => changeHistoryInstance as unknown as WorkflowChangeHistoryService
-      );
-
-      const esClient = makeEsClient();
-      const coreStart = makeCoreStart(esClient);
-      const service = await (async () => {
-        const startServices = jest.fn().mockResolvedValue([coreStart, makePluginsStart()]);
-        const svc = new WorkflowsService(startServices as any, loggerMock.create(), '9.0.0');
-        await Promise.resolve();
-        await Promise.resolve();
-        return svc;
-      })();
-
-      await service.getWorkflow('wf-1', 'default');
-
-      expect(mockedReadWorkflowVersioningEnabled).toHaveBeenCalledWith(coreStart);
-      expect(changeHistoryInstance.initialize).not.toHaveBeenCalled();
     });
 
     it('awaits initPromise before delegating to a sub-service', async () => {
@@ -238,7 +221,12 @@ describe('WorkflowsService (facade)', () => {
       );
 
       const startServices = jest.fn().mockReturnValue(startServicesPromise);
-      const service = new WorkflowsService(startServices as any, loggerMock.create(), '9.0.0');
+      const service = new WorkflowsService(
+        makeCoreSetup(startServices),
+        makePluginsSetup(),
+        loggerMock.create(),
+        '9.0.0'
+      );
 
       const call = service.getWorkflow('wf-1', 'default');
       // Give the microtask queue a chance to run — the call must still be pending.
@@ -266,7 +254,7 @@ describe('WorkflowsService (facade)', () => {
       });
       await service.updateWorkflow('wf-1', { name: 'new' } as any, 'default', request);
       await service.deleteWorkflows(['wf-1'], 'default', { force: true });
-      await service.disableAllWorkflows('my-space');
+      await service.disableAllWorkflows('my-space', request);
 
       expect(crudSpies.getWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
         includeDeleted: true,
@@ -291,7 +279,33 @@ describe('WorkflowsService (facade)', () => {
         request
       );
       expect(crudSpies.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default', { force: true });
-      expect(crudSpies.disableAllWorkflows).toHaveBeenCalledWith('my-space');
+      expect(crudSpies.disableAllWorkflows).toHaveBeenCalledWith('my-space', request);
+    });
+
+    it('reads soft-deleted workflows when gating workflow change history', async () => {
+      const getHistory = jest.fn().mockResolvedValue({ total: 0, items: [] });
+      MockedWorkflowChangeHistoryService.mockImplementation(
+        () =>
+          ({
+            initialize: jest.fn().mockResolvedValue(undefined),
+            isInitialized: jest.fn().mockReturnValue(true),
+            getHistory,
+          } as unknown as WorkflowChangeHistoryService)
+      );
+
+      crudSpies.getWorkflowDocumentSource.mockResolvedValue({
+        spaceId: 'default',
+      } as never);
+
+      const service = await buildService();
+
+      await service.getHistoryForWorkflow('wf-1', 'default', { page: 1, perPage: 20 });
+
+      expect(crudSpies.getWorkflowDocumentSource).toHaveBeenCalledWith('wf-1', 'default', {
+        includeGlobal: true,
+        includeDeleted: true,
+      });
+      expect(getHistory).toHaveBeenCalledWith('default', 'wf-1', { from: 0, size: 20 });
     });
 
     it('delegates search-side reads to WorkflowSearchService', async () => {
@@ -389,6 +403,37 @@ describe('WorkflowsService (facade)', () => {
         expect(listSpy).toHaveBeenCalledWith('my-space', { page: 2, perPage: 25 });
       } finally {
         listSpy.mockRestore();
+      }
+    });
+  });
+
+  describe('markStepAsResponded', () => {
+    it('resolves the responder via the security service and delegates with full audit metadata', async () => {
+      // The service owns username resolution so callers cannot spoof audit identity.
+      // Behavioral coverage of the ES update lives in the query-service tests.
+      const markSpy = jest
+        .spyOn(WorkflowExecutionQueryService.prototype, 'markStepAsResponded')
+        .mockResolvedValue(true as never);
+      try {
+        const service = await buildService();
+        const request = { headers: {} } as unknown as Parameters<
+          typeof service.markStepAsResponded
+        >[1];
+        await service.markStepAsResponded('step-exec-1', request, 'inbox', 'default');
+
+        expect(markSpy).toHaveBeenCalledWith(
+          'step-exec-1',
+          expect.objectContaining({
+            channel: 'inbox',
+            // The mock security service returns `system` for fake
+            // requests; the real service swaps in the actual user.
+            respondedBy: expect.any(String),
+            respondedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+          }),
+          'default'
+        );
+      } finally {
+        markSpy.mockRestore();
       }
     });
   });

@@ -852,4 +852,80 @@ describe('EditDslStepsFlyout', () => {
       expect(withinStep(0).getByTestId(`${DATA_TEST_SUBJ}AfterValue`)).toHaveValue(21);
     });
   });
+
+  describe('boundary help text', () => {
+    it('bounds steps by the frozen phase when one is configured', async () => {
+      renderFlyout({
+        initialSteps: {
+          dsl: {
+            data_retention: '60d',
+            frozen_after: '40d',
+            downsample: [
+              { after: '5d', fixed_interval: '2d' },
+              { after: '10d', fixed_interval: '4d' },
+            ],
+          },
+        } as IngestStreamLifecycleDSL,
+      });
+      await tick();
+
+      // Step 1 (index 0) has no previous step: only the frozen-phase upper bound is shown.
+      expect(
+        withinStep(0).getByText('Must occur before the frozen phase (40d).')
+      ).toBeInTheDocument();
+      expect(
+        withinStep(0).getByText('Must be smaller than the frozen phase (40d).')
+      ).toBeInTheDocument();
+
+      // Step 2 (index 1) references the previous step and the frozen phase.
+      expect(
+        withinStep(1).getByText(
+          'Must occur after the previous step (5d) and before the frozen phase (40d).'
+        )
+      ).toBeInTheDocument();
+      expect(
+        withinStep(1).getByText(
+          'Must be a multiple of the step 1 interval (2d) and smaller than the frozen phase (40d).'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('falls back to the delete phase (data retention) when there is no frozen phase', async () => {
+      renderFlyout({
+        initialSteps: {
+          dsl: {
+            data_retention: '30d',
+            downsample: [{ after: '5d', fixed_interval: '2d' }],
+          },
+        } as IngestStreamLifecycleDSL,
+      });
+      await tick();
+
+      expect(
+        withinStep(0).getByText('Must occur before the delete phase (30d).')
+      ).toBeInTheDocument();
+      expect(
+        withinStep(0).getByText('Must be smaller than the delete phase (30d).')
+      ).toBeInTheDocument();
+    });
+
+    it('prevents saving when the interval reaches the frozen phase', async () => {
+      const { onSave } = renderFlyout({
+        initialSteps: {
+          dsl: {
+            data_retention: '60d',
+            frozen_after: '40d',
+            downsample: [{ after: '5d', fixed_interval: '40d' }],
+          },
+        } as IngestStreamLifecycleDSL,
+      });
+
+      await tick();
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+
+      await tick();
+      expect(onSave).toHaveBeenCalledTimes(0);
+      expect(getTab(1).querySelector('[data-euiicon-type="warning"]')).not.toBeNull();
+    });
+  });
 });

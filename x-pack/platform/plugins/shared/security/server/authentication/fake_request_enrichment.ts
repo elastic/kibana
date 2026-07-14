@@ -14,14 +14,14 @@ import { deepFreeze } from '@kbn/std';
 /**
  * Identity fields suppressed on the enriched user — reads return `undefined`
  * (matching the pre-enrichment `getCurrentUser === null` contract). Only
- * `profile_uid` is intentionally exposed. The `Record<keyof Omit<...>>` shape
- * keeps this list in sync with `AuthenticatedUser` via the type checker.
+ * `profile_uid` and `username` are intentionally exposed. The
+ * `Record<keyof Omit<...>>` shape keeps this list in sync with
+ * `AuthenticatedUser` via the type checker.
  */
 const ENRICHED_USER_BLOCKED_PROPERTIES_RECORD: Record<
-  keyof Omit<AuthenticatedUser, 'profile_uid'>,
+  keyof Omit<AuthenticatedUser, 'profile_uid' | 'username'>,
   true
 > = {
-  username: true,
   email: true,
   full_name: true,
   roles: true,
@@ -34,6 +34,11 @@ const ENRICHED_USER_BLOCKED_PROPERTIES_RECORD: Record<
   elastic_cloud_user: true,
   operator: true,
   api_key: true,
+  // A fake enriched request is never authenticated via an
+  // `Authorization` header, so the real value would be nullish anyway, and reading back
+  // `undefined` cannot trigger an unintended xsrf bypass: the xsrf handler exempts a request
+  // only when the scheme is non-null and in the configured allowlist.
+  http_authentication_scheme: true,
 };
 
 const ENRICHED_USER_BLOCKED_PROPERTIES = new Set<string>(
@@ -59,27 +64,31 @@ const readAuthorization = (request: KibanaRequest): string | undefined => {
 export const createFakeRequestEnrichment = (logger: Logger): FakeRequestEnrichment => {
   const fakeRequestEntries = new WeakMap<KibanaRequest, EnrichmentEntry>();
 
-  const enrichRequestWithUserProfile: FakeRequestEnricher = (request, userProfileId) => {
+  const enrichRequestWithUserProfile: FakeRequestEnricher = (request, { profileId, username }) => {
     if (!request.isFakeRequest) {
       throw new Error(
         `enrichRequestWithUserProfile must only be called on a fake request ` +
-          `(profile_uid="${userProfileId}").`
+          `(profile_uid="${profileId}").`
       );
     }
 
     if (fakeRequestEntries.has(request)) {
       logger.warn(
         `enrichRequestWithUserProfile called on an already-enriched fake request; ignoring ` +
-          `the new enrichment (profile_uid="${userProfileId}").`
+          `the new enrichment (profile_uid="${profileId}").`
       );
       return;
     }
 
-    logger.debug(`Enriching request with user profile ID "${userProfileId}".`);
+    logger.debug(`Enriching request with user profile ID "${profileId}".`);
 
-    // Only `profile_uid` is exposed; blocked fields return undefined, other
-    // props (symbols, `then`, `toJSON`) fall through so JS reflection works.
-    const enrichedUserStub: Partial<AuthenticatedUser> = { profile_uid: userProfileId };
+    // Only `profile_uid` and `username` are exposed; blocked fields return
+    // undefined, other props (symbols, `then`, `toJSON`) fall through so JS
+    // reflection works.
+    const enrichedUserStub: Partial<AuthenticatedUser> = {
+      profile_uid: profileId,
+      username,
+    };
     const enrichedUser = deepFreeze(
       new Proxy(enrichedUserStub as AuthenticatedUser, {
         get: (target, prop, receiver) => {

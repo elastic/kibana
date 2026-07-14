@@ -14,7 +14,8 @@ import { CASES_ALL_WITH_ALERTS_ROLE } from '../../fixtures/roles';
 // Ported from the "When user has all privileges for cases" suite in the FTR
 // pages/alerts/add_to_case.ts. A user with cases write privileges sees the
 // add-to-case row actions and can open the new/existing case dialogs.
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/275595
+test.describe.skip(
   'Observability alerts - add to case (all privileges)',
   { tag: [...tags.stateful.classic] },
   () => {

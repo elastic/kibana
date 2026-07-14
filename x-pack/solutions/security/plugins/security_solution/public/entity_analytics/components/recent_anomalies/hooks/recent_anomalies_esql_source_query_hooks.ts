@@ -13,8 +13,27 @@ import { useIntervalForHeatmap } from '../anomaly_heatmap_interval';
 import type { AnomalyBand } from '../anomaly_bands';
 import { getHiddenBandsFilters } from '../hidden_bands_filter';
 import { getEntityIdsFilter } from '../entity_ids_filter';
+import { getJobIdsFilter } from '../job_ids_filter';
 
 export type ViewByMode = 'entity' | 'jobId';
+
+/**
+ * Base filter for ML anomaly records, matching the `result_type`/`is_interim`/
+ * `record_score` constraints the anomaly overview and summary APIs apply
+ * so this panel doesn't surface interim or sub-threshold records those APIs wouldn't.
+ */
+const BASE_RECORD_FILTER = `| WHERE result_type == "record" AND is_interim == false AND record_score >= 1`;
+
+/**
+ * Time-range filter applied inside the query text via ?_tstart/?_tend named
+ * params (populated by getESQLResults when given a timeRange) instead of the
+ * request-level `filter` DSL. A request-level filter that matches no data
+ * makes the FROM pattern resolve to zero indices, which trips an
+ * Elasticsearch bug in LOOKUP JOIN lookup-index resolution and fails the
+ * query with a misleading "Lookup Join requires a single lookup mode index"
+ * error instead of returning an empty result (elastic/kibana#277613).
+ */
+const TIME_RANGE_FILTER = `| WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend`;
 
 const ANOMALY_ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
@@ -99,6 +118,12 @@ interface EsqlSourceParams {
    * filter (leave unconstrained).
    */
   entityIds?: string[];
+  /**
+   * Job IDs of the security ML jobs used to constrain anomalies to the same jobs the
+   * anomaly overview/summary APIs query. `undefined` means not yet resolved
+   * (leave unconstrained until the calling hook is ready).
+   */
+  jobIds?: string[];
 }
 
 export const useRecentAnomaliesTopRowsEsqlSource = ({
@@ -108,6 +133,7 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
   watchlistId,
   spaceId,
   entityIds,
+  jobIds,
 }: EsqlSourceParams & { rowsLimit: number }): string | undefined => {
   const euidApi = useEntityStoreEuidApi();
 
@@ -116,7 +142,9 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
   if (viewBy === 'jobId') {
     return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
-    | WHERE record_score IS NOT NULL
+    ${BASE_RECORD_FILTER}
+    ${TIME_RANGE_FILTER}
+    ${getJobIdsFilter(jobIds)}
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
     ${getEntityIdsFilter(entityIds)}
@@ -131,7 +159,9 @@ export const useRecentAnomaliesTopRowsEsqlSource = ({
   // Entity mode
   return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
-    | WHERE record_score IS NOT NULL
+    ${BASE_RECORD_FILTER}
+    ${TIME_RANGE_FILTER}
+    ${getJobIdsFilter(jobIds)}
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
     ${getEntityIdsFilter(entityIds)}
@@ -151,6 +181,7 @@ export const useRecentAnomaliesDataEsqlSource = ({
   watchlistId,
   spaceId,
   entityIds,
+  jobIds,
   timeRange,
 }: EsqlSourceParams & { rowLabels?: string[]; timeRange?: { from: string; to: string } }) => {
   const euidApi = useEntityStoreEuidApi();
@@ -162,7 +193,8 @@ export const useRecentAnomaliesDataEsqlSource = ({
   if (viewBy === 'jobId') {
     return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
-    | WHERE record_score IS NOT NULL AND job_id IN (${formattedLabels})
+    ${BASE_RECORD_FILTER} AND job_id IN (${formattedLabels})
+    ${TIME_RANGE_FILTER}
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IS NOT NULL
     ${getEntityIdsFilter(entityIds)}
@@ -182,7 +214,9 @@ export const useRecentAnomaliesDataEsqlSource = ({
   // Entity mode
   return `SET unmapped_fields="nullify";
     FROM ${ML_ANOMALIES_INDEX}
-    | WHERE record_score IS NOT NULL
+    ${BASE_RECORD_FILTER}
+    ${TIME_RANGE_FILTER}
+    ${getJobIdsFilter(jobIds)}
     ${getEuidEvaluationBlock(euidApi.euid)}
     | WHERE entity_id IN (${formattedLabels})
     ${getEntityStoreJoinBlock(spaceId, watchlistId)}

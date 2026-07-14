@@ -73,7 +73,7 @@ export class DataGrid {
     await this.waitUntilFieldListHasCountOfFields();
     await this.page.testSubj.fill('fieldListFiltersFieldSearch', field);
     await this.page.testSubj.click(`fieldToggle-${field}`);
-    await this.waitUntilSearchingHasFinished();
+    await this.waitForLoad();
   }
 
   async changeRowsPerPageTo(rowsPerPage: number) {
@@ -86,11 +86,6 @@ export class DataGrid {
     });
   }
 
-  async closeDocViewerFlyout() {
-    await this.page.testSubj.click('euiFlyoutCloseButton');
-    await this.page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
-  }
-
   async closeInTableSearch() {
     const input = this.getInTableSearchInput();
 
@@ -100,26 +95,6 @@ export class DataGrid {
     await this.page.testSubj
       .locator(IN_TABLE_SEARCH_BUTTON_TEST_SUBJ)
       .waitFor({ state: 'visible' });
-  }
-
-  async clickFieldActionInDocViewer(fieldName: string, actionTestSubj: string) {
-    await this.openDocViewerTab('doc_view_table');
-
-    const flyout = this.page.testSubj.locator('docViewerFlyout');
-
-    await expect(async () => {
-      const nameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
-      await nameCell.waitFor({ state: 'visible' });
-      await nameCell.evaluate((el) => {
-        el.scrollIntoView({ block: 'center', inline: 'nearest' });
-      });
-      await nameCell.hover();
-
-      const action = flyout.locator(`[data-test-subj="${actionTestSubj}-${fieldName}"]`);
-      await action.waitFor({ state: 'visible' });
-      await action.scrollIntoViewIfNeeded();
-      await action.click();
-    }).toPass({ timeout: 15_000 });
   }
 
   async expandCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
@@ -233,19 +208,6 @@ export class DataGrid {
     );
   }
 
-  async getDocViewerFieldTokens(limit = 10): Promise<string[]> {
-    const flyout = this.page.testSubj.locator('docViewerFlyout');
-    await flyout.waitFor({ state: 'visible' });
-    return this.readFieldTokenLabels(flyout, limit);
-  }
-
-  async getDocViewerRowActionCount(): Promise<number> {
-    const flyout = this.page.testSubj.locator('docViewerFlyout');
-    await flyout.waitFor({ state: 'visible' });
-
-    return flyout.locator('[data-test-subj*="docTableRowAction"]').count();
-  }
-
   getInTableSearchCellMatches(rowIndex: number, columnId: string): Locator {
     return this.getCell(rowIndex, columnId).locator(`.${IN_TABLE_SEARCH_HIGHLIGHT_CLASS_NAME}`);
   }
@@ -282,7 +244,7 @@ export class DataGrid {
       await this.page.testSubj.click(`pagination-button-${lastPageNumber}`);
     }
 
-    await this.waitUntilSearchingHasFinished();
+    await this.waitForLoad();
   }
 
   async goToNextInTableSearchMatch() {
@@ -296,11 +258,6 @@ export class DataGrid {
 
   async isSelectedRowsMenuVisible(): Promise<boolean> {
     return this.page.testSubj.locator('unifiedDataTableSelectionBtn').isVisible();
-  }
-
-  async openAndWaitForDocViewerFlyout({ rowIndex }: { rowIndex: number }) {
-    await this.openDocumentDetails({ rowIndex });
-    await this.waitForDocViewerFlyoutOpen();
   }
 
   async openColumnMenuByField(field: string) {
@@ -324,10 +281,6 @@ export class DataGrid {
     await expandButton.click({ delay: 50 });
   }
 
-  async openDocViewerTab(tabId: string) {
-    await this.page.testSubj.click(`docViewerTab-${tabId}`);
-  }
-
   async openGridDisplaySettings() {
     await this.page.testSubj.click('dataGridDisplaySelectorButton');
   }
@@ -342,14 +295,6 @@ export class DataGrid {
   async openSelectedRowsMenu() {
     await this.page.testSubj.click('unifiedDataTableSelectionBtn');
     await this.page.testSubj.waitForSelector('unifiedDataTableSelectionMenu', { state: 'visible' });
-  }
-
-  async openSurroundingDocuments(rowIndex: number) {
-    await this.openAndWaitForDocViewerFlyout({ rowIndex });
-    await this.page.testSubj
-      .locator('docViewerFlyout')
-      .getByLabel('View surrounding documents')
-      .click();
   }
 
   async readJsonFromCodeEditor<T extends Record<string, unknown>>(): Promise<T> {
@@ -434,12 +379,8 @@ export class DataGrid {
     await input.waitFor({ state: 'visible' });
     await input.fill(newValue.toString());
     await input.press('Enter');
-    await this.waitUntilSearchingHasFinished();
+    await this.waitForLoad();
     await this.page.keyboard.press('Escape');
-  }
-
-  async toggleColumnInDocViewer(fieldName: string) {
-    await this.clickFieldActionInDocViewer(fieldName, 'toggleColumnButton');
   }
 
   async waitForDocTableRendered() {
@@ -477,12 +418,7 @@ export class DataGrid {
       .toBe(true);
   }
 
-  async waitForDocViewerFlyoutOpen() {
-    const docViewer = this.page.testSubj.locator('kbnDocViewer');
-    await docViewer.waitFor({ state: 'visible', timeout: 30_000 });
-  }
-
-  async waitUntilSearchingHasFinished() {
+  async waitForLoad() {
     try {
       await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
         state: 'visible',

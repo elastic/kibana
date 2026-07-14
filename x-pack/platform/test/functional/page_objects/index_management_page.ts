@@ -11,16 +11,16 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
   const retry = getService('retry');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['common', 'appMenu']);
 
   const browser = getService('browser');
   return {
     async sectionHeadingText() {
-      return await testSubjects.getVisibleText('appTitle');
+      return await testSubjects.getVisibleText('appHeaderTitle');
     },
 
     async expectToBeOnIndexManagement() {
-      const headingText = await testSubjects.getVisibleText('appTitle');
+      const headingText = await testSubjects.getVisibleText('appHeaderTitle');
       expect(headingText).to.be('Index Management');
     },
 
@@ -69,6 +69,17 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
       await find.clickByLinkText(name);
     },
 
+    async searchAndClickDataStreamNameLink(name: string): Promise<void> {
+      await retry.try(async () => {
+        await testSubjects.setValue('dataStreamSearch', name);
+        if (!(await find.existsByLinkText(name))) {
+          await testSubjects.click('reloadButton');
+          throw new Error(`Data stream "${name}" is not visible yet`);
+        }
+      });
+      await find.clickByLinkText(name);
+    },
+
     async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {
       const deleteButons = await testSubjects.findAll('deletePolicyButton');
       await deleteButons[indexOfRow].click();
@@ -94,8 +105,8 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
     async clickIndexAt(indexOfRow: number): Promise<void> {
       const indexList = await testSubjects.findAll('indexTableIndexNameLink');
       await indexList[indexOfRow].click();
-      await retry.waitFor('details page title to show up', async () => {
-        return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
+      await retry.waitFor('details page content to show up', async () => {
+        return (await testSubjects.isDisplayed('indexDetailsContent')) === true;
       });
     },
 
@@ -107,7 +118,7 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
     },
 
     async clickContextMenu() {
-      await testSubjects.click('indexActionsContextMenuButton');
+      await pageObjects.appMenu.clickMenuItem('indexActionsContextMenuButton');
     },
 
     async getIndexList() {
@@ -174,14 +185,14 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
       async openIndexDetailsPage(indexOfRow: number) {
         const indexList = await testSubjects.findAll('indexTableIndexNameLink');
         await indexList[indexOfRow].click();
-        await retry.waitFor('index details page title to show up', async () => {
-          return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
+        await retry.waitFor('index details page content to show up', async () => {
+          return (await testSubjects.isDisplayed('indexDetailsContent')) === true;
         });
       },
       async expectIndexDetailsPageIsLoaded() {
         await testSubjects.existOrFail('indexDetailsTab-overview');
         await testSubjects.existOrFail('indexDetailsContent');
-        await testSubjects.existOrFail('indexDetailsBackToIndicesButton');
+        await testSubjects.existOrFail('appHeaderBack');
       },
       async expectUrlShouldChangeTo(tabId: string) {
         const url = await browser.getCurrentUrl();

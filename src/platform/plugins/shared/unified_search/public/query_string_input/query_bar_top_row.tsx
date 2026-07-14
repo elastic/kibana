@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { EMPTY, delay, mergeMap, of } from 'rxjs';
+import { EMPTY, delay, distinctUntilChanged, mergeMap, of } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle, debounce } from 'lodash';
 
@@ -63,17 +63,22 @@ import {
   type DateRangePickerOnChangeProps,
   type AutoRefreshSettings,
 } from '@kbn/date-range-picker';
+import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
+import { EsqlApproximationToggle } from './esql_approximation_toggle';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
 import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
 import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
+import { QuerySubmitTrigger } from '../search_bar/query_submit_metadata';
 
 /** Feature flag key for the new DateRangePicker. Falls back to `true` (new picker). */
 const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
+const DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG =
+  'unifiedSearch.dateRangePickerPresetsPersistenceEnabled';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -159,7 +164,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onChange: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  onSubmit: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
+  onSubmit: (
+    payload: { dateRange: TimeRange; query?: Query | QT },
+    trigger?: QuerySubmitTrigger
+  ) => void;
   onSendToBackground: (payload: { dateRange: TimeRange; query?: Query | QT }) => Promise<void>;
   onCancel?: () => void;
   onDraftChange?: (draft: UnifiedSearchDraft | undefined) => void;
@@ -258,6 +266,15 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * the flag is disabled, the legacy picker is always used.
    */
   enableDateRangePicker?: boolean;
+  /**
+   * When provided, renders the ES|QL approximate execution toggle (bolt icon) before the date picker.
+   */
+  esqlApproximation?: {
+    isApproximate: boolean;
+    onChange: (isApproximate: boolean) => void;
+    additionalText?: string;
+    disabled?: boolean;
+  };
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -388,11 +405,46 @@ export const QueryBarTopRow = React.memo(
       http,
       dataViews,
       application,
+      featureFlags,
     } = kibana.services;
 
+    const isDateRangePickerFeatureFlagEnabled$ = useMemo(
+      () =>
+        enableDateRangePicker && featureFlags
+          ? featureFlags
+              .getBooleanValue$(DATE_RANGE_PICKER_FEATURE_FLAG, true)
+              .pipe(distinctUntilChanged())
+          : of(true),
+      [enableDateRangePicker, featureFlags]
+    );
+    const isDateRangePickerFeatureFlagEnabled = useObservable(
+      isDateRangePickerFeatureFlagEnabled$,
+      true
+    );
+
     const shouldUseLegacyTimePicker =
-      !enableDateRangePicker ||
-      !kibana.services.featureFlags?.getBooleanValue(DATE_RANGE_PICKER_FEATURE_FLAG, true);
+      !enableDateRangePicker || !isDateRangePickerFeatureFlagEnabled;
+
+    const isPresetsPersistenceFeatureFlagEnabled$ = useMemo(
+      () =>
+        featureFlags
+          ? featureFlags
+              .getBooleanValue$(DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG, true)
+              .pipe(distinctUntilChanged())
+          : of(true),
+      [featureFlags]
+    );
+    const isPresetsPersistenceFeatureFlagEnabled = useObservable(
+      isPresetsPersistenceFeatureFlagEnabled$,
+      true
+    );
+    const shouldPersistDateRangePickerPresets =
+      !shouldUseLegacyTimePicker && isPresetsPersistenceFeatureFlagEnabled;
+    const dateRangePickerPresets = useDateRangePickerPresets({
+      service: data.dateRangePickerPresets,
+      persistenceEnabled: shouldPersistDateRangePickerPresets,
+      notifications,
+    });
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
     const shouldRenderESQLUi = Boolean(showQueryInput && isQueryLangSelected);
@@ -468,12 +520,15 @@ export const QueryBarTopRow = React.memo(
     });
 
     const onSubmit = useCallback(
-      ({ query, dateRange }: { query?: Query | QT; dateRange: TimeRange }) => {
+      (
+        { query, dateRange }: { query?: Query | QT; dateRange: TimeRange },
+        trigger?: QuerySubmitTrigger
+      ) => {
         if (timeHistory) {
           timeHistory.add(dateRange);
         }
 
-        propsOnSubmit({ query, dateRange });
+        propsOnSubmit({ query, dateRange }, trigger);
       },
       [timeHistory, propsOnSubmit]
     );
@@ -484,10 +539,13 @@ export const QueryBarTopRow = React.memo(
           persistedLog.add(queryRef.current.query);
         }
         event.preventDefault();
-        onSubmit({
-          query: queryRef.current,
-          dateRange: dateRangeRef.current,
-        });
+        onSubmit(
+          {
+            query: queryRef.current,
+            dateRange: dateRangeRef.current,
+          },
+          QuerySubmitTrigger.QUERY_BAR_SUBMIT
+        );
       },
       [persistedLog, onSubmit]
     );
@@ -557,7 +615,7 @@ export const QueryBarTopRow = React.memo(
         };
 
         if (isQuickSelection) {
-          onSubmit(retVal);
+          onSubmit(retVal, QuerySubmitTrigger.TIME_FILTER);
         } else {
           propsOnChange(retVal);
         }
@@ -579,10 +637,13 @@ export const QueryBarTopRow = React.memo(
       ({ start, end, isInvalid }: DateRangePickerOnChangeProps) => {
         setIsDateRangeInvalid(isInvalid);
         if (!isInvalid) {
-          onSubmit({
-            query: queryRef.current,
-            dateRange: { from: start, to: end },
-          });
+          onSubmit(
+            {
+              query: queryRef.current,
+              dateRange: { from: start, to: end },
+            },
+            QuerySubmitTrigger.TIME_FILTER
+          );
         }
       },
       [onSubmit]
@@ -660,10 +721,13 @@ export const QueryBarTopRow = React.memo(
 
     const onInputSubmit = useCallback(
       (query: Query) => {
-        onSubmit({
-          query,
-          dateRange: dateRangeRef.current,
-        });
+        onSubmit(
+          {
+            query,
+            dateRange: dateRangeRef.current,
+          },
+          QuerySubmitTrigger.QUERY_BAR_SUBMIT
+        );
       },
       [onSubmit]
     );
@@ -844,8 +908,10 @@ export const QueryBarTopRow = React.memo(
               compressed
               collapsed={isMobile || isQueryInputFocused}
               showTimeWindowButtons
-              presets={commonlyUsedRanges}
+              presets={dateRangePickerPresets.presets}
               recent={recentlyUsedRanges}
+              onPresetSave={dateRangePickerPresets.onPresetSave}
+              onPresetDelete={dateRangePickerPresets.onPresetDelete}
               settings={dateRangePickerSettingsWithAutoRefresh}
               onSettingsChange={onDateRangePickerSettingsChange}
               onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}
@@ -1041,6 +1107,14 @@ export const QueryBarTopRow = React.memo(
               {shouldRenderESQLUi ? (
                 <>
                   {shouldRenderUpdateButton() ? button : null}
+                  {props.esqlApproximation && (
+                    <EsqlApproximationToggle
+                      isApproximate={props.esqlApproximation.isApproximate}
+                      onChange={props.esqlApproximation.onChange}
+                      additionalText={props.esqlApproximation.additionalText}
+                      disabled={props.esqlApproximation.disabled}
+                    />
+                  )}
                   {shouldRenderDatePicker() ? renderDatePicker() : null}
                 </>
               ) : (
@@ -1300,6 +1374,14 @@ export const QueryBarTopRow = React.memo(
                 {renderQueryInput()}
                 {props.renderQueryInputAppend?.()}
                 {shouldShowDatePickerAsBadge() && props.filterBar}
+                {props.esqlApproximation && (
+                  <EsqlApproximationToggle
+                    isApproximate={props.esqlApproximation.isApproximate}
+                    onChange={props.esqlApproximation.onChange}
+                    additionalText={props.esqlApproximation.additionalText}
+                    disabled={props.esqlApproximation.disabled}
+                  />
+                )}
                 {renderDatePickerWithUpdateBtn()}
               </EuiFlexGroup>
               {!shouldShowDatePickerAsBadge() && props.filterBar}

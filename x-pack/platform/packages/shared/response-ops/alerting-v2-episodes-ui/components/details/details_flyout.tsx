@@ -25,6 +25,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
+import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { isRuleLoaded } from '../../types/rule_state';
 import { useInvalidateEpisodeQueries } from '../../hooks/use_invalidate_episode_queries';
 import { FLYOUT_FOOTER_OFFSET, getAlertEpisodeDetailsPath } from '../../constants';
 import { AlertEpisodeDetailsHeaderSection } from './details_header_section';
@@ -32,12 +34,13 @@ import { AlertEpisodeOverviewSection } from './overview_section';
 import { AlertEpisodesRelatedSection } from './related_section';
 import { AlertEpisodeMetadataSection } from './metadata_section';
 import { AlertEpisodeRunbookSection } from './runbook_section';
+import { AlertEpisodeTimelineSection } from './timeline_section';
 import type { EpisodeAction } from '../../actions/types';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 import { EpisodeActionsBar } from '../episode_actions_bar';
 
-type TabId = 'overview' | 'related' | 'metadata' | 'runbook';
+type TabId = 'overview' | 'related' | 'timeline' | 'metadata' | 'runbook';
 
 export interface AlertEpisodeDetailsFlyoutProps {
   episodeId: string;
@@ -59,11 +62,18 @@ export const AlertEpisodeDetailsFlyout = ({
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
 
   const { data: episode } = useFetchEpisodeQuery({ episodeId, services });
+  const ruleId = episode?.['rule.id'];
+  const { ruleState } = useFetchRule({ id: ruleId, http: services.http });
+  const showRuleDependentTabs = isRuleLoaded(ruleState);
+
   const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
   const compatibleActions = useMemo(
     () => (actions && episodes.length ? actions.filter((a) => a.isCompatible({ episodes })) : []),
     [actions, episodes]
   );
+
+  const effectiveTab: TabId =
+    !showRuleDependentTabs && (tab === 'metadata' || tab === 'runbook') ? 'overview' : tab;
 
   return (
     <EuiFlyout
@@ -127,37 +137,48 @@ export const AlertEpisodeDetailsFlyout = ({
           <AlertEpisodeDetailsHeaderSection
             episodeId={episodeId}
             services={services}
-            titleSize="m"
+            titleSize="s"
           />
           <EuiTabs bottomBorder={false}>
             <EuiTab
-              isSelected={tab === 'overview'}
+              isSelected={effectiveTab === 'overview'}
               onClick={() => setTab('overview')}
               data-test-subj="alertingV2EpisodeFlyoutTabOverview"
             >
               {i18n.FLYOUT_TAB_OVERVIEW}
             </EuiTab>
             <EuiTab
-              isSelected={tab === 'related'}
+              isSelected={effectiveTab === 'related'}
               onClick={() => setTab('related')}
               data-test-subj="alertingV2EpisodeFlyoutTabRelated"
             >
               {i18n.FLYOUT_TAB_RELATED}
             </EuiTab>
             <EuiTab
-              isSelected={tab === 'metadata'}
-              onClick={() => setTab('metadata')}
-              data-test-subj="alertingV2EpisodeFlyoutTabMetadata"
+              isSelected={effectiveTab === 'timeline'}
+              onClick={() => setTab('timeline')}
+              data-test-subj="alertingV2EpisodeFlyoutTabTimeline"
             >
-              {i18n.FLYOUT_TAB_METADATA}
+              {i18n.FLYOUT_TAB_TIMELINE}
             </EuiTab>
-            <EuiTab
-              isSelected={tab === 'runbook'}
-              onClick={() => setTab('runbook')}
-              data-test-subj="alertingV2EpisodeFlyoutTabRunbook"
-            >
-              {i18n.FLYOUT_TAB_RUNBOOK}
-            </EuiTab>
+            {showRuleDependentTabs ? (
+              <>
+                <EuiTab
+                  isSelected={effectiveTab === 'metadata'}
+                  onClick={() => setTab('metadata')}
+                  data-test-subj="alertingV2EpisodeFlyoutTabMetadata"
+                >
+                  {i18n.FLYOUT_TAB_METADATA}
+                </EuiTab>
+                <EuiTab
+                  isSelected={effectiveTab === 'runbook'}
+                  onClick={() => setTab('runbook')}
+                  data-test-subj="alertingV2EpisodeFlyoutTabRunbook"
+                >
+                  {i18n.FLYOUT_TAB_RUNBOOK}
+                </EuiTab>
+              </>
+            ) : null}
           </EuiTabs>
         </EuiPanel>
       </EuiFlyoutHeader>
@@ -172,7 +193,7 @@ export const AlertEpisodeDetailsFlyout = ({
         // panel edge — same `:has()` selectors as the page, anchored on each
         // wrapper's stable direct child.
         css={
-          tab === 'metadata'
+          effectiveTab === 'metadata'
             ? css`
                 [class*='euiFlyoutBody__overflow']:not([class*='__overflowContent']) {
                   overflow: hidden;
@@ -193,19 +214,30 @@ export const AlertEpisodeDetailsFlyout = ({
                   padding-inline: ${euiTheme.size.m};
                 }
               `
+            : effectiveTab === 'timeline'
+            ? css`
+                padding: ${euiTheme.size.m};
+                // EuiFlyoutBody applies a static overflow-shadow mask that fades
+                // the top/bottom edges of the scroll container regardless of
+                // scrollability. The timeline's comment list starts flush at the
+                // top, so add inner top padding to clear the mask's fade band.
+                [class*='euiFlyoutBody__overflowContent'] {
+                  padding-block-start: ${euiTheme.size.s};
+                }
+              `
             : css`
                 padding: ${euiTheme.size.m};
               `
         }
       >
-        {tab === 'overview' && (
+        {effectiveTab === 'overview' && (
           <AlertEpisodeOverviewSection
             episodeId={episodeId}
             groupHash={groupHash}
             services={services}
           />
         )}
-        {tab === 'related' && (
+        {effectiveTab === 'related' && (
           <AlertEpisodesRelatedSection
             episodeId={episodeId}
             services={services}
@@ -213,7 +245,14 @@ export const AlertEpisodeDetailsFlyout = ({
             compressed
           />
         )}
-        {tab === 'metadata' && (
+        {effectiveTab === 'timeline' && (
+          <AlertEpisodeTimelineSection
+            episodeId={episodeId}
+            groupHash={groupHash}
+            services={services}
+          />
+        )}
+        {effectiveTab === 'metadata' && (
           <AlertEpisodeMetadataSection
             episodeId={episodeId}
             services={services}
@@ -225,7 +264,7 @@ export const AlertEpisodeDetailsFlyout = ({
             decreaseAvailableHeightBy={FLYOUT_FOOTER_OFFSET}
           />
         )}
-        {tab === 'runbook' && (
+        {effectiveTab === 'runbook' && (
           <AlertEpisodeRunbookSection episodeId={episodeId} services={services} />
         )}
       </EuiFlyoutBody>

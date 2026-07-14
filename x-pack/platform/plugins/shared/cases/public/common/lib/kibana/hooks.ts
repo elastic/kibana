@@ -48,9 +48,16 @@ export const useCasesConfig = () => {
       // TODO: flip defaults to `true` once attachments/templates are GA.
       // https://github.com/elastic/security-team/issues/15066
       attachmentsEnabled: config?.attachments?.enabled ?? false,
+      chatEnabled: config?.chat?.enabled ?? false,
       templatesEnabled: config?.templates?.enabled ?? false,
+      detailsRedesignEnabled: config?.casesRedesign?.details ?? false,
     }),
-    [config?.attachments?.enabled, config?.templates?.enabled]
+    [
+      config?.attachments?.enabled,
+      config?.chat?.enabled,
+      config?.templates?.enabled,
+      config?.casesRedesign?.details,
+    ]
   );
 };
 

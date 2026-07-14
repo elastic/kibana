@@ -1,0 +1,175 @@
+version: "1"
+name: "Significant Events Detection"
+description: "Detects statistically significant changes in alert firing patterns per rule using the Elasticsearch change_point aggregation. Writes an immutable change-point detection per rule on transition; lifecycle (recovered/quiet) is NOT determined here — it is read from the alerts by the discovery flow."
+enabled: true
+tags:
+  - observability
+  - streams
+  - significant-events
+  - detection
+settings:
+  timeout: "10m"
+  concurrency:
+    key: significant-events-detection
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      - name: lookback
+        type: string
+        default: "now-40m"
+        required: false
+        description: "Time window start for the change_point aggregation (ES date math, e.g. now-40m). Must give the change_point agg >= 22 buckets at the configured bucketInterval and be wide enough for a drop-to-silence to stand out (~40m at 1m buckets => ~41 buckets)."
+      - name: bucketInterval
+        type: string
+        default: "1m"
+        required: false
+        description: "Fixed interval for the date_histogram bucketing inside change_point. Must be >= the rule's alert emission cadence — a finer interval leaves alternate buckets empty, producing a 0/N sawtooth whose variance masks real drops (a recovery then misreads as `stationary`)."
+consts:
+  DETECTIONS_INDEX: ".significant_events-detections"
+  # Window used to look up a rule's most recent change-point detection when deciding whether the
+  # currently observed change_point_type is a transition. Must comfortably exceed the scan
+  # cadence so the prior detection is still visible.
+  LAST_DETECTION_LOOKBACK: "now-24h"
+steps:
+  # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
+  - name: set_init_vars
+    type: data.set
+    with:
+      spaceId: "{{ workflow.spaceId }}"
+  # -----------------------------------------------------------------------
+  # Pre-pass: early exit on idle spaces — one cheap count skips the expensive scan when there are
+  # no alerts (per-space scheduled workflow; many spaces may be idle). With no alert docs the
+  # change_point scan produces no buckets, so there is nothing to write.
+  # -----------------------------------------------------------------------
+  - name: count_alerts_in_lookback
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ variables.spaceId }}/internal/significant_events/detections/workflow/_count_alerts"
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        lookback: '{{ inputs.lookback }}'
+    on-failure:
+      continue: true
+
+  - name: compute_idle_counts
+    type: data.set
+    with:
+      alerts_count: "${{ steps.count_alerts_in_lookback.output.count | default: 1 }}"
+
+  - name: exit_no_active_alerts
+    type: workflow.output
+    if: "${{ steps.compute_idle_counts.output.alerts_count == 0 }}"
+    status: cancelled
+    with:
+      reason: "No recent alerts — change point scan skipped"
+
+  # -----------------------------------------------------------------------
+  # Step 1: Per-rule change_point over the main lookback.
+  # -----------------------------------------------------------------------
+  - name: run_change_point_aggregation
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ variables.spaceId }}/internal/significant_events/detections/workflow/_change_point_scan"
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        lookback: '{{ inputs.lookback }}'
+        bucketInterval: '{{ inputs.bucketInterval }}'
+
+  # -----------------------------------------------------------------------
+  # Step 2: Foreach rule bucket — observe the change_point type and write a DETECTION on transition.
+  # A detection is an immutable observation of the rule's change_point_type (the full vocabulary,
+  # including `stationary`/`non_stationary`). We write exactly one detection when the observed type
+  # differs from that rule's most recent detection — no lifecycle determination, no per-scan firehose.
+  # -----------------------------------------------------------------------
+  - name: foreach_rule
+    type: foreach
+    if: "${{ steps.run_change_point_aggregation.output.aggregations.by_rule.buckets != null }}"
+    foreach: "${{ steps.run_change_point_aggregation.output.aggregations.by_rule.buckets }}"
+    steps:
+      - name: compute_rule_context
+        # change_point_type computed once — the single key of the change_points.type object.
+        # has_rule_uuid guards writes: by_rule buckets with an empty key produce broken docs.
+        type: data.set
+        with:
+          change_point_type: "${{ foreach.item.change_points.type | entries | map: 'key' | first | default: '' }}"
+          has_rule_uuid: "${{ foreach.item.key != null and foreach.item.key != '' }}"
+
+      - name: check_last_detection
+        # Most recent DETECTION for this rule (detections carry change_point_type; processed markers do not,
+        # so `exists: change_point_type` excludes markers). Used to decide whether the observed
+        # type is a transition.
+        if: "${{ steps.compute_rule_context.output.has_rule_uuid }}"
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
+          body:
+            size: 1
+            sort:
+              - "@timestamp":
+                  order: desc
+            query:
+              bool:
+                filter:
+                  - term:
+                      kibana.space_ids: "{{ variables.spaceId }}"
+                  - term:
+                      rule_uuid: "{{ foreach.item.key }}"
+                  - exists:
+                      field: change_point_type
+                  - range:
+                      "@timestamp":
+                        gte: '{{ consts.LAST_DETECTION_LOOKBACK }}'
+        on-failure:
+          continue: true
+
+      - name: compute_transition
+        type: data.set
+        with:
+          # "" when the rule has no prior detection in the window; any observed type then reads as a
+          # transition (first observation for the rule).
+          last_change_point_type: "{% if steps.check_last_detection.output.hits.total.value > 0 %}{{ steps.check_last_detection.output.hits.hits[0]._source.change_point_type | default: '' }}{% else %}{% endif %}"
+          detection_p_value: "${{ foreach.item.change_points.type[steps.compute_rule_context.output.change_point_type].p_value | default: 0 }}"
+
+      - name: compute_write_gate
+        type: data.set
+        with:
+          # Write only when the observed change_point_type differs from the rule's last detection.
+          # A transient lookup error (check_last_detection runs on-failure:continue) must not force a
+          # write, so require error == null.
+          is_transition: >-
+            ${{ steps.compute_rule_context.output.has_rule_uuid
+            and steps.check_last_detection.error == null
+            and steps.compute_rule_context.output.change_point_type != ''
+            and steps.compute_rule_context.output.change_point_type != steps.compute_transition.output.last_change_point_type }}
+
+      - name: write_detection
+        # One immutable detection per transition. detection_id is minted fresh for every detection
+        # ({rule}-{execution}); latest-per-rule reads regroup by rule_uuid. No lifecycle fields
+        # and no cross-pipeline handoff fields — change_point_type/p_value are top-level.
+        if: "${{ steps.compute_write_gate.output.is_transition }}"
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
+          body:
+            "@timestamp": '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+            kibana:
+              space_ids:
+                - "{{ variables.spaceId }}"
+            detection_id: "{{ foreach.item.key }}-{{ execution.id }}"
+            rule_uuid: "{{ foreach.item.key }}"
+            rule_name: "{{ foreach.item.rule_name.top[0].metrics | entries | map: 'value' | first | default: 'unknown' }}"
+            stream_name: "{{ foreach.item.stream.buckets[0].key }}"
+            change_point_type: "{{ steps.compute_rule_context.output.change_point_type }}"
+            p_value: "${{ steps.compute_transition.output.detection_p_value }}"
+            alert_index: "{{ steps.run_change_point_aggregation.output.alertIndex }}"
+            workflow_execution_id: "{{ execution.id }}"
+        on-failure:
+          continue: true
