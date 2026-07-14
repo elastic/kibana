@@ -10,7 +10,7 @@ import {
   RULE_MIGRATION_VENDOR_COPY,
   type RuleMigrationVendor,
   type RuleMigrationVendorCopy,
-} from '../vendor_copy';
+} from '../translations';
 
 export const useRuleMigrationVendorCopy = (
   vendor: RuleMigrationVendor

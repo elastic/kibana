@@ -5,19 +5,9 @@
  * 2.0.
  */
 
-import {
-  QRADAR_COPYRIGHT_NOTICE,
-  SENTINEL_COPYRIGHT_NOTICE,
-  SPLUNK_COPYRIGHT_NOTICE,
-} from '../translations/data_input_flyouts';
-import { MigrationSource } from '../types';
-
-export const VENDOR_COPYRIGHT_NOTICES: Record<MigrationSource, string> = {
-  [MigrationSource.SPLUNK]: SPLUNK_COPYRIGHT_NOTICE,
-  [MigrationSource.QRADAR]: QRADAR_COPYRIGHT_NOTICE,
-  [MigrationSource.SENTINEL]: SENTINEL_COPYRIGHT_NOTICE,
-};
+import type { MigrationSource } from '../types';
+import { RULE_MIGRATION_VENDOR_COPY } from '../../rules/translations';
 
 export const getCopyrightNoticeByVendor = (vendor: MigrationSource): string => {
-  return VENDOR_COPYRIGHT_NOTICES[vendor];
+  return RULE_MIGRATION_VENDOR_COPY[vendor].copyrightNotice;
 };

@@ -210,7 +210,7 @@ describe('MigrationReadyPanel', () => {
 
     it.each([
       [MigrationSource.SPLUNK, 'Upload missing macros and lookup lists.'],
-      [MigrationSource.QRADAR, 'Upload missing reference sets and rule enhancements'],
+      [MigrationSource.QRADAR, 'Upload missing reference sets'],
       [MigrationSource.SENTINEL, 'Upload missing watchlists'],
     ])('should render missing resources button aria label for %s', async (vendor, ariaLabel) => {
       renderReadyPanel({ ...mockMigrationStatsReady, vendor });

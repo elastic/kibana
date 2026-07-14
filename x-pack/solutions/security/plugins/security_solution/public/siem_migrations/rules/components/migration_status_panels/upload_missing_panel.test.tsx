@@ -71,7 +71,7 @@ describe('RuleMigrationsUploadMissingPanel', () => {
 
   it.each([
     [MigrationSource.SPLUNK, 'Upload missing macros and lookup lists.'],
-    [MigrationSource.QRADAR, 'Upload missing reference sets and rule enhancements'],
+    [MigrationSource.QRADAR, 'Upload missing reference sets'],
     [MigrationSource.SENTINEL, 'Upload missing watchlists'],
   ])('renders the panel title for %s missing resources', (vendor, expectedTitle) => {
     let setMissingResourcesCallback: (resources: SiemMigrationResourceBase[]) => void = jest.fn();
