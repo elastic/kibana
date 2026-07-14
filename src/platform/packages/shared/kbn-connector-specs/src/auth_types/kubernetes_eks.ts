@@ -27,13 +27,10 @@ const authSchema = lazySchema(() =>
         .string()
         .min(1, { message: i18n.KUBERNETES_EKS_SECRET_ACCESS_KEY_REQUIRED_MESSAGE })
         .meta({ sensitive: true, label: i18n.KUBERNETES_EKS_SECRET_ACCESS_KEY_LABEL }),
-      region: z
-        .string()
-        .min(1, { message: i18n.KUBERNETES_EKS_REGION_REQUIRED_MESSAGE })
-        .meta({
-          label: i18n.KUBERNETES_EKS_REGION_LABEL,
-          helpText: i18n.KUBERNETES_EKS_REGION_HELP_TEXT,
-        }),
+      region: z.string().min(1, { message: i18n.KUBERNETES_EKS_REGION_REQUIRED_MESSAGE }).meta({
+        label: i18n.KUBERNETES_EKS_REGION_LABEL,
+        helpText: i18n.KUBERNETES_EKS_REGION_HELP_TEXT,
+      }),
       clusterName: z
         .string()
         .min(1, { message: i18n.KUBERNETES_EKS_CLUSTER_NAME_REQUIRED_MESSAGE })
