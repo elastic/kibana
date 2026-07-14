@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type { Detection, Discovery, SignificantEventStatus } from '@kbn/significant-events-schema';
-
-export const DETECTION_KIND_COLORS: Record<Detection['kind'], string> = {
-  detection: 'warning',
-  quiet: 'success',
-  handled: 'primary',
-};
+import type { Discovery, SignificantEventStatus } from '@kbn/significant-events-schema';
 
 export const DISCOVERY_KIND_COLORS: Record<Discovery['kind'], string> = {
   discovery: 'warning',
