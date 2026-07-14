@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosInstance, AxiosResponse } from 'axios';
+import type {
+  AxiosInstance,
+  AxiosResponse,
+  AxiosResponseHeaders,
+  RawAxiosResponseHeaders,
+} from 'axios';
 import type { FetchLike } from '@kbn/mcp-client';
 
 /**
@@ -128,9 +133,7 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
     // the GET SSE channel immediately after. Pre-create the gate here so tool-call
     // POSTs can await it, preferring the session id the server just assigned.
     if (res.status === 202) {
-      const responseSessionId =
-        getHeaderValue((res.headers ?? {}) as Record<string, unknown>, MCP_SESSION_HEADER) ||
-        sessionId;
+      const responseSessionId = getHeaderValue(res.headers, MCP_SESSION_HEADER) || sessionId;
       ensureChannelGate(responseSessionId);
     }
 
@@ -169,7 +172,10 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
 }
 
 // Case-insensitive lookup since header keys may arrive in varying case.
-function getHeaderValue(headers: Record<string, unknown>, name: string): string {
+function getHeaderValue(
+  headers: RawAxiosResponseHeaders | AxiosResponseHeaders,
+  name: string
+): string {
   const lowerName = name.toLowerCase();
   for (const [key, value] of Object.entries(headers)) {
     if (key.toLowerCase() === lowerName) {
