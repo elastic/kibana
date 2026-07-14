@@ -26,7 +26,7 @@ describe('createTraceContextWhereClause', () => {
       createTraceContextWhereClause({ traceId: 'abc123', spanId: 'span456' })
     );
     expect(pipeline.toString()).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND span.id == "span456"'
+      'FROM foo-*\n  | WHERE trace.id == "abc123" AND KQL("span.id: \\"span456\\"")'
     );
   });
   it('returns a pipeline with traceId and transactionId', () => {
@@ -34,7 +34,7 @@ describe('createTraceContextWhereClause', () => {
       createTraceContextWhereClause({ traceId: 'abc123', transactionId: 'txn789' })
     );
     expect(pipeline.toString()).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND transaction.id == "txn789"'
+      'FROM foo-*\n  | WHERE trace.id == "abc123" AND KQL("transaction.id: \\"txn789\\"")'
     );
   });
 
@@ -47,7 +47,7 @@ describe('createTraceContextWhereClause', () => {
       })
     );
     expect(pipeline.toString()).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND (transaction.id == "txn789" OR span.id == "span456")'
+      'FROM foo-*\n  | WHERE trace.id == "abc123" AND KQL("transaction.id: \\"txn789\\" OR span.id: \\"span456\\"")'
     );
   });
 });
@@ -65,7 +65,7 @@ describe('createTraceContextWhereClauseForErrors', () => {
       createTraceContextWhereClauseForErrors({ traceId: 'abc123', spanId: 'span456' })
     );
     expect(pipeline.toString()).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND span.id == "span456" AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
+      'FROM foo-*\n  | WHERE trace.id == "abc123" AND KQL("span.id: \\"span456\\"") AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
     );
   });
 
@@ -74,7 +74,7 @@ describe('createTraceContextWhereClauseForErrors', () => {
       createTraceContextWhereClauseForErrors({ traceId: 'abc123', transactionId: 'txn789' })
     );
     expect(pipeline.toString()).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND transaction.id == "txn789" AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
+      'FROM foo-*\n  | WHERE trace.id == "abc123" AND KQL("transaction.id: \\"txn789\\"") AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
     );
   });
 
@@ -87,7 +87,7 @@ describe('createTraceContextWhereClauseForErrors', () => {
       })
     );
     expect(pipeline.toString()).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND (transaction.id == "txn789" OR span.id == "span456") AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
+      'FROM foo-*\n  | WHERE trace.id == "abc123" AND KQL("transaction.id: \\"txn789\\" OR span.id: \\"span456\\"") AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
     );
   });
 });

@@ -21,12 +21,14 @@ const createBaseTraceContextFilters = ({
 }) => {
   let queryString = `${TRACE_ID_FIELD} == ?traceId`;
 
-  if (transactionId && spanId) {
-    queryString += ` AND (${TRANSACTION_ID_FIELD} == ?transactionId OR ${SPAN_ID_FIELD} == ?spanId)`;
-  } else if (transactionId) {
-    queryString += ` AND ${TRANSACTION_ID_FIELD} == ?transactionId`;
-  } else if (spanId) {
-    queryString += ` AND ${SPAN_ID_FIELD} == ?spanId`;
+  // transaction.id and span.id may not be mapped in all log indices (e.g. OTel logs lack
+  // transaction.id), so a plain ES|QL field reference would throw a verification_exception.
+  // KQL() gracefully returns false for documents where the field is absent.
+  const kqlParts: string[] = [];
+  if (transactionId) kqlParts.push(`${TRANSACTION_ID_FIELD}: "${transactionId}"`);
+  if (spanId) kqlParts.push(`${SPAN_ID_FIELD}: "${spanId}"`);
+  if (kqlParts.length > 0) {
+    queryString += ` AND KQL("""${kqlParts.join(' OR ')}""")`;
   }
 
   return queryString;
@@ -42,9 +44,8 @@ export const createTraceContextWhereClause = ({
   transactionId?: string;
 }) => {
   const queryString = createBaseTraceContextFilters({ traceId, spanId, transactionId });
-  const params = [{ traceId }, { transactionId }, { spanId }];
 
-  return where(queryString, params);
+  return where(queryString, [{ traceId }]);
 };
 
 export const createTraceContextWhereClauseForErrors = ({
@@ -67,7 +68,5 @@ export const createTraceContextWhereClauseForErrors = ({
 
   queryString += ` AND  KQL("""${conditions.join(' OR ')}""")`;
 
-  const params = [{ traceId }, { transactionId }, { spanId }];
-
-  return where(queryString, params);
+  return where(queryString, [{ traceId }]);
 };
