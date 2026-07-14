@@ -38,7 +38,7 @@ export class ServerlessVectordbPlugin
         defaultMessage: 'Vector DB',
       }),
       appRoute: '/app/vectordb',
-      euiIconType: 'logoElasticsearch',
+      euiIconType: 'logoVectorDB',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       deepLinks: [
         {
