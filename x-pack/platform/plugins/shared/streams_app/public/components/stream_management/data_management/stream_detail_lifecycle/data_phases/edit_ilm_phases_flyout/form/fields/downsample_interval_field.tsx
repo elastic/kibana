@@ -10,15 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { useController, useFormContext, useWatch, type FieldPath } from 'react-hook-form';
 
+import { getIntervalBoundHelpText, type HelpTextBound } from '@kbn/data-lifecycle-phases';
 import type { DownsamplePhase, PreservedTimeUnit, TimeUnit } from '../types';
 import { DOWNSAMPLE_PHASES } from '../types';
-import {
-  formatDuration,
-  getIntervalBoundHelpText,
-  getMultipleStepAttributes,
-  getUnitSelectOptions,
-  type HelpTextBound,
-} from '../../../shared';
+import { formatDuration, getMultipleStepAttributes, getUnitSelectOptions } from '../../../shared';
 import { getRelativeBoundsInMs } from '../utils';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';
 import type { IlmPhasesFlyoutFormInternal } from '../types';
