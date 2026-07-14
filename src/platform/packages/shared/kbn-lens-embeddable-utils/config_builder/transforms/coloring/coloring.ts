@@ -8,7 +8,7 @@
  */
 
 import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { DEFAULT_COLOR_STEPS } from '@kbn/coloring';
+import { CUSTOM_PALETTE, DEFAULT_COLOR_STEPS } from '@kbn/coloring';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   AllColoringTypes,
@@ -156,9 +156,9 @@ export function fromColorByValueAPIToLensState(
 
   return {
     type: 'palette',
-    name: 'custom',
+    name: CUSTOM_PALETTE,
     params: {
-      name: 'custom',
+      name: CUSTOM_PALETTE,
       progression: 'fixed', // to be removed
       reverse: false, // always applied to steps during transform
       // @ts-expect-error - This can be null
@@ -195,13 +195,13 @@ export function fromColorByValueLensStateToAPI(
   if (!colorParams) return;
 
   // config.name is the root palette identifier used by the runtime palette service
-  const palette = config.name ?? colorParams.name ?? 'custom';
+  const palette = config.name ?? colorParams.name ?? CUSTOM_PALETTE;
   const rangeMin = getRangeValue(colorParams.rangeMin);
   const rangeMax = getRangeValue(colorParams.rangeMax);
 
   // A named (non-custom) palette maps to a `distributed_palette`, where the palette
   // service owns the individual bands, so the per-band stops are dropped.
-  if (palette !== 'custom') {
+  if (palette !== CUSTOM_PALETTE) {
     return {
       type: 'distributed_palette',
       palette,

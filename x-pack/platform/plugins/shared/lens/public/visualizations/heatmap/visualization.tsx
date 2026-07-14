@@ -134,7 +134,7 @@ function computePaletteParams(
     ...palette.params,
     colors,
     // Positions are a custom-palette concept only; named palettes distribute uniformly at render.
-    stops: palette.params?.name === 'custom' ? stops : [],
+    stops: palette.params?.name === CUSTOM_PALETTE ? stops : [],
     reverse: false, // managed at UI level
   };
 }
