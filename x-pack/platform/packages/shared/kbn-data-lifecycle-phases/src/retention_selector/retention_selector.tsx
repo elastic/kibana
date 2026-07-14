@@ -223,7 +223,12 @@ export const RetentionSelector = ({
           </EuiPanel>
         </EuiFlexItem>
       ) : (
-        <EuiFlexItem grow={false} ref={listScrollRef} data-test-subj="retentionSelectorListScroll">
+        <EuiFlexItem
+          grow={false}
+          ref={listScrollRef}
+          data-test-subj="retentionSelectorListScroll"
+          css={styles.paddedSection}
+        >
           {list}
         </EuiFlexItem>
       )}

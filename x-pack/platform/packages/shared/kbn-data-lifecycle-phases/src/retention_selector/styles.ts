@@ -36,11 +36,20 @@ export const getRetentionSelectorStyles = ({
   `,
   selectable: css`
     .euiSelectableListItem {
-      padding: ${euiTheme.size.s} ${euiTheme.size.l};
+      padding-block: ${euiTheme.size.s};
     }
 
+    /*
+     * EUI's text column is flex-grow:1 but has no min-width, so a long,
+     * unbroken option name keeps its intrinsic width and pushes the append
+     * action (e.g. the inspect button) out of the row. Allowing it to shrink
+     * lets the row's own ellipsis styles truncate the name. We can't use
+     * listProps.textWrap="truncate" here because that collapses the whole
+     * multi-line row (name + description) onto a single truncated line.
+     */
     .euiSelectableListItem__text {
       padding-block: 0;
+      min-width: 0;
     }
   `,
   scrollContainer:
