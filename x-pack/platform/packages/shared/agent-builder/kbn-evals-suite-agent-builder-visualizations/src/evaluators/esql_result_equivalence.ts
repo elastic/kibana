@@ -46,6 +46,24 @@ export interface NormalizeOptions {
    * Example: `floatTolerance: 2` rounds `1.005123` to `1.01`.
    */
   floatTolerance?: number;
+  /**
+   * Compare each row as an unordered *multiset of cell values*, ignoring
+   * column names and column order. Defaults to `false` (positional
+   * comparison, matching the original ported behaviour).
+   *
+   * Visualization queries routinely differ only cosmetically in their output
+   * shape — `RENAME response.keyword AS \`Response Code\`` and reordering via
+   * `KEEP \`Response Code\`, \`Requests\`` produce the same data under
+   * different column names/positions. Positional comparison scores those a
+   * spurious 0. Sorting cell values per row makes the comparison robust to
+   * both renames and reordering.
+   *
+   * Trade-off: two genuinely different queries that happen to emit the same
+   * set of values in different columns would be treated as equal. For the
+   * label + measure shape of chart-backing queries this is an acceptable and
+   * deliberate loosening.
+   */
+  ignoreColumnIdentity?: boolean;
 }
 
 /**
@@ -71,7 +89,12 @@ function normalizeRows(
   values: unknown[][],
   options: NormalizeOptions
 ): string[] {
-  const { sortRows = true, ignoreFields = [], floatTolerance } = options;
+  const {
+    sortRows = true,
+    ignoreFields = [],
+    floatTolerance,
+    ignoreColumnIdentity = false,
+  } = options;
 
   const keepIndices = columns
     .map((col, idx) => ({ col, idx }))
@@ -80,6 +103,11 @@ function normalizeRows(
 
   const serialized = values.map((row) => {
     const kept = keepIndices.map((idx) => serializeValue(row[idx], floatTolerance));
+    if (ignoreColumnIdentity) {
+      // Sort per-cell JSON so column order / rename doesn't affect the row key.
+      const cells = kept.map((cell) => JSON.stringify(cell)).sort();
+      return JSON.stringify(cells);
+    }
     return JSON.stringify(kept);
   });
 

@@ -28,7 +28,13 @@ node scripts/evals run --suite agent-builder-visualizations
 
 ## Dataset
 
-Seed examples live inline in `evals/visualization_creation/visualization_creation.spec.ts` and target the `kibana_sample_data_logs` index (loaded in `beforeAll`). Grow this to 20–30 real prompts with ground-truth ES|QL and expected chart types.
+Seed examples live inline in `evals/visualization_creation/visualization_creation.spec.ts`. Most target the `kibana_sample_data_logs` index (loaded in `beforeAll`). Two examples reproduce an OTel host-metrics `TS` failure seen in dashboard-level evals and target a self-contained TSDB fixture, `metrics-hostmetricsreceiver.otel-default` (`system.cpu.load_average.{1m,5m,15m}` gauges, `host.name` dimension), created and torn down by `src/fixtures/setup.ts`. Grow this to 20–30 real prompts with ground-truth ES|QL and expected chart types.
+
+**Gold queries follow the agent's idiom.** Each gold query includes the raw-`@timestamp` time filter (`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`) and the auto-bucket-count form (`BUCKET(@timestamp, 75, ?_tstart, ?_tend)` / `TBUCKET(75, ?_tstart, ?_tend)`) the default agent emits, rather than fixed intervals. This keeps the gold and candidate structurally parallel so the equivalence evaluators measure real differences instead of cosmetic ones. The `?_tstart` / `?_tend` bind params substitute to a **now-relative** window (see `src/evaluators/esql_bind_params.ts`), which is why the OTel fixture is seeded with now-relative timestamps — a single realistic window brackets both `kibana_sample_data_logs` (anchored around install time) and the OTel samples.
+
+### OTel metrics fixture
+
+`src/fixtures` builds the TSDB index the CPU-load examples execute against. Because Elasticsearch ships a managed `metrics-otel@template` (priority 120) that forces `metrics-*.otel-*` names to be data streams, `setupOtelMetricsFixtures` first registers a higher-priority (500) override template with no `data_stream` block so the fixture can be created as a plain TSDB index with the exact field paths the gold `TS` query references. These examples specifically guard against the failure where the agent leaves the `.1m` / `.5m` / `.15m` field paths unquoted (Elasticsearch lexes `.1m` as a numeric literal → `parsing_exception`).
 
 ## Notes
 

@@ -180,6 +180,10 @@ export function createEvaluateDataset({
     esClient,
     predictionExtractor,
     groundTruthExtractor,
+    // Visualization queries differ cosmetically in output shape (column
+    // aliases via RENAME, reordering via KEEP). Compare rows as unordered
+    // value multisets so those differences don't produce a spurious 0.
+    normalize: { ignoreColumnIdentity: true },
   });
 
   const esqlResultEquivalenceEvaluator: VisualizationAgentEvaluator = {

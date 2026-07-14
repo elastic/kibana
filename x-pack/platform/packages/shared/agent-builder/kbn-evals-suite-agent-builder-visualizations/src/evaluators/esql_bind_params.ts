@@ -19,11 +19,36 @@
  * Unknown query parameter [_tstart]`. Substituting before execution
  * unblocks the query so the underlying intent can be measured.
  *
- * The window is intentionally wide (`2000-01-01` → `2100-12-31`) so the
- * substitution never artificially excludes fixture rows.
+ * The window is **now-relative** and deliberately moderate rather than the
+ * old 100-year span. Two reasons:
+ *
+ * 1. The agent emits the auto-bucket-count form
+ *    `BUCKET(@timestamp, 75, ?_tstart, ?_tend)` / `TBUCKET(75, ...)`, which
+ *    divides the substituted window into ~75 buckets. A 100-year window
+ *    collapsed every time-series query into a single ~1.3-year bucket
+ *    (1 row), which — against a fixed-interval gold — produced a spurious
+ *    zero from the result-equivalence evaluator. A realistic window keeps
+ *    bucketing meaningful.
+ * 2. It brackets both fixtures: `kibana_sample_data_logs` (anchored around
+ *    install time, i.e. now) and the OTel host-metrics TSDB fixture (seeded
+ *    in the last few hours — see `src/fixtures`). A fixed calendar window
+ *    could not cover both because the sample-data timestamps move with the
+ *    install date.
  */
-export const DEFAULT_TSTART = '2000-01-01T00:00:00.000Z';
-export const DEFAULT_TEND = '2100-12-31T23:59:59.999Z';
+const DEFAULT_LOOKBACK_MS = 60 * 24 * 60 * 60 * 1000; // 60 days
+const DEFAULT_LOOKAHEAD_MS = 2 * 24 * 60 * 60 * 1000; // 2 days
+
+/**
+ * Compute the default `?_tstart` / `?_tend` bounds relative to the current
+ * time. Evaluated per call (not a module constant) so the window always
+ * tracks `now` and never goes stale.
+ */
+export function getDefaultTimeBounds(now: number = Date.now()): { tstart: string; tend: string } {
+  return {
+    tstart: new Date(now - DEFAULT_LOOKBACK_MS).toISOString(),
+    tend: new Date(now + DEFAULT_LOOKAHEAD_MS).toISOString(),
+  };
+}
 
 /**
  * Pattern matching the agent's named time bind parameters. `\b` after
@@ -51,7 +76,8 @@ export function substituteEsqlBindParams(
   overrides?: { tstart?: string; tend?: string }
 ): string {
   if (typeof query !== 'string' || query.length === 0) return query;
-  const tstart = overrides?.tstart ?? DEFAULT_TSTART;
-  const tend = overrides?.tend ?? DEFAULT_TEND;
+  const defaults = getDefaultTimeBounds();
+  const tstart = overrides?.tstart ?? defaults.tstart;
+  const tend = overrides?.tend ?? defaults.tend;
   return query.replace(TSTART_TOKEN, `"${tstart}"`).replace(TEND_TOKEN, `"${tend}"`);
 }
