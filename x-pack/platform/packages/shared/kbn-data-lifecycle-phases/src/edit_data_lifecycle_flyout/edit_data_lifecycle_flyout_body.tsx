@@ -37,6 +37,8 @@ export interface EditDataLifecycleFlyoutBodyIlmConfig {
   isLoadingInherited?: boolean;
   onSelect: (policyName: string) => void;
   onInspect?: (policyName: string) => void;
+  canManage?: boolean;
+  hasExistingPolicy?: boolean;
 }
 
 export interface EditDataLifecycleFlyoutBodyProps {
@@ -74,6 +76,10 @@ export const EditDataLifecycleFlyoutBody = (props: EditDataLifecycleFlyoutBodyPr
 
   const ilmPolicies = props.ilm?.policies ?? EMPTY_ILM_POLICIES;
   const selectedIlmPolicyName = props.ilm?.selectedPolicyName;
+  const canManageIlm = props.ilm?.canManage ?? true;
+  const hasExistingIlmPolicy = props.ilm?.hasExistingPolicy ?? false;
+  const ilmReadOnly = inheritLifecycle || !canManageIlm;
+  const ilmCardDisabled = !canManageIlm && !hasExistingIlmPolicy;
 
   const dataStreamLifecycleContentForUi = props.dataStreamLifecycleContent ? (
     // Force a remount when toggling inheritance so uncontrolled inputs can't keep a locally edited value.
@@ -120,11 +126,15 @@ export const EditDataLifecycleFlyoutBody = (props: EditDataLifecycleFlyoutBodyPr
   }, [retentionOptions, pinnedPolicyName]);
 
   const visibleRetentionOptions = useMemo(() => {
-    if (!inheritLifecycle) return sortedRetentionOptions;
-    // When inheriting, only the inherited policy should appear. The empty-list
-    // case (no inherited policy) is handled upstream by a no-policy panel.
-    return sortedRetentionOptions.filter((option) => option.name === selectedIlmPolicyName);
-  }, [inheritLifecycle, sortedRetentionOptions, selectedIlmPolicyName]);
+    if (!ilmReadOnly) return sortedRetentionOptions;
+    if (!selectedIlmPolicyName) return [];
+    // In read-only mode only the applied policy should appear.
+    const matching = sortedRetentionOptions.filter(
+      (option) => option.name === selectedIlmPolicyName
+    );
+
+    return matching.length > 0 ? matching : [{ name: selectedIlmPolicyName }];
+  }, [ilmReadOnly, sortedRetentionOptions, selectedIlmPolicyName]);
 
   const flyoutScrollContainerRef = useRef<HTMLDivElement>(null);
   const flyoutScrollContainerRefForContent: RefObject<HTMLElement | null> | undefined =
@@ -135,6 +145,8 @@ export const EditDataLifecycleFlyoutBody = (props: EditDataLifecycleFlyoutBodyPr
       <EditDataLifecycleFlyoutBodyContent
         flyoutScrollContainerRef={flyoutScrollContainerRefForContent}
         inheritLifecycle={inheritLifecycle}
+        ilmReadOnly={ilmReadOnly}
+        ilmCardDisabled={ilmCardDisabled}
         lifecycleMethod={lifecycleMethod}
         showLifecycleMethodPicker={showLifecycleMethodPicker}
         inherit={

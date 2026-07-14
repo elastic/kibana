@@ -29,6 +29,16 @@ export const EvaluateRequestBody = lazySchema(() =>
         )
         .min(1)
         .max(1),
+      evidence_mapping: z
+        .object({
+          profile: z.enum([
+            'elastic-inference',
+            'otel-genai-events',
+            'otel-genai-attributes',
+            'claude-code',
+          ]),
+        })
+        .optional(),
     }),
     evaluators: z
       .array(
@@ -68,6 +78,7 @@ export const EvaluateResponse = lazySchema(() =>
           .optional(),
         error: z
           .object({
+            code: z.literal('evidence_unmet').optional(),
             message: z.string().max(8192),
           })
           .optional(),
