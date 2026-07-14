@@ -341,17 +341,26 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   // Entity tool flyouts.
   const openEntityRiskInputs = useCallback(
     ({ title, ...props }: OpenEntityRiskInputsParams) =>
-      open(<RiskInputs {...props} />, toolProperties(title ?? formatFlyoutTitle(RISK_INPUTS_TITLE, props.entityName))),
+      open(
+        <RiskInputs {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(RISK_INPUTS_TITLE, props.entityName))
+      ),
     [open, toolProperties]
   );
   const openEntityAnomalyInsights = useCallback(
     ({ title, ...props }: OpenEntityAnomalyInsightsParams) =>
-      open(<AnomalyInsights {...props} />, toolProperties(title ?? formatFlyoutTitle(ANOMALY_INSIGHTS_TITLE, props.value))),
+      open(
+        <AnomalyInsights {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(ANOMALY_INSIGHTS_TITLE, props.value))
+      ),
     [open, toolProperties]
   );
   const openEntityAlertsInsights = useCallback(
     ({ title, ...props }: OpenEntityAlertsInsightsParams) =>
-      open(<AlertsInsights {...props} />, toolProperties(title ?? formatFlyoutTitle(ALERTS_INSIGHTS_TITLE, props.value))),
+      open(
+        <AlertsInsights {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(ALERTS_INSIGHTS_TITLE, props.value))
+      ),
     [open, toolProperties]
   );
   const openEntityMisconfigurationInsights = useCallback(
@@ -372,27 +381,42 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   );
   const openEntityGraphView = useCallback(
     ({ title, ...props }: OpenEntityGraphViewParams) =>
-      open(<GraphView {...props} />, toolProperties(title ?? formatFlyoutTitle(ENTITY_GRAPH_VIEW_TITLE, props.entityName))),
+      open(
+        <GraphView {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(ENTITY_GRAPH_VIEW_TITLE, props.entityName))
+      ),
     [open, toolProperties]
   );
   const openEntityResolution = useCallback(
     ({ title, ...props }: OpenEntityResolutionParams) =>
-      open(<Resolution {...props} />, toolProperties(title ?? formatFlyoutTitle(RESOLUTION_TITLE, props.entityName))),
+      open(
+        <Resolution {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(RESOLUTION_TITLE, props.entityName))
+      ),
     [open, toolProperties]
   );
   const openEntityEntraInsights = useCallback(
     ({ title, ...props }: OpenEntityEntraInsightsParams) =>
-      open(<EntraInsights {...props} />, toolProperties(title ?? formatFlyoutTitle(ENTRA_INSIGHTS_TITLE, props.value))),
+      open(
+        <EntraInsights {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(ENTRA_INSIGHTS_TITLE, props.value))
+      ),
     [open, toolProperties]
   );
   const openEntityOktaInsights = useCallback(
     ({ title, ...props }: OpenEntityOktaInsightsParams) =>
-      open(<OktaInsights {...props} />, toolProperties(title ?? formatFlyoutTitle(OKTA_INSIGHTS_TITLE, props.value))),
+      open(
+        <OktaInsights {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(OKTA_INSIGHTS_TITLE, props.value))
+      ),
     [open, toolProperties]
   );
   const openEntityFieldsTable = useCallback(
     ({ title, ...props }: OpenEntityFieldsTableParams) =>
-      open(<FieldsTableTool {...props} />, toolProperties(title ?? formatFlyoutTitle(FIELDS_TABLE_TITLE, props.entityName))),
+      open(
+        <FieldsTableTool {...props} />,
+        toolProperties(title ?? formatFlyoutTitle(FIELDS_TABLE_TITLE, props.entityName))
+      ),
     [open, toolProperties]
   );
 

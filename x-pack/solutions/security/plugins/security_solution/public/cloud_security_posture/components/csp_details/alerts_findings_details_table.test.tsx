@@ -75,7 +75,9 @@ jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () =
   useNavigateToAlertsPageWithFilters: jest.fn().mockReturnValue(jest.fn()),
 }));
 
-const renderTable = (onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void) =>
+const renderTable = (
+  onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void
+) =>
   render(
     <TestProviders>
       <AlertsDetailsTable

@@ -209,7 +209,11 @@ describe('useEntityFlyoutApi', () => {
 
   it('openEntityAlertsInsights uses the caller-provided title when given', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
-    result.current.openEntityAlertsInsights({ entityType: 'host', value: 'my-host', title: 'Custom' });
+    result.current.openEntityAlertsInsights({
+      entityType: 'host',
+      value: 'my-host',
+      title: 'Custom',
+    });
 
     expect(mockOpenSystemFlyout.mock.calls[0][1].title).toBe('Custom');
   });

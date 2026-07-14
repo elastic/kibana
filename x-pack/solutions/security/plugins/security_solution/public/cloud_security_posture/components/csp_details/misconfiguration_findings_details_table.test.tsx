@@ -57,7 +57,9 @@ jest.mock('../../../common/components/links', () => ({
   ),
 }));
 
-const renderTable = (onShowFinding: (resourceId: string, ruleId: string, ruleName?: string) => void) =>
+const renderTable = (
+  onShowFinding: (resourceId: string, ruleId: string, ruleName?: string) => void
+) =>
   render(
     <TestProviders>
       <MisconfigurationFindingsDetailsTable
