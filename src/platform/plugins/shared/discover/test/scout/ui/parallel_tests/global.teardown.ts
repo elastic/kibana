@@ -14,10 +14,13 @@ import {
 } from '../fixtures/metrics_experience/constants';
 
 globalTeardownHook('Teardown Discover tests data', async ({ esClient, apiServices, log }) => {
-  log.debug('[teardown:discover] resetting isEsqlDefault feature flag');
+  log.debug(
+    '[teardown:discover] resetting isEsqlDefault & metricsEditGridSettingsEnabled feature flag'
+  );
   await apiServices.core.settings({
     'feature_flags.overrides': {
       'discover.isEsqlDefault': null,
+      'discover.metricsEditGridSettingsEnabled': null,
     },
   });
 
