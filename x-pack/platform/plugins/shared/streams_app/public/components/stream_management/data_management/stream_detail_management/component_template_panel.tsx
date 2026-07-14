@@ -126,6 +126,9 @@ export function ComponentTemplatePanel({
     >
       {componentTemplates && (
         <EuiInMemoryTable
+          tableCaption={i18n.translate('xpack.streams.componentTemplatePanel.tableCaption', {
+            defaultMessage: 'Component templates',
+          })}
           items={componentTemplates}
           columns={columns}
           tableLayout={'auto'}

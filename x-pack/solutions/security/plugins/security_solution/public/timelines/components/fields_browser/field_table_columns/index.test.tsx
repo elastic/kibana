@@ -54,7 +54,7 @@ describe('useFieldTableColumns', () => {
     });
 
     const { container, getByTestId } = render(
-      <EuiInMemoryTable items={[fieldItem]} columns={columns} />,
+      <EuiInMemoryTable tableCaption="Fields browser table" items={[fieldItem]} columns={columns} />,
       {
         wrapper: TestProviders,
       }
@@ -74,7 +74,7 @@ describe('useFieldTableColumns', () => {
     });
 
     const { container, queryByTestId } = render(
-      <EuiInMemoryTable items={[fieldItem]} columns={columns} />,
+      <EuiInMemoryTable tableCaption="Fields browser table" items={[fieldItem]} columns={columns} />,
       {
         wrapper: TestProviders,
       }
@@ -94,7 +94,7 @@ describe('useFieldTableColumns', () => {
     });
 
     const { container, queryByTestId } = render(
-      <EuiInMemoryTable items={[{ ...fieldItem, isRuntime: false }]} columns={columns} />,
+      <EuiInMemoryTable tableCaption="Fields browser table" items={[{ ...fieldItem, isRuntime: false }]} columns={columns} />,
       {
         wrapper: TestProviders,
       }
@@ -113,7 +113,7 @@ describe('useFieldTableColumns', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
+    const { getByTestId } = render(<EuiInMemoryTable tableCaption="Fields browser table" items={[fieldItem]} columns={columns} />, {
       wrapper: TestProviders,
     });
 
@@ -131,7 +131,7 @@ describe('useFieldTableColumns', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
+    const { getByTestId } = render(<EuiInMemoryTable tableCaption="Fields browser table" items={[fieldItem]} columns={columns} />, {
       wrapper: TestProviders,
     });
 
@@ -148,7 +148,7 @@ describe('useFieldTableColumns', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
+    const { getByTestId } = render(<EuiInMemoryTable tableCaption="Fields browser table" items={[fieldItem]} columns={columns} />, {
       wrapper: TestProviders,
     });
 

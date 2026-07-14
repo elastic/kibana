@@ -208,6 +208,7 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
         <EuiSkeletonText lines={5} />
       ) : (
         <EuiBasicTable
+          tableCaption={i18n.FIELD_DEFINITIONS_TABLE_CAPTION}
           items={fieldDefinitions}
           rowHeader="name"
           columns={columns}

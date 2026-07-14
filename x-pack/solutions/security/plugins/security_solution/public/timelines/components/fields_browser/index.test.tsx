@@ -153,7 +153,7 @@ describe('useFieldBrowserOptions', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
+    const { getByTestId } = render(<EuiInMemoryTable tableCaption="Fields browser table" items={[fieldItem]} columns={columns} />, {
       wrapper: TestProviders,
     });
 
@@ -211,7 +211,7 @@ describe('useFieldBrowserOptions', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
+    const { getByTestId } = render(<EuiInMemoryTable tableCaption="Fields browser table" items={[fieldItem]} columns={columns} />, {
       wrapper: TestProviders,
     });
 
@@ -248,7 +248,7 @@ describe('useFieldBrowserOptions', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
+    const { getByTestId } = render(<EuiInMemoryTable tableCaption="Fields browser table" items={[fieldItem]} columns={columns} />, {
       wrapper: TestProviders,
     });
 
@@ -304,7 +304,7 @@ describe('useFieldBrowserOptions', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
+    const { getByTestId } = render(<EuiInMemoryTable tableCaption="Fields browser table" items={[fieldItem]} columns={columns} />, {
       wrapper: TestProviders,
     });
 

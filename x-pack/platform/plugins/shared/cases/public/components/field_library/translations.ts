@@ -201,3 +201,15 @@ export const GLOBAL_FIELD_YES = i18n.translate('xpack.cases.fieldLibrary.globalF
 export const GLOBAL_FIELD_NO = i18n.translate('xpack.cases.fieldLibrary.globalFieldNo', {
   defaultMessage: 'No',
 });
+
+export const FIELD_DEFINITIONS_TABLE_CAPTION = i18n.translate(
+  'xpack.cases.fieldLibrary.tableCaption',
+  {
+    defaultMessage: 'Field definitions',
+  }
+);
+
+export const FIELD_DEFINITIONS_TABLE_CAPTION = i18n.translate(
+  'xpack.cases.fieldLibrary.tableCaption',
+  { defaultMessage: 'Field definitions' }
+);
