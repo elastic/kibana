@@ -16,10 +16,10 @@ import {
 } from '../fixtures/constants';
 
 apiTest.describe('Discover sessions API feature flag', { tag: tags.deploymentAgnostic }, () => {
-  let adminCredentials: RoleApiCredentials;
+  let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
-    adminCredentials = await requestAuth.getApiKeyForAdmin();
+    viewerCredentials = await requestAuth.getApiKeyForViewer();
     await apiServices.core.settings({
       'feature_flags.overrides': {
         [DISCOVER_SESSIONS_API_ENABLED_FEATURE_FLAG_KEY]: false,
@@ -39,7 +39,7 @@ apiTest.describe('Discover sessions API feature flag', { tag: tags.deploymentAgn
     const response = await apiClient.post(DISCOVER_SESSION_API_BASE_PATH, {
       headers: {
         ...COMMON_HEADERS,
-        ...adminCredentials.apiKeyHeader,
+        ...viewerCredentials.apiKeyHeader,
       },
       body: {
         title: 'Disabled Discover sessions API',
