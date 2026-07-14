@@ -8,7 +8,12 @@
  */
 
 import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { CUSTOM_PALETTE, DEFAULT_COLOR_STEPS } from '@kbn/coloring';
+import {
+  CUSTOM_PALETTE,
+  DEFAULT_COLOR_STEPS,
+  LEGACY_COMPLIMENTARY_PALETTE,
+  COMPLEMENTARY_PALETTE,
+} from '@kbn/coloring';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   AllColoringTypes,
@@ -208,12 +213,17 @@ export function fromColorByValueLensStateToAPI(
   // A named (non-custom) palette maps to a `distributed_palette`, where the palette
   // service owns the individual bands, so the per-band stops are dropped.
   if (palette !== CUSTOM_PALETTE) {
-    if (!isValidDistributedPaletteId(palette)) {
+    // `complimentary` is the legacy misspelling of `complementary`
+    // (https://github.com/elastic/kibana/issues/161194). Runtime canonicalizes it before rendering,
+    // so we map only that alias here
+    const canonicalPalette =
+      palette === LEGACY_COMPLIMENTARY_PALETTE ? COMPLEMENTARY_PALETTE : palette;
+    if (!isValidDistributedPaletteId(canonicalPalette)) {
       return;
     }
     return {
       type: 'distributed_palette',
-      palette,
+      palette: canonicalPalette,
     };
   }
 

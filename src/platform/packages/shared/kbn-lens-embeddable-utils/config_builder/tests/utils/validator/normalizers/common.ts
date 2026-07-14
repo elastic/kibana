@@ -9,6 +9,7 @@
 
 import { orderBy } from 'lodash';
 
+import { LEGACY_COMPLIMENTARY_PALETTE, COMPLEMENTARY_PALETTE } from '@kbn/coloring';
 import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
@@ -657,9 +658,13 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           // Continuity has no meaning for a distributed palette and is always set to 'none'
           palette.params.continuity = 'none';
 
-          if (palette.params.name === undefined && palette.name) {
-            palette.params.name = palette.name;
-          }
+          // The transform canonicalizes the legacy `complimentary` spelling to the GA palette id
+          // (`complementary`), matching runtime. Canonicalize the original side too so the
+          // round-trip identity holds.
+          const canonicalName =
+            palette.name === LEGACY_COMPLIMENTARY_PALETTE ? COMPLEMENTARY_PALETTE : palette.name;
+          palette.name = canonicalName;
+          palette.params.name = canonicalName;
           palette.params.rangeType = useNumericRange ? 'number' : 'percent';
           clearUnusedNamedPaletteParams(palette);
           return;
