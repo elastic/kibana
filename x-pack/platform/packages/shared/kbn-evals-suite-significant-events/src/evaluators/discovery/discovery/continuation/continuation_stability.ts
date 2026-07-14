@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Evaluator, Example } from '@kbn/evals';
-import { selectEvaluators } from '@kbn/evals';
+import type { ConverseStep, Evaluator, Example } from '@kbn/evals';
 
 /** One discovery agent invocation in a sequential "detections over time" run. */
 export interface ContinuationCycle {
@@ -14,15 +13,19 @@ export interface ContinuationCycle {
   ruleName?: string;
   /** discovery_slug(s) the agent emitted this cycle (one per produced discovery). */
   producedSlugs: string[];
+
+  steps?: ConverseStep[];
 }
 
 export interface ContinuationStabilityResult {
-  /** Fraction of post-establishing cycles that reused an already-seen slug; null when not gradable. */
+  /** Fraction of comparable post-establishing cycles that reused an already-seen slug; null when not gradable. */
   score: number | null;
   /** Cycles after the establishing cycle that reused a prior slug. */
   reusedCycles: number;
   /** Cycles after the establishing cycle that were gradable (produced at least one slug). */
   comparableCycles: number;
+  /** Post-establishing cycles that produced no discovery at all — excluded from scoring. */
+  emptyCycles: number;
   /** Distinct slugs across the whole run — ideal is 1 for a single cascade. */
   distinctSlugs: number;
   explanation: string;
@@ -32,6 +35,13 @@ export interface ContinuationStabilityResult {
  * Score whether related detections arriving one-at-a-time fold into the SAME slug rather than
  * proliferating new ones. score = reusedCycles / comparableCycles (a cycle is "reused" when any slug
  * it produced was already seen). Null when there are fewer than two gradable cycles.
+ *
+ * A post-establishing cycle that produced NO discovery at all (`producedSlugs: []`) is excluded
+ * from `comparableCycles` rather than counted as a continuation miss — "the agent produced
+ * nothing" and "the agent produced a discovery under the wrong slug" are different failure modes,
+ * and conflating them let an unrelated zero-output cycle silently deflate the same score meant to
+ * measure routing correctness. Mirrors how leading empty cycles are already skipped before the
+ * episode is established.
  */
 export function scoreContinuationStability(
   cycles: ContinuationCycle[]
@@ -40,6 +50,7 @@ export function scoreContinuationStability(
   const allSlugs = new Set<string>();
   let reusedCycles = 0;
   let comparableCycles = 0;
+  let emptyCycles = 0;
   let establishedFirstCycle = false;
 
   cycles.forEach((cycle) => {
@@ -58,6 +69,11 @@ export function scoreContinuationStability(
       return;
     }
 
+    if (slugs.length === 0) {
+      emptyCycles += 1;
+      return;
+    }
+
     comparableCycles += 1;
     const reused = slugs.some((slug) => seen.has(slug));
     if (reused) {
@@ -69,14 +85,19 @@ export function scoreContinuationStability(
     });
   });
 
+  const emptyNote =
+    emptyCycles > 0 ? `; ${emptyCycles} cycle(s) produced no discovery and were excluded` : '';
+
   if (comparableCycles === 0) {
     return {
       score: null,
       reusedCycles: 0,
       comparableCycles: 0,
+      emptyCycles,
       distinctSlugs: allSlugs.size,
       explanation:
-        'Fewer than two gradable cycles — nothing to continue (need an establishing cycle plus at least one follow-up)',
+        'Fewer than two gradable cycles — nothing to continue (need an establishing cycle plus ' +
+        `at least one follow-up)${emptyNote}`,
     };
   }
 
@@ -85,10 +106,11 @@ export function scoreContinuationStability(
     score,
     reusedCycles,
     comparableCycles,
+    emptyCycles,
     distinctSlugs: allSlugs.size,
     explanation:
       `${reusedCycles}/${comparableCycles} follow-up cycle(s) reused an established slug ` +
-      `(${allSlugs.size} distinct slug(s) across the run; ideal is 1 for a single cascade)`,
+      `(${allSlugs.size} distinct slug(s) across the run; ideal is 1 for a single cascade)${emptyNote}`,
   };
 }
 
@@ -105,7 +127,3 @@ export const continuationStabilityEvaluator: ContinuationEvaluator = {
   kind: 'CODE',
   evaluate: ({ output }) => Promise.resolve(scoreContinuationStability(output.cycles ?? [])),
 };
-
-/** Factory mirroring `createDiscoveryEvaluators` so the spec wires it the same way. */
-export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
-  selectEvaluators([continuationStabilityEvaluator]);
