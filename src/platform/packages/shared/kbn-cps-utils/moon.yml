@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/css-utils'
   - '@kbn/ui-callout'
+  - '@kbn/zod'
 tags:
   - shared-browser
   - package
