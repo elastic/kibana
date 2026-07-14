@@ -33,7 +33,6 @@ export type TaskComponentStatus = z.infer<typeof TaskComponentStatus>;
 export const TaskComponentStatus = BaseComponentStatus.merge(
   z.object({
     status: z.string(),
-    remainingLogsToExtract: z.number().nullable(),
     runs: z.number(),
     lastError: z.string(),
   })
