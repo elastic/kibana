@@ -4,9 +4,9 @@ pageLoadAssetSize:
   agentBuilder: 289
   agentBuilderDashboards: 3074
   agentBuilderPlatform: 4152
+  agentBuilderSml: 328
   agentBuilderVisualizations: 2000
   agentBuilderWorkflows: 13383
-  agentContextLayer: 324
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
