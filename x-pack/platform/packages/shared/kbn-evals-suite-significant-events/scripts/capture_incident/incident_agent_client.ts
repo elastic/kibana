@@ -20,16 +20,9 @@ const longRoundDispatcher = new Agent({
   bodyTimeout: STREAM_IDLE_TIMEOUT_MS,
 });
 
-/** A single step the agent took during a round (tool call, reasoning, …). */
-interface ConverseStep {
-  type: string;
-  tool_id?: string;
-}
-
 /** The distilled result of one conversation turn. */
 export interface AgentTurn {
   message: string;
-  steps: ConverseStep[];
 }
 
 /**
@@ -58,7 +51,6 @@ export class IncidentAgentClient {
   private readonly apiKey: string;
   private readonly agentId: string;
   private readonly log: ToolingLog;
-  private readonly signal?: AbortSignal;
   private connectorIdPromise?: Promise<string | undefined>;
 
   constructor({
@@ -66,20 +58,17 @@ export class IncidentAgentClient {
     apiKey,
     agentId = 'elastic-ai-agent',
     log,
-    signal,
   }: {
     kibanaUrl: string;
     apiKey: string;
     agentId?: string;
     log: ToolingLog;
-    signal?: AbortSignal;
   }) {
     // Trim a trailing slash so URL joining stays predictable.
     this.baseUrl = kibanaUrl.replace(/\/+$/, '');
     this.apiKey = apiKey;
     this.agentId = agentId;
     this.log = log;
-    this.signal = signal;
   }
 
   /**
@@ -100,7 +89,6 @@ export class IncidentAgentClient {
       try {
         const response = await fetch(url, {
           headers: { Authorization: `ApiKey ${this.apiKey}`, 'kbn-xsrf': 'true' },
-          signal: this.signal,
         } as RequestInit);
         if (!response.ok) {
           return undefined;
@@ -143,7 +131,6 @@ export class IncidentAgentClient {
         Accept: 'text/event-stream',
       },
       body: JSON.stringify(body),
-      signal: this.signal,
       // `dispatcher` is an undici (Node global fetch) extension not present in the
       // DOM RequestInit type; cast as the repo does elsewhere for custom fetch.
       dispatcher: longRoundDispatcher,
@@ -164,14 +151,13 @@ export class IncidentAgentClient {
     return this.consumeStream(response.body);
   }
 
-  /** Reduces the SSE stream to the final message plus the tool steps taken. */
+  /** Reduces the SSE stream to the final assistant message. */
   private async consumeStream(body: ReadableStream<Uint8Array>): Promise<AgentTurn> {
     const reader = body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
     let message = '';
     let chunks = '';
-    let steps: ConverseStep[] = [];
     let pausedForPrompt = false;
     let streamError: string | undefined;
 
@@ -188,9 +174,6 @@ export class IncidentAgentClient {
             JSON.stringify(data);
           break;
         }
-        case 'tool_call':
-          steps.push({ type: 'tool_call', tool_id: data.tool_id as string | undefined });
-          break;
         case 'message_chunk':
           // Streamed partial answer; accumulate as a fallback for when the terminal
           // `message_complete` arrives empty or never lands.
@@ -204,27 +187,9 @@ export class IncidentAgentClient {
           }
           break;
         case 'round_complete': {
-          const round = data.round as
-            | {
-                response?: { message?: string };
-                steps?: Array<{ type?: string; tool_id?: string }>;
-              }
-            | undefined;
+          const round = data.round as { response?: { message?: string } } | undefined;
           if (!message && typeof round?.response?.message === 'string') {
             message = round.response.message;
-          }
-          // round_complete carries the authoritative step list (which already
-          // includes tool calls), so replace the incrementally collected steps to
-          // avoid counting tool calls twice. Keep the incremental steps as a
-          // fallback when this frame carries none.
-          const roundSteps: ConverseStep[] = [];
-          for (const step of round?.steps ?? []) {
-            if (step?.type) {
-              roundSteps.push({ type: step.type, tool_id: step.tool_id });
-            }
-          }
-          if (roundSteps.length > 0) {
-            steps = roundSteps;
           }
           break;
         }
@@ -289,15 +254,6 @@ export class IncidentAgentClient {
       throw new Error(`Agent Builder round failed: ${streamError}`);
     }
 
-    const toolCalls = steps.filter((step) => step.type === 'tool_call');
-    if (toolCalls.length > 0) {
-      this.log.debug(
-        `Agent used ${toolCalls.length} tool call(s): ${toolCalls
-          .map((step) => step.tool_id ?? 'unknown')
-          .join(', ')}`
-      );
-    }
-
     if (pausedForPrompt && !message) {
       throw new Error(
         'The agent paused awaiting user input (prompt_request); a non-interactive capture run ' +
@@ -305,6 +261,6 @@ export class IncidentAgentClient {
       );
     }
 
-    return { message, steps };
+    return { message };
   }
 }

@@ -36,14 +36,14 @@ const REINDEX_MAX_WAIT_MS = 8 * 60 * 60 * 1000;
 const MAX_REINDEX_DOCS = 3_000_000;
 
 /** Extracts the `host:port` form used by `reindex.remote.whitelist` from a URL. */
-export function toHostPort(hostUrl: string): string {
+function toHostPort(hostUrl: string): string {
   const url = new URL(hostUrl);
   const port = url.port || (url.protocol === 'https:' ? '443' : '80');
   return `${url.hostname}:${port}`;
 }
 
 /** Matches a `host:port` string against a whitelist pattern that may contain `*`. */
-export function matchesWhitelistPattern(hostPort: string, pattern: string): boolean {
+function matchesWhitelistPattern(hostPort: string, pattern: string): boolean {
   const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
   return new RegExp(`^${escaped}$`).test(hostPort);
 }
@@ -121,7 +121,7 @@ interface ReindexScript {
   params: Record<string, unknown>;
 }
 
-export function buildReindexScript(config: ResolvedIncidentConfig): ReindexScript {
+function buildReindexScript(config: ResolvedIncidentConfig): ReindexScript {
   const lines: string[] = [];
 
   if (config.preserveProvenance) {
@@ -162,7 +162,7 @@ export function buildReindexScript(config: ResolvedIncidentConfig): ReindexScrip
  * incident's own `incident-<id>-*` bucket. These match the local indices the
  * reindex creates (docs route to their original data-stream names).
  */
-export function localCapturePatterns(config: ResolvedIncidentConfig): string[] {
+function localCapturePatterns(config: ResolvedIncidentConfig): string[] {
   const fromSource = config.sourceIndex
     .filter((pattern) => !pattern.startsWith('-'))
     .map((pattern) => {
@@ -302,7 +302,10 @@ async function remoteReindex({
   const sourceIndex = config.sourceIndex.join(', ');
 
   const request: ReindexRequest = {
-    wait_for_completion: true,
+    // Large, multi-dataset slices from a frozen (`partial-`) tier reindex slowly, so
+    // submit asynchronously and poll the task rather than holding one long HTTP
+    // connection that would hit the client socket timeout.
+    wait_for_completion: false,
     // Scroll keep-alive for the reindex's underlying scroll. The default (5m) is
     // shorter than the gap between frozen-tier batches (a single 5k batch can take
     // several minutes to thaw from blob storage), so the scroll context expires
@@ -337,10 +340,9 @@ async function remoteReindex({
 
   log.info(`Reindexing "${sourceIndex}" from ${config.source.host} → original index names (async)`);
 
-  const submit = await esClient.reindex(
-    { ...request, wait_for_completion: false },
-    { requestTimeout: REINDEX_SUBMIT_REQUEST_TIMEOUT_MS }
-  );
+  const submit = await esClient.reindex(request, {
+    requestTimeout: REINDEX_SUBMIT_REQUEST_TIMEOUT_MS,
+  });
 
   const taskId = (submit as { task?: string | number }).task;
   if (taskId === undefined || taskId === null) {

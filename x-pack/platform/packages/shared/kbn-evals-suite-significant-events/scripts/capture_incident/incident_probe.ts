@@ -181,16 +181,6 @@ export async function probeOverview({
     );
   }
 
-  const symptomInWindow =
-    symptomHitsInWindow > 0
-      ? symptomHitsInWindow
-      : (
-          await esClient.count(
-            { index, ignore_unavailable: true, query: withTimeRange(timeRange, symptom) },
-            { requestTimeout: PROBE_REQUEST_TIMEOUT_MS }
-          )
-        ).count ?? 0;
-
   // 3. Scope the snapshot by the agent's entity field over the discovered values.
   const snapshotQuery: QueryDsl = { terms: { [entityField]: entityValues } };
   log.info(`Entity scope "${entityField}": ${entityValues.length} value(s) from the symptom hits.`);
@@ -227,8 +217,9 @@ export async function probeOverview({
   const includedEntries = datasets.filter((entry) => !excludedSet.has(entry.dataset));
   const expectedDocCount = includedEntries.reduce((sum, entry) => sum + entry.count, 0);
   // All symptom-carrying datasets are protected/included, so every in-window symptom
-  // doc is captured.
-  const expectedSymptomDocCount = symptomInWindow;
+  // doc is captured. When 0 hits fell in the wide search window, `timeRange` falls
+  // back to that same window, so the in-window count is authoritative either way.
+  const expectedSymptomDocCount = symptomHitsInWindow;
 
   if (snapshotSlice.total > 0) {
     log.info(

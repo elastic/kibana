@@ -125,7 +125,7 @@ Your FINAL message MUST be ONLY this fenced JSON block — never end on a tool c
  * after any "thinking out loud" / example snippets), then the widest balanced
  * `{…}` span as a last resort.
  */
-export function extractJsonCandidates(message: string): string[] {
+function extractJsonCandidates(message: string): string[] {
   const fenced: string[] = [];
   const fenceRe = /```(?:json)?\s*([\s\S]*?)```/gi;
   let match: RegExpExecArray | null;
@@ -218,9 +218,9 @@ async function converseForJson<T>({
     lastError = parsed.error;
     log.warning(`Attempt ${attempt} unusable: ${lastError}`);
     log.debug(
-      `Raw agent message (${turn.message.length} chars, ${
-        turn.steps.length
-      } steps): ${JSON.stringify(turn.message.slice(0, 800))}`
+      `Raw agent message (${turn.message.length} chars): ${JSON.stringify(
+        turn.message.slice(0, 800)
+      )}`
     );
   }
 
@@ -238,7 +238,7 @@ async function converseForJson<T>({
  * keys in `_source` (we don't know which the rootly ingestion used), e.g.
  * `{ rootly: { title } }` and `{ 'rootly.title': … }` both resolve `rootly.title`.
  */
-export function getField(source: Record<string, unknown>, path: string): unknown {
+function getField(source: Record<string, unknown>, path: string): unknown {
   if (path in source) {
     return source[path];
   }
@@ -259,10 +259,7 @@ export function getField(source: Record<string, unknown>, path: string): unknown
 }
 
 /** First non-empty string across the given candidate paths (unwrapping single-value arrays). */
-export function firstString(
-  source: Record<string, unknown>,
-  ...paths: string[]
-): string | undefined {
+function firstString(source: Record<string, unknown>, ...paths: string[]): string | undefined {
   for (const path of paths) {
     const value = getField(source, path);
     if (typeof value === 'string' && value.trim().length > 0) {
@@ -286,7 +283,7 @@ export function firstString(
  * `rootly.causal-service[].selected_services[].name = "Docker Registry"`. Returns
  * every distinct value/name found, in document order.
  */
-export function formFieldValues(node: unknown): string[] {
+function formFieldValues(node: unknown): string[] {
   const items = Array.isArray(node) ? node : node == null ? [] : [node];
   const out: string[] = [];
   const push = (value: unknown): void => {
@@ -433,10 +430,12 @@ export async function investigateIncidentMetadata({
   const started = firstString(rootly, 'rootly.started_at', 'rootly.created_at');
 
   const raw: Record<string, unknown> = {
-    title: firstString(rootly, 'rootly.title', 'rootly.public_title') ?? `incident-${incidentId}`,
+    // A missing title should fail the schema loudly rather than be masked by a
+    // placeholder — the agent uses it as a fact when deriving the symptom.
+    title: firstString(rootly, 'rootly.title', 'rootly.public_title') ?? '',
     // Deterministic date from the real incident timestamp (the schema trims it to
     // YYYY-MM-DD). A wrong year here makes the symptom match 0 logs.
-    date: started ?? firstString(rootly, 'rootly.date') ?? '',
+    date: started ?? '',
     slackChannel: firstString(rootly, 'rootly.slack_channel_name'),
     // Region custom field verbatim (may be cloud-prefixed); cloud = CSP name hint.
     region: formFieldFirst(rootly, 'rootly.region'),

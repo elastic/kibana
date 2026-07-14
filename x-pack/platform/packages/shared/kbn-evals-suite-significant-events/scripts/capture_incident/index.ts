@@ -38,7 +38,9 @@ const createEsClientFromUrl = (esUrl: string): Client => {
 const deriveConfigForIncident = async (incidentId: string, log: ToolingLog): Promise<string> => {
   const incidentApiKey = process.env.INCIDENT_KIBANA_API_KEY;
   const overviewKibanaApiKey = process.env.OVERVIEW_KIBANA_API_KEY;
-  const overviewApiKey = process.env.OVERVIEW_ES_API_KEY || process.env.OVERVIEW_API_KEY;
+  // The probe hits the same Overview ES as the remote reindex, and the reindex key
+  // (`monitor` + `read`) is a superset of the probe's `read`, so a single key covers both.
+  const overviewApiKey = process.env.OVERVIEW_API_KEY;
 
   if (!incidentApiKey) {
     throw new Error(
@@ -56,7 +58,6 @@ const deriveConfigForIncident = async (incidentId: string, log: ToolingLog): Pro
 
   return writeIncidentConfigFromId({
     log,
-    signal: new AbortController().signal,
     incidentId,
     incidentKibanaUrl: INCIDENT_KIBANA_URL,
     incidentApiKey,
@@ -131,10 +132,9 @@ run(
           needs ES read on rootly_incidents / pagerduty_incidents + Console access.
         OVERVIEW_KIBANA_API_KEY
           OVERVIEW cluster Agent Builder key (log-grounded symptom; needs agentBuilder:read).
-        OVERVIEW_ES_API_KEY
-          Overview source cluster key for the probe. Falls back to OVERVIEW_API_KEY.
         OVERVIEW_API_KEY
-          Source API key for the remote reindex (cluster:["monitor"] + read on logs-*).
+          Overview source cluster key for the probe + remote reindex
+          (cluster:["monitor"] + read on logs-*).
       `,
     },
   }

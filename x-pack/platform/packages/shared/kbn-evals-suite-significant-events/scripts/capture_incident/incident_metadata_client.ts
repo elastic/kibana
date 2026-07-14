@@ -29,24 +29,12 @@ export class IncidentMetadataClient {
   private readonly baseUrl: string;
   private readonly apiKey: string;
   private readonly log: ToolingLog;
-  private readonly signal?: AbortSignal;
 
-  constructor({
-    kibanaUrl,
-    apiKey,
-    log,
-    signal,
-  }: {
-    kibanaUrl: string;
-    apiKey: string;
-    log: ToolingLog;
-    signal?: AbortSignal;
-  }) {
+  constructor({ kibanaUrl, apiKey, log }: { kibanaUrl: string; apiKey: string; log: ToolingLog }) {
     // Trim a trailing slash so URL joining stays predictable.
     this.baseUrl = kibanaUrl.replace(/\/+$/, '');
     this.apiKey = apiKey;
     this.log = log;
-    this.signal = signal;
   }
 
   /**
@@ -73,7 +61,6 @@ export class IncidentMetadataClient {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-      signal: this.signal,
     } as RequestInit);
 
     if (!response.ok) {

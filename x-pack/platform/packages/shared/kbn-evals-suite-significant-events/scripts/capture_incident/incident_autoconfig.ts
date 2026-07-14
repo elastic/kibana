@@ -40,7 +40,7 @@ async function getRemotes(esClient: Client, log: ToolingLog): Promise<string[]> 
  * check: an exact match, or a passthrough when the remote list could not be read.
  * Throws otherwise so a hallucinated alias fails fast instead of reindexing nothing.
  */
-export function resolveRemote(requested: string, remotes: string[]): string {
+function resolveRemote(requested: string, remotes: string[]): string {
   if (remotes.length === 0 || remotes.includes(requested)) {
     return requested;
   }
@@ -53,7 +53,6 @@ export function resolveRemote(requested: string, remotes: string[]): string {
 
 export interface AutoConfigOptions {
   log: ToolingLog;
-  signal?: AbortSignal;
   incidentId: string;
   /** INCIDENT cluster Kibana (rootly/pagerduty metadata, read directly). */
   incidentKibanaUrl: string;
@@ -79,7 +78,6 @@ export interface AutoConfigOptions {
 export async function writeIncidentConfigFromId(options: AutoConfigOptions): Promise<string> {
   const {
     log,
-    signal,
     incidentId,
     incidentKibanaUrl,
     incidentApiKey,
@@ -96,7 +94,6 @@ export async function writeIncidentConfigFromId(options: AutoConfigOptions): Pro
     kibanaUrl: incidentKibanaUrl,
     apiKey: incidentApiKey,
     log,
-    signal,
   });
   const metadata = await investigateIncidentMetadata({
     client: incidentMetadataClient,
@@ -111,7 +108,6 @@ export async function writeIncidentConfigFromId(options: AutoConfigOptions): Pro
     kibanaUrl: overviewKibanaUrl,
     apiKey: overviewKibanaApiKey,
     log,
-    signal,
   });
 
   // Resolve the remote alias against the source's real remotes. The agent is
