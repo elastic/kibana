@@ -323,4 +323,3 @@ export const GRANULARITY_MONTH = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.granularityMonth',
   { defaultMessage: 'Month' }
 );
-
