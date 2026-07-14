@@ -8,7 +8,7 @@
 import React, { forwardRef, useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiHighlight, useEuiTheme } from '@elastic/eui';
-import type { SmlAutocompleteHttpResultItem } from '@kbn/agent-context-layer-plugin/public';
+import type { SmlAutocompleteHttpResultItem } from '@kbn/agent-builder-sml-plugin/public';
 import { useSmlAutocomplete } from '../../../../../../../hooks/sml/use_sml_autocomplete';
 import { useAgentId } from '../../../../../../../hooks/use_conversation';
 import { useAgentBuilderAgentById } from '../../../../../../../hooks/agents/use_agent_by_id';

@@ -11,9 +11,6 @@ import { CommandId } from './command_menu';
 import type { MessageEditorInstance } from './use_message_editor';
 import { stripZeroWidthSpaces } from './utils';
 
-jest.mock('../../../../hooks/use_context_engine_enabled', () => ({
-  useContextEngineEnabled: () => true,
-}));
 jest.mock('../../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: () => true,
 }));
