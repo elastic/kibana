@@ -13,10 +13,10 @@ import type {
   WorkflowExecutionsDataAccess,
 } from '@kbn/workflows/server/data_access_layer';
 import {
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
   createMockGetExecutionsByIdsResponse,
   createMockStepExecutionsDataAccess,
   createMockWorkflowExecutionsDataAccess,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '@kbn/workflows/server/data_access_layer';
 import { getWorkflowExecution } from './get_workflow_execution';
 
@@ -92,9 +92,12 @@ describe('getWorkflowExecution', () => {
         includeOutput: false,
       });
 
-      expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(baseExecutionDoc.stepExecutionIds, {
-        sourceExcludes: ['input', 'output'],
-      });
+      expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(
+        baseExecutionDoc.stepExecutionIds,
+        {
+          sourceExcludes: ['input', 'output'],
+        }
+      );
     });
 
     it('should pass _source_excludes: ["input"] when only includeInput is false', async () => {
@@ -107,9 +110,12 @@ describe('getWorkflowExecution', () => {
         includeOutput: true,
       });
 
-      expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(baseExecutionDoc.stepExecutionIds, {
-        sourceExcludes: ['input'],
-      });
+      expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(
+        baseExecutionDoc.stepExecutionIds,
+        {
+          sourceExcludes: ['input'],
+        }
+      );
     });
 
     it('should pass _source_excludes: ["output"] when only includeOutput is false', async () => {
@@ -122,9 +128,12 @@ describe('getWorkflowExecution', () => {
         includeOutput: false,
       });
 
-      expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(baseExecutionDoc.stepExecutionIds, {
-        sourceExcludes: ['output'],
-      });
+      expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(
+        baseExecutionDoc.stepExecutionIds,
+        {
+          sourceExcludes: ['output'],
+        }
+      );
     });
 
     it('should default includeInput and includeOutput to false when omitted', async () => {
@@ -135,9 +144,12 @@ describe('getWorkflowExecution', () => {
         logger: mockLogger,
       });
 
-      expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(baseExecutionDoc.stepExecutionIds, {
-        sourceExcludes: ['input', 'output'],
-      });
+      expect(mockStepExecutionsDataAccess.getByIds).toHaveBeenCalledWith(
+        baseExecutionDoc.stepExecutionIds,
+        {
+          sourceExcludes: ['input', 'output'],
+        }
+      );
     });
   });
 

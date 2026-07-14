@@ -155,8 +155,13 @@ const hardDeleteWorkflows = async (
     ) => Promise<WorkflowExecutionListDto>;
   }
 ): Promise<DeleteWorkflowsResponse> => {
-  const { workflowExecutionsDataAccess, stepExecutionsDataAccess, taskScheduler, logger, getWorkflowExecutions } =
-    deps;
+  const {
+    workflowExecutionsDataAccess,
+    stepExecutionsDataAccess,
+    taskScheduler,
+    logger,
+    getWorkflowExecutions,
+  } = deps;
   const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
 
   const disabledIds = await disableWorkflowsForDeletion(hits, client);

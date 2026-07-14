@@ -12,7 +12,6 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import {
-  createExecutionsDataAccessJestMock,
   mockExecutionsDataAccessInitSetup,
   mockExecutionsDataAccessInitStart,
 } from './test_utils/executions_data_access_jest_mock';

@@ -12,10 +12,10 @@ import type {
   WorkflowExecutionsDataAccess,
 } from '@kbn/workflows/server/data_access_layer';
 import {
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
   createMockGetExecutionsByIdsResponse,
   createMockStepExecutionsDataAccess,
   createMockWorkflowExecutionsDataAccess,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '@kbn/workflows/server/data_access_layer';
 import { getChildWorkflowExecutions } from './get_child_workflow_executions';
 
@@ -153,7 +153,9 @@ describe('getChildWorkflowExecutions', () => {
         ])
       );
     mockStepExecutionsDataAccess.getByIds
-      .mockResolvedValueOnce(mockStepGetByIds([createWorkflowExecuteStep('step-1', 'child-exec-1')]))
+      .mockResolvedValueOnce(
+        mockStepGetByIds([createWorkflowExecuteStep('step-1', 'child-exec-1')])
+      )
       .mockResolvedValueOnce(
         mockStepGetByIds([
           {
@@ -207,11 +209,21 @@ describe('getChildWorkflowExecutions', () => {
       stepExecutionsDataAccess: mockStepExecutionsDataAccess,
     });
 
-    expect(mockWorkflowExecutionsDataAccess.getByIds).toHaveBeenNthCalledWith(1, ['parent-exec-1'], {
-      sourceIncludes: ['spaceId', 'stepExecutionIds'],
-    });
+    expect(mockWorkflowExecutionsDataAccess.getByIds).toHaveBeenNthCalledWith(
+      1,
+      ['parent-exec-1'],
+      {
+        sourceIncludes: ['spaceId', 'stepExecutionIds'],
+      }
+    );
     expect(mockWorkflowExecutionsDataAccess.getByIds).toHaveBeenNthCalledWith(2, ['child-exec-1'], {
-      sourceIncludes: expect.arrayContaining(['id', 'spaceId', 'workflowId', 'status', 'stepExecutionIds']),
+      sourceIncludes: expect.arrayContaining([
+        'id',
+        'spaceId',
+        'workflowId',
+        'status',
+        'stepExecutionIds',
+      ]),
     });
   });
 
