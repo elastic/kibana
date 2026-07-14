@@ -18,6 +18,17 @@ describe('getImportedLifecycle', () => {
     ).toEqual({ ilm: { policy: 'my-policy' } });
   });
 
+  it('keeps ILM policy references unchanged for non-time-series targets', () => {
+    // The ILM path always returns the policy reference unchanged, even for
+    // non-time-series targets where any downsampling steps have no effect.
+    expect(
+      getImportedLifecycle({
+        effectiveLifecycle: { ilm: { policy: 'policy-with-downsampling' } },
+        targetIsTimeSeries: false,
+      })
+    ).toEqual({ ilm: { policy: 'policy-with-downsampling' } });
+  });
+
   it('applies a DSL source as an explicit custom retention', () => {
     expect(
       getImportedLifecycle({
