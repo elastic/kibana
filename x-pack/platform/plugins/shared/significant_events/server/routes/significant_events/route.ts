@@ -8,6 +8,7 @@ import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { QueryOccurrencesResponse } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { createSignificantEventsTracedEsClient } from '../../lib/significant_events/create_significant_events_traced_es_client';
 import { BUCKET_SIZE_PATTERN } from '../../lib/significant_events/helpers/fill_bucket_gaps';
 import { fetchQueryOccurrencesFromAlerts } from '../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { getQueryOccurrencesResponse } from '../../oas_examples';
@@ -95,12 +96,17 @@ const readSignificantEventsKIQueryOccurrenceStatsRoute = createServerRoute({
     getScopedClients,
     getSpaceId,
     server,
+    logger,
   }): Promise<QueryOccurrencesResponse> => {
     const scopedClients = await getScopedClients({ request });
     const { streamsClient, scopedClusterClient, licensing, uiSettingsClient } = scopedClients;
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
+    const esClient = createSignificantEventsTracedEsClient({
+      client: scopedClusterClient.asCurrentUser,
+      logger,
+    });
     const { name } = params.path;
     const { from, to, bucketSize, query, searchMode } = params.query;
 
@@ -119,7 +125,7 @@ const readSignificantEventsKIQueryOccurrenceStatsRoute = createServerRoute({
         alertsReader,
         spaceId: await getSpaceId(request),
       },
-      { kiClient, scopedClusterClient }
+      { kiClient, esClient }
     );
   },
 });

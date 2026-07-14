@@ -150,6 +150,22 @@ describe('OpenAIConnector', () => {
         expect(response).toEqual(mockResponse.data);
       });
 
+      it('forwards maxContentLength to the request when provided', async () => {
+        await connector.runApi(
+          { body: JSON.stringify(sampleOpenAiBody), maxContentLength: 10 * 1024 * 1024 },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+          connectorUsageCollector
+        );
+      });
+
+      it('does not set maxContentLength when not provided', async () => {
+        await connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector);
+        expect(mockRequest.mock.calls[0][0]).not.toHaveProperty('maxContentLength');
+      });
+
       it('overrides the default model with the default model specified in the body', async () => {
         const requestBody = { model: 'gpt-3.5-turbo', ...sampleOpenAiBody };
         const response = await connector.runApi(
@@ -287,6 +303,26 @@ describe('OpenAIConnector', () => {
           connectorUsageCollector
         );
         expect(response).toEqual(mockResponse.data);
+      });
+
+      it('forwards maxContentLength to the streaming request when provided', async () => {
+        // Streaming responses are still subject to axios `maxContentLength` (enforced while the
+        // response stream is consumed), so the override must be forwarded for streaming too.
+        await connector.streamApi(
+          {
+            body: JSON.stringify(sampleOpenAiBody),
+            stream: true,
+            maxContentLength: 10 * 1024 * 1024,
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({
+            responseType: 'stream',
+            maxContentLength: 10 * 1024 * 1024,
+          }),
+          connectorUsageCollector
+        );
       });
 
       it('the OpenAI API call is successful with correct parameters when stream = true', async () => {

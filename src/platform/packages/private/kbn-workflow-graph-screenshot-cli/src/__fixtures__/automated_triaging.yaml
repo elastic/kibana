@@ -1,0 +1,11 @@
+version: '1'
+name: Automated Triaging
+description: A minimal automated triage fixture for unit tests
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: triage
+    type: connector.slack-post-message
+    connector_id: slack-1
+    message: 'Triaging: {{event.title}}'

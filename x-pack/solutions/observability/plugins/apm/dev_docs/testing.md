@@ -132,58 +132,27 @@ node x-pack/solutions/observability/plugins/apm/scripts/test/dat --runner --stat
 
 ---
 
-## E2E Tests (Cypress)
+## UI Tests (Scout)
 
-The E2E tests are located in [`x-pack/solutions/observability/plugins/apm/ftr_e2e`](../ftr_e2e).
+The APM UI tests are written with [Scout](../../../../../../src/platform/packages/shared/kbn-scout/README.md) (Playwright) and live in [`x-pack/solutions/observability/plugins/apm/test/scout/ui`](../test/scout/ui).
 
-Tests run on buildkite PR pipeline are parallelized (8 parallel jobs) and are orchestrated by the Cypress dashboard service. It can be configured in [.buildkite/pipelines/pull_request/apm_cypress.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/apm_cypress.yml) with the property `parallelism`.
-
-```yml
-    ...
-    depends_on: build
-    parallelism: 3
-    ...
-```
-
-[Test tips and best practices](../ftr_e2e/README.md)
-
-#### Start Cypress dashboard
+#### Start the Scout server
 
 ```
-node x-pack/solutions/observability/plugins/apm/scripts/test/e2e --open
+node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
 #### Run tests
 
 ```
-node x-pack/solutions/observability/plugins/apm/scripts/test/e2e
-```
-
-#### Run tests in headed mode
-
-```
-node x-pack/solutions/observability/plugins/apm/scripts/test/e2e --headed
+node scripts/scout run-tests --arch stateful --domain classic --config x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel.playwright.config.ts
 ```
 
 ### A11y checks
 
-Accessibility tests are added on the e2e with `checkA11y()`, they will run together with cypress.
+Accessibility tests are added with `page.checkA11y()`.
 
 ---
-
-## Functional tests (Security and Correlations tests)
-
-```sh
-# Start server
-node scripts/functional_tests_server --config x-pack/solutions/observability/test/functional/apps/apm/config.ts
-
-# Run tests
-node scripts/functional_test_runner --config x-pack/solutions/observability/test/functional/apps/apm/config.ts --grep='APM specs'
-```
-
-APM tests are located in `x-pack/solutions/observability/test/functional/apps/apm`.
-For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
-diff --git a/x-pack/solutions/observability/plugins/apm/scripts/test/README.md b/x-pack/solutions/observability/plugins/apm/scripts/test/README.md
 
 ## Serverless API tests
 

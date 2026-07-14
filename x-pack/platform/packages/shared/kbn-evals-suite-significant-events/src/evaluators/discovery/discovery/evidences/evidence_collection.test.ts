@@ -11,13 +11,24 @@ import { evidenceCollectionEvaluator } from './evidence_collection';
 const evaluate = (discoveries: Partial<Discovery>[]) =>
   evidenceCollectionEvaluator.evaluate({
     input: {
-      episodeSuffix: 'test',
       detections: discoveries.flatMap((d) => d.detections ?? []) as Detection[],
     },
     output: { discoveries: discoveries as Discovery[], steps: [] },
     expected: {} as never,
     metadata: null,
   });
+
+const createDetection = (
+  ruleUuid: string,
+  extra: Partial<Discovery['detections'][number]> = {}
+): Discovery['detections'][number] => ({
+  detection_id: `${ruleUuid}-det`,
+  rule_uuid: ruleUuid,
+  rule_name: ruleUuid,
+  change_point_type: 'spike',
+  p_value: 0,
+  ...extra,
+});
 
 describe('evidenceCollectionEvaluator', () => {
   it('is unavailable when there are no detections', async () => {
@@ -27,10 +38,7 @@ describe('evidenceCollectionEvaluator', () => {
   it('scores 1 when every rule has attributed evidence', async () => {
     const discoveries: Partial<Discovery>[] = [
       {
-        detections: [
-          { kind: 'detection', rule_uuid: 'r1' },
-          { kind: 'detection', rule_uuid: 'r2' },
-        ],
+        detections: [createDetection('r1'), createDetection('r2')],
         evidences: [{ rule_uuid: 'r1' }, { rule_uuid: 'r2' }],
       },
     ];
@@ -41,8 +49,8 @@ describe('evidenceCollectionEvaluator', () => {
     const discoveries: Partial<Discovery>[] = [
       {
         detections: [
-          { kind: 'detection', rule_uuid: 'r1', rule_name: 'A' },
-          { kind: 'detection', rule_uuid: 'r2', rule_name: 'B' },
+          createDetection('r1', { rule_name: 'A' }),
+          createDetection('r2', { rule_name: 'B' }),
         ],
         evidences: [{ rule_uuid: 'r1' }],
       },
@@ -52,7 +60,7 @@ describe('evidenceCollectionEvaluator', () => {
 
   it('scores 0 when a discovery emits detections but no evidence', async () => {
     const discoveries: Partial<Discovery>[] = [
-      { detections: [{ kind: 'detection', rule_uuid: 'r1' }], evidences: [] },
+      { detections: [createDetection('r1')], evidences: [] },
     ];
     expect((await evaluate(discoveries)).score).toBe(0);
   });
